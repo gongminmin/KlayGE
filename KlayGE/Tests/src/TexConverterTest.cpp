@@ -79,32 +79,32 @@ public:
 
 TEST_F(TexConverterTest, NoMetadata)
 {
-	RunTest("lion.jpg", "", "lion.passthrough.dds", 1.0f / 255);
+	RunTest("lion.jpg", "", "lion_passthrough.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, PassThrough)
 {
-	RunTest("lion.jpg", "lion.jpg.passthrough.kmeta", "lion.passthrough.dds", 1.0f / 255);
+	RunTest("lion.jpg", "lion_passthrough.kmeta", "lion_passthrough.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Compression)
 {
-	RunTest("lion.jpg", "lion.jpg.bc1.kmeta", "lion.bc1.dds", 1.0f / 255);
+	RunTest("lion.jpg", "lion_bc1.kmeta", "lion_bc1.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, CompressionSRGB)
 {
-	RunTest("lion.jpg", "lion.jpg.bc1_srgb.kmeta", "lion.bc1_srgb.dds", 1.0f / 255);
+	RunTest("lion.jpg", "lion_bc1_srgb.kmeta", "lion_bc1_srgb.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Mip)
 {
-	RunTest("lion.jpg", "lion.jpg.mip.kmeta", "lion.mip.dds", 1.0f / 255);
+	RunTest("lion.jpg", "lion_mip.kmeta", "lion_mip.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Channel)
 {
-	RunTest("lion.jpg", "lion.jpg.channel.kmeta", "lion.channel.dds", 1.0f / 255);
+	RunTest("lion.jpg", "lion_channel.kmeta", "lion_channel.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Array)
@@ -119,27 +119,27 @@ TEST_F(TexConverterTest, ArrayMip)
 
 TEST_F(TexConverterTest, DDSSRGB)
 {
-	RunTest("lion.bc1.dds", "lion.jpg.bc1_srgb.kmeta", "lion.bc1_srgb.dds", 1.0f / 255);
+	RunTest("lion_bc1.dds", "lion_bc1_srgb.kmeta", "lion_bc1_srgb.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, DDSChannel)
 {
-	RunTest("lion.bc1.dds", "lion.jpg.channel.kmeta", "lion.bc1_channel.dds", 1.0f / 255);
+	RunTest("lion_bc1.dds", "lion_channel.kmeta", "lion_bc1_channel.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, NormalCompressionBC5)
 {
-	RunTest("lion_ddn.jpg", "lion_ddn.jpg.bc5.kmeta", "lion_ddn_bc5.dds", 1.0f / 255);
+	RunTest("lion_ddn.jpg", "lion_ddn_bc5.kmeta", "lion_ddn_bc5.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, NormalCompressionBC3)
 {
-	RunTest("lion_ddn.jpg", "lion_ddn.jpg.bc3.kmeta", "lion_ddn_bc3.dds", 1.0f / 255);
+	RunTest("lion_ddn.jpg", "lion_ddn_bc3.kmeta", "lion_ddn_bc3.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, NormalCompressionGR)
 {
-	RunTest("lion_ddn.jpg", "lion_ddn.jpg.gr.kmeta", "lion_ddn_gr.dds", 1.0f / 255);
+	RunTest("lion_ddn.jpg", "lion_ddn_gr.kmeta", "lion_ddn_gr.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Bump2Normal)
