@@ -99,24 +99,17 @@ namespace KlayGE
 
 		if (metadata_.MipmapEnabled())
 		{
-			if (metadata_.AutoGenMipmap())
+			if (metadata_.NumMipmaps() == 0)
 			{
-				if (metadata_.NumMipmaps() == 0)
+				num_mipmaps_ = 1;
+				uint32_t w = width_;
+				uint32_t h = height_;
+				while ((w != 1) || (h != 1))
 				{
-					num_mipmaps_ = 1;
-					uint32_t w = width_;
-					uint32_t h = height_;
-					while ((w != 1) || (h != 1))
-					{
-						++ num_mipmaps_;
+					++ num_mipmaps_;
 
-						w = std::max<uint32_t>(1U, w / 2);
-						h = std::max<uint32_t>(1U, h / 2);
-					}
-				}
-				else
-				{
-					num_mipmaps_ = metadata_.NumMipmaps();
+					w = std::max<uint32_t>(1U, w / 2);
+					h = std::max<uint32_t>(1U, h / 2);
 				}
 			}
 			else
@@ -129,8 +122,11 @@ namespace KlayGE
 			num_mipmaps_ = 1;
 		}
 
+		bool need_gen_mipmaps = false;
 		if ((num_mipmaps_ > 1) && metadata_.AutoGenMipmap())
 		{
+			need_gen_mipmaps = true;
+
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
 				planes_[arr].resize(num_mipmaps_);
@@ -154,7 +150,6 @@ namespace KlayGE
 					h = std::max<uint32_t>(1U, h / 2);
 
 					planes_[arr][m + 1] = MakeSharedPtr<ImagePlane>();
-					*planes_[arr][m + 1] = planes_[arr][m]->ResizeTo(w, h, metadata_.LinearMipmap());
 				}
 			}
 		}
@@ -184,7 +179,8 @@ namespace KlayGE
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
-				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				uint32_t const num = need_gen_mipmaps ? 1 : num_mipmaps_;
+				for (uint32_t m = 0; m < num; ++ m)
 				{
 					planes_[arr][m]->RgbToLum();
 				}
@@ -195,9 +191,26 @@ namespace KlayGE
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
-				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				uint32_t const num = need_gen_mipmaps ? 1 : num_mipmaps_;
+				for (uint32_t m = 0; m < num; ++ m)
 				{
 					planes_[arr][m]->BumpToNormal(metadata_.BumpScale());
+				}
+			}
+		}
+
+		if (need_gen_mipmaps)
+		{
+			for (uint32_t arr = 0; arr < array_size_; ++ arr)
+			{
+				uint32_t w = width_;
+				uint32_t h = height_;
+				for (uint32_t m = 0; m < num_mipmaps_ - 1; ++ m)
+				{
+					w = std::max<uint32_t>(1U, w / 2);
+					h = std::max<uint32_t>(1U, h / 2);
+
+					*planes_[arr][m + 1] = planes_[arr][m]->ResizeTo(w, h, metadata_.LinearMipmap());
 				}
 			}
 		}
