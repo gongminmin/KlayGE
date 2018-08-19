@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/Hash.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -38,6 +39,8 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
+#include <KlayGE/TexConverter.hpp>
+#include <KlayGE/TexMetadata.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -129,223 +132,212 @@ OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
 	return caps;
 }
 
-void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, OfflineRenderDeviceCaps const & caps)
+TexMetadata DefaultTextureMetadata(size_t res_type_hash, OfflineRenderDeviceCaps const & caps)
 {
-	std::ofstream ofs("convert.bat");
-
-	if (("albedo" == res_type)
-		|| ("emissive" == res_type))
+	TexMetadata default_metadata;
+	switch (res_type_hash)
 	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
+	case CT_HASH("albedo"):
+	case CT_HASH("emissive"):
+		default_metadata.Slot((res_type_hash == CT_HASH("albedo")) ? RenderMaterial::TS_Albedo : RenderMaterial::TS_Emissive);
+		default_metadata.ForceSRGB(true);
+		if (caps.bc7_support)
 		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
+			default_metadata.PreferedFormat(EF_BC7_SRGB);
+		}
+		else if (caps.bc1_support)
+		{
+			default_metadata.PreferedFormat(EF_BC1_SRGB);
+		}
+		else if (caps.etc1_support)
+		{
+			default_metadata.PreferedFormat(EF_ETC1);
+		}
+		break;
 
-			ofs << "@echo off" << std::endl << std::endl;
-			if (caps.srgb_support)
-			{
-				ofs << "ForceTexSRGB \"" << res_names[i] << "\" temp.dds" << std::endl;
-			}
-			else
-			{
-				ofs << "copy \"" << res_names[i] << "\" temp.dds" << std::endl;
-			}
-			ofs << "Mipmapper temp.dds" << std::endl;
-			if (caps.bc7_support)
-			{
-				ofs << "TexCompressor BC7 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.bc1_support)
-			{
-				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.etc1_support)
-			{
-				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else
-			{
-				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			ofs << "del temp.dds" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
-	}
-	else if (("glossiness" == res_type)
-		|| ("metalness" == res_type))
-	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
+	case CT_HASH("glossiness"):
+	case CT_HASH("metalness"):
+		default_metadata.Slot((res_type_hash == CT_HASH("glossiness")) ? RenderMaterial::TS_Glossiness : RenderMaterial::TS_Metalness);
+		default_metadata.ForceSRGB(false);
+		if (caps.bc7_support)
 		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
+			default_metadata.PreferedFormat(EF_BC7);
+		}
+		else if (caps.bc1_support)
+		{
+			default_metadata.PreferedFormat(EF_BC1);
+		}
+		else if (caps.etc1_support)
+		{
+			default_metadata.PreferedFormat(EF_ETC1);
+		}
+		break;
 
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "copy \"" << res_names[i] << "\" temp.dds" << std::endl;
-			ofs << "Mipmapper temp.dds" << std::endl;
-			if (caps.bc7_support)
-			{
-				ofs << "TexCompressor BC7 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.bc4_support)
-			{
-				ofs << "TexCompressor BC4 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.bc1_support)
-			{
-				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.etc1_support)
-			{
-				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else
-			{
-				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			ofs << "del temp.dds" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
-	}
-	else if ("normal" == res_type)
-	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
+	case CT_HASH("normal"):
+	case CT_HASH("bump"):
+		default_metadata.Slot(RenderMaterial::TS_Normal);
+		default_metadata.ForceSRGB(false);
+		if (res_type_hash == CT_HASH("bump"))
 		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
-
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
-			if (caps.bc5_support)
-			{
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
-			}
-			else if (caps.bc3_support)
-			{
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-			}
-			else
-			{
-				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			ofs << "del temp.dds" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
-	}
-	else if ("bump" == res_type)
-	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
-		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
-
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-			ofs << "Mipmapper temp.dds" << std::endl; 
-			if (caps.bc5_support)
-			{
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
-			}
-			else if (caps.bc3_support)
-			{
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-			}
-			else
-			{
-				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			ofs << "del temp.dds" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
-	}
-	else if ("height" == res_type)
-	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
-		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
-
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
-			if (caps.bc4_support)
-			{
-				ofs << "TexCompressor BC4 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.bc1_support)
-			{
-				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else if (caps.etc1_support)
-			{
-				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			else
-			{
-				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
-			}
-			ofs << "del temp.dds" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
-	}
-	else if ("cubemap" == res_type)
-	{
-		std::string y_fmt;
-		std::string c_fmt;
-		if (caps.r16_support)
-		{
-			y_fmt = "R16";
-		}
-		else if (caps.r16f_support)
-		{
-			y_fmt = "R16F";
+			default_metadata.BumpToNormal(true);
+			default_metadata.BumpScale(1.0f);
 		}
 		if (caps.bc5_support)
 		{
-			c_fmt = "BC5";
+			default_metadata.PreferedFormat(EF_BC5);
 		}
 		else if (caps.bc3_support)
 		{
-			c_fmt = "BC3";
+			default_metadata.PreferedFormat(EF_BC3);
 		}
-
-		for (size_t i = 0; i < res_names.size(); ++ i)
+		else
 		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
-
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
+			default_metadata.PreferedFormat(EF_GR8);
 		}
+		break;
+
+	case CT_HASH("height"):
+		default_metadata.Slot(RenderMaterial::TS_Height);
+		default_metadata.ForceSRGB(false);
+		if (caps.bc4_support)
+		{
+			default_metadata.PreferedFormat(EF_BC4);
+		}
+		else if (caps.bc1_support)
+		{
+			default_metadata.PreferedFormat(EF_BC1);
+		}
+		else if (caps.etc1_support)
+		{
+			default_metadata.PreferedFormat(EF_ETC1);
+		}
+		break;
 	}
-	else if ("model" == res_type)
-	{
-		for (size_t i = 0; i < res_names.size(); ++ i)
-		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
 
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << caps.platform << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
-		}
+	default_metadata.MipmapEnabled(true);
+	default_metadata.AutoGenMipmap(true);
+
+	return default_metadata;
+}
+
+TexMetadata LoadTextureMetadata(std::string const & res_name, TexMetadata const & default_metadata)
+{
+	std::string metadata_name = res_name + ".kmeta";
+	if (ResLoader::Instance().Locate(metadata_name).empty())
+	{
+		return default_metadata;
 	}
-	else if ("effect" == res_type)
+	else
 	{
+		return TexMetadata(metadata_name);
+	}
+}
+
+void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, OfflineRenderDeviceCaps const & caps)
+{
+	size_t const res_type_hash = RT_HASH(res_type.c_str());
+
+	if ((CT_HASH("albedo") == res_type_hash)
+		|| (CT_HASH("emissive") == res_type_hash)
+		|| (CT_HASH("glossiness") == res_type_hash)
+		|| (CT_HASH("metalness") == res_type_hash)
+		|| (CT_HASH("normal") == res_type_hash)
+		|| (CT_HASH("bump") == res_type_hash)
+		|| (CT_HASH("height") == res_type_hash))
+	{
+		TexMetadata const default_metadata = DefaultTextureMetadata(res_type_hash, caps);
+
+		TexConverter tc;
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			ofs << "@echo Processing: " << res_names[i] << std::endl;
+			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
-			ofs << "@echo off" << std::endl << std::endl;
-			ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
-			ofs << "@echo on" << std::endl << std::endl;
+			TexMetadata metadata = LoadTextureMetadata(res_names[i], default_metadata);
+			TexturePtr output_tex = tc.Convert(res_names[i], metadata);
+			if (output_tex)
+			{
+				filesystem::path res_path(res_names[i]);
+				std::string tex_base = (res_path.parent_path() / res_path.stem()).string();
+				SaveTexture(output_tex, tex_base + ".dds");
+			}
 		}
 	}
 	else
 	{
-		printf("Error: Unknown resource type.");
-		return;
-	}
+		std::ofstream ofs("convert.bat");
 
-	ofs.close();
+		if (CT_HASH("cubemap") == res_type_hash)
+		{
+			std::string y_fmt;
+			std::string c_fmt;
+			if (caps.r16_support)
+			{
+				y_fmt = "R16";
+			}
+			else if (caps.r16f_support)
+			{
+				y_fmt = "R16F";
+			}
+			if (caps.bc5_support)
+			{
+				c_fmt = "BC5";
+			}
+			else if (caps.bc3_support)
+			{
+				c_fmt = "BC3";
+			}
 
-	if ((res_type != "cubemap") && (res_type != "model") && (res_type != "effect"))
-	{
-		int err = system("convert.bat");
-		KFL_UNUSED(err);
-		err = system("del convert.bat");
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+
+				ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+				ofs << "@echo off" << std::endl << std::endl;
+				ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
+				ofs << "@echo on" << std::endl << std::endl;
+			}
+		}
+		else if (CT_HASH("model") == res_type_hash)
+		{
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+
+				ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+				ofs << "@echo off" << std::endl << std::endl;
+				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << caps.platform << std::endl;
+				ofs << "@echo on" << std::endl << std::endl;
+			}
+		}
+		else if (CT_HASH("effect") == res_type_hash)
+		{
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+
+				ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+				ofs << "@echo off" << std::endl << std::endl;
+				ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "@echo on" << std::endl << std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "Error: Unknown resource type." << std::endl;
+		}
+
+		ofs.close();
+
+		if ((res_type_hash != CT_HASH("cubemap")) && (res_type_hash != CT_HASH("model")) && (res_type_hash != CT_HASH("effect")))
+		{
+			int err = system("convert.bat");
+			KFL_UNUSED(err);
+		}
+
+		int err = system("del convert.bat");
 		KFL_UNUSED(err);
 	}
 }
@@ -378,7 +370,7 @@ int main(int argc, char* argv[])
 	}
 	if (vm.count("version") > 0)
 	{
-		cout << "KlayGE PlatformDeployer, Version 1.0.0" << endl;
+		cout << "KlayGE PlatformDeployer, Version 2.0.0" << endl;
 		Context::Destroy();
 		return 1;
 	}
