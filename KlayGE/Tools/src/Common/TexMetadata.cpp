@@ -307,7 +307,8 @@ namespace KlayGE
 				}
 			}
 
-			if ((new_metadata.slot_ == RenderMaterial::TS_Normal) && document.HasMember("bump"))
+			if (((new_metadata.slot_ == RenderMaterial::TS_Normal) || (new_metadata.slot_ == RenderMaterial::TS_Height))
+				&& document.HasMember("bump"))
 			{
 				auto const & bump_val = document["bump"];
 
@@ -317,12 +318,24 @@ namespace KlayGE
 					BOOST_ASSERT(to_normal_val.IsBool());
 					new_metadata.bump_.to_normal = to_normal_val.GetBool();
 				}
-
 				if (bump_val.HasMember("scale"))
 				{
 					auto const & scale_val = bump_val["scale"];
 					BOOST_ASSERT(scale_val.IsNumber());
 					new_metadata.bump_.scale = GetFloat(scale_val);
+				}
+
+				if (bump_val.HasMember("from_normal"))
+				{
+					auto const & from_normal_val = bump_val["from_normal"];
+					BOOST_ASSERT(from_normal_val.IsBool());
+					new_metadata.bump_.from_normal = from_normal_val.GetBool();
+				}
+				if (bump_val.HasMember("min_z"))
+				{
+					auto const & min_z_val = bump_val["min_z"];
+					BOOST_ASSERT(min_z_val.IsNumber());
+					new_metadata.bump_.min_z = GetFloat(min_z_val);
 				}
 			}
 
@@ -513,13 +526,22 @@ namespace KlayGE
 			document.AddMember("mipmap", mipmap_val, allocator);
 		}
 
-		if ((slot_ == RenderMaterial::TS_Normal) && bump_.to_normal)
+		if (((slot_ == RenderMaterial::TS_Normal) || (slot_ == RenderMaterial::TS_Height))
+			&& (bump_.to_normal || bump_.from_normal))
 		{
 			rapidjson::Value bump_val;
 			bump_val.SetObject();
 
-			bump_val.AddMember("to_normal", bump_.to_normal, allocator);
-			bump_val.AddMember("scale", bump_.scale, allocator);
+			if ((slot_ == RenderMaterial::TS_Normal) && bump_.to_normal)
+			{
+				bump_val.AddMember("to_normal", bump_.to_normal, allocator);
+				bump_val.AddMember("scale", bump_.scale, allocator);
+			}
+			if ((slot_ == RenderMaterial::TS_Height) && bump_.from_normal)
+			{
+				bump_val.AddMember("from_normal", bump_.from_normal, allocator);
+				bump_val.AddMember("min_z", bump_.min_z, allocator);
+			}
 
 			document.AddMember("bump", bump_val, allocator);
 		}

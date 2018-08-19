@@ -156,3 +156,8 @@ TEST_F(TexConverterTest, Rgb2Lum)
 {
 	RunTest("background.jpg", "background_rgb2lum.kmeta", "background_lum.dds", 1.0f / 255);
 }
+
+TEST_F(TexConverterTest, Normal2Height)
+{
+	RunTest("lion_ddn.jpg", "lion_ddn_normal2height.kmeta", "lion_height.dds", 1.0f / 255);
+}

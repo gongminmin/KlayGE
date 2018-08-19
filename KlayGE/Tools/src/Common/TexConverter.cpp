@@ -199,6 +199,18 @@ namespace KlayGE
 			}
 		}
 
+		if ((metadata_.Slot() == RenderMaterial::TS_Height) && metadata_.NormalToHeight())
+		{
+			for (uint32_t arr = 0; arr < array_size_; ++ arr)
+			{
+				uint32_t const num = need_gen_mipmaps ? 1 : num_mipmaps_;
+				for (uint32_t m = 0; m < num; ++ m)
+				{
+					planes_[arr][m]->NormalToHeight(metadata_.HeightMinZ());
+				}
+			}
+		}
+
 		if (need_gen_mipmaps)
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)

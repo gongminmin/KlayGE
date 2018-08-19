@@ -49,6 +49,7 @@ namespace KlayGE
 		bool Load(std::string_view name, TexMetadata const & metadata);
 		void RgbToLum();
 		void BumpToNormal(float scale);
+		void NormalToHeight(float min_z);
 		void PrepareNormalCompression(ElementFormat normal_compression_format);
 		void FormatConversion(ElementFormat format);
 		ImagePlane ResizeTo(uint32_t width, uint32_t height, bool linear);

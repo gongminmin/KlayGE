@@ -153,6 +153,23 @@ namespace KlayGE
 			bump_.scale = scale;
 		}
 
+		bool NormalToHeight() const
+		{
+			return bump_.from_normal;
+		}
+		void NormalToHeight(bool from_normal)
+		{
+			bump_.from_normal = from_normal;
+		}
+		float HeightMinZ() const
+		{
+			return bump_.min_z;
+		}
+		void HeightMinZ(float min_z)
+		{
+			bump_.min_z = min_z;
+		}
+
 		uint32_t ArraySize() const;
 		void ArraySize(uint32_t size);
 		std::string_view PlaneFileName(uint32_t array_index, uint32_t mip) const;
@@ -181,6 +198,9 @@ namespace KlayGE
 		{
 			bool to_normal = false;
 			float scale = 1.0f;
+
+			bool from_normal = false;
+			float min_z = 1e-6f;
 		};
 		Bump bump_;
 
