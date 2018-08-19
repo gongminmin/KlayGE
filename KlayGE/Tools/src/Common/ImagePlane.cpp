@@ -460,6 +460,7 @@ namespace KlayGE
 		uint32_t const height = uncompressed_tex_->Height(0);
 		ElementFormat const format = uncompressed_tex_->Format();
 		uint32_t const elem_size = NumFormatBytes(format);
+		uint32_t const num_comp = NumComponents(format);
 
 		Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0,
 			uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
@@ -473,7 +474,16 @@ namespace KlayGE
 				Color color_32f;
 				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
 
-				height_map[y * width + x] = this->RgbToLum(color_32f);
+				float h;
+				if (num_comp == 1)
+				{
+					h = color_32f.r();
+				}
+				else
+				{
+					h = this->RgbToLum(color_32f);
+				}
+				height_map[y * width + x] = h;
 			}
 
 			ptr += mapper.RowPitch();
