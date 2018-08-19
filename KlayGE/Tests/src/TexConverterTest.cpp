@@ -141,3 +141,13 @@ TEST_F(TexConverterTest, NormalCompressionGR)
 {
 	RunTest("lion_ddn.jpg", "lion_ddn.jpg.gr.kmeta", "lion_ddn_gr.dds", 1.0f / 255);
 }
+
+TEST_F(TexConverterTest, Bump2Normal)
+{
+	RunTest("background.jpg", "background_bump2normal.kmeta", "background_normal.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, Bump2Normal_0_4)
+{
+	RunTest("background.jpg", "background_bump2normal_0_4.kmeta", "background_normal_0_4.dds", 1.0f / 255);
+}

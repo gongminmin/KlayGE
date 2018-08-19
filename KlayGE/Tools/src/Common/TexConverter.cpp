@@ -180,6 +180,43 @@ namespace KlayGE
 			}
 		}
 
+		if ((metadata_.Slot() == TS_Normal) && metadata_.BumpToNormal())
+		{
+			for (uint32_t arr = 0; arr < array_size_; ++ arr)
+			{
+				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				{
+					planes_[arr][m]->Bump2Normal(metadata_.BumpScale());
+				}
+			}
+		}
+	
+		bool need_normal_compression = false;
+		if (metadata_.Slot() == TS_Normal)
+		{
+			switch (metadata_.PreferedFormat())
+			{
+			case EF_BC3:
+			case EF_BC5:
+			case EF_GR8:
+				need_normal_compression = true;
+				break;
+
+			default:
+				break;
+			}
+		}
+		if (need_normal_compression)
+		{
+			for (uint32_t arr = 0; arr < array_size_; ++ arr)
+			{
+				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				{
+					planes_[arr][m]->PrepareNormalCompression(metadata_.PreferedFormat());
+				}
+			}
+		}
+
 		if (format_ != metadata_.PreferedFormat())
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)

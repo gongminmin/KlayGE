@@ -340,24 +340,7 @@ namespace KlayGE
 				break;
 			}
 		}
-
-		bool need_normal_compression = false;
-		if (metadata.Slot() == TS_Normal)
-		{
-			switch (metadata.PreferedFormat())
-			{
-			case EF_BC3:
-			case EF_BC5:
-			case EF_GR8:
-				need_normal_compression = true;
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		if (need_swizzle || need_normal_compression)
+		if (need_swizzle)
 		{
 			compressed_tex_.reset();
 
@@ -382,26 +365,6 @@ namespace KlayGE
 					{
 						swizzled_clr[ch] = original_clr[channel_mapping[ch]];
 					}
-					if (need_normal_compression)
-					{
-						switch (metadata.PreferedFormat())
-						{
-						case EF_BC3:
-							swizzled_clr.a() = swizzled_clr.r();
-							swizzled_clr.r() = 0;
-							swizzled_clr.b() = 0;
-							break;
-
-						case EF_BC5:
-						case EF_GR8:
-							swizzled_clr.b() = 0;
-							swizzled_clr.a() = 0;
-							break;
-
-						default:
-							KFL_UNREACHABLE("Invalid normal compression format.");
-						}
-					}
 					line_32f[x] = swizzled_clr;
 				}
 
@@ -412,6 +375,103 @@ namespace KlayGE
 		}
 
 		return true;
+	}
+
+	void ImagePlane::PrepareNormalCompression(ElementFormat normal_compression_format)
+	{
+		compressed_tex_.reset();
+
+		uint32_t const width = uncompressed_tex_->Width(0);
+		uint32_t const height = uncompressed_tex_->Height(0);
+		ElementFormat const format = uncompressed_tex_->Format();
+		uint32_t const elem_size = NumFormatBytes(format);
+
+		Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0,
+			uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+		uint8_t* ptr = mapper.Pointer<uint8_t>();
+
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width; ++ x)
+			{
+				Color color_32f;
+				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
+
+				switch (normal_compression_format)
+				{
+				case EF_BC3:
+					color_32f.a() = color_32f.r();
+					color_32f.r() = 0;
+					color_32f.b() = 0;
+					break;
+
+				case EF_BC5:
+				case EF_GR8:
+					color_32f.b() = 0;
+					color_32f.a() = 0;
+					break;
+
+				default:
+					KFL_UNREACHABLE("Invalid normal compression format.");
+				}
+
+				ConvertFromABGR32F(format, &color_32f, 1, ptr + x * elem_size);
+			}
+
+			ptr += mapper.RowPitch();
+		}
+	}
+
+	void ImagePlane::Bump2Normal(float scale)
+	{
+		compressed_tex_.reset();
+
+		uint32_t const width = uncompressed_tex_->Width(0);
+		uint32_t const height = uncompressed_tex_->Height(0);
+		ElementFormat const format = uncompressed_tex_->Format();
+		uint32_t const elem_size = NumFormatBytes(format);
+
+		Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0,
+			uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+		uint8_t* ptr = mapper.Pointer<uint8_t>();
+
+		std::vector<float> height_map(width * height);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width; ++ x)
+			{
+				Color color_32f;
+				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
+
+				float3 constexpr RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f);
+				height_map[y * width + x] = MathLib::dot(float3(color_32f.r(), color_32f.g(), color_32f.b()), RGB_TO_LUM);
+			}
+
+			ptr += mapper.RowPitch();
+		}
+
+		ptr = mapper.Pointer<uint8_t>();
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width; ++ x)
+			{
+				uint32_t const x0 = x;
+				uint32_t const x1 = (x0 + 1) % width;
+				float const dx = height_map[y * width + x1] - height_map[y * width + x0];
+
+				uint32_t const y0 = y;
+				uint32_t const y1 = (y0 + 1) % height;
+				float const dy = height_map[y1 * width + x] - height_map[y0 * width + x];
+
+				float3 normal = MathLib::normalize(float3(-dx, -dy, scale));
+				normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
+
+				Color const color_f32(normal.x(), normal.y(), normal.z(), 1);
+				ConvertFromABGR32F(format, &color_f32, 1, ptr + x * elem_size);
+			}
+
+			ptr += mapper.RowPitch();
+		}
 	}
 
 	void ImagePlane::FormatConversion(ElementFormat format)

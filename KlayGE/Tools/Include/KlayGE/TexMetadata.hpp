@@ -52,9 +52,6 @@ namespace KlayGE
 		TS_Normal,
 		TS_Height,
 
-		// Offline only
-		TS_Bump,	// Will be converted to normal map
-
 		TS_NumTextureSlots
 	};
 
@@ -112,6 +109,15 @@ namespace KlayGE
 			return mipmap_.linear;
 		}
 
+		bool BumpToNormal() const
+		{
+			return bump_.to_normal;
+		}
+		float BumpScale() const
+		{
+			return bump_.scale;
+		}
+
 		uint32_t ArraySize() const;
 		std::string_view PlaneFileName(uint32_t array_index, uint32_t mip) const;
 
@@ -132,6 +138,13 @@ namespace KlayGE
 			bool linear = true;
 		};
 		Mipmap mipmap_;
+
+		struct Bump
+		{
+			bool to_normal = false;
+			float scale = 1.0f;
+		};
+		Bump bump_;
 
 		// Array    Mipmap
 		std::vector<std::vector<std::string>> plane_file_names_;

@@ -42,6 +42,38 @@
 
 namespace
 {
+	float GetFloat(rapidjson::Value const & value)
+	{
+		if (value.IsFloat())
+		{
+			return value.GetFloat();
+		}
+		else if (value.IsDouble())
+		{
+			return static_cast<float>(value.GetDouble());
+		}
+		else if (value.IsInt())
+		{
+			return static_cast<float>(value.GetInt());
+		}
+		else if (value.IsUint())
+		{
+			return static_cast<float>(value.GetUint());
+		}
+		else if (value.IsInt64())
+		{
+			return static_cast<float>(value.GetInt64());
+		}
+		else if (value.IsUint64())
+		{
+			return static_cast<float>(value.GetUint64());
+		}
+		else
+		{
+			KFL_UNREACHABLE("Invalid value type.");
+		}
+	}
+
 	int GetInt(rapidjson::Value const & value)
 	{
 		if (value.IsInt())
@@ -144,10 +176,6 @@ namespace KlayGE
 
 				case CT_HASH("height"):
 					new_metadata.slot_ = TS_Height;
-					break;
-
-				case CT_HASH("bump"):
-					new_metadata.slot_ = TS_Bump;
 					break;
 
 				default:
@@ -267,6 +295,25 @@ namespace KlayGE
 					auto const & linear_val = mipmap_val["linear"];
 					BOOST_ASSERT(linear_val.IsBool());
 					new_metadata.mipmap_.linear = linear_val.GetBool();
+				}
+			}
+
+			if (document.HasMember("bump"))
+			{
+				auto const & bump_val = document["bump"];
+
+				if (bump_val.HasMember("to_normal"))
+				{
+					auto const & to_normal_val = bump_val["to_normal"];
+					BOOST_ASSERT(to_normal_val.IsBool());
+					new_metadata.bump_.to_normal = to_normal_val.GetBool();
+				}
+
+				if (bump_val.HasMember("scale"))
+				{
+					auto const & scale_val = bump_val["scale"];
+					BOOST_ASSERT(scale_val.IsNumber());
+					new_metadata.bump_.scale = GetFloat(scale_val);
 				}
 			}
 
