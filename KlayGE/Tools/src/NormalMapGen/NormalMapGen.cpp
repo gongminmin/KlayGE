@@ -12,7 +12,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	void CreateNormalMap(std::string const & in_file, std::string const & out_file)
+	void CreateNormalMap(std::string const & in_file, std::string const & out_file, float scale)
 	{
 		TexturePtr in_tex = LoadSoftwareTexture(in_file);
 		auto const type = in_tex->Type();
@@ -73,8 +73,8 @@ namespace
 				{
 					for (uint32_t x = 0; x < the_width; ++ x)
 					{
-						float3 normal = MathLib::normalize(float3(static_cast<float>(-dx[y * the_width + x]),
-							static_cast<float>(-dy[y * the_width + x]), 8));
+						float3 normal = MathLib::normalize(float3(-dx[y * the_width + x] / 255.0f,
+							-dy[y * the_width + x] / 255.0f, scale));
 						normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
 
 						data_block[base[i] + (y * the_width + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.z() * 255 + 0.5f), 0, 255));
@@ -91,6 +91,8 @@ namespace
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
 				normals[i].data = &data_block[base[i]];
+				normals[i].row_pitch = width * 4;
+				normals[i].slice_pitch = normals[i].row_pitch * height;
 			}
 
 			TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(type, width, height, depth, num_mipmaps, array_size, EF_ARGB8, true);
@@ -108,9 +110,9 @@ int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
 
-	if (argc != 3)
+	if (argc < 3)
 	{
-		cout << "Usage: NormalMapGen xxx.dds yyy.dds" << endl;
+		cout << "Usage: NormalMapGen xxx.dds yyy.dds [scale=8.0]" << endl;
 		return 1;
 	}
 
@@ -121,8 +123,14 @@ int main(int argc, char* argv[])
 		Context::Destroy();
 		return 1;
 	}
+	
+	float scale = 1;
+	if (argc >= 4)
+	{
+		scale = static_cast<float>(atof(argv[3]));
+	}
 
-	CreateNormalMap(in_file, argv[2]);
+	CreateNormalMap(in_file, argv[2], scale);
 
 	cout << "Normal map is saved to " << argv[2] << endl;
 
