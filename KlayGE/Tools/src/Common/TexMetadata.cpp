@@ -29,14 +29,17 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <algorithm>
 #include <iterator>
+#include <fstream>
 
 #include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
 
 #include <KlayGE/TexMetadata.hpp>
 
@@ -155,32 +158,31 @@ namespace KlayGE
 				switch (slot_hash)
 				{
 				case CT_HASH("albedo"):
-					new_metadata.slot_ = TS_Albedo;
+					new_metadata.slot_ = RenderMaterial::TS_Albedo;
 					break;
 
 				case CT_HASH("metalness"):
-					new_metadata.slot_ = TS_Metalness;
+					new_metadata.slot_ = RenderMaterial::TS_Metalness;
 					break;
 
 				case CT_HASH("glossiness"):
-					new_metadata.slot_ = TS_Glossiness;
+					new_metadata.slot_ = RenderMaterial::TS_Glossiness;
 					break;
 
 				case CT_HASH("emissive"):
-					new_metadata.slot_ = TS_Emissive;
+					new_metadata.slot_ = RenderMaterial::TS_Emissive;
 					break;
 
 				case CT_HASH("normal"):
-					new_metadata.slot_ = TS_Normal;
+					new_metadata.slot_ = RenderMaterial::TS_Normal;
 					break;
 
 				case CT_HASH("height"):
-					new_metadata.slot_ = TS_Height;
+					new_metadata.slot_ = RenderMaterial::TS_Height;
 					break;
 
 				default:
 					KFL_UNREACHABLE("Invalid texture slot.");
-					break;
 				}
 			}
 
@@ -305,7 +307,7 @@ namespace KlayGE
 				}
 			}
 
-			if (document.HasMember("bump"))
+			if ((new_metadata.slot_ == RenderMaterial::TS_Normal) && document.HasMember("bump"))
 			{
 				auto const & bump_val = document["bump"];
 
@@ -358,10 +360,203 @@ namespace KlayGE
 		}
 		else if (!name.empty())
 		{
-			LogError() << "COULDN'T find " << name << ". Fallback to default metadata." << std::endl;
+			LogError() << "Could NOT find " << name << ". Fallback to default metadata." << std::endl;
 		}
 
 		*this = std::move(new_metadata);
+	}
+
+	void TexMetadata::Save(std::string const & name) const
+	{
+		rapidjson::Document document;
+		document.SetObject();
+
+		auto& allocator = document.GetAllocator();
+
+		document.AddMember("version", 1U, allocator);
+
+		document.AddMember("type", "2D", allocator);
+
+		std::string slot_str;
+		switch (slot_)
+		{
+		case RenderMaterial::TS_Albedo:
+			slot_str = "albedo";
+			break;
+
+		case RenderMaterial::TS_Metalness:
+			slot_str = "metalness";
+			break;
+
+		case RenderMaterial::TS_Glossiness:
+			slot_str = "glossiness";
+			break;
+
+		case RenderMaterial::TS_Emissive:
+			slot_str = "emissive";
+			break;
+
+		case RenderMaterial::TS_Normal:
+			slot_str = "normal";
+			break;
+
+		case RenderMaterial::TS_Height:
+			slot_str = "height";
+			break;
+
+		default:
+			KFL_UNREACHABLE("Invalid texture slot.");
+		}
+		document.AddMember("slot", rapidjson::StringRef(slot_str.c_str(), static_cast<rapidjson::SizeType>(slot_str.size())), allocator);
+
+		std::string preferred_format_str;
+		if (prefered_format_ != EF_Unknown)
+		{
+			switch (prefered_format_)
+			{
+			case EF_BC1:
+				preferred_format_str = "BC1";
+				break;
+			case EF_BC1_SRGB:
+				preferred_format_str = "BC1_SRGB";
+				break;
+			case EF_BC2:
+				preferred_format_str = "BC2";
+				break;
+			case EF_BC2_SRGB:
+				preferred_format_str = "BC2_SRGB";
+				break;
+			case EF_BC3:
+				preferred_format_str = "BC3";
+				break;
+			case EF_BC3_SRGB:
+				preferred_format_str = "BC3_SRGB";
+				break;
+			case EF_BC4:
+				preferred_format_str = "BC4";
+				break;
+			case EF_BC4_SRGB:
+				preferred_format_str = "BC4_SRGB";
+				break;
+			case EF_BC5:
+				preferred_format_str = "BC5";
+				break;
+			case EF_BC5_SRGB:
+				preferred_format_str = "BC5_SRGB";
+				break;
+			case EF_BC6:
+				preferred_format_str = "BC6";
+				break;
+			case EF_BC7:
+				preferred_format_str = "BC7";
+				break;
+			case EF_BC7_SRGB:
+				preferred_format_str = "BC7_SRGB";
+				break;
+			case EF_ETC1:
+				preferred_format_str = "ETC1";
+				break;
+
+			case EF_GR8:
+				preferred_format_str = "GR8";
+				break;
+
+			default:
+				preferred_format_str = "Unknown";
+				break;
+			}
+			document.AddMember("prefered_format",
+				rapidjson::StringRef(preferred_format_str.c_str(), static_cast<rapidjson::SizeType>(preferred_format_str.size())),
+				allocator);
+		}
+
+		if (force_srgb_)
+		{
+			document.AddMember("force_srgb", force_srgb_, allocator);
+		}
+
+		bool need_swizzle = false;
+		for (size_t i = 0; i < std::size(channel_mapping_); ++ i)
+		{
+			if (channel_mapping_[i] != i)
+			{
+				need_swizzle = true;
+				break;
+			}
+		}
+		if (need_swizzle)
+		{
+			rapidjson::Value channel_mapping_val;
+			channel_mapping_val.SetArray();
+			for (size_t i = 0; i < std::size(channel_mapping_); ++ i)
+			{
+				channel_mapping_val.PushBack(static_cast<int>(channel_mapping_[i]), allocator);
+			}
+			document.AddMember("channel_mapping", channel_mapping_val, allocator);
+		}
+
+		if (rgb_to_lum_)
+		{
+			document.AddMember("rgb_to_lum", rgb_to_lum_, allocator);
+		}
+
+		if (mipmap_.enabled)
+		{
+			rapidjson::Value mipmap_val;
+			mipmap_val.SetObject();
+
+			mipmap_val.AddMember("enabled", mipmap_.enabled, allocator);
+			mipmap_val.AddMember("auto_gen", mipmap_.auto_gen, allocator);
+			mipmap_val.AddMember("num_levels", mipmap_.num_levels, allocator);
+			mipmap_val.AddMember("linear", mipmap_.linear, allocator);
+
+			document.AddMember("mipmap", mipmap_val, allocator);
+		}
+
+		if ((slot_ == RenderMaterial::TS_Normal) && bump_.to_normal)
+		{
+			rapidjson::Value bump_val;
+			bump_val.SetObject();
+
+			bump_val.AddMember("to_normal", bump_.to_normal, allocator);
+			bump_val.AddMember("scale", bump_.scale, allocator);
+
+			document.AddMember("bump", bump_val, allocator);
+		}
+
+		if ((plane_file_names_.size() > 1) || ((plane_file_names_.size() == 1) && (plane_file_names_[0].size() > 1)))
+		{
+			rapidjson::Value array_names_val;
+			array_names_val.SetArray();
+
+			for (size_t i = 0; i < plane_file_names_.size(); ++ i)
+			{
+				if (plane_file_names_[i].size() > 1)
+				{
+					rapidjson::Value mip_names_val;
+					mip_names_val.SetArray();
+					for (size_t j = 0; j < plane_file_names_[i].size(); ++ j)
+					{
+						auto const & str = plane_file_names_[i][j];
+						mip_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+					}
+					array_names_val.PushBack(mip_names_val, allocator);
+				}
+				else
+				{
+					auto const & str = plane_file_names_[i][0];
+					array_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+				}
+			}
+
+			document.AddMember("array", array_names_val, allocator);
+		}
+
+		rapidjson::StringBuffer sb;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+		document.Accept(writer);
+		std::ofstream ofs(name);
+		ofs << sb.GetString();
 	}
 	
 	uint32_t TexMetadata::ArraySize() const
@@ -369,8 +564,18 @@ namespace KlayGE
 		return plane_file_names_.empty() ? 1 : static_cast<uint32_t>(plane_file_names_.size());
 	}
 
+	void TexMetadata::ArraySize(uint32_t size)
+	{
+		plane_file_names_.resize(size);
+	}
+
 	std::string_view TexMetadata::PlaneFileName(uint32_t array_index, uint32_t mip) const
 	{
 		return plane_file_names_[array_index][mip];
+	}
+
+	void TexMetadata::PlaneFileName(uint32_t array_index, uint32_t mip, std::string_view name)
+	{
+		plane_file_names_[array_index][mip] = std::string(name);
 	}
 }

@@ -77,7 +77,7 @@ namespace KlayGE
 
 		if (!first_image.Load(input_name_, metadata_))
 		{
-			LogError() << "COULDN'T load " << input_name_ << '.' << std::endl;
+			LogError() << "Could NOT load " << input_name_ << '.' << std::endl;
 			return false;
 		}
 
@@ -141,7 +141,7 @@ namespace KlayGE
 					planes_[arr][0] = MakeSharedPtr<ImagePlane>();
 					if (!planes_[arr][0]->Load(plane_file_name, metadata_))
 					{
-						LogError() << "COULDN'T load " << plane_file_name << '.' << std::endl;
+						LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
 						return false;
 					}
 				}
@@ -172,7 +172,7 @@ namespace KlayGE
 						planes_[arr][m] = MakeSharedPtr<ImagePlane>();
 						if (!planes_[arr][m]->Load(plane_file_name, metadata_))
 						{
-							LogError() << "COULDN'T load " << plane_file_name << '.' << std::endl;
+							LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
 							return false;
 						}
 					}
@@ -191,7 +191,7 @@ namespace KlayGE
 			}
 		}
 
-		if ((metadata_.Slot() == TS_Normal) && metadata_.BumpToNormal())
+		if ((metadata_.Slot() == RenderMaterial::TS_Normal) && metadata_.BumpToNormal())
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
@@ -203,7 +203,7 @@ namespace KlayGE
 		}
 	
 		bool need_normal_compression = false;
-		if (metadata_.Slot() == TS_Normal)
+		if (metadata_.Slot() == RenderMaterial::TS_Normal)
 		{
 			switch (metadata_.PreferedFormat())
 			{

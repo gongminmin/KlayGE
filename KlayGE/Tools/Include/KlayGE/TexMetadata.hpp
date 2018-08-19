@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <string>
@@ -43,18 +44,6 @@
 
 namespace KlayGE
 {
-	enum TextureSlot
-	{
-		TS_Albedo,
-		TS_Metalness,
-		TS_Glossiness,
-		TS_Emissive,
-		TS_Normal,
-		TS_Height,
-
-		TS_NumTextureSlots
-	};
-
 	class KLAYGE_TOOL_API TexMetadata
 	{
 	public:
@@ -62,15 +51,20 @@ namespace KlayGE
 		explicit TexMetadata(std::string_view name);
 
 		void Load(std::string_view name);
+		void Save(std::string const & name) const;
 
 		Texture::TextureType Type() const
 		{
 			return type_;
 		}
 
-		TextureSlot Slot() const
+		RenderMaterial::TextureSlot Slot() const
 		{
 			return slot_;
+		}
+		void Slot(RenderMaterial::TextureSlot slot)
+		{
+			slot_ = slot;
 		}
 
 		ElementFormat PreferedFormat() const
@@ -86,50 +80,88 @@ namespace KlayGE
 		{
 			return force_srgb_;
 		}
+		void ForceSRGB(bool srgb)
+		{
+			force_srgb_ = srgb;
+		}
 
 		uint8_t ChannelMapping(uint32_t channel) const
 		{
 			return channel_mapping_[channel];
+		}
+		void ChannelMapping(uint32_t channel, uint8_t mapping)
+		{
+			channel_mapping_[channel] = mapping;
 		}
 
 		bool RgbToLum() const
 		{
 			return rgb_to_lum_;
 		}
+		void RgbToLum(bool rgb_to_lum)
+		{
+			rgb_to_lum_ = rgb_to_lum;
+		}
 
 		bool MipmapEnabled() const
 		{
 			return mipmap_.enabled;
 		}
+		void MipmapEnabled(bool mip)
+		{
+			mipmap_.enabled = mip;
+		}
 		bool AutoGenMipmap() const
 		{
 			return mipmap_.auto_gen;
+		}
+		void AutoGenMipmap(bool auto_gen)
+		{
+			mipmap_.auto_gen = auto_gen;
 		}
 		uint32_t NumMipmaps() const
 		{
 			return mipmap_.num_levels;
 		}
+		void NumMipmaps(uint32_t levels)
+		{
+			mipmap_.num_levels = levels;
+		}
 		bool LinearMipmap() const
 		{
 			return mipmap_.linear;
+		}
+		void LinearMipmap(bool linear)
+		{
+			mipmap_.linear = linear;
 		}
 
 		bool BumpToNormal() const
 		{
 			return bump_.to_normal;
 		}
+		void BumpToNormal(bool to_normal)
+		{
+			bump_.to_normal = to_normal;
+		}
 		float BumpScale() const
 		{
 			return bump_.scale;
 		}
+		void BumpScale(float scale)
+		{
+			bump_.scale = scale;
+		}
 
 		uint32_t ArraySize() const;
+		void ArraySize(uint32_t size);
 		std::string_view PlaneFileName(uint32_t array_index, uint32_t mip) const;
+		void PlaneFileName(uint32_t array_index, uint32_t mip, std::string_view name);
 
 	private:
 		Texture::TextureType type_ = Texture::TT_2D;
 
-		TextureSlot slot_ = TS_Albedo;
+		RenderMaterial::TextureSlot slot_ = RenderMaterial::TS_Albedo;
 
 		ElementFormat prefered_format_ = EF_Unknown;
 		bool force_srgb_ = false;
