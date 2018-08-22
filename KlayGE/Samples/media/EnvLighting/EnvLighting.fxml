@@ -32,6 +32,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="integrated_brdf_tex"/>
+	<parameter type="texture2D" name="color_map"/>
 	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -117,6 +118,16 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 
 	return float4(PrefilteredDiffuseIBL(diffuse, normal)
 		+ PBFittingPrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
+}
+
+float4 PBFittingErrorPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+{
+	float4 error = PBFittingPrefilteredPS(normal, incident) - PBPrefilteredPS(normal, incident);
+
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+	float lum = saturate(dot(error.rgb * 100, RGB_TO_LUM));
+
+	return color_map.SampleLevel(bilinear_sampler, float2(lum, 0.5f), 0);
 }
 		]]>
 	</shader>
@@ -344,6 +355,12 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 		<pass name="p0">
 			<state name="vertex_shader" value="GroundTruthVS()"/>
 			<state name="pixel_shader" value="PBFittingPrefilteredPS()"/>
+		</pass>
+	</technique>
+	<technique name="PBFittingError">
+		<pass name="p0">
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="PBFittingErrorPS()"/>
 		</pass>
 	</technique>
 </effect>

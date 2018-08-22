@@ -1,11 +1,12 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="Method" caption="Method" x="-140" y="500" align_x="right" width="140" height="100">
+	<dialog id="Method" caption="Method" x="-220" y="500" align_x="right" width="220" height="100">
 		<control type="static" id="TypeStatic" caption="Type:" x="20" y="20" width="100" height="24" is_default="0"/>
-		<control type="combo_box" id="TypeCombo" x="20" y="40" width="100" height="24" hotkey="0" is_default="0">
+		<control type="combo_box" id="TypeCombo" x="20" y="40" width="180" height="24" hotkey="0" is_default="0">
 			<item name="PB Fitting Prefiltered"/>
 			<item name="PB Prefiltered"/>
+			<item name="PB Fitting Error"/>
 			<item name="Prefiltered"/>
 			<item name="Approximate"/>
 			<item name="GroundTruth"/>

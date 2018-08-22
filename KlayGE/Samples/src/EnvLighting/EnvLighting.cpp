@@ -45,9 +45,10 @@ namespace
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
 			techs_[1] = effect_->TechniqueByName("PBPrefiltered");
-			techs_[2] = effect_->TechniqueByName("Prefiltered");
-			techs_[3] = effect_->TechniqueByName("Approximate");
-			techs_[4] = effect_->TechniqueByName("GroundTruth");
+			techs_[2] = effect_->TechniqueByName("PBFittingError");
+			techs_[3] = effect_->TechniqueByName("Prefiltered");
+			techs_[4] = effect_->TechniqueByName("Approximate");
+			techs_[5] = effect_->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 
 			SceneManager& sm = Context::Instance().SceneManagerInstance();
@@ -64,6 +65,84 @@ namespace
 					break;
 				}
 			}
+
+			// From https://github.com/BIDS/colormap/blob/master/parula.py
+			uint32_t const color_map[] =
+			{
+				Color(0.2081f, 0.1663f, 0.5292f, 1).ABGR(),
+				Color(0.2116238095f, 0.1897809524f, 0.5776761905f, 1).ABGR(),
+				Color(0.212252381f, 0.2137714286f, 0.6269714286f, 1).ABGR(),
+				Color(0.2081f, 0.2386f, 0.6770857143f, 1).ABGR(),
+				Color(0.1959047619f, 0.2644571429f, 0.7279f, 1).ABGR(),
+				Color(0.1707285714f, 0.2919380952f, 0.779247619f, 1).ABGR(),
+				Color(0.1252714286f, 0.3242428571f, 0.8302714286f, 1).ABGR(),
+				Color(0.0591333333f, 0.3598333333f, 0.8683333333f, 1).ABGR(),
+				Color(0.0116952381f, 0.3875095238f, 0.8819571429f, 1).ABGR(),
+				Color(0.0059571429f, 0.4086142857f, 0.8828428571f, 1).ABGR(),
+				Color(0.0165142857f, 0.4266f, 0.8786333333f, 1).ABGR(),
+				Color(0.032852381f, 0.4430428571f, 0.8719571429f, 1).ABGR(),
+				Color(0.0498142857f, 0.4585714286f, 0.8640571429f, 1).ABGR(),
+				Color(0.0629333333f, 0.4736904762f, 0.8554380952f, 1).ABGR(),
+				Color(0.0722666667f, 0.4886666667f, 0.8467f, 1).ABGR(),
+				Color(0.0779428571f, 0.5039857143f, 0.8383714286f, 1).ABGR(),
+				Color(0.079347619f, 0.5200238095f, 0.8311809524f, 1).ABGR(),
+				Color(0.0749428571f, 0.5375428571f, 0.8262714286f, 1).ABGR(),
+				Color(0.0640571429f, 0.5569857143f, 0.8239571429f, 1).ABGR(),
+				Color(0.0487714286f, 0.5772238095f, 0.8228285714f, 1).ABGR(),
+				Color(0.0343428571f, 0.5965809524f, 0.819852381f, 1).ABGR(),
+				Color(0.0265f, 0.6137f, 0.8135f, 1).ABGR(),
+				Color(0.0238904762f, 0.6286619048f, 0.8037619048f, 1).ABGR(),
+				Color(0.0230904762f, 0.6417857143f, 0.7912666667f, 1).ABGR(),
+				Color(0.0227714286f, 0.6534857143f, 0.7767571429f, 1).ABGR(),
+				Color(0.0266619048f, 0.6641952381f, 0.7607190476f, 1).ABGR(),
+				Color(0.0383714286f, 0.6742714286f, 0.743552381f, 1).ABGR(),
+				Color(0.0589714286f, 0.6837571429f, 0.7253857143f, 1).ABGR(),
+				Color(0.0843f, 0.6928333333f, 0.7061666667f, 1).ABGR(),
+				Color(0.1132952381f, 0.7015f, 0.6858571429f, 1).ABGR(),
+				Color(0.1452714286f, 0.7097571429f, 0.6646285714f, 1).ABGR(),
+				Color(0.1801333333f, 0.7176571429f, 0.6424333333f, 1).ABGR(),
+				Color(0.2178285714f, 0.7250428571f, 0.6192619048f, 1).ABGR(),
+				Color(0.2586428571f, 0.7317142857f, 0.5954285714f, 1).ABGR(),
+				Color(0.3021714286f, 0.7376047619f, 0.5711857143f, 1).ABGR(),
+				Color(0.3481666667f, 0.7424333333f, 0.5472666667f, 1).ABGR(),
+				Color(0.3952571429f, 0.7459f, 0.5244428571f, 1).ABGR(),
+				Color(0.4420095238f, 0.7480809524f, 0.5033142857f, 1).ABGR(),
+				Color(0.4871238095f, 0.7490619048f, 0.4839761905f, 1).ABGR(),
+				Color(0.5300285714f, 0.7491142857f, 0.4661142857f, 1).ABGR(),
+				Color(0.5708571429f, 0.7485190476f, 0.4493904762f, 1).ABGR(),
+				Color(0.609852381f, 0.7473142857f, 0.4336857143f, 1).ABGR(),
+				Color(0.6473f, 0.7456f, 0.4188f, 1).ABGR(),
+				Color(0.6834190476f, 0.7434761905f, 0.4044333333f, 1).ABGR(),
+				Color(0.7184095238f, 0.7411333333f, 0.3904761905f, 1).ABGR(),
+				Color(0.7524857143f, 0.7384f, 0.3768142857f, 1).ABGR(),
+				Color(0.7858428571f, 0.7355666667f, 0.3632714286f, 1).ABGR(),
+				Color(0.8185047619f, 0.7327333333f, 0.3497904762f, 1).ABGR(),
+				Color(0.8506571429f, 0.7299f, 0.3360285714f, 1).ABGR(),
+				Color(0.8824333333f, 0.7274333333f, 0.3217f, 1).ABGR(),
+				Color(0.9139333333f, 0.7257857143f, 0.3062761905f, 1).ABGR(),
+				Color(0.9449571429f, 0.7261142857f, 0.2886428571f, 1).ABGR(),
+				Color(0.9738952381f, 0.7313952381f, 0.266647619f, 1).ABGR(),
+				Color(0.9937714286f, 0.7454571429f, 0.240347619f, 1).ABGR(),
+				Color(0.9990428571f, 0.7653142857f, 0.2164142857f, 1).ABGR(),
+				Color(0.9955333333f, 0.7860571429f, 0.196652381f, 1).ABGR(),
+				Color(0.988f, 0.8066f, 0.1793666667f, 1).ABGR(),
+				Color(0.9788571429f, 0.8271428571f, 0.1633142857f, 1).ABGR(),
+				Color(0.9697f, 0.8481380952f, 0.147452381f, 1).ABGR(),
+				Color(0.9625857143f, 0.8705142857f, 0.1309f, 1).ABGR(),
+				Color(0.9588714286f, 0.8949f, 0.1132428571f, 1).ABGR(),
+				Color(0.9598238095f, 0.9218333333f, 0.0948380952f, 1).ABGR(),
+				Color(0.9661f, 0.9514428571f, 0.0755333333f, 1).ABGR(),
+				Color(0.9763f, 0.9831f, 0.0538f, 1).ABGR()
+			};
+
+			ElementInitData init_data;
+			init_data.data = color_map;
+			init_data.row_pitch = sizeof(color_map);
+			init_data.slice_pitch = init_data.row_pitch * 1;
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
+				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
 		virtual void DoBuildMeshInfo() override
@@ -89,7 +168,7 @@ namespace
 			technique_ = techs_[type];
 		}
 
-		void IntegrateBRDFTex(TexturePtr const & tex)
+		void IntegratedBRDFTex(TexturePtr const & tex)
 		{
 			*(effect_->ParameterByName("integrated_brdf_tex")) = tex;
 		}
@@ -107,7 +186,7 @@ namespace
 		}
 
 	private:
-		array<RenderTechnique*, 5> techs_;
+		array<RenderTechnique*, 6> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper
@@ -125,9 +204,9 @@ namespace
 			checked_pointer_cast<SphereRenderable>(renderable_)->RenderingType(type);
 		}
 
-		void IntegrateBRDFTex(TexturePtr const & tex)
+		void IntegratedBRDFTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<SphereRenderable>(renderable_)->IntegrateBRDFTex(tex);
+			checked_pointer_cast<SphereRenderable>(renderable_)->IntegratedBRDFTex(tex);
 		}
 	};
 
@@ -515,12 +594,12 @@ namespace
 		return rg / static_cast<float>(NUM_SAMPLES);
 	}
 
-	TexturePtr GenIntegrateBRDF()
+	TexturePtr GenIntegratedBRDF()
 	{
 		uint32_t const WIDTH = 128;
 		uint32_t const HEIGHT = 128;
 
-		std::vector<uint8_t> integrate_brdf_gr(WIDTH * HEIGHT * 2, 0);
+		std::vector<uint8_t> integrate_brdf_gr(WIDTH * HEIGHT * 2);
 		for (uint32_t y = 0; y < HEIGHT; ++ y)
 		{
 			float shininess = Glossiness2Shininess((y + 0.5f) / HEIGHT);
@@ -528,7 +607,7 @@ namespace
 			{
 				float cos_theta = (x + 0.5f) / WIDTH;
 
-				float2 lut = IntegrateBRDFBP(shininess, cos_theta);
+				float2 const lut = IntegrateBRDFBP(shininess, cos_theta);
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 0]
 					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 1]
@@ -536,18 +615,15 @@ namespace
 			}
 		}
 
-		std::vector<uint8_t> integrated_brdf_bc5(WIDTH * HEIGHT);
-		TexCompressionBC5 bc5_codec;
-		bc5_codec.EncodeMem(WIDTH, HEIGHT, &integrated_brdf_bc5[0], WIDTH * 4, WIDTH * HEIGHT,
-			&integrate_brdf_gr[0], WIDTH * 2, WIDTH * HEIGHT * 2, TCM_Quality);
-
 		ElementInitData init_data;
-		init_data.data = &integrated_brdf_bc5[0];
-		init_data.row_pitch = WIDTH * 4;
-		init_data.slice_pitch = WIDTH * HEIGHT;
-		
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance(); 
-		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_BC5, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		init_data.data = &integrate_brdf_gr[0];
+		init_data.row_pitch = WIDTH * 2;
+		init_data.slice_pitch = init_data.row_pitch * HEIGHT;
+
+		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, WIDTH, HEIGHT, 1, 1, 1, EF_GR8, false);
+		ret->CreateHWResource(init_data, nullptr);
+
+		return ret;
 	}
 }
 
@@ -576,9 +652,23 @@ void EnvLightingApp::OnCreate()
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
 	{
-		SaveTexture(GenIntegrateBRDF(), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
+		SaveTexture(GenIntegratedBRDF(), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
 	}
-	integrate_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
+
+	auto& rf = Context::Instance().RenderFactoryInstance();
+	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
+	ElementFormat const fmt = caps.BestMatchTextureFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 });
+	if (fmt == EF_GR8)
+	{
+		integrated_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
+	}
+	else
+	{
+		auto integrated_brdf_sw_tex = LoadSoftwareTexture("IntegratedBRDF.dds");
+
+		integrated_brdf_tex_ = rf.MakeTexture2D(integrated_brdf_sw_tex->Width(0), integrated_brdf_sw_tex->Height(0), 1, 1, fmt, 1, 0, EAH_GPU_Read);
+		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_);
+	}
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
@@ -597,7 +687,7 @@ void EnvLightingApp::OnCreate()
 				* MathLib::translation((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.08f,
 										0.0f, 
 									   (-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.08f));
-			checked_pointer_cast<SphereObject>(spheres_[i * spheres_column + j])->IntegrateBRDFTex(integrate_brdf_tex_);
+			checked_pointer_cast<SphereObject>(spheres_[i * spheres_column + j])->IntegratedBRDFTex(integrated_brdf_tex_);
 			spheres_[i * spheres_column + j]->AddToSceneManager();
 		}
 	}

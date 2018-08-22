@@ -25,7 +25,7 @@ private:
 
 	KlayGE::TrackballCameraController obj_controller_;
 
-	KlayGE::TexturePtr integrate_brdf_tex_;
+	KlayGE::TexturePtr integrated_brdf_tex_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int rendering_type_;
