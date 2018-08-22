@@ -1,0 +1,10 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "albedo",
+
+	"prefered_format": "BC7_SRGB",
+	"force_srgb": true
+}

@@ -97,6 +97,11 @@ TEST_F(TexConverterTest, CompressionSRGB)
 	RunTest("lion.jpg", "lion_bc1_srgb.kmeta", "lion_bc1_srgb.dds", 1.0f / 255);
 }
 
+TEST_F(TexConverterTest, CompressionBC7SRGB)
+{
+	RunTest("lion.jpg", "lion_bc7_srgb.kmeta", "lion_bc7_srgb.dds", 16.0f / 255);
+}
+
 TEST_F(TexConverterTest, Mip)
 {
 	RunTest("lion.jpg", "lion_mip.kmeta", "lion_mip.dds", 1.0f / 255);
