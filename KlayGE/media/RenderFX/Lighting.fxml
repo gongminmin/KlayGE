@@ -108,17 +108,16 @@ float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_diff)
 float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
 {
 	float n_dot_v = saturate(dot(normal, view));
-	glossiness = max(0.5f / 16, glossiness);
 	float2 env_brdf;
-	float4 tmp = ((float4(-4.996914762f, 7.253111161f, -1.963867075f, -0.170416225f) * glossiness
-		+ float4(8.993475061f, -15.42473953f, 4.712593001f, 0.448102365f)) * glossiness
-		+ float4(-4.928234727f, 10.95286522f, -3.852980973f, -0.389332014f)) * glossiness
-		+ float4(0.846124834f, -1.596815751f, 1.005729748f, 0.113484128f);
+	float4 tmp = ((float4(3.221071959f, -4.037492752f, 2.019851685f, -0.3509000242f) * glossiness
+		+ float4(-5.483835697f, 4.748570442f, -2.599167109f, 0.8398050666f)) * glossiness
+		+ float4(2.386495829f, 0.3970752358f, 0.1965616345f, -0.6608897448f)) * glossiness
+		+ float4(-0.2426506728f, 0.05738930777f, 0.318114996f, 0.1741847545f);
 	env_brdf.x = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
-	tmp = ((float4(-0.684077741f, 1.316163916f, -0.70869252f, 0.073264505f) * glossiness
-		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * glossiness
-		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * glossiness
-		+ float4(0.001922126f, 0.006697305f, -0.015741592f, 0.007229544f);
+	tmp = ((float4(-0.645807467f, 1.143745551f, -0.578012509f, 0.069540519f) * glossiness
+		+ float4(0.895991894f, -1.581523545f, 0.81029122f, -0.108531864f)) * glossiness
+		+ float4(-0.088478638f, 0.154233504f, -0.098784305f, 0.029798974f)) * glossiness
+		+ float4(0.001030646f, 0.008038982f, -0.016316089f, 0.007532373f);
 	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
 	env_brdf = saturate(env_brdf);
 	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
