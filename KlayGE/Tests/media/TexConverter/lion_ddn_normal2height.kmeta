@@ -1,0 +1,14 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "height",
+
+	"prefered_format": "BC4",
+
+	"bump":
+	{
+		"from_normal": true
+	}
+}
