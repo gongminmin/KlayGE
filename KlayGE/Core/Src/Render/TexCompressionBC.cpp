@@ -37,8 +37,9 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/Half.hpp>
 
-#include <vector>
 #include <cstring>
+#include <random>
+#include <vector>
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 	#include <intrin.h>		// For _BitScanForward
@@ -877,6 +878,13 @@ namespace
 		default:
 			KFL_UNREACHABLE("Invalid rotation mode");
 		}
+	}
+
+	int IntRand()
+	{
+		static thread_local std::mt19937 gen;
+		std::uniform_int_distribution<int> random_dis(0, RAND_MAX);
+		return random_dis(gen);
 	}
 }
 
@@ -2880,7 +2888,7 @@ namespace KlayGE
 		{
 			float4 const & p = pt ? p1 : p2;
 			float4& np = pt ? np1 : np2;
-			uint32_t const rdir = rand() & 0xF;
+			uint32_t const rdir = IntRand() & 0xF;
 
 			np = p;
 			if (has_pbits)
@@ -2913,7 +2921,7 @@ namespace KlayGE
 		}
 
 		size_t const p = static_cast<size_t>(exp(0.1f * static_cast<int64_t>(old_err - new_err) / temp) * RAND_MAX);
-		size_t const r = rand();
+		size_t const r = IntRand();
 
 		return r < p;
 	}
@@ -3020,7 +3028,7 @@ namespace KlayGE
 				best_err = error;
 				best_pbit_combo = static_cast<uint8_t>(pbi);
 
-				for (uint32_t ci = 0; ci < p1.size(); ++ci)
+				for (uint32_t ci = 0; ci < p1.size(); ++ ci)
 				{
 					p1[ci] = static_cast<float>(best_val_i[ci]);
 					p2[ci] = static_cast<float>(best_val_j[ci]);
@@ -3168,7 +3176,7 @@ namespace KlayGE
 		{
 			if (num_pts[i] > 0)
 			{
-				num_buckets_filled++;
+				++ num_buckets_filled;
 				last_filled_bucket = i;
 			}
 		}
