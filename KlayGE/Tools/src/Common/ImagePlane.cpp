@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
@@ -677,10 +678,64 @@ namespace KlayGE
 
 	void ImagePlane::FormatConversion(ElementFormat format)
 	{
+		uint32_t const tex_width = uncompressed_tex_->Width(0);
+		uint32_t const tex_height = uncompressed_tex_->Height(0);
+
+		uint32_t const block_width = BlockWidth(format);
+		uint32_t const block_height = BlockHeight(format);
+		uint32_t const block_bytes = BlockBytes(format);
+
+		uint32_t const row_pitch = (tex_width + block_width - 1) / block_width * block_bytes;
+		uint32_t const slice_pitch = (tex_height + block_height - 1) / block_height * row_pitch;
+
+		std::vector<uint8_t> new_tex_data(slice_pitch);
+
+		CPUInfo cpu;
+		uint32_t const num_threads = cpu.NumHWThreads();
+		thread_pool tp(1, num_threads);
+		std::vector<joiner<void>> joiners(num_threads);
+
+		uint32_t const tex_region_height = ((tex_height + num_threads - 1) / num_threads + block_height - 1) & ~(block_height - 1);
+		std::vector<TexturePtr> new_tex_regions(num_threads);
+		for (uint32_t i = 0; i < num_threads; ++ i)
+		{
+			joiners[i] = tp(
+				[block_height, tex_width, tex_height, tex_region_height, i, format, row_pitch,
+					&new_tex_data, &new_tex_regions, this]
+				{
+					uint32_t const this_tex_region_height = MathLib::clamp(static_cast<int>(tex_height - i * tex_region_height),
+						0, static_cast<int>(tex_region_height));
+					if (this_tex_region_height > 0)
+					{
+						new_tex_regions[i] = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, tex_width, this_tex_region_height,
+							1, 1, 1, format, true);
+
+						ElementInitData init_data;
+						init_data.data = new_tex_data.data() + i * tex_region_height / block_height * row_pitch;
+						init_data.row_pitch = row_pitch;
+						init_data.slice_pitch = (this_tex_region_height + block_height - 1) / block_height * row_pitch;
+
+						new_tex_regions[i]->CreateHWResource(init_data, nullptr);
+
+						uncompressed_tex_->CopyToSubTexture2D(*new_tex_regions[i], 0, 0, 0, 0, tex_width, this_tex_region_height,
+							0, 0, 0, i * tex_region_height, tex_width, this_tex_region_height);
+					}
+				});
+		}
+
 		TexturePtr new_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, uncompressed_tex_->Width(0), uncompressed_tex_->Height(0),
 			1, 1, 1, format, false);
-		new_tex->CreateHWResource({}, nullptr);
-		uncompressed_tex_->CopyToTexture(*new_tex);
+		ElementInitData init_data;
+		init_data.data = new_tex_data.data();
+		init_data.row_pitch = row_pitch;
+		init_data.slice_pitch = slice_pitch;
+
+		for (uint32_t i = 0; i < num_threads; ++ i)
+		{
+			joiners[i]();
+		}
+
+		new_tex->CreateHWResource(init_data, nullptr);
 
 		if (IsCompressedFormat(format))
 		{
