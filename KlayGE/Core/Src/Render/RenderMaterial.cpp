@@ -108,9 +108,9 @@ namespace
 		};
 
 	public:
-		explicit RenderMaterialLoadingDesc(std::string const & res_name)
+		explicit RenderMaterialLoadingDesc(std::string_view res_name)
 		{
-			mtl_desc_.res_name = res_name;
+			mtl_desc_.res_name = std::string(res_name);
 			mtl_desc_.mtl_data = MakeSharedPtr<RenderMaterialDesc::RenderMaterialData>();
 			mtl_desc_.mtl = MakeSharedPtr<RenderMaterialPtr>();
 		}
@@ -426,12 +426,12 @@ namespace
 
 namespace KlayGE
 {
-	RenderMaterialPtr SyncLoadRenderMaterial(std::string const & mtlml_name)
+	RenderMaterialPtr SyncLoadRenderMaterial(std::string_view mtlml_name)
 	{
 		return ResLoader::Instance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
 	}
 
-	RenderMaterialPtr ASyncLoadRenderMaterial(std::string const & mtlml_name)
+	RenderMaterialPtr ASyncLoadRenderMaterial(std::string_view mtlml_name)
 	{
 		// TODO: Make it really async
 		return ResLoader::Instance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
@@ -601,7 +601,7 @@ namespace KlayGE
 			root->AppendNode(two_sided_node);
 		}
 
-		std::ofstream ofs(mtlml_name.c_str());
+		std::ofstream ofs(std::string(mtlml_name).c_str());
 		if (!ofs)
 		{
 			ofs.open((ResLoader::Instance().LocalFolder() + mtlml_name).c_str());

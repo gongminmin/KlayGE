@@ -732,9 +732,9 @@ namespace
 		};
 
 	public:
-		FontLoadingDesc(std::string const & res_name, uint32_t flag)
+		FontLoadingDesc(std::string_view res_name, uint32_t flag)
 		{
-			font_desc_.res_name = res_name;
+			font_desc_.res_name = std::string(res_name);
 			font_desc_.flag = flag;
 			font_desc_.kfont_loader = MakeSharedPtr<KFont>();
 			font_desc_.kfont = MakeSharedPtr<FontPtr>();
@@ -913,12 +913,12 @@ namespace KlayGE
 	}
 
 
-	FontPtr SyncLoadFont(std::string const & font_name, uint32_t flags)
+	FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags)
 	{
 		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 
-	FontPtr ASyncLoadFont(std::string const & font_name, uint32_t flags)
+	FontPtr ASyncLoadFont(std::string_view font_name, uint32_t flags)
 	{
 		// TODO: Make it really async
 		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));

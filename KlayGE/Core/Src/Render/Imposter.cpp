@@ -60,9 +60,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit ImposterLoadingDesc(std::string const & res_name)
+		explicit ImposterLoadingDesc(std::string_view res_name)
 		{
-			imposter_desc_.res_name = res_name;
+			imposter_desc_.res_name = std::string(res_name);
 			imposter_desc_.imposter_data = MakeSharedPtr<ImposterDesc::ImposterData>();
 			imposter_desc_.imposter = MakeSharedPtr<ImposterPtr>();
 		}
@@ -158,12 +158,12 @@ namespace KlayGE
 		ImposterDesc imposter_desc_;
 	};
 
-	ImposterPtr SyncLoadImposter(std::string const & tex_name)
+	ImposterPtr SyncLoadImposter(std::string_view tex_name)
 	{
 		return ResLoader::Instance().SyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
 	}
 
-	ImposterPtr ASyncLoadImposter(std::string const & tex_name)
+	ImposterPtr ASyncLoadImposter(std::string_view tex_name)
 	{
 		return ResLoader::Instance().ASyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
 	}

@@ -447,7 +447,7 @@ namespace KlayGE
 		}
 	};
 
-	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
+	KLAYGE_CORE_API void LoadModel(std::string_view meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<uint32_t>& mesh_lods,
@@ -457,10 +457,10 @@ namespace KlayGE
 		std::vector<Joint>& joints, std::shared_ptr<AnimationActionsType>& actions,
 		std::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs);
-	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 

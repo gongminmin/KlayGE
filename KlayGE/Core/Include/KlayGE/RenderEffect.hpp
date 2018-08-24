@@ -1259,9 +1259,9 @@ namespace KlayGE
 		RenderEffectConstantBuffer* cbuff_;
 	};
 
-	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_names);
+	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_names);
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names);
-	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffect(std::string const & effect_name);
+	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name);
 	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names);
 }
 

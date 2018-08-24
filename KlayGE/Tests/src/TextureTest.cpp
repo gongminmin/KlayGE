@@ -51,7 +51,7 @@ public:
 		ResLoader::Instance().AddPath("../../Tests/media/Texture");
 	}
 
-	void TestCopyToTexture(std::string const & input_name, std::string const & sanity_name, float scale, bool gpu_tex, float tolerance)
+	void TestCopyToTexture(std::string_view input_name, std::string_view sanity_name, float scale, bool gpu_tex, float tolerance)
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -70,7 +70,7 @@ public:
 		ResLoader::Instance().Unload(target);
 	}
 
-	void TestCopyToSubTexture(std::string const & input_name, std::string const & sanity_name, bool gpu_tex, float tolerance)
+	void TestCopyToSubTexture(std::string_view input_name, std::string_view sanity_name, bool gpu_tex, float tolerance)
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -89,7 +89,7 @@ public:
 		ResLoader::Instance().Unload(target);
 	}
 
-	void TestUpdateSubTexture(std::string const & input_name, std::string const & sanity_name, bool gpu_tex, float tolerance)
+	void TestUpdateSubTexture(std::string_view input_name, std::string_view sanity_name, bool gpu_tex, float tolerance)
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 

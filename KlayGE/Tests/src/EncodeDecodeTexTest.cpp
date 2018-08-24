@@ -15,7 +15,7 @@
 using namespace std;
 using namespace KlayGE;
 
-void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_name,
+void TestEncodeDecodeTex(std::string_view input_name, std::string_view tc_name,
 		ElementFormat bc_fmt, float threshold)
 {
 	ResLoader::Instance().AddPath("../../Tests/media/EncodeDecodeTex");

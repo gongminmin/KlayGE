@@ -90,8 +90,8 @@ namespace KlayGE
 		uint32_t		fso_attrib_;
 	};
 
-	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string const & font_name, uint32_t flags = 0);
-	KLAYGE_CORE_API FontPtr ASyncLoadFont(std::string const & font_name, uint32_t flags = 0);
+	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags = 0);
+	KLAYGE_CORE_API FontPtr ASyncLoadFont(std::string_view font_name, uint32_t flags = 0);
 }
 
 #endif		// _FONT_HPP

@@ -69,10 +69,10 @@ namespace
 		};
 
 	public:
-		PostProcessLoadingDesc(std::string const & res_name, std::string const & pp_name)
+		PostProcessLoadingDesc(std::string_view res_name, std::string_view pp_name)
 		{
-			pp_desc_.res_name = res_name;
-			pp_desc_.pp_name = pp_name;
+			pp_desc_.res_name = std::string(res_name);
+			pp_desc_.pp_name = std::string(pp_name);
 			pp_desc_.pp_data = MakeSharedPtr<PostProcessDesc::PostProcessData>();
 			pp_desc_.pp = MakeSharedPtr<PostProcessPtr>();
 		}
@@ -878,12 +878,12 @@ namespace KlayGE
 	}
 
 
-	PostProcessPtr SyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
+	PostProcessPtr SyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name)
 	{
 		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
-	PostProcessPtr ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
+	PostProcessPtr ASyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name)
 	{
 		// TODO: Make it really async
 		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));

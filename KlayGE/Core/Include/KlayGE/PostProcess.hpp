@@ -191,8 +191,8 @@ namespace KlayGE
 		RenderEffectParameter* inv_width_height_ep_;
 	};
 
-	KLAYGE_CORE_API PostProcessPtr SyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
-	KLAYGE_CORE_API PostProcessPtr ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
+	KLAYGE_CORE_API PostProcessPtr SyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name);
+	KLAYGE_CORE_API PostProcessPtr ASyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name);
 
 
 	class KLAYGE_CORE_API PostProcessChain : public PostProcess

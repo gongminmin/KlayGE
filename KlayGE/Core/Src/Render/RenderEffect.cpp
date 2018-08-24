@@ -6172,9 +6172,9 @@ namespace KlayGE
 	}
 
 
-	RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name)
+	RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
 	}
 
 	RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names)
@@ -6182,10 +6182,10 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 
-	RenderEffectPtr ASyncLoadRenderEffect(std::string const & effect_name)
+	RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name)
 	{
 		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names)

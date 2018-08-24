@@ -100,9 +100,9 @@ namespace
 		};
 
 	public:
-		explicit ParticleSystemLoadingDesc(std::string const & res_name)
+		explicit ParticleSystemLoadingDesc(std::string_view res_name)
 		{
-			ps_desc_.res_name = res_name;
+			ps_desc_.res_name = std::string(res_name);
 			ps_desc_.ps_data = MakeSharedPtr<ParticleSystemDesc::ParticleSystemData>();
 			ps_desc_.ps = MakeSharedPtr<ParticleSystemPtr>();
 		}
@@ -930,12 +930,12 @@ namespace KlayGE
 	}
 
 
-	ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name)
+	ParticleSystemPtr SyncLoadParticleSystem(std::string_view psml_name)
 	{
 		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
-	ParticleSystemPtr ASyncLoadParticleSystem(std::string const & psml_name)
+	ParticleSystemPtr ASyncLoadParticleSystem(std::string_view psml_name)
 	{
 		// TODO: Make it really async
 		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));

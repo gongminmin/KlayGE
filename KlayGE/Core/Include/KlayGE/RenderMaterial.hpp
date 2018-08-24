@@ -92,8 +92,8 @@ namespace KlayGE
 		return pow(MAX_SHININESS, glossiness);
 	}
 
-	KLAYGE_CORE_API RenderMaterialPtr SyncLoadRenderMaterial(std::string const & mtlml_name);
-	KLAYGE_CORE_API RenderMaterialPtr ASyncLoadRenderMaterial(std::string const & mtlml_name);
+	KLAYGE_CORE_API RenderMaterialPtr SyncLoadRenderMaterial(std::string_view mtlml_name);
+	KLAYGE_CORE_API RenderMaterialPtr ASyncLoadRenderMaterial(std::string_view mtlml_name);
 	KLAYGE_CORE_API void SaveRenderMaterial(RenderMaterialPtr const & mtl, std::string const & mtlml_name);
 }
 

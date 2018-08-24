@@ -83,8 +83,8 @@ namespace KlayGE
 		TexturePtr rt1_tex_;
 	};
 
-	KLAYGE_CORE_API ImposterPtr SyncLoadImposter(std::string const & impml_name);
-	KLAYGE_CORE_API ImposterPtr ASyncLoadImposter(std::string const & impml_name);
+	KLAYGE_CORE_API ImposterPtr SyncLoadImposter(std::string_view impml_name);
+	KLAYGE_CORE_API ImposterPtr ASyncLoadImposter(std::string_view impml_name);
 }
 
 #endif		// _IMPOSTER_HPP

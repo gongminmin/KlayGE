@@ -1100,9 +1100,9 @@ namespace
 		};
 
 	public:
-		TextureLoadingDesc(std::string const & res_name, uint32_t access_hint)
+		TextureLoadingDesc(std::string_view res_name, uint32_t access_hint)
 		{
-			tex_desc_.res_name = res_name;
+			tex_desc_.res_name = std::string(res_name);
 			tex_desc_.access_hint = access_hint;
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
@@ -1655,7 +1655,7 @@ namespace KlayGE
 	}
 
 
-	void GetImageInfo(std::string const & tex_name, Texture::TextureType& type,
+	void GetImageInfo(std::string_view tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
@@ -2069,7 +2069,7 @@ namespace KlayGE
 		}
 	}
 
-	TexturePtr LoadSoftwareTexture(std::string const & tex_name)
+	TexturePtr LoadSoftwareTexture(std::string_view tex_name)
 	{
 		TexturePtr ret;
 		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
@@ -2286,12 +2286,12 @@ namespace KlayGE
 		return ret;
 	}
 
-	TexturePtr SyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	TexturePtr SyncLoadTexture(std::string_view tex_name, uint32_t access_hint)
 	{
 		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
-	TexturePtr ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	TexturePtr ASyncLoadTexture(std::string_view tex_name, uint32_t access_hint)
 	{
 		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}

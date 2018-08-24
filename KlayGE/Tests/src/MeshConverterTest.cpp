@@ -52,7 +52,7 @@ public:
 		ResLoader::Instance().AddPath("../../Tests/media/MeshConverter");
 	}
 
-	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string const & sanity_name)
+	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name)
 	{
 		MeshMetadata metadata(metadata_name);
 

@@ -99,11 +99,11 @@ namespace
 		};
 
 	public:
-		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint,
+		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint,
 			std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
-			model_desc_.res_name = res_name;
+			model_desc_.res_name = std::string(res_name);
 			model_desc_.access_hint = access_hint;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
@@ -1074,7 +1074,7 @@ namespace KlayGE
 #endif
 	}
 
-	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
+	void LoadModel(std::string_view meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<uint32_t>& mesh_lods,
@@ -1095,7 +1095,7 @@ namespace KlayGE
 			std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
 			if (full_meshml_name.empty())
 			{
-				full_meshml_name = meshml_name;
+				full_meshml_name = std::string(meshml_name);
 			}
 			std::replace(full_meshml_name.begin(), full_meshml_name.end(), '\\', '/');
 			ModelJIT(full_meshml_name);
@@ -1505,7 +1505,7 @@ namespace KlayGE
 		}
 	}
 
-	RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+	RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
@@ -1516,7 +1516,7 @@ namespace KlayGE
 			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	RenderModelPtr ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+	RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{

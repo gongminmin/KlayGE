@@ -50,7 +50,7 @@ public:
 		ResLoader::Instance().AddPath("../../Tests/media/TexConverter");
 	}
 
-	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string const & sanity_name, float tolerance)
+	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name, float tolerance)
 	{
 		TexMetadata metadata(metadata_name);
 

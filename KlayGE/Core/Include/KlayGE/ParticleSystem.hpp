@@ -353,8 +353,8 @@ namespace KlayGE
 		bool gs_support_;
 	};
 
-	KLAYGE_CORE_API ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name);
-	KLAYGE_CORE_API ParticleSystemPtr ASyncLoadParticleSystem(std::string const & psml_name);
+	KLAYGE_CORE_API ParticleSystemPtr SyncLoadParticleSystem(std::string_view psml_name);
+	KLAYGE_CORE_API ParticleSystemPtr ASyncLoadParticleSystem(std::string_view psml_name);
 
 	KLAYGE_CORE_API void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name);
 
