@@ -3531,7 +3531,8 @@ namespace KlayGE
 		uint32_t const src_elem_size = NumFormatBytes(src_cpu_format);
 		uint32_t const dst_elem_size = NumFormatBytes(dst_cpu_format);
 
-		if (!linear && (src_cpu_format == dst_cpu_format))
+		if ((!linear || ((src_width == dst_width) && (src_height == dst_height) && (src_height == dst_height)))
+			&& (src_cpu_format == dst_cpu_format))
 		{
 			for (uint32_t z = 0; z < dst_depth; ++ z)
 			{
@@ -3581,24 +3582,24 @@ namespace KlayGE
 			{
 				for (uint32_t z = 0; z < dst_depth; ++ z)
 				{
-					float fz = static_cast<float>(z) / dst_depth * src_depth;
-					uint32_t sz0 = static_cast<uint32_t>(fz);
+					float fz = static_cast<float>(z + 0.5f) / dst_depth * src_depth;
+					uint32_t sz0 = static_cast<uint32_t>(fz - 0.5f);
 					uint32_t sz1 = MathLib::clamp<uint32_t>(sz0 + 1, 0, src_depth - 1);
-					float weight_z = fz - sz0;
+					float weight_z = fz - sz0 - 0.5f;
 							
 					for (uint32_t y = 0; y < dst_height; ++ y)
 					{
-						float fy = static_cast<float>(y) / dst_height * src_height;
-						uint32_t sy0 = static_cast<uint32_t>(fy);
+						float fy = static_cast<float>(y + 0.5f) / dst_height * src_height;
+						uint32_t sy0 = static_cast<uint32_t>(fy - 0.5f);
 						uint32_t sy1 = MathLib::clamp<uint32_t>(sy0 + 1, 0, src_height - 1);
-						float weight_y = fy - sy0;
+						float weight_y = fy - sy0 - 0.5f;
 							
 						for (uint32_t x = 0; x < dst_width; ++ x)
 						{
-							float fx = static_cast<float>(x) / dst_width * src_width;
-							uint32_t sx0 = static_cast<uint32_t>(fx);
+							float fx = static_cast<float>(x + 0.5f) / dst_width * src_width;
+							uint32_t sx0 = static_cast<uint32_t>(fx - 0.5f);
 							uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
-							float weight_x = fx - sx0;
+							float weight_x = fx - sx0 - 0.5f;
 							Color clr_x00 = MathLib::lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
 								src_32f[(sz0 * src_height + sy0) * src_width + sx1], weight_x);
 							Color clr_x01 = MathLib::lerp(src_32f[(sz0 * src_height + sy1) * src_width + sx0],
