@@ -263,11 +263,6 @@ namespace KlayGE
 	protected:
 		void Destroy();
 
-		void AssignCapVertexFormats(std::vector<ElementFormat>&& vertex_formats);
-		void AssignCapTextureFormats(std::vector<ElementFormat>&& texture_formats);
-		void AssignCapRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>>&& render_target_formats);
-		void AssignCapUavFormats(std::vector<ElementFormat>&& uav_formats);
-
 	private:
 		virtual void CheckConfig(RenderSettings& settings);
 		virtual void StereoscopicForLCDShutter(int32_t eye);

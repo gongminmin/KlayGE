@@ -58,134 +58,13 @@
 #endif
 #include <boost/algorithm/string/classification.hpp>
 
+#include <KlayGE/ToolCommon.hpp>
+#include <KlayGE/PlatformDefinition.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
 uint32_t const KFX_VERSION = 0x0140;
-
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
-struct PlatformDefinition
-{
-	std::string platform;
-	uint8_t major_version;
-	uint8_t minor_version;
-
-	bool requires_flipping;
-	uint32_t native_shader_fourcc;
-	uint32_t native_shader_version;
-
-	ShaderModel max_shader_model;
-
-	uint32_t max_texture_depth;
-	uint32_t max_texture_array_length;
-	uint8_t max_pixel_texture_units;
-	uint8_t max_simultaneous_rts;
-
-	bool fp_color_support : 1;
-	bool pack_to_rgba_required : 1;
-	bool render_to_texture_array_support : 1;
-
-	bool gs_support : 1;
-	bool cs_support : 1;
-	bool hs_support : 1;
-	bool ds_support : 1;
-
-	bool bc4_support : 1;
-	bool bc5_support : 1;
-	bool frag_depth_support : 1;
-};
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
-
-int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
-{
-	XMLAttributePtr attr = node->Attrib(attr_name);
-	if (attr)
-	{
-		return attr->ValueInt();
-	}
-
-	return default_value;
-}
-
-std::string RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, std::string const & default_value)
-{
-	XMLAttributePtr attr = node->Attrib(attr_name);
-	if (attr)
-	{
-		return std::string(attr->ValueString());
-	}
-
-	return default_value;
-}
-
-int RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, int default_value)
-{
-	XMLNodePtr node = root->FirstNode(node_name);
-	if (node)
-	{
-		return RetrieveAttrValue(node, "value", default_value);
-	}
-
-	return default_value;
-}
-
-std::string RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, std::string const & default_value)
-{
-	XMLNodePtr node = root->FirstNode(node_name);
-	if (node)
-	{
-		return RetrieveAttrValue(node, "value", default_value);
-	}
-
-	return default_value;
-}
-
-PlatformDefinition LoadPlatformConfig(std::string const & platform)
-{
-	ResIdentifierPtr plat = ResLoader::Instance().Open("PlatConf/" + platform + ".plat");
-
-	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(plat);
-
-	PlatformDefinition ret;
-
-	ret.platform = RetrieveAttrValue(root, "name", "");
-	ret.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
-	ret.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
-
-	ret.requires_flipping = RetrieveNodeValue(root, "requires_flipping", 0) ? true : false;
-	std::string const fourcc_str = RetrieveNodeValue(root, "native_shader_fourcc", "");
-	ret.native_shader_fourcc = (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
-	ret.native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
-
-	XMLNodePtr max_shader_model_node = root->FirstNode("max_shader_model");
-	ret.max_shader_model = ShaderModel(static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
-		static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "minor", 0)));
-
-	ret.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
-	ret.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
-	ret.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
-	ret.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
-
-	ret.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
-	ret.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
-	ret.render_to_texture_array_support = RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
-
-	ret.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
-	ret.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
-	ret.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
-	ret.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
-
-	ret.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
-	ret.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
-	ret.frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
-
-	return ret;
-}
 
 int main(int argc, char* argv[])
 {
@@ -217,83 +96,19 @@ int main(int argc, char* argv[])
 	context_cfg.graphics_cfg.color_grading = false;
 	Context::Instance().Config(context_cfg);
 
-	PlatformDefinition plat = LoadPlatformConfig(platform);
-
-	// We only care about some fields
-	RenderDeviceCaps device_caps{};
-
-	device_caps.max_shader_model = plat.max_shader_model;
-
-	device_caps.max_texture_depth = plat.max_texture_depth;
-	device_caps.max_texture_array_length = plat.max_texture_array_length;
-	device_caps.max_pixel_texture_units = plat.max_pixel_texture_units;
-	device_caps.max_simultaneous_rts = plat.max_simultaneous_rts;
-
-	device_caps.fp_color_support = plat.fp_color_support;
-	device_caps.pack_to_rgba_required = plat.pack_to_rgba_required;
-	device_caps.render_to_texture_array_support = plat.render_to_texture_array_support;
-
-	device_caps.gs_support = plat.gs_support;
-	device_caps.cs_support = plat.cs_support;
-	device_caps.hs_support = plat.hs_support;
-	device_caps.ds_support = plat.ds_support;
-
-	std::vector<ElementFormat> texture_format =
-	{
-		EF_R8,
-		EF_ABGR8,
-		EF_ARGB8,
-		EF_BC1,
-		EF_BC1_SRGB,
-		EF_BC2,
-		EF_BC2_SRGB,
-		EF_BC3,
-		EF_BC3_SRGB
-	};
-	if (plat.bc4_support)
-	{
-		texture_format.insert(texture_format.end(),
-			{
-				EF_BC4,
-				EF_BC4_SRGB
-			});
-	}
-	if (plat.bc5_support)
-	{
-		texture_format.insert(texture_format.end(),
-			{
-				EF_BC5,
-				EF_BC5_SRGB
-			});
-	}
-
-	std::vector<ElementFormat> uav_format;
-	if (device_caps.max_shader_model >= ShaderModel(5, 1))
-	{
-		uav_format.insert(uav_format.end(),
-			{
-				EF_ABGR16F,
-				EF_B10G11R11F,
-				EF_ABGR8,
-				EF_R16UI,
-				EF_R32UI,
-				EF_R32F
-			});
-	}
+	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	int major_version = plat.major_version;
-	int minor_version = plat.minor_version;
-	bool frag_depth_support = plat.frag_depth_support;
-	re.SetCustomAttrib("PLATFORM", &plat.platform);
+	int major_version = platform_def.major_version;
+	int minor_version = platform_def.minor_version;
+	bool frag_depth_support = platform_def.frag_depth_support;
+	re.SetCustomAttrib("PLATFORM", &platform_def.platform);
 	re.SetCustomAttrib("MAJOR_VERSION", &major_version);
 	re.SetCustomAttrib("MINOR_VERSION", &minor_version);
-	re.SetCustomAttrib("NATIVE_SHADER_FOURCC", &plat.native_shader_fourcc);
-	re.SetCustomAttrib("NATIVE_SHADER_VERSION", &plat.native_shader_version);
-	re.SetCustomAttrib("REQUIRES_FLIPPING", &plat.requires_flipping);
-	re.SetCustomAttrib("DEVICE_CAPS", &device_caps);
-	re.SetCustomAttrib("TEXTURE_FORMAT", &texture_format);
-	re.SetCustomAttrib("UAV_FORMAT", &uav_format);
+	re.SetCustomAttrib("NATIVE_SHADER_FOURCC", &platform_def.native_shader_fourcc);
+	re.SetCustomAttrib("NATIVE_SHADER_VERSION", &platform_def.native_shader_version);
+	re.SetCustomAttrib("REQUIRES_FLIPPING", &platform_def.requires_flipping);
+	re.SetCustomAttrib("DEVICE_CAPS", &platform_def.device_caps);
 	re.SetCustomAttrib("FRAG_DEPTH_SUPPORT", &frag_depth_support);
 
 	std::string fxml_name(argv[2]);

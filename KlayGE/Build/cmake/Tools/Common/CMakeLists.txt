@@ -4,6 +4,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/ImagePlane.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/MeshConverter.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/MeshMetadata.cpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/Common/PlatformDefinition.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/TexConverter.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/TexMetadata.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/ToolCommon.cpp
@@ -12,14 +13,32 @@ SET(SOURCE_FILES
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/MeshConverter.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/MeshMetadata.hpp
+	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/PlatformDefinition.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/TexConverter.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/TexMetadata.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/Include/KlayGE/ToolCommon.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Common/ImagePlane.hpp
 )
 
+SET(PLAT_CONF_FILES
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/d3d_11_0.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/d3d_11_1.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/d3d_12_0.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/d3d_12_1.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_1.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_2.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_3.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_4.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_5.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gl_4_6.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gles_3_0.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gles_3_1.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/Common/PlatConf/gles_3_2.plat
+)
+
 SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
+SOURCE_GROUP("Resource Files\\PlatConf" FILES ${PLAT_CONF_FILES})
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/assimp/Build/${KLAYGE_BUILD_FOLDER}/assimp/include)
@@ -40,7 +59,7 @@ ELSE()
 ENDIF()
 
 ADD_LIBRARY(${LIB_NAME} SHARED
-	${SOURCE_FILES} ${HEADER_FILES})
+	${SOURCE_FILES} ${HEADER_FILES} ${PLAT_CONF_FILES})
 
 SET(LIB_OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX})
 

@@ -142,26 +142,6 @@ namespace KlayGE
 		{
 			native_shader_version_ = *static_cast<uint32_t*>(value);
 		}
-		else if (CT_HASH("VERTEX_FORMAT") == name_hash)
-		{
-			auto vertex_formats = *static_cast<std::vector<ElementFormat>*>(value);
-			this->AssignCapVertexFormats(std::move(vertex_formats));
-		}
-		else if (CT_HASH("TEXTURE_FORMAT") == name_hash)
-		{
-			auto texture_formats = *static_cast<std::vector<ElementFormat>*>(value);
-			this->AssignCapTextureFormats(std::move(texture_formats));
-		}
-		else if (CT_HASH("RENDER_TARGET_FORMAT") == name_hash)
-		{
-			auto render_target_formats = *static_cast<std::map<ElementFormat, std::vector<uint32_t>>*>(value);
-			this->AssignCapRenderTargetFormats(std::move(render_target_formats));
-		}
-		else if (CT_HASH("UAV_FORMAT") == name_hash)
-		{
-			auto uav_formats = *static_cast<std::vector<ElementFormat>*>(value);
-			this->AssignCapUavFormats(std::move(uav_formats));
-		}
 		else if (CT_HASH("DEVICE_CAPS") == name_hash)
 		{
 			caps_ = *static_cast<RenderDeviceCaps*>(value);

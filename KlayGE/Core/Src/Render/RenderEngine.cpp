@@ -1400,24 +1400,4 @@ namespace KlayGE
 
 		this->DoDestroy();
 	}
-
-	void RenderEngine::AssignCapVertexFormats(std::vector<ElementFormat>&& vertex_formats)
-	{
-		caps_.AssignVertexFormats(std::forward<std::vector<ElementFormat>>(vertex_formats));
-	}
-
-	void RenderEngine::AssignCapTextureFormats(std::vector<ElementFormat>&& texture_formats)
-	{
-		caps_.AssignTextureFormats(std::forward<std::vector<ElementFormat>>(texture_formats));
-	}
-
-	void RenderEngine::AssignCapRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>>&& render_target_formats)
-	{
-		caps_.AssignRenderTargetFormats(std::forward<std::map<ElementFormat, std::vector<uint32_t>>>(render_target_formats));
-	}
-
-	void RenderEngine::AssignCapUavFormats(std::vector<ElementFormat>&& uav_formats)
-	{
-		caps_.AssignUavFormats(std::forward<std::vector<ElementFormat>>(uav_formats));
-	}
 }

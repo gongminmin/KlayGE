@@ -1287,10 +1287,10 @@ namespace KlayGE
 			}
 		}
 
-		this->AssignCapVertexFormats(std::move(vertex_formats));
-		this->AssignCapTextureFormats(std::move(texture_formats));
-		this->AssignCapRenderTargetFormats(std::move(render_target_formats));
-		this->AssignCapUavFormats(std::move(uav_formats));
+		caps_.AssignVertexFormats(std::move(vertex_formats));
+		caps_.AssignTextureFormats(std::move(texture_formats));
+		caps_.AssignRenderTargetFormats(std::move(render_target_formats));
+		caps_.AssignUavFormats(std::move(uav_formats));
 	}
 
 	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)

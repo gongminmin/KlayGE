@@ -95,8 +95,6 @@ namespace KlayGE
 
 	struct KLAYGE_CORE_API RenderDeviceCaps
 	{
-		friend class RenderEngine;
-
 		ShaderModel max_shader_model;
 
 		uint32_t max_texture_width;
@@ -171,11 +169,12 @@ namespace KlayGE
 			return encoded >> 16;
 		}
 
-	private:
 		void AssignVertexFormats(std::vector<ElementFormat>&& vertex_formats);
 		void AssignTextureFormats(std::vector<ElementFormat>&& texture_formats);
 		void AssignRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>>&& render_target_formats);
 		void AssignUavFormats(std::vector<ElementFormat>&& uav_formats);
+
+	private:
 		void UpdateSupportBits();
 
 	private:

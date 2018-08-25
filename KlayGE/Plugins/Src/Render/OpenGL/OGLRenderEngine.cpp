@@ -1619,7 +1619,7 @@ namespace KlayGE
 				vertex_formats.push_back(EF_B10G11R11F);
 			}
 
-			this->AssignCapVertexFormats(std::move(vertex_formats));
+			caps_.AssignVertexFormats(std::move(vertex_formats));
 		}
 		{
 			std::vector<ElementFormat> texture_formats =
@@ -1734,7 +1734,7 @@ namespace KlayGE
 					});
 			}
 
-			this->AssignCapTextureFormats(std::move(texture_formats));
+			caps_.AssignTextureFormats(std::move(texture_formats));
 		}
 		{
 			GLint max_samples;
@@ -1795,7 +1795,7 @@ namespace KlayGE
 					EF_ABGR8_SRGB
 				});
 
-			this->AssignCapRenderTargetFormats(std::move(render_target_formats));
+			caps_.AssignRenderTargetFormats(std::move(render_target_formats));
 		}
 	}
 

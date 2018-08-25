@@ -2,6 +2,7 @@
 #include <KFL/Hash.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/JudaTexture.hpp>
+#include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
@@ -39,100 +40,14 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
+#include <KlayGE/PlatformDefinition.hpp>
 #include <KlayGE/TexConverter.hpp>
 #include <KlayGE/TexMetadata.hpp>
 
 using namespace std;
 using namespace KlayGE;
 
-struct OfflineRenderDeviceCaps
-{
-	std::string platform;
-	uint8_t major_version;
-	uint8_t minor_version;
-
-	bool bc1_support : 1;
-	bool bc3_support : 1;
-	bool bc4_support : 1;
-	bool bc5_support : 1;
-	bool bc7_support : 1;
-	bool etc1_support : 1;
-	bool r16_support : 1;
-	bool r16f_support : 1;
-	bool srgb_support : 1;
-};
-
-int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
-{
-	XMLAttributePtr attr = node->Attrib(attr_name);
-	if (attr)
-	{
-		return attr->ValueInt();
-	}
-
-	return default_value;
-}
-
-std::string RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, std::string const & default_value)
-{
-	XMLAttributePtr attr = node->Attrib(attr_name);
-	if (attr)
-	{
-		return std::string(attr->ValueString());
-	}
-
-	return default_value;
-}
-
-int RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, int default_value)
-{
-	XMLNodePtr node = root->FirstNode(node_name);
-	if (node)
-	{
-		return RetrieveAttrValue(node, "value", default_value);
-	}
-
-	return default_value;
-}
-
-std::string RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, std::string const & default_value)
-{
-	XMLNodePtr node = root->FirstNode(node_name);
-	if (node)
-	{
-		return RetrieveAttrValue(node, "value", default_value);
-	}
-
-	return default_value;
-}
-
-OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
-{
-	ResIdentifierPtr plat = ResLoader::Instance().Open("PlatConf/" + platform + ".plat");
-
-	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(plat);
-
-	OfflineRenderDeviceCaps caps;
-
-	caps.platform = RetrieveAttrValue(root, "name", "");
-	caps.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
-	caps.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
-
-	caps.bc1_support = RetrieveNodeValue(root, "bc1_support", 0) ? true : false;
-	caps.bc3_support = RetrieveNodeValue(root, "bc3_support", 0) ? true : false;
-	caps.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
-	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
-	caps.bc7_support = RetrieveNodeValue(root, "bc7_support", 0) ? true : false;
-	caps.etc1_support = RetrieveNodeValue(root, "etc1_support", 0) ? true : false;
-	caps.r16_support = RetrieveNodeValue(root, "r16_support", 0) ? true : false;
-	caps.r16f_support = RetrieveNodeValue(root, "r16f_support", 0) ? true : false;
-	caps.srgb_support = RetrieveNodeValue(root, "srgb_support", 0) ? true : false;
-
-	return caps;
-}
-
-TexMetadata DefaultTextureMetadata(size_t res_type_hash, OfflineRenderDeviceCaps const & caps)
+TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const & caps)
 {
 	TexMetadata default_metadata;
 	switch (res_type_hash)
@@ -141,36 +56,14 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, OfflineRenderDeviceCaps
 	case CT_HASH("emissive"):
 		default_metadata.Slot((res_type_hash == CT_HASH("albedo")) ? RenderMaterial::TS_Albedo : RenderMaterial::TS_Emissive);
 		default_metadata.ForceSRGB(true);
-		if (caps.bc7_support)
-		{
-			default_metadata.PreferedFormat(EF_BC7_SRGB);
-		}
-		else if (caps.bc1_support)
-		{
-			default_metadata.PreferedFormat(EF_BC1_SRGB);
-		}
-		else if (caps.etc1_support)
-		{
-			default_metadata.PreferedFormat(EF_ETC1);
-		}
+		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1 }));
 		break;
 
 	case CT_HASH("glossiness"):
 	case CT_HASH("metalness"):
 		default_metadata.Slot((res_type_hash == CT_HASH("glossiness")) ? RenderMaterial::TS_Glossiness : RenderMaterial::TS_Metalness);
 		default_metadata.ForceSRGB(false);
-		if (caps.bc7_support)
-		{
-			default_metadata.PreferedFormat(EF_BC7);
-		}
-		else if (caps.bc1_support)
-		{
-			default_metadata.PreferedFormat(EF_BC1);
-		}
-		else if (caps.etc1_support)
-		{
-			default_metadata.PreferedFormat(EF_ETC1);
-		}
+		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC7, EF_BC1, EF_ETC1 }));
 		break;
 
 	case CT_HASH("normal"):
@@ -182,35 +75,13 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, OfflineRenderDeviceCaps
 			default_metadata.BumpToNormal(true);
 			default_metadata.BumpScale(1.0f);
 		}
-		if (caps.bc5_support)
-		{
-			default_metadata.PreferedFormat(EF_BC5);
-		}
-		else if (caps.bc3_support)
-		{
-			default_metadata.PreferedFormat(EF_BC3);
-		}
-		else
-		{
-			default_metadata.PreferedFormat(EF_GR8);
-		}
+		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC5, EF_BC3, EF_GR8 }));
 		break;
 
 	case CT_HASH("height"):
 		default_metadata.Slot(RenderMaterial::TS_Height);
 		default_metadata.ForceSRGB(false);
-		if (caps.bc4_support)
-		{
-			default_metadata.PreferedFormat(EF_BC4);
-		}
-		else if (caps.bc1_support)
-		{
-			default_metadata.PreferedFormat(EF_BC1);
-		}
-		else if (caps.etc1_support)
-		{
-			default_metadata.PreferedFormat(EF_ETC1);
-		}
+		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 }));
 		break;
 	}
 
@@ -233,9 +104,10 @@ TexMetadata LoadTextureMetadata(std::string const & res_name, TexMetadata const 
 	}
 }
 
-void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, OfflineRenderDeviceCaps const & caps)
+void Deploy(std::vector<std::string> const & res_names, std::string_view res_type,
+	RenderDeviceCaps const & caps, std::string_view platform)
 {
-	size_t const res_type_hash = RT_HASH(res_type.c_str());
+	size_t const res_type_hash = HashRange(res_type.begin(), res_type.end());
 
 	if ((CT_HASH("albedo") == res_type_hash)
 		|| (CT_HASH("emissive") == res_type_hash)
@@ -270,19 +142,19 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			std::string y_fmt;
 			std::string c_fmt;
-			if (caps.r16_support)
+			if (caps.BestMatchTextureFormat({ EF_R16, EF_R16F }) == EF_R16)
 			{
 				y_fmt = "R16";
 			}
-			else if (caps.r16f_support)
+			else
 			{
 				y_fmt = "R16F";
 			}
-			if (caps.bc5_support)
+			if (caps.BestMatchTextureFormat({ EF_BC5, EF_BC3 }) == EF_BC5)
 			{
 				c_fmt = "BC5";
 			}
-			else if (caps.bc3_support)
+			else
 			{
 				c_fmt = "BC3";
 			}
@@ -307,7 +179,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
 				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << caps.platform << std::endl;
+				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}
@@ -320,7 +192,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
 				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"" << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}
@@ -344,7 +216,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 
 int main(int argc, char* argv[])
 {
-	ResLoader::Instance().AddPath("../../Tools/media/PlatformDeployer");
+	ResLoader::Instance().AddPath("../../Tools/media/Common");
 
 	std::vector<std::string> res_names;
 	std::string res_type;
@@ -489,8 +361,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	OfflineRenderDeviceCaps caps = LoadPlatformConfig(platform);
-	Deploy(res_names, res_type, caps);
+	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+	Deploy(res_names, res_type, platform_def.device_caps, platform);
 
 	Context::Destroy();
 
