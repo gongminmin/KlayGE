@@ -46,6 +46,8 @@
 #pragma clang diagnostic pop
 #endif
 
+#include <KlayGE/ToolCommon.hpp>
+#include <KlayGE/PlatformDefinition.hpp>
 #include <KlayGE/TexConverter.hpp>
 #include <KlayGE/TexMetadata.hpp>
 
@@ -57,6 +59,7 @@ int main(int argc, char* argv[])
 	std::string input_name;
 	std::string metadata_name;
 	std::string output_name;
+	std::string platform;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -65,6 +68,7 @@ int main(int argc, char* argv[])
 		("input-path,I", boost::program_options::value<std::string>(), "Input image path.")
 		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
 		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output image path.")
+		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -103,6 +107,14 @@ int main(int argc, char* argv[])
 	{
 		output_name = vm["output-path"].as<std::string>();
 	}
+	if (vm.count("platform") > 0)
+	{
+		platform = vm["platform"].as<std::string>();
+	}
+	else
+	{
+		platform = "d3d_11_0";
+	}
 	if (vm.count("quiet") > 0)
 	{
 		quiet = vm["quiet"].as<bool>();
@@ -120,14 +132,17 @@ int main(int argc, char* argv[])
 	{
 		filesystem::path input_path(file_name);
 		output_name = (input_path.parent_path() / input_path.stem()).string();
-		if (input_path.extension() == "dds")
+		if (input_path.extension() == ".dds")
 		{
 			output_name += "_converted";
 		}
 		output_name += ".dds";
 	}
 
+	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+
 	TexMetadata metadata(metadata_name);
+	metadata.DeviceDependentAdjustment(platform_def.device_caps);
 
 	TexConverter tc;
 	TexturePtr output_tex = tc.Convert(file_name, metadata);

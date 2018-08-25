@@ -32,6 +32,7 @@
 #include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
+#include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <algorithm>
@@ -252,6 +253,11 @@ namespace KlayGE
 				BOOST_ASSERT(force_srgb_val.IsBool());
 				new_metadata.force_srgb_ = force_srgb_val.GetBool();
 			}
+			else
+			{
+				new_metadata.force_srgb_
+					= ((new_metadata.slot_ == RenderMaterial::TS_Albedo) || (new_metadata.slot_ == RenderMaterial::TS_Emissive));
+			}
 
 			if (document.HasMember("channel_mapping"))
 			{
@@ -305,6 +311,11 @@ namespace KlayGE
 					BOOST_ASSERT(linear_val.IsBool());
 					new_metadata.mipmap_.linear = linear_val.GetBool();
 				}
+			}
+			else
+			{
+				new_metadata.mipmap_.enabled = true;
+				new_metadata.mipmap_.auto_gen = true;
 			}
 
 			if (((new_metadata.slot_ == RenderMaterial::TS_Normal) || (new_metadata.slot_ == RenderMaterial::TS_Height))
@@ -579,6 +590,36 @@ namespace KlayGE
 		document.Accept(writer);
 		std::ofstream ofs(name);
 		ofs << sb.GetString();
+	}
+
+	void TexMetadata::DeviceDependentAdjustment(RenderDeviceCaps const & caps)
+	{
+		if (prefered_format_ == EF_Unknown)
+		{
+			switch (slot_)
+			{
+			case RenderMaterial::TS_Albedo:
+			case RenderMaterial::TS_Emissive:
+				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1 });
+				break;
+
+			case RenderMaterial::TS_Glossiness:
+			case RenderMaterial::TS_Metalness:
+				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC7, EF_BC1, EF_ETC1 });
+				break;
+
+			case RenderMaterial::TS_Normal:
+				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC5, EF_BC3, EF_GR8 });
+				break;
+
+			case RenderMaterial::TS_Height:
+				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 });
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid texture slot");
+			}
+		}
 	}
 	
 	uint32_t TexMetadata::ArraySize() const

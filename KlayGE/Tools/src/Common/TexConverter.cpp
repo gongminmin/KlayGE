@@ -225,6 +225,8 @@ namespace KlayGE
 					*planes_[arr][m + 1] = planes_[arr][m]->ResizeTo(w, h, metadata_.LinearMipmap());
 				}
 			}
+
+			format_ = planes_[0][0]->UncompressedTex()->Format();
 		}
 	
 		bool need_normal_compression = false;
@@ -337,5 +339,36 @@ namespace KlayGE
 			output_num_mipmaps, output_array_size, output_format, false);
 		ret->CreateHWResource(output_init_data, nullptr);
 		return ret;
+	}
+}
+
+extern "C"
+{
+	using namespace KlayGE;
+
+	KLAYGE_SYMBOL_EXPORT void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+		RenderDeviceCaps const * caps)
+	{
+		KlayGE::TexMetadata metadata;
+		if (!metadata_name.empty())
+		{
+			metadata.Load(metadata_name);
+		}
+		if (caps)
+		{
+			metadata.DeviceDependentAdjustment(*caps);
+		}
+
+		TexConverter tc;
+		auto texture = tc.Convert(input_name, metadata);
+
+		std::filesystem::path input_path(input_name.begin(), input_name.end());
+		std::filesystem::path output_path(output_name.begin(), output_name.end());
+		if (output_path.parent_path() == input_path.parent_path())
+		{
+			output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+		}
+
+		SaveTexture(texture, output_path.string());
 	}
 }

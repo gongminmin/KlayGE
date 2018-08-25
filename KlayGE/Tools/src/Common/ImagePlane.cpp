@@ -752,6 +752,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(uncompressed_tex_);
 
+		compressed_tex_.reset();
+
 		auto const format = uncompressed_tex_->Format();
 
 		ImagePlane target;

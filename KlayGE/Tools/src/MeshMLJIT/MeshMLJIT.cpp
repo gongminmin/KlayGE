@@ -47,34 +47,6 @@ namespace
 		std::vector<std::pair<std::string, std::string>> texture_slots;
 	};
 
-	// Return path when appended to a_From will resolve to same as a_To
-	filesystem::path make_relative(filesystem::path from_path, filesystem::path to_path)
-	{
-		from_path = filesystem::absolute(from_path);
-		to_path = filesystem::absolute(to_path);
-
-		filesystem::path::const_iterator iter_from(from_path.begin());
-		filesystem::path::const_iterator iter_to(to_path.begin());
-		for (filesystem::path::const_iterator to_end(to_path.end()), from_end(from_path.end());
-			(iter_from != from_end) && (iter_to != to_end) && (*iter_from == *iter_to);
-			++ iter_from, ++ iter_to);
-
-		filesystem::path ret;
-		for (filesystem::path::const_iterator from_end(from_path.end()); iter_from != from_end; ++ iter_from)
-		{
-			if (*iter_from != ".")
-			{
-				ret /= "..";
-			}
-		}
-
-		for (; iter_to != to_path.end(); ++ iter_to)
-		{
-			ret /= *iter_to;
-		}
-		return ret;
-	}
-
 	std::string const JIT_EXT_NAME = ".model_bin";
 
 	template <int N>
@@ -1776,150 +1748,7 @@ namespace
 		}
 	}
 
-	void ConvertTextures(std::string const & output_name, std::vector<OfflineRenderMaterial>& mtls, std::string const & platform)
-	{
-		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> all_texture_slots;
-		for (size_t i = 0; i < mtls.size(); ++ i)
-		{
-			for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
-			{
-				all_texture_slots[filesystem::path(mtls[i].texture_slots[j].second)].emplace_back(i, j);
-			}
-		}
-
-		std::vector<std::pair<filesystem::path, std::string>> deploy_files;
-		for (auto const & slot : all_texture_slots)
-		{
-			std::string ext_name = slot.first.extension().string();
-			if (ext_name != ".dds")
-			{
-				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
-				int err = system(cmd.c_str());
-				KFL_UNUSED(err);
-
-				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
-				deploy_files.emplace_back(filesystem::path(tex_base + ".dds"),
-					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first);
-			}
-		}
-
-		std::vector<std::pair<filesystem::path, filesystem::path>> dup_files;
-		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> augmented_texture_slots;
-		for (auto const & slot : all_texture_slots)
-		{
-			std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
-			augmented_texture_slots[filesystem::path(tex_base + ".dds")].push_back(slot.second[0]);
-
-			for (size_t i = 1; i < slot.second.size(); ++ i)
-			{
-				std::pair<size_t, size_t> const & slot_index = slot.second[i];
-				std::string const & type = mtls[slot_index.first].texture_slots[slot_index.second].first;
-				if (type != mtls[slot.second[0].first].texture_slots[slot.second[0].second].first)
-				{
-					filesystem::path new_name(filesystem::path(tex_base + "_" + type + ".dds"));
-					if (filesystem::exists(new_name))
-					{
-						size_t j = 0;
-						do
-						{
-							std::ostringstream ss;
-							ss << tex_base << "_" << type << "_" << j << ".dds";
-							new_name = filesystem::path(ss.str());
-							++ j;
-						} while (filesystem::exists(new_name));
-					}
-
-					if (augmented_texture_slots.find(new_name) == augmented_texture_slots.end())
-					{
-						dup_files.emplace_back(filesystem::path(tex_base + ".dds"), new_name);
-						deploy_files.emplace_back(new_name, type);
-					}
-					augmented_texture_slots[new_name].push_back(slot_index);
-				}
-			}
-		}
-
-		for (auto const & dup : dup_files)
-		{
-			filesystem::copy_file(std::get<0>(dup), std::get<1>(dup));
-		}
-
-		for (auto const & df : deploy_files)
-		{
-			std::string deploy_type;
-			size_t const type_hash = RT_HASH(df.second.c_str());
-			if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
-				|| (CT_HASH("Diffuse Color Map") == type_hash)
-				|| (CT_HASH("Albedo") == type_hash))
-			{
-				deploy_type = "albedo";
-			}
-			else if (CT_HASH("Metalness") == type_hash)
-			{
-				deploy_type = "metalness";
-			}
-			else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
-			{
-				deploy_type = "glossiness";
-			}
-			else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
-			{
-				deploy_type = "emissive";
-			}
-			else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash))
-			{
-				deploy_type = "bump";
-			}
-			else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
-			{
-				deploy_type = "normal";
-			}
-			else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
-			{
-				deploy_type = "height";
-			}
-			else
-			{
-				// TODO
-				deploy_type = df.second;
-			}
-
-			cout << "Processing " << df.first.string() << endl;
-
-			std::string cmd = "platformdeployer -P " + platform + " -I \"" + df.first.string() + "\" -T " + deploy_type;
-			int err = system(cmd.c_str());
-			KFL_UNUSED(err);
-		}
-
-		filesystem::path output_folder = filesystem::path(output_name).parent_path();
-		for (auto const & slot : augmented_texture_slots)
-		{
-			std::string rel_path = make_relative(output_folder, slot.first).string();
-
-			for (auto const & slot_index : slot.second)
-			{
-				mtls[slot_index.first].texture_slots[slot_index.second].second = rel_path;
-			}
-		}
-	}
-
-	std::string ReplaceExtToDDS(std::string const & name)
-	{
-		std::string ret;
-		size_t dot_pos = name.find_last_of('.');
-		if (dot_pos != std::string::npos)
-		{
-			std::string base_name = name.substr(0, dot_pos);
-			ret = base_name + ".dds";
-		}
-		else
-		{
-			ret = name;
-		}
-		return ret;
-	}
-
-	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, std::string const & platform)
+	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name)
 	{
 		ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 		KlayGE::XMLDocument doc;
@@ -1932,10 +1761,6 @@ namespace
 		if (materials_chunk)
 		{
 			CompileMaterialsChunk(materials_chunk, mtls);
-			if (!platform.empty())
-			{
-				ConvertTextures(output_name, mtls, platform);
-			}
 
 			for (size_t i = 0; i < mtls.size(); ++ i)
 			{
@@ -1946,28 +1771,28 @@ namespace
 						|| (CT_HASH("Diffuse Color Map") == type_hash)
 						|| (CT_HASH("Albedo") == type_hash))
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Albedo] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Albedo] = mtls[i].texture_slots[j].second;
 					}
 					else if (CT_HASH("Metalness") == type_hash)
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Metalness] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Metalness] = mtls[i].texture_slots[j].second;
 					}
 					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Glossiness] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Glossiness] = mtls[i].texture_slots[j].second;
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Emissive] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Emissive] = mtls[i].texture_slots[j].second;
 					}
 					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
 						|| (CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Normal] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Normal] = mtls[i].texture_slots[j].second;
 					}
 					else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Height] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Height] = mtls[i].texture_slots[j].second;
 					}
 				}
 			}
@@ -2071,7 +1896,6 @@ int main(int argc, char* argv[])
 {
 	std::string input_name;
 	filesystem::path target_folder;
-	std::string platform;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -2079,7 +1903,6 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input meshml name.")
 		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
-		("platform,P", boost::program_options::value<std::string>()->implicit_value(""), "Platform name.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -2109,10 +1932,6 @@ int main(int argc, char* argv[])
 	if (vm.count("target-folder") > 0)
 	{
 		target_folder = vm["target-folder"].as<std::string>();
-	}
-	if (vm.count("platform") > 0)
-	{
-		platform = vm["platform"].as<std::string>();
 	}
 	if (vm.count("quiet") > 0)
 	{
@@ -2168,7 +1987,7 @@ int main(int argc, char* argv[])
 
 		std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
 
-		MeshMLJIT(meshml_name, output_name, platform);
+		MeshMLJIT(meshml_name, output_name);
 
 		if (!quiet)
 		{

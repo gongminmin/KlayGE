@@ -56,14 +56,12 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 	case CT_HASH("emissive"):
 		default_metadata.Slot((res_type_hash == CT_HASH("albedo")) ? RenderMaterial::TS_Albedo : RenderMaterial::TS_Emissive);
 		default_metadata.ForceSRGB(true);
-		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1 }));
 		break;
 
 	case CT_HASH("glossiness"):
 	case CT_HASH("metalness"):
 		default_metadata.Slot((res_type_hash == CT_HASH("glossiness")) ? RenderMaterial::TS_Glossiness : RenderMaterial::TS_Metalness);
 		default_metadata.ForceSRGB(false);
-		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC7, EF_BC1, EF_ETC1 }));
 		break;
 
 	case CT_HASH("normal"):
@@ -75,18 +73,18 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 			default_metadata.BumpToNormal(true);
 			default_metadata.BumpScale(1.0f);
 		}
-		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC5, EF_BC3, EF_GR8 }));
 		break;
 
 	case CT_HASH("height"):
 		default_metadata.Slot(RenderMaterial::TS_Height);
 		default_metadata.ForceSRGB(false);
-		default_metadata.PreferedFormat(caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 }));
 		break;
 	}
 
 	default_metadata.MipmapEnabled(true);
 	default_metadata.AutoGenMipmap(true);
+
+	default_metadata.DeviceDependentAdjustment(caps);
 
 	return default_metadata;
 }
@@ -129,8 +127,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			if (output_tex)
 			{
 				filesystem::path res_path(res_names[i]);
-				std::string tex_base = (res_path.parent_path() / res_path.stem()).string();
-				SaveTexture(output_tex, tex_base + ".dds");
+				SaveTexture(output_tex, res_path.replace_extension(".dds").string());
 			}
 		}
 	}

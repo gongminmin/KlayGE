@@ -27,6 +27,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
@@ -38,6 +39,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
+#include <KlayGE/ToolCommonLoader.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Hash.hpp>
 
@@ -1106,6 +1108,30 @@ namespace
 			tex_desc_.access_hint = access_hint;
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
+
+			std::filesystem::path res_path(tex_desc_.res_name);
+			bool const dds_ext = (res_path.extension().string() == ".dds");
+			std::string const metadata_name = tex_desc_.res_name + ".kmeta";
+			std::string runtime_name = tex_desc_.res_name;
+			if (!dds_ext || !ResLoader::Instance().Locate(metadata_name).empty())
+			{
+				// Texture's runtime format is dds, for now
+				runtime_name += ".dds";
+			}
+
+			if (ResLoader::Instance().Locate(runtime_name).empty())
+			{
+#if KLAYGE_IS_DEV_PLATFORM
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+				ToolCommonLoader::Instance().ConvertTexture(tex_desc_.res_name, metadata_name, runtime_name, &caps);
+#else
+				LogError() << "Could NOT locate " << runtime_name << std::endl;
+#endif
+			}
+
+			tex_desc_.res_name = runtime_name;
 		}
 
 		uint64_t Type() const override

@@ -52,6 +52,7 @@ namespace KlayGE
 
 		void Load(std::string_view name);
 		void Save(std::string const & name) const;
+		void DeviceDependentAdjustment(RenderDeviceCaps const & caps);
 
 		Texture::TextureType Type() const
 		{

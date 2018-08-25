@@ -147,16 +147,6 @@ public:
 			{
 				std::string tex_name;
 				target.GetTextureSlot(i, static_cast<MeshMLObj::Material::TextureSlot>(slot), tex_name);
-				if (!tex_name.empty())
-				{
-					std::filesystem::path tex_path(tex_name);
-					std::string const ext_name = tex_path.extension().string();
-					if (ext_name != ".dds")
-					{
-						std::string tex_base = (tex_path.parent_path() / tex_path.stem()).string();
-						tex_name = tex_base + ".dds";
-					}
-				}
 				EXPECT_EQ(tex_name, mtls[i]->tex_names[slot]);
 			}
 		}
