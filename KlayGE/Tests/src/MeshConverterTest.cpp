@@ -62,39 +62,9 @@ public:
 		MeshConverter mc;
 		EXPECT_TRUE(mc.Convert(input_name, metadata, target, vertex_export_settings));
 
-		std::vector<RenderMaterialPtr> mtls;
-		std::vector<VertexElement> merged_ves;
-		char all_is_index_16_bit;
-		std::vector<std::vector<uint8_t>> merged_buff;
-		std::vector<uint8_t> merged_indices;
-		std::vector<std::string> mesh_names;
-		std::vector<int32_t> mtl_ids;
-		std::vector<uint32_t> mesh_lods;
-		std::vector<AABBox> pos_bbs;
-		std::vector<AABBox> tc_bbs;
-		std::vector<uint32_t> mesh_num_vertices;
-		std::vector<uint32_t> mesh_base_vertices;
-		std::vector<uint32_t> mesh_num_indices;
-		std::vector<uint32_t> mesh_base_indices;
-		std::vector<Joint> joints;
-		std::shared_ptr<AnimationActionsType> actions;
-		std::shared_ptr<KeyFramesType> kfs;
-		uint32_t num_frames;
-		uint32_t frame_rate;
-		std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
+		auto sanity_model = LoadSoftwareModel(sanity_name);
 
-		LoadModel(sanity_name, mtls,
-			merged_ves, all_is_index_16_bit,
-			merged_buff, merged_indices,
-			mesh_names, mtl_ids, mesh_lods,
-			pos_bbs, tc_bbs,
-			mesh_num_vertices, mesh_base_vertices,
-			mesh_num_indices, mesh_base_indices,
-			joints, actions,
-			kfs, num_frames, frame_rate,
-			frame_pos_bbs);
-
-		EXPECT_EQ(target.NumMaterials(), mtls.size());
+		EXPECT_EQ(target.NumMaterials(), sanity_model->NumMaterials());
 		for (uint32_t i = 0; i < target.NumMaterials(); ++ i)
 		{
 			std::string name;
@@ -108,20 +78,22 @@ public:
 			bool two_sided;
 			target.GetMaterial(i, name, albedo, metalness, glossiness, emissive, transparent, alpha_test, sss, two_sided);
 
-			EXPECT_EQ(name, mtls[i]->name);
-			EXPECT_FLOAT_EQ(albedo.x(), mtls[i]->albedo.x());
-			EXPECT_FLOAT_EQ(albedo.y(), mtls[i]->albedo.y());
-			EXPECT_FLOAT_EQ(albedo.z(), mtls[i]->albedo.z());
-			EXPECT_FLOAT_EQ(albedo.w(), mtls[i]->albedo.w());
-			EXPECT_FLOAT_EQ(metalness, mtls[i]->metalness);
-			EXPECT_FLOAT_EQ(glossiness, mtls[i]->glossiness);
-			EXPECT_FLOAT_EQ(emissive.x(), mtls[i]->emissive.x());
-			EXPECT_FLOAT_EQ(emissive.y(), mtls[i]->emissive.y());
-			EXPECT_FLOAT_EQ(emissive.z(), mtls[i]->emissive.z());
-			EXPECT_EQ(transparent, mtls[i]->transparent);
-			EXPECT_FLOAT_EQ(alpha_test, mtls[i]->alpha_test);
-			EXPECT_EQ(sss, mtls[i]->sss);
-			EXPECT_EQ(two_sided, mtls[i]->two_sided);
+			auto sanity_mtl = sanity_model->GetMaterial(i);
+
+			EXPECT_EQ(name, sanity_mtl->name);
+			EXPECT_FLOAT_EQ(albedo.x(), sanity_mtl->albedo.x());
+			EXPECT_FLOAT_EQ(albedo.y(), sanity_mtl->albedo.y());
+			EXPECT_FLOAT_EQ(albedo.z(), sanity_mtl->albedo.z());
+			EXPECT_FLOAT_EQ(albedo.w(), sanity_mtl->albedo.w());
+			EXPECT_FLOAT_EQ(metalness, sanity_mtl->metalness);
+			EXPECT_FLOAT_EQ(glossiness, sanity_mtl->glossiness);
+			EXPECT_FLOAT_EQ(emissive.x(), sanity_mtl->emissive.x());
+			EXPECT_FLOAT_EQ(emissive.y(), sanity_mtl->emissive.y());
+			EXPECT_FLOAT_EQ(emissive.z(), sanity_mtl->emissive.z());
+			EXPECT_EQ(transparent, sanity_mtl->transparent);
+			EXPECT_FLOAT_EQ(alpha_test, sanity_mtl->alpha_test);
+			EXPECT_EQ(sss, sanity_mtl->sss);
+			EXPECT_EQ(two_sided, sanity_mtl->two_sided);
 
 			MeshMLObj::Material::SurfaceDetailMode detail_mode;
 			float height_offset;
@@ -147,17 +119,21 @@ public:
 			{
 				std::string tex_name;
 				target.GetTextureSlot(i, static_cast<MeshMLObj::Material::TextureSlot>(slot), tex_name);
-				EXPECT_EQ(tex_name, mtls[i]->tex_names[slot]);
+				EXPECT_EQ(tex_name, sanity_mtl->tex_names[slot]);
 			}
 		}
+
+		auto const & rl = checked_cast<StaticMesh*>(sanity_model->Subrenderable(0).get())->GetRenderLayout();
 
 		int position_stream = -1;
 		int normal_stream = -1;
 		int tangent_quat_stream = -1;
 		int texcoord_stream = -1;
 		int stream_index = 0;
-		for (auto const & ve : merged_ves)
+		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
+			auto ve = rl.VertexStreamFormat(i)[0];
+
 			if (ve.usage == VEU_Position)
 			{
 				position_stream = stream_index;
@@ -192,34 +168,53 @@ public:
 			EXPECT_NE(texcoord_stream, -1);
 		}
 
-		EXPECT_EQ(target.NumMeshes(), mesh_names.size());
-		uint32_t mesh_lod_index = 0;
+		EXPECT_EQ(target.NumMeshes(), sanity_model->NumSubrenderables());
 		for (uint32_t i = 0; i < target.NumMeshes(); ++ i)
 		{
+			auto const & sanity_mesh = *checked_cast<StaticMesh*>(sanity_model->Subrenderable(i).get());
+
 			int material_id;
 			std::string name;
 			int num_lods;
 			target.GetMesh(i, material_id, name, num_lods);
 
-			EXPECT_EQ(material_id, mtl_ids[i]);
-			EXPECT_EQ(name, mesh_names[i]);
-			EXPECT_EQ(num_lods, static_cast<int>(mesh_lods[i]));
+			std::wstring wname;
+			Convert(wname, name);
 
-			for (int lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+			EXPECT_EQ(material_id, sanity_mesh.MaterialID());
+			EXPECT_EQ(wname, sanity_mesh.Name());
+			EXPECT_EQ(num_lods, static_cast<int>(sanity_mesh.NumLods()));
+
+			for (int lod = 0; lod < num_lods; ++ lod)
 			{
-				EXPECT_EQ(target.NumVertices(i, lod), mesh_num_vertices[mesh_lod_index]);
-				EXPECT_EQ(target.NumTriangles(i, lod) * 3, mesh_num_indices[mesh_lod_index]);
+				EXPECT_EQ(target.NumVertices(i, lod), sanity_mesh.NumVertices(lod));
+				EXPECT_EQ(target.NumTriangles(i, lod) * 3, sanity_mesh.NumIndices(lod));
 
-				auto const * position_buff = reinterpret_cast<int16_t const *>(merged_buff[position_stream].data());
-				auto const pos_center = pos_bbs[i].Center();
-				auto const pos_extent = pos_bbs[i].HalfSize();
-				auto const * normal_buff = (normal_stream != -1) ? merged_buff[normal_stream].data() : nullptr;
-				auto const * tangent_buff = (tangent_quat_stream != -1) ? merged_buff[tangent_quat_stream].data() : nullptr;
-				auto const * texcoord_buff = (texcoord_stream != -1)
-					? reinterpret_cast<int16_t const *>(merged_buff[texcoord_stream].data()) : nullptr;
-				auto const tc_center = tc_bbs[i].Center();
-				auto const tc_extent = tc_bbs[i].HalfSize();
-				for (uint32_t vid = 0; vid < mesh_num_vertices[mesh_lod_index]; ++ vid)
+				GraphicsBuffer::Mapper position_mapper(*rl.GetVertexStream(position_stream), BA_Read_Only);
+				auto const * position_buff = position_mapper.Pointer<int16_t>();
+				auto const pos_center = sanity_mesh.PosBound().Center();
+				auto const pos_extent = sanity_mesh.PosBound().HalfSize();
+				uint8_t const * normal_buff = nullptr;
+				if (normal_stream != -1)
+				{
+					GraphicsBuffer::Mapper normal_mapper(*rl.GetVertexStream(normal_stream), BA_Read_Only);
+					normal_buff = normal_mapper.Pointer<uint8_t>();
+				}
+				uint8_t const * tangent_buff = nullptr;
+				if (tangent_quat_stream != -1)
+				{
+					GraphicsBuffer::Mapper tangent_quat_mapper(*rl.GetVertexStream(tangent_quat_stream), BA_Read_Only);
+					tangent_buff = tangent_quat_mapper.Pointer<uint8_t>();
+				}
+				int16_t const * texcoord_buff = nullptr;
+				if (texcoord_stream != -1)
+				{
+					GraphicsBuffer::Mapper texcoord_mapper(*rl.GetVertexStream(texcoord_stream), BA_Read_Only);
+					texcoord_buff = texcoord_mapper.Pointer<int16_t>();
+				}
+				auto const tc_center = sanity_mesh.TexcoordBound().Center();
+				auto const tc_extent = sanity_mesh.TexcoordBound().HalfSize();
+				for (uint32_t vid = 0; vid < sanity_mesh.NumVertices(lod); ++ vid)
 				{
 					float3 pos;
 					float3 normal;
@@ -230,7 +225,7 @@ public:
 
 					EXPECT_EQ(texcoord_components, 2);
 
-					uint32_t const index = vid + mesh_base_vertices[mesh_lod_index];
+					uint32_t const index = vid + sanity_mesh.StartVertexLocation(lod);
 
 					{
 						float3 sanity_pos;
@@ -281,13 +276,14 @@ public:
 					}
 				}
 
-				auto const * indices_buff_16 = reinterpret_cast<uint16_t const *>(merged_indices.data());
-				auto const * indices_buff_32 = reinterpret_cast<uint32_t const *>(merged_indices.data());
-				for (uint32_t tid = 0; tid < mesh_num_indices[mesh_lod_index] / 3; ++ tid)
+				GraphicsBuffer::Mapper indices_mapper(*rl.GetIndexStream(), BA_Read_Only);
+				auto const * indices_buff_16 = indices_mapper.Pointer<uint16_t>();
+				auto const * indices_buff_32 = indices_mapper.Pointer<uint32_t>();
+				for (uint32_t tid = 0; tid < sanity_mesh.NumIndices(lod) / 3; ++ tid)
 				{
-					uint32_t const index = tid + mesh_base_indices[mesh_lod_index] / 3;
+					uint32_t const index = tid + sanity_mesh.StartIndexLocation(lod) / 3;
 					uint32_t sanity_tri_index[3];
-					if (all_is_index_16_bit)
+					if (sanity_mesh.GetRenderLayout().IndexStreamFormat() == EF_R16UI)
 					{
 						sanity_tri_index[0] = indices_buff_16[index * 3 + 0];
 						sanity_tri_index[1] = indices_buff_16[index * 3 + 1];
@@ -310,32 +306,36 @@ public:
 			}
 		}
 
-		EXPECT_EQ(target.NumJoints(), joints.size());
-		for (uint32_t i = 0; i < target.NumJoints(); ++ i)
+		if (sanity_model->IsSkinned())
 		{
-			std::string joint_name;
-			int parent_id;
-			Quaternion bind_real;
-			Quaternion bind_dual;
-			target.GetJoint(i, joint_name, parent_id, bind_real, bind_dual);
+			auto& sanity_skinned_model = *checked_cast<SkinnedModel*>(sanity_model.get());
 
-			EXPECT_EQ(joint_name, joints[i].name);
-			EXPECT_EQ(parent_id, joints[i].parent);
+			EXPECT_EQ(target.NumJoints(), sanity_skinned_model.NumJoints());
+			for (uint32_t i = 0; i < target.NumJoints(); ++ i)
+			{
+				std::string joint_name;
+				int parent_id;
+				Quaternion bind_real;
+				Quaternion bind_dual;
+				target.GetJoint(i, joint_name, parent_id, bind_real, bind_dual);
 
-			EXPECT_TRUE(std::abs(bind_real.x() - joints[i].bind_real.x()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_real.y() - joints[i].bind_real.y()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_real.z() - joints[i].bind_real.z()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_real.w() - joints[i].bind_real.w()) < 1e-4f);
+				auto& sanity_joint = sanity_skinned_model.GetJoint(i);
 
-			EXPECT_TRUE(std::abs(bind_dual.x() - joints[i].bind_dual.x()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_dual.y() - joints[i].bind_dual.y()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_dual.z() - joints[i].bind_dual.z()) < 1e-4f);
-			EXPECT_TRUE(std::abs(bind_dual.w() - joints[i].bind_dual.w()) < 1e-4f);
-		}
+				EXPECT_EQ(joint_name, sanity_joint.name);
+				EXPECT_EQ(parent_id, sanity_joint.parent);
 
-		if (actions)
-		{
-			EXPECT_EQ(target.NumActions(), actions->size());
+				EXPECT_TRUE(std::abs(bind_real.x() - sanity_joint.bind_real.x()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_real.y() - sanity_joint.bind_real.y()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_real.z() - sanity_joint.bind_real.z()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_real.w() - sanity_joint.bind_real.w()) < 1e-4f);
+
+				EXPECT_TRUE(std::abs(bind_dual.x() - sanity_joint.bind_dual.x()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_dual.y() - sanity_joint.bind_dual.y()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_dual.z() - sanity_joint.bind_dual.z()) < 1e-4f);
+				EXPECT_TRUE(std::abs(bind_dual.w() - sanity_joint.bind_dual.w()) < 1e-4f);
+			}
+
+			EXPECT_EQ(target.NumActions(), sanity_skinned_model.NumActions());
 			for (uint32_t i = 0; i < target.NumActions(); ++ i)
 			{
 				std::string name;
@@ -343,24 +343,24 @@ public:
 				int end_frame;
 				target.GetAction(i, name, start_frame, end_frame);
 
-				EXPECT_EQ(name, (*actions)[i].name);
-				EXPECT_EQ(start_frame, static_cast<int>((*actions)[i].start_frame));
-				EXPECT_EQ(end_frame, static_cast<int>((*actions)[i].end_frame));
-			}
-		}
-		else
-		{
-			EXPECT_EQ(target.NumActions(), 0U);
-		}
+				std::string sanity_action_name;
+				uint32_t sanity_start_frame;
+				uint32_t sanity_end_frame;
+				sanity_skinned_model.GetAction(i, sanity_action_name, sanity_start_frame, sanity_end_frame);
 
-		if (kfs)
-		{
-			EXPECT_EQ(target.NumKeyframeSets(), kfs->size());
+				EXPECT_EQ(name, sanity_action_name);
+				EXPECT_EQ(start_frame, static_cast<int>(sanity_start_frame));
+				EXPECT_EQ(end_frame, static_cast<int>(sanity_end_frame));
+			}
+
+			EXPECT_EQ(target.NumKeyframeSets(), sanity_skinned_model.GetKeyFrames()->size());
 			for (uint32_t i = 0; i < target.NumKeyframeSets(); ++ i)
 			{
 				int joint_id;
 				target.GetKeyframeSet(i, joint_id);
 				EXPECT_EQ(static_cast<int>(i), joint_id);
+
+				auto const & sanity_key_frames = (*(sanity_skinned_model.GetKeyFrames()))[i];
 
 				for (uint32_t j = 0; j < target.NumKeyframes(i); ++ j)
 				{
@@ -373,7 +373,7 @@ public:
 					Quaternion sanity_bind_real;
 					Quaternion sanity_bind_dual;
 					float sanity_scale;
-					std::tie(sanity_bind_real, sanity_bind_dual, sanity_scale) = (*kfs)[i].Frame(static_cast<float>(frame_id));
+					std::tie(sanity_bind_real, sanity_bind_dual, sanity_scale) = sanity_key_frames.Frame(static_cast<float>(frame_id));
 
 					EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-4f);
 					EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-4f);
@@ -389,12 +389,11 @@ public:
 				}
 			}
 
-			EXPECT_EQ(target.NumFrames(), static_cast<int>(num_frames));
-			EXPECT_EQ(target.FrameRate(), static_cast<int>(frame_rate));
-		}
-		else
-		{
-			EXPECT_EQ(target.NumKeyframeSets(), 0U);
+			if (target.NumKeyframeSets() > 0)
+			{
+				EXPECT_EQ(target.NumFrames(), static_cast<int>(sanity_skinned_model.NumFrames()));
+				EXPECT_EQ(target.FrameRate(), static_cast<int>(sanity_skinned_model.FrameRate()));
+			}
 		}
 	}
 };

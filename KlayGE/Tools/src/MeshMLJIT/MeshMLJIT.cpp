@@ -1641,15 +1641,15 @@ namespace
 
 	void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk,
 		std::vector<AABBox> const & pos_bbs, uint32_t num_frames,
-		std::vector<AABBKeyFrames>& bb_kfss)
+		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs)
 	{
-		AABBKeyFrames bb_kfs;
+		auto bb_kfs = MakeSharedPtr<AABBKeyFrames>();
 		if (bb_kfs_chunk)
 		{
 			for (XMLNodePtr bb_kf_node = bb_kfs_chunk->FirstNode("bb_key_frame"); bb_kf_node; bb_kf_node = bb_kf_node->NextSibling("bb_key_frame"))
 			{
-				bb_kfs.frame_id.clear();
-				bb_kfs.bb.clear();
+				bb_kfs->frame_id.clear();
+				bb_kfs->bb.clear();
 
 				int32_t frame_id = -1;
 				for (XMLNodePtr key_node = bb_kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
@@ -1663,7 +1663,7 @@ namespace
 					{
 						++ frame_id;
 					}
-					bb_kfs.frame_id.push_back(frame_id);
+					bb_kfs->frame_id.push_back(frame_id);
 
 					float3 bb_min, bb_max;
 					XMLAttributePtr attr = key_node->Attrib("min");
@@ -1691,26 +1691,26 @@ namespace
 						bb_max.z() = max_node->Attrib("z")->ValueFloat();
 					}
 
-					bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
+					bb_kfs->bb.push_back(AABBox(bb_min, bb_max));
 				}
 
-				bb_kfss.push_back(bb_kfs);
+				frame_pos_bbs.push_back(bb_kfs);
 			}
 		}
 		else
 		{
-			bb_kfs.frame_id.resize(2);
-			bb_kfs.bb.resize(2);
+			bb_kfs->frame_id.resize(2);
+			bb_kfs->bb.resize(2);
 
-			bb_kfs.frame_id[0] = 0;
-			bb_kfs.frame_id[1] = num_frames - 1;
+			bb_kfs->frame_id[0] = 0;
+			bb_kfs->frame_id[1] = num_frames - 1;
 
 			for (uint32_t mesh_index = 0; mesh_index < pos_bbs.size(); ++ mesh_index)
 			{
-				bb_kfs.bb[0] = pos_bbs[mesh_index];
-				bb_kfs.bb[1] = pos_bbs[mesh_index];
+				bb_kfs->bb[0] = pos_bbs[mesh_index];
+				bb_kfs->bb[1] = pos_bbs[mesh_index];
 
-				bb_kfss.push_back(bb_kfs);
+				frame_pos_bbs.push_back(bb_kfs);
 			}
 		}
 	}
@@ -1832,10 +1832,10 @@ namespace
 		uint32_t num_frames = 0;
 		uint32_t frame_rate = 0;
 		std::shared_ptr<std::vector<KeyFrames>> kfs;
+		std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
 		if (key_frames_chunk)
 		{
 			kfs = MakeSharedPtr<KeyFramesType>(joints.size());
-			std::vector<AABBKeyFrames> bb_kfs;
 
 			CompileKeyFramesChunk(key_frames_chunk, num_frames, frame_rate, *kfs);
 
@@ -1869,7 +1869,7 @@ namespace
 			}
 
 			XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
-			CompileBBKeyFramesChunk(bb_kfs_chunk, pos_bbs, num_frames, bb_kfs);
+			CompileBBKeyFramesChunk(bb_kfs_chunk, pos_bbs, num_frames, frame_pos_bbs);
 		}
 
 		XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
@@ -1880,15 +1880,98 @@ namespace
 			CompileActionsChunk(actions_chunk, num_frames, *actions);
 		}
 
-		std::vector<RenderMaterialPtr> output_mtls(mtls.size());
-		for (size_t i = 0; i < mtls.size(); ++ i)
+		bool const skinned = kfs && !kfs->empty();
+
+		RenderModelPtr model;
+		if (skinned)
 		{
-			output_mtls[i] = MakeSharedPtr<RenderMaterial>(mtls[i].material);
+			model = MakeSharedPtr<SkinnedModel>(L"Software");
 		}
-		SaveModel(output_name, output_mtls, merged_ves, is_index_16_bit, merged_vertices, merged_indices,
-			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
-			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_start_indices,
-			joints, actions, kfs, num_frames, frame_rate);
+		else
+		{
+			model = MakeSharedPtr<RenderModel>(L"Software");
+		}
+
+		model->NumMaterials(mtls.size());
+		for (uint32_t mtl_index = 0; mtl_index < mtls.size(); ++ mtl_index)
+		{
+			model->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>(mtls[mtl_index].material);
+		}
+
+		std::vector<GraphicsBufferPtr> merged_vbs(merged_vertices.size());
+		for (size_t i = 0; i < merged_vertices.size(); ++ i)
+		{
+			auto vb = MakeSharedPtr<SoftwareGraphicsBuffer>(static_cast<uint32_t>(merged_vertices[i].size()), false);
+			vb->CreateHWResource(merged_vertices[i].data());
+
+			merged_vbs[i] = vb;
+		}
+		auto merged_ib = MakeSharedPtr<SoftwareGraphicsBuffer>(static_cast<uint32_t>(merged_indices.size()), false);
+		merged_ib->CreateHWResource(merged_indices.data());
+
+		uint32_t mesh_lod_index = 0;
+		std::vector<StaticMeshPtr> meshes(mesh_names.size());
+		for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
+		{
+			std::wstring wname;
+			Convert(wname, mesh_names[mesh_index]);
+
+			if (skinned)
+			{
+				meshes[mesh_index] = MakeSharedPtr<SkinnedMesh>(model, wname);
+			}
+			else
+			{
+				meshes[mesh_index] = MakeSharedPtr<StaticMesh>(model, wname);
+			}
+			StaticMeshPtr& mesh = meshes[mesh_index];
+
+			mesh->MaterialID(mtl_ids[mesh_index]);
+			mesh->PosBound(pos_bbs[mesh_index]);
+			mesh->TexcoordBound(tc_bbs[mesh_index]);
+
+			uint32_t const lods = mesh_lods[mesh_index];
+			mesh->NumLods(lods);
+			for (uint32_t lod = 0; lod < lods; ++ lod, ++ mesh_lod_index)
+			{
+				for (uint32_t ve_index = 0; ve_index < merged_vertices.size(); ++ ve_index)
+				{
+					mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
+				}
+				mesh->AddIndexStream(lod, merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
+
+				mesh->NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
+				mesh->NumIndices(lod, mesh_num_indices[mesh_lod_index]);
+				mesh->StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
+				mesh->StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
+			}
+		}
+
+		if (kfs && !kfs->empty())
+		{
+			if (!joints.empty())
+			{
+				SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
+
+				skinned_model->AssignJoints(joints.begin(), joints.end());
+				skinned_model->AttachKeyFrames(kfs);
+
+				skinned_model->NumFrames(num_frames);
+				skinned_model->FrameRate(frame_rate);
+
+				for (size_t mesh_index = 0; mesh_index < meshes.size(); ++mesh_index)
+				{
+					SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
+					skinned_mesh->AttachFramePosBounds(frame_pos_bbs[mesh_index]);
+				}
+
+				skinned_model->AttachActions(actions);
+			}
+		}
+
+		model->AssignSubrenderables(meshes.begin(), meshes.end());
+
+		SaveModel(model, output_name);
 	}
 }
 

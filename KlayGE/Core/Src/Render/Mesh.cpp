@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -60,40 +61,7 @@ namespace
 			std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
-			struct ModelData
-			{
-				struct MeshData
-				{
-					std::string name;
-					int32_t mtl_id;
-					uint32_t lods;
-					AABBox pos_bb;
-					AABBox tc_bb;
-					std::vector<uint32_t> num_vertices;
-					std::vector<uint32_t> base_vertices;
-					std::vector<uint32_t> num_indices;
-					std::vector<uint32_t> start_indices;
-				};
-
-				std::vector<RenderMaterialPtr> mtls;
-
-				std::vector<VertexElement> merged_ves;
-				char all_is_index_16_bit;
-				std::vector<std::vector<uint8_t>> merged_buff;
-				std::vector<uint8_t> merged_indices;
-				std::vector<GraphicsBufferPtr> merged_vbs;
-				GraphicsBufferPtr merged_ib;
-
-				std::vector<MeshData> meshes;
-
-				std::vector<Joint> joints;
-				std::shared_ptr<AnimationActionsType> actions;
-				std::shared_ptr<KeyFramesType> kfs;
-				uint32_t num_frames;
-				uint32_t frame_rate;
-				std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
-			};
-			std::shared_ptr<ModelData> model_data;
+			RenderModelPtr sw_model;
 
 			std::shared_ptr<RenderModelPtr> model;
 		};
@@ -107,7 +75,6 @@ namespace
 			model_desc_.access_hint = access_hint;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
-			model_desc_.model_data = MakeSharedPtr<ModelDesc::ModelData>();
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
 		}
 
@@ -139,47 +106,7 @@ namespace
 				return;
 			}
 
-			std::vector<std::string> mesh_names;
-			std::vector<int32_t> mtl_ids;
-			std::vector<uint32_t> mesh_lods;
-			std::vector<AABBox> pos_bbs;
-			std::vector<AABBox> tc_bbs;
-			std::vector<uint32_t> mesh_num_vertices;
-			std::vector<uint32_t> mesh_base_vertices;
-			std::vector<uint32_t> mesh_num_indices;
-			std::vector<uint32_t> mesh_start_indices;
-			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
-				model_desc_.model_data->all_is_index_16_bit,
-				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
-				mesh_names, mtl_ids, mesh_lods,
-				pos_bbs, tc_bbs,
-				mesh_num_vertices, mesh_base_vertices,
-				mesh_num_indices, mesh_start_indices,
-				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
-				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
-				model_desc_.model_data->frame_pos_bbs);
-
-			model_desc_.model_data->meshes.resize(mesh_names.size());
-			uint32_t mesh_lod_index = 0;
-			for (size_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
-			{
-				model_desc_.model_data->meshes[mesh_index].name = mesh_names[mesh_index];
-				model_desc_.model_data->meshes[mesh_index].mtl_id = mtl_ids[mesh_index];
-				model_desc_.model_data->meshes[mesh_index].lods = mesh_lods[mesh_index];
-				model_desc_.model_data->meshes[mesh_index].pos_bb = pos_bbs[mesh_index];
-				model_desc_.model_data->meshes[mesh_index].tc_bb = tc_bbs[mesh_index];
-
-				uint32_t const lods = model_desc_.model_data->meshes[mesh_index].lods;
-				model_desc_.model_data->meshes[mesh_index].num_vertices.resize(lods);
-				model_desc_.model_data->meshes[mesh_index].base_vertices.resize(lods);
-				model_desc_.model_data->meshes[mesh_index].num_indices.resize(lods);
-				model_desc_.model_data->meshes[mesh_index].start_indices.resize(lods);
-				memcpy(&model_desc_.model_data->meshes[mesh_index].num_vertices[0], &mesh_num_vertices[mesh_lod_index], lods * sizeof(uint32_t));
-				memcpy(&model_desc_.model_data->meshes[mesh_index].base_vertices[0], &mesh_base_vertices[mesh_lod_index], lods * sizeof(uint32_t));
-				memcpy(&model_desc_.model_data->meshes[mesh_index].num_indices[0], &mesh_num_indices[mesh_lod_index], lods * sizeof(uint32_t));
-				memcpy(&model_desc_.model_data->meshes[mesh_index].start_indices[0], &mesh_start_indices[mesh_lod_index], lods * sizeof(uint32_t));
-				mesh_lod_index += lods;
-			}
+			model_desc_.sw_model = LoadSoftwareModel(model_desc_.res_name);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -218,7 +145,7 @@ namespace
 			RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
 			model_desc_.res_name = rmld.model_desc_.res_name;
 			model_desc_.access_hint = rmld.model_desc_.access_hint;
-			model_desc_.model_data = rmld.model_desc_.model_data;
+			model_desc_.sw_model = rmld.model_desc_.sw_model;
 			model_desc_.model = rmld.model_desc_.model;
 		}
 
@@ -292,6 +219,8 @@ namespace
 						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
 						skinned_mesh->AttachFramePosBounds(rhs_skinned_mesh->GetFramePosBounds());
 					}
+
+					skinned_model->AttachActions(rhs_skinned_model->GetActions());
 				}
 
 				model->AssignSubrenderables(meshes.begin(), meshes.end());
@@ -316,73 +245,82 @@ namespace
 	private:
 		void FillModel()
 		{
-			RenderModelPtr const & model = *model_desc_.model;
+			auto const & model = *model_desc_.model;
+			auto const & sw_model = *model_desc_.sw_model;
 
-			model->NumMaterials(model_desc_.model_data->mtls.size());
-			for (uint32_t mtl_index = 0; mtl_index < model_desc_.model_data->mtls.size(); ++ mtl_index)
+			model->NumMaterials(sw_model.NumMaterials());
+			for (uint32_t mtl_index = 0; mtl_index < model_desc_.sw_model->NumMaterials(); ++ mtl_index)
 			{
-				model->GetMaterial(mtl_index) = model_desc_.model_data->mtls[mtl_index];
+				model->GetMaterial(mtl_index) = model_desc_.sw_model->GetMaterial(mtl_index);
 			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			auto const & sw_rl = checked_pointer_cast<StaticMesh>(sw_model.Subrenderable(0))->GetRenderLayout();
 
-			model_desc_.model_data->merged_vbs.resize(model_desc_.model_data->merged_buff.size());
-			for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
+			std::vector<GraphicsBufferPtr> merged_vbs(sw_rl.NumVertexStreams());
+			std::vector<VertexElement> merged_ves(sw_rl.NumVertexStreams());
+			for (uint32_t i = 0; i < merged_vbs.size(); ++ i)
 			{
-				model_desc_.model_data->merged_vbs[i] = rf.MakeDelayCreationVertexBuffer(BU_Static, model_desc_.access_hint,
-					static_cast<uint32_t>(model_desc_.model_data->merged_buff[i].size()));
+				merged_vbs[i] = rf.MakeDelayCreationVertexBuffer(BU_Static, model_desc_.access_hint, sw_rl.GetVertexStream(i)->Size());
+				merged_ves[i] = sw_rl.VertexStreamFormat(i)[0];
 			}
-			model_desc_.model_data->merged_ib = rf.MakeDelayCreationIndexBuffer(BU_Static, model_desc_.access_hint,
-				static_cast<uint32_t>(model_desc_.model_data->merged_indices.size()));
+			auto merged_ib = rf.MakeDelayCreationIndexBuffer(BU_Static, model_desc_.access_hint, sw_rl.GetIndexStream()->Size());
+			auto const merged_ib_format = sw_rl.IndexStreamFormat();
 
-			std::vector<StaticMeshPtr> meshes(model_desc_.model_data->meshes.size());
-			for (uint32_t mesh_index = 0; mesh_index < model_desc_.model_data->meshes.size(); ++ mesh_index)
+			std::vector<StaticMeshPtr> meshes(sw_model.NumSubrenderables());
+			for (uint32_t mesh_index = 0; mesh_index < sw_model.NumSubrenderables(); ++ mesh_index)
 			{
-				std::wstring wname;
-				Convert(wname, model_desc_.model_data->meshes[mesh_index].name);
+				auto const & sw_mesh = *checked_pointer_cast<StaticMesh>(sw_model.Subrenderable(mesh_index));
 
-				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, wname);
-				StaticMeshPtr& mesh = meshes[mesh_index];
+				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, sw_mesh.Name());
+				auto& mesh = *meshes[mesh_index];
 
-				mesh->MaterialID(model_desc_.model_data->meshes[mesh_index].mtl_id);
-				mesh->PosBound(model_desc_.model_data->meshes[mesh_index].pos_bb);
-				mesh->TexcoordBound(model_desc_.model_data->meshes[mesh_index].tc_bb);
+				mesh.MaterialID(sw_mesh.MaterialID());
+				mesh.PosBound(sw_mesh.PosBound());
+				mesh.TexcoordBound(sw_mesh.TexcoordBound());
 
-				uint32_t const lods = model_desc_.model_data->meshes[mesh_index].lods;
-				mesh->NumLods(lods);
+				uint32_t const lods = sw_mesh.NumLods();
+				mesh.NumLods(lods);
 				for (uint32_t lod = 0; lod < lods; ++ lod)
 				{
-					for (uint32_t ve_index = 0; ve_index < model_desc_.model_data->merged_buff.size(); ++ ve_index)
+					for (uint32_t ve_index = 0; ve_index < merged_vbs.size(); ++ ve_index)
 					{
-						mesh->AddVertexStream(lod, model_desc_.model_data->merged_vbs[ve_index], model_desc_.model_data->merged_ves[ve_index]);
+						mesh.AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
 					}
-					mesh->AddIndexStream(lod, model_desc_.model_data->merged_ib, model_desc_.model_data->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
+					mesh.AddIndexStream(lod, merged_ib, merged_ib_format);
 
-					mesh->NumVertices(lod, model_desc_.model_data->meshes[mesh_index].num_vertices[lod]);
-					mesh->NumIndices(lod, model_desc_.model_data->meshes[mesh_index].num_indices[lod]);
-					mesh->StartVertexLocation(lod, model_desc_.model_data->meshes[mesh_index].base_vertices[lod]);
-					mesh->StartIndexLocation(lod, model_desc_.model_data->meshes[mesh_index].start_indices[lod]);
+					mesh.NumVertices(lod, sw_mesh.NumVertices(lod));
+					mesh.NumIndices(lod, sw_mesh.NumIndices(lod));
+					mesh.StartVertexLocation(lod, sw_mesh.StartVertexLocation(lod));
+					mesh.StartIndexLocation(lod, sw_mesh.StartIndexLocation(lod));
 				}
 			}
 
-			if (model_desc_.model_data->kfs && !model_desc_.model_data->kfs->empty())
+			if (sw_model.IsSkinned())
 			{
-				if (!model_desc_.model_data->joints.empty())
+				auto& skinned_model = *checked_pointer_cast<SkinnedModel>(model);
+				auto const & sw_skinned_model = *checked_pointer_cast<SkinnedModel>(model_desc_.sw_model);
+
+				std::vector<Joint> joints(sw_skinned_model.NumJoints());
+				for (uint32_t i = 0; i < joints.size(); ++ i)
 				{
-					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
-
-					skinned_model->AssignJoints(model_desc_.model_data->joints.begin(), model_desc_.model_data->joints.end());
-					skinned_model->AttachKeyFrames(model_desc_.model_data->kfs);
-
-					skinned_model->NumFrames(model_desc_.model_data->num_frames);
-					skinned_model->FrameRate(model_desc_.model_data->frame_rate);
-
-					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
-					{
-						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
-						skinned_mesh->AttachFramePosBounds(model_desc_.model_data->frame_pos_bbs[mesh_index]);
-					}
+					joints[i] = sw_skinned_model.GetJoint(i);
 				}
+				skinned_model.AssignJoints(joints.begin(), joints.end());
+
+				skinned_model.AttachKeyFrames(sw_skinned_model.GetKeyFrames());
+
+				skinned_model.NumFrames(sw_skinned_model.NumFrames());
+				skinned_model.FrameRate(sw_skinned_model.FrameRate());
+
+				for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
+				{
+					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Subrenderable(mesh_index));
+					auto const & sw_skinned_mesh = *checked_pointer_cast<SkinnedMesh>(sw_skinned_model.Subrenderable(mesh_index));
+					skinned_mesh.AttachFramePosBounds(sw_skinned_mesh.GetFramePosBounds());
+				}
+
+				skinned_model.AttachActions(sw_skinned_model.GetActions());
 			}
 
 			model->AssignSubrenderables(meshes.begin(), meshes.end());
@@ -409,11 +347,96 @@ namespace
 			{
 				this->FillModel();
 
-				for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
+				auto const & sw_model = *model_desc_.sw_model;
+
+				auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+				auto const & rl = checked_pointer_cast<StaticMesh>(model->Subrenderable(0))->GetRenderLayout();
+				auto const & sw_rl = checked_pointer_cast<StaticMesh>(sw_model.Subrenderable(0))->GetRenderLayout();
+
+				for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 				{
-					model_desc_.model_data->merged_vbs[i]->CreateHWResource(&model_desc_.model_data->merged_buff[i][0]);
+					GraphicsBuffer::Mapper mapper(*sw_rl.GetVertexStream(i), BA_Read_Only);
+
+					uint32_t const num_vertices = sw_rl.GetVertexStream(i)->Size() / sizeof(uint32_t);
+
+					void* ptr = mapper.Pointer<void>();
+					auto ve = sw_rl.VertexStreamFormat(i)[0];
+
+					std::vector<uint8_t> buff;
+					if (!caps.VertexFormatSupport(ve.format))
+					{
+						buff.resize(sw_rl.GetVertexStream(i)->Size());
+						ptr = buff.data();
+
+						uint32_t const * src = mapper.Pointer<uint32_t>();
+						uint32_t* dst = static_cast<uint32_t*>(ptr);
+
+						if (ve.format == EF_A2BGR10)
+						{
+							ve.format = caps.BestMatchVertexFormat({ EF_ARGB8, EF_ABGR8 });
+
+							if (ve.format == EF_ARGB8)
+							{
+								for (uint32_t j = 0; j < num_vertices; ++ j)
+								{
+									float x = ((src[j] >> 0) & 0x3FF) / 1023.0f;
+									float y = ((src[j] >> 10) & 0x3FF) / 1023.0f;
+									float z = ((src[j] >> 20) & 0x3FF) / 1023.0f;
+									float w = ((src[j] >> 30) & 0x3) / 3.0f;
+
+									dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 0)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+								}
+							}
+							else
+							{
+								for (uint32_t j = 0; j < num_vertices; ++ j)
+								{
+									float x = ((src[j] >> 0) & 0x3FF) / 1023.0f;
+									float y = ((src[j] >> 10) & 0x3FF) / 1023.0f;
+									float z = ((src[j] >> 20) & 0x3FF) / 1023.0f;
+									float w = ((src[j] >> 30) & 0x3) / 3.0f;
+
+									dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+								}
+							}
+						}
+						else if (ve.format == EF_ARGB8)
+						{
+							BOOST_ASSERT(caps.VertexFormatSupport(EF_ABGR8));
+
+							ve.format = EF_ABGR8;
+
+							for (uint32_t j = 0; j < num_vertices; ++ j)
+							{
+								float x = ((src[j] >> 16) & 0xFF) / 255.0f;
+								float y = ((src[j] >> 8) & 0xFF) / 255.0f;
+								float z = ((src[j] >> 0) & 0xFF) / 255.0f;
+								float w = ((src[j] >> 24) & 0xFF) / 255.0f;
+
+								dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+							}
+						}
+						else
+						{
+							KFL_UNREACHABLE("Invalid vertex format");
+						}
+					}
+
+					rl.GetVertexStream(i)->CreateHWResource(ptr);
 				}
-				model_desc_.model_data->merged_ib->CreateHWResource(&model_desc_.model_data->merged_indices[0]);
+				{
+					GraphicsBuffer::Mapper mapper(*sw_rl.GetIndexStream(), BA_Read_Only);
+					rl.GetIndexStream()->CreateHWResource(mapper.Pointer<void>());
+				}
 
 				this->AddsSubPath();
 
@@ -423,7 +446,7 @@ namespace
 					checked_pointer_cast<StaticMesh>(model->Subrenderable(i))->BuildMeshInfo();
 				}
 
-				model_desc_.model_data.reset();
+				model_desc_.sw_model.reset();
 			}
 		}
 
@@ -591,12 +614,18 @@ namespace KlayGE
 
 	void StaticMesh::NumLods(uint32_t lods)
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
 		rls_.resize(lods);
 		for (auto& rl : rls_)
 		{
-			rl = rf.MakeRenderLayout();
+			if (model_.lock()->Name() == L"Software")
+			{
+				rl = MakeSharedPtr<RenderLayout>();
+			}
+			else
+			{
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				rl = rf.MakeRenderLayout();
+			}
 			rl->TopologyType(RenderLayout::TT_TriangleList);
 		}
 	}
@@ -1074,17 +1103,51 @@ namespace KlayGE
 #endif
 	}
 
-	void LoadModel(std::string_view meshml_name, std::vector<RenderMaterialPtr>& mtls,
-		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
-		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<uint32_t>& mesh_lods,
-		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
-		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
-		std::vector<Joint>& joints, std::shared_ptr<AnimationActionsType>& actions,
-		std::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
-		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs)
+	RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
+		BOOST_ASSERT(CreateModelFactoryFunc);
+		BOOST_ASSERT(CreateMeshFactoryFunc);
+
+		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+	}
+
+	RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+	{
+		BOOST_ASSERT(CreateModelFactoryFunc);
+		BOOST_ASSERT(CreateMeshFactoryFunc);
+
+		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+	}
+
+	RenderModelPtr LoadSoftwareModel(std::string_view meshml_name)
+	{
+		std::vector<RenderMaterialPtr> mtls;
+		std::vector<VertexElement> merged_ves;
+		char all_is_index_16_bit;
+		std::vector<std::vector<uint8_t>> merged_buff;
+		std::vector<uint8_t> merged_indices;
+		std::vector<std::string> mesh_names;
+		std::vector<int32_t> mtl_ids;
+		std::vector<uint32_t> mesh_lods;
+		std::vector<AABBox> pos_bbs;
+		std::vector<AABBox> tc_bbs;
+		std::vector<uint32_t> mesh_num_vertices;
+		std::vector<uint32_t> mesh_base_vertices;
+		std::vector<uint32_t> mesh_num_indices;
+		std::vector<uint32_t> mesh_start_indices;
+		std::vector<Joint> joints;
+		std::shared_ptr<AnimationActionsType> actions;
+		std::shared_ptr<KeyFramesType> kfs;
+		uint32_t num_frames = 0;
+		uint32_t frame_rate = 0;
+		std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
+
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
 		{
@@ -1249,51 +1312,11 @@ namespace KlayGE
 
 		int const index_elem_size = all_is_index_16_bit ? 2 : 4;
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		merged_buff.resize(merged_ves.size());
 		for (size_t i = 0; i < merged_buff.size(); ++ i)
 		{
 			merged_buff[i].resize(all_num_vertices * merged_ves[i].element_size());
 			decoded->read(&merged_buff[i][0], merged_buff[i].size() * sizeof(merged_buff[i][0]));
-
-			if ((EF_A2BGR10 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_A2BGR10))
-			{
-				merged_ves[i].format = EF_ARGB8;
-
-				uint32_t* p = reinterpret_cast<uint32_t*>(&merged_buff[i][0]);
-				for (uint32_t j = 0; j < all_num_vertices; ++ j)
-				{
-					float x = ((p[j] >>  0) & 0x3FF) / 1023.0f;
-					float y = ((p[j] >> 10) & 0x3FF) / 1023.0f;
-					float z = ((p[j] >> 20) & 0x3FF) / 1023.0f;
-					float w = ((p[j] >> 30) & 0x3) / 3.0f;
-
-					p[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
-				}
-			}
-			if ((EF_ARGB8 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ARGB8))
-			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ABGR8));
-
-				merged_ves[i].format = EF_ABGR8;
-
-				uint32_t* p = reinterpret_cast<uint32_t*>(&merged_buff[i][0]);
-				for (uint32_t j = 0; j < all_num_vertices; ++ j)
-				{
-					float x = ((p[j] >> 16) & 0xFF) / 255.0f;
-					float y = ((p[j] >>  8) & 0xFF) / 255.0f;
-					float z = ((p[j] >>  0) & 0xFF) / 255.0f;
-					float w = ((p[j] >> 24) & 0xFF) / 255.0f;
-
-					p[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
-				}
-			}
 		}
 		merged_indices.resize(all_num_indices * index_elem_size);
 		decoded->read(&merged_indices[0], merged_indices.size() * sizeof(merged_indices[0]));
@@ -1306,7 +1329,7 @@ namespace KlayGE
 		mesh_num_vertices.clear();
 		mesh_base_vertices.clear();
 		mesh_num_indices.clear();
-		mesh_base_indices.clear();
+		mesh_start_indices.clear();
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
 			mesh_names[mesh_index] = ReadShortString(decoded);
@@ -1350,7 +1373,7 @@ namespace KlayGE
 				decoded->read(&tmp, sizeof(tmp));
 				mesh_num_indices.push_back(LE2Native(tmp));
 				decoded->read(&tmp, sizeof(tmp));
-				mesh_base_indices.push_back(LE2Native(tmp));
+				mesh_start_indices.push_back(LE2Native(tmp));
 			}
 		}
 
@@ -1405,7 +1428,7 @@ namespace KlayGE
 				joint.inverse_origin_dual = MathLib::quat_trans_to_udq(rot, trans);
 				joint.inverse_origin_scale = -scale.x();
 			}
-			
+
 			joint.bind_scale *= flip;
 		}
 
@@ -1487,7 +1510,7 @@ namespace KlayGE
 					frame_pos_bbs[mesh_index]->bb[bb_k_index] = AABBox(bb_min, bb_max);
 				}
 			}
-			
+
 			if (num_actions > 0)
 			{
 				actions = MakeSharedPtr<AnimationActionsType>(num_actions);
@@ -1503,28 +1526,99 @@ namespace KlayGE
 				}
 			}
 		}
-	}
 
-	RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
-	{
-		BOOST_ASSERT(CreateModelFactoryFunc);
-		BOOST_ASSERT(CreateMeshFactoryFunc);
+		bool const skinned = kfs && !kfs->empty();
 
-		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
-	}
+		RenderModelPtr model;
+		if (skinned)
+		{
+			model = MakeSharedPtr<SkinnedModel>(L"Software");
+		}
+		else
+		{
+			model = MakeSharedPtr<RenderModel>(L"Software");
+		}
 
-	RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
-	{
-		BOOST_ASSERT(CreateModelFactoryFunc);
-		BOOST_ASSERT(CreateMeshFactoryFunc);
+		model->NumMaterials(mtls.size());
+		for (uint32_t mtl_index = 0; mtl_index < mtls.size(); ++ mtl_index)
+		{
+			model->GetMaterial(mtl_index) = mtls[mtl_index];
+		}
 
-		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+		std::vector<GraphicsBufferPtr> merged_vbs(merged_buff.size());
+		for (size_t i = 0; i < merged_buff.size(); ++ i)
+		{
+			auto vb = MakeSharedPtr<SoftwareGraphicsBuffer>(static_cast<uint32_t>(merged_buff[i].size()), false);
+			vb->CreateHWResource(merged_buff[i].data());
+
+			merged_vbs[i] = vb;
+		}
+		auto merged_ib = MakeSharedPtr<SoftwareGraphicsBuffer>(static_cast<uint32_t>(merged_indices.size()), false);
+		merged_ib->CreateHWResource(merged_indices.data());
+
+		uint32_t mesh_lod_index = 0;
+		std::vector<StaticMeshPtr> meshes(num_meshes);
+		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
+		{
+			std::wstring wname;
+			Convert(wname, mesh_names[mesh_index]);
+
+			if (skinned)
+			{
+				meshes[mesh_index] = MakeSharedPtr<SkinnedMesh>(model, wname);
+			}
+			else
+			{
+				meshes[mesh_index] = MakeSharedPtr<StaticMesh>(model, wname);
+			}
+			StaticMeshPtr& mesh = meshes[mesh_index];
+
+			mesh->MaterialID(mtl_ids[mesh_index]);
+			mesh->PosBound(pos_bbs[mesh_index]);
+			mesh->TexcoordBound(tc_bbs[mesh_index]);
+
+			uint32_t const lods = mesh_lods[mesh_index];
+			mesh->NumLods(lods);
+			for (uint32_t lod = 0; lod < lods; ++ lod, ++ mesh_lod_index)
+			{
+				for (uint32_t ve_index = 0; ve_index < merged_buff.size(); ++ ve_index)
+				{
+					mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
+				}
+				mesh->AddIndexStream(lod, merged_ib, all_is_index_16_bit ? EF_R16UI : EF_R32UI);
+
+				mesh->NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
+				mesh->NumIndices(lod, mesh_num_indices[mesh_lod_index]);
+				mesh->StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
+				mesh->StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
+			}
+		}
+
+		if (kfs && !kfs->empty())
+		{
+			if (!joints.empty())
+			{
+				SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
+
+				skinned_model->AssignJoints(joints.begin(), joints.end());
+				skinned_model->AttachKeyFrames(kfs);
+
+				skinned_model->NumFrames(num_frames);
+				skinned_model->FrameRate(frame_rate);
+
+				for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
+				{
+					SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
+					skinned_mesh->AttachFramePosBounds(frame_pos_bbs[mesh_index]);
+				}
+
+				skinned_model->AttachActions(actions);
+			}
+		}
+
+		model->AssignSubrenderables(meshes.begin(), meshes.end());
+
+		return model;
 	}
 
 	void SaveModelToMeshML(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
@@ -2083,26 +2177,28 @@ namespace KlayGE
 		}
 	}
 
-	void WriteBBKeyFramesChunk(std::vector<AABBKeyFrames> const & bb_kfs, std::ostream& os)
+	void WriteBBKeyFramesChunk(std::vector<std::shared_ptr<AABBKeyFrames>> const & frame_pos_bbs, std::ostream& os)
 	{
-		for (size_t i = 0; i < bb_kfs.size(); ++ i)
+		for (size_t i = 0; i < frame_pos_bbs.size(); ++ i)
 		{
-			uint32_t num_bb_kf = Native2LE(static_cast<uint32_t>(bb_kfs[i].frame_id.size()));
+			auto& bb_kf = *frame_pos_bbs[i];
+
+			uint32_t num_bb_kf = Native2LE(static_cast<uint32_t>(bb_kf.frame_id.size()));
 			os.write(reinterpret_cast<char*>(&num_bb_kf), sizeof(num_bb_kf));
 
-			for (uint32_t j = 0; j < bb_kfs[i].frame_id.size(); ++ j)
+			for (uint32_t j = 0; j < bb_kf.frame_id.size(); ++ j)
 			{
-				uint32_t frame_id = Native2LE(bb_kfs[i].frame_id[j]);
+				uint32_t frame_id = Native2LE(bb_kf.frame_id[j]);
 				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
 				float3 bb_min;
-				bb_min.x() = Native2LE(bb_kfs[i].bb[j].Min().x());
-				bb_min.y() = Native2LE(bb_kfs[i].bb[j].Min().y());
-				bb_min.z() = Native2LE(bb_kfs[i].bb[j].Min().z());
+				bb_min.x() = Native2LE(bb_kf.bb[j].Min().x());
+				bb_min.y() = Native2LE(bb_kf.bb[j].Min().y());
+				bb_min.z() = Native2LE(bb_kf.bb[j].Min().z());
 				os.write(reinterpret_cast<char*>(&bb_min), sizeof(bb_min));
-				float3 bb_max = bb_kfs[i].bb[j].Max();
-				bb_max.x() = Native2LE(bb_kfs[i].bb[j].Max().x());
-				bb_max.y() = Native2LE(bb_kfs[i].bb[j].Max().y());
-				bb_max.z() = Native2LE(bb_kfs[i].bb[j].Max().z());
+				float3 bb_max = bb_kf.bb[j].Max();
+				bb_max.x() = Native2LE(bb_kf.bb[j].Max().x());
+				bb_max.y() = Native2LE(bb_kf.bb[j].Max().y());
+				bb_max.z() = Native2LE(bb_kf.bb[j].Max().z());
 				os.write(reinterpret_cast<char*>(&bb_max), sizeof(bb_max));
 			}
 		}
@@ -2130,7 +2226,8 @@ namespace KlayGE
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
-		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
+		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate,
+		std::vector<std::shared_ptr<AABBKeyFrames>> const & frame_pos_bbs)
 	{
 		std::ostringstream ss;
 
@@ -2172,23 +2269,7 @@ namespace KlayGE
 		{
 			WriteKeyFramesChunk(num_frames, frame_rate, *kfs, ss);
 
-			std::vector<AABBKeyFrames> bb_kfss;
-
-			AABBKeyFrames bb_kfs;
-			bb_kfs.frame_id.resize(2);
-			bb_kfs.bb.resize(2);
-
-			bb_kfs.frame_id[0] = 0;
-			bb_kfs.frame_id[1] = num_frames - 1;
-
-			for (uint32_t mesh_index = 0; mesh_index < pos_bbs.size(); ++ mesh_index)
-			{
-				bb_kfs.bb[0] = pos_bbs[mesh_index];
-				bb_kfs.bb[1] = pos_bbs[mesh_index];
-
-				bb_kfss.push_back(bb_kfs);
-			}
-			WriteBBKeyFramesChunk(bb_kfss, ss);
+			WriteBBKeyFramesChunk(frame_pos_bbs, ss);
 
 			WriteActionsChunk(*actions, ss);
 		}
@@ -2224,14 +2305,15 @@ namespace KlayGE
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
-		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
+		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate,
+		std::vector<std::shared_ptr<AABBKeyFrames>> const & frame_pos_bbs)
 	{
 		if (meshml_name.find(jit_ext_name) != std::string::npos)
 		{
 			SaveModelToJIT(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 				mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_base_indices, joints, actions,
-				kfs, num_frames, frame_rate);
+				kfs, num_frames, frame_rate, frame_pos_bbs);
 		}
 		else
 		{
@@ -2244,8 +2326,6 @@ namespace KlayGE
 
 	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 		std::vector<RenderMaterialPtr> mtls(model->NumMaterials());
 		if (!mtls.empty())
 		{
@@ -2285,8 +2365,17 @@ namespace KlayGE
 				{
 					GraphicsBufferPtr const & vb = rl.GetVertexStream(j);
 					uint32_t size = vb->Size();
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
-					vb->CopyToBuffer(*vb_cpu);
+					GraphicsBufferPtr vb_cpu;
+					if (vb->AccessHint() & EAH_CPU_Read)
+					{
+						vb_cpu = vb;
+					}
+					else
+					{
+						auto& rf = Context::Instance().RenderFactoryInstance();
+						vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
+						vb->CopyToBuffer(*vb_cpu);
+					}
 
 					merged_buffs[j].resize(size);
 
@@ -2305,10 +2394,19 @@ namespace KlayGE
 				}
 
 				{
-					GraphicsBufferPtr ib = rl.GetIndexStream();
+					GraphicsBufferPtr const & ib = rl.GetIndexStream();
 					uint32_t size = ib->Size();
-					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
-					ib->CopyToBuffer(*ib_cpu);
+					GraphicsBufferPtr ib_cpu;
+					if (ib->AccessHint() & EAH_CPU_Read)
+					{
+						ib_cpu = ib;
+					}
+					else
+					{
+						auto& rf = Context::Instance().RenderFactoryInstance();
+						ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
+						ib->CopyToBuffer(*ib_cpu);
+					}
 
 					merged_indices.resize(size);
 
@@ -2337,6 +2435,9 @@ namespace KlayGE
 					mesh_base_indices.push_back(mesh.StartIndexLocation(lod));
 				}
 			}
+
+			mesh_base_vertices.push_back(mesh_base_vertices.back() + mesh_num_vertices.back());
+			mesh_base_indices.push_back(mesh_base_indices.back() + mesh_num_indices.back());
 		}
 
 		std::vector<Joint> joints;
@@ -2344,15 +2445,16 @@ namespace KlayGE
 		std::shared_ptr<KeyFramesType> kfs;
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
+		std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
 		if (model->IsSkinned())
 		{
-			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
+			auto& skinned_model = *checked_pointer_cast<SkinnedModel>(model);
 
-			uint32_t num_joints = skinned->NumJoints();
+			uint32_t num_joints = skinned_model.NumJoints();
 			joints.resize(num_joints);
 			for (uint32_t i = 0; i < num_joints; ++ i)
 			{
-				Joint joint = skinned->GetJoint(i);
+				Joint joint = skinned_model.GetJoint(i);
 
 				float flip = MathLib::SignBit(joint.inverse_origin_scale);
 
@@ -2386,18 +2488,25 @@ namespace KlayGE
 				joints[i] = joint;
 			}
 
-			actions = skinned->GetActions();
+			actions = skinned_model.GetActions();
 
-			num_frame = skinned->NumFrames();
-			frame_rate = skinned->FrameRate();
+			num_frame = skinned_model.NumFrames();
+			frame_rate = skinned_model.FrameRate();
 
-			kfs = skinned->GetKeyFrames();
+			kfs = skinned_model.GetKeyFrames();
+
+			frame_pos_bbs.resize(mesh_names.size());
+			for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
+			{
+				auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Subrenderable(mesh_index));
+				frame_pos_bbs[mesh_index] = skinned_mesh.GetFramePosBounds();
+			}
 		}
 
 		SaveModel(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
-			joints, actions, kfs, num_frame, frame_rate);
+			joints, actions, kfs, num_frame, frame_rate, frame_pos_bbs);
 	}
 
 
