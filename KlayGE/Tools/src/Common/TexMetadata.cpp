@@ -111,10 +111,20 @@ namespace KlayGE
 
 	TexMetadata::TexMetadata(std::string_view name)
 	{
-		this->Load(name);
+		this->Load(name, false);
 	}
 
+	TexMetadata::TexMetadata(std::string_view name, bool assign_default_values)
+	{
+		this->Load(name, assign_default_values);
+	}
+	
 	void TexMetadata::Load(std::string_view name)
+	{
+		this->Load(name, false);
+	}
+
+	void TexMetadata::Load(std::string_view name, bool assign_default_values)
 	{
 		TexMetadata new_metadata;
 
@@ -253,7 +263,7 @@ namespace KlayGE
 				BOOST_ASSERT(force_srgb_val.IsBool());
 				new_metadata.force_srgb_ = force_srgb_val.GetBool();
 			}
-			else
+			else if (assign_default_values)
 			{
 				new_metadata.force_srgb_
 					= ((new_metadata.slot_ == RenderMaterial::TS_Albedo) || (new_metadata.slot_ == RenderMaterial::TS_Emissive));
@@ -312,7 +322,7 @@ namespace KlayGE
 					new_metadata.mipmap_.linear = linear_val.GetBool();
 				}
 			}
-			else
+			else if (assign_default_values)
 			{
 				new_metadata.mipmap_.enabled = true;
 				new_metadata.mipmap_.auto_gen = true;

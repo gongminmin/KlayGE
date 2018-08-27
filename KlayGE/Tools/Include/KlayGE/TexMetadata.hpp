@@ -49,8 +49,10 @@ namespace KlayGE
 	public:
 		TexMetadata();
 		explicit TexMetadata(std::string_view name);
+		TexMetadata(std::string_view name, bool assign_default_values);
 
 		void Load(std::string_view name);
+		void Load(std::string_view name, bool assign_default_values);
 		void Save(std::string const & name) const;
 		void DeviceDependentAdjustment(RenderDeviceCaps const & caps);
 
