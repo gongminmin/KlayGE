@@ -144,7 +144,7 @@ namespace KlayGE
 	}
 
 	void MeshMLObj::GetJoint(int joint_id, std::string& joint_name, int& parent_id,
-		Quaternion& bind_real, Quaternion& bind_dual) const
+		Quaternion& bind_real, Quaternion& bind_dual, float& bind_scale) const
 	{
 		auto iter = joints_.find(joint_id);
 		BOOST_ASSERT(iter != joints_.end());
@@ -153,6 +153,7 @@ namespace KlayGE
 		parent_id = iter->second.parent_id;
 		bind_real = iter->second.bind_real;
 		bind_dual = iter->second.bind_dual;
+		bind_scale = iter->second.bind_scale;
 	}
 
 	int MeshMLObj::AllocMaterial()

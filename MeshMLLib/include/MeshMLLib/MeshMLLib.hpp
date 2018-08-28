@@ -156,7 +156,7 @@ namespace KlayGE
 			Quaternion const & bind_real, Quaternion const & bind_dual);
 		uint32_t NumJoints() const;
 		void GetJoint(int joint_id, std::string& joint_name, int& parent_id,
-			Quaternion& bind_real, Quaternion& bind_dual) const;
+			Quaternion& bind_real, Quaternion& bind_dual, float& bind_scale) const;
 
 		int AllocMaterial();
 		void SetMaterial(int mtl_id, std::string_view name, float4 const & albedo, float metalness, float glossiness,
