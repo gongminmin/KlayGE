@@ -1512,6 +1512,9 @@ namespace
 				}
 			}
 
+			std::tie(joint.inverse_origin_real, joint.inverse_origin_dual) = MathLib::inverse(joint.bind_real, joint.bind_dual);
+			joint.inverse_origin_scale = 1 / joint.bind_scale;
+
 			joints.push_back(joint);
 		}
 	}

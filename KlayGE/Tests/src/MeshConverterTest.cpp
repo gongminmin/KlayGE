@@ -317,7 +317,8 @@ public:
 				int parent_id;
 				Quaternion bind_real;
 				Quaternion bind_dual;
-				target.GetJoint(i, joint_name, parent_id, bind_real, bind_dual);
+				float bind_scale;
+				target.GetJoint(i, joint_name, parent_id, bind_real, bind_dual, bind_scale);
 
 				auto& sanity_joint = sanity_skinned_model.GetJoint(i);
 
@@ -333,6 +334,8 @@ public:
 				EXPECT_TRUE(std::abs(bind_dual.y() - sanity_joint.bind_dual.y()) < 1e-4f);
 				EXPECT_TRUE(std::abs(bind_dual.z() - sanity_joint.bind_dual.z()) < 1e-4f);
 				EXPECT_TRUE(std::abs(bind_dual.w() - sanity_joint.bind_dual.w()) < 1e-4f);
+
+				EXPECT_TRUE(std::abs(bind_scale - sanity_joint.bind_scale) < 1e-5f);
 			}
 
 			EXPECT_EQ(target.NumActions(), sanity_skinned_model.NumActions());
