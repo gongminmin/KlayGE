@@ -122,7 +122,7 @@ namespace
 				attr = albedo_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Albedo] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Albedo] = std::string(attr->ValueString());
 				}
 			}
 			else
@@ -169,7 +169,7 @@ namespace
 				attr = metalness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Metalness] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Metalness] = std::string(attr->ValueString());
 				}
 			}
 
@@ -184,7 +184,7 @@ namespace
 				attr = glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Glossiness] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Glossiness] = std::string(attr->ValueString());
 				}
 			}
 			else
@@ -209,7 +209,7 @@ namespace
 				attr = emissive_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Emissive] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Emissive] = std::string(attr->ValueString());
 				}
 			}
 			else
@@ -245,7 +245,7 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Normal] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Normal] = std::string(attr->ValueString());
 				}
 			}
 
@@ -259,7 +259,7 @@ namespace
 				XMLAttributePtr attr = height_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Height] = attr->ValueString();
+					mtl.tex_names[RenderMaterial::TS_Height] = std::string(attr->ValueString());
 				}
 
 				attr = height_node->Attrib("offset");
