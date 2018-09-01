@@ -9,7 +9,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <cstring>
 #include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
@@ -23,7 +22,6 @@
 
 #include <KlayGE/MeshMetadata.hpp>
 #include <KlayGE/MeshConverter.hpp>
-#include <MeshMLLib/MeshMLLib.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -32,7 +30,7 @@ int main(int argc, char* argv[])
 {
 	std::string input_name;
 	std::string metadata_name;
-	filesystem::path target_folder;
+	std::string output_name;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -40,7 +38,7 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-path,I", boost::program_options::value<std::string>(), "Input mesh path.")
 		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
-		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
+		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output image path.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -75,9 +73,9 @@ int main(int argc, char* argv[])
 	{
 		metadata_name = input_name + ".kmeta";
 	}
-	if (vm.count("target-folder") > 0)
+	if (vm.count("output-path") > 0)
 	{
-		target_folder = vm["target-folder"].as<std::string>();
+		output_name = vm["output-path"].as<std::string>();
 	}
 	if (vm.count("quiet") > 0)
 	{
@@ -92,14 +90,13 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	if (target_folder.empty())
+	filesystem::path input_folder = filesystem::path(ResLoader::Instance().Locate(file_name)).parent_path();
+	if (output_name.empty())
 	{
-		target_folder = filesystem::path(ResLoader::Instance().Locate(file_name)).parent_path();
+		filesystem::path const input_path(input_name);
+		filesystem::path const base_name = input_path.stem();
+		output_name = (input_folder / base_name).string() + ".meshml";
 	}
-
-	filesystem::path const input_path(input_name);
-	filesystem::path const base_name = input_path.stem();
-	std::string const output_name = (target_folder / base_name).string() + ".meshml";
 
 	MeshMetadata metadata(metadata_name);
 
@@ -127,7 +124,7 @@ int main(int argc, char* argv[])
 				cout << "LOD " << lod << ": " << num_vertices << " vertices, " << num_triangles << " triangles." << endl;
 			}
 
-			cout << "MeshML has been saved to " << output_name << "." << endl;
+			cout << "Mesh has been saved to " << output_name << "." << endl;
 		}
 	}
 	else
