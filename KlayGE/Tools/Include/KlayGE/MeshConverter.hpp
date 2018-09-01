@@ -55,63 +55,49 @@ namespace KlayGE
 	private:
 		static uint32_t constexpr MAX_NUMBER_OF_TEXTURECOORDS = 8;
 
-		struct JointBinding
-		{
-			int joint_id;
-			int vertex_id;
-			float weight;
-		};
-
 		struct Mesh
 		{
 			int mtl_id;
 			std::string name;
 
-			std::vector<float3> positions;
-			std::vector<float3> normals;
-			std::vector<Quaternion> tangent_quats;
-			std::array<std::vector<float3>, MAX_NUMBER_OF_TEXTURECOORDS> texcoords;
-			std::vector<JointBinding> joint_binding;
+			struct Lod
+			{
+				std::vector<float3> positions;
+				std::vector<float3> normals;
+				std::vector<Quaternion> tangent_quats;
+				std::array<std::vector<float3>, MAX_NUMBER_OF_TEXTURECOORDS> texcoords;
+				std::vector<std::vector<std::pair<uint32_t, float>>> joint_binding;
 
-			std::vector<uint32_t> indices;
+				std::vector<uint32_t> indices;
+			};
+			std::vector<Lod> lods;
 
 			bool has_normal;
 			bool has_tangent_frame;
 			std::array<bool, MAX_NUMBER_OF_TEXTURECOORDS> has_texcoord;
 		};
 
-		struct Joint
-		{
-			int id;
-			int parent_id;
-			std::string name;
-
-			float4x4 bone_to_mesh;
-			float4x4 local_matrix;   // local to parent
-		};
-
-		typedef std::map<std::string, Joint> JointsMap;
-
 	public:
-		bool Convert(std::string_view input_name, MeshMetadata const & input_metadata,
-			MeshMLObj& meshml_obj, int& vertex_export_settings);
+		RenderModelPtr Convert(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
-		void RecursiveTransformMesh(uint32_t num_lods, uint32_t lod,
-			float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes, std::vector<Mesh> const & lod0_meshes);
-		void ConvertMaterials(aiScene const * scene);
-		void BuildMeshData(std::vector<Mesh>& meshes, JointsMap const& joint_nodes, aiScene const * scene,
-			bool update_center, float3& center, MeshMetadata const & input_metadata);
-		void BuildJoints(JointsMap& joint_nodes, aiScene const * scene);
-		void BuildActions(JointsMap const & joint_nodes, aiScene const * scene);
-		void ResampleJointTransform(int start_frame, int end_frame, float fps_scale,
+		void RecursiveTransformMesh(uint32_t lod, float4x4 const & parent_mat, aiNode const * node);
+		void BuildMaterials(aiScene const * scene);
+		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods, MeshMetadata const & input_metadata);
+		void BuildJoints(aiScene const * scene);
+		void BuildActions(aiScene const * scene);
+		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
-			std::vector<std::pair<float, float3>> const & scale,
-			KeyFrameSet& rkf);
+			std::vector<std::pair<float, float3>> const & scale);
 
 	private:
-		MeshMLObj* meshml_obj_;
-		int vertex_export_settings_;
+		RenderModelPtr render_model_;
+
+		std::vector<Mesh> meshes_;
+		std::vector<Joint> joints_;
+		bool has_normal_;
+		bool has_tangent_quat_;
+		bool has_texcoord_;
 	};
 }
 

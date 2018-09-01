@@ -104,24 +104,24 @@ int main(int argc, char* argv[])
 	MeshMetadata metadata(metadata_name);
 
 	MeshConverter mesh_converter;
+	auto model = mesh_converter.Convert(file_name, metadata);
 
-	MeshMLObj meshml_obj(1.0f);
-	int vertex_export_settings;
-	if (mesh_converter.Convert(file_name, metadata, meshml_obj, vertex_export_settings))
+	if (model)
 	{
-		std::ofstream ofs(output_name);
-		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
+		SaveModel(model, output_name);
 
 		if (!quiet)
 		{
-			for (uint32_t lod = 0; lod < meshml_obj.NumMeshLods(0); ++ lod)
+			for (uint32_t lod = 0; lod < model->NumLods(); ++ lod)
 			{
 				size_t num_vertices = 0;
 				size_t num_triangles = 0;
-				for (uint32_t mindex = 0; mindex < meshml_obj.NumMeshes(); ++ mindex)
+				for (uint32_t mindex = 0; mindex < model->NumSubrenderables(); ++ mindex)
 				{
-					num_vertices += meshml_obj.NumVertices(static_cast<int>(mindex), static_cast<int>(lod));
-					num_triangles += meshml_obj.NumTriangles(static_cast<int>(mindex), static_cast<int>(lod));
+					auto const & mesh = *checked_cast<StaticMesh*>(model->Subrenderable(mindex).get());
+
+					num_vertices += mesh.NumVertices(lod);
+					num_triangles += mesh.NumIndices(lod) / 3;
 				}
 
 				cout << "LOD " << lod << ": " << num_vertices << " vertices, " << num_triangles << " triangles." << endl;
