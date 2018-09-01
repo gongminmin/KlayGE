@@ -41,12 +41,6 @@ using namespace KlayGE;
 
 namespace
 {
-	struct OfflineRenderMaterial
-	{
-		RenderMaterial material;
-		std::vector<std::pair<std::string, std::string>> texture_slots;
-	};
-
 	std::string const JIT_EXT_NAME = ".model_bin";
 
 	template <int N>
@@ -87,13 +81,12 @@ namespace
 		}
 	}
 
-	void CompileMaterialsChunk(XMLNodePtr const & materials_chunk, std::vector<OfflineRenderMaterial>& mtls)
+	void CompileMaterialsChunk(XMLNodePtr const & materials_chunk, std::vector<RenderMaterial>& mtls)
 	{
 		uint32_t mtl_index = 0;
 		for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
 		{
-			OfflineRenderMaterial offline_mtl;
-			auto& mtl = offline_mtl.material;
+			RenderMaterial mtl;
 
 			mtl.name = "Material " + std::to_string(mtl_index);
 
@@ -129,7 +122,7 @@ namespace
 				attr = albedo_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Albedo", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Albedo] = attr->ValueString();
 				}
 			}
 			else
@@ -176,7 +169,7 @@ namespace
 				attr = metalness_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Metalness", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Metalness] = attr->ValueString();
 				}
 			}
 
@@ -191,7 +184,7 @@ namespace
 				attr = glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Glossiness", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Glossiness] = attr->ValueString();
 				}
 			}
 			else
@@ -216,7 +209,7 @@ namespace
 				attr = emissive_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Emissive", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Emissive] = attr->ValueString();
 				}
 			}
 			else
@@ -245,16 +238,6 @@ namespace
 					}
 				}
 			}
-
-			XMLNodePtr bump_node = mtl_node->FirstNode("bump");
-			if (bump_node)
-			{
-				XMLAttributePtr attr = bump_node->Attrib("texture");
-				if (attr)
-				{
-					offline_mtl.texture_slots.emplace_back("Bump", attr->ValueString());
-				}
-			}
 			
 			XMLNodePtr normal_node = mtl_node->FirstNode("normal");
 			if (normal_node)
@@ -262,17 +245,21 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Normal", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Normal] = attr->ValueString();
 				}
 			}
 
 			XMLNodePtr height_node = mtl_node->FirstNode("height");
+			if (!height_node)
+			{
+				height_node = mtl_node->FirstNode("bump");
+			}
 			if (height_node)
 			{
 				XMLAttributePtr attr = height_node->Attrib("texture");
 				if (attr)
 				{
-					offline_mtl.texture_slots.emplace_back("Height", attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_Height] = attr->ValueString();
 				}
 
 				attr = height_node->Attrib("offset");
@@ -428,12 +415,42 @@ namespace
 			{
 				for (; tex_node; tex_node = tex_node->NextSibling("texture"))
 				{
-					offline_mtl.texture_slots.emplace_back(tex_node->Attrib("type")->ValueString(),
-						tex_node->Attrib("name")->ValueString());
+					auto const type = tex_node->Attrib("type")->ValueString();
+					size_t const type_hash = HashRange(type.begin(), type.end());
+
+					std::string const name(tex_node->Attrib("name")->ValueString());
+
+					if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
+						|| (CT_HASH("Diffuse Color Map") == type_hash)
+						|| (CT_HASH("Albedo") == type_hash))
+					{
+						mtl.tex_names[RenderMaterial::TS_Albedo] = name;
+					}
+					else if (CT_HASH("Metalness") == type_hash)
+					{
+						mtl.tex_names[RenderMaterial::TS_Metalness] = name;
+					}
+					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
+					{
+						mtl.tex_names[RenderMaterial::TS_Glossiness] = name;
+					}
+					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
+					{
+						mtl.tex_names[RenderMaterial::TS_Emissive] = name;
+					}
+					else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
+					{
+						mtl.tex_names[RenderMaterial::TS_Normal] = name;
+					}
+					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
+						|| (CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
+					{
+						mtl.tex_names[RenderMaterial::TS_Height] = name;
+					}
 				}
 			}
 
-			mtls.push_back(offline_mtl);
+			mtls.push_back(mtl);
 		}
 	}
 
@@ -1760,45 +1777,10 @@ namespace
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
-		std::vector<OfflineRenderMaterial> mtls;
+		std::vector<RenderMaterial> mtls;
 		if (materials_chunk)
 		{
 			CompileMaterialsChunk(materials_chunk, mtls);
-
-			for (size_t i = 0; i < mtls.size(); ++ i)
-			{
-				for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
-				{
-					size_t const type_hash = RT_HASH(mtls[i].texture_slots[j].first.c_str());
-					if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
-						|| (CT_HASH("Diffuse Color Map") == type_hash)
-						|| (CT_HASH("Albedo") == type_hash))
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Albedo] = mtls[i].texture_slots[j].second;
-					}
-					else if (CT_HASH("Metalness") == type_hash)
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Metalness] = mtls[i].texture_slots[j].second;
-					}
-					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Glossiness] = mtls[i].texture_slots[j].second;
-					}
-					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Emissive] = mtls[i].texture_slots[j].second;
-					}
-					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
-						|| (CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Normal] = mtls[i].texture_slots[j].second;
-					}
-					else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
-					{
-						mtls[i].material.tex_names[RenderMaterial::TS_Height] = mtls[i].texture_slots[j].second;
-					}
-				}
-			}
 		}
 
 		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
@@ -1898,7 +1880,7 @@ namespace
 		model->NumMaterials(mtls.size());
 		for (uint32_t mtl_index = 0; mtl_index < mtls.size(); ++ mtl_index)
 		{
-			model->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>(mtls[mtl_index].material);
+			model->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>(mtls[mtl_index]);
 		}
 
 		std::vector<GraphicsBufferPtr> merged_vbs(merged_vertices.size());
