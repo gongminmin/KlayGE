@@ -540,32 +540,64 @@ public:
 				auto const & key_frames = (*(skinned_model.GetKeyFrameSets()))[i];
 				auto const & sanity_key_frames = (*(sanity_skinned_model.GetKeyFrameSets()))[i];
 
-				for (uint32_t j = 0; j < key_frames.frame_id.size(); ++ j)
+				EXPECT_EQ(key_frames.frame_id.size(), key_frames.bind_real.size());
+				EXPECT_EQ(key_frames.frame_id.size(), key_frames.bind_dual.size());
+				EXPECT_EQ(key_frames.frame_id.size(), key_frames.bind_scale.size());
+
+				if (key_frames.frame_id == sanity_key_frames.frame_id)
 				{
-					uint32_t const frame_id = key_frames.frame_id[j];
+					for (uint32_t j = 0; j < key_frames.frame_id.size(); ++ j)
+					{
+						auto const & bind_real = sanity_key_frames.bind_real[j];
+						auto const & bind_dual = sanity_key_frames.bind_dual[j];
+						float bind_scale = sanity_key_frames.bind_scale[j];
 
-					Quaternion bind_real;
-					Quaternion bind_dual;
-					float bind_scale;
-					std::tie(bind_real, bind_dual, bind_scale) = sanity_key_frames.Frame(static_cast<float>(frame_id));
+						auto const & sanity_bind_real = sanity_key_frames.bind_real[j];
+						auto const & sanity_bind_dual = sanity_key_frames.bind_dual[j];
+						float sanity_bind_scale = sanity_key_frames.bind_scale[j];
 
-					Quaternion sanity_bind_real;
-					Quaternion sanity_bind_dual;
-					float sanity_bind_scale;
-					std::tie(sanity_bind_real, sanity_bind_dual, sanity_bind_scale)
-						= sanity_key_frames.Frame(static_cast<float>(frame_id));
+						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-5f);
 
-					EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-5f);
+						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-5f);
 
-					EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-4f);
-					EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+					}
+				}
+				else
+				{
+					for (uint32_t j = 0; j < key_frames.frame_id.size(); ++ j)
+					{
+						uint32_t const frame_id = key_frames.frame_id[j];
 
-					EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+						Quaternion bind_real;
+						Quaternion bind_dual;
+						float bind_scale;
+						std::tie(bind_real, bind_dual, bind_scale) = sanity_key_frames.Frame(static_cast<float>(frame_id));
+
+						Quaternion sanity_bind_real;
+						Quaternion sanity_bind_dual;
+						float sanity_bind_scale;
+						std::tie(sanity_bind_real, sanity_bind_dual, sanity_bind_scale)
+							= sanity_key_frames.Frame(static_cast<float>(frame_id));
+
+						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-4f);
+
+						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-4f);
+						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-4f);
+
+						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+					}
 				}
 			}
 

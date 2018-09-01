@@ -725,6 +725,11 @@ namespace KlayGE
 			action_frame_offset = action_frame_offset + anim.frame_num;
 		}
 
+		for (size_t i = 0; i < kfs->size(); ++ i)
+		{
+			CompressKeyFrameSet((*kfs)[i]);
+		}
+
 		skinned_model.AttachKeyFrameSets(kfs);
 		skinned_model.AttachActions(actions);
 
@@ -782,6 +787,58 @@ namespace KlayGE
 			rkf.bind_real.push_back(bind_real_resampled);
 			rkf.bind_dual.push_back(bind_dual_resampled);
 			rkf.bind_scale.push_back(scale_resampled.x());
+		}
+	}
+
+	void MeshConverter::CompressKeyFrameSet(KeyFrameSet& kf)
+	{
+		float const THRESHOLD = 1e-3f;
+
+		BOOST_ASSERT((kf.bind_real.size() == kf.bind_dual.size())
+			&& (kf.frame_id.size() == kf.bind_scale.size())
+			&& (kf.frame_id.size() == kf.bind_real.size()));
+
+		int base = 0;
+		while (base < static_cast<int>(kf.frame_id.size() - 2))
+		{
+			int const frame0 = kf.frame_id[base + 0];
+			int const frame1 = kf.frame_id[base + 1];
+			int const frame2 = kf.frame_id[base + 2];
+			float const factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
+			Quaternion interpolate_real;
+			Quaternion interpolate_dual;
+			std::tie(interpolate_real, interpolate_dual) = MathLib::sclerp(kf.bind_real[base + 0], kf.bind_dual[base + 0],
+				kf.bind_real[base + 2], kf.bind_dual[base + 2], factor);
+			float const scale = MathLib::lerp(kf.bind_scale[base + 0], kf.bind_scale[base + 2], factor);
+
+			if (MathLib::dot(kf.bind_real[base + 1], interpolate_real) < 0)
+			{
+				interpolate_real = -interpolate_real;
+				interpolate_dual = -interpolate_dual;
+			}
+
+			Quaternion diff_real;
+			Quaternion diff_dual;
+			std::tie(diff_real, diff_dual) = MathLib::inverse(kf.bind_real[base + 1], kf.bind_dual[base + 1]);
+			diff_dual = MathLib::mul_dual(diff_real, diff_dual * scale, interpolate_real, interpolate_dual);
+			diff_real = MathLib::mul_real(diff_real, interpolate_real);
+			float diff_scale = scale * kf.bind_scale[base + 1];
+
+			if ((MathLib::abs(diff_real.x()) < THRESHOLD) && (MathLib::abs(diff_real.y()) < THRESHOLD)
+				&& (MathLib::abs(diff_real.z()) < THRESHOLD) && (MathLib::abs(diff_real.w() - 1) < THRESHOLD)
+				&& (MathLib::abs(diff_dual.x()) < THRESHOLD) && (MathLib::abs(diff_dual.y()) < THRESHOLD)
+				&& (MathLib::abs(diff_dual.z()) < THRESHOLD) && (MathLib::abs(diff_dual.w()) < THRESHOLD)
+				&& (MathLib::abs(diff_scale - 1) < THRESHOLD))
+			{
+				kf.frame_id.erase(kf.frame_id.begin() + base + 1);
+				kf.bind_real.erase(kf.bind_real.begin() + base + 1);
+				kf.bind_dual.erase(kf.bind_dual.begin() + base + 1);
+				kf.bind_scale.erase(kf.bind_scale.begin() + base + 1);
+			}
+			else
+			{
+				++ base;
+			}
 		}
 	}
 

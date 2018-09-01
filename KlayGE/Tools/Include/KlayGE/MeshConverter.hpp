@@ -89,6 +89,7 @@ namespace KlayGE
 		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale);
+		void CompressKeyFrameSet(KeyFrameSet& kf);
 
 	private:
 		RenderModelPtr render_model_;
