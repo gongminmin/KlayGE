@@ -269,7 +269,7 @@ namespace KlayGE
 		int16_t parent;
 	};
 
-	struct KLAYGE_CORE_API KeyFrames
+	struct KLAYGE_CORE_API KeyFrameSet
 	{
 		std::vector<uint32_t> frame_id;
 		std::vector<Quaternion> bind_real;
@@ -278,16 +278,14 @@ namespace KlayGE
 
 		std::tuple<Quaternion, Quaternion, float> Frame(float frame) const;
 	};
-	typedef std::vector<KeyFrames> KeyFramesType;
 
-	struct KLAYGE_CORE_API AABBKeyFrames
+	struct KLAYGE_CORE_API AABBKeyFrameSet
 	{
 		std::vector<uint32_t> frame_id;
 		std::vector<AABBox> bb;
 
 		AABBox Frame(float frame) const;
 	};
-	typedef std::vector<AABBKeyFrames> AABBKeyFramesType;
 
 	struct KLAYGE_CORE_API AnimationAction
 	{
@@ -295,14 +293,9 @@ namespace KlayGE
 		uint32_t start_frame;
 		uint32_t end_frame;
 	};
-	typedef std::vector<AnimationAction> AnimationActionsType;
 
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{
-	public:
-		typedef std::vector<Joint> JointsType;
-		typedef std::vector<float4> RotationsType;
-
 	public:
 		explicit SkinnedModel(std::wstring const & name);
 		virtual ~SkinnedModel()
@@ -333,21 +326,21 @@ namespace KlayGE
 			joints_.assign(first, last);
 			this->UpdateBinds();
 		}
-		RotationsType const & GetBindRealParts() const
+		std::vector<float4> const & GetBindRealParts() const
 		{
 			return bind_reals_;
 		}
-		RotationsType const & GetBindDualParts() const
+		std::vector<float4> const & GetBindDualParts() const
 		{
 			return bind_duals_;
 		}
-		void AttachKeyFrames(std::shared_ptr<KeyFramesType> const & kf)
+		void AttachKeyFrameSets(std::shared_ptr<std::vector<KeyFrameSet>> const & kf)
 		{
-			key_frames_ = kf;
+			key_frame_sets_ = kf;
 		}
-		std::shared_ptr<KeyFramesType> const & GetKeyFrames() const
+		std::shared_ptr<std::vector<KeyFrameSet>> const & GetKeyFrameSets() const
 		{
-			return key_frames_;
+			return key_frame_sets_;
 		}
 		uint32_t NumFrames() const
 		{
@@ -374,8 +367,8 @@ namespace KlayGE
 
 		virtual AABBox FramePosBound(uint32_t frame) const;
 
-		void AttachActions(std::shared_ptr<AnimationActionsType> const & actions);
-		std::shared_ptr<AnimationActionsType> const & GetActions() const
+		void AttachActions(std::shared_ptr<std::vector<AnimationAction>> const & actions);
+		std::shared_ptr<std::vector<AnimationAction>> const & GetActions() const
 		{
 			return actions_;
 		}
@@ -387,17 +380,17 @@ namespace KlayGE
 		void UpdateBinds();
 
 	protected:
-		JointsType joints_;
-		RotationsType bind_reals_;
-		RotationsType bind_duals_;
+		std::vector<Joint> joints_;
+		std::vector<float4> bind_reals_;
+		std::vector<float4> bind_duals_;
 
-		std::shared_ptr<KeyFramesType> key_frames_;
+		std::shared_ptr<std::vector<KeyFrameSet>> key_frame_sets_;
 		float last_frame_;
 
 		uint32_t num_frames_;
 		uint32_t frame_rate_;
 
-		std::shared_ptr<AnimationActionsType> actions_;
+		std::shared_ptr<std::vector<AnimationAction>> actions_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
@@ -409,14 +402,14 @@ namespace KlayGE
 		}
 
 		virtual AABBox FramePosBound(uint32_t frame) const;
-		void AttachFramePosBounds(std::shared_ptr<AABBKeyFrames> const & frame_pos_aabbs);
-		std::shared_ptr<AABBKeyFrames> const & GetFramePosBounds() const
+		void AttachFramePosBounds(std::shared_ptr<AABBKeyFrameSet> const & frame_pos_aabbs);
+		std::shared_ptr<AABBKeyFrameSet> const & GetFramePosBounds() const
 		{
 			return frame_pos_aabbs_;
 		}
 
 	private:
-		std::shared_ptr<AABBKeyFrames> frame_pos_aabbs_;
+		std::shared_ptr<AABBKeyFrameSet> frame_pos_aabbs_;
 	};
 
 

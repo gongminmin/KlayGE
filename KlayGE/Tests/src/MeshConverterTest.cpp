@@ -356,14 +356,14 @@ public:
 				EXPECT_EQ(end_frame, static_cast<int>(sanity_end_frame));
 			}
 
-			EXPECT_EQ(target.NumKeyframeSets(), sanity_skinned_model.GetKeyFrames()->size());
+			EXPECT_EQ(target.NumKeyframeSets(), sanity_skinned_model.GetKeyFrameSets()->size());
 			for (uint32_t i = 0; i < target.NumKeyframeSets(); ++ i)
 			{
 				int joint_id;
 				target.GetKeyframeSet(i, joint_id);
 				EXPECT_EQ(static_cast<int>(i), joint_id);
 
-				auto const & sanity_key_frames = (*(sanity_skinned_model.GetKeyFrames()))[i];
+				auto const & sanity_key_frames = (*(sanity_skinned_model.GetKeyFrameSets()))[i];
 
 				for (uint32_t j = 0; j < target.NumKeyframes(i); ++ j)
 				{

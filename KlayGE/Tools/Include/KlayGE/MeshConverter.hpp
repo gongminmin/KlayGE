@@ -107,7 +107,7 @@ namespace KlayGE
 		void ResampleJointTransform(int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale,
-			KeyFrames& rkf);
+			KeyFrameSet& rkf);
 
 	private:
 		MeshMLObj* meshml_obj_;

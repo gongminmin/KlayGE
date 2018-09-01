@@ -560,7 +560,7 @@ namespace KlayGE
 		{
 			std::string name;
 			int frame_num;
-			std::map<int/*joint_id*/, KeyFrames> resampled_frames;
+			std::map<int/*joint_id*/, KeyFrameSet> resampled_frames;
 		};
 
 		std::vector<Animation> animations;
@@ -615,7 +615,7 @@ namespace KlayGE
 					}
 
 					// resample
-					KeyFrames resampled_kf;
+					KeyFrameSet resampled_kf;
 					this->ResampleJointTransform(0, anim.frame_num, static_cast<float>(cur_anim->mTicksPerSecond / resample_fps),
 						poss, quats, scales, resampled_kf);
 
@@ -628,7 +628,7 @@ namespace KlayGE
 				int joint_id = joint.second.id;
 				if (anim.resampled_frames.find(joint_id) == anim.resampled_frames.end())
 				{
-					KeyFrames default_tf;
+					KeyFrameSet default_tf;
 					default_tf.frame_id.push_back(0);
 					Quaternion quat;
 					float3 pos;
@@ -681,7 +681,7 @@ namespace KlayGE
 	void MeshConverter::ResampleJointTransform(int start_frame, int end_frame, float fps_scale,
 		std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 		std::vector<std::pair<float, float3>> const & scales,
-		KeyFrames& rkf)
+		KeyFrameSet& rkf)
 	{
 		size_t i_pos = 0;
 		size_t i_rot = 0;

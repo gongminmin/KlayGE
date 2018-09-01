@@ -1521,7 +1521,7 @@ namespace
 
 	void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk,
 		uint32_t& num_frames, uint32_t& frame_rate,
-		KeyFramesType& kfss)
+		std::vector<KeyFrameSet>& kfss)
 	{
 		XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
 		if (nf_attr)
@@ -1548,7 +1548,7 @@ namespace
 			{
 				++ joint_id;
 			}
-			KeyFrames& kfs = kfss[joint_id];
+			KeyFrameSet& kfs = kfss[joint_id];
 
 			kfs.frame_id.clear();
 			kfs.bind_real.clear();
@@ -1605,7 +1605,7 @@ namespace
 						bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
 						bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
 					}
-							
+
 					XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
 					if (!bind_dual_node)
 					{
@@ -1644,9 +1644,9 @@ namespace
 
 	void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk,
 		std::vector<AABBox> const & pos_bbs, uint32_t num_frames,
-		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs)
+		std::vector<std::shared_ptr<AABBKeyFrameSet>>& frame_pos_bbs)
 	{
-		auto bb_kfs = MakeSharedPtr<AABBKeyFrames>();
+		auto bb_kfs = MakeSharedPtr<AABBKeyFrameSet>();
 		if (bb_kfs_chunk)
 		{
 			for (XMLNodePtr bb_kf_node = bb_kfs_chunk->FirstNode("bb_key_frame"); bb_kf_node; bb_kf_node = bb_kf_node->NextSibling("bb_key_frame"))
@@ -1834,11 +1834,11 @@ namespace
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
 		uint32_t num_frames = 0;
 		uint32_t frame_rate = 0;
-		std::shared_ptr<std::vector<KeyFrames>> kfs;
-		std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
+		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
+		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
 		if (key_frames_chunk)
 		{
-			kfs = MakeSharedPtr<KeyFramesType>(joints.size());
+			kfs = MakeSharedPtr<std::vector<KeyFrameSet>>(joints.size());
 
 			CompileKeyFramesChunk(key_frames_chunk, num_frames, frame_rate, *kfs);
 
@@ -1957,7 +1957,7 @@ namespace
 				SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
 
 				skinned_model->AssignJoints(joints.begin(), joints.end());
-				skinned_model->AttachKeyFrames(kfs);
+				skinned_model->AttachKeyFrameSets(kfs);
 
 				skinned_model->NumFrames(num_frames);
 				skinned_model->FrameRate(frame_rate);
