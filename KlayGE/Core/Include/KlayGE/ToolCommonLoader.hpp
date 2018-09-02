@@ -47,6 +47,8 @@ namespace KlayGE
 	public:
 		static ToolCommonLoader& Instance();
 
+		void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps);
 		void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps);
 
@@ -54,9 +56,12 @@ namespace KlayGE
 		ToolCommonLoader();
 
 	private:
+		using ConvertModelFunc = void(*)(std::string_view tex_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps);
 		using ConvertTextureFunc = void(*)(std::string_view tex_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps);
 
+		ConvertModelFunc DynamicConvertModel_;
 		ConvertTextureFunc DynamicConvertTexture_;
 
 		DllLoader dll_loader_;

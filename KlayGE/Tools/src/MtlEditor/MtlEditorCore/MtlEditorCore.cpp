@@ -412,42 +412,6 @@ namespace KlayGE
 		last_file_path_ = mesh_path.parent_path().string();
 		ResLoader::Instance().AddPath(last_file_path_);
 
-		std::string ext_name = mesh_path.extension().string();
-		if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
-		{
-			std::string meshconv_name = "MeshConv" KLAYGE_DBG_SUFFIX;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			meshconv_name += ".exe";
-#endif
-			meshconv_name = ResLoader::Instance().Locate(meshconv_name);
-			bool failed = false;
-			if (meshconv_name.empty())
-			{
-				failed = true;
-			}
-			else
-			{
-#ifndef KLAYGE_PLATFORM_WINDOWS
-				if (std::string::npos == meshconv_name.find("/"))
-				{
-					meshconv_name = "./" + meshconv_name;
-				}
-#endif
-				if (system((meshconv_name + " -I \"" + name + "\" -T \"" + last_file_path_ + "\" -q").c_str()) != 0)
-				{
-					failed = true;
-				}
-			}
-
-			if (failed)
-			{
-				LogError() << "MeshConv failed. Forgot to build Tools?" << std::endl;
-				return false;
-			}
-
-			mesh_path.replace_extension(".meshml");
-		}
-
 		std::filesystem::path imposter_path = mesh_path;
 		imposter_path.replace_extension(".impml");
 		std::string imposter_name = imposter_path.string();

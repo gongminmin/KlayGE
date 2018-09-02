@@ -1,15 +1,13 @@
 ﻿#include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/Math.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -38,7 +36,7 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-path,I", boost::program_options::value<std::string>(), "Input mesh path.")
 		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
-		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output image path.")
+		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output mesh path.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -53,7 +51,7 @@ int main(int argc, char* argv[])
 	}
 	if (vm.count("version") > 0)
 	{
-		cout << "KlayGE Mesh Converter, Version 1.0.0" << endl;
+		cout << "KlayGE Mesh Converter, Version 2.0.0" << endl;
 		return 1;
 	}
 	if (vm.count("input-path") > 0)

@@ -1119,7 +1119,24 @@ namespace
 				runtime_name += ".dds";
 			}
 
+			bool jit = false;
 			if (ResLoader::Instance().Locate(runtime_name).empty())
+			{
+				jit = true;
+			}
+			else
+			{
+				ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
+				ResIdentifierPtr file = ResLoader::Instance().Open(tex_desc_.res_name);
+				if (file)
+				{
+					if (runtime_file->Timestamp() < file->Timestamp())
+					{
+						jit = true;
+					}
+				}
+			}
+			if (jit)
 			{
 #if KLAYGE_IS_DEV_PLATFORM
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();

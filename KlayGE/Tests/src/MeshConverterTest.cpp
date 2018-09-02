@@ -37,7 +37,6 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/MeshConverter.hpp>
 #include <KlayGE/MeshMetadata.hpp>
-#include <MeshMLLib/MeshMLLib.hpp>
 
 #include "KlayGETests.hpp"
 
@@ -635,4 +634,14 @@ TEST_F(MeshConverterTest, StaticLodTransforms)
 TEST_F(MeshConverterTest, AnimationPassThrough)
 {
 	RunTest("anim.fbx", "", "anim.meshml");
+}
+
+TEST_F(MeshConverterTest, StaticMeshML)
+{
+	RunTest("tree2a.lod.meshml", "", "tree2a.lod.meshml");
+}
+
+TEST_F(MeshConverterTest, AnimationMeshML)
+{
+	RunTest("anim.meshml", "", "anim.meshml");
 }

@@ -41,6 +41,8 @@
 
 #include <KlayGE/ToolCommon.hpp>
 #include <KlayGE/PlatformDefinition.hpp>
+#include <KlayGE/MeshConverter.hpp>
+#include <KlayGE/MeshMetadata.hpp>
 #include <KlayGE/TexConverter.hpp>
 #include <KlayGE/TexMetadata.hpp>
 
@@ -102,6 +104,19 @@ TexMetadata LoadTextureMetadata(std::string const & res_name, TexMetadata const 
 	}
 }
 
+MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const & default_metadata)
+{
+	std::string metadata_name = res_name + ".kmeta";
+	if (ResLoader::Instance().Locate(metadata_name).empty())
+	{
+		return default_metadata;
+	}
+	else
+	{
+		return MeshMetadata(metadata_name);
+	}
+}
+
 void Deploy(std::vector<std::string> const & res_names, std::string_view res_type,
 	RenderDeviceCaps const & caps, std::string_view platform)
 {
@@ -127,7 +142,25 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			if (output_tex)
 			{
 				filesystem::path res_path(res_names[i]);
-				SaveTexture(output_tex, res_path.replace_extension(".dds").string());
+				SaveTexture(output_tex, res_path.string() + ".dds");
+			}
+		}
+	}
+	else if (CT_HASH("model") == res_type_hash)
+	{
+		MeshMetadata const default_metadata;
+
+		MeshConverter mc;
+		for (size_t i = 0; i < res_names.size(); ++i)
+		{
+			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+
+			auto metadata = LoadMeshMetadata(res_names[i], default_metadata);
+			auto output_model = mc.Convert(res_names[i], metadata);
+			if (output_model)
+			{
+				filesystem::path res_path(res_names[i]);
+				SaveModel(output_model, res_path.string() + ".model_bin");
 			}
 		}
 	}
@@ -164,19 +197,6 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 
 				ofs << "@echo off" << std::endl << std::endl;
 				ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
-				ofs << "@echo on" << std::endl << std::endl;
-			}
-		}
-		else if (CT_HASH("model") == res_type_hash)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
-
-				ofs << "@echo Processing: " << res_names[i] << std::endl;
-
-				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}

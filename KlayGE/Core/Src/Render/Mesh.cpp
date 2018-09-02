@@ -33,6 +33,7 @@
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderMaterial.hpp>
+#include <KlayGE/ToolCommonLoader.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
@@ -1008,45 +1009,22 @@ namespace KlayGE
 
 	void ModelJIT(std::string const & meshml_name)
 	{
-		std::string::size_type const pkt_offset(meshml_name.find("//"));
-		std::string folder_name;
-		std::string path_name;
-		if (pkt_offset != std::string::npos)
-		{
-			std::string pkt_name = meshml_name.substr(0, pkt_offset);
-			std::string::size_type const password_offset = pkt_name.find("|");
-			if (password_offset != std::string::npos)
-			{
-				pkt_name = pkt_name.substr(0, password_offset - 1);
-			}
-
-			std::string::size_type offset = pkt_name.rfind("/");
-			if (offset != std::string::npos)
-			{
-				folder_name = pkt_name.substr(0, offset + 1);
-			}
-
-			std::string const file_name = meshml_name.substr(pkt_offset + 2);
-			path_name = folder_name + file_name;
-		}
-		else
-		{
-			path_name = meshml_name;
-		}
+		std::string const metadata_name = meshml_name + ".kmeta";
+		std::string const runtime_name = meshml_name + jit_ext_name;
 
 		bool jit = false;
-		if (ResLoader::Instance().Locate(path_name + jit_ext_name).empty())
+		if (ResLoader::Instance().Locate(runtime_name).empty())
 		{
 			jit = true;
 		}
 		else
 		{
-			ResIdentifierPtr lzma_file = ResLoader::Instance().Open(path_name + jit_ext_name);
+			ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
 			uint32_t fourcc;
-			lzma_file->read(&fourcc, sizeof(fourcc));
+			runtime_file->read(&fourcc, sizeof(fourcc));
 			fourcc = LE2Native(fourcc);
 			uint32_t ver;
-			lzma_file->read(&ver, sizeof(ver));
+			runtime_file->read(&ver, sizeof(ver));
 			ver = LE2Native(ver);
 			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
 			{
@@ -1057,7 +1035,7 @@ namespace KlayGE
 				ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 				if (file)
 				{
-					if (lzma_file->Timestamp() < file->Timestamp())
+					if (runtime_file->Timestamp() < file->Timestamp())
 					{
 						jit = true;
 					}
@@ -1065,42 +1043,17 @@ namespace KlayGE
 			}
 		}
 
-#if KLAYGE_IS_DEV_PLATFORM
 		if (jit)
 		{
-			std::string meshmljit_name = "MeshMLJIT" KLAYGE_DBG_SUFFIX;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			meshmljit_name += ".exe";
-#endif
-			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
-			bool failed = false;
-			if (meshmljit_name.empty())
-			{
-				failed = true;
-			}
-			else
-			{
-#ifndef KLAYGE_PLATFORM_WINDOWS
-				if (std::string::npos == meshmljit_name.find("/"))
-				{
-					meshmljit_name = "./" + meshmljit_name;
-				}
-#endif
-				if (system((meshmljit_name + " -I \"" + meshml_name + "\" -T \"" + folder_name + "\" -q").c_str()) != 0)
-				{
-					failed = true;
-				}
-			}
+#if KLAYGE_IS_DEV_PLATFORM
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			if (failed)
-			{
-				LogError() << "MeshMLJIT failed. Forgot to build Tools?" << std::endl;
-			}
-		}
+			ToolCommonLoader::Instance().ConvertModel(meshml_name, metadata_name, runtime_name, &caps);
 #else
-		BOOST_ASSERT(!jit);
-		KFL_UNUSED(jit);
+			LogError() << "Could NOT locate " << runtime_name << std::endl;
 #endif
+		}
 	}
 
 	RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
@@ -1148,55 +1101,41 @@ namespace KlayGE
 		uint32_t frame_rate = 0;
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
 
-		ResIdentifierPtr lzma_file;
+		ResIdentifierPtr runtime_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
 		{
-			lzma_file = ResLoader::Instance().Open(meshml_name);
+			runtime_file = ResLoader::Instance().Open(meshml_name);
 		}
 		else
 		{
-			std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
-			if (full_meshml_name.empty())
-			{
-				full_meshml_name = std::string(meshml_name);
-			}
-			std::replace(full_meshml_name.begin(), full_meshml_name.end(), '\\', '/');
-			ModelJIT(full_meshml_name);
+			std::string meshml_name_str(meshml_name);
+			ModelJIT(meshml_name_str);
 
-			std::string no_packing_name;
-			size_t offset = full_meshml_name.rfind("//");
-			if (offset != std::string::npos)
-			{
-				no_packing_name = full_meshml_name.substr(offset + 2);
-			}
-			else
-			{
-				no_packing_name = full_meshml_name;
-			}
-			lzma_file = ResLoader::Instance().Open(no_packing_name + jit_ext_name);
+			runtime_file = ResLoader::Instance().Open(meshml_name_str + jit_ext_name);
 		}
+
 		uint32_t fourcc;
-		lzma_file->read(&fourcc, sizeof(fourcc));
+		runtime_file->read(&fourcc, sizeof(fourcc));
 		fourcc = LE2Native(fourcc);
 		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', ' '>::value));
 
 		uint32_t ver;
-		lzma_file->read(&ver, sizeof(ver));
+		runtime_file->read(&ver, sizeof(ver));
 		ver = LE2Native(ver);
 		BOOST_ASSERT(MODEL_BIN_VERSION == ver);
 
 		std::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
 		uint64_t original_len, len;
-		lzma_file->read(&original_len, sizeof(original_len));
+		runtime_file->read(&original_len, sizeof(original_len));
 		original_len = LE2Native(original_len);
-		lzma_file->read(&len, sizeof(len));
+		runtime_file->read(&len, sizeof(len));
 		len = LE2Native(len);
 
 		LZMACodec lzma;
-		lzma.Decode(*ss, lzma_file, len, original_len);
+		lzma.Decode(*ss, runtime_file, len, original_len);
 
-		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), lzma_file->Timestamp(), ss);
+		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(runtime_file->ResName(), runtime_file->Timestamp(), ss);
 
 		uint32_t num_mtls;
 		decoded->read(&num_mtls, sizeof(num_mtls));

@@ -41,6 +41,7 @@ namespace KlayGE
 
 		dll_loader_.Load(tool_common_name);
 
+		DynamicConvertModel_ = reinterpret_cast<ConvertModelFunc>(dll_loader_.GetProcAddress("ConvertModel"));
 		DynamicConvertTexture_ = reinterpret_cast<ConvertTextureFunc>(dll_loader_.GetProcAddress("ConvertTexture"));
 	}
 
@@ -48,6 +49,12 @@ namespace KlayGE
 	{
 		static ToolCommonLoader ret;
 		return ret;
+	}
+
+	void ToolCommonLoader::ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+		RenderDeviceCaps const * caps)
+	{
+		DynamicConvertModel_(input_name, metadata_name, output_name, caps);
 	}
 
 	void ToolCommonLoader::ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
