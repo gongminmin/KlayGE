@@ -50,36 +50,63 @@ namespace KlayGE
 		explicit MeshMetadata(std::string_view name);
 
 		void Load(std::string_view name);
+		void Save(std::string const & name) const;
 
 		bool AutoCenter() const
 		{
 			return auto_center_;
+		}
+		void AutoCenter(bool auto_center)
+		{
+			auto_center_ = auto_center;
 		}
 
 		float3 const & Pivot() const
 		{
 			return pivot_;
 		}
+		void Pivot(float3 const & pivot)
+		{
+			pivot_ = pivot;
+		}
 		float3 const & Translation() const
 		{
 			return translation_;
+		}
+		void Translation(float3 const & trans)
+		{
+			translation_ = trans;
 		}
 		Quaternion const & Rotation() const
 		{
 			return rotation_;
 		}
+		void Rotation(Quaternion const & rot)
+		{
+			rotation_ = rot;
+		}
 		float3 const & Scale() const
 		{
 			return scale_;
+		}
+		void Scale(float3 const & scale)
+		{
+			scale_ = scale;
 		}
 
 		uint8_t AxisMapping(uint32_t axis) const
 		{
 			return axis_mapping_[axis];
 		}
+		void AxisMapping(uint32_t axis, uint8_t mapping)
+		{
+			axis_mapping_[axis] = mapping;
+		}
 
 		uint32_t NumLods() const;
+		void NumLods(uint32_t lods);
 		std::string_view LodFileName(uint32_t lod) const;
+		void LodFileName(uint32_t lod, std::string_view lod_name);
 
 		float4x4 const & Transform() const
 		{
@@ -89,6 +116,8 @@ namespace KlayGE
 		{
 			return transform_it_;
 		}
+
+		void UpdateTransforms();
 
 	private:
 		bool auto_center_ = false;

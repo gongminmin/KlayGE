@@ -35,8 +35,10 @@
 
 #include <algorithm>
 #include <iterator>
+#include <fstream>
 
 #include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
 
 #include <KlayGE/MeshMetadata.hpp>
 
@@ -215,16 +217,7 @@ namespace KlayGE
 				}
 			}
 
-			new_metadata.transform_ = MathLib::transformation(&new_metadata.pivot_, static_cast<Quaternion*>(nullptr),
-				&new_metadata.scale_,
-				&new_metadata.pivot_, &new_metadata.rotation_, &new_metadata.translation_);
-
-			float4 const axis[3] = { new_metadata.transform_.Col(0), new_metadata.transform_.Col(1), new_metadata.transform_.Col(2) };
-			new_metadata.transform_.Col(0, axis[new_metadata.axis_mapping_[0]]);
-			new_metadata.transform_.Col(1, axis[new_metadata.axis_mapping_[1]]);
-			new_metadata.transform_.Col(2, axis[new_metadata.axis_mapping_[2]]);
-
-			new_metadata.transform_it_ = MathLib::transpose(MathLib::inverse(new_metadata.transform_));
+			new_metadata.UpdateTransforms();
 		}
 		else if(!name.empty())
 		{
@@ -234,13 +227,137 @@ namespace KlayGE
 		*this = std::move(new_metadata);
 	}
 
+	void MeshMetadata::Save(std::string const & name) const
+	{
+		rapidjson::Document document;
+		document.SetObject();
+
+		auto& allocator = document.GetAllocator();
+
+		document.AddMember("version", 1U, allocator);
+
+		if (auto_center_)
+		{
+			document.AddMember("auto_center", auto_center_, allocator);
+		}
+
+		if (MathLib::length_sq(pivot_) > 1e-6f)
+		{
+			rapidjson::Value pivot_val;
+			pivot_val.SetArray();
+			for (size_t i = 0; i < pivot_.size(); ++ i)
+			{
+				pivot_val.PushBack(pivot_[i], allocator);
+			}
+			document.AddMember("pivot", pivot_val, allocator);
+		}
+
+		if (MathLib::length_sq(translation_) > 1e-6f)
+		{
+			rapidjson::Value translation_val;
+			translation_val.SetArray();
+			for (size_t i = 0; i < translation_.size(); ++ i)
+			{
+				translation_val.PushBack(translation_[i], allocator);
+			}
+			document.AddMember("translation", translation_val, allocator);
+		}
+
+		if (!MathLib::equal(rotation_.x(), 0.0f) || !MathLib::equal(rotation_.y(), 0.0f) || !MathLib::equal(rotation_.z(), 0.0f)
+			|| !MathLib::equal(rotation_.w(), 1.0f))
+		{
+			rapidjson::Value rotation_val;
+			rotation_val.SetArray();
+			for (size_t i = 0; i < rotation_.size(); ++ i)
+			{
+				rotation_val.PushBack(rotation_[i], allocator);
+			}
+			document.AddMember("rotation", rotation_val, allocator);
+		}
+
+		if (!MathLib::equal(scale_.x(), 1.0f) || !MathLib::equal(scale_.y(), 1.0f) || !MathLib::equal(scale_.z(), 1.0f))
+		{
+			rapidjson::Value scale_val;
+			scale_val.SetArray();
+			for (size_t i = 0; i < scale_.size(); ++ i)
+			{
+				scale_val.PushBack(scale_[i], allocator);
+			}
+			document.AddMember("scale", scale_val, allocator);
+		}
+
+		bool need_swizzle = false;
+		for (size_t i = 0; i < std::size(axis_mapping_); ++ i)
+		{
+			if (axis_mapping_[i] != i)
+			{
+				need_swizzle = true;
+				break;
+			}
+		}
+		if (need_swizzle)
+		{
+			rapidjson::Value axis_mapping_val;
+			axis_mapping_val.SetArray();
+			for (size_t i = 0; i < std::size(axis_mapping_); ++ i)
+			{
+				axis_mapping_val.PushBack(static_cast<int>(axis_mapping_[i]), allocator);
+			}
+			document.AddMember("axis_mapping", axis_mapping_val, allocator);
+		}
+
+		if ((lod_file_names_.size() > 1) || ((lod_file_names_.size() == 1) && (lod_file_names_[0].size() > 1)))
+		{
+			rapidjson::Value array_names_val;
+			array_names_val.SetArray();
+
+			for (size_t i = 0; i < lod_file_names_.size(); ++ i)
+			{
+				auto const & str = lod_file_names_[i];
+				array_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+			}
+
+			document.AddMember("lod", array_names_val, allocator);
+		}
+
+		rapidjson::StringBuffer sb;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+		document.Accept(writer);
+		std::ofstream ofs(name);
+		ofs << sb.GetString();
+	}
+
 	uint32_t MeshMetadata::NumLods() const
 	{
 		return lod_file_names_.empty() ? 1 : static_cast<uint32_t>(lod_file_names_.size());
 	}
 
+	void MeshMetadata::NumLods(uint32_t lods)
+	{
+		lod_file_names_.resize(lods);
+	}
+
 	std::string_view MeshMetadata::LodFileName(uint32_t lod) const
 	{
 		return lod_file_names_[lod];
+	}
+
+	void MeshMetadata::LodFileName(uint32_t lod, std::string_view lod_name)
+	{
+		lod_file_names_[lod] = std::string(lod_name);
+	}
+
+	void MeshMetadata::UpdateTransforms()
+	{
+		transform_ = MathLib::transformation(&pivot_, static_cast<Quaternion*>(nullptr),
+			&scale_,
+			&pivot_, &rotation_, &translation_);
+
+		float4 const axis[3] = { transform_.Col(0), transform_.Col(1), transform_.Col(2) };
+		transform_.Col(0, axis[axis_mapping_[0]]);
+		transform_.Col(1, axis[axis_mapping_[1]]);
+		transform_.Col(2, axis[axis_mapping_[2]]);
+
+		transform_it_ = MathLib::transpose(MathLib::inverse(transform_));
 	}
 }
