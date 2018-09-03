@@ -205,7 +205,7 @@ namespace KlayGE
 	void MeshConverter::RecursiveTransformMesh(uint32_t lod, float4x4 const & parent_mat, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
-		auto const trans_quat = MathLib::to_quaternion(trans_mat);
+		auto const trans_it_mat = MathLib::transpose(MathLib::inverse(trans_mat));
 
 		for (uint32_t n = 0; n < node->mNumMeshes; ++ n)
 		{
@@ -213,18 +213,16 @@ namespace KlayGE
 
 			for (size_t vi = 0; vi < mesh.lods[lod].positions.size(); ++ vi)
 			{
-				auto const pos = MathLib::transform_coord(mesh.lods[lod].positions[vi], trans_mat);
-				mesh.lods[lod].positions[vi] = pos;
+				mesh.lods[lod].positions[vi] = MathLib::transform_coord(mesh.lods[lod].positions[vi], trans_mat);
 
+				if (mesh.has_normal || mesh.has_tangent_frame)
+				{
+					mesh.lods[lod].normals[vi] = MathLib::transform_normal(mesh.lods[lod].normals[vi], trans_it_mat);
+				}
 				if (mesh.has_tangent_frame)
 				{
-					auto const quat = mesh.lods[lod].tangent_quats[vi] * trans_quat;
-					mesh.lods[lod].tangent_quats[vi] = quat;
-				}
-				else
-				{
-					auto const normal = MathLib::transform_normal(mesh.lods[lod].normals[vi], trans_mat);
-					mesh.lods[lod].normals[vi] = normal;
+					mesh.lods[lod].tangents[vi] = MathLib::transform_normal(mesh.lods[lod].tangents[vi], trans_mat);
+					mesh.lods[lod].binormals[vi] = MathLib::transform_normal(mesh.lods[lod].binormals[vi], trans_mat);
 				}
 			}
 
@@ -383,9 +381,8 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods, MeshMetadata const & input_metadata)
+	void MeshConverter::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods)
 	{
-		float3 center(0, 0, 0);
 		for (size_t lod = 0; lod < scene_lods.size(); ++ lod)
 		{
 			for (unsigned int mi = 0; mi < scene_lods[lod]->mNumMeshes; ++ mi)
@@ -435,19 +432,19 @@ namespace KlayGE
 				}
 				for (unsigned int vi = 0; vi < mesh->mNumVertices; ++ vi)
 				{
-					positions[vi] = MathLib::transform_coord(float3(&mesh->mVertices[vi].x), input_metadata.Transform()) - center;
+					positions[vi] = float3(&mesh->mVertices[vi].x);
 
 					if (has_normal)
 					{
-						normals[vi] = MathLib::transform_normal(float3(&mesh->mNormals[vi].x), input_metadata.TransformIT());
+						normals[vi] = float3(&mesh->mNormals[vi].x);
 					}
 					if (has_tangent)
 					{
-						tangents[vi] = MathLib::transform_normal(float3(&mesh->mTangents[vi].x), input_metadata.Transform());
+						tangents[vi] = float3(&mesh->mTangents[vi].x);
 					}
 					if (has_binormal)
 					{
-						binormals[vi] = MathLib::transform_normal(float3(&mesh->mBitangents[vi].x), input_metadata.Transform());
+						binormals[vi] = float3(&mesh->mBitangents[vi].x);
 					}
 
 					for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
@@ -469,17 +466,14 @@ namespace KlayGE
 					has_normal = true;
 				}
 
-				auto& tangent_quats = meshes_[mi].lods[lod].tangent_quats;
-				tangent_quats.resize(mesh->mNumVertices);
+				auto& mesh_tangents = meshes_[mi].lods[lod].tangents;
+				auto& mesh_binormals = meshes_[mi].lods[lod].binormals;
+				mesh_tangents.resize(mesh->mNumVertices);
+				mesh_binormals.resize(mesh->mNumVertices);
 				if ((!has_tangent || !has_binormal) && (first_texcoord != AI_MAX_NUMBER_OF_TEXTURECOORDS))
 				{
-					MathLib::compute_tangent(tangents.begin(), binormals.begin(), indices.begin(), indices.end(),
+					MathLib::compute_tangent(mesh_tangents.begin(), mesh_binormals.begin(), indices.begin(), indices.end(),
 						positions.begin(), positions.end(), texcoords[first_texcoord].begin(), normals.begin());
-
-					for (size_t i = 0; i < positions.size(); ++ i)
-					{
-						tangent_quats[i] = MathLib::to_quaternion(tangents[i], binormals[i], normals[i], 8);
-					}
 
 					has_tangent = true;
 				}
@@ -526,26 +520,7 @@ namespace KlayGE
 						if (!found)
 						{
 							BOOST_ASSERT_MSG(false, "Joint not found!");
-						}					
-					}
-				}
-			}
-
-			if (input_metadata.AutoCenter() && (lod == 0))
-			{
-				auto aabb = MathLib::compute_aabbox(meshes_[0].lods[lod].positions.begin(), meshes_[0].lods[lod].positions.end());
-				for (unsigned int mi = 0; mi < scene_lods[lod]->mNumMeshes; ++ mi)
-				{
-					auto aabb_mesh = MathLib::compute_aabbox(meshes_[mi].lods[lod].positions.begin(),
-						meshes_[mi].lods[lod].positions.end());
-					aabb = AABBox(MathLib::minimize(aabb.Min(), aabb_mesh.Min()), MathLib::maximize(aabb.Max(), aabb_mesh.Max()));
-				}
-				center = aabb.Center();
-				for (unsigned int mi = 0; mi < scene_lods[lod]->mNumMeshes; ++ mi)
-				{
-					for (auto& pos : meshes_[mi].lods[lod].positions)
-					{
-						pos -= center;
+						}
 					}
 				}
 			}
@@ -908,7 +883,7 @@ namespace KlayGE
 			meshes_[mi].lods.resize(num_lods);
 		}
 
-		this->BuildMeshData(scenes, metadata);
+		this->BuildMeshData(scenes);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			this->RecursiveTransformMesh(lod, float4x4::Identity(), scenes[lod]->mRootNode);
@@ -1718,7 +1693,14 @@ namespace KlayGE
 					tangent_quat.z() = tangent_quat_node->Attrib("z")->ValueFloat();
 					tangent_quat.w() = tangent_quat_node->Attrib("w")->ValueFloat();
 				}
-				mesh_lod.tangent_quats.push_back(tangent_quat);
+				
+				float3 const tangent = MathLib::transform_quat(float3(1, 0, 0), tangent_quat);
+				float3 const binormal = MathLib::transform_quat(float3(0, 1, 0), tangent_quat) * MathLib::sgn(tangent_quat.w());
+				float3 const normal = MathLib::transform_quat(float3(0, 0, 1), tangent_quat);
+
+				mesh_lod.tangents.push_back(tangent);
+				mesh_lod.binormals.push_back(binormal);
+				mesh_lod.normals.push_back(normal);
 			}
 		}
 
@@ -1789,7 +1771,9 @@ namespace KlayGE
 		}
 		if (recompute_tangent_quat)
 		{
-			mesh_lod.tangent_quats.resize(mesh_lod.positions.size());
+			mesh_lod.tangents.resize(mesh_lod.positions.size());
+			mesh_lod.binormals.resize(mesh_lod.positions.size());
+			mesh_lod.normals.resize(mesh_lod.positions.size());
 			for (uint32_t index = 0; index < mesh_lod.positions.size(); ++ index)
 			{
 				float3 tangent, binormal, normal;
@@ -1826,7 +1810,9 @@ namespace KlayGE
 					normal = MathLib::cross(tangent, binormal);
 				}
 
-				mesh_lod.tangent_quats[index] = MathLib::to_quaternion(tangent, binormal, normal, 8);
+				mesh_lod.tangents[index] = tangent;
+				mesh_lod.binormals[index] = binormal;
+				mesh_lod.normals[index] = normal;
 			}
 		}
 	}
@@ -2352,6 +2338,43 @@ namespace KlayGE
 		uint32_t const num_lods = static_cast<uint32_t>(meshes_[0].lods.size());
 		bool const skinned = !joints_.empty();
 
+		AABBox model_aabb = meshes_[0].pos_bb;
+		for (size_t mesh_index = 1; mesh_index < meshes_.size(); ++ mesh_index)
+		{
+			model_aabb.Min() = MathLib::minimize(model_aabb.Min(), meshes_[mesh_index].pos_bb.Min());
+			model_aabb.Max() = MathLib::maximize(model_aabb.Max(), meshes_[mesh_index].pos_bb.Max());
+		}
+		float3 const model_center = metadata.AutoCenter() ? model_aabb.Center() : float3(0, 0, 0);
+
+		for (size_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+		{
+			auto& mesh = meshes_[mesh_index];
+			for (uint32_t lod = 0; lod < num_lods; ++ lod)
+			{
+				auto& mesh_lod = mesh.lods[lod];
+
+				for (auto& position : mesh_lod.positions)
+				{
+					position = MathLib::transform_coord(position - model_center, metadata.Transform());
+				}
+				for (auto& tangent : mesh_lod.tangents)
+				{
+					tangent = MathLib::normalize(MathLib::transform_normal(tangent, metadata.Transform()));
+				}
+				for (auto& binormal : mesh_lod.binormals)
+				{
+					binormal = MathLib::normalize(MathLib::transform_normal(binormal, metadata.Transform()));
+				}
+				for (auto& normal : mesh_lod.normals)
+				{
+					normal = MathLib::normalize(MathLib::transform_normal(normal, metadata.TransformIT()));
+				}
+			}
+
+			mesh.pos_bb.Min() = MathLib::transform_coord(mesh.pos_bb.Min() - model_center, metadata.Transform());
+			mesh.pos_bb.Max() = MathLib::transform_coord(mesh.pos_bb.Max() - model_center, metadata.Transform());
+		}
+
 		std::vector<VertexElement> merged_ves;
 		std::vector<std::vector<uint8_t>> merged_vertices;
 		std::vector<uint8_t> merged_indices;
@@ -2463,8 +2486,11 @@ namespace KlayGE
 					}
 					if (tangent_quat_stream != -1)
 					{
-						for (auto const & tangent_quat : mesh_lod.tangent_quats)
+						for (size_t i = 0; i < mesh_lod.tangents.size(); ++ i)
 						{
+							Quaternion const tangent_quat = MathLib::to_quaternion(mesh_lod.tangents[i], mesh_lod.binormals[i],
+								mesh_lod.normals[i], 8);
+
 							uint32_t compact = (
 								MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
@@ -2472,7 +2498,8 @@ namespace KlayGE
 								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 
 							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
-							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(), p, p + sizeof(compact));
+							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+								p, p + sizeof(compact));
 						}
 					}
 					if (diffuse_stream != -1)

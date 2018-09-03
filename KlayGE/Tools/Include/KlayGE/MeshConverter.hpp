@@ -61,8 +61,9 @@ namespace KlayGE
 			struct Lod
 			{
 				std::vector<float3> positions;
+				std::vector<float3> tangents;
+				std::vector<float3> binormals;
 				std::vector<float3> normals;
-				std::vector<Quaternion> tangent_quats;
 				std::vector<Color> diffuses;
 				std::vector<Color> speculars;
 				std::array<std::vector<float3>, MAX_NUMBER_OF_TEXTURECOORDS> texcoords;
@@ -89,7 +90,7 @@ namespace KlayGE
 		// From assimp
 		void RecursiveTransformMesh(uint32_t lod, float4x4 const & parent_mat, aiNode const * node);
 		void BuildMaterials(aiScene const * scene);
-		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods, MeshMetadata const & input_metadata);
+		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
 		void BuildActions(aiScene const * scene);
 		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,

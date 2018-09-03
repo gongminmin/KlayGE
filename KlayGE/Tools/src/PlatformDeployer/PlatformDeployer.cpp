@@ -137,8 +137,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 		{
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
-			TexMetadata metadata = LoadTextureMetadata(res_names[i], default_metadata);
-			TexturePtr output_tex = tc.Convert(res_names[i], metadata);
+			auto metadata = LoadTextureMetadata(res_names[i], default_metadata);
+			auto output_tex = tc.Convert(res_names[i], metadata);
 			if (output_tex)
 			{
 				filesystem::path res_path(res_names[i]);
@@ -151,7 +151,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 		MeshMetadata const default_metadata;
 
 		MeshConverter mc;
-		for (size_t i = 0; i < res_names.size(); ++i)
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
