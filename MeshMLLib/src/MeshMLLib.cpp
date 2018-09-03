@@ -34,6 +34,7 @@
 #include <set>
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <limits>
 #include <string>
 
@@ -645,6 +646,8 @@ namespace KlayGE
 		}
 
 		int model_ver = 6;
+
+		os << std::setprecision(8);
 
 		// Initialize the xml document
 		os << "<?xml version=\"1.0\"";

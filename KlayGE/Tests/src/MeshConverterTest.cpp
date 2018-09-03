@@ -437,8 +437,8 @@ public:
 						sanity_tc.y() = ((sanity_texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1)
 							* sanity_tc_extent.y() + sanity_tc_center.y();
 
-						EXPECT_TRUE(std::abs(tc.x() - sanity_tc.x()) < 1e-3f);
-						EXPECT_TRUE(std::abs(tc.y() - sanity_tc.y()) < 1e-3f);
+						EXPECT_TRUE(std::abs(tc.x() - sanity_tc.x()) < 2e-3f);
+						EXPECT_TRUE(std::abs(tc.y() - sanity_tc.y()) < 2e-3f);
 					}
 
 					if (blend_weights_stream != -1)

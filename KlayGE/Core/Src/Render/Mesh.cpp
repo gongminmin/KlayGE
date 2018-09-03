@@ -1642,7 +1642,7 @@ namespace KlayGE
 					bool has_normal = false;
 					for (size_t ve = 0; ve < merged_ves.size(); ++ ve)
 					{
-						uint8_t const * src = &merged_buffs[ve][(mesh_base_vertices[i] + v) * merged_ves[ve].element_size()];
+						uint8_t const * src = &merged_buffs[ve][(mesh_base_vertices[mesh_lod_index] + v) * merged_ves[ve].element_size()];
 
 						switch (merged_ves[ve].usage)
 						{

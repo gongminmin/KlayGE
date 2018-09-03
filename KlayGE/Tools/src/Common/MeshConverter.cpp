@@ -1693,7 +1693,7 @@ namespace KlayGE
 					tangent_quat.z() = tangent_quat_node->Attrib("z")->ValueFloat();
 					tangent_quat.w() = tangent_quat_node->Attrib("w")->ValueFloat();
 				}
-				
+
 				float3 const tangent = MathLib::transform_quat(float3(1, 0, 0), tangent_quat);
 				float3 const binormal = MathLib::transform_quat(float3(0, 1, 0), tangent_quat) * MathLib::sgn(tangent_quat.w());
 				float3 const normal = MathLib::transform_quat(float3(0, 0, 1), tangent_quat);
@@ -2476,9 +2476,9 @@ namespace KlayGE
 						for (auto const & n : mesh_lod.normals)
 						{
 							float3 const normal = MathLib::normalize(n) * 0.5f + 0.5f;
-							uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255)
-								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
-								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 16);
+							uint32_t compact = MathLib::clamp(static_cast<uint32_t>(normal.x() * 255 + 0.5f), 0U, 255U)
+								| (MathLib::clamp(static_cast<uint32_t>(normal.y() * 255 + 0.5f), 0U, 255U) << 8)
+								| (MathLib::clamp(static_cast<uint32_t>(normal.z() * 255 + 0.5f), 0U, 255U) << 16);
 
 							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
 							merged_vertices[normal_stream].insert(merged_vertices[normal_stream].end(), p, p + sizeof(compact));
@@ -2492,10 +2492,10 @@ namespace KlayGE
 								mesh_lod.normals[i], 8);
 
 							uint32_t compact = (
-								MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
+								MathLib::clamp(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 0)
+								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 8)
+								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 16)
+								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 24);
 
 							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
 							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
@@ -2563,7 +2563,7 @@ namespace KlayGE
 								joint_ids[wi] = static_cast<uint8_t>(binding[wi].first);
 
 								float const w = binding[wi].second / total_weight;
-								weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(w * 255), 0, 255));
+								weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(w * 255 + 0.5f), 0U, 255U));
 							}
 							for (size_t wi = num; wi < MAX_BINDINGS; ++ wi)
 							{
