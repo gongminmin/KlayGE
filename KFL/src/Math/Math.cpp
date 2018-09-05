@@ -2319,11 +2319,16 @@ namespace KlayGE
 		template <typename T>
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat) noexcept
 		{
-			Vector_T<T, 3> scale, trans;
-			Quaternion_T<T> rot;
-			decompose(scale, rot, trans, mat);
+			Vector_T<T, 3> min, max;
+			min = max = transform_coord(aabb.Corner(0), mat);
+			for (size_t j = 1; j < 8; ++j)
+			{
+				Vector_T<T, 3> const vec = transform_coord(aabb.Corner(j), mat);
+				min = minimize(min, vec);
+				max = maximize(max, vec);
+			}
 
-			return transform_aabb(aabb, scale, rot, trans);
+			return AABBox_T<T>(min, max);
 		}
 
 		template AABBox transform_aabb(AABBox const & aabb, float3 const & scale, Quaternion const & rot, float3 const & trans) noexcept;
@@ -2352,7 +2357,10 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			return transform_obb(obb, scale, rot, trans);
+			Vector_T<T, 3> center = transform_coord(obb.Center(), mat);
+			Quaternion_T<T> rotation = mul(obb.Rotation(), rot);
+			Vector_T<T, 3> extent = obb.HalfSize() * scale;
+			return OBBox_T<T>(center, rotation, extent);
 		}
 
 		template OBBox transform_obb(OBBox const & obb, float3 const & scale, Quaternion const & rot, float3 const & trans) noexcept;
@@ -2375,7 +2383,9 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			return transform_sphere(sphere, scale.x(), rot, trans);
+			Vector_T<T, 3> center = transform_coord(sphere.Center(), mat);
+			T radius = sphere.Radius() * scale.x();
+			return Sphere_T<T>(center, radius);
 		}
 
 		template Sphere transform_sphere(Sphere const & sphere, float scale, Quaternion const & rot, float3 const & trans) noexcept;
