@@ -54,6 +54,8 @@ namespace KlayGE
 		RenderModelPtr Convert(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
+		void RemoveUnusedJoints();
+		void RemoveUnusedMaterials();
 		void CompressKeyFrameSet(KeyFrameSet& kf);
 
 		// From assimp

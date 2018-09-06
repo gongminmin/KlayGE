@@ -513,9 +513,12 @@ namespace KlayGE
 							{
 								for (unsigned int wi = 0; wi < bone->mNumWeights; ++ wi)
 								{
-									int const vertex_id = bone->mWeights[wi].mVertexId;
 									float const weight = bone->mWeights[wi].mWeight;
-									meshes_[mi].lods[lod].joint_bindings[vertex_id].push_back({ ji, weight });
+									if (weight >= 0.5f / 255)
+									{
+										int const vertex_id = bone->mWeights[wi].mVertexId;
+										meshes_[mi].lods[lod].joint_bindings[vertex_id].push_back({ ji, weight });
+									}
 								}
 
 								found = true;
@@ -2263,6 +2266,111 @@ namespace KlayGE
 		}
 	}
 
+	void MeshConverter::RemoveUnusedJoints()
+	{
+		std::vector<uint32_t> joint_mapping(joints_.size());
+		std::vector<bool> joints_used(joints_.size(), false);
+
+		for (auto const & mesh : meshes_)
+		{
+			for (auto const & lod : mesh.lods)
+			{
+				for (auto const & bindings : lod.joint_bindings)
+				{
+					for (auto const & bind : bindings)
+					{
+						joints_used[bind.first] = true;
+					}
+				}
+			}
+		}
+
+		for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
+		{
+			if (joints_used[ji])
+			{
+				Joint const * j = &joints_[ji];
+				while ((j->parent != -1) && !joints_used[j->parent])
+				{
+					joints_used[j->parent] = true;
+					j = &joints_[j->parent];
+				}
+			}
+		}
+
+		uint32_t new_joint_id = 0;
+		for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
+		{
+			if (joints_used[ji])
+			{
+				joint_mapping[ji] = new_joint_id;
+				++ new_joint_id;
+			}
+		}
+
+		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+		auto& kfs = *skinned_model.GetKeyFrameSets();
+
+		for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
+		{
+			if (joints_used[ji])
+			{
+				BOOST_ASSERT(joint_mapping[ji] <= ji);
+				joints_[joint_mapping[ji]] = joints_[ji];
+				kfs[joint_mapping[ji]] = kfs[ji];
+			}
+		}
+		joints_.resize(new_joint_id);
+		kfs.resize(joints_.size());
+
+		for (auto& mesh : meshes_)
+		{
+			for (auto& lod : mesh.lods)
+			{
+				for (auto& bindings : lod.joint_bindings)
+				{
+					for (auto& bind : bindings)
+					{
+						bind.first = joint_mapping[bind.first];
+					}
+				}
+			}
+		}
+	}
+
+	void MeshConverter::RemoveUnusedMaterials()
+	{
+		std::vector<uint32_t> mtl_mapping(render_model_->NumMaterials());
+		std::vector<bool> mtl_used(mtl_mapping.size(), false);
+
+		for (auto& mesh : meshes_)
+		{
+			mtl_used[mesh.mtl_id] = true;
+		}
+
+		uint32_t new_mtl_id = 0;
+		for (uint32_t i = 0; i < render_model_->NumMaterials(); ++ i)
+		{
+			if (mtl_used[i])
+			{
+				mtl_mapping[i] = new_mtl_id;
+				++ new_mtl_id;
+			}
+		}
+
+		for (uint32_t i = 0; i < render_model_->NumMaterials(); ++ i)
+		{
+			BOOST_ASSERT(mtl_mapping[i] <= i);
+			render_model_->GetMaterial(i) = render_model_->GetMaterial(mtl_mapping[i]);
+		}
+		render_model_->NumMaterials(new_mtl_id);
+
+		for (auto& mesh : meshes_)
+		{
+			mesh.mtl_id = mtl_mapping[mesh.mtl_id];
+		}
+	}
+
 	void MeshConverter::CompressKeyFrameSet(KeyFrameSet& kf)
 	{
 		float const THRESHOLD = 1e-3f;
@@ -2358,6 +2466,12 @@ namespace KlayGE
 
 		uint32_t const num_lods = static_cast<uint32_t>(meshes_[0].lods.size());
 		bool const skinned = !joints_.empty();
+
+		if (skinned)
+		{
+			this->RemoveUnusedJoints();
+		}
+		this->RemoveUnusedMaterials();
 
 		auto global_transform = metadata.Transform();
 		if (metadata.AutoCenter())
