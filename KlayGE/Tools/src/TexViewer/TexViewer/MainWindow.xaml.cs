@@ -173,12 +173,6 @@ namespace TexViewer
 
 		private void OpenTexture(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
-			if (ext_name != ".dds")
-			{
-				return;
-			}
-
 			core_.OpenTexture(file_name);
 			this.FileNameChanged(file_name);
 
@@ -235,7 +229,9 @@ namespace TexViewer
 			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
 			dlg.DefaultExt = ".dds";
-			dlg.Filter = "All Texture Files (*.dds)|*.dds|DDS Files (*.dds)|*.dds|All Files|*.*";
+			dlg.Filter = "All Image Files|*.dds;*.bmp;*.exr;*.gif;*.hdr;*.ico;*.iff;*.jng;*.jpg;*.j2k;*.jxr;*.mng;"
+				+ "*.pcx;*.pbm;*.pgm;*.ppm;*.pfm;*.png;*.pict;*.psd;*.raw;*.ras;*.sgi;*.tga;*.tiff;*.wbmp;*.webp;*.xbm;*.xpm;"
+				+ "|All Files|*.*";
 			dlg.CheckPathExists = true;
 			dlg.CheckFileExists = true;
 			if (true == dlg.ShowDialog())
