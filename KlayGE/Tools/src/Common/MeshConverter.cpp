@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/XMLDom.hpp>
@@ -232,7 +233,11 @@ namespace KlayGE
 					}
 				}
 
-				BOOST_ASSERT(found);
+				if (!found)
+				{
+					LogError() << "Could NOT find the correspondence node between LoDs" << std::endl;
+					Verify(false);
+				}
 			}
 		}
 
