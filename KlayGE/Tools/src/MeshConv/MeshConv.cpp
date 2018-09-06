@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
 	std::string input_name;
 	std::string metadata_name;
 	std::string output_name;
+	std::string target_folder;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
 		("input-path,I", boost::program_options::value<std::string>(), "Input mesh path.")
 		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
 		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output mesh path.")
+		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -67,9 +69,9 @@ int main(int argc, char* argv[])
 	{
 		metadata_name = vm["metadata-path"].as<std::string>();
 	}
-	else
+	if (vm.count("target-folder") > 0)
 	{
-		metadata_name = input_name + ".kmeta";
+		target_folder = vm["target-folder"].as<std::string>();
 	}
 	if (vm.count("output-path") > 0)
 	{
@@ -88,15 +90,27 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	filesystem::path input_folder = filesystem::path(ResLoader::Instance().Locate(file_name)).parent_path();
+	if (metadata_name.empty())
+	{
+		metadata_name = file_name + ".kmeta";
+	}
 	if (output_name.empty())
 	{
-		filesystem::path const input_path(input_name);
-		filesystem::path const base_name = input_path.stem();
-		output_name = (input_folder / base_name).string() + ".meshml";
+		if (target_folder.empty())
+		{
+			output_name = file_name + ".model_bin";
+		}
+		else
+		{
+			output_name = (target_folder / filesystem::path(file_name).filename()).string() + ".model_bin";
+		}
 	}
 
-	MeshMetadata metadata(metadata_name);
+	MeshMetadata metadata;
+	if (!ResLoader::Instance().Locate(metadata_name).empty())
+	{
+		metadata.Load(metadata_name);
+	}
 
 	MeshConverter mesh_converter;
 	auto model = mesh_converter.Convert(file_name, metadata);

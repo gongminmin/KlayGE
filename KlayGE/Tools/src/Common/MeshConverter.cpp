@@ -202,43 +202,43 @@ namespace
 
 namespace KlayGE
 {
-	void MeshConverter::RecursiveTransformMesh(uint32_t lod, float4x4 const & parent_mat, aiNode const * node)
+	void MeshConverter::RecursiveTransformMesh(uint32_t num_lods, uint32_t lod, float4x4 const & parent_mat, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
-		auto const trans_it_mat = MathLib::transpose(MathLib::inverse(trans_mat));
 
-		for (uint32_t n = 0; n < node->mNumMeshes; ++ n)
+		if (node->mNumMeshes > 0)
 		{
-			auto& mesh = meshes_[node->mMeshes[n]];
-
-			for (size_t vi = 0; vi < mesh.lods[lod].positions.size(); ++ vi)
+			if (lod == 0)
 			{
-				mesh.lods[lod].positions[vi] = MathLib::transform_coord(mesh.lods[lod].positions[vi], trans_mat);
+				NodeTransform node_transform;
+				node_transform.name = node->mName.C_Str();
+				node_transform.mesh_indices.assign(node->mMeshes, node->mMeshes + node->mNumMeshes);
+				node_transform.lod_transforms.resize(num_lods);
+				node_transform.lod_transforms[0] = trans_mat;
 
-				if (mesh.has_normal || mesh.has_tangent_frame)
-				{
-					mesh.lods[lod].normals[vi] = MathLib::transform_normal(mesh.lods[lod].normals[vi], trans_it_mat);
-				}
-				if (mesh.has_tangent_frame)
-				{
-					mesh.lods[lod].tangents[vi] = MathLib::transform_normal(mesh.lods[lod].tangents[vi], trans_mat);
-					mesh.lods[lod].binormals[vi] = MathLib::transform_normal(mesh.lods[lod].binormals[vi], trans_mat);
-				}
+				nodes_.push_back(node_transform);
 			}
-
-			for (auto& binding : mesh.lods[lod].joint_bindings)
+			else
 			{
-				std::sort(binding.begin(), binding.end(),
-					[](std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs)
+				bool found = false;
+				for (auto& node_transform : nodes_)
+				{
+					if (node_transform.name == node->mName.C_Str())
 					{
-						return lhs.second > rhs.second;
-					});
+						node_transform.lod_transforms[lod] = trans_mat;
+						found = true;
+
+						break;
+					}
+				}
+
+				BOOST_ASSERT(found);
 			}
 		}
 
 		for (uint32_t i = 0; i < node->mNumChildren; ++ i)
 		{
-			this->RecursiveTransformMesh(lod, trans_mat, node->mChildren[i]);
+			this->RecursiveTransformMesh(num_lods, lod, trans_mat, node->mChildren[i]);
 		}
 	}
 
@@ -521,6 +521,15 @@ namespace KlayGE
 						{
 							BOOST_ASSERT_MSG(false, "Joint not found!");
 						}
+					}
+
+					for (auto& binding : meshes_[mi].lods[lod].joint_bindings)
+					{
+						std::sort(binding.begin(), binding.end(),
+							[](std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs)
+							{
+								return lhs.second > rhs.second;
+							});
 					}
 				}
 			}
@@ -886,7 +895,7 @@ namespace KlayGE
 		this->BuildMeshData(scenes);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
-			this->RecursiveTransformMesh(lod, float4x4::Identity(), scenes[lod]->mRootNode);
+			this->RecursiveTransformMesh(num_lods, lod, float4x4::Identity(), scenes[lod]->mRootNode);
 		}
 
 		if (skinned)
@@ -894,9 +903,8 @@ namespace KlayGE
 			this->BuildActions(scenes[0].get());
 		}
 
-		for (size_t mi = 0; mi < meshes_.size(); ++ mi)
+		for (auto& mesh : meshes_)
 		{
-			auto& mesh = meshes_[mi];
 			auto& lod0 = mesh.lods[0];
 
 			mesh.pos_bb = MathLib::compute_aabbox(lod0.positions.begin(), lod0.positions.end());
@@ -1372,6 +1380,7 @@ namespace KlayGE
 			recompute_tc_bb = true;
 		}
 	}
+
 	void MeshConverter::CompileMeshesChunk(XMLNodePtr const & meshes_chunk)
 	{
 		uint32_t num_meshes = 0;
@@ -1380,11 +1389,15 @@ namespace KlayGE
 			++ num_meshes;
 		}
 		meshes_.resize(num_meshes);
+		nodes_.resize(num_meshes);
 
 		uint32_t mesh_index = 0;
 		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 		{
-			meshes_[mesh_index].name = std::string(mesh_node->Attrib("name")->ValueString());
+			nodes_[mesh_index].name = std::string(mesh_node->Attrib("name")->ValueString());
+			nodes_[mesh_index].mesh_indices.push_back(mesh_index);
+
+			meshes_[mesh_index].name = nodes_[mesh_index].name;
 			meshes_[mesh_index].mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
 
 			bool recompute_pos_bb;
@@ -1416,6 +1429,7 @@ namespace KlayGE
 				}
 
 				meshes_[mesh_index].lods.resize(mesh_lod);
+				nodes_[mesh_index].lod_transforms.assign(mesh_lod, float4x4::Identity());
 
 				for (uint32_t lod = 0; lod < mesh_lod; ++ lod)
 				{
@@ -1428,6 +1442,7 @@ namespace KlayGE
 			else
 			{
 				meshes_[mesh_index].lods.resize(1);
+				nodes_[mesh_index].lod_transforms.assign(1, float4x4::Identity());
 
 				this->CompileMeshLodChunk(mesh_node, mesh_index, 0, recompute_pos_bb, recompute_tc_bb);
 
@@ -2314,6 +2329,7 @@ namespace KlayGE
 
 		render_model_.reset();
 		meshes_.clear();
+		nodes_.clear();
 		joints_.clear();
 		has_normal_ = false;
 		has_tangent_quat_ = false;
@@ -2338,41 +2354,29 @@ namespace KlayGE
 		uint32_t const num_lods = static_cast<uint32_t>(meshes_[0].lods.size());
 		bool const skinned = !joints_.empty();
 
-		AABBox model_aabb = meshes_[0].pos_bb;
-		for (size_t mesh_index = 1; mesh_index < meshes_.size(); ++ mesh_index)
+		auto global_transform = metadata.Transform();
+		if (metadata.AutoCenter())
 		{
-			model_aabb.Min() = MathLib::minimize(model_aabb.Min(), meshes_[mesh_index].pos_bb.Min());
-			model_aabb.Max() = MathLib::maximize(model_aabb.Max(), meshes_[mesh_index].pos_bb.Max());
-		}
-		float3 const model_center = metadata.AutoCenter() ? model_aabb.Center() : float3(0, 0, 0);
-
-		for (size_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
-		{
-			auto& mesh = meshes_[mesh_index];
-			for (uint32_t lod = 0; lod < num_lods; ++ lod)
+			bool first_aabb = true;
+			AABBox model_aabb;
+			for (auto const & node : nodes_)
 			{
-				auto& mesh_lod = mesh.lods[lod];
-
-				for (auto& position : mesh_lod.positions)
+				for (auto const mesh_index : node.mesh_indices)
 				{
-					position = MathLib::transform_coord(position - model_center, metadata.Transform());
-				}
-				for (auto& tangent : mesh_lod.tangents)
-				{
-					tangent = MathLib::normalize(MathLib::transform_normal(tangent, metadata.Transform()));
-				}
-				for (auto& binormal : mesh_lod.binormals)
-				{
-					binormal = MathLib::normalize(MathLib::transform_normal(binormal, metadata.Transform()));
-				}
-				for (auto& normal : mesh_lod.normals)
-				{
-					normal = MathLib::normalize(MathLib::transform_normal(normal, metadata.TransformIT()));
+					auto trans_aabb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.lod_transforms[0]);
+					if (first_aabb)
+					{
+						model_aabb = trans_aabb;
+						first_aabb = false;
+					}
+					else
+					{
+						model_aabb |= trans_aabb;
+					}
 				}
 			}
 
-			mesh.pos_bb.Min() = MathLib::transform_coord(mesh.pos_bb.Min() - model_center, metadata.Transform());
-			mesh.pos_bb.Max() = MathLib::transform_coord(mesh.pos_bb.Max() - model_center, metadata.Transform());
+			global_transform = MathLib::translation(-model_aabb.Center()) * global_transform;
 		}
 
 		std::vector<VertexElement> merged_ves;
@@ -2444,188 +2448,208 @@ namespace KlayGE
 		}
 
 		{
-			uint32_t mesh_lod_index = 0;
-			for (uint32_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+			for (auto const & node : nodes_)
 			{
-				auto& mesh = meshes_[mesh_index];
-
-				float3 const pos_center = mesh.pos_bb.Center();
-				float3 const pos_extent = mesh.pos_bb.HalfSize();
-				float3 const tc_center = mesh.tc_bb.Center();
-				float3 const tc_extent = mesh.tc_bb.HalfSize();
-				for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+				auto const trans0_mat = node.lod_transforms[0] * global_transform;
+				for (auto const mesh_index : node.mesh_indices)
 				{
-					auto& mesh_lod = mesh.lods[lod];
+					auto const pos_bb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, trans0_mat);
+					auto const & tc_bb = meshes_[mesh_index].tc_bb;
 
-					for (auto const & position : mesh_lod.positions)
+					float3 const pos_center = pos_bb.Center();
+					float3 const pos_extent = pos_bb.HalfSize();
+					float3 const tc_center = tc_bb.Center();
+					float3 const tc_extent = tc_bb.HalfSize();
+
+					for (uint32_t lod = 0; lod < num_lods; ++ lod)
 					{
-						float3 const pos = (position - pos_center) / pos_extent * 0.5f + 0.5f;
-						int16_t const s_pos[] =
-						{
-							static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
-							static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
-							static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
-							32767
-						};
+						float4x4 const trans_mat = node.lod_transforms[lod] * global_transform;
+						float4x4 const trans_mat_it = MathLib::transpose(MathLib::inverse(trans_mat));
 
-						uint8_t const * p = reinterpret_cast<uint8_t const *>(s_pos);
-						merged_vertices[position_stream].insert(merged_vertices[position_stream].end(), p, p + sizeof(s_pos));
-					}
-					if (normal_stream != -1)
-					{
-						for (auto const & n : mesh_lod.normals)
-						{
-							float3 const normal = MathLib::normalize(n) * 0.5f + 0.5f;
-							uint32_t compact = MathLib::clamp(static_cast<uint32_t>(normal.x() * 255 + 0.5f), 0U, 255U)
-								| (MathLib::clamp(static_cast<uint32_t>(normal.y() * 255 + 0.5f), 0U, 255U) << 8)
-								| (MathLib::clamp(static_cast<uint32_t>(normal.z() * 255 + 0.5f), 0U, 255U) << 16);
+						auto& mesh_lod = meshes_[mesh_index].lods[lod];
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
-							merged_vertices[normal_stream].insert(merged_vertices[normal_stream].end(), p, p + sizeof(compact));
-						}
-					}
-					if (tangent_quat_stream != -1)
-					{
-						for (size_t i = 0; i < mesh_lod.tangents.size(); ++ i)
+						for (auto const & position : mesh_lod.positions)
 						{
-							Quaternion const tangent_quat = MathLib::to_quaternion(mesh_lod.tangents[i], mesh_lod.binormals[i],
-								mesh_lod.normals[i], 8);
-
-							uint32_t compact = (
-								MathLib::clamp(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 0)
-								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 8)
-								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 16)
-								| (MathLib::clamp(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 24);
-
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
-							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
-								p, p + sizeof(compact));
-						}
-					}
-					if (diffuse_stream != -1)
-					{
-						for (auto const & diffuse : mesh_lod.diffuses)
-						{
-							uint32_t const clr = diffuse.ABGR();
-
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
-							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(), p, p + sizeof(clr));
-						}
-					}
-					if (specular_stream != -1)
-					{
-						for (auto const & specular : mesh_lod.speculars)
-						{
-							uint32_t const clr = specular.ABGR();
-
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
-							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(), p, p + sizeof(clr));
-						}
-					}
-					if (texcoord_stream != -1)
-					{
-						for (auto const & tc : mesh_lod.texcoords[0])
-						{
-							float3 tex_coord = float3(tc.x(), tc.y(), 0.0f);
-							tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
-							int16_t s_tc[2] =
+							float3 const pos = (MathLib::transform_coord(position, trans_mat) - pos_center) / pos_extent * 0.5f + 0.5f;
+							int16_t const s_pos[] =
 							{
-								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
-									-32768, 32767)),
-								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
-									-32768, 32767)),
+								static_cast<int16_t>(
+									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+								static_cast<int16_t>(
+									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+								static_cast<int16_t>(
+									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+								32767
 							};
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(s_tc);
-							merged_vertices[texcoord_stream].insert(merged_vertices[texcoord_stream].end(), p, p + sizeof(s_tc));
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(s_pos);
+							merged_vertices[position_stream].insert(merged_vertices[position_stream].end(), p, p + sizeof(s_pos));
 						}
-					}
-
-					if (blend_weights_stream != -1)
-					{
-						BOOST_ASSERT(blend_indices_stream != -1);
-
-						for (auto const & binding : mesh_lod.joint_bindings)
+						if (normal_stream != -1)
 						{
-							size_t constexpr MAX_BINDINGS = 4;
-
-							float total_weight = 0;
-							size_t const num = std::min(MAX_BINDINGS, binding.size());
-							for (size_t wi = 0; wi < num; ++ wi)
+							for (auto const & n : mesh_lod.normals)
 							{
-								total_weight += binding[wi].second;
-							}
+								float3 const normal = MathLib::normalize(MathLib::transform_normal(n, trans_mat_it)) * 0.5f + 0.5f;
+								uint32_t const compact = MathLib::clamp(static_cast<uint32_t>(normal.x() * 255 + 0.5f), 0U, 255U)
+									| (MathLib::clamp(static_cast<uint32_t>(normal.y() * 255 + 0.5f), 0U, 255U) << 8)
+									| (MathLib::clamp(static_cast<uint32_t>(normal.z() * 255 + 0.5f), 0U, 255U) << 16);
 
-							uint8_t joint_ids[MAX_BINDINGS];
-							uint8_t weights[MAX_BINDINGS];
-							for (size_t wi = 0; wi < num; ++ wi)
-							{
-								joint_ids[wi] = static_cast<uint8_t>(binding[wi].first);
-
-								float const w = binding[wi].second / total_weight;
-								weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(w * 255 + 0.5f), 0U, 255U));
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
+								merged_vertices[normal_stream].insert(merged_vertices[normal_stream].end(), p, p + sizeof(compact));
 							}
-							for (size_t wi = num; wi < MAX_BINDINGS; ++ wi)
-							{
-								joint_ids[wi] = 0;
-								weights[wi] = 0;
-							}
-
-							merged_vertices[blend_weights_stream].insert(merged_vertices[blend_weights_stream].end(),
-								weights, weights + sizeof(weights));
-							merged_vertices[blend_indices_stream].insert(merged_vertices[blend_indices_stream].end(),
-								joint_ids, joint_ids + sizeof(joint_ids));
 						}
-					}
+						if (tangent_quat_stream != -1)
+						{
+							for (size_t i = 0; i < mesh_lod.tangents.size(); ++ i)
+							{
+								float3 const tangent = MathLib::normalize(MathLib::transform_normal(mesh_lod.tangents[i], trans_mat));
+								float3 const binormal = MathLib::normalize(MathLib::transform_normal(mesh_lod.binormals[i], trans_mat));
+								float3 const normal = MathLib::normalize(MathLib::transform_normal(mesh_lod.normals[i], trans_mat_it));
 
-					mesh_num_vertices.push_back(static_cast<uint32_t>(mesh_lod.positions.size()));
-					mesh_base_vertices.push_back(mesh_base_vertices.back() + mesh_num_vertices.back());
+								Quaternion const tangent_quat = MathLib::to_quaternion(tangent, binormal, normal, 8);
+
+								uint32_t const compact = (
+									MathLib::clamp(
+										static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 0)
+									| (MathLib::clamp(
+										static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 8)
+									| (MathLib::clamp(
+										static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 16)
+									| (MathLib::clamp(
+										static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 24);
+
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
+								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+									p, p + sizeof(compact));
+							}
+						}
+						if (diffuse_stream != -1)
+						{
+							for (auto const & diffuse : mesh_lod.diffuses)
+							{
+								uint32_t const clr = diffuse.ABGR();
+
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
+								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+									p, p + sizeof(clr));
+							}
+						}
+						if (specular_stream != -1)
+						{
+							for (auto const & specular : mesh_lod.speculars)
+							{
+								uint32_t const clr = specular.ABGR();
+
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
+								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+									p, p + sizeof(clr));
+							}
+						}
+						if (texcoord_stream != -1)
+						{
+							for (auto const & tc : mesh_lod.texcoords[0])
+							{
+								float3 tex_coord = float3(tc.x(), tc.y(), 0.0f);
+								tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
+								int16_t s_tc[2] =
+								{
+									static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
+										-32768, 32767)),
+									static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
+										-32768, 32767)),
+								};
+
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(s_tc);
+								merged_vertices[texcoord_stream].insert(merged_vertices[texcoord_stream].end(), p, p + sizeof(s_tc));
+							}
+						}
+
+						if (blend_weights_stream != -1)
+						{
+							BOOST_ASSERT(blend_indices_stream != -1);
+
+							for (auto const & binding : mesh_lod.joint_bindings)
+							{
+								size_t constexpr MAX_BINDINGS = 4;
+
+								float total_weight = 0;
+								size_t const num = std::min(MAX_BINDINGS, binding.size());
+								for (size_t wi = 0; wi < num; ++ wi)
+								{
+									total_weight += binding[wi].second;
+								}
+
+								uint8_t joint_ids[MAX_BINDINGS];
+								uint8_t weights[MAX_BINDINGS];
+								for (size_t wi = 0; wi < num; ++ wi)
+								{
+									joint_ids[wi] = static_cast<uint8_t>(binding[wi].first);
+
+									float const w = binding[wi].second / total_weight;
+									weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(w * 255 + 0.5f), 0U, 255U));
+								}
+								for (size_t wi = num; wi < MAX_BINDINGS; ++ wi)
+								{
+									joint_ids[wi] = 0;
+									weights[wi] = 0;
+								}
+
+								merged_vertices[blend_weights_stream].insert(merged_vertices[blend_weights_stream].end(),
+									weights, weights + sizeof(weights));
+								merged_vertices[blend_indices_stream].insert(merged_vertices[blend_indices_stream].end(),
+									joint_ids, joint_ids + sizeof(joint_ids));
+							}
+						}
+
+						mesh_num_vertices.push_back(static_cast<uint32_t>(mesh_lod.positions.size()));
+						mesh_base_vertices.push_back(mesh_base_vertices.back() + mesh_num_vertices.back());
+					}
 				}
 			}
 		}
 
 		{
 			uint32_t max_index = 0;
-			for (uint32_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+			for (auto const & mesh : meshes_)
 			{
-				auto& mesh = meshes_[mesh_index];
-				for (uint32_t lod = 0; lod < num_lods; ++ lod)
+				for (auto const & mesh_lod : mesh.lods)
 				{
-					for (size_t index = 0; index < mesh.lods[lod].indices.size(); ++ index)
+					for (auto index : mesh_lod.indices)
 					{
-						max_index = std::max(max_index, mesh.lods[lod].indices[index]);
+						max_index = std::max(max_index, index);
 					}
 				}
 			}
 
 			is_index_16_bit = (max_index < 0xFFFF);
 
-			uint32_t mesh_lod_index = 0;
-			for (uint32_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+			for (auto const & node : nodes_)
 			{
-				auto& mesh = meshes_[mesh_index];
-				for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+				for (auto const mesh_index : node.mesh_indices)
 				{
-					for (size_t index = 0; index < mesh.lods[lod].indices.size(); ++ index)
+					for (auto const & mesh_lod : meshes_[mesh_index].lods)
 					{
-						if (is_index_16_bit)
+						for (auto const index : mesh_lod.indices)
 						{
-							uint16_t const i16 = static_cast<uint16_t>(mesh.lods[lod].indices[index]);
+							if (is_index_16_bit)
+							{
+								uint16_t const i16 = static_cast<uint16_t>(index);
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i16);
-							merged_indices.insert(merged_indices.end(), p, p + sizeof(i16));
-						}
-						else
-						{
-							uint32_t const i32 = mesh.lods[lod].indices[index];
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&i16);
+								merged_indices.insert(merged_indices.end(), p, p + sizeof(i16));
+							}
+							else
+							{
+								uint32_t const i32 = index;
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i32);
-							merged_indices.insert(merged_indices.end(), p, p + sizeof(i32));
+								uint8_t const * p = reinterpret_cast<uint8_t const *>(&i32);
+								merged_indices.insert(merged_indices.end(), p, p + sizeof(i32));
+							}
 						}
+
+						mesh_num_indices.push_back(static_cast<uint32_t>(mesh_lod.indices.size()));
+						mesh_start_indices.push_back(mesh_start_indices.back() + mesh_num_indices.back());
 					}
-
-					mesh_num_indices.push_back(static_cast<uint32_t>(mesh.lods[lod].indices.size()));
-					mesh_start_indices.push_back(mesh_start_indices.back() + mesh_num_indices.back());
 				}
 			}
 		}
@@ -2642,39 +2666,44 @@ namespace KlayGE
 		merged_ib->CreateHWResource(merged_indices.data());
 
 		uint32_t mesh_lod_index = 0;
-		std::vector<StaticMeshPtr> render_meshes(meshes_.size());
-		for (uint32_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+		std::vector<StaticMeshPtr> render_meshes;
+		for (auto const & node : nodes_)
 		{
 			std::wstring wname;
-			KlayGE::Convert(wname, meshes_[mesh_index].name);
+			KlayGE::Convert(wname, node.name);
 
-			if (skinned)
+			auto const trans0_mat = node.lod_transforms[0] * global_transform;
+			for (auto const mesh_index : node.mesh_indices)
 			{
-				render_meshes[mesh_index] = MakeSharedPtr<SkinnedMesh>(render_model_, wname);
-			}
-			else
-			{
-				render_meshes[mesh_index] = MakeSharedPtr<StaticMesh>(render_model_, wname);
-			}
-			auto& render_mesh = *render_meshes[mesh_index];
-
-			render_mesh.MaterialID(meshes_[mesh_index].mtl_id);
-			render_mesh.PosBound(meshes_[mesh_index].pos_bb);
-			render_mesh.TexcoordBound(meshes_[mesh_index].tc_bb);
-
-			render_mesh.NumLods(num_lods);
-			for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
-			{
-				for (uint32_t ve_index = 0; ve_index < merged_vertices.size(); ++ ve_index)
+				StaticMeshPtr render_mesh;
+				if (skinned)
 				{
-					render_mesh.AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
+					render_mesh = MakeSharedPtr<SkinnedMesh>(render_model_, wname);
 				}
-				render_mesh.AddIndexStream(lod, merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
+				else
+				{
+					render_mesh = MakeSharedPtr<StaticMesh>(render_model_, wname);
+				}
+				render_meshes.push_back(render_mesh);
 
-				render_mesh.NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
-				render_mesh.NumIndices(lod, mesh_num_indices[mesh_lod_index]);
-				render_mesh.StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
-				render_mesh.StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
+				render_mesh->MaterialID(meshes_[mesh_index].mtl_id);
+				render_mesh->PosBound(MathLib::transform_aabb(meshes_[mesh_index].pos_bb, trans0_mat));
+				render_mesh->TexcoordBound(meshes_[mesh_index].tc_bb);
+
+				render_mesh->NumLods(num_lods);
+				for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+				{
+					for (uint32_t ve_index = 0; ve_index < merged_vertices.size(); ++ ve_index)
+					{
+						render_mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
+					}
+					render_mesh->AddIndexStream(lod, merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
+
+					render_mesh->NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
+					render_mesh->NumIndices(lod, mesh_num_indices[mesh_lod_index]);
+					render_mesh->StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
+					render_mesh->StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
+				}
 			}
 		}
 
@@ -2690,22 +2719,27 @@ namespace KlayGE
 			skinned_model.AssignJoints(joints_.begin(), joints_.end());
 
 			// TODO: Run skinning on CPU to get the bounding box
-			for (size_t mesh_index = 0; mesh_index < meshes_.size(); ++ mesh_index)
+			uint32_t total_mesh_index = 0;
+			for (uint32_t node_index = 0; node_index < nodes_.size(); ++ node_index)
 			{
-				auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(render_meshes[mesh_index]);
+				auto const & node = nodes_[node_index];
+				for (size_t mesh_index = 0; mesh_index < node.mesh_indices.size(); ++ mesh_index, ++ total_mesh_index)
+				{
+					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(render_meshes[total_mesh_index]);
 
-				auto frame_pos_aabbs = MakeSharedPtr<AABBKeyFrameSet>();
+					auto frame_pos_aabbs = MakeSharedPtr<AABBKeyFrameSet>();
 
-				frame_pos_aabbs->frame_id.resize(2);
-				frame_pos_aabbs->bb.resize(2);
+					frame_pos_aabbs->frame_id.resize(2);
+					frame_pos_aabbs->bb.resize(2);
 
-				frame_pos_aabbs->frame_id[0] = 0;
-				frame_pos_aabbs->frame_id[1] = skinned_model.NumFrames() - 1;
+					frame_pos_aabbs->frame_id[0] = 0;
+					frame_pos_aabbs->frame_id[1] = skinned_model.NumFrames() - 1;
 
-				frame_pos_aabbs->bb[0] = meshes_[mesh_index].pos_bb;
-				frame_pos_aabbs->bb[1] = meshes_[mesh_index].tc_bb;
+					frame_pos_aabbs->bb[0] = skinned_mesh.PosBound();
+					frame_pos_aabbs->bb[1] = skinned_mesh.PosBound();
 
-				skinned_mesh.AttachFramePosBounds(frame_pos_aabbs);
+					skinned_mesh.AttachFramePosBounds(frame_pos_aabbs);
+				}
 			}
 		}
 

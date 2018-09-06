@@ -141,7 +141,11 @@ int main(int argc, char* argv[])
 
 	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
 
-	TexMetadata metadata(metadata_name);
+	TexMetadata metadata;
+	if (!ResLoader::Instance().Locate(metadata_name).empty())
+	{
+		metadata.Load(metadata_name);
+	}
 	metadata.DeviceDependentAdjustment(platform_def.device_caps);
 
 	TexConverter tc;

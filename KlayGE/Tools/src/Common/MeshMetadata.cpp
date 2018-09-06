@@ -221,7 +221,7 @@ namespace KlayGE
 		}
 		else if(!name.empty())
 		{
-			LogError() << "COULDN'T find " << name << ". Fallback to default metadata." << std::endl;
+			LogError() << "Could NOT find " << name << ". Fallback to default metadata." << std::endl;
 		}
 
 		*this = std::move(new_metadata);
