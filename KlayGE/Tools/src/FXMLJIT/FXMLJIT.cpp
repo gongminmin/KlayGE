@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	ResLoader::Instance().AddPath("../../Tools/media/PlatformDeployer");
+	ResLoader::Instance().AddPath("../../Tools/media/Common");
 
 	std::string platform = argv[1];
 
