@@ -111,6 +111,8 @@ public:
 		int normal_stream = -1;
 		int tangent_quat_stream = -1;
 		int texcoord_stream = -1;
+		int diffuse_stream = -1;
+		int specular_stream = -1;
 		int blend_weights_stream = -1;
 		int blend_indices_stream = -1;
 		{
@@ -135,6 +137,14 @@ public:
 				{
 					texcoord_stream = stream_index;
 				}
+				if ((ve.usage == VEU_Diffuse) && (ve.usage_index == 0) && (ve.format == EF_ABGR8))
+				{
+					diffuse_stream = stream_index;
+				}
+				if ((ve.usage == VEU_Specular) && (ve.usage_index == 0) && (ve.format == EF_ABGR8))
+				{
+					specular_stream = stream_index;
+				}
 				if ((ve.usage == VEU_BlendWeight) && (ve.usage_index == 0) && (ve.format == EF_ABGR8))
 				{
 					blend_weights_stream = stream_index;
@@ -152,6 +162,8 @@ public:
 		int sanity_normal_stream = -1;
 		int sanity_tangent_quat_stream = -1;
 		int sanity_texcoord_stream = -1;
+		int sanity_diffuse_stream = -1;
+		int sanity_specular_stream = -1;
 		int sanity_blend_weights_stream = -1;
 		int sanity_blend_indices_stream = -1;
 		{
@@ -175,6 +187,14 @@ public:
 				if ((sanity_ve.usage == VEU_TextureCoord) && (sanity_ve.usage_index == 0) && (sanity_ve.format == EF_SIGNED_GR16))
 				{
 					sanity_texcoord_stream = stream_index;
+				}
+				if ((sanity_ve.usage == VEU_Diffuse) && (sanity_ve.usage_index == 0) && (sanity_ve.format == EF_ABGR8))
+				{
+					sanity_diffuse_stream = stream_index;
+				}
+				if ((sanity_ve.usage == VEU_Specular) && (sanity_ve.usage_index == 0) && (sanity_ve.format == EF_ABGR8))
+				{
+					sanity_specular_stream = stream_index;
 				}
 				if ((sanity_ve.usage == VEU_BlendWeight) && (sanity_ve.usage_index == 0) && (sanity_ve.format == EF_ABGR8))
 				{
@@ -237,6 +257,30 @@ public:
 		else
 		{
 			EXPECT_EQ(texcoord_stream, -1);
+		}
+		if (diffuse_stream != -1)
+		{
+			EXPECT_NE(diffuse_stream, -1);
+
+			auto ve = rl.VertexStreamFormat(diffuse_stream)[0];
+			auto sanity_ve = sanity_rl.VertexStreamFormat(sanity_diffuse_stream)[0];
+			EXPECT_TRUE(ve == sanity_ve);
+		}
+		else
+		{
+			EXPECT_EQ(diffuse_stream, -1);
+		}
+		if (specular_stream != -1)
+		{
+			EXPECT_NE(specular_stream, -1);
+
+			auto ve = rl.VertexStreamFormat(specular_stream)[0];
+			auto sanity_ve = sanity_rl.VertexStreamFormat(sanity_specular_stream)[0];
+			EXPECT_TRUE(ve == sanity_ve);
+		}
+		else
+		{
+			EXPECT_EQ(specular_stream, -1);
 		}
 		if (blend_weights_stream != -1)
 		{
@@ -329,6 +373,28 @@ public:
 					sanity_texcoord_buff = sanity_texcoord_mapper.Pointer<int16_t>();
 				}
 
+				uint8_t const * diffuse_buff = nullptr;
+				uint8_t const * sanity_diffuse_buff = nullptr;
+				if (diffuse_stream != -1)
+				{
+					GraphicsBuffer::Mapper diffuse_mapper(*rl.GetVertexStream(diffuse_stream), BA_Read_Only);
+					diffuse_buff = diffuse_mapper.Pointer<uint8_t>();
+
+					GraphicsBuffer::Mapper sanity_diffuse_mapper(*sanity_rl.GetVertexStream(sanity_diffuse_stream), BA_Read_Only);
+					sanity_diffuse_buff = sanity_diffuse_mapper.Pointer<uint8_t>();
+				}
+
+				uint8_t const * specular_buff = nullptr;
+				uint8_t const * sanity_specular_buff = nullptr;
+				if (specular_stream != -1)
+				{
+					GraphicsBuffer::Mapper specular_mapper(*rl.GetVertexStream(specular_stream), BA_Read_Only);
+					specular_buff = specular_mapper.Pointer<uint8_t>();
+
+					GraphicsBuffer::Mapper sanity_specular_mapper(*sanity_rl.GetVertexStream(sanity_specular_stream), BA_Read_Only);
+					sanity_specular_buff = sanity_specular_mapper.Pointer<uint8_t>();
+				}
+
 				uint8_t const * blend_weights_buff = nullptr;
 				uint8_t const * sanity_blend_weights_buff = nullptr;
 				if (blend_weights_stream != -1)
@@ -386,13 +452,13 @@ public:
 
 					if (normal_stream != -1)
 					{
-						float4 normal;
+						float3 normal;
 						normal.x() = (normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
 						normal.y() = (normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
 						normal.z() = (normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
 						normal = MathLib::normalize(normal);
 
-						float4 sanity_normal;
+						float3 sanity_normal;
 						sanity_normal.x() = (sanity_normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
 						sanity_normal.y() = (sanity_normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
 						sanity_normal.z() = (sanity_normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
@@ -439,6 +505,46 @@ public:
 
 						EXPECT_TRUE(std::abs(tc.x() - sanity_tc.x()) < 2e-3f);
 						EXPECT_TRUE(std::abs(tc.y() - sanity_tc.y()) < 2e-3f);
+					}
+
+					if (diffuse_stream != -1)
+					{
+						Color diffuse;
+						diffuse.r() = diffuse_buff[index * 4 + 0] / 255.0f;
+						diffuse.g() = diffuse_buff[index * 4 + 1] / 255.0f;
+						diffuse.b() = diffuse_buff[index * 4 + 2] / 255.0f;
+						diffuse.a() = diffuse_buff[index * 4 + 3] / 255.0f;
+
+						Color sanity_diffuse;
+						sanity_diffuse.r() = sanity_diffuse_buff[index * 4 + 0] / 255.0f;
+						sanity_diffuse.g() = sanity_diffuse_buff[index * 4 + 1] / 255.0f;
+						sanity_diffuse.b() = sanity_diffuse_buff[index * 4 + 2] / 255.0f;
+						sanity_diffuse.a() = sanity_diffuse_buff[index * 4 + 3] / 255.0f;
+
+						EXPECT_TRUE(std::abs(diffuse.r() - sanity_diffuse.r()) < 2e-3f);
+						EXPECT_TRUE(std::abs(diffuse.g() - sanity_diffuse.g()) < 2e-3f);
+						EXPECT_TRUE(std::abs(diffuse.b() - sanity_diffuse.b()) < 2e-3f);
+						EXPECT_TRUE(std::abs(diffuse.a() - sanity_diffuse.a()) < 2e-3f);
+					}
+
+					if (specular_stream != -1)
+					{
+						Color specular;
+						specular.r() = specular_buff[index * 4 + 0] / 255.0f;
+						specular.g() = specular_buff[index * 4 + 1] / 255.0f;
+						specular.b() = specular_buff[index * 4 + 2] / 255.0f;
+						specular.a() = specular_buff[index * 4 + 3] / 255.0f;
+
+						Color sanity_specular;
+						sanity_specular.r() = sanity_specular_buff[index * 4 + 0] / 255.0f;
+						sanity_specular.g() = sanity_specular_buff[index * 4 + 1] / 255.0f;
+						sanity_specular.b() = sanity_specular_buff[index * 4 + 2] / 255.0f;
+						sanity_specular.a() = sanity_specular_buff[index * 4 + 3] / 255.0f;
+
+						EXPECT_TRUE(std::abs(specular.r() - sanity_specular.r()) < 2e-3f);
+						EXPECT_TRUE(std::abs(specular.g() - sanity_specular.g()) < 2e-3f);
+						EXPECT_TRUE(std::abs(specular.b() - sanity_specular.b()) < 2e-3f);
+						EXPECT_TRUE(std::abs(specular.a() - sanity_specular.a()) < 2e-3f);
 					}
 
 					if (blend_weights_stream != -1)
