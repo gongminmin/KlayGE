@@ -49,6 +49,7 @@
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic pop
 #endif
+#include <assimp/cexport.h>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -928,6 +929,435 @@ namespace KlayGE
 
 			mesh.pos_bb = MathLib::compute_aabbox(lod0.positions.begin(), lod0.positions.end());
 			mesh.tc_bb = MathLib::compute_aabbox(lod0.texcoords[0].begin(), lod0.texcoords[0].end());
+		}
+	}
+
+	void MeshConverter::SaveByAssimp(std::string const & output_name)
+	{
+		std::vector<aiScene> scene_lods(render_model_->NumLods());
+		for (uint32_t lod = 0; lod < render_model_->NumLods(); ++ lod)
+		{
+			auto& ai_scene = scene_lods[lod];
+
+			ai_scene.mNumMaterials = static_cast<uint32_t>(render_model_->NumMaterials());
+			ai_scene.mMaterials = new aiMaterial*[ai_scene.mNumMaterials];
+			for (uint32_t i = 0; i < ai_scene.mNumMaterials; ++ i)
+			{
+				auto const & mtl = *render_model_->GetMaterial(i);
+
+				ai_scene.mMaterials[i] = new aiMaterial;
+				auto& ai_mtl = *ai_scene.mMaterials[i];
+
+				{
+					aiString name;
+					name.Set(mtl.name.c_str());
+					ai_mtl.AddProperty(&name, AI_MATKEY_NAME);
+				}
+
+				{
+					float3 const diffuse = mtl.albedo * (1 - mtl.metalness);
+					float3 const specular = MathLib::lerp(float3(0.04f, 0.04f, 0.04f),
+						float3(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z()), mtl.metalness);
+
+					aiColor3D const ai_diffuse(diffuse.x(), diffuse.y(), diffuse.z());
+					ai_mtl.AddProperty(&ai_diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+
+					float const ai_shininess_strength = MathLib::max3(specular.x(), specular.y(), specular.z());
+					ai_mtl.AddProperty(&ai_shininess_strength, 1, AI_MATKEY_SHININESS_STRENGTH);
+
+					aiColor3D const ai_specular(specular.x() / ai_shininess_strength, specular.y() / ai_shininess_strength,
+						specular.z() / ai_shininess_strength);
+					ai_mtl.AddProperty(&ai_specular, 1, AI_MATKEY_COLOR_SPECULAR);
+				}
+				{
+					aiColor3D const ai_emissive(mtl.emissive.x(), mtl.emissive.y(), mtl.emissive.z());
+					ai_mtl.AddProperty(&ai_emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+				}
+
+				{
+					ai_real const ai_opacity = mtl.albedo.w();
+					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_OPACITY);
+				}
+
+				{
+					ai_real const ai_shininess = Glossiness2Shininess(mtl.glossiness);
+					ai_mtl.AddProperty(&ai_shininess, 1, AI_MATKEY_SHININESS);
+				}
+
+				if (mtl.two_sided)
+				{
+					int const ai_two_sided = 1;
+					ai_mtl.AddProperty(&ai_two_sided, 1, AI_MATKEY_TWOSIDED);
+				}
+
+				// TODO: alpha test, SSS
+
+				if (!mtl.tex_names[RenderMaterial::TS_Albedo].empty())
+				{
+					aiString name;
+					name.Set(mtl.tex_names[RenderMaterial::TS_Albedo]);
+					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(0));
+				}
+
+				if (!mtl.tex_names[RenderMaterial::TS_Glossiness].empty())
+				{
+					aiString name;
+					name.Set(mtl.tex_names[RenderMaterial::TS_Glossiness]);
+					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_SHININESS(0));
+				}
+
+				if (!mtl.tex_names[RenderMaterial::TS_Emissive].empty())
+				{
+					aiString name;
+					name.Set(mtl.tex_names[RenderMaterial::TS_Emissive]);
+					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_EMISSIVE(0));
+				}
+
+				if (!mtl.tex_names[RenderMaterial::TS_Normal].empty())
+				{
+					aiString name;
+					name.Set(mtl.tex_names[RenderMaterial::TS_Normal]);
+					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_NORMALS(0));
+				}
+
+				if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
+				{
+					aiString name;
+					name.Set(mtl.tex_names[RenderMaterial::TS_Height]);
+					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_HEIGHT(0));
+
+					// TODO: AI_MATKEY_BUMPSCALING
+				}
+			}
+
+			ai_scene.mNumMeshes = render_model_->NumSubrenderables();
+			ai_scene.mMeshes = new aiMesh*[ai_scene.mNumMeshes];
+
+			ai_scene.mRootNode = new aiNode;
+			ai_scene.mRootNode->mNumChildren = ai_scene.mNumMeshes;
+			ai_scene.mRootNode->mChildren = new aiNode*[ai_scene.mRootNode->mNumChildren];
+			ai_scene.mRootNode->mNumMeshes = 0;
+			ai_scene.mRootNode->mMeshes = nullptr;
+			ai_scene.mRootNode->mParent = nullptr;
+
+			for (uint32_t i = 0; i < ai_scene.mNumMeshes; ++ i)
+			{
+				auto const & mesh = *checked_cast<StaticMesh*>(render_model_->Subrenderable(i).get());
+
+				ai_scene.mMeshes[i] = new aiMesh;
+				auto& ai_mesh = *ai_scene.mMeshes[i];
+
+				ai_mesh.mMaterialIndex = mesh.MaterialID();
+				ai_mesh.mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+
+				ai_scene.mRootNode->mChildren[i] = new aiNode;
+				ai_scene.mRootNode->mChildren[i]->mNumMeshes = 1;
+				ai_scene.mRootNode->mChildren[i]->mMeshes = new unsigned int[1];
+				ai_scene.mRootNode->mChildren[i]->mMeshes[0] = i;
+				ai_scene.mRootNode->mChildren[i]->mParent = ai_scene.mRootNode;
+				ai_scene.mRootNode->mChildren[i]->mNumChildren = 0;
+				ai_scene.mRootNode->mChildren[i]->mChildren = nullptr;
+
+				std::string name;
+				KlayGE::Convert(name, mesh.Name());
+				ai_scene.mRootNode->mChildren[i]->mName.Set(name.c_str());
+
+				auto const & rl = mesh.GetRenderLayout();
+
+				ai_mesh.mNumVertices = mesh.NumVertices(lod);
+				uint32_t const start_vertex = mesh.StartVertexLocation(lod);
+
+				for (uint32_t vi = 0; vi < rl.NumVertexStreams(); ++ vi)
+				{
+					GraphicsBuffer::Mapper mapper(*rl.GetVertexStream(vi), BA_Read_Only);
+
+					auto const & ve = rl.VertexStreamFormat(vi)[0];
+					switch (ve.usage)
+					{
+					case VEU_Position:
+						ai_mesh.mVertices = new aiVector3D[ai_mesh.mNumVertices];
+
+						switch (ve.format)
+						{
+						case EF_SIGNED_ABGR16:
+							{
+								auto const & pos_bb = mesh.PosBound();
+								float3 const pos_center = pos_bb.Center();
+								float3 const pos_extent = pos_bb.HalfSize();
+
+								int16_t const * p_16 = mapper.Pointer<int16_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									ai_mesh.mVertices[j].x
+										= ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
+									ai_mesh.mVertices[j].y
+										= ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
+									ai_mesh.mVertices[j].z
+										= ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+								}
+
+								break;
+							}
+
+						case EF_BGR32F:
+						case EF_ABGR32F:
+							{
+								uint32_t const num_elems = NumComponents(ve.format);
+								float const * p_32f = mapper.Pointer<float>() + start_vertex * num_elems;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									ai_mesh.mVertices[j]
+										= aiVector3D(p_32f[j * num_elems + 0], p_32f[j * num_elems + 1], p_32f[j * num_elems + 2]);
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported position format.");
+						}
+						break;
+
+					case VEU_Tangent:
+						ai_mesh.mTangents = new aiVector3D[ai_mesh.mNumVertices];
+						ai_mesh.mBitangents = new aiVector3D[ai_mesh.mNumVertices];
+						ai_mesh.mNormals = new aiVector3D[ai_mesh.mNumVertices];
+
+						switch (ve.format)
+						{
+						case EF_ABGR8:
+							{
+								uint8_t const * tangent_quats = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									Quaternion tangent_quat;
+									tangent_quat.x() = (tangent_quats[j * 4 + 0] / 255.0f) * 2 - 1;
+									tangent_quat.y() = (tangent_quats[j * 4 + 1] / 255.0f) * 2 - 1;
+									tangent_quat.z() = (tangent_quats[j * 4 + 2] / 255.0f) * 2 - 1;
+									tangent_quat.w() = (tangent_quats[j * 4 + 3] / 255.0f) * 2 - 1;
+									tangent_quat = MathLib::normalize(tangent_quat);
+
+									auto const tangent = MathLib::transform_quat(float3(1, 0, 0), tangent_quat);
+									auto const binormal = MathLib::transform_quat(float3(0, 1, 0), tangent_quat)
+										* MathLib::sgn(tangent_quat.w());
+									auto const normal = MathLib::transform_quat(float3(0, 0, 1), tangent_quat);
+
+									ai_mesh.mTangents[j] = aiVector3D(tangent.x(), tangent.y(), tangent.z());
+									ai_mesh.mBitangents[j] = aiVector3D(binormal.x(), binormal.y(), binormal.z());
+									ai_mesh.mNormals[j] = aiVector3D(normal.x(), normal.y(), normal.z());
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported tangent frame format.");
+						}
+						break;
+
+					case VEU_Normal:
+						ai_mesh.mNormals = new aiVector3D[ai_mesh.mNumVertices];
+
+						switch (ve.format)
+						{
+						case EF_ABGR8:
+							{
+								uint8_t const * normals = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									float3 normal;
+									normal.x() = (normals[j * 4 + 0] / 255.0f) * 2 - 1;
+									normal.y() = (normals[j * 4 + 1] / 255.0f) * 2 - 1;
+									normal.z() = (normals[j * 4 + 2] / 255.0f) * 2 - 1;
+									normal = MathLib::normalize(normal);
+
+									ai_mesh.mNormals[j] = aiVector3D(normal.x(), normal.y(), normal.z());
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported normal format.");
+						}
+						break;
+
+					case VEU_Diffuse:
+						ai_mesh.mColors[0] = new aiColor4D[ai_mesh.mNumVertices];
+
+						switch (ve.format)
+						{
+						case EF_ABGR8:
+							{
+								uint8_t const * diffuses = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									aiColor4D diffuse;
+									diffuse.r = (diffuses[j * 4 + 0] / 255.0f) * 2 - 1;
+									diffuse.g = (diffuses[j * 4 + 1] / 255.0f) * 2 - 1;
+									diffuse.b = (diffuses[j * 4 + 2] / 255.0f) * 2 - 1;
+									diffuse.a = (diffuses[j * 4 + 3] / 255.0f) * 2 - 1;
+
+									ai_mesh.mColors[0][j] = diffuse;
+								}
+								break;
+							}
+
+						case EF_ARGB8:
+							{
+								uint8_t const * diffuses = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									aiColor4D diffuse;
+									diffuse.r = (diffuses[j * 4 + 2] / 255.0f) * 2 - 1;
+									diffuse.g = (diffuses[j * 4 + 1] / 255.0f) * 2 - 1;
+									diffuse.b = (diffuses[j * 4 + 0] / 255.0f) * 2 - 1;
+									diffuse.a = (diffuses[j * 4 + 3] / 255.0f) * 2 - 1;
+
+									ai_mesh.mColors[0][j] = diffuse;
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported normal format.");
+						}
+						break;
+
+					case VEU_Specular:
+						ai_mesh.mColors[1] = new aiColor4D[ai_mesh.mNumVertices];
+
+						switch (ve.format)
+						{
+						case EF_ABGR8:
+							{
+								uint8_t const * speculars = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									aiColor4D specular;
+									specular.r = (speculars[j * 4 + 0] / 255.0f) * 2 - 1;
+									specular.g = (speculars[j * 4 + 1] / 255.0f) * 2 - 1;
+									specular.b = (speculars[j * 4 + 2] / 255.0f) * 2 - 1;
+									specular.a = (speculars[j * 4 + 3] / 255.0f) * 2 - 1;
+
+									ai_mesh.mColors[1][j] = specular;
+								}
+								break;
+							}
+
+						case EF_ARGB8:
+							{
+								uint8_t const * speculars = mapper.Pointer<uint8_t>() + start_vertex * 4;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									aiColor4D specular;
+									specular.r = (speculars[j * 4 + 2] / 255.0f) * 2 - 1;
+									specular.g = (speculars[j * 4 + 1] / 255.0f) * 2 - 1;
+									specular.b = (speculars[j * 4 + 0] / 255.0f) * 2 - 1;
+									specular.a = (speculars[j * 4 + 3] / 255.0f) * 2 - 1;
+
+									ai_mesh.mColors[1][j] = specular;
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported normal format.");
+						}
+						break;
+
+					case VEU_TextureCoord:
+						ai_mesh.mTextureCoords[ve.usage_index] = new aiVector3D[ai_mesh.mNumVertices];
+						ai_mesh.mNumUVComponents[ve.usage_index] = 2;
+
+						switch (ve.format)
+						{
+						case EF_SIGNED_GR16:
+							{
+								auto const & tc_bb = mesh.TexcoordBound();
+								float3 const tc_center = tc_bb.Center();
+								float3 const tc_extent = tc_bb.HalfSize();
+
+								int16_t const * tc_16 = mapper.Pointer<int16_t>() + start_vertex * 2;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									ai_mesh.mTextureCoords[ve.usage_index][j].x
+										= ((tc_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+									ai_mesh.mTextureCoords[ve.usage_index][j].y
+										= ((tc_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+								}
+
+								break;
+							}
+
+						case EF_GR32F:
+							{
+								float const * tc_32f = mapper.Pointer<float>() + start_vertex * 2;
+								for (uint32_t j = 0; j < ai_mesh.mNumVertices; ++ j)
+								{
+									ai_mesh.mTextureCoords[ve.usage_index][j] = aiVector3D(tc_32f[j * 2 + 0], tc_32f[j * 2 + 1], 0);
+								}
+								break;
+							}
+
+						default:
+							KFL_UNREACHABLE("Unsupported texcoord format.");
+						}
+						break;
+
+					default:
+						KFL_UNREACHABLE("Unsupported vertex format.");
+					}
+				}
+
+				{
+					ai_mesh.mNumFaces = mesh.NumIndices(lod) / 3;
+					uint32_t const start_index = mesh.StartIndexLocation(lod);
+
+					ai_mesh.mFaces = new aiFace[ai_mesh.mNumFaces];
+
+					GraphicsBuffer::Mapper mapper(*rl.GetIndexStream(), BA_Read_Only);
+					if (rl.IndexStreamFormat() == EF_R16UI)
+					{
+						auto const * indices_16 = mapper.Pointer<int16_t>() + start_index;
+
+						for (uint32_t j = 0; j < ai_mesh.mNumFaces; ++ j)
+						{
+							auto& ai_face = ai_mesh.mFaces[j];
+
+							ai_face.mIndices = new unsigned int[3];
+							ai_face.mNumIndices = 3;
+
+							ai_face.mIndices[0] = indices_16[j * 3 + 0];
+							ai_face.mIndices[1] = indices_16[j * 3 + 1];
+							ai_face.mIndices[2] = indices_16[j * 3 + 2];
+						}
+					}
+					else
+					{
+						auto const * indices_32 = mapper.Pointer<int32_t>() + start_index;
+
+						for (uint32_t j = 0; j < ai_mesh.mNumFaces; ++ j)
+						{
+							auto& ai_face = ai_mesh.mFaces[j];
+
+							ai_face.mIndices = new unsigned int[3];
+							ai_face.mNumIndices = 3;
+
+							ai_face.mIndices[0] = indices_32[j * 3 + 0];
+							ai_face.mIndices[1] = indices_32[j * 3 + 1];
+							ai_face.mIndices[2] = indices_32[j * 3 + 2];
+						}
+					}
+				}
+			}
+
+			auto const output_path = std::filesystem::path(output_name);
+			auto const output_ext = output_path.extension();
+			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
+			if (scene_lods.size() > 1)
+			{
+				lod_output_name  += "_lod_" + std::to_string(lod);
+			}
+			lod_output_name += output_ext.string();
+			aiExportScene(&ai_scene, output_ext.string().substr(1).c_str(), lod_output_name.c_str(), 0);
 		}
 	}
 
@@ -2462,7 +2892,13 @@ namespace KlayGE
 		has_diffuse_ = false;
 		has_specular_ = false;
 
-		if (input_path.extension() == ".meshml")
+		auto const input_ext = input_path.extension();
+		if (input_ext == ".model_bin")
+		{
+			render_model_ = LoadSoftwareModel(input_name_str);
+			return render_model_;
+		}
+		else if (input_ext == ".meshml")
 		{
 			this->LoadFromMeshML(input_name_str, metadata);
 		}
@@ -2909,6 +3345,14 @@ extern "C"
 			output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
 		}
 
-		SaveModel(model, output_path.string());
+		auto const outptu_ext = output_path.extension().string();
+		if ((outptu_ext == ".meshml") || (outptu_ext == ".model_bin"))
+		{
+			SaveModel(model, output_path.string());
+		}
+		else
+		{
+			mc.SaveByAssimp(output_path.string());
+		}
 	}
 }

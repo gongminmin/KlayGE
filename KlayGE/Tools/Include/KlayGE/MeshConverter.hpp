@@ -52,6 +52,7 @@ namespace KlayGE
 	{
 	public:
 		RenderModelPtr Convert(std::string_view input_name, MeshMetadata const & metadata);
+		void SaveByAssimp(std::string const & output_name);
 
 	private:
 		void RemoveUnusedJoints();

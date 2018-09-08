@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -2265,6 +2266,15 @@ namespace KlayGE
 
 	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
 	{
+		std::filesystem::path output_path(meshml_name);
+		auto const output_ext = output_path.extension().string();
+		bool need_conversion = false;
+		if ((output_ext != ".meshml") && (output_ext != ".model_bin"))
+		{
+			output_path += ".model_bin";
+			need_conversion = true;
+		}
+
 		std::vector<RenderMaterialPtr> mtls(model->NumMaterials());
 		if (!mtls.empty())
 		{
@@ -2442,10 +2452,24 @@ namespace KlayGE
 			}
 		}
 
-		SaveModel(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+		SaveModel(output_path.string(), mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 			joints, actions, kfs, num_frame, frame_rate, frame_pos_bbs);
+
+#if KLAYGE_IS_DEV_PLATFORM
+		if (need_conversion)
+		{
+			RenderDeviceCaps const * caps = nullptr;
+			if (Context::Instance().RenderFactoryValid())
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				caps = &rf.RenderEngineInstance().DeviceCaps();
+			}
+
+			ToolCommonLoader::Instance().ConvertModel(output_path.string(), "", meshml_name, caps);
+		}
+#endif
 	}
 
 
