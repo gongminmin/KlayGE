@@ -317,7 +317,7 @@ namespace
 
 				for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
 				{
-					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Subrenderable(mesh_index));
+					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
 					auto const & sw_skinned_mesh = *checked_pointer_cast<SkinnedMesh>(sw_skinned_model.Subrenderable(mesh_index));
 					skinned_mesh.AttachFramePosBounds(sw_skinned_mesh.GetFramePosBounds());
 				}
