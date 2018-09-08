@@ -1126,14 +1126,13 @@ namespace
 			}
 			else
 			{
-				ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
-				ResIdentifierPtr file = ResLoader::Instance().Open(tex_desc_.res_name);
-				if (file)
+				uint64_t const runtime_file_timestamp = ResLoader::Instance().Timestamp(runtime_name);
+				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.res_name);
+				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
+					|| (((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp))))
 				{
-					if (runtime_file->Timestamp() < file->Timestamp())
-					{
-						jit = true;
-					}
+					jit = true;
 				}
 			}
 			if (jit)

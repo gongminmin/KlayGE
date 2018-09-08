@@ -3136,11 +3136,7 @@ namespace KlayGE
 
 				for (auto const & include_name : include_names)
 				{
-					ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
-					if (include_source)
-					{
-						timestamp_ = std::max(timestamp_, include_source->Timestamp());
-					}
+					timestamp_ = std::max(timestamp_, ResLoader::Instance().Timestamp(include_name));
 				}
 			}
 		}

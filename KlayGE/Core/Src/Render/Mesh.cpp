@@ -1033,13 +1033,13 @@ namespace KlayGE
 			}
 			else
 			{
-				ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
-				if (file)
+				uint64_t const runtime_file_timestamp = runtime_file->Timestamp();
+				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(meshml_name);
+				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
+					|| ((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp)))
 				{
-					if (runtime_file->Timestamp() < file->Timestamp())
-					{
-						jit = true;
-					}
+					jit = true;
 				}
 			}
 		}

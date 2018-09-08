@@ -717,6 +717,22 @@ namespace KlayGE
 		return ResIdentifierPtr();
 	}
 
+	uint64_t ResLoader::Timestamp(std::string_view name)
+	{
+		uint64_t timestamp = 0;
+		auto res_path = this->Locate(name);
+		if (!res_path.empty())
+		{
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+			timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
+			timestamp = std::filesystem::last_write_time(res_path);
+#endif
+		}
+
+		return timestamp;
+	}
+
 	std::shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
 		this->RemoveUnrefResources();

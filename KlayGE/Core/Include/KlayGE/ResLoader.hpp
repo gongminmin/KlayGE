@@ -28,15 +28,15 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KLAYGE_RESLOADER_HPP
-#define _KLAYGE_RESLOADER_HPP
+#ifndef KLAYGE_CORE_RESLOADER_HPP
+#define KLAYGE_CORE_RESLOADER_HPP
 
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <istream>
-#include <vector>
 #include <string>
+#include <vector>
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'x', 'alloc'
@@ -108,6 +108,7 @@ namespace KlayGE
 
 		ResIdentifierPtr Open(std::string_view name);
 		std::string Locate(std::string_view name);
+		uint64_t Timestamp(std::string_view name);
 		std::string AbsPath(std::string_view path);
 
 		std::shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
@@ -182,4 +183,4 @@ namespace KlayGE
 	};
 }
 
-#endif			// _KLAYGE_RESLOADER_HPP
+#endif			// KLAYGE_CORE_RESLOADER_HPP
