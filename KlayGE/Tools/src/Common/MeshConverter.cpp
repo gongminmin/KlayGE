@@ -280,28 +280,34 @@ namespace KlayGE
 			{
 				albedo = Color4ToFloat3(ai_albedo);
 			}
+			{
+				float3 specular(0, 0, 0);
+				float strength = 1;
+				aiColor4D ai_specular;
+
+				// TODO: Restore metalness from specular color
+				if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &ai_specular))
+				{
+					specular = Color4ToFloat3(ai_specular);
+				}
+				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength))
+				{
+					specular *= strength;
+				}
+			}
 			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &ai_emissive))
 			{
 				emissive = Color4ToFloat3(ai_emissive);
 			}
 
-			unsigned int max = 1;
-			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_OPACITY, &ai_opacity, &max))
+			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_OPACITY, &ai_opacity))
 			{
 				opacity = ai_opacity;
 			}
 
-			max = 1;
-			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &ai_shininess, &max))
+			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_SHININESS, &ai_shininess))
 			{
 				shininess = ai_shininess;
-
-				max = 1;
-				float strength;
-				if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max))
-				{
-					shininess *= strength;
-				}
 			}
 			shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
 
@@ -310,8 +316,7 @@ namespace KlayGE
 				transparent = true;
 			}
 
-			max = 1;
-			if (AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &ai_two_sided, &max))
+			if (AI_SUCCESS == aiGetMaterialInteger(mtl, AI_MATKEY_TWOSIDED, &ai_two_sided))
 			{
 				two_sided = ai_two_sided ? true : false;
 			}
@@ -381,6 +386,12 @@ namespace KlayGE
 			else
 			{
 				render_mtl.height_offset_scale = float2(-0.5f, 0.06f);
+
+				float ai_bumpscaling = 0;
+				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_BUMPSCALING, &ai_bumpscaling))
+				{
+					render_mtl.height_offset_scale.y() = ai_bumpscaling;
+				}
 			}
 			render_mtl.tess_factors = float4(5, 5, 1, 9);
 		}
@@ -561,12 +572,12 @@ namespace KlayGE
 		std::map<std::string, Joint> joint_nodes;
 
 		std::function<void(aiNode const *, float4x4 const &)> build_bind_matrix =
-			[&build_bind_matrix, &joint_nodes, scene](aiNode const * meshNode, float4x4 const & parent_mat)
+			[&build_bind_matrix, &joint_nodes, scene](aiNode const * node, float4x4 const & parent_mat)
 		{
-			float4x4 const mesh_trans = MathLib::transpose(float4x4(&meshNode->mTransformation.a1)) * parent_mat;
-			for (unsigned int i = 0; i < meshNode->mNumMeshes; ++ i)
+			float4x4 const mesh_trans = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+			for (unsigned int i = 0; i < node->mNumMeshes; ++ i)
 			{
-				aiMesh const * mesh = scene->mMeshes[meshNode->mMeshes[i]];
+				aiMesh const * mesh = scene->mMeshes[node->mMeshes[i]];
 				for (unsigned int ibone = 0; ibone < mesh->mNumBones; ++ ibone)
 				{
 					aiBone const * bone = mesh->mBones[ibone];
@@ -581,15 +592,15 @@ namespace KlayGE
 				}
 			}
 
-			for (unsigned int i = 0; i < meshNode->mNumChildren; ++ i)
+			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
 			{
-				build_bind_matrix(meshNode->mChildren[i], mesh_trans);
+				build_bind_matrix(node->mChildren[i], mesh_trans);
 			}
 		};
 
-		std::function<bool(aiNode const *)> mark_joint_nodes = [&mark_joint_nodes, &joint_nodes](aiNode const * root)
+		std::function<bool(aiNode const *)> mark_joint_nodes = [&mark_joint_nodes, &joint_nodes](aiNode const * node)
 		{
-			std::string name = root->mName.C_Str();
+			std::string name = node->mName.C_Str();
 			bool child_has_bone = false;
 
 			auto iter = joint_nodes.find(name);
@@ -598,9 +609,9 @@ namespace KlayGE
 				child_has_bone = true;
 			}
 
-			for (unsigned int i = 0; i < root->mNumChildren; ++ i)
+			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
 			{
-				child_has_bone = mark_joint_nodes(root->mChildren[i]) || child_has_bone;
+				child_has_bone = mark_joint_nodes(node->mChildren[i]) || child_has_bone;
 			}
 
 			if (child_has_bone && (iter == joint_nodes.end()))
@@ -617,16 +628,16 @@ namespace KlayGE
 		};
 
 		std::function<void(aiNode const *, int)> alloc_joints =
-			[this, &joint_nodes, &alloc_joints](aiNode const * root, int parent_id)
+			[this, &joint_nodes, &alloc_joints](aiNode const * node, int parent_id)
 		{
-			std::string name = root->mName.C_Str();
+			std::string name = node->mName.C_Str();
 			int joint_id = -1;
 			auto iter = joint_nodes.find(name);
 			if (iter != joint_nodes.end())
 			{
 				joint_id = static_cast<int>(joints_.size());
 
-				auto const local_matrix = MathLib::transpose(float4x4(&root->mTransformation.a1));
+				auto const local_matrix = MathLib::transpose(float4x4(&node->mTransformation.a1));
 				// Borrow those variables to store a local matrix
 				MatrixToDQ(local_matrix, iter->second.inverse_origin_real, iter->second.inverse_origin_dual,
 					iter->second.inverse_origin_scale);
@@ -636,9 +647,9 @@ namespace KlayGE
 				joints_.push_back(iter->second);
 			}
 
-			for (unsigned int i = 0; i < root->mNumChildren; ++ i)
+			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
 			{
-				alloc_joints(root->mChildren[i], joint_id);
+				alloc_joints(node->mChildren[i], joint_id);
 			}
 		};
 
@@ -2433,7 +2444,8 @@ namespace KlayGE
 			return RenderModelPtr();
 		}
 
-		auto in_folder = std::filesystem::path(ResLoader::Instance().Locate(input_name_str)).parent_path().string();
+		std::filesystem::path input_path(input_name_str);
+		auto const in_folder = input_path.parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)
 		{
@@ -2450,7 +2462,6 @@ namespace KlayGE
 		has_diffuse_ = false;
 		has_specular_ = false;
 
-		std::filesystem::path input_path(input_name_str);
 		if (input_path.extension() == ".meshml")
 		{
 			this->LoadFromMeshML(input_name_str, metadata);
@@ -2882,7 +2893,7 @@ extern "C"
 	{
 		KFL_UNUSED(caps);
 
-		KlayGE::MeshMetadata metadata;
+		MeshMetadata metadata;
 		if (!metadata_name.empty())
 		{
 			metadata.Load(metadata_name);
