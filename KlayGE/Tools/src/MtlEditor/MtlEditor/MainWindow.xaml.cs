@@ -427,7 +427,7 @@ namespace MtlEditor
 			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
 			dlg.DefaultExt = ".meshml";
-			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.collada;*.dxf;*.csm;"
+			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.dae;*.dxf;*.csm;"
 				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5mesh;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
 				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x|All Files|*.*";
 			dlg.CheckPathExists = true;
@@ -448,7 +448,8 @@ namespace MtlEditor
 			Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
 			dlg.DefaultExt = ".meshml";
-			dlg.Filter = "MeshML Files (*.meshml)|*.meshml|All Files|*.*";
+			dlg.Filter = "All Model Files|*.model_bin;*.dae;*.x;*.stp;*.obj;*.stl;*.ply;*.3ds;*.gltf;*.glb;*.assbin;*.assxml;*.x3d;*.3mf|"
+				+ "All Files|*.*";
 			dlg.OverwritePrompt = true;
 			if (true == dlg.ShowDialog())
 			{
