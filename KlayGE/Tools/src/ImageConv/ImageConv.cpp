@@ -139,29 +139,61 @@ int main(int argc, char* argv[])
 		output_name += ".dds";
 	}
 
-	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
-
-	TexMetadata metadata;
-	if (!ResLoader::Instance().Locate(metadata_name).empty())
+	bool conversion = false;
+	filesystem::path const output_path(output_name);
+	if (output_path.extension() == ".dds")
 	{
-		metadata.Load(metadata_name);
-	}
-	metadata.DeviceDependentAdjustment(platform_def.device_caps);
-
-	TexConverter tc;
-	TexturePtr output_tex = tc.Convert(file_name, metadata);
-	if (output_tex)
-	{
-		SaveTexture(output_tex, output_name);
-
-		if (!quiet)
+		if (ResLoader::Instance().Locate(output_name).empty())
 		{
-			cout << "Texture has been saved to " << output_name << "." << endl;
+			conversion = true;
+		}
+		else
+		{
+			uint64_t const output_file_timestamp = ResLoader::Instance().Timestamp(output_name);
+			uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(file_name);
+			uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+			if (((input_file_timestamp > 0) && (output_file_timestamp < input_file_timestamp))
+				|| (((metadata_timestamp > 0) && (output_file_timestamp < metadata_timestamp))))
+			{
+				conversion = true;
+			}
 		}
 	}
 	else
 	{
-		LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+		conversion = true;
+	}
+
+	if (conversion)
+	{
+		PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+
+		TexMetadata metadata;
+		if (!ResLoader::Instance().Locate(metadata_name).empty())
+		{
+			metadata.Load(metadata_name);
+		}
+		metadata.DeviceDependentAdjustment(platform_def.device_caps);
+
+		TexConverter tc;
+		TexturePtr output_tex = tc.Convert(file_name, metadata);
+		if (output_tex)
+		{
+			SaveTexture(output_tex, output_name);
+
+			if (!quiet)
+			{
+				cout << "Texture has been saved to " << output_name << "." << endl;
+			}
+		}
+		else
+		{
+			LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+		}
+	}
+	else
+	{
+		cout << "Target file " << output_name << " is up-to-dated. No need to do the conversion." << std::endl;
 	}
 
 	Context::Destroy();

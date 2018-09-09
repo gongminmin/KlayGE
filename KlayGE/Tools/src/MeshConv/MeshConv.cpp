@@ -106,42 +106,83 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	MeshMetadata metadata;
-	if (!ResLoader::Instance().Locate(metadata_name).empty())
+	bool conversion = false;
+	filesystem::path const output_path(output_name);
+	if (output_path.extension() == ".model_bin")
 	{
-		metadata.Load(metadata_name);
-	}
+		uint32_t const MODEL_BIN_VERSION = 15;
 
-	MeshConverter mesh_converter;
-	auto model = mesh_converter.Convert(file_name, metadata);
-
-	if (model)
-	{
-		SaveModel(model, output_name);
-
-		if (!quiet)
+		ResIdentifierPtr output_file = ResLoader::Instance().Open(output_name);
+		uint32_t fourcc;
+		output_file->read(&fourcc, sizeof(fourcc));
+		fourcc = LE2Native(fourcc);
+		uint32_t ver;
+		output_file->read(&ver, sizeof(ver));
+		ver = LE2Native(ver);
+		if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
 		{
-			for (uint32_t lod = 0; lod < model->NumLods(); ++ lod)
+			conversion = true;
+		}
+		else
+		{
+			uint64_t const output_file_timestamp = output_file->Timestamp();
+			uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(file_name);
+			uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+			if (((input_file_timestamp > 0) && (output_file_timestamp < input_file_timestamp))
+				|| ((metadata_timestamp > 0) && (output_file_timestamp < metadata_timestamp)))
 			{
-				size_t num_vertices = 0;
-				size_t num_triangles = 0;
-				for (uint32_t mindex = 0; mindex < model->NumSubrenderables(); ++ mindex)
-				{
-					auto const & mesh = *checked_cast<StaticMesh*>(model->Subrenderable(mindex).get());
-
-					num_vertices += mesh.NumVertices(lod);
-					num_triangles += mesh.NumIndices(lod) / 3;
-				}
-
-				cout << "LOD " << lod << ": " << num_vertices << " vertices, " << num_triangles << " triangles." << endl;
+				conversion = true;
 			}
-
-			cout << "Mesh has been saved to " << output_name << "." << endl;
 		}
 	}
 	else
 	{
-		LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+		conversion = true;
+	}
+
+	if (conversion)
+	{
+		MeshMetadata metadata;
+		if (!ResLoader::Instance().Locate(metadata_name).empty())
+		{
+			metadata.Load(metadata_name);
+		}
+
+		MeshConverter mesh_converter;
+		auto model = mesh_converter.Convert(file_name, metadata);
+
+		if (model)
+		{
+			SaveModel(model, output_name);
+
+			if (!quiet)
+			{
+				for (uint32_t lod = 0; lod < model->NumLods(); ++ lod)
+				{
+					size_t num_vertices = 0;
+					size_t num_triangles = 0;
+					for (uint32_t mindex = 0; mindex < model->NumSubrenderables(); ++ mindex)
+					{
+						auto const & mesh = *checked_cast<StaticMesh*>(model->Subrenderable(mindex).get());
+
+						num_vertices += mesh.NumVertices(lod);
+						num_triangles += mesh.NumIndices(lod) / 3;
+					}
+
+					cout << "LOD " << lod << ": " << num_vertices << " vertices, " << num_triangles << " triangles." << endl;
+				}
+
+				cout << "Mesh has been saved to " << output_name << "." << endl;
+			}
+		}
+		else
+		{
+			LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+		}
+	}
+	else
+	{
+		cout << "Target file " << output_name << " is up-to-dated. No need to do the conversion." << std::endl;
 	}
 
 	Context::Destroy();
