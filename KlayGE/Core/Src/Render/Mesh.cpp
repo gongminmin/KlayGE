@@ -642,7 +642,8 @@ namespace KlayGE
 		{
 			if (!mtl_->tex_names[i].empty())
 			{
-				if (!ResLoader::Instance().Locate(mtl_->tex_names[i]).empty())
+				if (!ResLoader::Instance().Locate(mtl_->tex_names[i]).empty()
+					|| !ResLoader::Instance().Locate(mtl_->tex_names[i] + ".dds").empty())
 				{
 					textures_[i] = ASyncLoadTexture(mtl_->tex_names[i], EAH_GPU_Read | EAH_Immutable);
 				}

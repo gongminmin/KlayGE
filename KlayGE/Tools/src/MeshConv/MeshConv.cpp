@@ -113,26 +113,33 @@ int main(int argc, char* argv[])
 		uint32_t const MODEL_BIN_VERSION = 15;
 
 		ResIdentifierPtr output_file = ResLoader::Instance().Open(output_name);
-		uint32_t fourcc;
-		output_file->read(&fourcc, sizeof(fourcc));
-		fourcc = LE2Native(fourcc);
-		uint32_t ver;
-		output_file->read(&ver, sizeof(ver));
-		ver = LE2Native(ver);
-		if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
+		if (output_file)
 		{
-			conversion = true;
-		}
-		else
-		{
-			uint64_t const output_file_timestamp = output_file->Timestamp();
-			uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(file_name);
-			uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
-			if (((input_file_timestamp > 0) && (output_file_timestamp < input_file_timestamp))
-				|| ((metadata_timestamp > 0) && (output_file_timestamp < metadata_timestamp)))
+			uint32_t fourcc;
+			output_file->read(&fourcc, sizeof(fourcc));
+			fourcc = LE2Native(fourcc);
+			uint32_t ver;
+			output_file->read(&ver, sizeof(ver));
+			ver = LE2Native(ver);
+			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
 			{
 				conversion = true;
 			}
+			else
+			{
+				uint64_t const output_file_timestamp = output_file->Timestamp();
+				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(file_name);
+				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+				if (((input_file_timestamp > 0) && (output_file_timestamp < input_file_timestamp))
+					|| ((metadata_timestamp > 0) && (output_file_timestamp < metadata_timestamp)))
+				{
+					conversion = true;
+				}
+			}
+		}
+		else
+		{
+			conversion = true;
 		}
 	}
 	else
@@ -182,7 +189,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		cout << "Target file " << output_name << " is up-to-dated. No need to do the conversion." << std::endl;
+		cout << "Target file " << output_name << " is up-to-date. No need to do the conversion." << std::endl;
 	}
 
 	Context::Destroy();

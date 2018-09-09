@@ -59,6 +59,7 @@ int main(int argc, char* argv[])
 	std::string input_name;
 	std::string metadata_name;
 	std::string output_name;
+	std::string target_folder;
 	std::string platform;
 	bool quiet = false;
 
@@ -68,6 +69,7 @@ int main(int argc, char* argv[])
 		("input-path,I", boost::program_options::value<std::string>(), "Input image path.")
 		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
 		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output image path.")
+		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
 		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
@@ -99,9 +101,9 @@ int main(int argc, char* argv[])
 	{
 		metadata_name = vm["metadata-path"].as<std::string>();
 	}
-	else
+	if (vm.count("target-folder") > 0)
 	{
-		metadata_name = input_name + ".kmeta";
+		target_folder = vm["target-folder"].as<std::string>();
 	}
 	if (vm.count("output-path") > 0)
 	{
@@ -128,15 +130,20 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	if (metadata_name.empty())
+	{
+		metadata_name = file_name + ".kmeta";
+	}
 	if (output_name.empty())
 	{
-		filesystem::path input_path(file_name);
-		output_name = (input_path.parent_path() / input_path.stem()).string();
-		if (input_path.extension() == ".dds")
+		if (target_folder.empty())
 		{
-			output_name += "_converted";
+			output_name = file_name + ".dds";
 		}
-		output_name += ".dds";
+		else
+		{
+			output_name = (target_folder / filesystem::path(file_name).filename()).string() + ".dds";
+		}
 	}
 
 	bool conversion = false;
@@ -166,6 +173,8 @@ int main(int argc, char* argv[])
 
 	if (conversion)
 	{
+		ResLoader::Instance().AddPath("../../Tools/media/Common");
+
 		PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
 
 		TexMetadata metadata;
@@ -193,7 +202,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		cout << "Target file " << output_name << " is up-to-dated. No need to do the conversion." << std::endl;
+		cout << "Target file " << output_name << " is up-to-date. No need to do the conversion." << std::endl;
 	}
 
 	Context::Destroy();
