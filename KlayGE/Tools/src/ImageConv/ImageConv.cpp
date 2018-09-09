@@ -122,27 +122,42 @@ int main(int argc, char* argv[])
 		quiet = vm["quiet"].as<bool>();
 	}
 
-	std::string file_name = ResLoader::Instance().Locate(input_name);
-	if (file_name.empty())
+	std::string const full_input_name = ResLoader::Instance().Locate(input_name);
+	if (full_input_name.empty())
 	{
-		cout << "Could NOT find " << input_name << endl;
+		int ret;
+		cout << "Could NOT find " << input_name << '.';
+
+		std::string const possible_output_name = ResLoader::Instance().Locate(input_name + ".dds");
+		if (std::filesystem::exists(possible_output_name))
+		{
+			cout << " But " << possible_output_name << " does exist.";
+			ret = 0;
+		}
+		else
+		{
+			ret = 1;
+		}
+
+		cout << endl;
+
 		Context::Destroy();
-		return 1;
+		return ret;
 	}
 
 	if (metadata_name.empty())
 	{
-		metadata_name = file_name + ".kmeta";
+		metadata_name = full_input_name + ".kmeta";
 	}
 	if (output_name.empty())
 	{
 		if (target_folder.empty())
 		{
-			output_name = file_name + ".dds";
+			output_name = full_input_name + ".dds";
 		}
 		else
 		{
-			output_name = (target_folder / filesystem::path(file_name).filename()).string() + ".dds";
+			output_name = (target_folder / filesystem::path(full_input_name).filename()).string() + ".dds";
 		}
 	}
 
@@ -157,7 +172,7 @@ int main(int argc, char* argv[])
 		else
 		{
 			uint64_t const output_file_timestamp = ResLoader::Instance().Timestamp(output_name);
-			uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(file_name);
+			uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(full_input_name);
 			uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
 			if (((input_file_timestamp > 0) && (output_file_timestamp < input_file_timestamp))
 				|| (((metadata_timestamp > 0) && (output_file_timestamp < metadata_timestamp))))
@@ -185,7 +200,7 @@ int main(int argc, char* argv[])
 		metadata.DeviceDependentAdjustment(platform_def.device_caps);
 
 		TexConverter tc;
-		TexturePtr output_tex = tc.Convert(file_name, metadata);
+		TexturePtr output_tex = tc.Convert(full_input_name, metadata);
 		if (output_tex)
 		{
 			SaveTexture(output_tex, output_name);
@@ -197,7 +212,7 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+			LogError() << "FAIL to convert file " << full_input_name << " with metadata " << metadata_name << std::endl;
 		}
 	}
 	else
