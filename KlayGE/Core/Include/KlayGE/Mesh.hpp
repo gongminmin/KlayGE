@@ -440,15 +440,15 @@ namespace KlayGE
 		}
 	};
 
-	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view meshml_name);
+	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view model_name);
 
-	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
+	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & model_name);
 
 
 	class KLAYGE_CORE_API RenderableLightSourceProxy : public StaticMesh

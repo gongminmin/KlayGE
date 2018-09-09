@@ -1009,10 +1009,10 @@ namespace KlayGE
 
 	std::string const jit_ext_name = ".model_bin";
 
-	void ModelJIT(std::string const & meshml_name)
+	void ModelJIT(std::string const & model_name)
 	{
-		std::string const metadata_name = meshml_name + ".kmeta";
-		std::string const runtime_name = meshml_name + jit_ext_name;
+		std::string const metadata_name = model_name + ".kmeta";
+		std::string const runtime_name = model_name + jit_ext_name;
 
 		bool jit = false;
 		if (ResLoader::Instance().Locate(runtime_name).empty())
@@ -1035,7 +1035,7 @@ namespace KlayGE
 			else
 			{
 				uint64_t const runtime_file_timestamp = runtime_file->Timestamp();
-				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(meshml_name);
+				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(model_name);
 				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
 				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
 					|| ((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp)))
@@ -1051,36 +1051,36 @@ namespace KlayGE
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			ToolCommonLoader::Instance().ConvertModel(meshml_name, metadata_name, runtime_name, &caps);
+			ToolCommonLoader::Instance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
 #else
 			LogError() << "Could NOT locate " << runtime_name << std::endl;
 #endif
 		}
 	}
 
-	RenderModelPtr SyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
 			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	RenderModelPtr ASyncLoadModel(std::string_view meshml_name, uint32_t access_hint,
+	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
 			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	RenderModelPtr LoadSoftwareModel(std::string_view meshml_name)
+	RenderModelPtr LoadSoftwareModel(std::string_view model_name)
 	{
 		std::vector<RenderMaterialPtr> mtls;
 		std::vector<VertexElement> merged_ves;
@@ -1104,16 +1104,17 @@ namespace KlayGE
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
 
 		ResIdentifierPtr runtime_file;
-		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
+		std::filesystem::path model_path(model_name.begin(), model_name.end());
+		if (model_path.extension().string() == jit_ext_name)
 		{
-			runtime_file = ResLoader::Instance().Open(meshml_name);
+			runtime_file = ResLoader::Instance().Open(model_name);
 		}
 		else
 		{
-			std::string meshml_name_str(meshml_name);
-			ModelJIT(meshml_name_str);
+			std::string model_name_str(model_name);
+			ModelJIT(model_name_str);
 
-			runtime_file = ResLoader::Instance().Open(meshml_name_str + jit_ext_name);
+			runtime_file = ResLoader::Instance().Open(model_name_str + jit_ext_name);
 		}
 
 		uint32_t fourcc;
@@ -1562,7 +1563,7 @@ namespace KlayGE
 		return model;
 	}
 
-	void SaveModelToMeshML(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
+	void SaveModelToMeshML(std::string const & model_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
@@ -1909,10 +1910,10 @@ namespace KlayGE
 			}
 		}
 
-		std::ofstream ofs(meshml_name.c_str());
+		std::ofstream ofs(model_name.c_str());
 		if (!ofs)
 		{
-			ofs.open((ResLoader::Instance().LocalFolder() + meshml_name).c_str());
+			ofs.open((ResLoader::Instance().LocalFolder() + model_name).c_str());
 		}
 		obj.WriteMeshML(ofs);
 	}
@@ -2238,7 +2239,7 @@ namespace KlayGE
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
 
-	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
+	void SaveModel(std::string const & model_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
@@ -2249,25 +2250,25 @@ namespace KlayGE
 		std::shared_ptr<std::vector<KeyFrameSet>> const & kfs, uint32_t num_frames, uint32_t frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> const & frame_pos_bbs)
 	{
-		if (meshml_name.find(jit_ext_name) != std::string::npos)
+		if (model_name.find(jit_ext_name) != std::string::npos)
 		{
-			SaveModelToJIT(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+			SaveModelToJIT(model_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 				mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_base_indices, joints, actions,
 				kfs, num_frames, frame_rate, frame_pos_bbs);
 		}
 		else
 		{
-			SaveModelToMeshML(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+			SaveModelToMeshML(model_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 				mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_base_indices, joints, actions,
 				kfs, num_frames, frame_rate);
 		}
 	}
 
-	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
+	void SaveModel(RenderModelPtr const & model, std::string const & model_name)
 	{
-		std::filesystem::path output_path(meshml_name);
+		std::filesystem::path output_path(model_name);
 		auto const output_ext = output_path.extension().string();
 		bool need_conversion = false;
 		if ((output_ext != ".meshml") && (output_ext != ".model_bin"))
@@ -2468,7 +2469,7 @@ namespace KlayGE
 				caps = &rf.RenderEngineInstance().DeviceCaps();
 			}
 
-			ToolCommonLoader::Instance().ConvertModel(output_path.string(), "", meshml_name, caps);
+			ToolCommonLoader::Instance().ConvertModel(output_path.string(), "", model_name, caps);
 		}
 #endif
 	}
