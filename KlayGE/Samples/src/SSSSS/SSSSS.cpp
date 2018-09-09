@@ -69,7 +69,7 @@ SSSSSApp::SSSSSApp()
 
 void SSSSSApp::OnCreate()
 {
-	RenderablePtr scene_model = ASyncLoadModel("ScifiRoom.meshml",
+	RenderablePtr scene_model = ASyncLoadModel("ScifiRoom/Scifi.3DS",
 		EAH_GPU_Read | EAH_Immutable);
 	RenderablePtr sss_model = ASyncLoadModel("Infinite-Level_02.meshml",
 		EAH_GPU_Read | EAH_Immutable);

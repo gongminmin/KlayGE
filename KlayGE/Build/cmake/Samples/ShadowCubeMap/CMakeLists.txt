@@ -44,16 +44,16 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/lamp.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Scifi.3DS.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci2.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci3.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci4.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci5.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci6.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci8.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci9.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI1.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI2.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI3.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI4.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI5.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI6.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI8.JPG.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI9.JPG.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

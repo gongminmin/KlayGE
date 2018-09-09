@@ -15,7 +15,7 @@ def update(app_time, elapsed_time):
 		</update>
 	</light>
 
-	<model name="room" meshml="ScifiRoom.meshml"/>
+	<model name="room" meshml="ScifiRoom/Scifi.3DS"/>
 	<model name="teapot" meshml="teapot.meshml">
 		<attr value="moveable"/>
 		<update>

@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Metalness/helmet_armet_2.meshml" "29a8d99c824be86098ee830d9c8dcfc32705cfde")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Metalness/helmet_armet_2.3ds" "BE4C3084DD55E92608D0410BB7646EF0231A6BB1")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Metalness/Metalness.cpp
@@ -44,7 +44,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/helmet_armet_2.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/helmet_armet_2.3ds.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/Metalness.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/Metalness.uiml
 )

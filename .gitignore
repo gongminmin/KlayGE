@@ -51,11 +51,16 @@ KlayGE/media/Textures
 KlayGE/Samples/media/Common/Assets/*.png
 KlayGE/Samples/media/Common/*.pfx
 KlayGE/Samples/media/Common/*/*.dds
+KlayGE/Samples/media/Common/*/*.jpg
 KlayGE/Samples/media/*/*/*.dds
+KlayGE/Samples/media/*/*/*.jpg
 KlayGE/Samples/media/*/*/*.impml
 KlayGE/Samples/media/*/*/*.meshml
+KlayGE/Samples/media/*/*/*.3ds
 KlayGE/Samples/media/*/*.dds
+KlayGE/Samples/media/*/*.jpg
 KlayGE/Samples/media/*/*.meshml
+KlayGE/Samples/media/*/*.3ds
 KlayGE/Samples/media/*/*.7z
 KlayGE/Samples/media/*/*.jdt
 KlayGE/Samples/media/*/*.avi
@@ -65,6 +70,7 @@ KlayGE/Samples/media/*/*Py.zip
 KlayGE/Tests/media/*
 KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*.dds
+KlayGE/Tools/media/*/*.jpg
 KlayGE/Tools/media/*/*Py.zip
 KlayGE/Tools/src/*/*/obj
 KlayGE/Tools/src/*/*/*.csproj
@@ -72,6 +78,7 @@ KlayGE/Tools/src/KGEditor/KGEditor/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tools/src/TexViewer/TexViewer/Images
 KlayGE/Tutorials/media/*/*.dds
+KlayGE/Tutorials/media/*/*.jpg
 KlayGE/klayge_logo.png
 External/7z
 External/android_native_app_glue

@@ -169,7 +169,7 @@ void MetalnessApp::OnCreate()
 		}
 	}
 
-	single_object_ = MakeSharedPtr<MetalObject>("helmet_armet_2.meshml");
+	single_object_ = MakeSharedPtr<MetalObject>("helmet_armet_2.3ds");
 	single_object_->ModelMatrix(MathLib::scaling(2.0f, 2.0f, 2.0f));
 	single_object_->AddToSceneManager();
 
