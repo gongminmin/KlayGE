@@ -55,15 +55,6 @@ class CfgBuildDefault:
 		# The path of GLES SDK's include. Could fill in the path, or "auto".
 		self.gles_include_dir = "auto"
 
-		# The path of 3DSMax. Could fill in the path, or "auto".
-		self.max_path = "auto"
-
-		# The path of 3DSMax SDK. Could fill in the path, or "auto".
-		self.max_sdk_path = "auto"
-
-		# The path of Maya. Could fill in the path, or "auto".
-		self.maya_path = "auto"
-
 		# The path of LibOVR. Could fill in the path, or "auto".
 		self.libovr_path = "auto"
 

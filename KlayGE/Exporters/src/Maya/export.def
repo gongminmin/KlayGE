@@ -1,6 +1,0 @@
-LIBRARY MeshML
-
-EXPORTS
-
-	initializePlugin	@1
-	uninitializePlugin	@2

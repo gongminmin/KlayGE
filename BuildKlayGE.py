@@ -10,12 +10,6 @@ def BuildKlayGE(build_info):
 		if build_info.gles_include_dir != "auto":
 			additional_options += " -DKLAYGE_GLES_INCLUDE_DIR:STRING=\"%s\"" % build_info.gles_include_dir
 	if build_info.is_windows_desktop:
-		if build_info.max_path != "auto":
-			additional_options += " -DKLAYGE_3DSMAX_PATH:STRING=\"%s\"" % build_info.max_path
-		if build_info.max_sdk_path != "auto":
-			additional_options += " -DKLAYGE_3DSMAX_SDK_PATH:STRING=\"%s\"" % build_info.max_sdk_path
-		if build_info.maya_path != "auto":
-			additional_options += " -DKLAYGE_MAYA_PATH:STRING=\"%s\"" % build_info.maya_path
 		if build_info.libovr_path != "auto":
 			additional_options += " -DKLAYGE_LibOVR_PATH:STRING=\"%s\"" % build_info.libovr_path
 	for compiler_info in build_info.compilers:

@@ -117,18 +117,6 @@ class BuildInfo:
 		except:
 			cfg_build.gles_include_dir = "auto"
 		try:
-			cfg_build.max_path
-		except:
-			cfg_build.max_path = "auto"
-		try:
-			cfg_build.max_sdk_path
-		except:
-			cfg_build.max_sdk_path = "auto"
-		try:
-			cfg_build.maya_path
-		except:
-			cfg_build.maya_path = "auto"
-		try:
 			cfg_build.libovr_path
 		except:
 			cfg_build.libovr_path = "auto"
@@ -460,9 +448,6 @@ class BuildInfo:
 		self.cfg = cfg
 
 		self.gles_include_dir = cfg_build.gles_include_dir
-		self.max_path = cfg_build.max_path
-		self.max_sdk_path = cfg_build.max_sdk_path
-		self.maya_path = cfg_build.maya_path
 		self.libovr_path = cfg_build.libovr_path
 
 		self.DisplayInfo();
@@ -627,9 +612,6 @@ class BuildInfo:
 		print("\tConfigures: %s" % cfgs)
 		print("\tGLES SDK include path: %s" % self.gles_include_dir)
 		if self.is_windows_desktop:
-			print("\t3DSMax path: %s" % self.max_path)
-			print("\t3DSMax SDK path: %s" % self.max_sdk_path)
-			print("\tMaya path: %s" % self.maya_path)
 			print("\tOculus LibOVR path: %s" % self.libovr_path)
 		
 		print("")
