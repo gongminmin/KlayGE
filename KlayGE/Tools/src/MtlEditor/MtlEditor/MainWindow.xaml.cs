@@ -447,7 +447,7 @@ namespace MtlEditor
 		{
 			Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-			dlg.DefaultExt = ".meshml";
+			dlg.DefaultExt = ".model_bin";
 			dlg.Filter = "All Model Files|*.model_bin;*.dae;*.x;*.stp;*.obj;*.stl;*.ply;*.3ds;*.gltf;*.glb;*.assbin;*.assxml;*.x3d;*.3mf|"
 				+ "All Files|*.*";
 			dlg.OverwritePrompt = true;

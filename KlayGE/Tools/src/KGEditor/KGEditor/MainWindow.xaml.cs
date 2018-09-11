@@ -593,12 +593,6 @@ namespace KGEditor
 
 		private void AddModelNativeCallback(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name);
-			if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
-			{
-				return;
-			}
-
 			this.ExecuteCommand(new KGEditorCommandAddModel(core_, this, scene_, file_name));
 		}
 

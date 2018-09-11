@@ -3346,7 +3346,7 @@ extern "C"
 		}
 
 		auto const outptu_ext = output_path.extension().string();
-		if ((outptu_ext == ".meshml") || (outptu_ext == ".model_bin"))
+		if (outptu_ext == ".model_bin")
 		{
 			SaveModel(model, output_path.string());
 		}
