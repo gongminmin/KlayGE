@@ -47,7 +47,8 @@ namespace
 	{
 	public:
 		SphereRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Sphere")
+			: StaticMesh(model, L"Sphere"),
+				distance_(0.8f)
 		{
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
@@ -170,6 +171,11 @@ namespace
 			*(effect_->ParameterByName("glossiness")) = glossiness;
 		}
 
+		void Id(uint32_t id)
+		{
+			id_ = id;
+		}
+
 		void RenderingType(int type)
 		{
 			technique_ = techs_[type];
@@ -185,6 +191,15 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
+			uint32_t const spheres_row = 10;
+			uint32_t const spheres_column = 10;
+			uint32_t const j = id_ / spheres_column;
+			uint32_t const i = id_ - j * spheres_column;
+			float3 const pos((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.06f,
+				(-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.06f,
+				distance_);
+			model_mat_ = MathLib::translation(MathLib::transform_coord(pos, camera.InverseViewMatrix()));
+
 			float4x4 const mvp = model_mat_ * camera.ViewProjMatrix();
 
 			*(effect_->ParameterByName("model")) = model_mat_;
@@ -192,18 +207,31 @@ namespace
 			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
+		void Distance(float distance)
+		{
+			distance_ = distance;
+		}
+		float Distance() const
+		{
+			return distance_;
+		}
+
 	private:
 		array<RenderTechnique*, 6> techs_;
+
+		uint32_t id_;
+		float distance_;
 	};
 
 	class SphereObject : public SceneObjectHelper
 	{
 	public:
-		SphereObject(float4 const & diff, float4 const & spec, float glossiness)
+		SphereObject(float4 const & diff, float4 const & spec, float glossiness, uint32_t id)
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
 			checked_pointer_cast<SphereRenderable>(renderable_)->Material(diff, spec, glossiness);
+			checked_pointer_cast<SphereRenderable>(renderable_)->Id(id);
 		}
 
 		void RenderingType(int type)
@@ -214,6 +242,15 @@ namespace
 		void IntegratedBRDFTex(TexturePtr const & tex)
 		{
 			checked_pointer_cast<SphereRenderable>(renderable_)->IntegratedBRDFTex(tex);
+		}
+
+		void Distance(float distance)
+		{
+			checked_pointer_cast<SphereRenderable>(renderable_)->Distance(distance);
+		}
+		float Distance() const
+		{
+			return checked_pointer_cast<SphereRenderable>(renderable_)->Distance();
 		}
 	};
 
@@ -532,11 +569,13 @@ namespace
 
 	enum
 	{
+		Zoom,
 		Exit,
 	};
 
 	InputActionDefine actions[] =
 	{
+		InputActionDefine(Zoom, MS_Z),
 		InputActionDefine(Exit, KS_Escape),
 	};
 
@@ -917,29 +956,20 @@ void EnvLightingApp::OnCreate()
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
 	ambient_light->AddToSceneManager();
 
-	uint32_t spheres_row = 10;
-	uint32_t spheres_column = 10; 
-	spheres_.resize(spheres_row * spheres_column);
-	for (uint32_t i = 0; i < spheres_row; ++ i)
+	spheres_.resize(std::size(diff_parametes));
+	for (size_t i = 0; i < spheres_.size(); ++ i)
 	{
-		for (uint32_t j = 0; j < spheres_column; ++ j)
-		{
-			spheres_[i * spheres_column + j] = MakeSharedPtr<SphereObject>(diff_parametes[i * spheres_column + j],
-				spec_parameters[i * spheres_column + j], glossiness_parametes[i * spheres_column + j]);
-			spheres_[i * spheres_column + j]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
-				* MathLib::translation((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.08f,
-										0.0f, 
-									   (-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.08f));
-			checked_pointer_cast<SphereObject>(spheres_[i * spheres_column + j])->IntegratedBRDFTex(integrated_brdf_tex_);
-			spheres_[i * spheres_column + j]->AddToSceneManager();
-		}
+		spheres_[i] = MakeSharedPtr<SphereObject>(diff_parametes[i], spec_parameters[i], glossiness_parametes[i],
+			static_cast<uint32_t>(i));
+		checked_pointer_cast<SphereObject>(spheres_[i])->IntegratedBRDFTex(integrated_brdf_tex_);
+		spheres_[i]->AddToSceneManager();
 	}
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
-	this->LookAt(float3(0.0f, 0.2f, -0.6f), float3(0, 0, 0));
+	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
 
 	obj_controller_.AttachCamera(this->ActiveCamera());
@@ -981,6 +1011,18 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 {
 	switch (action.first)
 	{
+	case Zoom:
+		{
+			auto const param = checked_pointer_cast<InputMouseActionParam>(action.second);
+			float const delta = -param->wheel_delta / 120.0f * 0.05f;
+			for (size_t i = 0; i < spheres_.size(); ++ i)
+			{
+				auto& sphere = *checked_pointer_cast<SphereObject>(spheres_[i]);
+				sphere.Distance(sphere.Distance() + delta);
+			}
+		}
+		break;
+
 	case Exit:
 		this->Quit();
 		break;
