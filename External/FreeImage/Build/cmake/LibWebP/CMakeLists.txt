@@ -1,146 +1,175 @@
 SET(LIB_NAME LibWebP)
 
 SET(LIBWEBP_DEC_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.alpha.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.buffer.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.frame.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.idec.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.io.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.quant.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.tree.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.vp8.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.vp8l.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/dec.webp.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/alpha_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/buffer_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/frame_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/idec_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/io_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/quant_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/tree_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8l_dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/webp_dec.c
 )
 SET(LIBWEBP_DEMUX_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/demux/demux.demux.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/demux/anim_decode.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/demux/demux.c
 )
 SET(LIBWEBP_DSP_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.alpha_processing.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.alpha_processing_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.alpha_processing_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.argb.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.argb_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.argb_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.cost.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.cost_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.cost_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.cost_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.cpu.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec_clip_tables.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec_neon.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.dec_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc_avx2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc_neon.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.enc_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.filters.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.filters_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.filters_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.lossless.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.lossless_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.lossless_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.lossless_neon.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.lossless_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.rescaler.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.rescaler_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.rescaler_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.upsampling.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.upsampling_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.upsampling_neon.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.upsampling_sse2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.yuv.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.yuv_mips_dsp_r2.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.yuv_mips32.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.yuv_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/alpha_processing.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/alpha_processing_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/alpha_processing_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/alpha_processing_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/alpha_processing_sse41.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/cost.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/cost_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/cost_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/cost_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/cpu.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_clip_tables.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dec_sse41.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_avx2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/enc_sse41.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/filters.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/filters_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/filters_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/filters_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/filters_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_enc_sse41.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/rescaler_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/ssim.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/ssim_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling_msa.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/upsampling_sse41.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_mips_dsp_r2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_mips32.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_neon.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_sse2.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_sse41.c
 )
 SET(LIBWEBP_ENC_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.alpha.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.analysis.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.backward_references.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.config.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.cost.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.filter.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.frame.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.histogram.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.iterator.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.near_lossless.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.picture.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.picture_csp.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.picture_psnr.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.picture_rescale.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.picture_tools.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.quant.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.syntax.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.token.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.tree.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.vp8l.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/enc.webpenc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/alpha_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/analysis_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/backward_references_cost_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/backward_references_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/config_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/cost_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/filter_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/frame_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/histogram_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/iterator_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/near_lossless_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/picture_csp_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/picture_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/picture_psnr_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/picture_rescale_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/picture_tools_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/predictor_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/quant_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/syntax_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/token_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/tree_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/vp8l_enc.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/webp_enc.c
 )
 SET(LIBWEBP_MUX_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/mux.anim_encode.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/mux.muxedit.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/mux.muxinternal.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/mux.muxread.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/anim_encode.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/muxedit.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/muxinternal.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/muxread.c
 )
 SET(LIBWEBP_UTILS_SOURCE_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.bit_reader.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.bit_writer.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.color_cache.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.filters.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.huffman.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.huffman_encode.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.quant_levels.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.quant_levels_dec.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.random.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.rescaler.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.thread.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_reader_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_writer_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/color_cache_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/filters_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman_encode_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels_dec_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/random_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/rescaler_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/thread_utils.c
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.c
 )
 SET(LIBWEBP_DEC_HEADER_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/alphai.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/decode_vp8.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8i.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8li.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/webpi.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/alphai_dec.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/common_dec.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8_dec.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8i_dec.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/vp8li_dec.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dec/webpi_dec.h
 )
 SET(LIBWEBP_DSP_HEADER_FILES
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/common_sse2.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/common_sse41.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/dsp.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/lossless_common.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/mips_macro.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/msa_macro.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/neon.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/dsp/yuv_tables_sse2.h
 )
 SET(LIBWEBP_ENC_HEADER_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/backward_references.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/cost.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/histogram.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/vp8enci.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/vp8li.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/backward_references_enc.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/cost_enc.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/histogram_enc.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/vp8i_enc.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/enc/vp8li_enc.h
 )
 SET(LIBWEBP_MUX_HEADER_FILES
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/animi.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/mux/muxi.h
 )
 SET(LIBWEBP_UTILS_HEADER_FILES
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_reader.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_reader_inl.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_writer.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/color_cache.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/endian_inl.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/filters.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman_encode.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels_dec.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/random.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/rescaler.h
-	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/thread.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_reader_inl_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_reader_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/bit_writer_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/color_cache_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/endian_inl_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/filters_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman_encode_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/huffman_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels_dec_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/quant_levels_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/random_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/rescaler_utils.h
+	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/thread_utils.h
 	${FREEIMAGE_PROJECT_DIR}/Source/LibWebP/src/utils/utils.h
 )
 SET(LIBWEBP_WEBP_HEADER_FILES
@@ -169,7 +198,7 @@ SOURCE_GROUP("Header Files\\webp" FILES ${LIBWEBP_WEBP_HEADER_FILES})
 IF(KLAYGE_PLATFORM_WINDOWS)
 	ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 ENDIF()
-INCLUDE_DIRECTORIES(${FREEIMAGE_PROJECT_DIR}/Source/src)
+INCLUDE_DIRECTORIES(${FREEIMAGE_PROJECT_DIR}/Source/LibWebP)
 ADD_LIBRARY(${LIB_NAME} STATIC
 	${LIBWEBP_DEC_SOURCE_FILES} ${LIBWEBP_DEMUX_SOURCE_FILES} ${LIBWEBP_DSP_SOURCE_FILES}
 	${LIBWEBP_ENC_SOURCE_FILES} ${LIBWEBP_MUX_SOURCE_FILES} ${LIBWEBP_UTILS_SOURCE_FILES}
