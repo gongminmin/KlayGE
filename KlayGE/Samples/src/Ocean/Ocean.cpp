@@ -205,7 +205,7 @@ namespace
 			base_level_ = 0;
 			strength_ = 10;
 
-			renderable_ = MakeSharedPtr<RenderOcean>(base_level_, strength_);
+			this->AddRenderable(MakeSharedPtr<RenderOcean>(base_level_, strength_));
 
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
 			reflect_mat_ = MathLib::reflect(ocean_plane_);
@@ -237,7 +237,7 @@ namespace
 
 			use_tex_array_ = re.DeviceCaps().max_texture_array_length >= ocean_param_.num_frames;
 
-			checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->PatchLength(ocean_param_.patch_length);
 
 			TexturePtr disp_tex = LoadSoftwareTexture("OceanDisplacement.dds");
 			TexturePtr grad_tex = LoadSoftwareTexture("OceanGradient.dds");
@@ -298,8 +298,8 @@ namespace
 				}
 				gradient_tex_array_->BuildMipSubLevels();
 
-				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMapArray(displacement_tex_array_);
-				checked_pointer_cast<RenderOcean>(renderable_)->GradientMapArray(gradient_tex_array_);
+				checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementMapArray(displacement_tex_array_);
+				checked_pointer_cast<RenderOcean>(renderables_[0])->GradientMapArray(gradient_tex_array_);
 			}
 			else
 			{
@@ -385,19 +385,19 @@ namespace
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
 			int frame0 = static_cast<int>(frame);
 			int frame1 = frame0 + 1;
-			checked_pointer_cast<RenderOcean>(renderable_)->InterpolateFrac(frame - frame0);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->InterpolateFrac(frame - frame0);
 			frame0 %= ocean_param_.num_frames;
 			frame1 %= ocean_param_.num_frames;
 			if (use_tex_array_)
 			{
-				checked_pointer_cast<RenderOcean>(renderable_)->Frames(int2(frame0, frame1));
+				checked_pointer_cast<RenderOcean>(renderables_[0])->Frames(int2(frame0, frame1));
 			}
 			else
 			{
-				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
-				checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
+				checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
+				checked_pointer_cast<RenderOcean>(renderables_[0])->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
 			}
-			checked_pointer_cast<RenderOcean>(renderable_)->DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
+			checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
 
 			return false;
@@ -405,7 +405,7 @@ namespace
 
 		void ReflectionTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderOcean>(renderable_)->ReflectionTex(tex);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->ReflectionTex(tex);
 		}
 
 		void ReflectViewParams(float3& reflect_eye, float3& reflect_at, float3& reflect_up,
@@ -523,18 +523,18 @@ namespace
 
 		void SkylightTex(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			checked_pointer_cast<RenderOcean>(renderable_)->SkylightTex(y_cube, c_cube);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->SkylightTex(y_cube, c_cube);
 		}
 
 		void FogColor(Color const & fog_color)
 		{
-			checked_pointer_cast<RenderOcean>(renderable_)->FogColor(fog_color);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->FogColor(fog_color);
 		}
 
 	private:
 		void GenWaveTextures()
 		{
-			checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
+			checked_pointer_cast<RenderOcean>(renderables_[0])->PatchLength(ocean_param_.patch_length);
 
 			ocean_simulator_->Parameters(ocean_param_);
 
@@ -780,12 +780,12 @@ namespace
 		explicit SceneObjectFoggySkyBox(uint32_t attrib = 0)
 			: SceneObjectSkyBox(attrib)
 		{
-			renderable_ = MakeSharedPtr<RenderableFoggySkyBox>();
+			renderables_[0] = MakeSharedPtr<RenderableFoggySkyBox>();
 		}
 
 		void FogColor(Color const & clr)
 		{
-			checked_pointer_cast<RenderableFoggySkyBox>(renderable_)->FogColor(clr);
+			checked_pointer_cast<RenderableFoggySkyBox>(renderables_[0])->FogColor(clr);
 		}
 	};
 

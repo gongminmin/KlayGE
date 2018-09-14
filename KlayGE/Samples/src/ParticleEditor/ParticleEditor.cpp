@@ -104,11 +104,11 @@ namespace
 		RenderTechnique* color_tech_;
 	};
 
-	class TerrainObject : public SceneObjectHelper
+	class TerrainObject : public SceneObject
 	{
 	public:
 		TerrainObject()
-			: SceneObjectHelper(MakeSharedPtr<TerrainRenderable>(), SOA_Cullable)
+			: SceneObject(MakeSharedPtr<TerrainRenderable>(), SOA_Cullable)
 		{
 		}
 	};

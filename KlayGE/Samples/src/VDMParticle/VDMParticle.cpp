@@ -147,13 +147,13 @@ void VDMParticleApp::OnCreate()
 
 	RenderablePtr robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
-	SceneObjectPtr robot = MakeSharedPtr<SceneObjectHelper>(robot_model, SceneObject::SOA_Cullable);
+	auto robot = MakeSharedPtr<SceneObject>(robot_model, SceneObject::SOA_Cullable);
 	robot->ModelMatrix(MathLib::translation(0.0f, 0.0f, -2.0f));
 	scene_objs_.push_back(robot);
 
 	RenderablePtr room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
-	SceneObjectPtr room = MakeSharedPtr<SceneObjectHelper>(room_model, SceneObject::SOA_Cullable);
+	auto room = MakeSharedPtr<SceneObject>(room_model, SceneObject::SOA_Cullable);
 	scene_objs_.push_back(room);
 
 	for (auto& so : scene_objs_)

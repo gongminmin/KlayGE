@@ -179,7 +179,7 @@ void DeferredRenderingApp::OnCreate()
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
 	spot_light_src_[2]->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
+	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);

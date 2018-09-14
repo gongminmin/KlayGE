@@ -50,7 +50,7 @@ namespace KlayGE
 		float2 x_dir_, y_dir_;
 	};
 
-	class KLAYGE_CORE_API InfTerrainSceneObject : public SceneObjectHelper
+	class KLAYGE_CORE_API InfTerrainSceneObject : public SceneObject
 	{
 	public:
 		InfTerrainSceneObject();
@@ -246,7 +246,7 @@ namespace KlayGE
 		TexturePtr mask_map_cpu_tex_;
 	};
 
-	class KLAYGE_CORE_API HQTerrainSceneObject : public SceneObjectHelper
+	class KLAYGE_CORE_API HQTerrainSceneObject : public SceneObject
 	{
 	public:
 		explicit HQTerrainSceneObject(RenderablePtr const & renderable);

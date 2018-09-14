@@ -540,18 +540,19 @@ namespace
 		RenderTechnique* rov_at_render_tech_;
 	};
 
-	class PolygonObject : public SceneObjectHelper
+	class PolygonObject : public SceneObject
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
+			this->AddRenderable(SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>()));
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
@@ -560,7 +561,7 @@ namespace
 
 		void SetOITMode(OITMode mode)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->SetOITMode(mode);
@@ -569,7 +570,7 @@ namespace
 
 		void SetAlpha(float alpha)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->SetAlpha(alpha);
@@ -578,7 +579,7 @@ namespace
 
 		void FirstPass(bool fp)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->FirstPass(fp);
@@ -587,7 +588,7 @@ namespace
 
 		void DepthPass(bool dp)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->DepthPass(dp);
@@ -596,7 +597,7 @@ namespace
 
 		void LastDepth(TexturePtr const & depth_tex)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LastDepth(depth_tex);
@@ -605,7 +606,7 @@ namespace
 
 		void BackgroundTex(TexturePtr const & bg_tex)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BackgroundTex(bg_tex);
@@ -614,7 +615,7 @@ namespace
 
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LinkedListBuffer(fragment_link_buf, start_offset_buf);
@@ -623,7 +624,7 @@ namespace
 
 		void AccumWeightTextures(TexturePtr const & accum_tex, TexturePtr const & weight_tex)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AccumWeightTextures(accum_tex, weight_tex);
@@ -632,7 +633,7 @@ namespace
 
 		void RenderQuad()
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			checked_pointer_cast<RenderPolygon>(model->Subrenderable(0))->RenderQuad();
 		}
 	};

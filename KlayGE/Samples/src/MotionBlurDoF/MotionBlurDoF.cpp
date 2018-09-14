@@ -198,7 +198,7 @@ namespace
 		}
 	};
 
-	class Teapot : public SceneObjectHelper
+	class Teapot : public SceneObject
 	{
 	private:
 		struct InstData
@@ -210,8 +210,10 @@ namespace
 
 	public:
 		Teapot()
-			: SceneObjectHelper(SOA_Moveable | SOA_Cullable)
+			: SceneObject(SOA_Moveable | SOA_Cullable)
 		{
+			this->AddRenderable(RenderablePtr());
+
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 3, EF_ABGR32F));
@@ -234,7 +236,7 @@ namespace
 
 		void SetRenderable(RenderablePtr const & ra)
 		{
-			renderable_ = ra;
+			renderables_[0] = ra;
 		}
 
 		void SubThreadUpdate(float app_time, float elapsed_time) override
@@ -259,17 +261,17 @@ namespace
 
 		void VelocityPass(bool velocity)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->VelocityPass(velocity);
+			checked_pointer_cast<MotionBlurRenderMesh>(renderables_[0])->VelocityPass(velocity);
 		}
 
 		void BlurRadius(uint32_t blur_radius)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->BlurRadius(blur_radius);
+			checked_pointer_cast<MotionBlurRenderMesh>(renderables_[0])->BlurRadius(blur_radius);
 		}
 
 		void Exposure(float exposure)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->Exposure(exposure);
+			checked_pointer_cast<MotionBlurRenderMesh>(renderables_[0])->Exposure(exposure);
 		}
 
 	private:
@@ -1137,7 +1139,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 						LogWarn() << "Wrong callings to script engine" << std::endl;
 					}
 
-					SceneObjectPtr so = MakeSharedPtr<Teapot>();
+					auto so = MakeSharedPtr<Teapot>();
 					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
 					checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);

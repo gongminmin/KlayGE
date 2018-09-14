@@ -223,34 +223,36 @@ namespace
 		float distance_;
 	};
 
-	class SphereObject : public SceneObjectHelper
+	class SphereObject : public SceneObject
 	{
 	public:
 		SphereObject(float4 const & diff, float4 const & spec, float glossiness, uint32_t id)
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
-			checked_pointer_cast<SphereRenderable>(renderable_)->Material(diff, spec, glossiness);
-			checked_pointer_cast<SphereRenderable>(renderable_)->Id(id);
+			auto renderable = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
+			checked_pointer_cast<SphereRenderable>(renderable)->Material(diff, spec, glossiness);
+			checked_pointer_cast<SphereRenderable>(renderable)->Id(id);
+			this->AddRenderable(renderable);
 		}
 
 		void RenderingType(int type)
 		{
-			checked_pointer_cast<SphereRenderable>(renderable_)->RenderingType(type);
+			checked_pointer_cast<SphereRenderable>(renderables_[0])->RenderingType(type);
 		}
 
 		void IntegratedBRDFTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<SphereRenderable>(renderable_)->IntegratedBRDFTex(tex);
+			checked_pointer_cast<SphereRenderable>(renderables_[0])->IntegratedBRDFTex(tex);
 		}
 
 		void Distance(float distance)
 		{
-			checked_pointer_cast<SphereRenderable>(renderable_)->Distance(distance);
+			checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance(distance);
 		}
 		float Distance() const
 		{
-			return checked_pointer_cast<SphereRenderable>(renderable_)->Distance();
+			return checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance();
 		}
 	};
 

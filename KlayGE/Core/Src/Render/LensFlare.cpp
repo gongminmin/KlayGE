@@ -85,11 +85,10 @@ namespace KlayGE
 		*(effect_->ParameterByName("scale")) = static_cast<float>(re.CurFrameBuffer()->Width()) / re.CurFrameBuffer()->Height();
 	}
 
-	
+
 	LensFlareSceneObject::LensFlareSceneObject()
-		: SceneObjectHelper(0)
+		: SceneObject(MakeSharedPtr<LensFlareRenderable>(), 0)
 	{
-		renderable_ = MakeSharedPtr<LensFlareRenderable>();
 	}
 
 	void LensFlareSceneObject::Direction(float3 const & dir)
@@ -153,7 +152,7 @@ namespace KlayGE
 				flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
 			}
 
-			checked_pointer_cast<LensFlareRenderable>(renderable_)->FlareParam(flare_param, alpha_fac);
+			checked_pointer_cast<LensFlareRenderable>(renderables_[0])->FlareParam(flare_param, alpha_fac);
 		}
 		else
 		{
@@ -167,7 +166,7 @@ namespace KlayGE
 
 	void LensFlareSceneObject::Pass(PassType type)
 	{
-		SceneObjectHelper::Pass(type);
+		SceneObject::Pass(type);
 		this->Visible(this->LFVisible());
 	}
 }

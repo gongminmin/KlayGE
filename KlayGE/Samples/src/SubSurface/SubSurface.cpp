@@ -30,53 +30,54 @@ using namespace std;
 
 namespace
 {
-	class ModelObject : public SceneObjectHelper
+	class ModelObject : public SceneObject
 	{
 	public:
 		ModelObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>());
+			this->AddRenderable(SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>()));
 		}
 
 		void EyePos(float3 const & eye_pos)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->EyePos(eye_pos);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->EyePos(eye_pos);
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->LightPos(light_pos);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->LightPos(light_pos);
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->LightColor(light_color);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->LightColor(light_color);
 		}
 		
 		void LightFalloff(float3 const & light_falloff)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->LightFalloff(light_falloff);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->LightFalloff(light_falloff);
 		}
 
 		void BackFaceDepthPass(bool dfdp)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthPass(dfdp);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->BackFaceDepthPass(dfdp);
 		}
 
 		void BackFaceDepthTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->BackFaceDepthTex(tex);
 		}
 
 		void SigmaT(float sigma_t)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->SigmaT(sigma_t);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->SigmaT(sigma_t);
 		}
 
 		void MtlThickness(float thickness)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->MtlThickness(thickness);
+			checked_pointer_cast<DetailedModel>(renderables_[0])->MtlThickness(thickness);
 		}
 	};
 

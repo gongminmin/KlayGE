@@ -41,56 +41,24 @@
 
 namespace KlayGE
 {
-	SceneObjectHelper::SceneObjectHelper(uint32_t attrib)
-		: SceneObject(attrib)
-	{
-	}
-
-	SceneObjectHelper::SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib)
-		: SceneObjectHelper(attrib)
-	{
-		renderable_ = renderable;
-		renderable_hw_res_ready_ = renderable_->HWResourceReady();
-		this->OnAttachRenderable(false);
-	}
-
-	void SceneObjectHelper::OnAttachRenderable(bool add_to_scene)
-	{
-		if (renderable_ && (renderable_->NumSubrenderables() > 0))
-		{
-			children_.resize(renderable_->NumSubrenderables());
-			for (uint32_t i = 0; i < renderable_->NumSubrenderables(); ++ i)
-			{
-				SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(renderable_->Subrenderable(i), attrib_);
-				child->Parent(this);
-				children_[i] = child;
-
-				if (add_to_scene)
-				{
-					child->AddToSceneManagerLocked();
-				}
-			}
-		}
-	}
-
 	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)
-		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
+		: SceneObject(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
 	{
 	}
 
 	void SceneObjectSkyBox::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->Technique(effect, tech);
+		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->Technique(effect, tech);
 	}
 
 	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
+		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->CubeMap(cube);
 	}
 
 	void SceneObjectSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
+		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->CompressedCubeMap(y_cube, c_cube);
 	}
 
 
@@ -100,10 +68,9 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
-		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+		: SceneObject(light_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
 	{
-		renderable_ = light_model;
 		model_scaling_ = float4x4::Identity();
 
 		children_.resize(light_model->NumSubrenderables());
@@ -111,7 +78,7 @@ namespace KlayGE
 		{
 			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i))->AttachLightSrc(light);
 
-			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(light_model->Subrenderable(i), attrib_);
+			auto child = MakeSharedPtr<SceneObject>(light_model->Subrenderable(i), attrib_);
 			child->Parent(this);
 			children_[i] = child;
 		}
@@ -132,7 +99,7 @@ namespace KlayGE
 			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
 		}
 
-		RenderModelPtr light_model = checked_pointer_cast<RenderModel>(renderable_);
+		RenderModelPtr light_model = checked_pointer_cast<RenderModel>(renderables_[0]);
 		for (uint32_t i = 0; i < light_model->NumSubrenderables(); ++ i)
 		{
 			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i));
@@ -193,10 +160,9 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
-		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+		: SceneObject(camera_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera)
 	{
-		renderable_ = camera_model;
 		model_scaling_ = float4x4::Identity();
 
 		children_.resize(camera_model->NumSubrenderables());
@@ -204,7 +170,7 @@ namespace KlayGE
 		{
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Subrenderable(i))->AttachCamera(camera);
 
-			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(camera_model->Subrenderable(i), attrib_);
+			auto child = MakeSharedPtr<SceneObject>(camera_model->Subrenderable(i), attrib_);
 			child->Parent(this);
 			children_[i] = child;
 		}

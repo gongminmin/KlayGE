@@ -149,7 +149,7 @@ namespace KlayGE
 
 
 	InfTerrainSceneObject::InfTerrainSceneObject()
-		: SceneObjectHelper(SOA_Moveable)
+		: SceneObject(SOA_Moveable)
 	{
 	}
 
@@ -171,8 +171,8 @@ namespace KlayGE
 
 		float4x4 proj_to_virtual_view = camera.InverseViewProjMatrix() * virtual_view;
 
-		float2 const & x_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderable_)->XDir();
-		float2 const & y_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderable_)->YDir();
+		float2 const & x_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->XDir();
+		float2 const & y_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->YDir();
 		float3 x_dir(x_dir_2d.x(), -camera.EyePos().y(), x_dir_2d.y());
 		float3 y_dir(y_dir_2d.x(), -camera.EyePos().y(), y_dir_2d.y());
 
@@ -212,7 +212,7 @@ namespace KlayGE
 				intersect = true;
 			}
 		}
-		checked_pointer_cast<InfTerrainRenderable>(renderable_)->OffsetY(sy);
+		checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->OffsetY(sy);
 
 		this->Visible(intersect);
 
@@ -716,13 +716,12 @@ namespace KlayGE
 
 
 	HQTerrainSceneObject::HQTerrainSceneObject(RenderablePtr const & renderable)
-		: SceneObjectHelper(SOA_Moveable),
+		: SceneObject(renderable, SOA_Moveable),
 			reset_terrain_(true)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		last_eye_pos_ = re.DefaultFrameBuffer()->GetViewport()->camera->EyePos();
 
-		renderable_ = renderable;
 		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
 	}
 
@@ -738,12 +737,12 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->SetMatrices(camera);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->SetMatrices(camera);
 
 		reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera.EyePos());
 		if (reset_terrain_)
 		{
-			checked_pointer_cast<HQTerrainRenderable>(renderable_)->FlushTerrainData();
+			checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->FlushTerrainData();
 			reset_terrain_ = false;
 			last_eye_pos_ = camera.EyePos();
 		}
@@ -753,46 +752,46 @@ namespace KlayGE
 
 	void HQTerrainSceneObject::Tessellation(bool tess)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->Tessellation(tess);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->Tessellation(tess);
 	}
 
 	void HQTerrainSceneObject::ShowPatches(bool sp)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->ShowPatches(sp);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->ShowPatches(sp);
 	}
 
 	void HQTerrainSceneObject::ShowTiles(bool st)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->ShowTiles(st);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->ShowTiles(st);
 	}
 
 	void HQTerrainSceneObject::Wireframe(bool wf)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->Wireframe(wf);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->Wireframe(wf);
 	}
 
 	void HQTerrainSceneObject::DetailNoiseScale(float scale)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->DetailNoiseScale(scale);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->DetailNoiseScale(scale);
 	}
 
 	void HQTerrainSceneObject::TessellatedTriSize(int size)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TessellatedTriSize(size);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->TessellatedTriSize(size);
 	}
 
 	void HQTerrainSceneObject::TextureLayer(uint32_t layer, TexturePtr const & tex)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TextureLayer(layer, tex);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->TextureLayer(layer, tex);
 	}
 
 	void HQTerrainSceneObject::TextureScale(uint32_t layer, float2 const & scale)
 	{
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TextureScale(layer, scale);
+		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->TextureScale(layer, scale);
 	}
 
 	float HQTerrainSceneObject::GetHeight(float x, float z)
 	{
-		return checked_pointer_cast<HQTerrainRenderable>(renderable_)->GetHeight(x, z);
+		return checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->GetHeight(x, z);
 	}
 }

@@ -91,18 +91,19 @@ namespace
 		}
 	};
 
-	class PolygonObject : public SceneObjectHelper
+	class PolygonObject : public SceneObject
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
+			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>()));
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
@@ -111,7 +112,7 @@ namespace
 
 		void LightColor(float3 const & light_color)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
@@ -120,7 +121,7 @@ namespace
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
@@ -129,7 +130,7 @@ namespace
 
 		void ProceduralType(int type)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralType(type);
@@ -138,7 +139,7 @@ namespace
 
 		void ProceduralFreq(float freq)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralFreq(freq);
@@ -147,7 +148,7 @@ namespace
 
 		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) override
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AppTime(app_time);

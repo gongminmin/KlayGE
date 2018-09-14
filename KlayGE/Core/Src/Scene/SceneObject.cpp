@@ -27,14 +27,22 @@
 namespace KlayGE
 {
 	SceneObject::SceneObject(uint32_t attrib)
-		: attrib_(attrib), parent_(nullptr), renderable_hw_res_ready_(false),
+		: attrib_(attrib), parent_(nullptr),
 			model_(float4x4::Identity()), abs_model_(float4x4::Identity()),
-			visible_mark_(BO_No)
+			pos_aabb_dirty_(true), visible_mark_(BO_No)
 	{
 		if (!(attrib & SOA_Overlay) && (attrib & (SOA_Cullable | SOA_Moveable)))
 		{
+			pos_aabb_os_ = MakeUniquePtr<AABBox>();
 			pos_aabb_ws_ = MakeUniquePtr<AABBox>();
 		}
+	}
+
+	SceneObject::SceneObject(RenderablePtr const & renderable, uint32_t attrib)
+		: SceneObject(attrib)
+	{
+		this->AddRenderable(renderable);
+		this->OnAttachRenderable(false);
 	}
 
 	SceneObject::~SceneObject()
@@ -62,9 +70,36 @@ namespace KlayGE
 		return children_[index];
 	}
 
+	uint32_t SceneObject::NumRenderables() const
+	{
+		return static_cast<uint32_t>(renderables_.size());
+	}
+
 	RenderablePtr const & SceneObject::GetRenderable() const
 	{
-		return renderable_;
+		return this->GetRenderable(0);
+	}
+
+	RenderablePtr const & SceneObject::GetRenderable(uint32_t i) const
+	{
+		return renderables_[i];
+	}
+
+	void SceneObject::AddRenderable(RenderablePtr const & renderable)
+	{
+		renderables_.push_back(renderable);
+		renderables_hw_res_ready_.push_back(false);
+		pos_aabb_dirty_ = true;
+	}
+
+	void SceneObject::DelRenderable(RenderablePtr const & renderable)
+	{
+		auto iter = std::find(renderables_.begin(), renderables_.end(), renderable);
+		if (iter != renderables_.end())
+		{
+			renderables_.erase(iter);
+			pos_aabb_dirty_ = true;
+		}
 	}
 
 	void SceneObject::ModelMatrix(float4x4 const & mat)
@@ -98,14 +133,18 @@ namespace KlayGE
 			abs_model_ = model_;
 		}
 
-		if (renderable_)
+		if (!renderables_.empty())
 		{
 			if (pos_aabb_ws_)
 			{
-				*pos_aabb_ws_ = MathLib::transform_aabb(renderable_->PosBound(), abs_model_);
+				this->UpdatePosBound();
+				*pos_aabb_ws_ = MathLib::transform_aabb(*pos_aabb_os_, abs_model_);
 			}
 
-			renderable_->ModelMatrix(abs_model_);
+			for (auto const & renderable : renderables_)
+			{
+				renderable->ModelMatrix(abs_model_);
+			}
 		}
 	}
 
@@ -140,12 +179,19 @@ namespace KlayGE
 	bool SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		bool refreshed = false;
-		if (renderable_ && !renderable_hw_res_ready_ && renderable_->HWResourceReady())
+		for (size_t i = 0; i < renderables_.size(); ++ i)
+		{
+			if (renderables_[i] && !renderables_hw_res_ready_[i] && renderables_[i]->HWResourceReady())
+			{
+				renderables_hw_res_ready_[i] = true;
+				refreshed = true;
+			}
+		}
+
+		if (refreshed)
 		{
 			this->OnAttachRenderable(false);
 			this->UpdateAbsModelMatrix();
-			refreshed = true;
-			renderable_hw_res_ready_ = true;
 		}
 
 		if (main_thread_update_func_)
@@ -231,25 +277,25 @@ namespace KlayGE
 
 	void SceneObject::SelectMode(bool select_mode)
 	{
-		if (renderable_)
+		for (auto const & renderable : renderables_)
 		{
-			renderable_->SelectMode(select_mode);
+			renderable->SelectMode(select_mode);
 		}
 	}
 
 	void SceneObject::ObjectID(uint32_t id)
 	{
-		if (renderable_)
+		for (auto const & renderable : renderables_)
 		{
-			renderable_->ObjectID(id);
+			renderable->ObjectID(id);
 		}
 	}
 
 	bool SceneObject::SelectMode() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->SelectMode();
+			return renderables_[0]->SelectMode();
 		}
 		else
 		{
@@ -259,21 +305,22 @@ namespace KlayGE
 
 	void SceneObject::Pass(PassType type)
 	{
-		if (renderable_)
+		for (auto const & renderable : renderables_)
 		{
-			renderable_->Pass(type);
-			if (attrib_ & SOA_NotCastShadow)
-			{
-				this->Visible(PC_ShadowMap != GetPassCategory(type));
-			}
+			renderable->Pass(type);
+		}
+
+		if (attrib_ & SOA_NotCastShadow)
+		{
+			this->Visible(PC_ShadowMap != GetPassCategory(type));
 		}
 	}
 
 	bool SceneObject::TransparencyBackFace() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->TransparencyBackFace();
+			return renderables_[0]->TransparencyBackFace();
 		}
 		else
 		{
@@ -283,9 +330,9 @@ namespace KlayGE
 
 	bool SceneObject::TransparencyFrontFace() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->TransparencyFrontFace();
+			return renderables_[0]->TransparencyFrontFace();
 		}
 		else
 		{
@@ -295,9 +342,9 @@ namespace KlayGE
 
 	bool SceneObject::SSS() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->SSS();
+			return renderables_[0]->SSS();
 		}
 		else
 		{
@@ -307,9 +354,9 @@ namespace KlayGE
 
 	bool SceneObject::Reflection() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->Reflection();
+			return renderables_[0]->Reflection();
 		}
 		else
 		{
@@ -319,9 +366,9 @@ namespace KlayGE
 
 	bool SceneObject::SimpleForward() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->SimpleForward();
+			return renderables_[0]->SimpleForward();
 		}
 		else
 		{
@@ -331,9 +378,9 @@ namespace KlayGE
 
 	bool SceneObject::VDM() const
 	{
-		if (renderable_)
+		if (renderables_[0])
 		{
-			return renderable_->VDM();
+			return renderables_[0]->VDM();
 		}
 		else
 		{
@@ -343,9 +390,41 @@ namespace KlayGE
 
 	void SceneObject::OnAttachRenderable(bool add_to_scene)
 	{
-		if (add_to_scene)
+		for (auto const & renderable : renderables_)
 		{
-			this->AddToSceneManagerLocked();
+			if (renderable && (renderable->NumSubrenderables() > 0))
+			{
+				size_t const base = children_.size();
+				children_.resize(base + renderable->NumSubrenderables());
+				for (uint32_t i = 0; i < renderable->NumSubrenderables(); ++ i)
+				{
+					auto child = MakeSharedPtr<SceneObject>(renderable->Subrenderable(i), attrib_);
+					child->Parent(this);
+					children_[base + i] = child;
+
+					if (add_to_scene)
+					{
+						child->AddToSceneManagerLocked();
+					}
+				}
+			}
+		}
+	}
+
+	void SceneObject::UpdatePosBound()
+	{
+		if (pos_aabb_dirty_)
+		{
+			if (pos_aabb_os_)
+			{
+				*pos_aabb_os_ = renderables_[0]->PosBound();
+				for (size_t i = 1; i < renderables_.size(); ++ i)
+				{
+					*pos_aabb_os_ |= renderables_[i]->PosBound();
+				}
+			}
+
+			pos_aabb_dirty_ = false;
 		}
 	}
 }

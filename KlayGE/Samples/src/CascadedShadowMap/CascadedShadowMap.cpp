@@ -90,11 +90,11 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
-	SceneObjectPtr plane_so = MakeSharedPtr<SceneObjectHelper>(plane_model, SceneObject::SOA_Cullable);
+	auto plane_so = MakeSharedPtr<SceneObject>(plane_model, SceneObject::SOA_Cullable);
 	plane_so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
 	plane_so->AddToSceneManager();
 
-	SceneObjectPtr katapult_so = MakeSharedPtr<SceneObjectHelper>(katapult_model, SceneObject::SOA_Cullable);
+	auto katapult_so = MakeSharedPtr<SceneObject>(katapult_model, SceneObject::SOA_Cullable);
 	katapult_so->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 1.0f);

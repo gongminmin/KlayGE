@@ -144,7 +144,7 @@ void AreaLightingApp::OnCreate()
 	tube_area_light_src_->AddToSceneManager();
 	tube_area_light_src_->Visible(false);
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
+	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj->AddToSceneManager();
 
 	for (int i = -5; i < 5; ++ i)
@@ -155,7 +155,7 @@ void AreaLightingApp::OnCreate()
 			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
 			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
 			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
-			SceneObjectPtr sphere_obj = MakeSharedPtr<SceneObjectHelper>(sphere_mesh, SceneObject::SOA_Cullable);
+			auto sphere_obj = MakeSharedPtr<SceneObject>(sphere_mesh, SceneObject::SOA_Cullable);
 			sphere_obj->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f) * MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
 			sphere_obj->AddToSceneManager();
 		}

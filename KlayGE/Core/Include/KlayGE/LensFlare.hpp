@@ -29,8 +29,8 @@ namespace KlayGE
 
 		void OnRenderBegin();
 	};
-	
-	class KLAYGE_CORE_API LensFlareSceneObject : public SceneObjectHelper
+
+	class KLAYGE_CORE_API LensFlareSceneObject : public SceneObject
 	{
 	public:
 		LensFlareSceneObject();

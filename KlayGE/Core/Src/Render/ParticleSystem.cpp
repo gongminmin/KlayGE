@@ -604,7 +604,7 @@ namespace KlayGE
 
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
-		: SceneObjectHelper(SOA_Moveable | SOA_NotCastShadow),
+		: SceneObject(SOA_Moveable | SOA_NotCastShadow),
 			particles_(max_num_particles),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
@@ -612,7 +612,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
-		renderable_ = MakeSharedPtr<RenderParticles>(gs_support_);
+		this->AddRenderable(MakeSharedPtr<RenderParticles>(gs_support_));
 	}
 
 	ParticleSystemPtr ParticleSystem::Clone()
@@ -799,7 +799,7 @@ namespace KlayGE
 					return lhs.second > rhs.second;
 				});
 
-			checked_pointer_cast<RenderParticles>(renderable_)->PosBound(AABBox(min_bb, max_bb));
+			checked_pointer_cast<RenderParticles>(renderables_[0])->PosBound(AABBox(min_bb, max_bb));
 		}
 	}
 
@@ -807,7 +807,7 @@ namespace KlayGE
 	{
 		if (!actived_particles.empty())
 		{
-			RenderLayout& rl = renderable_->GetRenderLayout();
+			RenderLayout& rl = renderables_[0]->GetRenderLayout();
 
 			GraphicsBufferPtr instance_gb;
 			if (gs_support_)
@@ -901,32 +901,32 @@ namespace KlayGE
 	void ParticleSystem::ParticleAlphaFromTex(std::string const & tex_name)
 	{
 		particle_alpha_from_tex_name_ = tex_name;
-		checked_pointer_cast<RenderParticles>(renderable_)->ParticleAlphaFrom(
+		checked_pointer_cast<RenderParticles>(renderables_[0])->ParticleAlphaFrom(
 			SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
 	}
 
 	void ParticleSystem::ParticleAlphaToTex(std::string const & tex_name)
 	{
 		particle_alpha_to_tex_name_ = tex_name;
-		checked_pointer_cast<RenderParticles>(renderable_)->ParticleAlphaTo(
+		checked_pointer_cast<RenderParticles>(renderables_[0])->ParticleAlphaTo(
 			SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
 	}
 
 	void ParticleSystem::ParticleColorFrom(Color const & clr)
 	{
 		particle_color_from_ = clr;
-		checked_pointer_cast<RenderParticles>(renderable_)->ParticleColorFrom(clr);
+		checked_pointer_cast<RenderParticles>(renderables_[0])->ParticleColorFrom(clr);
 	}
 
 	void ParticleSystem::ParticleColorTo(Color const & clr)
 	{
 		particle_color_to_ = clr;
-		checked_pointer_cast<RenderParticles>(renderable_)->ParticleColorTo(clr);
+		checked_pointer_cast<RenderParticles>(renderables_[0])->ParticleColorTo(clr);
 	}
 
 	void ParticleSystem::SceneDepthTexture(TexturePtr const & depth_tex)
 	{
-		checked_pointer_cast<RenderParticles>(renderable_)->SceneDepthTexture(depth_tex);
+		checked_pointer_cast<RenderParticles>(renderables_[0])->SceneDepthTexture(depth_tex);
 	}
 
 

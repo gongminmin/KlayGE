@@ -596,7 +596,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				if (scene_model_->HWResourceReady())
 				{
-					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_, SceneObject::SOA_Cullable);
+					auto so = MakeSharedPtr<SceneObject>(scene_model_, SceneObject::SOA_Cullable);
 					so->AddToSceneManager();
 
 					for (uint32_t i = 0; i < so->NumChildren(); ++ i)
@@ -620,7 +620,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else
 			{
-				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(teapot_model_->Subrenderable(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+				auto so = MakeSharedPtr<SceneObject>(teapot_model_->Subrenderable(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
 				so->AddToSceneManager();
 				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);

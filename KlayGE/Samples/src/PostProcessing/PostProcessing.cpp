@@ -118,7 +118,7 @@ void PostProcessingApp::OnCreate()
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 	scene_obj->BindMainThreadUpdateFunc(ObjectUpdate());
 	scene_obj->AddToSceneManager();
 

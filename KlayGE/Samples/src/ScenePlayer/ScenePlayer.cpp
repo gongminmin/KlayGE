@@ -653,7 +653,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
-		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model, obj_attr);
+		auto scene_obj = MakeSharedPtr<SceneObject>(model, obj_attr);
 		scene_obj->ModelMatrix(obj_mat);
 		if (!update_script.empty())
 		{

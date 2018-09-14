@@ -880,7 +880,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			SceneObjectHelperPtr font_obj = MakeSharedPtr<SceneObjectHelper>(font_renderable_, fso_attrib_);
+			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText2D(x, y, z, xScale, yScale, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}
@@ -894,7 +894,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			SceneObjectHelperPtr font_obj = MakeSharedPtr<SceneObjectHelper>(font_renderable_, fso_attrib_);
+			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText2D(rc, z, xScale, yScale, clr, text, font_size, align);
 			font_obj->AddToSceneManager();
 		}
@@ -906,7 +906,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			SceneObjectHelperPtr font_obj = MakeSharedPtr<SceneObjectHelper>(font_renderable_, fso_attrib_);
+			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText3D(mvp, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}

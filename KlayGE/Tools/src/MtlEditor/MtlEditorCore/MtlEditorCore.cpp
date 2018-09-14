@@ -115,90 +115,91 @@ namespace
 		}
 	};
 
-	class ModelObject : public SceneObjectHelper
+	class ModelObject : public SceneObject
 	{
 	public:
 		explicit ModelObject(std::string const & name)
-			: SceneObjectHelper(0)
+			: SceneObject(0)
 		{
-			renderable_ = SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable,
+			auto renderable = SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<DetailedSkinnedModel>(), CreateMeshFactory<DetailedSkinnedMesh>());
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
+			checked_pointer_cast<DetailedSkinnedModel>(renderable)->SetTime(0);
+			this->AddRenderable(renderable);
 		}
 
 		virtual ~ModelObject()
 		{
-			ResLoader::Instance().Unload(renderable_);
+			ResLoader::Instance().Unload(renderables_[0]);
 		}
 
 		uint32_t NumLods() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumLods();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->NumLods();
 		}
 
 		void ActiveLod(int32_t lod)
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->ActiveLod(lod);
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->ActiveLod(lod);
 		}
 
 		uint32_t NumFrames() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumFrames();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->NumFrames();
 		}
 
 		uint32_t FrameRate() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->FrameRate();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->FrameRate();
 		}
 
 		RenderablePtr const & Mesh(size_t id) const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->Subrenderable(id);
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->Subrenderable(id);
 		}
 
 		uint32_t NumMeshes() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumSubrenderables();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->NumSubrenderables();
 		}
 
 		void RebindJoints()
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->RebindJoints();
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->RebindJoints();
 		}
 
 		void UnbindJoints()
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->UnbindJoints();
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->UnbindJoints();
 		}
 
 		RenderMaterialPtr const & GetMaterial(int32_t i) const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->GetMaterial(i);
+			return checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->GetMaterial(i);
 		}
 
 		void SetTime(float time)
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(time);
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->SetTime(time);
 		}
 
 		void SetFrame(float frame)
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetFrame(frame);
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->SetFrame(frame);
 		}
 
 		void VisualizeLighting()
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeLighting();
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->VisualizeLighting();
 		}
 
 		void VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeVertex(usage, usage_index);
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->VisualizeVertex(usage, usage_index);
 		}
 
 		void VisualizeTexture(int slot)
 		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeTexture(slot);
+			checked_pointer_cast<DetailedSkinnedModel>(renderables_[0])->VisualizeTexture(slot);
 		}
 	};
 
@@ -324,11 +325,11 @@ namespace KlayGE
 		main_light_->BindUpdateFunc(LightSourceUpdate());
 		main_light_->AddToSceneManager();
 
-		axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(),
+		axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderAxis>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		axis_->AddToSceneManager();
 
-		grid_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderGrid>(),
+		grid_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderGrid>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		grid_->AddToSceneManager();
 
@@ -358,7 +359,7 @@ namespace KlayGE
 
 		ambient_light_->SkylightTex(default_cube_map_);
 
-		selected_bb_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableLineBox>(),
+		selected_bb_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableLineBox>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
 		selected_bb_->AddToSceneManager();
@@ -442,14 +443,14 @@ namespace KlayGE
 
 		if (checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable())->NumJoints() > 0)
 		{
-			skeleton_model_ = MakeSharedPtr<SceneObjectHelper>(
+			skeleton_model_ = MakeSharedPtr<SceneObject>(
 				MakeSharedPtr<SkeletonMesh>(checked_pointer_cast<RenderModel>(model_->GetRenderable())), 0);
 			skeleton_model_->AddToSceneManager();
 		}
 
 		if (!ResLoader::Instance().Locate(imposter_name).empty())
 		{
-			imposter_ = MakeSharedPtr<SceneObjectHelper>(
+			imposter_ = MakeSharedPtr<SceneObject>(
 				MakeSharedPtr<RenderImpostor>(imposter_name, model_->GetRenderable()->PosBound()), 0);
 			imposter_->AddToSceneManager();
 			imposter_->Visible(false);

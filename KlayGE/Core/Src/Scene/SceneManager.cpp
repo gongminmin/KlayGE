@@ -606,31 +606,37 @@ namespace KlayGE
 
 		for (auto const & obj : scene_objs)
 		{
-			auto so = obj.get();
+			auto* so = obj.get();
 			if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
 			{
-				auto renderable = so->GetRenderable().get();
-				if (renderable)
+				for (uint32_t i = 0; i < so->NumRenderables(); ++ i)
 				{
-					renderable->ClearInstances();
+					auto* renderable = so->GetRenderable(i).get();
+					if (renderable)
+					{
+						renderable->ClearInstances();
+					}
 				}
 			}
 		}
 
 		for (auto const & obj : scene_objs)
 		{
-			auto so = obj.get();
+			auto* so = obj.get();
 			if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
 			{
-				auto renderable = so->GetRenderable().get();
-				if (renderable)
+				for (uint32_t i = 0; i < so->NumRenderables(); ++ i)
 				{
-					if (0 == renderable->NumInstances())
+					auto renderable = so->GetRenderable(i).get();
+					if (renderable)
 					{
-						renderable->AddToRenderQueue();
+						if (0 == renderable->NumInstances())
+						{
+							renderable->AddToRenderQueue();
+						}
+						renderable->AddInstance(so);
+						++ num_objects_rendered_;
 					}
-					renderable->AddInstance(so);
-					++ num_objects_rendered_;
 				}
 			}
 		}

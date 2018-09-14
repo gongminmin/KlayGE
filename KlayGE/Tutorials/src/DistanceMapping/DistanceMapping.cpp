@@ -177,27 +177,27 @@ namespace
 		float4x4 inv_model_mat_;
 	};
 
-	class PolygonObject : public SceneObjectHelper
+	class PolygonObject : public SceneObject
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
+			: SceneObject(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
 		{
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			checked_pointer_cast<RenderPolygon>(renderable_)->LightPos(light_pos);
+			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightPos(light_pos);
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			checked_pointer_cast<RenderPolygon>(renderable_)->LightColor(light_color);
+			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightColor(light_color);
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			checked_pointer_cast<RenderPolygon>(renderable_)->LightFalloff(light_falloff);
+			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightFalloff(light_falloff);
 		}
 	};
 

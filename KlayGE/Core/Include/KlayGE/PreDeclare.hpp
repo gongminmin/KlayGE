@@ -50,8 +50,6 @@ namespace KlayGE
 	typedef std::shared_ptr<SceneNode> SceneNodePtr;
 	class SceneObject;
 	typedef std::shared_ptr<SceneObject> SceneObjectPtr;
-	class SceneObjectHelper;
-	typedef std::shared_ptr<SceneObjectHelper> SceneObjectHelperPtr;
 	class SceneObjectSkyBox;
 	typedef std::shared_ptr<SceneObjectSkyBox> SceneObjectSkyBoxPtr;
 	class SceneObjectLightSourceProxy;

@@ -172,11 +172,11 @@ void SSSSSApp::OnCreate()
 		});
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
-	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model, SceneObject::SOA_Cullable);
+	auto subsurface_obj = MakeSharedPtr<SceneObject>(sss_model, SceneObject::SOA_Cullable);
 	subsurface_obj->ModelMatrix(MathLib::translation(0.0f, 5.0f, 0.0f));
 	subsurface_obj->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
+	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj->AddToSceneManager();
 
 	SceneObjectSkyBoxPtr sky_box = MakeSharedPtr<SceneObjectSkyBox>();

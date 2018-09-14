@@ -100,14 +100,14 @@ namespace
 		float4x4 model_;
 	};
 
-	class TileObject : public SceneObjectHelper
+	class TileObject : public SceneObject
 	{
 	public:
 		TileObject()
-			: SceneObjectHelper(0),
+			: SceneObject(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
-			renderable_ = MakeSharedPtr<RenderTile>();
+			this->AddRenderable(MakeSharedPtr<RenderTile>());
 		}
 
 		void TileSize(uint32_t tile_size)
@@ -118,21 +118,21 @@ namespace
 
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
-			checked_pointer_cast<RenderTile>(renderable_)->SetPosBuffer(pos_vb);
+			checked_pointer_cast<RenderTile>(renderables_[0])->SetPosBuffer(pos_vb);
 		}
 
 		void Position(float2 const & pos)
 		{
 			position_ = pos;
 			mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
-			checked_pointer_cast<RenderTile>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
+			checked_pointer_cast<RenderTile>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 		void Scale(float scale)
 		{
 			scale_ = scale;
 			mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
-			checked_pointer_cast<RenderTile>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
+			checked_pointer_cast<RenderTile>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 	private:
@@ -200,14 +200,14 @@ namespace
 		float4x4 model_;
 	};
 
-	class GridBorderObject : public SceneObjectHelper
+	class GridBorderObject : public SceneObject
 	{
 	public:
 		GridBorderObject()
-			: SceneObjectHelper(0),
+			: SceneObject(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
-			renderable_ = MakeSharedPtr<RenderGridBorder>();
+			this->AddRenderable(MakeSharedPtr<RenderGridBorder>());
 		}
 
 		void TileSize(uint32_t tile_size)
@@ -218,21 +218,21 @@ namespace
 
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
-			checked_pointer_cast<RenderGridBorder>(renderable_)->SetPosBuffer(pos_vb);
+			checked_pointer_cast<RenderGridBorder>(renderables_[0])->SetPosBuffer(pos_vb);
 		}
 
 		void Position(float2 const & pos)
 		{
 			position_ = pos;
 			mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
-			checked_pointer_cast<RenderGridBorder>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
+			checked_pointer_cast<RenderGridBorder>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 		void Scale(float scale)
 		{
 			scale_ = scale;
 			mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
-			checked_pointer_cast<RenderGridBorder>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
+			checked_pointer_cast<RenderGridBorder>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 	private:

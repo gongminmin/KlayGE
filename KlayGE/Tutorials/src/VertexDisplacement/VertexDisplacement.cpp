@@ -68,18 +68,18 @@ namespace
 		}
 	};
 
-	class FlagObject : public SceneObjectHelper
+	class FlagObject : public SceneObject
 	{
 	public:
 		FlagObject(int length_segs, int width_segs)
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = MakeSharedPtr<FlagRenderable>(length_segs, width_segs);
+			this->AddRenderable(MakeSharedPtr<FlagRenderable>(length_segs, width_segs));
 		}
 
 		virtual bool MainThreadUpdate(float app_time, float /*elapsed_time*/) override
 		{
-			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(app_time / 0.4f);
+			checked_pointer_cast<FlagRenderable>(renderables_[0])->SetAngle(app_time / 0.4f);
 			return false;
 		}
 	};

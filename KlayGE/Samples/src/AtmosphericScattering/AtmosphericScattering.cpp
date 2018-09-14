@@ -191,12 +191,12 @@ void AtmosphericScatteringApp::OnCreate()
 
 	RenderModelPtr model_planet = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
-	planet_ = MakeSharedPtr<SceneObjectHelper>(model_planet->Subrenderable(0), SceneObjectHelper::SOA_Cullable);
+	planet_ = MakeSharedPtr<SceneObject>(model_planet->Subrenderable(0), SceneObject::SOA_Cullable);
 	planet_->AddToSceneManager();
 
 	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
-	atmosphere_ = MakeSharedPtr<SceneObjectHelper>(model_atmosphere->Subrenderable(0), SceneObjectHelper::SOA_Cullable);
+	atmosphere_ = MakeSharedPtr<SceneObject>(model_atmosphere->Subrenderable(0), SceneObject::SOA_Cullable);
 	atmosphere_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));

@@ -334,18 +334,24 @@ namespace
 		bool wireframe_;
 	};
 
-	class PolygonObject : public SceneObjectHelper
+	class PolygonObject : public SceneObject
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
+			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>()));
+		}
+
+		bool MainThreadUpdate(float app_time, float elapsed_time) override
+		{
+			return SceneObject::MainThreadUpdate(app_time, elapsed_time);
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
@@ -354,7 +360,7 @@ namespace
 
 		void LightColor(float3 const & light_color)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
@@ -363,7 +369,7 @@ namespace
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
@@ -372,7 +378,7 @@ namespace
 
 		void HeightScale(float scale)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->HeightScale(scale);
@@ -381,7 +387,7 @@ namespace
 
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BindJudaTexture(juda_tex);
@@ -390,13 +396,13 @@ namespace
 
 		std::vector<uint32_t> const & JudaTexTileIDs(uint32_t index) const
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			return checked_pointer_cast<RenderPolygon>(model->Subrenderable(index))->JudaTexTileIDs();
 		}
 
 		void DetailType(uint32_t dt)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->DetailType(dt);
@@ -405,7 +411,7 @@ namespace
 
 		void NaLength(bool len)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->NaLength(len);
@@ -414,7 +420,7 @@ namespace
 
 		void Wireframe(bool wf)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->Wireframe(wf);

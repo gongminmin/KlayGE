@@ -58,12 +58,12 @@ namespace
 		explicit SceneObjectFoggySkyBox(uint32_t attrib = 0)
 			: SceneObjectSkyBox(attrib)
 		{
-			renderable_ = MakeSharedPtr<RenderableFoggySkyBox>();
+			renderables_[0] = MakeSharedPtr<RenderableFoggySkyBox>();
 		}
 
 		void FogColor(Color const & clr)
 		{
-			checked_pointer_cast<RenderableFoggySkyBox>(renderable_)->FogColor(clr);
+			checked_pointer_cast<RenderableFoggySkyBox>(renderables_[0])->FogColor(clr);
 		}
 	};
 

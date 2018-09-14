@@ -202,7 +202,7 @@ void DeepGBuffersApp::OnCreate()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[1]->AddToSceneManager();
 
-	scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
+	scene_obj_ = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj_->ModelMatrix(MathLib::scaling(3.0f, 3.0f, 3.0f));
 	scene_obj_->AddToSceneManager();
 

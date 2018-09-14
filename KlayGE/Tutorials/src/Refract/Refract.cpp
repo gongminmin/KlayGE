@@ -124,23 +124,25 @@ namespace
 		RenderTechnique* front_face_tech_;
 	};
 
-	class RefractorObject : public SceneObjectHelper
+	class RefractorObject : public SceneObject
 	{
 	public:
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Subrenderable(0);
-			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
+			auto renderable = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Subrenderable(0);
+			checked_pointer_cast<RefractorRenderable>(renderable)->CompressedCubeMap(y_cube, c_cube);
+			this->AddRenderable(renderable);
 		}
 
 		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
-			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex);
+			checked_pointer_cast<RefractorRenderable>(renderables_[0])->BackFaceTexture(bf_tex);
 		}
 		void BackFaceDepthTexture(TexturePtr const & bf_tex)
 		{
-			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceDepthTexture(bf_tex);
+			checked_pointer_cast<RefractorRenderable>(renderables_[0])->BackFaceDepthTexture(bf_tex);
 		}
 	};
 

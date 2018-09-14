@@ -202,17 +202,17 @@ namespace
 		TexturePtr caustics_map_;
 	};
 
-	class PlaneObject : public SceneObjectHelper
+	class PlaneObject : public SceneObject
 	{
 	public:
 		PlaneObject(float length, float width)
-			: SceneObjectHelper(MakeSharedPtr<ReceivePlane>(length, width), SOA_Moveable)
+			: SceneObject(MakeSharedPtr<ReceivePlane>(length, width), SOA_Moveable)
 		{
 		}
 
 		void CausticsPass(uint32_t pass)
 		{
-			checked_pointer_cast<ReceivePlane>(renderable_)->CausticsPass(pass);
+			checked_pointer_cast<ReceivePlane>(renderables_[0])->CausticsPass(pass);
 		}
 	};
 
@@ -648,14 +648,14 @@ void CausticsMapApp::OnCreate()
 
 	RenderablePtr model_sphere = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
-	sphere_ = MakeSharedPtr<SceneObjectHelper>(model_sphere, SceneObjectHelper::SOA_Cullable);
+	sphere_ = MakeSharedPtr<SceneObject>(model_sphere, SceneObject::SOA_Cullable);
 	sphere_->ModelMatrix(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_->AddToSceneManager();
 	sphere_->Visible(false);
 
 	RenderablePtr model_bunny = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
-	bunny_ = MakeSharedPtr<SceneObjectHelper>(model_bunny, SceneObjectHelper::SOA_Cullable);
+	bunny_ = MakeSharedPtr<SceneObject>(model_bunny, SceneObject::SOA_Cullable);
 	bunny_->ModelMatrix(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_->AddToSceneManager();
 	bunny_->Visible(false);

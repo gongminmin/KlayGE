@@ -91,21 +91,24 @@ namespace
 		}
 	};
 
-	class MetalObject : public SceneObjectHelper
+	class MetalObject : public SceneObject
 	{
 	public:
 		explicit MetalObject(std::string const & model_name)
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
+			this->AddRenderable(SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>()));
 		}
 
 		void Material(float3 const & albedo, float metalness, float glossiness)
 		{
-			for (uint32_t i = 0; i < renderable_->NumSubrenderables(); ++ i)
+			for (auto const & renderable : renderables_)
 			{
-				checked_pointer_cast<MetalRenderable>(renderable_->Subrenderable(i))->Material(albedo, metalness, glossiness);
+				for (uint32_t i = 0; i < renderable->NumSubrenderables(); ++ i)
+				{
+					checked_pointer_cast<MetalRenderable>(renderable->Subrenderable(i))->Material(albedo, metalness, glossiness);
+				}
 			}
 		}
 	};

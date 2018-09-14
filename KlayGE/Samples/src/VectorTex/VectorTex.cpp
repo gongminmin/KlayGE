@@ -72,18 +72,19 @@ namespace
 		}
 	};
 
-	class TeapotObject : public SceneObjectHelper
+	class TeapotObject : public SceneObject
 	{
 	public:
 		TeapotObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Subrenderable(0);
+			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Subrenderable(0));
 		}
 
 		void VectorTexture(TexturePtr const & vector_tex)
 		{
-			checked_pointer_cast<RenderTeapot>(renderable_)->VectorTexture(vector_tex);
+			checked_pointer_cast<RenderTeapot>(renderables_[0])->VectorTexture(vector_tex);
 		}
 	};
 

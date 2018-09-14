@@ -34,9 +34,9 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectHelperPtr renderableBox_;
-	KlayGE::SceneObjectHelperPtr renderableFile_;
-	KlayGE::SceneObjectHelperPtr renderableMesh_;
+	KlayGE::SceneObjectPtr renderableBox_;
+	KlayGE::SceneObjectPtr renderableFile_;
+	KlayGE::SceneObjectPtr renderableMesh_;
 };
 
 class RenderPolygon : public KlayGE::StaticMesh
@@ -70,14 +70,14 @@ void TutorFramework::OnCreate()
 	KlayGE::OBBox boxRange(KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(
+	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(
 		KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor), KlayGE::SceneObject::SOA_Cullable);
 	renderableBox_->AddToSceneManager();
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
 		KlayGE::CreateModelFactory<KlayGE::RenderModel>(), KlayGE::CreateMeshFactory<RenderPolygon>());
 
-	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(loadedModel, KlayGE::SceneObject::SOA_Cullable);
+	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(loadedModel, KlayGE::SceneObject::SOA_Cullable);
 	renderableFile_->ModelMatrix(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
 	renderableFile_->AddToSceneManager();
 
@@ -135,7 +135,7 @@ void TutorFramework::OnCreate()
 	}
 	model->AssignSubrenderables(meshes.begin(), meshes.end());
 
-	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(model, KlayGE::SceneObject::SOA_Cullable);
+	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(model, KlayGE::SceneObject::SOA_Cullable);
 	renderableMesh_->AddToSceneManager();
 
 	this->LookAt(KlayGE::float3(0, 0,-4.0f), KlayGE::float3(0, 0, 0));

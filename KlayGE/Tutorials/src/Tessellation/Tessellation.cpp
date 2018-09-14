@@ -84,22 +84,22 @@ namespace
 		RenderEffectParameter* tess_factors_param_;
 	};
 
-	class TriangleObject : public SceneObjectHelper
+	class TriangleObject : public SceneObject
 	{
 	public:
 		TriangleObject()
-			: SceneObjectHelper(MakeSharedPtr<RenderTriangle>(), SOA_Cullable)
+			: SceneObject(MakeSharedPtr<RenderTriangle>(), SOA_Cullable)
 		{
 		}
 
 		void TessEnabled(bool enabled)
 		{
-			checked_pointer_cast<RenderTriangle>(renderable_)->TessEnabled(enabled);
+			checked_pointer_cast<RenderTriangle>(renderables_[0])->TessEnabled(enabled);
 		}
 
 		void TessFactors(float4 const & factor)
 		{
-			checked_pointer_cast<RenderTriangle>(renderable_)->TessFactors(factor);
+			checked_pointer_cast<RenderTriangle>(renderables_[0])->TessFactors(factor);
 		}
 	};
 

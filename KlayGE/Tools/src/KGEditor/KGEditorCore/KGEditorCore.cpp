@@ -558,11 +558,11 @@ namespace KlayGE
 
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
-		axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(),
+		axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderAxis>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		axis_->AddToSceneManager();
 
-		grid_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderGrid>(),
+		grid_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderGrid>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		grid_->AddToSceneManager();
 
@@ -572,23 +572,23 @@ namespace KlayGE
 			SyncLoadTexture("default_bg_c.dds", EAH_GPU_Read | EAH_Immutable));
 		sky_box_->AddToSceneManager();
 
-		selected_bb_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableLineBox>(),
+		selected_bb_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableLineBox>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
 		selected_bb_->AddToSceneManager();
 		checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetColor(Color(1, 1, 1, 1));
 
-		translation_axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableTranslationAxis>(),
+		translation_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableTranslationAxis>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		translation_axis_->Visible(false);
 		translation_axis_->AddToSceneManager();
 
-		rotation_axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableRotationAxis>(),
+		rotation_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableRotationAxis>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		rotation_axis_->Visible(false);
 		rotation_axis_->AddToSceneManager();
 
-		scaling_axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableScalingAxis>(),
+		scaling_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableScalingAxis>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
 		scaling_axis_->Visible(false);
 		scaling_axis_->AddToSceneManager();
@@ -865,7 +865,7 @@ namespace KlayGE
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
 		RenderModelPtr model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
-		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model,
+		auto scene_obj = MakeSharedPtr<SceneObject>(model,
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 		scene_obj->AddToSceneManager();
 		for (size_t i = 0; i < model->NumSubrenderables(); ++ i)

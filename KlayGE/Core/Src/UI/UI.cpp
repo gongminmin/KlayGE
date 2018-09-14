@@ -933,8 +933,7 @@ namespace KlayGE
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				SceneObjectHelperPtr ui_rect_obj
-					= MakeSharedPtr<SceneObjectHelper>(rect.second, SceneObject::SOA_Overlay);
+				auto ui_rect_obj = MakeSharedPtr<SceneObject>(rect.second, SceneObject::SOA_Overlay);
 				ui_rect_obj->AddToSceneManager();
 			}
 		}

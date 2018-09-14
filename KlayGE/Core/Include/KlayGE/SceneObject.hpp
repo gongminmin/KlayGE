@@ -40,6 +40,7 @@ namespace KlayGE
 
 	public:
 		explicit SceneObject(uint32_t attrib);
+		SceneObject(RenderablePtr const & renderable, uint32_t attrib);
 		virtual ~SceneObject();
 
 		SceneObject* Parent() const;
@@ -47,7 +48,12 @@ namespace KlayGE
 		uint32_t NumChildren() const;
 		const SceneObjectPtr& Child(uint32_t index) const;
 
+		uint32_t NumRenderables() const;
 		RenderablePtr const & GetRenderable() const;
+		RenderablePtr const & GetRenderable(uint32_t i) const;
+
+		void AddRenderable(RenderablePtr const & renderable);
+		void DelRenderable(RenderablePtr const & renderable);
 
 		virtual void ModelMatrix(float4x4 const & mat);
 		virtual float4x4 const & ModelMatrix() const;
@@ -92,19 +98,24 @@ namespace KlayGE
 		bool SimpleForward() const;
 		bool VDM() const;
 
+	private:
+		void UpdatePosBound();
+
 	protected:
 		uint32_t attrib_;
 
 		SceneObject* parent_;
 		std::vector<SceneObjectPtr> children_;
 
-		RenderablePtr renderable_;
-		bool renderable_hw_res_ready_;
+		std::vector<RenderablePtr> renderables_;
+		std::vector<bool> renderables_hw_res_ready_;
 		std::vector<VertexElement> instance_format_;
 
 		float4x4 model_;
 		float4x4 abs_model_;
+		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
+		bool pos_aabb_dirty_;
 		BoundOverlap visible_mark_;
 
 		std::function<void(SceneObject&, float, float)> sub_thread_update_func_;

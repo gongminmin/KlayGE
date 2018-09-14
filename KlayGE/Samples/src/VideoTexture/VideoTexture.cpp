@@ -87,33 +87,34 @@ namespace
 		}
 	};
 
-	class TeapotObject : public SceneObjectHelper
+	class TeapotObject : public SceneObject
 	{
 	public:
 		TeapotObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObject(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Subrenderable(0);
+			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Subrenderable(0));
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)
 		{
-			checked_pointer_cast<RenderTeapot>(renderable_)->VideoTexture(video_tex);
+			checked_pointer_cast<RenderTeapot>(renderables_[0])->VideoTexture(video_tex);
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			checked_pointer_cast<RenderTeapot>(renderable_)->LightPos(light_pos);
+			checked_pointer_cast<RenderTeapot>(renderables_[0])->LightPos(light_pos);
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			checked_pointer_cast<RenderTeapot>(renderable_)->LightColor(light_color);
+			checked_pointer_cast<RenderTeapot>(renderables_[0])->LightColor(light_color);
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			checked_pointer_cast<RenderTeapot>(renderable_)->LightFalloff(light_falloff);
+			checked_pointer_cast<RenderTeapot>(renderables_[0])->LightFalloff(light_falloff);
 		}
 	};
 

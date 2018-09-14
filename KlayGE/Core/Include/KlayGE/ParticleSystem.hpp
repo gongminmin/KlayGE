@@ -224,7 +224,7 @@ namespace KlayGE
 		std::weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem : public SceneObjectHelper
+	class KLAYGE_CORE_API ParticleSystem : public SceneObject
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);

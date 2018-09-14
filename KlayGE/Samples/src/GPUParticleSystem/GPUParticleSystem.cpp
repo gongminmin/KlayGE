@@ -254,22 +254,22 @@ namespace
 		TexturePtr noise_vol_tex_;
 	};
 
-	class ParticlesObject : public SceneObjectHelper
+	class ParticlesObject : public SceneObject
 	{
 	public:
 		explicit ParticlesObject(int max_num_particles)
-			: SceneObjectHelper(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Moveable)
+			: SceneObject(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Moveable)
 		{
 		}
 
 		void PosTexture(TexturePtr const & particle_pos_tex)
 		{
-			checked_pointer_cast<RenderParticles>(renderable_)->PosTexture(particle_pos_tex);
+			checked_pointer_cast<RenderParticles>(renderables_[0])->PosTexture(particle_pos_tex);
 		}
 
 		void PosVB(GraphicsBufferPtr const & particle_pos_vb)
 		{
-			checked_pointer_cast<RenderParticles>(renderable_)->PosVB(particle_pos_vb);
+			checked_pointer_cast<RenderParticles>(renderables_[0])->PosVB(particle_pos_vb);
 		}
 	};
 
@@ -752,11 +752,11 @@ namespace
 		}
 	};
 
-	class TerrainObject : public SceneObjectHelper
+	class TerrainObject : public SceneObject
 	{
 	public:
 		TerrainObject(TexturePtr const & height_map, TexturePtr const & normal_map)
-			: SceneObjectHelper(MakeSharedPtr<TerrainRenderable>(height_map, normal_map), SOA_Cullable)
+			: SceneObject(MakeSharedPtr<TerrainRenderable>(height_map, normal_map), SOA_Cullable)
 		{
 		}
 	};

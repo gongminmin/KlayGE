@@ -28,19 +28,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObjectHelper : public SceneObject
-	{
-	public:
-		explicit SceneObjectHelper(uint32_t attrib);
-		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
-		virtual ~SceneObjectHelper()
-		{
-		}
-
-		virtual void OnAttachRenderable(bool add_to_scene) override;
-	};
-
-	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
+	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObject
 	{
 	public:
 		explicit SceneObjectSkyBox(uint32_t attrib = 0);
@@ -53,7 +41,7 @@ namespace KlayGE
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
 	};
 
-	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
+	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObject
 	{
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
@@ -76,7 +64,7 @@ namespace KlayGE
 		LightSourcePtr light_;
 	};
 
-	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneObjectHelper
+	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneObject
 	{
 	public:
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);
