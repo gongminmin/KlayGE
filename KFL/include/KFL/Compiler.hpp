@@ -149,6 +149,11 @@
 	// GNU C++
 
 	#define KLAYGE_COMPILER_GCC
+	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+		#define KLAYGE_COMPILER_NAME mgw
+	#else
+		#define KLAYGE_COMPILER_NAME gcc
+	#endif
 
 	#include <bits/c++config.h>
 	#ifdef _GLIBCXX_USE_FLOAT128

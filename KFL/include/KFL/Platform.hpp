@@ -52,7 +52,6 @@
 	#endif
 
 	#if defined(__MINGW32__)
-		#define KLAYGE_COMPILER_NAME mgw
 		#include <_mingw.h>
 	#else
 		#include <sdkddkver.h>
