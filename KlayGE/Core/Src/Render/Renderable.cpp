@@ -72,7 +72,7 @@ namespace KlayGE
 			active_lod_ = -1;
 		}
 
-		for (auto const & mesh : subrenderables_)
+		for (auto const & mesh : this->RenderableList())
 		{
 			mesh->ActiveLod(lod);
 		}
@@ -332,6 +332,11 @@ namespace KlayGE
 	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
 		model_mat_ = mat;
+	}
+
+	ArrayRef<RenderablePtr> Renderable::RenderableList() const
+	{
+		return ArrayRef<RenderablePtr>();
 	}
 
 	void Renderable::UpdateBoundBox()

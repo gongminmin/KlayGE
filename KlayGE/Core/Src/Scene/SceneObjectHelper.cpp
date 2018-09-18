@@ -69,18 +69,13 @@ namespace KlayGE
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
 		: SceneObject(light_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
-			light_(light)
+			light_(light), light_model_(light_model)
 	{
 		model_scaling_ = float4x4::Identity();
 
-		children_.resize(light_model->NumSubrenderables());
-		for (uint32_t i = 0; i < light_model->NumSubrenderables(); ++ i)
+		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
 		{
-			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i))->AttachLightSrc(light);
-
-			auto child = MakeSharedPtr<SceneObject>(light_model->Subrenderable(i), attrib_);
-			child->Parent(this);
-			children_[i] = child;
+			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
 		}
 	}
 
@@ -99,10 +94,9 @@ namespace KlayGE
 			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
 		}
 
-		RenderModelPtr light_model = checked_pointer_cast<RenderModel>(renderables_[0]);
-		for (uint32_t i = 0; i < light_model->NumSubrenderables(); ++ i)
+		for (uint32_t i = 0; i < renderables_.size(); ++ i)
 		{
-			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i));
+			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
 			light_mesh->Update();
 		}
 
@@ -161,18 +155,13 @@ namespace KlayGE
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
 		: SceneObject(camera_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
-			camera_(camera)
+			camera_(camera), camera_model_(camera_model)
 	{
 		model_scaling_ = float4x4::Identity();
 
-		children_.resize(camera_model->NumSubrenderables());
-		for (uint32_t i = 0; i < camera_model->NumSubrenderables(); ++ i)
+		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++ i)
 		{
-			checked_pointer_cast<RenderableCameraProxy>(camera_model->Subrenderable(i))->AttachCamera(camera);
-
-			auto child = MakeSharedPtr<SceneObject>(camera_model->Subrenderable(i), attrib_);
-			child->Parent(this);
-			children_[i] = child;
+			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 	}
 

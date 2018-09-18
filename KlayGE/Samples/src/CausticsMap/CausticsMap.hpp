@@ -123,10 +123,14 @@ private:
 	KlayGE::PostProcessPtr copy_pp_;
 	KlayGE::PostProcessPtr depth_to_linear_pp_;
 
-	KlayGE::SceneObjectPtr plane_object_;
+	KlayGE::SceneObjectPtr plane_obj_;
+	KlayGE::RenderablePtr plane_renderable_;
 	KlayGE::SceneObjectPtr refract_obj_;
-	KlayGE::SceneObjectPtr bunny_;
-	KlayGE::SceneObjectPtr sphere_;
+	KlayGE::RenderablePtr refract_model_;
+	KlayGE::SceneObjectPtr bunny_obj_;
+	KlayGE::RenderablePtr bunny_model_;
+	KlayGE::SceneObjectPtr sphere_obj_;
+	KlayGE::RenderablePtr sphere_model_;
 	KlayGE::RenderablePtr caustics_grid_;
 
 	KlayGE::UIDialogPtr dialog_;

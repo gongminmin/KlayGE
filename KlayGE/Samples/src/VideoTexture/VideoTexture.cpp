@@ -94,7 +94,7 @@ namespace
 			: SceneObject(SOA_Cullable)
 		{
 			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Subrenderable(0));
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Mesh(0));
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)

@@ -36,7 +36,7 @@ namespace KlayGE
 		{
 			std::string name;
 			EntityType type;
-			RenderablePtr model;
+			RenderModelPtr model;
 			std::string meshml_name;
 			LightSourcePtr light;
 			std::string projective_tex_name;

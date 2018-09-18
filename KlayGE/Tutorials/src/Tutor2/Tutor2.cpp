@@ -133,7 +133,8 @@ void TutorFramework::OnCreate()
 	{
 		meshes[i]->BuildMeshInfo();
 	}
-	model->AssignSubrenderables(meshes.begin(), meshes.end());
+	model->AssignMeshes(meshes.begin(), meshes.end());
+	model->BuildModelInfo();
 
 	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(model, KlayGE::SceneObject::SOA_Cullable);
 	renderableMesh_->AddToSceneManager();

@@ -102,8 +102,8 @@ public:
 			}
 		}
 
-		auto const & rl = checked_cast<StaticMesh*>(target->Subrenderable(0).get())->GetRenderLayout();
-		auto const & sanity_rl = checked_cast<StaticMesh*>(sanity_model->Subrenderable(0).get())->GetRenderLayout();
+		auto const & rl = checked_cast<StaticMesh*>(target->Mesh(0).get())->GetRenderLayout();
+		auto const & sanity_rl = checked_cast<StaticMesh*>(sanity_model->Mesh(0).get())->GetRenderLayout();
 
 		EXPECT_EQ(rl.NumVertexStreams(), sanity_rl.NumVertexStreams());
 
@@ -308,11 +308,11 @@ public:
 		}
 		EXPECT_EQ(rl.IndexStreamFormat(), sanity_rl.IndexStreamFormat());
 
-		EXPECT_EQ(target->NumSubrenderables(), sanity_model->NumSubrenderables());
-		for (uint32_t i = 0; i < target->NumSubrenderables(); ++ i)
+		EXPECT_EQ(target->NumMeshes(), sanity_model->NumMeshes());
+		for (uint32_t i = 0; i < target->NumMeshes(); ++ i)
 		{
-			auto const & mesh = *checked_cast<StaticMesh*>(target->Subrenderable(i).get());
-			auto const & sanity_mesh = *checked_cast<StaticMesh*>(sanity_model->Subrenderable(i).get());
+			auto const & mesh = *checked_cast<StaticMesh*>(target->Mesh(i).get());
+			auto const & sanity_mesh = *checked_cast<StaticMesh*>(sanity_model->Mesh(i).get());
 
 			EXPECT_EQ(mesh.MaterialID(), sanity_mesh.MaterialID());
 			EXPECT_EQ(mesh.Name(), sanity_mesh.Name());

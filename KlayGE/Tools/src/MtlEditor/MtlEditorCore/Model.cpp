@@ -139,7 +139,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	bool has_normal = false;
 	bool has_tangent_quat = false;
 	bool has_skinned = false;
-	RenderLayout const & rl = subrenderables_[0]->GetRenderLayout();
+	RenderLayout const & rl = meshes_[0]->GetRenderLayout();
 	for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 	{
 		switch (rl.VertexStreamFormat(i)[0].usage)
@@ -168,7 +168,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 		for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
@@ -334,7 +334,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
 		}
 
-		for (auto const & renderable : subrenderables_)
+		for (auto const & renderable : meshes_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
@@ -349,7 +349,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	{
 		if (!has_normal)
 		{
-			for (auto const & renderable : subrenderables_)
+			for (auto const & renderable : meshes_)
 			{
 				StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 				for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
@@ -365,7 +365,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		std::vector<float3> binormals(total_num_vertices);
 
 		// Compute TBN
-		for (auto const & renderable : subrenderables_)
+		for (auto const & renderable : meshes_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
@@ -409,7 +409,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			}
 		}
 
-		for (auto const & renderable : subrenderables_)
+		for (auto const & renderable : meshes_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
@@ -453,7 +453,7 @@ void DetailedSkinnedModel::SetTime(float time)
 
 void DetailedSkinnedModel::VisualizeLighting()
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeLighting();
@@ -462,7 +462,7 @@ void DetailedSkinnedModel::VisualizeLighting()
 
 void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
 		mesh->VisualizeVertex(usage, usage_index);
@@ -471,7 +471,7 @@ void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usa
 
 void DetailedSkinnedModel::VisualizeTexture(int slot)
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeTexture(slot);
@@ -480,7 +480,7 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 
 void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
@@ -492,7 +492,7 @@ void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 
 void DetailedSkinnedModel::UpdateTechniques(KlayGE::uint32_t mtl_index)
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
@@ -504,7 +504,7 @@ void DetailedSkinnedModel::UpdateTechniques(KlayGE::uint32_t mtl_index)
 
 void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
 {
-	for (auto const & renderable : subrenderables_)
+	for (auto const & renderable : meshes_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))

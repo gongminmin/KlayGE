@@ -105,10 +105,7 @@ namespace
 		{
 			for (auto const & renderable : renderables_)
 			{
-				for (uint32_t i = 0; i < renderable->NumSubrenderables(); ++ i)
-				{
-					checked_pointer_cast<MetalRenderable>(renderable->Subrenderable(i))->Material(albedo, metalness, glossiness);
-				}
+				checked_pointer_cast<MetalRenderable>(renderable)->Material(albedo, metalness, glossiness);
 			}
 		}
 	};

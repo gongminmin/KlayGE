@@ -22,6 +22,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/ArrayRef.hpp>
 #include <vector>
 #include <KlayGE/RenderMaterial.hpp>
 
@@ -191,21 +192,7 @@ namespace KlayGE
 
 		virtual void ModelMatrix(float4x4 const & mat);
 
-		template <typename ForwardIterator>
-		void AssignSubrenderables(ForwardIterator first, ForwardIterator last)
-		{
-			subrenderables_.assign(first, last);
-
-			this->UpdateBoundBox();
-		}
-		RenderablePtr const & Subrenderable(size_t id) const
-		{
-			return subrenderables_[id];
-		}
-		uint32_t NumSubrenderables() const
-		{
-			return static_cast<uint32_t>(subrenderables_.size());
-		}
+		virtual ArrayRef<RenderablePtr> RenderableList() const;
 
 		virtual bool HWResourceReady() const
 		{
@@ -340,8 +327,6 @@ namespace KlayGE
 		RenderEffectParameter* alpha_test_threshold_param_;
 
 		std::array<TexturePtr, RenderMaterial::TS_NumTextureSlots> textures_;
-
-		std::vector<RenderablePtr> subrenderables_;
 	};
 }
 

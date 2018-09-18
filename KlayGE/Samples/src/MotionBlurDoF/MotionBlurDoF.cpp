@@ -1106,7 +1106,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			{
 				if (model_instance_->HWResourceReady())
 				{
-					renderInstance_ = model_instance_->Subrenderable(0);
+					renderInstance_ = model_instance_->Mesh(0);
 					loading_percentage_ = 80 - NUM_LINE;
 				}
 			}
@@ -1158,7 +1158,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			{
 				if (model_mesh_)
 				{
-					renderMesh_ = model_mesh_->Subrenderable(0);
+					renderMesh_ = model_mesh_->Mesh(0);
 					loading_percentage_ = 100;
 				}
 			}

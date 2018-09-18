@@ -26,7 +26,8 @@ private:
 	void WireframeHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr polygon_;
+	KlayGE::SceneObjectPtr polygon_obj_;
+	KlayGE::RenderModelPtr polygon_model_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 

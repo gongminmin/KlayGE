@@ -112,7 +112,7 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	imposter_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 		Color(0, 0, 0, 0), 1, 0);
 
-	RenderablePtr scene_model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
+	auto scene_model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
 
 	auto const & aabbox = scene_model->PosBound();
 	float3 const dimensions = aabbox.Max() - aabbox.Min();
@@ -156,9 +156,9 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 
 			re.BindFrameBuffer(imposter_fb);
 
-			for (uint32_t i = 0; i < scene_model->NumSubrenderables(); ++ i)
+			for (uint32_t i = 0; i < scene_model->NumMeshes(); ++ i)
 			{
-				auto mesh = scene_model->Subrenderable(i).get();
+				auto mesh = scene_model->Mesh(i).get();
 
 				while (!mesh->AllHWResourceReady());
 				mesh->Pass(PT_OpaqueGBufferMRT);

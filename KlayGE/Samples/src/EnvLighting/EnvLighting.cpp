@@ -230,7 +230,7 @@ namespace
 			: SceneObject(SOA_Cullable)
 		{
 			auto renderable = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Mesh(0);
 			checked_pointer_cast<SphereRenderable>(renderable)->Material(diff, spec, glossiness);
 			checked_pointer_cast<SphereRenderable>(renderable)->Id(id);
 			this->AddRenderable(renderable);

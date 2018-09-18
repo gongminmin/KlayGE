@@ -382,7 +382,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			{
 				if (teapot_model_->HWResourceReady())
 				{
-					teapot_ = MakeSharedPtr<SceneObject>(teapot_model_->Subrenderable(0), SceneObject::SOA_Cullable);
+					teapot_ = MakeSharedPtr<SceneObject>(teapot_model_->Mesh(0), SceneObject::SOA_Cullable);
 					teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
 					teapot_->AddToSceneManager();
 

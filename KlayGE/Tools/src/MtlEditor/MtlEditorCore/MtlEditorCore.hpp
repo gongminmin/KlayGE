@@ -133,8 +133,10 @@ namespace KlayGE
 		LightSourcePtr ambient_light_;
 		LightSourcePtr main_light_;
 
-		SceneObjectPtr model_;
-		SceneObjectPtr skeleton_model_;
+		SceneObjectPtr object_;
+		RenderModelPtr model_;
+		SceneObjectPtr skeleton_object_;
+		SkinnedMeshPtr skeleton_model_;
 		SceneObjectPtr imposter_;
 		SceneObjectPtr axis_;
 		SceneObjectPtr grid_;

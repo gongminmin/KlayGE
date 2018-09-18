@@ -160,7 +160,7 @@ void DeepGBuffersApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr scene_model = ASyncLoadModel("chipmunk-CE-01.meshml", EAH_GPU_Read | EAH_Immutable,
+	scene_model_ = ASyncLoadModel("chipmunk-CE-01.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<SwitchableMesh>());
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -202,7 +202,7 @@ void DeepGBuffersApp::OnCreate()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[1]->AddToSceneManager();
 
-	scene_obj_ = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
+	scene_obj_ = MakeSharedPtr<SceneObject>(scene_model_, SceneObject::SOA_Cullable);
 	scene_obj_->ModelMatrix(MathLib::scaling(3.0f, 3.0f, 3.0f));
 	scene_obj_->AddToSceneManager();
 
@@ -286,10 +286,9 @@ void DeepGBuffersApp::ReceivesLightingHandler(UICheckBox const & sender)
 {
 	bool lighting = sender.GetChecked();
 
-	RenderablePtr const & model = scene_obj_->GetRenderable();
-	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+	for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
-		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->ReceivesLighting(lighting);
+		checked_pointer_cast<SwitchableMesh>(scene_model_->Mesh(i))->ReceivesLighting(lighting);
 	}
 }
 
@@ -297,10 +296,9 @@ void DeepGBuffersApp::TransparencyChangedHandler(UISlider const & sender)
 {
 	transparency_ = sender.GetValue() / 20.0f;
 
-	RenderablePtr const & model = scene_obj_->GetRenderable();
-	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+	for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
-		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->Transparency(transparency_);
+		checked_pointer_cast<SwitchableMesh>(scene_model_->Mesh(i))->Transparency(transparency_);
 	}
 
 	std::wostringstream stream;
@@ -319,10 +317,9 @@ void DeepGBuffersApp::SimpleForwardHandler(UICheckBox const & sender)
 		control->SetChecked(false);
 	}
 
-	RenderablePtr const & model = scene_obj_->GetRenderable();
-	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+	for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
-		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->SimpleForwardMode(simple_forward);
+		checked_pointer_cast<SwitchableMesh>(scene_model_->Mesh(i))->SimpleForwardMode(simple_forward);
 	}
 }
 

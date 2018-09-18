@@ -30,6 +30,7 @@ private:
 	KlayGE::SpotLightSourcePtr spot_light_[2];
 
 	KlayGE::SceneObjectPtr scene_obj_;
+	KlayGE::RenderModelPtr scene_model_;
 	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;

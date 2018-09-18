@@ -476,16 +476,12 @@ namespace KlayGE
 				[this] { this->UpdateThreadFunc(); }));
 		}
 
-		std::vector<SceneObjectPtr> added_scene_objs;
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
 			for (auto const & scene_obj : scene_objs_)
 			{
-				if (scene_obj->MainThreadUpdate(app_time, frame_time))
-				{
-					added_scene_objs.push_back(scene_obj);
-				}
+				scene_obj->MainThreadUpdate(app_time, frame_time);
 			}
 
 			overlay_scene_objs_.clear();
@@ -499,12 +495,6 @@ namespace KlayGE
 				{
 					++ iter;
 				}
-			}
-
-			for (auto const & scene_obj : added_scene_objs)
-			{
-				scene_obj->OnAttachRenderable(true);
-				this->OnAddSceneObject(scene_obj);
 			}
 		}
 

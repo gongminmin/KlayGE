@@ -30,57 +30,6 @@ using namespace std;
 
 namespace
 {
-	class ModelObject : public SceneObject
-	{
-	public:
-		ModelObject()
-			: SceneObject(SOA_Cullable)
-		{
-			this->AddRenderable(SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>()));
-		}
-
-		void EyePos(float3 const & eye_pos)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->EyePos(eye_pos);
-		}
-
-		void LightPos(float3 const & light_pos)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->LightPos(light_pos);
-		}
-
-		void LightColor(float3 const & light_color)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->LightColor(light_color);
-		}
-		
-		void LightFalloff(float3 const & light_falloff)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->LightFalloff(light_falloff);
-		}
-
-		void BackFaceDepthPass(bool dfdp)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->BackFaceDepthPass(dfdp);
-		}
-
-		void BackFaceDepthTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->BackFaceDepthTex(tex);
-		}
-
-		void SigmaT(float sigma_t)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->SigmaT(sigma_t);
-		}
-
-		void MtlThickness(float thickness)
-		{
-			checked_pointer_cast<DetailedModel>(renderables_[0])->MtlThickness(thickness);
-		}
-	};
-
 	enum
 	{
 		Exit,
@@ -111,8 +60,10 @@ void SubSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	model_ = MakeSharedPtr<ModelObject>();
-	model_->AddToSceneManager();
+	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>());
+	object_ = MakeSharedPtr<SceneObject>(model_, SceneObject::SOA_Cullable);
+	object_->AddToSceneManager();
 
 	this->LookAt(float3(-0.4f, 1, 3.9f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 200.0f);
@@ -201,7 +152,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, {}, &back_face_ds_clear_value);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex);
+		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthTex(back_face_ds_tex);
 	}
 	else
 	{
@@ -217,7 +168,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex);
+		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthTex(back_face_depth_tex);
 	}
 
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex, 0, 1, 0));
@@ -239,7 +190,7 @@ void SubSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction con
 void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
 {
 	float sigma_t = sender.GetValue() * 0.2f;
-	checked_pointer_cast<ModelObject>(model_)->SigmaT(sigma_t);
+	checked_pointer_cast<DetailedModel>(model_)->SigmaT(sigma_t);
 
 	std::wostringstream stream;
 	stream << L"Sigma_t: " << sigma_t;
@@ -249,7 +200,7 @@ void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
 void SubSurfaceApp::MtlThicknessChangedHandler(KlayGE::UISlider const & sender)
 {
 	float mtl_thickness = sender.GetValue() * 0.1f;
-	checked_pointer_cast<ModelObject>(model_)->MtlThickness(mtl_thickness);
+	checked_pointer_cast<DetailedModel>(model_)->MtlThickness(mtl_thickness);
 
 	std::wostringstream stream;
 	stream << L"Material thickness: " << mtl_thickness;
@@ -280,7 +231,7 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 	case 0:
 		renderEngine.BindFrameBuffer(back_face_depth_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 0.0f, 0);
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(true);
+		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthPass(true);
 		return App3DFramework::URV_NeedFlush;
 
 	default:
@@ -294,11 +245,11 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		}
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->LightPos(light_->Position());
-		checked_pointer_cast<ModelObject>(model_)->LightColor(light_->Color());
-		checked_pointer_cast<ModelObject>(model_)->LightFalloff(light_->Falloff());
-		checked_pointer_cast<ModelObject>(model_)->EyePos(this->ActiveCamera().EyePos());
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(false);
+		checked_pointer_cast<DetailedModel>(model_)->LightPos(light_->Position());
+		checked_pointer_cast<DetailedModel>(model_)->LightColor(light_->Color());
+		checked_pointer_cast<DetailedModel>(model_)->LightFalloff(light_->Falloff());
+		checked_pointer_cast<DetailedModel>(model_)->EyePos(this->ActiveCamera().EyePos());
+		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthPass(false);
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}

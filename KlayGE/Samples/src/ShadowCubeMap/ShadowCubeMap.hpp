@@ -36,7 +36,7 @@ private:
 	
 	KlayGE::RenderModelPtr scene_model_;
 	KlayGE::RenderModelPtr teapot_model_;
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
+	std::vector<KlayGE::RenderablePtr> scene_meshes_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

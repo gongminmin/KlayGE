@@ -1030,7 +1030,7 @@ namespace KlayGE
 				}
 			}
 
-			ai_scene.mNumMeshes = render_model_->NumSubrenderables();
+			ai_scene.mNumMeshes = render_model_->NumMeshes();
 			ai_scene.mMeshes = new aiMesh*[ai_scene.mNumMeshes];
 
 			ai_scene.mRootNode = new aiNode;
@@ -1042,7 +1042,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < ai_scene.mNumMeshes; ++ i)
 			{
-				auto const & mesh = *checked_cast<StaticMesh*>(render_model_->Subrenderable(i).get());
+				auto const & mesh = *checked_cast<StaticMesh*>(render_model_->Mesh(i).get());
 
 				ai_scene.mMeshes[i] = new aiMesh;
 				auto& ai_mesh = *ai_scene.mMeshes[i];
@@ -2511,7 +2511,7 @@ namespace KlayGE
 	void MeshConverter::CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index)
 	{
 		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
-		auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Subrenderable(mesh_index));
+		auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Mesh(mesh_index));
 
 		auto bb_kfs = MakeSharedPtr<AABBKeyFrameSet>();
 		if (bb_kfs_chunk)
@@ -2694,7 +2694,7 @@ namespace KlayGE
 			}
 
 			XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
-			for (uint32_t mesh_index = 0; mesh_index < skinned_model.NumSubrenderables(); ++ mesh_index)
+			for (uint32_t mesh_index = 0; mesh_index < skinned_model.NumMeshes(); ++ mesh_index)
 			{
 				this->CompileBBKeyFramesChunk(bb_kfs_chunk, mesh_index);
 			}
@@ -3309,7 +3309,7 @@ namespace KlayGE
 			}
 		}
 
-		render_model_->AssignSubrenderables(render_meshes.begin(), render_meshes.end());
+		render_model_->AssignMeshes(render_meshes.begin(), render_meshes.end());
 
 		if (!in_path)
 		{

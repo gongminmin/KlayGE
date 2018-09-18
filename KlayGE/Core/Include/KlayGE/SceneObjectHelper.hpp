@@ -54,6 +54,11 @@ namespace KlayGE
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
 
+		RenderModelPtr const & LightModel() const
+		{
+			return light_model_;
+		}
+
 	private:
 		RenderModelPtr LoadModel(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
@@ -62,6 +67,7 @@ namespace KlayGE
 		float4x4 model_scaling_;
 
 		LightSourcePtr light_;
+		RenderModelPtr light_model_;
 	};
 
 	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneObject
@@ -77,6 +83,11 @@ namespace KlayGE
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
 
+		RenderModelPtr const & CameraModel() const
+		{
+			return camera_model_;
+		}
+
 	private:
 		RenderModelPtr LoadModel(std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
@@ -84,6 +95,7 @@ namespace KlayGE
 		float4x4 model_scaling_;
 
 		CameraPtr camera_;
+		RenderModelPtr camera_model_;
 	};
 }
 

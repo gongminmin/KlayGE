@@ -91,69 +91,74 @@ namespace
 		}
 	};
 
-	class PolygonObject : public SceneObject
+	class PolygonModel : public RenderModel
 	{
 	public:
-		PolygonObject()
-			: SceneObject(SOA_Cullable)
+		explicit PolygonModel(std::wstring const & name)
+			: RenderModel(name)
 		{
-			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>()));
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightPos(light_pos);
 			}
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightColor(light_color);
 			}
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightFalloff(light_falloff);
 			}
 		}
 
 		void ProceduralType(int type)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralType(type);
+				checked_pointer_cast<RenderPolygon>(mesh)->ProceduralType(type);
 			}
 		}
 
 		void ProceduralFreq(float freq)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralFreq(freq);
+				checked_pointer_cast<RenderPolygon>(mesh)->ProceduralFreq(freq);
 			}
+		}
+	};
+
+	class PolygonObject : public SceneObject
+	{
+	public:
+		explicit PolygonObject(RenderModelPtr const & polygon_model)
+			: SceneObject(polygon_model, SOA_Cullable)
+		{
+			polygon_model_ = polygon_model;
 		}
 
 		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) override
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (uint32_t i = 0; i < polygon_model_->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AppTime(app_time);
+				checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(i))->AppTime(app_time);
 			}
 		}
+
+	private:
+		RenderModelPtr polygon_model_;
 	};
 
 
@@ -212,13 +217,13 @@ void ProceduralTexApp::InputHandler(InputEngine const & /*sender*/, InputAction 
 void ProceduralTexApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	procedural_type_ = sender.GetSelectedIndex();
-	checked_pointer_cast<PolygonObject>(polygon_)->ProceduralType(procedural_type_);
+	checked_pointer_cast<PolygonModel>(polygon_model_)->ProceduralType(procedural_type_);
 }
 
 void ProceduralTexApp::FreqChangedHandler(KlayGE::UISlider const & sender)
 {
 	procedural_freq_ = static_cast<float>(sender.GetValue());
-	checked_pointer_cast<PolygonObject>(polygon_)->ProceduralFreq(procedural_freq_);
+	checked_pointer_cast<PolygonModel>(polygon_model_)->ProceduralFreq(procedural_freq_);
 
 	std::wostringstream stream;
 	stream << L"Freq: " << procedural_freq_;
@@ -267,8 +272,10 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		}
 		else if (loading_percentage_ < 60)
 		{
-			polygon_ = MakeSharedPtr<PolygonObject>();
-			polygon_->AddToSceneManager();
+			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
+			polygon_obj_ = MakeSharedPtr<PolygonObject>(polygon_model_);
+			polygon_obj_->AddToSceneManager();
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
@@ -364,9 +371,9 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		light_pos = MathLib::normalize(light_pos) * 1.2f;
 		light_->Position(light_pos);
 
-		checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
-		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
-		checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+		checked_pointer_cast<PolygonModel>(polygon_model_)->LightPos(light_->Position());
+		checked_pointer_cast<PolygonModel>(polygon_model_)->LightColor(light_->Color());
+		checked_pointer_cast<PolygonModel>(polygon_model_)->LightFalloff(light_->Falloff());
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}

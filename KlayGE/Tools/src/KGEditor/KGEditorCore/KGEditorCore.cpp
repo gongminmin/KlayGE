@@ -678,10 +678,10 @@ namespace KlayGE
 				scaling_axis_->Visible(false);
 				for (auto iter = entities_.begin(); iter != entities_.end(); ++ iter)
 				{
-					RenderablePtr const & model = iter->second.model;
-					for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+					auto* model = iter->second.model.get();
+					for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 					{
-						model->Subrenderable(i)->SelectMode(true);
+						model->Mesh(i)->SelectMode(true);
 					}
 				}
 
@@ -698,10 +698,10 @@ namespace KlayGE
 				this->UpdateHelperObjs();
 				for (auto iter = entities_.begin(); iter != entities_.end(); ++ iter)
 				{
-					RenderablePtr const & model = iter->second.model;
-					for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+					auto* model = iter->second.model.get();
+					for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 					{
-						model->Subrenderable(i)->SelectMode(false);
+						model->Mesh(i)->SelectMode(false);
 					}
 				}
 
@@ -864,13 +864,13 @@ namespace KlayGE
 
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
-		RenderModelPtr model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
+		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
 		auto scene_obj = MakeSharedPtr<SceneObject>(model,
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 		scene_obj->AddToSceneManager();
-		for (size_t i = 0; i < model->NumSubrenderables(); ++ i)
+		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
-			model->Subrenderable(i)->ObjectID(entity_id);
+			model->Mesh(i)->ObjectID(entity_id);
 		}
 
 		EntityInfo mi;
@@ -960,10 +960,10 @@ namespace KlayGE
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
-		RenderablePtr const & model = light_proxy->GetRenderable();
-		for (size_t i = 0; i < model->NumSubrenderables(); ++ i)
+		auto const & model = checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy)->LightModel();
+		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
-			model->Subrenderable(i)->ObjectID(entity_id);
+			model->Mesh(i)->ObjectID(entity_id);
 		}
 
 		EntityInfo li;
@@ -1015,10 +1015,10 @@ namespace KlayGE
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
-		RenderablePtr const & model = camera_proxy->GetRenderable();
-		for (size_t i = 0; i < model->NumSubrenderables(); ++ i)
+		auto const & model = checked_pointer_cast<SceneObjectCameraProxy>(camera_proxy)->CameraModel();
+		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
-			model->Subrenderable(i)->ObjectID(entity_id);
+			model->Mesh(i)->ObjectID(entity_id);
 		}
 
 		EntityInfo ci;

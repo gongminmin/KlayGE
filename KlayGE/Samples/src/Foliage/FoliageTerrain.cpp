@@ -312,9 +312,9 @@ namespace KlayGE
 			{
 				plant_lod_instance_buffers_[plant_type][lod] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
 					plant_3d_tiles * plant_3d_tiles * num_tile_plants_[plant_type].x() * sizeof(PlantInstanceData), nullptr);
-				for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+				for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 				{
-					auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+					auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
 					mesh->InstanceBuffer(lod, plant_lod_instance_buffers_[plant_type][lod]);
 				}
 
@@ -353,9 +353,9 @@ namespace KlayGE
 			{
 				for (uint32_t lod = 0; lod < plant_meshes_[plant_type]->NumLods(); ++ lod)
 				{
-					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
-						auto const * mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						auto const * mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
 						auto const & rl = mesh->GetRenderLayout(lod);
 
 						lod_indirect_args.insert(lod_indirect_args.end(),
@@ -383,9 +383,9 @@ namespace KlayGE
 			{
 				for (uint32_t lod = 0; lod < plant_meshes_[plant_type]->NumLods(); ++ lod)
 				{
-					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
-						auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
 						auto& rl = mesh->GetRenderLayout(lod);
 
 						rl.BindIndirectArgs(plant_lod_primitive_indirect_args_);
@@ -495,7 +495,7 @@ namespace KlayGE
 
 					re.Render(*foliage_dist_effect_, *foliage_dist_rw_tech_, *foliage_dist_rl_);
 
-					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
 						plant_primitive_written_buff_->CopyToSubBuffer(*plant_lod_primitive_indirect_args_, offset, 0, sizeof(uint32_t));
 						offset += 5 * sizeof(uint32_t);
@@ -567,9 +567,9 @@ namespace KlayGE
 				{
 					uint32_t const num_instances = static_cast<uint32_t>(
 						checked_pointer_cast<SOStatisticsQuery>(plant_lod_primitive_written_query_[plant_type][lod])->NumPrimitivesWritten());
-					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
-						auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
 						mesh->ForceNumInstances(lod, num_instances);
 					}
 					num_3d_plants_ += num_instances;
@@ -604,9 +604,9 @@ namespace KlayGE
 
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
-			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 			{
-				auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+				auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
 				for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
 				{
 					mesh->Pass(type_);

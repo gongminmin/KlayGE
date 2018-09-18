@@ -63,8 +63,6 @@ namespace KlayGE
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
-		virtual void OnAttachRenderable(bool add_to_scene);
-
 		virtual void AddToSceneManager();
 		virtual void AddToSceneManagerLocked();
 		virtual void DelFromSceneManager();

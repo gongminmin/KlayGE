@@ -42,7 +42,6 @@ namespace KlayGE
 		: SceneObject(attrib)
 	{
 		this->AddRenderable(renderable);
-		this->OnAttachRenderable(false);
 	}
 
 	SceneObject::~SceneObject()
@@ -87,8 +86,28 @@ namespace KlayGE
 
 	void SceneObject::AddRenderable(RenderablePtr const & renderable)
 	{
-		renderables_.push_back(renderable);
-		renderables_hw_res_ready_.push_back(false);
+		if (renderable && renderable->HWResourceReady())
+		{
+			auto renderable_list = renderable->RenderableList();
+			if (renderable_list.empty())
+			{
+				renderables_.push_back(renderable);
+				renderables_hw_res_ready_.push_back(true);
+			}
+			else
+			{
+				for (auto const & r : renderable_list)
+				{
+					renderables_.push_back(r);
+					renderables_hw_res_ready_.push_back(true);
+				}
+			}
+		}
+		else
+		{
+			renderables_.push_back(renderable);
+			renderables_hw_res_ready_.push_back(false);
+		}
 		pos_aabb_dirty_ = true;
 	}
 
@@ -185,12 +204,21 @@ namespace KlayGE
 			{
 				renderables_hw_res_ready_[i] = true;
 				refreshed = true;
+
+				auto renderable_list = renderables_[i]->RenderableList();
+				if (!renderable_list.empty())
+				{
+					renderables_[i] = renderable_list[0];
+					renderables_.insert(renderables_.begin() + i + 1, renderable_list.begin() + 1, renderable_list.end());
+					renderables_hw_res_ready_.insert(renderables_hw_res_ready_.begin() + i + 1, renderable_list.size() - 1, false);
+
+					i += renderable_list.size() - 1;
+				}
 			}
 		}
 
 		if (refreshed)
 		{
-			this->OnAttachRenderable(false);
 			this->UpdateAbsModelMatrix();
 		}
 
@@ -385,29 +413,6 @@ namespace KlayGE
 		else
 		{
 			return false;
-		}
-	}
-
-	void SceneObject::OnAttachRenderable(bool add_to_scene)
-	{
-		for (auto const & renderable : renderables_)
-		{
-			if (renderable && (renderable->NumSubrenderables() > 0))
-			{
-				size_t const base = children_.size();
-				children_.resize(base + renderable->NumSubrenderables());
-				for (uint32_t i = 0; i < renderable->NumSubrenderables(); ++ i)
-				{
-					auto child = MakeSharedPtr<SceneObject>(renderable->Subrenderable(i), attrib_);
-					child->Parent(this);
-					children_[base + i] = child;
-
-					if (add_to_scene)
-					{
-						child->AddToSceneManagerLocked();
-					}
-				}
-			}
 		}
 	}
 

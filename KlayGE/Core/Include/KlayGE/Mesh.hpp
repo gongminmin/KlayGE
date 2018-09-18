@@ -222,7 +222,25 @@ namespace KlayGE
 			return materials_[i];
 		}
 
-		void AddToRenderQueue();
+		ArrayRef<RenderablePtr> RenderableList() const override;
+
+		template <typename ForwardIterator>
+		void AssignMeshes(ForwardIterator first, ForwardIterator last)
+		{
+			meshes_.assign(first, last);
+
+			this->UpdateBoundBox();
+		}
+		RenderablePtr const & Mesh(size_t id) const
+		{
+			return meshes_[id];
+		}
+		uint32_t NumMeshes() const
+		{
+			return static_cast<uint32_t>(meshes_.size());
+		}
+
+		void AddToRenderQueue() override;
 
 		virtual void Pass(PassType type);
 
@@ -251,6 +269,8 @@ namespace KlayGE
 		std::vector<RenderMaterialPtr> materials_;
 
 		bool hw_res_ready_;
+
+		std::vector<RenderablePtr> meshes_;
 	};
 
 

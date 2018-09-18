@@ -43,122 +43,6 @@ namespace
 		DT_SmoothTessellation,
 	};
 
-	class RenderDetailedModel : public RenderModel
-	{
-	public:
-		explicit RenderDetailedModel(std::wstring const & name)
-			: RenderModel(name)
-		{
-		}
-
-		virtual void DoBuildModelInfo() override
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			RenderLayout& rl = this->Subrenderable(0)->GetRenderLayout();
-
-			AABBox const & pos_bb = this->PosBound();
-			AABBox const & tc_bb = this->TexcoordBound();
-			float3 const pos_center = pos_bb.Center();
-			float3 const pos_extent = pos_bb.HalfSize();
-			float3 const tc_center = tc_bb.Center();
-			float3 const tc_extent = tc_bb.HalfSize();
-
-			std::vector<float3> positions(rl.NumVertices());
-			std::vector<float2> texs(rl.NumVertices());
-			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
-			{
-				GraphicsBufferPtr const & vb = rl.GetVertexStream(i);
-				switch (rl.VertexStreamFormat(i)[0].usage)
-				{
-				case VEU_Position:
-					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
-						vb->CopyToBuffer(*vb_cpu);
-
-						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						int16_t const * p_16 = mapper.Pointer<int16_t>();
-						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
-						{
-							positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
-							positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
-							positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
-						}
-					}
-					break;
-
-				case VEU_TextureCoord:
-					if (0 == rl.VertexStreamFormat(i)[0].usage_index)
-					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
-						vb->CopyToBuffer(*vb_cpu);
-
-						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						int16_t const * t_16 = mapper.Pointer<int16_t>();
-						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
-						{
-							texs[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
-							texs[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
-						}
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-
-			std::vector<uint32_t> indices(rl.NumIndices());
-			{
-				GraphicsBufferPtr ib = rl.GetIndexStream();
-				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
-				ib->CopyToBuffer(*ib_cpu);
-
-				GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-				if (EF_R16UI == rl.IndexStreamFormat())
-				{
-					uint16_t* p = mapper.Pointer<uint16_t>();
-					std::copy(p, p + indices.size(), indices.begin());
-				}
-				else
-				{
-					uint32_t* p = mapper.Pointer<uint32_t>();
-					std::copy(p, p + indices.size(), indices.begin());
-				}
-			}
-
-			std::vector<float> distortions(rl.NumVertices(), 0);
-			std::vector<uint32_t> vert_times(rl.NumVertices(), 0);
-			for (size_t i = 0; i < indices.size(); i += 3)
-			{
-				uint32_t i0 = indices[i + 0];
-				uint32_t i1 = indices[i + 1];
-				uint32_t i2 = indices[i + 2];
-
-				float geom_area = MathLib::length(MathLib::cross(positions[i1] - positions[i0], positions[i2] - positions[i0]));
-				float tex_area = MathLib::cross(texs[i1] - texs[i0], texs[i2] - texs[i0]);
-				float tri_distortion = sqrt(geom_area / tex_area) / 2.5f;
-				distortions[i0] += tri_distortion;
-				distortions[i1] += tri_distortion;
-				distortions[i2] += tri_distortion;
-				++ vert_times[i0];
-				++ vert_times[i1];
-				++ vert_times[i2];
-			}
-			for (size_t i = 0; i < distortions.size(); ++ i)
-			{
-				if (vert_times[i] > 0)
-				{
-					distortions[i] /= vert_times[i];
-				}
-			}
-
-			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-				static_cast<uint32_t>(distortions.size() * sizeof(distortions[0])), &distortions[0]);
-			rl.BindVertexStream(distortion_vb, VertexElement(VEU_TextureCoord, 1, EF_R32F));
-		}
-	};
-
 	class RenderPolygon : public StaticMesh
 	{
 	public:
@@ -334,96 +218,187 @@ namespace
 		bool wireframe_;
 	};
 
-	class PolygonObject : public SceneObject
+	class RenderDetailedModel : public RenderModel
 	{
 	public:
-		PolygonObject()
-			: SceneObject(SOA_Cullable)
+		explicit RenderDetailedModel(std::wstring const & name)
+			: RenderModel(name)
 		{
-			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>()));
 		}
 
-		bool MainThreadUpdate(float app_time, float elapsed_time) override
+		virtual void DoBuildModelInfo() override
 		{
-			return SceneObject::MainThreadUpdate(app_time, elapsed_time);
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			RenderLayout& rl = this->Mesh(0)->GetRenderLayout();
+
+			AABBox const & pos_bb = this->PosBound();
+			AABBox const & tc_bb = this->TexcoordBound();
+			float3 const pos_center = pos_bb.Center();
+			float3 const pos_extent = pos_bb.HalfSize();
+			float3 const tc_center = tc_bb.Center();
+			float3 const tc_extent = tc_bb.HalfSize();
+
+			std::vector<float3> positions(rl.NumVertices());
+			std::vector<float2> texs(rl.NumVertices());
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl.GetVertexStream(i);
+				switch (rl.VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Position:
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
+						vb->CopyToBuffer(*vb_cpu);
+
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						int16_t const * p_16 = mapper.Pointer<int16_t>();
+						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
+						{
+							positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
+							positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
+							positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+						}
+					}
+					break;
+
+				case VEU_TextureCoord:
+					if (0 == rl.VertexStreamFormat(i)[0].usage_index)
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
+						vb->CopyToBuffer(*vb_cpu);
+
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						int16_t const * t_16 = mapper.Pointer<int16_t>();
+						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
+						{
+							texs[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+							texs[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+						}
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			std::vector<uint32_t> indices(rl.NumIndices());
+			{
+				GraphicsBufferPtr ib = rl.GetIndexStream();
+				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
+				ib->CopyToBuffer(*ib_cpu);
+
+				GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
+				if (EF_R16UI == rl.IndexStreamFormat())
+				{
+					uint16_t* p = mapper.Pointer<uint16_t>();
+					std::copy(p, p + indices.size(), indices.begin());
+				}
+				else
+				{
+					uint32_t* p = mapper.Pointer<uint32_t>();
+					std::copy(p, p + indices.size(), indices.begin());
+				}
+			}
+
+			std::vector<float> distortions(rl.NumVertices(), 0);
+			std::vector<uint32_t> vert_times(rl.NumVertices(), 0);
+			for (size_t i = 0; i < indices.size(); i += 3)
+			{
+				uint32_t i0 = indices[i + 0];
+				uint32_t i1 = indices[i + 1];
+				uint32_t i2 = indices[i + 2];
+
+				float geom_area = MathLib::length(MathLib::cross(positions[i1] - positions[i0], positions[i2] - positions[i0]));
+				float tex_area = MathLib::cross(texs[i1] - texs[i0], texs[i2] - texs[i0]);
+				float tri_distortion = sqrt(geom_area / tex_area) / 2.5f;
+				distortions[i0] += tri_distortion;
+				distortions[i1] += tri_distortion;
+				distortions[i2] += tri_distortion;
+				++ vert_times[i0];
+				++ vert_times[i1];
+				++ vert_times[i2];
+			}
+			for (size_t i = 0; i < distortions.size(); ++ i)
+			{
+				if (vert_times[i] > 0)
+				{
+					distortions[i] /= vert_times[i];
+				}
+			}
+
+			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				static_cast<uint32_t>(distortions.size() * sizeof(distortions[0])), &distortions[0]);
+			rl.BindVertexStream(distortion_vb, VertexElement(VEU_TextureCoord, 1, EF_R32F));
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightPos(light_pos);
 			}
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightColor(light_color);
 			}
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
+				checked_pointer_cast<RenderPolygon>(mesh)->LightFalloff(light_falloff);
 			}
 		}
 
 		void HeightScale(float scale)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->HeightScale(scale);
+				checked_pointer_cast<RenderPolygon>(mesh)->HeightScale(scale);
 			}
 		}
 
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BindJudaTexture(juda_tex);
+				checked_pointer_cast<RenderPolygon>(mesh)->BindJudaTexture(juda_tex);
 			}
 		}
 
 		std::vector<uint32_t> const & JudaTexTileIDs(uint32_t index) const
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			return checked_pointer_cast<RenderPolygon>(model->Subrenderable(index))->JudaTexTileIDs();
+			return checked_pointer_cast<RenderPolygon>(this->Mesh(index))->JudaTexTileIDs();
 		}
 
 		void DetailType(uint32_t dt)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->DetailType(dt);
+				checked_pointer_cast<RenderPolygon>(mesh)->DetailType(dt);
 			}
 		}
 
 		void NaLength(bool len)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->NaLength(len);
+				checked_pointer_cast<RenderPolygon>(mesh)->NaLength(len);
 			}
 		}
 
 		void Wireframe(bool wf)
 		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderables_[0]);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->Wireframe(wf);
+				checked_pointer_cast<RenderPolygon>(mesh)->Wireframe(wf);
 			}
 		}
 	};
@@ -492,7 +467,7 @@ void DetailedSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputActio
 void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 {
 	height_scale_ = sender.GetValue() / 100.0f;
-	checked_pointer_cast<PolygonObject>(polygon_)->HeightScale(height_scale_);
+	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->HeightScale(height_scale_);
 
 	std::wostringstream stream;
 	stream << L"Scale: " << height_scale_;
@@ -501,17 +476,17 @@ void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 
 void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
-	checked_pointer_cast<PolygonObject>(polygon_)->DetailType(sender.GetSelectedIndex());
+	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->DetailType(sender.GetSelectedIndex());
 }
 
 void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const & sender)
 {
-	checked_pointer_cast<PolygonObject>(polygon_)->NaLength(sender.GetChecked());
+	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->NaLength(sender.GetChecked());
 }
 
 void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 {
-	checked_pointer_cast<PolygonObject>(polygon_)->Wireframe(sender.GetChecked());
+	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->Wireframe(sender.GetChecked());
 }
 
 void DetailedSurfaceApp::DoUpdateOverlay()
@@ -555,10 +530,12 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		}
 		else if (loading_percentage_ < 60)
 		{
-			polygon_ = MakeSharedPtr<PolygonObject>();
-			checked_pointer_cast<PolygonObject>(polygon_)->BindJudaTexture(juda_tex_);
-			juda_tex_->UpdateCache(checked_pointer_cast<PolygonObject>(polygon_)->JudaTexTileIDs(0));
-			polygon_->AddToSceneManager();
+			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
+			polygon_obj_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
+			checked_pointer_cast<RenderDetailedModel>(polygon_model_)->BindJudaTexture(juda_tex_);
+			juda_tex_->UpdateCache(checked_pointer_cast<RenderDetailedModel>(polygon_model_)->JudaTexTileIDs(0));
+			polygon_obj_->AddToSceneManager();
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
@@ -681,9 +658,9 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		light_pos = MathLib::normalize(light_pos);
 		light_->Position(light_pos);
 
-		checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
-		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
-		checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightPos(light_->Position());
+		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightColor(light_->Color());
+		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightFalloff(light_->Falloff());
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}

@@ -131,7 +131,7 @@ namespace
 			: SceneObject(SOA_Cullable)
 		{
 			auto renderable = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Subrenderable(0);
+				CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable)->CompressedCubeMap(y_cube, c_cube);
 			this->AddRenderable(renderable);
 		}
