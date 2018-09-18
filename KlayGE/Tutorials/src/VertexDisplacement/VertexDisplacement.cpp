@@ -68,22 +68,6 @@ namespace
 		}
 	};
 
-	class FlagObject : public SceneObject
-	{
-	public:
-		FlagObject(int length_segs, int width_segs)
-			: SceneObject(SOA_Cullable)
-		{
-			this->AddRenderable(MakeSharedPtr<FlagRenderable>(length_segs, width_segs));
-		}
-
-		virtual bool MainThreadUpdate(float app_time, float /*elapsed_time*/) override
-		{
-			checked_pointer_cast<FlagRenderable>(renderables_[0])->SetAngle(app_time / 0.4f);
-			return false;
-		}
-	};
-
 
 	enum
 	{
@@ -116,7 +100,13 @@ void VertexDisplacement::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	flag_ = MakeSharedPtr<FlagObject>(8, 6);
+	flag_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<FlagRenderable>(8, 6), SceneObject::SOA_Cullable);
+	flag_->BindMainThreadUpdateFunc([](SceneObject& obj, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(elapsed_time);
+
+			checked_pointer_cast<FlagRenderable>(obj.GetRenderable(0))->SetAngle(app_time / 0.4f);
+		});
 	flag_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));

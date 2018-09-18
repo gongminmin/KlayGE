@@ -177,30 +177,6 @@ namespace
 		float4x4 inv_model_mat_;
 	};
 
-	class PolygonObject : public SceneObject
-	{
-	public:
-		PolygonObject()
-			: SceneObject(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
-		{
-		}
-
-		void LightPos(float3 const & light_pos)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightPos(light_pos);
-		}
-
-		void LightColor(float3 const & light_color)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightColor(light_color);
-		}
-
-		void LightFalloff(float3 const & light_falloff)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightFalloff(light_falloff);
-		}
-	};
-
 
 	class PointLightSourceUpdate
 	{
@@ -247,7 +223,8 @@ void DistanceMapping::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	polygon_ = MakeSharedPtr<PolygonObject>();
+	polygon_renderable_ = MakeSharedPtr<RenderPolygon>();
+	polygon_ = MakeSharedPtr<SceneObject>(polygon_renderable_, SceneObject::SOA_Cullable);
 	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
 	polygon_->AddToSceneManager();
 
@@ -270,7 +247,7 @@ void DistanceMapping::OnCreate()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
 	light_proxy_->AddToSceneManager();
 
-	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -343,9 +320,9 @@ uint32_t DistanceMapping::DoUpdate(uint32_t /*pass*/)
 	}
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightPos(light_->Position());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightColor(light_->Color());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

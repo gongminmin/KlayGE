@@ -532,10 +532,10 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
-			polygon_obj_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
+			polygon_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
 			checked_pointer_cast<RenderDetailedModel>(polygon_model_)->BindJudaTexture(juda_tex_);
 			juda_tex_->UpdateCache(checked_pointer_cast<RenderDetailedModel>(polygon_model_)->JudaTexTileIDs(0));
-			polygon_obj_->AddToSceneManager();
+			polygon_->AddToSceneManager();
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);

@@ -20,6 +20,7 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
+	KlayGE::RenderablePtr polygon_renderable_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

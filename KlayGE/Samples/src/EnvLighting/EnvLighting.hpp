@@ -20,7 +20,8 @@ private:
 	void TypeChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
-	std::vector<KlayGE::SceneObjectPtr> spheres_;
+	std::vector<KlayGE::SceneObjectPtr> sphere_objs_;
+	std::vector<KlayGE::RenderModelPtr> sphere_models_;
 	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::TrackballCameraController obj_controller_;

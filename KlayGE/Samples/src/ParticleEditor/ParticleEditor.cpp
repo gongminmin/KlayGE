@@ -104,15 +104,6 @@ namespace
 		RenderTechnique* color_tech_;
 	};
 
-	class TerrainObject : public SceneObject
-	{
-	public:
-		TerrainObject()
-			: SceneObject(MakeSharedPtr<TerrainRenderable>(), SOA_Cullable)
-		{
-		}
-	};
-
 	enum
 	{
 		Exit
@@ -161,7 +152,7 @@ void ParticleEditorApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	terrain_ = MakeSharedPtr<TerrainObject>();
+	terrain_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<TerrainRenderable>(), SceneObject::SOA_Cullable);
 	terrain_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

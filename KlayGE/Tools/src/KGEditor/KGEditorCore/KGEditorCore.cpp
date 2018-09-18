@@ -678,10 +678,10 @@ namespace KlayGE
 				scaling_axis_->Visible(false);
 				for (auto iter = entities_.begin(); iter != entities_.end(); ++ iter)
 				{
-					auto* model = iter->second.model.get();
-					for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+					auto const & model = *iter->second.model;
+					for (uint32_t i = 0; i < model.NumMeshes(); ++ i)
 					{
-						model->Mesh(i)->SelectMode(true);
+						model.Mesh(i)->SelectMode(true);
 					}
 				}
 
@@ -698,10 +698,10 @@ namespace KlayGE
 				this->UpdateHelperObjs();
 				for (auto iter = entities_.begin(); iter != entities_.end(); ++ iter)
 				{
-					auto* model = iter->second.model.get();
-					for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+					auto const & model = *iter->second.model;
+					for (uint32_t i = 0; i < model.NumMeshes(); ++ i)
 					{
-						model->Mesh(i)->SelectMode(false);
+						model.Mesh(i)->SelectMode(false);
 					}
 				}
 

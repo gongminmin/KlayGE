@@ -22,6 +22,7 @@ private:
 	KlayGE::FontPtr font_;
 
 	KlayGE::SceneObjectPtr object_;
+	KlayGE::RenderModelPtr model_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 };

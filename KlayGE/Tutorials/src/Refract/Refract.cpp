@@ -124,28 +124,6 @@ namespace
 		RenderTechnique* front_face_tech_;
 	};
 
-	class RefractorObject : public SceneObject
-	{
-	public:
-		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
-			: SceneObject(SOA_Cullable)
-		{
-			auto renderable = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Mesh(0);
-			checked_pointer_cast<RefractorRenderable>(renderable)->CompressedCubeMap(y_cube, c_cube);
-			this->AddRenderable(renderable);
-		}
-
-		void BackFaceTexture(TexturePtr const & bf_tex)
-		{
-			checked_pointer_cast<RefractorRenderable>(renderables_[0])->BackFaceTexture(bf_tex);
-		}
-		void BackFaceDepthTexture(TexturePtr const & bf_tex)
-		{
-			checked_pointer_cast<RefractorRenderable>(renderables_[0])->BackFaceDepthTexture(bf_tex);
-		}
-	};
-
 	enum
 	{
 		Exit,
@@ -180,8 +158,13 @@ void Refract::OnCreate()
 	y_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	refractor_ = MakeSharedPtr<RefractorObject>(y_cube_map_, c_cube_map_);
+	refractor_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>());
+
+	refractor_ = MakeSharedPtr<SceneObject>(refractor_model_->Mesh(0), SceneObject::SOA_Cullable);
 	refractor_->AddToSceneManager();
+
+	checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->CompressedCubeMap(y_cube_map_, c_cube_map_);
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
@@ -305,7 +288,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_buffer_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferMRT);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyBackGBufferMRT);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -315,7 +298,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_depth_buffer_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_GenShadowMap);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_GenShadowMap);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -333,9 +316,9 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyFrontShading);
-			checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(backface_tex_);
-			checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceDepthTexture(backface_depth_tex_);
 
 			sky_box_->Visible(true);
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
@@ -345,7 +328,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			// Pass 1: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferMRT);
+			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyBackGBufferMRT);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -357,9 +340,9 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-		checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyFrontShading);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(backface_tex_);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
+		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
+		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);
+		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceDepthTexture(backface_depth_tex_);
 
 		sky_box_->Visible(true);
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;

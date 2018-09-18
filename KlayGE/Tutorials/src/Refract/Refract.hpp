@@ -19,6 +19,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
+	KlayGE::RenderModelPtr refractor_model_;
 	KlayGE::SceneObjectPtr refractor_;
 	KlayGE::SceneObjectPtr sky_box_;
 

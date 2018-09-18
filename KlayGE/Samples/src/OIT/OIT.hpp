@@ -34,7 +34,7 @@ private:
 	void LayerChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr polygon_obj_;
+	KlayGE::SceneObjectPtr polygon_;
 	KlayGE::RenderModelPtr polygon_model_;
 	KlayGE::SceneObjectPtr sky_box_;
 

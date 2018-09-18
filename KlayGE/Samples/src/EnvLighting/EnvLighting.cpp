@@ -223,39 +223,6 @@ namespace
 		float distance_;
 	};
 
-	class SphereObject : public SceneObject
-	{
-	public:
-		SphereObject(float4 const & diff, float4 const & spec, float glossiness, uint32_t id)
-			: SceneObject(SOA_Cullable)
-		{
-			auto renderable = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Mesh(0);
-			checked_pointer_cast<SphereRenderable>(renderable)->Material(diff, spec, glossiness);
-			checked_pointer_cast<SphereRenderable>(renderable)->Id(id);
-			this->AddRenderable(renderable);
-		}
-
-		void RenderingType(int type)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->RenderingType(type);
-		}
-
-		void IntegratedBRDFTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->IntegratedBRDFTex(tex);
-		}
-
-		void Distance(float distance)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance(distance);
-		}
-		float Distance() const
-		{
-			return checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance();
-		}
-	};
-
 	float4 const diff_parametes[] =
 	{
 		float4(0.0147f,  0.0332f,  0.064f,   1),
@@ -958,13 +925,22 @@ void EnvLightingApp::OnCreate()
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
 	ambient_light->AddToSceneManager();
 
-	spheres_.resize(std::size(diff_parametes));
-	for (size_t i = 0; i < spheres_.size(); ++ i)
+	sphere_objs_.resize(std::size(diff_parametes));
+	sphere_models_.resize(sphere_objs_.size());
+	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
 	{
-		spheres_[i] = MakeSharedPtr<SphereObject>(diff_parametes[i], spec_parameters[i], glossiness_parametes[i],
-			static_cast<uint32_t>(i));
-		checked_pointer_cast<SphereObject>(spheres_[i])->IntegratedBRDFTex(integrated_brdf_tex_);
-		spheres_[i]->AddToSceneManager();
+		sphere_models_[i] = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+			CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>());
+
+		auto const & mesh = checked_pointer_cast<SphereRenderable>(sphere_models_[i]->Mesh(0));
+
+		sphere_objs_[i] = MakeSharedPtr<SceneObject>(mesh, SceneObject::SOA_Cullable);
+
+		mesh->Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
+		mesh->Id(static_cast<uint32_t>(i));
+		mesh->IntegratedBRDFTex(integrated_brdf_tex_);
+
+		sphere_objs_[i]->AddToSceneManager();
 	}
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
@@ -1017,9 +993,9 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 		{
 			auto const param = checked_pointer_cast<InputMouseActionParam>(action.second);
 			float const delta = -param->wheel_delta / 120.0f * 0.05f;
-			for (size_t i = 0; i < spheres_.size(); ++ i)
+			for (size_t i = 0; i < sphere_objs_.size(); ++ i)
 			{
-				auto& sphere = *checked_pointer_cast<SphereObject>(spheres_[i]);
+				auto& sphere = *checked_pointer_cast<SphereRenderable>(sphere_objs_[i]->GetRenderable());
 				sphere.Distance(sphere.Distance() + delta);
 			}
 		}
@@ -1034,9 +1010,9 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	rendering_type_ = sender.GetSelectedIndex();
-	for (size_t i = 0; i < spheres_.size(); ++ i)
+	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
 	{
-		checked_pointer_cast<SphereObject>(spheres_[i])->RenderingType(rendering_type_);
+		checked_pointer_cast<SphereRenderable>(sphere_objs_[i]->GetRenderable())->RenderingType(rendering_type_);
 	}
 }
 

@@ -254,25 +254,6 @@ namespace
 		TexturePtr noise_vol_tex_;
 	};
 
-	class ParticlesObject : public SceneObject
-	{
-	public:
-		explicit ParticlesObject(int max_num_particles)
-			: SceneObject(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Moveable)
-		{
-		}
-
-		void PosTexture(TexturePtr const & particle_pos_tex)
-		{
-			checked_pointer_cast<RenderParticles>(renderables_[0])->PosTexture(particle_pos_tex);
-		}
-
-		void PosVB(GraphicsBufferPtr const & particle_pos_vb)
-		{
-			checked_pointer_cast<RenderParticles>(renderables_[0])->PosVB(particle_pos_vb);
-		}
-	};
-
 	class GPUParticleSystem : public RenderableHelper
 	{
 	public:
@@ -752,15 +733,6 @@ namespace
 		}
 	};
 
-	class TerrainObject : public SceneObject
-	{
-	public:
-		TerrainObject(TexturePtr const & height_map, TexturePtr const & normal_map)
-			: SceneObject(MakeSharedPtr<TerrainRenderable>(height_map, normal_map), SOA_Cullable)
-		{
-		}
-	};
-
 	std::shared_ptr<GPUParticleSystem> gpu_ps;
 
 
@@ -839,13 +811,15 @@ void GPUParticleSystemApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);
+	particles_renderable_ = MakeSharedPtr<RenderParticles>(NUM_PARTICLE);
+	particles_ = MakeSharedPtr<SceneObject>(particles_renderable_, SceneObject::SOA_Moveable);
 	particles_->AddToSceneManager();
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);
 
-	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height_tex, terrain_normal_tex);
+	terrain_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex),
+		SceneObject::SOA_Cullable);
 	terrain_->AddToSceneManager();
 
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
@@ -859,7 +833,7 @@ void GPUParticleSystemApp::OnCreate()
 
 	if (use_cs)
 	{
-		checked_pointer_cast<ParticlesObject>(particles_)->PosVB(gpu_ps->PosVB());
+		checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 	}
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
@@ -881,7 +855,7 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
+	checked_pointer_cast<RenderParticles>(particles_renderable_)->SceneTexture(scene_tex_);
 
 	blend_pp_->InputPin(0, scene_tex_);
 
@@ -950,11 +924,11 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 
 			if (use_so)
 			{
-				checked_pointer_cast<ParticlesObject>(particles_)->PosVB(gpu_ps->PosVB());
+				checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 			}
 			else
 			{
-				checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
+				checked_pointer_cast<RenderParticles>(particles_renderable_)->PosTexture(gpu_ps->PosTexture());
 			}
 
 			re.BindFrameBuffer(fog_buffer_);

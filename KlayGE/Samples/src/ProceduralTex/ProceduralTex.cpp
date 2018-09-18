@@ -140,27 +140,6 @@ namespace
 		}
 	};
 
-	class PolygonObject : public SceneObject
-	{
-	public:
-		explicit PolygonObject(RenderModelPtr const & polygon_model)
-			: SceneObject(polygon_model, SOA_Cullable)
-		{
-			polygon_model_ = polygon_model;
-		}
-
-		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) override
-		{
-			for (uint32_t i = 0; i < polygon_model_->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(i))->AppTime(app_time);
-			}
-		}
-
-	private:
-		RenderModelPtr polygon_model_;
-	};
-
 
 	enum
 	{
@@ -274,8 +253,18 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
-			polygon_obj_ = MakeSharedPtr<PolygonObject>(polygon_model_);
-			polygon_obj_->AddToSceneManager();
+			polygon_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
+			polygon_->BindSubThreadUpdateFunc([this](SceneObject& obj, float app_time, float elapsed_time)
+				{
+					KFL_UNUSED(obj);
+					KFL_UNUSED(elapsed_time);
+
+					for (uint32_t i = 0; i < polygon_model_->NumMeshes(); ++ i)
+					{
+						checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(i))->AppTime(app_time);
+					}
+				});
+			polygon_->AddToSceneManager();
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);

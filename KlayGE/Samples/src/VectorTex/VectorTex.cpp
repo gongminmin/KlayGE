@@ -72,22 +72,6 @@ namespace
 		}
 	};
 
-	class TeapotObject : public SceneObject
-	{
-	public:
-		TeapotObject()
-			: SceneObject(SOA_Cullable)
-		{
-			this->AddRenderable(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Mesh(0));
-		}
-
-		void VectorTexture(TexturePtr const & vector_tex)
-		{
-			checked_pointer_cast<RenderTeapot>(renderables_[0])->VectorTexture(vector_tex);
-		}
-	};
-
 	enum
 	{
 		Exit
@@ -137,10 +121,13 @@ void VectorTexApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	object_ = MakeSharedPtr<TeapotObject>();
+	model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>());
+	object_ = MakeSharedPtr<SceneObject>(model_->Mesh(0), SceneObject::SOA_Cullable);
 	object_->AddToSceneManager();
 
-	checked_pointer_cast<TeapotObject>(object_)->VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
+	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->VectorTexture(
+		ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
 }

@@ -661,9 +661,9 @@ void OITApp::OnCreate()
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
-	polygon_obj_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
+	polygon_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
 	checked_pointer_cast<PolygonModel>(polygon_model_)->LightPos(float3(-1, 2, 1));
-	polygon_obj_->AddToSceneManager();
+	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 10);
