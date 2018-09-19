@@ -43,7 +43,7 @@ namespace KlayGE
 			return lf_visible_;
 		}
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
+		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		virtual void Pass(PassType type);
 

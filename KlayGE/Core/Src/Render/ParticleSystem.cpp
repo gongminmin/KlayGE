@@ -882,7 +882,7 @@ namespace KlayGE
 		}
 	}
 
-	bool ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
+	void ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		KFL_UNUSED(app_time);
 		KFL_UNUSED(elapsed_time);
@@ -894,8 +894,6 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(actived_particles_mutex_);
 			this->UpdateParticleBufferNoLock(actived_particles_);
 		}
-
-		return false;
 	}
 
 	void ParticleSystem::ParticleAlphaFromTex(std::string const & tex_name)

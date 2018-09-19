@@ -85,7 +85,7 @@ namespace KlayGE
 	{
 	}
 
-	bool SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	void SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LightSource::LT_Spot == light_->Type())
@@ -99,8 +99,6 @@ namespace KlayGE
 			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
 			light_mesh->Update();
 		}
-
-		return false;
 	}
 
 	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)

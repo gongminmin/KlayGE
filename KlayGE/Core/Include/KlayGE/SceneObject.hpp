@@ -72,7 +72,7 @@ namespace KlayGE
 		void BindMainThreadUpdateFunc(std::function<void(SceneObject&, float, float)> const & update_func);
 
 		virtual void SubThreadUpdate(float app_time, float elapsed_time);
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time);
+		virtual void MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;

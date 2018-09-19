@@ -195,7 +195,7 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
+	void SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		bool refreshed = false;
 		for (size_t i = 0; i < renderables_.size(); ++ i)
@@ -226,8 +226,6 @@ namespace KlayGE
 		{
 			main_thread_update_func_(*this, app_time, elapsed_time);
 		}
-
-		return refreshed;
 	}
 
 	void SceneObject::AddToSceneManager()

@@ -370,7 +370,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override
+		void MainThreadUpdate(float app_time, float elapsed_time) override
 		{
 			if (dirty_)
 			{
@@ -399,8 +399,6 @@ namespace
 			}
 			checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
-
-			return false;
 		}
 
 		void ReflectionTex(TexturePtr const & tex)

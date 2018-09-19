@@ -285,8 +285,8 @@ namespace KlayGE
 			return updaters_[index];
 		}
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) override;
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
+		void SubThreadUpdate(float app_time, float elapsed_time) override;
+		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		uint32_t NumParticles() const
 		{
