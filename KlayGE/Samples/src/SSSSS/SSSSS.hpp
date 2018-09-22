@@ -9,7 +9,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -43,7 +43,7 @@ private:
 	KlayGE::TrackballCameraController light_controller_;
 
 	KlayGE::LightSourcePtr light_;
-	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
+	KlayGE::SceneNodePtr light_proxy_;
 
 	KlayGE::CameraPtr scene_camera_;
 	KlayGE::CameraPtr light_camera_;

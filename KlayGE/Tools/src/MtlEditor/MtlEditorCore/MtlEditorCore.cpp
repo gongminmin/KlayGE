@@ -10,7 +10,7 @@
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -237,13 +237,13 @@ namespace KlayGE
 		main_light_->BindUpdateFunc(LightSourceUpdate());
 		main_light_->AddToSceneManager();
 
-		axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderAxis>(),
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
-		axis_->AddToSceneManager();
+		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderAxis>(),
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(axis_);
 
-		grid_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderGrid>(),
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
-		grid_->AddToSceneManager();
+		grid_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderGrid>(),
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_);
 
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 		if (Context::Instance().Config().graphics_cfg.gamma)
@@ -267,14 +267,14 @@ namespace KlayGE
 
 		sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(default_cube_map_);
-		sky_box_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 		ambient_light_->SkylightTex(default_cube_map_);
 
-		selected_bb_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableLineBox>(),
-			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableLineBox>(),
+			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
-		selected_bb_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(selected_bb_);
 		checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetColor(Color(1, 1, 1, 1));
 
 		this->LookAt(float3(-5, 5, -5), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
@@ -331,7 +331,7 @@ namespace KlayGE
 
 		if (object_)
 		{
-			object_->DelFromSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(object_);
 			object_.reset();
 
 			ResLoader::Instance().Unload(model_);
@@ -339,14 +339,14 @@ namespace KlayGE
 		}
 		if (skeleton_object_)
 		{
-			skeleton_object_->DelFromSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(skeleton_object_);
 			skeleton_object_.reset();
 
 			skeleton_model_.reset();
 		}
 		if (imposter_)
 		{
-			imposter_->DelFromSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(imposter_);
 			imposter_.reset();
 		}
 
@@ -354,8 +354,8 @@ namespace KlayGE
 		model_ = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
 			CreateModelFactory<DetailedSkinnedModel>(), CreateMeshFactory<DetailedSkinnedMesh>());
 		checked_pointer_cast<DetailedSkinnedModel>(model_)->SetTime(0);
-		object_ = MakeSharedPtr<SceneObject>(model_, 0);
-		object_->AddToSceneManager();
+		object_ = MakeSharedPtr<SceneNode>(model_, 0);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 		for (size_t i = 0; i < model_->NumMeshes(); ++ i)
 		{
 			model_->Mesh(i)->ObjectID(static_cast<uint32_t>(i + 1));
@@ -364,15 +364,15 @@ namespace KlayGE
 		if (checked_pointer_cast<DetailedSkinnedModel>(model_)->NumJoints() > 0)
 		{
 			skeleton_model_ = MakeSharedPtr<SkeletonMesh>(model_);
-			skeleton_object_ = MakeSharedPtr<SceneObject>(skeleton_model_, 0);
-			skeleton_object_->AddToSceneManager();
+			skeleton_object_ = MakeSharedPtr<SceneNode>(skeleton_model_, 0);
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skeleton_object_);
 		}
 
 		if (!ResLoader::Instance().Locate(imposter_name).empty())
 		{
-			imposter_ = MakeSharedPtr<SceneObject>(
+			imposter_ = MakeSharedPtr<SceneNode>(
 				MakeSharedPtr<RenderImpostor>(imposter_name, model_->PosBound()), 0);
-			imposter_->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(imposter_);
 			imposter_->Visible(false);
 		}
 
@@ -449,7 +449,7 @@ namespace KlayGE
 
 			float4x4 scaling = MathLib::scaling(len, len, len);
 			float4x4 trans = MathLib::translation(origin);
-			axis_->ModelMatrix(scaling * trans);
+			axis_->TransformToParent(scaling * trans);
 		}
 
 		uint32_t deferrd_pass_start;
@@ -1165,7 +1165,7 @@ namespace KlayGE
 				obb = MathLib::convert_to_obbox(mesh->PosBound());
 			}
 			checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetBox(obb);
-			selected_bb_->ModelMatrix(object_->ModelMatrix());
+			selected_bb_->TransformToParent(object_->TransformToParent());
 			selected_bb_->Visible(true);
 		}
 		else

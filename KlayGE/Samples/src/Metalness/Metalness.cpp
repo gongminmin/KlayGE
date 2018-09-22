@@ -14,7 +14,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -133,8 +133,22 @@ void MetalnessApp::OnCreate()
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
 	ambient_light->AddToSceneManager();
 
-	uint32_t spheres_row = 10;
-	uint32_t spheres_column = 10;
+	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
+
+	sphere_group_->BindMainThreadUpdateFunc([](SceneNode& node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+
+			node.TransformToParent(camera.InverseViewMatrix());
+		});
+
+	uint32_t const spheres_row = 10;
+	uint32_t const spheres_column = 10;
 	spheres_.resize(spheres_row * spheres_column);
 	for (uint32_t i = 0; i < spheres_row; ++ i)
 	{
@@ -144,23 +158,24 @@ void MetalnessApp::OnCreate()
 				CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
 			this->Material(*sphere_model, albedo_, (i + 1.0f) / spheres_row, j / (spheres_column - 1.0f));
 
-			spheres_[i * spheres_column + j] = MakeSharedPtr<SceneObject>(sphere_model, SceneObject::SOA_Cullable);
-			spheres_[i * spheres_column + j]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
-				* MathLib::translation((-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.08f, 0.0f,
-					(-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.08f));
-			spheres_[i * spheres_column + j]->AddToSceneManager();
+			spheres_[i * spheres_column + j] = MakeSharedPtr<SceneNode>(sphere_model, SceneNode::SOA_Cullable);
+			spheres_[i * spheres_column + j]->TransformToParent(MathLib::translation(
+				(-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.06f,
+				-(-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.06f,
+				0.8f));
+			sphere_group_->AddChild(spheres_[i * spheres_column + j]);
 		}
 	}
 
 	single_model_ = SyncLoadModel("helmet_armet_2.3ds", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
-	single_object_ = MakeSharedPtr<SceneObject>(single_model_, SceneObject::SOA_Cullable);
-	single_object_->ModelMatrix(MathLib::scaling(2.0f, 2.0f, 2.0f));
-	single_object_->AddToSceneManager();
+	single_object_ = MakeSharedPtr<SceneNode>(single_model_, SceneNode::SOA_Cullable);
+	single_object_->TransformToParent(MathLib::scaling(2.0f, 2.0f, 2.0f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(single_object_);
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	this->LookAt(float3(0.0f, 0.3f, -0.9f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
@@ -232,10 +247,7 @@ void MetalnessApp::SingleObjectHandler(UICheckBox const & sender)
 	dialog_->Control<UISlider>(id_glossiness_)->SetEnabled(single_sphere_mode);
 	dialog_->Control<UISlider>(id_metalness_)->SetEnabled(single_sphere_mode);
 
-	for (size_t i = 0; i < spheres_.size(); ++ i)
-	{
-		spheres_[i]->Visible(!single_sphere_mode);
-	}
+	sphere_group_->Visible(!single_sphere_mode);
 	single_object_->Visible(single_sphere_mode);
 }
 

@@ -14,7 +14,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
 #include <KlayGE/Script.hpp>
@@ -198,7 +198,7 @@ namespace
 		}
 	};
 
-	class Teapot : public SceneObject
+	class Teapot : public SceneNode
 	{
 	private:
 		struct InstData
@@ -210,7 +210,7 @@ namespace
 
 	public:
 		Teapot()
-			: SceneObject(SOA_Moveable | SOA_Cullable)
+			: SceneNode(SOA_Moveable | SOA_Cullable)
 		{
 			this->AddRenderable(RenderablePtr());
 
@@ -225,7 +225,7 @@ namespace
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
-			model_ = mat;
+			xform_to_parent_ = mat;
 			inst_.clr = clr.ABGR();
 		}
 
@@ -243,17 +243,17 @@ namespace
 		{
 			KFL_UNUSED(app_time);
 
-			last_model_ = model_;
+			last_xform_to_parent_ = xform_to_parent_;
 
-			float4x4 mat_t = MathLib::transpose(last_model_);
+			float4x4 mat_t = MathLib::transpose(last_xform_to_parent_);
 			inst_.last_mat[0] = mat_t.Row(0);
 			inst_.last_mat[1] = mat_t.Row(1);
 			inst_.last_mat[2] = mat_t.Row(2);
 
-			float e = elapsed_time * 0.3f * -model_(3, 1);
-			model_ *= MathLib::rotation_y(e);
+			float e = elapsed_time * 0.3f * -xform_to_parent_(3, 1);
+			xform_to_parent_ *= MathLib::rotation_y(e);
 
-			mat_t = MathLib::transpose(model_);
+			mat_t = MathLib::transpose(xform_to_parent_);
 			inst_.mat[0] = mat_t.Row(0);
 			inst_.mat[1] = mat_t.Row(1);
 			inst_.mat[2] = mat_t.Row(2);
@@ -276,7 +276,7 @@ namespace
 
 	private:
 		InstData inst_;
-		float4x4 last_model_;
+		float4x4 last_xform_to_parent_;
 	};
 
 
@@ -997,9 +997,9 @@ void MotionBlurDoFApp::MBExposureChangedHandler(KlayGE::UISlider const & sender)
 	stream << "Exposure: " << exposure_;
 	mb_dialog_->Control<UIStatic>(id_mb_exposure_static_)->SetText(stream.str());
 
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 	{
-		checked_pointer_cast<Teapot>(scene_objs_[i])->Exposure(exposure_);
+		checked_pointer_cast<Teapot>(scene_nodes_[i])->Exposure(exposure_);
 	}
 }
 
@@ -1012,9 +1012,9 @@ void MotionBlurDoFApp::MBBlurRadiusChangedHandler(KlayGE::UISlider const & sende
 	stream << "Blur Radius: " << blur_radius_;
 	mb_dialog_->Control<UIStatic>(id_mb_blur_radius_static_)->SetText(stream.str());
 
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 	{
-		checked_pointer_cast<Teapot>(scene_objs_[i])->BlurRadius(blur_radius_);
+		checked_pointer_cast<Teapot>(scene_nodes_[i])->BlurRadius(blur_radius_);
 	}
 }
 
@@ -1039,16 +1039,16 @@ void MotionBlurDoFApp::UseInstancingHandler(UICheckBox const & /*sender*/)
 
 	if (use_instance_)
 	{
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->SetRenderable(renderInstance_);
 		}
 	}
 	else
 	{
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->SetRenderable(renderMesh_);
 		}
 	}
 }
@@ -1145,8 +1145,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
 					checked_pointer_cast<Teapot>(so)->Exposure(exposure_);
 					checked_pointer_cast<Teapot>(so)->BlurRadius(blur_radius_);
-					so->AddToSceneManager();
-					scene_objs_.push_back(so);
+					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
+					scene_nodes_.push_back(so);
 
 					so->SubThreadUpdate(0, 0);
 					so->MainThreadUpdate(0, 0);
@@ -1197,9 +1197,9 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 		}
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->VelocityPass(false);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->VelocityPass(false);
 		}
 		return App3DFramework::URV_NeedFlush;
 
@@ -1211,9 +1211,9 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 		renderEngine.BindFrameBuffer(velocity_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->VelocityPass(true);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->VelocityPass(true);
 		}
 		return App3DFramework::URV_NeedFlush;
 

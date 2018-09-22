@@ -13,7 +13,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -123,9 +123,9 @@ void TessellationApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	polygon_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderTriangle>(), SceneObject::SOA_Cullable);
-	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
-	polygon_->AddToSceneManager();
+	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderTriangle>(), SceneNode::SOA_Cullable);
+	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);

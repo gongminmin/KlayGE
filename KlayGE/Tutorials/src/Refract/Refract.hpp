@@ -20,8 +20,8 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr refractor_model_;
-	KlayGE::SceneObjectPtr refractor_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr refractor_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 

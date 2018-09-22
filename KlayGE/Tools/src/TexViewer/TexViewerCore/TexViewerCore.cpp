@@ -8,7 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -122,10 +122,10 @@ namespace KlayGE
 		font_ = SyncLoadFont("gkai00mp.kfont");
 
 		quad_ = MakeSharedPtr<RenderQuad>();
-		quad_so_ = MakeSharedPtr<SceneObject>(quad_,
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		quad_so_ = MakeSharedPtr<SceneNode>(quad_,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		quad_so_->Visible(false);
-		quad_so_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(quad_so_);
 
 		this->LookAt(float3(-5, 5, -5), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 		this->Proj(0.1f, 100);
@@ -389,7 +389,7 @@ namespace KlayGE
 
 			float4x4 mat = MathLib::scaling(width * zoom_ / vp_width * 2.0f, height * zoom_ / vp_height * 2.0f, 1.0f)
 				* MathLib::translation((offset_x_ * 2 - width) * zoom_ / vp_width, (offset_y_ * 2 - height) * zoom_ / vp_height, 0.0f);
-			quad_so_->ModelMatrix(mat);
+			quad_so_->TransformToParent(mat);
 		}
 	}
 }

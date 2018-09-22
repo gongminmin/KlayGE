@@ -31,7 +31,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/SceneObject.hpp>
+#include <KlayGE/SceneNode.hpp>
 
 #include <string>
 #include <tuple>
@@ -454,9 +454,9 @@ namespace KlayGE
 	template <typename T>
 	struct CreateSceneObjectFactory
 	{
-		SceneObjectPtr operator()(RenderModelPtr const & model)
+		SceneNodePtr operator()(RenderModelPtr const & model)
 		{
-			return MakeSharedPtr<T>(model, SceneObject::SOA_Cullable);
+			return MakeSharedPtr<T>(model, SceneNode::SOA_Cullable);
 		}
 	};
 

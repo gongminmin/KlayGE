@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
@@ -113,7 +113,7 @@ void AreaLightingApp::OnCreate()
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(point_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	point_light_src_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(point_light_src_);
 	point_light_src_->Visible(false);
 
 	sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
@@ -127,7 +127,7 @@ void AreaLightingApp::OnCreate()
 
 	sphere_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sphere_area_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	sphere_area_light_src_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_area_light_src_);
 	sphere_area_light_src_->Visible(false);
 
 	tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
@@ -141,11 +141,11 @@ void AreaLightingApp::OnCreate()
 
 	tube_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(tube_area_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	tube_area_light_src_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tube_area_light_src_);
 	tube_area_light_src_->Visible(false);
 
-	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
-	scene_obj->AddToSceneManager();
+	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
 	for (int i = -5; i < 5; ++ i)
 	{
@@ -155,9 +155,10 @@ void AreaLightingApp::OnCreate()
 			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
 			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
 			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
-			auto sphere_obj = MakeSharedPtr<SceneObject>(sphere_mesh, SceneObject::SOA_Cullable);
-			sphere_obj->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f) * MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
-			sphere_obj->AddToSceneManager();
+			auto sphere_obj = MakeSharedPtr<SceneNode>(sphere_mesh, SceneNode::SOA_Cullable);
+			sphere_obj->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
+				* MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj);
 		}
 	}
 
@@ -214,7 +215,7 @@ void AreaLightingApp::OnCreate()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 }
 
 void AreaLightingApp::OnResize(uint32_t width, uint32_t height)

@@ -20,9 +20,10 @@ private:
 	void TypeChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
-	std::vector<KlayGE::SceneObjectPtr> sphere_objs_;
+	KlayGE::SceneNodePtr sphere_group_;
+	std::vector<KlayGE::SceneNodePtr> sphere_objs_;
 	std::vector<KlayGE::RenderModelPtr> sphere_models_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::TrackballCameraController obj_controller_;
 
@@ -31,6 +32,8 @@ private:
 	KlayGE::UIDialogPtr dialog_;
 	int rendering_type_;
 	int id_type_combo_;
+
+	float distance_ = 0.8f;
 };
 
 #endif		// _ENVLIGHTING_HPP

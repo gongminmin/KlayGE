@@ -42,7 +42,8 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/AABBox.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneManager.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
@@ -838,7 +839,7 @@ namespace KlayGE
 	Font::Font(std::shared_ptr<FontRenderable> const & fr)
 			: font_renderable_(fr)
 	{
-		fso_attrib_ = SceneObject::SOA_Overlay;
+		fsn_attrib_ = SceneNode::SOA_Overlay;
 	}
 
 	Font::Font(std::shared_ptr<FontRenderable> const & fr, uint32_t flags)
@@ -846,7 +847,7 @@ namespace KlayGE
 	{
 		if (flags & Font::FS_Cullable)
 		{
-			fso_attrib_ |= SceneObject::SOA_Cullable;
+			fsn_attrib_ |= SceneNode::SOA_Cullable;
 		}
 	}
 
@@ -880,9 +881,9 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
 			font_renderable_->AddText2D(x, y, z, xScale, yScale, clr, text, font_size);
-			font_obj->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().OverlayRootNode().AddChild(font_node);
 		}
 	}
 
@@ -894,9 +895,9 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
 			font_renderable_->AddText2D(rc, z, xScale, yScale, clr, text, font_size, align);
-			font_obj->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().OverlayRootNode().AddChild(font_node);
 		}
 	}
 
@@ -906,9 +907,9 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_obj = MakeSharedPtr<SceneObject>(font_renderable_, fso_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
 			font_renderable_->AddText3D(mvp, clr, text, font_size);
-			font_obj->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(font_node);
 		}
 	}
 

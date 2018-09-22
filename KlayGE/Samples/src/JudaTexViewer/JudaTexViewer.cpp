@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Window.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -100,11 +100,11 @@ namespace
 		float4x4 model_;
 	};
 
-	class TileObject : public SceneObject
+	class TileObject : public SceneNode
 	{
 	public:
 		TileObject()
-			: SceneObject(0),
+			: SceneNode(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
 			this->AddRenderable(MakeSharedPtr<RenderTile>());
@@ -200,11 +200,11 @@ namespace
 		float4x4 model_;
 	};
 
-	class GridBorderObject : public SceneObject
+	class GridBorderObject : public SceneNode
 	{
 	public:
 		GridBorderObject()
-			: SceneObject(0),
+			: SceneNode(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
 			this->AddRenderable(MakeSharedPtr<RenderGridBorder>());
@@ -291,10 +291,10 @@ void JudaTexViewer::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	tile_ = MakeSharedPtr<TileObject>();
-	tile_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tile_);
 
 	grid_border_ = MakeSharedPtr<GridBorderObject>();
-	grid_border_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_border_);
 
 	this->OpenJudaTex("klayge_logo.jdt");
 

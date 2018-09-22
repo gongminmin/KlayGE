@@ -13,7 +13,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -224,9 +224,9 @@ void DistanceMapping::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_renderable_ = MakeSharedPtr<RenderPolygon>();
-	polygon_ = MakeSharedPtr<SceneObject>(polygon_renderable_, SceneObject::SOA_Cullable);
-	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
-	polygon_->AddToSceneManager();
+	polygon_ = MakeSharedPtr<SceneNode>(polygon_renderable_, SceneNode::SOA_Cullable);
+	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -245,7 +245,7 @@ void DistanceMapping::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
-	light_proxy_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 

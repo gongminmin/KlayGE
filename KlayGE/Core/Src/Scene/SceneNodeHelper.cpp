@@ -37,12 +37,12 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 
 namespace KlayGE
 {
 	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)
-		: SceneObject(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
+		: SceneNode(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
 	{
 	}
 
@@ -68,7 +68,7 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
-		: SceneObject(light_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+		: SceneNode(light_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light), light_model_(light_model)
 	{
 		model_scaling_ = float4x4::Identity();
@@ -87,11 +87,11 @@ namespace KlayGE
 
 	void SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
-		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+		xform_to_parent_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LightSource::LT_Spot == light_->Type())
 		{
 			float radius = light_->CosOuterInner().w();
-			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
+			xform_to_parent_ = MathLib::scaling(radius, radius, 1.0f) * xform_to_parent_;
 		}
 
 		for (uint32_t i = 0; i < renderables_.size(); ++ i)
@@ -99,6 +99,8 @@ namespace KlayGE
 			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
 			light_mesh->Update();
 		}
+
+		this->UpdateTransforms();
 	}
 
 	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
@@ -152,7 +154,7 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
-		: SceneObject(camera_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+		: SceneNode(camera_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera), camera_model_(camera_model)
 	{
 		model_scaling_ = float4x4::Identity();
@@ -171,7 +173,9 @@ namespace KlayGE
 
 	void SceneObjectCameraProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
-		model_ = model_scaling_ * camera_->InverseViewMatrix();
+		xform_to_parent_ = model_scaling_ * camera_->InverseViewMatrix();
+
+		this->UpdateTransforms();
 	}
 
 	void SceneObjectCameraProxy::Scaling(float x, float y, float z)

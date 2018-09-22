@@ -15,7 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
@@ -812,15 +812,15 @@ void GPUParticleSystemApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	particles_renderable_ = MakeSharedPtr<RenderParticles>(NUM_PARTICLE);
-	particles_ = MakeSharedPtr<SceneObject>(particles_renderable_, SceneObject::SOA_Moveable);
-	particles_->AddToSceneManager();
+	particles_ = MakeSharedPtr<SceneNode>(particles_renderable_, SceneNode::SOA_Moveable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(particles_);
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);
 
-	terrain_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex),
-		SceneObject::SOA_Cullable);
-	terrain_->AddToSceneManager();
+	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex),
+		SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 	

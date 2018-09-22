@@ -15,7 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -661,9 +661,9 @@ void OITApp::OnCreate()
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
-	polygon_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
+	polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
 	checked_pointer_cast<PolygonModel>(polygon_model_)->LightPos(float3(-1, 2, 1));
-	polygon_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 10);
@@ -676,7 +676,7 @@ void OITApp::OnCreate()
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	depth_texture_support_ = caps.depth_texture_support;
 

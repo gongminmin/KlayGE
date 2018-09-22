@@ -558,7 +558,7 @@ namespace
 
 namespace KlayGE
 {
-	ParticleEmitter::ParticleEmitter(SceneObjectPtr const & ps)
+	ParticleEmitter::ParticleEmitter(SceneNodePtr const & ps)
 			: ps_(checked_pointer_cast<ParticleSystem>(ps)),
 				model_mat_(float4x4::Identity()),
 				min_spin_(-PI / 2), max_spin_(+PI / 2)
@@ -592,7 +592,7 @@ namespace KlayGE
 	}
 
 
-	ParticleUpdater::ParticleUpdater(SceneObjectPtr const & ps)
+	ParticleUpdater::ParticleUpdater(SceneNodePtr const & ps)
 		: ps_(checked_pointer_cast<ParticleSystem>(ps))
 	{
 	}
@@ -604,7 +604,7 @@ namespace KlayGE
 
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
-		: SceneObject(SOA_Moveable | SOA_NotCastShadow),
+		: SceneNode(SOA_Moveable | SOA_NotCastShadow),
 			particles_(max_num_particles),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
@@ -1094,7 +1094,7 @@ namespace KlayGE
 	}
 
 
-	PointParticleEmitter::PointParticleEmitter(SceneObjectPtr const & ps)
+	PointParticleEmitter::PointParticleEmitter(SceneNodePtr const & ps)
 		: ParticleEmitter(ps),
 			random_dis_(0, 10000)
 	{
@@ -1138,7 +1138,7 @@ namespace KlayGE
 	}
 
 
-	PolylineParticleUpdater::PolylineParticleUpdater(SceneObjectPtr const & ps)
+	PolylineParticleUpdater::PolylineParticleUpdater(SceneNodePtr const & ps)
 		: ParticleUpdater(ps)
 	{
 	}

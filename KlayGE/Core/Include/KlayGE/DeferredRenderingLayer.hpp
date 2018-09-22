@@ -670,7 +670,7 @@ namespace KlayGE
 		RenderEffectParameter* skylight_y_cube_tex_param_;
 		RenderEffectParameter* skylight_c_cube_tex_param_;
 
-		std::vector<SceneObject*> visible_scene_objs_;
+		std::vector<SceneNode*> visible_scene_nodes_;
 		bool has_sss_objs_;
 		bool has_reflective_objs_;
 		bool has_simple_forward_objs_;

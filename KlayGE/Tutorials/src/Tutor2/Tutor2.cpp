@@ -8,7 +8,8 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneManager.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -34,9 +35,9 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr renderableBox_;
-	KlayGE::SceneObjectPtr renderableFile_;
-	KlayGE::SceneObjectPtr renderableMesh_;
+	KlayGE::SceneNodePtr renderableBox_;
+	KlayGE::SceneNodePtr renderableFile_;
+	KlayGE::SceneNodePtr renderableMesh_;
 };
 
 class RenderPolygon : public KlayGE::StaticMesh
@@ -70,16 +71,16 @@ void TutorFramework::OnCreate()
 	KlayGE::OBBox boxRange(KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(
-		KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor), KlayGE::SceneObject::SOA_Cullable);
-	renderableBox_->AddToSceneManager();
+	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(
+		KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor), KlayGE::SceneNode::SOA_Cullable);
+	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableBox_);
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
 		KlayGE::CreateModelFactory<KlayGE::RenderModel>(), KlayGE::CreateMeshFactory<RenderPolygon>());
 
-	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(loadedModel, KlayGE::SceneObject::SOA_Cullable);
-	renderableFile_->ModelMatrix(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
-	renderableFile_->AddToSceneManager();
+	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(loadedModel, KlayGE::SceneNode::SOA_Cullable);
+	renderableFile_->TransformToParent(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
+	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableFile_);
 
 	std::vector<KlayGE::float3> vertices;
 	vertices.push_back(KlayGE::float3(0.5f,-0.25f, 0.25f));
@@ -136,8 +137,8 @@ void TutorFramework::OnCreate()
 	model->AssignMeshes(meshes.begin(), meshes.end());
 	model->BuildModelInfo();
 
-	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(model, KlayGE::SceneObject::SOA_Cullable);
-	renderableMesh_->AddToSceneManager();
+	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(model, KlayGE::SceneNode::SOA_Cullable);
+	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableMesh_);
 
 	this->LookAt(KlayGE::float3(0, 0,-4.0f), KlayGE::float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);

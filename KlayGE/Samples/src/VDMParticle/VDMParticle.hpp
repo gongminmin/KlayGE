@@ -34,7 +34,7 @@ private:
 
 	KlayGE::FontPtr font_;
 	
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
+	std::vector<KlayGE::SceneNodePtr> scene_objs_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::ParticleEmitterPtr particle_emitter_;

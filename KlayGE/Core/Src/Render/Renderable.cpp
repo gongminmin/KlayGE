@@ -23,7 +23,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/SceneObject.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Camera.hpp>
@@ -272,9 +272,9 @@ namespace KlayGE
 		}
 	}
 
-	void Renderable::AddInstance(SceneObject const * obj)
+	void Renderable::AddInstance(SceneNode const * node)
 	{
-		instances_.push_back(obj);
+		instances_.push_back(node);
 	}
 
 	void Renderable::ClearInstances()

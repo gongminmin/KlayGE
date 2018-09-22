@@ -179,13 +179,13 @@ namespace KlayGE
 				this->AddInstance(*iter);
 			}
 		}
-		void AddInstance(SceneObject const * obj);
+		void AddInstance(SceneNode const * node);
 		void ClearInstances();
 		uint32_t NumInstances() const
 		{
 			return static_cast<uint32_t>(instances_.size());
 		}
-		SceneObject const * GetInstance(uint32_t index) const
+		SceneNode const * GetInstance(uint32_t index) const
 		{
 			return instances_[index];
 		}
@@ -258,7 +258,7 @@ namespace KlayGE
 		virtual void UpdateTechniques();
 
 	protected:
-		std::vector<SceneObject const *> instances_;
+		std::vector<SceneNode const *> instances_;
 
 		RenderEffectPtr effect_;
 		RenderTechnique* technique_;

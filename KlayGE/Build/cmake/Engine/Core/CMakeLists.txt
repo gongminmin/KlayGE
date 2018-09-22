@@ -372,15 +372,14 @@ SOURCE_GROUP("Input System\\Header Files" FILES ${INPUT_HEADER_FILES})
 
 SET(SCENE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneManager.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneObject.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneObjectHelper.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneNode.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneNodeHelper.cpp
 )
 
 SET(SCENE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneManager.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneNode.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneObject.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneObjectHelper.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneNodeHelper.hpp
 )
 
 SOURCE_GROUP("Scene Management\\Source Files" FILES ${SCENE_SOURCE_FILES})

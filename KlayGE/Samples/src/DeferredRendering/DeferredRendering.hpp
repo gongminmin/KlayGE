@@ -30,9 +30,9 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr spot_light_src_[3];
+	KlayGE::SceneNodePtr spot_light_src_[3];
 
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -59,7 +59,7 @@ private:
 
 	KlayGE::SpotLightSourcePtr spot_light_[3];
 	std::vector<KlayGE::LightSourcePtr> particle_lights_;
-	std::vector<KlayGE::SceneObjectPtr> particle_light_srcs_;
+	std::vector<KlayGE::SceneNodePtr> particle_light_srcs_;
 
 	KlayGE::ParticleSystemPtr ps_;
 };

@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 
 namespace KlayGE
 {
@@ -30,7 +30,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class KLAYGE_CORE_API LensFlareSceneObject : public SceneObject
+	class KLAYGE_CORE_API LensFlareSceneObject : public SceneNode
 	{
 	public:
 		LensFlareSceneObject();

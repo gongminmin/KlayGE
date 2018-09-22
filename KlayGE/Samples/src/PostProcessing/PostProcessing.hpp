@@ -33,7 +33,7 @@ private:
 	void BlackHoleHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

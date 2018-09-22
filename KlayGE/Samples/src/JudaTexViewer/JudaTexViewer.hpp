@@ -29,8 +29,8 @@ private:
 	KlayGE::JudaTexturePtr juda_tex_;
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr tile_;
-	KlayGE::SceneObjectPtr grid_border_;
+	KlayGE::SceneNodePtr tile_;
+	KlayGE::SceneNodePtr grid_border_;
 
 	KlayGE::GraphicsBufferPtr tile_pos_vb_;
 

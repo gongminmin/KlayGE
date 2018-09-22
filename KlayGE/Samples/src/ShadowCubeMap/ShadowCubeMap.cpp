@@ -17,7 +17,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -346,9 +346,10 @@ namespace
 	class OccluderObjectUpdate
 	{
 	public:
-		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float /*elapsed_time*/)
 		{
-			obj.ModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-app_time / 1.5f));
+			node.TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
+				* MathLib::rotation_y(-app_time / 1.5f));
 		}
 	};
 
@@ -462,7 +463,7 @@ void ShadowCubeMap::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.5f, 0.5f, 0.5f);
-	light_proxy_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 	for (int i = 0; i < 6; ++ i)
 	{
@@ -596,8 +597,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				if (scene_model_->HWResourceReady())
 				{
-					auto so = MakeSharedPtr<SceneObject>(scene_model_, SceneObject::SOA_Cullable);
-					so->AddToSceneManager();
+					auto node = MakeSharedPtr<SceneNode>(scene_model_, SceneNode::SOA_Cullable);
+					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(node);
 
 					for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 					{
@@ -621,9 +622,9 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			else
 			{
 				auto const & teapot = teapot_model_->Mesh(0);
-				auto so = MakeSharedPtr<SceneObject>(teapot, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+				auto so = MakeSharedPtr<SceneNode>(teapot, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
-				so->AddToSceneManager();
+				Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
 				checked_pointer_cast<OccluderMesh>(teapot)->LampTexture(lamp_tex_);
 				checked_pointer_cast<OccluderMesh>(teapot)->CubeSMTexture(shadow_cube_tex_);
 				checked_pointer_cast<OccluderMesh>(teapot)->DPSMTexture(shadow_dual_tex_);

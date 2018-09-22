@@ -57,7 +57,7 @@ namespace KlayGE
 	private:
 		FontPtr font_;
 
-		SceneObjectPtr quad_so_;
+		SceneNodePtr quad_so_;
 		RenderablePtr quad_;
 		TexturePtr texture_original_;
 		TexturePtr texture_display_;

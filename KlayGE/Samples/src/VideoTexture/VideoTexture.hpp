@@ -21,12 +21,12 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr object_;
+	KlayGE::SceneNodePtr object_;
 	KlayGE::RenderModelPtr model_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::SceneNodePtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 };
 

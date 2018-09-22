@@ -87,7 +87,7 @@ namespace KlayGE
 
 	private:
 		std::shared_ptr<FontRenderable> font_renderable_;
-		uint32_t		fso_attrib_;
+		uint32_t fsn_attrib_;
 	};
 
 	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags = 0);

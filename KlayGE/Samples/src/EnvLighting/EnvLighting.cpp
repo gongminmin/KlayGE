@@ -14,7 +14,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -47,8 +47,7 @@ namespace
 	{
 	public:
 		SphereRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Sphere"),
-				distance_(0.8f)
+			: StaticMesh(model, L"Sphere")
 		{
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
@@ -171,11 +170,6 @@ namespace
 			*(effect_->ParameterByName("glossiness")) = glossiness;
 		}
 
-		void Id(uint32_t id)
-		{
-			id_ = id;
-		}
-
 		void RenderingType(int type)
 		{
 			technique_ = techs_[type];
@@ -191,15 +185,6 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			uint32_t const spheres_row = 10;
-			uint32_t const spheres_column = 10;
-			uint32_t const j = id_ / spheres_column;
-			uint32_t const i = id_ - j * spheres_column;
-			float3 const pos((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.06f,
-				(-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.06f,
-				distance_);
-			model_mat_ = MathLib::translation(MathLib::transform_coord(pos, camera.InverseViewMatrix()));
-
 			float4x4 const mvp = model_mat_ * camera.ViewProjMatrix();
 
 			*(effect_->ParameterByName("model")) = model_mat_;
@@ -207,20 +192,8 @@ namespace
 			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
-		void Distance(float distance)
-		{
-			distance_ = distance;
-		}
-		float Distance() const
-		{
-			return distance_;
-		}
-
 	private:
 		array<RenderTechnique*, 6> techs_;
-
-		uint32_t id_;
-		float distance_;
 	};
 
 	float4 const diff_parametes[] =
@@ -925,6 +898,20 @@ void EnvLightingApp::OnCreate()
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
 	ambient_light->AddToSceneManager();
 
+	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
+
+	sphere_group_->BindMainThreadUpdateFunc([this](SceneNode& node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+
+			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
+		});
+
 	sphere_objs_.resize(std::size(diff_parametes));
 	sphere_models_.resize(sphere_objs_.size());
 	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
@@ -934,18 +921,26 @@ void EnvLightingApp::OnCreate()
 
 		auto const & mesh = checked_pointer_cast<SphereRenderable>(sphere_models_[i]->Mesh(0));
 
-		sphere_objs_[i] = MakeSharedPtr<SceneObject>(mesh, SceneObject::SOA_Cullable);
+		uint32_t const spheres_row = 10;
+		uint32_t const spheres_column = 10;
+		size_t const y = i / spheres_column;
+		size_t const x = i - y * spheres_column;
+
+		sphere_objs_[i] = MakeSharedPtr<SceneNode>(mesh, SceneNode::SOA_Cullable);
+		sphere_objs_[i]->TransformToParent(MathLib::translation(
+			(-static_cast<float>(spheres_column / 2) + x + 0.5f) * 0.06f,
+			-(-static_cast<float>(spheres_row / 2) + y + 0.5f) * 0.06f,
+			0.0f));
 
 		mesh->Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
-		mesh->Id(static_cast<uint32_t>(i));
 		mesh->IntegratedBRDFTex(integrated_brdf_tex_);
 
-		sphere_objs_[i]->AddToSceneManager();
+		sphere_group_->AddChild(sphere_objs_[i]);
 	}
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
@@ -993,11 +988,7 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 		{
 			auto const param = checked_pointer_cast<InputMouseActionParam>(action.second);
 			float const delta = -param->wheel_delta / 120.0f * 0.05f;
-			for (size_t i = 0; i < sphere_objs_.size(); ++ i)
-			{
-				auto& sphere = *checked_pointer_cast<SphereRenderable>(sphere_objs_[i]->GetRenderable());
-				sphere.Distance(sphere.Distance() + delta);
-			}
+			distance_ += delta;
 		}
 		break;
 

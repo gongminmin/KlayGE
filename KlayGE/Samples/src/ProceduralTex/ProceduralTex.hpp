@@ -23,12 +23,12 @@ private:
 	void FreqChangedHandler(KlayGE::UISlider const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr polygon_;
+	KlayGE::SceneNodePtr polygon_;
 	KlayGE::RenderModelPtr polygon_model_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::SceneNodePtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::UIDialogPtr dialog_;

@@ -15,7 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -103,7 +103,7 @@ void SSSSSApp::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.1f, 0.1f, 0.1f);
-	light_proxy_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -172,16 +172,16 @@ void SSSSSApp::OnCreate()
 		});
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
-	auto subsurface_obj = MakeSharedPtr<SceneObject>(sss_model, SceneObject::SOA_Cullable);
-	subsurface_obj->ModelMatrix(MathLib::translation(0.0f, 5.0f, 0.0f));
-	subsurface_obj->AddToSceneManager();
+	auto subsurface_obj = MakeSharedPtr<SceneNode>(sss_model, SceneNode::SOA_Cullable);
+	subsurface_obj->TransformToParent(MathLib::translation(0.0f, 5.0f, 0.0f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(subsurface_obj);
 
-	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
-	scene_obj->AddToSceneManager();
+	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
-	SceneObjectSkyBoxPtr sky_box = MakeSharedPtr<SceneObjectSkyBox>();
+	auto sky_box = MakeSharedPtr<SceneObjectSkyBox>();
 	sky_box->CompressedCubeMap(y_cube, c_cube);
-	sky_box->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box);
 }
 
 void SSSSSApp::OnResize(uint32_t width, uint32_t height)

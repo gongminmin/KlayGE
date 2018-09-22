@@ -24,7 +24,7 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr object_;
+	KlayGE::SceneNodePtr object_;
 	KlayGE::RenderModelPtr model_;
 
 	KlayGE::TrackballCameraController tbController_;
@@ -32,7 +32,7 @@ private:
 	bool depth_texture_support_;
 	KlayGE::FrameBufferPtr back_face_depth_fb_;
 
-	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::SceneNodePtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::UIDialogPtr dialog_params_;

@@ -18,7 +18,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -147,18 +147,18 @@ void VDMParticleApp::OnCreate()
 
 	RenderablePtr robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
-	auto robot = MakeSharedPtr<SceneObject>(robot_model, SceneObject::SOA_Cullable);
-	robot->ModelMatrix(MathLib::translation(0.0f, 0.0f, -2.0f));
+	auto robot = MakeSharedPtr<SceneNode>(robot_model, SceneNode::SOA_Cullable);
+	robot->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
 	scene_objs_.push_back(robot);
 
 	RenderablePtr room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
-	auto room = MakeSharedPtr<SceneObject>(room_model, SceneObject::SOA_Cullable);
+	auto room = MakeSharedPtr<SceneNode>(room_model, SceneNode::SOA_Cullable);
 	scene_objs_.push_back(room);
 
 	for (auto& so : scene_objs_)
 	{
-		so->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
 	}
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -179,10 +179,10 @@ void VDMParticleApp::OnCreate()
 	ps_ = SyncLoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	ps_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ps_);
 
 	float const SCALE = 6;
-	ps_->ModelMatrix(MathLib::scaling(SCALE, SCALE, SCALE));
+	ps_->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
 	ps_->Emitter(0)->ModelMatrix(MathLib::translation(light_->Position() / SCALE));
 
 	scene_fb_ = rf.MakeFrameBuffer();

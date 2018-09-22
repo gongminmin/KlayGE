@@ -22,13 +22,13 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SceneObject.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KFL/AABBox.hpp>
 #include <KlayGE/Mesh.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObject
+	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneNode
 	{
 	public:
 		explicit SceneObjectSkyBox(uint32_t attrib = 0);
@@ -41,7 +41,7 @@ namespace KlayGE
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
 	};
 
-	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObject
+	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneNode
 	{
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
@@ -70,7 +70,7 @@ namespace KlayGE
 		RenderModelPtr light_model_;
 	};
 
-	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneObject
+	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneNode
 	{
 	public:
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);

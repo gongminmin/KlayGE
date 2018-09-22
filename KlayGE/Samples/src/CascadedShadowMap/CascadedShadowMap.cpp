@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
@@ -90,12 +90,12 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
-	auto plane_so = MakeSharedPtr<SceneObject>(plane_model, SceneObject::SOA_Cullable);
-	plane_so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
-	plane_so->AddToSceneManager();
+	auto plane_so = MakeSharedPtr<SceneNode>(plane_model, SceneNode::SOA_Cullable);
+	plane_so->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_so);
 
-	auto katapult_so = MakeSharedPtr<SceneObject>(katapult_model, SceneObject::SOA_Cullable);
-	katapult_so->AddToSceneManager();
+	auto katapult_so = MakeSharedPtr<SceneNode>(katapult_model, SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(katapult_so);
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
@@ -150,7 +150,7 @@ void CascadedShadowMapApp::OnCreate()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < ShaderModel(5, 0))

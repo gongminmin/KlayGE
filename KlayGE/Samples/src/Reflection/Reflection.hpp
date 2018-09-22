@@ -26,13 +26,13 @@ private:
 private:
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneObjectPtr teapot_;
+	KlayGE::SceneNodePtr teapot_;
 
 	KlayGE::LightSourcePtr point_light_;
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 

@@ -24,10 +24,11 @@ private:
 	void Material(KlayGE::RenderModel const & model, KlayGE::float3 const & albedo, float metalness, float glossiness);
 
 	KlayGE::FontPtr font_;
-	std::vector<KlayGE::SceneObjectPtr> spheres_;
-	KlayGE::SceneObjectPtr single_object_;
+	KlayGE::SceneNodePtr sphere_group_;
+	std::vector<KlayGE::SceneNodePtr> spheres_;
+	KlayGE::SceneNodePtr single_object_;
 	KlayGE::RenderModelPtr single_model_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::float3 albedo_;
 	float glossiness_;

@@ -15,7 +15,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Show.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
@@ -133,7 +133,7 @@ void VideoTextureApp::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
-	light_proxy_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -149,8 +149,8 @@ void VideoTextureApp::OnCreate()
 
 	model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>());
-	object_ = MakeSharedPtr<SceneObject>(model_->Mesh(0), SceneObject::SOA_Cullable);
-	object_->AddToSceneManager();
+	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));

@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
@@ -177,10 +177,10 @@ void DeferredRenderingApp::OnCreate()
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
-	spot_light_src_[2]->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[2]);
 
-	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable);
-	scene_obj->AddToSceneManager();
+	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -271,15 +271,15 @@ void DeferredRenderingApp::OnCreate()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	ps_ = SyncLoadParticleSystem("Fire.psml");
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	ps_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ps_);
 
 	float const SCALE = 3;
-	ps_->ModelMatrix(MathLib::scaling(SCALE, SCALE, SCALE));
+	ps_->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
 
 	ParticleEmitterPtr emitter0 = ps_->Emitter(0);
 	emitter0->ModelMatrix(MathLib::translation(spot_light_[0]->Position() / SCALE));
@@ -389,10 +389,14 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 {
 	int num_lights = sender.GetValue();
 
+	auto& scene_mgr = Context::Instance().SceneManagerInstance();
+
+	std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+
 	for (size_t i = num_lights; i < particle_lights_.size(); ++ i)
 	{
 		particle_lights_[i]->DelFromSceneManager();
-		particle_light_srcs_[i]->DelFromSceneManager();
+		scene_mgr.SceneRootNode().RemoveChild(particle_light_srcs_[i]);
 	}
 
 	size_t old_size = particle_lights_.size();
@@ -408,7 +412,7 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 
 		particle_light_srcs_[i] = MakeSharedPtr<SceneObjectLightSourceProxy>(particle_lights_[i]);
 		checked_pointer_cast<SceneObjectLightSourceProxy>(particle_light_srcs_[i])->Scaling(0.1f, 0.1f, 0.1f);
-		particle_light_srcs_[i]->AddToSceneManager();
+		scene_mgr.SceneRootNode().AddChild(particle_light_srcs_[i]);
 	}
 
 	std::wostringstream stream;

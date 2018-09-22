@@ -7,8 +7,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObject.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneManager.hpp>
+#include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -235,16 +236,16 @@ void ScreenSpaceReflectionApp::OnCreate()
 	point_light_->Falloff(float3(1, 0, 0.3f));
 	point_light_->AddToSceneManager();
 
-	auto scene_obj = MakeSharedPtr<SceneObject>(dino_model, SceneObject::SOA_Cullable);
-	scene_obj->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
-	scene_obj->AddToSceneManager();
+	auto scene_obj = MakeSharedPtr<SceneNode>(dino_model, SceneNode::SOA_Cullable);
+	scene_obj->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	back_refl_fb_ = rf.MakeFrameBuffer();
 
@@ -382,9 +383,9 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			{
 				if (teapot_model_->HWResourceReady())
 				{
-					teapot_ = MakeSharedPtr<SceneObject>(teapot_model_->Mesh(0), SceneObject::SOA_Cullable);
-					teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
-					teapot_->AddToSceneManager();
+					teapot_ = MakeSharedPtr<SceneNode>(teapot_model_->Mesh(0), SceneNode::SOA_Cullable);
+					teapot_->TransformToParent(MathLib::scaling(float3(15, 15, 15)));
+					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(teapot_);
 
 					this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
 					this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
@@ -411,7 +412,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			float3 eye = screen_camera_->EyePos();
 			float3 at = screen_camera_->LookAt();
 
-			float3 center = MathLib::transform_coord(teapot_->GetRenderable()->PosBound().Center(), teapot_->ModelMatrix());
+			float3 center = MathLib::transform_coord(teapot_->GetRenderable()->PosBound().Center(), teapot_->TransformToWorld());
 			float3 direction = eye - at;
 
 			back_camera->ViewParams(center, center + direction, screen_camera_->UpVec());

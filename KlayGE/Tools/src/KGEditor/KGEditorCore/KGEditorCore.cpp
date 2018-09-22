@@ -10,7 +10,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -558,40 +558,40 @@ namespace KlayGE
 
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
-		axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderAxis>(),
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
-		axis_->AddToSceneManager();
+		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderAxis>(),
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(axis_);
 
-		grid_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderGrid>(),
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
-		grid_->AddToSceneManager();
+		grid_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderGrid>(),
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_);
 
 		sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(
 			SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable),
 			SyncLoadTexture("default_bg_c.dds", EAH_GPU_Read | EAH_Immutable));
-		sky_box_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
-		selected_bb_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableLineBox>(),
-			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableLineBox>(),
+			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
-		selected_bb_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(selected_bb_);
 		checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetColor(Color(1, 1, 1, 1));
 
-		translation_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableTranslationAxis>(),
-			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		translation_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableTranslationAxis>(),
+			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		translation_axis_->Visible(false);
-		translation_axis_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(translation_axis_);
 
-		rotation_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableRotationAxis>(),
-			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		rotation_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableRotationAxis>(),
+			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		rotation_axis_->Visible(false);
-		rotation_axis_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(rotation_axis_);
 
-		scaling_axis_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<RenderableScalingAxis>(),
-			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		scaling_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableScalingAxis>(),
+			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		scaling_axis_->Visible(false);
-		scaling_axis_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scaling_axis_);
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
 		tb_controller_.Scalers(0.01f, 0.05f);
@@ -734,7 +734,7 @@ namespace KlayGE
 
 				float4x4 scaling = MathLib::scaling(len, len, len);
 				float4x4 trans = MathLib::translation(origin);
-				axis_->ModelMatrix(scaling * trans);
+				axis_->TransformToParent(scaling * trans);
 			}
 
 			uint32_t urv = deferred_rendering_->Update(deferred_pass);
@@ -865,9 +865,9 @@ namespace KlayGE
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
 		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
-		auto scene_obj = MakeSharedPtr<SceneObject>(model,
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-		scene_obj->AddToSceneManager();
+		auto scene_obj = MakeSharedPtr<SceneNode>(model,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
 			model->Mesh(i)->ObjectID(entity_id);
@@ -900,7 +900,7 @@ namespace KlayGE
 		{
 			if (ET_Model == iter->second.type)
 			{
-				iter->second.scene_obj->DelFromSceneManager();
+				Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(iter->second.scene_obj);
 				entities_.erase(iter ++);
 			}
 			else
@@ -955,8 +955,8 @@ namespace KlayGE
 		light->Falloff(float3(1, 0, 1));
 		light->AddToSceneManager();
 
-		SceneObjectPtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
-		light_proxy->AddToSceneManager();
+		SceneNodePtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy);
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
@@ -992,7 +992,7 @@ namespace KlayGE
 			if (ET_Light == iter->second.type)
 			{
 				iter->second.light->DelFromSceneManager();
-				iter->second.scene_obj->DelFromSceneManager();
+				Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(iter->second.scene_obj);
 				entities_.erase(iter ++);
 			}
 			else
@@ -1010,8 +1010,8 @@ namespace KlayGE
 		CameraPtr camera = MakeSharedPtr<Camera>();
 		camera->AddToSceneManager();
 
-		SceneObjectPtr camera_proxy = MakeSharedPtr<SceneObjectCameraProxy>(camera);
-		camera_proxy->AddToSceneManager();
+		SceneNodePtr camera_proxy = MakeSharedPtr<SceneObjectCameraProxy>(camera);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(camera_proxy);
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
@@ -1047,7 +1047,7 @@ namespace KlayGE
 			if (ET_Camera == iter->second.type)
 			{
 				iter->second.light->DelFromSceneManager();
-				iter->second.scene_obj->DelFromSceneManager();
+				Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(iter->second.scene_obj);
 				entities_.erase(iter ++);
 			}
 			else
@@ -1067,7 +1067,7 @@ namespace KlayGE
 		auto iter = entities_.find(entity_id);
 		if (iter != entities_.end())
 		{
-			iter->second.scene_obj->DelFromSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(iter->second.scene_obj);
 
 			switch (iter->second.type)
 			{
@@ -1128,7 +1128,7 @@ namespace KlayGE
 					&ei.trf_pivot, &ei.trf_rotate, &ei.trf_pos);
 				break;
 			}
-			selected_bb_->ModelMatrix(mat);
+			selected_bb_->TransformToParent(mat);
 		}
 
 		update_property_event_();
@@ -1290,7 +1290,7 @@ namespace KlayGE
 			break;
 
 		default:
-			ei.scene_obj->ModelMatrix(model_mat);
+			ei.scene_obj->TransformToParent(model_mat);
 			break;
 		}
 		this->UpdateEntityAxis();
@@ -1313,9 +1313,9 @@ namespace KlayGE
 			float3 proxy_scaling;
 			float4x4 mat = this->CalcAdaptiveScaling(oi, 100, proxy_scaling);
 
-			translation_axis_->ModelMatrix(mat);
-			rotation_axis_->ModelMatrix(mat);
-			scaling_axis_->ModelMatrix(mat);
+			translation_axis_->TransformToParent(mat);
+			rotation_axis_->TransformToParent(mat);
+			scaling_axis_->TransformToParent(mat);
 
 			switch (oi.type)
 			{
@@ -1332,7 +1332,7 @@ namespace KlayGE
 					&oi.trf_pivot, &oi.trf_rotate, &oi.trf_pos);
 				break;
 			}
-			selected_bb_->ModelMatrix(mat);
+			selected_bb_->TransformToParent(mat);
 		}
 	}
 
@@ -1409,7 +1409,7 @@ namespace KlayGE
 
 				if (selected_entity_ == entity.first)
 				{
-					selected_bb_->ModelMatrix(mat);
+					selected_bb_->TransformToParent(mat);
 				}
 			}
 		}
@@ -1453,11 +1453,11 @@ namespace KlayGE
 				uint32_t const width = fb->Width();
 				uint32_t const height = fb->Height();
 
-				float4x4 const & inv_mvp = MathLib::inverse(rotation_axis_->ModelMatrix() * this->ActiveCamera().ViewProjMatrix());
+				float4x4 const & inv_mvp = MathLib::inverse(rotation_axis_->TransformToWorld() * this->ActiveCamera().ViewProjMatrix());
 				float3 ray_target = MathLib::transform_coord(float3((pt.x() + 0.5f) / width * 2 - 1,
 					1 - (pt.y() + 0.5f) / height * 2, 1), inv_mvp);
 				float3 ray_origin = MathLib::transform_coord(float3(0, 0, 0),
-					MathLib::inverse(rotation_axis_->ModelMatrix() * this->ActiveCamera().ViewMatrix()));
+					MathLib::inverse(rotation_axis_->TransformToWorld() * this->ActiveCamera().ViewMatrix()));
 				float3 ray_dir = ray_target - ray_origin;
 
 				float3 intersect_pt[3] =
@@ -1594,13 +1594,14 @@ namespace KlayGE
 					uint32_t const width = fb->Width();
 					uint32_t const height = fb->Height();
 
-					float4x4 const & inv_mvp = MathLib::inverse(rotation_axis_->ModelMatrix() * this->ActiveCamera().ViewProjMatrix());
+					float4x4 const & inv_mvp = MathLib::inverse(rotation_axis_->TransformToWorld()
+						* this->ActiveCamera().ViewProjMatrix());
 					float3 last_ray_target = MathLib::transform_coord(float3((last_mouse_pt_.x() + 0.5f) / width * 2 - 1,
 						1 - (last_mouse_pt_.y() + 0.5f) / height * 2, 1), inv_mvp);
 					float3 this_ray_target = MathLib::transform_coord(float3((pt.x() + 0.5f) / width * 2 - 1,
 						1 - (pt.y() + 0.5f) / height * 2, 1), inv_mvp);
 					float3 ray_origin = MathLib::transform_coord(float3(0, 0, 0),
-						MathLib::inverse(rotation_axis_->ModelMatrix() * this->ActiveCamera().ViewMatrix()));
+						MathLib::inverse(rotation_axis_->TransformToWorld() * this->ActiveCamera().ViewMatrix()));
 					float3 last_ray_dir = last_ray_target - ray_origin;
 					float3 this_ray_dir = this_ray_target - ray_origin;
 
@@ -1852,7 +1853,7 @@ namespace KlayGE
 
 					float4x4 model_mat = MathLib::transformation<float>(&oi.trf_pivot, nullptr, &oi.trf_scale,
 						&oi.trf_pivot, &oi.trf_rotate, &oi.trf_pos);
-					oi.scene_obj->ModelMatrix(model_mat);
+					oi.scene_obj->TransformToParent(model_mat);
 				}
 				else if ("light" == node->Name())
 				{

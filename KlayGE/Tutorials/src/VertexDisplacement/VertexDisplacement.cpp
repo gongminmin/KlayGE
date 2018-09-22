@@ -12,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -100,14 +100,14 @@ void VertexDisplacement::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	flag_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<FlagRenderable>(8, 6), SceneObject::SOA_Cullable);
-	flag_->BindMainThreadUpdateFunc([](SceneObject& obj, float app_time, float elapsed_time)
+	flag_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<FlagRenderable>(8, 6), SceneNode::SOA_Cullable);
+	flag_->BindMainThreadUpdateFunc([](SceneNode& node, float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(elapsed_time);
 
-			checked_pointer_cast<FlagRenderable>(obj.GetRenderable(0))->SetAngle(app_time / 0.4f);
+			checked_pointer_cast<FlagRenderable>(node.GetRenderable(0))->SetAngle(app_time / 0.4f);
 		});
-	flag_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(flag_);
 
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);

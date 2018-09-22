@@ -24,7 +24,7 @@ private:
 	void InsideChangedHandler(KlayGE::UISlider const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr polygon_;
+	KlayGE::SceneNodePtr polygon_;
 
 	KlayGE::UIDialogPtr dialog_;
 	KlayGE::float4 tess_factor_;

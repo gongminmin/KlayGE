@@ -15,7 +15,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Show.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
@@ -123,8 +123,8 @@ void VectorTexApp::OnCreate()
 
 	model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>());
-	object_ = MakeSharedPtr<SceneObject>(model_->Mesh(0), SceneObject::SOA_Cullable);
-	object_->AddToSceneManager();
+	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
 	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->VectorTexture(
 		ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));

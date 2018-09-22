@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Window.hpp>
@@ -152,8 +152,8 @@ void ParticleEditorApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	terrain_ = MakeSharedPtr<SceneObject>(MakeSharedPtr<TerrainRenderable>(), SceneObject::SOA_Cullable);
-	terrain_->AddToSceneManager();
+	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<TerrainRenderable>(), SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -814,12 +814,12 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	if (ps_)
 	{
-		ps_->DelFromSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(ps_);
 	}
 	ps_ = SyncLoadParticleSystem(name);
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	ps_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ps_);
 
 	if (scene_depth_tex_)
 	{

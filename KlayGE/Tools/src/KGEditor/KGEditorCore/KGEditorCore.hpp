@@ -46,7 +46,7 @@ namespace KlayGE
 			float3 trf_pos;
 			float3 trf_scale;
 			Quaternion trf_rotate;
-			SceneObjectPtr scene_obj;
+			SceneNodePtr scene_obj;
 		};
 
 	private:
@@ -184,13 +184,13 @@ namespace KlayGE
 		std::map<uint32_t, EntityInfo> entities_;
 		std::map<uint32_t, EntityInfo> backup_entities_;
 		uint32_t selected_entity_;
-		SceneObjectPtr axis_;
-		SceneObjectPtr grid_;
-		SceneObjectPtr sky_box_;
-		SceneObjectPtr selected_bb_;
-		SceneObjectPtr translation_axis_;
-		SceneObjectPtr rotation_axis_;
-		SceneObjectPtr scaling_axis_;
+		SceneNodePtr axis_;
+		SceneNodePtr grid_;
+		SceneNodePtr sky_box_;
+		SceneNodePtr selected_bb_;
+		SceneNodePtr translation_axis_;
+		SceneNodePtr rotation_axis_;
+		SceneNodePtr scaling_axis_;
 		float3 display_scaling_for_axis_;
 		CameraPtr system_camera_;
 		uint32_t active_camera_id_;

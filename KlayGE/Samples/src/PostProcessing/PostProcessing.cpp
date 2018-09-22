@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -39,9 +39,9 @@ namespace
 	class ObjectUpdate
 	{
 	public:
-		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float /*elapsed_time*/)
 		{
-			obj.ModelMatrix(MathLib::rotation_y(-app_time / 1.5f));
+			node.TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
 		}
 	};
 
@@ -118,9 +118,9 @@ void PostProcessingApp::OnCreate()
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 
-	auto scene_obj = MakeSharedPtr<SceneObject>(scene_model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-	scene_obj->BindMainThreadUpdateFunc(ObjectUpdate());
-	scene_obj->AddToSceneManager();
+	auto scene_node = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	scene_node->BindMainThreadUpdateFunc(ObjectUpdate());
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_node);
 
 	fpcController_.Scalers(0.05f, 0.1f);
 
@@ -221,7 +221,7 @@ void PostProcessingApp::OnCreate()
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	color_fb_ = rf.MakeFrameBuffer();
 	color_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;

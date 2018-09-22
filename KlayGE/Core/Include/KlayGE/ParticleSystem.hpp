@@ -35,7 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 
 #include <mutex>
 #include <random>
@@ -58,7 +58,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleEmitter
 	{
 	public:
-		explicit ParticleEmitter(SceneObjectPtr const & ps);
+		explicit ParticleEmitter(SceneNodePtr const & ps);
 		virtual ~ParticleEmitter()
 		{
 		}
@@ -207,7 +207,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleUpdater
 	{
 	public:
-		explicit ParticleUpdater(SceneObjectPtr const & ps);
+		explicit ParticleUpdater(SceneNodePtr const & ps);
 		virtual ~ParticleUpdater()
 		{
 		}
@@ -224,7 +224,7 @@ namespace KlayGE
 		std::weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem : public SceneObject
+	class KLAYGE_CORE_API ParticleSystem : public SceneNode
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);
@@ -362,7 +362,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API PointParticleEmitter : public ParticleEmitter
 	{
 	public:
-		explicit PointParticleEmitter(SceneObjectPtr const & ps);
+		explicit PointParticleEmitter(SceneNodePtr const & ps);
 
 		virtual std::string const & Type() const override;
 		virtual ParticleEmitterPtr Clone() override;
@@ -380,7 +380,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
 	{
 	public:
-		explicit PolylineParticleUpdater(SceneObjectPtr const & ps);
+		explicit PolylineParticleUpdater(SceneNodePtr const & ps);
 
 		virtual std::string const & Type() const override;
 		virtual ParticleUpdaterPtr Clone() override;

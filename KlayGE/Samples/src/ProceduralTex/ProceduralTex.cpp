@@ -15,7 +15,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -253,8 +253,8 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
-			polygon_ = MakeSharedPtr<SceneObject>(polygon_model_, SceneObject::SOA_Cullable);
-			polygon_->BindSubThreadUpdateFunc([this](SceneObject& obj, float app_time, float elapsed_time)
+			polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
+			polygon_->BindSubThreadUpdateFunc([this](SceneNode& obj, float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(obj);
 					KFL_UNUSED(elapsed_time);
@@ -264,7 +264,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 						checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(i))->AppTime(app_time);
 					}
 				});
-			polygon_->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
@@ -287,7 +287,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 
 			light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 			checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
-			light_proxy_->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 			loading_percentage_ = 80;
 			progress_bar->SetValue(loading_percentage_);

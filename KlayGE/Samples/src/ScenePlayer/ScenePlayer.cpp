@@ -15,7 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
@@ -165,15 +165,15 @@ namespace
 		}
 	};
 
-	class SceneObjectUpdate : public PyScriptUpdate
+	class SceneNodeUpdate : public PyScriptUpdate
 	{
 	public:
-		explicit SceneObjectUpdate(std::string const & script)
+		explicit SceneNodeUpdate(std::string const & script)
 			: PyScriptUpdate(script)
 		{
 		}
 
-		void operator()(SceneObject& obj, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
 			std::any py_ret = this->Run(app_time, elapsed_time);
 			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
@@ -194,7 +194,7 @@ namespace
 							{
 								obj_mat[i] = std::any_cast<float>(mat[i]);
 							}
-							obj.ModelMatrix(obj_mat);
+							node.TransformToParent(obj_mat);
 						}
 					}
 				}
@@ -391,7 +391,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					EAH_GPU_Read | EAH_Immutable, init_data));
 			}
 
-			sky_box_->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 		}
 	}
 
@@ -557,9 +557,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				std::istream(&stream_buff) >> scale.x() >> scale.y() >> scale.z();
 			}
 
-			SceneObjectPtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
+			SceneNodePtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
 			checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy)->Scaling(scale);
-			light_proxy->AddToSceneManager();
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy);
 
 			light_proxies_.push_back(light_proxy);
 		}
@@ -567,7 +567,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	for (XMLNodePtr model_node = root->FirstNode("model"); model_node; model_node = model_node->NextSibling("model"))
 	{
-		uint32_t obj_attr = SceneObject::SOA_Cullable;
+		uint32_t obj_attr = SceneNode::SOA_Cullable;
 		float4x4 obj_mat = float4x4::Identity();
 
 		float3 scale(1, 1, 1);
@@ -608,7 +608,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			{
 				if (!attr->TryConvert(obj_attr))
 				{
-					obj_attr = SceneObject::SOA_Cullable;
+					obj_attr = SceneNode::SOA_Cullable;
 
 					std::string_view const attr_str = attr->ValueString();
 					std::vector<std::string> tokens;
@@ -618,19 +618,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 						boost::algorithm::trim(token);
 						if ("cullable" == token)
 						{
-							obj_attr |= SceneObject::SOA_Cullable;
+							obj_attr |= SceneNode::SOA_Cullable;
 						}
 						else if ("overlay" == token)
 						{
-							obj_attr |= SceneObject::SOA_Overlay;
+							obj_attr |= SceneNode::SOA_Overlay;
 						}
 						else if ("moveable" == token)
 						{
-							obj_attr |= SceneObject::SOA_Moveable;
+							obj_attr |= SceneNode::SOA_Moveable;
 						}
 						else if ("invisible" == token)
 						{
-							obj_attr |= SceneObject::SOA_Invisible;
+							obj_attr |= SceneNode::SOA_Invisible;
 						}
 					}
 				}
@@ -653,14 +653,14 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
-		auto scene_obj = MakeSharedPtr<SceneObject>(model, obj_attr);
-		scene_obj->ModelMatrix(obj_mat);
+		auto scene_obj = MakeSharedPtr<SceneNode>(model, obj_attr);
+		scene_obj->TransformToParent(obj_mat);
 		if (!update_script.empty())
 		{
-			scene_obj->BindSubThreadUpdateFunc(SceneObjectUpdate(update_script));
+			scene_obj->BindSubThreadUpdateFunc(SceneNodeUpdate(update_script));
 		}
 		scene_objs_.push_back(scene_obj);
-		scene_obj->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 	}
 
 	{

@@ -11,7 +11,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/InfTerrain.hpp>
 #include <KlayGE/LensFlare.hpp>
@@ -847,7 +847,7 @@ void OceanApp::OnCreate()
 		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
-	HQTerrainSceneObjectPtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
+	HQTerrainSceneNodePtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
 	terrain->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
 	terrain->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
 	terrain->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
@@ -857,10 +857,10 @@ void OceanApp::OnCreate()
 	terrain->TextureScale(2, float2(3, 3));
 	terrain->TextureScale(3, float2(1, 1));
 	terrain_ = terrain;
-	terrain_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	ocean_ = MakeSharedPtr<OceanObject>();
-	ocean_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ocean_);
 	checked_pointer_cast<OceanObject>(ocean_)->SkylightTex(y_cube, c_cube);
 	checked_pointer_cast<OceanObject>(ocean_)->FogColor(fog_color);
 
@@ -870,11 +870,11 @@ void OceanApp::OnCreate()
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();
 	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
-	sun_flare_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sun_flare_);
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));

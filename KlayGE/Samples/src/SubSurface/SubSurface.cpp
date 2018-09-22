@@ -4,7 +4,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -62,8 +62,8 @@ void SubSurfaceApp::OnCreate()
 
 	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>());
-	object_ = MakeSharedPtr<SceneObject>(model_, SceneObject::SOA_Cullable);
-	object_->AddToSceneManager();
+	object_ = MakeSharedPtr<SceneNode>(model_, SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
 	this->LookAt(float3(-0.4f, 1, 3.9f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 200.0f);
@@ -80,7 +80,7 @@ void SubSurfaceApp::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
-	light_proxy_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

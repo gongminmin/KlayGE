@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/ParticleSystem.hpp>
@@ -197,14 +197,14 @@ void DeepGBuffersApp::OnCreate()
 
 	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[0])->Scaling(0.1f, 0.1f, 0.1f);
-	spot_light_src_[0]->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[0]);
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
-	spot_light_src_[1]->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[1]);
 
-	scene_obj_ = MakeSharedPtr<SceneObject>(scene_model_, SceneObject::SOA_Cullable);
-	scene_obj_->ModelMatrix(MathLib::scaling(3.0f, 3.0f, 3.0f));
-	scene_obj_->AddToSceneManager();
+	scene_obj_ = MakeSharedPtr<SceneNode>(scene_model_, SceneNode::SOA_Cullable);
+	scene_obj_->TransformToParent(MathLib::scaling(3.0f, 3.0f, 3.0f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj_);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -259,7 +259,7 @@ void DeepGBuffersApp::OnCreate()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 }
 
 void DeepGBuffersApp::OnResize(uint32_t width, uint32_t height)

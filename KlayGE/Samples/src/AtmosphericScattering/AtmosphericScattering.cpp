@@ -7,8 +7,8 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObject.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -191,13 +191,13 @@ void AtmosphericScatteringApp::OnCreate()
 
 	RenderModelPtr model_planet = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
-	planet_ = MakeSharedPtr<SceneObject>(model_planet->Mesh(0), SceneObject::SOA_Cullable);
-	planet_->AddToSceneManager();
+	planet_ = MakeSharedPtr<SceneNode>(model_planet->Mesh(0), SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(planet_);
 
 	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
-	atmosphere_ = MakeSharedPtr<SceneObject>(model_atmosphere->Mesh(0), SceneObject::SOA_Cullable);
-	atmosphere_->AddToSceneManager();
+	atmosphere_ = MakeSharedPtr<SceneNode>(model_atmosphere->Mesh(0), SceneNode::SOA_Cullable);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(atmosphere_);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));
 	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");

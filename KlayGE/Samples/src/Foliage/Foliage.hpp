@@ -23,9 +23,9 @@ private:
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr terrain_;
-	KlayGE::SceneObjectPtr sky_box_;
-	KlayGE::SceneObjectPtr sun_flare_;
+	KlayGE::SceneNodePtr terrain_;
+	KlayGE::SceneNodePtr sky_box_;
+	KlayGE::SceneNodePtr sun_flare_;
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;
