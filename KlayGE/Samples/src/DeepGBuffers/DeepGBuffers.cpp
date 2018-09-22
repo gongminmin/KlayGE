@@ -310,12 +310,8 @@ void DeepGBuffersApp::SimpleForwardHandler(UICheckBox const & sender)
 {
 	bool const simple_forward = sender.GetChecked();
 
-	if (simple_forward)
-	{
-		auto control = dialog_->Control<UICheckBox>(id_receives_lighting_);
-		control->SetEnabled(false);
-		control->SetChecked(false);
-	}
+	auto control = dialog_->Control<UICheckBox>(id_receives_lighting_);
+	control->SetEnabled(!simple_forward);
 
 	for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
