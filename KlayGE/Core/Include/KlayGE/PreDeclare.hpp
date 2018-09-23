@@ -48,12 +48,6 @@ namespace KlayGE
 	class SceneManager;
 	class SceneNode;
 	typedef std::shared_ptr<SceneNode> SceneNodePtr;
-	class SceneNodeSkyBox;
-	typedef std::shared_ptr<SceneNodeSkyBox> SceneNodeSkyBoxPtr;
-	class SceneNodeLightSourceProxy;
-	typedef std::shared_ptr<SceneNodeLightSourceProxy> SceneNodeLightSourceProxyPtr;
-	class SceneNodeCameraProxy;
-	typedef std::shared_ptr<SceneNodeCameraProxy> SceneNodeCameraProxyPtr;
 
 	class Blitter;
 	typedef std::shared_ptr<Blitter> BlitterPtr;

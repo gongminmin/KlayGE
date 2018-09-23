@@ -254,9 +254,8 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
 			polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
-			polygon_->BindSubThreadUpdateFunc([this](SceneNode& obj, float app_time, float elapsed_time)
+			polygon_->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
 				{
-					KFL_UNUSED(obj);
 					KFL_UNUSED(elapsed_time);
 
 					for (uint32_t i = 0; i < polygon_model_->NumMeshes(); ++ i)

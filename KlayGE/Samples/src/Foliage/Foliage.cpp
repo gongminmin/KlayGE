@@ -52,21 +52,6 @@ namespace
 		}
 	};
 
-	class SceneObjectFoggySkyBox : public SceneObjectSkyBox
-	{
-	public:
-		explicit SceneObjectFoggySkyBox(uint32_t attrib = 0)
-			: SceneObjectSkyBox(attrib)
-		{
-			renderables_[0] = MakeSharedPtr<RenderableFoggySkyBox>();
-		}
-
-		void FogColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderableFoggySkyBox>(renderables_[0])->FogColor(clr);
-		}
-	};
-
 
 	enum
 	{
@@ -143,9 +128,9 @@ void FoliageApp::OnCreate()
 	terrain_ = terrain;
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
-	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableFoggySkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
+	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->FogColor(fog_color);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();

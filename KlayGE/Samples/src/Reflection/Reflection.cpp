@@ -10,6 +10,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -244,7 +245,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	back_refl_fb_ = rf.MakeFrameBuffer();
@@ -398,7 +399,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			{
 				if (y_cube_->HWResourceReady() && c_cube_->HWResourceReady())
 				{
-					checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_, c_cube_);
+					checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_, c_cube_);
 					checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_, c_cube_);
 
 					loading_percentage_ = 100;

@@ -28,19 +28,6 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneNode
-	{
-	public:
-		explicit SceneObjectSkyBox(uint32_t attrib = 0);
-		virtual ~SceneObjectSkyBox()
-		{
-		}
-
-		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech);
-		void CubeMap(TexturePtr const & cube);
-		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
-	};
-
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneNode
 	{
 	public:
@@ -48,8 +35,6 @@ namespace KlayGE
 		SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model);
 		SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
-
-		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
@@ -77,8 +62,6 @@ namespace KlayGE
 		SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model);
 		SceneObjectCameraProxy(CameraPtr const & camera,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
-
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);

@@ -343,16 +343,6 @@ namespace
 		float tess_factor_;
 	};
 
-	class OccluderObjectUpdate
-	{
-	public:
-		void operator()(SceneNode& node, float app_time, float /*elapsed_time*/)
-		{
-			node.TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
-				* MathLib::rotation_y(-app_time / 1.5f));
-		}
-	};
-
 
 	class PointLightSourceUpdate
 	{
@@ -623,7 +613,13 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				auto const & teapot = teapot_model_->Mesh(0);
 				auto so = MakeSharedPtr<SceneNode>(teapot, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
+				so->OnSubThreadUpdate().connect([so](float app_time, float elapsed_time)
+					{
+						KFL_UNUSED(elapsed_time);
+
+						so->TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
+							* MathLib::rotation_y(-app_time / 1.5f));
+					});
 				Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
 				checked_pointer_cast<OccluderMesh>(teapot)->LampTexture(lamp_tex_);
 				checked_pointer_cast<OccluderMesh>(teapot)->CubeSMTexture(shadow_cube_tex_);

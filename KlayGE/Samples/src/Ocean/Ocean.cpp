@@ -363,6 +363,13 @@ namespace
 					gradient_tex_[i]->BuildMipSubLevels();
 				}
 			}
+
+			this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+				{
+					KFL_UNUSED(elapsed_time);
+
+					this->MainThreadUpdateFunc(app_time);
+				});
 		}
 
 		Plane const & OceanPlane() const
@@ -370,7 +377,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		void MainThreadUpdate(float app_time, float elapsed_time) override
+		void MainThreadUpdateFunc(float app_time)
 		{
 			if (dirty_)
 			{
@@ -378,8 +385,6 @@ namespace
 
 				dirty_ = false;
 			}
-
-			InfTerrainSceneObject::MainThreadUpdate(app_time, elapsed_time);
 
 			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
@@ -517,16 +522,6 @@ namespace
 				ocean_param_.choppy_scale = choppy;
 				dirty_ = true;
 			}
-		}
-
-		void SkylightTex(TexturePtr const & y_cube, TexturePtr const & c_cube)
-		{
-			checked_pointer_cast<RenderOcean>(renderables_[0])->SkylightTex(y_cube, c_cube);
-		}
-
-		void FogColor(Color const & fog_color)
-		{
-			checked_pointer_cast<RenderOcean>(renderables_[0])->FogColor(fog_color);
 		}
 
 	private:
@@ -772,21 +767,6 @@ namespace
 		}
 	};
 
-	class SceneObjectFoggySkyBox : public SceneObjectSkyBox
-	{
-	public:
-		explicit SceneObjectFoggySkyBox(uint32_t attrib = 0)
-			: SceneObjectSkyBox(attrib)
-		{
-			renderables_[0] = MakeSharedPtr<RenderableFoggySkyBox>();
-		}
-
-		void FogColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderableFoggySkyBox>(renderables_[0])->FogColor(clr);
-		}
-	};
-
 
 	enum
 	{
@@ -861,15 +841,15 @@ void OceanApp::OnCreate()
 
 	ocean_ = MakeSharedPtr<OceanObject>();
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ocean_);
-	checked_pointer_cast<OceanObject>(ocean_)->SkylightTex(y_cube, c_cube);
-	checked_pointer_cast<OceanObject>(ocean_)->FogColor(fog_color);
+	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->SkylightTex(y_cube, c_cube);
+	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->FogColor(fog_color);
 
 	checked_pointer_cast<ProceduralTerrain>(terrain_->GetRenderable())
 		->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
 
-	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableFoggySkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
+	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->FogColor(fog_color);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();

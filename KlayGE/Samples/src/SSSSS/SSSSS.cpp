@@ -16,6 +16,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -179,8 +180,8 @@ void SSSSSApp::OnCreate()
 	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
-	auto sky_box = MakeSharedPtr<SceneObjectSkyBox>();
-	sky_box->CompressedCubeMap(y_cube, c_cube);
+	auto sky_box = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableSkyBox>(sky_box->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box);
 }
 

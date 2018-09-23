@@ -16,6 +16,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
@@ -168,12 +169,13 @@ namespace
 	class SceneNodeUpdate : public PyScriptUpdate
 	{
 	public:
-		explicit SceneNodeUpdate(std::string const & script)
-			: PyScriptUpdate(script)
+		SceneNodeUpdate(SceneNode& node, std::string const & script)
+			: PyScriptUpdate(script),
+				node_(node)
 		{
 		}
 
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(float app_time, float elapsed_time)
 		{
 			std::any py_ret = this->Run(app_time, elapsed_time);
 			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
@@ -194,12 +196,15 @@ namespace
 							{
 								obj_mat[i] = std::any_cast<float>(mat[i]);
 							}
-							node.TransformToParent(obj_mat);
+							node_.TransformToParent(obj_mat);
 						}
 					}
 				}
 			}
 		}
+
+	private:
+		SceneNode& node_;
 	};
 
 	class CameraUpdate : public PyScriptUpdate
@@ -351,22 +356,22 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = root->Attrib("skybox");
 		if (attr)
 		{
-			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+			sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
 
 			std::string const skybox_name = std::string(attr->ValueString());
 			if (!ResLoader::Instance().Locate(skybox_name).empty())
 			{
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(ASyncLoadTexture(skybox_name,
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(ASyncLoadTexture(skybox_name,
 					EAH_GPU_Read | EAH_Immutable));
 			}
 			else if (!ResLoader::Instance().Locate(skybox_name + ".dds").empty())
 			{
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(ASyncLoadTexture(skybox_name + ".dds",
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(ASyncLoadTexture(skybox_name + ".dds",
 					EAH_GPU_Read | EAH_Immutable));
 			}
 			else if (!ResLoader::Instance().Locate(skybox_name + "_y.dds").empty())
 			{
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(
 					ASyncLoadTexture(skybox_name + "_y.dds", EAH_GPU_Read | EAH_Immutable),
 					ASyncLoadTexture(skybox_name + "_c.dds", EAH_GPU_Read | EAH_Immutable));
 			}
@@ -387,7 +392,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					init_data[i].slice_pitch = init_data[i].row_pitch;
 				}
 
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0,
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_Immutable, init_data));
 			}
 
@@ -657,7 +662,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		scene_obj->TransformToParent(obj_mat);
 		if (!update_script.empty())
 		{
-			scene_obj->BindSubThreadUpdateFunc(SceneNodeUpdate(update_script));
+			scene_obj->OnSubThreadUpdate().connect(SceneNodeUpdate(*scene_obj, update_script));
 		}
 		scene_objs_.push_back(scene_obj);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);

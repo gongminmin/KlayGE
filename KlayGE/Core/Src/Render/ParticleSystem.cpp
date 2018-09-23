@@ -613,6 +613,20 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
 		this->AddRenderable(MakeSharedPtr<RenderParticles>(gs_support_));
+
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
+
+				this->MainThreadUpdateFunc();
+			});
+		this->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+
+				this->SubThreadUpdateFunc(elapsed_time);
+			});
 	}
 
 	ParticleSystemPtr ParticleSystem::Clone()
@@ -866,10 +880,8 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::SubThreadUpdate(float app_time, float elapsed_time)
+	void ParticleSystem::SubThreadUpdateFunc(float elapsed_time)
 	{
-		KFL_UNUSED(app_time);
-
 		std::lock_guard<std::mutex> lock(actived_particles_mutex_);
 
 		this->UpdateParticlesNoLock(elapsed_time, actived_particles_);
@@ -882,11 +894,8 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
+	void ParticleSystem::MainThreadUpdateFunc()
 	{
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapsed_time);
-
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 		if (!caps.arbitrary_multithread_rendering_support)

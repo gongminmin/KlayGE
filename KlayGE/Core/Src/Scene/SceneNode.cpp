@@ -278,6 +278,13 @@ namespace KlayGE
 		}
 	}
 
+	void SceneNode::ClearRenderables()
+	{
+		renderables_.clear();
+		renderables_hw_res_ready_.clear();
+		pos_aabb_dirty_ = true;
+	}
+
 	void SceneNode::TransformToParent(float4x4 const & mat)
 	{
 		xform_to_parent_ = mat;
@@ -346,22 +353,9 @@ namespace KlayGE
 		return visible_mark_;
 	}
 
-	void SceneNode::BindSubThreadUpdateFunc(std::function<void(SceneNode&, float, float)> const & update_func)
-	{
-		sub_thread_update_func_ = update_func;
-	}
-
-	void SceneNode::BindMainThreadUpdateFunc(std::function<void(SceneNode&, float, float)> const & update_func)
-	{
-		main_thread_update_func_ = update_func;
-	}
-
 	void SceneNode::SubThreadUpdate(float app_time, float elapsed_time)
 	{
-		if (sub_thread_update_func_)
-		{
-			sub_thread_update_func_(*this, app_time, elapsed_time);
-		}
+		sub_thread_update_event_(app_time, elapsed_time);
 	}
 
 	void SceneNode::MainThreadUpdate(float app_time, float elapsed_time)
@@ -386,10 +380,7 @@ namespace KlayGE
 			}
 		}
 
-		if (main_thread_update_func_)
-		{
-			main_thread_update_func_(*this, app_time, elapsed_time);
-		}
+		main_thread_update_event_(app_time, elapsed_time);
 	}
 
 	uint32_t SceneNode::Attrib() const

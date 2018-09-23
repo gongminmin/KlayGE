@@ -10,6 +10,7 @@
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
@@ -265,8 +266,8 @@ namespace KlayGE
 		}
 		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-		sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(default_cube_map_);
+		sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+		checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(default_cube_map_);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 		ambient_light_->SkylightTex(default_cube_map_);
@@ -567,18 +568,18 @@ namespace KlayGE
 
 			if (!!c_tex)
 			{
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_tex, c_tex);
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
 				ambient_light_->SkylightTex(y_tex, c_tex);
 			}
 			else
 			{
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(y_tex);
+				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(y_tex);
 				ambient_light_->SkylightTex(y_tex);
 			}
 		}
 		else
 		{
-			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(default_cube_map_);
+			checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(default_cube_map_);
 			ambient_light_->SkylightTex(default_cube_map_);
 		}
 	}

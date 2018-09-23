@@ -15,6 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -136,7 +137,7 @@ void MetalnessApp::OnCreate()
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
 
-	sphere_group_->BindMainThreadUpdateFunc([](SceneNode& node, float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
@@ -144,7 +145,7 @@ void MetalnessApp::OnCreate()
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
-			node.TransformToParent(camera.InverseViewMatrix());
+			sphere_group_->TransformToParent(camera.InverseViewMatrix());
 		});
 
 	uint32_t const spheres_row = 10;
@@ -173,8 +174,8 @@ void MetalnessApp::OnCreate()
 	single_object_->TransformToParent(MathLib::scaling(2.0f, 2.0f, 2.0f));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(single_object_);
 
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	this->LookAt(float3(0.0f, 0.3f, -0.9f), float3(0, 0, 0));

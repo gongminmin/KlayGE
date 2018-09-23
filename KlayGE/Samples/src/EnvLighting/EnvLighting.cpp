@@ -15,6 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -901,7 +902,7 @@ void EnvLightingApp::OnCreate()
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
 
-	sphere_group_->BindMainThreadUpdateFunc([this](SceneNode& node, float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
@@ -909,7 +910,7 @@ void EnvLightingApp::OnCreate()
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
-			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
+			sphere_group_->TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
 		});
 
 	sphere_objs_.resize(std::size(diff_parametes));
@@ -938,8 +939,8 @@ void EnvLightingApp::OnCreate()
 		sphere_group_->AddChild(sphere_objs_[i]);
 	}
 
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0, 0));

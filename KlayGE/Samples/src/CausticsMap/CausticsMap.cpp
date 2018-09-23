@@ -12,6 +12,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Light.hpp>
@@ -653,11 +654,11 @@ void CausticsMapApp::OnCreate()
 
 	caustics_grid_ = MakeSharedPtr<CausticsGrid>();
 
-	//Sky Box
+	// Sky Box
 	y_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");

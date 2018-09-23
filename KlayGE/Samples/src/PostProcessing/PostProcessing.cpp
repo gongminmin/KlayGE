@@ -14,6 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -36,15 +37,6 @@ using namespace KlayGE;
 
 namespace
 {
-	class ObjectUpdate
-	{
-	public:
-		void operator()(SceneNode& node, float app_time, float /*elapsed_time*/)
-		{
-			node.TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
-		}
-	};
-
 	class PointLightSourceUpdate
 	{
 	public:
@@ -119,7 +111,12 @@ void PostProcessingApp::OnCreate()
 	point_light_->AddToSceneManager();
 
 	auto scene_node = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-	scene_node->BindMainThreadUpdateFunc(ObjectUpdate());
+	scene_node->OnMainThreadUpdate().connect([scene_node](float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(elapsed_time);
+
+			scene_node->TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
+		});
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_node);
 
 	fpcController_.Scalers(0.05f, 0.1f);
@@ -219,8 +216,8 @@ void PostProcessingApp::OnCreate()
 		});
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
+	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
 
 	color_fb_ = rf.MakeFrameBuffer();

@@ -101,11 +101,11 @@ void VertexDisplacement::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	flag_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<FlagRenderable>(8, 6), SceneNode::SOA_Cullable);
-	flag_->BindMainThreadUpdateFunc([](SceneNode& node, float app_time, float elapsed_time)
+	flag_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(elapsed_time);
 
-			checked_pointer_cast<FlagRenderable>(node.GetRenderable(0))->SetAngle(app_time / 0.4f);
+			checked_pointer_cast<FlagRenderable>(flag_->GetRenderable(0))->SetAngle(app_time / 0.4f);
 		});
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(flag_);
 

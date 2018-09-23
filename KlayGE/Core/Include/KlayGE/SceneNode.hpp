@@ -37,6 +37,16 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Renderable.hpp>
 
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'sp'
+#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#endif
+#include <boost/signals2.hpp>
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic pop
+#endif
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneNode : boost::noncopyable, public std::enable_shared_from_this<SceneNode>
@@ -85,6 +95,7 @@ namespace KlayGE
 
 		void AddRenderable(RenderablePtr const & renderable);
 		void DelRenderable(RenderablePtr const & renderable);
+		void ClearRenderables();
 
 		virtual void TransformToParent(float4x4 const & mat);
 		virtual void TransformToWorld(float4x4 const & mat);
@@ -95,11 +106,18 @@ namespace KlayGE
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
-		void BindSubThreadUpdateFunc(std::function<void(SceneNode&, float, float)> const & update_func);
-		void BindMainThreadUpdateFunc(std::function<void(SceneNode&, float, float)> const & update_func);
+		using UpdateEvent = boost::signals2::signal<void(float, float)>;
+		UpdateEvent& OnSubThreadUpdate()
+		{
+			return sub_thread_update_event_;
+		}
+		UpdateEvent& OnMainThreadUpdate()
+		{
+			return main_thread_update_event_;
+		}
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time);
-		virtual void MainThreadUpdate(float app_time, float elapsed_time);
+		void SubThreadUpdate(float app_time, float elapsed_time);
+		void MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
@@ -149,8 +167,8 @@ namespace KlayGE
 		bool pos_aabb_dirty_ = true;
 		BoundOverlap visible_mark_ = BO_No;
 
-		std::function<void(SceneNode&, float, float)> sub_thread_update_func_;
-		std::function<void(SceneNode&, float, float)> main_thread_update_func_;
+		UpdateEvent sub_thread_update_event_;
+		UpdateEvent main_thread_update_event_;
 	};
 }
 

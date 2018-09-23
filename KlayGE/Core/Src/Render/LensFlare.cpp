@@ -89,6 +89,13 @@ namespace KlayGE
 	LensFlareSceneObject::LensFlareSceneObject()
 		: SceneNode(MakeSharedPtr<LensFlareRenderable>(), 0)
 	{
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
+
+				this->MainThreadUpdateFunc();
+			});
 	}
 
 	void LensFlareSceneObject::Direction(float3 const & dir)
@@ -101,7 +108,7 @@ namespace KlayGE
 		return dir_;
 	}
 
-	void LensFlareSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	void LensFlareSceneObject::MainThreadUpdateFunc()
 	{
 		float const FLARE_RENDERANGLE = 0.9f;
 		float const FLARE_SCALEAMOUNT = 0.2f;

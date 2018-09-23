@@ -54,9 +54,6 @@ namespace KlayGE
 	{
 	public:
 		InfTerrainSceneObject();
-		virtual ~InfTerrainSceneObject();
-
-		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
 	protected:
 		float base_level_;
@@ -251,8 +248,6 @@ namespace KlayGE
 	public:
 		explicit HQTerrainSceneObject(RenderablePtr const & renderable);
 		virtual ~HQTerrainSceneObject();
-
-		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Tessellation(bool tess);
 		void ShowPatches(bool sp);

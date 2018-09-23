@@ -41,27 +41,6 @@
 
 namespace KlayGE
 {
-	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)
-		: SceneNode(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
-	{
-	}
-
-	void SceneObjectSkyBox::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->Technique(effect, tech);
-	}
-
-	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->CubeMap(cube);
-	}
-
-	void SceneObjectSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderables_[0])->CompressedCubeMap(y_cube, c_cube);
-	}
-
-
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
 		: SceneObjectLightSourceProxy(light, CreateMeshFactory<RenderableLightSourceProxy>())
 	{
@@ -77,30 +56,31 @@ namespace KlayGE
 		{
 			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
 		}
+
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
+
+				xform_to_parent_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+				if (LightSource::LT_Spot == light_->Type())
+				{
+					float radius = light_->CosOuterInner().w();
+					xform_to_parent_ = MathLib::scaling(radius, radius, 1.0f) * xform_to_parent_;
+				}
+
+				for (uint32_t i = 0; i < renderables_.size(); ++ i)
+				{
+					RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
+					light_mesh->Update();
+				}
+			});
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectLightSourceProxy(light, this->LoadModel(light, CreateMeshFactoryFunc))
 	{
-	}
-
-	void SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
-	{
-		xform_to_parent_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
-		if (LightSource::LT_Spot == light_->Type())
-		{
-			float radius = light_->CosOuterInner().w();
-			xform_to_parent_ = MathLib::scaling(radius, radius, 1.0f) * xform_to_parent_;
-		}
-
-		for (uint32_t i = 0; i < renderables_.size(); ++ i)
-		{
-			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
-			light_mesh->Update();
-		}
-
-		this->UpdateTransforms();
 	}
 
 	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
@@ -163,19 +143,20 @@ namespace KlayGE
 		{
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
+
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
+
+				xform_to_parent_ = model_scaling_ * camera_->InverseViewMatrix();
+			});
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectCameraProxy(camera, this->LoadModel(CreateMeshFactoryFunc))
 	{
-	}
-
-	void SceneObjectCameraProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
-	{
-		xform_to_parent_ = model_scaling_ * camera_->InverseViewMatrix();
-
-		this->UpdateTransforms();
 	}
 
 	void SceneObjectCameraProxy::Scaling(float x, float y, float z)

@@ -151,70 +151,69 @@ namespace KlayGE
 	InfTerrainSceneObject::InfTerrainSceneObject()
 		: SceneNode(SOA_Moveable)
 	{
-	}
-
-	InfTerrainSceneObject::~InfTerrainSceneObject()
-	{
-	}
-
-	void InfTerrainSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
-
-		float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
-		if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
-		{
-			look_at_vec = float3(0, 0, 1);
-		}
-		float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
-
-		float4x4 proj_to_virtual_view = camera.InverseViewProjMatrix() * virtual_view;
-
-		float2 const & x_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->XDir();
-		float2 const & y_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->YDir();
-		float3 x_dir(x_dir_2d.x(), -camera.EyePos().y(), x_dir_2d.y());
-		float3 y_dir(y_dir_2d.x(), -camera.EyePos().y(), y_dir_2d.y());
-
-		float3 const frustum[8] = 
-		{
-			MathLib::transform_coord(float3(-1, +1, 1), proj_to_virtual_view),
-			MathLib::transform_coord(float3(+1, +1, 1), proj_to_virtual_view),
-			MathLib::transform_coord(float3(-1, -1, 1), proj_to_virtual_view),
-			MathLib::transform_coord(float3(+1, -1, 1), proj_to_virtual_view),
-			MathLib::transform_coord(float3(-1, +1, 0), proj_to_virtual_view),
-			MathLib::transform_coord(float3(+1, +1, 0), proj_to_virtual_view),
-			MathLib::transform_coord(float3(-1, -1, 0), proj_to_virtual_view),
-			MathLib::transform_coord(float3(+1, -1, 0), proj_to_virtual_view)
-		};
-
-		int const view_cube[24] =
-		{
-			0, 1, 1, 3, 3, 2, 2, 0,
-			4, 5, 5, 7, 7, 6, 6, 4,
-			0, 4, 1, 5, 3, 7, 2, 6
-		};
-
-		Plane const lower_bound = MathLib::from_point_normal(float3(0, base_level_ - camera.EyePos().y() - strength_, 0), float3(0, 1, 0));
-
-		bool intersect = false;
-		float sy = 0;
-		for (int i = 0; i < 12; ++ i)
-		{
-			int src = view_cube[i * 2 + 0];
-			int dst = view_cube[i * 2 + 1];
-			if (MathLib::dot_coord(lower_bound, frustum[src]) / MathLib::dot_coord(lower_bound, frustum[dst]) < 0)
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 			{
-				float t = MathLib::intersect_ray(lower_bound, frustum[src], frustum[dst] - frustum[src]);
-				float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
-				sy = std::max(sy, std::max((x_dir.z() * p.x() - x_dir.x() * p.z()) / x_dir.x(),
-					(y_dir.z() * p.x() - y_dir.x() * p.z()) / y_dir.x()));
-				intersect = true;
-			}
-		}
-		checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->OffsetY(sy);
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
 
-		this->Visible(intersect);
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+
+				float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
+				if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
+				{
+					look_at_vec = float3(0, 0, 1);
+				}
+				float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
+
+				float4x4 proj_to_virtual_view = camera.InverseViewProjMatrix() * virtual_view;
+
+				float2 const & x_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->XDir();
+				float2 const & y_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->YDir();
+				float3 x_dir(x_dir_2d.x(), -camera.EyePos().y(), x_dir_2d.y());
+				float3 y_dir(y_dir_2d.x(), -camera.EyePos().y(), y_dir_2d.y());
+
+				float3 const frustum[8] =
+				{
+					MathLib::transform_coord(float3(-1, +1, 1), proj_to_virtual_view),
+					MathLib::transform_coord(float3(+1, +1, 1), proj_to_virtual_view),
+					MathLib::transform_coord(float3(-1, -1, 1), proj_to_virtual_view),
+					MathLib::transform_coord(float3(+1, -1, 1), proj_to_virtual_view),
+					MathLib::transform_coord(float3(-1, +1, 0), proj_to_virtual_view),
+					MathLib::transform_coord(float3(+1, +1, 0), proj_to_virtual_view),
+					MathLib::transform_coord(float3(-1, -1, 0), proj_to_virtual_view),
+					MathLib::transform_coord(float3(+1, -1, 0), proj_to_virtual_view)
+				};
+
+				int const view_cube[24] =
+				{
+					0, 1, 1, 3, 3, 2, 2, 0,
+					4, 5, 5, 7, 7, 6, 6, 4,
+					0, 4, 1, 5, 3, 7, 2, 6
+				};
+
+				Plane const lower_bound = MathLib::from_point_normal(
+					float3(0, base_level_ - camera.EyePos().y() - strength_, 0), float3(0, 1, 0));
+
+				bool intersect = false;
+				float sy = 0;
+				for (int i = 0; i < 12; ++ i)
+				{
+					int src = view_cube[i * 2 + 0];
+					int dst = view_cube[i * 2 + 1];
+					if (MathLib::dot_coord(lower_bound, frustum[src]) / MathLib::dot_coord(lower_bound, frustum[dst]) < 0)
+					{
+						float t = MathLib::intersect_ray(lower_bound, frustum[src], frustum[dst] - frustum[src]);
+						float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
+						sy = std::max(sy, std::max((x_dir.z() * p.x() - x_dir.x() * p.z()) / x_dir.x(),
+							(y_dir.z() * p.x() - y_dir.x() * p.z()) / y_dir.x()));
+						intersect = true;
+					}
+				}
+				checked_pointer_cast<InfTerrainRenderable>(renderables_[0])->OffsetY(sy);
+
+				this->Visible(intersect);
+			});
 	}
 
 
@@ -721,29 +720,29 @@ namespace KlayGE
 		last_eye_pos_ = re.DefaultFrameBuffer()->GetViewport()->camera->EyePos();
 
 		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
+
+		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			{
+				KFL_UNUSED(app_time);
+				KFL_UNUSED(elapsed_time);
+
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+
+				checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->SetMatrices(camera);
+
+				reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera.EyePos());
+				if (reset_terrain_)
+				{
+					checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->FlushTerrainData();
+					reset_terrain_ = false;
+					last_eye_pos_ = camera.EyePos();
+				}
+			});
 	}
 
 	HQTerrainSceneObject::~HQTerrainSceneObject()
 	{
-	}
-
-	void HQTerrainSceneObject::MainThreadUpdate(float app_time, float elapsed_time)
-	{
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapsed_time);
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
-
-		checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->SetMatrices(camera);
-
-		reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera.EyePos());
-		if (reset_terrain_)
-		{
-			checked_pointer_cast<HQTerrainRenderable>(renderables_[0])->FlushTerrainData();
-			reset_terrain_ = false;
-			last_eye_pos_ = camera.EyePos();
-		}
 	}
 
 	void HQTerrainSceneObject::Tessellation(bool tess)
