@@ -148,11 +148,13 @@ void AreaLightingApp::OnCreate()
 	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 
+	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
+
 	for (int i = -5; i < 5; ++ i)
 	{
 		for (int j = -5; j < 5; ++ j)
 		{
-			RenderModelPtr sphere_mesh = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
+			auto sphere_mesh = sphere_model_unique->Clone();
 			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
 			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
 			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;

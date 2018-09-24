@@ -20,7 +20,7 @@
 
 using namespace KlayGE;
 
-DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
+DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModel const & model, std::wstring_view name)
 	: SkinnedMesh(model, name),
 			visualize_(-1)
 {
@@ -30,18 +30,17 @@ void DetailedSkinnedMesh::DoBuildMeshInfo()
 {
 	SkinnedMesh::DoBuildMeshInfo();
 
-	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->Effect());
+	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(model_)->Effect());
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
 {
 	SkinnedMesh::OnRenderBegin();
 	
-	RenderModelPtr model = model_.lock();
-	if (model && model->IsSkinned())
+	if (model_->IsSkinned())
 	{
-		*(deferred_effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
-		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
+		*(deferred_effect_->ParameterByName("joint_reals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindRealParts();
+		*(deferred_effect_->ParameterByName("joint_duals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindDualParts();
 	}
 }
 
@@ -97,8 +96,7 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 	auto drl = Context::Instance().DeferredRenderingLayerInstance();
 	if (drl)
 	{
-		RenderModelPtr model = model_.lock();
-		this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model->IsSkinned()));
+		this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model_->IsSkinned()));
 	}
 }
 
@@ -118,16 +116,16 @@ void DetailedSkinnedMesh::UpdateTechniques()
 
 	if (visualize_ >= 0)
 	{
-		std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+		auto const & model = *checked_cast<DetailedSkinnedModel const *>(model_);
 
-		gbuffer_mrt_tech_ = model->visualize_gbuffer_mrt_techs_[visualize_];
+		gbuffer_mrt_tech_ = model.visualize_gbuffer_mrt_techs_[visualize_];
 		gbuffer_alpha_blend_back_mrt_tech_ = gbuffer_mrt_tech_;
 		gbuffer_alpha_blend_front_mrt_tech_ = gbuffer_mrt_tech_;
 	}
 }
 
 
-DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
+DetailedSkinnedModel::DetailedSkinnedModel(std::wstring_view name)
 		: SkinnedModel(name),
 			is_skinned_(false)
 {
@@ -466,22 +464,22 @@ uint32_t DetailedSkinnedModel::ImportMaterial(std::string const & name)
 }
 
 
-SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
+SkeletonMesh::SkeletonMesh(RenderModel const & model)
 	: SkinnedMesh(model, L"SkeletonMesh")
 {
 	std::vector<float4> positions;
 	std::vector<uint32_t> bone_indices;
 	std::vector<uint16_t> indices;
 
-	auto skinned_model = checked_pointer_cast<DetailedSkinnedModel>(model);
-	for (uint32_t i = 0; i < skinned_model->NumJoints(); ++ i)
+	auto const & skinned_model = *checked_cast<DetailedSkinnedModel const *>(&model);
+	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++ i)
 	{
-		auto& joint = skinned_model->GetJoint(i);
+		auto& joint = skinned_model.GetJoint(i);
 		if (joint.parent > 0)
 		{
 			uint16_t const num_vertices = static_cast<uint16_t>(positions.size());
 
-			float const color = i / (skinned_model->NumJoints() - 1.0f);
+			float const color = i / (skinned_model.NumJoints() - 1.0f);
 
 			Quaternion bind_real = joint.inverse_origin_real;
 			Quaternion bind_dual = joint.inverse_origin_dual;
@@ -500,7 +498,7 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 			positions.push_back(float4(joint_pos.x(), joint_pos.y(), joint_pos.z(), color));
 			bone_indices.push_back(i);
 
-			auto& parent_joint = skinned_model->GetJoint(joint.parent);
+			auto& parent_joint = skinned_model.GetJoint(joint.parent);
 
 			bind_real = parent_joint.inverse_origin_real;
 			bind_dual = parent_joint.inverse_origin_dual;
@@ -576,7 +574,7 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 
 	effect_attrs_ |= EA_SimpleForward;
 
-	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->Effect());
+	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(model_)->Effect());
 	simple_forward_tech_ = effect_->TechniqueByName("SkeletonTech");
 
 	{
@@ -665,10 +663,6 @@ void SkeletonMesh::OnRenderBegin()
 {
 	SkinnedMesh::OnRenderBegin();
 
-	RenderModelPtr model = model_.lock();
-	if (model)
-	{
-		*(deferred_effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
-		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
-	}
+	*(deferred_effect_->ParameterByName("joint_reals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindRealParts();
+	*(deferred_effect_->ParameterByName("joint_duals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindDualParts();
 }

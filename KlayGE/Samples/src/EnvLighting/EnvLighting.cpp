@@ -47,8 +47,8 @@ namespace
 	class SphereRenderable : public StaticMesh
 	{
 	public:
-		SphereRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Sphere")
+		SphereRenderable(RenderModel const & model, std::wstring_view name)
+			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
@@ -913,12 +913,14 @@ void EnvLightingApp::OnCreate()
 			sphere_group_->TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
 		});
 
+	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
+
 	sphere_objs_.resize(std::size(diff_parametes));
 	sphere_models_.resize(sphere_objs_.size());
 	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
 	{
-		sphere_models_[i] = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>());
+		sphere_models_[i] = sphere_model_unique->Clone(CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
 
 		auto const & mesh = checked_pointer_cast<SphereRenderable>(sphere_models_[i]->Mesh(0));
 

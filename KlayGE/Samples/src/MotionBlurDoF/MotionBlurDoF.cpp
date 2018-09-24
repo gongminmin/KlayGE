@@ -42,7 +42,7 @@ namespace
 	class MotionBlurRenderMesh : public StaticMesh
 	{
 	public:
-		MotionBlurRenderMesh(RenderModelPtr const & model, std::wstring const & name)
+		MotionBlurRenderMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name),
 				half_exposure_(1)
 		{
@@ -67,7 +67,7 @@ namespace
 	class RenderInstanceMesh : public MotionBlurRenderMesh
 	{
 	public:
-		RenderInstanceMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
+		RenderInstanceMesh(RenderModel const & model, std::wstring_view /*name*/)
 			: MotionBlurRenderMesh(model, L"InstancedMesh")
 		{
 			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
@@ -124,7 +124,7 @@ namespace
 		};
 
 	public:
-		RenderNonInstancedMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
+		RenderNonInstancedMesh(RenderModel const & model, std::wstring_view /*name*/)
 			: MotionBlurRenderMesh(model, L"NonInstancedMesh")
 		{
 			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
@@ -680,9 +680,9 @@ void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
 	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderInstanceMesh>);
 	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderNonInstancedMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

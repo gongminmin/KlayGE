@@ -38,8 +38,8 @@ namespace
 	class RefractorRenderable : public StaticMesh
 	{
 	public:
-		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Refractor")
+		RefractorRenderable(RenderModel const & model, std::wstring_view name)
+			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("Refract.fxml");
 			front_face_tech_ = effect_->TechniqueByName("Refract");
@@ -160,7 +160,7 @@ void Refract::OnCreate()
 	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	refractor_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractorRenderable>);
 
 	refractor_ = MakeSharedPtr<SceneNode>(refractor_model_->Mesh(0), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(refractor_);

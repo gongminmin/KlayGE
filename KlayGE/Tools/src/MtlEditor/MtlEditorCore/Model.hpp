@@ -12,7 +12,7 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 	friend class DetailedSkinnedMesh;
 
 public:
-	explicit DetailedSkinnedModel(std::wstring const & name);
+	explicit DetailedSkinnedModel(std::wstring_view name);
 
 	void DoBuildModelInfo() override;
 
@@ -42,7 +42,7 @@ private:
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
+	DetailedSkinnedMesh(KlayGE::RenderModel const & model, std::wstring_view name);
 
 	void DoBuildMeshInfo() override;
 
@@ -63,7 +63,7 @@ private:
 class SkeletonMesh : public KlayGE::SkinnedMesh
 {
 public:
-	explicit SkeletonMesh(KlayGE::RenderModelPtr const & model);
+	explicit SkeletonMesh(KlayGE::RenderModel const & model);
 
 	void OnRenderBegin() override;
 };

@@ -38,8 +38,8 @@ namespace
 	class RenderTeapot : public StaticMesh
 	{
 	public:
-		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Teapot")
+		RenderTeapot(RenderModel const & model, std::wstring_view name)
+			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("VectorTex.fxml");
 			technique_ = effect_->TechniqueByName("Object");
@@ -122,7 +122,7 @@ void VectorTexApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
 	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 

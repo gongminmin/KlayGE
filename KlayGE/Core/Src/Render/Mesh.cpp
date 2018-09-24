@@ -58,8 +58,8 @@ namespace
 		{
 			std::string res_name;
 			uint32_t access_hint;
-			std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
-			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
+			std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc;
+			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc;
 
 			RenderModelPtr sw_model;
 
@@ -68,8 +68,8 @@ namespace
 
 	public:
 		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint,
-			std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 		{
 			model_desc_.res_name = std::string(res_name);
 			model_desc_.access_hint = access_hint;
@@ -151,80 +151,9 @@ namespace
 
 		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
-			RenderModelPtr rhs_model = std::static_pointer_cast<RenderModel>(resource);
-			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
-
-			model->NumMaterials(rhs_model->NumMaterials());
-			for (uint32_t mtl_index = 0; mtl_index < model->NumMaterials(); ++ mtl_index)
-			{
-				RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
-				*mtl = *rhs_model->GetMaterial(mtl_index);
-				model->GetMaterial(mtl_index) = mtl;
-			}
-
-			if (rhs_model->NumMeshes() > 0)
-			{
-				std::vector<StaticMeshPtr> meshes(rhs_model->NumMeshes());
-				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumMeshes(); ++ mesh_index)
-				{
-					StaticMeshPtr rhs_mesh = checked_pointer_cast<StaticMesh>(rhs_model->Mesh(mesh_index));
-
-					meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, rhs_mesh->Name());
-					StaticMeshPtr& mesh = meshes[mesh_index];
-
-					mesh->MaterialID(rhs_mesh->MaterialID());
-					mesh->NumLods(rhs_mesh->NumLods());
-					mesh->PosBound(rhs_mesh->PosBound());
-					mesh->TexcoordBound(rhs_mesh->TexcoordBound());
-
-					for (uint32_t lod = 0; lod < rhs_mesh->NumLods(); ++ lod)
-					{
-						RenderLayout const & rhs_rl = rhs_mesh->GetRenderLayout(lod);
-
-						for (uint32_t ve_index = 0; ve_index < rhs_rl.NumVertexStreams(); ++ ve_index)
-						{
-							mesh->AddVertexStream(lod, rhs_rl.GetVertexStream(ve_index),
-								rhs_rl.VertexStreamFormat(ve_index)[0]);
-						}
-						mesh->AddIndexStream(lod, rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
-
-						mesh->NumVertices(lod, rhs_mesh->NumVertices(lod));
-						mesh->NumIndices(lod, rhs_mesh->NumIndices(lod));
-						mesh->StartVertexLocation(lod, rhs_mesh->StartVertexLocation(lod));
-						mesh->StartIndexLocation(lod, rhs_mesh->StartIndexLocation(lod));
-					}
-				}
-
-				BOOST_ASSERT(model->IsSkinned() == rhs_model->IsSkinned());
-
-				if (rhs_model->IsSkinned())
-				{
-					SkinnedModelPtr rhs_skinned_model = checked_pointer_cast<SkinnedModel>(rhs_model);
-					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
-
-					std::vector<Joint> joints(rhs_skinned_model->NumJoints());
-					for (uint32_t i = 0; i < rhs_skinned_model->NumJoints(); ++ i)
-					{
-						joints[i] = rhs_skinned_model->GetJoint(i);
-					}
-					skinned_model->AssignJoints(joints.begin(), joints.end());
-					skinned_model->AttachKeyFrameSets(rhs_skinned_model->GetKeyFrameSets());
-
-					skinned_model->NumFrames(rhs_skinned_model->NumFrames());
-					skinned_model->FrameRate(rhs_skinned_model->FrameRate());
-
-					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
-					{
-						SkinnedMeshPtr rhs_skinned_mesh = checked_pointer_cast<SkinnedMesh>(rhs_skinned_model->Mesh(mesh_index));
-						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
-						skinned_mesh->AttachFramePosBounds(rhs_skinned_mesh->GetFramePosBounds());
-					}
-
-					skinned_model->AttachActions(rhs_skinned_model->GetActions());
-				}
-
-				model->AssignMeshes(meshes.begin(), meshes.end());
-			}
+			auto rhs_model = std::static_pointer_cast<RenderModel>(resource);
+			auto model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
+			model->CloneDataFrom(*rhs_model, model_desc_.CreateMeshFactoryFunc);
 
 			this->AddsSubPath();
 
@@ -248,82 +177,30 @@ namespace
 			auto const & model = *model_desc_.model;
 			auto const & sw_model = *model_desc_.sw_model;
 
-			model->NumMaterials(sw_model.NumMaterials());
-			for (uint32_t mtl_index = 0; mtl_index < model_desc_.sw_model->NumMaterials(); ++ mtl_index)
-			{
-				model->GetMaterial(mtl_index) = model_desc_.sw_model->GetMaterial(mtl_index);
-			}
+			model->CloneDataFrom(sw_model, model_desc_.CreateMeshFactoryFunc);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			auto const & sw_rl = checked_pointer_cast<StaticMesh>(sw_model.Mesh(0))->GetRenderLayout();
+			auto const & sw_rl = checked_pointer_cast<StaticMesh>(sw_model.Mesh(0))->GetRenderLayout(0);
 
 			std::vector<GraphicsBufferPtr> merged_vbs(sw_rl.NumVertexStreams());
-			std::vector<VertexElement> merged_ves(sw_rl.NumVertexStreams());
-			for (uint32_t i = 0; i < merged_vbs.size(); ++ i)
+			for (uint32_t i = 0; i < sw_rl.NumVertexStreams(); ++ i)
 			{
 				merged_vbs[i] = rf.MakeDelayCreationVertexBuffer(BU_Static, model_desc_.access_hint, sw_rl.GetVertexStream(i)->Size());
-				merged_ves[i] = sw_rl.VertexStreamFormat(i)[0];
 			}
 			auto merged_ib = rf.MakeDelayCreationIndexBuffer(BU_Static, model_desc_.access_hint, sw_rl.GetIndexStream()->Size());
-			auto const merged_ib_format = sw_rl.IndexStreamFormat();
 
-			std::vector<StaticMeshPtr> meshes(sw_model.NumMeshes());
-			for (uint32_t mesh_index = 0; mesh_index < sw_model.NumMeshes(); ++ mesh_index)
+			for (uint32_t mesh_index = 0; mesh_index < model->NumMeshes(); ++ mesh_index)
 			{
-				auto const & sw_mesh = *checked_pointer_cast<StaticMesh>(sw_model.Mesh(mesh_index));
-
-				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, sw_mesh.Name());
-				auto& mesh = *meshes[mesh_index];
-
-				mesh.MaterialID(sw_mesh.MaterialID());
-				mesh.PosBound(sw_mesh.PosBound());
-				mesh.TexcoordBound(sw_mesh.TexcoordBound());
-
-				uint32_t const lods = sw_mesh.NumLods();
-				mesh.NumLods(lods);
-				for (uint32_t lod = 0; lod < lods; ++ lod)
+				for (uint32_t lod = 0; lod < model->Mesh(mesh_index)->NumLods(); ++ lod)
 				{
-					for (uint32_t ve_index = 0; ve_index < merged_vbs.size(); ++ ve_index)
+					auto& rl = model->Mesh(mesh_index)->GetRenderLayout(lod);
+					for (uint32_t i = 0; i < sw_rl.NumVertexStreams(); ++ i)
 					{
-						mesh.AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
+						rl.SetVertexStream(i, merged_vbs[i]);
 					}
-					mesh.AddIndexStream(lod, merged_ib, merged_ib_format);
-
-					mesh.NumVertices(lod, sw_mesh.NumVertices(lod));
-					mesh.NumIndices(lod, sw_mesh.NumIndices(lod));
-					mesh.StartVertexLocation(lod, sw_mesh.StartVertexLocation(lod));
-					mesh.StartIndexLocation(lod, sw_mesh.StartIndexLocation(lod));
+					rl.BindIndexStream(merged_ib, rl.IndexStreamFormat());
 				}
 			}
-
-			if (sw_model.IsSkinned())
-			{
-				auto& skinned_model = *checked_pointer_cast<SkinnedModel>(model);
-				auto const & sw_skinned_model = *checked_pointer_cast<SkinnedModel>(model_desc_.sw_model);
-
-				std::vector<Joint> joints(sw_skinned_model.NumJoints());
-				for (uint32_t i = 0; i < joints.size(); ++ i)
-				{
-					joints[i] = sw_skinned_model.GetJoint(i);
-				}
-				skinned_model.AssignJoints(joints.begin(), joints.end());
-
-				skinned_model.AttachKeyFrameSets(sw_skinned_model.GetKeyFrameSets());
-
-				skinned_model.NumFrames(sw_skinned_model.NumFrames());
-				skinned_model.FrameRate(sw_skinned_model.FrameRate());
-
-				for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
-				{
-					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
-					auto const & sw_skinned_mesh = *checked_pointer_cast<SkinnedMesh>(sw_skinned_model.Mesh(mesh_index));
-					skinned_mesh.AttachFramePosBounds(sw_skinned_mesh.GetFramePosBounds());
-				}
-
-				skinned_model.AttachActions(sw_skinned_model.GetActions());
-			}
-
-			model->AssignMeshes(meshes.begin(), meshes.end());
 		}
 
 		void AddsSubPath()
@@ -458,7 +335,7 @@ namespace
 
 namespace KlayGE
 {
-	RenderModel::RenderModel(std::wstring const & name)
+	RenderModel::RenderModel(std::wstring_view name)
 		: name_(name),
 			hw_res_ready_(false)
 	{
@@ -614,9 +491,71 @@ namespace KlayGE
 		}
 	}
 
+	RenderModelPtr RenderModel::Clone(std::function<RenderModelPtr(std::wstring_view)> const & CreateModelFactoryFunc,
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc)
+	{
+		auto ret_model = CreateModelFactoryFunc(this->Name());
+		ret_model->CloneDataFrom(*this, CreateMeshFactoryFunc);
 
-	StaticMesh::StaticMesh(RenderModelPtr const & model, std::wstring const & name)
-		: name_(name), model_(model),
+		ret_model->BuildModelInfo();
+		for (uint32_t i = 0; i < ret_model->NumMeshes(); ++i)
+		{
+			checked_pointer_cast<StaticMesh>(ret_model->Mesh(i))->BuildMeshInfo();
+		}
+
+		return ret_model;
+	}
+
+	void RenderModel::CloneDataFrom(RenderModel const & source,
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc)
+	{
+		this->NumMaterials(source.NumMaterials());
+		for (uint32_t mtl_index = 0; mtl_index < source.NumMaterials(); ++ mtl_index)
+		{
+			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
+			*mtl = *source.GetMaterial(mtl_index);
+			this->GetMaterial(mtl_index) = mtl;
+		}
+
+		if (source.NumMeshes() > 0)
+		{
+			std::vector<StaticMeshPtr> meshes(source.NumMeshes());
+			for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++ mesh_index)
+			{
+				auto const & src_mesh = *checked_pointer_cast<StaticMesh>(source.Mesh(mesh_index));
+
+				meshes[mesh_index] = CreateMeshFactoryFunc(*this, src_mesh.Name());
+				auto& mesh = *meshes[mesh_index];
+
+				mesh.MaterialID(src_mesh.MaterialID());
+				mesh.NumLods(src_mesh.NumLods());
+				mesh.PosBound(src_mesh.PosBound());
+				mesh.TexcoordBound(src_mesh.TexcoordBound());
+
+				for (uint32_t lod = 0; lod < src_mesh.NumLods(); ++ lod)
+				{
+					auto const & src_rl = src_mesh.GetRenderLayout(lod);
+
+					for (uint32_t ve_index = 0; ve_index < src_rl.NumVertexStreams(); ++ ve_index)
+					{
+						mesh.AddVertexStream(lod, src_rl.GetVertexStream(ve_index), src_rl.VertexStreamFormat(ve_index)[0]);
+					}
+					mesh.AddIndexStream(lod, src_rl.GetIndexStream(), src_rl.IndexStreamFormat());
+
+					mesh.NumVertices(lod, src_mesh.NumVertices(lod));
+					mesh.NumIndices(lod, src_mesh.NumIndices(lod));
+					mesh.StartVertexLocation(lod, src_mesh.StartVertexLocation(lod));
+					mesh.StartIndexLocation(lod, src_mesh.StartIndexLocation(lod));
+				}
+			}
+
+			this->AssignMeshes(meshes.begin(), meshes.end());
+		}
+	}
+
+
+	StaticMesh::StaticMesh(RenderModel const & model, std::wstring_view name)
+		: name_(name), model_(&model),
 			hw_res_ready_(false)
 	{
 	}
@@ -630,7 +569,7 @@ namespace KlayGE
 		rls_.resize(lods);
 		for (auto& rl : rls_)
 		{
-			if (model_.lock()->Name() == L"Software")
+			if (model_->Name() == L"Software")
 			{
 				rl = MakeSharedPtr<RenderLayout>();
 			}
@@ -645,9 +584,7 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo()
 	{
-		RenderModelPtr model = model_.lock();
-
-		mtl_ = model->GetMaterial(this->MaterialID());
+		mtl_ = model_->GetMaterial(this->MaterialID());
 
 		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
@@ -685,7 +622,7 @@ namespace KlayGE
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model->IsSkinned()));
+			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model_->IsSkinned()));
 		}
 	}
 
@@ -789,7 +726,7 @@ namespace KlayGE
 	}
 
 
-	SkinnedModel::SkinnedModel(std::wstring const & name)
+	SkinnedModel::SkinnedModel(std::wstring_view name)
 		: RenderModel(name),
 			last_frame_(-1),
 			num_frames_(0), frame_rate_(0)
@@ -1000,8 +937,42 @@ namespace KlayGE
 		}
 	}
 
+	void SkinnedModel::CloneDataFrom(RenderModel const & source,
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc)
+	{
+		RenderModel::CloneDataFrom(source, CreateMeshFactoryFunc);
 
-	SkinnedMesh::SkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
+		BOOST_ASSERT(this->IsSkinned() == source.IsSkinned());
+
+		if (this->IsSkinned())
+		{
+			auto const & src_skinned_model = *checked_cast<SkinnedModel const *>(&source);
+			auto& skinned_model = *checked_cast<SkinnedModel*>(this);
+
+			std::vector<Joint> joints(src_skinned_model.NumJoints());
+			for (uint32_t i = 0; i < src_skinned_model.NumJoints(); ++ i)
+			{
+				joints[i] = src_skinned_model.GetJoint(i);
+			}
+			skinned_model.AssignJoints(joints.begin(), joints.end());
+			skinned_model.AttachKeyFrameSets(src_skinned_model.GetKeyFrameSets());
+
+			skinned_model.NumFrames(src_skinned_model.NumFrames());
+			skinned_model.FrameRate(src_skinned_model.FrameRate());
+
+			for (size_t mesh_index = 0; mesh_index < src_skinned_model.NumMeshes(); ++ mesh_index)
+			{
+				auto const & src_skinned_mesh = *checked_pointer_cast<SkinnedMesh>(src_skinned_model.Mesh(mesh_index));
+				auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Mesh(mesh_index));
+				skinned_mesh.AttachFramePosBounds(src_skinned_mesh.GetFramePosBounds());
+			}
+
+			skinned_model.AttachActions(src_skinned_model.GetActions());
+		}
+	}
+
+
+	SkinnedMesh::SkinnedMesh(RenderModel const & model, std::wstring_view name)
 		: StaticMesh(model, name)
 	{
 	}
@@ -1070,8 +1041,8 @@ namespace KlayGE
 	}
 
 	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
@@ -1081,8 +1052,8 @@ namespace KlayGE
 	}
 
 	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
@@ -1518,11 +1489,11 @@ namespace KlayGE
 
 			if (skinned)
 			{
-				meshes[mesh_index] = MakeSharedPtr<SkinnedMesh>(model, wname);
+				meshes[mesh_index] = MakeSharedPtr<SkinnedMesh>(*model, wname);
 			}
 			else
 			{
-				meshes[mesh_index] = MakeSharedPtr<StaticMesh>(model, wname);
+				meshes[mesh_index] = MakeSharedPtr<StaticMesh>(*model, wname);
 			}
 			StaticMeshPtr& mesh = meshes[mesh_index];
 
@@ -2104,8 +2075,8 @@ namespace KlayGE
 	}
 
 
-	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModel const & model, std::wstring_view name)
+		: StaticMesh(model, name)
 	{
 		auto effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("LightSourceProxy"));
@@ -2191,8 +2162,8 @@ namespace KlayGE
 	}
 
 
-	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+	RenderableCameraProxy::RenderableCameraProxy(RenderModel const & model, std::wstring_view name)
+		: StaticMesh(model, name)
 	{
 		auto effect = SyncLoadRenderEffect("CameraProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("CameraProxy"));

@@ -61,7 +61,7 @@ void SubSurfaceApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<DetailedMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<DetailedMesh>);
 	object_ = MakeSharedPtr<SceneNode>(model_, SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 

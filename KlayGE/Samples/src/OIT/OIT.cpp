@@ -38,7 +38,7 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
+		RenderPolygon(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name),
 				no_oit_tech_(nullptr),
 				dp_1st_tech_(nullptr), dp_nth_tech_(nullptr), dp_1st_depth_tech_(nullptr), dp_nth_depth_tech_(nullptr),
@@ -575,7 +575,7 @@ void OITApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 	polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
 	polygon_model_->ForEachMesh([](Renderable& mesh)
 		{

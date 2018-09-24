@@ -33,7 +33,7 @@ namespace
 	class SwitchableMesh : public StaticMesh
 	{
 	public:
-		SwitchableMesh(RenderModelPtr const & model, std::wstring const & name)
+		SwitchableMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name),
 				lighting_(true)
 		{
@@ -162,7 +162,7 @@ void DeepGBuffersApp::OnCreate()
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("chipmunk-CE-01.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<SwitchableMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<SwitchableMesh>);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

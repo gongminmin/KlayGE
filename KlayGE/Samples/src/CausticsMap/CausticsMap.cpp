@@ -207,7 +207,7 @@ namespace
 	class RefractMesh : public StaticMesh
 	{
 	public:
-		RefractMesh(RenderModelPtr const & model, std::wstring const & name)
+		RefractMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 			scene_effect_ = SyncLoadRenderEffect("Scene.fxml");
@@ -587,14 +587,14 @@ void CausticsMapApp::OnCreate()
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_obj_);
 
 	sphere_model_ = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
 	sphere_obj_ = MakeSharedPtr<SceneNode>(sphere_model_, SceneNode::SOA_Cullable);
 	sphere_obj_->TransformToParent(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj_);
 	sphere_obj_->Visible(false);
 
 	bunny_model_ = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
 	bunny_obj_ = MakeSharedPtr<SceneNode>(bunny_model_, SceneNode::SOA_Cullable);
 	bunny_obj_->TransformToParent(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(bunny_obj_);

@@ -41,7 +41,7 @@ namespace KlayGE
 	class FoliageMesh : public StaticMesh
 	{
 	public:
-		FoliageMesh(RenderModelPtr const & model, std::wstring const & name)
+		FoliageMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 		}
@@ -260,7 +260,7 @@ namespace KlayGE
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			plant_meshes_[plant_type] = SyncLoadModel(plant_parameters[plant_type].mesh_name, EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<FoliageMesh>());
+				CreateModelFactory<RenderModel>, CreateMeshFactory<FoliageMesh>);
 			plant_impostor_meshes_[plant_type] = MakeSharedPtr<FoliageImpostorMesh>(plant_meshes_[plant_type]->PosBound());
 
 			plant_imposters_[plant_type] = SyncLoadImposter(plant_parameters[plant_type].imposter_name);

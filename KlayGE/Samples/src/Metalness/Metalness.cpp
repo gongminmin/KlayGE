@@ -39,8 +39,8 @@ namespace
 	class MetalRenderable : public StaticMesh
 	{
 	public:
-		MetalRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Metal")
+		MetalRenderable(RenderModel const & model, std::wstring_view name)
+			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("Metalness.fxml");
 			technique_ = effect_->TechniqueByName("PBFittingPrefiltered");
@@ -148,6 +148,9 @@ void MetalnessApp::OnCreate()
 			sphere_group_->TransformToParent(camera.InverseViewMatrix());
 		});
 
+	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
+
 	uint32_t const spheres_row = 10;
 	uint32_t const spheres_column = 10;
 	spheres_.resize(spheres_row * spheres_column);
@@ -155,8 +158,7 @@ void MetalnessApp::OnCreate()
 	{
 		for (uint32_t j = 0; j < spheres_column; ++ j)
 		{
-			auto sphere_model = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
+			auto sphere_model = sphere_model_unique->Clone(CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
 			this->Material(*sphere_model, albedo_, (i + 1.0f) / spheres_row, j / (spheres_column - 1.0f));
 
 			spheres_[i * spheres_column + j] = MakeSharedPtr<SceneNode>(sphere_model, SceneNode::SOA_Cullable);
@@ -169,7 +171,7 @@ void MetalnessApp::OnCreate()
 	}
 
 	single_model_ = SyncLoadModel("helmet_armet_2.3ds", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
 	single_object_ = MakeSharedPtr<SceneNode>(single_model_, SceneNode::SOA_Cullable);
 	single_object_->TransformToParent(MathLib::scaling(2.0f, 2.0f, 2.0f));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(single_object_);

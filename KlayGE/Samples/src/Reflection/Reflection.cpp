@@ -34,7 +34,7 @@ namespace
 	class ReflectMesh : public StaticMesh
 	{
 	public:
-		ReflectMesh(RenderModelPtr const & model, std::wstring const & name)
+		ReflectMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 		}
@@ -158,7 +158,7 @@ namespace
 	class DinoMesh : public StaticMesh
 	{
 	public:
-		DinoMesh(RenderModelPtr const & model, std::wstring const & name)
+		DinoMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 		}
@@ -212,9 +212,9 @@ void ScreenSpaceReflectionApp::OnCreate()
 	c_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<ReflectMesh>);
 	RenderablePtr dino_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<DinoMesh>);
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);

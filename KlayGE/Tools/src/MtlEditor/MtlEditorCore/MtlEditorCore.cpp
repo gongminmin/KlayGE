@@ -353,7 +353,7 @@ namespace KlayGE
 
 		std::string mesh_name = mesh_path.string();
 		model_ = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<DetailedSkinnedModel>(), CreateMeshFactory<DetailedSkinnedMesh>());
+			CreateModelFactory<DetailedSkinnedModel>, CreateMeshFactory<DetailedSkinnedMesh>);
 		checked_pointer_cast<DetailedSkinnedModel>(model_)->SetTime(0);
 		object_ = MakeSharedPtr<SceneNode>(model_, 0);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
@@ -364,7 +364,7 @@ namespace KlayGE
 
 		if (checked_pointer_cast<DetailedSkinnedModel>(model_)->NumJoints() > 0)
 		{
-			skeleton_model_ = MakeSharedPtr<SkeletonMesh>(model_);
+			skeleton_model_ = MakeSharedPtr<SkeletonMesh>(*model_);
 			skeleton_object_ = MakeSharedPtr<SceneNode>(skeleton_model_, 0);
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skeleton_object_);
 		}

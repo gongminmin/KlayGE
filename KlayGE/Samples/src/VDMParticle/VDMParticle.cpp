@@ -41,7 +41,7 @@ namespace
 	class ForwardMesh : public StaticMesh
 	{
 	public:
-		ForwardMesh(RenderModelPtr const & model, std::wstring const & name)
+		ForwardMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("VDMParticle.fxml");
@@ -146,13 +146,13 @@ void VDMParticleApp::OnCreate()
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	RenderablePtr robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
 	auto robot = MakeSharedPtr<SceneNode>(robot_model, SceneNode::SOA_Cullable);
 	robot->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
 	scene_objs_.push_back(robot);
 
 	RenderablePtr room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<ForwardMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
 	auto room = MakeSharedPtr<SceneNode>(room_model, SceneNode::SOA_Cullable);
 	scene_objs_.push_back(room);
 

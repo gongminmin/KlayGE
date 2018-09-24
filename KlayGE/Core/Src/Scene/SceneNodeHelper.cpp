@@ -42,7 +42,7 @@
 namespace KlayGE
 {
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
-		: SceneObjectLightSourceProxy(light, CreateMeshFactory<RenderableLightSourceProxy>())
+		: SceneObjectLightSourceProxy(light, CreateMeshFactory<RenderableLightSourceProxy>)
 	{
 	}
 
@@ -78,7 +78,7 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 		: SceneObjectLightSourceProxy(light, this->LoadModel(light, CreateMeshFactoryFunc))
 	{
 	}
@@ -94,7 +94,7 @@ namespace KlayGE
 	}
 
 	RenderModelPtr SceneObjectLightSourceProxy::LoadModel(LightSourcePtr const & light,
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		std::string mesh_name;
 		switch (light->Type())
@@ -124,12 +124,12 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid light type");
 		}
 		return SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);
+			CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}
 
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera)
-		: SceneObjectCameraProxy(camera, CreateMeshFactory<RenderableCameraProxy>())
+		: SceneObjectCameraProxy(camera, CreateMeshFactory<RenderableCameraProxy>)
 	{
 	}
 
@@ -154,7 +154,7 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
-			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 		: SceneObjectCameraProxy(camera, this->LoadModel(CreateMeshFactoryFunc))
 	{
 	}
@@ -170,9 +170,9 @@ namespace KlayGE
 	}
 
 	RenderModelPtr SceneObjectCameraProxy::LoadModel(
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		return SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);
+			CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}
 }

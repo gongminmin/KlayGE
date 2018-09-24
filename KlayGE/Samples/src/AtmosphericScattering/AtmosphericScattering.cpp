@@ -33,7 +33,7 @@ namespace
 	class PlanetMesh : public StaticMesh
 	{
 	public:
-		PlanetMesh(RenderModelPtr const & model, std::wstring const & name)
+		PlanetMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
@@ -87,7 +87,7 @@ namespace
 	class AtmosphereMesh : public StaticMesh
 	{
 	public:
-		AtmosphereMesh(RenderModelPtr const & model, std::wstring const & name)
+		AtmosphereMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name)
 		{
 			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
@@ -190,12 +190,12 @@ void AtmosphericScatteringApp::OnCreate()
 	light_controller_.Scalers(0.003f, 0.003f);
 
 	RenderModelPtr model_planet = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<PlanetMesh>);
 	planet_ = MakeSharedPtr<SceneNode>(model_planet->Mesh(0), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(planet_);
 
 	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 	atmosphere_ = MakeSharedPtr<SceneNode>(model_atmosphere->Mesh(0), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(atmosphere_);
 

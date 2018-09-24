@@ -43,7 +43,7 @@ private:
 class RenderPolygon : public KlayGE::StaticMesh
 {
 public:
-	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
+	RenderPolygon(KlayGE::RenderModel const & model, std::wstring_view name);
 
 	virtual void DoBuildMeshInfo() override;
 
@@ -76,7 +76,7 @@ void TutorFramework::OnCreate()
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableBox_);
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
-		KlayGE::CreateModelFactory<KlayGE::RenderModel>(), KlayGE::CreateMeshFactory<RenderPolygon>());
+		KlayGE::CreateModelFactory<KlayGE::RenderModel>, KlayGE::CreateMeshFactory<RenderPolygon>);
 
 	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(loadedModel, KlayGE::SceneNode::SOA_Cullable);
 	renderableFile_->TransformToParent(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
@@ -101,7 +101,7 @@ void TutorFramework::OnCreate()
 	indices1.push_back(2); indices1.push_back(6); indices1.push_back(3); indices1.push_back(7);
 	indices1.push_back(0); indices1.push_back(4);
 
-	meshes[0] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"side_mesh");
+	meshes[0] = KlayGE::MakeSharedPtr<RenderPolygon>(*model, L"side_mesh");
 
 	meshes[0]->NumLods(1);
 
@@ -121,7 +121,7 @@ void TutorFramework::OnCreate()
 	indices2.push_back(7); indices2.push_back(6); indices2.push_back(5);
 	indices2.push_back(7); indices2.push_back(5); indices2.push_back(4);
 
-	meshes[1] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"cap_mesh");
+	meshes[1] = KlayGE::MakeSharedPtr<RenderPolygon>(*model, L"cap_mesh");
 	meshes[1]->NumLods(1);
 	meshes[1]->AddVertexStream(0, &vertices[0], static_cast<KlayGE::uint32_t>(sizeof(vertices[0]) * vertices.size()),
 		KlayGE::VertexElement(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
@@ -175,7 +175,7 @@ KlayGE::uint32_t TutorFramework::DoUpdate(KlayGE::uint32_t /*pass*/)
 }
 
 
-RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name)
+RenderPolygon::RenderPolygon(KlayGE::RenderModel const & model, std::wstring_view name)
 	: KlayGE::StaticMesh(model, name)
 {
 	KlayGE::RenderEffectPtr effect = KlayGE::SyncLoadRenderEffect("RenderableHelper.fxml");

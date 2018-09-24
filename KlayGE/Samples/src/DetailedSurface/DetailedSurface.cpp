@@ -46,7 +46,7 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
+		RenderPolygon(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name),
 				detail_type_(DT_Parallax), wireframe_(false)
 		{
@@ -221,7 +221,7 @@ namespace
 	class RenderDetailedModel : public RenderModel
 	{
 	public:
-		explicit RenderDetailedModel(std::wstring const & name)
+		explicit RenderDetailedModel(std::wstring_view name)
 			: RenderModel(name)
 		{
 		}
@@ -482,7 +482,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		else if (loading_percentage_ < 60)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
+				CreateModelFactory<RenderDetailedModel>, CreateMeshFactory<RenderPolygon>);
 			polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
 			polygon_model_->ForEachMesh([this](Renderable& mesh)
 				{

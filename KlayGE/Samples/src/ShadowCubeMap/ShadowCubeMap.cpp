@@ -188,7 +188,7 @@ namespace
 	class OccluderMesh : public StaticMesh, public ShadowMapped
 	{
 	public:
-		OccluderMesh(RenderModelPtr const & model, std::wstring const & name)
+		OccluderMesh(RenderModel const & model, std::wstring_view name)
 			: StaticMesh(model, name),
 				ShadowMapped(SHADOW_MAP_SIZE),
 				smooth_mesh_(false), tess_factor_(5)
@@ -389,9 +389,9 @@ void ShadowCubeMap::OnCreate()
 	loading_percentage_ = 0;
 	lamp_tex_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
