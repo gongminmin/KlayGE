@@ -126,11 +126,11 @@ private:
 	KlayGE::SceneNodePtr plane_obj_;
 	KlayGE::RenderablePtr plane_renderable_;
 	KlayGE::SceneNodePtr refract_obj_;
-	KlayGE::RenderablePtr refract_model_;
+	KlayGE::RenderModelPtr refract_model_;
 	KlayGE::SceneNodePtr bunny_obj_;
-	KlayGE::RenderablePtr bunny_model_;
+	KlayGE::RenderModelPtr bunny_model_;
 	KlayGE::SceneNodePtr sphere_obj_;
-	KlayGE::RenderablePtr sphere_model_;
+	KlayGE::RenderModelPtr sphere_model_;
 	KlayGE::RenderablePtr caustics_grid_;
 
 	KlayGE::UIDialogPtr dialog_;

@@ -126,6 +126,9 @@ namespace KlayGE
 		virtual uint32_t DoUpdate(uint32_t pass) override;
 
 		void UpdateSelectedMesh();
+		void UpdateEffectAttrib(uint32_t mtl_id);
+		void UpdateMaterial(uint32_t mtl_id);
+		void UpdateTechniques(uint32_t mtl_id);
 
 	private:
 		FontPtr font_;

@@ -333,73 +333,9 @@ namespace
 			rl.BindVertexStream(distortion_vb, VertexElement(VEU_TextureCoord, 1, EF_R32F));
 		}
 
-		void LightPos(float3 const & light_pos)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LightPos(light_pos);
-			}
-		}
-
-		void LightColor(float3 const & light_color)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LightColor(light_color);
-			}
-		}
-
-		void LightFalloff(float3 const & light_falloff)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LightFalloff(light_falloff);
-			}
-		}
-
-		void HeightScale(float scale)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->HeightScale(scale);
-			}
-		}
-
-		void BindJudaTexture(JudaTexturePtr const & juda_tex)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->BindJudaTexture(juda_tex);
-			}
-		}
-
 		std::vector<uint32_t> const & JudaTexTileIDs(uint32_t index) const
 		{
 			return checked_pointer_cast<RenderPolygon>(this->Mesh(index))->JudaTexTileIDs();
-		}
-
-		void DetailType(uint32_t dt)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->DetailType(dt);
-			}
-		}
-
-		void NaLength(bool len)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->NaLength(len);
-			}
-		}
-
-		void Wireframe(bool wf)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->Wireframe(wf);
-			}
 		}
 	};
 
@@ -467,7 +403,10 @@ void DetailedSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputActio
 void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 {
 	height_scale_ = sender.GetValue() / 100.0f;
-	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->HeightScale(height_scale_);
+	polygon_model_->ForEachMesh([this](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->HeightScale(height_scale_);
+		});
 
 	std::wostringstream stream;
 	stream << L"Scale: " << height_scale_;
@@ -476,17 +415,29 @@ void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 
 void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
-	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->DetailType(sender.GetSelectedIndex());
+	int const index = sender.GetSelectedIndex();
+	polygon_model_->ForEachMesh([index](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->DetailType(index);
+		});
 }
 
 void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const & sender)
 {
-	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->NaLength(sender.GetChecked());
+	bool const na = sender.GetChecked();
+	polygon_model_->ForEachMesh([na](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->NaLength(na);
+		});
 }
 
 void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 {
-	checked_pointer_cast<RenderDetailedModel>(polygon_model_)->Wireframe(sender.GetChecked());
+	bool const wf = sender.GetChecked();
+	polygon_model_->ForEachMesh([wf](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->Wireframe(wf);
+		});
 }
 
 void DetailedSurfaceApp::DoUpdateOverlay()
@@ -533,7 +484,10 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
 			polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
-			checked_pointer_cast<RenderDetailedModel>(polygon_model_)->BindJudaTexture(juda_tex_);
+			polygon_model_->ForEachMesh([this](Renderable& mesh)
+				{
+					checked_cast<RenderPolygon*>(&mesh)->BindJudaTexture(juda_tex_);
+				});
 			juda_tex_->UpdateCache(checked_pointer_cast<RenderDetailedModel>(polygon_model_)->JudaTexTileIDs(0));
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
@@ -658,9 +612,14 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		light_pos = MathLib::normalize(light_pos);
 		light_->Position(light_pos);
 
-		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightPos(light_->Position());
-		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightColor(light_->Color());
-		checked_pointer_cast<RenderDetailedModel>(polygon_model_)->LightFalloff(light_->Falloff());
+		polygon_model_->ForEachMesh([this](Renderable& mesh)
+			{
+				auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+
+				polygon_mesh.LightPos(light_->Position());
+				polygon_mesh.LightColor(light_->Color());
+				polygon_mesh.LightFalloff(light_->Falloff());
+			});
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}

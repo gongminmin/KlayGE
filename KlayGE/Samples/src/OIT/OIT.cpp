@@ -541,92 +541,6 @@ namespace
 		RenderTechnique* rov_at_render_tech_;
 	};
 
-	class PolygonModel : public RenderModel
-	{
-	public:
-		explicit PolygonModel(std::wstring const & name)
-			: RenderModel(name)
-		{
-		}
-
-		void LightPos(float3 const & light_pos)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LightPos(light_pos);
-			}
-		}
-
-		void SetOITMode(OITMode mode)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->SetOITMode(mode);
-			}
-		}
-
-		void SetAlpha(float alpha)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->SetAlpha(alpha);
-			}
-		}
-
-		void FirstPass(bool fp)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->FirstPass(fp);
-			}
-		}
-
-		void DepthPass(bool dp)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->DepthPass(dp);
-			}
-		}
-
-		void LastDepth(TexturePtr const & depth_tex)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LastDepth(depth_tex);
-			}
-		}
-
-		void BackgroundTex(TexturePtr const & bg_tex)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->BackgroundTex(bg_tex);
-			}
-		}
-
-		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->LinkedListBuffer(fragment_link_buf, start_offset_buf);
-			}
-		}
-
-		void AccumWeightTextures(TexturePtr const & accum_tex, TexturePtr const & weight_tex)
-		{
-			for (auto const & mesh : meshes_)
-			{
-				checked_pointer_cast<RenderPolygon>(mesh)->AccumWeightTextures(accum_tex, weight_tex);
-			}
-		}
-
-		void RenderQuad()
-		{
-			checked_pointer_cast<RenderPolygon>(this->Mesh(0))->RenderQuad();
-		}
-	};
-
 
 	enum
 	{
@@ -661,9 +575,12 @@ void OITApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<PolygonModel>(), CreateMeshFactory<RenderPolygon>());
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
 	polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
-	checked_pointer_cast<PolygonModel>(polygon_model_)->LightPos(float3(-1, 2, 1));
+	polygon_model_->ForEachMesh([](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->LightPos(float3(-1, 2, 1));
+		});
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
@@ -855,7 +772,10 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		linked_list_fb_->GetViewport()->width = width;
 		linked_list_fb_->GetViewport()->height = height;
 
-		checked_pointer_cast<PolygonModel>(polygon_model_)->BackgroundTex(opaque_bg_tex_);
+		polygon_model_->ForEachMesh([this](Renderable& mesh)
+			{
+				checked_cast<RenderPolygon*>(&mesh)->BackgroundTex(opaque_bg_tex_);
+			});
 
 		if (caps.rovs_support)
 		{
@@ -882,14 +802,20 @@ void OITApp::InputHandler(InputEngine const & /*sender*/, InputAction const & ac
 void OITApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 {
 	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
-	checked_pointer_cast<PolygonModel>(polygon_model_)->SetOITMode(oit_mode_);
+	polygon_model_->ForEachMesh([this](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->SetOITMode(oit_mode_);
+		});
 	dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
 }
 
 void OITApp::AlphaHandler(KlayGE::UISlider const & sender)
 {
 	float alpha = sender.GetValue() * 0.01f;
-	checked_pointer_cast<PolygonModel>(polygon_model_)->SetAlpha(alpha);
+	polygon_model_->ForEachMesh([alpha](Renderable& mesh)
+		{
+			checked_cast<RenderPolygon*>(&mesh)->SetAlpha(alpha);
+		});
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << "Alpha: " << alpha;
@@ -937,8 +863,11 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 
 	if ((OM_PerPixelLinkedLists == oit_mode_) || (OM_AdaptiveTransparency == oit_mode_) || (OM_RovAdaptiveTransparency == oit_mode_))
 	{
-		checked_pointer_cast<PolygonModel>(polygon_model_)->LinkedListBuffer(frag_link_buf_,
-			(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_buf_ : start_offset_buf_);
+		polygon_model_->ForEachMesh([this](Renderable& mesh)
+			{
+				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_buf_,
+					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_buf_ : start_offset_buf_);
+			});
 
 		switch (pass)
 		{
@@ -955,7 +884,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
-			checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(true);
+			polygon_model_->ForEachMesh([](Renderable& mesh)
+				{
+					checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+				});
 			
 			re.BindFrameBuffer(linked_list_fb_);
 			{
@@ -973,14 +905,17 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 
 		default:
-			checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(false);
+			polygon_model_->ForEachMesh([](Renderable& mesh)
+				{
+					checked_cast<RenderPolygon*>(&mesh)->FirstPass(false);
+				});
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			if (OM_PerPixelLinkedLists == oit_mode_)
 			{
 				re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 			}
-			checked_pointer_cast<PolygonModel>(polygon_model_)->RenderQuad();
+			checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(0))->RenderQuad();
 			return App3DFramework::URV_Finished;
 		}
 	}
@@ -994,7 +929,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
-			checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(true);
+			polygon_model_->ForEachMesh([](Renderable& mesh)
+				{
+					checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+				});
 
 			re.BindFrameBuffer(weighted_fb_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 1), 1, 0);
@@ -1002,8 +940,11 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 
 		default:
 			re.BindFrameBuffer(FrameBufferPtr());
-			checked_pointer_cast<PolygonModel>(polygon_model_)->AccumWeightTextures(accum_tex_, weight_tex_);
-			checked_pointer_cast<PolygonModel>(polygon_model_)->RenderQuad();
+			polygon_model_->ForEachMesh([this](Renderable& mesh)
+				{
+					checked_cast<RenderPolygon*>(&mesh)->AccumWeightTextures(accum_tex_, weight_tex_);
+				});
+			checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(0))->RenderQuad();
 			return App3DFramework::URV_Finished;
 		}
 	}
@@ -1023,14 +964,20 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 				{
 					num_layers_ = 1;
 
-					checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(true);
+					polygon_model_->ForEachMesh([](Renderable& mesh)
+						{
+							checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+						});
 					re.BindFrameBuffer(peeling_fbs_[0]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 					return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 				}
 				else
 				{
-					checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(false);
+					polygon_model_->ForEachMesh([](Renderable& mesh)
+						{
+							checked_cast<RenderPolygon*>(&mesh)->FirstPass(false);
+						});
 
 					bool finished = false;
 
@@ -1066,7 +1013,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 					{
 						if (!finished)
 						{
-							checked_pointer_cast<PolygonModel>(polygon_model_)->LastDepth(depth_texs_[(layer - 1) % 2]);
+							polygon_model_->ForEachMesh([this, layer](Renderable& mesh)
+								{
+									checked_cast<RenderPolygon*>(&mesh)->LastDepth(depth_texs_[(layer - 1) % 2]);
+								});
 
 							re.BindFrameBuffer(peeling_fbs_[layer]);
 							peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
@@ -1106,8 +1056,13 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 				{
 					num_layers_ = 1;
 
-					checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(true);
-					checked_pointer_cast<PolygonModel>(polygon_model_)->DepthPass(depth_pass);
+					polygon_model_->ForEachMesh([depth_pass](Renderable& mesh)
+						{
+							auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+
+							polygon_mesh.FirstPass(true);
+							polygon_mesh.DepthPass(depth_pass);
+						});
 					if (depth_pass)
 					{
 						re.BindFrameBuffer(depth_fbs_[0]);
@@ -1122,8 +1077,13 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 				}
 				else
 				{
-					checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(false);
-					checked_pointer_cast<PolygonModel>(polygon_model_)->DepthPass(depth_pass);
+					polygon_model_->ForEachMesh([depth_pass](Renderable& mesh)
+						{
+							auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+
+							polygon_mesh.FirstPass(false);
+							polygon_mesh.DepthPass(depth_pass);
+						});
 
 					bool finished = false;
 
@@ -1163,7 +1123,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 					{
 						if (!finished)
 						{
-							checked_pointer_cast<PolygonModel>(polygon_model_)->LastDepth(depth_texs_[(layer - 1) % 2]);
+							polygon_model_->ForEachMesh([this, layer](Renderable& mesh)
+								{
+									checked_cast<RenderPolygon*>(&mesh)->LastDepth(depth_texs_[(layer - 1) % 2]);
+								});
 
 							if (depth_pass)
 							{
@@ -1214,7 +1177,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 	}
 	else
 	{
-		checked_pointer_cast<PolygonModel>(polygon_model_)->FirstPass(true);
+		polygon_model_->ForEachMesh([](Renderable& mesh)
+			{
+				checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+			});
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);

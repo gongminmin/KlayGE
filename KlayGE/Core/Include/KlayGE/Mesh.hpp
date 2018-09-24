@@ -252,6 +252,8 @@ namespace KlayGE
 
 		virtual bool HWResourceReady() const override;
 
+		void ForEachMesh(std::function<void(Renderable&)> const & callback) const;
+
 	protected:
 		virtual void UpdateBoundBox() override;
 		virtual void DoBuildModelInfo()

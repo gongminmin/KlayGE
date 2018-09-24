@@ -61,7 +61,7 @@ void SubSurfaceApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>());
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<DetailedMesh>());
 	object_ = MakeSharedPtr<SceneNode>(model_, SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
@@ -152,7 +152,10 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, {}, &back_face_ds_clear_value);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 
-		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthTex(back_face_ds_tex);
+		model_->ForEachMesh([back_face_ds_tex](Renderable& mesh)
+			{
+				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthTex(back_face_ds_tex);
+			});
 	}
 	else
 	{
@@ -168,7 +171,10 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthTex(back_face_depth_tex);
+		model_->ForEachMesh([back_face_depth_tex](Renderable& mesh)
+			{
+				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthTex(back_face_depth_tex);
+			});
 	}
 
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex, 0, 1, 0));
@@ -190,7 +196,10 @@ void SubSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction con
 void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
 {
 	float sigma_t = sender.GetValue() * 0.2f;
-	checked_pointer_cast<DetailedModel>(model_)->SigmaT(sigma_t);
+	model_->ForEachMesh([sigma_t](Renderable& mesh)
+		{
+			checked_cast<DetailedMesh*>(&mesh)->SigmaT(sigma_t);
+		});
 
 	std::wostringstream stream;
 	stream << L"Sigma_t: " << sigma_t;
@@ -200,7 +209,10 @@ void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
 void SubSurfaceApp::MtlThicknessChangedHandler(KlayGE::UISlider const & sender)
 {
 	float mtl_thickness = sender.GetValue() * 0.1f;
-	checked_pointer_cast<DetailedModel>(model_)->MtlThickness(mtl_thickness);
+	model_->ForEachMesh([mtl_thickness](Renderable& mesh)
+		{
+			checked_cast<DetailedMesh*>(&mesh)->MtlThickness(mtl_thickness);
+		});
 
 	std::wostringstream stream;
 	stream << L"Material thickness: " << mtl_thickness;
@@ -231,7 +243,10 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 	case 0:
 		renderEngine.BindFrameBuffer(back_face_depth_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 0.0f, 0);
-		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthPass(true);
+		model_->ForEachMesh([](Renderable& mesh)
+			{
+				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthPass(true);
+			});
 		return App3DFramework::URV_NeedFlush;
 
 	default:
@@ -245,11 +260,16 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		}
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-		checked_pointer_cast<DetailedModel>(model_)->LightPos(light_->Position());
-		checked_pointer_cast<DetailedModel>(model_)->LightColor(light_->Color());
-		checked_pointer_cast<DetailedModel>(model_)->LightFalloff(light_->Falloff());
-		checked_pointer_cast<DetailedModel>(model_)->EyePos(this->ActiveCamera().EyePos());
-		checked_pointer_cast<DetailedModel>(model_)->BackFaceDepthPass(false);
+		model_->ForEachMesh([this](Renderable& mesh)
+			{
+				auto& detailed_mesh = *checked_cast<DetailedMesh*>(&mesh);
+
+				detailed_mesh.LightPos(light_->Position());
+				detailed_mesh.LightColor(light_->Color());
+				detailed_mesh.LightFalloff(light_->Falloff());
+				detailed_mesh.EyePos(this->ActiveCamera().EyePos());
+				detailed_mesh.BackFaceDepthPass(false);
+			});
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}

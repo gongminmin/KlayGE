@@ -466,19 +466,19 @@ namespace KlayGE
 
 	void RenderModel::NumLods(uint32_t lods)
 	{
-		for (auto const & mesh : meshes_)
-		{
-			mesh->NumLods(lods);
-		}
+		this->ForEachMesh([lods](Renderable& mesh)
+			{
+				mesh.NumLods(lods);
+			});
 	}
 
 	uint32_t RenderModel::NumLods() const
 	{
 		uint32_t max_lod = 0;
-		for (auto const & mesh : meshes_)
-		{
-			max_lod = std::max(max_lod, mesh->NumLods());
-		}
+		this->ForEachMesh([&max_lod](Renderable& mesh)
+			{
+				max_lod = std::max(max_lod, mesh.NumLods());
+			});
 		return max_lod;
 	}
 
@@ -495,18 +495,18 @@ namespace KlayGE
 
 	void RenderModel::OnRenderBegin()
 	{
-		for (auto const & mesh : meshes_)
-		{
-			mesh->OnRenderBegin();
-		}
+		this->ForEachMesh([](Renderable& mesh)
+			{
+				mesh.OnRenderBegin();
+			});
 	}
 
 	void RenderModel::OnRenderEnd()
 	{
-		for (auto const & mesh : meshes_)
-		{
-			mesh->OnRenderEnd();
-		}
+		this->ForEachMesh([](Renderable& mesh)
+			{
+				mesh.OnRenderEnd();
+			});
 	}
 
 	AABBox const & RenderModel::PosBound() const
@@ -523,70 +523,70 @@ namespace KlayGE
 	{
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		for (auto const & mesh : meshes_)
-		{
-			pos_aabb_ |= mesh->PosBound();
-			tc_aabb_ |= mesh->TexcoordBound();
-		}
+		this->ForEachMesh([this](Renderable& mesh)
+			{
+				pos_aabb_ |= mesh.PosBound();
+				tc_aabb_ |= mesh.TexcoordBound();
+			});
 	}
 
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
-		for (auto const & mesh : meshes_)
-		{
-			mesh->Pass(type);
-		}
+		this->ForEachMesh([type](Renderable& mesh)
+			{
+				mesh.Pass(type);
+			});
 	}
 
 	bool RenderModel::SpecialShading() const
 	{
 		bool ss = false;
-		for (auto const & mesh : meshes_)
-		{
-			ss |= mesh->SpecialShading();
-		}
+		this->ForEachMesh([&ss](Renderable& mesh)
+			{
+				ss |= mesh.SpecialShading();
+			});
 		return ss;
 	}
 	
 	bool RenderModel::TransparencyBackFace() const
 	{
 		bool ab = false;
-		for (auto const & mesh : meshes_)
-		{
-			ab |= mesh->TransparencyBackFace();
-		}
+		this->ForEachMesh([&ab](Renderable& mesh)
+			{
+				ab |= mesh.TransparencyBackFace();
+			});
 		return ab;
 	}
 
 	bool RenderModel::TransparencyFrontFace() const
 	{
 		bool ab = false;
-		for (auto const & mesh : meshes_)
-		{
-			ab |= mesh->TransparencyFrontFace();
-		}
+		this->ForEachMesh([&ab](Renderable& mesh)
+			{
+				ab |= mesh.TransparencyFrontFace();
+			});
 		return ab;
 	}
 
 	bool RenderModel::Reflection() const
 	{
-		bool ab = false;
-		for (auto const & mesh : meshes_)
-		{
-			ab |= mesh->Reflection();
-		}
-		return ab;
+		bool ref = false;
+		this->ForEachMesh([&ref](Renderable& mesh)
+			{
+				ref |= mesh.Reflection();
+			});
+		return ref;
 	}
 
 	bool RenderModel::SimpleForward() const
 	{
-		bool ab = false;
-		for (auto const & mesh : meshes_)
-		{
-			ab |= mesh->SimpleForward();
-		}
-		return ab;
+		bool sf = false;
+		this->ForEachMesh([&sf](Renderable& mesh)
+			{
+				sf |= mesh.SimpleForward();
+			});
+		return sf;
 	}
 
 	bool RenderModel::HWResourceReady() const
@@ -604,6 +604,14 @@ namespace KlayGE
 			}
 		}
 		return ready;
+	}
+
+	void RenderModel::ForEachMesh(std::function<void(Renderable&)> const & callback) const
+	{
+		for (auto const & mesh : meshes_)
+		{
+			callback(*mesh);
+		}
 	}
 
 
@@ -954,10 +962,10 @@ namespace KlayGE
 	AABBox SkinnedModel::FramePosBound(uint32_t frame) const
 	{
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
-		for (auto const & mesh : meshes_)
-		{
-			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
-		}
+		this->ForEachMesh([&pos_aabb, frame](Renderable& mesh)
+			{
+				pos_aabb |= checked_cast<SkinnedMesh*>(&mesh)->FramePosBound(frame);
+			});
 
 		return pos_aabb;
 	}

@@ -451,69 +451,6 @@ void DetailedSkinnedModel::SetTime(float time)
 	this->SetFrame(time * frame_rate_);
 }
 
-void DetailedSkinnedModel::VisualizeLighting()
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		mesh->VisualizeLighting();
-	}
-}
-
-void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
-		mesh->VisualizeVertex(usage, usage_index);
-	}
-}
-
-void DetailedSkinnedModel::VisualizeTexture(int slot)
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		mesh->VisualizeTexture(slot);
-	}
-}
-
-void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
-		{
-			mesh->UpdateEffectAttrib();
-		}
-	}
-}
-
-void DetailedSkinnedModel::UpdateTechniques(KlayGE::uint32_t mtl_index)
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
-		{
-			mesh->UpdateTechniques();
-		}
-	}
-}
-
-void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
-{
-	for (auto const & renderable : meshes_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
-		{
-			mesh->UpdateMaterial();
-		}
-	}
-}
-
 uint32_t DetailedSkinnedModel::CopyMaterial(uint32_t mtl_index)
 {
 	uint32_t new_index = static_cast<uint32_t>(materials_.size());
