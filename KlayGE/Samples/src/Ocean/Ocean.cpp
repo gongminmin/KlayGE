@@ -827,16 +827,16 @@ void OceanApp::OnCreate()
 		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
-	HQTerrainSceneNodePtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
-	terrain->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(3, ASyncLoadTexture("Dirt.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureScale(0, float2(7, 7));
-	terrain->TextureScale(1, float2(1, 1));
-	terrain->TextureScale(2, float2(3, 3));
-	terrain->TextureScale(3, float2(1, 1));
-	terrain_ = terrain;
+	auto terrain_renderable = MakeSharedPtr<ProceduralTerrain>();
+	terrain_ = MakeSharedPtr<HQTerrainSceneObject>(terrain_renderable);
+	terrain_renderable->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(3, ASyncLoadTexture("Dirt.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureScale(0, float2(7, 7));
+	terrain_renderable->TextureScale(1, float2(1, 1));
+	terrain_renderable->TextureScale(2, float2(3, 3));
+	terrain_renderable->TextureScale(3, float2(1, 1));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	ocean_ = MakeSharedPtr<OceanObject>();
@@ -844,8 +844,7 @@ void OceanApp::OnCreate()
 	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->SkylightTex(y_cube, c_cube);
 	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->FogColor(fog_color);
 
-	checked_pointer_cast<ProceduralTerrain>(terrain_->GetRenderable())
-		->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
+	terrain_renderable->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
 
 	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableFoggySkyBox>(), SceneNode::SOA_NotCastShadow);
 	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);

@@ -523,36 +523,31 @@ namespace KlayGE
 
 		for (auto const & node : scene_nodes)
 		{
-			if ((node->VisibleMark() != BO_No) && node->Children().empty())
+			if (node->VisibleMark() != BO_No)
 			{
-				for (uint32_t i = 0; i < node->NumRenderables(); ++ i)
-				{
-					auto* renderable = node->GetRenderable(i).get();
-					if (renderable)
+				node->ForEachRenderable([](Renderable& renderable)
 					{
-						renderable->ClearInstances();
-					}
-				}
+						renderable.ClearInstances();
+					});
 			}
 		}
 
 		for (auto const & node : scene_nodes)
 		{
-			if ((node->VisibleMark() != BO_No) && node->Children().empty())
+			if (node->VisibleMark() != BO_No)
 			{
-				for (uint32_t i = 0; i < node->NumRenderables(); ++ i)
-				{
-					auto renderable = node->GetRenderable(i).get();
-					if (renderable)
+				node->ForEachRenderable([this, node](Renderable& renderable)
 					{
-						if (0 == renderable->NumInstances())
+						if (renderable.Enabled())
 						{
-							renderable->AddToRenderQueue();
+							if (0 == renderable.NumInstances())
+							{
+								renderable.AddToRenderQueue();
+							}
+							renderable.AddInstance(node);
+							++ num_objects_rendered_;
 						}
-						renderable->AddInstance(node);
-						++ num_objects_rendered_;
-					}
-				}
+					});
 			}
 		}
 

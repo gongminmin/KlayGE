@@ -201,6 +201,9 @@ namespace KlayGE
 		}
 		bool AllHWResourceReady() const;
 
+		bool Enabled() const;
+		void Enabled(bool enabled);
+
 		// For select mode
 
 		virtual void ObjectID(uint32_t id);
@@ -271,14 +274,16 @@ namespace KlayGE
 
 		std::vector<RenderLayoutPtr> rls_;
 
-		int32_t active_lod_;
+		int32_t active_lod_ = 0;
+
+		bool enabled_ = true;
 
 		// For select mode
 
 		RenderTechnique* select_mode_tech_;
 		RenderEffectParameter* select_mode_object_id_param_;
 		float4 select_mode_object_id_;
-		bool select_mode_on_;
+		bool select_mode_on_ = false;
 
 		// For deferred only
 
@@ -299,10 +304,10 @@ namespace KlayGE
 		RenderTechnique* simple_forward_tech_;
 		RenderTechnique* vdm_tech_;
 
-		float4x4 model_mat_;
+		float4x4 model_mat_ = float4x4::Identity();
 
 		PassType type_;
-		uint32_t effect_attrs_;
+		uint32_t effect_attrs_ = 0;
 
 		RenderMaterialPtr mtl_;
 

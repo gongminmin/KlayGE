@@ -161,8 +161,7 @@ namespace
 	{
 	public:
 		GridObject()
-			: SceneNode(0),
-				position_(0.0f, 0.0f), scale_(1.0f)
+			: SceneNode(0)
 		{
 			this->AddRenderable(MakeSharedPtr<RenderableType>());
 		}
@@ -175,21 +174,17 @@ namespace
 
 		void Position(float2 const & pos)
 		{
-			position_ = pos;
-			mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
+			mat_translation_ = MathLib::translation(+pos.x(), -pos.y(), 0.0f);
 			checked_pointer_cast<RenderableType>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 		void Scale(float scale)
 		{
-			scale_ = scale;
-			mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
+			mat_scaling_ = MathLib::scaling(scale, scale, 1.0f);
 			checked_pointer_cast<RenderableType>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
 	private:
-		float2 position_;
-		float scale_;
 		float4x4 mat_tile_scaling_;
 		float4x4 mat_translation_;
 		float4x4 mat_scaling_;

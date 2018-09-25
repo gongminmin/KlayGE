@@ -244,19 +244,6 @@ namespace KlayGE
 	{
 	public:
 		explicit HQTerrainSceneObject(RenderablePtr const & renderable);
-		virtual ~HQTerrainSceneObject();
-
-		void Tessellation(bool tess);
-		void ShowPatches(bool sp);
-		void ShowTiles(bool st);
-		void Wireframe(bool wf);
-		void DetailNoiseScale(float scale);
-		void TessellatedTriSize(int size);
-
-		void TextureLayer(uint32_t layer, TexturePtr const & tex);
-		void TextureScale(uint32_t layer, float2 const & scale);
-
-		float GetHeight(float x, float z);
 
 	private:
 		bool reset_terrain_;

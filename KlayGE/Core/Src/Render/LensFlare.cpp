@@ -127,7 +127,7 @@ namespace KlayGE
 		// update flare
 		if (angle > FLARE_RENDERANGLE)
 		{
-			lf_visible_ = true;
+			renderables_[0]->Enabled(true);
 
 			// get angle amount by current angle
 			float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE);	// convert angle to percent 
@@ -163,15 +163,7 @@ namespace KlayGE
 		}
 		else
 		{
-			lf_visible_ = false;
+			renderables_[0]->Enabled(false);
 		}
-
-		this->Visible(true);
-	}
-
-	void LensFlareSceneObject::Pass(PassType type)
-	{
-		SceneNode::Pass(type);
-		this->Visible(this->LFVisible());
 	}
 }

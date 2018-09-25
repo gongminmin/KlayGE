@@ -116,16 +116,16 @@ void FoliageApp::OnCreate()
 		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
-	HQTerrainSceneNodePtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
-	terrain->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(3, ASyncLoadTexture("Ground.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureScale(0, float2(7, 7));
-	terrain->TextureScale(1, float2(1, 1));
-	terrain->TextureScale(2, float2(3, 3));
-	terrain->TextureScale(3, float2(11, 11));
-	terrain_ = terrain;
+	auto terrain_renderable = MakeSharedPtr<ProceduralTerrain>();
+	terrain_ = MakeSharedPtr<HQTerrainSceneObject>(terrain_renderable);
+	terrain_renderable->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureLayer(3, ASyncLoadTexture("Ground.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain_renderable->TextureScale(0, float2(7, 7));
+	terrain_renderable->TextureScale(1, float2(1, 1));
+	terrain_renderable->TextureScale(2, float2(3, 3));
+	terrain_renderable->TextureScale(3, float2(11, 11));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableFoggySkyBox>(), SceneNode::SOA_NotCastShadow);

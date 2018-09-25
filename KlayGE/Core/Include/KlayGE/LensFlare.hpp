@@ -38,18 +38,10 @@ namespace KlayGE
 		void Direction(float3 const & dir);
 		float3 const & Direction() const;
 
-		bool LFVisible() const
-		{
-			return lf_visible_;
-		}
-
 		void MainThreadUpdateFunc();
-
-		virtual void Pass(PassType type);
 
 	private:
 		float3 dir_;
-		bool lf_visible_;
 	};
 }
 

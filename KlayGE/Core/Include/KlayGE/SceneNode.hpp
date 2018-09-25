@@ -97,6 +97,8 @@ namespace KlayGE
 		void DelRenderable(RenderablePtr const & renderable);
 		void ClearRenderables();
 
+		void ForEachRenderable(std::function<void(Renderable&)> const & callback) const;
+
 		virtual void TransformToParent(float4x4 const & mat);
 		virtual void TransformToWorld(float4x4 const & mat);
 		virtual float4x4 const & TransformToParent() const;

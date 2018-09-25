@@ -285,6 +285,17 @@ namespace KlayGE
 		pos_aabb_dirty_ = true;
 	}
 
+	void SceneNode::ForEachRenderable(std::function<void(Renderable&)> const & callback) const
+	{
+		for (auto const & renderable : renderables_)
+		{
+			if (renderable)
+			{
+				callback(*renderable);
+			}
+		}
+	}
+
 	void SceneNode::TransformToParent(float4x4 const & mat)
 	{
 		xform_to_parent_ = mat;

@@ -40,11 +40,7 @@ namespace KlayGE
 	}
 
 	Renderable::Renderable(std::wstring_view name)
-		: name_(name),
-			rls_(1),
-			active_lod_(0),
-			select_mode_on_(false),
-			model_mat_(float4x4::Identity()), effect_attrs_(0)
+		: name_(name), rls_(1)
 	{
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
@@ -390,6 +386,16 @@ namespace KlayGE
 			}
 		}
 		return ready;
+	}
+
+	bool Renderable::Enabled() const
+	{
+		return enabled_;
+	}
+
+	void Renderable::Enabled(bool enabled)
+	{
+		enabled_ = enabled;
 	}
 
 	void Renderable::ObjectID(uint32_t id)
