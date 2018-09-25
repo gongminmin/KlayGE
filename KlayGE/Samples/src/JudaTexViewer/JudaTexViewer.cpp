@@ -44,11 +44,11 @@ namespace
 #pragma pack(pop)
 #endif
 
-	class RenderTile : public RenderableHelper
+	class RenderTile : public Renderable
 	{
 	public:
 		RenderTile()
-			: RenderableHelper(L"Tile")
+			: Renderable(L"Tile")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -68,19 +68,19 @@ namespace
 				0, 1, 2, 3
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-			rl_->BindIndexStream(ib, EF_R16UI);
+			rls_[0]->BindIndexStream(ib, EF_R16UI);
 		}
 
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
-			rl_->BindVertexStream(pos_vb,
+			rls_[0]->BindVertexStream(pos_vb,
 				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
 				RenderLayout::ST_Instance);
 		}
@@ -100,11 +100,11 @@ namespace
 		float4x4 model_;
 	};
 	
-	class RenderGridBorder : public RenderableHelper
+	class RenderGridBorder : public Renderable
 	{
 	public:
 		RenderGridBorder()
-			: RenderableHelper(L"Grid")
+			: Renderable(L"Grid")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -124,19 +124,19 @@ namespace
 				0, 1, 2, 3, 0
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_LineStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_LineStrip);
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-			rl_->BindIndexStream(ib, EF_R16UI);
+			rls_[0]->BindIndexStream(ib, EF_R16UI);
 		}
 
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
-			rl_->BindVertexStream(pos_vb,
+			rls_[0]->BindVertexStream(pos_vb,
 				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
 				RenderLayout::ST_Instance);
 		}

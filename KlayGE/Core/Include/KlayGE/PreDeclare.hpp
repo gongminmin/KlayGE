@@ -70,8 +70,6 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderMaterial> RenderMaterialPtr;
 	class Renderable;
 	typedef std::shared_ptr<Renderable> RenderablePtr;
-	class RenderableHelper;
-	typedef std::shared_ptr<RenderableHelper> RenderableHelperPtr;
 	class RenderablePoint;
 	typedef std::shared_ptr<RenderablePoint> RenderablePointPtr;
 	class RenderableLine;

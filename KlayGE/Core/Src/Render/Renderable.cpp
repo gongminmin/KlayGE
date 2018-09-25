@@ -35,7 +35,14 @@
 namespace KlayGE
 {
 	Renderable::Renderable()
-		: active_lod_(0),
+		: Renderable(L"")
+	{
+	}
+
+	Renderable::Renderable(std::wstring_view name)
+		: name_(name),
+			rls_(1),
+			active_lod_(0),
 			select_mode_on_(false),
 			model_mat_(float4x4::Identity()), effect_attrs_(0)
 	{
@@ -52,12 +59,12 @@ namespace KlayGE
 
 	void Renderable::NumLods(uint32_t lods)
 	{
-		KFL_UNUSED(lods);
+		rls_.resize(lods);
 	}
 
 	uint32_t Renderable::NumLods() const
 	{
-		return 1;
+		return static_cast<uint32_t>(rls_.size());
 	}
 
 	void Renderable::ActiveLod(int32_t lod)
@@ -78,10 +85,19 @@ namespace KlayGE
 		}
 	}
 
+	RenderLayout& Renderable::GetRenderLayout() const
+	{
+		return this->GetRenderLayout(active_lod_);
+	}
+
 	RenderLayout& Renderable::GetRenderLayout(uint32_t lod) const
 	{
-		KFL_UNUSED(lod);
-		return this->GetRenderLayout();
+		return *rls_[lod];
+	}
+
+	std::wstring const & Renderable::Name() const
+	{
+		return name_;
 	}
 
 	void Renderable::OnRenderBegin()
@@ -215,6 +231,16 @@ namespace KlayGE
 
 	void Renderable::OnInstanceEnd(uint32_t /*id*/)
 	{
+	}
+
+	AABBox const & Renderable::PosBound() const
+	{
+		return pos_aabb_;
+	}
+
+	AABBox const & Renderable::TexcoordBound() const
+	{
+		return tc_aabb_;
 	}
 
 	void Renderable::AddToRenderQueue()

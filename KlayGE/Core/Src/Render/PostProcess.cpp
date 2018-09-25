@@ -248,15 +248,15 @@ namespace
 
 namespace KlayGE
 {
-	PostProcess::PostProcess(std::wstring const & name, bool volumetric)
-			: RenderableHelper(name),
+	PostProcess::PostProcess(std::wstring_view name, bool volumetric)
+			: Renderable(name),
 				volumetric_(volumetric),
 				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
 				num_bind_output_(0)
 	{
 	}
 
-	PostProcess::PostProcess(std::wstring const & name, bool volumetric,
+	PostProcess::PostProcess(std::wstring_view name, bool volumetric,
 		ArrayRef<std::string> param_names,
 		ArrayRef<std::string> input_pin_names,
 		ArrayRef<std::string> output_pin_names,
@@ -849,23 +849,23 @@ namespace KlayGE
 	{
 		if (cs_based_)
 		{
-			rl_.reset();
+			rls_[0].reset();
 			frame_buffer_.reset();
 		}
 		else
 		{
-			if (!rl_)
+			if (!rls_[0])
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderEngine& re = rf.RenderEngineInstance();
 
 				if (volumetric_)
 				{
-					rl_ = re.VolumetricPostProcessRenderLayout();
+					rls_[0] = re.VolumetricPostProcessRenderLayout();
 				}
 				else
 				{
-					rl_ = re.PostProcessRenderLayout();
+					rls_[0] = re.PostProcessRenderLayout();
 				}
 
 				pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));

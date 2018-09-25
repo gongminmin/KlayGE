@@ -74,16 +74,16 @@ namespace KlayGE
 		}
 	};
 
-	class FoliageImpostorMesh : public RenderableHelper
+	class FoliageImpostorMesh : public Renderable
 	{
 	public:
 		explicit FoliageImpostorMesh(AABBox const & aabbox)
-			: RenderableHelper(L"FoliageImpostor")
+			: Renderable(L"FoliageImpostor")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			float2 pos[] = 
 			{
@@ -93,7 +93,7 @@ namespace KlayGE
 				float2(+1, -1)
 			};
 			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
-			rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("GBufferFoliageImpostor.fxml"));
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
@@ -113,13 +113,13 @@ namespace KlayGE
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rl_->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+			rls_[0]->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
 				RenderLayout::ST_Instance);
 		}
 
 		void ForceNumInstances(uint32_t num)
 		{
-			rl_->NumInstances(num);
+			rls_[0]->NumInstances(num);
 		}
 
 		void OnRenderBegin() override
@@ -134,7 +134,7 @@ namespace KlayGE
 			billboard_mat(3, 2) = 0;
 			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
-			RenderableHelper::OnRenderBegin();
+			Renderable::OnRenderBegin();
 		}
 	};
 

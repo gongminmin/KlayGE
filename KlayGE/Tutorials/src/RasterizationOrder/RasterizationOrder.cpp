@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderQuad : public RenderableHelper
+	class RenderQuad : public Renderable
 	{
 	public:
 		RenderQuad()
-			: RenderableHelper(L"RasterizationOrder")
+			: Renderable(L"RasterizationOrder")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -52,11 +52,11 @@ namespace
 				float2(-1, -3)
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			// From https://github.com/BIDS/colormap/blob/master/parula.py
 			uint32_t const color_map[] =

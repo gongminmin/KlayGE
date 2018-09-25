@@ -34,11 +34,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderAxis : public RenderableHelper
+	class RenderAxis : public Renderable
 	{
 	public:
 		explicit RenderAxis()
-			: RenderableHelper(L"Axis")
+			: Renderable(L"Axis")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -56,12 +56,12 @@ namespace
 				float4(0, 0, 1, 2),
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_LineList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -76,11 +76,11 @@ namespace
 		}
 	};
 
-	class RenderableTranslationAxis : public RenderableHelper
+	class RenderableTranslationAxis : public Renderable
 	{
 	public:
 		RenderableTranslationAxis()
-			: RenderableHelper(L"TranslationAxis")
+			: Renderable(L"TranslationAxis")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -163,20 +163,20 @@ namespace
 
 			MathLib::compute_normal(normals.begin(), indices.begin(), indices.end(), positions.begin(), positions.end());
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
 				VertexElement(VEU_Position, 0, EF_BGR32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
 				VertexElement(VEU_TextureCoord, 0, EF_R32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
 				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
 
 			pos_aabb_ = MathLib::compute_aabbox(positions.begin(), positions.end());
@@ -202,11 +202,11 @@ namespace
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
-	class RenderableRotationAxis : public RenderableHelper
+	class RenderableRotationAxis : public Renderable
 	{
 	public:
 		RenderableRotationAxis()
-			: RenderableHelper(L"RotationAxis")
+			: Renderable(L"RotationAxis")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -269,20 +269,20 @@ namespace
 
 			MathLib::compute_normal(normals.begin(), indices.begin(), indices.end(), positions.begin(), positions.end());
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
 				VertexElement(VEU_Position, 0, EF_BGR32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
 				VertexElement(VEU_TextureCoord, 0, EF_R32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
 				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
 
 			pos_aabb_ = MathLib::compute_aabbox(positions.begin(), positions.end());
@@ -308,11 +308,11 @@ namespace
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
-	class RenderableScalingAxis : public RenderableHelper
+	class RenderableScalingAxis : public Renderable
 	{
 	public:
 		RenderableScalingAxis()
-			: RenderableHelper(L"ScalingAxis")
+			: Renderable(L"ScalingAxis")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -432,20 +432,20 @@ namespace
 
 			MathLib::compute_normal(normals.begin(), indices.begin(), indices.end(), positions.begin(), positions.end());
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
 				VertexElement(VEU_Position, 0, EF_BGR32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
 				VertexElement(VEU_TextureCoord, 0, EF_R32F));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
 				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			rls_[0]->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
 
 			pos_aabb_ = MathLib::compute_aabbox(positions.begin(), positions.end());
@@ -471,11 +471,11 @@ namespace
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
-	class RenderGrid : public RenderableHelper
+	class RenderGrid : public Renderable
 	{
 	public:
 		RenderGrid()
-			: RenderableHelper(L"Grid")
+			: Renderable(L"Grid")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -495,11 +495,11 @@ namespace
 				xyzs[(i + 2 * GRID_SIZE + 1) * 2 + 1] = float3(static_cast<float>(+GRID_SIZE), 0, static_cast<float>(-GRID_SIZE + i));
 			}
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_LineList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));

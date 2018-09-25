@@ -134,6 +134,7 @@ namespace KlayGE
 
 	public:
 		Renderable();
+		explicit Renderable(std::wstring_view name);
 		virtual ~Renderable();
 
 		virtual RenderEffectPtr const & GetRenderEffect() const
@@ -152,9 +153,9 @@ namespace KlayGE
 		{
 			return active_lod_;
 		}
-		virtual RenderLayout& GetRenderLayout() const = 0;
+		virtual RenderLayout& GetRenderLayout() const;
 		virtual RenderLayout& GetRenderLayout(uint32_t lod) const;
-		virtual std::wstring const & Name() const = 0;
+		virtual std::wstring const & Name() const;
 
 		virtual void OnRenderBegin();
 		virtual void OnRenderEnd();
@@ -163,8 +164,8 @@ namespace KlayGE
 		virtual void OnInstanceBegin(uint32_t id);
 		virtual void OnInstanceEnd(uint32_t id);
 
-		virtual AABBox const & PosBound() const = 0;
-		virtual AABBox const & TexcoordBound() const = 0;
+		virtual AABBox const & PosBound() const;
+		virtual AABBox const & TexcoordBound() const;
 
 		virtual void AddToRenderQueue();
 
@@ -258,10 +259,17 @@ namespace KlayGE
 		virtual void UpdateTechniques();
 
 	protected:
+		std::wstring name_;
+
+		AABBox pos_aabb_;
+		AABBox tc_aabb_;
+
 		std::vector<SceneNode const *> instances_;
 
 		RenderEffectPtr effect_;
 		RenderTechnique* technique_;
+
+		std::vector<RenderLayoutPtr> rls_;
 
 		int32_t active_lod_;
 

@@ -18,7 +18,6 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/RenderMaterial.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 
 #include <KlayGE/SSRPostProcess.hpp>
 

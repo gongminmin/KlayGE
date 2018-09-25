@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LensFlareRenderable : public RenderableHelper
+	class KLAYGE_CORE_API LensFlareRenderable : public Renderable
 	{
 	public:
 		LensFlareRenderable();

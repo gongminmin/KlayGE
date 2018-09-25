@@ -73,25 +73,12 @@ namespace KlayGE
 		}
 
 		void NumLods(uint32_t lods) override;
-		uint32_t NumLods() const override
-		{
-			return static_cast<uint32_t>(rls_.size());
-		}
-		RenderLayout& GetRenderLayout() const override
-		{
-			return this->GetRenderLayout(active_lod_);
-		}
-		RenderLayout& GetRenderLayout(uint32_t lod) const override
-		{
-			return *rls_[lod];
-		}
+		using Renderable::NumLods;
 
-		virtual AABBox const & PosBound() const;
 		virtual void PosBound(AABBox const & aabb);
-		virtual AABBox const & TexcoordBound() const;
+		using Renderable::PosBound;
 		virtual void TexcoordBound(AABBox const & aabb);
-
-		virtual std::wstring const & Name() const;
+		using Renderable::TexcoordBound;
 
 		void NumVertices(uint32_t lod, uint32_t n)
 		{
@@ -161,13 +148,6 @@ namespace KlayGE
 		virtual void DoBuildMeshInfo();
 
 	protected:
-		std::wstring name_;
-
-		std::vector<RenderLayoutPtr> rls_;
-
-		AABBox pos_aabb_;
-		AABBox tc_aabb_;
-
 		int32_t mtl_id_;
 
 		RenderModel const * model_;
@@ -203,21 +183,12 @@ namespace KlayGE
 
 		void NumLods(uint32_t lods) override;
 		uint32_t NumLods() const override;
-		RenderLayout& GetRenderLayout() const override
-		{
-			return *rl_;
-		}
 
 		void OnRenderBegin();
 		void OnRenderEnd();
 
 		AABBox const & PosBound() const;
 		AABBox const & TexcoordBound() const;
-
-		std::wstring const & Name() const
-		{
-			return name_;
-		}
 
 		size_t NumMaterials() const
 		{
@@ -283,13 +254,6 @@ namespace KlayGE
 		}
 
 	protected:
-		std::wstring name_;
-
-		RenderLayoutPtr rl_;
-
-		AABBox pos_aabb_;
-		AABBox tc_aabb_;
-
 		std::vector<RenderMaterialPtr> materials_;
 
 		bool hw_res_ready_;

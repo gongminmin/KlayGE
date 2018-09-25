@@ -36,6 +36,7 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -66,11 +67,11 @@
 
 namespace KlayGE
 {
-	class FontRenderable : public RenderableHelper
+	class FontRenderable : public Renderable
 	{
 	public:
 		explicit FontRenderable(std::shared_ptr<KFont> const & kfl)
-				: RenderableHelper(L"Font"),
+				: Renderable(L"Font"),
 					three_dim_(false),
 					kfont_loader_(kfl),
 					tick_(0)
@@ -79,14 +80,14 @@ namespace KlayGE
 
 			restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 			if (restart_)
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 			}
 			else
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 			}
 
 			uint32_t const kfont_char_size = kfont_loader_->CharSize();
@@ -112,9 +113,9 @@ namespace KlayGE
 			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * 4 * sizeof(FontVert)), TransientBuffer::BF_Vertex);
 			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * INDEX_PER_CHAR * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
-			rl_->BindVertexStream(tb_vb_->GetBuffer(), { VertexElement(VEU_Position, 0, EF_BGR32F),
+			rls_[0]->BindVertexStream(tb_vb_->GetBuffer(), { VertexElement(VEU_Position, 0, EF_BGR32F),
 				VertexElement(VEU_Diffuse, 0, EF_ABGR8), VertexElement(VEU_TextureCoord, 0, EF_GR32F) });
-			rl_->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
+			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 
 			pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -147,8 +148,8 @@ namespace KlayGE
 			tb_vb_->EnsureDataReady();
 			tb_ib_->EnsureDataReady();
 
-			rl_->SetVertexStream(0, tb_vb_->GetBuffer());
-			rl_->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
+			rls_[0]->SetVertexStream(0, tb_vb_->GetBuffer());
+			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 		}
 
 		void OnRenderEnd()
@@ -185,11 +186,11 @@ namespace KlayGE
 					++ i;
 				}
 
-				rl_->NumVertices(vert_length / sizeof(FontVert));
-				rl_->StartIndexLocation(ind_offset / sizeof(uint16_t));
-				rl_->NumIndices(ind_length / sizeof(uint16_t));
+				rls_[0]->NumVertices(vert_length / sizeof(FontVert));
+				rls_[0]->StartIndexLocation(ind_offset / sizeof(uint16_t));
+				rls_[0]->NumIndices(ind_length / sizeof(uint16_t));
 
-				re.Render(*this->GetRenderEffect(), *this->GetRenderTechnique(), *rl_);
+				re.Render(*this->GetRenderEffect(), *this->GetRenderTechnique(), *rls_[0]);
 			}
 
 			for (size_t i = 0; i < tb_vb_sub_allocs_.size(); ++ i)

@@ -40,7 +40,6 @@
 
 #include <KFL/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 
 #include <list>
 #include <vector>

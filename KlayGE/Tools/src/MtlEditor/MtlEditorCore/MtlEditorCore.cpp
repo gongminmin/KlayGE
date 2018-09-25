@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderAxis : public RenderableHelper
+	class RenderAxis : public Renderable
 	{
 	public:
 		RenderAxis()
-			: RenderableHelper(L"Axis")
+			: Renderable(L"Axis")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -54,12 +54,12 @@ namespace
 				float4(0, 0, 1, 2),
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_LineList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -74,11 +74,11 @@ namespace
 		}
 	};
 
-	class RenderGrid : public RenderableHelper
+	class RenderGrid : public Renderable
 	{
 	public:
 		RenderGrid()
-			: RenderableHelper(L"Grid")
+			: Renderable(L"Grid")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -96,12 +96,12 @@ namespace
 				xyzs[(i + 21) * 2 + 1] = float3(+10, 0, -10.0f + i);
 			}
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_LineList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -116,16 +116,16 @@ namespace
 		}
 	};
 
-	class RenderImpostor : public RenderableHelper
+	class RenderImpostor : public Renderable
 	{
 	public:
 		RenderImpostor(std::string const & name, AABBox const & aabbox)
-			: RenderableHelper(L"RenderImpostor")
+			: Renderable(L"RenderImpostor")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			float2 pos[] =
 			{
@@ -135,7 +135,7 @@ namespace
 				float2(+1, -1)
 			};
 			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
-			rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Imposter.fxml"));
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
@@ -171,7 +171,7 @@ namespace
 			float2 start_tc = imposter_->StartTexCoord(camera->EyePos() - pos_aabb_.Center());
 			*(deferred_effect_->ParameterByName("start_tc")) = start_tc;
 
-			RenderableHelper::OnRenderBegin();
+			Renderable::OnRenderBegin();
 		}
 
 	private:

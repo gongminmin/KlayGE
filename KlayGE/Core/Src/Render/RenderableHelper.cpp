@@ -48,34 +48,8 @@
 
 namespace KlayGE
 {
-	RenderableHelper::RenderableHelper(std::wstring const & name)
-		: name_(name)
-	{
-	}
-
-	RenderLayout& RenderableHelper::GetRenderLayout() const
-	{
-		return *rl_;
-	}
-
-	AABBox const & RenderableHelper::PosBound() const
-	{
-		return pos_aabb_;
-	}
-
-	AABBox const & RenderableHelper::TexcoordBound() const
-	{
-		return tc_aabb_;
-	}
-
-	std::wstring const & RenderableHelper::Name() const
-	{
-		return name_;
-	}
-
-
 	RenderablePoint::RenderablePoint()
-		: RenderableHelper(L"Point")
+		: Renderable(L"Point")
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -85,12 +59,12 @@ namespace KlayGE
 		color_ep_ = effect_->ParameterByName("color");
 		mvp_param_ = effect_->ParameterByName("mvp");
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_PointList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_PointList);
 
 		float v = 0;
 		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(v), &v);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -126,7 +100,7 @@ namespace KlayGE
 
 
 	RenderableLine::RenderableLine()
-		: RenderableHelper(L"Line")
+		: Renderable(L"Line")
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -142,11 +116,11 @@ namespace KlayGE
 			0, 1
 		};
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_LineList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -188,7 +162,7 @@ namespace KlayGE
 
 
 	RenderableTriangle::RenderableTriangle()
-		: RenderableHelper(L"Triangle")
+		: Renderable(L"Triangle")
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -205,11 +179,11 @@ namespace KlayGE
 			0, 1, 2
 		};
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -252,7 +226,7 @@ namespace KlayGE
 
 
 	RenderableTriBox::RenderableTriBox()
-		: RenderableHelper(L"TriBox")
+		: Renderable(L"TriBox")
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -284,14 +258,14 @@ namespace KlayGE
 			1, 3, 7, 7, 5, 1
 		};
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		auto ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-		rl_->BindIndexStream(ib, EF_R16UI);
+		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -335,7 +309,7 @@ namespace KlayGE
 
 
 	RenderableLineBox::RenderableLineBox()
-		: RenderableHelper(L"LineBox")
+		: Renderable(L"LineBox")
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 
@@ -364,14 +338,14 @@ namespace KlayGE
 			0, 4, 1, 5, 2, 6, 3, 7
 		};
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_LineList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_LineList);
 
 		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		auto ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-		rl_->BindIndexStream(ib, EF_R16UI);
+		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -416,12 +390,12 @@ namespace KlayGE
 
 	RenderablePlane::RenderablePlane(float length, float width,
 				int length_segs, int width_segs, bool has_tex_coord, bool has_tangent)
-			: RenderableHelper(L"RenderablePlane")
+			: Renderable(L"RenderablePlane")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		std::vector<int16_t> positions;
 		for (int y = 0; y < width_segs + 1; ++ y)
@@ -446,7 +420,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]);
-		rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_SIGNED_ABGR16));
+		rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_SIGNED_ABGR16));
 
 		if (has_tex_coord)
 		{
@@ -470,7 +444,7 @@ namespace KlayGE
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(tex_coords.size() * sizeof(tex_coords[0])), &tex_coords[0]);
-			rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_SIGNED_GR16));
+			rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_SIGNED_GR16));
 		}
 
 		if (has_tangent)
@@ -492,7 +466,7 @@ namespace KlayGE
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(tangent.size() * sizeof(tangent[0])), &tangent[0]);
-			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Tangent, 0, fmt));
+			rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_Tangent, 0, fmt));
 		}
 
 		std::vector<uint16_t> index;
@@ -512,7 +486,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
-		rl_->BindIndexStream(ib, EF_R16UI);
+		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 		pos_aabb_ = AABBox(float3(-length / 2, -width / 2, 0), float3(+length / 2, +width / 2, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
@@ -521,7 +495,7 @@ namespace KlayGE
 
 	RenderDecal::RenderDecal(TexturePtr const & normal_tex, TexturePtr const & albedo_tex,
 			float3 const & albedo_clr, float metalness, float glossiness)
-		: RenderableHelper(L"Decal")
+		: Renderable(L"Decal")
 	{
 		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
 
@@ -548,14 +522,14 @@ namespace KlayGE
 		};
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-		rl_->BindIndexStream(ib, EF_R16UI);
+		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 		model_mat_ = float4x4::Identity();
 		effect_attrs_ |= EA_AlphaTest;
@@ -572,7 +546,7 @@ namespace KlayGE
 
 	void RenderDecal::OnRenderBegin()
 	{
-		RenderableHelper::OnRenderBegin();
+		Renderable::OnRenderBegin();
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();

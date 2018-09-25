@@ -437,24 +437,24 @@ namespace
 #pragma pack(pop)
 #endif
 
-	class RenderParticles : public RenderableHelper
+	class RenderParticles : public Renderable
 	{
 	public:
 		explicit RenderParticles(bool gs_support)
-			: RenderableHelper(L"Particles")
+			: Renderable(L"Particles")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = SyncLoadRenderEffect("Particle.fxml");
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 			if (gs_support)
 			{
-				rl_->TopologyType(RenderLayout::TT_PointList);
+				rls_[0]->TopologyType(RenderLayout::TT_PointList);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
 					sizeof(ParticleInstance), nullptr);
-				rl_->BindVertexStream(pos_vb,
+				rls_[0]->BindVertexStream(pos_vb,
 					{ VertexElement(VEU_Position, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 0, EF_ABGR32F) });
 
 				simple_forward_tech_ = effect_->TechniqueByName("ParticleWithGS");
@@ -475,22 +475,22 @@ namespace
 					0, 1, 2, 3
 				};
 
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					sizeof(texs), texs);
-				rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F),
+				rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F),
 					RenderLayout::ST_Geometry, 0);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
 					sizeof(ParticleInstance), nullptr);
-				rl_->BindVertexStream(pos_vb,
+				rls_[0]->BindVertexStream(pos_vb,
 					{ VertexElement(VEU_TextureCoord, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
 					RenderLayout::ST_Instance);
 
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					sizeof(indices), indices);
-				rl_->BindIndexStream(ib, EF_R16UI);
+				rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 				simple_forward_tech_ = effect_->TechniqueByName("Particle");
 				vdm_tech_ = effect_->TechniqueByName("ParticleVDM");
@@ -552,7 +552,7 @@ namespace
 			pos_aabb_ = pos_aabb;
 		}
 
-		using RenderableHelper::PosBound;
+		using Renderable::PosBound;
 	};
 }
 

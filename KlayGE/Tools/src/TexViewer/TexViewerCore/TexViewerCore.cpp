@@ -27,11 +27,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderQuad : public RenderableHelper
+	class RenderQuad : public Renderable
 	{
 	public:
 		RenderQuad()
-			: RenderableHelper(L"Quad")
+			: Renderable(L"Quad")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -52,12 +52,12 @@ namespace
 				float2(1, 1),
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));

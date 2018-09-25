@@ -15,7 +15,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
-#include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/Renderable.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Window.hpp>
 

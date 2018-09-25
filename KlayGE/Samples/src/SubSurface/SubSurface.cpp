@@ -3,7 +3,6 @@
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/FrameBuffer.hpp>

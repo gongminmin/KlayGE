@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderableSkyBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableSkyBox : public Renderable
 	{
 	public:
 		RenderableSkyBox();

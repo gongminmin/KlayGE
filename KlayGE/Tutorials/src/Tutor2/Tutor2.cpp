@@ -4,6 +4,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>

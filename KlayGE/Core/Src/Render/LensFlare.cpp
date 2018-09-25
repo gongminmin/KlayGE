@@ -25,12 +25,12 @@ namespace KlayGE
 	int const SUN_FLARENUM = 6;
 
 	LensFlareRenderable::LensFlareRenderable()
-		: RenderableHelper(L"LensFlare")
+		: Renderable(L"LensFlare")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		std::vector<float3> vertices;
 		for (int i = 0; i < SUN_FLARENUM; ++ i)
@@ -43,7 +43,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])), &vertices[0]);
-		rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+		rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 		std::vector<uint32_t> indices;
 		for (int i = 0; i < SUN_FLARENUM; ++ i)
@@ -59,7 +59,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
-		rl_->BindIndexStream(ib, EF_R32UI);
+		rls_[0]->BindIndexStream(ib, EF_R32UI);
 
 		effect_ = SyncLoadRenderEffect("LensFlare.fxml");
 		simple_forward_tech_ = effect_->TechniqueByName("LensFlare");

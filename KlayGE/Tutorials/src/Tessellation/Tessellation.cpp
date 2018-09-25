@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTriangle : public RenderableHelper
+	class RenderTriangle : public Renderable
 	{
 	public:
 		RenderTriangle()
-			: RenderableHelper(L"Triangle")
+			: Renderable(L"Triangle")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -52,10 +52,10 @@ namespace
 				float3(-0.7f, -0.8f, 0)
 			};
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -65,12 +65,12 @@ namespace
 		{
 			if (enabled)
 			{
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				rls_[0]->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 				technique_ = effect_->TechniqueByName("Tessellation");
 			}
 			else
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 				technique_ = effect_->TechniqueByName("NoTessellation");
 			}
 		}

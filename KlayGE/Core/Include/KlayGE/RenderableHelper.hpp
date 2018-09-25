@@ -36,33 +36,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderableHelper : public Renderable
-	{
-	public:
-		explicit RenderableHelper(std::wstring const & name);
-		virtual ~RenderableHelper()
-		{
-		}
-
-		virtual RenderLayout& GetRenderLayout() const;
-
-		virtual AABBox const & PosBound() const;
-		virtual AABBox const & TexcoordBound() const;
-
-		virtual std::wstring const & Name() const;
-
-	protected:
-		std::wstring name_;
-
-		AABBox pos_aabb_;
-		AABBox tc_aabb_;
-
-		RenderLayoutPtr rl_;
-
-		RenderEffectParameter* color_ep_;
-	};
-
-	class KLAYGE_CORE_API RenderablePoint : public RenderableHelper
+	class KLAYGE_CORE_API RenderablePoint : public Renderable
 	{
 	public:
 		explicit RenderablePoint();
@@ -78,9 +52,10 @@ namespace KlayGE
 
 	private:
 		RenderEffectParameter* v0_ep_;
+		RenderEffectParameter* color_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderableLine : public RenderableHelper
+	class KLAYGE_CORE_API RenderableLine : public Renderable
 	{
 	public:
 		explicit RenderableLine();
@@ -97,9 +72,10 @@ namespace KlayGE
 	private:
 		RenderEffectParameter* v0_ep_;
 		RenderEffectParameter* v1_ep_;
+		RenderEffectParameter* color_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderableTriangle : public RenderableHelper
+	class KLAYGE_CORE_API RenderableTriangle : public Renderable
 	{
 	public:
 		explicit RenderableTriangle();
@@ -117,9 +93,10 @@ namespace KlayGE
 		RenderEffectParameter* v0_ep_;
 		RenderEffectParameter* v1_ep_;
 		RenderEffectParameter* v2_ep_;
+		RenderEffectParameter* color_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderableTriBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableTriBox : public Renderable
 	{
 	public:
 		explicit RenderableTriBox();
@@ -142,9 +119,10 @@ namespace KlayGE
 		RenderEffectParameter* v5_ep_;
 		RenderEffectParameter* v6_ep_;
 		RenderEffectParameter* v7_ep_;
+		RenderEffectParameter* color_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderableLineBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableLineBox : public Renderable
 	{
 	public:
 		explicit RenderableLineBox();
@@ -167,9 +145,10 @@ namespace KlayGE
 		RenderEffectParameter* v5_ep_;
 		RenderEffectParameter* v6_ep_;
 		RenderEffectParameter* v7_ep_;
+		RenderEffectParameter* color_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper
+	class KLAYGE_CORE_API RenderablePlane : public Renderable
 	{
 	public:
 		RenderablePlane(float length, float width, int length_segs, int width_segs,
@@ -179,7 +158,7 @@ namespace KlayGE
 		}
 	};
 
-	class KLAYGE_CORE_API RenderDecal : public RenderableHelper
+	class KLAYGE_CORE_API RenderDecal : public Renderable
 	{
 	public:
 		RenderDecal(TexturePtr const & normal_tex, TexturePtr const & albedo_tex,

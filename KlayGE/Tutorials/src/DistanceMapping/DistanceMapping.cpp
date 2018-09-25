@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderPolygon : public RenderableHelper
+	class RenderPolygon : public Renderable
 	{
 	public:
 		RenderPolygon()
-			: RenderableHelper(L"Polygon")
+			: Renderable(L"Polygon")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -73,14 +73,14 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
-			rl_->BindVertexStream(tex0_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(tex0_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
 
 			float3 normal_float3[std::size(xyzs)];
 			MathLib::compute_normal(normal_float3,
@@ -135,10 +135,10 @@ namespace
 			}
 			
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(tangent), tangent);
-			rl_->BindVertexStream(tan_vb, VertexElement(VEU_Tangent, 0, fmt));
+			rls_[0]->BindVertexStream(tan_vb, VertexElement(VEU_Tangent, 0, fmt));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-			rl_->BindIndexStream(ib, EF_R16UI);
+			rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -146,7 +146,7 @@ namespace
 
 		void ModelMatrix(float4x4 const & mat)
 		{
-			RenderableHelper::ModelMatrix(mat);
+			Renderable::ModelMatrix(mat);
 			inv_model_mat_ = MathLib::inverse(model_mat_);
 		}
 

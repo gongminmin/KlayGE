@@ -36,11 +36,11 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API PostProcess : public RenderableHelper
+	class KLAYGE_CORE_API PostProcess : public Renderable
 	{
 	public:
-		PostProcess(std::wstring const & name, bool volumetric);
-		PostProcess(std::wstring const & name, bool volumetric,
+		PostProcess(std::wstring_view name, bool volumetric);
+		PostProcess(std::wstring_view name, bool volumetric,
 			ArrayRef<std::string> param_names,
 			ArrayRef<std::string> input_pin_names,
 			ArrayRef<std::string> output_pin_names,

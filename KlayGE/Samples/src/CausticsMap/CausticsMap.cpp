@@ -366,11 +366,11 @@ namespace
 		TexturePtr env_cube_;
 	};
 
-	class CausticsGrid : public RenderableHelper
+	class CausticsGrid : public Renderable
 	{
 	public:
 		CausticsGrid()
-			: RenderableHelper(L"CausticsGrid")
+			: Renderable(L"CausticsGrid")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -383,17 +383,17 @@ namespace
 				}
 			}
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 
 			effect_ = SyncLoadRenderEffect("Caustics.fxml");
 			*(effect_->ParameterByName("pt_texture")) = ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{
-				rl_->TopologyType(RenderLayout::TT_PointList);
+				rls_[0]->TopologyType(RenderLayout::TT_PointList);
 
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
-				rl_->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+				rls_[0]->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 				single_caustics_pass_ = effect_->TechniqueByName("GenSingleFaceCausticsMapWithGS");
 				BOOST_ASSERT(single_caustics_pass_->Validate());
@@ -402,11 +402,11 @@ namespace
 			}
 			else
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
-				rl_->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F), RenderLayout::ST_Instance, 1);
+				rls_[0]->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F), RenderLayout::ST_Instance, 1);
 
 				float2 texs[] =
 				{
@@ -422,11 +422,11 @@ namespace
 				};
 
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-				rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
+				rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
 					RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
 
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-				rl_->BindIndexStream(ib, EF_R16UI);
+				rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 				single_caustics_pass_ = effect_->TechniqueByName("GenSingleFaceCausticsMap");
 				BOOST_ASSERT(single_caustics_pass_->Validate());

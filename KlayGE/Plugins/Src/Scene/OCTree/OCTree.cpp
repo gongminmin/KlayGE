@@ -29,7 +29,6 @@
 #include <KFL/Matrix.hpp>
 #include <KFL/Plane.hpp>
 #include <KlayGE/SceneNode.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>

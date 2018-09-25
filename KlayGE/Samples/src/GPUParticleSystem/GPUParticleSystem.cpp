@@ -134,11 +134,11 @@ namespace
 		float birth_time;
 	};
 
-	class RenderParticles : public RenderableHelper
+	class RenderParticles : public Renderable
 	{
 	public:
 		explicit RenderParticles(int max_num_particles)
-			: RenderableHelper(L"RenderParticles"),
+			: Renderable(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -156,13 +156,13 @@ namespace
 				0, 1, 2, 3,
 			};
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 
 			effect_ = SyncLoadRenderEffect("GPUParticleSystem.fxml");
 			*(effect_->ParameterByName("particle_tex")) = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{
-				rl_->TopologyType(RenderLayout::TT_PointList);
+				rls_[0]->TopologyType(RenderLayout::TT_PointList);
 
 				if (use_so || use_cs)
 				{
@@ -179,7 +179,7 @@ namespace
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						max_num_particles * sizeof(float2), &p_in_tex[0]);
 
-					rl_->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F));
+					rls_[0]->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F));
 					technique_ = effect_->TechniqueByName("ParticlesWithGS");
 				}
 			}
@@ -200,12 +200,12 @@ namespace
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					sizeof(indices), indices);
 
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-				rl_->BindVertexStream(tex0, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
+				rls_[0]->BindVertexStream(tex0, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
 										RenderLayout::ST_Geometry, max_num_particles);
-				rl_->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F),
+				rls_[0]->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F),
 										RenderLayout::ST_Instance, 1);
-				rl_->BindIndexStream(ib, EF_R16UI);
+				rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 				technique_ = effect_->TechniqueByName("Particles");
 			}
@@ -244,7 +244,7 @@ namespace
 		{
 			if (use_gs && (use_so || use_cs))
 			{
-				rl_->BindVertexStream(particle_pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
+				rls_[0]->BindVertexStream(particle_pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 			}
 		}
 
@@ -254,11 +254,11 @@ namespace
 		TexturePtr noise_vol_tex_;
 	};
 
-	class GPUParticleSystem : public RenderableHelper
+	class GPUParticleSystem : public Renderable
 	{
 	public:
 		GPUParticleSystem(int max_num_particles, TexturePtr const & terrain_height_map, TexturePtr const & terrain_normal_map)
-			: RenderableHelper(L"GPUParticleSystem"),
+			: Renderable(L"GPUParticleSystem"),
 				max_num_particles_(max_num_particles),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
 				model_mat_(float4x4::Identity()),
@@ -325,9 +325,9 @@ namespace
 			}
 			else if (use_so)
 			{
-				rl_ = rf.MakeRenderLayout();
-				rl_->TopologyType(RenderLayout::TT_PointList);
-				rl_->NumVertices(max_num_particles);
+				rls_[0] = rf.MakeRenderLayout();
+				rls_[0]->TopologyType(RenderLayout::TT_PointList);
+				rls_[0]->NumVertices(max_num_particles);
 
 				update_so_tech_ = effect_->TechniqueByName("UpdateSO");
 				technique_ = update_so_tech_;
@@ -372,8 +372,8 @@ namespace
 			}
 			else
 			{
-				rl_ = rf.MakeRenderLayout();
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rls_[0] = rf.MakeRenderLayout();
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 				{
 					float3 xyzs[] = 
 					{
@@ -385,7 +385,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						sizeof(xyzs), &xyzs[0]);
-					rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+					rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 					pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 				}
@@ -400,7 +400,7 @@ namespace
 
 					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						sizeof(texs), &texs[0]);
-					rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
+					rls_[0]->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
 
 					tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				}

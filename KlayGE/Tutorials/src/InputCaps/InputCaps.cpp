@@ -5,7 +5,6 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>

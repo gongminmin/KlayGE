@@ -336,7 +336,7 @@ namespace
 namespace KlayGE
 {
 	RenderModel::RenderModel(std::wstring_view name)
-		: name_(name),
+		: Renderable(name),
 			hw_res_ready_(false)
 	{
 	}
@@ -555,8 +555,8 @@ namespace KlayGE
 
 
 	StaticMesh::StaticMesh(RenderModel const & model, std::wstring_view name)
-		: name_(name), model_(&model),
-			hw_res_ready_(false)
+		: Renderable(name),
+			model_(&model), hw_res_ready_(false)
 	{
 	}
 
@@ -566,7 +566,8 @@ namespace KlayGE
 
 	void StaticMesh::NumLods(uint32_t lods)
 	{
-		rls_.resize(lods);
+		Renderable::NumLods(lods);
+
 		for (auto& rl : rls_)
 		{
 			if (model_->Name() == L"Software")
@@ -626,24 +627,9 @@ namespace KlayGE
 		}
 	}
 
-	std::wstring const & StaticMesh::Name() const
-	{
-		return name_;
-	}
-
-	AABBox const & StaticMesh::PosBound() const
-	{
-		return pos_aabb_;
-	}
-
 	void StaticMesh::PosBound(AABBox const & aabb)
 	{
 		pos_aabb_ = aabb;
-	}
-
-	AABBox const & StaticMesh::TexcoordBound() const
-	{
-		return tc_aabb_;
 	}
 
 	void StaticMesh::TexcoordBound(AABBox const & aabb)

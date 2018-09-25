@@ -24,10 +24,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API InfTerrainRenderable : public RenderableHelper
+	class KLAYGE_CORE_API InfTerrainRenderable : public Renderable
 	{
 	public:
-		InfTerrainRenderable(std::wstring const & name, uint32_t num_grids = 256, float stride = 1, float increate_rate = 1.012f);
+		InfTerrainRenderable(std::wstring_view name, uint32_t num_grids = 256, float stride = 1, float increate_rate = 1.012f);
 		virtual ~InfTerrainRenderable();
 
 		float2 const & XDir() const
@@ -61,7 +61,7 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API HQTerrainRenderable : public RenderableHelper
+	class KLAYGE_CORE_API HQTerrainRenderable : public Renderable
 	{
 		friend class HQTerrainSceneObject;
 
@@ -105,7 +105,7 @@ namespace KlayGE
 		//    ####################
 		//    ####################
 		//
-		class TileRing
+		class TileRing : boost::noncopyable
 		{
 		public:
 			// hole_width & outer_width are num of tiles
@@ -153,9 +153,6 @@ namespace KlayGE
 			int const hole_width_, outer_width_, ring_width_;
 			int const num_tiles_;
 			float const tile_size_;
-
-			TileRing(TileRing const & rhs);
-			TileRing& operator=(TileRing const & rhs);
 		};
 
 	public:

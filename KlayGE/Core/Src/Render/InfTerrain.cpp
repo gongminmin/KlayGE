@@ -25,13 +25,13 @@
 
 namespace KlayGE
 {
-	InfTerrainRenderable::InfTerrainRenderable(std::wstring const & name, uint32_t num_grids, float stride, float increate_rate)
-		: RenderableHelper(name)
+	InfTerrainRenderable::InfTerrainRenderable(std::wstring_view name, uint32_t num_grids, float stride, float increate_rate)
+		: Renderable(name)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -80,7 +80,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])), &vertices[0]);
-		rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+		rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 		std::vector<uint32_t> indices;
 		for (uint32_t y = 0; y < num_grids - 1; ++ y)
@@ -99,7 +99,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
-		rl_->BindIndexStream(ib, EF_R32UI);
+		rls_[0]->BindIndexStream(ib, EF_R32UI);
 	}
 
 	InfTerrainRenderable::~InfTerrainRenderable()
@@ -128,7 +128,7 @@ namespace KlayGE
 
 		if (deferred_effect_)
 		{
-			RenderableHelper::OnRenderBegin();
+			Renderable::OnRenderBegin();
 		}
 		else
 		{
@@ -353,7 +353,7 @@ namespace KlayGE
 
 	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect,
 			float world_scale, float vertical_scale, int world_uv_repeats)
-		: RenderableHelper(L"HQTerrain"),
+		: Renderable(L"HQTerrain"),
 			world_scale_(world_scale), vertical_scale_(vertical_scale), world_uv_repeats_(world_uv_repeats),
 			ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
 			tessellated_tri_size_(6), wireframe_(false), show_patches_(false), show_tiles_(false)
@@ -436,7 +436,7 @@ namespace KlayGE
 
 	void HQTerrainRenderable::UpdateTechniques()
 	{
-		RenderableHelper::UpdateTechniques();
+		Renderable::UpdateTechniques();
 
 		auto deferred_effect = deferred_effect_.get();
 
@@ -672,15 +672,15 @@ namespace KlayGE
 
 			if (need_tess)
 			{
-				rl_ = ring->GetTessRL();
+				rls_[0] = ring->GetTessRL();
 			}
 			else
 			{
-				rl_ = ring->GetNonTessRL();
+				rls_[0] = ring->GetNonTessRL();
 			}
 
 			*tile_size_param_ = ring->TileSize();
-			re.Render(*effect_, *technique_, *rl_);
+			re.Render(*effect_, *technique_, *rls_[0]);
 		}
 	}
 
