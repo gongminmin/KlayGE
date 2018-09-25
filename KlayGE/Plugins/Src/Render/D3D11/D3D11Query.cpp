@@ -167,16 +167,24 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 
-		D3D11_QUERY_DESC desc;
-		desc.Query = D3D11_QUERY_TIMESTAMP;
-		desc.MiscFlags = 0;
+		D3D11_QUERY_DESC disjoint_desc;
+		disjoint_desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
+		disjoint_desc.MiscFlags = 0;
+
+		ID3D11Query* disjoint_query;
+		d3d_device->CreateQuery(&disjoint_desc, &disjoint_query);
+		timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
+
+		D3D11_QUERY_DESC timestamp_desc;
+		timestamp_desc.Query = D3D11_QUERY_TIMESTAMP;
+		timestamp_desc.MiscFlags = 0;
 
 		ID3D11Query* start_query;
-		d3d_device->CreateQuery(&desc, &start_query);
+		d3d_device->CreateQuery(&timestamp_desc, &start_query);
 		timestamp_start_query_ = MakeCOMPtr(start_query);
 
 		ID3D11Query* end_query;
-		d3d_device->CreateQuery(&desc, &end_query);
+		d3d_device->CreateQuery(&timestamp_desc, &end_query);
 		timestamp_end_query_ = MakeCOMPtr(end_query);
 	}
 
@@ -185,6 +193,7 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
+		d3d_imm_ctx->Begin(timestamp_disjoint_query_.get());
 		d3d_imm_ctx->End(timestamp_start_query_.get());
 	}
 
@@ -194,6 +203,7 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(timestamp_end_query_.get());
+		d3d_imm_ctx->End(timestamp_disjoint_query_.get());
 
 		this->SignalFence();
 	}
@@ -201,22 +211,18 @@ namespace KlayGE
 	double D3D11TimerQuery::TimeElapsed()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.InvTimestampFreq() > 0)
-		{
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
-			this->WaitForFence();
+		this->WaitForFence();
 
-			uint64_t start_timestamp, end_timestamp;
-			while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
-			while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
+		uint64_t start_timestamp, end_timestamp;
+		while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
+		while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
 
-			return (end_timestamp - start_timestamp) * re.InvTimestampFreq();
-		}
-		else
-		{
-			return -1;
-		}
+		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
+		while (S_OK != d3d_imm_ctx->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
+
+		return disjoint.Disjoint ? -1 : static_cast<double>(end_timestamp - start_timestamp) / disjoint.Frequency;
 	}
 
 

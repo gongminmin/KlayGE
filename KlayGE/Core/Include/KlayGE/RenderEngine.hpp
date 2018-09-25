@@ -104,7 +104,6 @@ namespace KlayGE
 			GraphicsBufferPtr const & buff_args, uint32_t offset);
 		virtual void EndPass();
 		virtual void EndFrame();
-		virtual void UpdateGPUTimestampsFrequency();
 
 		// Just for debug or profile propose
 		virtual void ForceFlush() = 0;

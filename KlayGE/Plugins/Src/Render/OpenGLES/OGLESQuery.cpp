@@ -97,8 +97,9 @@ namespace KlayGE
 			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
 		}
 
-		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.GPUDisjointOccurred())
+		GLint disjoint_occurred = 0;
+		glGetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint_occurred);
+		if (disjoint_occurred)
 		{
 			return -1;
 		}

@@ -70,8 +70,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D12RenderEngine::D3D12RenderEngine()
-		: inv_timestamp_freq_(0),
-			render_cmd_fence_val_(0), res_cmd_fence_val_(0)
+		: render_cmd_fence_val_(0), res_cmd_fence_val_(0)
 	{
 		UINT dxgi_factory_flags = 0;
 
@@ -156,19 +155,6 @@ namespace KlayGE
 
 		this->ResetRenderCmd();
 		this->ClearTempObjs();
-	}
-
-	void D3D12RenderEngine::UpdateGPUTimestampsFrequency()
-	{
-		inv_timestamp_freq_ = 0;
-		if (d3d_render_cmd_queue_)
-		{
-			UINT64 freq;
-			if (SUCCEEDED(d3d_render_cmd_queue_->GetTimestampFrequency(&freq)))
-			{
-				inv_timestamp_freq_ = 1.0 / freq;
-			}
-		}
 	}
 
 	IDXGIFactory4* D3D12RenderEngine::DXGIFactory4() const

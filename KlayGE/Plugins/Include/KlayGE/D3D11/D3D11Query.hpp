@@ -75,6 +75,7 @@ namespace KlayGE
 		double TimeElapsed() override;
 
 	private:
+		ID3D11QueryPtr timestamp_disjoint_query_;
 		ID3D11QueryPtr timestamp_start_query_;
 		ID3D11QueryPtr timestamp_end_query_;
 	};

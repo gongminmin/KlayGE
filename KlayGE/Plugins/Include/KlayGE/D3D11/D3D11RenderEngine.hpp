@@ -53,7 +53,6 @@ namespace KlayGE
 
 		void BeginFrame() override;
 		void EndFrame() override;
-		void UpdateGPUTimestampsFrequency() override;
 
 		IDXGIFactory1* DXGIFactory1() const;
 		IDXGIFactory2* DXGIFactory2() const;
@@ -114,11 +113,6 @@ namespace KlayGE
 		char const * DomainShaderProfile() const
 		{
 			return ds_profile_;
-		}
-
-		double InvTimestampFreq() const
-		{
-			return inv_timestamp_freq_;
 		}
 
 		void RSSetState(ID3D11RasterizerState* ras);
@@ -266,9 +260,6 @@ namespace KlayGE
 		StereoMethod stereo_method_;
 		FrameBufferPtr stereo_nv_3d_vision_fb_;
 		TexturePtr stereo_nv_3d_vision_tex_;
-
-		ID3D11QueryPtr timestamp_disjoint_query_;
-		double inv_timestamp_freq_;
 
 		HANDLE device_lost_event_;
 		DWORD  device_lost_reg_cookie_;

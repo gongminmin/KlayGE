@@ -279,31 +279,26 @@ namespace KlayGE
 	double D3D12TimerQuery::TimeElapsed()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		double const inv_freq = re.InvTimestampFreq();
-		if (inv_freq > 0)
-		{
-			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-			cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, timestamp_result_.get(), 0);
+		cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, timestamp_result_.get(), 0);
 
-			re.ForceFinish();
+		re.ForceFinish();
 
-			D3D12_RANGE range;
-			range.Begin = 0;
+		UINT64 freq;
+		re.D3DRenderCmdQueue()->GetTimestampFrequency(&freq);
 
-			uint64_t* timestamp;
-			range.End = sizeof(uint64_t) * 2;
-			timestamp_result_->Map(0, &range, reinterpret_cast<void**>(&timestamp));
-			double ret = (timestamp[1] - timestamp[0]) * inv_freq;
-			range.End = 0;
-			timestamp_result_->Unmap(0, &range);
+		D3D12_RANGE range;
+		range.Begin = 0;
 
-			return ret;
-		}
-		else
-		{
-			return -1;
-		}
+		uint64_t* timestamp;
+		range.End = sizeof(uint64_t) * 2;
+		timestamp_result_->Map(0, &range, reinterpret_cast<void**>(&timestamp));
+		double ret = static_cast<double>(timestamp[1] - timestamp[0]) / freq;
+		range.End = 0;
+		timestamp_result_->Unmap(0, &range);
+
+		return ret;
 	}
 
 

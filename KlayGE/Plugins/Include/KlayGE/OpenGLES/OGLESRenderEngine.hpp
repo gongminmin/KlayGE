@@ -44,8 +44,6 @@ namespace KlayGE
 			return false;
 		}
 
-		void UpdateGPUTimestampsFrequency() override;
-
 		void ForceFlush();
 
 		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
@@ -132,11 +130,6 @@ namespace KlayGE
 			return hack_for_angle_;
 		}
 
-		bool GPUDisjointOccurred() const
-		{
-			return gpu_disjoint_occurred_;
-		}
-
 	private:
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
@@ -190,8 +183,6 @@ namespace KlayGE
 		bool hack_for_adreno_;
 		bool hack_for_android_emulator_;
 		bool hack_for_angle_;
-
-		bool gpu_disjoint_occurred_;
 	};
 }
 

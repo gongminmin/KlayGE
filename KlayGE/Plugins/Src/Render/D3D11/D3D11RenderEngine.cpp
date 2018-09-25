@@ -96,7 +96,6 @@ namespace KlayGE
 	D3D11RenderEngine::D3D11RenderEngine()
 		: num_so_buffs_(0),
 			dsv_ptr_cache_(nullptr),
-			inv_timestamp_freq_(0),
 			device_lost_event_(nullptr), device_lost_reg_cookie_(0), thread_pool_wait_(nullptr)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
@@ -200,29 +199,12 @@ namespace KlayGE
 
 	void D3D11RenderEngine::BeginFrame()
 	{
-		if (Context::Instance().Config().perf_profiler)
-		{
-			d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
-		}
-
 		RenderEngine::BeginFrame();
 	}
 
 	void D3D11RenderEngine::EndFrame()
 	{
 		RenderEngine::EndFrame();
-
-		if (Context::Instance().Config().perf_profiler)
-		{
-			d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
-		}
-	}
-
-	void D3D11RenderEngine::UpdateGPUTimestampsFrequency()
-	{
-		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
-		while (S_OK != d3d_imm_ctx_->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
-		inv_timestamp_freq_ = disjoint.Disjoint ? 0 : (1.0 / disjoint.Frequency);
 	}
 
 	IDXGIFactory1* D3D11RenderEngine::DXGIFactory1() const
@@ -419,14 +401,6 @@ namespace KlayGE
 				}
 			}
 		}
-
-		D3D11_QUERY_DESC desc;
-		desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
-		desc.MiscFlags = 0;
-
-		ID3D11Query* disjoint_query;
-		d3d_device_->CreateQuery(&desc, &disjoint_query);
-		timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
 	}
 
 	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
@@ -913,9 +887,6 @@ namespace KlayGE
 
 		stereo_nv_3d_vision_fb_.reset();
 		stereo_nv_3d_vision_tex_.reset();
-
-		timestamp_disjoint_query_.reset();
-		inv_timestamp_freq_ = 0;
 
 		d3d_imm_ctx_->ClearState();
 		d3d_imm_ctx_->Flush();

@@ -78,7 +78,6 @@ namespace KlayGE
 
 		void BeginFrame() override;
 		void EndFrame() override;
-		void UpdateGPUTimestampsFrequency() override;
 
 		IDXGIFactory4* DXGIFactory4() const;
 		IDXGIFactory5* DXGIFactory5() const;
@@ -136,11 +135,6 @@ namespace KlayGE
 		char const * DomainShaderProfile() const
 		{
 			return ds_profile_;
-		}
-
-		double InvTimestampFreq() const
-		{
-			return inv_timestamp_freq_;
 		}
 
 		void OMSetStencilRef(uint16_t stencil_ref);
@@ -334,8 +328,6 @@ namespace KlayGE
 		};
 
 		StereoMethod stereo_method_;
-
-		double inv_timestamp_freq_;
 
 		FencePtr render_cmd_fence_;
 		uint64_t render_cmd_fence_val_;

@@ -108,10 +108,6 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEngine::UpdateGPUTimestampsFrequency()
-	{
-	}
-
 	// ½¨Á¢äÖÈ¾´°¿Ú
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::CreateRenderWindow(std::string const & name, RenderSettings& settings)

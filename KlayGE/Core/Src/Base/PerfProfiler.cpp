@@ -154,10 +154,6 @@ namespace KlayGE
 	{
 		if (Context::Instance().Config().perf_profiler)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEngine& re = rf.RenderEngineInstance();
-			re.UpdateGPUTimestampsFrequency();
-
 			for (auto& range : perf_ranges_)
 			{
 				if (std::get<2>(range)->Dirty())
