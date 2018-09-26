@@ -25,7 +25,6 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneNodePtr sphere_group_;
-	std::vector<KlayGE::SceneNodePtr> spheres_;
 	KlayGE::SceneNodePtr single_object_;
 	KlayGE::RenderModelPtr single_model_;
 	KlayGE::SceneNodePtr sky_box_;

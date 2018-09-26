@@ -567,7 +567,7 @@ void CausticsMapApp::OnCreate()
 	dummy_light_env_->Position(float3(0.0f, 20.0f, 0.0f));
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
 
 	//Input Bind
 	InputEngine& ie(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -587,17 +587,17 @@ void CausticsMapApp::OnCreate()
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_obj_);
 
 	sphere_model_ = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
-	sphere_obj_ = MakeSharedPtr<SceneNode>(sphere_model_, SceneNode::SOA_Cullable);
+	sphere_obj_ = sphere_model_->RootNode();
 	sphere_obj_->TransformToParent(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj_);
 	sphere_obj_->Visible(false);
 
 	bunny_model_ = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
-	bunny_obj_ = MakeSharedPtr<SceneNode>(bunny_model_, SceneNode::SOA_Cullable);
+	bunny_obj_ = bunny_model_->RootNode();
 	bunny_obj_->TransformToParent(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(bunny_obj_);
 	bunny_obj_->Visible(false);
 
 	refract_obj_ = sphere_obj_;
@@ -931,7 +931,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	//Pass 0 ~ 3 Caustics Map
 	if (0 == pass)
 	{
-		dummy_light_env_->Position(MathLib::transform_coord(refract_model_->PosBound().Center(), refract_obj_->TransformToWorld()));
+		dummy_light_env_->Position(refract_model_->RootNode()->PosBoundWS().Center());
 
 		if (depth_texture_support_)
 		{

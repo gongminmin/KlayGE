@@ -47,9 +47,9 @@ namespace
 			technique_ = effect_->TechniqueByName("Mesh");
 		}
 
-		void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
 			*(effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
@@ -144,21 +144,16 @@ void VDMParticleApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	RenderablePtr robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
-	auto robot = MakeSharedPtr<SceneNode>(robot_model, SceneNode::SOA_Cullable);
-	robot->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
-	scene_objs_.push_back(robot);
+	robot_model->RootNode()->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
+	scene_objs_.push_back(robot_model->RootNode());
 
-	RenderablePtr room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
-	auto room = MakeSharedPtr<SceneNode>(room_model, SceneNode::SOA_Cullable);
-	scene_objs_.push_back(room);
-
-	for (auto& so : scene_objs_)
-	{
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
-	}
+	scene_objs_.push_back(room_model->RootNode());
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

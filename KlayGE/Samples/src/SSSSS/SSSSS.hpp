@@ -43,7 +43,7 @@ private:
 	KlayGE::TrackballCameraController light_controller_;
 
 	KlayGE::LightSourcePtr light_;
-	KlayGE::SceneNodePtr light_proxy_;
+	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 
 	KlayGE::CameraPtr scene_camera_;
 	KlayGE::CameraPtr light_camera_;

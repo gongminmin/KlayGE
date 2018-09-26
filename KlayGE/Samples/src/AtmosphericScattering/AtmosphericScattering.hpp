@@ -29,14 +29,14 @@ private:
 
 private:
 	KlayGE::FontPtr font_;
-	KlayGE::SceneNodePtr planet_;
-	KlayGE::SceneNodePtr atmosphere_;
+	KlayGE::RenderModelPtr planet_model_;
+	KlayGE::RenderModelPtr atmosphere_model_;
 
 	KlayGE::TrackballCameraController obj_controller_;
 	KlayGE::TrackballCameraController light_controller_;
 	KlayGE::Camera light_ctrl_camera_;
 
-	KlayGE::SceneNodePtr sun_light_src_;
+	KlayGE::SceneObjectLightSourceProxyPtr sun_light_src_;
 	KlayGE::DirectionalLightSourcePtr sun_light_;
 
 	KlayGE::Color beta_;

@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneNode
+	class KLAYGE_CORE_API SceneObjectLightSourceProxy
 	{
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
@@ -44,6 +44,11 @@ namespace KlayGE
 			return light_model_;
 		}
 
+		SceneNodePtr const & RootNode() const
+		{
+			return light_model_->RootNode();
+		}
+
 	private:
 		RenderModelPtr LoadModel(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc);
@@ -55,7 +60,7 @@ namespace KlayGE
 		RenderModelPtr light_model_;
 	};
 
-	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneNode
+	class KLAYGE_CORE_API SceneObjectCameraProxy
 	{
 	public:
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);
@@ -69,6 +74,11 @@ namespace KlayGE
 		RenderModelPtr const & CameraModel() const
 		{
 			return camera_model_;
+		}
+
+		SceneNodePtr const & RootNode() const
+		{
+			return camera_model_->RootNode();
 		}
 
 	private:

@@ -26,9 +26,9 @@ DetailedMesh::DetailedMesh(RenderModel const & model, std::wstring_view name)
 	technique_ = effect_->TechniqueByName("SubSurfaceTech");
 }
 
-void DetailedMesh::DoBuildMeshInfo()
+void DetailedMesh::DoBuildMeshInfo(RenderModel const & model)
 {
-	StaticMesh::DoBuildMeshInfo();
+	StaticMesh::DoBuildMeshInfo(model);
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();

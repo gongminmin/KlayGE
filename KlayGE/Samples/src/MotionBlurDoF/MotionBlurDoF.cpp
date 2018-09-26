@@ -73,8 +73,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
+
 			AABBox const & bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = bb.Center();
 			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
@@ -130,8 +132,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
+
 			AABBox const & bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = bb.Center();
 			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
@@ -679,9 +683,9 @@ void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
 	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderInstanceMesh>);
+		SceneNode::SOA_Cullable, nullptr, CreateModelFactory<RenderModel>, CreateMeshFactory<RenderInstanceMesh>);
 	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderNonInstancedMesh>);
+		SceneNode::SOA_Cullable, nullptr, CreateModelFactory<RenderModel>, CreateMeshFactory<RenderNonInstancedMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

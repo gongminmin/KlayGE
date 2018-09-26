@@ -865,10 +865,9 @@ namespace KlayGE
 
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
-		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
-		auto scene_obj = MakeSharedPtr<SceneNode>(model,
-			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
+		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		auto scene_obj = model->RootNode();
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
 			model->Mesh(i)->ObjectID(entity_id);
@@ -881,7 +880,7 @@ namespace KlayGE
 		mi.type = ET_Model;
 		mi.model = model;
 		mi.meshml_name = meshml_name;
-		mi.obb = MathLib::convert_to_obbox(model->PosBound());
+		mi.obb = MathLib::convert_to_obbox(model->RootNode()->PosBoundOS());
 		mi.trf_pivot = mi.obb.Center();
 		mi.trf_pos = float3(0, 0, 0);
 		mi.trf_scale = float3(1, 1, 1);
@@ -956,8 +955,8 @@ namespace KlayGE
 		light->Falloff(float3(1, 0, 1));
 		light->AddToSceneManager();
 
-		SceneNodePtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy);
+		auto light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy->RootNode());
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
@@ -972,12 +971,13 @@ namespace KlayGE
 		li.type = ET_Light;
 		li.model = model;
 		li.light = light;
-		li.obb = MathLib::convert_to_obbox(light_proxy->GetRenderable()->PosBound());
+		li.obb = MathLib::convert_to_obbox(light_proxy->RootNode()->PosBoundOS());
 		li.trf_pivot = float3(0, 0, 0);
 		li.trf_pos = float3(0, 0, 0);
 		li.trf_scale = float3(1, 1, 1);
 		li.trf_rotate = Quaternion::Identity();
-		li.scene_obj = light_proxy;
+		li.scene_obj = light_proxy->RootNode();
+		li.light_proxy = light_proxy;
 		entities_.insert(std::make_pair(entity_id, li));
 
 		update_selective_buffer_ = true;
@@ -1011,8 +1011,8 @@ namespace KlayGE
 		CameraPtr camera = MakeSharedPtr<Camera>();
 		camera->AddToSceneManager();
 
-		SceneNodePtr camera_proxy = MakeSharedPtr<SceneObjectCameraProxy>(camera);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(camera_proxy);
+		auto camera_proxy = MakeSharedPtr<SceneObjectCameraProxy>(camera);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(camera_proxy->RootNode());
 
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
@@ -1027,12 +1027,13 @@ namespace KlayGE
 		ci.type = ET_Camera;
 		ci.model = model;
 		ci.camera = camera;
-		ci.obb = MathLib::convert_to_obbox(camera_proxy->GetRenderable()->PosBound());
+		ci.obb = MathLib::convert_to_obbox(camera_proxy->RootNode()->PosBoundOS());
 		ci.trf_pivot = float3(0, 0, 0);
 		ci.trf_pos = float3(0, 0, 0);
 		ci.trf_scale = float3(1, 1, 1);
 		ci.trf_rotate = Quaternion::Identity();
-		ci.scene_obj = camera_proxy;
+		ci.scene_obj = camera_proxy->RootNode();
+		ci.camera_proxy = camera_proxy;
 		entities_.insert(std::make_pair(entity_id, ci));
 
 		update_selective_buffer_ = true;
@@ -1280,14 +1281,14 @@ namespace KlayGE
 		case ET_Light:
 			mat = this->CalcAdaptiveScaling(ei, 25, proxy_scaling);
 			ei.light->ModelMatrix(mat);
-			checked_pointer_cast<SceneObjectLightSourceProxy>(ei.scene_obj)->Scaling(proxy_scaling * ei.trf_scale);
+			ei.light_proxy->Scaling(proxy_scaling * ei.trf_scale);
 			break;
 
 		case ET_Camera:
 			mat = this->CalcAdaptiveScaling(ei, 75, proxy_scaling);
 			ei.camera->ViewParams(ei.trf_pos, ei.trf_pos + MathLib::transform_normal(float3(0, 0, 1), mat),
 				MathLib::transform_normal(float3(0, 1, 0), mat));
-			checked_pointer_cast<SceneObjectCameraProxy>(ei.scene_obj)->Scaling(proxy_scaling * ei.trf_scale);
+			ei.camera_proxy->Scaling(proxy_scaling * ei.trf_scale);
 			break;
 
 		default:
@@ -1400,12 +1401,12 @@ namespace KlayGE
 				if (ET_Light == ei.type)
 				{
 					mat = this->CalcAdaptiveScaling(ei, 25, proxy_scaling);
-					checked_pointer_cast<SceneObjectLightSourceProxy>(ei.scene_obj)->Scaling(proxy_scaling * ei.trf_scale);
+					ei.light_proxy->Scaling(proxy_scaling * ei.trf_scale);
 				}
 				else
 				{
 					mat = this->CalcAdaptiveScaling(ei, 75, proxy_scaling);
-					checked_pointer_cast<SceneObjectCameraProxy>(ei.scene_obj)->Scaling(proxy_scaling * ei.trf_scale);
+					ei.camera_proxy->Scaling(proxy_scaling * ei.trf_scale);
 				}
 
 				if (selected_entity_ == entity.first)

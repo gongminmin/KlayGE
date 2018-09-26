@@ -112,9 +112,10 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	imposter_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 		Color(0, 0, 0, 0), 1, 0);
 
-	auto scene_model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
+	auto scene_model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr);
 
-	auto const & aabbox = scene_model->PosBound();
+	auto const & aabbox = scene_model->RootNode()->PosBoundOS();
 	float3 const dimensions = aabbox.Max() - aabbox.Min();
 	float const diag_length = MathLib::length(dimensions);
 

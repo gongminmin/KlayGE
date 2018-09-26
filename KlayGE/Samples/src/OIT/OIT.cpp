@@ -96,9 +96,9 @@ namespace
 			effect_attrs_ = EA_TransparencyFront;
 		}
 
-		void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			AABBox const & pos_bb = this->PosBound();
 			*(no_oit_effect_->ParameterByName("pos_center")) = pos_bb.Center();
@@ -574,13 +574,12 @@ void OITApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
-	polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
 	polygon_model_->ForEachMesh([](Renderable& mesh)
 		{
 			checked_cast<RenderPolygon*>(&mesh)->LightPos(float3(-1, 2, 1));
 		});
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 10);

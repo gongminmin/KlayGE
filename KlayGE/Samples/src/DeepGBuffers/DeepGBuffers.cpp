@@ -162,6 +162,7 @@ void DeepGBuffersApp::OnCreate()
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("chipmunk-CE-01.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<SwitchableMesh>);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -197,15 +198,13 @@ void DeepGBuffersApp::OnCreate()
 	spot_light_[1]->AddToSceneManager();
 
 	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[0])->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[0]);
+	spot_light_src_[0]->Scaling(0.1f, 0.1f, 0.1f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[0]->RootNode());
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[1]);
+	spot_light_src_[1]->Scaling(0.1f, 0.1f, 0.1f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[1]->RootNode());
 
-	scene_obj_ = MakeSharedPtr<SceneNode>(scene_model_, SceneNode::SOA_Cullable);
-	scene_obj_->TransformToParent(MathLib::scaling(3.0f, 3.0f, 3.0f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj_);
+	scene_model_->RootNode()->TransformToParent(MathLib::scaling(3.0f, 3.0f, 3.0f));
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

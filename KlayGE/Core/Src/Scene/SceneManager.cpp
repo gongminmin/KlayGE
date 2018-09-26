@@ -538,7 +538,7 @@ namespace KlayGE
 			{
 				node->ForEachRenderable([this, node](Renderable& renderable)
 					{
-						if (renderable.Enabled())
+						if (renderable.Enabled() && (renderable.GetRenderTechnique() != nullptr))
 						{
 							if (0 == renderable.NumInstances())
 							{

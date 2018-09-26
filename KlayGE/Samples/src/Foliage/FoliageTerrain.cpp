@@ -46,9 +46,9 @@ namespace KlayGE
 		{
 		}
 
-		void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			std::string g_buffer_files[2];
 			g_buffer_files[0] = "GBufferFoliage.fxml";
@@ -260,8 +260,9 @@ namespace KlayGE
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			plant_meshes_[plant_type] = SyncLoadModel(plant_parameters[plant_type].mesh_name, EAH_GPU_Read | EAH_Immutable,
+				SceneNode::SOA_Cullable, nullptr,
 				CreateModelFactory<RenderModel>, CreateMeshFactory<FoliageMesh>);
-			plant_impostor_meshes_[plant_type] = MakeSharedPtr<FoliageImpostorMesh>(plant_meshes_[plant_type]->PosBound());
+			plant_impostor_meshes_[plant_type] = MakeSharedPtr<FoliageImpostorMesh>(plant_meshes_[plant_type]->RootNode()->PosBoundOS());
 
 			plant_imposters_[plant_type] = SyncLoadImposter(plant_parameters[plant_type].imposter_name);
 			checked_pointer_cast<FoliageImpostorMesh>(plant_impostor_meshes_[plant_type])->ImpostorTexture(
@@ -468,7 +469,7 @@ namespace KlayGE
 			*(foliage_dist_effect_->ParameterByName("tile_addr_offset_width"))
 				= uint2(tile_addr_offset_width_[plant_type].x(), tile_addr_offset_width_[plant_type].y());
 
-			auto const & aabbox = plant_meshes_[plant_type]->PosBound();
+			auto const & aabbox = plant_meshes_[plant_type]->RootNode()->PosBoundOS();
 			*(foliage_dist_effect_->ParameterByName("plant_aabb_min")) = aabbox.Min();
 			*(foliage_dist_effect_->ParameterByName("plant_aabb_max")) = aabbox.Max();
 			*(foliage_dist_effect_->ParameterByName("probability_channel")) = plant_parameters[plant_type].probability_channel;
@@ -516,7 +517,7 @@ namespace KlayGE
 			*(foliage_dist_effect_->ParameterByName("tile_addr_offset_width"))
 				= uint2(tile_addr_offset_width_[plant_type].z(), tile_addr_offset_width_[plant_type].w());
 
-			auto const & aabbox = plant_meshes_[plant_type]->PosBound();
+			auto const & aabbox = plant_meshes_[plant_type]->RootNode()->PosBoundOS();
 			*(foliage_dist_effect_->ParameterByName("plant_aabb_min")) = aabbox.Min();
 			*(foliage_dist_effect_->ParameterByName("plant_aabb_max")) = aabbox.Max();
 			*(foliage_dist_effect_->ParameterByName("probability_channel")) = plant_parameters[plant_type].probability_channel;

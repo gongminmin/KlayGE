@@ -244,8 +244,8 @@ void DistanceMapping::OnCreate()
 	light_->AddToSceneManager();
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
+	light_proxy_->Scaling(0.05f, 0.05f, 0.05f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
 
 	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 

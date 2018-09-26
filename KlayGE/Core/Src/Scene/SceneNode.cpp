@@ -242,28 +242,7 @@ namespace KlayGE
 
 	void SceneNode::AddRenderable(RenderablePtr const & renderable)
 	{
-		if (renderable && renderable->HWResourceReady())
-		{
-			auto renderable_list = renderable->RenderableList();
-			if (renderable_list.empty())
-			{
-				renderables_.push_back(renderable);
-				renderables_hw_res_ready_.push_back(true);
-			}
-			else
-			{
-				for (auto const & r : renderable_list)
-				{
-					renderables_.push_back(r);
-					renderables_hw_res_ready_.push_back(true);
-				}
-			}
-		}
-		else
-		{
-			renderables_.push_back(renderable);
-			renderables_hw_res_ready_.push_back(false);
-		}
+		renderables_.push_back(renderable);
 		pos_aabb_dirty_ = true;
 	}
 
@@ -273,7 +252,6 @@ namespace KlayGE
 		if (iter != renderables_.end())
 		{
 			renderables_.erase(iter);
-			renderables_hw_res_ready_.erase(renderables_hw_res_ready_.begin() + (iter - renderables_.begin()));
 			pos_aabb_dirty_ = true;
 		}
 	}
@@ -281,7 +259,6 @@ namespace KlayGE
 	void SceneNode::ClearRenderables()
 	{
 		renderables_.clear();
-		renderables_hw_res_ready_.clear();
 		pos_aabb_dirty_ = true;
 	}
 
@@ -321,6 +298,11 @@ namespace KlayGE
 	float4x4 const & SceneNode::TransformToWorld() const
 	{
 		return xform_to_world_;
+	}
+
+	AABBox const & SceneNode::PosBoundOS() const
+	{
+		return *pos_aabb_os_;
 	}
 
 	AABBox const & SceneNode::PosBoundWS() const
@@ -371,26 +353,6 @@ namespace KlayGE
 
 	void SceneNode::MainThreadUpdate(float app_time, float elapsed_time)
 	{
-		for (size_t i = 0; i < renderables_.size(); ++ i)
-		{
-			if (renderables_[i] && !renderables_hw_res_ready_[i] && renderables_[i]->HWResourceReady())
-			{
-				renderables_hw_res_ready_[i] = true;
-
-				auto renderable_list = renderables_[i]->RenderableList();
-				if (!renderable_list.empty())
-				{
-					renderables_[i] = renderable_list[0];
-					renderables_.insert(renderables_.begin() + i + 1, renderable_list.begin() + 1, renderable_list.end());
-					renderables_hw_res_ready_.insert(renderables_hw_res_ready_.begin() + i + 1, renderable_list.size() - 1, false);
-
-					i += renderable_list.size() - 1;
-
-					pos_aabb_dirty_ = true;
-				}
-			}
-		}
-
 		main_thread_update_event_(app_time, elapsed_time);
 	}
 

@@ -79,7 +79,7 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController trackball_controller_;
-	KlayGE::SceneNodePtr light_proxy_;
+	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 	KlayGE::LightSourcePtr dummy_light_;
 

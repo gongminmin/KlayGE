@@ -22,7 +22,8 @@ public:
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 
-	virtual void DoBuildMeshInfo() override;
+protected:
+	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
 
 private:
 	bool depth_texture_support_;

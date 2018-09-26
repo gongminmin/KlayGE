@@ -195,9 +195,9 @@ namespace
 			effect_ = SyncLoadRenderEffect("ShadowCubeMap.fxml");
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
 			*(effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
@@ -388,8 +388,10 @@ void ShadowCubeMap::OnCreate()
 	loading_percentage_ = 0;
 	lamp_tex_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -451,8 +453,8 @@ void ShadowCubeMap::OnCreate()
 	light_->AddToSceneManager();
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.5f, 0.5f, 0.5f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
+	light_proxy_->Scaling(0.5f, 0.5f, 0.5f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
 
 	for (int i = 0; i < 6; ++ i)
 	{
@@ -586,9 +588,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				if (scene_model_->HWResourceReady())
 				{
-					auto node = MakeSharedPtr<SceneNode>(scene_model_, SceneNode::SOA_Cullable);
-					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(node);
-
 					for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 					{
 						checked_pointer_cast<OccluderMesh>(scene_model_->Mesh(i))->LampTexture(lamp_tex_);

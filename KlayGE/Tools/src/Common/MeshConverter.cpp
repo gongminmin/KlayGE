@@ -897,11 +897,11 @@ namespace KlayGE
 
 		if (skinned)
 		{
-			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software");
+			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software", 0);
 		}
 		else
 		{
-			render_model_ = MakeSharedPtr<RenderModel>(L"Software");
+			render_model_ = MakeSharedPtr<RenderModel>(L"Software", 0);
 		}
 
 		this->BuildMaterials(scenes[0].get());
@@ -2637,11 +2637,11 @@ namespace KlayGE
 
 		if (skinned)
 		{
-			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software");
+			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software", 0);
 		}
 		else
 		{
-			render_model_ = MakeSharedPtr<RenderModel>(L"Software");
+			render_model_ = MakeSharedPtr<RenderModel>(L"Software", 0);
 		}
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");

@@ -152,8 +152,10 @@ namespace
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
+
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
@@ -913,31 +915,32 @@ void EnvLightingApp::OnCreate()
 		});
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
 
-	sphere_objs_.resize(std::size(diff_parametes));
-	sphere_models_.resize(sphere_objs_.size());
-	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
+	sphere_models_.resize(std::size(diff_parametes));
+	for (size_t i = 0; i < sphere_models_.size(); ++ i)
 	{
 		sphere_models_[i] = sphere_model_unique->Clone(CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
-
-		auto const & mesh = checked_pointer_cast<SphereRenderable>(sphere_models_[i]->Mesh(0));
 
 		uint32_t const spheres_row = 10;
 		uint32_t const spheres_column = 10;
 		size_t const y = i / spheres_column;
 		size_t const x = i - y * spheres_column;
 
-		sphere_objs_[i] = MakeSharedPtr<SceneNode>(mesh, SceneNode::SOA_Cullable);
-		sphere_objs_[i]->TransformToParent(MathLib::translation(
+		sphere_models_[i]->RootNode()->TransformToParent(MathLib::translation(
 			(-static_cast<float>(spheres_column / 2) + x + 0.5f) * 0.06f,
 			-(-static_cast<float>(spheres_row / 2) + y + 0.5f) * 0.06f,
 			0.0f));
 
-		mesh->Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
-		mesh->IntegratedBRDFTex(integrated_brdf_tex_);
+		sphere_models_[i]->ForEachMesh([i, this](Renderable& mesh)
+			{
+				auto& sphere_mesh = *checked_cast<SphereRenderable*>(&mesh);
+				sphere_mesh.Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
+				sphere_mesh.IntegratedBRDFTex(integrated_brdf_tex_);
+			});
 
-		sphere_group_->AddChild(sphere_objs_[i]);
+		sphere_group_->AddChild(sphere_models_[i]->RootNode());
 	}
 
 	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
@@ -1003,9 +1006,12 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	rendering_type_ = sender.GetSelectedIndex();
-	for (size_t i = 0; i < sphere_objs_.size(); ++ i)
+	for (size_t i = 0; i < sphere_models_.size(); ++ i)
 	{
-		checked_pointer_cast<SphereRenderable>(sphere_objs_[i]->GetRenderable())->RenderingType(rendering_type_);
+		sphere_models_[i]->ForEachMesh([this](Renderable& mesh)
+			{
+				checked_cast<SphereRenderable*>(&mesh)->RenderingType(rendering_type_);
+			});
 	}
 }
 

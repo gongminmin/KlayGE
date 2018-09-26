@@ -22,15 +22,16 @@ using namespace KlayGE;
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModel const & model, std::wstring_view name)
 	: SkinnedMesh(model, name),
-			visualize_(-1)
+		visualize_(-1),
+		model_(checked_cast<DetailedSkinnedModel const *>(&model))
 {
 }
 
-void DetailedSkinnedMesh::DoBuildMeshInfo()
+void DetailedSkinnedMesh::DoBuildMeshInfo(RenderModel const & model)
 {
-	SkinnedMesh::DoBuildMeshInfo();
+	SkinnedMesh::DoBuildMeshInfo(model);
 
-	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(model_)->Effect());
+	this->BindDeferredEffect(model_->Effect());
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
@@ -39,8 +40,8 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	
 	if (model_->IsSkinned())
 	{
-		*(deferred_effect_->ParameterByName("joint_reals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindRealParts();
-		*(deferred_effect_->ParameterByName("joint_duals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindDualParts();
+		*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
+		*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 	}
 }
 
@@ -107,7 +108,7 @@ void DetailedSkinnedMesh::UpdateMaterial()
 		textures_[i].reset();
 	}
 
-	StaticMesh::BuildMeshInfo();
+	StaticMesh::BuildMeshInfo(*model_);
 }
 
 void DetailedSkinnedMesh::UpdateTechniques()
@@ -116,17 +117,15 @@ void DetailedSkinnedMesh::UpdateTechniques()
 
 	if (visualize_ >= 0)
 	{
-		auto const & model = *checked_cast<DetailedSkinnedModel const *>(model_);
-
-		gbuffer_mrt_tech_ = model.visualize_gbuffer_mrt_techs_[visualize_];
+		gbuffer_mrt_tech_ = model_->visualize_gbuffer_mrt_techs_[visualize_];
 		gbuffer_alpha_blend_back_mrt_tech_ = gbuffer_mrt_tech_;
 		gbuffer_alpha_blend_front_mrt_tech_ = gbuffer_mrt_tech_;
 	}
 }
 
 
-DetailedSkinnedModel::DetailedSkinnedModel(std::wstring_view name)
-		: SkinnedModel(name),
+DetailedSkinnedModel::DetailedSkinnedModel(std::wstring_view name, uint32_t node_attrib)
+		: SkinnedModel(name, node_attrib),
 			is_skinned_(false)
 {
 }
@@ -178,13 +177,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	AABBox const & pos_bb = this->PosBound();
-	AABBox const & tc_bb = this->TexcoordBound();
-	float3 const pos_center = pos_bb.Center();
-	float3 const pos_extent = pos_bb.HalfSize();
-	float3 const tc_center = tc_bb.Center();
-	float3 const tc_extent = tc_bb.HalfSize();
-
 	std::vector<float3> positions(total_num_vertices);
 	std::vector<float2> texcoords(total_num_vertices);
 	std::vector<float3> normals(total_num_vertices);
@@ -201,11 +193,23 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 				int16_t const * p_16 = mapper.Pointer<int16_t>();
-				for (uint32_t j = 0; j < total_num_vertices; ++ j)
+				uint32_t j = 0;
+				for (auto const & renderable : meshes_)
 				{
-					positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
-					positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
-					positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+					auto mesh = checked_pointer_cast<StaticMesh>(renderable);
+					AABBox const & pos_bb = mesh->PosBound();
+					float3 const pos_center = pos_bb.Center();
+					float3 const pos_extent = pos_bb.HalfSize();
+					for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+					{
+						for (uint32_t v = 0; v < mesh->NumVertices(lod); ++ v)
+						{
+							positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
+							positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
+							positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+							++ j;
+						}
+					}
 				}
 			}
 			break;
@@ -217,10 +221,22 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 				int16_t const * t_16 = mapper.Pointer<int16_t>();
-				for (uint32_t j = 0; j < total_num_vertices; ++ j)
+				uint32_t j = 0;
+				for (auto const & renderable : meshes_)
 				{
-					texcoords[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
-					texcoords[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+					auto mesh = checked_pointer_cast<StaticMesh>(renderable);
+					AABBox const & tc_bb = mesh->TexcoordBound();
+					float3 const tc_center = tc_bb.Center();
+					float3 const tc_extent = tc_bb.HalfSize();
+					for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+					{
+						for (uint32_t v = 0; v < mesh->NumVertices(lod); ++ v)
+						{
+							texcoords[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+							texcoords[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+							++ j;
+						}
+					}
 				}
 			}
 			break;
@@ -322,14 +338,26 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	{
 		std::vector<int16_t> tcs16(total_num_vertices);
 		texcoords.resize(total_num_vertices);
-		for (size_t i = 0; i < texcoords.size(); ++ i)
+		uint32_t i = 0;
+		for (auto const & renderable : meshes_)
 		{
-			texcoords[i] = float2(positions[i].x(), positions[i].y());
+			auto mesh = checked_pointer_cast<StaticMesh>(renderable);
+			AABBox const & tc_bb = mesh->TexcoordBound();
+			float3 const tc_center = tc_bb.Center();
+			float3 const tc_extent = tc_bb.HalfSize();
+			for (uint32_t lod = 0; lod < mesh->NumLods(); ++lod)
+			{
+				for (uint32_t v = 0; v < mesh->NumVertices(lod); ++v)
+				{
+					texcoords[i] = float2(positions[i].x(), positions[i].y());
 
-			float3 tc16 = float3(texcoords[i].x(), texcoords[i].y(), 0.0f);
-			tc16 = (tc16 - tc_center) / tc_extent * 0.5f + 0.5f;
-			tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.x() * 65535 - 32768), -32768, 32767));
-			tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
+					float3 tc16 = float3(texcoords[i].x(), texcoords[i].y(), 0.0f);
+					tc16 = (tc16 - tc_center) / tc_extent * 0.5f + 0.5f;
+					tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.x() * 65535 - 32768), -32768, 32767));
+					tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
+					++ i;
+				}
+			}
 		}
 
 		for (auto const & renderable : meshes_)
@@ -465,7 +493,8 @@ uint32_t DetailedSkinnedModel::ImportMaterial(std::string const & name)
 
 
 SkeletonMesh::SkeletonMesh(RenderModel const & model)
-	: SkinnedMesh(model, L"SkeletonMesh")
+	: SkinnedMesh(model, L"SkeletonMesh"),
+		model_(checked_cast<DetailedSkinnedModel const *>(&model))
 {
 	std::vector<float4> positions;
 	std::vector<uint32_t> bone_indices;
@@ -574,7 +603,7 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 
 	effect_attrs_ |= EA_SimpleForward;
 
-	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(model_)->Effect());
+	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(&model)->Effect());
 	simple_forward_tech_ = effect_->TechniqueByName("SkeletonTech");
 
 	{
@@ -663,6 +692,6 @@ void SkeletonMesh::OnRenderBegin()
 {
 	SkinnedMesh::OnRenderBegin();
 
-	*(deferred_effect_->ParameterByName("joint_reals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindRealParts();
-	*(deferred_effect_->ParameterByName("joint_duals")) = checked_cast<DetailedSkinnedModel const *>(model_)->GetBindDualParts();
+	*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
+	*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 }

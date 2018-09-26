@@ -103,8 +103,10 @@ namespace KlayGE
 		virtual void TransformToWorld(float4x4 const & mat);
 		virtual float4x4 const & TransformToParent() const;
 		virtual float4x4 const & TransformToWorld() const;
+		virtual AABBox const & PosBoundOS() const;
 		virtual AABBox const & PosBoundWS() const;
 		void UpdateTransforms();
+		void UpdatePosBound();
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
@@ -148,8 +150,6 @@ namespace KlayGE
 
 		void Parent(SceneNode* so);
 
-		void UpdatePosBound();
-
 	protected:
 		std::wstring name_;
 
@@ -159,7 +159,6 @@ namespace KlayGE
 		std::vector<SceneNodePtr> children_;
 
 		std::vector<RenderablePtr> renderables_;
-		std::vector<bool> renderables_hw_res_ready_;
 		std::vector<VertexElement> instance_format_;
 
 		float4x4 xform_to_parent_  = float4x4::Identity();

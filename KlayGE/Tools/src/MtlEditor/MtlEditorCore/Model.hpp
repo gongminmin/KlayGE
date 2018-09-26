@@ -12,7 +12,7 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 	friend class DetailedSkinnedMesh;
 
 public:
-	explicit DetailedSkinnedModel(std::wstring_view name);
+	explicit DetailedSkinnedModel(std::wstring_view name, uint32_t node_attrib);
 
 	void DoBuildModelInfo() override;
 
@@ -44,8 +44,6 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	DetailedSkinnedMesh(KlayGE::RenderModel const & model, std::wstring_view name);
 
-	void DoBuildMeshInfo() override;
-
 	void OnRenderBegin();
 
 	void VisualizeLighting();
@@ -56,8 +54,13 @@ public:
 	void UpdateMaterial();
 	virtual void UpdateTechniques() override;
 
+protected:
+	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
+
 private:
 	int visualize_;
+
+	DetailedSkinnedModel const * model_;
 };
 
 class SkeletonMesh : public KlayGE::SkinnedMesh
@@ -66,6 +69,9 @@ public:
 	explicit SkeletonMesh(KlayGE::RenderModel const & model);
 
 	void OnRenderBegin() override;
+
+private:
+	DetailedSkinnedModel const * model_;
 };
 
 #endif		// _MTL_EDITOR_CORE_MODEL_HPP

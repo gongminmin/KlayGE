@@ -47,8 +47,7 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
-		: SceneNode(light_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
-			light_(light), light_model_(light_model)
+		: light_(light), light_model_(light_model)
 	{
 		model_scaling_ = float4x4::Identity();
 
@@ -57,23 +56,26 @@ namespace KlayGE
 			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
 		}
 
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				xform_to_parent_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+				auto const & node = this->RootNode();
+
+				node->TransformToParent(model_scaling_ * MathLib::to_matrix(light_->Rotation())
+					* MathLib::translation(light_->Position()));
 				if (LightSource::LT_Spot == light_->Type())
 				{
 					float radius = light_->CosOuterInner().w();
-					xform_to_parent_ = MathLib::scaling(radius, radius, 1.0f) * xform_to_parent_;
+					node->TransformToParent(MathLib::scaling(radius, radius, 1.0f) * node->TransformToParent());
 				}
 
-				for (uint32_t i = 0; i < renderables_.size(); ++ i)
-				{
-					RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(renderables_[i]);
-					light_mesh->Update();
-				}
+				node->ForEachRenderable([](Renderable& mesh)
+					{
+						auto& light_mesh = *checked_cast<RenderableLightSourceProxy*>(&mesh);
+						light_mesh.Update();
+					});
 			});
 	}
 
@@ -124,7 +126,8 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid light type");
 		}
 		return SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
+			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}
 
 
@@ -134,8 +137,7 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
-		: SceneNode(camera_model, SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
-			camera_(camera), camera_model_(camera_model)
+		: camera_(camera), camera_model_(camera_model)
 	{
 		model_scaling_ = float4x4::Identity();
 
@@ -144,12 +146,14 @@ namespace KlayGE
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				xform_to_parent_ = model_scaling_ * camera_->InverseViewMatrix();
+				auto const & node = this->RootNode();
+
+				node->TransformToParent(model_scaling_ * camera_->InverseViewMatrix());
 			});
 	}
 
@@ -173,6 +177,7 @@ namespace KlayGE
 		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		return SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
+			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}
 }

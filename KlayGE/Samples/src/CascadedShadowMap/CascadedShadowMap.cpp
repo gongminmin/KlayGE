@@ -72,8 +72,10 @@ void CascadedShadowMapApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
+	auto plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+	auto katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -91,12 +93,7 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
-	auto plane_so = MakeSharedPtr<SceneNode>(plane_model, SceneNode::SOA_Cullable);
-	plane_so->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_so);
-
-	auto katapult_so = MakeSharedPtr<SceneNode>(katapult_model, SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(katapult_so);
+	plane_model->RootNode()->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
 
 	fpcController_.Scalers(0.05f, 1.0f);
 

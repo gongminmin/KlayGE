@@ -46,9 +46,9 @@ class RenderPolygon : public KlayGE::StaticMesh
 public:
 	RenderPolygon(KlayGE::RenderModel const & model, std::wstring_view name);
 
-	virtual void DoBuildMeshInfo() override;
+	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
 
-	virtual void OnRenderBegin();
+	void OnRenderBegin() override;
 };
 
 int SampleMain()
@@ -77,11 +77,11 @@ void TutorFramework::OnCreate()
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableBox_);
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
+		KlayGE::SceneNode::SOA_Cullable, &KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode(),
 		KlayGE::CreateModelFactory<KlayGE::RenderModel>, KlayGE::CreateMeshFactory<RenderPolygon>);
 
-	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(loadedModel, KlayGE::SceneNode::SOA_Cullable);
+	renderableFile_ = loadedModel->RootNode();
 	renderableFile_->TransformToParent(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
-	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableFile_);
 
 	std::vector<KlayGE::float3> vertices;
 	vertices.push_back(KlayGE::float3(0.5f,-0.25f, 0.25f));
@@ -93,7 +93,7 @@ void TutorFramework::OnCreate()
 	vertices.push_back(KlayGE::float3(1.0f, 0.25f,-0.25f));
 	vertices.push_back(KlayGE::float3(0.5f, 0.25f,-0.25f));
 
-	KlayGE::RenderModelPtr model = KlayGE::MakeSharedPtr<KlayGE::RenderModel>(L"model");
+	KlayGE::RenderModelPtr model = KlayGE::MakeSharedPtr<KlayGE::RenderModel>(L"model", KlayGE::SceneNode::SOA_Cullable);
 
 	std::vector<KlayGE::StaticMeshPtr> meshes(2);
 
@@ -133,12 +133,12 @@ void TutorFramework::OnCreate()
 
 	for (size_t i = 0; i < meshes.size(); ++ i)
 	{
-		meshes[i]->BuildMeshInfo();
+		meshes[i]->BuildMeshInfo(*model);
 	}
 	model->AssignMeshes(meshes.begin(), meshes.end());
 	model->BuildModelInfo();
 
-	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(model, KlayGE::SceneNode::SOA_Cullable);
+	renderableMesh_ = model->RootNode();
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableMesh_);
 
 	this->LookAt(KlayGE::float3(0, 0,-4.0f), KlayGE::float3(0, 0, 0));
@@ -186,8 +186,10 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModel const & model, std::wstring_vie
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void RenderPolygon::DoBuildMeshInfo()
+void RenderPolygon::DoBuildMeshInfo(KlayGE::RenderModel const & model)
 {
+	KFL_UNUSED(model);
+
 	KlayGE::AABBox const & pos_bb = this->PosBound();
 	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();

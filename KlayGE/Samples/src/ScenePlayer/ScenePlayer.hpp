@@ -40,7 +40,7 @@ private:
 	KlayGE::SceneNodePtr sky_box_;
 
 	std::vector<KlayGE::LightSourcePtr> lights_;
-	std::vector<KlayGE::SceneNodePtr> light_proxies_;
+	std::vector<KlayGE::SceneObjectLightSourceProxyPtr> light_proxies_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

@@ -38,9 +38,9 @@ namespace
 		{
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			mtl_ = SyncLoadRenderMaterial("ReflectMesh.mtlml");
 
@@ -163,9 +163,9 @@ namespace
 		}
 
 	private:
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
-			StaticMesh::DoBuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo(model);
 
 			mtl_ = SyncLoadRenderMaterial("DinoMesh.mtlml");
 		}
@@ -211,8 +211,10 @@ void ScreenSpaceReflectionApp::OnCreate()
 	c_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ReflectMesh>);
-	RenderablePtr dino_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto dino_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<DinoMesh>);
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
@@ -236,9 +238,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	point_light_->Falloff(float3(1, 0, 0.3f));
 	point_light_->AddToSceneManager();
 
-	auto scene_obj = MakeSharedPtr<SceneNode>(dino_model, SceneNode::SOA_Cullable);
-	scene_obj->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
+	dino_model->RootNode()->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 

@@ -74,11 +74,6 @@ namespace KlayGE
 			// -1 means automatic choose lod
 			active_lod_ = -1;
 		}
-
-		for (auto const & mesh : this->RenderableList())
-		{
-			mesh->ActiveLod(lod);
-		}
 	}
 
 	RenderLayout& Renderable::GetRenderLayout() const
@@ -354,11 +349,6 @@ namespace KlayGE
 	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
 		model_mat_ = mat;
-	}
-
-	ArrayRef<RenderablePtr> Renderable::RenderableList() const
-	{
-		return ArrayRef<RenderablePtr>();
 	}
 
 	void Renderable::UpdateBoundBox()

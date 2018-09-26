@@ -60,8 +60,10 @@ namespace
 			}
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
+
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
@@ -148,11 +150,11 @@ void MetalnessApp::OnCreate()
 		});
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
 
 	uint32_t const spheres_row = 10;
 	uint32_t const spheres_column = 10;
-	spheres_.resize(spheres_row * spheres_column);
 	for (uint32_t i = 0; i < spheres_row; ++ i)
 	{
 		for (uint32_t j = 0; j < spheres_column; ++ j)
@@ -160,20 +162,19 @@ void MetalnessApp::OnCreate()
 			auto sphere_model = sphere_model_unique->Clone(CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
 			this->Material(*sphere_model, albedo_, (i + 1.0f) / spheres_row, j / (spheres_column - 1.0f));
 
-			spheres_[i * spheres_column + j] = MakeSharedPtr<SceneNode>(sphere_model, SceneNode::SOA_Cullable);
-			spheres_[i * spheres_column + j]->TransformToParent(MathLib::translation(
+			sphere_model->RootNode()->TransformToParent(MathLib::translation(
 				(-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.06f,
 				-(-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.06f,
 				0.8f));
-			sphere_group_->AddChild(spheres_[i * spheres_column + j]);
+			sphere_group_->AddChild(sphere_model->RootNode());
 		}
 	}
 
 	single_model_ = SyncLoadModel("helmet_armet_2.3ds", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
-	single_object_ = MakeSharedPtr<SceneNode>(single_model_, SceneNode::SOA_Cullable);
+	single_object_ = single_model_->RootNode();
 	single_object_->TransformToParent(MathLib::scaling(2.0f, 2.0f, 2.0f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(single_object_);
 
 	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
 	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);

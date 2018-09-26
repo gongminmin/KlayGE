@@ -353,10 +353,10 @@ namespace KlayGE
 
 		std::string mesh_name = mesh_path.string();
 		model_ = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
+			0, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 			CreateModelFactory<DetailedSkinnedModel>, CreateMeshFactory<DetailedSkinnedMesh>);
 		checked_pointer_cast<DetailedSkinnedModel>(model_)->SetTime(0);
-		object_ = MakeSharedPtr<SceneNode>(model_, 0);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
+		object_ = model_->RootNode();
 		for (size_t i = 0; i < model_->NumMeshes(); ++ i)
 		{
 			model_->Mesh(i)->ObjectID(static_cast<uint32_t>(i + 1));
@@ -372,14 +372,14 @@ namespace KlayGE
 		if (!ResLoader::Instance().Locate(imposter_name).empty())
 		{
 			imposter_ = MakeSharedPtr<SceneNode>(
-				MakeSharedPtr<RenderImpostor>(imposter_name, model_->PosBound()), 0);
+				MakeSharedPtr<RenderImpostor>(imposter_name, model_->RootNode()->PosBoundOS()), 0);
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(imposter_);
 			imposter_->Visible(false);
 		}
 
 		imposter_mode_ = false;
 
-		AABBox const & bb = model_->PosBound();
+		AABBox const & bb = model_->RootNode()->PosBoundOS();
 		float3 center = bb.Center();
 		float3 half_size = bb.HalfSize();
 		this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, center.y(), 0), float3(0.0f, 1.0f, 0.0f));
@@ -430,7 +430,7 @@ namespace KlayGE
 
 			if (model_)
 			{
-				AABBox bb = MathLib::transform_aabb(model_->PosBound(), camera.ViewMatrix())
+				AABBox bb = MathLib::transform_aabb(model_->RootNode()->PosBoundWS(), camera.ViewMatrix())
 					| MathLib::transform_aabb(grid_->GetRenderable()->PosBound(), camera.ViewMatrix());
 				float near_plane = std::max(0.01f, bb.Min().z() * 0.8f);
 				float far_plane = std::max(near_plane + 0.1f, bb.Max().z() * 1.2f);

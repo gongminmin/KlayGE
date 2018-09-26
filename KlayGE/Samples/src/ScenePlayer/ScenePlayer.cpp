@@ -561,9 +561,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				std::istream(&stream_buff) >> scale.x() >> scale.y() >> scale.z();
 			}
 
-			SceneNodePtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
-			checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy)->Scaling(scale);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy);
+			auto light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
+			light_proxy->Scaling(scale);
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy->RootNode());
 
 			light_proxies_.push_back(light_proxy);
 		}
@@ -655,16 +655,16 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = model_node->Attrib("meshml");
 		BOOST_ASSERT(attr);
 
-		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable);
+		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable,
+			obj_attr, &Context::Instance().SceneManagerInstance().SceneRootNode());
 		scene_models_.push_back(model);
-		auto scene_obj = MakeSharedPtr<SceneNode>(model, obj_attr);
+		auto const & scene_obj = model->RootNode();
 		scene_obj->TransformToParent(obj_mat);
 		if (!update_script.empty())
 		{
 			scene_obj->OnSubThreadUpdate().connect(SceneNodeUpdate(*scene_obj, update_script));
 		}
 		scene_objs_.push_back(scene_obj);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
 	}
 
 	{

@@ -37,6 +37,7 @@
 #include <KlayGE/ToolCommonLoader.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KlayGE/SceneManager.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -58,7 +59,9 @@ namespace
 		{
 			std::string res_name;
 			uint32_t access_hint;
-			std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc;
+			uint32_t node_attrib;
+			SceneNode* parent_node;
+			std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc;
 			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc;
 
 			RenderModelPtr sw_model;
@@ -67,12 +70,14 @@ namespace
 		};
 
 	public:
-		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint,
-			std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+			std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 		{
 			model_desc_.res_name = std::string(res_name);
 			model_desc_.access_hint = access_hint;
+			model_desc_.node_attrib = node_attrib;
+			model_desc_.parent_node = parent_node;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
@@ -91,7 +96,7 @@ namespace
 
 		std::shared_ptr<void> CreateResource() override
 		{
-			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(L"Model");
+			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(L"Model", model_desc_.node_attrib);
 			*model_desc_.model = model;
 			return model;
 		}
@@ -152,7 +157,7 @@ namespace
 		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			auto rhs_model = std::static_pointer_cast<RenderModel>(resource);
-			auto model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
+			auto model = model_desc_.CreateModelFactoryFunc(rhs_model->RootNode()->Name(), rhs_model->RootNode()->Attrib());
 			model->CloneDataFrom(*rhs_model, model_desc_.CreateMeshFactoryFunc);
 
 			this->AddsSubPath();
@@ -160,7 +165,7 @@ namespace
 			model->BuildModelInfo();
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<StaticMesh>(model->Mesh(i))->BuildMeshInfo();
+				checked_pointer_cast<StaticMesh>(model->Mesh(i))->BuildMeshInfo(*model);
 			}
 
 			return std::static_pointer_cast<void>(model);
@@ -320,10 +325,16 @@ namespace
 				model->BuildModelInfo();
 				for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 				{
-					checked_pointer_cast<StaticMesh>(model->Mesh(i))->BuildMeshInfo();
+					checked_pointer_cast<StaticMesh>(model->Mesh(i))->BuildMeshInfo(*model);
 				}
 
 				model_desc_.sw_model.reset();
+
+				if (model_desc_.parent_node != nullptr)
+				{
+					std::lock_guard<std::mutex> lock(Context::Instance().SceneManagerInstance().MutexForUpdate());
+					model_desc_.parent_node->AddChild(model->RootNode());
+				}
 			}
 		}
 
@@ -335,18 +346,10 @@ namespace
 
 namespace KlayGE
 {
-	RenderModel::RenderModel(std::wstring_view name)
-		: Renderable(name),
+	RenderModel::RenderModel(std::wstring_view name, uint32_t node_attrib)
+		: root_node_(MakeSharedPtr<SceneNode>(name, node_attrib)),
 			hw_res_ready_(false)
 	{
-	}
-
-	void RenderModel::NumLods(uint32_t lods)
-	{
-		this->ForEachMesh([lods](Renderable& mesh)
-			{
-				mesh.NumLods(lods);
-			});
 	}
 
 	uint32_t RenderModel::NumLods() const
@@ -359,111 +362,12 @@ namespace KlayGE
 		return max_lod;
 	}
 
-	ArrayRef<RenderablePtr> RenderModel::RenderableList() const
+	void RenderModel::ActiveLod(int32_t lod)
 	{
-		return MakeArrayRef(meshes_);
-	}
-
-	void RenderModel::AddToRenderQueue()
-	{
-		// SceneObjects on RenderMeshes' are in charge of adding them to render queue.
-		// Don't need to do it here.
-	}
-
-	void RenderModel::OnRenderBegin()
-	{
-		this->ForEachMesh([](Renderable& mesh)
+		this->ForEachMesh([lod](Renderable& mesh)
 			{
-				mesh.OnRenderBegin();
+				mesh.ActiveLod(lod);
 			});
-	}
-
-	void RenderModel::OnRenderEnd()
-	{
-		this->ForEachMesh([](Renderable& mesh)
-			{
-				mesh.OnRenderEnd();
-			});
-	}
-
-	AABBox const & RenderModel::PosBound() const
-	{
-		return pos_aabb_;
-	}
-
-	AABBox const & RenderModel::TexcoordBound() const
-	{
-		return tc_aabb_;
-	}
-
-	void RenderModel::UpdateBoundBox()
-	{
-		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		this->ForEachMesh([this](Renderable& mesh)
-			{
-				pos_aabb_ |= mesh.PosBound();
-				tc_aabb_ |= mesh.TexcoordBound();
-			});
-	}
-
-	void RenderModel::Pass(PassType type)
-	{
-		Renderable::Pass(type);
-		this->ForEachMesh([type](Renderable& mesh)
-			{
-				mesh.Pass(type);
-			});
-	}
-
-	bool RenderModel::SpecialShading() const
-	{
-		bool ss = false;
-		this->ForEachMesh([&ss](Renderable& mesh)
-			{
-				ss |= mesh.SpecialShading();
-			});
-		return ss;
-	}
-	
-	bool RenderModel::TransparencyBackFace() const
-	{
-		bool ab = false;
-		this->ForEachMesh([&ab](Renderable& mesh)
-			{
-				ab |= mesh.TransparencyBackFace();
-			});
-		return ab;
-	}
-
-	bool RenderModel::TransparencyFrontFace() const
-	{
-		bool ab = false;
-		this->ForEachMesh([&ab](Renderable& mesh)
-			{
-				ab |= mesh.TransparencyFrontFace();
-			});
-		return ab;
-	}
-
-	bool RenderModel::Reflection() const
-	{
-		bool ref = false;
-		this->ForEachMesh([&ref](Renderable& mesh)
-			{
-				ref |= mesh.Reflection();
-			});
-		return ref;
-	}
-
-	bool RenderModel::SimpleForward() const
-	{
-		bool sf = false;
-		this->ForEachMesh([&sf](Renderable& mesh)
-			{
-				sf |= mesh.SimpleForward();
-			});
-		return sf;
 	}
 
 	bool RenderModel::HWResourceReady() const
@@ -471,9 +375,9 @@ namespace KlayGE
 		bool ready = hw_res_ready_;
 		if (ready)
 		{
-			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			for (auto const & mesh : meshes_)
 			{
-				ready &= checked_pointer_cast<StaticMesh>(this->Mesh(i))->HWResourceReady();
+				ready &= mesh->HWResourceReady();
 				if (!ready)
 				{
 					break;
@@ -491,16 +395,16 @@ namespace KlayGE
 		}
 	}
 
-	RenderModelPtr RenderModel::Clone(std::function<RenderModelPtr(std::wstring_view)> const & CreateModelFactoryFunc,
+	RenderModelPtr RenderModel::Clone(std::function<RenderModelPtr(std::wstring_view, uint32_t)> const & CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc)
 	{
-		auto ret_model = CreateModelFactoryFunc(this->Name());
+		auto ret_model = CreateModelFactoryFunc(root_node_->Name(), root_node_->Attrib());
 		ret_model->CloneDataFrom(*this, CreateMeshFactoryFunc);
 
 		ret_model->BuildModelInfo();
-		for (uint32_t i = 0; i < ret_model->NumMeshes(); ++i)
+		for (auto const & ret_mesh : ret_model->meshes_)
 		{
-			checked_pointer_cast<StaticMesh>(ret_model->Mesh(i))->BuildMeshInfo();
+			checked_pointer_cast<StaticMesh>(ret_mesh)->BuildMeshInfo(*ret_model);
 		}
 
 		return ret_model;
@@ -556,11 +460,7 @@ namespace KlayGE
 
 	StaticMesh::StaticMesh(RenderModel const & model, std::wstring_view name)
 		: Renderable(name),
-			model_(&model), hw_res_ready_(false)
-	{
-	}
-
-	StaticMesh::~StaticMesh()
+			hw_res_ready_(false), software_model_(model.RootNode()->Name() == L"Software")
 	{
 	}
 
@@ -570,7 +470,7 @@ namespace KlayGE
 
 		for (auto& rl : rls_)
 		{
-			if (model_->Name() == L"Software")
+			if (software_model_)
 			{
 				rl = MakeSharedPtr<RenderLayout>();
 			}
@@ -583,9 +483,9 @@ namespace KlayGE
 		}
 	}
 
-	void StaticMesh::DoBuildMeshInfo()
+	void StaticMesh::DoBuildMeshInfo(RenderModel const & model)
 	{
-		mtl_ = model_->GetMaterial(this->MaterialID());
+		mtl_ = model.GetMaterial(this->MaterialID());
 
 		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
@@ -623,7 +523,7 @@ namespace KlayGE
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model_->IsSkinned()));
+			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model.IsSkinned()));
 		}
 	}
 
@@ -712,8 +612,8 @@ namespace KlayGE
 	}
 
 
-	SkinnedModel::SkinnedModel(std::wstring_view name)
-		: RenderModel(name),
+	SkinnedModel::SkinnedModel(std::wstring_view name, uint32_t node_attrib)
+		: RenderModel(name, node_attrib),
 			last_frame_(-1),
 			num_frames_(0), frame_rate_(0)
 	{
@@ -1026,26 +926,26 @@ namespace KlayGE
 		}
 	}
 
-	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			access_hint, node_attrib, parent_node, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring_view)> CreateModelFactoryFunc,
+	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			access_hint, node_attrib, parent_node, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
 	RenderModelPtr LoadSoftwareModel(std::string_view model_name)
@@ -1442,11 +1342,11 @@ namespace KlayGE
 		RenderModelPtr model;
 		if (skinned)
 		{
-			model = MakeSharedPtr<SkinnedModel>(L"Software");
+			model = MakeSharedPtr<SkinnedModel>(L"Software", 0);
 		}
 		else
 		{
-			model = MakeSharedPtr<RenderModel>(L"Software");
+			model = MakeSharedPtr<RenderModel>(L"Software", 0);
 		}
 
 		model->NumMaterials(mtls.size());

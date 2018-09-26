@@ -26,12 +26,11 @@ private:
 	void WireframeHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneNodePtr polygon_;
 	KlayGE::RenderModelPtr polygon_model_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneNodePtr light_proxy_;
+	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::JudaTexturePtr juda_tex_;

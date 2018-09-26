@@ -193,8 +193,6 @@ namespace KlayGE
 
 		virtual void ModelMatrix(float4x4 const & mat);
 
-		virtual ArrayRef<RenderablePtr> RenderableList() const;
-
 		virtual bool HWResourceReady() const
 		{
 			return true;
@@ -270,7 +268,7 @@ namespace KlayGE
 		std::vector<SceneNode const *> instances_;
 
 		RenderEffectPtr effect_;
-		RenderTechnique* technique_;
+		RenderTechnique* technique_ = nullptr;
 
 		std::vector<RenderLayoutPtr> rls_;
 

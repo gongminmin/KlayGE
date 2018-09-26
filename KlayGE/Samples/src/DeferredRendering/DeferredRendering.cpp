@@ -129,7 +129,8 @@ void DeferredRenderingApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr scene_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	auto scene_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -174,14 +175,11 @@ void DeferredRenderingApp::OnCreate()
 	spot_light_[2]->AddToSceneManager();
 
 	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[0])->Scaling(0.1f, 0.1f, 0.1f);
+	spot_light_src_[0]->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
+	spot_light_src_[1]->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[2]);
-
-	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(spot_light_src_[2]->RootNode());
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -397,7 +395,7 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 	for (size_t i = num_lights; i < particle_lights_.size(); ++ i)
 	{
 		particle_lights_[i]->DelFromSceneManager();
-		scene_mgr.SceneRootNode().RemoveChild(particle_light_srcs_[i]);
+		scene_mgr.SceneRootNode().RemoveChild(particle_light_srcs_[i]->RootNode());
 	}
 
 	size_t old_size = particle_lights_.size();
@@ -412,8 +410,8 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 		particle_lights_[i]->AddToSceneManager();
 
 		particle_light_srcs_[i] = MakeSharedPtr<SceneObjectLightSourceProxy>(particle_lights_[i]);
-		checked_pointer_cast<SceneObjectLightSourceProxy>(particle_light_srcs_[i])->Scaling(0.1f, 0.1f, 0.1f);
-		scene_mgr.SceneRootNode().AddChild(particle_light_srcs_[i]);
+		particle_light_srcs_[i]->Scaling(0.1f, 0.1f, 0.1f);
+		scene_mgr.SceneRootNode().AddChild(particle_light_srcs_[i]->RootNode());
 	}
 
 	std::wostringstream stream;

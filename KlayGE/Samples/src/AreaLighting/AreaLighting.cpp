@@ -91,7 +91,8 @@ void AreaLightingApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr scene_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	auto scene_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -113,9 +114,9 @@ void AreaLightingApp::OnCreate()
 	point_light_->Enabled(false);
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(point_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(point_light_src_);
-	point_light_src_->Visible(false);
+	point_light_src_->Scaling(0.1f, 0.1f, 0.1f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(point_light_src_->RootNode());
+	point_light_src_->RootNode()->Visible(false);
 
 	sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
 	sphere_area_light_->Attrib(0);
@@ -127,9 +128,9 @@ void AreaLightingApp::OnCreate()
 	sphere_area_light_->Enabled(false);
 
 	sphere_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sphere_area_light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_area_light_src_);
-	sphere_area_light_src_->Visible(false);
+	sphere_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_area_light_src_->RootNode());
+	sphere_area_light_src_->RootNode()->Visible(false);
 
 	tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
 	tube_area_light_->Attrib(0);
@@ -141,14 +142,11 @@ void AreaLightingApp::OnCreate()
 	tube_area_light_->Enabled(false);
 
 	tube_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(tube_area_light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tube_area_light_src_);
-	tube_area_light_src_->Visible(false);
+	tube_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tube_area_light_src_->RootNode());
+	tube_area_light_src_->RootNode()->Visible(false);
 
-	auto scene_obj = MakeSharedPtr<SceneNode>(scene_model, SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
-
-	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
+	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable, nullptr);
 
 	for (int i = -5; i < 5; ++ i)
 	{
@@ -158,10 +156,9 @@ void AreaLightingApp::OnCreate()
 			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
 			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
 			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
-			auto sphere_obj = MakeSharedPtr<SceneNode>(sphere_mesh, SceneNode::SOA_Cullable);
-			sphere_obj->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
+			sphere_mesh->RootNode()->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
 				* MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj);
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_mesh->RootNode());
 		}
 	}
 
@@ -253,11 +250,11 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 	{
 	case 0:
 		point_light_->Enabled(true);
-		point_light_src_->Visible(true);
+		point_light_src_->RootNode()->Visible(true);
 		sphere_area_light_->Enabled(false);
-		sphere_area_light_src_->Visible(false);
+		sphere_area_light_src_->RootNode()->Visible(false);
 		tube_area_light_->Enabled(false);
-		tube_area_light_src_->Visible(false);
+		tube_area_light_src_->RootNode()->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
@@ -266,11 +263,11 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 
 	case 1:
 		point_light_->Enabled(false);
-		point_light_src_->Visible(false);
+		point_light_src_->RootNode()->Visible(false);
 		sphere_area_light_->Enabled(true);
-		sphere_area_light_src_->Visible(true);
+		sphere_area_light_src_->RootNode()->Visible(true);
 		tube_area_light_->Enabled(false);
-		tube_area_light_src_->Visible(false);
+		tube_area_light_src_->RootNode()->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(true);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(true);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
@@ -279,11 +276,11 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 
 	case 2:
 		point_light_->Enabled(false);
-		point_light_src_->Visible(false);
+		point_light_src_->RootNode()->Visible(false);
 		sphere_area_light_->Enabled(false);
-		sphere_area_light_src_->Visible(false);
+		sphere_area_light_src_->RootNode()->Visible(false);
 		tube_area_light_->Enabled(true);
-		tube_area_light_src_->Visible(true);
+		tube_area_light_src_->RootNode()->Visible(true);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(true);
@@ -300,7 +297,7 @@ void AreaLightingApp::RadiusChangedHandler(UISlider const & sender)
 	float radius = sender.GetValue() / 100.0f;
 
 	checked_pointer_cast<SphereAreaLightSource>(sphere_area_light_)->Radius(radius);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(radius, radius, radius);
+	sphere_area_light_src_->Scaling(radius, radius, radius);
 
 	std::wostringstream stream;
 	stream << L"Radius: " << radius;
@@ -312,7 +309,7 @@ void AreaLightingApp::LengthChangedHandler(UISlider const & sender)
 	float length = sender.GetValue() / 100.0f;
 
 	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, length));
-	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, length);
+	tube_area_light_src_->Scaling(0.1f, 0.1f, length);
 
 	std::wostringstream stream;
 	stream << L"Length: " << length;

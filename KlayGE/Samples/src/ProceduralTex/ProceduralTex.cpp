@@ -41,8 +41,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ProceduralMarbleTex");
 		}
 
-		virtual void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
+
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
@@ -208,9 +210,9 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		else if (loading_percentage_ < 60)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+				SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
-			polygon_ = MakeSharedPtr<SceneNode>(polygon_model_, SceneNode::SOA_Cullable);
-			polygon_->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
+			polygon_model_->RootNode()->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(elapsed_time);
 
@@ -219,7 +221,6 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 						checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(i))->AppTime(app_time);
 					}
 				});
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
@@ -241,8 +242,8 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			light_->AddToSceneManager();
 
 			light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-			checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_);
+			light_proxy_->Scaling(0.01f, 0.01f, 0.01f);
+			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
 
 			loading_percentage_ = 80;
 			progress_bar->SetValue(loading_percentage_);
