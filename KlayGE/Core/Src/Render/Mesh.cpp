@@ -1737,7 +1737,8 @@ namespace KlayGE
 		uint32_t ver = Native2LE(MODEL_BIN_VERSION);
 		ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
-		uint64_t original_len = Native2LE(static_cast<uint64_t>(ss.str().size()));
+		auto const & ss_str = ss.str();
+		uint64_t original_len = Native2LE(static_cast<uint64_t>(ss_str.size()));
 		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
 
 		std::ofstream::pos_type p = ofs.tellp();
@@ -1745,7 +1746,7 @@ namespace KlayGE
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 
 		LZMACodec lzma;
-		len = lzma.Encode(ofs, ss.str().c_str(), ss.str().size());
+		len = lzma.Encode(ofs, MakeArrayRef(reinterpret_cast<uint8_t const *>(ss_str.c_str()), ss_str.size()));
 
 		ofs.seekp(p, std::ios_base::beg);
 		len = Native2LE(len);

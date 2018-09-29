@@ -125,7 +125,7 @@ namespace KlayGE
 		SceneNode scene_root_;
 		SceneNode overlay_root_;
 
-		std::unordered_map<size_t, std::shared_ptr<std::vector<BoundOverlap>>> visible_marks_map_;
+		std::unordered_map<size_t, std::unique_ptr<BoundOverlap[]>> visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;

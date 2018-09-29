@@ -411,7 +411,7 @@ void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, quantizer_char
 			mse += d * d;
 		}
 
-		lzma_enc.Encode(char_lzma_dist, &uint8_dist[0], uint8_dist.size());
+		lzma_enc.Encode(char_lzma_dist, uint8_dist);
 		uint64_t len = static_cast<uint64_t>(char_lzma_dist.size());
 
 		lzma_dist.insert(lzma_dist.end(), reinterpret_cast<uint8_t*>(&len), reinterpret_cast<uint8_t*>(&len + 1));

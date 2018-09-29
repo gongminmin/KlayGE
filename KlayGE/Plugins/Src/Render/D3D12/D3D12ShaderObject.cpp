@@ -303,7 +303,7 @@ namespace KlayGE
 				native_shader_stream.read(reinterpret_cast<char*>(&blob_size), sizeof(blob_size));
 				std::shared_ptr<std::vector<uint8_t>> code_blob = MakeSharedPtr<std::vector<uint8_t>>(blob_size);
 
-				native_shader_stream.read(reinterpret_cast<char*>(&((*code_blob)[0])), blob_size);
+				native_shader_stream.read(reinterpret_cast<char*>(code_blob->data()), blob_size);
 
 				so_template_->shader_desc_[type] = MakeSharedPtr<D3D12ShaderObjectTemplate::D3D12ShaderDesc>();
 				auto& sd = *so_template_->shader_desc_[type];
@@ -440,7 +440,7 @@ namespace KlayGE
 
 			uint32_t blob_size = Native2LE(static_cast<uint32_t>(code_blob->size()));
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
-			oss.write(reinterpret_cast<char const *>(&((*code_blob)[0])), code_blob->size());
+			oss.write(reinterpret_cast<char const *>(code_blob->data()), code_blob->size());
 
 			auto const & sd = *so_template_->shader_desc_[type];
 

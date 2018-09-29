@@ -181,13 +181,11 @@ namespace KlayGE
 			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
 		void OGLLinkShaders(RenderEffect const & effect);
 
-		void OGLESAttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
-
 		std::shared_ptr<std::vector<uint8_t>> D3D11CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids);
 		void D3D11AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
+
 	private:
 		std::shared_ptr<NullShaderObjectTemplate> so_template_;
 

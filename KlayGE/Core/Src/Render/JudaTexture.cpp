@@ -650,27 +650,27 @@ namespace KlayGE
 				}
 
 				uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-				std::shared_ptr<std::vector<uint8_t>> data = MakeSharedPtr<std::vector<uint8_t>>(full_tile_bytes);
+				auto data = MakeUniquePtr<uint8_t[]>(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint64_t offsets[2];
 					input_file_->seekg(data_blocks_offset_ + data_index * sizeof(uint64_t), std::ios_base::beg);
 					input_file_->read(offsets, sizeof(offsets));
 					uint32_t const comed_len = static_cast<uint32_t>(offsets[1] - offsets[0]);
-					std::vector<uint8_t> comed_data(comed_len);
+					auto comed_data = MakeUniquePtr<uint8_t[]>(comed_len);
 					input_file_->seekg(offsets[0], std::ios_base::beg);
-					input_file_->read(&comed_data[0], comed_len);
-					lzma_dec_.Decode(&(*data)[0], &comed_data[0], comed_len, full_tile_bytes);
+					input_file_->read(comed_data.get(), comed_len);
+					lzma_dec_.Decode(data.get(), MakeArrayRef(comed_data.get(), comed_len), full_tile_bytes);
 				}
 				else
 				{
-					memset(&(*data)[0], 0, full_tile_bytes);
+					memset(data.get(), 0, full_tile_bytes);
 				}
 
-				iter = decoded_block_cache_.emplace(data_index, DecodedBlockInfo(data, decode_tick_)).first;
+				iter = decoded_block_cache_.emplace(data_index, DecodedBlockInfo(std::move(data), decode_tick_)).first;
 			}
 
-			return &(*iter->second.data)[0];
+			return iter->second.data.get();
 		}
 		else
 		{
@@ -1117,7 +1117,7 @@ namespace KlayGE
 			std::vector<uint8_t> const & data = juda_tex->data_blocks_[non_empty_block_data_index[i]];
 
 			std::vector<uint8_t> comed_data;
-			lzma_enc.Encode(comed_data, &data[0], data.size());
+			lzma_enc.Encode(comed_data, data);
 
 			uint32_t comed_len = static_cast<uint32_t>(comed_data.size());
 			block_start_pos[i + 1] = block_start_pos[i] + comed_len;

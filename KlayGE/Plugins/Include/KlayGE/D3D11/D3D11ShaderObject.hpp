@@ -17,6 +17,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
+#include <KFL/ArrayRef.hpp>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
@@ -45,10 +46,7 @@ namespace KlayGE
 		void Bind() override;
 		void Unbind() override;
 
-		std::shared_ptr<std::vector<uint8_t>> const & VSCode() const
-		{
-			return so_template_->shader_code_[ST_VertexShader].first;
-		}
+		ArrayRef<uint8_t> VSCode() const;
 
 		uint32_t VSSignature() const
 		{
@@ -141,7 +139,7 @@ namespace KlayGE
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
 		void CreateGeometryShaderWithStreamOutput(ShaderType type, RenderEffect const & effect,
-			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob,
+			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, ArrayRef<uint8_t> code_blob,
 			std::vector<ShaderDesc::StreamOutputDecl> const & so_decl);
 
 	private:

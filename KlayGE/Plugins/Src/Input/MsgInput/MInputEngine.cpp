@@ -120,14 +120,14 @@ namespace KlayGE
 			TERRC(std::errc::function_not_supported);
 		}
 
-		std::vector<RAWINPUTDEVICELIST> raw_input_devices(devices);
-		::GetRawInputDeviceList(&raw_input_devices[0], &devices, sizeof(raw_input_devices[0]));
+		auto raw_input_devices = MakeUniquePtr<RAWINPUTDEVICELIST[]>(devices);
+		::GetRawInputDeviceList(raw_input_devices.get(), &devices, sizeof(raw_input_devices[0]));
 
 		RAWINPUTDEVICE rid;
 		rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 		rid.hwndTarget = hwnd;
 		std::vector<RAWINPUTDEVICE> rids;
-		for (size_t i = 0; i < raw_input_devices.size(); ++ i)
+		for (size_t i = 0; i < devices; ++ i)
 		{
 			InputDevicePtr device;
 			switch (raw_input_devices[i].dwType)
@@ -151,10 +151,10 @@ namespace KlayGE
 					UINT size = 0;
 					if (0 == ::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, nullptr, &size))
 					{
-						std::vector<uint8_t> buf(size);
-						::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, &buf[0], &size);
+						auto buf = MakeUniquePtr<uint8_t[]>(size);
+						::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, buf.get(), &size);
 
-						RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+						RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
 						if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage)
 							&& ((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage)
 								|| (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)))
@@ -296,10 +296,10 @@ namespace KlayGE
 			UINT size = 0;
 			if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 			{
-				std::vector<uint8_t> data(size);
-				::GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER));
+				auto data = MakeUniquePtr<uint8_t[]>(size);
+				::GetRawInputData(ri, RID_INPUT, data.get(), &size, sizeof(RAWINPUTHEADER));
 
-				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
+				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(data.get());
 
 				for (auto const & device : devices_)
 				{

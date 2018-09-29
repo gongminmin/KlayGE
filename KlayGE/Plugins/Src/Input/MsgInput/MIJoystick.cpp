@@ -54,18 +54,18 @@ namespace KlayGE
 		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, buf.get(), &size);
 
 			PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
 
 			HIDP_CAPS caps;
 			if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
 			{
-				std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
+				auto button_caps = MakeUniquePtr<HIDP_BUTTON_CAPS[]>(caps.NumberInputButtonCaps);
 
 				uint16_t caps_length = caps.NumberInputButtonCaps;
-				if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
+				if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, button_caps.get(), &caps_length, preparsed_data))
 				{
 					num_buttons_ = std::min<uint32_t>(static_cast<uint32_t>(buttons_[0].size()),
 						button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
@@ -76,10 +76,10 @@ namespace KlayGE
 		size = 0;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, buf.get(), &size);
 
-			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
 			device_id_ = info->hid.dwProductId;
 		}
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -101,10 +101,10 @@ namespace KlayGE
 		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, buf.get(), &size);
 
-			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
 			if (device_id_ != info->hid.dwProductId)
 			{
 				return;
@@ -116,22 +116,22 @@ namespace KlayGE
 		size = 0;
 		if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, buf.get(), &size);
 
-			PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+			PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(buf.get());
 
 			HIDP_CAPS caps;
 			if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
 			{
-				std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
+				auto button_caps = MakeUniquePtr<HIDP_BUTTON_CAPS[]>(caps.NumberInputButtonCaps);
 
 				uint16_t caps_length = caps.NumberInputButtonCaps;
-				if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
+				if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, button_caps.get(), &caps_length, preparsed_data))
 				{
-					std::vector<HIDP_VALUE_CAPS> value_caps(caps.NumberInputValueCaps);
+					auto value_caps = MakeUniquePtr<HIDP_VALUE_CAPS[]>(caps.NumberInputValueCaps);
 					caps_length = caps.NumberInputValueCaps;
-					if (HIDP_STATUS_SUCCESS == mie.HidP_GetValueCaps(HidP_Input, &value_caps[0], &caps_length, preparsed_data))
+					if (HIDP_STATUS_SUCCESS == mie.HidP_GetValueCaps(HidP_Input, value_caps.get(), &caps_length, preparsed_data))
 					{
 						USAGE usage[32];
 						ULONG usage_length = num_buttons_;

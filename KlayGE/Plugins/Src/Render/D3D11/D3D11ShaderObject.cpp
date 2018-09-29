@@ -282,7 +282,7 @@ namespace KlayGE
 				native_shader_stream.read(reinterpret_cast<char*>(&blob_size), sizeof(blob_size));
 				std::shared_ptr<std::vector<uint8_t>> code_blob = MakeSharedPtr<std::vector<uint8_t>>(blob_size);
 
-				native_shader_stream.read(reinterpret_cast<char*>(&((*code_blob)[0])), blob_size);
+				native_shader_stream.read(reinterpret_cast<char*>(code_blob->data()), blob_size);
 
 				so_template_->shader_desc_[type] = MakeSharedPtr<D3D11ShaderObjectTemplate::D3D11ShaderDesc>();
 				auto& sd = *so_template_->shader_desc_[type];
@@ -419,7 +419,7 @@ namespace KlayGE
 
 			uint32_t blob_size = Native2LE(static_cast<uint32_t>(code_blob->size()));
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
-			oss.write(reinterpret_cast<char const *>(&((*code_blob)[0])), code_blob->size());
+			oss.write(reinterpret_cast<char const *>(code_blob->data()), code_blob->size());
 
 			auto const & sd = *so_template_->shader_desc_[type];
 
@@ -788,9 +788,11 @@ namespace KlayGE
 	}
 
 	void D3D11ShaderObject::CreateGeometryShaderWithStreamOutput(ShaderType type, RenderEffect const & effect,
-		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob,
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, ArrayRef<uint8_t> code_blob,
 		std::vector<ShaderDesc::StreamOutputDecl> const & so_decl)
 	{
+		BOOST_ASSERT(!code_blob.empty());
+
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto const & d3d11_re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
 		auto d3d_device = d3d11_re.D3DDevice();
@@ -810,7 +812,7 @@ namespace KlayGE
 		}
 
 		ID3D11GeometryShader* gs;
-		if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
+		if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob.data(), code_blob.size(),
 			&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
 			&gs)))
 		{
@@ -847,7 +849,7 @@ namespace KlayGE
 				case ST_VertexShader:
 					{
 						ID3D11VertexShader* vs;
-						if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), nullptr, &vs)))
+						if (FAILED(d3d_device->CreateVertexShader(code_blob->data(), code_blob->size(), nullptr, &vs)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -859,7 +861,7 @@ namespace KlayGE
 							{
 								if (caps.gs_support)
 								{
-									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, *code_blob,
 										sd.so_decl);
 								}
 								else
@@ -876,7 +878,7 @@ namespace KlayGE
 				case ST_PixelShader:
 					{
 						ID3D11PixelShader* ps;
-						if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ps)))
+						if (FAILED(d3d_device->CreatePixelShader(code_blob->data(), code_blob->size(), nullptr, &ps)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -894,7 +896,7 @@ namespace KlayGE
 						if (sd.so_decl.empty())
 						{
 							ID3D11GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
+							if (FAILED(d3d_device->CreateGeometryShader(code_blob->data(), code_blob->size(), nullptr, &gs)))
 							{
 								is_shader_validate_[type] = false;
 							}
@@ -906,7 +908,7 @@ namespace KlayGE
 						}
 						else
 						{
-							this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+							this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, *code_blob,
 								sd.so_decl);
 
 							if (is_shader_validate_[type])
@@ -925,7 +927,7 @@ namespace KlayGE
 					if (caps.cs_support)
 					{
 						ID3D11ComputeShader* cs;
-						if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), nullptr, &cs)))
+						if (FAILED(d3d_device->CreateComputeShader(code_blob->data(), code_blob->size(), nullptr, &cs)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -945,7 +947,7 @@ namespace KlayGE
 					if (caps.hs_support)
 					{
 						ID3D11HullShader* hs;
-						if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), nullptr, &hs)))
+						if (FAILED(d3d_device->CreateHullShader(code_blob->data(), code_blob->size(), nullptr, &hs)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -966,7 +968,7 @@ namespace KlayGE
 					if (caps.ds_support)
 					{
 						ID3D11DomainShader* ds;
-						if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ds)))
+						if (FAILED(d3d_device->CreateDomainShader(code_blob->data(), code_blob->size(), nullptr, &ds)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -978,7 +980,7 @@ namespace KlayGE
 							{
 								if (caps.gs_support)
 								{
-									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, *code_blob,
 										sd.so_decl);
 								}
 								else
@@ -1426,5 +1428,11 @@ namespace KlayGE
 			std::vector<UINT> uav_init_counts(uavs_.size(), 0);
 			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs.size()), &uavs[0], &uav_init_counts[0]);
 		}
+	}
+
+	ArrayRef<uint8_t> D3D11ShaderObject:: VSCode() const
+	{
+		auto const & vs_ptr = so_template_->shader_code_[ST_VertexShader].first;
+		return vs_ptr ? MakeArrayRef(*vs_ptr) : ArrayRef<uint8_t>();
 	}
 }

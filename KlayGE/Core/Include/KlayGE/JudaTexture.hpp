@@ -172,11 +172,11 @@ namespace KlayGE
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			std::shared_ptr<std::vector<uint8_t>> data;
+			std::unique_ptr<uint8_t[]> data;
 			uint64_t tick;
 
-			DecodedBlockInfo(std::shared_ptr<std::vector<uint8_t>> const & d, uint64_t t)
-				: data(d), tick(t)
+			DecodedBlockInfo(std::unique_ptr<uint8_t[]>&& d, uint64_t t)
+				: data(std::move(d)), tick(t)
 			{
 			}
 		};
