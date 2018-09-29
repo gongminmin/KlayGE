@@ -75,11 +75,9 @@ void CalcTBN(float4 pos,
 void CalcTBNVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float4 tangent_quat : TANGENT,
-					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
 					out float4 oH			: TEXCOORD1,	// in tangent space
 					out float3 oV			: TEXCOORD2,
-					out float oDistortion	: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -88,8 +86,6 @@ void CalcTBNVS(float4 pos				: POSITION,
 
 	CalcTBN(pos, texcoord0, tangent_quat,
 		oL, oH, oV, oPos);
-
-	oDistortion = distortion;
 }
 
 float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool nl)
@@ -128,8 +124,7 @@ float4 BumpMappingPS(float4 L		: TEXCOORD0,
 
 float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 					float4 H			: TEXCOORD1,
-					float3 V			: TEXCOORD2,
-					float distortion	: TEXCOORD3) : SV_Target
+					float3 V			: TEXCOORD2) : SV_Target
 {
 	float2 texCoord0 = float2(L.w, H.w);
 	
@@ -144,7 +139,6 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float4 tangent_quat			: TANGENT,
-					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
 					out float4 oH			: TEXCOORD1,	// in tangent space
 					out float3 oV			: TEXCOORD2,	// in tangent space
@@ -327,13 +321,11 @@ struct VS_CONTROL_POINT_OUTPUT
 	float3 Pos : POSITION;
 	float2 Texcoord0 : TEXCOORD0;
 	float4 TangentQuat : TEXCOORD1;
-	float Distortion : TEXCOORD2;
 };
 
 VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float4 tangent_quat			: TANGENT,
-					float distortion	: TEXCOORD1)
+					float4 tangent_quat			: TANGENT)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord0 = texcoord0 * tc_extent + tc_center;
@@ -344,7 +336,6 @@ VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 	output.Pos = pos.xyz;
 	output.Texcoord0 = texcoord0;
 	output.TangentQuat = tangent_quat;
-	output.Distortion = distortion * height_scale;
 
 	return output;
 }
@@ -431,7 +422,7 @@ VS_CONTROL_POINT_OUTPUT TessellationHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p,
 	return p[i];
 }
 
-void PostTessellation(float3 bc_coords, float3 pos, float2 texcoord0, float4 tangent_quat, float3 distortion3,
+void PostTessellation(float3 bc_coords, float3 pos, float2 texcoord0, float4 tangent_quat,
 						out float4 oL, out float4 oH, out float3 oV,
 						out float4 oPos)
 {
@@ -440,11 +431,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 texcoord0, float4 tan
 	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
 	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 
-	float distortion = distortion3.x * bc_coords.z
-			+ distortion3.y * bc_coords.x
-			+ distortion3.z * bc_coords.y;
-
-	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion;
+	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * height_scale * 0.05f;
 	pos += height * obj_to_tangent[2];
 
 	oPos = mul(float4(pos, 1), mvp);
@@ -483,7 +470,6 @@ void FlatTessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				tangent_quat);
 				
 	PostTessellation(bc_coords, pos, texcoord0, tangent_quat,
-				float3(patch[0].Distortion, patch[1].Distortion, patch[2].Distortion),
 				oL, oH, oV, oPos);
 }
 
@@ -509,7 +495,6 @@ void SmoothTessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				tangent_quat);
 
 	PostTessellation(bc_coords, pos, texcoord0, tangent_quat,
-				float3(patch[0].Distortion, patch[1].Distortion, patch[2].Distortion),
 				oL, oH, oV, oPos);
 }
 		]]>
