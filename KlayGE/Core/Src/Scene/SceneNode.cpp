@@ -527,7 +527,7 @@ namespace KlayGE
 				{
 					if (child->pos_aabb_os_)
 					{
-						*pos_aabb_os_ |= *child->pos_aabb_os_;
+						*pos_aabb_os_ |= MathLib::transform_aabb(*child->pos_aabb_os_, child->TransformToParent());
 					}
 				}
 			}

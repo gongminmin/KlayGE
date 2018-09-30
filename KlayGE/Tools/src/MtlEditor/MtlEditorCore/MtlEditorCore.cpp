@@ -353,7 +353,7 @@ namespace KlayGE
 
 		std::string mesh_name = mesh_path.string();
 		model_ = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
-			0, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+			SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
 			CreateModelFactory<DetailedSkinnedModel>, CreateMeshFactory<DetailedSkinnedMesh>);
 		checked_pointer_cast<DetailedSkinnedModel>(model_)->SetTime(0);
 		object_ = model_->RootNode();

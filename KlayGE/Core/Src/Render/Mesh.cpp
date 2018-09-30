@@ -828,9 +828,7 @@ namespace KlayGE
 	{
 		RenderModel::CloneDataFrom(source, CreateMeshFactoryFunc);
 
-		BOOST_ASSERT(this->IsSkinned() == source.IsSkinned());
-
-		if (this->IsSkinned())
+		if (source.IsSkinned())
 		{
 			auto const & src_skinned_model = *checked_cast<SkinnedModel const *>(&source);
 			auto& skinned_model = *checked_cast<SkinnedModel*>(this);
