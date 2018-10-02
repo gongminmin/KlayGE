@@ -60,7 +60,7 @@ namespace KlayGE
 		void CompressKeyFrameSet(KeyFrameSet& kf);
 
 		// From assimp
-		void RecursiveTransformMesh(uint32_t num_lods, uint32_t lod, float4x4 const & parent_mat, aiNode const * node);
+		void BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node);
 		void BuildMaterials(aiScene const * scene);
 		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
@@ -124,7 +124,12 @@ namespace KlayGE
 			std::string name;
 
 			std::vector<uint32_t> mesh_indices;
-			std::vector<float4x4> lod_transforms;
+			std::vector<float4x4> xform_to_parent;
+			std::vector<float4x4> xform_to_world;
+
+			AABBox aabb_local;
+
+			int16_t parent_id;
 		};
 
 		std::vector<Mesh> meshes_;

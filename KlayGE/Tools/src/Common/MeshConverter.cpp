@@ -204,47 +204,53 @@ namespace
 
 namespace KlayGE
 {
-	void MeshConverter::RecursiveTransformMesh(uint32_t num_lods, uint32_t lod, float4x4 const & parent_mat, aiNode const * node)
+	void MeshConverter::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
 	{
-		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
+		auto const ai_node_name = (parent_id == -1) ? "Root" : node->mName.C_Str();
 
-		if (node->mNumMeshes > 0)
+		int16_t index = -1;
+		if (lod == 0)
 		{
-			if (lod == 0)
+			NodeTransform node_transform;
+			node_transform.name = ai_node_name;
+			if (node->mNumMeshes > 0)
 			{
-				NodeTransform node_transform;
-				node_transform.name = node->mName.C_Str();
 				node_transform.mesh_indices.assign(node->mMeshes, node->mMeshes + node->mNumMeshes);
-				node_transform.lod_transforms.resize(num_lods);
-				node_transform.lod_transforms[0] = trans_mat;
-
-				nodes_.push_back(node_transform);
 			}
-			else
+			node_transform.xform_to_parent.resize(num_lods);
+			node_transform.xform_to_world.resize(num_lods);
+			node_transform.xform_to_parent[0] = trans_mat;
+			node_transform.parent_id = parent_id;
+
+			index = static_cast<int16_t>(nodes_.size());
+			nodes_.push_back(node_transform);
+		}
+		else
+		{
+			bool found = false;
+			for (size_t i = 0; i < nodes_.size(); ++ i)
 			{
-				bool found = false;
-				for (auto& node_transform : nodes_)
+				if (nodes_[i].name == ai_node_name)
 				{
-					if (node_transform.name == node->mName.C_Str())
-					{
-						node_transform.lod_transforms[lod] = trans_mat;
-						found = true;
+					index = static_cast<int16_t>(i);
+					nodes_[i].xform_to_parent[lod] = trans_mat;
+					found = true;
 
-						break;
-					}
+					break;
 				}
+			}
 
-				if (!found)
-				{
-					LogError() << "Could NOT find the correspondence node between LoDs" << std::endl;
-					Verify(false);
-				}
+			if (!found)
+			{
+				LogError() << "Could NOT find the correspondence node between LoDs" << std::endl;
+				Verify(false);
 			}
 		}
 
 		for (uint32_t i = 0; i < node->mNumChildren; ++ i)
 		{
-			this->RecursiveTransformMesh(num_lods, lod, trans_mat, node->mChildren[i]);
+			this->BuildNodeData(num_lods, lod, index, node->mChildren[i]);
 		}
 	}
 
@@ -915,7 +921,7 @@ namespace KlayGE
 		this->BuildMeshData(scenes);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
-			this->RecursiveTransformMesh(num_lods, lod, float4x4::Identity(), scenes[lod]->mRootNode);
+			this->BuildNodeData(num_lods, lod, -1, scenes[lod]->mRootNode);
 		}
 
 		if (skinned)
@@ -929,6 +935,34 @@ namespace KlayGE
 
 			mesh.pos_bb = MathLib::compute_aabbox(lod0.positions.begin(), lod0.positions.end());
 			mesh.tc_bb = MathLib::compute_aabbox(lod0.texcoords[0].begin(), lod0.texcoords[0].end());
+		}
+
+		for (auto& node : nodes_)
+		{
+			node.aabb_local.Min() = float3(+1e10f, +1e10f, +1e10f);
+			node.aabb_local.Max() = float3(-1e10f, -1e10f, -1e10f);
+		}
+
+		for (size_t i = nodes_.size(); i > 0; -- i)
+		{
+			auto& node = nodes_[i - 1];
+			if (!node.mesh_indices.empty())
+			{
+				for (auto index : node.mesh_indices)
+				{
+					node.aabb_local |= meshes_[index].pos_bb;
+				}
+			}
+
+			if (node.parent_id >= 0)
+			{
+				if ((node.aabb_local.Min().x() < node.aabb_local.Max().x())
+					&& (node.aabb_local.Min().y() < node.aabb_local.Max().y())
+					&& (node.aabb_local.Min().z() < node.aabb_local.Max().z()))
+				{
+					nodes_[node.parent_id].aabb_local |= MathLib::transform_aabb(node.aabb_local, node.xform_to_parent[0]);
+				}
+			}
 		}
 	}
 
@@ -1845,6 +1879,7 @@ namespace KlayGE
 		{
 			nodes_[mesh_index].name = std::string(mesh_node->Attrib("name")->ValueString());
 			nodes_[mesh_index].mesh_indices.push_back(mesh_index);
+			nodes_[mesh_index].parent_id = (mesh_index == 0) ? -1 : 0;
 
 			meshes_[mesh_index].name = nodes_[mesh_index].name;
 			meshes_[mesh_index].mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
@@ -1878,7 +1913,8 @@ namespace KlayGE
 				}
 
 				meshes_[mesh_index].lods.resize(mesh_lod);
-				nodes_[mesh_index].lod_transforms.assign(mesh_lod, float4x4::Identity());
+				nodes_[mesh_index].xform_to_parent.assign(mesh_lod, float4x4::Identity());
+				nodes_[mesh_index].xform_to_world.resize(mesh_lod);
 
 				for (uint32_t lod = 0; lod < mesh_lod; ++ lod)
 				{
@@ -1891,7 +1927,8 @@ namespace KlayGE
 			else
 			{
 				meshes_[mesh_index].lods.resize(1);
-				nodes_[mesh_index].lod_transforms.assign(1, float4x4::Identity());
+				nodes_[mesh_index].xform_to_parent.assign(1, float4x4::Identity());
+				nodes_[mesh_index].xform_to_world.resize(1);
 
 				this->CompileMeshLodChunk(mesh_node, mesh_index, 0, recompute_pos_bb, recompute_tc_bb);
 
@@ -2920,29 +2957,30 @@ namespace KlayGE
 		}
 		this->RemoveUnusedMaterials();
 
-		auto global_transform = metadata.Transform();
-		if (metadata.AutoCenter())
 		{
-			bool first_aabb = true;
-			AABBox model_aabb;
-			for (auto const & node : nodes_)
+			auto global_transform = metadata.Transform();
+			if (metadata.AutoCenter())
 			{
-				for (auto const mesh_index : node.mesh_indices)
-				{
-					auto trans_aabb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.lod_transforms[0]);
-					if (first_aabb)
-					{
-						model_aabb = trans_aabb;
-						first_aabb = false;
-					}
-					else
-					{
-						model_aabb |= trans_aabb;
-					}
-				}
+				global_transform = MathLib::translation(-nodes_[0].aabb_local.Center()) * nodes_[0].xform_to_parent[0] * global_transform;
 			}
 
-			global_transform = MathLib::translation(-model_aabb.Center()) * global_transform;
+			for (uint32_t lod = 0; lod < num_lods; ++ lod)
+			{
+				nodes_[0].xform_to_world[lod] = nodes_[0].xform_to_parent[lod] * global_transform;
+			}
+		}
+
+		for (size_t i = 1; i < nodes_.size(); ++ i)
+		{
+			for (uint32_t lod = 0; lod < num_lods; ++ lod)
+			{
+				nodes_[i].xform_to_world[lod] = nodes_[i].xform_to_parent[lod];
+
+				if (nodes_[i].parent_id >= 0)
+				{
+					nodes_[i].xform_to_world[lod] *= nodes_[nodes_[i].parent_id].xform_to_world[lod];
+				}
+			}
 		}
 
 		std::vector<VertexElement> merged_ves;
@@ -3016,10 +3054,9 @@ namespace KlayGE
 		{
 			for (auto const & node : nodes_)
 			{
-				auto const trans0_mat = node.lod_transforms[0] * global_transform;
 				for (auto const mesh_index : node.mesh_indices)
 				{
-					auto const pos_bb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, trans0_mat);
+					auto const pos_bb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.xform_to_world[0]);
 					auto const & tc_bb = meshes_[mesh_index].tc_bb;
 
 					float3 const pos_center = pos_bb.Center();
@@ -3029,7 +3066,7 @@ namespace KlayGE
 
 					for (uint32_t lod = 0; lod < num_lods; ++ lod)
 					{
-						float4x4 const trans_mat = node.lod_transforms[lod] * global_transform;
+						float4x4 const & trans_mat = node.xform_to_world[lod];
 						float4x4 const trans_mat_it = MathLib::transpose(MathLib::inverse(trans_mat));
 
 						auto& mesh_lod = meshes_[mesh_index].lods[lod];
@@ -3238,7 +3275,6 @@ namespace KlayGE
 			std::wstring wname;
 			KlayGE::Convert(wname, node.name);
 
-			auto const trans0_mat = node.lod_transforms[0] * global_transform;
 			for (auto const mesh_index : node.mesh_indices)
 			{
 				StaticMeshPtr render_mesh;
@@ -3253,13 +3289,13 @@ namespace KlayGE
 				render_meshes.push_back(render_mesh);
 
 				render_mesh->MaterialID(meshes_[mesh_index].mtl_id);
-				render_mesh->PosBound(MathLib::transform_aabb(meshes_[mesh_index].pos_bb, trans0_mat));
+				render_mesh->PosBound(MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.xform_to_world[0]));
 				render_mesh->TexcoordBound(meshes_[mesh_index].tc_bb);
 
 				render_mesh->NumLods(num_lods);
 				for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
 				{
-					for (uint32_t ve_index = 0; ve_index < merged_vertices.size(); ++ ve_index)
+					for (uint32_t ve_index = 0; ve_index < merged_vbs.size(); ++ ve_index)
 					{
 						render_mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
 					}
@@ -3285,27 +3321,22 @@ namespace KlayGE
 			skinned_model.AssignJoints(joints_.begin(), joints_.end());
 
 			// TODO: Run skinning on CPU to get the bounding box
-			uint32_t total_mesh_index = 0;
-			for (uint32_t node_index = 0; node_index < nodes_.size(); ++ node_index)
+			for (uint32_t mesh_index = 0; mesh_index < render_meshes.size(); ++ mesh_index)
 			{
-				auto const & node = nodes_[node_index];
-				for (size_t mesh_index = 0; mesh_index < node.mesh_indices.size(); ++ mesh_index, ++ total_mesh_index)
-				{
-					auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(render_meshes[total_mesh_index]);
+				auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(render_meshes[mesh_index]);
 
-					auto frame_pos_aabbs = MakeSharedPtr<AABBKeyFrameSet>();
+				auto frame_pos_aabbs = MakeSharedPtr<AABBKeyFrameSet>();
 
-					frame_pos_aabbs->frame_id.resize(2);
-					frame_pos_aabbs->bb.resize(2);
+				frame_pos_aabbs->frame_id.resize(2);
+				frame_pos_aabbs->bb.resize(2);
 
-					frame_pos_aabbs->frame_id[0] = 0;
-					frame_pos_aabbs->frame_id[1] = skinned_model.NumFrames() - 1;
+				frame_pos_aabbs->frame_id[0] = 0;
+				frame_pos_aabbs->frame_id[1] = skinned_model.NumFrames() - 1;
 
-					frame_pos_aabbs->bb[0] = skinned_mesh.PosBound();
-					frame_pos_aabbs->bb[1] = skinned_mesh.PosBound();
+				frame_pos_aabbs->bb[0] = skinned_mesh.PosBound();
+				frame_pos_aabbs->bb[1] = skinned_mesh.PosBound();
 
-					skinned_mesh.AttachFramePosBounds(frame_pos_aabbs);
-				}
+				skinned_mesh.AttachFramePosBounds(frame_pos_aabbs);
 			}
 		}
 
