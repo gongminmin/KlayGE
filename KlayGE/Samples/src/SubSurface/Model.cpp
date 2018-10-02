@@ -19,8 +19,8 @@
 using namespace KlayGE;
 
 
-DetailedMesh::DetailedMesh(RenderModel const & model, std::wstring_view name)
-	: StaticMesh(model, name)
+DetailedMesh::DetailedMesh(std::wstring_view name)
+	: StaticMesh(name)
 {
 	effect_ = SyncLoadRenderEffect("SubSurface.fxml");
 	technique_ = effect_->TechniqueByName("SubSurfaceTech");

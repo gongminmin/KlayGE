@@ -3244,11 +3244,11 @@ namespace KlayGE
 				StaticMeshPtr render_mesh;
 				if (skinned)
 				{
-					render_mesh = MakeSharedPtr<SkinnedMesh>(*render_model_, wname);
+					render_mesh = MakeSharedPtr<SkinnedMesh>(wname);
 				}
 				else
 				{
-					render_mesh = MakeSharedPtr<StaticMesh>(*render_model_, wname);
+					render_mesh = MakeSharedPtr<StaticMesh>(wname);
 				}
 				render_meshes.push_back(render_mesh);
 

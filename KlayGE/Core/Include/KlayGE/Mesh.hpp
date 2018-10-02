@@ -41,9 +41,9 @@
 namespace KlayGE
 {
 	template <typename T>
-	StaticMeshPtr CreateMeshFactory(RenderModel const & model, std::wstring_view name)
+	StaticMeshPtr CreateMeshFactory(std::wstring_view name)
 	{
-		return MakeSharedPtr<T>(model, name);
+		return MakeSharedPtr<T>(name);
 	}
 
 	template <typename T>
@@ -56,7 +56,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API StaticMesh : public Renderable
 	{
 	public:
-		StaticMesh(RenderModel const & model, std::wstring_view name);
+		explicit StaticMesh(std::wstring_view name);
 
 		void BuildMeshInfo(RenderModel const & model)
 		{
@@ -150,7 +150,6 @@ namespace KlayGE
 		int32_t mtl_id_;
 
 		bool hw_res_ready_;
-		bool software_model_;
 	};
 
 	class KLAYGE_CORE_API RenderModel
@@ -220,13 +219,11 @@ namespace KlayGE
 
 		bool HWResourceReady() const;
 
-		RenderModelPtr Clone(std::function<RenderModelPtr(std::wstring_view, uint32_t)> const & CreateModelFactoryFunc
-				= CreateModelFactory<RenderModel>,
-			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc
-				= CreateMeshFactory<StaticMesh>);
+		RenderModelPtr Clone(
+			std::function<RenderModelPtr(std::wstring_view, uint32_t)> const & CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 		virtual void CloneDataFrom(RenderModel const & source,
-			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc
-				= CreateMeshFactory<StaticMesh>);
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 
 	protected:
 		virtual void DoBuildModelInfo()
@@ -294,8 +291,7 @@ namespace KlayGE
 		}
 
 		void CloneDataFrom(RenderModel const & source,
-			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> const & CreateMeshFactoryFunc
-				= CreateMeshFactory<StaticMesh>) override;
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>) override;
 
 		Joint& GetJoint(uint32_t index)
 		{
@@ -386,7 +382,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
 	{
 	public:
-		SkinnedMesh(RenderModel const & model, std::wstring_view name);
+		explicit SkinnedMesh(std::wstring_view name);
 
 		AABBox FramePosBound(uint32_t frame) const;
 		void AttachFramePosBounds(std::shared_ptr<AABBKeyFrameSet> const & frame_pos_aabbs);
@@ -403,11 +399,11 @@ namespace KlayGE
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		uint32_t node_attrib, SceneNode* parent_node = nullptr,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
-		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
 		uint32_t node_attrib, SceneNode* parent_node = nullptr,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
-		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view model_name);
 
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & model_name);
@@ -416,7 +412,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableLightSourceProxy : public StaticMesh
 	{
 	public:
-		RenderableLightSourceProxy(RenderModel const & model, std::wstring_view name);
+		explicit RenderableLightSourceProxy(std::wstring_view name);
 
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
@@ -445,7 +441,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableCameraProxy : public StaticMesh
 	{
 	public:
-		RenderableCameraProxy(RenderModel const & model, std::wstring_view name);
+		explicit RenderableCameraProxy(std::wstring_view name);
 
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 

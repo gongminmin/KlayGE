@@ -41,8 +41,8 @@ namespace KlayGE
 	class FoliageMesh : public StaticMesh
 	{
 	public:
-		FoliageMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit FoliageMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 		}
 

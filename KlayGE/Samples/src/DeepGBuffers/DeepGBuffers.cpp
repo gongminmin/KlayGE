@@ -33,8 +33,8 @@ namespace
 	class SwitchableMesh : public StaticMesh
 	{
 	public:
-		SwitchableMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name),
+		explicit SwitchableMesh(std::wstring_view name)
+			: StaticMesh(name),
 				lighting_(true)
 		{
 			gbuffers_effect_ = SyncLoadRenderEffect("GBuffer.fxml");

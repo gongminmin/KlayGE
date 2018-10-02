@@ -41,8 +41,8 @@ namespace
 	class MotionBlurRenderMesh : public StaticMesh
 	{
 	public:
-		MotionBlurRenderMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name),
+		explicit MotionBlurRenderMesh(std::wstring_view name)
+			: StaticMesh(name),
 				half_exposure_(1)
 		{
 		}
@@ -66,8 +66,8 @@ namespace
 	class RenderInstanceMesh : public MotionBlurRenderMesh
 	{
 	public:
-		RenderInstanceMesh(RenderModel const & model, std::wstring_view /*name*/)
-			: MotionBlurRenderMesh(model, L"InstancedMesh")
+		explicit RenderInstanceMesh(std::wstring_view /*name*/)
+			: MotionBlurRenderMesh(L"InstancedMesh")
 		{
 			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
 			technique_ = effect_->TechniqueByName("ColorDepthInstanced");
@@ -125,8 +125,8 @@ namespace
 		};
 
 	public:
-		RenderNonInstancedMesh(RenderModel const & model, std::wstring_view /*name*/)
-			: MotionBlurRenderMesh(model, L"NonInstancedMesh")
+		explicit RenderNonInstancedMesh(std::wstring_view /*name*/)
+			: MotionBlurRenderMesh(L"NonInstancedMesh")
 		{
 			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
 			technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");

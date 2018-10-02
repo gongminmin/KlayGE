@@ -38,8 +38,8 @@ namespace
 	class MetalRenderable : public StaticMesh
 	{
 	public:
-		MetalRenderable(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit MetalRenderable(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("Metalness.fxml");
 			technique_ = effect_->TechniqueByName("PBFittingPrefiltered");

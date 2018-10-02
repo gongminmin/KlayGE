@@ -42,7 +42,7 @@ private:
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	DetailedSkinnedMesh(KlayGE::RenderModel const & model, std::wstring_view name);
+	explicit DetailedSkinnedMesh(std::wstring_view name);
 
 	void OnRenderBegin();
 

@@ -36,8 +36,8 @@ namespace
 	class RenderTeapot : public StaticMesh
 	{
 	public:
-		RenderTeapot(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit RenderTeapot(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("VectorTex.fxml");
 			technique_ = effect_->TechniqueByName("Object");

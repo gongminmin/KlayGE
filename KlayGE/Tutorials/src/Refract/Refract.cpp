@@ -37,8 +37,8 @@ namespace
 	class RefractorRenderable : public StaticMesh
 	{
 	public:
-		RefractorRenderable(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit RefractorRenderable(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("Refract.fxml");
 			front_face_tech_ = effect_->TechniqueByName("Refract");

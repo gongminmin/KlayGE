@@ -187,8 +187,8 @@ namespace
 	class OccluderMesh : public StaticMesh, public ShadowMapped
 	{
 	public:
-		OccluderMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name),
+		explicit OccluderMesh(std::wstring_view name)
+			: StaticMesh(name),
 				ShadowMapped(SHADOW_MAP_SIZE),
 				smooth_mesh_(false), tess_factor_(5)
 		{

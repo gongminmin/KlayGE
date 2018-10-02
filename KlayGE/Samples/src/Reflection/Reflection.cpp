@@ -33,8 +33,8 @@ namespace
 	class ReflectMesh : public StaticMesh
 	{
 	public:
-		ReflectMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit ReflectMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 		}
 
@@ -157,8 +157,8 @@ namespace
 	class DinoMesh : public StaticMesh
 	{
 	public:
-		DinoMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit DinoMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 		}
 

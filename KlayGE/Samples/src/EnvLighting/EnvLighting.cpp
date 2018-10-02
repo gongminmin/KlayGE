@@ -46,8 +46,8 @@ namespace
 	class SphereRenderable : public StaticMesh
 	{
 	public:
-		SphereRenderable(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit SphereRenderable(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");

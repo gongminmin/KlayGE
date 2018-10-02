@@ -45,8 +45,8 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name),
+		explicit RenderPolygon(std::wstring_view name)
+			: StaticMesh(name),
 				detail_type_(DT_Parallax), wireframe_(false)
 		{
 			effect_ = SyncLoadRenderEffect("DetailedSurface.fxml");

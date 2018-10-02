@@ -40,8 +40,8 @@ namespace
 	class ForwardMesh : public StaticMesh
 	{
 	public:
-		ForwardMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit ForwardMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("VDMParticle.fxml");
 			technique_ = effect_->TechniqueByName("Mesh");

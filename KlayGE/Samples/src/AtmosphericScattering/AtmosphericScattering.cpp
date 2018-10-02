@@ -33,8 +33,8 @@ namespace
 	class PlanetMesh : public StaticMesh
 	{
 	public:
-		PlanetMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit PlanetMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
 			technique_ = effect_->TechniqueByName("PlanetTech");
@@ -89,8 +89,8 @@ namespace
 	class AtmosphereMesh : public StaticMesh
 	{
 	public:
-		AtmosphereMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit AtmosphereMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
 			technique_ = effect_->TechniqueByName("AtmosphereTech");

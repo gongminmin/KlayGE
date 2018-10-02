@@ -207,8 +207,8 @@ namespace
 	class RefractMesh : public StaticMesh
 	{
 	public:
-		RefractMesh(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit RefractMesh(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			scene_effect_ = SyncLoadRenderEffect("Scene.fxml");
 			depth_wodt_tech_f_ = scene_effect_->TechniqueByName("DepthTexWODTFront");

@@ -80,7 +80,7 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 		: SceneObjectLightSourceProxy(light, this->LoadModel(light, CreateMeshFactoryFunc))
 	{
 	}
@@ -96,7 +96,7 @@ namespace KlayGE
 	}
 
 	RenderModelPtr SceneObjectLightSourceProxy::LoadModel(LightSourcePtr const & light,
-		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		std::string mesh_name;
 		switch (light->Type())
@@ -158,7 +158,7 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
-			std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 		: SceneObjectCameraProxy(camera, this->LoadModel(CreateMeshFactoryFunc))
 	{
 	}
@@ -173,8 +173,7 @@ namespace KlayGE
 		model_scaling_ = MathLib::scaling(s);
 	}
 
-	RenderModelPtr SceneObjectCameraProxy::LoadModel(
-		std::function<StaticMeshPtr(RenderModel const &, std::wstring_view)> CreateMeshFactoryFunc)
+	RenderModelPtr SceneObjectCameraProxy::LoadModel(std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
 		return SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,

@@ -37,8 +37,8 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name),
+		explicit RenderPolygon(std::wstring_view name)
+			: StaticMesh(name),
 				no_oit_tech_(nullptr),
 				dp_1st_tech_(nullptr), dp_nth_tech_(nullptr), dp_1st_depth_tech_(nullptr), dp_nth_depth_tech_(nullptr),
 				wb_effect_(nullptr), wb_render_tech_(nullptr), wb_blit_tech_(nullptr),

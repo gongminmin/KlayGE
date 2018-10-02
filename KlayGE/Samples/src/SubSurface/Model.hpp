@@ -8,7 +8,7 @@
 class DetailedMesh : public KlayGE::StaticMesh
 {
 public:
-	DetailedMesh(KlayGE::RenderModel const & model, std::wstring_view name);
+	explicit DetailedMesh(std::wstring_view name);
 
 	void OnRenderBegin();
 

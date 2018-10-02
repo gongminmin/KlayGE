@@ -20,10 +20,9 @@
 
 using namespace KlayGE;
 
-DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModel const & model, std::wstring_view name)
-	: SkinnedMesh(model, name),
-		visualize_(-1),
-		model_(checked_cast<DetailedSkinnedModel const *>(&model))
+DetailedSkinnedMesh::DetailedSkinnedMesh(std::wstring_view name)
+	: SkinnedMesh(name),
+		visualize_(-1)
 {
 }
 
@@ -31,6 +30,7 @@ void DetailedSkinnedMesh::DoBuildMeshInfo(RenderModel const & model)
 {
 	SkinnedMesh::DoBuildMeshInfo(model);
 
+	model_ = checked_cast<DetailedSkinnedModel const *>(&model);
 	this->BindDeferredEffect(model_->Effect());
 }
 
@@ -493,7 +493,7 @@ uint32_t DetailedSkinnedModel::ImportMaterial(std::string const & name)
 
 
 SkeletonMesh::SkeletonMesh(RenderModel const & model)
-	: SkinnedMesh(model, L"SkeletonMesh"),
+	: SkinnedMesh(L"SkeletonMesh"),
 		model_(checked_cast<DetailedSkinnedModel const *>(&model))
 {
 	std::vector<float4> positions;

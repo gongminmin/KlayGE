@@ -34,8 +34,8 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModel const & model, std::wstring_view name)
-			: StaticMesh(model, name)
+		explicit RenderPolygon(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("ProceduralTex.fxml");
 			technique_ = effect_->TechniqueByName("ProceduralMarbleTex");
