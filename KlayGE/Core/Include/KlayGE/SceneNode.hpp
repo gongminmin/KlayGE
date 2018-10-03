@@ -69,7 +69,7 @@ namespace KlayGE
 		SceneNode(RenderablePtr const & renderable, std::wstring_view name, uint32_t attrib);
 		virtual ~SceneNode();
 
-		std::wstring_view Name();
+		std::wstring_view Name() const;
 		void Name(std::wstring_view name);
 
 		SceneNode* FindFirstNode(std::wstring_view name);

@@ -33,8 +33,7 @@ namespace KlayGE
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
 		SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model);
-		SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
+		SceneObjectLightSourceProxy(LightSourcePtr const & light, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);

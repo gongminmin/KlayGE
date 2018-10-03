@@ -73,7 +73,7 @@ namespace KlayGE
 	{
 	}
 
-	std::wstring_view SceneNode::Name()
+	std::wstring_view SceneNode::Name() const
 	{
 		return name_;
 	}
