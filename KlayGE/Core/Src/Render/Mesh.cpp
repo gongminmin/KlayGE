@@ -134,12 +134,7 @@ namespace
 
 		bool Match(ResLoadingDesc const & rhs) const override
 		{
-			if (this->Type() == rhs.Type())
-			{
-				RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
-				return (model_desc_.res_name == rmld.model_desc_.res_name)
-					&& (model_desc_.access_hint == rmld.model_desc_.access_hint);
-			}
+			KFL_UNUSED(rhs);
 			return false;
 		}
 

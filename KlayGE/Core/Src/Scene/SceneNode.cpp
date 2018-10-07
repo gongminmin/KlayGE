@@ -276,6 +276,7 @@ namespace KlayGE
 	void SceneNode::TransformToParent(float4x4 const & mat)
 	{
 		xform_to_parent_ = mat;
+		pos_aabb_dirty_ = true;
 	}
 
 	void SceneNode::TransformToWorld(float4x4 const & mat)
@@ -288,6 +289,7 @@ namespace KlayGE
 		{
 			xform_to_parent_ = mat;
 		}
+		pos_aabb_dirty_ = true;
 	}
 
 	float4x4 const & SceneNode::TransformToParent() const
@@ -321,18 +323,10 @@ namespace KlayGE
 			xform_to_world_ = xform_to_parent_;
 		}
 
-		if (!renderables_.empty())
+		if (pos_aabb_ws_)
 		{
-			if (pos_aabb_ws_)
-			{
-				this->UpdatePosBound();
-				*pos_aabb_ws_ = MathLib::transform_aabb(*pos_aabb_os_, xform_to_world_);
-			}
-
-			for (auto const & renderable : renderables_)
-			{
-				renderable->ModelMatrix(xform_to_world_);
-			}
+			this->UpdatePosBound();
+			*pos_aabb_ws_ = MathLib::transform_aabb(*pos_aabb_os_, xform_to_world_);
 		}
 	}
 
@@ -517,17 +511,28 @@ namespace KlayGE
 		{
 			if (pos_aabb_os_)
 			{
-				*pos_aabb_os_ = renderables_[0]->PosBound();
-				for (size_t i = 1; i < renderables_.size(); ++ i)
+				pos_aabb_os_->Min() = float3(+1e10f, +1e10f, +1e10f);
+				pos_aabb_os_->Max() = float3(-1e10f, -1e10f, -1e10f);
+
+				if (!renderables_.empty())
 				{
-					*pos_aabb_os_ |= renderables_[i]->PosBound();
+					*pos_aabb_os_ = renderables_[0]->PosBound();
+					for (size_t i = 1; i < renderables_.size(); ++ i)
+					{
+						*pos_aabb_os_ |= renderables_[i]->PosBound();
+					}
 				}
 
 				for (auto const & child : children_)
 				{
 					if (child->pos_aabb_os_)
 					{
-						*pos_aabb_os_ |= MathLib::transform_aabb(*child->pos_aabb_os_, child->TransformToParent());
+						if ((child->pos_aabb_os_->Min().x() < child->pos_aabb_os_->Max().x())
+							&& (child->pos_aabb_os_->Min().y() < child->pos_aabb_os_->Max().y())
+							&& (child->pos_aabb_os_->Min().z() < child->pos_aabb_os_->Max().z()))
+						{
+							*pos_aabb_os_ |= MathLib::transform_aabb(*child->pos_aabb_os_, child->TransformToParent());
+						}
 					}
 				}
 			}

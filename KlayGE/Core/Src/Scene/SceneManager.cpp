@@ -532,11 +532,11 @@ namespace KlayGE
 			}
 		}
 
-		for (auto const & node : scene_nodes)
+		for (auto* node : scene_nodes)
 		{
 			if (node->VisibleMark() != BO_No)
 			{
-				node->ForEachRenderable([this, node](Renderable& renderable)
+				node->ForEachRenderable([node](Renderable& renderable)
 					{
 						if (renderable.Enabled() && (renderable.GetRenderTechnique() != nullptr))
 						{
@@ -545,9 +545,10 @@ namespace KlayGE
 								renderable.AddToRenderQueue();
 							}
 							renderable.AddInstance(node);
-							++ num_objects_rendered_;
 						}
 					});
+
+				++ num_objects_rendered_;
 			}
 		}
 

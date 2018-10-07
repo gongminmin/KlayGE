@@ -160,10 +160,6 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 		virtual void OnRenderEnd();
 
-		// These two functions are used for non-instancing rendering
-		virtual void OnInstanceBegin(uint32_t id);
-		virtual void OnInstanceEnd(uint32_t id);
-
 		virtual AABBox const & PosBound() const;
 		virtual AABBox const & TexcoordBound() const;
 
@@ -192,6 +188,11 @@ namespace KlayGE
 		}
 
 		virtual void ModelMatrix(float4x4 const & mat);
+		virtual void BindSceneNode(SceneNode const * node);
+		SceneNode const * CurrSceneNode() const
+		{
+			return curr_node_;
+		}
 
 		virtual bool HWResourceReady() const
 		{
@@ -266,6 +267,7 @@ namespace KlayGE
 		AABBox tc_aabb_;
 
 		std::vector<SceneNode const *> instances_;
+		SceneNode const * curr_node_ = nullptr;
 
 		RenderEffectPtr effect_;
 		RenderTechnique* technique_ = nullptr;

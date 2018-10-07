@@ -216,14 +216,6 @@ namespace KlayGE
 	{
 	}
 
-	void Renderable::OnInstanceBegin(uint32_t /*id*/)
-	{
-	}
-
-	void Renderable::OnInstanceEnd(uint32_t /*id*/)
-	{
-	}
-
 	AABBox const & Renderable::PosBound() const
 	{
 		return pos_aabb_;
@@ -271,21 +263,23 @@ namespace KlayGE
 		}
 		else
 		{
-			this->OnRenderBegin();
 			if (instances_.empty())
 			{
+				this->OnRenderBegin();
 				re.Render(effect, tech, layout);
+				this->OnRenderEnd();
 			}
 			else
 			{
-				for (uint32_t i = 0; i < instances_.size(); ++ i)
+				for (auto const * node : instances_)
 				{
-					this->OnInstanceBegin(i);
+					this->BindSceneNode(node);
+
+					this->OnRenderBegin();
 					re.Render(effect, tech, layout);
-					this->OnInstanceEnd(i);
+					this->OnRenderEnd();
 				}
 			}
-			this->OnRenderEnd();
 		}
 	}
 
@@ -349,6 +343,12 @@ namespace KlayGE
 	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
 		model_mat_ = mat;
+	}
+
+	void Renderable::BindSceneNode(SceneNode const * node)
+	{
+		curr_node_ = node;
+		model_mat_ = node->TransformToWorld();
 	}
 
 	void Renderable::UpdateBoundBox()

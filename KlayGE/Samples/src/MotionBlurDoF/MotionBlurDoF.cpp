@@ -156,14 +156,10 @@ namespace
 			*(effect_->ParameterByName("proj")) = curr_proj;
 			*(effect_->ParameterByName("prev_view")) = prev_view;
 			*(effect_->ParameterByName("prev_proj")) = prev_proj;
-			*(effect_->ParameterByName("elapsed_time")) = app.FrameTime();
 
 			*(effect_->ParameterByName("half_exposure_x_framerate")) = half_exposure_ / app.FrameTime();
-		}
 
-		void OnInstanceBegin(uint32_t id)
-		{
-			InstData const * data = static_cast<InstData const *>(instances_[id]->InstanceData());
+			InstData const * data = static_cast<InstData const *>(curr_node_->InstanceData());
 
 			float4x4 model;
 			model.Col(0, data->mat[0]);
@@ -1088,6 +1084,11 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 
 uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 {
+	Context& context = Context::Instance();
+	App3DFramework& app = context.AppInstance();
+	SceneManager& scene_mgr = context.SceneManagerInstance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
+
 	if (0 == pass)
 	{
 		if (loading_percentage_ < 100)
@@ -1136,11 +1137,13 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					checked_pointer_cast<Teapot>(so)->AddRenderable(renderInstance_);
 					checked_pointer_cast<MotionBlurRenderMesh>(so->GetRenderable())->Exposure(exposure_);
 					checked_pointer_cast<MotionBlurRenderMesh>(so->GetRenderable())->BlurRadius(blur_radius_);
-					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
 					scene_nodes_.push_back(so);
 
 					so->SubThreadUpdate(0, 0);
 					so->MainThreadUpdate(0, 0);
+
+					std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+					scene_mgr.SceneRootNode().AddChild(so);
 				}
 
 				++ loading_percentage_;
@@ -1155,11 +1158,6 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 		}
 	}
-
-	Context& context = Context::Instance();
-	App3DFramework& app = context.AppInstance();
-	SceneManager& sceneMgr = context.SceneManagerInstance();
-	RenderEngine& renderEngine = context.RenderFactoryInstance().RenderEngineInstance();
 
 	switch (pass)
 	{
@@ -1177,7 +1175,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 		}
 
-		renderEngine.BindFrameBuffer(clr_depth_fb_);
+		re.BindFrameBuffer(clr_depth_fb_);
 		{
 			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 			if (Context::Instance().Config().graphics_cfg.gamma)
@@ -1186,7 +1184,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				clear_clr.g() = 0.133f;
 				clear_clr.b() = 0.325f;
 			}
-			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 		}
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
@@ -1200,8 +1198,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->Apply();
 		}
 
-		renderEngine.BindFrameBuffer(velocity_fb_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
+		re.BindFrameBuffer(velocity_fb_);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
 			checked_pointer_cast<MotionBlurRenderMesh>(scene_nodes_[i]->GetRenderable())->VelocityPass(true);
@@ -1209,10 +1207,10 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_NeedFlush;
 
 	default:
-		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
-		num_renderables_rendered_ = sceneMgr.NumRenderablesRendered();
-		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
-		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
+		num_objs_rendered_ = scene_mgr.NumObjectsRendered();
+		num_renderables_rendered_ = scene_mgr.NumRenderablesRendered();
+		num_primitives_rendered_ = scene_mgr.NumPrimitivesRendered();
+		num_vertices_rendered_ = scene_mgr.NumVerticesRendered();
 
 		color_tex_->BuildMipSubLevels();
 		depth_tex_->BuildMipSubLevels();
@@ -1238,8 +1236,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			motion_blur_copy_pp_->Apply();
 		}
 
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		return App3DFramework::URV_Finished;
 	}
 }
