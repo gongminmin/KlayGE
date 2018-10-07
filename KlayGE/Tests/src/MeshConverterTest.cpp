@@ -445,9 +445,9 @@ public:
 						sanity_pos.z() = ((sanity_position_buff[index * 4 + 2] + 32768) / 65535.0f * 2 - 1)
 							* sanity_pos_extent.z() + sanity_pos_center.z();
 
-						EXPECT_TRUE(std::abs(pos.x() - sanity_pos.x()) < 1e-3f);
-						EXPECT_TRUE(std::abs(pos.y() - sanity_pos.y()) < 1e-3f);
-						EXPECT_TRUE(std::abs(pos.z() - sanity_pos.z()) < 1e-3f);
+						EXPECT_LT(std::abs(pos.x() - sanity_pos.x()), 0.00065f);
+						EXPECT_LT(std::abs(pos.y() - sanity_pos.y()), 0.00065f);
+						EXPECT_LT(std::abs(pos.z() - sanity_pos.z()), 0.00065f);
 					}
 
 					if (normal_stream != -1)
@@ -464,9 +464,9 @@ public:
 						sanity_normal.z() = (sanity_normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
 						sanity_normal = MathLib::normalize(sanity_normal);
 
-						EXPECT_TRUE(std::abs(normal.x() - sanity_normal.x()) < 2e-2f);
-						EXPECT_TRUE(std::abs(normal.y() - sanity_normal.y()) < 2e-2f);
-						EXPECT_TRUE(std::abs(normal.z() - sanity_normal.z()) < 2e-2f);
+						EXPECT_LT(std::abs(normal.x() - sanity_normal.x()), 0.02f);
+						EXPECT_LT(std::abs(normal.y() - sanity_normal.y()), 0.02f);
+						EXPECT_LT(std::abs(normal.z() - sanity_normal.z()), 0.02f);
 					}
 
 					if (tangent_quat_stream != -1)
@@ -485,10 +485,10 @@ public:
 						sanity_tangent.w() = (sanity_tangent_buff[index * 4 + 3] / 255.0f) * 2 - 1;
 						sanity_tangent = MathLib::normalize(sanity_tangent);
 
-						EXPECT_TRUE(std::abs(tangent.x() - sanity_tangent.x()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.y() - sanity_tangent.y()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.z() - sanity_tangent.z()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.w() - sanity_tangent.w()) < 2e-2f);
+						EXPECT_LT(std::abs(tangent.x() - sanity_tangent.x()), 0.01f);
+						EXPECT_LT(std::abs(tangent.y() - sanity_tangent.y()), 0.01f);
+						EXPECT_LT(std::abs(tangent.z() - sanity_tangent.z()), 0.01f);
+						EXPECT_LT(std::abs(tangent.w() - sanity_tangent.w()), 0.012f);
 					}
 
 					if (texcoord_stream != -1)
@@ -503,8 +503,8 @@ public:
 						sanity_tc.y() = ((sanity_texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1)
 							* sanity_tc_extent.y() + sanity_tc_center.y();
 
-						EXPECT_TRUE(std::abs(tc.x() - sanity_tc.x()) < 2e-3f);
-						EXPECT_TRUE(std::abs(tc.y() - sanity_tc.y()) < 2e-3f);
+						EXPECT_LT(std::abs(tc.x() - sanity_tc.x()), 0.0012f);
+						EXPECT_LT(std::abs(tc.y() - sanity_tc.y()), 0.0012f);
 					}
 
 					if (diffuse_stream != -1)
@@ -521,10 +521,10 @@ public:
 						sanity_diffuse.b() = sanity_diffuse_buff[index * 4 + 2] / 255.0f;
 						sanity_diffuse.a() = sanity_diffuse_buff[index * 4 + 3] / 255.0f;
 
-						EXPECT_TRUE(std::abs(diffuse.r() - sanity_diffuse.r()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.g() - sanity_diffuse.g()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.b() - sanity_diffuse.b()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.a() - sanity_diffuse.a()) < 2e-3f);
+						EXPECT_LT(std::abs(diffuse.r() - sanity_diffuse.r()), 0.002f);
+						EXPECT_LT(std::abs(diffuse.g() - sanity_diffuse.g()), 0.002f);
+						EXPECT_LT(std::abs(diffuse.b() - sanity_diffuse.b()), 0.002f);
+						EXPECT_LT(std::abs(diffuse.a() - sanity_diffuse.a()), 0.002f);
 					}
 
 					if (specular_stream != -1)
@@ -541,10 +541,10 @@ public:
 						sanity_specular.b() = sanity_specular_buff[index * 4 + 2] / 255.0f;
 						sanity_specular.a() = sanity_specular_buff[index * 4 + 3] / 255.0f;
 
-						EXPECT_TRUE(std::abs(specular.r() - sanity_specular.r()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.g() - sanity_specular.g()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.b() - sanity_specular.b()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.a() - sanity_specular.a()) < 2e-3f);
+						EXPECT_LT(std::abs(specular.r() - sanity_specular.r()), 0.002f);
+						EXPECT_LT(std::abs(specular.g() - sanity_specular.g()), 0.002f);
+						EXPECT_LT(std::abs(specular.b() - sanity_specular.b()), 0.002f);
+						EXPECT_LT(std::abs(specular.a() - sanity_specular.a()), 0.002f);
 					}
 
 					if (blend_weights_stream != -1)
@@ -608,17 +608,17 @@ public:
 				EXPECT_EQ(joint.name, sanity_joint.name);
 				EXPECT_EQ(joint.parent, sanity_joint.parent);
 
-				EXPECT_TRUE(std::abs(joint.bind_real.x() - sanity_joint.bind_real.x()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.y() - sanity_joint.bind_real.y()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.z() - sanity_joint.bind_real.z()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.w() - sanity_joint.bind_real.w()) < 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_real.x() - sanity_joint.bind_real.x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_real.y() - sanity_joint.bind_real.y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_real.z() - sanity_joint.bind_real.z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_real.w() - sanity_joint.bind_real.w()), 1e-4f);
 
-				EXPECT_TRUE(std::abs(joint.bind_dual.x() - sanity_joint.bind_dual.x()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.y() - sanity_joint.bind_dual.y()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.z() - sanity_joint.bind_dual.z()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.w() - sanity_joint.bind_dual.w()) < 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_dual.x() - sanity_joint.bind_dual.x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_dual.y() - sanity_joint.bind_dual.y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_dual.z() - sanity_joint.bind_dual.z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.bind_dual.w() - sanity_joint.bind_dual.w()), 1e-4f);
 
-				EXPECT_TRUE(std::abs(joint.bind_scale - sanity_joint.bind_scale) < 1e-5f);
+				EXPECT_LT(std::abs(joint.bind_scale - sanity_joint.bind_scale), 1e-5f);
 			}
 
 			EXPECT_EQ(skinned_model.NumActions(), sanity_skinned_model.NumActions());
@@ -661,17 +661,17 @@ public:
 						auto const & sanity_bind_dual = sanity_key_frames.bind_dual[j];
 						float sanity_bind_scale = sanity_key_frames.bind_scale[j];
 
-						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-5f);
+						EXPECT_LT(std::abs(bind_real.x() - sanity_bind_real.x()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.y() - sanity_bind_real.y()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.z() - sanity_bind_real.z()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.w() - sanity_bind_real.w()), 1e-5f);
 
-						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.x() - sanity_bind_dual.x()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.y() - sanity_bind_dual.y()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.z() - sanity_bind_dual.z()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.w() - sanity_bind_dual.w()), 1e-5f);
 
-						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+						EXPECT_LT(std::abs(bind_scale - sanity_bind_scale), 1e-4f);
 					}
 				}
 				else
@@ -691,17 +691,17 @@ public:
 						std::tie(sanity_bind_real, sanity_bind_dual, sanity_bind_scale)
 							= sanity_key_frames.Frame(static_cast<float>(frame_id));
 
-						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-4f);
+						EXPECT_LT(std::abs(bind_real.x() - sanity_bind_real.x()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.y() - sanity_bind_real.y()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.z() - sanity_bind_real.z()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.w() - sanity_bind_real.w()), 1e-4f);
 
-						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.x() - sanity_bind_dual.x()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.y() - sanity_bind_dual.y()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.z() - sanity_bind_dual.z()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.w() - sanity_bind_dual.w()), 1e-4f);
 
-						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+						EXPECT_LT(std::abs(bind_scale - sanity_bind_scale), 1e-4f);
 					}
 				}
 			}
