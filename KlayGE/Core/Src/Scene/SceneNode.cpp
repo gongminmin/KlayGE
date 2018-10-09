@@ -193,7 +193,7 @@ namespace KlayGE
 		children_.clear();
 	}
 
-	void SceneNode::MainThreadUpdateNode(float app_time, float elapsed_time)
+	void SceneNode::MainThreadUpdateSubtree(float app_time, float elapsed_time)
 	{
 		this->Traverse([app_time, elapsed_time](SceneNode& node)
 			{
@@ -204,7 +204,7 @@ namespace KlayGE
 			});
 	}
 
-	void SceneNode::SubThreadUpdateNode(float app_time, float elapsed_time)
+	void SceneNode::SubThreadUpdateSubtree(float app_time, float elapsed_time)
 	{
 		this->Traverse([app_time, elapsed_time](SceneNode& node)
 			{
@@ -321,12 +321,6 @@ namespace KlayGE
 		else
 		{
 			xform_to_world_ = xform_to_parent_;
-		}
-
-		if (pos_aabb_ws_)
-		{
-			this->UpdatePosBound();
-			*pos_aabb_ws_ = MathLib::transform_aabb(*pos_aabb_os_, xform_to_world_);
 		}
 	}
 
@@ -500,11 +494,11 @@ namespace KlayGE
 		}
 	}
 
-	void SceneNode::UpdatePosBound()
+	void SceneNode::UpdatePosBoundSubtree()
 	{
 		for (auto const & child : children_)
 		{
-			child->UpdatePosBound();
+			child->UpdatePosBoundSubtree();
 		}
 
 		if (pos_aabb_dirty_)
@@ -535,6 +529,8 @@ namespace KlayGE
 						}
 					}
 				}
+
+				*pos_aabb_ws_ = MathLib::transform_aabb(*pos_aabb_os_, xform_to_world_);
 			}
 
 			pos_aabb_dirty_ = false;

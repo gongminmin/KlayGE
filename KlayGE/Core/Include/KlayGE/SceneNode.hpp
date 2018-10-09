@@ -84,8 +84,8 @@ namespace KlayGE
 		void RemoveChild(SceneNodePtr const & node);
 		void ClearChildren();
 
-		void MainThreadUpdateNode(float app_time, float elapsed_time);
-		void SubThreadUpdateNode(float app_time, float elapsed_time);
+		void MainThreadUpdateSubtree(float app_time, float elapsed_time);
+		void SubThreadUpdateSubtree(float app_time, float elapsed_time);
 
 		void Traverse(std::function<bool(SceneNode&)> const & callback);
 
@@ -106,7 +106,7 @@ namespace KlayGE
 		virtual AABBox const & PosBoundOS() const;
 		virtual AABBox const & PosBoundWS() const;
 		void UpdateTransforms();
-		void UpdatePosBound();
+		void UpdatePosBoundSubtree();
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 

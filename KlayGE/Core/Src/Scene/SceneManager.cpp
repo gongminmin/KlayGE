@@ -396,7 +396,8 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
-			scene_root_.MainThreadUpdateNode(app_time, frame_time);
+			scene_root_.MainThreadUpdateSubtree(app_time, frame_time);
+			scene_root_.UpdatePosBoundSubtree();
 
 			overlay_root_.ClearChildren();
 			for (auto iter = lights_.begin(); iter != lights_.end();)
@@ -714,8 +715,8 @@ namespace KlayGE
 				{
 					std::lock_guard<std::mutex> lock(update_mutex_);
 
-					scene_root_.SubThreadUpdateNode(app_time, frame_time);
-					overlay_root_.SubThreadUpdateNode(app_time, frame_time);
+					scene_root_.SubThreadUpdateSubtree(app_time, frame_time);
+					overlay_root_.SubThreadUpdateSubtree(app_time, frame_time);
 				}
 
 				if (frame_time < update_elapse_)

@@ -204,7 +204,7 @@ namespace KlayGE
 			{
 				root_node_->AddRenderable(*iter);
 			}
-			root_node_->UpdatePosBound();
+			root_node_->UpdatePosBoundSubtree();
 		}
 		RenderablePtr const & Mesh(size_t id) const
 		{
