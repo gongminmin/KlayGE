@@ -655,8 +655,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = model_node->Attrib("meshml");
 		BOOST_ASSERT(attr);
 
-		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable,
-			obj_attr, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		RenderModelPtr model = ASyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable,
+			obj_attr, AddToSceneRootHelper);
 		scene_models_.push_back(model);
 		auto const & scene_obj = model->RootNode();
 		scene_obj->TransformToParent(obj_mat);

@@ -92,7 +92,7 @@ void AreaLightingApp::OnCreate()
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	auto scene_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable, AddToSceneRootHelper);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -146,7 +146,7 @@ void AreaLightingApp::OnCreate()
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tube_area_light_src_->RootNode());
 	tube_area_light_src_->RootNode()->Visible(false);
 
-	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable, nullptr);
+	auto sphere_model_unique = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable);
 
 	for (int i = -5; i < 5; ++ i)
 	{

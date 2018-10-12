@@ -170,11 +170,17 @@ void MetalnessApp::OnCreate()
 		}
 	}
 
-	single_model_ = SyncLoadModel("helmet_armet_2.3ds", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
-		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
-	single_object_ = single_model_->RootNode();
+	single_object_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	single_object_->TransformToParent(MathLib::scaling(2.0f, 2.0f, 2.0f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(single_object_);
+	single_model_ = ASyncLoadModel("helmet_armet_2.3ds", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable,
+		[this](RenderModel& model)
+		{
+			this->Material(model, albedo_, metalness_, glossiness_);
+			AddToSceneHelper(*single_object_, model);
+		},
+		CreateModelFactory<RenderModel>, CreateMeshFactory<MetalRenderable>);
 
 	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
 	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);

@@ -73,9 +73,14 @@ void CascadedShadowMapApp::OnCreate()
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	auto plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable,
+		[](RenderModel& model)
+		{
+			model.RootNode()->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
+			AddToSceneRootHelper(model);
+		});
 	auto katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable, AddToSceneRootHelper);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -92,8 +97,6 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
-
-	plane_model->RootNode()->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
 
 	fpcController_.Scalers(0.05f, 1.0f);
 

@@ -388,7 +388,7 @@ void ShadowCubeMap::OnCreate()
 	loading_percentage_ = 0;
 	lamp_tex_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr,

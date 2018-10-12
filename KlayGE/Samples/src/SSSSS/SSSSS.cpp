@@ -70,9 +70,14 @@ SSSSSApp::SSSSSApp()
 void SSSSSApp::OnCreate()
 {
 	auto scene_model = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable, AddToSceneRootHelper);
 	auto sss_model = ASyncLoadModel("Infinite-Level_02.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable,
+		[](RenderModel& model)
+		{
+			model.RootNode()->TransformToParent(MathLib::translation(0.0f, 5.0f, 0.0f));
+			AddToSceneRootHelper(model);
+		});
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds",
 		EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds",
@@ -171,8 +176,6 @@ void SSSSSApp::OnCreate()
 			this->TranslucencyStrengthChangedHandler(sender);
 		});
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
-
-	sss_model->RootNode()->TransformToParent(MathLib::translation(0.0f, 5.0f, 0.0f));
 
 	auto sky_box = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
 	checked_pointer_cast<RenderableSkyBox>(sky_box->GetRenderable())->CompressedCubeMap(y_cube, c_cube);

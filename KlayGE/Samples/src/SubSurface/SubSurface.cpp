@@ -60,7 +60,7 @@ void SubSurfaceApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<DetailedMesh>);
 
 	this->LookAt(float3(-0.4f, 1, 3.9f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));

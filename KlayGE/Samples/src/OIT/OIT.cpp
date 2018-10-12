@@ -574,7 +574,7 @@ void OITApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_model_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 	polygon_model_->ForEachMesh([](Renderable& mesh)
 		{

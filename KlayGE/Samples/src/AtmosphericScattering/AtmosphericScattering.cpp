@@ -194,11 +194,11 @@ void AtmosphericScatteringApp::OnCreate()
 	light_controller_.Scalers(0.003f, 0.003f);
 
 	planet_model_ = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<PlanetMesh>);
 
 	atmosphere_model_ = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));

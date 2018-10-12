@@ -214,7 +214,12 @@ void ScreenSpaceReflectionApp::OnCreate()
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ReflectMesh>);
 	auto dino_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable,
+		[](RenderModel& model)
+		{
+			model.RootNode()->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+			AddToSceneRootHelper(model);
+		},
 		CreateModelFactory<RenderModel>, CreateMeshFactory<DinoMesh>);
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
@@ -237,8 +242,6 @@ void ScreenSpaceReflectionApp::OnCreate()
 	point_light_->Position(float3(0, 3, -2));
 	point_light_->Falloff(float3(1, 0, 0.3f));
 	point_light_->AddToSceneManager();
-
-	dino_model->RootNode()->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 

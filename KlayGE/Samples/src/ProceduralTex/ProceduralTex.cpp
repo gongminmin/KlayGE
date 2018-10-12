@@ -210,7 +210,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		else if (loading_percentage_ < 60)
 		{
 			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-				SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+				SceneNode::SOA_Cullable, AddToSceneRootHelper,
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 			polygon_model_->RootNode()->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
 				{

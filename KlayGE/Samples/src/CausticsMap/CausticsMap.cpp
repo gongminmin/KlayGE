@@ -586,19 +586,29 @@ void CausticsMapApp::OnCreate()
 	plane_obj_ = MakeSharedPtr<SceneNode>(plane_renderable_, SceneNode::SOA_Moveable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_obj_);
 
-	sphere_model_ = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
-		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
-	sphere_obj_ = sphere_model_->RootNode();
+	sphere_obj_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	sphere_obj_->TransformToParent(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_obj_->Visible(false);
-
-	bunny_model_ = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj_);
+	sphere_model_ = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable,
+		[this](RenderModel& model)
+		{
+			AddToSceneHelper(*sphere_obj_, model);
+		},
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
-	bunny_obj_ = bunny_model_->RootNode();
+
+	bunny_obj_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	bunny_obj_->TransformToParent(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_obj_->Visible(false);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(bunny_obj_);
+	bunny_model_ = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable,
+		[this](RenderModel& model)
+		{
+			AddToSceneHelper(*bunny_obj_, model);
+		},
+		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractMesh>);
 
 	refract_obj_ = sphere_obj_;
 	refract_model_ = sphere_model_;

@@ -84,7 +84,18 @@ void PostProcessingApp::OnCreate()
 	TexturePtr c_cube = ASyncLoadTexture("rnl_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("rnl_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	auto scene_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+		SceneNode::SOA_Cullable | SceneNode::SOA_Moveable,
+		[](RenderModel& model)
+		{
+			auto& node = *model.RootNode();
+			node.OnMainThreadUpdate().connect([&node](float app_time, float elapsed_time)
+				{
+					KFL_UNUSED(elapsed_time);
+					node.TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
+				});
+
+			AddToSceneRootHelper(model);
+		});
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -109,13 +120,6 @@ void PostProcessingApp::OnCreate()
 	point_light_->Falloff(float3(1, 0, 1));
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
-
-	scene_model->RootNode()->OnMainThreadUpdate().connect([scene_model](float app_time, float elapsed_time)
-		{
-			KFL_UNUSED(elapsed_time);
-
-			scene_model->RootNode()->TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
-		});
 
 	fpcController_.Scalers(0.05f, 0.1f);
 

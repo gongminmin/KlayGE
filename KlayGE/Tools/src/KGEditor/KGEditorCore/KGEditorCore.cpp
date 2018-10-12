@@ -866,7 +866,7 @@ namespace KlayGE
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
 		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
-			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, &Context::Instance().SceneManagerInstance().SceneRootNode());
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, AddToSceneRootHelper);
 		auto scene_obj = model->RootNode();
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{

@@ -41,16 +41,19 @@
 namespace KlayGE
 {
 	template <typename T>
-	StaticMeshPtr CreateMeshFactory(std::wstring_view name)
+	inline StaticMeshPtr CreateMeshFactory(std::wstring_view name)
 	{
 		return MakeSharedPtr<T>(name);
 	}
 
 	template <typename T>
-	RenderModelPtr CreateModelFactory(std::wstring_view name, uint32_t node_attrib)
+	inline RenderModelPtr CreateModelFactory(std::wstring_view name, uint32_t node_attrib)
 	{
 		return MakeSharedPtr<T>(name, node_attrib);
 	}
+
+	KLAYGE_CORE_API void AddToSceneHelper(SceneNode& node, RenderModel& model);
+	KLAYGE_CORE_API void AddToSceneRootHelper(RenderModel& model);
 
 
 	class KLAYGE_CORE_API StaticMesh : public Renderable
@@ -397,11 +400,13 @@ namespace KlayGE
 
 
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		uint32_t node_attrib, SceneNode* parent_node = nullptr,
+		uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading = nullptr,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		uint32_t node_attrib, SceneNode* parent_node = nullptr,
+		uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading = nullptr,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view model_name);

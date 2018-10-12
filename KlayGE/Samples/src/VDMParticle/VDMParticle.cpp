@@ -145,13 +145,17 @@ void VDMParticleApp::OnCreate()
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	auto robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable,
+		[](RenderModel& model)
+		{
+			model.RootNode()->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
+			AddToSceneRootHelper(model);
+		},
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
-	robot_model->RootNode()->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
 	scene_objs_.push_back(robot_model->RootNode());
 
 	auto room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, &Context::Instance().SceneManagerInstance().SceneRootNode(),
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
 	scene_objs_.push_back(room_model->RootNode());
 

@@ -60,7 +60,7 @@ namespace
 			std::string res_name;
 			uint32_t access_hint;
 			uint32_t node_attrib;
-			SceneNode* parent_node;
+			std::function<void(RenderModel&)> OnFinishLoading;
 			std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc;
 			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc;
 
@@ -70,14 +70,15 @@ namespace
 		};
 
 	public:
-		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+		RenderModelLoadingDesc(std::string_view res_name, uint32_t access_hint, uint32_t node_attrib,
+			std::function<void(RenderModel&)> OnFinishLoading,
 			std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 		{
 			model_desc_.res_name = std::string(res_name);
 			model_desc_.access_hint = access_hint;
 			model_desc_.node_attrib = node_attrib;
-			model_desc_.parent_node = parent_node;
+			model_desc_.OnFinishLoading = OnFinishLoading;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
@@ -161,6 +162,11 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<StaticMesh>(model->Mesh(i))->BuildMeshInfo(*model);
+			}
+			
+			if (model_desc_.OnFinishLoading)
+			{
+				model_desc_.OnFinishLoading(*model);
 			}
 
 			return std::static_pointer_cast<void>(model);
@@ -325,10 +331,9 @@ namespace
 
 				model_desc_.sw_model.reset();
 
-				if (model_desc_.parent_node != nullptr)
+				if (model_desc_.OnFinishLoading)
 				{
-					std::lock_guard<std::mutex> lock(Context::Instance().SceneManagerInstance().MutexForUpdate());
-					model_desc_.parent_node->AddChild(model->RootNode());
+					model_desc_.OnFinishLoading(*model);
 				}
 			}
 		}
@@ -341,6 +346,18 @@ namespace
 
 namespace KlayGE
 {
+	void AddToSceneHelper(SceneNode& node, RenderModel& model)
+	{
+		auto& scene_mgr = Context::Instance().SceneManagerInstance();
+		std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+		node.AddChild(model.RootNode());
+	}
+
+	void AddToSceneRootHelper(RenderModel& model)
+	{
+		AddToSceneHelper(Context::Instance().SceneManagerInstance().SceneRootNode(), model);
+	}
+
 	RenderModel::RenderModel(std::wstring_view name, uint32_t node_attrib)
 		: root_node_(MakeSharedPtr<SceneNode>(name, node_attrib)),
 			hw_res_ready_(false)
@@ -919,7 +936,8 @@ namespace KlayGE
 		}
 	}
 
-	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
@@ -927,10 +945,11 @@ namespace KlayGE
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
-			access_hint, node_attrib, parent_node, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib, SceneNode* parent_node,
+	RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
@@ -938,7 +957,7 @@ namespace KlayGE
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
-			access_hint, node_attrib, parent_node, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
 	RenderModelPtr LoadSoftwareModel(std::string_view model_name)

@@ -77,7 +77,7 @@ void TutorFramework::OnCreate()
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableBox_);
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
-		KlayGE::SceneNode::SOA_Cullable, &KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode(),
+		KlayGE::SceneNode::SOA_Cullable, KlayGE::AddToSceneRootHelper,
 		KlayGE::CreateModelFactory<KlayGE::RenderModel>, KlayGE::CreateMeshFactory<RenderPolygon>);
 
 	renderableFile_ = loadedModel->RootNode();
