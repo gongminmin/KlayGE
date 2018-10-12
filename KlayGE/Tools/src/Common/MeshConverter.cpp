@@ -207,21 +207,25 @@ namespace KlayGE
 	void MeshConverter::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
-		auto const ai_node_name = (parent_id == -1) ? "Root" : node->mName.C_Str();
+		std::wstring wname;
+		KlayGE::Convert(wname, node->mName.C_Str());
+		auto const ai_node_name = (parent_id == -1) ? L"Root" : wname;
 
 		int16_t index = -1;
 		if (lod == 0)
 		{
 			NodeTransform node_transform;
-			node_transform.name = ai_node_name;
+			node_transform.node = MakeSharedPtr<SceneNode>(ai_node_name, SceneNode::SOA_Cullable);
+			node_transform.node->TransformToParent(trans_mat);
 			if (node->mNumMeshes > 0)
 			{
 				node_transform.mesh_indices.assign(node->mMeshes, node->mMeshes + node->mNumMeshes);
 			}
-			node_transform.xform_to_parent.resize(num_lods);
-			node_transform.xform_to_world.resize(num_lods);
-			node_transform.xform_to_parent[0] = trans_mat;
 			node_transform.parent_id = parent_id;
+			if (parent_id >= 0)
+			{
+				nodes_[parent_id].node->AddChild(node_transform.node);
+			}
 
 			index = static_cast<int16_t>(nodes_.size());
 			nodes_.push_back(node_transform);
@@ -231,10 +235,13 @@ namespace KlayGE
 			bool found = false;
 			for (size_t i = 0; i < nodes_.size(); ++ i)
 			{
-				if (nodes_[i].name == ai_node_name)
+				if (nodes_[i].node->Name() == ai_node_name)
 				{
 					index = static_cast<int16_t>(i);
-					nodes_[i].xform_to_parent[lod] = trans_mat;
+					if (node->mNumMeshes > 0)
+					{
+						nodes_[index].mesh_indices.assign(node->mMeshes, node->mMeshes + node->mNumMeshes);
+					}
 					found = true;
 
 					break;
@@ -901,17 +908,6 @@ namespace KlayGE
 
 		bool const skinned = !joints_.empty();
 
-		if (skinned)
-		{
-			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software", 0);
-		}
-		else
-		{
-			render_model_ = MakeSharedPtr<RenderModel>(L"Software", 0);
-		}
-
-		this->BuildMaterials(scenes[0].get());
-
 		meshes_.resize(scenes[0]->mNumMeshes);
 		for (size_t mi = 0; mi < meshes_.size(); ++ mi)
 		{
@@ -923,6 +919,17 @@ namespace KlayGE
 		{
 			this->BuildNodeData(num_lods, lod, -1, scenes[lod]->mRootNode);
 		}
+
+		if (skinned)
+		{
+			render_model_ = MakeSharedPtr<SkinnedModel>(nodes_[0].node);
+		}
+		else
+		{
+			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
+		}
+
+		this->BuildMaterials(scenes[0].get());
 
 		if (skinned)
 		{
@@ -960,7 +967,7 @@ namespace KlayGE
 					&& (node.aabb_local.Min().y() < node.aabb_local.Max().y())
 					&& (node.aabb_local.Min().z() < node.aabb_local.Max().z()))
 				{
-					nodes_[node.parent_id].aabb_local |= MathLib::transform_aabb(node.aabb_local, node.xform_to_parent[0]);
+					nodes_[node.parent_id].aabb_local |= MathLib::transform_aabb(node.aabb_local, node.node->TransformToParent());
 				}
 			}
 		}
@@ -1066,14 +1073,6 @@ namespace KlayGE
 
 			ai_scene.mNumMeshes = render_model_->NumMeshes();
 			ai_scene.mMeshes = new aiMesh*[ai_scene.mNumMeshes];
-
-			ai_scene.mRootNode = new aiNode;
-			ai_scene.mRootNode->mNumChildren = ai_scene.mNumMeshes;
-			ai_scene.mRootNode->mChildren = new aiNode*[ai_scene.mRootNode->mNumChildren];
-			ai_scene.mRootNode->mNumMeshes = 0;
-			ai_scene.mRootNode->mMeshes = nullptr;
-			ai_scene.mRootNode->mParent = nullptr;
-
 			for (uint32_t i = 0; i < ai_scene.mNumMeshes; ++ i)
 			{
 				auto const & mesh = *checked_cast<StaticMesh*>(render_model_->Mesh(i).get());
@@ -1084,17 +1083,9 @@ namespace KlayGE
 				ai_mesh.mMaterialIndex = mesh.MaterialID();
 				ai_mesh.mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-				ai_scene.mRootNode->mChildren[i] = new aiNode;
-				ai_scene.mRootNode->mChildren[i]->mNumMeshes = 1;
-				ai_scene.mRootNode->mChildren[i]->mMeshes = new unsigned int[1];
-				ai_scene.mRootNode->mChildren[i]->mMeshes[0] = i;
-				ai_scene.mRootNode->mChildren[i]->mParent = ai_scene.mRootNode;
-				ai_scene.mRootNode->mChildren[i]->mNumChildren = 0;
-				ai_scene.mRootNode->mChildren[i]->mChildren = nullptr;
-
 				std::string name;
 				KlayGE::Convert(name, mesh.Name());
-				ai_scene.mRootNode->mChildren[i]->mName.Set(name.c_str());
+				ai_mesh.mName.Set(name.c_str());
 
 				auto const & rl = mesh.GetRenderLayout();
 
@@ -1383,6 +1374,50 @@ namespace KlayGE
 				}
 			}
 
+			ai_scene.mRootNode = new aiNode;
+			ai_scene.mRootNode->mParent = nullptr;
+			std::function<void(aiNode& ai_node, SceneNode const & node)> convert_node_subtree
+				= [&convert_node_subtree, this](aiNode& ai_node, SceneNode const & node)
+					{
+						std::string name;
+						KlayGE::Convert(name, node.Name());
+
+						ai_node.mName.Set(name);
+
+						float4x4 const & local_mat = node.TransformToParent();
+						ai_node.mTransformation = aiMatrix4x4(
+							local_mat(0, 0), local_mat(1, 0), local_mat(2, 0), local_mat(3, 0),
+							local_mat(0, 1), local_mat(1, 1), local_mat(2, 1), local_mat(3, 1),
+							local_mat(0, 2), local_mat(1, 2), local_mat(2, 2), local_mat(3, 2),
+							local_mat(0, 3), local_mat(1, 3), local_mat(2, 3), local_mat(3, 3));
+
+						ai_node.mNumChildren = static_cast<uint32_t>(node.Children().size());
+						ai_node.mChildren = ai_node.mNumChildren > 0 ? new aiNode*[ai_node.mNumChildren] : nullptr;
+						ai_node.mNumMeshes = node.NumRenderables();
+						ai_node.mMeshes = ai_node.mNumMeshes > 0 ? new unsigned int[ai_node.mNumMeshes] : nullptr;
+
+						for (uint32_t i = 0; i < node.NumRenderables(); ++ i)
+						{
+							auto const & mesh = node.GetRenderable(i);
+							for (uint32_t j = 0; j < render_model_->NumMeshes(); ++ j)
+							{
+								if (mesh == render_model_->Mesh(j))
+								{
+									ai_node.mMeshes[i] = j;
+									break;
+								}
+							}
+						}
+
+						for (uint32_t i = 0; i < node.Children().size(); ++ i)
+						{
+							ai_node.mChildren[i] = new aiNode;
+							ai_node.mChildren[i]->mParent = &ai_node;
+							convert_node_subtree(*ai_node.mChildren[i], *node.Children()[i]);
+						}
+					};
+			convert_node_subtree(*ai_scene.mRootNode, *render_model_->RootNode());
+
 			auto const output_path = std::filesystem::path(output_name);
 			auto const output_ext = output_path.extension();
 			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
@@ -1391,7 +1426,26 @@ namespace KlayGE
 				lod_output_name  += "_lod_" + std::to_string(lod);
 			}
 			lod_output_name += output_ext.string();
-			aiExportScene(&ai_scene, output_ext.string().substr(1).c_str(), lod_output_name.c_str(), 0);
+
+			char const * format_id_table[][2] =
+			{
+				{ "dae", "collada" },
+				{ "stl", "stlb" },
+				{ "ply", "plyb" },
+				{ "gltf", "gltf2" },
+			};
+
+			auto format_id = output_ext.string().substr(1);
+			for (size_t i = 0; i < std::size(format_id_table); ++ i)
+			{
+				if (format_id == format_id_table[i][0])
+				{
+					format_id = format_id_table[i][1];
+					break;
+				}
+			}
+
+			aiExportScene(&ai_scene, format_id.c_str(), lod_output_name.c_str(), 0);
 		}
 	}
 
@@ -1877,11 +1931,23 @@ namespace KlayGE
 		uint32_t mesh_index = 0;
 		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 		{
-			nodes_[mesh_index].name = std::string(mesh_node->Attrib("name")->ValueString());
-			nodes_[mesh_index].mesh_indices.push_back(mesh_index);
-			nodes_[mesh_index].parent_id = (mesh_index == 0) ? -1 : 0;
+			auto const name = std::string(mesh_node->Attrib("name")->ValueString());
+			std::wstring wname;
+			KlayGE::Convert(wname, name);
 
-			meshes_[mesh_index].name = nodes_[mesh_index].name;
+			nodes_[mesh_index].node = MakeSharedPtr<SceneNode>(wname, SceneNode::SOA_Cullable);
+			nodes_[mesh_index].mesh_indices.push_back(mesh_index);
+			if (mesh_index != 0)
+			{
+				nodes_[0].node->AddChild(nodes_[mesh_index].node);
+				nodes_[mesh_index].parent_id = 0;
+			}
+			else
+			{
+				nodes_[mesh_index].parent_id = -1;
+			}
+
+			meshes_[mesh_index].name = name;
 			meshes_[mesh_index].mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
 
 			bool recompute_pos_bb;
@@ -1913,8 +1979,6 @@ namespace KlayGE
 				}
 
 				meshes_[mesh_index].lods.resize(mesh_lod);
-				nodes_[mesh_index].xform_to_parent.assign(mesh_lod, float4x4::Identity());
-				nodes_[mesh_index].xform_to_world.resize(mesh_lod);
 
 				for (uint32_t lod = 0; lod < mesh_lod; ++ lod)
 				{
@@ -1927,8 +1991,6 @@ namespace KlayGE
 			else
 			{
 				meshes_[mesh_index].lods.resize(1);
-				nodes_[mesh_index].xform_to_parent.assign(1, float4x4::Identity());
-				nodes_[mesh_index].xform_to_world.resize(1);
 
 				this->CompileMeshLodChunk(mesh_node, mesh_index, 0, recompute_pos_bb, recompute_tc_bb);
 
@@ -2672,25 +2734,25 @@ namespace KlayGE
 
 		bool const skinned = !joints_.empty();
 
+		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
+		if (meshes_chunk)
+		{
+			this->CompileMeshesChunk(meshes_chunk);
+		}
+
 		if (skinned)
 		{
-			render_model_ = MakeSharedPtr<SkinnedModel>(L"Software", 0);
+			render_model_ = MakeSharedPtr<SkinnedModel>(nodes_[0].node);
 		}
 		else
 		{
-			render_model_ = MakeSharedPtr<RenderModel>(L"Software", 0);
+			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
 		}
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
 		if (materials_chunk)
 		{
 			this->CompileMaterialsChunk(materials_chunk);
-		}
-
-		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
-		if (meshes_chunk)
-		{
-			this->CompileMeshesChunk(meshes_chunk);
 		}
 
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
@@ -2957,30 +3019,11 @@ namespace KlayGE
 		}
 		this->RemoveUnusedMaterials();
 
+		auto global_transform = metadata.Transform();
+		if (metadata.AutoCenter())
 		{
-			auto global_transform = metadata.Transform();
-			if (metadata.AutoCenter())
-			{
-				global_transform = MathLib::translation(-nodes_[0].aabb_local.Center()) * nodes_[0].xform_to_parent[0] * global_transform;
-			}
-
-			for (uint32_t lod = 0; lod < num_lods; ++ lod)
-			{
-				nodes_[0].xform_to_world[lod] = nodes_[0].xform_to_parent[lod] * global_transform;
-			}
-		}
-
-		for (size_t i = 1; i < nodes_.size(); ++ i)
-		{
-			for (uint32_t lod = 0; lod < num_lods; ++ lod)
-			{
-				nodes_[i].xform_to_world[lod] = nodes_[i].xform_to_parent[lod];
-
-				if (nodes_[i].parent_id >= 0)
-				{
-					nodes_[i].xform_to_world[lod] *= nodes_[nodes_[i].parent_id].xform_to_world[lod];
-				}
-			}
+			global_transform = MathLib::translation(-nodes_[0].aabb_local.Center())
+				* nodes_[0].node->TransformToParent() * global_transform;
 		}
 
 		std::vector<VertexElement> merged_ves;
@@ -3052,161 +3095,155 @@ namespace KlayGE
 		}
 
 		{
-			for (auto const & node : nodes_)
+			for (auto const & mesh : meshes_)
 			{
-				for (auto const mesh_index : node.mesh_indices)
+				auto const & pos_bb = mesh.pos_bb;
+				auto const & tc_bb = mesh.tc_bb;
+
+				float3 const pos_center = pos_bb.Center();
+				float3 const pos_extent = pos_bb.HalfSize();
+				float3 const tc_center = tc_bb.Center();
+				float3 const tc_extent = tc_bb.HalfSize();
+
+				for (uint32_t lod = 0; lod < num_lods; ++ lod)
 				{
-					auto const pos_bb = MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.xform_to_world[0]);
-					auto const & tc_bb = meshes_[mesh_index].tc_bb;
+					auto& mesh_lod = mesh.lods[lod];
 
-					float3 const pos_center = pos_bb.Center();
-					float3 const pos_extent = pos_bb.HalfSize();
-					float3 const tc_center = tc_bb.Center();
-					float3 const tc_extent = tc_bb.HalfSize();
-
-					for (uint32_t lod = 0; lod < num_lods; ++ lod)
+					for (auto const & position : mesh_lod.positions)
 					{
-						float4x4 const & trans_mat = node.xform_to_world[lod];
-						float4x4 const trans_mat_it = MathLib::transpose(MathLib::inverse(trans_mat));
-
-						auto& mesh_lod = meshes_[mesh_index].lods[lod];
-
-						for (auto const & position : mesh_lod.positions)
+						float3 const pos = (position - pos_center) / pos_extent * 0.5f + 0.5f;
+						int16_t const s_pos[] =
 						{
-							float3 const pos = (MathLib::transform_coord(position, trans_mat) - pos_center) / pos_extent * 0.5f + 0.5f;
-							int16_t const s_pos[] =
+							static_cast<int16_t>(
+								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+							static_cast<int16_t>(
+								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+							static_cast<int16_t>(
+								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+							32767
+						};
+
+						uint8_t const * p = reinterpret_cast<uint8_t const *>(s_pos);
+						merged_vertices[position_stream].insert(merged_vertices[position_stream].end(), p, p + sizeof(s_pos));
+					}
+					if (normal_stream != -1)
+					{
+						for (auto const & n : mesh_lod.normals)
+						{
+							float3 const normal = MathLib::normalize(n) * 0.5f + 0.5f;
+							uint32_t const compact = MathLib::clamp(static_cast<uint32_t>(normal.x() * 255 + 0.5f), 0U, 255U)
+								| (MathLib::clamp(static_cast<uint32_t>(normal.y() * 255 + 0.5f), 0U, 255U) << 8)
+								| (MathLib::clamp(static_cast<uint32_t>(normal.z() * 255 + 0.5f), 0U, 255U) << 16);
+
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
+							merged_vertices[normal_stream].insert(merged_vertices[normal_stream].end(), p, p + sizeof(compact));
+						}
+					}
+					if (tangent_quat_stream != -1)
+					{
+						for (size_t i = 0; i < mesh_lod.tangents.size(); ++ i)
+						{
+							float3 const tangent = MathLib::normalize(mesh_lod.tangents[i]);
+							float3 const binormal = MathLib::normalize(mesh_lod.binormals[i]);
+							float3 const normal = MathLib::normalize(mesh_lod.normals[i]);
+
+							Quaternion const tangent_quat = MathLib::to_quaternion(tangent, binormal, normal, 8);
+
+							uint32_t const compact = (
+								MathLib::clamp(
+									static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 0)
+								| (MathLib::clamp(
+									static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 8)
+								| (MathLib::clamp(
+									static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 16)
+								| (MathLib::clamp(
+									static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 24);
+
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
+							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+								p, p + sizeof(compact));
+						}
+					}
+					if (diffuse_stream != -1)
+					{
+						for (auto const & diffuse : mesh_lod.diffuses)
+						{
+							uint32_t const clr = diffuse.ABGR();
+
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
+							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+								p, p + sizeof(clr));
+						}
+					}
+					if (specular_stream != -1)
+					{
+						for (auto const & specular : mesh_lod.speculars)
+						{
+							uint32_t const clr = specular.ABGR();
+
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
+							merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
+								p, p + sizeof(clr));
+						}
+					}
+					if (texcoord_stream != -1)
+					{
+						for (auto const & tc : mesh_lod.texcoords[0])
+						{
+							float3 tex_coord = float3(tc.x(), tc.y(), 0.0f);
+							tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
+							int16_t const s_tc[2] =
 							{
-								static_cast<int16_t>(
-									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
-								static_cast<int16_t>(
-									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
-								static_cast<int16_t>(
-									MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
-								32767
+								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
+									-32768, 32767)),
+								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
+									-32768, 32767)),
 							};
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(s_pos);
-							merged_vertices[position_stream].insert(merged_vertices[position_stream].end(), p, p + sizeof(s_pos));
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(s_tc);
+							merged_vertices[texcoord_stream].insert(merged_vertices[texcoord_stream].end(), p, p + sizeof(s_tc));
 						}
-						if (normal_stream != -1)
-						{
-							for (auto const & n : mesh_lod.normals)
-							{
-								float3 const normal = MathLib::normalize(MathLib::transform_normal(n, trans_mat_it)) * 0.5f + 0.5f;
-								uint32_t const compact = MathLib::clamp(static_cast<uint32_t>(normal.x() * 255 + 0.5f), 0U, 255U)
-									| (MathLib::clamp(static_cast<uint32_t>(normal.y() * 255 + 0.5f), 0U, 255U) << 8)
-									| (MathLib::clamp(static_cast<uint32_t>(normal.z() * 255 + 0.5f), 0U, 255U) << 16);
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
-								merged_vertices[normal_stream].insert(merged_vertices[normal_stream].end(), p, p + sizeof(compact));
-							}
-						}
-						if (tangent_quat_stream != -1)
-						{
-							for (size_t i = 0; i < mesh_lod.tangents.size(); ++ i)
-							{
-								float3 const tangent = MathLib::normalize(MathLib::transform_normal(mesh_lod.tangents[i], trans_mat));
-								float3 const binormal = MathLib::normalize(MathLib::transform_normal(mesh_lod.binormals[i], trans_mat));
-								float3 const normal = MathLib::normalize(MathLib::transform_normal(mesh_lod.normals[i], trans_mat_it));
-
-								Quaternion const tangent_quat = MathLib::to_quaternion(tangent, binormal, normal, 8);
-
-								uint32_t const compact = (
-									MathLib::clamp(
-										static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 0)
-									| (MathLib::clamp(
-										static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 8)
-									| (MathLib::clamp(
-										static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 16)
-									| (MathLib::clamp(
-										static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255 + 0.5f), 0U, 255U) << 24);
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&compact);
-								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
-									p, p + sizeof(compact));
-							}
-						}
-						if (diffuse_stream != -1)
-						{
-							for (auto const & diffuse : mesh_lod.diffuses)
-							{
-								uint32_t const clr = diffuse.ABGR();
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
-								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
-									p, p + sizeof(clr));
-							}
-						}
-						if (specular_stream != -1)
-						{
-							for (auto const & specular : mesh_lod.speculars)
-							{
-								uint32_t const clr = specular.ABGR();
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&clr);
-								merged_vertices[tangent_quat_stream].insert(merged_vertices[tangent_quat_stream].end(),
-									p, p + sizeof(clr));
-							}
-						}
-						if (texcoord_stream != -1)
-						{
-							for (auto const & tc : mesh_lod.texcoords[0])
-							{
-								float3 tex_coord = float3(tc.x(), tc.y(), 0.0f);
-								tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
-								int16_t s_tc[2] =
-								{
-									static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
-										-32768, 32767)),
-									static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
-										-32768, 32767)),
-								};
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(s_tc);
-								merged_vertices[texcoord_stream].insert(merged_vertices[texcoord_stream].end(), p, p + sizeof(s_tc));
-							}
-						}
-
-						if (blend_weights_stream != -1)
-						{
-							BOOST_ASSERT(blend_indices_stream != -1);
-
-							for (auto const & binding : mesh_lod.joint_bindings)
-							{
-								size_t constexpr MAX_BINDINGS = 4;
-
-								float total_weight = 0;
-								size_t const num = std::min(MAX_BINDINGS, binding.size());
-								for (size_t wi = 0; wi < num; ++ wi)
-								{
-									total_weight += binding[wi].second;
-								}
-
-								uint8_t joint_ids[MAX_BINDINGS];
-								uint8_t weights[MAX_BINDINGS];
-								for (size_t wi = 0; wi < num; ++ wi)
-								{
-									joint_ids[wi] = static_cast<uint8_t>(binding[wi].first);
-
-									float const w = binding[wi].second / total_weight;
-									weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(w * 255 + 0.5f), 0U, 255U));
-								}
-								for (size_t wi = num; wi < MAX_BINDINGS; ++ wi)
-								{
-									joint_ids[wi] = 0;
-									weights[wi] = 0;
-								}
-
-								merged_vertices[blend_weights_stream].insert(merged_vertices[blend_weights_stream].end(),
-									weights, weights + sizeof(weights));
-								merged_vertices[blend_indices_stream].insert(merged_vertices[blend_indices_stream].end(),
-									joint_ids, joint_ids + sizeof(joint_ids));
-							}
-						}
-
-						mesh_num_vertices.push_back(static_cast<uint32_t>(mesh_lod.positions.size()));
-						mesh_base_vertices.push_back(mesh_base_vertices.back() + mesh_num_vertices.back());
 					}
+
+					if (blend_weights_stream != -1)
+					{
+						BOOST_ASSERT(blend_indices_stream != -1);
+
+						for (auto const & binding : mesh_lod.joint_bindings)
+						{
+							size_t constexpr MAX_BINDINGS = 4;
+
+							float total_weight = 0;
+							size_t const num = std::min(MAX_BINDINGS, binding.size());
+							for (size_t wi = 0; wi < num; ++ wi)
+							{
+								total_weight += binding[wi].second;
+							}
+
+							uint8_t joint_ids[MAX_BINDINGS];
+							uint8_t weights[MAX_BINDINGS];
+							for (size_t wi = 0; wi < num; ++ wi)
+							{
+								joint_ids[wi] = static_cast<uint8_t>(binding[wi].first);
+
+								float const w = binding[wi].second / total_weight;
+								weights[wi] = static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(w * 255 + 0.5f), 0U, 255U));
+							}
+							for (size_t wi = num; wi < MAX_BINDINGS; ++ wi)
+							{
+								joint_ids[wi] = 0;
+								weights[wi] = 0;
+							}
+
+							merged_vertices[blend_weights_stream].insert(merged_vertices[blend_weights_stream].end(),
+								weights, weights + sizeof(weights));
+							merged_vertices[blend_indices_stream].insert(merged_vertices[blend_indices_stream].end(),
+								joint_ids, joint_ids + sizeof(joint_ids));
+						}
+					}
+
+					mesh_num_vertices.push_back(static_cast<uint32_t>(mesh_lod.positions.size()));
+					mesh_base_vertices.push_back(mesh_base_vertices.back() + mesh_num_vertices.back());
 				}
 			}
 		}
@@ -3226,33 +3263,30 @@ namespace KlayGE
 
 			is_index_16_bit = (max_index < 0xFFFF);
 
-			for (auto const & node : nodes_)
+			for (auto const & mesh : meshes_)
 			{
-				for (auto const mesh_index : node.mesh_indices)
+				for (auto const & mesh_lod : mesh.lods)
 				{
-					for (auto const & mesh_lod : meshes_[mesh_index].lods)
+					for (auto const index : mesh_lod.indices)
 					{
-						for (auto const index : mesh_lod.indices)
+						if (is_index_16_bit)
 						{
-							if (is_index_16_bit)
-							{
-								uint16_t const i16 = static_cast<uint16_t>(index);
+							uint16_t const i16 = static_cast<uint16_t>(index);
 
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&i16);
-								merged_indices.insert(merged_indices.end(), p, p + sizeof(i16));
-							}
-							else
-							{
-								uint32_t const i32 = index;
-
-								uint8_t const * p = reinterpret_cast<uint8_t const *>(&i32);
-								merged_indices.insert(merged_indices.end(), p, p + sizeof(i32));
-							}
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i16);
+							merged_indices.insert(merged_indices.end(), p, p + sizeof(i16));
 						}
+						else
+						{
+							uint32_t const i32 = index;
 
-						mesh_num_indices.push_back(static_cast<uint32_t>(mesh_lod.indices.size()));
-						mesh_start_indices.push_back(mesh_start_indices.back() + mesh_num_indices.back());
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i32);
+							merged_indices.insert(merged_indices.end(), p, p + sizeof(i32));
+						}
 					}
+
+					mesh_num_indices.push_back(static_cast<uint32_t>(mesh_lod.indices.size()));
+					mesh_start_indices.push_back(mesh_start_indices.back() + mesh_num_indices.back());
 				}
 			}
 		}
@@ -3270,42 +3304,39 @@ namespace KlayGE
 
 		uint32_t mesh_lod_index = 0;
 		std::vector<StaticMeshPtr> render_meshes;
-		for (auto const & node : nodes_)
+		for (auto const & mesh : meshes_)
 		{
 			std::wstring wname;
-			KlayGE::Convert(wname, node.name);
+			KlayGE::Convert(wname, mesh.name);
 
-			for (auto const mesh_index : node.mesh_indices)
+			StaticMeshPtr render_mesh;
+			if (skinned)
 			{
-				StaticMeshPtr render_mesh;
-				if (skinned)
-				{
-					render_mesh = MakeSharedPtr<SkinnedMesh>(wname);
-				}
-				else
-				{
-					render_mesh = MakeSharedPtr<StaticMesh>(wname);
-				}
-				render_meshes.push_back(render_mesh);
+				render_mesh = MakeSharedPtr<SkinnedMesh>(wname);
+			}
+			else
+			{
+				render_mesh = MakeSharedPtr<StaticMesh>(wname);
+			}
+			render_meshes.push_back(render_mesh);
 
-				render_mesh->MaterialID(meshes_[mesh_index].mtl_id);
-				render_mesh->PosBound(MathLib::transform_aabb(meshes_[mesh_index].pos_bb, node.xform_to_world[0]));
-				render_mesh->TexcoordBound(meshes_[mesh_index].tc_bb);
+			render_mesh->MaterialID(mesh.mtl_id);
+			render_mesh->PosBound(mesh.pos_bb);
+			render_mesh->TexcoordBound(mesh.tc_bb);
 
-				render_mesh->NumLods(num_lods);
-				for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+			render_mesh->NumLods(num_lods);
+			for (uint32_t lod = 0; lod < num_lods; ++ lod, ++ mesh_lod_index)
+			{
+				for (uint32_t ve_index = 0; ve_index < merged_vbs.size(); ++ ve_index)
 				{
-					for (uint32_t ve_index = 0; ve_index < merged_vbs.size(); ++ ve_index)
-					{
-						render_mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
-					}
-					render_mesh->AddIndexStream(lod, merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
-
-					render_mesh->NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
-					render_mesh->NumIndices(lod, mesh_num_indices[mesh_lod_index]);
-					render_mesh->StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
-					render_mesh->StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
+					render_mesh->AddVertexStream(lod, merged_vbs[ve_index], merged_ves[ve_index]);
 				}
+				render_mesh->AddIndexStream(lod, merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
+
+				render_mesh->NumVertices(lod, mesh_num_vertices[mesh_lod_index]);
+				render_mesh->NumIndices(lod, mesh_num_indices[mesh_lod_index]);
+				render_mesh->StartVertexLocation(lod, mesh_base_vertices[mesh_lod_index]);
+				render_mesh->StartIndexLocation(lod, mesh_start_indices[mesh_lod_index]);
 			}
 		}
 
@@ -3341,6 +3372,17 @@ namespace KlayGE
 		}
 
 		render_model_->AssignMeshes(render_meshes.begin(), render_meshes.end());
+
+		for (auto const & node : nodes_)
+		{
+			for (auto const mesh_index : node.mesh_indices)
+			{
+				node.node->AddRenderable(render_meshes[mesh_index]);
+			}
+		}
+
+		nodes_[0].node->UpdatePosBoundSubtree();
+		nodes_[0].node->TransformToParent(nodes_[0].node->TransformToParent() * global_transform);
 
 		if (!in_path)
 		{

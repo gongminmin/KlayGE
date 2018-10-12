@@ -158,6 +158,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderModel
 	{
 	public:
+		explicit RenderModel(SceneNodePtr const & root_node);
 		RenderModel(std::wstring_view name, uint32_t node_attrib);
 
 		SceneNodePtr const & RootNode() const
@@ -168,6 +169,7 @@ namespace KlayGE
 		void BuildModelInfo()
 		{
 			this->DoBuildModelInfo();
+			root_node_->UpdatePosBoundSubtree();
 
 			hw_res_ready_ = true;
 		}
@@ -202,12 +204,6 @@ namespace KlayGE
 		void AssignMeshes(ForwardIterator first, ForwardIterator last)
 		{
 			meshes_.assign(first, last);
-			root_node_->ClearRenderables();
-			for (auto iter = first; iter != last; ++ iter)
-			{
-				root_node_->AddRenderable(*iter);
-			}
-			root_node_->UpdatePosBoundSubtree();
 		}
 		RenderablePtr const & Mesh(size_t id) const
 		{
@@ -286,6 +282,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{
 	public:
+		explicit SkinnedModel(SceneNodePtr const & root_node);
 		SkinnedModel(std::wstring_view name, uint32_t node_attrib);
 
 		bool IsSkinned() const override

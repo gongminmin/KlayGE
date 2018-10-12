@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	filesystem::path const output_path(output_name);
 	if (output_path.extension() == ".model_bin")
 	{
-		uint32_t const MODEL_BIN_VERSION = 15;
+		uint32_t const MODEL_BIN_VERSION = 16;
 
 		ResIdentifierPtr output_file = ResLoader::Instance().Open(output_name);
 		if (output_file)

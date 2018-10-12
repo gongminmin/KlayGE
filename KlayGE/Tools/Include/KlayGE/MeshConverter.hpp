@@ -121,11 +121,9 @@ namespace KlayGE
 
 		struct NodeTransform
 		{
-			std::string name;
+			SceneNodePtr node;
 
 			std::vector<uint32_t> mesh_indices;
-			std::vector<float4x4> xform_to_parent;
-			std::vector<float4x4> xform_to_world;
 
 			AABBox aabb_local;
 

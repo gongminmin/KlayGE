@@ -50,7 +50,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 15;
+	uint32_t const MODEL_BIN_VERSION = 16;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -358,9 +358,14 @@ namespace KlayGE
 		AddToSceneHelper(Context::Instance().SceneManagerInstance().SceneRootNode(), model);
 	}
 
-	RenderModel::RenderModel(std::wstring_view name, uint32_t node_attrib)
-		: root_node_(MakeSharedPtr<SceneNode>(name, node_attrib)),
+	RenderModel::RenderModel(SceneNodePtr const & root_node)
+		: root_node_(root_node),
 			hw_res_ready_(false)
+	{
+	}
+
+	RenderModel::RenderModel(std::wstring_view name, uint32_t node_attrib)
+		: RenderModel(MakeSharedPtr<SceneNode>(name, node_attrib))
 	{
 	}
 
@@ -467,6 +472,49 @@ namespace KlayGE
 
 			this->AssignMeshes(meshes.begin(), meshes.end());
 		}
+
+		std::vector<SceneNode const *> source_nodes;
+		std::vector<SceneNodePtr> new_nodes;
+		source.RootNode()->Traverse([this, &source, &source_nodes, &new_nodes](SceneNode& node)
+			{
+				source_nodes.push_back(&node);
+
+				SceneNodePtr new_node;
+				if (new_nodes.empty())
+				{
+					new_node = root_node_;
+				}
+				else
+				{
+					new_node = MakeSharedPtr<SceneNode>(node.Name(), node.Attrib());
+
+					for (size_t j = 0; j < source_nodes.size() - 1; ++ j)
+					{
+						if (node.Parent() == source_nodes[j])
+						{
+							new_nodes[j]->AddChild(new_node);
+						}
+					}
+				}
+				new_nodes.push_back(new_node);
+
+				for (uint32_t i = 0; i < node.NumRenderables(); ++ i)
+				{
+					for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++ mesh_index)
+					{
+						if (node.GetRenderable(i) == source.Mesh(mesh_index))
+						{
+							new_node->AddRenderable(this->Mesh(mesh_index));
+							break;
+						}
+					}
+				}
+				new_node->TransformToParent(node.TransformToParent());
+
+				return true;
+			});
+
+		root_node_->UpdatePosBoundSubtree();
 	}
 
 
@@ -624,13 +672,18 @@ namespace KlayGE
 	}
 
 
-	SkinnedModel::SkinnedModel(std::wstring_view name, uint32_t node_attrib)
-		: RenderModel(name, node_attrib),
+	SkinnedModel::SkinnedModel(SceneNodePtr const & root_node)
+		: RenderModel(root_node),
 			last_frame_(-1),
 			num_frames_(0), frame_rate_(0)
 	{
 	}
-	
+
+	SkinnedModel::SkinnedModel(std::wstring_view name, uint32_t node_attrib)
+		: SkinnedModel(MakeSharedPtr<SceneNode>(name, node_attrib))
+	{
+	}
+
 	void SkinnedModel::BuildBones(float frame)
 	{
 		for (size_t i = 0; i < joints_.size(); ++ i)
@@ -976,6 +1029,7 @@ namespace KlayGE
 		std::vector<uint32_t> mesh_base_vertices;
 		std::vector<uint32_t> mesh_num_indices;
 		std::vector<uint32_t> mesh_start_indices;
+		std::vector<std::pair<SceneNodePtr, std::vector<uint16_t>>> nodes;
 		std::vector<Joint> joints;
 		std::shared_ptr<std::vector<AnimationAction>> actions;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
@@ -1026,6 +1080,9 @@ namespace KlayGE
 		uint32_t num_meshes;
 		decoded->read(&num_meshes, sizeof(num_meshes));
 		num_meshes = LE2Native(num_meshes);
+		uint32_t num_nodes;
+		decoded->read(&num_nodes, sizeof(num_nodes));
+		num_nodes = LE2Native(num_nodes);
 		uint32_t num_joints;
 		decoded->read(&num_joints, sizeof(num_joints));
 		num_joints = LE2Native(num_joints);
@@ -1199,6 +1256,50 @@ namespace KlayGE
 			}
 		}
 
+		nodes.resize(num_nodes);
+		for (auto& node : nodes)
+		{
+			auto node_name = ReadShortString(decoded);
+			std::wstring node_wname;
+			Convert(node_wname, node_name);
+
+			uint32_t attrib;
+			decoded->read(&attrib, sizeof(attrib));
+
+			node.first = MakeSharedPtr<SceneNode>(node_wname, attrib);
+
+			int16_t parent_index;
+			decoded->read(&parent_index, sizeof(parent_index));
+			parent_index = LE2Native(parent_index);
+
+			if (parent_index >= 0)
+			{
+				nodes[parent_index].first->AddChild(node.first);
+			}
+
+			uint16_t num_mesh_indices;
+			decoded->read(&num_mesh_indices, sizeof(num_mesh_indices));
+			num_mesh_indices = LE2Native(num_mesh_indices);
+
+			if (num_mesh_indices > 0)
+			{
+				node.second.resize(num_mesh_indices);
+				decoded->read(node.second.data(), node.second.size() * sizeof(node.second[0]));
+				for (auto& mesh_index : node.second)
+				{
+					mesh_index = LE2Native(mesh_index);
+				}
+			}
+
+			float4x4 xform_to_parent;
+			decoded->read(&xform_to_parent, sizeof(xform_to_parent));
+			for (auto& item : xform_to_parent)
+			{
+				item = LE2Native(item);
+			}
+			node.first->TransformToParent(xform_to_parent);
+		}
+
 		joints.resize(num_joints);
 		for (uint32_t joint_index = 0; joint_index < num_joints; ++ joint_index)
 		{
@@ -1354,11 +1455,11 @@ namespace KlayGE
 		RenderModelPtr model;
 		if (skinned)
 		{
-			model = MakeSharedPtr<SkinnedModel>(L"Software", 0);
+			model = MakeSharedPtr<SkinnedModel>(nodes[0].first);
 		}
 		else
 		{
-			model = MakeSharedPtr<RenderModel>(L"Software", 0);
+			model = MakeSharedPtr<RenderModel>(nodes[0].first);
 		}
 
 		model->NumMaterials(mtls.size());
@@ -1439,6 +1540,16 @@ namespace KlayGE
 		}
 
 		model->AssignMeshes(meshes.begin(), meshes.end());
+
+		for (auto& node : nodes)
+		{
+			for (auto mesh_index : node.second)
+			{
+				node.first->AddRenderable(meshes[mesh_index]);
+			}
+		}
+
+		model->RootNode()->UpdatePosBoundSubtree();
 
 		return model;
 	}
@@ -1584,6 +1695,62 @@ namespace KlayGE
 		}
 	}
 
+	void WriteNodesChunk(std::vector<SceneNode const *> const & nodes, std::vector<Renderable const *> const & renderables,
+		std::ostream& os)
+	{
+		for (size_t i = 0; i < nodes.size(); ++ i)
+		{
+			std::string name;
+			Convert(name, nodes[i]->Name());
+			WriteShortString(os, name);
+
+			uint32_t attrib = Native2LE(nodes[i]->Attrib());
+			os.write(reinterpret_cast<char*>(&attrib), sizeof(attrib));
+
+			int16_t node_parent = -1;
+			if (nodes[i]->Parent() != nullptr)
+			{
+				for (size_t j = 0; j < i; ++ j)
+				{
+					if (nodes[j] == nodes[i]->Parent())
+					{
+						node_parent = static_cast<int16_t>(j);
+						break;
+					}
+				}
+			}
+
+			node_parent = Native2LE(node_parent);
+			os.write(reinterpret_cast<char*>(&node_parent), sizeof(node_parent));
+
+			std::vector<uint16_t> mesh_indices;
+			nodes[i]->ForEachRenderable([&renderables, &mesh_indices](Renderable& mesh)
+				{
+					for (size_t i = 0; i < renderables.size(); ++ i)
+					{
+						if (renderables[i] == &mesh)
+						{
+							uint16_t index = static_cast<uint16_t>(i);
+							index = Native2LE(index);
+							mesh_indices.push_back(index);
+							break;
+						}
+					}
+				});
+			uint16_t num_meshes = static_cast<uint16_t>(mesh_indices.size());
+			num_meshes = Native2LE(num_meshes);
+			os.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			os.write(reinterpret_cast<char*>(mesh_indices.data()), mesh_indices.size() * sizeof(mesh_indices[0]));
+
+			float4x4 xform_to_parent = nodes[i]->TransformToParent();
+			for (auto& item : xform_to_parent)
+			{
+				item = Native2LE(item);
+			}
+			os.write(reinterpret_cast<char*>(&xform_to_parent), sizeof(xform_to_parent));
+		}
+	}
+
 	void WriteBonesChunk(std::vector<Joint> const & joints, std::ostream& os)
 	{
 		for (size_t i = 0; i < joints.size(); ++ i)
@@ -1692,6 +1859,7 @@ namespace KlayGE
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
+		std::vector<SceneNode const *> const & nodes, std::vector<Renderable const *> const & renderables,
 		std::vector<Joint> const & joints, std::shared_ptr<std::vector<AnimationAction>> const & actions,
 		std::shared_ptr<std::vector<KeyFrameSet>> const & kfs, uint32_t num_frames, uint32_t frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> const & frame_pos_bbs)
@@ -1704,6 +1872,9 @@ namespace KlayGE
 
 			uint32_t num_meshes = Native2LE(static_cast<uint32_t>(pos_bbs.size()));
 			ss.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+
+			uint32_t num_nodes = Native2LE(static_cast<uint32_t>(nodes.size()));
+			ss.write(reinterpret_cast<char*>(&num_nodes), sizeof(num_nodes));
 
 			uint32_t num_joints = Native2LE(static_cast<uint32_t>(joints.size()));
 			ss.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
@@ -1725,6 +1896,11 @@ namespace KlayGE
 			WriteMeshesChunk(mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 				mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 				merged_ves, merged_buffs, merged_indices, all_is_index_16_bit, ss);
+		}
+
+		if (!nodes.empty())
+		{
+			WriteNodesChunk(nodes, renderables, ss);
 		}
 
 		if (!joints.empty())
@@ -1890,6 +2066,19 @@ namespace KlayGE
 			mesh_base_indices.push_back(mesh_base_indices.back() + mesh_num_indices.back());
 		}
 
+		std::vector<SceneNode const *> nodes;
+		model->RootNode()->Traverse([&nodes](SceneNode& node)
+			{
+				nodes.push_back(&node);
+				return true;
+			});
+
+		std::vector<Renderable const *> renderables;
+		for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
+		{
+			renderables.push_back(model->Mesh(mesh_index).get());
+		}
+
 		std::vector<Joint> joints;
 		std::shared_ptr<std::vector<AnimationAction>> actions;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
@@ -1956,6 +2145,7 @@ namespace KlayGE
 		SaveModel(output_path.string(), mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
+			nodes, renderables,
 			joints, actions, kfs, num_frame, frame_rate, frame_pos_bbs);
 
 #if KLAYGE_IS_DEV_PLATFORM

@@ -98,7 +98,7 @@ namespace KlayGE
 	RenderModelPtr SceneObjectLightSourceProxy::LoadModel(LightSourcePtr const & light,
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
-		std::string mesh_name;
+		char const * mesh_name;
 		switch (light->Type())
 		{
 		case LightSource::LT_Ambient:
@@ -125,7 +125,7 @@ namespace KlayGE
 		default:
 			KFL_UNREACHABLE("Invalid light type");
 		}
-		return SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
+		return SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
 			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}
