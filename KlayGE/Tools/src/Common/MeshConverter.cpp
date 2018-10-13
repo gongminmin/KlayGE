@@ -1341,7 +1341,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*rl.GetIndexStream(), BA_Read_Only);
 					if (rl.IndexStreamFormat() == EF_R16UI)
 					{
-						auto const * indices_16 = mapper.Pointer<int16_t>() + start_index;
+						auto const * indices_16 = mapper.Pointer<uint16_t>() + start_index;
 
 						for (uint32_t j = 0; j < ai_mesh.mNumFaces; ++ j)
 						{
@@ -1357,7 +1357,7 @@ namespace KlayGE
 					}
 					else
 					{
-						auto const * indices_32 = mapper.Pointer<int32_t>() + start_index;
+						auto const * indices_32 = mapper.Pointer<uint32_t>() + start_index;
 
 						for (uint32_t j = 0; j < ai_mesh.mNumFaces; ++ j)
 						{
