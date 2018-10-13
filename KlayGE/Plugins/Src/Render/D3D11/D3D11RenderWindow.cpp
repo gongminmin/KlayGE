@@ -232,7 +232,7 @@ namespace KlayGE
 				{
 					d3d11_re.D3DDevice(d3d_device, d3d_imm_ctx, out_feature_level);
 
-					if (Context::Instance().AppInstance().ConfirmDevice())
+					if (Context::Instance().AppInstance().OnConfirmDevice()())
 					{
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{

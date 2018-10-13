@@ -211,7 +211,7 @@ namespace KlayGE
 
 					d3d12_re.D3DDevice(d3d_device, d3d_cmd_queue, req_feature_levels.MaxSupportedFeatureLevel);
 
-					if (Context::Instance().AppInstance().ConfirmDevice())
+					if (Context::Instance().AppInstance().OnConfirmDevice()())
 					{
 						description_ = adapter_->Description() + L" FL ";
 						std::wstring_view fl_str;

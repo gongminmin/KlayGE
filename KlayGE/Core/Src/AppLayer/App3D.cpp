@@ -536,6 +536,12 @@ namespace KlayGE
 		Context::Instance().AppInstance(*this);
 
 		ContextCfg cfg = Context::Instance().Config();
+
+		if (cfg.deferred_rendering)
+		{
+			DeferredRenderingLayer::Register();
+		}
+
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg, native_wnd);
 #ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		cfg.graphics_cfg.left = main_wnd_->Left();
@@ -611,19 +617,6 @@ namespace KlayGE
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings, void* native_wnd)
 	{
 		return MakeSharedPtr<Window>(name, settings, native_wnd);
-	}
-
-	bool App3DFramework::ConfirmDevice() const
-	{
-		bool confirmed = true;
-
-		ContextCfg const & cfg = Context::Instance().Config();
-		if (cfg.deferred_rendering)
-		{
-			confirmed &= DeferredRenderingLayer::ConfirmDevice();
-		}
-
-		return confirmed;
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE

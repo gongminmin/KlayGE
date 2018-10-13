@@ -183,16 +183,16 @@ RasterizationOrderApp::RasterizationOrderApp()
 			: App3DFramework("RasterizationOrder")
 {
 	ResLoader::Instance().AddPath("../../Tutorials/media/RasterizationOrder");
-}
 
-bool RasterizationOrderApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < ShaderModel(5, 0))
-	{
-		return false;
-	}
-	return true;
+	this->OnConfirmDevice().connect([]
+		{
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (caps.max_shader_model < ShaderModel(5, 0))
+			{
+				return false;
+			}
+			return true;
+		});
 }
 
 void RasterizationOrderApp::OnCreate()

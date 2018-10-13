@@ -127,16 +127,16 @@ VDMParticleApp::VDMParticleApp()
 					particle_rendering_type_(PRT_FullRes)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/VDMParticle");
-}
 
-bool VDMParticleApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if ((caps.max_simultaneous_rts < 3) || !caps.depth_texture_support || caps.pack_to_rgba_required)
-	{
-		return false;
-	}
-	return true;
+	this->OnConfirmDevice().connect([]
+		{
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if ((caps.max_simultaneous_rts < 3) || !caps.depth_texture_support || caps.pack_to_rgba_required)
+			{
+				return false;
+			}
+			return true;
+		});
 }
 
 void VDMParticleApp::OnCreate()

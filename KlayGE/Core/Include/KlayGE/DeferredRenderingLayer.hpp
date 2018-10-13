@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _DEFERREDRENDERINGLAYER_HPP
-#define _DEFERREDRENDERINGLAYER_HPP
+#ifndef KLAYGE_CORE_DEFERRED_RENDERING_LAYER_HPP
+#define KLAYGE_CORE_DEFERRED_RENDERING_LAYER_HPP
 
 #pragma once
 
@@ -195,7 +195,7 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
-		static bool ConfirmDevice();
+		static void Register();
 
 		void Suspend();
 		void Resume();
@@ -724,4 +724,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _DEFERREDRENDERINGLAYER_HPP
+#endif		// KLAYGE_CORE_DEFERRED_RENDERING_LAYER_HPP

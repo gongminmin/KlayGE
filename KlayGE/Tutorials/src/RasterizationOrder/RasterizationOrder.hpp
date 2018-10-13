@@ -10,8 +10,6 @@ class RasterizationOrderApp : public KlayGE::App3DFramework
 public:
 	RasterizationOrderApp();
 
-	bool ConfirmDevice() const override;
-
 private:
 	void OnCreate();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
