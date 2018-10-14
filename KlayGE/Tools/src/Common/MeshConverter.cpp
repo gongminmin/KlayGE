@@ -1433,6 +1433,7 @@ namespace KlayGE
 				{ "stl", "stlb" },
 				{ "ply", "plyb" },
 				{ "gltf", "gltf2" },
+				{ "glb", "glb2" },
 			};
 
 			auto format_id = output_ext.string().substr(1);
@@ -1445,7 +1446,7 @@ namespace KlayGE
 				}
 			}
 
-			aiExportScene(&ai_scene, format_id.c_str(), lod_output_name.c_str(), 0);
+			aiExportScene(&ai_scene, format_id.c_str(), lod_output_name.c_str(), aiProcess_ConvertToLeftHanded);
 		}
 	}
 
@@ -3267,21 +3268,36 @@ namespace KlayGE
 			{
 				for (auto const & mesh_lod : mesh.lods)
 				{
-					for (auto const index : mesh_lod.indices)
+					for (size_t i = 0; i < mesh_lod.indices.size(); i += 3)
 					{
+						uint32_t triangle[] = 
+						{
+							mesh_lod.indices[i + 0],
+							mesh_lod.indices[i + 1],
+							mesh_lod.indices[i + 2]
+						};
+
+						if (metadata.FlipWindingOrder())
+						{
+							std::swap(triangle[1], triangle[2]);
+						}
+
 						if (is_index_16_bit)
 						{
-							uint16_t const i16 = static_cast<uint16_t>(index);
+							uint16_t const triangle_16[]
+							{
+								static_cast<uint16_t>(triangle[0]),
+								static_cast<uint16_t>(triangle[1]),
+								static_cast<uint16_t>(triangle[2])
+							};
 
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i16);
-							merged_indices.insert(merged_indices.end(), p, p + sizeof(i16));
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(triangle_16);
+							merged_indices.insert(merged_indices.end(), p, p + sizeof(triangle_16));
 						}
 						else
 						{
-							uint32_t const i32 = index;
-
-							uint8_t const * p = reinterpret_cast<uint8_t const *>(&i32);
-							merged_indices.insert(merged_indices.end(), p, p + sizeof(i32));
+							uint8_t const * p = reinterpret_cast<uint8_t const *>(triangle);
+							merged_indices.insert(merged_indices.end(), p, p + sizeof(triangle));
 						}
 					}
 

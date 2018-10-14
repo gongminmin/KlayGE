@@ -103,6 +103,15 @@ namespace KlayGE
 			axis_mapping_[axis] = mapping;
 		}
 
+		bool FlipWindingOrder() const
+		{
+			return flip_winding_order_;
+		}
+		void FlipWindingOrder(bool flip_winding_order)
+		{
+			flip_winding_order_ = flip_winding_order;
+		}
+
 		uint32_t NumLods() const;
 		void NumLods(uint32_t lods);
 		std::string_view LodFileName(uint32_t lod) const;
@@ -127,6 +136,7 @@ namespace KlayGE
 		Quaternion rotation_ = Quaternion::Identity();
 		float3 scale_ = float3(1, 1, 1);
 		uint8_t axis_mapping_[3] = { 0, 1, 2 };
+		bool flip_winding_order_ = false;
 		std::vector<std::string> lod_file_names_;
 
 		float4x4 transform_ = float4x4::Identity();

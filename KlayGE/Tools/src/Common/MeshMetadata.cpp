@@ -204,6 +204,13 @@ namespace KlayGE
 				}
 			}
 
+			if (document.HasMember("flip_winding_order"))
+			{
+				auto const & flip_winding_order_val = document["flip_winding_order"];
+				BOOST_ASSERT(flip_winding_order_val.IsBool());
+				new_metadata.flip_winding_order_ = flip_winding_order_val.GetBool();
+			}
+
 			if (document.HasMember("lod"))
 			{
 				auto const & lod_val = document["lod"];
@@ -304,6 +311,11 @@ namespace KlayGE
 				axis_mapping_val.PushBack(static_cast<int>(axis_mapping_[i]), allocator);
 			}
 			document.AddMember("axis_mapping", axis_mapping_val, allocator);
+		}
+
+		if (flip_winding_order_)
+		{
+			document.AddMember("flip_winding_order", flip_winding_order_, allocator);
 		}
 
 		if ((lod_file_names_.size() > 1) || ((lod_file_names_.size() == 1) && (lod_file_names_[0].size() > 1)))
