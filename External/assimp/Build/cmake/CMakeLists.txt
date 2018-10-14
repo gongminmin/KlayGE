@@ -44,6 +44,11 @@ FOREACH(flag_var
 	STRING(REPLACE "${NO_RTTI_FLAG}" "${RTTI_FLAG}" ${flag_var} "${${flag_var}}")
 ENDFOREACH()
 
+IF(MINGW)
+	# To fix a problem that Importer/StepFile/StepFileGen1.cpp is too big
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1")
+ENDIF()
+
 OPTION(BUILD_SHARED_LIBS "" ON)
 OPTION(BUILD_TESTING "" OFF)
 OPTION(ASSIMP_OPT_BUILD_PACKAGES "" OFF)

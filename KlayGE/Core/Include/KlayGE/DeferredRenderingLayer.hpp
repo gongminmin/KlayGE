@@ -385,6 +385,8 @@ namespace KlayGE
 #endif
 
 	private:
+		static bool ConfirmDevice();
+
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
 		void AccumulateToLightingTex(PerViewport const & pvp, PassTargetBuffer pass_tb);
 

@@ -878,21 +878,23 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::Register()
 	{
-		Context::Instance().AppInstance().OnConfirmDevice().connect([]
-			{
-				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				if ((caps.max_simultaneous_rts < 2)
-					|| !caps.hw_instancing_support || !caps.instance_id_support
-					|| !caps.depth_texture_support
-					|| !caps.fp_color_support
-					|| caps.pack_to_rgba_required
-					|| !caps.TextureRenderTargetFormatSupport(EF_D24S8, 1, 0))
-				{
-					return false;
-				}
+		Context::Instance().AppInstance().OnConfirmDevice().connect(DeferredRenderingLayer::ConfirmDevice);
+	}
 
-				return true;
-			});
+	bool DeferredRenderingLayer::ConfirmDevice()
+	{
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if ((caps.max_simultaneous_rts < 2)
+			|| !caps.hw_instancing_support || !caps.instance_id_support
+			|| !caps.depth_texture_support
+			|| !caps.fp_color_support
+			|| caps.pack_to_rgba_required
+			|| !caps.TextureRenderTargetFormatSupport(EF_D24S8, 1, 0))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	void DeferredRenderingLayer::Suspend()
