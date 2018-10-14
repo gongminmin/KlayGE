@@ -852,7 +852,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::LoadFromAssimp(std::string const & input_name, MeshMetadata const & metadata)
+	void MeshConverter::LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata)
 	{
 		auto ai_property_store_deleter = [](aiPropertyStore* props)
 		{
@@ -882,7 +882,7 @@ namespace KlayGE
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			std::string_view const lod_file_name = (lod == 0) ? input_name : metadata.LodFileName(lod);
-			std::string const file_name = (lod == 0) ? input_name : ResLoader::Instance().Locate(lod_file_name);
+			std::string const file_name = (lod == 0) ? std::string(input_name) : ResLoader::Instance().Locate(lod_file_name);
 			if (file_name.empty())
 			{
 				LogError() << "Could NOT find " << lod_file_name << " for LoD " << lod << '.' << std::endl;
@@ -973,7 +973,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::SaveByAssimp(std::string const & output_name)
+	void MeshConverter::SaveByAssimp(std::string_view output_name)
 	{
 		std::vector<aiScene> scene_lods(render_model_->NumLods());
 		for (uint32_t lod = 0; lod < render_model_->NumLods(); ++ lod)
@@ -1418,7 +1418,7 @@ namespace KlayGE
 					};
 			convert_node_subtree(*ai_scene.mRootNode, *render_model_->RootNode());
 
-			auto const output_path = std::filesystem::path(output_name);
+			std::filesystem::path const output_path(output_name.begin(), output_name.end());
 			auto const output_ext = output_path.extension();
 			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
 			if (scene_lods.size() > 1)
@@ -2717,7 +2717,7 @@ namespace KlayGE
 		skinned_model.AttachActions(actions);
 	}
 
-	void MeshConverter::LoadFromMeshML(std::string const & input_name, MeshMetadata const & metadata)
+	void MeshConverter::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)
 	{
 		KFL_UNUSED(metadata);
 
@@ -3437,7 +3437,7 @@ extern "C"
 		auto const outptu_ext = output_path.extension().string();
 		if (outptu_ext == ".model_bin")
 		{
-			SaveModel(model, output_path.string());
+			SaveModel(*model, output_path.string());
 		}
 		else
 		{

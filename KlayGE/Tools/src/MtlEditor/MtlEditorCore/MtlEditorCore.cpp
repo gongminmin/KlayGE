@@ -407,7 +407,7 @@ namespace KlayGE
 
 	void MtlEditorCore::SaveAsModel(std::string const & name)
 	{
-		SaveModel(model_, name);
+		SaveModel(*model_, name);
 	}
 
 	void MtlEditorCore::DoUpdateOverlay()

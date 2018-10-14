@@ -1941,9 +1941,9 @@ namespace KlayGE
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
 
-	void SaveModel(RenderModelPtr const & model, std::string const & model_name)
+	void SaveModel(RenderModel const & model, std::string_view model_name)
 	{
-		std::filesystem::path output_path(model_name);
+		std::filesystem::path output_path(model_name.begin(), model_name.end());
 		auto const output_ext = output_path.extension().string();
 		bool need_conversion = false;
 		if (output_ext != ".model_bin")
@@ -1952,12 +1952,12 @@ namespace KlayGE
 			need_conversion = true;
 		}
 
-		std::vector<RenderMaterialPtr> mtls(model->NumMaterials());
+		std::vector<RenderMaterialPtr> mtls(model.NumMaterials());
 		if (!mtls.empty())
 		{
 			for (uint32_t i = 0; i < mtls.size(); ++ i)
 			{
-				mtls[i] = model->GetMaterial(i);
+				mtls[i] = model.GetMaterial(i);
 			}
 		}
 
@@ -1965,7 +1965,7 @@ namespace KlayGE
 		std::vector<std::vector<uint8_t>> merged_buffs;
 		char all_is_index_16_bit = false;
 		std::vector<uint8_t> merged_indices;
-		std::vector<std::string> mesh_names(model->NumMeshes());
+		std::vector<std::string> mesh_names(model.NumMeshes());
 		std::vector<int32_t> mtl_ids(mesh_names.size());
 		std::vector<uint32_t> mesh_lods(mesh_names.size());
 		std::vector<AABBox> pos_bbs(mesh_names.size());
@@ -1977,7 +1977,7 @@ namespace KlayGE
 		if (!mesh_names.empty())
 		{
 			{
-				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Mesh(0));
+				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model.Mesh(0));
 
 				RenderLayout const & rl = mesh.GetRenderLayout();
 				merged_ves.resize(rl.NumVertexStreams());
@@ -2043,7 +2043,7 @@ namespace KlayGE
 
 			for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
 			{
-				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Mesh(mesh_index));
+				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model.Mesh(mesh_index));
 
 				Convert(mesh_names[mesh_index], mesh.Name());
 				mtl_ids[mesh_index] = mesh.MaterialID();
@@ -2067,7 +2067,7 @@ namespace KlayGE
 		}
 
 		std::vector<SceneNode const *> nodes;
-		model->RootNode()->Traverse([&nodes](SceneNode& node)
+		model.RootNode()->Traverse([&nodes](SceneNode& node)
 			{
 				nodes.push_back(&node);
 				return true;
@@ -2076,7 +2076,7 @@ namespace KlayGE
 		std::vector<Renderable const *> renderables;
 		for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
 		{
-			renderables.push_back(model->Mesh(mesh_index).get());
+			renderables.push_back(model.Mesh(mesh_index).get());
 		}
 
 		std::vector<Joint> joints;
@@ -2085,9 +2085,9 @@ namespace KlayGE
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
-		if (model->IsSkinned())
+		if (model.IsSkinned())
 		{
-			auto& skinned_model = *checked_pointer_cast<SkinnedModel>(model);
+			auto& skinned_model = *checked_cast<SkinnedModel const *>(&model);
 
 			uint32_t num_joints = skinned_model.NumJoints();
 			joints.resize(num_joints);

@@ -52,7 +52,7 @@ namespace KlayGE
 	{
 	public:
 		RenderModelPtr Convert(std::string_view input_name, MeshMetadata const & metadata);
-		void SaveByAssimp(std::string const & output_name);
+		void SaveByAssimp(std::string_view output_name);
 
 	private:
 		void RemoveUnusedJoints();
@@ -68,7 +68,7 @@ namespace KlayGE
 		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale);
-		void LoadFromAssimp(std::string const & input_name, MeshMetadata const & metadata);
+		void LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata);
 
 		// From MeshML
 		void CompileMaterialsChunk(XMLNodePtr const & materials_chunk);
@@ -84,7 +84,7 @@ namespace KlayGE
 		void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk);
 		void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index);
 		void CompileActionsChunk(XMLNodePtr const & actions_chunk);
-		void LoadFromMeshML(std::string const & input_name, MeshMetadata const & metadata);
+		void LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
 		RenderModelPtr render_model_;

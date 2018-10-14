@@ -408,7 +408,7 @@ namespace KlayGE
 		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view model_name);
 
-	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & model_name);
+	KLAYGE_CORE_API void SaveModel(RenderModel const & model, std::string_view model_name);
 
 
 	class KLAYGE_CORE_API RenderableLightSourceProxy : public StaticMesh

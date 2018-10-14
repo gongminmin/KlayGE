@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
 
 		if (model)
 		{
-			SaveModel(model, output_name);
+			SaveModel(*model, output_name);
 
 			if (!quiet)
 			{

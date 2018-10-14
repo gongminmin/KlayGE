@@ -160,7 +160,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			if (output_model)
 			{
 				filesystem::path res_path(res_names[i]);
-				SaveModel(output_model, res_path.string() + ".model_bin");
+				SaveModel(*output_model, res_path.string() + ".model_bin");
 			}
 		}
 	}
