@@ -50,8 +50,8 @@ namespace KlayGE
 		{
 		}
 
-		void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps)
+		RenderModelPtr ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps) override
 		{
 			KFL_UNUSED(caps);
 
@@ -72,10 +72,12 @@ namespace KlayGE
 			}
 
 			mc.Save(*model, output_path.string());
+
+			return model;
 		}
 
-		void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps)
+		TexturePtr ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps) override
 		{
 			KlayGE::TexMetadata metadata;
 			if (!metadata_name.empty())
@@ -98,6 +100,8 @@ namespace KlayGE
 			}
 
 			SaveTexture(texture, output_path.string());
+
+			return texture;
 		}
 	};
 }

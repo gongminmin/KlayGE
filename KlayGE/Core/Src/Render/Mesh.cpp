@@ -938,57 +938,6 @@ namespace KlayGE
 	}
 
 
-	std::string const jit_ext_name = ".model_bin";
-
-	void ModelJIT(std::string const & model_name)
-	{
-		std::string const metadata_name = model_name + ".kmeta";
-		std::string const runtime_name = model_name + jit_ext_name;
-
-		bool jit = false;
-		if (ResLoader::Instance().Locate(runtime_name).empty())
-		{
-			jit = true;
-		}
-		else
-		{
-			ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
-			uint32_t fourcc;
-			runtime_file->read(&fourcc, sizeof(fourcc));
-			fourcc = LE2Native(fourcc);
-			uint32_t ver;
-			runtime_file->read(&ver, sizeof(ver));
-			ver = LE2Native(ver);
-			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
-			{
-				jit = true;
-			}
-			else
-			{
-				uint64_t const runtime_file_timestamp = runtime_file->Timestamp();
-				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(model_name);
-				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
-				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
-					|| ((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp)))
-				{
-					jit = true;
-				}
-			}
-		}
-
-		if (jit)
-		{
-#if KLAYGE_IS_DEV_PLATFORM
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
-			Context::Instance().DevHelperInstance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
-#else
-			LogError() << "Could NOT locate " << runtime_name << std::endl;
-#endif
-		}
-	}
-
 	RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint, uint32_t node_attrib,
 		std::function<void(RenderModel&)> OnFinishLoading,
 		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc,
@@ -1015,6 +964,59 @@ namespace KlayGE
 
 	RenderModelPtr LoadSoftwareModel(std::string_view model_name)
 	{
+		char const * JIT_EXT_NAME = ".model_bin";
+
+		std::string runtime_name(model_name);
+		if (std::filesystem::path(runtime_name).extension() != JIT_EXT_NAME)
+		{
+			std::string const metadata_name = runtime_name + ".kmeta";
+			runtime_name += JIT_EXT_NAME;
+
+			bool jit = false;
+			if (ResLoader::Instance().Locate(runtime_name).empty())
+			{
+				jit = true;
+			}
+			else
+			{
+				ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
+				uint32_t fourcc;
+				runtime_file->read(&fourcc, sizeof(fourcc));
+				fourcc = LE2Native(fourcc);
+				uint32_t ver;
+				runtime_file->read(&ver, sizeof(ver));
+				ver = LE2Native(ver);
+				if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
+				{
+					jit = true;
+				}
+				else
+				{
+					uint64_t const runtime_file_timestamp = runtime_file->Timestamp();
+					uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(model_name);
+					uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+					if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
+						|| ((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp)))
+					{
+						jit = true;
+					}
+				}
+			}
+
+			if (jit)
+			{
+#if KLAYGE_IS_DEV_PLATFORM
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+				return Context::Instance().DevHelperInstance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
+#else
+				LogError() << "Could NOT locate " << runtime_name << std::endl;
+				return RenderModelPtr();
+#endif
+			}
+		}
+
 		std::vector<RenderMaterialPtr> mtls;
 		std::vector<VertexElement> merged_ves;
 		char all_is_index_16_bit;
@@ -1037,19 +1039,7 @@ namespace KlayGE
 		uint32_t frame_rate = 0;
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
 
-		ResIdentifierPtr runtime_file;
-		std::filesystem::path model_path(model_name.begin(), model_name.end());
-		if (model_path.extension().string() == jit_ext_name)
-		{
-			runtime_file = ResLoader::Instance().Open(model_name);
-		}
-		else
-		{
-			std::string model_name_str(model_name);
-			ModelJIT(model_name_str);
-
-			runtime_file = ResLoader::Instance().Open(model_name_str + jit_ext_name);
-		}
+		ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
 
 		uint32_t fourcc;
 		runtime_file->read(&fourcc, sizeof(fourcc));

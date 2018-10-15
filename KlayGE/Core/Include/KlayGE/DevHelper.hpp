@@ -47,9 +47,9 @@ namespace KlayGE
 	public:
 		virtual ~DevHelper();
 
-		virtual void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+		virtual RenderModelPtr ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) = 0;
-		virtual void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+		virtual TexturePtr ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) = 0;
 	};
 }
