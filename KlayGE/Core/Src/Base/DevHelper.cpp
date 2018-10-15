@@ -1,5 +1,5 @@
 /**
- * @file ToolCommonLoader.hpp
+ * @file DevHelper.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -29,39 +29,9 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ToolCommonLoader.hpp>
-
-#if KLAYGE_IS_DEV_PLATFORM
+#include <KlayGE/DevHelper.hpp>
 
 namespace KlayGE
 {
-	ToolCommonLoader::ToolCommonLoader()
-	{
-		std::string const tool_common_name = DLL_PREFIX "ToolCommon" DLL_SUFFIX;
-
-		dll_loader_.Load(tool_common_name);
-
-		DynamicConvertModel_ = reinterpret_cast<ConvertModelFunc>(dll_loader_.GetProcAddress("ConvertModel"));
-		DynamicConvertTexture_ = reinterpret_cast<ConvertTextureFunc>(dll_loader_.GetProcAddress("ConvertTexture"));
-	}
-
-	ToolCommonLoader& ToolCommonLoader::Instance()
-	{
-		static ToolCommonLoader ret;
-		return ret;
-	}
-
-	void ToolCommonLoader::ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-		RenderDeviceCaps const * caps)
-	{
-		DynamicConvertModel_(input_name, metadata_name, output_name, caps);
-	}
-
-	void ToolCommonLoader::ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-		RenderDeviceCaps const * caps)
-	{
-		DynamicConvertTexture_(input_name, metadata_name, output_name, caps);
-	}
+	DevHelper::~DevHelper() = default;
 }
-
-#endif

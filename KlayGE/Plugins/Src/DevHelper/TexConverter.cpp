@@ -34,12 +34,36 @@
 
 #include <cstring>
 
-#include <KlayGE/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
 #include "ImagePlane.hpp"
 
-namespace KlayGE
+using namespace KlayGE;
+
+namespace
 {
-	TexturePtr TexConverter::Convert(std::string_view input_name, TexMetadata const & metadata)
+	class KLAYGE_DEV_HELPER_API TexLoader
+	{
+	public:
+		TexturePtr Load(std::string_view input_name, TexMetadata const & metadata);
+
+	private:
+		bool Load();
+		TexturePtr StoreToTexture();
+
+	private:
+		std::string input_name_;
+
+		TexMetadata metadata_;
+
+		std::vector<std::vector<std::shared_ptr<ImagePlane>>> planes_;
+		uint32_t width_;
+		uint32_t height_;
+		uint32_t array_size_;
+		uint32_t num_mipmaps_;
+		ElementFormat format_;
+	};
+
+	TexturePtr TexLoader::Load(std::string_view input_name, TexMetadata const & metadata)
 	{
 		TexturePtr ret;
 
@@ -55,7 +79,7 @@ namespace KlayGE
 
 		if (this->Load())
 		{
-			ret = this->Save();
+			ret = this->StoreToTexture();
 		}
 
 		if (!in_path)
@@ -66,7 +90,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	bool TexConverter::Load()
+	bool TexLoader::Load()
 	{
 		array_size_ = metadata_.ArraySize();
 
@@ -271,7 +295,7 @@ namespace KlayGE
 		return true;
 	}
 
-	TexturePtr TexConverter::Save()
+	TexturePtr TexLoader::StoreToTexture()
 	{
 		Texture::TextureType output_type = Texture::TT_2D;
 		uint32_t output_width = width_;
@@ -342,33 +366,11 @@ namespace KlayGE
 	}
 }
 
-extern "C"
+namespace KlayGE
 {
-	using namespace KlayGE;
-
-	KLAYGE_SYMBOL_EXPORT void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-		RenderDeviceCaps const * caps)
+	TexturePtr TexConverter::Load(std::string_view input_name, TexMetadata const & metadata)
 	{
-		KlayGE::TexMetadata metadata;
-		if (!metadata_name.empty())
-		{
-			metadata.Load(metadata_name);
-		}
-		if (caps)
-		{
-			metadata.DeviceDependentAdjustment(*caps);
-		}
-
-		TexConverter tc;
-		auto texture = tc.Convert(input_name, metadata);
-
-		std::filesystem::path input_path(input_name.begin(), input_name.end());
-		std::filesystem::path output_path(output_name.begin(), output_name.end());
-		if (output_path.parent_path() == input_path.parent_path())
-		{
-			output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
-		}
-
-		SaveTexture(texture, output_path.string());
+		TexLoader tl;
+		return tl.Load(input_name, metadata);
 	}
 }

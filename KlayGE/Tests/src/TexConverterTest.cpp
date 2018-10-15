@@ -34,8 +34,8 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/CXX17/filesystem.hpp>
-#include <KlayGE/TexConverter.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 #include "KlayGETests.hpp"
 
@@ -55,7 +55,7 @@ public:
 		TexMetadata metadata(metadata_name);
 
 		TexConverter tc;
-		auto target = tc.Convert(input_name, metadata);
+		auto target = tc.Load(input_name, metadata);
 		EXPECT_TRUE(target);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);

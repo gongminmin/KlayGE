@@ -60,11 +60,11 @@ SET(BASE_HEADER_FILES
 
 IF(KLAYGE_IS_DEV_PLATFORM)
 	SET(BASE_SOURCE_FILES ${BASE_SOURCE_FILES}
-		${KLAYGE_PROJECT_DIR}/Core/Src/Base/ToolCommonLoader.cpp
+		${KLAYGE_PROJECT_DIR}/Core/Src/Base/DevHelper.cpp
 	)
 
 	SET(BASE_HEADER_FILES ${BASE_HEADER_FILES}
-		${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ToolCommonLoader.hpp
+		${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DevHelper.hpp
 	)
 ENDIF()
 

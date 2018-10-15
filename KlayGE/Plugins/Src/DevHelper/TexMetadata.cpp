@@ -42,7 +42,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 namespace
 {

@@ -64,7 +64,7 @@
 #endif
 #include <boost/algorithm/string/trim.hpp>
 
-#include <KlayGE/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -200,11 +200,108 @@ namespace
 			}
 		}
 	}
-}
 
-namespace KlayGE
-{
-	void MeshConverter::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
+	class MeshLoader
+	{
+	public:
+		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
+
+	private:
+		void RemoveUnusedJoints();
+		void RemoveUnusedMaterials();
+		void CompressKeyFrameSet(KeyFrameSet& kf);
+
+		// From assimp
+		void BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node);
+		void BuildMaterials(aiScene const * scene);
+		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods);
+		void BuildJoints(aiScene const * scene);
+		void BuildActions(aiScene const * scene);
+		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
+			std::vector<std::pair<float, float3>> const & scale);
+		void LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata);
+
+		// From MeshML
+		void CompileMaterialsChunk(XMLNodePtr const & materials_chunk);
+		void CompileMeshBoundingBox(XMLNodePtr const & mesh_node, uint32_t mesh_index,
+			bool& recompute_pos_bb, bool& recompute_tc_bb);
+		void CompileMeshesChunk(XMLNodePtr const & meshes_chunk);
+		void CompileMeshLodChunk(XMLNodePtr const & lod_node, uint32_t mesh_index, uint32_t lod,
+			bool recompute_pos_bb, bool recompute_tc_bb);
+		void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, uint32_t mesh_index, uint32_t lod,
+			bool recompute_pos_bb, bool recompute_tc_bb);
+		void CompileMeshesTrianglesChunk(XMLNodePtr const & triangles_chunk, uint32_t mesh_index, uint32_t lod);
+		void CompileBonesChunk(XMLNodePtr const & bones_chunk);
+		void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk);
+		void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index);
+		void CompileActionsChunk(XMLNodePtr const & actions_chunk);
+		void LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata);
+
+	private:
+		RenderModelPtr render_model_;
+
+		static uint32_t constexpr MAX_NUMBER_OF_TEXTURECOORDS = 8;
+
+		struct Mesh
+		{
+			int mtl_id;
+			std::string name;
+
+			struct Lod
+			{
+				std::vector<float3> positions;
+				std::vector<float3> tangents;
+				std::vector<float3> binormals;
+				std::vector<float3> normals;
+				std::vector<Color> diffuses;
+				std::vector<Color> speculars;
+				std::array<std::vector<float3>, MAX_NUMBER_OF_TEXTURECOORDS> texcoords;
+				std::vector<std::vector<std::pair<uint32_t, float>>> joint_bindings;
+
+				std::vector<uint32_t> indices;
+			};
+			std::vector<Lod> lods;
+
+			bool has_normal;
+			bool has_tangent_frame;
+			std::array<bool, MAX_NUMBER_OF_TEXTURECOORDS> has_texcoord;
+
+			AABBox pos_bb;
+			AABBox tc_bb;
+		};
+
+		struct NodeTransform
+		{
+			SceneNodePtr node;
+
+			std::vector<uint32_t> mesh_indices;
+
+			AABBox aabb_local;
+
+			int16_t parent_id;
+		};
+
+		std::vector<Mesh> meshes_;
+		std::vector<NodeTransform> nodes_;
+		std::vector<Joint> joints_;
+		bool has_normal_;
+		bool has_tangent_quat_;
+		bool has_texcoord_;
+		bool has_diffuse_;
+		bool has_specular_;
+	};
+
+	class MeshSaver
+	{
+	public:
+		void Save(RenderModel const & model, std::string_view output_name);
+
+	private:
+		void SaveByAssimp(RenderModel const & model, std::string_view output_name);
+	};
+
+	void MeshLoader::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
 		std::wstring wname;
@@ -261,7 +358,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::BuildMaterials(aiScene const * scene)
+	void MeshLoader::BuildMaterials(aiScene const * scene)
 	{
 		render_model_->NumMaterials(scene->mNumMaterials);
 
@@ -411,7 +508,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods)
+	void MeshLoader::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods)
 	{
 		for (size_t lod = 0; lod < scene_lods.size(); ++ lod)
 		{
@@ -581,7 +678,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::BuildJoints(aiScene const * scene)
+	void MeshLoader::BuildJoints(aiScene const * scene)
 	{
 		std::map<std::string, Joint> joint_nodes;
 
@@ -672,7 +769,7 @@ namespace KlayGE
 		alloc_joints(scene->mRootNode, -1);
 	}
 
-	void MeshConverter::BuildActions(aiScene const * scene)
+	void MeshLoader::BuildActions(aiScene const * scene)
 	{
 		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
 
@@ -799,7 +896,7 @@ namespace KlayGE
 		skinned_model.NumFrames(action_frame_offset);
 	}
 
-	void MeshConverter::ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
 		std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 		std::vector<std::pair<float, float3>> const & scales)
 	{
@@ -852,7 +949,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata)
+	void MeshLoader::LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata)
 	{
 		auto ai_property_store_deleter = [](aiPropertyStore* props)
 		{
@@ -973,18 +1070,33 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::SaveByAssimp(std::string_view output_name)
+	void MeshSaver::Save(RenderModel const & model, std::string_view output_name)
 	{
-		std::vector<aiScene> scene_lods(render_model_->NumLods());
-		for (uint32_t lod = 0; lod < render_model_->NumLods(); ++ lod)
+		std::filesystem::path output_path(output_name.begin(), output_name.end());
+
+		auto const output_ext = output_path.extension().string();
+		if (output_ext == ".model_bin")
+		{
+			SaveModel(model, output_path.string());
+		}
+		else
+		{
+			this->SaveByAssimp(model, output_path.string());
+		}
+	}
+
+	void MeshSaver::SaveByAssimp(RenderModel const & model, std::string_view output_name)
+	{
+		std::vector<aiScene> scene_lods(model.NumLods());
+		for (uint32_t lod = 0; lod < model.NumLods(); ++ lod)
 		{
 			auto& ai_scene = scene_lods[lod];
 
-			ai_scene.mNumMaterials = static_cast<uint32_t>(render_model_->NumMaterials());
+			ai_scene.mNumMaterials = static_cast<uint32_t>(model.NumMaterials());
 			ai_scene.mMaterials = new aiMaterial*[ai_scene.mNumMaterials];
 			for (uint32_t i = 0; i < ai_scene.mNumMaterials; ++ i)
 			{
-				auto const & mtl = *render_model_->GetMaterial(i);
+				auto const & mtl = *model.GetMaterial(i);
 
 				ai_scene.mMaterials[i] = new aiMaterial;
 				auto& ai_mtl = *ai_scene.mMaterials[i];
@@ -1071,11 +1183,11 @@ namespace KlayGE
 				}
 			}
 
-			ai_scene.mNumMeshes = render_model_->NumMeshes();
+			ai_scene.mNumMeshes = model.NumMeshes();
 			ai_scene.mMeshes = new aiMesh*[ai_scene.mNumMeshes];
 			for (uint32_t i = 0; i < ai_scene.mNumMeshes; ++ i)
 			{
-				auto const & mesh = *checked_cast<StaticMesh*>(render_model_->Mesh(i).get());
+				auto const & mesh = *checked_cast<StaticMesh*>(model.Mesh(i).get());
 
 				ai_scene.mMeshes[i] = new aiMesh;
 				auto& ai_mesh = *ai_scene.mMeshes[i];
@@ -1377,7 +1489,7 @@ namespace KlayGE
 			ai_scene.mRootNode = new aiNode;
 			ai_scene.mRootNode->mParent = nullptr;
 			std::function<void(aiNode& ai_node, SceneNode const & node)> convert_node_subtree
-				= [&convert_node_subtree, this](aiNode& ai_node, SceneNode const & node)
+				= [&convert_node_subtree, model](aiNode& ai_node, SceneNode const & node)
 					{
 						std::string name;
 						KlayGE::Convert(name, node.Name());
@@ -1399,9 +1511,9 @@ namespace KlayGE
 						for (uint32_t i = 0; i < node.NumRenderables(); ++ i)
 						{
 							auto const & mesh = node.GetRenderable(i);
-							for (uint32_t j = 0; j < render_model_->NumMeshes(); ++ j)
+							for (uint32_t j = 0; j < model.NumMeshes(); ++ j)
 							{
-								if (mesh == render_model_->Mesh(j))
+								if (mesh == model.Mesh(j))
 								{
 									ai_node.mMeshes[i] = j;
 									break;
@@ -1416,7 +1528,7 @@ namespace KlayGE
 							convert_node_subtree(*ai_node.mChildren[i], *node.Children()[i]);
 						}
 					};
-			convert_node_subtree(*ai_scene.mRootNode, *render_model_->RootNode());
+			convert_node_subtree(*ai_scene.mRootNode, *model.RootNode());
 
 			std::filesystem::path const output_path(output_name.begin(), output_name.end());
 			auto const output_ext = output_path.extension();
@@ -1450,7 +1562,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMaterialsChunk(XMLNodePtr const & materials_chunk)
+	void MeshLoader::CompileMaterialsChunk(XMLNodePtr const & materials_chunk)
 	{
 		uint32_t num_mtls = 0;
 		for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node;
@@ -1832,7 +1944,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMeshBoundingBox(XMLNodePtr const & mesh_node, uint32_t mesh_index,
+	void MeshLoader::CompileMeshBoundingBox(XMLNodePtr const & mesh_node, uint32_t mesh_index,
 		bool& recompute_pos_bb, bool& recompute_tc_bb)
 	{
 		XMLNodePtr pos_bb_node = mesh_node->FirstNode("pos_bb");
@@ -1919,7 +2031,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMeshesChunk(XMLNodePtr const & meshes_chunk)
+	void MeshLoader::CompileMeshesChunk(XMLNodePtr const & meshes_chunk)
 	{
 		uint32_t num_meshes = 0;
 		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
@@ -2001,7 +2113,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMeshLodChunk(XMLNodePtr const & lod_node, uint32_t mesh_index, uint32_t lod,
+	void MeshLoader::CompileMeshLodChunk(XMLNodePtr const & lod_node, uint32_t mesh_index, uint32_t lod,
 		bool recompute_pos_bb, bool recompute_tc_bb)
 	{
 		XMLNodePtr vertices_chunk = lod_node->FirstNode("vertices_chunk");
@@ -2020,7 +2132,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, uint32_t mesh_index, uint32_t lod,
+	void MeshLoader::CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, uint32_t mesh_index, uint32_t lod,
 		bool recompute_pos_bb, bool recompute_tc_bb)
 	{
 		auto& mesh = meshes_[mesh_index];
@@ -2381,7 +2493,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileMeshesTrianglesChunk(XMLNodePtr const & triangles_chunk, uint32_t mesh_index, uint32_t lod)
+	void MeshLoader::CompileMeshesTrianglesChunk(XMLNodePtr const & triangles_chunk, uint32_t mesh_index, uint32_t lod)
 	{
 		auto& mesh = meshes_[mesh_index];
 		auto& mesh_lod = mesh.lods[lod];
@@ -2406,7 +2518,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileBonesChunk(XMLNodePtr const & bones_chunk)
+	void MeshLoader::CompileBonesChunk(XMLNodePtr const & bones_chunk)
 	{
 		for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 		{
@@ -2486,7 +2598,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk)
+	void MeshLoader::CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk)
 	{
 		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
 
@@ -2608,7 +2720,7 @@ namespace KlayGE
 		skinned_model.AttachKeyFrameSets(kfss);
 	}
 
-	void MeshConverter::CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index)
+	void MeshLoader::CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index)
 	{
 		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
 		auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Mesh(mesh_index));
@@ -2680,7 +2792,7 @@ namespace KlayGE
 		skinned_mesh.AttachFramePosBounds(bb_kfs);
 	}
 
-	void MeshConverter::CompileActionsChunk(XMLNodePtr const & actions_chunk)
+	void MeshLoader::CompileActionsChunk(XMLNodePtr const & actions_chunk)
 	{
 		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
 
@@ -2717,7 +2829,7 @@ namespace KlayGE
 		skinned_model.AttachActions(actions);
 	}
 
-	void MeshConverter::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)
+	void MeshLoader::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)
 	{
 		KFL_UNUSED(metadata);
 
@@ -2807,7 +2919,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::RemoveUnusedJoints()
+	void MeshLoader::RemoveUnusedJoints()
 	{
 		std::vector<uint32_t> joint_mapping(joints_.size());
 		std::vector<bool> joints_used(joints_.size(), false);
@@ -2879,7 +2991,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::RemoveUnusedMaterials()
+	void MeshLoader::RemoveUnusedMaterials()
 	{
 		std::vector<uint32_t> mtl_mapping(render_model_->NumMaterials());
 		std::vector<bool> mtl_used(mtl_mapping.size(), false);
@@ -2912,7 +3024,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshConverter::CompressKeyFrameSet(KeyFrameSet& kf)
+	void MeshLoader::CompressKeyFrameSet(KeyFrameSet& kf)
 	{
 		float const THRESHOLD = 1e-3f;
 
@@ -2965,7 +3077,7 @@ namespace KlayGE
 	}
 
 
-	RenderModelPtr MeshConverter::Convert(std::string_view input_name, MeshMetadata const & metadata)
+	RenderModelPtr MeshLoader::Load(std::string_view input_name, MeshMetadata const & metadata)
 	{
 		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
 		if (input_name_str.empty())
@@ -3409,39 +3521,18 @@ namespace KlayGE
 	}
 }
 
-extern "C"
+namespace KlayGE
 {
-	using namespace KlayGE;
-
-	KLAYGE_SYMBOL_EXPORT void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-		RenderDeviceCaps const * caps)
+	RenderModelPtr MeshConverter::Load(std::string_view input_name, MeshMetadata const & metadata)
 	{
-		KFL_UNUSED(caps);
+		MeshLoader ml;
+		return ml.Load(input_name, metadata);
+	}
 
-		MeshMetadata metadata;
-		if (!metadata_name.empty())
-		{
-			metadata.Load(metadata_name);
-		}
-
-		MeshConverter mc;
-		auto model = mc.Convert(input_name, metadata);
-
-		std::filesystem::path input_path(input_name.begin(), input_name.end());
-		std::filesystem::path output_path(output_name.begin(), output_name.end());
-		if (output_path.parent_path() == input_path.parent_path())
-		{
-			output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
-		}
-
-		auto const outptu_ext = output_path.extension().string();
-		if (outptu_ext == ".model_bin")
-		{
-			SaveModel(*model, output_path.string());
-		}
-		else
-		{
-			mc.SaveByAssimp(output_path.string());
-		}
+	void MeshConverter::Save(RenderModel& model, std::string_view output_name)
+	{
+		MeshSaver ms;
+		ms.Save(model, output_name);
 	}
 }
+

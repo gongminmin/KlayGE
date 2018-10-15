@@ -34,7 +34,7 @@
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderMaterial.hpp>
-#include <KlayGE/ToolCommonLoader.hpp>
+#include <KlayGE/DevHelper.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -982,7 +982,7 @@ namespace KlayGE
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			ToolCommonLoader::Instance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
+			Context::Instance().DevHelperInstance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
 #else
 			LogError() << "Could NOT locate " << runtime_name << std::endl;
 #endif
@@ -2158,7 +2158,7 @@ namespace KlayGE
 				caps = &rf.RenderEngineInstance().DeviceCaps();
 			}
 
-			ToolCommonLoader::Instance().ConvertModel(output_path.string(), "", model_name, caps);
+			Context::Instance().DevHelperInstance().ConvertModel(output_path.string(), "", model_name, caps);
 		}
 #endif
 	}

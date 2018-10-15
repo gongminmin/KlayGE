@@ -39,11 +39,11 @@
 #include <string>
 #include <vector>
 
-#include <KlayGE/ToolCommon.hpp>
+#include <KlayGE/DevHelper/DevHelper.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_TOOL_API MeshMetadata
+	class KLAYGE_DEV_HELPER_API MeshMetadata
 	{
 	public:
 		MeshMetadata();

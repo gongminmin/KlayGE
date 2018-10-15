@@ -35,14 +35,15 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX17/string_view.hpp>
+#include <KlayGE/RenderDeviceCaps.hpp>
 
 #include <string>
 
-#include <KlayGE/RenderDeviceCaps.hpp>
+#include <KlayGE/DevHelper/DevHelper.hpp>
 
 namespace KlayGE
 {
-	struct KLAYGE_TOOL_API PlatformDefinition
+	struct KLAYGE_DEV_HELPER_API PlatformDefinition
 	{
 		PlatformDefinition();
 		explicit PlatformDefinition(std::string_view platform);

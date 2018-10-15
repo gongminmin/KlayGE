@@ -41,7 +41,7 @@
 #include <FreeImage.h>
 
 #include "ImagePlane.hpp"
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 namespace
 {

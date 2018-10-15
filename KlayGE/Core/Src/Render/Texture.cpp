@@ -39,7 +39,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
-#include <KlayGE/ToolCommonLoader.hpp>
+#include <KlayGE/DevHelper.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Hash.hpp>
 
@@ -1141,7 +1141,7 @@ namespace
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-				ToolCommonLoader::Instance().ConvertTexture(tex_desc_.res_name, metadata_name, runtime_name, &caps);
+				Context::Instance().DevHelperInstance().ConvertTexture(tex_desc_.res_name, metadata_name, runtime_name, &caps);
 #else
 				LogError() << "Could NOT locate " << runtime_name << std::endl;
 #endif

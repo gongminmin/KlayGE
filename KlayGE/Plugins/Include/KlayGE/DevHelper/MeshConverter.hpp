@@ -1,5 +1,5 @@
 /**
- * @file ToolCommonLoader.hpp
+ * @file MeshConverter.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,46 +28,32 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_CORE_BASE_TOOL_COMMON_LOADER_HPP
-#define KLAYGE_CORE_BASE_TOOL_COMMON_LOADER_HPP
+#ifndef KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP
+#define KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP
 
 #pragma once
 
-#if KLAYGE_IS_DEV_PLATFORM
-
 #include <KlayGE/PreDeclare.hpp>
-
 #include <KFL/CXX17/string_view.hpp>
-#include <KFL/DllLoader.hpp>
+#include <KlayGE/Mesh.hpp>
+
+#include <map>
+#include <vector>
+
+#include <KlayGE/DevHelper/DevHelper.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
+
+struct aiNode;
+struct aiScene;
 
 namespace KlayGE
 {
-	class ToolCommonLoader
+	class KLAYGE_DEV_HELPER_API MeshConverter
 	{
 	public:
-		static ToolCommonLoader& Instance();
-
-		void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps);
-		void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps);
-
-	private:
-		ToolCommonLoader();
-
-	private:
-		using ConvertModelFunc = void(*)(std::string_view tex_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps);
-		using ConvertTextureFunc = void(*)(std::string_view tex_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps);
-
-		ConvertModelFunc DynamicConvertModel_;
-		ConvertTextureFunc DynamicConvertTexture_;
-
-		DllLoader dll_loader_;
+		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
+		void Save(RenderModel& model, std::string_view output_name);
 	};
 }
 
-#endif
-
-#endif			// KLAYGE_CORE_BASE_TOOL_COMMON_LOADER_HPP
+#endif		// KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP

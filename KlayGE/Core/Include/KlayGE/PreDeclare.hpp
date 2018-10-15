@@ -377,6 +377,8 @@ namespace KlayGE
 
 	class Package;
 	typedef std::shared_ptr<Package> PackagePtr;
+
+	class DevHelper;
 }
 
 #endif			// _KLAYGE_PREDECLARE_HPP

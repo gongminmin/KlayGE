@@ -40,7 +40,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include <KlayGE/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
 
 namespace
 {

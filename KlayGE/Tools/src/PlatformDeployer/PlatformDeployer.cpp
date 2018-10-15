@@ -40,11 +40,11 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/PlatformDefinition.hpp>
-#include <KlayGE/MeshConverter.hpp>
-#include <KlayGE/MeshMetadata.hpp>
-#include <KlayGE/TexConverter.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/PlatformDefinition.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -138,7 +138,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
 			auto metadata = LoadTextureMetadata(res_names[i], default_metadata);
-			auto output_tex = tc.Convert(res_names[i], metadata);
+			auto output_tex = tc.Load(res_names[i], metadata);
 			if (output_tex)
 			{
 				filesystem::path res_path(res_names[i]);
@@ -156,7 +156,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
 			auto metadata = LoadMeshMetadata(res_names[i], default_metadata);
-			auto output_model = mc.Convert(res_names[i], metadata);
+			auto output_model = mc.Load(res_names[i], metadata);
 			if (output_model)
 			{
 				filesystem::path res_path(res_names[i]);
@@ -233,8 +233,6 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 
 int main(int argc, char* argv[])
 {
-	ResLoader::Instance().AddPath("../../Tools/media/Common");
-
 	std::vector<std::string> res_names;
 	std::string res_type;
 	std::string platform;

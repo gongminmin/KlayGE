@@ -18,8 +18,8 @@
 #pragma clang diagnostic pop
 #endif
 
-#include <KlayGE/MeshMetadata.hpp>
-#include <KlayGE/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -171,11 +171,11 @@ int main(int argc, char* argv[])
 		}
 
 		MeshConverter mesh_converter;
-		auto model = mesh_converter.Convert(full_input_name, metadata);
+		auto model = mesh_converter.Load(full_input_name, metadata);
 
 		if (model)
 		{
-			SaveModel(*model, output_name);
+			mesh_converter.Save(*model, output_name);
 
 			if (!quiet)
 			{

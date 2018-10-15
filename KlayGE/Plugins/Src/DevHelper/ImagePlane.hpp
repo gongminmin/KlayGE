@@ -39,6 +39,8 @@
 
 #include <vector>
 
+#include <KlayGE/DevHelper/DevHelper.hpp>
+
 namespace KlayGE
 {
 	class TexMetadata;

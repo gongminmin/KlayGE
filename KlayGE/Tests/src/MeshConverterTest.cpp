@@ -35,8 +35,8 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/MeshConverter.hpp>
-#include <KlayGE/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
 
 #include "KlayGETests.hpp"
 
@@ -56,7 +56,7 @@ public:
 		MeshMetadata metadata(metadata_name);
 
 		MeshConverter mc;
-		auto target = mc.Convert(input_name, metadata);
+		auto target = mc.Load(input_name, metadata);
 		EXPECT_TRUE(target);
 
 		auto sanity_model = LoadSoftwareModel(sanity_name);

@@ -1,5 +1,5 @@
 /**
- * @file TexConverter.hpp
+ * @file DevHelper.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,45 +28,32 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_TOOLS_TOOL_COMMON_TEX_CONVERTER_HPP
-#define KLAYGE_TOOLS_TOOL_COMMON_TEX_CONVERTER_HPP
+#ifndef KLAYGE_CORE_BASE_DEV_HELPER_HPP
+#define KLAYGE_CORE_BASE_DEV_HELPER_HPP
 
 #pragma once
 
+#if KLAYGE_IS_DEV_PLATFORM
+
 #include <KlayGE/PreDeclare.hpp>
+
 #include <KFL/CXX17/string_view.hpp>
-#include <KlayGE/ElementFormat.hpp>
-
-#include <vector>
-
-#include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KFL/DllLoader.hpp>
 
 namespace KlayGE
 {
-	class ImagePlane;
-
-	class KLAYGE_TOOL_API TexConverter
+	class KLAYGE_CORE_API DevHelper : boost::noncopyable
 	{
 	public:
-		TexturePtr Convert(std::string_view input_name, TexMetadata const & metadata);
+		virtual ~DevHelper();
 
-	private:
-		bool Load();
-		TexturePtr Save();
-
-	private:
-		std::string input_name_;
-
-		TexMetadata metadata_;
-
-		std::vector<std::vector<std::shared_ptr<ImagePlane>>> planes_;
-		uint32_t width_;
-		uint32_t height_;
-		uint32_t array_size_;
-		uint32_t num_mipmaps_;
-		ElementFormat format_;
+		virtual void ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps) = 0;
+		virtual void ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
+			RenderDeviceCaps const * caps) = 0;
 	};
 }
 
-#endif		// KLAYGE_TOOLS_TOOL_COMMON_TEX_CONVERTER_HPP
+#endif
+
+#endif			// KLAYGE_CORE_BASE_DEV_HELPER_HPP

@@ -46,10 +46,9 @@
 #pragma clang diagnostic pop
 #endif
 
-#include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/PlatformDefinition.hpp>
-#include <KlayGE/TexConverter.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/PlatformDefinition.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -188,8 +187,6 @@ int main(int argc, char* argv[])
 
 	if (conversion)
 	{
-		ResLoader::Instance().AddPath("../../Tools/media/Common");
-
 		PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
 
 		TexMetadata metadata;
@@ -200,7 +197,7 @@ int main(int argc, char* argv[])
 		metadata.DeviceDependentAdjustment(platform_def.device_caps);
 
 		TexConverter tc;
-		TexturePtr output_tex = tc.Convert(full_input_name, metadata);
+		TexturePtr output_tex = tc.Load(full_input_name, metadata);
 		if (output_tex)
 		{
 			SaveTexture(output_tex, output_name);

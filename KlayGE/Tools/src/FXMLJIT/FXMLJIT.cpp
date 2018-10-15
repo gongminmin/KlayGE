@@ -59,7 +59,7 @@
 #include <boost/algorithm/string/classification.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/PlatformDefinition.hpp>
+#include <KlayGE/DevHelper/PlatformDefinition.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -73,8 +73,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: FXMLJIT d3d_12_1|d3d_12_0|d3d_11_1|d3d_11_0|gl_4_6|gl_4_5|gl_4_4|gl_4_3|gl_4_2|gl_4_1|gles_3_2|gles_3_1|gles_3_0 xxx.fxml [target folder]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../Tools/media/Common");
 
 	std::string platform = argv[1];
 

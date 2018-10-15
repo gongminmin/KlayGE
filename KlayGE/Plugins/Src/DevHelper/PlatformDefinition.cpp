@@ -32,8 +32,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/ResLoader.hpp>
 
-#include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/PlatformDefinition.hpp>
+#include <KlayGE/DevHelper/PlatformDefinition.hpp>
 
 namespace
 {
