@@ -79,15 +79,7 @@ namespace KlayGE
 		TexturePtr ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) override
 		{
-			KlayGE::TexMetadata metadata;
-			if (!metadata_name.empty())
-			{
-				metadata.Load(metadata_name);
-			}
-			if (caps)
-			{
-				metadata.DeviceDependentAdjustment(*caps);
-			}
+			auto metadata = this->LoadTexMetadata(metadata_name, caps);
 
 			TexConverter tc;
 			auto texture = tc.Load(input_name, metadata);
@@ -102,6 +94,34 @@ namespace KlayGE
 			SaveTexture(texture, output_path.string());
 
 			return texture;
+		}
+		
+		void GetImageInfo(std::string_view input_name, std::string_view metadata_name, RenderDeviceCaps const * caps,
+			Texture::TextureType& type,
+			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+		{
+			auto metadata = this->LoadTexMetadata(metadata_name, caps);
+
+			TexConverter tc;
+			tc.GetImageInfo(input_name, metadata,
+				type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+		}
+
+	private:
+		KlayGE::TexMetadata LoadTexMetadata(std::string_view metadata_name, RenderDeviceCaps const * caps)
+		{
+			KlayGE::TexMetadata metadata;
+			if (!metadata_name.empty())
+			{
+				metadata.Load(metadata_name);
+			}
+			if (caps)
+			{
+				metadata.DeviceDependentAdjustment(*caps);
+			}
+
+			return metadata;
 		}
 	};
 }

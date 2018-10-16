@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/TexCompression.hpp>
 
 #include <cstring>
 
@@ -45,6 +46,11 @@ namespace
 	{
 	public:
 		TexturePtr Load(std::string_view input_name, TexMetadata const & metadata);
+
+		static void GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
+			Texture::TextureType& type,
+			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
 
 	private:
 		bool Load();
@@ -88,6 +94,93 @@ namespace
 		}
 
 		return ret;
+	}
+
+	void TexLoader::GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
+		Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	{
+		ImagePlane image;
+		image.Load(input_name, metadata);
+
+		type = Texture::TT_2D;
+		width = image.Width();
+		height = image.Height();
+		depth = 1;
+
+		if (metadata.MipmapEnabled())
+		{
+			if (metadata.NumMipmaps() == 0)
+			{
+				num_mipmaps = 1;
+				uint32_t w = width;
+				uint32_t h = height;
+				while ((w != 1) || (h != 1))
+				{
+					++ num_mipmaps;
+
+					w = std::max<uint32_t>(1U, w / 2);
+					h = std::max<uint32_t>(1U, h / 2);
+				}
+			}
+			else
+			{
+				num_mipmaps = metadata.NumMipmaps();
+			}
+		}
+		else
+		{
+			num_mipmaps = 1;
+		}
+
+		array_size = metadata.ArraySize();
+
+		if (image.CompressedTex())
+		{
+			format = image.CompressedTex()->Format();
+		}
+		else
+		{
+			format = image.UncompressedTex()->Format();
+		}
+		BOOST_ASSERT(format != EF_Unknown);
+		ElementFormat metadata_format = metadata.PreferedFormat();
+		if (metadata_format == EF_Unknown)
+		{
+			metadata_format = format;
+		}
+
+		if ((num_mipmaps > 1) && metadata.AutoGenMipmap())
+		{
+			format = image.UncompressedTex()->Format();
+		}
+
+		if (format != metadata_format)
+		{
+			format = metadata_format;
+
+			uint32_t const block_width = BlockWidth(format);
+			uint32_t const block_height = BlockHeight(format);
+			uint32_t const block_bytes = BlockBytes(format);
+
+			row_pitch = (width + block_width - 1) / block_width * block_bytes;
+			slice_pitch = (height + block_height - 1) / block_height * row_pitch;
+		}
+		else if (IsCompressedFormat(format))
+		{
+			Texture::Mapper mapper(*image.CompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+				image.CompressedTex()->Width(0), image.CompressedTex()->Height(0));
+			row_pitch = mapper.RowPitch();
+			slice_pitch = mapper.SlicePitch();
+		}
+		else
+		{
+			Texture::Mapper mapper(*image.UncompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+				image.UncompressedTex()->Width(0), image.UncompressedTex()->Height(0));
+			row_pitch = mapper.RowPitch();
+			slice_pitch = mapper.SlicePitch();
+		}
 	}
 
 	bool TexLoader::Load()
@@ -372,5 +465,14 @@ namespace KlayGE
 	{
 		TexLoader tl;
 		return tl.Load(input_name, metadata);
+	}
+
+	void TexConverter::GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
+		Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	{
+		return TexLoader::GetImageInfo(input_name, metadata,
+			type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
 	}
 }

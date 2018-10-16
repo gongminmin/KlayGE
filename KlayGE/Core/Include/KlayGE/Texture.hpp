@@ -360,12 +360,8 @@ namespace KlayGE
 	KLAYGE_CORE_API void GetImageInfo(std::string_view tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
-	KLAYGE_CORE_API void GetImageInfo(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
 
 	KLAYGE_CORE_API TexturePtr LoadSoftwareTexture(std::string_view tex_name);
-	KLAYGE_CORE_API TexturePtr LoadSoftwareTexture(ResIdentifierPtr const & tex_res);
 	KLAYGE_CORE_API TexturePtr SyncLoadTexture(std::string_view tex_name, uint32_t access_hint);
 	KLAYGE_CORE_API TexturePtr ASyncLoadTexture(std::string_view tex_name, uint32_t access_hint);
 

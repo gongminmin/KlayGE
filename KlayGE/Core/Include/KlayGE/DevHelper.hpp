@@ -39,6 +39,7 @@
 
 #include <KFL/CXX17/string_view.hpp>
 #include <KFL/DllLoader.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
@@ -51,6 +52,10 @@ namespace KlayGE
 			RenderDeviceCaps const * caps) = 0;
 		virtual TexturePtr ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) = 0;
+		virtual void GetImageInfo(std::string_view input_name, std::string_view metadata_name, RenderDeviceCaps const * caps,
+			Texture::TextureType& type,
+			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch) = 0;
 	};
 }
 
