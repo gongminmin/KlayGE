@@ -121,7 +121,7 @@ void VectorTexApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+	model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
 	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);

@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/bunny.meshml" "3d5fadd23ae6a8599bb1afeee5468543bb1215de")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/bunny.glb" "196D1D7656F9AF2D5547D3FEA44EDDEE524D925B")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/diffuse.dds" "b68b543509b380eb1a65755107f0fcdcf8f4d9e6")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/distance.dds" "60aaa3599993f631aa266b8ad8cf8ac3f8858090")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/normal.dds" "3b6fc91238c77d42efa091e8ec047f97a33c3840")
@@ -24,7 +24,7 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
@@ -52,8 +52,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/bunny.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/bunny.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/diffuse.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/distance.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/normal.dds

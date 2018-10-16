@@ -12,6 +12,7 @@
 *.dds
 *.png
 *.3ds
+*.glb
 KlayGE.log
 __pycache__
 CfgBuild.py

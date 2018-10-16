@@ -44,7 +44,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Tutorials/media/Refract/Refract.kfx
 )
 

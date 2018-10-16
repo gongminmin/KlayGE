@@ -61,7 +61,7 @@ def update(app_time, elapsed_time):
 		</update>
 	</light>
 
-	<model name="sponza" meshml="sponza_crytek.meshml"/>
+	<model name="sponza" meshml="Sponza/sponza.glb"/>
 
 	<camera>
 		<eye_pos v="-14.5 18 -3"/>

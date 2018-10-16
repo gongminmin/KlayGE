@@ -15,9 +15,9 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -68,56 +68,56 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_blue_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_green_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_blue_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_green_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_roof_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_diff.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_dif.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_hanging.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds	
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/background.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/background_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/chain_texture.png.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/chain_texture_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/lion.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/lion_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/spnza_bricks_a_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/spnza_bricks_a_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/spnza_bricks_a_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_arch_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_arch_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_arch_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_ceiling_a_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_ceiling_a_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_a_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_a_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_a_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_b_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_b_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_b_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_c_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_c_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_column_c_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_curtain_blue_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_curtain_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_curtain_green_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_details_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_details_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_fabric_blue_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_fabric_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_fabric_green_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_fabric_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_flagpole_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_flagpole_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_floor_a_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_floor_a_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_roof_diff.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_thorn_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_thorn_diff.png.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/sponza_thorn_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_dif.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_hanging.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_plant.png.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_plant_spec.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_round.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_round_ddn.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/Sponza/vase_round_spec.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/fire.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Fire.psml
 )

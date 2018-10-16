@@ -210,10 +210,10 @@ void ScreenSpaceReflectionApp::OnCreate()
 	loading_percentage_ = 0;
 	c_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+	teapot_model_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ReflectMesh>);
-	auto dino_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto dino_model = ASyncLoadModel("dino50.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[](RenderModel& model)
 		{

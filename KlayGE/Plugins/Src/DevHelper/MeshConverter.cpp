@@ -1024,7 +1024,7 @@ namespace
 				| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
 				| aiProcess_Triangulate // triangulate polygons with more than 3 edges
 				| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
-				| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
+				/*| aiProcess_FixInfacingNormals*/, // find normals facing inwards and inverts them
 				nullptr, props.get()), ai_scene_deleter);
 
 			if (!scenes[lod])

@@ -361,7 +361,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		}
 		else if (loading_percentage_ < 60)
 		{
-			polygon_model_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+			polygon_model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 				SceneNode::SOA_Cullable, AddToSceneRootHelper,
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 			polygon_model_->ForEachMesh([this](Renderable& mesh)

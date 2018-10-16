@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SSSSS/Infinite-Level_02.meshml" "6C0B72867A8A2C5A291BDC535EB8285CBF5E9A1D")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SSSSS/Infinite-Level_02.glb" "BDAD2D49D23FD10778E251CB95A09BC1BD6A3125")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.jpg" "24395FF82ADF81FF094CBF6ED5C93A6BEAF83C31")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SSSSS/Map-COL.jpg" "6C84DCC480BEBAE97DBC039C279F9C08C4DED2E2")
 
@@ -17,9 +17,9 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -81,7 +81,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI6.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI8.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI9.JPG.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Map-COL.jpg.dds
 )

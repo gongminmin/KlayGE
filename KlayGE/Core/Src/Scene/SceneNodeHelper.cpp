@@ -102,24 +102,24 @@ namespace KlayGE
 		switch (light->Type())
 		{
 		case LightSource::LT_Ambient:
-			mesh_name = "ambient_light_proxy.meshml";
+			mesh_name = "AmbientLightProxy.glb";
 			break;
 
 		case LightSource::LT_Point:
 		case LightSource::LT_SphereArea:
-			mesh_name = "point_light_proxy.meshml";
+			mesh_name = "PointLightProxy.glb";
 			break;
 
 		case LightSource::LT_Directional:
-			mesh_name = "directional_light_proxy.meshml";
+			mesh_name = "DirectionalLightProxy.glb";
 			break;
 
 		case LightSource::LT_Spot:
-			mesh_name = "spot_light_proxy.meshml";
+			mesh_name = "SpotLightProxy.glb";
 			break;
 
 		case LightSource::LT_TubeArea:
-			mesh_name = "tube_light_proxy.meshml";
+			mesh_name = "TubeLightProxy.glb";
 			break;
 
 		default:
@@ -175,7 +175,7 @@ namespace KlayGE
 
 	RenderModelPtr SceneObjectCameraProxy::LoadModel(std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
-		return SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
+		return SyncLoadModel("CameraProxy.glb", EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
 			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
 	}

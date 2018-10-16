@@ -87,11 +87,12 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			*(effect_->ParameterByName("mvp")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
+			*(effect_->ParameterByName("model")) = model_mat_;
+			*(effect_->ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			auto const & light_src = Context::Instance().SceneManagerInstance().GetLight(0);
 
-			*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_src->Position(), inv_model_mat_);
+			*(effect_->ParameterByName("light_pos")) = light_src->Position();
 			*(effect_->ParameterByName("light_color")) = light_src->Color();
 			*(effect_->ParameterByName("light_falloff")) = light_src->Falloff();
 		}
@@ -144,17 +145,17 @@ void VDMParticleApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	auto robot_model = ASyncLoadModel("attack_droid.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto robot_model = ASyncLoadModel("attack_droid.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[](RenderModel& model)
 		{
-			model.RootNode()->TransformToParent(MathLib::translation(0.0f, 0.0f, -2.0f));
+			model.RootNode()->TransformToParent(model.RootNode()->TransformToParent() * MathLib::translation(0.0f, 0.0f, -2.0f));
 			AddToSceneRootHelper(model);
 		},
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
 	scene_objs_.push_back(robot_model->RootNode());
 
-	auto room_model = ASyncLoadModel("sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto room_model = ASyncLoadModel("Sponza/sponza.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<ForwardMesh>);
 	scene_objs_.push_back(room_model->RootNode());

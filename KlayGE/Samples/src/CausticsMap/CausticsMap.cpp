@@ -590,7 +590,7 @@ void CausticsMapApp::OnCreate()
 	sphere_obj_->TransformToParent(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_obj_->Visible(false);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj_);
-	sphere_model_ = ASyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+	sphere_model_ = ASyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[this](RenderModel& model)
 		{
@@ -602,7 +602,7 @@ void CausticsMapApp::OnCreate()
 	bunny_obj_->TransformToParent(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_obj_->Visible(false);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(bunny_obj_);
-	bunny_model_ = ASyncLoadModel("bunny.meshml", EAH_GPU_Read | EAH_Immutable,
+	bunny_model_ = ASyncLoadModel("bunny.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[this](RenderModel& model)
 		{

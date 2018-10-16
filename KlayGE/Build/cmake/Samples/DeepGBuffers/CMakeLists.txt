@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01.meshml" "EAD0FFA8DEE988AF25D9427C0E01CC2BC448CE71")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01.glb" "BDA0F4B0AFFE2159AE347D229EC78E940969296A")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.jpg" "B94DAC63684CB38EC65A2A720C7AC27BA8D0973A")
 
 SET(SOURCE_FILES
@@ -20,9 +20,9 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -74,7 +74,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/DeepGBuffers.kfx
 )

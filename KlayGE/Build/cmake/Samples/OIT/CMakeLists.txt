@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot_clean.meshml" "5100EEF7C1060E9496048B76710CADF88B998809")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot_clean.glb" "46CC7A2C06A6CFFF529744CC09E21C946DC2890A")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_diffuse.jpg" "1C29E58BC8C9AA64D976CAB5464BF6CDE352D68E")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_normal.jpg" "4E90E7073DAEC57536A03D17B10DE2FC9FB0345D")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_selfillumination.jpg" "097B975852004CA2B0BCB8C35E9D78FD80335B10")
@@ -68,7 +68,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/PerPixelLinkedLists.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/RovAdaptiveTransparency.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/WeightedBlended.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot_clean.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot_clean.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_diffuse.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_normal.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_selfillumination.jpg.dds

@@ -19,7 +19,7 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
@@ -45,7 +45,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/lamp.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Scifi.3DS.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI1.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI2.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI3.JPG.dds

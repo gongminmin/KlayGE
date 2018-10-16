@@ -1,0 +1,9 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "albedo",
+
+	"prefered_format": "BC3_SRGB"
+}

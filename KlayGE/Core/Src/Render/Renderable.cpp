@@ -348,7 +348,7 @@ namespace KlayGE
 	void Renderable::BindSceneNode(SceneNode const * node)
 	{
 		curr_node_ = node;
-		model_mat_ = node->TransformToWorld();
+		this->ModelMatrix(node->TransformToWorld());
 	}
 
 	void Renderable::UpdateBoundBox()

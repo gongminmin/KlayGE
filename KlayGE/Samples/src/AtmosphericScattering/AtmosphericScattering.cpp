@@ -193,11 +193,11 @@ void AtmosphericScatteringApp::OnCreate()
 	light_controller_.AttachCamera(light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
-	planet_model_ = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
+	planet_model_ = SyncLoadModel("geosphere.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<PlanetMesh>);
 
-	atmosphere_model_ = SyncLoadModel("geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
+	atmosphere_model_ = SyncLoadModel("geosphere.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 

@@ -1,0 +1,9 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "glossiness",
+
+	"prefered_format": "BC4"
+}

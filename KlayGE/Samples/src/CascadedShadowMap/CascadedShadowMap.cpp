@@ -72,14 +72,14 @@ void CascadedShadowMapApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	auto plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto plane_model = ASyncLoadModel("plane.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[](RenderModel& model)
 		{
 			model.RootNode()->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
 			AddToSceneRootHelper(model);
 		});
-	auto katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto katapult_model = ASyncLoadModel("katapult.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");

@@ -1,6 +1,6 @@
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/earth_day.dds" "23347ac909cbaf9aed03e8228d4eb64639e785f7")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/earth_night.dds" "1d44faa87e412a4d675aa4de5d4a1cf4bb0b68e7")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/geosphere.meshml" "19f021ac780d313c9c3058d0c5605ddd1bce4746")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/geosphere.glb" "189E62FD09C6CE0C44E7483B900095DDD0A415F9")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds" "e006d8f16187e53c34f49c29d092a8f53f74824b")
 
 SET(SOURCE_FILES
@@ -22,7 +22,7 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/directional_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/DirectionalLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
@@ -48,7 +48,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/AtmosphericScattering.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/earth_day.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/earth_night.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/geosphere.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/geosphere.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/AtmosphericScattering/ocean_mask.dds
 )
 	

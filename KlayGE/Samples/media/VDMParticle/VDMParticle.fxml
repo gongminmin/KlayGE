@@ -7,6 +7,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="model"/>
 
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float4" name="light_color"/>
@@ -54,18 +55,19 @@ void MeshVS(float4 position : POSITION,
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	oPos = mul(position, mvp);
+	float4 pos_world = mul(position, model);
 	
-	float3x3 obj_to_tangent;
-	obj_to_tangent[0] = transform_quat(float3(1, 0, 0), tangent_quat);
-	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
-	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
+	float3x3 world_to_tangent;
+	world_to_tangent[0] = normalize(mul(transform_quat(float3(1, 0, 0), tangent_quat), (float3x3)model));
+	world_to_tangent[1] = normalize(mul(transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w), (float3x3)model));
+	world_to_tangent[2] = normalize(mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model));
 
-	float3 light_vec = light_pos - position.xyz;
-	float3 view_vec = eye_pos - position.xyz;
+	float3 light_vec = light_pos - pos_world.xyz;
+	float3 view_vec = eye_pos - pos_world.xyz;
 	float3 half_vec = normalize(light_vec) + normalize(view_vec);
 
-	oL.xyz = mul(obj_to_tangent, light_vec);
-	oH.xyz = mul(obj_to_tangent, half_vec);
+	oL.xyz = mul(world_to_tangent, light_vec);
+	oH.xyz = mul(world_to_tangent, half_vec);
 
 	oL.w = texcoord.x;
 	oH.w = texcoord.y;

@@ -1,13 +1,13 @@
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/grass.impml" "b2af295016c2e72b9a151875cdc4b93795f52456")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/grass.imposter.rt0.dds" "4b57e9eec4ef81b72df7ff7f378d3e202c3fc87b")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/grass.imposter.rt1.dds" "477f64508a879f9c0fb962e1ed8222e110c2451e")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/grass.meshml" "2225BBF6C2C388ADDD8A37DDE3EC23C49311897F")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/grass.glb" "443A4D7D297D2A29859602E38E218B59DC16B262")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/Grass1.jpg" "DF8634644BA1348833F4C5EC92ED10E064C17435")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass1/Grass4.jpg" "6B7C83B975D313A5E9F7C3A7DB6E4839AAB9300C")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.impml" "4b26571de0110919057fcb6c166352672dc675b6")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt0.dds" "3eaf350da568d0feac1efe7886cba6c96ae179b9")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt1.dds" "5e8b57d7221867dc980a25debc7392dfebc416b1")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.meshml" "457B046CC06E82CEC35D1DD3719360AD599828BF")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.glb" "12FCAB994E1DF29095AD07F3D797100683B1C48A")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.png" "B880CC3951ABE55109027C08133619EDD43FBA49")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Tree1/bark1.jpg" "1952F403EA18CD82C668A042B8A709C711531D1D")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Foliage/Tree1/bark1_nmp.jpg" "10662EF40E004609E5E95B3E9B24FF4B40EFAEA8")
@@ -60,9 +60,9 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -126,13 +126,13 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.imposter.rt1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass1.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass4.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.png.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.imposter.rt0.dds

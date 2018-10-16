@@ -83,7 +83,7 @@ void PostProcessingApp::OnCreate()
 
 	TexturePtr c_cube = ASyncLoadTexture("rnl_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("rnl_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	auto scene_model = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto scene_model = ASyncLoadModel("dino50.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable | SceneNode::SOA_Moveable,
 		[](RenderModel& model)
 		{

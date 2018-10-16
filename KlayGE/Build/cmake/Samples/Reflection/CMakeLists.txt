@@ -22,9 +22,9 @@ SET(RESOURCE_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -88,8 +88,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.cam_path
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/ReflectMesh.mtlml
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.glb.model_bin
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

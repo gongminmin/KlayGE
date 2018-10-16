@@ -678,9 +678,9 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
-	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+	model_instance_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr, CreateModelFactory<RenderModel>, CreateMeshFactory<RenderInstanceMesh>);
-	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+	model_mesh_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr, CreateModelFactory<RenderModel>, CreateMeshFactory<RenderNonInstancedMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

@@ -1,7 +1,7 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml" "D1BA3DAEE4B3726094C380CBCC1E6E6763419897")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/katapult.glb" "67C960F2C372FD9F2B7F0236030F024FCD93521B")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_f.jpg" "65B06A21A3B57B7E4665CC02A8C99D539A631EE2")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_fb.jpg" "D15F52F87C8983EE204106124BB960EC75B1C56F")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/plane.meshml" "026bb36bcdc4d29c041521a4256f5b1236f4ff7a")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/plane.glb" "440D1BF048E6383EA332F1EDC3E6154D79FDDD63")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/stones.jpg" "2229A6DCABAA44A8E9A47A8626A59EF6217D68C7")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/tau_bump.jpg" "02398AE98D19DF7DE60D30A8329E6A3A7A396DDB")
 
@@ -20,9 +20,9 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/IndirectLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -74,8 +74,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/katapult.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/plane.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/katapult.glb.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/plane.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_f.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_fb.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/stones.jpg.dds

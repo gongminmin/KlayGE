@@ -42,7 +42,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/VectorTex/Drawing.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/VectorTex/VectorTex.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

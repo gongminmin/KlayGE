@@ -1,4 +1,4 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SubSurface/Dragon.meshml" "2B23B3476AA88A420012BCA76755E1E3316ECDD1")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SubSurface/Dragon.glb" "52F7E1993268B2DFE29181E4E3CB1B67A6B022AD")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SubSurface/Eye_022green.jpg" "726200238A2E325BF84220A31C84F9AAB7B8CC5F")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SubSurface/REDRUST2.jpg" "3588B4C50C8CC92945431C5C4845568FB4A33654")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SubSurface/SCALE_B_W.png" "981BA9B95513C5D4F8316C70DE164CB8BB3DBEBF")
@@ -25,7 +25,7 @@ SET(UI_FILES
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/PointLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
@@ -48,7 +48,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAASearchTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Dragon.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Dragon.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Eye_022green.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/REDRUST2.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/SCALE_B_W.png.dds

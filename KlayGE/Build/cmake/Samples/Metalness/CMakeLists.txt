@@ -43,7 +43,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/helmet_armet_2.3ds.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/Metalness.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Metalness/Metalness.uiml

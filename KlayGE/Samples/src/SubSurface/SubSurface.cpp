@@ -59,7 +59,7 @@ void SubSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	model_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable,
+	model_ = SyncLoadModel("Dragon.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<DetailedMesh>);
 
