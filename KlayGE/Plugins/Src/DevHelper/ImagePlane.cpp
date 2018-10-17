@@ -454,6 +454,24 @@ namespace KlayGE
 			}
 		}
 
+		auto const preferred_fmt = metadata.PreferedFormat();
+		if ((preferred_fmt != EF_Unknown) && IsCompressedFormat(preferred_fmt))
+		{
+			uint32_t const block_width = BlockWidth(preferred_fmt);
+			uint32_t const block_height = BlockHeight(preferred_fmt);
+
+			uint32_t const width = uncompressed_tex_->Width(0);
+			uint32_t const height = uncompressed_tex_->Height(0);
+
+			uint32_t const aligned_width = (width + block_width - 1) & ~(block_width - 1);
+			uint32_t const aligned_height = (height + block_height - 1) & ~(block_height - 1);
+
+			if ((width != aligned_width) || (height != aligned_height))
+			{
+				*this = this->ResizeTo(aligned_width, aligned_height, true);
+			}
+		}
+
 		return true;
 	}
 
