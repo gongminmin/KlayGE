@@ -1,10 +1,9 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml" "3610e9ef72a662cd8c97043cdd8e57724c3b6afa")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_e.dds" "100339339154778c263f99259706e3cfc7769191")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_f.dds" "8c4a8f351ee0e05e071130be8e40ee1274c8a1d3")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_fb.dds" "cb65cbc2de7514745521a25fcd97cace712a2939")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml" "D1BA3DAEE4B3726094C380CBCC1E6E6763419897")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_f.jpg" "65B06A21A3B57B7E4665CC02A8C99D539A631EE2")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_fb.jpg" "D15F52F87C8983EE204106124BB960EC75B1C56F")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/plane.meshml" "026bb36bcdc4d29c041521a4256f5b1236f4ff7a")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/stones.dds" "8656637ad71427f8926cfa9cae1ee3626f9bd5dd")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/tau_bump.dds" "512f0b5fed7569cc10ff6533f45cbca6b9b5c20b")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/stones.jpg" "2229A6DCABAA44A8E9A47A8626A59EF6217D68C7")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/tau_bump.jpg" "02398AE98D19DF7DE60D30A8329E6A3A7A396DDB")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/CascadedShadowMap/CascadedShadowMap.cpp

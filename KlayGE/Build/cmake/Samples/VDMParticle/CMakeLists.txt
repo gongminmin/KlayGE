@@ -1,10 +1,10 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_diffuse.dds" "f97873084a14bfb7dee9c0cc86de9c7062302ac9")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_normal.dds" "9505e187bb9cfa4b44516bfaa197840750986a82")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_specular.dds" "e432e15e1d1d85145a8617ad9da98f649ec97dc2")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_diffuse.dds" "28934a2cbe7f169b976899962bd4429bbec278bd")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_normal.dds" "9434eb8984debc8ac0c2aa9f0af2c03eaf6ab6d5")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_specular.dds" "25889f641377037dee04e50a415c81e3b23c7dea")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/attack_droid.meshml" "b725a810a0d6f950a6bdffab5c24250d9ce9af38")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_diffuse.jpg" "4E2D10CF7385A3DA1B0DA0D5FCF76A3EB66D6A38")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_normal.jpg" "286EA8170335D88E06A3FA0A1623990738B0133A")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_specular.jpg" "809516113FDC0F0C2429754DC79E018796A73999")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_diffuse.jpg" "4E802E3DC8B64E61A8A9E68DE59B003E694612BB")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_normal.jpg" "82B1A0DED59CB8497A411D2B4574E297E9330B80")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_specular.jpg" "463534C478C47E62C48C0E4F75B73C3D55B85091")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/attack_droid.meshml" "B7818E5C9377ADC25936199FD6C3DFF8D949DC58")
 DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/fire.dds" "f5037acd6159f853ee7b8848034f8f03c55f7136")
 
 SET(SOURCE_FILES

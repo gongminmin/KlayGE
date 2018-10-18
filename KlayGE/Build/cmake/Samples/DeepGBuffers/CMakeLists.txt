@@ -1,5 +1,5 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01.meshml" "2b5b43235d4290947f25ac1ab075b6842c9dafb5")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.dds" "7e15b8f7705808df82dc685d33029594de519572")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01.meshml" "EAD0FFA8DEE988AF25D9427C0E01CC2BC448CE71")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.jpg" "B94DAC63684CB38EC65A2A720C7AC27BA8D0973A")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DeepGBuffers/DeepGBuffers.cpp

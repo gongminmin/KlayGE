@@ -3,7 +3,7 @@
 
 	"type": "2D",
 
-	"slot": "albedo",
+	"slot": "emissive",
 
 	"prefered_format": "BC1_SRGB"
 }
