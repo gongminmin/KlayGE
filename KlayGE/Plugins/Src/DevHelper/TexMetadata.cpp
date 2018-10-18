@@ -111,7 +111,7 @@ namespace KlayGE
 
 	TexMetadata::TexMetadata(std::string_view name)
 	{
-		this->Load(name, false);
+		this->Load(name, true);
 	}
 
 	TexMetadata::TexMetadata(std::string_view name, bool assign_default_values)
@@ -121,7 +121,7 @@ namespace KlayGE
 	
 	void TexMetadata::Load(std::string_view name)
 	{
-		this->Load(name, false);
+		this->Load(name, true);
 	}
 
 	void TexMetadata::Load(std::string_view name, bool assign_default_values)
@@ -287,6 +287,12 @@ namespace KlayGE
 				auto const & rgb_to_lum_val = document["rgb_to_lum"];
 				BOOST_ASSERT(rgb_to_lum_val.IsBool());
 				new_metadata.rgb_to_lum_ = rgb_to_lum_val.GetBool();
+			}
+			else if (assign_default_values)
+			{
+				new_metadata.rgb_to_lum_
+					= ((new_metadata.slot_ == RenderMaterial::TS_Glossiness) || (new_metadata.slot_ == RenderMaterial::TS_Metalness)
+						|| (new_metadata.slot_ == RenderMaterial::TS_Height));
 			}
 
 			if (document.HasMember("mipmap"))
@@ -615,7 +621,7 @@ namespace KlayGE
 
 			case RenderMaterial::TS_Glossiness:
 			case RenderMaterial::TS_Metalness:
-				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC7, EF_BC1, EF_ETC1 });
+				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 });
 				break;
 
 			case RenderMaterial::TS_Normal:

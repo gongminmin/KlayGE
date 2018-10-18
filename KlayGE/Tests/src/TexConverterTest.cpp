@@ -52,7 +52,7 @@ public:
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name, float tolerance)
 	{
-		TexMetadata metadata(metadata_name);
+		TexMetadata metadata(metadata_name, false);
 
 		TexConverter tc;
 		auto target = tc.Load(input_name, metadata);
