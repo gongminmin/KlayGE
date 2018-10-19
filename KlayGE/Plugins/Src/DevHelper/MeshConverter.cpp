@@ -53,6 +53,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/pbrmaterial.h>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -372,6 +373,7 @@ namespace
 			float opacity = 1;
 			bool transparent = false;
 			bool two_sided = false;
+			float alpha_test = 0;
 
 			aiString ai_name;
 			aiColor4D ai_albedo;
@@ -379,6 +381,7 @@ namespace
 			float ai_shininess;
 			aiColor4D ai_emissive;
 			int ai_two_sided;
+			float ai_alpha_test;
 
 			auto mtl = scene->mMaterials[mi];
 
@@ -432,6 +435,11 @@ namespace
 				two_sided = ai_two_sided ? true : false;
 			}
 
+			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_ALPHACUTOFF, &ai_alpha_test))
+			{
+				alpha_test = ai_alpha_test;
+			}
+
 			render_model_->GetMaterial(mi) = MakeSharedPtr<RenderMaterial>();
 			auto& render_mtl = *render_model_->GetMaterial(mi);
 			render_mtl.name = name;
@@ -440,7 +448,7 @@ namespace
 			render_mtl.glossiness = Shininess2Glossiness(shininess);
 			render_mtl.emissive = emissive;
 			render_mtl.transparent = transparent;
-			render_mtl.alpha_test = 0;
+			render_mtl.alpha_test = alpha_test;
 			render_mtl.sss = false;
 			render_mtl.two_sided = two_sided;
 
@@ -1143,7 +1151,13 @@ namespace
 					ai_mtl.AddProperty(&ai_two_sided, 1, AI_MATKEY_TWOSIDED);
 				}
 
-				// TODO: alpha test, SSS
+				if (mtl.alpha_test > 0)
+				{
+					ai_real const ai_opacity = mtl.alpha_test;
+					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
+				}
+
+				// TODO: SSS
 
 				if (!mtl.tex_names[RenderMaterial::TS_Albedo].empty())
 				{
@@ -1179,7 +1193,11 @@ namespace
 					name.Set(mtl.tex_names[RenderMaterial::TS_Height]);
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_HEIGHT(0));
 
-					// TODO: AI_MATKEY_BUMPSCALING
+					if (!MathLib::equal<float>(mtl.height_offset_scale.y(), 0.06f))
+					{
+						ai_real const ai_bump_scaling = mtl.height_offset_scale.y();
+						ai_mtl.AddProperty(&ai_bump_scaling, 1, AI_MATKEY_BUMPSCALING);
+					}
 				}
 			}
 
