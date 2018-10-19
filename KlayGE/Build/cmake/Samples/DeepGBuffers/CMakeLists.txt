@@ -75,7 +75,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/chipmunk-CE-01Tex1.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeepGBuffers/DeepGBuffers.kfx
 )
 

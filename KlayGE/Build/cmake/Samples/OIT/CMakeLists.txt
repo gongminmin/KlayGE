@@ -69,10 +69,10 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/RovAdaptiveTransparency.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/WeightedBlended.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot_clean.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_diffuse.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_normal.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_selfillumination.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_specular.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_diffuse.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_normal.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_selfillumination.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_specular.jpg.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

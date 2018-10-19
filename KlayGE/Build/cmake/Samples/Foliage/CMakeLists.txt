@@ -127,27 +127,27 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.imposter.rt1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass4.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass1.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass4.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.png.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.imposter.rt1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1_nmp.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/leafs1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1_nmp.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/leafs1.png.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.impml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.imposter.rt0.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.imposter.rt1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2_nmp.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/leafs2.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2_nmp.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/leafs2.png.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoggySkyBox.kfx

@@ -76,11 +76,10 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/katapult.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/plane.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_e.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_f.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_fb.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/stones.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/tau_bump.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_f.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_fb.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/stones.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/tau_bump.jpg.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

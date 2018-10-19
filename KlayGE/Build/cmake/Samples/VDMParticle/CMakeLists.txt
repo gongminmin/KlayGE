@@ -103,12 +103,12 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_diffuse.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_normal.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_specular.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_diffuse.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_normal.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_specular.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_diffuse.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_normal.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_back_specular.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_diffuse.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_normal.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/At_Droid_top_specular.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/attack_droid.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/fire.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/VDMParticle/Fire.psml

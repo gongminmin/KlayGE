@@ -82,8 +82,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI8.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/SCI9.JPG.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Map-COL.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Map-COL.jpg.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)

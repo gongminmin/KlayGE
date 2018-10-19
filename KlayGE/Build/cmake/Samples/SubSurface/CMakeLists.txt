@@ -49,10 +49,10 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Dragon.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Eye_022green.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/REDRUST2.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/SCALE_B_W.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Stucco8.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Eye_022green.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/REDRUST2.jpg.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/SCALE_B_W.png.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/Stucco8.jpg.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SubSurface/SubSurface.kfx
 )
 
