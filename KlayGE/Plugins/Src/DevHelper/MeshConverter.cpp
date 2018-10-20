@@ -376,13 +376,13 @@ namespace
 			float alpha_test = 0;
 
 			aiString ai_name;
-			aiColor4D ai_albedo;
-			float ai_opacity;
-			float ai_metallic;
-			float ai_shininess;
-			aiColor4D ai_emissive;
-			int ai_two_sided;
-			float ai_alpha_test;
+			aiColor4D ai_albedo(0, 0, 0, 0);
+			float ai_opacity = 1;
+			float ai_metallic = 0;
+			float ai_shininess = 1;
+			aiColor4D ai_emissive(0, 0, 0, 0);
+			int ai_two_sided = 0;
+			float ai_alpha_test = 0;
 
 			auto mtl = scene->mMaterials[mi];
 
@@ -1194,13 +1194,13 @@ namespace
 
 				if (is_gltf)
 				{
-					ai_real const ai_opacity = mtl.alpha_test;
-					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
-
 					aiString ai_alpha_mode;
 					if (mtl.alpha_test > 0)
 					{
 						ai_alpha_mode.Set("MASK");
+
+						ai_real const ai_opacity = mtl.alpha_test;
+						ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 					}
 					else if (mtl.albedo.w() < 1)
 					{
