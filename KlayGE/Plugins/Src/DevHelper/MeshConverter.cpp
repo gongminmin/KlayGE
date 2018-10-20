@@ -378,6 +378,7 @@ namespace
 			aiString ai_name;
 			aiColor4D ai_albedo;
 			float ai_opacity;
+			float ai_metallic;
 			float ai_shininess;
 			aiColor4D ai_emissive;
 			int ai_two_sided;
@@ -390,33 +391,31 @@ namespace
 				name = ai_name.C_Str();
 			}
 
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &ai_albedo))
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, &ai_albedo))
 			{
 				albedo = Color4ToFloat3(ai_albedo);
+				opacity = ai_albedo.a;
 			}
+			else
 			{
-				float3 specular(0, 0, 0);
-				float strength = 1;
-				aiColor4D ai_specular;
-
-				// TODO: Restore metalness from specular color
-				if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &ai_specular))
+				if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &ai_albedo))
 				{
-					specular = Color4ToFloat3(ai_specular);
+					albedo = Color4ToFloat3(ai_albedo);
 				}
-				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength))
+				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_OPACITY, &ai_opacity))
 				{
-					specular *= strength;
+					opacity = ai_opacity;
 				}
 			}
+
 			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &ai_emissive))
 			{
 				emissive = Color4ToFloat3(ai_emissive);
 			}
 
-			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_OPACITY, &ai_opacity))
+			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &ai_metallic))
 			{
-				opacity = ai_opacity;
+				metalness = ai_metallic;
 			}
 
 			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_SHININESS, &ai_shininess))
@@ -435,9 +434,24 @@ namespace
 				two_sided = ai_two_sided ? true : false;
 			}
 
-			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_ALPHACUTOFF, &ai_alpha_test))
+			aiString ai_alpha_mode;
+			if (AI_SUCCESS == aiGetMaterialString(mtl, AI_MATKEY_GLTF_ALPHAMODE, &ai_alpha_mode))
 			{
-				alpha_test = ai_alpha_test;
+				if (strcmp(ai_alpha_mode.C_Str(), "MASK") == 0)
+				{
+					if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_ALPHACUTOFF, &ai_alpha_test))
+					{
+						alpha_test = ai_alpha_test;
+					}
+				}
+				else if (strcmp(ai_alpha_mode.C_Str(), "BLEND") == 0)
+				{
+					transparent = true;
+				}
+				else if(strcmp(ai_alpha_mode.C_Str(), "OPAQUE") == 0)
+				{
+					transparent = false;
+				}
 			}
 
 			render_model_->GetMaterial(mi) = MakeSharedPtr<RenderMaterial>();
@@ -461,13 +475,24 @@ namespace
 				render_mtl.tex_names[RenderMaterial::TS_Albedo] = str.C_Str();
 			}
 
-			count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_UNKNOWN);
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, 0, 0, 0, 0, 0, 0);
 
 				render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+			}
+			else
+			{
+				count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
+				if (count > 0)
+				{
+					aiString str;
+					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
+
+					render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+				}
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_EMISSIVE);
@@ -1095,6 +1120,11 @@ namespace
 
 	void MeshSaver::SaveByAssimp(RenderModel const & model, std::string_view output_name)
 	{
+		std::filesystem::path const output_path(output_name.begin(), output_name.end());
+		auto const output_ext = output_path.extension();
+
+		bool const is_gltf = (output_ext == ".gltf") || (output_ext == ".glb");
+
 		std::vector<aiScene> scene_lods(model.NumLods());
 		for (uint32_t lod = 0; lod < model.NumLods(); ++ lod)
 		{
@@ -1116,12 +1146,24 @@ namespace
 				}
 
 				{
-					float3 const diffuse = mtl.albedo * (1 - mtl.metalness);
+					if (is_gltf)
+					{
+						aiColor4D const ai_albedo(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z(), mtl.albedo.w());
+						ai_mtl.AddProperty(&ai_albedo, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
+
+						float ai_metallic = mtl.metalness;
+						ai_mtl.AddProperty(&ai_metallic, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
+					}
+					else
+					{
+						float3 const diffuse = mtl.albedo * (1 - mtl.metalness);
+
+						aiColor3D const ai_diffuse(diffuse.x(), diffuse.y(), diffuse.z());
+						ai_mtl.AddProperty(&ai_diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+					}
+
 					float3 const specular = MathLib::lerp(float3(0.04f, 0.04f, 0.04f),
 						float3(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z()), mtl.metalness);
-
-					aiColor3D const ai_diffuse(diffuse.x(), diffuse.y(), diffuse.z());
-					ai_mtl.AddProperty(&ai_diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 
 					float const ai_shininess_strength = MathLib::max3(specular.x(), specular.y(), specular.z());
 					ai_mtl.AddProperty(&ai_shininess_strength, 1, AI_MATKEY_SHININESS_STRENGTH);
@@ -1145,16 +1187,31 @@ namespace
 					ai_mtl.AddProperty(&ai_shininess, 1, AI_MATKEY_SHININESS);
 				}
 
-				if (mtl.two_sided)
 				{
-					int const ai_two_sided = 1;
+					int const ai_two_sided = mtl.two_sided;
 					ai_mtl.AddProperty(&ai_two_sided, 1, AI_MATKEY_TWOSIDED);
 				}
 
-				if (mtl.alpha_test > 0)
+				if (is_gltf)
 				{
 					ai_real const ai_opacity = mtl.alpha_test;
 					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
+
+					aiString ai_alpha_mode;
+					if (mtl.alpha_test > 0)
+					{
+						ai_alpha_mode.Set("MASK");
+					}
+					else if (mtl.albedo.w() < 1)
+					{
+						ai_alpha_mode.Set("BLEND");
+					}
+					else
+					{
+						ai_alpha_mode.Set("OPAQUE");
+					}
+
+					ai_mtl.AddProperty(&ai_alpha_mode, AI_MATKEY_GLTF_ALPHAMODE);
 				}
 
 				// TODO: SSS
@@ -1163,14 +1220,28 @@ namespace
 				{
 					aiString name;
 					name.Set(mtl.tex_names[RenderMaterial::TS_Albedo]);
-					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(0));
+					if (is_gltf)
+					{
+						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+					}
+					else
+					{
+						ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(0));
+					}
 				}
 
 				if (!mtl.tex_names[RenderMaterial::TS_Glossiness].empty())
 				{
 					aiString name;
 					name.Set(mtl.tex_names[RenderMaterial::TS_Glossiness]);
-					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_SHININESS(0));
+					if (is_gltf)
+					{
+						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
+					}
+					else
+					{
+						ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_SHININESS(0));
+					}
 				}
 
 				if (!mtl.tex_names[RenderMaterial::TS_Emissive].empty())
@@ -1548,8 +1619,6 @@ namespace
 					};
 			convert_node_subtree(*ai_scene.mRootNode, *model.RootNode());
 
-			std::filesystem::path const output_path(output_name.begin(), output_name.end());
-			auto const output_ext = output_path.extension();
 			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
 			if (scene_lods.size() > 1)
 			{
