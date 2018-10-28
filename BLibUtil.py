@@ -654,7 +654,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				toolset_name = "v141_clang_c2"
 			else:
 				toolset_name = "v140_clang_c2"
-		toolset_name = "-T %s" % toolset_name
+		toolset_name = "-T %s,host=x64" % toolset_name
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -689,13 +689,13 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 	if build_info.multi_config:
 		if 0 == build_info.project_type.find("vs"):
 			if "x64" == compiler_info.arch:
-				vc_option = "x86_amd64"
+				vc_option = "amd64"
 				vc_arch = "x64"
 			elif "arm" == compiler_info.arch:
-				vc_option = "x86_arm"
+				vc_option = "amd64_arm"
 				vc_arch = "ARM"
 			elif "arm64" == compiler_info.arch:
-				vc_option = "x86_arm64"
+				vc_option = "amd64_arm64"
 				vc_arch = "ARM64"
 			else:
 				LogError("Unsupported VS architecture.\n")
