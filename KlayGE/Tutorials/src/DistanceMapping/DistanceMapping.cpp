@@ -87,21 +87,19 @@ namespace
 				indices, indices + std::size(indices),
 				xyzs, xyzs + std::size(xyzs));
 
-			float4 tangent_float4[std::size(xyzs)];
+			float3 tangent_float3[std::size(xyzs)];
 			float3 binormal_float3[std::size(xyzs)];
-			MathLib::compute_tangent(tangent_float4, binormal_float3,
+			MathLib::compute_tangent(tangent_float3, binormal_float3,
 				indices, indices + std::size(indices),
 				xyzs, xyzs + std::size(xyzs), texs, normal_float3);
 
 			Quaternion tangent_quat[std::size(xyzs)];
 			for (uint32_t j = 0; j < std::size(xyzs); ++ j)
 			{
-				float3 n = MathLib::normalize(normal_float3[j]);
-				float3 b = MathLib::normalize(binormal_float3[j]);
+				float3 const t = MathLib::normalize(tangent_float3[j]);
+				float3 const b = MathLib::normalize(binormal_float3[j]);
+				float3 const n = MathLib::normalize(normal_float3[j]);
 
-				float3 t(tangent_float4[j].x(), tangent_float4[j].y(), tangent_float4[j].z());
-				t = MathLib::normalize(t);
-				
 				tangent_quat[j] = MathLib::to_quaternion(t, b, n, 8);
 			}
 

@@ -698,9 +698,9 @@ namespace KlayGE
 			typedef typename std::iterator_traits<NormalIterator>::value_type normal_type;
 			typedef typename position_type::value_type value_type;
 
-			int const num = static_cast<int>(std::distance(xyzsBegin, xyzsEnd));
+			size_t const num = static_cast<size_t>(std::distance(xyzsBegin, xyzsEnd));
 
-			for (int i = 0; i < num; ++ i)
+			for (size_t i = 0; i < num; ++ i)
 			{
 				*(targentsBegin + i) = tangent_type::Zero();
 				*(binormsBegin + i) = binormal_type::Zero();
@@ -716,20 +716,20 @@ namespace KlayGE
 				position_type const & v1XYZ(*(xyzsBegin + v1Index));
 				position_type const & v2XYZ(*(xyzsBegin + v2Index));
 
-				Vector_T<value_type, 3> v1v0 = v1XYZ - v0XYZ;
-				Vector_T<value_type, 3> v2v0 = v2XYZ - v0XYZ;
+				Vector_T<value_type, 3> const v1v0 = v1XYZ - v0XYZ;
+				Vector_T<value_type, 3> const v2v0 = v2XYZ - v0XYZ;
 
 				texcoord_type const & v0Tex(*(texsBegin + v0Index));
 				texcoord_type const & v1Tex(*(texsBegin + v1Index));
 				texcoord_type const & v2Tex(*(texsBegin + v2Index));
 
-				value_type s1 = v1Tex.x() - v0Tex.x();
-				value_type t1 = v1Tex.y() - v0Tex.y();
+				value_type const s1 = v1Tex.x() - v0Tex.x();
+				value_type const t1 = v1Tex.y() - v0Tex.y();
 
-				value_type s2 = v2Tex.x() - v0Tex.x();
-				value_type t2 = v2Tex.y() - v0Tex.y();
+				value_type const s2 = v2Tex.x() - v0Tex.x();
+				value_type const t2 = v2Tex.y() - v0Tex.y();
 
-				value_type denominator = s1 * t2 - s2 * t1;
+				value_type const denominator = s1 * t2 - s2 * t1;
 				Vector_T<value_type, 3> tangent, binormal;
 				if (MathLib::abs(denominator) < std::numeric_limits<value_type>::epsilon())
 				{
@@ -742,36 +742,34 @@ namespace KlayGE
 					binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 				}
 
-				tangent_type t = Vector_T<value_type, 4>(tangent.x(), tangent.y(), tangent.z(), value_type(1));
-
-				*(targentsBegin + v0Index) += t;
+				*(targentsBegin + v0Index) += tangent;
 				*(binormsBegin + v0Index) += binormal;
 
-				*(targentsBegin + v1Index) += t;
+				*(targentsBegin + v1Index) += tangent;
 				*(binormsBegin + v1Index) += binormal;
 
-				*(targentsBegin + v2Index) += t;
+				*(targentsBegin + v2Index) += tangent;
 				*(binormsBegin + v2Index) += binormal;
 			}
 
-			for (int i = 0; i < num; ++ i)
+			for (size_t i = 0; i < num; ++ i)
 			{
-				tangent_type t(*(targentsBegin + i));
-				Vector_T<value_type, 3> tangent(t.x(), t.y(), t.z());
+				tangent_type tangent(*(targentsBegin + i));
 				binormal_type binormal(*(binormsBegin + i));
-				normal_type normal(*(normalsBegin + i));
+				normal_type const normal(*(normalsBegin + i));
 
 				// Gram-Schmidt orthogonalize
 				tangent = normalize(tangent - normal * dot(tangent, normal));
+				*(targentsBegin + i) = tangent;
+
+				binormal_type binormal_cross = cross(normal, tangent);
 				// Calculate handedness
-				value_type k = 1;
-				if (dot(cross(normal, tangent), binormal) < 0)
+				if (dot(binormal_cross, binormal) < 0)
 				{
-					k = -1;
+					binormal_cross = -binormal_cross;
 				}
 
-				*(targentsBegin + i) = Vector_T<value_type, 4>(tangent.x(), tangent.y(), tangent.z(), k);
-				*(binormsBegin + i) = cross(normal, tangent);
+				*(binormsBegin + i) = binormal_cross;
 			}
 		}
 
