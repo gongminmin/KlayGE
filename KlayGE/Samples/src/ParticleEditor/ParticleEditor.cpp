@@ -819,7 +819,11 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	ps_ = SyncLoadParticleSystem(name);
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ps_);
+	{
+		auto& scene_mgr = Context::Instance().SceneManagerInstance();
+		std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+		scene_mgr.SceneRootNode().AddChild(ps_);
+	}
 
 	if (scene_depth_tex_)
 	{

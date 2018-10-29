@@ -388,7 +388,11 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 				{
 					teapot_ = MakeSharedPtr<SceneNode>(teapot_model_->Mesh(0), SceneNode::SOA_Cullable);
 					teapot_->TransformToParent(MathLib::scaling(float3(15, 15, 15)));
-					Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(teapot_);
+					{
+						auto& scene_mgr = Context::Instance().SceneManagerInstance();
+						std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+						scene_mgr.SceneRootNode().AddChild(teapot_);
+					}
 
 					this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
 					this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));

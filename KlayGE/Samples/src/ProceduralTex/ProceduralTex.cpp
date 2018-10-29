@@ -243,7 +243,11 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 
 			light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 			light_proxy_->Scaling(0.01f, 0.01f, 0.01f);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+			{
+				auto& scene_mgr = Context::Instance().SceneManagerInstance();
+				std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+				scene_mgr.SceneRootNode().AddChild(light_proxy_->RootNode());
+			}
 
 			loading_percentage_ = 80;
 			progress_bar->SetValue(loading_percentage_);

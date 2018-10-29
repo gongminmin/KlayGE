@@ -618,7 +618,11 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						so->TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
 							* MathLib::rotation_y(-app_time / 1.5f));
 					});
-				Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(so);
+				{
+					auto& scene_mgr = Context::Instance().SceneManagerInstance();
+					std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+					scene_mgr.SceneRootNode().AddChild(so);
+				}
 				checked_pointer_cast<OccluderMesh>(teapot)->LampTexture(lamp_tex_);
 				checked_pointer_cast<OccluderMesh>(teapot)->CubeSMTexture(shadow_cube_tex_);
 				checked_pointer_cast<OccluderMesh>(teapot)->DPSMTexture(shadow_dual_tex_);
