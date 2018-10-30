@@ -294,6 +294,12 @@ namespace KlayGE
 
 		glGenFramebuffers(1, &fbo_blit_src_);
 		glGenFramebuffers(1, &fbo_blit_dst_);
+
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_clip_control())
+		{
+			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+			clip_control_ = true;
+		}
 	}
 
 	void OGLRenderEngine::CheckConfig(RenderSettings& settings)
@@ -1447,7 +1453,10 @@ namespace KlayGE
 
 	void OGLRenderEngine::AdjustProjectionMatrix(float4x4& proj_mat)
 	{
-		proj_mat *= MathLib::scaling(1.0f, 1.0f, 2.0f) * MathLib::translation(0.0f, 0.0f, -1.0f);
+		if (!clip_control_)
+		{
+			proj_mat *= MathLib::scaling(1.0f, 1.0f, 2.0f) * MathLib::translation(0.0f, 0.0f, -1.0f);
+		}
 	}
 
 	// 填充设备能力

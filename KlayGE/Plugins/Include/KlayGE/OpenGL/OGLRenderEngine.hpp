@@ -210,6 +210,8 @@ namespace KlayGE
 
 		GLenum polygon_mode_override_;
 
+		bool clip_control_ = false;
+
 		bool hack_for_nv_;
 		bool hack_for_amd_;
 		bool hack_for_intel_;
