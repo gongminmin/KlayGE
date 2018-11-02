@@ -24,6 +24,7 @@
 
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
+#pragma warning(disable: 4244) // Conversion from doubel to int64
 #pragma warning(disable: 4456) // Declaration of 'name' hides previous local declaration
 #pragma warning(disable: 4702) // Unreachable code
 #endif

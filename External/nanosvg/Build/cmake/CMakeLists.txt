@@ -9,9 +9,4 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/External/Build/CMake/ExternalCommon.cmake)
 
-SET(KLAYGE_BIN_DIR "${NANOSVG_DIR}/../../KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
-SET(REL_PATH "External/Downloads/nanosvg.7z")
-SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
-SET(PACKAGE_FILE_ID "dab66836a01c7232969917a53097b5608e409871")
-
-DOWNLOAD_PACKAGE("nanosvg" ${REL_PATH} ${PACKAGE_FILE_ID})
+UpdateExternalLib("nanosvg" "nanosvg" "git://github.com/memononen/nanosvg.git" "2b08deeb553c723d151f908d786c64136d26d576")
