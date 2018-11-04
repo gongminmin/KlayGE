@@ -37,14 +37,10 @@
 #include <vector>
 #include <string>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
 
 #include <KlayGE/DevHelper/PlatformDefinition.hpp>
 #include <KlayGE/DevHelper/TexConverter.hpp>
@@ -62,24 +58,23 @@ int main(int argc, char* argv[])
 	std::string platform;
 	bool quiet = false;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-path,I", boost::program_options::value<std::string>(), "Input image path.")
-		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
-		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output image path.")
-		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
-		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
-		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
-		("version,v", "Version.");
+	cxxopts::Options options("ImageConv", "KlayGE Image Converter");
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-path", "Input image path.", cxxopts::value<std::string>())
+		("M,metadata-path", "(Optional) Input metadata path.", cxxopts::value<std::string>())
+		("O,output-path", "(Optional) Output image path.", cxxopts::value<std::string>())
+		("T,target-folder", "Target folder.", cxxopts::value<std::string>())
+		("P,platform", "Platform name.", cxxopts::value<std::string>())
+		("q,quiet", "Quiet mode.", cxxopts::value<bool>()->implicit_value("true"))
+		("V,version", "Version.");
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -94,6 +89,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input image path." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("metadata-path") > 0)

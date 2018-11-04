@@ -1,4 +1,34 @@
-﻿#include <KlayGE/KlayGE.hpp>
+﻿/**
+ * @file MeshConv.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
+#include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -9,14 +39,10 @@
 #include <string>
 #include <vector>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
 
 #include <KlayGE/DevHelper/MeshMetadata.hpp>
 #include <KlayGE/DevHelper/MeshConverter.hpp>
@@ -32,23 +58,22 @@ int main(int argc, char* argv[])
 	std::string target_folder;
 	bool quiet = false;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-path,I", boost::program_options::value<std::string>(), "Input mesh path.")
-		("metadata-path,M", boost::program_options::value<std::string>(), "Input metadata path.")
-		("output-path,O", boost::program_options::value<std::string>(), "(Optional) Output mesh path.")
-		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
-		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
-		("version,v", "Version.");
+	cxxopts::Options options("ImageConv", "KlayGE Mesh Converter");
+	options.add_options()
+		("H,help", "Produce help message")
+		("I,input-path", "Input mesh path.", cxxopts::value<std::string>())
+		("M,metadata-path", "(Optional) Input metadata path.", cxxopts::value<std::string>())
+		("O,output-path", "(Optional) Output mesh path.", cxxopts::value<std::string>())
+		("T,target-folder", "Target folder.", cxxopts::value<std::string>())
+		("q,quiet", "Quiet mode.", cxxopts::value<bool>()->implicit_value("true"))
+		("v,version", "Version.");
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -63,6 +88,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input mesh path." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("metadata-path") > 0)

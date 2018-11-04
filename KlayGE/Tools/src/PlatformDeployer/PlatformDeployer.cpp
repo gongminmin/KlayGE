@@ -1,3 +1,33 @@
+/**
+ * @file PlatformDeployer.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Util.hpp>
@@ -21,14 +51,11 @@
 #pragma clang diagnostic pop
 #endif
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
+
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
@@ -237,21 +264,20 @@ int main(int argc, char* argv[])
 	std::string res_type;
 	std::string platform;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input resource name.")
-		("type,T", boost::program_options::value<std::string>(), "Resource type.")
-		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
-		("version,v", "Version.");
+	cxxopts::Options options("ImageConv", "KlayGE PlatformDeployer");
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-name", "Input resource name.", cxxopts::value<std::string>())
+		("T,type", "Resource type.", cxxopts::value<std::string>())
+		("P,platform", "Platform name.", cxxopts::value<std::string>())
+		("v,version", "Version.");
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		Context::Destroy();
 		return 1;
 	}
@@ -297,6 +323,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input resources names." << endl;
+		cout << options.help() << endl;
 		Context::Destroy();
 		return 1;
 	}

@@ -48,14 +48,10 @@
 #include <fstream>
 #include <iostream>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -208,24 +204,23 @@ int main(int argc, char* argv[])
 	uint32_t size;
 	bool quiet = false;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input meshml name.")
-		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
-		("azimuth,A", boost::program_options::value<uint32_t>(&azimuth)->default_value(8U), "Num of view angles in XoZ plane.")
-		("elevation,E", boost::program_options::value<uint32_t>(&elevation)->default_value(8U), "Num of view angles in XoY plane.")
-		("size,S", boost::program_options::value<uint32_t>(&size)->default_value(256U), "Size of each imposter.")
-		("quiet,q", boost::program_options::value<bool>(&quiet)->implicit_value(true), "Quiet mode.")
-		("version,v", "Version.");
+	cxxopts::Options options("ImageConv", "KlayGE Imposter Generator");
+	options.add_options()
+		("H,help", "Produce help message")
+		("I,input-name", "Input mesh name.", cxxopts::value<std::string>())
+		("T,target-folder", "Target folder.", cxxopts::value<std::string>())
+		("A,azimuth", "Num of view angles in XoZ plane.", cxxopts::value<uint32_t>(azimuth)->default_value("8"))
+		("E,elevation", "Num of view angles in XoY plane.", cxxopts::value<uint32_t>(elevation)->default_value("8"))
+		("S,size", "Size of each imposter.", cxxopts::value<uint32_t>(size)->default_value("256"))
+		("q,quiet", "Quiet mode.", cxxopts::value<bool>()->implicit_value("true"))
+		("v,version", "Version.");
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -240,6 +235,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input meshml name." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("target-folder") > 0)

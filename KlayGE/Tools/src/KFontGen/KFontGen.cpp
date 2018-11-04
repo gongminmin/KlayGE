@@ -1,4 +1,35 @@
+/**
+ * @file KFontGen.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KFL/Math.hpp>
@@ -16,14 +47,10 @@
 #include <cstring>
 #include <atomic>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -480,32 +507,31 @@ int main(int argc, char* argv[])
 	header.non_empty_chars = 0;
 	header.char_size = 32;
 
-	std::string ttf_name;
-	std::string kfont_name;
+	std::filesystem::path ttf_name;
+	std::filesystem::path kfont_name;
 	int start_code;
 	int end_code;
 	int num_threads;
 
 	CPUInfo cpu;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
-		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Default is input-name.kfont.")
-		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code. Default is 0.")
-		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65535), "End code. Default is 65535.")
-		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size. Default is 32.")
-		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads. Default is the number of CPU threads.")
-		("version,v", "Version.");
+	cxxopts::Options options("KFontGen", "KlayGE Font Generator");
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-name", "Input font name.", cxxopts::value<std::string>())
+		("O,output-name", "Output file name. (default: input-name.kfont)", cxxopts::value<std::string>())
+		("S,start-code", "Start code. Default is 0.", cxxopts::value<int>(start_code)->default_value("0"))
+		("E,end-code", "End code.", cxxopts::value<int>(end_code)->default_value("65535"))
+		("C,char-size", "Character size.", cxxopts::value<uint32_t>(header.char_size)->default_value("32"))
+		("T,threads", "Number of Threads. (default: The number of CPU threads)", cxxopts::value<int>(num_threads))
+		("V,version", "Version.");
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -520,6 +546,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Input font name was not set." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("output-name") > 0)
@@ -528,7 +555,25 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
+		kfont_name = ttf_name;
+		kfont_name.replace_extension(".kfont");
+	}
+
+	if (vm.count("start-code") == 0)
+	{
+		start_code = 0;
+	}
+	if (vm.count("end-code") == 0)
+	{
+		end_code = 65535;
+	}
+	if (vm.count("char-size") == 0)
+	{
+		header.char_size = 32;
+	}
+	if (vm.count("threads") == 0)
+	{
+		num_threads = cpu.NumHWThreads();
 	}
 
 	std::vector<std::pair<int32_t, int32_t>> char_index;
@@ -542,7 +587,7 @@ int main(int argc, char* argv[])
 		}
 
 		KFont kfont_input;
-		if (kfont_input.Load(kfont_name))
+		if (kfont_input.Load(kfont_name.string()))
 		{
 			if (kfont_input.CharSize() == header.char_size)
 			{
@@ -598,7 +643,7 @@ int main(int argc, char* argv[])
 
 	std::vector<uint8_t> ttf;
 	{
-		std::ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
+		std::ifstream ttf_input(ttf_name.string(), ios_base::binary);
 		if (ttf_input)
 		{
 			ttf_input.seekg(0, ios_base::end);
@@ -742,6 +787,6 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		kfont_output.Save(kfont_name);
+		kfont_output.Save(kfont_name.string());
 	}
 }

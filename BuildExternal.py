@@ -5,7 +5,7 @@ import sys
 from BLibUtil import *
 
 def BuildBoost(build_info, compiler_info):
-	BuildAProject("boost", "External/boost", build_info, compiler_info, build_info.is_windows_desktop)
+	BuildAProject("boost", "External/boost", build_info, compiler_info)
 
 def BuildPython(build_info, compiler_info):
 	BuildAProject("Python", "External/Python", build_info, compiler_info)
@@ -52,6 +52,9 @@ def BuildGtest(build_info, compiler_info):
 def BuildFreeImage(build_info, compiler_info):
 	BuildAProject("FreeImage", "External/FreeImage", build_info, compiler_info, build_info.is_windows)
 
+def BuildCxxopts(build_info, compiler_info):
+	BuildAProject("cxxopts", "External/cxxopts", build_info, compiler_info)
+
 def BuildExternalLibs(build_info):
 	for compiler_info in build_info.compilers:
 		BuildBoost(build_info, compiler_info)
@@ -70,6 +73,7 @@ def BuildExternalLibs(build_info):
 			BuildNanosvg(build_info, compiler_info)
 			BuildGtest(build_info, compiler_info)
 			BuildFreeImage(build_info, compiler_info)
+			BuildCxxopts(build_info, compiler_info)
 
 			if (compiler_info.arch != "arm") and (compiler_info.arch != "arm64"):
 				BuildUniversalDXSDK(build_info, compiler_info)
