@@ -196,6 +196,10 @@ namespace KlayGE
 				break;
 		}
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"	// Ignore OpenGL's deprecation
+#endif
 		std::vector<NSOpenGLPixelFormatAttribute> visual_attr;
 		visual_attr.push_back(NSOpenGLPFAColorSize);
 		visual_attr.push_back(r_size * 3);
@@ -232,6 +236,9 @@ namespace KlayGE
 
 		[[(NSOpenGLView*)ns_view_ openGLContext] makeCurrentContext];	// Create GL Context
 		[[(NSOpenGLView*)ns_view_ openGLContext] setView:ns_view_];		// initilize fbo 0
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14
+#pragma GCC diagnostic pop
+#endif
 
 		[pool release];
 	}
@@ -272,7 +279,14 @@ namespace KlayGE
 	
 	void Window::FlushBuffer()
 	{
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"	// Ignore OpenGL's deprecation
+#endif
 		[[(NSOpenGLView*)ns_view_ openGLContext]flushBuffer];
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14
+#pragma GCC diagnostic pop
+#endif
 	}
 
 	uint2 Window::GetNSViewSize()

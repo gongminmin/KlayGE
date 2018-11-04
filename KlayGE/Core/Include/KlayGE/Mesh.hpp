@@ -160,6 +160,7 @@ namespace KlayGE
 	public:
 		explicit RenderModel(SceneNodePtr const & root_node);
 		RenderModel(std::wstring_view name, uint32_t node_attrib);
+		virtual ~RenderModel();
 
 		SceneNodePtr const & RootNode() const
 		{

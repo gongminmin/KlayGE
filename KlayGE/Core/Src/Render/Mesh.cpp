@@ -369,6 +369,10 @@ namespace KlayGE
 	{
 	}
 
+	RenderModel::~RenderModel()
+	{
+	}
+
 	uint32_t RenderModel::NumLods() const
 	{
 		uint32_t max_lod = 0;

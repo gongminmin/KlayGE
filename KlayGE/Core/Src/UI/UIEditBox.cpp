@@ -74,8 +74,6 @@ namespace KlayGE
 		{
 			char_width_.resize(buffer_.size() + 1);
 
-			UISize size;
-
 			for (size_t i = 0; i < char_width_.size(); ++ i)
 			{
 				std::wstring str = buffer_.substr(0, i);

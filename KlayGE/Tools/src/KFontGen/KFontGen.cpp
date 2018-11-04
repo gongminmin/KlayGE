@@ -144,11 +144,11 @@ public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t internal_char_size, uint32_t char_size,
 		uint32_t const * validate_chars, font_info* char_info, float* char_dist_data,
 		int32_t& cur_num_char, std::atomic<int32_t>& cur_package, uint32_t num_chars,
-		float& min_value, float& max_value, uint32_t thread_id, uint32_t num_threads, uint32_t num_chars_per_package)
+		float& min_value, float& max_value, uint32_t num_chars_per_package)
 		: ft_lib_(ft_lib), ft_face_(ft_face), internal_char_size_(internal_char_size), char_size_(char_size),
 			validate_chars_(validate_chars), char_info_(char_info), char_dist_data_(char_dist_data),
 			cur_num_char_(&cur_num_char), cur_package_(&cur_package), num_chars_(num_chars),
-			thread_id_(thread_id), num_threads_(num_threads), num_chars_per_package_(num_chars_per_package),
+			num_chars_per_package_(num_chars_per_package),
 			min_value_(&min_value), max_value_(&max_value)
 	{
 	}
@@ -284,8 +284,6 @@ private:
 	int32_t* cur_num_char_;
 	std::atomic<int32_t>* cur_package_;
 	uint32_t num_chars_;
-	uint32_t thread_id_;
-	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
 	float* min_value_;
@@ -338,8 +336,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
 				&validate_chars[0], &char_info[0], &char_dist_data[0], cur_num_char[i],
 				cur_package, static_cast<uint32_t>(validate_chars.size()),
-				std::ref(min_values[i]), std::ref(max_values[i]),
-				i, num_threads, 64));
+				std::ref(min_values[i]), std::ref(max_values[i]), 64));
 		}
 	
 		Timer timer;
