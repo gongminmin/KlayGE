@@ -485,6 +485,7 @@ namespace KlayGE
 
 		PostProcessPtr ssvo_pp_;
 		PostProcessPtr ssvo_blur_pp_;
+		PostProcessPtr ssvo_upsample_pp_;
 
 		PostProcessPtr sss_blur_pps_[2];
 		bool sss_enabled_;

@@ -50,14 +50,32 @@ namespace KlayGE
 
 		proj_param_ = effect->ParameterByName("proj");
 		inv_proj_param_ = effect->ParameterByName("inv_proj");
+
+		upper_left_param_ = effect->ParameterByName("upper_left");
+		x_dir_param_ = effect->ParameterByName("x_dir");
+		y_dir_param_ = effect->ParameterByName("y_dir");
+
+		aspect_param_ = effect_->ParameterByName("aspect");
 	}
 
 	void SSVOPostProcess::OnRenderBegin()
 	{
 		PostProcess::OnRenderBegin();
 
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const & viewport = *re.CurFrameBuffer()->GetViewport();
+
+		Camera const & camera = *viewport.camera;
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
+
+		float3 const upper_left = MathLib::transform_coord(float3(-1, +1, 1), camera.InverseProjMatrix());
+		float3 const upper_right = MathLib::transform_coord(float3(+1, +1, 1), camera.InverseProjMatrix());
+		float3 const lower_left = MathLib::transform_coord(float3(-1, -1, 1), camera.InverseProjMatrix());
+		*upper_left_param_ = upper_left;
+		*x_dir_param_ = upper_right - upper_left;
+		*y_dir_param_ = lower_left - upper_left;
+
+		*aspect_param_ = static_cast<float>(viewport.width) / viewport.height;
 	}
 }

@@ -7,11 +7,25 @@
 	<include name="util.fxml"/>
 	
 	<cbuffer name="never_changes">
-		<parameter type="float2" name="sphere_xy" array_size="2">
+		<parameter type="float2" name="vogel_disk_offsets" array_size="16">
 			<value>
 				<![CDATA[
-					0.66667, 0,
-					0, 0.33333
+					0.176777, 0.0,
+					-0.225718, 0.206885,
+					0.0343507, -0.393789,
+					0.284864, 0.370948,
+					-0.52232, -0.0918239,
+					0.494281, -0.315336,
+					-0.164493, 0.615786,
+					-0.316681, -0.607012,
+					0.685167, 0.248588,
+					-0.711557, 0.295696,
+					0.341422, -0.73463,
+					0.256072, 0.808194,
+					-0.766143, -0.440767,
+					0.896453, -0.200303,
+					-0.544632, 0.780785,
+					-0.130341, -0.975582
 				]]>
 			</value>
 		</parameter>
@@ -20,11 +34,13 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="inv_proj"/>
+		<parameter type="float4" name="width_height"/>
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="x_dir"/>
+		<parameter type="float3" name="y_dir"/>
+		<parameter type="float" name="aspect"/>
 	</cbuffer>
 
-	<cbuffer name="vo_params">
-		<parameter type="float" name="vo_intensity" value="2.14"/>
-	</cbuffer>
 	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -35,6 +51,13 @@
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="point_plus_1_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="mip_map_lod_bias" value="1"/>
 	</parameter>
 
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
@@ -51,49 +74,49 @@
 
 	<shader>
 		<![CDATA[
-float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius, float depth_center)
+float3 TexcoordToView(float2 tex)
 {
-	float rotate = noise_tex.Sample(bilinear_wrap_sampler, tc * 1.5f).x;
+	return upper_left + x_dir * tex.x + y_dir * tex.y;
+}
+
+float InterleavedGradientNoise(float2 position_screen)
+{
+	float3 magic = float3(0.06711056f, 4.0f * 0.00583715f, 52.9829189f);
+	return frac(magic.z * frac(dot(position_screen, magic.xy)));
+}
+
+float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 normal, float depth_center)
+{
+	const float RADIUS = 1;
+	const int SAMPLES_COUNT = 16;
+
+	float rotate = 2 * 3.1415f * InterleavedGradientNoise(tc * width_height.xy);
 	float sz, cz;
 	sincos(rotate, sz, cz);
 
-	x_dir *= radius;
-	y_dir *= radius;
+	float2 radius_screen = RADIUS / depth_center;
+	radius_screen.y *= aspect;
 
-	float sqr_radius = radius * radius;
 	float obscurance = 0;
-	float total_weight = 0;
-	for (int i = 0; i < 2; ++ i)
+	for (int i = 0; i < SAMPLES_COUNT; ++ i)
 	{
-		float2 sxy = sphere_xy[i];
-		sxy = float2(dot(sxy, float2(cz, -sz)), dot(sxy, float2(sz, cz)));
-		for (int j = 0; j < 2; ++ j)
-		{
-			float3 sample_point_offset = sxy.x * x_dir + sxy.y * y_dir;
-			float3 sample_point = pos_es + sample_point_offset;
-			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
+		float2 sxy = vogel_disk_offsets[i];
+		float2 sample_offset = float2(dot(sxy, float2(cz, -sz)), dot(sxy, float2(sz, cz)));
 
-			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float depth_sample = depth_tex.Sample(point_sampler, tc_sample).x;
-			float3 pos_es_sample = sample_point * (depth_sample / sample_point.z);
-			float3 dir_es_sample = pos_es_sample - pos_es;
+		float2 tc_sample = tc + radius_screen * sample_offset;
+		float depth_sample = depth_tex.Sample(point_sampler, tc_sample).x;
+		float3 view_dir_sample = normalize(TexcoordToView(tc_sample));
+		float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
+		float3 dir_es_sample = pos_es_sample - pos_es;
 
-			float epsilon = 0.0001f;
-			float beta = 0.002f;
+		const float EPSILON = 0.0001f;
+		const float BETA = 0.002f;
 
-			float dist_sqr = dot(dir_es_sample, dir_es_sample);
-			if (dist_sqr < sqr_radius)
-			{
-				obscurance += max(0.0f, dot(dir_es_sample, normal) - depth_center * beta) / (dist_sqr + epsilon);
-				total_weight += 1.0f;
-			}
-
-			sxy = -sxy;
-		}
+		float dist_sqr = dot(dir_es_sample, dir_es_sample);
+		obscurance += max(0.0f, dot(dir_es_sample, normal) + depth_center * BETA) / (dist_sqr + EPSILON);
 	}
 
-	float delta = 1.0f;
-	return (total_weight > 1e-6f) ? 2.0f * delta * obscurance / total_weight : 0;
+	return saturate(obscurance / SAMPLES_COUNT);
 }
 
 void SSVOVS(float4 pos : POSITION,
@@ -108,20 +131,16 @@ void SSVOVS(float4 pos : POSITION,
 
 float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float radius = 1;
-	float obscurance = 1;
-
 	float depth = depth_tex.Sample(point_sampler, tc).x;
 	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(point_sampler, tc));
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
-	float3 y_dir = normalize(cross(normal, float3(0, 0, 1)));
-	float3 x_dir = cross(y_dir, normal);
+	float ao = 1 - CalcAlchemyObscurance(tc, pos_es, normal, depth);
+	ao *= ao;
 
-	obscurance = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
-	return max(0.0f, 1.0f - obscurance);
+	return ao;
 }
 		]]>
 	</shader>
@@ -140,14 +159,78 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	</technique>
 
 	<technique name="SSVOBlurY" inherit="BlurY1">
+	</technique>
+
+
+	<parameter type="texture2D" name="ssvo_tex"/>
+
+	<shader>
+		<![CDATA[
+float4 SSVOUpsamplePS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 tc_00 = tc;
+	float2 tc_01 = tc + float2(width_height.z * 2, 0);
+	float2 tc_10 = tc + float2(0, width_height.w * 2);
+	float2 tc_11 = tc + width_height.zw * 2;
+	
+	float depth = depth_tex.Sample(point_sampler, tc).x;
+	float4 depths_half = float4(depth_tex.SampleLevel(point_sampler, tc_00, 1).x,
+		depth_tex.SampleLevel(point_sampler, tc_01, 1).x,
+		depth_tex.SampleLevel(point_sampler, tc_10, 1).x,
+		depth_tex.SampleLevel(point_sampler, tc_11, 1).x);
+	float4 depths_diffs = abs(depth - depths_half);
+	
+	float4 aos_half = float4(ssvo_tex.Sample(point_sampler, tc_00).x,
+		ssvo_tex.Sample(point_sampler, tc_01).x,
+		ssvo_tex.Sample(point_sampler, tc_10).x,
+		ssvo_tex.Sample(point_sampler, tc_11).x);
+
+	float2 coord = tc * width_height.xy;
+	float2 frac_coord = frac(coord);
+
+	float4 ao = 0.0f;
+	float weights_sum = 0.0f;
+
+	const float EPSILON = 0.0001f;
+
+	float weight_00 = (1 - frac_coord.x) * (1 - frac_coord.y) / (depths_diffs.x + EPSILON);
+	ao += weight_00 * aos_half.x;
+	weights_sum += weight_00;
+
+	float weight_01 = frac_coord.x * (1.0f - frac_coord.y) / (depths_diffs.y + EPSILON);
+	ao += weight_01 * aos_half.y;
+	weights_sum += weight_01;
+
+	float weight_10 = (1.0f - frac_coord.x) * frac_coord.y / (depths_diffs.z + EPSILON);
+	ao += weight_10 * aos_half.z;
+	weights_sum += weight_10;
+
+	float weight_11 = frac_coord.x * frac_coord.y / (depths_diffs.w + EPSILON);
+	ao += weight_11 * aos_half.w;
+	weights_sum += weight_11;
+
+	ao /= weights_sum;
+
+	return ao;
+}
+		]]>
+	</shader>
+
+	<technique name="SSVOUpsample">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="dst_color"/>
 			<state name="dest_blend" value="zero"/>
 			<state name="blend_op_alpha" value="add"/>
 			<state name="src_blend_alpha" value="zero"/>
-			<state name="dest_blend_alpha" value="dst_alpha"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SSVOUpsamplePS()"/>
 		</pass>
 	</technique>
 </effect>

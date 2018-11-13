@@ -685,9 +685,10 @@ namespace KlayGE
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
 		auto effect_x = SyncLoadRenderEffect("SSVO.fxml");
 		auto effect_y = effect_x->Clone();
-		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(8, 1.0f,
+		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(3, 1.0f,
 			effect_x, effect_x->TechniqueByName("SSVOBlurX"),
 			effect_y, effect_y->TechniqueByName("SSVOBlurY"));
+		ssvo_upsample_pp_ = SyncLoadPostProcess("SSVO.ppml", "SSVOUpsample");
 		for (int i = 0; i < 2; ++ i)
 		{
 			ssr_pps_[i] = MakeSharedPtr<SSRPostProcess>(i != 0);
@@ -2740,9 +2741,13 @@ namespace KlayGE
 
 			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
 			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_resolved_depth_tex);
-			ssvo_blur_pp_->OutputPin(0,
-				(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+			ssvo_blur_pp_->OutputPin(0, pvp.small_ssvo_tex);
 			ssvo_blur_pp_->Apply();
+
+			ssvo_upsample_pp_->InputPin(0, pvp.small_ssvo_tex);
+			ssvo_upsample_pp_->OutputPin(0,
+				(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+			ssvo_upsample_pp_->Apply();
 		}
 	}
 
