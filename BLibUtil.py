@@ -785,7 +785,11 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				if not os.path.exists(build_dir):
 					os.makedirs(build_dir)
 					if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
-						additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+						env = os.environ
+						if not ("CC" in env):
+							additional_options += " -DCMAKE_C_COMPILER=clang"
+						if not ("CXX" in env):
+							additional_options += " -DCMAKE_CXX_COMPILER=clang++"
 
 				os.chdir(build_dir)
 

@@ -35,7 +35,7 @@ matrix:
       env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" COMPILER="gcc"
 
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       addons:
         apt:
@@ -70,18 +70,51 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0" COMPILER="clang"
-
-    - os: osx
-      osx_image: xcode9.3
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
+
+    - os: linux
+      dist: xenial
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-7
+          packages:
+            - clang-7
+            - libc++-7-dev
+            - libc++abi-7-dev
+            - wine
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update:
+            - true
+      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" COMPILER="clang"
 
     - os: osx
       osx_image: xcode9.4
+      addons:
+        homebrew:
+          casks:
+            - xquartz
+          packages:
+            - wine
+          update:
+            - true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
 
     - os: osx
       osx_image: xcode10.1
+      addons:
+        homebrew:
+          casks:
+            - xquartz
+          packages:
+            - wine
+          update:
+            - true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14"
 
 before_install:
@@ -90,11 +123,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       export WINEARCH=win32;
       winetricks;
-    fi
-  # macOS
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew cask install xquartz;
-      brew install wine;
     fi
 
 script:
