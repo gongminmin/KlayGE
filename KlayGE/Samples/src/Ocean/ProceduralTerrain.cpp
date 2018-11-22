@@ -64,6 +64,8 @@ namespace KlayGE
 		mask_pp_->InputPin(0, height_map_tex_);
 		mask_pp_->InputPin(1, gradient_map_tex_);
 		mask_pp_->OutputPin(0, mask_map_tex_);
+
+		mvp_wo_oblique_param_ = effect_->ParameterByName("mvp_wo_oblique");
 	}
 
 	void ProceduralTerrain::FlushTerrainData()
@@ -105,6 +107,10 @@ namespace KlayGE
 	{
 		HQTerrainRenderable::OnRenderBegin();
 
+		float4x4 original_mvp;
+		mvp_param_->Value(original_mvp);
+		*mvp_wo_oblique_param_ = original_mvp;
+
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl && (drl->ActiveViewport() == 0))
 		{
@@ -125,8 +131,7 @@ namespace KlayGE
 				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
 
-			// TODO: Figure out how to restore depth from oblique clipping matrix
-			//*mvp_param_ = mvp;
+			*mvp_param_ = mvp;
 		}
 	}
 }
