@@ -1707,8 +1707,8 @@ namespace KlayGE
 		pp_chain_[0]->SetParam(0, esm_scale_factor);
 		pp_chain_[1]->SetParam(0, esm_scale_factor);
 
-		float q = fp / (fp - np);
-		float4 near_q_far(np * q, q, fp, 1 / fp / esm_scale_factor);
+		float4 near_q_far = camera.NearQFarParam();
+		near_q_far.w() = 1 / fp / esm_scale_factor;
 		pp_chain_[0]->SetParam(1, near_q_far);
 		near_q_far.z() *= esm_scale_factor;
 		pp_chain_[1]->SetParam(1, near_q_far);

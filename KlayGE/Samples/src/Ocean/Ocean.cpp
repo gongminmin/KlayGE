@@ -152,9 +152,8 @@ namespace
 					Camera const & camera = app.ActiveCamera();
 					*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
 					*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
-					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
-					*(effect_->ParameterByName("near_q_far")) = near_q_far;
+					float4 const near_q_far = camera.NearQFarParam();
+					*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 					*(effect_->ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
 					*(effect_->ParameterByName("min_samples")) = static_cast<int32_t>(20);
 					*(effect_->ParameterByName("max_samples")) = static_cast<int32_t>(30);
@@ -177,9 +176,8 @@ namespace
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
-					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
-					*(effect_->ParameterByName("near_q_far")) = near_q_far;
+					float4 const near_q_far = camera.NearQFarParam();
+					*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				*reflection_tex_param_ = reflection_tex_;

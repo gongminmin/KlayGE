@@ -81,6 +81,7 @@ namespace KlayGE
 		float4x4 const & InverseViewProjMatrixWOAdjust() const;
 		float4x4 const & PrevViewMatrix() const;
 		float4x4 const & PrevProjMatrix() const;
+		float4 NearQFarParam() const;
 
 		Frustum const & ViewFrustum() const;
 

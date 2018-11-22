@@ -309,10 +309,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 1:
 		if (depth_texture_support_)
 		{
-			Camera& camera = this->ActiveCamera();
-			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			float4 near_q_far(camera.NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
-			depth_to_linear_pp_->SetParam(0, near_q_far);
+			depth_to_linear_pp_->SetParam(0, this->ActiveCamera().NearQFarParam());
 			depth_to_linear_pp_->Apply();
 		
 			// Pass 1: Render front face

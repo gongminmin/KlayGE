@@ -74,9 +74,8 @@ namespace
 					Camera const & camera = app.ActiveCamera();
 					*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
 					*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
-					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
-					*(effect_->ParameterByName("near_q_far")) = near_q_far;
+					float4 const near_q_far = camera.NearQFarParam();
+					*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 					*(effect_->ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}

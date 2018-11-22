@@ -70,11 +70,11 @@ namespace KlayGE
 	void SSRPostProcess::Apply()
 	{
 		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
-		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+		float4 const near_q_far = camera.NearQFarParam();
 
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
-		*near_q_far_param_ = float3(camera.NearPlane() * q, q, camera.FarPlane());
+		*near_q_far_param_ = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
 
 		this->Render();

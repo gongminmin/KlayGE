@@ -373,10 +373,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(scene_fb_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 
-			Camera const & camera = this->ActiveCamera();
-			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			float4 near_q_far(this->ActiveCamera().NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
-			depth_to_linear_pp_->SetParam(0, near_q_far);
+			depth_to_linear_pp_->SetParam(0, this->ActiveCamera().NearQFarParam());
 
 			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 			if (Context::Instance().Config().graphics_cfg.gamma)

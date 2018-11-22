@@ -2047,10 +2047,7 @@ namespace KlayGE
 			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_tex;
 			*g_buffer_ds_tex_ms_param_ = pvp.g_buffer_ds_tex;
 
-			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-			float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-			float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
-			*near_q_far_param_ = near_q_far;
+			*near_q_far_param_ = pvp.frame_buffer->GetViewport()->camera->NearQFarParam();
 
 			re.BindFrameBuffer(pvp.g_buffer_resolved_fb);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color3)->ClearColor(Color(0, 0, 0, 0));
@@ -2158,10 +2155,7 @@ namespace KlayGE
 
 				if ((index_in_pass > 0) && ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type)))
 				{
-					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-
-					float4 near_q_far(sm_camera->NearPlane() * q, q, sm_camera->FarPlane(), 1 / sm_camera->FarPlane());
-					depth_to_esm_pp_->SetParam(0, near_q_far);
+					depth_to_esm_pp_->SetParam(0, sm_camera->NearQFarParam());
 
 					float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
 					depth_to_esm_pp_->SetParam(1, inv_sm_proj);
@@ -3952,11 +3946,7 @@ namespace KlayGE
 		}
 		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
 		*linear_depth_rw_tex_param_ = pvp.g_buffer_resolved_depth_tex;
-
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-		float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
-		*near_q_far_param_ = near_q_far;
+		*near_q_far_param_ = pvp.frame_buffer->GetViewport()->camera->NearQFarParam();
 
 		re.Dispatch(*dr_effect_, *technique_depth_to_tiled_min_max_[pvp.sample_count != 1], out_tex->Width(0), out_tex->Height(0), 1);
 
@@ -4089,9 +4079,7 @@ namespace KlayGE
 
 		this->PreparePVP(pvp);
 
-		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-		float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
-		depth_to_linear_pps_[pvp.sample_count != 1]->SetParam(0, near_q_far);
+		depth_to_linear_pps_[pvp.sample_count != 1]->SetParam(0, camera->NearQFarParam());
 
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_resolved_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_resolved_depth_tex;

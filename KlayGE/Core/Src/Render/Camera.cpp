@@ -257,6 +257,12 @@ namespace KlayGE
 		return prev_proj_mat_;
 	}
 
+	float4 Camera::NearQFarParam() const
+	{
+		float const q = far_plane_ / (far_plane_ - near_plane_);
+		return float4(near_plane_ * q, q, far_plane_, 1 / far_plane_);
+	}
+
 	Frustum const & Camera::ViewFrustum() const
 	{
 		if (frustum_dirty_)

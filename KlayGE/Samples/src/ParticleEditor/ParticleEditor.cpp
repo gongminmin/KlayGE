@@ -905,10 +905,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			{
 				re.BindFrameBuffer(scene_buffer_);
 
-				Camera const & camera = this->ActiveCamera();
-				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-				float4 near_q_far(this->ActiveCamera().NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
-				depth_to_linear_pp_->SetParam(0, near_q_far);
+				depth_to_linear_pp_->SetParam(0, this->ActiveCamera().NearQFarParam());
 			
 				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 				if (Context::Instance().Config().graphics_cfg.gamma)
