@@ -603,10 +603,11 @@ namespace KlayGE
 	}
 
 
-	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
+	ParticleSystem::ParticleSystem(uint32_t max_num_particles, bool sort_particles)
 		: SceneNode(SOA_Moveable | SOA_NotCastShadow),
 			particles_(max_num_particles),
-			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
+			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f),
+			sort_particles_(sort_particles)
 	{
 		this->ClearParticles();
 
@@ -745,17 +746,22 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::UpdateParticlesNoLock(float elapsed_time, std::vector<std::pair<uint32_t, float>>& actived_particles)
+	void ParticleSystem::UpdateParticlesNoLock(float elapsed_time)
 	{
 		auto emitter_iter = emitters_.begin();
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 
 		float4x4 const & view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
 
-		actived_particles.clear();
+		actived_particles_.clear();
 
 		float3 min_bb(+1e10f, +1e10f, +1e10f);
 		float3 max_bb(-1e10f, -1e10f, -1e10f);
+
+		for (auto const & updater : updaters_)
+		{
+			updater->SnapParams();
+		}
 
 		for (uint32_t i = 0; i < particles_.size(); ++ i)
 		{
@@ -795,31 +801,46 @@ namespace KlayGE
 			if (particle.life > 0)
 			{
 				float3 const & pos = particle.pos;
-				float p_to_v = (pos.x() * view_mat(0, 2) + pos.y() * view_mat(1, 2) + pos.z() * view_mat(2, 2) + view_mat(3, 2))
-					/ (pos.x() * view_mat(0, 3) + pos.y() * view_mat(1, 3) + pos.z() * view_mat(2, 3) + view_mat(3, 3));
 
-				actived_particles.emplace_back(i, p_to_v);
+				float depth_es;
+				if (sort_particles_)
+				{
+					float4 const pos4(pos.x(), pos.y(), pos.z(), 1);
+					float4 const z_row = view_mat.Col(2);
+					float4 const w_row = view_mat.Col(3);
+
+					depth_es = MathLib::dot(pos4, z_row) / MathLib::dot(pos4, w_row);
+				}
+				else
+				{
+					depth_es = 0;
+				}
+
+				actived_particles_.emplace_back(i, depth_es);
 
 				min_bb = MathLib::minimize(min_bb, pos);
 				max_bb = MathLib::maximize(min_bb, pos);
 			}
 		}
 
-		if (!actived_particles.empty())
+		if (!actived_particles_.empty())
 		{
-			std::sort(actived_particles.begin(), actived_particles.end(),
-				[](std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs)
-				{
-					return lhs.second > rhs.second;
-				});
+			if (sort_particles_)
+			{
+				std::sort(actived_particles_.begin(), actived_particles_.end(),
+					[](std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs)
+					{
+						return lhs.second > rhs.second;
+					});
+			}
 
 			checked_pointer_cast<RenderParticles>(renderables_[0])->PosBound(AABBox(min_bb, max_bb));
 		}
 	}
 
-	void ParticleSystem::UpdateParticleBufferNoLock(std::vector<std::pair<uint32_t, float>> const & actived_particles)
+	void ParticleSystem::UpdateParticleBufferNoLock()
 	{
-		if (!actived_particles.empty())
+		if (!actived_particles_.empty())
 		{
 			RenderLayout& rl = renderables_[0]->GetRenderLayout();
 
@@ -833,7 +854,7 @@ namespace KlayGE
 				instance_gb = rl.InstanceStream();
 			}
 
-			uint32_t const num_active_particles = static_cast<uint32_t>(actived_particles.size());
+			uint32_t const num_active_particles = static_cast<uint32_t>(actived_particles_.size());
 			uint32_t const new_instance_size = num_active_particles * sizeof(ParticleInstance);
 			if (!instance_gb || (instance_gb->Size() < new_instance_size))
 			{
@@ -868,7 +889,7 @@ namespace KlayGE
 				ParticleInstance* instance_data = mapper.Pointer<ParticleInstance>();
 				for (uint32_t i = 0; i < num_active_particles; ++ i, ++ instance_data)
 				{
-					Particle const & par = particles_[actived_particles[i].first];
+					Particle const & par = particles_[actived_particles_[i].first];
 					instance_data->pos = par.pos;
 					instance_data->life = par.life;
 					instance_data->spin = par.spin;
@@ -884,13 +905,13 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(actived_particles_mutex_);
 
-		this->UpdateParticlesNoLock(elapsed_time, actived_particles_);
+		this->UpdateParticlesNoLock(elapsed_time);
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 		if (caps.arbitrary_multithread_rendering_support)
 		{
-			this->UpdateParticleBufferNoLock(actived_particles_);
+			this->UpdateParticleBufferNoLock();
 		}
 	}
 
@@ -901,7 +922,7 @@ namespace KlayGE
 		if (!caps.arbitrary_multithread_rendering_support)
 		{
 			std::lock_guard<std::mutex> lock(actived_particles_mutex_);
-			this->UpdateParticleBufferNoLock(actived_particles_);
+			this->UpdateParticleBufferNoLock();
 		}
 	}
 
@@ -1170,43 +1191,44 @@ namespace KlayGE
 
 	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
 	{
-		std::lock_guard<std::mutex> lock(update_mutex_);
-
-		BOOST_ASSERT(!size_over_life_.empty());
-		BOOST_ASSERT(!mass_over_life_.empty());
-		BOOST_ASSERT(!opacity_over_life_.empty());
+		BOOST_ASSERT(!this_frame_size_over_life_.empty());
+		BOOST_ASSERT(!this_frame_mass_over_life_.empty());
+		BOOST_ASSERT(!this_frame_opacity_over_life_.empty());
 
 		float pos = (par.init_life - par.life) / par.init_life;
 
-		float cur_size = size_over_life_.back().y();
-		for (auto iter = size_over_life_.begin(); iter != size_over_life_.end() - 1; ++ iter)
+		float cur_size = this_frame_size_over_life_.back().y();
+		for (auto iter = std::next(this_frame_size_over_life_.begin()); iter != this_frame_size_over_life_.end(); ++ iter)
 		{
-			if ((iter + 1)->x() >= pos)
+			if (iter->x() >= pos)
 			{
-				float const s = (pos - iter->x()) / ((iter + 1)->x() - iter->x());
-				cur_size = MathLib::lerp(iter->y(), (iter + 1)->y(), s);
+				float2 const & prev = *std::prev(iter);
+				float const s = (pos - prev.x()) / (iter->x() - prev.x());
+				cur_size = MathLib::lerp(prev.y(), iter->y(), s);
 				break;
 			}
 		}
 
-		float cur_mass = mass_over_life_.back().y();
-		for (auto iter = mass_over_life_.begin(); iter != mass_over_life_.end() - 1; ++ iter)
+		float cur_mass = this_frame_mass_over_life_.back().y();
+		for (auto iter = std::next(this_frame_mass_over_life_.begin()); iter != this_frame_mass_over_life_.end(); ++ iter)
 		{
-			if ((iter + 1)->x() >= pos)
+			if (iter->x() >= pos)
 			{
-				float const s = (pos - iter->x()) / ((iter + 1)->x() - iter->x());
-				cur_mass = MathLib::lerp(iter->y(), (iter + 1)->y(), s);
+				float2 const & prev = *std::prev(iter);
+				float const s = (pos - prev.x()) / (iter->x() - prev.x());
+				cur_mass = MathLib::lerp(prev.y(), iter->y(), s);
 				break;
 			}
 		}
 
-		float cur_alpha = opacity_over_life_.back().y();
-		for (auto iter = opacity_over_life_.begin(); iter != opacity_over_life_.end() - 1; ++ iter)
+		float cur_alpha = this_frame_opacity_over_life_.back().y();
+		for (auto iter = std::next(this_frame_opacity_over_life_.begin()); iter != this_frame_opacity_over_life_.end(); ++ iter)
 		{
-			if ((iter + 1)->x() >= pos)
+			if (iter->x() >= pos)
 			{
-				float const s = (pos - iter->x()) / ((iter + 1)->x() - iter->x());
-				cur_alpha = MathLib::lerp(iter->y(), (iter + 1)->y(), s);
+				float2 const & prev = *std::prev(iter);
+				float const s = (pos - prev.x()) / (iter->x() - prev.x());
+				cur_alpha = MathLib::lerp(prev.y(), iter->y(), s);
 				break;
 			}
 		}
@@ -1220,5 +1242,14 @@ namespace KlayGE
 		par.spin += 0.001f;
 		par.size = cur_size;
 		par.alpha = cur_alpha;
+	}
+
+	void PolylineParticleUpdater::SnapParams()
+	{
+		std::lock_guard<std::mutex> lock(update_mutex_);
+
+		this_frame_size_over_life_ = size_over_life_;
+		this_frame_mass_over_life_ = mass_over_life_;
+		this_frame_opacity_over_life_ = opacity_over_life_;
 	}
 }

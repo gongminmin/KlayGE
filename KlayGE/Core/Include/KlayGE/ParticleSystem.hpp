@@ -216,6 +216,7 @@ namespace KlayGE
 		virtual ParticleUpdaterPtr Clone() = 0;
 
 		virtual void Update(Particle& par, float elapse_time) = 0;
+		virtual void SnapParams() = 0;
 
 	protected:
 		void DoClone(ParticleUpdaterPtr const & rhs);
@@ -227,7 +228,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleSystem : public SceneNode
 	{
 	public:
-		explicit ParticleSystem(uint32_t max_num_particles);
+		explicit ParticleSystem(uint32_t max_num_particles, bool sort_particles = false);
 
 		virtual ParticleSystemPtr Clone();
 
@@ -330,8 +331,8 @@ namespace KlayGE
 		void SceneDepthTexture(TexturePtr const & depth_tex);
 
 	private:
-		void UpdateParticlesNoLock(float elapsed_time, std::vector<std::pair<uint32_t, float>>& active_particles);
-		void UpdateParticleBufferNoLock(std::vector<std::pair<uint32_t, float>> const & active_particles);
+		void UpdateParticlesNoLock(float elapsed_time);
+		void UpdateParticleBufferNoLock();
 
 	protected:
 		std::vector<ParticleEmitterPtr> emitters_;
@@ -349,6 +350,8 @@ namespace KlayGE
 		std::string particle_alpha_to_tex_name_;
 		Color particle_color_from_;
 		Color particle_color_to_;
+
+		bool sort_particles_;
 
 		bool gs_support_;
 	};
@@ -413,13 +416,19 @@ namespace KlayGE
 			return opacity_over_life_;
 		}
 
-		virtual void Update(Particle& par, float elapse_time) override;
+		void Update(Particle& par, float elapse_time) override;
+		void SnapParams() override;
 
 	private:
 		std::mutex update_mutex_;
+
 		std::vector<float2> size_over_life_;
 		std::vector<float2> mass_over_life_;
 		std::vector<float2> opacity_over_life_;
+
+		std::vector<float2> this_frame_size_over_life_;
+		std::vector<float2> this_frame_mass_over_life_;
+		std::vector<float2> this_frame_opacity_over_life_;
 	};
 }
 

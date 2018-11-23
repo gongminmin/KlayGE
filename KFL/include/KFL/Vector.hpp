@@ -80,15 +80,15 @@ namespace KlayGE
 		}
 		explicit constexpr Vector_T(T const * rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoCopy(&vec_[0], rhs);
+			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs);
 		}
 		constexpr Vector_T(T const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoAssign(&vec_[0], rhs);
+			detail::vector_helper<T, N>::DoAssign(vec_.data(), rhs);
 		}
 		Vector_T(Vector_T const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs.data());
 		}
 		Vector_T(Vector_T&& rhs) noexcept
 			: vec_(std::move(rhs.vec_))
@@ -99,7 +99,7 @@ namespace KlayGE
 		{
 			static_assert(M >= N, "Could not convert to a smaller vector.");
 
-			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs.data());
 		}
 
 		constexpr Vector_T(T const & x, T const & y) noexcept
@@ -170,6 +170,15 @@ namespace KlayGE
 			return vec_[index];
 		}
 
+		pointer data() noexcept
+		{
+			return &vec_[0];
+		}
+		constexpr const_pointer data() const noexcept
+		{
+			return &vec_[0];
+		}
+
 		reference x() noexcept
 		{
 			static_assert(elem_num >= 1, "Must be 1D vector.");
@@ -218,43 +227,43 @@ namespace KlayGE
 		template <typename U>
 		Vector_T const & operator+=(Vector_T<U, N> const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoAdd(&vec_[0], &vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoAdd(vec_.data(), vec_.data(), rhs.data());
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator+=(U const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoAdd(&vec_[0], &vec_[0], rhs);
+			detail::vector_helper<T, N>::DoAdd(vec_.data(), vec_.data(), rhs);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator-=(Vector_T<U, N> const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoSub(vec_.data(), vec_.data(), rhs.data());
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator-=(U const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoSub(&vec_[0], &vec_[0], rhs);
+			detail::vector_helper<T, N>::DoSub(vec_.data(), vec_.data(), rhs);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator*=(Vector_T<U, N> const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoMul(&vec_[0], &vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoMul(vec_.data(), vec_.data(), rhs.data());
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator*=(U const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoScale(&vec_[0], &vec_[0], rhs);
+			detail::vector_helper<T, N>::DoScale(vec_.data(), vec_.data(), rhs);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator/=(Vector_T<U, N> const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoDiv(&vec_[0], &vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoDiv(vec_.data(), vec_.data(), rhs.data());
 			return *this;
 		}
 		template <typename U>
@@ -281,7 +290,7 @@ namespace KlayGE
 		{
 			static_assert(M >= N, "Could not assign to a smaller vector.");
 
-			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs.data());
 			return *this;
 		}
 
@@ -291,18 +300,18 @@ namespace KlayGE
 		Vector_T const operator-() const noexcept
 		{
 			Vector_T temp(*this);
-			detail::vector_helper<T, N>::DoNegate(&temp.vec_[0], &vec_[0]);
+			detail::vector_helper<T, N>::DoNegate(temp.data(), vec_.data());
 			return temp;
 		}
 
 		void swap(Vector_T& rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoSwap(&vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoSwap(vec_.data(), rhs.data());
 		}
 
 		bool operator==(Vector_T const & rhs) const noexcept
 		{
-			return detail::vector_helper<T, N>::DoEqual(&vec_[0], &rhs[0]);
+			return detail::vector_helper<T, N>::DoEqual(vec_.data(), rhs.data());
 		}
 
 	private:

@@ -119,6 +119,15 @@ namespace KlayGE
 			return *(this->begin() + index);
 		}
 
+		pointer data() noexcept
+		{
+			return &m_[0][0];
+		}
+		constexpr const_pointer data() const noexcept
+		{
+			return &m_[0][0];
+		}
+
 		void Row(size_t index, Vector_T<T, col_num> const & rhs) noexcept;
 		Vector_T<T, 4> const & Row(size_t index) const noexcept;
 		void Col(size_t index, Vector_T<T, row_num> const & rhs) noexcept;
