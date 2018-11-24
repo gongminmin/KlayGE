@@ -663,7 +663,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if "android" == build_info.target_platform:
-		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/CMake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
 		if "win" == build_info.host_platform:
 			android_ndk_path = os.environ["ANDROID_NDK"]
@@ -678,7 +678,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 		else:
 			LogError("Unsupported Darwin architecture.\n")
 	elif "ios" == build_info.target_platform:
-		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/iOS.cmake\"" % curdir
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/CMake/iOS.cmake\"" % curdir
 		if "arm" == compiler_info.arch:
 			additional_options += " -DIOS_PLATFORM=OS"
 		elif "x86" == compiler_info.arch:
@@ -734,7 +734,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			else:
 				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
-			cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, "../cmake"))
+			cmake_cmd.AddCommand('"%s" -G "%s" %s %s ../CMake' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options))
 			if cmake_cmd.Execute() != 0:
 				LogWarning("Config %s failed, retry 1...\n" % name)
 				if cmake_cmd.Execute() != 0:
@@ -809,7 +809,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
-				cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, additional_options, config_options, "../cmake"))
+				cmake_cmd.AddCommand('"%s" -G "%s" %s %s ../CMake' % (build_info.cmake_path, compiler_info.generator, additional_options, config_options))
 				if cmake_cmd.Execute() != 0:
 					LogWarning("Config %s failed, retry 1...\n" % name)
 					if cmake_cmd.Execute() != 0:
