@@ -20,7 +20,7 @@ def BuildFreetype(build_info, compiler_info):
 	BuildAProject("freetype", "External/freetype", build_info, compiler_info)
 
 def Build7z(build_info, compiler_info):
-	BuildAProject("7z", "External/7z", build_info, compiler_info, build_info.is_windows)
+	BuildAProject("7z", "External/7z", build_info, compiler_info)
 
 def BuildUniversalDXSDK(build_info, compiler_info):
 	BuildAProject("UniversalDXSDK", "External/UniversalDXSDK", build_info, compiler_info)
@@ -41,7 +41,7 @@ def BuildAndroidNativeAppGlue(build_info, compiler_info):
 	BuildAProject("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
 
 def BuildAssimp(build_info, compiler_info):
-	BuildAProject("assimp", "External/assimp", build_info, compiler_info, True)
+	BuildAProject("assimp", "External/assimp", build_info, compiler_info)
 
 def BuildNanosvg(build_info, compiler_info):
 	BuildAProject("nanosvg", "External/nanosvg", build_info, compiler_info)
@@ -50,7 +50,7 @@ def BuildGtest(build_info, compiler_info):
 	BuildAProject("googletest", "External/googletest", build_info, compiler_info)
 
 def BuildFreeImage(build_info, compiler_info):
-	BuildAProject("FreeImage", "External/FreeImage", build_info, compiler_info, build_info.is_windows)
+	BuildAProject("FreeImage", "External/FreeImage", build_info, compiler_info)
 
 def BuildCxxopts(build_info, compiler_info):
 	BuildAProject("cxxopts", "External/cxxopts", build_info, compiler_info)

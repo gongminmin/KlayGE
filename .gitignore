@@ -49,6 +49,9 @@ KlayGE/bin/*/*.py
 KlayGE/bin/*/*Py.zip
 KlayGE/bin/*/GL*CompatibilityReport.html
 KlayGE/bin/*/HWCollect.txt
+KlayGE/bin/*/*.iobj
+KlayGE/bin/*/*.ipdb
+KlayGE/bin/*/*.ilk
 KlayGE/Core/Src/Base/TableGen
 KlayGE/media/Fonts
 KlayGE/media/Models
