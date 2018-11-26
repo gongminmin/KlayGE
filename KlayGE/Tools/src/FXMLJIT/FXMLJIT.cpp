@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 	context_cfg.graphics_cfg.color_grading = false;
 	Context::Instance().Config(context_cfg);
 
-	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+	PlatformDefinition platform_def(platform + ".plat");
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	int major_version = platform_def.major_version;

@@ -220,6 +220,9 @@ namespace KlayGE
 		this->AddPath("..");
 		this->AddPath("../../media/RenderFX");
 		this->AddPath("../../media/Models");
+#if KLAYGE_IS_DEV_PLATFORM
+		this->AddPath("../../media/PlatConf");
+#endif
 		this->AddPath("../../media/Textures/2D");
 		this->AddPath("../../media/Textures/3D");
 		this->AddPath("../../media/Textures/Cube");

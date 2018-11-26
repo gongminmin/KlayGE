@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
 
 	if (conversion)
 	{
-		PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+		PlatformDefinition platform_def(platform + ".plat");
 
 		TexMetadata metadata;
 		if (!ResLoader::Instance().Locate(metadata_name).empty())

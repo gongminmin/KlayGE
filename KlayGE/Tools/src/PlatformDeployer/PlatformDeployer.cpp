@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
+	PlatformDefinition platform_def(platform + ".plat");
 	Deploy(res_names, res_type, platform_def.device_caps, platform);
 
 	Context::Destroy();
