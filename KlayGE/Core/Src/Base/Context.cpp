@@ -154,7 +154,9 @@ namespace KlayGE
 		script_factory_.reset();
 		audio_data_src_factory_.reset();
 
+#if KLAYGE_IS_DEV_PLATFORM
 		dev_helper_.reset();
+#endif
 
 		app_ = nullptr;
 

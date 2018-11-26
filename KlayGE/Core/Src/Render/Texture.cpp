@@ -1290,7 +1290,7 @@ namespace
 				Context::Instance().DevHelperInstance().ConvertTexture(tex_desc_.res_name, tex_desc_.metadata_name,
 					tex_desc_.runtime_name, &caps);
 #else
-				LogError() << "Could NOT locate " << runtime_name << std::endl;
+				LogError() << "Could NOT locate " << tex_desc_.runtime_name << std::endl;
 #endif
 			}
 

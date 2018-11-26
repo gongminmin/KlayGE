@@ -27,6 +27,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SMAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SSVO.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Translucency.ppml
