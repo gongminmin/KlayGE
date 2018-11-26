@@ -1,6 +1,6 @@
 SET(NDK_VERSION 16b)
 
-SET(ANAG_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+SET(ANAG_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../android_native_app_glue")
 SET(ANAG_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/android_native_app_glue/${KLAYGE_PLATFORM_NAME}")
 SET(REL_PATH "External/Downloads/android_native_app_glue_${NDK_VERSION}.patched.7z")
 SET(PACKAGE_FILE_ID "b32103ef58937c827b9a1dba3070f49d8c9ec1c0")

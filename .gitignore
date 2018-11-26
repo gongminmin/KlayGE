@@ -43,8 +43,9 @@ KlayGE/bin/*/*.so
 KlayGE/bin/*/*.dylib
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.exe.config
-KlayGE/bin/*/*.exe.manifest
+KlayGE/bin/*/*.manifest
 KlayGE/bin/*/*.pdb
+KlayGE/bin/*/*.pri
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*Py.zip
 KlayGE/bin/*/GL*CompatibilityReport.html
