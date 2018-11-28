@@ -11,7 +11,7 @@ def BuildExternalLibs(build_info):
 if __name__ == "__main__":
 	BuildExternalLibs(BuildInfo.FromArgv(sys.argv))
 
-	if sys.argv[1].lower() == "clean":
+	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
 		import shutil
 		clean_dir_list = [ "assimp", "cxxopts", "libogg", "nanosvg", "rapidjson" ]
 		for dir in clean_dir_list:
