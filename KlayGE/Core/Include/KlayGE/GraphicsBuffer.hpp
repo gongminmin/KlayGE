@@ -96,7 +96,7 @@ namespace KlayGE
 		};
 
 	public:
-		GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte);
+		GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride);
 		virtual ~GraphicsBuffer();
 
 		uint32_t Size() const
@@ -120,6 +120,7 @@ namespace KlayGE
 
 		virtual void CreateHWResource(void const * init_data) = 0;
 		virtual void DeleteHWResource() = 0;
+		virtual bool HWResourceReady() const = 0;
 
 		virtual void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) = 0;
 
@@ -132,6 +133,7 @@ namespace KlayGE
 		uint32_t access_hint_;
 
 		uint32_t size_in_byte_;
+		uint32_t structure_byte_stride_;
 	};
 
 	class KLAYGE_CORE_API SoftwareGraphicsBuffer : public GraphicsBuffer
@@ -145,6 +147,10 @@ namespace KlayGE
 
 		void CreateHWResource(void const * init_data) override;
 		void DeleteHWResource() override;
+		bool HWResourceReady() const override
+		{
+			return true;
+		}
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 

@@ -33,8 +33,8 @@
 
 namespace KlayGE
 {
-	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte)
-			: usage_(usage), access_hint_(access_hint), size_in_byte_(size_in_byte)
+	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride)
+			: usage_(usage), access_hint_(access_hint), size_in_byte_(size_in_byte), structure_byte_stride_(structure_byte_stride)
 	{
 	}
 
@@ -44,7 +44,7 @@ namespace KlayGE
 
 
 	SoftwareGraphicsBuffer::SoftwareGraphicsBuffer(uint32_t size_in_byte, bool ref_only)
-		: GraphicsBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, size_in_byte),
+		: GraphicsBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, size_in_byte, 0),
 			ref_only_(ref_only)
 	{
 	}

@@ -53,24 +53,29 @@ namespace KlayGE
 			return d3d_texture_.get();
 		}
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
 
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-			uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
-			CubeFaces first_face, uint32_t num_faces, uint32_t level);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+			uint32_t array_size, uint32_t level);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+			uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level);
 
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level);
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face, uint32_t level);
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t level);
 
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t level);
 
 		virtual void DeleteHWResource() override;
 		virtual bool HWResourceReady() const override;
@@ -112,21 +117,27 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level);
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
-		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const = 0;
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const;
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+
+		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const;
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level) const;
+		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			CubeFaces first_face, uint32_t num_faces, uint32_t level) const;
-		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const;
-		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+
+		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const;
-		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const;
-		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const;
-		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
 			uint32_t level) const;
-		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const;
+		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const;
+
+		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) const;
+		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level) const;
+		virtual D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const;
 
 	protected:
 		ID3D11Device*				d3d_device_;
@@ -164,13 +175,13 @@ namespace KlayGE
 			void*& data) override;
 		virtual void Unmap1D(uint32_t array_index, uint32_t level) override;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
-		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t first_array_index, uint32_t array_size,
+		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
-		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t first_array_index, uint32_t array_size,
+		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
 
 	private:
@@ -204,11 +215,14 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch) override;
 		virtual void Unmap2D(uint32_t array_index, uint32_t level) override;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const override;
-		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
-		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) const override;
+		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) const override;
+		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) const override;
 
 	private:
 		uint32_t width_;
@@ -240,15 +254,15 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) override;
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) override;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
 			uint32_t level) const override;
-		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
 			uint32_t level) const override;
-		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
 			uint32_t level) const override;
 
 	private:
@@ -284,17 +298,19 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch) override;
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			CubeFaces first_face, uint32_t num_faces, uint32_t level) const override;
-		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t first_array_index, uint32_t array_size,
+		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
-		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const override;
-		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
-		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const override;
+		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const override;
+		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) const override;
+		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t level) const override;
 
 	private:
 		uint32_t width_;

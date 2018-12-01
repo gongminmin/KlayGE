@@ -115,15 +115,16 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
-		uint32_t first_level, uint32_t num_levels)
+	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, num_items);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, first_array_index);
+			HashCombine(hash_val, array_size);
 			HashCombine(hash_val, first_level);
 			HashCombine(hash_val, num_levels);
 
@@ -134,7 +135,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillSRVDesc(first_array_index, num_items, first_level, num_levels);
+				auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
 				D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, desc);
 				return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
 			}
@@ -146,15 +147,16 @@ namespace KlayGE
 		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
-		uint32_t level)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, num_items);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, first_array_index);
+			HashCombine(hash_val, array_size);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
 			HashCombine(hash_val, 0);
@@ -166,7 +168,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillUAVDesc(first_array_index, num_items, level);
+				auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
 				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
@@ -178,14 +180,15 @@ namespace KlayGE
 		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(array_index);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, array_index);
 			HashCombine(hash_val, 1);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, first_slice);
@@ -198,7 +201,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillUAVDesc(array_index, first_slice, num_slices, level);
+				auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
 				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
@@ -210,15 +213,16 @@ namespace KlayGE
 		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
-		CubeFaces first_face, uint32_t num_faces, uint32_t level)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(first_array_index * 6 + first_face);
-			HashCombine(hash_val, num_items * 6 + num_faces);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, first_array_index * 6 + first_face);
+			HashCombine(hash_val, array_size * 6 + num_faces);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
 			HashCombine(hash_val, 0);
@@ -230,7 +234,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillUAVDesc(first_array_index, num_items, first_face, num_faces, level);
+				auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
 				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
@@ -242,8 +246,8 @@ namespace KlayGE
 		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
-		uint32_t level)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
@@ -251,7 +255,8 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(first_array_index);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, first_array_index);
 			HashCombine(hash_val, array_size);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
@@ -264,7 +269,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillRTVDesc(first_array_index, array_size, level);
+				auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
 				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
@@ -276,15 +281,16 @@ namespace KlayGE
 		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(array_index);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, array_index);
 			HashCombine(hash_val, 1);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, first_slice);
@@ -297,7 +303,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillRTVDesc(array_index, first_slice, num_slices, level);
+				auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
 				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
@@ -309,14 +315,15 @@ namespace KlayGE
 		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face,
-		uint32_t level)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		CubeFaces face, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(array_index * 6 + face);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, array_index * 6 + face);
 			HashCombine(hash_val, 1);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
@@ -329,7 +336,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillRTVDesc(array_index, face, level);
+				auto desc = this->FillRTVDesc(pf, array_index, face, level);
 				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
@@ -341,8 +348,8 @@ namespace KlayGE
 		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
-		uint32_t level)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
@@ -350,7 +357,8 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(first_array_index);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, first_array_index);
 			HashCombine(hash_val, array_size);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
@@ -363,7 +371,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillDSVDesc(first_array_index, array_size, level);
+				auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
 				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
@@ -375,15 +383,16 @@ namespace KlayGE
 		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(array_index);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, array_index);
 			HashCombine(hash_val, 1);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, first_slice);
@@ -396,7 +405,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillDSVDesc(array_index, first_slice, num_slices, level);
+				auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
 				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
@@ -408,13 +417,15 @@ namespace KlayGE
 		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index,
+		CubeFaces face, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = HashValue(array_index * 6 + face);
+			size_t hash_val = HashValue(pf);
+			HashCombine(hash_val, array_index * 6 + face);
 			HashCombine(hash_val, 1);
 			HashCombine(hash_val, level);
 			HashCombine(hash_val, 0);
@@ -427,7 +438,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto desc = this->FillDSVDesc(array_index, face, level);
+				auto desc = this->FillDSVDesc(pf, array_index, face, level);
 				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
@@ -963,18 +974,21 @@ namespace KlayGE
 		d3d_texture_readback_buff_.reset();
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(num_items);
+		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
@@ -983,11 +997,12 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 		CubeFaces first_face, uint32_t num_faces, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(num_items);
+		KFL_UNUSED(array_size);
 		KFL_UNUSED(first_face);
 		KFL_UNUSED(num_faces);
 		KFL_UNUSED(level);
@@ -995,8 +1010,10 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
@@ -1004,9 +1021,10 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
@@ -1015,8 +1033,9 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);
@@ -1024,8 +1043,10 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
@@ -1033,9 +1054,10 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
@@ -1044,8 +1066,9 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);

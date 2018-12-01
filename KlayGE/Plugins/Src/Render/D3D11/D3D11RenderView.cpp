@@ -44,13 +44,13 @@ namespace KlayGE
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture, int first_array_index, int array_size, int level)
 		: rt_src_(&texture), rt_first_subres_(first_array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
 	{
-		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DRenderTargetView(first_array_index, array_size, level);
-
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
 		sample_count_ = texture.SampleCount();
 		sample_quality_ = texture.SampleQuality();
+
+		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetrieveD3DRenderTargetView(pf_, first_array_index, array_size, level);
 
 		this->BindDiscardFunc();
 	}
@@ -58,13 +58,13 @@ namespace KlayGE
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
 		: rt_src_(&texture_3d), rt_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), rt_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
-		rt_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DRenderTargetView(array_index, first_slice, num_slices, level);
-
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
 		sample_count_ = texture_3d.SampleCount();
 		sample_quality_ = texture_3d.SampleQuality();
+
+		rt_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetrieveD3DRenderTargetView(pf_, array_index, first_slice, num_slices, level);
 
 		this->BindDiscardFunc();
 	}
@@ -72,13 +72,13 @@ namespace KlayGE
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
 	{
-		rt_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DRenderTargetView(array_index, face, level);
-
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
 		sample_count_ = texture_cube.SampleCount();
 		sample_quality_ = texture_cube.SampleQuality();
+
+		rt_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetrieveD3DRenderTargetView(pf_, array_index, face, level);
 
 		this->BindDiscardFunc();
 	}
@@ -160,13 +160,13 @@ namespace KlayGE
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 		: rt_src_(&texture), rt_first_subres_(first_array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
 	{
-		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DDepthStencilView(first_array_index, array_size, level);
-
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
 		sample_count_ = texture.SampleCount();
 		sample_quality_ = texture.SampleQuality();
+
+		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetrieveD3DDepthStencilView(pf_, first_array_index, array_size, level);
 
 		this->BindDiscardFunc();
 	}
@@ -174,13 +174,13 @@ namespace KlayGE
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
 		: rt_src_(&texture_3d), rt_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), rt_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
-		ds_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DDepthStencilView(array_index, first_slice, num_slices, level);
-
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
 		sample_count_ = texture_3d.SampleCount();
 		sample_quality_ = texture_3d.SampleQuality();
+
+		ds_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetrieveD3DDepthStencilView(pf_, array_index, first_slice, num_slices, level);
 
 		this->BindDiscardFunc();
 	}
@@ -188,13 +188,13 @@ namespace KlayGE
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
 	{
-		ds_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DDepthStencilView(array_index, face, level);
-
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
 		sample_count_ = texture_cube.SampleCount();
 		sample_quality_ = texture_cube.SampleQuality();
+
+		ds_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetrieveD3DDepthStencilView(pf_, array_index, face, level);
 
 		this->BindDiscardFunc();
 	}
@@ -207,7 +207,7 @@ namespace KlayGE
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
-		ds_view_ = checked_cast<D3D11Texture*>(ds_tex.get())->RetriveD3DDepthStencilView(0, 1, 0);
+		ds_view_ = checked_cast<D3D11Texture*>(ds_tex.get())->RetrieveD3DDepthStencilView(pf, 0, 1, 0);
 
 		width_ = width;
 		height_ = height;
@@ -288,11 +288,11 @@ namespace KlayGE
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		ua_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DUnorderedAccessView(first_array_index, array_size, level);
-
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+
+		ua_view_ = checked_cast<D3D11Texture*>(&texture)->RetrieveD3DUnorderedAccessView(pf_, first_array_index, array_size, level);
 
 		this->BindDiscardFunc();
 	}
@@ -304,11 +304,12 @@ namespace KlayGE
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		ua_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DUnorderedAccessView(array_index, first_slice, num_slices, level);
-
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+
+		ua_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetrieveD3DUnorderedAccessView(pf_, array_index, first_slice, num_slices,
+			level);
 
 		this->BindDiscardFunc();
 	}
@@ -320,11 +321,11 @@ namespace KlayGE
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		ua_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DUnorderedAccessView(array_index, face, level);
-
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+
+		ua_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetrieveD3DUnorderedAccessView(pf_, array_index, face, level);
 
 		this->BindDiscardFunc();
 	}

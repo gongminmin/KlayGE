@@ -29,7 +29,7 @@ namespace KlayGE
 
 		ID3D11Buffer* D3DBuffer() const
 		{
-			return buffer_.get();
+			return d3d_buffer_.get();
 		}
 
 		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
@@ -46,8 +46,9 @@ namespace KlayGE
 		void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
 
-		virtual void CreateHWResource(void const * init_data) override;
-		virtual void DeleteHWResource() override;
+		void CreateHWResource(void const * init_data) override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 
@@ -61,7 +62,8 @@ namespace KlayGE
 	private:
 		ID3D11Device* d3d_device_;
 		ID3D11DeviceContext* d3d_imm_ctx_;
-		ID3D11BufferPtr buffer_;
+
+		ID3D11BufferPtr d3d_buffer_;
 		ID3D11ShaderResourceViewPtr d3d_sr_view_;
 		mutable ID3D11RenderTargetViewPtr d3d_rt_view_;
 		ID3D11UnorderedAccessViewPtr d3d_ua_view_;

@@ -132,11 +132,11 @@ namespace KlayGE
 		}
 	}
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture1D::FillSRVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t first_level,
-		uint32_t num_levels) const
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture1D::FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t first_level, uint32_t num_levels) const
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-		switch (format_)
+		switch (pf)
 		{
 		case EF_D16:
 			desc.Format = DXGI_FORMAT_R16_UNORM;
@@ -151,7 +151,7 @@ namespace KlayGE
 			break;
 
 		default:
-			desc.Format = dxgi_fmt_;
+			desc.Format = D3D12Mapping::MappingFormat(pf);
 			break;
 		}
 		desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -161,7 +161,7 @@ namespace KlayGE
 			desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
 			desc.Texture1DArray.MostDetailedMip = first_level;
 			desc.Texture1DArray.MipLevels = num_levels;
-			desc.Texture1DArray.ArraySize = num_items;
+			desc.Texture1DArray.ArraySize = array_size;
 			desc.Texture1DArray.FirstArraySlice = first_array_index;
 			desc.Texture1DArray.ResourceMinLODClamp = 0;
 		}
@@ -176,15 +176,16 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture1D::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture1D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = dxgi_fmt_;
+		desc.Format = D3D12Mapping::MappingFormat(pf);
 		if (array_size_ > 1)
 		{
 			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
 			desc.Texture1DArray.MipSlice = level;
-			desc.Texture1DArray.ArraySize = num_items;
+			desc.Texture1DArray.ArraySize = array_size;
 			desc.Texture1DArray.FirstArraySlice = first_array_index;
 		}
 		else
@@ -196,10 +197,11 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture1D::FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture1D::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D12_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(this->Format());
+		desc.Format = D3D12Mapping::MappingFormat(pf);
 		if (this->ArraySize() > 1)
 		{
 			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
@@ -216,10 +218,11 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture1D::FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture1D::FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D12_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(this->Format());
+		desc.Format = D3D12Mapping::MappingFormat(pf);
 		desc.Flags = D3D12_DSV_FLAG_NONE;
 		if (this->ArraySize() > 1)
 		{
@@ -382,9 +385,10 @@ namespace KlayGE
 						D3D12_RESOURCE_STATE_RENDER_TARGET);
 					re.FlushResourceBarriers(cmd_list);
 
-					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetriveD3DRenderTargetView(index, 1, level)->Handle();
+					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetrieveD3DRenderTargetView(format_, index, 1, level)->Handle();
 
-					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle = this->RetriveD3DShaderResourceView(index, 1, level - 1, 1)->Handle();
+					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
+						= this->RetrieveD3DShaderResourceView(format_, index, 1, level - 1, 1)->Handle();
 					device->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, sr_handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 					cmd_list->OMSetRenderTargets(1, &rt_handle, false, nullptr);

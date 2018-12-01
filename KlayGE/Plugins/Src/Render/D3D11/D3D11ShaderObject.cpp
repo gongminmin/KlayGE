@@ -66,7 +66,7 @@ namespace
 				*srvsrc_ = std::make_tuple(tex_subres.tex.get(),
 					tex_subres.first_array_index * tex_subres.tex->NumMipMaps() + tex_subres.first_level,
 					tex_subres.num_items * tex_subres.num_levels);
-				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
+				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetrieveD3DShaderResourceView(tex_subres.tex->Format(),
 					tex_subres.first_array_index, tex_subres.num_items,
 					tex_subres.first_level, tex_subres.num_levels).get();
 			}
@@ -127,7 +127,7 @@ namespace
 			if (tex_subres.tex)
 			{
 				*uavsrc_ = tex_subres.tex.get();
-				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
+				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetrieveD3DUnorderedAccessView(tex_subres.tex->Format(),
 					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
 			}
 			else

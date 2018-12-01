@@ -43,8 +43,9 @@ namespace KlayGE
 		void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
 
-		virtual void CreateHWResource(void const * init_data) override;
-		virtual void DeleteHWResource() override;
+		void CreateHWResource(void const * init_data) override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 

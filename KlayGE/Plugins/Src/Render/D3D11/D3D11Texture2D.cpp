@@ -117,7 +117,7 @@ namespace KlayGE
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
-			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
+			this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
 		}
 	}
 
@@ -261,11 +261,11 @@ namespace KlayGE
 		}
 	}
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture2D::FillSRVDesc(uint32_t first_array_index, uint32_t num_items,
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture2D::FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-		switch (format_)
+		switch (pf)
 		{
 		case EF_D16:
 			desc.Format = DXGI_FORMAT_R16_UNORM;
@@ -280,7 +280,7 @@ namespace KlayGE
 			break;
 
 		default:
-			desc.Format = dxgi_fmt_;
+			desc.Format = D3D11Mapping::MappingFormat(pf);
 			break;
 		}
 
@@ -290,7 +290,7 @@ namespace KlayGE
 			{
 				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
 				desc.Texture2DMSArray.FirstArraySlice = first_array_index;
-				desc.Texture2DMSArray.ArraySize = num_items;
+				desc.Texture2DMSArray.ArraySize = array_size;
 			}
 			else
 			{
@@ -298,7 +298,7 @@ namespace KlayGE
 				desc.Texture2DArray.MostDetailedMip = first_level;
 				desc.Texture2DArray.MipLevels = num_levels;
 				desc.Texture2DArray.FirstArraySlice = first_array_index;
-				desc.Texture2DArray.ArraySize = num_items;
+				desc.Texture2DArray.ArraySize = array_size;
 			}
 		}
 		else
@@ -318,16 +318,17 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture2D::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture2D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = dxgi_fmt_;
+		desc.Format = D3D11Mapping::MappingFormat(pf);
 		if (array_size_ > 1)
 		{
 			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 			desc.Texture2DArray.MipSlice = level;
 			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.ArraySize = num_items;
+			desc.Texture2DArray.ArraySize = array_size;
 		}
 		else
 		{
@@ -338,10 +339,11 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture2D::FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture2D::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D11Mapping::MappingFormat(this->Format());
+		desc.Format = D3D11Mapping::MappingFormat(pf);
 		if (array_size_ > 1)
 		{
 			if (sample_count_ > 1)
@@ -374,10 +376,11 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture2D::FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture2D::FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
 	{
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = D3D11Mapping::MappingFormat(this->Format());
+		desc.Format = D3D11Mapping::MappingFormat(pf);
 		desc.Flags = 0;
 		if (array_size_ > 1)
 		{
@@ -507,7 +510,7 @@ namespace KlayGE
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
-			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
+			this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
 		}
 	}
 }

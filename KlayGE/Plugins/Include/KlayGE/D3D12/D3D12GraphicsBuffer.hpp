@@ -51,7 +51,7 @@ namespace KlayGE
 
 		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
 		{
-			return buffer_counter_upload_;
+			return d3d_buffer_counter_upload_;
 		}
 
 		D3D12ShaderResourceViewSimulationPtr const & D3DShaderResourceView() const
@@ -68,8 +68,9 @@ namespace KlayGE
 		void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
 
-		virtual void CreateHWResource(void const * init_data) override;
-		virtual void DeleteHWResource() override;
+		void CreateHWResource(void const * init_data) override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 
@@ -88,7 +89,7 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D12ResourcePtr buffer_counter_upload_;
+		ID3D12ResourcePtr d3d_buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		uint32_t counter_offset_;

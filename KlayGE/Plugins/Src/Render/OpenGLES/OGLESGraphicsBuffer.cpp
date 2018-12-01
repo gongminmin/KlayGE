@@ -26,7 +26,7 @@ namespace KlayGE
 {
 	OGLESGraphicsBuffer::OGLESGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
 				uint32_t size_in_byte, ElementFormat fmt)
-			: GraphicsBuffer(usage, access_hint, size_in_byte),
+			: GraphicsBuffer(usage, access_hint, size_in_byte, 0),
 				vb_(0), tex_(0), target_(target), fmt_as_shader_res_(fmt)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
@@ -144,6 +144,11 @@ namespace KlayGE
 
 			vb_ = 0;
 		}
+	}
+
+	bool OGLESGraphicsBuffer::HWResourceReady() const
+	{
+		return vb_ != 0;
 	}
 
 	void* OGLESGraphicsBuffer::Map(BufferAccess ba)
