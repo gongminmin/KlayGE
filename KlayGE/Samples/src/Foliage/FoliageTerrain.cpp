@@ -249,7 +249,8 @@ namespace KlayGE
 				sizeof(indirect_args), indirect_args, EF_R32UI);
 
 			plant_primitive_written_fb_ = rf.MakeFrameBuffer();
-			plant_primitive_written_buff_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*plant_primitive_written_buff_, EF_R32UI);
+			plant_primitive_written_buff_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(plant_primitive_written_buff_, EF_R32UI,
+				0, static_cast<uint32_t>(std::size(indirect_args)));
 			plant_primitive_written_fb_->AttachUAV(0, plant_primitive_written_buff_uav_);
 		}
 		else
@@ -439,7 +440,7 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(plant_primitive_written_fb_);
 
-			*(foliage_dist_effect_->ParameterByName("rw_primitive_buff")) = plant_primitive_written_buff_;
+			*(foliage_dist_effect_->ParameterByName("rw_primitive_buff")) = plant_primitive_written_buff_uav_;
 		}
 		else
 		{

@@ -145,10 +145,11 @@ namespace KlayGE
 	class D3D11UnorderedAccessView : public UnorderedAccessView
 	{
 	public:
-		D3D11UnorderedAccessView(Texture& texture_1d_2d_cube, int first_array_index, int array_size, int level);
-		D3D11UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D11UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		D3D11UnorderedAccessView(GraphicsBuffer& gb, ElementFormat pf);
+		D3D11UnorderedAccessView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
+		D3D11UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level);
+		D3D11UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
+		D3D11UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 		virtual ~D3D11UnorderedAccessView();
 
 		void Clear(float4 const & val);
@@ -161,7 +162,7 @@ namespace KlayGE
 
 		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
 		{
-			return ua_view_.get();
+			return d3d_ua_view_.get();
 		}
 
 		void* UASrc() const
@@ -187,7 +188,7 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx_;
 		ID3D11DeviceContext1* d3d_imm_ctx_1_;
 
-		ID3D11UnorderedAccessViewPtr ua_view_;
+		ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 		void* ua_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;

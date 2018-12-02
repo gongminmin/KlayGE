@@ -20,6 +20,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
@@ -73,26 +74,10 @@ namespace KlayGE
 		UnorderedAccessView();
 		virtual ~UnorderedAccessView();
 
-		uint32_t Width() const
-		{
-			return width_;
-		}
-		uint32_t Height() const
-		{
-			return height_;
-		}
 		ElementFormat Format() const
 		{
 			return pf_;
 		}
-
-		virtual void Clear(float4 const & val) = 0;
-		virtual void Clear(uint4 const & val) = 0;
-
-		virtual void Discard() = 0;
-
-		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
-		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;
 
 		void InitCount(uint32_t count)
 		{
@@ -103,12 +88,82 @@ namespace KlayGE
 			return init_count_;
 		}
 
-	protected:
-		uint32_t width_;
-		uint32_t height_;
-		ElementFormat pf_;
+		TexturePtr const & TextureResource() const
+		{
+			return tex_;
+		}
+		uint32_t FirstArrayIndex() const
+		{
+			return first_array_index_;
+		}
+		uint32_t ArraySize() const
+		{
+			return array_size_;
+		}
+		uint32_t Level() const
+		{
+			return level_;
+		}
+		uint32_t FirstSlice() const
+		{
+			return first_slice_;
+		}
+		uint32_t NumSlices() const
+		{
+			return num_slices_;
+		}
+		Texture::CubeFaces FirstFace() const
+		{
+			return first_face_;
+		}
+		uint32_t NumFaces() const
+		{
+			return num_faces_;
+		}
 
-		uint32_t init_count_;
+		GraphicsBufferPtr const & BufferResource() const
+		{
+			return buff_;
+		}
+		uint32_t FirstElement() const
+		{
+			return first_elem_;
+		}
+		uint32_t NumElements() const
+		{
+			return num_elems_;
+		}
+
+		virtual void Clear(float4 const & val) = 0;
+		virtual void Clear(uint4 const & val) = 0;
+
+		virtual void Discard() = 0;
+
+		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
+		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;
+
+	protected:
+		ElementFormat pf_;
+		uint32_t init_count_ = 0;
+
+		// For textures
+		TexturePtr tex_;
+		uint32_t first_array_index_;
+		uint32_t array_size_;
+		uint32_t level_;
+
+		// For 3D textures
+		uint32_t first_slice_;
+		uint32_t num_slices_;
+
+		// For cube textures
+		Texture::CubeFaces first_face_;
+		uint32_t num_faces_;
+
+		// For buffers
+		GraphicsBufferPtr buff_;
+		uint32_t first_elem_;
+		uint32_t num_elems_;
 	};
 }
 

@@ -216,13 +216,16 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
-			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
+			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
+		src_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(src_, EF_GR32F, 0, 3 * width * height);
 
 		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
-			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
+			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
+		dst_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(dst_, EF_GR32F, 0, 3 * width * height);
 
 		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
-			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
+			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
+		tmp_buffer_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(tmp_buffer_, EF_GR32F, 0, 3 * width * height);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -289,9 +292,10 @@ namespace KlayGE
 		*(effect_->ParameterByName("istride")) = istride;
 		*(effect_->ParameterByName("istride3")) = uint2(0, istride3);
 		*(effect_->ParameterByName("phase_base")) = phase_base;
-		this->Radix008A(tmp_buffer_, src_, thread_count, istride, true);
+		this->Radix008A(tmp_buffer_uav_, src_, thread_count, istride, true);
 
 		GraphicsBufferPtr buf[2] = { dst_, tmp_buffer_ };
+		UnorderedAccessViewPtr buf_uav[2] = { dst_uav_, tmp_buffer_uav_ };
 		int index = 0;
 
 		uint32_t t = width_;
@@ -303,7 +307,7 @@ namespace KlayGE
 			*(effect_->ParameterByName("istride")) = istride;
 			*(effect_->ParameterByName("istride3")) = uint2(0, istride3);
 			*(effect_->ParameterByName("phase_base")) = phase_base;
-			this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
+			this->Radix008A(buf_uav[index], buf[!index], thread_count, istride, false);
 			index = !index;
 
 			t /= 8;
@@ -322,7 +326,7 @@ namespace KlayGE
 		*(effect_->ParameterByName("istride")) = istride;
 		*(effect_->ParameterByName("istride3")) = uint2(istride3, 0);
 		*(effect_->ParameterByName("phase_base")) = phase_base;
-		this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
+		this->Radix008A(buf_uav[index], buf[!index], thread_count, istride, false);
 		index = !index;
 
 		t = height_;
@@ -334,7 +338,7 @@ namespace KlayGE
 			*(effect_->ParameterByName("istride")) = istride;
 			*(effect_->ParameterByName("istride3")) = uint2(istride3, 0);
 			*(effect_->ParameterByName("phase_base")) = phase_base;
-			this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
+			this->Radix008A(buf_uav[index], buf[!index], thread_count, istride, false);
 			index = !index;
 
 			t /= 8;
@@ -348,7 +352,7 @@ namespace KlayGE
 		re.BindFrameBuffer(old_fb);
 	}
 
-	void GpuFftCS4::Radix008A(GraphicsBufferPtr const & dst,
+	void GpuFftCS4::Radix008A(UnorderedAccessViewPtr const & dst_uav,
 				   GraphicsBufferPtr const & src,
 				   uint32_t thread_count, uint32_t istride, bool first)
 	{
@@ -357,7 +361,7 @@ namespace KlayGE
 
 		// Buffers
 		*(effect_->ParameterByName("src_data")) = src;
-		*(effect_->ParameterByName("dst_data")) = dst;
+		*(effect_->ParameterByName("dst_data")) = dst_uav;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();

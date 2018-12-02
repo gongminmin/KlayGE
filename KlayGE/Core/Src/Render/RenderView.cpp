@@ -15,17 +15,9 @@
 
 namespace KlayGE
 {
-	RenderView::~RenderView()
-	{
-	}
+	RenderView::~RenderView() = default;
 
 
-	UnorderedAccessView::UnorderedAccessView()
-		: init_count_(0)
-	{
-	}
-
-	UnorderedAccessView::~UnorderedAccessView()
-	{
-	}
+	UnorderedAccessView::UnorderedAccessView() = default;
+	UnorderedAccessView::~UnorderedAccessView() = default;
 }

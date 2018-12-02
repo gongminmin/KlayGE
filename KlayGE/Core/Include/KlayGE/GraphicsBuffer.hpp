@@ -114,6 +114,11 @@ namespace KlayGE
 			return access_hint_;
 		}
 
+		uint32_t StructureByteStride() const
+		{
+			return structure_byte_stride_;
+		}
+
 		virtual void CopyToBuffer(GraphicsBuffer& target) = 0;
 		virtual void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) = 0;

@@ -292,29 +292,6 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture2D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
-	{
-		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(pf);
-		if (array_size_ > 1)
-		{
-			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-			desc.Texture2DArray.MipSlice = level;
-			desc.Texture2DArray.ArraySize = array_size;
-			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.PlaneSlice = 0;
-		}
-		else
-		{
-			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-			desc.Texture2D.MipSlice = level;
-			desc.Texture2D.PlaneSlice = 0;
-		}
-
-		return desc;
-	}
-
 	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture2D::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 		uint32_t level) const
 	{

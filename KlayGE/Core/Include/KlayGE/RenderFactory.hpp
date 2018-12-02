@@ -110,13 +110,20 @@ namespace KlayGE
 		virtual RenderViewPtr MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level) = 0;
 		virtual RenderViewPtr Make3DDepthStencilRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level) = 0;
 
-		virtual UnorderedAccessViewPtr Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level) = 0;
-		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level) = 0;
-		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level) = 0;
-		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level) = 0;
-		virtual UnorderedAccessViewPtr MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level) = 0;
-		virtual UnorderedAccessViewPtr Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level) = 0;
-		virtual UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf) = 0;
+		virtual UnorderedAccessViewPtr Make1DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+			int level, ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+			int level, ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(TexturePtr const & texture, int array_index, Texture::CubeFaces face,
+			int level, ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t slice,
+			int level, ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr MakeCubeUnorderedAccessView(TexturePtr const & texture, int array_index, int level,
+			ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr Make3DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level, ElementFormat pf = EF_Unknown) = 0;
+		virtual UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+			uint32_t first_elem, uint32_t num_elems) = 0;
 
 		RenderStateObjectPtr MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 			BlendStateDesc const & bs_desc);

@@ -208,40 +208,47 @@ namespace KlayGE
 		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, array_index, first_slice, num_slices, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make1DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+		int level, ElementFormat pf)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+		int level, ElementFormat pf)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int array_index,
+		Texture::CubeFaces face, int level, ElementFormat pf)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, face, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, array_index, face, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t slice,
+		int level, ElementFormat pf)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, slice, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, array_index, slice, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::MakeCubeUnorderedAccessView(TexturePtr const & texture, int array_index, int level,
+		ElementFormat pf)
 	{
 		int array_size = 1;
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, array_size, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, array_index, array_size, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make3DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level, ElementFormat pf)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, first_slice, num_slices, level);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, pf, array_index, first_slice, num_slices, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf)
+	UnorderedAccessViewPtr D3D12RenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(gbuffer, pf);
+		return MakeSharedPtr<D3D12UnorderedAccessView>(gbuffer, pf, first_elem, num_elems);
 	}
 
 	ShaderObjectPtr D3D12RenderFactory::MakeShaderObject()

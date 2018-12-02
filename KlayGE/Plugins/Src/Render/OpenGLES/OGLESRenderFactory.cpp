@@ -193,37 +193,44 @@ namespace KlayGE
 		return RenderViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make1DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make1DUnorderedAccessView(TexturePtr const & /*texture*/, int /*first_array_index*/,
+		int /*array_size*/, int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*first_array_index*/,
+		int /*array_size*/, int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
+		Texture::CubeFaces /*face*/, int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
+		uint32_t /*slice*/, int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::MakeCubeUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::MakeCubeUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
+		int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make3DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make3DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
+		uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/, ElementFormat /*pf*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& /*gbuffer*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBufferPtr const & /*gbuffer*/,
+		ElementFormat /*pf*/, uint32_t /*first_elem*/, uint32_t /*num_elems*/)
 	{
 		return UnorderedAccessViewPtr();
 	}

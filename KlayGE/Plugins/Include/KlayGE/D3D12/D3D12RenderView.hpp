@@ -224,10 +224,11 @@ namespace KlayGE
 	class D3D12UnorderedAccessView : public UnorderedAccessView
 	{
 	public:
-		D3D12UnorderedAccessView(Texture& texture_1d_2d_cube, int first_array_index, int array_size, int level);
-		D3D12UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D12UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		D3D12UnorderedAccessView(GraphicsBuffer& gb, ElementFormat pf);
+		D3D12UnorderedAccessView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
+		D3D12UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level);
+		D3D12UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
+		D3D12UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 
 		void Clear(float4 const & val);
 		void Clear(uint4 const & val);
@@ -239,7 +240,7 @@ namespace KlayGE
 
 		D3D12UnorderedAccessViewSimulationPtr const & D3DUnorderedAccessView() const
 		{
-			return ua_view_;
+			return d3d_ua_view_;
 		}
 
 		D3D12ResourcePtr const & UASrc() const
@@ -261,7 +262,7 @@ namespace KlayGE
 		ID3D12Device* d3d_device_;
 		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
-		D3D12UnorderedAccessViewSimulationPtr ua_view_;
+		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		D3D12ResourcePtr ua_src_;
 		ID3D12ResourcePtr ua_counter_upload_src_;
 		uint32_t ua_first_subres_;

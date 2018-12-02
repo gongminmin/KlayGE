@@ -190,16 +190,26 @@ namespace KlayGE
 			interval_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
 				MAX_NUM_CASCADES * sizeof(float2), nullptr, EF_GR32F);
+			interval_buff_float_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(interval_buff_, EF_GR32F, 0, MAX_NUM_CASCADES);
+			interval_buff_uint_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(interval_buff_, EF_GR32UI, 0, MAX_NUM_CASCADES);
+
 			scale_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
 				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			scale_buff_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(scale_buff_, EF_BGR32F, 0, MAX_NUM_CASCADES);
+
 			bias_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
 				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			bias_buff_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(bias_buff_, EF_BGR32F, 0, MAX_NUM_CASCADES);
+
 			cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
 				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			cascade_min_buff_uint_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(cascade_min_buff_, EF_BGR32UI, 0, MAX_NUM_CASCADES);
+
 			cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
 				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			cascade_max_buff_uint_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(cascade_max_buff_, EF_BGR32UI, 0, MAX_NUM_CASCADES);
 
 			for (uint32_t i = 0; i < 2; ++ i)
 			{
@@ -303,15 +313,15 @@ namespace KlayGE
 			int dispatch_x = (depth_tex_->Width(0) + TILE_DIM - 1) / TILE_DIM;
 			int dispatch_y = (depth_tex_->Height(0) + TILE_DIM - 1) / TILE_DIM;
 
-			*interval_buff_param_ = interval_buff_;
-			*interval_buff_uint_param_ = interval_buff_;
+			*interval_buff_param_ = interval_buff_float_uav_;
+			*interval_buff_uint_param_ = interval_buff_uint_uav_;
 			*interval_buff_read_param_ = interval_buff_;
-			*cascade_min_buff_uint_param_ = cascade_min_buff_;
-			*cascade_max_buff_uint_param_ = cascade_max_buff_;
+			*cascade_min_buff_uint_param_ = cascade_min_buff_uint_uav_;
+			*cascade_max_buff_uint_param_ = cascade_max_buff_uint_uav_;
 			*cascade_min_buff_read_param_ = cascade_min_buff_;
 			*cascade_max_buff_read_param_ = cascade_max_buff_;
-			*scale_buff_param_ = scale_buff_;
-			*bias_buff_param_ = bias_buff_;
+			*scale_buff_param_ = scale_buff_uav_;
+			*bias_buff_param_ = bias_buff_uav_;
 			*depth_tex_param_ = depth_tex_;
 			*num_cascades_param_ = static_cast<int32_t>(num_cascades);
 			*inv_depth_width_height_param_ = float2(1.0f / depth_tex_->Width(0), 1.0f / depth_tex_->Height(0));

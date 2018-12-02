@@ -172,6 +172,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(TextureSubresource const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
+		virtual RenderVariable& operator=(UnorderedAccessViewPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(ShaderDesc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
@@ -207,6 +208,7 @@ namespace KlayGE
 		virtual void Value(TextureSubresource& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(GraphicsBufferPtr& value) const;
+		virtual void Value(UnorderedAccessViewPtr& value) const;
 		virtual void Value(std::string& val) const;
 		virtual void Value(ShaderDesc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
@@ -532,19 +534,53 @@ namespace KlayGE
 		std::string elem_type_;
 	};
 
+	class RenderVariableRwTexture : public RenderVariable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override;
+
+		virtual RenderVariable& operator=(TexturePtr const & value);
+		RenderVariable& operator=(UnorderedAccessViewPtr const & value) override;
+		RenderVariable& operator=(std::string const & value);
+
+		virtual void Value(TexturePtr& val) const;
+		void Value(UnorderedAccessViewPtr& val) const override;
+		void Value(std::string& val) const override;
+
+	protected:
+		UnorderedAccessViewPtr val_;
+		std::string elem_type_;
+	};
+
 	class RenderVariableBuffer : public RenderVariable
 	{
 	public:
 		std::unique_ptr<RenderVariable> Clone() override;
 
-		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
-		virtual RenderVariable& operator=(std::string const & value);
+		RenderVariable& operator=(GraphicsBufferPtr const & value) override;
+		RenderVariable& operator=(std::string const & value) override;
 
-		virtual void Value(GraphicsBufferPtr& val) const;
-		virtual void Value(std::string& val) const;
+		void Value(GraphicsBufferPtr& val) const override;
+		void Value(std::string& val) const override;
 
 	protected:
 		GraphicsBufferPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableRwBuffer : public RenderVariable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override;
+
+		RenderVariable& operator=(UnorderedAccessViewPtr const & value) override;
+		RenderVariable& operator=(std::string const & value) override;
+
+		void Value(UnorderedAccessViewPtr& val) const override;
+		void Value(std::string& val) const override;
+
+	protected:
+		UnorderedAccessViewPtr val_;
 		std::string elem_type_;
 	};
 
@@ -553,15 +589,25 @@ namespace KlayGE
 	public:
 		std::unique_ptr<RenderVariable> Clone() override;
 
-		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
-		virtual RenderVariable& operator=(std::string const & value);
+		RenderVariable& operator=(GraphicsBufferPtr const & value) override;
 
-		virtual void Value(GraphicsBufferPtr& val) const;
-		virtual void Value(std::string& val) const;
+		void Value(GraphicsBufferPtr& val) const override;
 
 	protected:
 		GraphicsBufferPtr val_;
-		std::string elem_type_;
+	};
+
+	class RenderVariableRwByteAddressBuffer : public RenderVariable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override;
+
+		RenderVariable& operator=(UnorderedAccessViewPtr const & value) override;
+
+		void Value(UnorderedAccessViewPtr& val) const override;
+
+	protected:
+		UnorderedAccessViewPtr val_;
 	};
 
 	typedef RenderVariableConcrete<bool> RenderVariableBool;

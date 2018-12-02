@@ -169,44 +169,12 @@ namespace KlayGE
 			{
 				counter_offset_ = 0;
 			}
-
-			D3D12_UNORDERED_ACCESS_VIEW_DESC d3d_ua_view;
-			if (access_hint_ & EAH_Raw)
-			{
-				d3d_ua_view.Format = DXGI_FORMAT_R32_TYPELESS;
-				d3d_ua_view.Buffer.StructureByteStride = 0;
-			}
-			else if (access_hint_ & EAH_GPU_Structured)
-			{
-				d3d_ua_view.Format = DXGI_FORMAT_UNKNOWN;
-				d3d_ua_view.Buffer.StructureByteStride = structure_byte_stride_;
-			}
-			else
-			{
-				d3d_ua_view.Format = D3D12Mapping::MappingFormat(fmt_as_shader_res_);
-				d3d_ua_view.Buffer.StructureByteStride = 0;
-			}
-			d3d_ua_view.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-			d3d_ua_view.Buffer.FirstElement = 0;
-			d3d_ua_view.Buffer.NumElements = size_in_byte_ / structure_byte_stride_;
-			d3d_ua_view.Buffer.CounterOffsetInBytes = counter_offset_;
-			if (access_hint_ & EAH_Raw)
-			{
-				d3d_ua_view.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
-			}
-			else
-			{
-				d3d_ua_view.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-			}
-
-			d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, d3d_ua_view);
 		}
 	}
 
 	void D3D12GraphicsBuffer::DeleteHWResource()
 	{
 		d3d_sr_view_.reset();
-		d3d_ua_view_.reset();
 		counter_offset_ = 0;
 		d3d_buffer_counter_upload_.reset();
 		d3d_resource_.reset();

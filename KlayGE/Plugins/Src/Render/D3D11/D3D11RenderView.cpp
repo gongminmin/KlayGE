@@ -281,70 +281,215 @@ namespace KlayGE
 	}
 
 
-	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
-		: ua_src_(&texture), ua_first_subres_(first_array_index * texture.NumMipMaps() + level), ua_num_subres_(1)
+	D3D11UnorderedAccessView::D3D11UnorderedAccessView(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
+		: ua_src_(texture.get()), ua_first_subres_(first_array_index * texture->NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		width_ = texture.Width(level);
-		height_ = texture.Height(level);
-		pf_ = texture.Format();
+		tex_ = texture;
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
 
-		ua_view_ = checked_cast<D3D11Texture*>(&texture)->RetrieveD3DUnorderedAccessView(pf_, first_array_index, array_size, level);
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture->Depth(0);
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(pf_);
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+			if (array_size_ > 1)
+			{
+				desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
+				desc.Texture1DArray.MipSlice = level_;
+				desc.Texture1DArray.FirstArraySlice = first_array_index_;
+				desc.Texture1DArray.ArraySize = array_size_;
+			}
+			else
+			{
+				desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1D;
+				desc.Texture1D.MipSlice = level_;
+			}
+			break;
+
+		case Texture::TT_2D:
+			if (array_size_ > 1)
+			{
+				desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+				desc.Texture2DArray.MipSlice = level_;
+				desc.Texture2DArray.FirstArraySlice = first_array_index_;
+				desc.Texture2DArray.ArraySize = array_size_;
+			}
+			else
+			{
+				desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MipSlice = level_;
+			}
+			break;
+
+		case Texture::TT_3D:
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+			desc.Texture3D.MipSlice = level_;
+			desc.Texture3D.FirstWSlice = first_slice_;
+			desc.Texture3D.WSize = num_slices_;
+			break;
+
+		case Texture::TT_Cube:
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
+			desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
+			break;
+		}
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		d3d_device_->CreateUnorderedAccessView(checked_cast<D3D11Texture*>(texture.get())->D3DResource(), &desc, &d3d_ua_view);
+		d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 
 		this->BindDiscardFunc();
 	}
 
-	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-		: ua_src_(&texture_3d), ua_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), ua_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
+	D3D11UnorderedAccessView::D3D11UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
+		: ua_src_(texture_3d.get()), ua_first_subres_((array_index * texture_3d->Depth(level) + first_slice) * texture_3d->NumMipMaps() + level),
+			ua_num_subres_(num_slices * texture_3d->NumMipMaps() + level)
+	{
+		BOOST_ASSERT(array_index == 0);
+
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+
+		tex_ = texture_3d;
+		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
+
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = first_slice;
+		num_slices_ = num_slices;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(pf_);
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MipSlice = level_;
+		desc.Texture3D.FirstWSlice = first_slice_;
+		desc.Texture3D.WSize = num_slices_;
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		d3d_device_->CreateUnorderedAccessView(checked_cast<D3D11Texture*>(texture_3d.get())->D3DResource(), &desc, &d3d_ua_view);
+		d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
+
+		this->BindDiscardFunc();
+	}
+
+	D3D11UnorderedAccessView::D3D11UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+		: ua_src_(texture_cube.get()), ua_first_subres_((array_index * 6 + face) * texture_cube->NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		width_ = texture_3d.Width(level);
-		height_ = texture_3d.Height(level);
-		pf_ = texture_3d.Format();
+		tex_ = texture_cube;
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 
-		ua_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetrieveD3DUnorderedAccessView(pf_, array_index, first_slice, num_slices,
-			level);
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture_cube->Depth(0);
+		first_face_ = face;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(pf_);
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+		desc.Texture2DArray.MipSlice = level_;
+		desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
+		desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		d3d_device_->CreateUnorderedAccessView(checked_cast<D3D11Texture*>(texture_cube.get())->D3DResource(), &desc, &d3d_ua_view);
+		d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 
 		this->BindDiscardFunc();
 	}
 
-	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
-		: ua_src_(&texture_cube), ua_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ua_num_subres_(1)
+	D3D11UnorderedAccessView::D3D11UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+		: ua_src_(gb.get()), ua_first_subres_(0), ua_num_subres_(1)
 	{
-		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		uint32_t const access_hint = gb->AccessHint();
 
-		width_ = texture_cube.Width(level);
-		height_ = texture_cube.Width(level);
-		pf_ = texture_cube.Format();
-
-		ua_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetrieveD3DUnorderedAccessView(pf_, array_index, face, level);
-
-		this->BindDiscardFunc();
-	}
-
-	D3D11UnorderedAccessView::D3D11UnorderedAccessView(GraphicsBuffer& gb, ElementFormat pf)
-		: ua_src_(&gb), ua_first_subres_(0), ua_num_subres_(1)
-	{
-		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(access_hint & EAH_GPU_Unordered);
 
 		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 		d3d_imm_ctx_1_ = renderEngine.D3DDeviceImmContext1();
 
-		ua_view_ = checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DUnorderedAccessView();
-
-		width_ = gb.Size() / NumFormatBytes(pf);
-		height_ = 1;
+		buff_ = gb;
 		pf_ = pf;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		level_ = 0;
+		first_slice_ = 0;
+		num_slices_ = 0;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = first_elem;
+		num_elems_ = num_elems;
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		if (access_hint & EAH_Raw)
+		{
+			uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
+		}
+		else if (access_hint & EAH_GPU_Structured)
+		{
+			uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		}
+		else
+		{
+			uav_desc.Format = D3D11Mapping::MappingFormat(pf);
+		}
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = first_elem;
+		uav_desc.Buffer.NumElements = num_elems;
+		uav_desc.Buffer.Flags = 0;
+		if (access_hint & EAH_Raw)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_RAW;
+		}
+		if (access_hint & EAH_Append)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
+		}
+		if (access_hint & EAH_Counter)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
+		}
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		TIFHR(d3d_device_->CreateUnorderedAccessView(checked_cast<D3D11GraphicsBuffer*>(gb.get())->D3DBuffer(), &uav_desc, &d3d_ua_view));
+		d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 
 		this->BindDiscardFunc();
 	}
@@ -355,12 +500,12 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::Clear(float4 const & val)
 	{
-		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_.get(), &val.x());
+		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(d3d_ua_view_.get(), &val.x());
 	}
 
 	void D3D11UnorderedAccessView::Clear(uint4 const & val)
 	{
-		d3d_imm_ctx_->ClearUnorderedAccessViewUint(ua_view_.get(), &val.x());
+		d3d_imm_ctx_->ClearUnorderedAccessViewUint(d3d_ua_view_.get(), &val.x());
 	}
 
 	void D3D11UnorderedAccessView::Discard()
@@ -383,13 +528,13 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
-		d3d_imm_ctx_1_->DiscardView(ua_view_.get());
+		d3d_imm_ctx_1_->DiscardView(d3d_ua_view_.get());
 	}
 
 	void D3D11UnorderedAccessView::FackDiscard()
 	{
 		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_.get(), clr);
+		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(d3d_ua_view_.get(), clr);
 	}
 
 	void D3D11UnorderedAccessView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)

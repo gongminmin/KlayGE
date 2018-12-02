@@ -220,25 +220,6 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11TextureCube::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
-	{
-		return this->FillUAVDesc(pf, first_array_index, array_size, CF_Positive_X, 6, level);
-	}
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11TextureCube::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		CubeFaces first_face, uint32_t num_faces, uint32_t level) const
-	{
-		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D11Mapping::MappingFormat(pf);
-		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.FirstArraySlice = first_array_index * 6 + first_face;
-		desc.Texture2DArray.ArraySize = array_size * 6 + num_faces;
-
-		return desc;
-	}
-
 	D3D11_RENDER_TARGET_VIEW_DESC D3D11TextureCube::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 		uint32_t level) const
 	{

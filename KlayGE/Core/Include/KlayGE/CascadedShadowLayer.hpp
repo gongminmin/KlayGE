@@ -146,10 +146,16 @@ namespace KlayGE
 		RenderEffectParameter* max_cascade_scale_param_;
 
 		GraphicsBufferPtr interval_buff_;
+		UnorderedAccessViewPtr interval_buff_float_uav_;
+		UnorderedAccessViewPtr interval_buff_uint_uav_;
 		GraphicsBufferPtr scale_buff_;
+		UnorderedAccessViewPtr scale_buff_uav_;
 		GraphicsBufferPtr bias_buff_;
+		UnorderedAccessViewPtr bias_buff_uav_;
 		GraphicsBufferPtr cascade_min_buff_;
+		UnorderedAccessViewPtr cascade_min_buff_uint_uav_;
 		GraphicsBufferPtr cascade_max_buff_;
+		UnorderedAccessViewPtr cascade_max_buff_uint_uav_;
 
 		GraphicsBufferPtr interval_cpu_buffs_[2];
 		GraphicsBufferPtr scale_cpu_buffs_[2];

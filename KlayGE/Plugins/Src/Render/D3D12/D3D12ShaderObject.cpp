@@ -138,14 +138,13 @@ namespace
 
 		void operator()()
 		{
-			TextureSubresource tex_subres;
-			param_->Value(tex_subres);
-			if (tex_subres.tex)
+			UnorderedAccessViewPtr uav;
+			param_->Value(uav);
+			if (uav)
 			{
-				uavsrc_->first = checked_cast<D3D12Texture*>(tex_subres.tex.get());
+				uavsrc_->first = checked_cast<D3D12Texture*>(uav->TextureResource().get());
 				uavsrc_->second = nullptr; // TODO
-				*uav_ = checked_cast<D3D12Texture*>(tex_subres.tex.get())->RetrieveD3DUnorderedAccessView(tex_subres.tex->Format(),
-					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
+				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView().get();
 			}
 			else
 			{
@@ -171,13 +170,13 @@ namespace
 
 		void operator()()
 		{
-			GraphicsBufferPtr buf;
-			param_->Value(buf);
-			if (buf)
+			UnorderedAccessViewPtr uav;
+			param_->Value(uav);
+			if (uav)
 			{
-				uavsrc_->first = checked_cast<D3D12GraphicsBuffer*>(buf.get());
-				uavsrc_->second = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DBufferCounterUpload().get();
-				*uav_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
+				uavsrc_->first = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get());
+				uavsrc_->second = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get())->D3DBufferCounterUpload().get();
+				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView().get();
 			}
 			else
 			{

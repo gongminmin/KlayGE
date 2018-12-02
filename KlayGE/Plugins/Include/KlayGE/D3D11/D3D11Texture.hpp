@@ -56,13 +56,6 @@ namespace KlayGE
 		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
 
-		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-			uint32_t array_size, uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-			uint32_t num_slices, uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-			uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level);
-
 		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level);
 		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
@@ -120,13 +113,6 @@ namespace KlayGE
 		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const = 0;
 
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const;
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-			uint32_t num_slices, uint32_t level) const;
-		virtual D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			CubeFaces first_face, uint32_t num_faces, uint32_t level) const;
-
 		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const;
 		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
@@ -147,7 +133,6 @@ namespace KlayGE
 
 		ID3D11ResourcePtr d3d_texture_;
 		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
-		std::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
 		std::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
 		std::unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
 	};
@@ -177,8 +162,6 @@ namespace KlayGE
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
 		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
@@ -217,8 +200,6 @@ namespace KlayGE
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
 		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
@@ -256,10 +237,6 @@ namespace KlayGE
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-			uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
 			uint32_t level) const override;
 		D3D11_DEPTH_STENCIL_VIEW_DESC FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
@@ -300,10 +277,6 @@ namespace KlayGE
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const override;
-		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			CubeFaces first_face, uint32_t num_faces, uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const override;

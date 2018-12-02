@@ -59,11 +59,6 @@ namespace KlayGE
 			return d3d_sr_view_;
 		}
 
-		D3D12UnorderedAccessViewSimulationPtr const & D3DUnorderedAccessView() const
-		{
-			return d3d_ua_view_;
-		}
-
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
@@ -91,7 +86,6 @@ namespace KlayGE
 	private:
 		ID3D12ResourcePtr d3d_buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
-		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		uint32_t counter_offset_;
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 

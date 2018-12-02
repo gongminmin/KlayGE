@@ -174,32 +174,6 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
-	{
-		BOOST_ASSERT(0 == first_array_index);
-		BOOST_ASSERT(1 == array_size);
-		KFL_UNUSED(array_size);
-
-		return this->FillUAVDesc(pf, first_array_index, 0, this->Depth(level), level);
-	}
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
-	{
-		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
-
-		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D11Mapping::MappingFormat(pf);
-		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
-		desc.Texture3D.MipSlice = level;
-		desc.Texture3D.FirstWSlice = first_slice;
-		desc.Texture3D.WSize = num_slices;
-
-		return desc;
-	}
-
 	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture3D::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
 		uint32_t num_slices, uint32_t level) const
 	{

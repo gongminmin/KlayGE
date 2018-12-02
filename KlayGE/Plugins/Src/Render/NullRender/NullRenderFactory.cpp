@@ -283,64 +283,79 @@ namespace KlayGE
 		return RenderViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make1DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+		int level, ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int first_array_index, int array_size,
+		int level, ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int array_index,
+		Texture::CubeFaces face, int level, ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t slice,
+		int level, ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(slice);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level)
+	UnorderedAccessViewPtr NullRenderFactory::MakeCubeUnorderedAccessView(TexturePtr const & texture, int array_index, int level,
+		ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make3DUnorderedAccessView(TexturePtr const & texture, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level, ElementFormat pf)
 	{
 		KFL_UNUSED(texture);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
 		KFL_UNUSED(level);
+		KFL_UNUSED(pf);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf)
+	UnorderedAccessViewPtr NullRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
 	{
 		KFL_UNUSED(gbuffer);
 		KFL_UNUSED(pf);
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
 		return UnorderedAccessViewPtr();
 	}
 

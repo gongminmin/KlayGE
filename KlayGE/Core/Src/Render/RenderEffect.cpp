@@ -53,7 +53,9 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/Texture.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/CXX17/filesystem.hpp>
@@ -622,6 +624,19 @@ namespace
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
+			var = MakeUniquePtr<RenderVariableTexture>();
+			*var = TexturePtr();
+			attr = node.Attrib("elem_type");
+			if (attr)
+			{
+				*var = std::string(attr->ValueString());
+			}
+			else
+			{
+				*var = std::string("float4");
+			}
+			break;
+
 		case REDT_rw_texture1D:
 		case REDT_rw_texture2D:
 		case REDT_rw_texture3D:
@@ -632,8 +647,8 @@ namespace
 		case REDT_rasterizer_ordered_texture2D:
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
-			var = MakeUniquePtr<RenderVariableTexture>();
-			*var = TexturePtr();
+			var = MakeUniquePtr<RenderVariableRwTexture>();
+			*var = UnorderedAccessViewPtr();
 			attr = node.Attrib("elem_type");
 			if (attr)
 			{
@@ -1354,12 +1369,8 @@ namespace
 
 		case REDT_buffer:
 		case REDT_structured_buffer:
-		case REDT_rw_buffer:
-		case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
-		case REDT_rasterizer_ordered_buffer:
-		case REDT_rasterizer_ordered_structured_buffer:
 			var = MakeUniquePtr<RenderVariableBuffer>();
 			*var = GraphicsBufferPtr();
 			attr = node.Attrib("elem_type");
@@ -1373,11 +1384,32 @@ namespace
 			}
 			break;
 
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
+			var = MakeUniquePtr<RenderVariableRwBuffer>();
+			*var = UnorderedAccessViewPtr();
+			attr = node.Attrib("elem_type");
+			if (attr)
+			{
+				*var = std::string(attr->ValueString());
+			}
+			else
+			{
+				*var = std::string("float4");
+			}
+			break;
+
 		case REDT_byte_address_buffer:
-		case REDT_rw_byte_address_buffer:
-		case REDT_rasterizer_ordered_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 			*var = GraphicsBufferPtr();
+			break;
+
+		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
+			var = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
+			*var = UnorderedAccessViewPtr();
 			break;
 
 		default:
@@ -1480,6 +1512,13 @@ namespace
 		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
+			{
+				var = MakeUniquePtr<RenderVariableTexture>();
+				*var = TexturePtr();
+				*var = ReadShortString(res);
+			}
+			break;
+
 		case REDT_rw_texture1D:
 		case REDT_rw_texture2D:
 		case REDT_rw_texture3D:
@@ -1491,8 +1530,8 @@ namespace
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
 			{
-				var = MakeUniquePtr<RenderVariableTexture>();
-				*var = TexturePtr();
+				var = MakeUniquePtr<RenderVariableRwTexture>();
+				*var = UnorderedAccessViewPtr();
 				*var = ReadShortString(res);
 			}
 			break;
@@ -1921,12 +1960,8 @@ namespace
 
 		case REDT_buffer:
 		case REDT_structured_buffer:
-		case REDT_rw_buffer:
-		case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
-		case REDT_rasterizer_ordered_buffer:
-		case REDT_rasterizer_ordered_structured_buffer:
 			{
 				var = MakeUniquePtr<RenderVariableBuffer>();
 				*var = GraphicsBufferPtr();
@@ -1934,11 +1969,26 @@ namespace
 			}
 			break;
 
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
+			{
+				var = MakeUniquePtr<RenderVariableRwBuffer>();
+				*var = UnorderedAccessViewPtr();
+				*var = ReadShortString(res);
+			}
+			break;
+
 		case REDT_byte_address_buffer:
-		case REDT_rw_byte_address_buffer:
-		case REDT_rasterizer_ordered_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 			*var = GraphicsBufferPtr();
+			break;
+
+		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
+			var = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
+			*var = UnorderedAccessViewPtr();
 			break;
 
 		default:
@@ -5645,6 +5695,11 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
+	RenderVariable& RenderVariable::operator=(UnorderedAccessViewPtr const & /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
 	RenderVariable& RenderVariable::operator=(std::string const & /*value*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
@@ -5811,6 +5866,11 @@ namespace KlayGE
 	}
 
 	void RenderVariable::Value(GraphicsBufferPtr& /*value*/) const
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	void RenderVariable::Value(UnorderedAccessViewPtr& /*value*/) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -6035,6 +6095,7 @@ namespace KlayGE
 		}
 	}
 
+
 	std::unique_ptr<RenderVariable> RenderVariableTexture::Clone()
 	{
 		auto ret = MakeUniquePtr<RenderVariableTexture>();
@@ -6098,6 +6159,70 @@ namespace KlayGE
 	}
 
 
+	std::unique_ptr<RenderVariable> RenderVariableRwTexture::Clone()
+	{
+		auto ret = MakeUniquePtr<RenderVariableRwTexture>();
+		UnorderedAccessViewPtr val;
+		this->Value(val);
+		*ret = val;
+		std::string elem_type;
+		this->Value(elem_type);
+		*ret = elem_type;
+		return std::move(ret);
+	}
+
+	RenderVariable& RenderVariableRwTexture::operator=(TexturePtr const & value)
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		switch (value->Type())
+		{
+		case Texture::TT_1D:
+			val_ = rf.Make1DUnorderedAccessView(value, 0, value->ArraySize(), 0);
+			break;
+
+		case Texture::TT_2D:
+			val_ = rf.Make2DUnorderedAccessView(value, 0, value->ArraySize(), 0);
+			break;
+
+		case Texture::TT_3D:
+			val_ = rf.Make3DUnorderedAccessView(value, 0, 0, value->Depth(0), 0);
+			break;
+
+		case Texture::TT_Cube:
+			val_ = rf.MakeCubeUnorderedAccessView(value, 0, 0);
+			break;
+		}
+		return *this;
+	}
+
+	RenderVariable& RenderVariableRwTexture::operator=(UnorderedAccessViewPtr const & value)
+	{
+		val_ = value;
+		return *this;
+	}
+
+	void RenderVariableRwTexture::Value(TexturePtr& val) const
+	{
+		val = val_->TextureResource();
+	}
+
+	void RenderVariableRwTexture::Value(UnorderedAccessViewPtr& val) const
+	{
+		val = val_;
+	}
+
+	RenderVariable& RenderVariableRwTexture::operator=(std::string const & value)
+	{
+		elem_type_ = value;
+		return *this;
+	}
+
+	void RenderVariableRwTexture::Value(std::string& val) const
+	{
+		val = elem_type_;
+	}
+
+
 	std::unique_ptr<RenderVariable> RenderVariableBuffer::Clone()
 	{
 		auto ret = MakeUniquePtr<RenderVariableBuffer>();
@@ -6133,15 +6258,47 @@ namespace KlayGE
 	}
 
 
+	std::unique_ptr<RenderVariable> RenderVariableRwBuffer::Clone()
+	{
+		auto ret = MakeUniquePtr<RenderVariableRwBuffer>();
+		UnorderedAccessViewPtr val;
+		this->Value(val);
+		*ret = val;
+		std::string elem_type;
+		this->Value(elem_type);
+		*ret = elem_type;
+		return std::move(ret);
+	}
+
+	RenderVariable& RenderVariableRwBuffer::operator=(UnorderedAccessViewPtr const & value)
+	{
+		val_ = value;
+		return *this;
+	}
+
+	void RenderVariableRwBuffer::Value(UnorderedAccessViewPtr& val) const
+	{
+		val = val_;
+	}
+
+	RenderVariable& RenderVariableRwBuffer::operator=(std::string const & value)
+	{
+		elem_type_ = value;
+		return *this;
+	}
+
+	void RenderVariableRwBuffer::Value(std::string& val) const
+	{
+		val = elem_type_;
+	}
+
+
 	std::unique_ptr<RenderVariable> RenderVariableByteAddressBuffer::Clone()
 	{
 		auto ret = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 		GraphicsBufferPtr val;
 		this->Value(val);
 		*ret = val;
-		std::string elem_type;
-		this->Value(elem_type);
-		*ret = elem_type;
 		return std::move(ret);
 	}
 
@@ -6156,15 +6313,25 @@ namespace KlayGE
 		val = val_;
 	}
 
-	RenderVariable& RenderVariableByteAddressBuffer::operator=(std::string const & value)
+
+	std::unique_ptr<RenderVariable> RenderVariableRwByteAddressBuffer::Clone()
 	{
-		elem_type_ = value;
+		auto ret = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
+		UnorderedAccessViewPtr val;
+		this->Value(val);
+		*ret = val;
+		return std::move(ret);
+	}
+
+	RenderVariable& RenderVariableRwByteAddressBuffer::operator=(UnorderedAccessViewPtr const & value)
+	{
+		val_ = value;
 		return *this;
 	}
 
-	void RenderVariableByteAddressBuffer::Value(std::string& val) const
+	void RenderVariableRwByteAddressBuffer::Value(UnorderedAccessViewPtr& val) const
 	{
-		val = elem_type_;
+		val = val_;
 	}
 
 

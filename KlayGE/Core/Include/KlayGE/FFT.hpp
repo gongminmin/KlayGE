@@ -68,16 +68,19 @@ namespace KlayGE
 			TexturePtr const & in_real, TexturePtr const & in_imag);
 
 	private:
-		void Radix008A(GraphicsBufferPtr const & dst,
+		void Radix008A(UnorderedAccessViewPtr const & dst_uav,
 				   GraphicsBufferPtr const & src,
 				   uint32_t thread_count, uint32_t istride, bool first);
 
 	private:
 		GraphicsBufferPtr src_;
+		UnorderedAccessViewPtr src_uav_;
 		GraphicsBufferPtr dst_;
+		UnorderedAccessViewPtr dst_uav_;
 		RenderLayoutPtr quad_layout_;
 		FrameBufferPtr tex_fb_;
 		GraphicsBufferPtr tmp_buffer_;
+		UnorderedAccessViewPtr tmp_buffer_uav_;
 		
 		RenderEffectPtr effect_;
 		RenderTechnique* radix008a_tech_;

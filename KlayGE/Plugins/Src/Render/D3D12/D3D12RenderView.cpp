@@ -421,75 +421,210 @@ namespace KlayGE
 	}
 
 
-	D3D12UnorderedAccessView::D3D12UnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
-		: ua_first_subres_(first_array_index * texture.NumMipMaps() + level), ua_num_subres_(1)
+	D3D12UnorderedAccessView::D3D12UnorderedAccessView(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
+		: ua_first_subres_(first_array_index * texture->NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		width_ = texture.Width(level);
-		height_ = texture.Height(level);
-		pf_ = texture.Format();
+		tex_ = texture;
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
-		ua_view_ = d3d_tex->RetrieveD3DUnorderedAccessView(pf_, first_array_index, array_size, level);
-		ua_src_ = d3d_tex->shared_from_this();
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture->Depth(0);
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		ua_src_ = checked_pointer_cast<D3D12Texture>(texture);
 		counter_offset_ = 0;
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf_);
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+			if (array_size_ > 1)
+			{
+				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
+				desc.Texture1DArray.MipSlice = level_;
+				desc.Texture1DArray.ArraySize = array_size_;
+				desc.Texture1DArray.FirstArraySlice = first_array_index_;
+			}
+			else
+			{
+				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+				desc.Texture1D.MipSlice = level_;
+			}
+			break;
+
+		case Texture::TT_2D:
+			if (array_size_ > 1)
+			{
+				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+				desc.Texture2DArray.MipSlice = level_;
+				desc.Texture2DArray.ArraySize = array_size_;
+				desc.Texture2DArray.FirstArraySlice = first_array_index_;
+				desc.Texture2DArray.PlaneSlice = 0;
+			}
+			else
+			{
+				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MipSlice = level_;
+				desc.Texture2D.PlaneSlice = 0;
+			}
+			break;
+
+		case Texture::TT_3D:
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+			desc.Texture3D.MipSlice = level_;
+			desc.Texture3D.FirstWSlice = first_slice_;
+			desc.Texture3D.WSize = num_slices_;
+			break;
+
+		case Texture::TT_Cube:
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level_;
+			desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
+			desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
+			desc.Texture2DArray.PlaneSlice = 0;
+			break;
+		}
+		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
 	}
 
-	D3D12UnorderedAccessView::D3D12UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-		: ua_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), ua_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
+	D3D12UnorderedAccessView::D3D12UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
+		: ua_first_subres_((array_index * texture_3d->Depth(level) + first_slice) * texture_3d->NumMipMaps() + level), ua_num_subres_(num_slices * texture_3d->NumMipMaps() + level)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		width_ = texture_3d.Width(level);
-		height_ = texture_3d.Height(level);
-		pf_ = texture_3d.Format();
+		tex_ = texture_3d;
+		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
-		ua_view_ = d3d_tex->RetrieveD3DUnorderedAccessView(pf_, array_index, first_slice, num_slices, level);
-		ua_src_ = d3d_tex->shared_from_this();
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = first_slice;
+		num_slices_ = num_slices;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		ua_src_ = checked_pointer_cast<D3D12Texture>(texture_3d);
 		counter_offset_ = 0;
+		
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf_);
+		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MipSlice = level_;
+		desc.Texture3D.FirstWSlice = first_slice_;
+		desc.Texture3D.WSize = num_slices_;
+		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
 	}
 
-	D3D12UnorderedAccessView::D3D12UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
-		: ua_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ua_num_subres_(1)
+	D3D12UnorderedAccessView::D3D12UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+		: ua_first_subres_((array_index * 6 + face) * texture_cube->NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		width_ = texture_cube.Width(level);
-		height_ = texture_cube.Width(level);
-		pf_ = texture_cube.Format();
+		tex_ = texture_cube;
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
-		ua_view_ = d3d_tex->RetrieveD3DUnorderedAccessView(pf_, array_index, face, level);
-		ua_src_ = d3d_tex->shared_from_this();
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture_cube->Depth(0);
+		first_face_ = face;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		ua_src_ = checked_pointer_cast<D3D12Texture>(texture_cube);
 		counter_offset_ = 0;
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf_);
+		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+		desc.Texture2DArray.MipSlice = level_;
+		desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
+		desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
+		desc.Texture2DArray.PlaneSlice = 0;
+		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
 	}
 
-	D3D12UnorderedAccessView::D3D12UnorderedAccessView(GraphicsBuffer& gb, ElementFormat pf)
+	D3D12UnorderedAccessView::D3D12UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
 		: ua_first_subres_(0), ua_num_subres_(1)
 	{
-		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
+		uint32_t const access_hint = gb->AccessHint();
+
+		BOOST_ASSERT(access_hint & EAH_GPU_Unordered);
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		D3D12GraphicsBuffer* d3d_buff = checked_cast<D3D12GraphicsBuffer*>(&gb);
-		ua_view_ = d3d_buff->D3DUnorderedAccessView();
-		ua_src_ = d3d_buff->shared_from_this();
+		buff_ = gb;
+		pf_ = pf;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		level_ = 0;
+		first_slice_ = 0;
+		num_slices_ = 0;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = first_elem;
+		num_elems_ = num_elems;
+
+		D3D12GraphicsBufferPtr d3d_buff = checked_pointer_cast<D3D12GraphicsBuffer>(gb);
+		ua_src_ = d3d_buff;
 		ua_counter_upload_src_ = d3d_buff->D3DBufferCounterUpload();
 		counter_offset_ = d3d_buff->CounterOffset();
 
-		width_ = gb.Size() / NumFormatBytes(pf);
-		height_ = 1;
-		pf_ = pf;
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		if (access_hint & EAH_Raw)
+		{
+			uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			uav_desc.Buffer.StructureByteStride = 0;
+		}
+		else if (access_hint & EAH_GPU_Structured)
+		{
+			uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+			uav_desc.Buffer.StructureByteStride = gb->StructureByteStride();
+		}
+		else
+		{
+			uav_desc.Format = D3D12Mapping::MappingFormat(pf);
+			uav_desc.Buffer.StructureByteStride = 0;
+		}
+		uav_desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = first_elem_;
+		uav_desc.Buffer.NumElements = num_elems_;
+		uav_desc.Buffer.CounterOffsetInBytes = counter_offset_;
+		if (access_hint & EAH_Raw)
+		{
+			uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
+		}
+		else
+		{
+			uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+		}
+		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), uav_desc);
 	}
 
 	void D3D12UnorderedAccessView::Clear(float4 const & val)
@@ -510,10 +645,10 @@ namespace KlayGE
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
-		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_f4_val_ = val;
-		d3d_cmd_list_->ClearUnorderedAccessViewFloat(gpu_handle, ua_view_->Handle(),
+		d3d_cmd_list_->ClearUnorderedAccessViewFloat(gpu_handle, d3d_ua_view_->Handle(),
 			ua_src_->D3DResource().get(), &clear_f4_val_.x(), 0, nullptr);
 	}
 
@@ -535,10 +670,10 @@ namespace KlayGE
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
-		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_ui4_val_ = val;
-		d3d_cmd_list_->ClearUnorderedAccessViewUint(gpu_handle, ua_view_->Handle(),
+		d3d_cmd_list_->ClearUnorderedAccessViewUint(gpu_handle, d3d_ua_view_->Handle(),
 			ua_src_->D3DResource().get(), &clear_ui4_val_.x(), 0, nullptr);
 	}
 
