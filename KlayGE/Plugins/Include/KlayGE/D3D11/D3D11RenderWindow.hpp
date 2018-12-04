@@ -78,11 +78,11 @@ namespace KlayGE
 		{
 			return depth_stencil_;
 		}
-		RenderViewPtr const & D3DBackBufferRTV() const
+		RenderTargetViewPtr const & D3DBackBufferRtv() const
 		{
 			return render_target_view_;
 		}
-		RenderViewPtr const & D3DBackBufferRightEyeRTV() const
+		RenderTargetViewPtr const & D3DBackBufferRightEyeRtv() const
 		{
 			return render_target_view_right_eye_;
 		}
@@ -142,10 +142,10 @@ namespace KlayGE
 
 		TexturePtr					back_buffer_;
 		TexturePtr					depth_stencil_;
-		RenderViewPtr				render_target_view_;
-		RenderViewPtr				depth_stencil_view_;
-		RenderViewPtr				render_target_view_right_eye_;
-		RenderViewPtr				depth_stencil_view_right_eye_;
+		RenderTargetViewPtr			render_target_view_;
+		DepthStencilViewPtr			depth_stencil_view_;
+		RenderTargetViewPtr			render_target_view_right_eye_;
+		DepthStencilViewPtr			depth_stencil_view_right_eye_;
 
 		DXGI_FORMAT					back_buffer_format_;
 		ElementFormat				depth_stencil_fmt_;

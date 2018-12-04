@@ -37,6 +37,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -651,15 +652,15 @@ namespace KlayGE
 		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		sm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
+		sm_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(sm_tex_, 0, 1, 0));
 		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
-		sm_fb_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
+		auto sm_depth_view = rf.Make2DDsv(sm_depth_tex_, 0, 1, 0);
+		sm_fb_->Attach(sm_depth_view);
 
 		csm_fb_ = rf.MakeFrameBuffer();
 		csm_tex_ = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		csm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*csm_tex_, 0, 1, 0));
-		csm_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE * 2, SM_SIZE * 2, EF_D24S8, 1, 0));
+		csm_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(csm_tex_, 0, 1, 0));
+		csm_fb_->Attach(rf.Make2DDsv(SM_SIZE * 2, SM_SIZE * 2, EF_D24S8, 1, 0));
 
 		for (auto& tex : unfiltered_sm_2d_texs_)
 		{
@@ -711,9 +712,9 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
-		rsm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rsm_texs_[0], 0, 1, 0)); // normal (light space)
-		rsm_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*rsm_texs_[1], 0, 1, 0)); // albedo
-		rsm_fb_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
+		rsm_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(rsm_texs_[0], 0, 1, 0)); // normal (light space)
+		rsm_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(rsm_texs_[1], 0, 1, 0)); // albedo
+		rsm_fb_->Attach(sm_depth_view);
 			
 		copy_to_light_buffer_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBuffer");
 		copy_to_light_buffer_i_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBufferI");
@@ -999,7 +1000,7 @@ namespace KlayGE
 		{
 			pvp.attrib |= VPAM_Enabled;
 
-			BOOST_ASSERT(fb->Attached(FrameBuffer::ATT_Color0)->SampleCount() == 1);
+			BOOST_ASSERT(fb->AttachedRtv(FrameBuffer::Attachment::Color0)->SampleCount() == 1);
 		}
 
 		uint32_t const width = pvp.frame_buffer->GetViewport()->width;
@@ -1014,7 +1015,7 @@ namespace KlayGE
 		BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, sample_quality, EAH_GPU_Read | EAH_GPU_Write);
-		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 1, 0);
+		auto ds_view = rf.Make2DDsv(pvp.g_buffer_ds_tex, 0, 1, 0);
 
 		pvp.g_buffer_resolved_rt0_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
@@ -1094,18 +1095,15 @@ namespace KlayGE
 			{
 				TexturePtr tex = rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				pvp.g_buffer_vdm_max_ds_texs.push_back(tex);
-				pvp.g_buffer_vdm_max_ds_views.push_back(rf.Make2DDepthStencilRenderView(*tex, 0, 1, 0));
+				pvp.g_buffer_vdm_max_ds_views.push_back(rf.Make2DDsv(tex, 0, 1, 0));
 				w = std::max(1U, w / 2);
 				h = std::max(1U, h / 2);
 			}
 		}
 
-		RenderViewPtr g_buffer_rt0_view = rf.Make2DRenderView(*pvp.g_buffer_rt0_tex, 0, 1, 0);
-		RenderViewPtr g_buffer_rt1_view = rf.Make2DRenderView(*pvp.g_buffer_rt1_tex, 0, 1, 0);
-
-		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_Color0, g_buffer_rt0_view);
-		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_Color1, g_buffer_rt1_view);
-		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		pvp.g_buffer_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.g_buffer_rt0_tex, 0, 1, 0));
+		pvp.g_buffer_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.g_buffer_rt1_tex, 0, 1, 0));
+		pvp.g_buffer_fb->Attach(ds_view);
 
 		this->SetupViewportGI(index, false);
 
@@ -1135,25 +1133,24 @@ namespace KlayGE
 		}
 #endif
 		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
-		pvp.shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
+		pvp.shadowing_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.shadowing_tex, 0, 1, 0));
 
 		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }, 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
-		pvp.projective_shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
+		pvp.projective_shadowing_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.projective_shadowing_tex, 0, 1, 0));
 
 		pvp.reflection_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		pvp.reflection_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.reflection_tex, 0, 1, 0));
-		pvp.reflection_fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(
-			pvp.reflection_tex->Width(0), pvp.reflection_tex->Height(0), ds_view->Format(), 1, 0));
+		pvp.reflection_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.reflection_tex, 0, 1, 0));
+		pvp.reflection_fb->Attach(rf.Make2DDsv(pvp.reflection_tex->Width(0), pvp.reflection_tex->Height(0), ds_view->Format(), 1, 0));
 
 		BOOST_ASSERT(caps.TextureRenderTargetFormatSupport(EF_ABGR16F, 1, 0));
 		ElementFormat shading_fmt = EF_ABGR16F;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		pvp.lighting_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_tex, 0, 1, 0));
-		pvp.lighting_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		pvp.lighting_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.lighting_tex, 0, 1, 0));
+		pvp.lighting_fb->Attach(ds_view);
 #endif
 
 		uint32_t const vdm_width = std::max(1U, width / 4);
@@ -1161,10 +1158,10 @@ namespace KlayGE
 		pvp.vdm_color_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_transition_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_count_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.vdm_color_tex, 0, 1, 0));
-		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*pvp.vdm_transition_tex, 0, 1, 0));
-		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*pvp.vdm_count_tex, 0, 1, 0));
-		pvp.vdm_fb->Attach(FrameBuffer::ATT_DepthStencil, pvp.g_buffer_vdm_max_ds_views[1]);
+		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.vdm_color_tex, 0, 1, 0));
+		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.vdm_transition_tex, 0, 1, 0));
+		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.vdm_count_tex, 0, 1, 0));
+		pvp.vdm_fb->Attach(pvp.g_buffer_vdm_max_ds_views[1]);
 
 		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
@@ -1210,7 +1207,7 @@ namespace KlayGE
 				if (sample_count != 1)
 				{
 					pvp.temp_shading_fb = rf.MakeFrameBuffer();
-					pvp.temp_shading_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.temp_shading_tex, 0, 1, 0));
+					pvp.temp_shading_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.temp_shading_tex, 0, 1, 0));
 				}
 			}
 
@@ -1218,8 +1215,8 @@ namespace KlayGE
 			BOOST_ASSERT(lighting_mask_fmt != EF_Unknown);
 			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, sample_count, sample_quality,
 				EAH_GPU_Read | EAH_GPU_Write);
-			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
-			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			pvp.lighting_mask_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.lighting_mask_tex, 0, 1, 0));
+			pvp.lighting_mask_fb->Attach(ds_view);
 
 			if (sample_count != 1)
 			{
@@ -1229,10 +1226,10 @@ namespace KlayGE
 				pvp.multi_sample_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write);
 
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.g_buffer_resolved_rt0_tex, 0, 1, 0));
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*pvp.g_buffer_resolved_rt1_tex, 0, 1, 0));
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*pvp.g_buffer_resolved_depth_tex, 0, 1, 0));
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::ATT_Color3, rf.Make2DRenderView(*pvp.multi_sample_mask_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.g_buffer_resolved_rt0_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.g_buffer_resolved_rt1_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.g_buffer_resolved_depth_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color3, rf.Make2DRtv(pvp.multi_sample_mask_tex, 0, 1, 0));
 			}
 
 			auto const light_indices_fmt = caps.BestMatchUavFormat({ EF_R16UI, EF_R32UI });
@@ -1250,26 +1247,26 @@ namespace KlayGE
 			BOOST_ASSERT(fmt != EF_Unknown);
 			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
+			pvp.light_index_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.light_index_tex, 0, 1, 0));
 		}
 #endif
 
-		pvp.shading_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shading_tex, 0, 1, 0));
-		pvp.shading_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		pvp.shading_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.shading_tex, 0, 1, 0));
+		pvp.shading_fb->Attach(ds_view);
 
 		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++ i)
 		{
-			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.merged_shading_texs[i], 0, 1, 0));
-			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-			pvp.merged_depth_fbs[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.merged_depth_texs[i], 0, 1, 0));
-			pvp.merged_depth_fbs[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.merged_shading_texs[i], 0, 1, 0));
+			pvp.merged_shading_fbs[i]->Attach(ds_view);
+			pvp.merged_depth_fbs[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.merged_depth_texs[i], 0, 1, 0));
+			pvp.merged_depth_fbs[i]->Attach(ds_view);
 		}
 		if (pvp.sample_count != 1)
 		{
 			for (size_t i = 0; i < pvp.merged_depth_resolved_fbs.size(); ++ i)
 			{
-				pvp.merged_depth_resolved_fbs[i]->Attach(FrameBuffer::ATT_Color0,
-					rf.Make2DRenderView(*pvp.merged_depth_resolved_texs[i], 0, 1, 0));
+				pvp.merged_depth_resolved_fbs[i]->Attach(FrameBuffer::Attachment::Color0,
+					rf.Make2DRtv(pvp.merged_depth_resolved_texs[i], 0, 1, 0));
 			}
 		}
 
@@ -2050,7 +2047,7 @@ namespace KlayGE
 			*near_q_far_param_ = pvp.frame_buffer->GetViewport()->camera->NearQFarParam();
 
 			re.BindFrameBuffer(pvp.g_buffer_resolved_fb);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color3)->ClearColor(Color(0, 0, 0, 0));
+			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color3)->ClearColor(Color(0, 0, 0, 0));
 			re.Render(*dr_effect_, *technique_resolve_g_buffers_, *rl_quad_);
 		}
 #endif
@@ -2061,7 +2058,7 @@ namespace KlayGE
 		if (cs_cldr_)
 		{
 			re.BindFrameBuffer(pvp.lighting_mask_fb);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 			re.Render(*dr_effect_, *technique_cldr_lighting_mask_, *rl_quad_);
 
 			this->CreateDepthMinMaxMapCS(pvp);
@@ -2409,14 +2406,14 @@ namespace KlayGE
 				if (li == static_cast<uint32_t>(projective_light_index_))
 				{
 					re.BindFrameBuffer(pvp.projective_shadowing_fb);
-					pvp.projective_shadowing_fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+					pvp.projective_shadowing_fb->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(1, 1, 1, 1));
 				}
 				else
 				{
 					re.BindFrameBuffer(pvp.shadowing_fb);
 					if (shadowing_channel <= 0)
 					{
-						pvp.shadowing_fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+						pvp.shadowing_fb->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(1, 1, 1, 1));
 					}
 				}
 
@@ -2709,7 +2706,7 @@ namespace KlayGE
 		else
 		{
 			re.BindFrameBuffer(pvp.shading_fb);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
+			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
 		}
 		re.Render(*dr_effect_, *technique_shading_, *rl_quad_);
 	}
@@ -2772,8 +2769,7 @@ namespace KlayGE
 
 			if (light_camera)
 			{
-				trans_pp->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
-					pvp.g_buffer_fb->Attached(FrameBuffer::ATT_DepthStencil));
+				trans_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_fb->AttachedDsv());
 				trans_pp->InputPin(0, pvp.g_buffer_rt0_tex);
 				trans_pp->InputPin(1, pvp.g_buffer_rt1_tex);
 				trans_pp->InputPin(2, pvp.g_buffer_depth_tex);
@@ -2799,8 +2795,7 @@ namespace KlayGE
 	{
 		auto* sss_pp = sss_blur_pps_[pvp.sample_count != 1].get();
 
-		sss_pp->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
-			pvp.g_buffer_fb->Attached(FrameBuffer::ATT_DepthStencil));
+		sss_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_fb->AttachedDsv());
 		sss_pp->InputPin(0, pvp.merged_shading_texs[pvp.curr_merged_buffer_index]);
 		sss_pp->InputPin(1, pvp.g_buffer_depth_tex);
 		sss_pp->OutputPin(0, pvp.merged_shading_texs[pvp.curr_merged_buffer_index]);
@@ -3053,7 +3048,7 @@ namespace KlayGE
 			depth_to_max_pp->InputPin(0, input_tex);
 			// Borrow the small_ssvo_tex
 			depth_to_max_pp->OutputPin(0, (0 == i) ? pvp.small_ssvo_tex : pvp.vdm_color_tex);
-			depth_to_max_pp->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, pvp.g_buffer_vdm_max_ds_views[i]);
+			depth_to_max_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_vdm_max_ds_views[i]);
 			depth_to_max_pp->Apply();
 		}
 	}
@@ -3379,7 +3374,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.light_index_fb);
-		pvp.light_index_fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+		pvp.light_index_fb->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
 
@@ -4180,8 +4175,8 @@ namespace KlayGE
 			{
 			case PRT_ShadowMap:
 				re.BindFrameBuffer(sm_fb_);
-				sm_fb_->Attached(FrameBuffer::ATT_Color0)->Discard();
-				sm_fb_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+				sm_fb_->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
+				sm_fb_->AttachedDsv()->ClearDepth(1.0f);
 				break;
 
 			case PRT_CascadedShadowMap:
@@ -4199,9 +4194,9 @@ namespace KlayGE
 
 				rsm_fb_->GetViewport()->camera = sm_fb_->GetViewport()->camera;
 				re.BindFrameBuffer(rsm_fb_);
-				rsm_fb_->Attached(FrameBuffer::ATT_Color0)->Discard();
-				rsm_fb_->Attached(FrameBuffer::ATT_Color1)->Discard();
-				rsm_fb_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
+				rsm_fb_->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
+				rsm_fb_->AttachedRtv(FrameBuffer::Attachment::Color1)->Discard();
+				rsm_fb_->AttachedDsv()->ClearDepthStencil(1.0f, 0);
 				break;
 			}
 		}
@@ -4325,7 +4320,7 @@ namespace KlayGE
 		}
 
 		re.BindFrameBuffer(pvp.reflection_fb);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_ReflectionOnly | (App3DFramework::URV_OpaqueOnly << pass_tb);
 	}
 
@@ -4471,7 +4466,7 @@ namespace KlayGE
 		auto& re = rf.RenderEngineInstance();
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 		dr_debug_pp_->Apply();
 
 		return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
@@ -4483,7 +4478,7 @@ namespace KlayGE
 		auto& re = rf.RenderEngineInstance();
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 		dr_debug_pp_->Apply();
 
 		return App3DFramework::URV_Finished | App3DFramework::URV_SkipPostProcess;

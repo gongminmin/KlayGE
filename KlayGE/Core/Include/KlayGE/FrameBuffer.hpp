@@ -32,24 +32,22 @@
 #include <vector>
 
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {
 	class KLAYGE_CORE_API FrameBuffer : boost::noncopyable
 	{
 	public:
-		enum Attachment
+		enum class Attachment
 		{
-			ATT_DepthStencil,
-			ATT_Color0,
-			ATT_Color1,
-			ATT_Color2,
-			ATT_Color3,
-			ATT_Color4,
-			ATT_Color5,
-			ATT_Color6,
-			ATT_Color7
+			Color0 = 0,
+			Color1,
+			Color2,
+			Color3,
+			Color4,
+			Color5,
+			Color6,
+			Color7
 		};
 
 		enum ClearBufferMask
@@ -63,6 +61,8 @@ namespace KlayGE
 		FrameBuffer();
 		virtual ~FrameBuffer();
 
+		static Attachment CalcAttachment(uint32_t index);
+
 		virtual std::wstring const & Description() const = 0;
 
 		uint32_t Left() const;
@@ -74,13 +74,17 @@ namespace KlayGE
 		ViewportPtr& GetViewport();
 		void SetViewport(ViewportPtr const & viewport);
 
-		void Attach(uint32_t att, RenderViewPtr const & view);
-		void Detach(uint32_t att);
-		RenderViewPtr const & Attached(uint32_t att) const;
+		void Attach(Attachment att, RenderTargetViewPtr const & view);
+		void Detach(Attachment att);
+		RenderTargetViewPtr const & AttachedRtv(Attachment att) const;
 
-		void AttachUAV(uint32_t att, UnorderedAccessViewPtr const & view);
-		void DetachUAV(uint32_t att);
-		UnorderedAccessViewPtr const & AttachedUAV(uint32_t att) const;
+		void Attach(DepthStencilViewPtr const & view);
+		void Detach();
+		DepthStencilViewPtr const & AttachedDsv() const;
+
+		void Attach(uint32_t index, UnorderedAccessViewPtr const & view);
+		void Detach(uint32_t index);
+		UnorderedAccessViewPtr const & AttachedUav(uint32_t index) const;
 
 		virtual void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) = 0;
 		virtual void Discard(uint32_t flags) = 0;
@@ -108,8 +112,8 @@ namespace KlayGE
 
 		ViewportPtr viewport_;
 
-		std::vector<RenderViewPtr> clr_views_;
-		RenderViewPtr ds_view_;
+		std::vector<RenderTargetViewPtr> rt_views_;
+		DepthStencilViewPtr ds_view_;
 		std::vector<UnorderedAccessViewPtr> ua_views_;
 		bool views_dirty_;
 	};

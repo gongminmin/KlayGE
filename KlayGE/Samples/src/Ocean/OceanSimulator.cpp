@@ -181,14 +181,14 @@ namespace KlayGE
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		displacement_fb_ = rf.MakeFrameBuffer();
-		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 1, 0));
+		displacement_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(displacement_tex_, 0, 1, 0));
 		gradient_fb_ = rf.MakeFrameBuffer();
-		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 1, 0));
+		gradient_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(gradient_tex_, 0, 1, 0));
 
 		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		tex_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*out_real_tex_, 0, 1, 0));
-		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag_tex_, 0, 1, 0));
+		tex_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(out_real_tex_, 0, 1, 0));
+		tex_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(out_imag_tex_, 0, 1, 0));
 
 		uint32_t actual_dim = param_.dmap_dim;
 		uint32_t input_dim = actual_dim + 1;

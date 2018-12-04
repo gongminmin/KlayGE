@@ -89,6 +89,11 @@ namespace KlayGE
 		data_block_.clear();
 	}
 
+	bool SoftwareGraphicsBuffer::HWResourceReady() const
+	{
+		return subres_data_ != nullptr;
+	}
+
 	void SoftwareGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
 		std::memcpy(subres_data_ + offset, data, size);

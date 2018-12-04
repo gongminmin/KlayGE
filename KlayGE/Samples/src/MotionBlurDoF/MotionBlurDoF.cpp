@@ -8,6 +8,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -358,7 +359,7 @@ namespace
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
-				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 1, 0));
+				spread_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(spread_tex_, 0, 1, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
 					static_cast<float>(height), 1.0f / width, 1.0f / height));
@@ -501,7 +502,7 @@ namespace
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 1, 0));
+				bokeh_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(bokeh_tex_, 0, 1, 0));
 
 				if (gs_support_)
 				{
@@ -842,15 +843,15 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	depth_texture_support_ = caps.depth_texture_support;
 
-	RenderViewPtr ds_view;
+	DepthStencilViewPtr ds_view;
 	if (depth_texture_support_)
 	{
 		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
+		ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 	}
 	else
 	{
-		ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+		ds_view = rf.Make2DDsv(width, height, EF_D16, 1, 0);
 	}
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
@@ -870,14 +871,14 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	BOOST_ASSERT(color_fmt != EF_Unknown);
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
-	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
-	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	clr_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
+	clr_depth_fb_->Attach(ds_view);
 
 	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
 	BOOST_ASSERT(motion_fmt != EF_Unknown);
 	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	velocity_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*velocity_tex_, 0, 1, 0));
-	velocity_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	velocity_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(velocity_tex_, 0, 1, 0));
+	velocity_fb_->Attach(ds_view);
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
@@ -1235,7 +1236,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		}
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 		return App3DFramework::URV_Finished;
 	}
 }

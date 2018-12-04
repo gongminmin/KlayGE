@@ -765,17 +765,17 @@ namespace KlayGE
 			if (!cs_based_)
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				RenderViewPtr view;
+				RenderTargetViewPtr rtv;
 				if (Texture::TT_2D == tex->Type())
 				{
-					view = rf.Make2DRenderView(*tex, array_index, 1, level);
+					rtv = rf.Make2DRtv(tex, array_index, 1, level);
 				}
 				else
 				{
 					BOOST_ASSERT(Texture::TT_Cube == tex->Type());
-					view = rf.Make2DRenderView(*tex, array_index, static_cast<Texture::CubeFaces>(face), level);
+					rtv = rf.Make2DRtv(tex, array_index, static_cast<Texture::CubeFaces>(face), level);
 				}
-				frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index, view);
+				frame_buffer_->Attach(FrameBuffer::CalcAttachment(index), rtv);
 			}
 
 			if (output_pins_ep_[index])

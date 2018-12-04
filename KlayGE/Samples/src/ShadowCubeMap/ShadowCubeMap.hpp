@@ -50,7 +50,7 @@ private:
 
 	KlayGE::FrameBufferPtr shadow_dual_buffers_[2];
 	KlayGE::TexturePtr shadow_dual_texs_[2];
-	KlayGE::RenderViewPtr shadow_dual_view_[2];
+	KlayGE::RenderTargetViewPtr shadow_dual_view_[2];
 	KlayGE::TexturePtr shadow_dual_tex_;
 
 	KlayGE::TexturePtr lamp_tex_;

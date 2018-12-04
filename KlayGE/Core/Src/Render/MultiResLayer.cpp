@@ -123,11 +123,11 @@ namespace KlayGE
 			float4 constexpr subsplat_clear_value(0, 128, 0, 0);
 			auto subsplat_ds_tex = rf.MakeTexture2D(multi_res_tex->Width(i), multi_res_tex->Height(i), 1, 1, EF_D24S8,
 				1, 0, EAH_GPU_Write, {}, &subsplat_clear_value);
-			auto subsplat_ds_view = rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0);
+			auto subsplat_ds_view = rf.Make2DDsv(subsplat_ds_tex, 0, 1, 0);
 
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*multi_res_tex, 0, 1, i));
-			fb->Attach(FrameBuffer::ATT_DepthStencil, subsplat_ds_view);
+			fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(multi_res_tex, 0, 1, i));
+			fb->Attach(subsplat_ds_view);
 			multi_res_fbs_[i] = fb;
 		}
 	}

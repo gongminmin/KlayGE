@@ -58,6 +58,8 @@ namespace KlayGE
 		{
 			return d3d_sr_view_;
 		}
+		D3D12RenderTargetViewSimulationPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
+		D3D12UnorderedAccessViewSimulationPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,

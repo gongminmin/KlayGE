@@ -16,6 +16,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderView.hpp>
 
 #include <system_error>
 
@@ -35,6 +36,11 @@ namespace KlayGE
 
 	FrameBuffer::~FrameBuffer()
 	{
+	}
+
+	FrameBuffer::Attachment FrameBuffer::CalcAttachment(uint32_t index)
+	{
+		return static_cast<Attachment>(static_cast<uint32_t>(Attachment::Color0) + index);
 	}
 
 	// 渲染目标的左坐标
@@ -84,63 +90,43 @@ namespace KlayGE
 		viewport_ = viewport;
 	}
 
-	void FrameBuffer::Attach(uint32_t att, RenderViewPtr const & view)
+	void FrameBuffer::Attach(Attachment att, RenderTargetViewPtr const & view)
 	{
-		switch (att)
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (static_cast<uint32_t>(att) >= re.DeviceCaps().max_simultaneous_rts)
 		{
-		case ATT_DepthStencil:
+			TERRC(std::errc::function_not_supported);
+		}
+
+		uint32_t const rt_index = static_cast<uint32_t>(att);
+		if ((rt_index < rt_views_.size()) && rt_views_[rt_index])
+		{
+			this->Detach(att);
+		}
+
+		if (rt_views_.size() < rt_index + 1)
+		{
+			rt_views_.resize(rt_index + 1);
+		}
+
+		rt_views_[rt_index] = view;
+		size_t min_rt_index = rt_index;
+		for (size_t i = 0; i < rt_index; ++ i)
+		{
+			if (rt_views_[i])
 			{
-				if (ds_view_)
-				{
-					this->Detach(att);
-				}
-
-				ds_view_ = view;
+				min_rt_index = i;
 			}
-			break;
+		}
+		if (min_rt_index == rt_index)
+		{
+			width_ = view->Width();
+			height_ = view->Height();
 
-		default:
-			{
-				BOOST_ASSERT(att >= ATT_Color0);
-
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
-				{
-					TERRC(std::errc::function_not_supported);
-				}
-
-				uint32_t clr_id = att - ATT_Color0;
-				if ((clr_id < clr_views_.size()) && clr_views_[clr_id])
-				{
-					this->Detach(att);
-				}
-
-				if (clr_views_.size() < clr_id + 1)
-				{
-					clr_views_.resize(clr_id + 1);
-				}
-
-				clr_views_[clr_id] = view;
-				size_t min_clr_index = clr_id;
-				for (size_t i = 0; i < clr_id; ++ i)
-				{
-					if (clr_views_[i])
-					{
-						min_clr_index = i;
-					}
-				}
-				if (min_clr_index == clr_id)
-				{
-					width_ = view->Width();
-					height_ = view->Height();
-
-					viewport_->left		= 0;
-					viewport_->top		= 0;
-					viewport_->width	= width_;
-					viewport_->height	= height_;
-				}
-			}
-			break;
+			viewport_->left		= 0;
+			viewport_->top		= 0;
+			viewport_->width	= width_;
+			viewport_->height	= height_;
 		}
 
 		if (view)
@@ -151,107 +137,116 @@ namespace KlayGE
 		views_dirty_ = true;
 	}
 
-	void FrameBuffer::Detach(uint32_t att)
+	void FrameBuffer::Detach(Attachment att)
 	{
-		switch (att)
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (static_cast<uint32_t>(att) >= re.DeviceCaps().max_simultaneous_rts)
 		{
-		case ATT_DepthStencil:
-			ds_view_.reset();
-			break;
+			TERRC(std::errc::function_not_supported);
+		}
 
-		default:
-			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
-				{
-					TERRC(std::errc::function_not_supported);
-				}
-
-				uint32_t clr_id = att - ATT_Color0;
-				if ((clr_id < clr_views_.size()) && clr_views_[clr_id])
-				{
-					clr_views_[clr_id]->OnDetached(*this, att);
-					clr_views_[clr_id].reset();
-				}
-			}
-			break;
+		uint32_t const rt_index = static_cast<uint32_t>(att);
+		if ((rt_index < rt_views_.size()) && rt_views_[rt_index])
+		{
+			rt_views_[rt_index]->OnDetached(*this, att);
+			rt_views_[rt_index].reset();
 		}
 
 		views_dirty_ = true;
 	}
 
-	RenderViewPtr const & FrameBuffer::Attached(uint32_t att) const
+	RenderTargetViewPtr const & FrameBuffer::AttachedRtv(Attachment att) const
 	{
-		switch (att)
+		uint32_t const rt_index = static_cast<uint32_t>(att);
+		if (rt_index < rt_views_.size())
 		{
-		case ATT_DepthStencil:
-			return ds_view_;
-
-		default:
-			{
-				uint32_t const clr_id = att - ATT_Color0;
-				if (clr_id < clr_views_.size())
-				{
-					return clr_views_[clr_id];
-				}
-				else
-				{
-					static RenderViewPtr null_view;
-					return null_view;
-				}
-			}
+			return rt_views_[rt_index];
+		}
+		else
+		{
+			static RenderTargetViewPtr null_view;
+			return null_view;
 		}
 	}
-
-	void FrameBuffer::AttachUAV(uint32_t att, UnorderedAccessViewPtr const & view)
+	
+	void FrameBuffer::Attach(DepthStencilViewPtr const & view)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (att >= static_cast<uint32_t>(re.DeviceCaps().max_simultaneous_uavs))
+		if (ds_view_)
 		{
-			TERRC(std::errc::function_not_supported);
+			this->Detach();
 		}
 
-		if ((att < ua_views_.size()) && ua_views_[att])
-		{
-			this->DetachUAV(att);
-		}
+		ds_view_ = view;
 
-		if (ua_views_.size() < att + 1)
-		{
-			ua_views_.resize(att + 1);
-		}
-
-		ua_views_[att] = view;
 		if (view)
 		{
-			view->OnAttached(*this, att);
+			view->OnAttached(*this);
 		}
 
 		views_dirty_ = true;
 	}
+	
+	void FrameBuffer::Detach()
+	{
+		ds_view_.reset();
 
-	void FrameBuffer::DetachUAV(uint32_t att)
+		views_dirty_ = true;
+	}
+	
+	DepthStencilViewPtr const & FrameBuffer::AttachedDsv() const
+	{
+		return ds_view_;
+	}
+
+	void FrameBuffer::Attach(uint32_t index, UnorderedAccessViewPtr const & view)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
+		if (index >= re.DeviceCaps().max_simultaneous_uavs)
 		{
 			TERRC(std::errc::function_not_supported);
 		}
 
-		if ((att < ua_views_.size()) && ua_views_[att])
+		if ((index < ua_views_.size()) && ua_views_[index])
 		{
-			ua_views_[att]->OnDetached(*this, att);
-			ua_views_[att].reset();
+			this->Detach(index);
+		}
+
+		if (ua_views_.size() < index + 1)
+		{
+			ua_views_.resize(index + 1);
+		}
+
+		ua_views_[index] = view;
+		if (view)
+		{
+			view->OnAttached(*this, index);
 		}
 
 		views_dirty_ = true;
 	}
 
-	UnorderedAccessViewPtr const & FrameBuffer::AttachedUAV(uint32_t att) const
+	void FrameBuffer::Detach(uint32_t index)
 	{
-		if (att < ua_views_.size())
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (index >= re.DeviceCaps().max_simultaneous_rts)
 		{
-			return ua_views_[att];
+			TERRC(std::errc::function_not_supported);
+		}
+
+		if ((index < ua_views_.size()) && ua_views_[index])
+		{
+			ua_views_[index]->OnDetached(*this, index);
+			ua_views_[index].reset();
+		}
+
+		views_dirty_ = true;
+	}
+
+	UnorderedAccessViewPtr const & FrameBuffer::AttachedUav(uint32_t index) const
+	{
+		if (index < ua_views_.size())
+		{
+			return ua_views_[index];
 		}
 		else
 		{

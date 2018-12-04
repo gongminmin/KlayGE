@@ -6,6 +6,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -1030,7 +1031,7 @@ void EnvLightingApp::DoUpdateOverlay()
 uint32_t EnvLightingApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
+	re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1.0f, 0);
 
 	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

@@ -52,7 +52,7 @@ private:
 
 	std::vector<KlayGE::TexturePtr> low_res_color_texs_;
 	std::vector<KlayGE::TexturePtr> low_res_max_ds_texs_;
-	std::vector<KlayGE::RenderViewPtr> low_res_max_ds_views_;
+	std::vector<KlayGE::DepthStencilViewPtr> low_res_max_ds_views_;
 
 	KlayGE::FrameBufferPtr half_res_fb_;
 

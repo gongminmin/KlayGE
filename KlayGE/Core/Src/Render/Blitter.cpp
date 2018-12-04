@@ -82,7 +82,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dst, dst_array_index, 1, dst_level));
+		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
 		frame_buffer_->GetViewport()->left = dst_x_offset;
 		frame_buffer_->GetViewport()->top = dst_y_offset;
 		frame_buffer_->GetViewport()->width = dst_width;
@@ -147,7 +147,7 @@ namespace KlayGE
 		FrameBufferPtr curr_fb = re.CurFrameBuffer();
 		for (uint32_t z = 0; z < dst_depth; ++ z)
 		{
-			frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dst, dst_array_index, dst_z_offset + z, dst_level));
+			frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, dst_z_offset + z, dst_level));
 			re.BindFrameBuffer(frame_buffer_);
 			re.Render(*effect_, *tech, *quad_rl_);
 		}
@@ -232,7 +232,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dst, dst_array_index, 1, dst_level));
+		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
 		frame_buffer_->GetViewport()->left = dst_x_offset;
 		frame_buffer_->GetViewport()->top = dst_y_offset;
 		frame_buffer_->GetViewport()->width = dst_width;

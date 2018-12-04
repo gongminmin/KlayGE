@@ -89,7 +89,7 @@ namespace KlayGE
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
-		std::vector<RenderViewPtr> g_buffer_vdm_max_ds_views;
+		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_views;
 
 		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;

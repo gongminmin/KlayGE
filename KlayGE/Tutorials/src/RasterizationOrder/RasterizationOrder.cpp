@@ -8,6 +8,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -243,13 +244,13 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	ras_order_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 		EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
 		width * height * sizeof(uint32_t), nullptr, EF_R32UI);
-	ras_order_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(ras_order_buff_, EF_R32UI, 0, width * height);
-	ras_order_fb_->AttachUAV(0, ras_order_uav_);
+	ras_order_uav_ = rf.MakeGraphicsBufferUav(ras_order_buff_, EF_R32UI, 0, width * height);
+	ras_order_fb_->Attach(0, ras_order_uav_);
 
 	checked_pointer_cast<RenderQuad>(render_quad_)->BindRasOrderBuffer(ras_order_uav_);
 
 	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	ras_order_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ras_order_tex_, 0, 1, 0));
+	ras_order_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(ras_order_tex_, 0, 1, 0));
 
 	copy_pp_->InputPin(0, ras_order_tex_);
 

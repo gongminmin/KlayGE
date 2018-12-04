@@ -986,8 +986,8 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 		deferred_rendering_->ShadingTex(1)->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	reflection_ds_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1,
 		EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
-	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*reflection_ds_tex_, 0, 1, 0));
+	reflection_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(reflection_tex_, 0, 1, 0));
+	reflection_fb_->Attach(rf.Make2DDsv(reflection_ds_tex_, 0, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, reflection_fb_,
 		VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);

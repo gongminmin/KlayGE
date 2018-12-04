@@ -6177,19 +6177,19 @@ namespace KlayGE
 		switch (value->Type())
 		{
 		case Texture::TT_1D:
-			val_ = rf.Make1DUnorderedAccessView(value, 0, value->ArraySize(), 0);
+			val_ = rf.Make1DUav(value, 0, value->ArraySize(), 0);
 			break;
 
 		case Texture::TT_2D:
-			val_ = rf.Make2DUnorderedAccessView(value, 0, value->ArraySize(), 0);
+			val_ = rf.Make2DUav(value, 0, value->ArraySize(), 0);
 			break;
 
 		case Texture::TT_3D:
-			val_ = rf.Make3DUnorderedAccessView(value, 0, 0, value->Depth(0), 0);
+			val_ = rf.Make3DUav(value, 0, 0, value->Depth(0), 0);
 			break;
 
 		case Texture::TT_Cube:
-			val_ = rf.MakeCubeUnorderedAccessView(value, 0, 0);
+			val_ = rf.MakeCubeUav(value, 0, 0);
 			break;
 		}
 		return *this;

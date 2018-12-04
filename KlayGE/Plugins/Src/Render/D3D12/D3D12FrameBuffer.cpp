@@ -95,11 +95,11 @@ namespace KlayGE
 	{
 		if (flags & CBM_Color)
 		{
-			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 			{
-				if (clr_views_[i])
+				if (rt_views_[i])
 				{
-					clr_views_[i]->ClearColor(clr);
+					rt_views_[i]->ClearColor(clr);
 				}
 			}
 		}
@@ -134,11 +134,11 @@ namespace KlayGE
 	{
 		if (flags & CBM_Color)
 		{
-			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 			{
-				if (clr_views_[i])
+				if (rt_views_[i])
 				{
-					clr_views_[i]->Discard();
+					rt_views_[i]->Discard();
 				}
 			}
 		}
@@ -184,12 +184,12 @@ namespace KlayGE
 		d3d_rt_src_.clear();
 		d3d_rt_first_subres_.clear();
 		d3d_rt_num_subres_.clear();
-		d3d_rt_handles_.resize(clr_views_.size());
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+		d3d_rt_handles_.resize(rt_views_.size());
+		for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 		{
-			if (clr_views_[i])
+			if (rt_views_[i])
 			{
-				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
+				D3D12RenderTargetView* p = checked_cast<D3D12RenderTargetView*>(rt_views_[i].get());
 				d3d_rt_src_.push_back(p->RTSrc().get());
 				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
@@ -208,7 +208,7 @@ namespace KlayGE
 
 		if (ds_view_)
 		{
-			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(ds_view_.get());
+			D3D12DepthStencilView* p = checked_cast<D3D12DepthStencilView*>(ds_view_.get());
 			d3d_ds_src_ = p->DSSrc().get();
 			d3d_ds_first_subres_ = p->DSFirstSubRes();
 			d3d_ds_num_subres_ = p->DSNumSubRes();
@@ -235,9 +235,9 @@ namespace KlayGE
 		rtv_formats_.fill(DXGI_FORMAT_UNKNOWN);
 		sample_count_ = 0;
 		sample_quality_ = 0;
-		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		for (size_t i = 0; i < rt_views_.size(); ++ i)
 		{
-			auto view = clr_views_[i].get();
+			auto view = rt_views_[i].get();
 			if (view)
 			{
 				auto fmt = view->Format();

@@ -132,6 +132,99 @@ namespace KlayGE
 		return ret;
 	}
 
+	RenderTargetViewPtr RenderFactory::Make1DRtv(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make1DRtv(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	RenderTargetViewPtr RenderFactory::Make2DRtv(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make2DRtv(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	RenderTargetViewPtr RenderFactory::Make2DRtv(TexturePtr const & texture, int array_index, Texture::CubeFaces face, int level)
+	{
+		return this->Make2DRtv(texture, texture->Format(), array_index, face, level);
+	}
+
+	RenderTargetViewPtr RenderFactory::Make2DRtv(TexturePtr const & texture, int array_index, uint32_t slice, int level)
+	{
+		return this->Make2DRtv(texture, texture->Format(), array_index, slice, level);
+	}
+
+	RenderTargetViewPtr RenderFactory::Make3DRtv(TexturePtr const & texture, int array_index, uint32_t first_slice, uint32_t num_slices,
+		int level)
+	{
+		return this->Make3DRtv(texture, texture->Format(), array_index, first_slice, num_slices, level);
+	}
+
+	RenderTargetViewPtr RenderFactory::MakeCubeRtv(TexturePtr const & texture, int array_index, int level)
+	{
+		return this->MakeCubeRtv(texture, texture->Format(), array_index, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::Make1DDsv(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make1DDsv(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::Make2DDsv(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make2DDsv(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::Make2DDsv(TexturePtr const & texture, int array_index, Texture::CubeFaces face, int level)
+	{
+		return this->Make2DDsv(texture, texture->Format(), array_index, face, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::Make2DDsv(TexturePtr const & texture, int array_index, uint32_t slice, int level)
+	{
+		return this->Make2DDsv(texture, texture->Format(), array_index, slice, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::Make3DDsv(TexturePtr const & texture, int array_index, uint32_t first_slice, uint32_t num_slices,
+		int level)
+	{
+		return this->Make3DDsv(texture, texture->Format(), array_index, first_slice, num_slices, level);
+	}
+
+	DepthStencilViewPtr RenderFactory::MakeCubeDsv(TexturePtr const & texture, int array_index, int level)
+	{
+		return this->MakeCubeDsv(texture, texture->Format(), array_index, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::Make1DUav(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make1DUav(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::Make2DUav(TexturePtr const & texture, int first_array_index, int array_size, int level)
+	{
+		return this->Make2DUav(texture, texture->Format(), first_array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::Make2DUav(TexturePtr const & texture, int array_index, Texture::CubeFaces face, int level)
+	{
+		return this->Make2DUav(texture, texture->Format(), array_index, face, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::Make2DUav(TexturePtr const & texture, int array_index, uint32_t slice, int level)
+	{
+		return this->Make2DUav(texture, texture->Format(), array_index, slice, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::Make3DUav(TexturePtr const & texture, int array_index, uint32_t first_slice, uint32_t num_slices,
+		int level)
+	{
+		return this->Make3DUav(texture, texture->Format(), array_index, first_slice, num_slices, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::MakeCubeUav(TexturePtr const & texture, int array_index, int level)
+	{
+		return this->MakeCubeUav(texture, texture->Format(), array_index, level);
+	}
+
 	RenderStateObjectPtr RenderFactory::MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 		BlendStateDesc const & bs_desc)
 	{

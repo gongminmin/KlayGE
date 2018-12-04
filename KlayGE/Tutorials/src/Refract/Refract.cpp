@@ -7,6 +7,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -216,17 +217,17 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	ContextCfg const & cfg = Context::Instance().Config();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	RenderViewPtr backface_ds_view;
+	DepthStencilViewPtr backface_ds_view;
 	if (depth_texture_support_)
 	{
 		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ cfg.graphics_cfg.depth_stencil_fmt, EF_D16 }, 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		backface_ds_view = rf.Make2DDepthStencilRenderView(*backface_ds_tex_, 0, 1, 0);
+		backface_ds_view = rf.Make2DDsv(backface_ds_tex_, 0, 1, 0);
 	}
 	else
 	{
-		backface_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+		backface_ds_view = rf.Make2DDsv(width, height, EF_D16, 1, 0);
 	}
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
@@ -238,8 +239,8 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	BOOST_ASSERT(normal_fmt != EF_Unknown);
 	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	backface_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_tex_, 0, 1, 0));
-	backface_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);
+	backface_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(backface_tex_, 0, 1, 0));
+	backface_buffer_->Attach(backface_ds_view);
 
 	if (depth_texture_support_)
 	{
@@ -249,8 +250,8 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	}
 	else
 	{
-		backface_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_depth_tex_, 0, 1, 0));
-		backface_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);
+		backface_depth_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(backface_depth_tex_, 0, 1, 0));
+		backface_depth_buffer_->Attach(backface_ds_view);
 	}
 
 	UIManager::Instance().SettleCtrls();
@@ -289,7 +290,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		{
 			// Pass 0: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
 			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyBackGBufferMRT);
 			sky_box_->Visible(false);
@@ -299,7 +300,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		{
 			// Pass 0: Render backface's depth
 			re.BindFrameBuffer(backface_depth_buffer_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
 			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_GenShadowMap);
 			sky_box_->Visible(false);
@@ -314,7 +315,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		
 			// Pass 1: Render front face
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 
 			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
 			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);
@@ -338,7 +339,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		
 		// Pass 2: Render front face
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 
 		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
 		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);

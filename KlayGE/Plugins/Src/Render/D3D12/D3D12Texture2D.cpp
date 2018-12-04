@@ -338,6 +338,29 @@ namespace KlayGE
 		return desc;
 	}
 
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture2D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf);
+		if (array_size_ > 1)
+		{
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.ArraySize = array_size;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
+			desc.Texture2DArray.PlaneSlice = 0;
+		}
+		else
+		{
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MipSlice = level;
+			desc.Texture2D.PlaneSlice = 0;
+		}
+
+		return desc;
+	}
+
 	void D3D12Texture2D::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch)
@@ -372,7 +395,8 @@ namespace KlayGE
 		}
 		else
 		{
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 			ID3D12Device* device = re.D3DDevice();
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -482,7 +506,9 @@ namespace KlayGE
 						D3D12_RESOURCE_STATE_RENDER_TARGET);
 					re.FlushResourceBarriers(cmd_list);
 
-					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetrieveD3DRenderTargetView(format_, index, 1, level)->Handle();
+					auto rtv = rf.Make2DRtv(this->shared_from_this(), index, 1, level);
+					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle
+						= checked_pointer_cast<D3D12RenderTargetView>(rtv)->D3DRenderTargetView()->Handle();
 
 					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
 						= this->RetrieveD3DShaderResourceView(format_, index, 1, level - 1, 1)->Handle();

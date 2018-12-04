@@ -374,8 +374,8 @@ namespace KlayGE
 						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 					stereo_nv_3d_vision_fb_ = rf.MakeFrameBuffer();
-					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
-						rf.Make2DRenderView(*stereo_nv_3d_vision_tex_, 0, 1, 0));
+					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::Attachment::Color0,
+						rf.Make2DRtv(stereo_nv_3d_vision_tex_, 0, 1, 0));
 
 					NVSTEREOIMAGEHEADER sih;
 					sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
@@ -1364,8 +1364,8 @@ namespace KlayGE
 		{
 		case SM_DXGI:
 			{
-				RenderView const * view = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
+				RenderTargetView const * view = (0 == eye) ? win->D3DBackBufferRtv().get() : win->D3DBackBufferRightEyeRtv().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->D3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1417,8 +1417,8 @@ namespace KlayGE
 
 		case SM_AMDQuadBuffer:
 			{
-				RenderView const * view = win->D3DBackBufferRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
+				RenderTargetView const * view = win->D3DBackBufferRtv().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->D3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;

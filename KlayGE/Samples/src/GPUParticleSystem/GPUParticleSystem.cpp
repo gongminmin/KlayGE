@@ -466,12 +466,12 @@ namespace
 				if (use_mrt)
 				{
 					pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
-					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 1, 0));
-					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 1, 0));
+					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[0], 0, 1, 0));
+					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(particle_vel_texture_[0], 0, 1, 0));
 
 					pos_vel_rt_buffer_[1] = rf.MakeFrameBuffer();
-					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
-					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
+					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[1], 0, 1, 0));
+					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
 					pos_vel_rt_buffer_[0]->GetViewport()->camera = pos_vel_rt_buffer_[1]->GetViewport()->camera
 						= screen_buffer->GetViewport()->camera;
@@ -479,16 +479,16 @@ namespace
 				else
 				{
 					pos_rt_buffer_[0] = rf.MakeFrameBuffer();
-					pos_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 1, 0));
+					pos_rt_buffer_[0]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[0], 0, 1, 0));
 
 					vel_rt_buffer_[0] = rf.MakeFrameBuffer();
-					vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 1, 0));
+					vel_rt_buffer_[0]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_vel_texture_[0], 0, 1, 0));
 
 					pos_rt_buffer_[1] = rf.MakeFrameBuffer();
-					pos_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
+					pos_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[1], 0, 1, 0));
 
 					vel_rt_buffer_[1] = rf.MakeFrameBuffer();
-					vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
+					vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
 					pos_rt_buffer_[0]->GetViewport()->camera = pos_rt_buffer_[1]->GetViewport()->camera
 						= vel_rt_buffer_[0]->GetViewport()->camera = vel_rt_buffer_[1]->GetViewport()->camera
@@ -845,15 +845,15 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	auto ds_view = rf.Make2DDsv(width, height, EF_D16, 1, 0);
 
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
-	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	scene_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_tex_, 0, 1, 0));
+	scene_buffer_->Attach(ds_view);
 
 	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 1, 0));
-	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	fog_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(fog_tex_, 0, 1, 0));
+	fog_buffer_->Attach(ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_renderable_)->SceneTexture(scene_tex_);
 

@@ -46,7 +46,7 @@ private:
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
 	std::array<KlayGE::FrameBufferPtr, 2> depth_fbs_;
 	std::array<KlayGE::TexturePtr, 2> depth_texs_;
-	std::array<KlayGE::RenderViewPtr, 2> depth_views_;
+	std::array<KlayGE::DepthStencilViewPtr, 2> depth_views_;
 	std::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 	KlayGE::PostProcessPtr blend_pp_;
 	KlayGE::uint32_t num_layers_;

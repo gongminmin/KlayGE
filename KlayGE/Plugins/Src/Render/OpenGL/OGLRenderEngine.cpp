@@ -282,12 +282,11 @@ namespace KlayGE
 		}
 #endif
 
-		win->Attach(FrameBuffer::ATT_Color0,
-			MakeSharedPtr<OGLScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
+		win->Attach(FrameBuffer::Attachment::Color0,
+			MakeSharedPtr<OGLScreenRenderTargetView>(win->Width(), win->Height(), settings.color_fmt));
 		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
 		{
-			win->Attach(FrameBuffer::ATT_DepthStencil,
-				MakeSharedPtr<OGLScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
+			win->Attach(MakeSharedPtr<OGLScreenDepthStencilView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
 		}
 
 		this->BindFrameBuffer(win);

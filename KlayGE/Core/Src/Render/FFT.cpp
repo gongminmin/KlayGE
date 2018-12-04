@@ -217,15 +217,15 @@ namespace KlayGE
 
 		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		src_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(src_, EF_GR32F, 0, 3 * width * height);
+		src_uav_ = rf.MakeGraphicsBufferUav(src_, EF_GR32F, 0, 3 * width * height);
 
 		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		dst_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(dst_, EF_GR32F, 0, 3 * width * height);
+		dst_uav_ = rf.MakeGraphicsBufferUav(dst_, EF_GR32F, 0, 3 * width * height);
 
 		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		tmp_buffer_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(tmp_buffer_, EF_GR32F, 0, 3 * width * height);
+		tmp_buffer_uav_ = rf.MakeGraphicsBufferUav(tmp_buffer_, EF_GR32F, 0, 3 * width * height);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -266,8 +266,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		tex_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*out_real, 0, 1, 0));
-		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag, 0, 1, 0));
+		tex_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(out_real, 0, 1, 0));
+		tex_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(out_imag, 0, 1, 0));
 
 		FrameBufferPtr old_fb = re.CurFrameBuffer();
 		re.BindFrameBuffer(FrameBufferPtr());

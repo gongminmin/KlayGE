@@ -133,7 +133,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 	KlayGE::TexturePtr back_face_depth_tex;
 	KlayGE::TexturePtr back_face_ds_tex;
-	KlayGE::RenderViewPtr back_face_ds_view;
+	KlayGE::DepthStencilViewPtr back_face_ds_view;
 	ElementFormat fmt;
 	if (depth_texture_support_)
 	{
@@ -148,7 +148,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		float4 constexpr back_face_ds_clear_value(0, 0, 0, 0);
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, {}, &back_face_ds_clear_value);
-		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
+		back_face_ds_view = rf.Make2DDsv(back_face_ds_tex, 0, 1, 0);
 
 		model_->ForEachMesh([back_face_ds_tex](Renderable& mesh)
 			{
@@ -167,7 +167,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 			fmt = EF_R16F;
 		}
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+		back_face_ds_view = rf.Make2DDsv(width, height, EF_D16, 1, 0);
 
 		model_->ForEachMesh([back_face_depth_tex](Renderable& mesh)
 			{
@@ -175,8 +175,8 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 			});
 	}
 
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex, 0, 1, 0));
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, back_face_ds_view);
+	back_face_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(back_face_depth_tex, 0, 1, 0));
+	back_face_depth_fb_->Attach(back_face_ds_view);
 
 	UIManager::Instance().SettleCtrls();
 }

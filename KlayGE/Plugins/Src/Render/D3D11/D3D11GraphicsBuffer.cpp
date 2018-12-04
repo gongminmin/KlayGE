@@ -44,21 +44,58 @@ namespace KlayGE
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11GraphicsBuffer::D3DRenderTargetView() const
+	ID3D11RenderTargetViewPtr D3D11GraphicsBuffer::CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems) const
 	{
-		if (this->HWResourceReady() && !d3d_rt_view_)
-		{
-			D3D11_RENDER_TARGET_VIEW_DESC desc;
-			desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
-			desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
-			desc.Buffer.ElementOffset = 0;
-			desc.Buffer.ElementWidth = this->Size() / NumFormatBytes(fmt_as_shader_res_);
+		D3D11_RENDER_TARGET_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(pf);
+		desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
+		desc.Buffer.ElementOffset = first_elem;
+		desc.Buffer.ElementWidth = num_elems;
 
-			ID3D11RenderTargetView* rt_view;
-			TIFHR(d3d_device_->CreateRenderTargetView(d3d_buffer_.get(), &desc, &rt_view));
-			d3d_rt_view_ = MakeCOMPtr(rt_view);
+		ID3D11RenderTargetView* rt_view;
+		TIFHR(d3d_device_->CreateRenderTargetView(d3d_buffer_.get(), &desc, &rt_view));
+		return MakeCOMPtr(rt_view);
+	}
+
+	ID3D11UnorderedAccessViewPtr D3D11GraphicsBuffer::CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems) const
+	{
+		BOOST_ASSERT(access_hint_ & EAH_GPU_Unordered);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		if (access_hint_ & EAH_Raw)
+		{
+			uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
 		}
-		return d3d_rt_view_;
+		else if (access_hint_ & EAH_GPU_Structured)
+		{
+			uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		}
+		else
+		{
+			uav_desc.Format = D3D11Mapping::MappingFormat(pf);
+		}
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = first_elem;
+		uav_desc.Buffer.NumElements = num_elems;
+		uav_desc.Buffer.Flags = 0;
+		if (access_hint_ & EAH_Raw)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_RAW;
+		}
+		if (access_hint_ & EAH_Append)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
+		}
+		if (access_hint_ & EAH_Counter)
+		{
+			uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
+		}
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		TIFHR(d3d_device_->CreateUnorderedAccessView(d3d_buffer_.get(), &uav_desc, &d3d_ua_view));
+		return MakeCOMPtr(d3d_ua_view);
 	}
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
@@ -174,7 +211,6 @@ namespace KlayGE
 	void D3D11GraphicsBuffer::DeleteHWResource()
 	{
 		d3d_sr_view_.reset();
-		d3d_rt_view_.reset();
 		d3d_buffer_.reset();
 	}
 

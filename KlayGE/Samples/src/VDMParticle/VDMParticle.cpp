@@ -9,6 +9,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -267,8 +268,8 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	depth_to_linear_pp_->InputPin(0, scene_ds_tex_);
 	depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
 
-	scene_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
-	scene_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*scene_ds_tex_, 0, 1, 0));
+	scene_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_tex_, 0, 1, 0));
+	scene_fb_->Attach(rf.Make2DDsv(scene_ds_tex_, 0, 1, 0));
 
 	if (ps_)
 	{
@@ -284,25 +285,25 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 		{
 			low_res_color_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
 			low_res_max_ds_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
-			low_res_max_ds_views_.push_back(rf.Make2DDepthStencilRenderView(*low_res_max_ds_texs_.back(), 0, 1, 0));
+			low_res_max_ds_views_.push_back(rf.Make2DDsv(low_res_max_ds_texs_.back(), 0, 1, 0));
 			w /= 2;
 			h /= 2;
 		}
 	}
 
 	
-	half_res_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*low_res_color_texs_[0], 0, 1, 0));
-	half_res_fb_->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[0]);
+	half_res_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(low_res_color_texs_[0], 0, 1, 0));
+	half_res_fb_->Attach(low_res_max_ds_views_[0]);
 
-	quarter_res_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*low_res_color_texs_[1], 0, 1, 0));
-	quarter_res_fb_->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[1]);
+	quarter_res_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(low_res_color_texs_[1], 0, 1, 0));
+	quarter_res_fb_->Attach(low_res_max_ds_views_[1]);
 
 	vdm_transition_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	vdm_count_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	vdm_quarter_res_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*low_res_color_texs_[1], 0, 1, 0));
-	vdm_quarter_res_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*vdm_transition_tex_, 0, 1, 0));
-	vdm_quarter_res_fb_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*vdm_count_tex_, 0, 1, 0));
-	vdm_quarter_res_fb_->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[1]);
+	vdm_quarter_res_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(low_res_color_texs_[1], 0, 1, 0));
+	vdm_quarter_res_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(vdm_transition_tex_, 0, 1, 0));
+	vdm_quarter_res_fb_->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(vdm_count_tex_, 0, 1, 0));
+	vdm_quarter_res_fb_->Attach(low_res_max_ds_views_[1]);
 
 	copy_pp_->InputPin(0, scene_tex_);
 	copy_to_depth_pp_->InputPin(0, scene_ds_tex_);
@@ -371,7 +372,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 	case 0:
 		{
 			re.BindFrameBuffer(scene_fb_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 
 			depth_to_linear_pp_->SetParam(0, this->ActiveCamera().NearQFarParam());
 
@@ -426,7 +427,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 						static_cast<float>((h + 1) & ~1) / h));
 					depth_to_max_pp_->InputPin(0, input_tex);
 					depth_to_max_pp_->OutputPin(0, low_res_color_texs_[i]);
-					depth_to_max_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[i]);
+					depth_to_max_pp_->OutputFrameBuffer()->Attach(low_res_max_ds_views_[i]);
 					depth_to_max_pp_->Apply();
 				}
 
@@ -434,19 +435,19 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 				{
 				case PRT_NaiveHalfRes:
 					re.BindFrameBuffer(half_res_fb_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+					re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 					break;
 
 				case PRT_NaiveQuarterRes:
 					re.BindFrameBuffer(quarter_res_fb_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+					re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 					break;
 
 				case PRT_VDMQuarterRes:
 					re.BindFrameBuffer(vdm_quarter_res_fb_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color1)->ClearColor(Color(0, 0, 0, 0));
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color2)->ClearColor(Color(0, 0, 0, 0));
+					re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
+					re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color1)->ClearColor(Color(0, 0, 0, 0));
+					re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color2)->ClearColor(Color(0, 0, 0, 0));
 					break;
 
 				default:
@@ -462,7 +463,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 		ps_->Visible(false);
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 
 		copy_pp_->Apply();
 

@@ -22,11 +22,32 @@
 
 namespace KlayGE
 {
-	class OGLESRenderView : public RenderView
+	class OGLESRenderTargetView : public RenderTargetView
 	{
 	public:
-		OGLESRenderView();
-		virtual ~OGLESRenderView();
+		OGLESRenderTargetView();
+		virtual ~OGLESRenderTargetView();
+
+		GLuint GLTexture() const
+		{
+			return gl_tex_;
+		}
+
+	protected:
+		void DoClearColor(Color const & clr);
+		void DoDiscardColor();
+
+	protected:
+		GLuint gl_tex_;
+		GLuint gl_fbo_;
+		GLuint index_;
+	};
+
+	class OGLESDepthStencilView : public DepthStencilView
+	{
+	public:
+		OGLESDepthStencilView();
+		virtual ~OGLESDepthStencilView();
 
 		void ClearDepth(float depth);
 		void ClearStencil(int32_t stencil);
@@ -34,165 +55,153 @@ namespace KlayGE
 
 		GLuint GLTexture() const
 		{
-			return tex_;
+			return gl_tex_;
 		}
 
 	protected:
-		void DoClear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
-		void DoDiscardColor();
+		void DoClearDepthStencil(uint32_t flags, float depth, int32_t stencil);
 		void DoDiscardDepthStencil();
 
 	protected:
-		GLuint tex_;
-		GLuint fbo_;
-		GLuint index_;
+		GLuint gl_tex_;
+		GLuint gl_fbo_;
 	};
 
-	typedef std::shared_ptr<OGLESRenderView> OGLESRenderViewPtr;
-
-	class OGLESScreenColorRenderView : public OGLESRenderView
+	class OGLESScreenRenderTargetView : public OGLESRenderTargetView
 	{
 	public:
-		OGLESScreenColorRenderView(uint32_t width, uint32_t height, ElementFormat pf);
+		OGLESScreenRenderTargetView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void ClearColor(Color const & clr);
-		void ClearDepth(float depth);
-		void ClearStencil(int32_t stencil);
-		void ClearDepthStencil(float depth, int32_t stencil);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 	};
 
-	typedef std::shared_ptr<OGLESScreenColorRenderView> OGLES2ScreenColorRenderViewPtr;
+	typedef std::shared_ptr<OGLESScreenRenderTargetView> OGLESScreenRenderTargetViewPtr;
 
 
-	class OGLESScreenDepthStencilRenderView : public OGLESRenderView
+	class OGLESScreenDepthStencilView : public OGLESDepthStencilView
 	{
 	public:
-		OGLESScreenDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf);
+		OGLESScreenDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void ClearColor(Color const & clr);
+		void Discard() override;
 
-		virtual void Discard() override;
-
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 	};
 
-	typedef std::shared_ptr<OGLESScreenDepthStencilRenderView> OGLES2ScreenDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESScreenDepthStencilView> OGLESScreenDepthStencilViewPtr;
 
 
-	class OGLESTexture1DRenderView : public OGLESRenderView
+	class OGLESTexture1DRenderTargetView : public OGLESRenderTargetView
 	{
 	public:
-		OGLESTexture1DRenderView(Texture& texture_1d, int array_index, int array_size, int level);
+		OGLESTexture1DRenderTargetView(TexturePtr const & texture_1d, ElementFormat pf, int array_index, int array_size, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
-		OGLESTexture1D& texture_1d_;
 		int array_index_;
 		int array_size_;
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLESTexture1DRenderView> OGLES2Texture1DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture1DRenderTargetView> OGLESTexture1DRenderTargetViewPtr;
 
 
-	class OGLESTexture2DRenderView : public OGLESRenderView
+	class OGLESTexture2DRenderTargetView : public OGLESRenderTargetView
 	{
 	public:
-		OGLESTexture2DRenderView(Texture& texture_2d, int array_index, int array_size, int level);
+		OGLESTexture2DRenderTargetView(TexturePtr const & texture_2d, ElementFormat pf, int array_index, int array_size, int level);
 
 		void ClearColor(Color const & clr);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
 
 	private:
-		OGLESTexture2D& texture_2d_;
 		int array_index_;
 		int array_size_;
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLESTexture2DRenderView> OGLES2Texture2DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture2DRenderTargetView> OGLESTexture2DRenderTargetViewPtr;
 
 
-	class OGLESTexture3DRenderView : public OGLESRenderView
+	class OGLESTexture3DRenderTargetView : public OGLESRenderTargetView
 	{
 	public:
-		OGLESTexture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
-		~OGLESTexture3DRenderView();
+		OGLESTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t slice, int level);
+		~OGLESTexture3DRenderTargetView();
 
 		void ClearColor(Color const & clr);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
 
-		void OnUnbind(FrameBuffer& fb, uint32_t att);
-
-	private:
-		void CopyToSlice(uint32_t att);
+		void OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att);
 
 	private:
-		OGLESTexture3D& texture_3d_;
+		void CopyToSlice(FrameBuffer::Attachment att);
+
+	private:
 		uint32_t slice_;
 		int level_;
 		int copy_to_tex_;
-		GLuint tex_2d_;
+		GLuint gl_tex_2d_;
 	};
 
-	typedef std::shared_ptr<OGLESTexture3DRenderView> OGLES2Texture3DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture3DRenderTargetView> OGLESTexture3DRenderTargetViewPtr;
 
 
-	class OGLESTextureCubeRenderView : public OGLESRenderView
+	class OGLESTextureCubeRenderTargetView : public OGLESRenderTargetView
 	{
 	public:
-		OGLESTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		OGLESTextureCubeRenderView(Texture& texture_cube, int array_index, int level);
+		OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
+		OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, int level);
 
 		void ClearColor(Color const & clr);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
 
 	private:
-		OGLESTextureCube& texture_cube_;
 		Texture::CubeFaces face_;
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLESTextureCubeRenderView> OGLES2TextureCubeRenderViewPtr;
+	typedef std::shared_ptr<OGLESTextureCubeRenderTargetView> OGLESTextureCubeRenderTargetViewPtr;
 
 
-	class OGLESDepthStencilRenderView : public OGLESRenderView
+	class OGLESTextureDepthStencilView : public OGLESDepthStencilView
 	{
 	public:
-		OGLESDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		OGLESDepthStencilRenderView(Texture& texture, int array_index, int array_size, int level);
-		~OGLESDepthStencilRenderView();
+		OGLESTextureDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		OGLESTextureDepthStencilView(TexturePtr const & texture, ElementFormat pf, int array_index, int array_size, int level);
+		~OGLESTextureDepthStencilView();
 
 		void ClearColor(Color const & clr);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb);
+		void OnDetached(FrameBuffer& fb);
 
 	private:
 		GLenum target_type_;
@@ -200,50 +209,50 @@ namespace KlayGE
 		int array_size_;
 		int level_;
 		uint32_t sample_count_, sample_quality_;
-		GLuint rbos_[2];
+		GLuint gl_rbos_[2];
 	};
 
-	typedef std::shared_ptr<OGLESDepthStencilRenderView> OGLES2DepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESTextureDepthStencilView> OGLESTextureDepthStencilViewPtr;
 
 
-	class OGLESTextureCubeDepthStencilRenderView : public OGLESRenderView
+	class OGLESTextureCubeFaceDepthStencilView : public OGLESDepthStencilView
 	{
 	public:
-		OGLESTextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
+		OGLESTextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
 
 		void ClearColor(Color const & clr);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb);
+		void OnDetached(FrameBuffer& fb);
 
 	private:
-		OGLESTextureCube& texture_cube_;
 		Texture::CubeFaces face_;
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLESTextureCubeDepthStencilRenderView> OGLES2TextureCubeDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESTextureCubeFaceDepthStencilView> OGLESTextureCubeFaceDepthStencilViewPtr;
+
 
 #if defined(KLAYGE_PLATFORM_IOS)
-	class OGLESEAGLRenderView : public OGLESRenderView
+	class OGLESEAGLRenderView : public OGLESRenderTargetView
 	{
 	public:
 		explicit OGLESEAGLRenderView(ElementFormat pf);
 
 		void ClearColor(Color const & clr);
-		void ClearDepth(float depth);
 
 		virtual void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
 
 		void BindRenderBuffer();
 
 	protected:
-		GLuint rf_;
+		GLuint gl_rf_;
 	};
 
 	typedef std::shared_ptr<OGLESEAGLRenderView> OGLESEAGLRenderViewPtr;

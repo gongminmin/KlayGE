@@ -152,10 +152,7 @@ namespace KlayGE
 
 		void CreateHWResource(void const * init_data) override;
 		void DeleteHWResource() override;
-		bool HWResourceReady() const override
-		{
-			return true;
-		}
+		bool HWResourceReady() const override;
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 

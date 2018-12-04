@@ -91,11 +91,11 @@ namespace KlayGE
 		{
 			return depth_stencil_;
 		}
-		RenderViewPtr const & D3DBackBufferRTV() const
+		RenderTargetViewPtr const & D3DBackBufferRtv() const
 		{
 			return render_target_render_views_[curr_back_buffer_];
 		}
-		RenderViewPtr const & D3DBackBufferRightEyeRTV() const
+		RenderTargetViewPtr const & D3DBackBufferRightEyeRtv() const
 		{
 			return render_target_render_views_right_eye_[curr_back_buffer_];
 		}
@@ -148,8 +148,8 @@ namespace KlayGE
 		HANDLE frame_latency_waitable_obj_;
 
 		std::array<TexturePtr, NUM_BACK_BUFFERS> render_targets_;
-		std::array<RenderViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;
-		std::array<RenderViewPtr, NUM_BACK_BUFFERS> render_target_render_views_right_eye_;
+		std::array<RenderTargetViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;
+		std::array<RenderTargetViewPtr, NUM_BACK_BUFFERS> render_target_render_views_right_eye_;
 
 		TexturePtr depth_stencil_;
 

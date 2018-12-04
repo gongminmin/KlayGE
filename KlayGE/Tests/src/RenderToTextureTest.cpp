@@ -145,8 +145,8 @@ private:
 		auto target = rf.MakeTexture2D(width, height, 1, 1, format, sample_count, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto target_ds = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, 0, EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
-		fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*target_ds, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
+		fb->Attach(rf.Make2DDsv(target_ds, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 		auto tech = effect->TechniqueByName("RenderToTexture");
@@ -192,7 +192,7 @@ private:
 		auto target = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(),
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 
@@ -229,7 +229,7 @@ private:
 		auto target = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(),
 			source->SampleCount(), source->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 

@@ -36,11 +36,11 @@ namespace KlayGE
 
 	ID3D11RenderTargetView* D3D11FrameBuffer::D3DRTView(uint32_t n) const
 	{
-		if (n < clr_views_.size())
+		if (n < rt_views_.size())
 		{
-			if (clr_views_[n])
+			if (rt_views_[n])
 			{
-				return checked_cast<D3D11RenderTargetRenderView*>(clr_views_[n].get())->D3DRenderTargetView();
+				return checked_cast<D3D11RenderTargetView*>(rt_views_[n].get())->D3DRenderTargetView();
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace KlayGE
 	{
 		if (ds_view_)
 		{
-			return checked_cast<D3D11DepthStencilRenderView*>(ds_view_.get())->D3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilView*>(ds_view_.get())->D3DDepthStencilView();
 		}
 
 		return nullptr;
@@ -83,12 +83,12 @@ namespace KlayGE
 			d3d_rt_src_.clear();
 			d3d_rt_first_subres_.clear();
 			d3d_rt_num_subres_.clear();
-			d3d_rt_view_.resize(clr_views_.size());
-			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			d3d_rt_view_.resize(rt_views_.size());
+			for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 			{
-				if (clr_views_[i])
+				if (rt_views_[i])
 				{
-					D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
+					D3D11RenderTargetView* p = checked_cast<D3D11RenderTargetView*>(rt_views_[i].get());
 					d3d_rt_src_.push_back(p->RTSrc());
 					d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 					d3d_rt_num_subres_.push_back(p->RTNumSubRes());
@@ -101,7 +101,7 @@ namespace KlayGE
 			}
 			if (ds_view_)
 			{
-				D3D11DepthStencilRenderView* p = checked_cast<D3D11DepthStencilRenderView*>(ds_view_.get());
+				D3D11DepthStencilView* p = checked_cast<D3D11DepthStencilView*>(ds_view_.get());
 				d3d_rt_src_.push_back(p->RTSrc());
 				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
@@ -169,11 +169,11 @@ namespace KlayGE
 	{
 		if (flags & CBM_Color)
 		{
-			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 			{
-				if (clr_views_[i])
+				if (rt_views_[i])
 				{
-					clr_views_[i]->ClearColor(clr);
+					rt_views_[i]->ClearColor(clr);
 				}
 			}
 		}
@@ -208,11 +208,11 @@ namespace KlayGE
 	{
 		if (flags & CBM_Color)
 		{
-			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			for (uint32_t i = 0; i < rt_views_.size(); ++ i)
 			{
-				if (clr_views_[i])
+				if (rt_views_[i])
 				{
-					clr_views_[i]->Discard();
+					rt_views_[i]->Discard();
 				}
 			}
 		}

@@ -46,7 +46,7 @@
 
 namespace KlayGE
 {
-	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(D3D12Resource* res,
+	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(D3D12Resource const * res,
 			D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc)
 		: res_(res)
 	{
@@ -68,7 +68,7 @@ namespace KlayGE
 	}
 
 
-	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(D3D12Resource* res,
+	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(D3D12Resource const * res,
 			D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc)
 		: res_(res)
 	{
@@ -90,7 +90,7 @@ namespace KlayGE
 	}
 
 
-	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(D3D12Resource* res,
+	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(D3D12Resource const * res,
 		D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc)
 		: res_(res)
 	{
@@ -112,7 +112,7 @@ namespace KlayGE
 	}
 
 
-	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(D3D12Resource* res,
+	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(D3D12Resource const * res,
 			D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc)
 		: res_(res), counter_offset_(0)
 	{
@@ -144,83 +144,126 @@ namespace KlayGE
 	}
 
 
-	D3D12RenderView::D3D12RenderView()
+	D3D12RenderTargetView::D3D12RenderTargetView(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
+		: rt_src_(checked_pointer_cast<D3D12Texture>(texture)), rt_first_subres_(first_array_index * texture->NumMipMaps() + level),
+			rt_num_subres_(1)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_cmd_list_ = re.D3DRenderCmdList();
+
+		tex_ = texture;
+		width_ = texture->Width(level);
+		height_ = texture->Height(level);
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
+		sample_count_ = texture->SampleCount();
+		sample_quality_ = texture->SampleQuality();
+
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture->Depth(0);
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		d3d_rt_view_ = checked_cast<D3D12Texture*>(texture.get())->CreateD3DRenderTargetView(pf_, first_array_index_, array_size_, level_);
 	}
 
-	D3D12RenderView::~D3D12RenderView()
+	D3D12RenderTargetView::D3D12RenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
+		: rt_src_(checked_pointer_cast<D3D12Texture>(texture_3d)),
+			rt_first_subres_((array_index * texture_3d->Depth(level) + first_slice) * texture_3d->NumMipMaps() + level),
+			rt_num_subres_(num_slices * texture_3d->NumMipMaps() + level)
 	{
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
+
+		tex_ = texture_3d;
+		width_ = texture_3d->Width(level);
+		height_ = texture_3d->Height(level);
+		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
+		sample_count_ = texture_3d->SampleCount();
+		sample_quality_ = texture_3d->SampleQuality();
+
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = first_slice;
+		num_slices_ = num_slices;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		d3d_rt_view_ = checked_cast<D3D12Texture*>(texture_3d.get())->CreateD3DRenderTargetView(pf_, first_array_index_, first_slice_,
+			num_slices_, level_);
 	}
 
-
-	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(Texture& texture, int first_array_index, int array_size, int level)
-		: rt_first_subres_(first_array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
+	D3D12RenderTargetView::D3D12RenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+		: rt_src_(checked_pointer_cast<D3D12Texture>(texture_cube)),
+			rt_first_subres_((array_index * 6 + face) * texture_cube->NumMipMaps() + level), rt_num_subres_(1)
 	{
-		width_ = texture.Width(level);
-		height_ = texture.Height(level);
-		pf_ = texture.Format();
-		sample_count_ = texture.SampleCount();
-		sample_quality_ = texture.SampleQuality();
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
-		rt_view_ = d3d_tex->RetrieveD3DRenderTargetView(pf_, first_array_index, array_size, level);
-		rt_src_ = d3d_tex->shared_from_this();
+		tex_ = texture_cube;
+		width_ = texture_cube->Width(level);
+		height_ = texture_cube->Width(level);
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
+		sample_count_ = texture_cube->SampleCount();
+		sample_quality_ = texture_cube->SampleQuality();
+
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture_cube->Depth(0);
+		first_face_ = face;
+		num_faces_ = 1;
+		first_elem_ = 0;
+		num_elems_ = 0;
+	
+		d3d_rt_view_ = checked_cast<D3D12Texture*>(texture_cube.get())->CreateD3DRenderTargetView(pf_, first_array_index_, first_face_,
+			level_);
 	}
 
-	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-		: rt_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), rt_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
+	D3D12RenderTargetView::D3D12RenderTargetView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems)
+		: rt_src_(checked_pointer_cast<D3D12GraphicsBuffer>(gb)), rt_first_subres_(0), rt_num_subres_(1)
 	{
-		width_ = texture_3d.Width(level);
-		height_ = texture_3d.Height(level);
-		pf_ = texture_3d.Format();
-		sample_count_ = texture_3d.SampleCount();
-		sample_quality_ = texture_3d.SampleQuality();
+		BOOST_ASSERT(gb->AccessHint() & EAH_GPU_Write);
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
-		rt_view_ = d3d_tex->RetrieveD3DRenderTargetView(pf_, array_index, first_slice, num_slices, level);
-		rt_src_ = d3d_tex->shared_from_this();
-	}
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
-		: rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
-	{
-		width_ = texture_cube.Width(level);
-		height_ = texture_cube.Width(level);
-		pf_ = texture_cube.Format();
-		sample_count_ = texture_cube.SampleCount();
-		sample_quality_ = texture_cube.SampleQuality();
-
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
-		rt_view_ = d3d_tex->RetrieveD3DRenderTargetView(pf_, array_index, face, level);
-		rt_src_ = d3d_tex->shared_from_this();
-	}
-
-	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf)
-		: rt_first_subres_(0), rt_num_subres_(1)
-	{
-		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
-
-		rt_src_ = checked_cast<D3D12GraphicsBuffer*>(&gb)->shared_from_this();
-
-		D3D12_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(pf);
-		desc.ViewDimension = D3D12_RTV_DIMENSION_BUFFER;
-		desc.Buffer.FirstElement = 0;
-		desc.Buffer.NumElements = std::min(width * height, gb.Size() / NumFormatBytes(pf));
-
-		rt_view_ = MakeSharedPtr<D3D12RenderTargetViewSimulation>(rt_src_.get(), desc);
-
-		width_ = width * height;
+		buff_ = gb;
+		width_ = num_elems;
 		height_ = 1;
 		pf_ = pf;
 		sample_count_ = 1;
 		sample_quality_ = 0;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		level_ = 0;
+		first_slice_ = 0;
+		num_slices_ = 0;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+		first_elem_ = first_elem;
+		num_elems_ = num_elems;
+
+		d3d_rt_view_ = checked_cast<D3D12GraphicsBuffer*>(gb.get())->CreateD3DRenderTargetView(pf, first_elem_, num_elems_);
 	}
 
-	void D3D12RenderTargetRenderView::ClearColor(Color const & clr)
+	void D3D12RenderTargetView::ClearColor(Color const & clr)
 	{
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
@@ -230,25 +273,10 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.FlushResourceBarriers(d3d_cmd_list_);
 
-		d3d_cmd_list_->ClearRenderTargetView(rt_view_->Handle(), &clr.r(), 0, nullptr);
+		d3d_cmd_list_->ClearRenderTargetView(d3d_rt_view_->Handle(), &clr.r(), 0, nullptr);
 	}
 
-	void D3D12RenderTargetRenderView::ClearDepth(float /*depth*/)
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void D3D12RenderTargetRenderView::ClearStencil(int32_t /*stencil*/)
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void D3D12RenderTargetRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void D3D12RenderTargetRenderView::Discard()
+	void D3D12RenderTargetView::Discard()
 	{
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
@@ -266,66 +294,116 @@ namespace KlayGE
 		d3d_cmd_list_->DiscardResource(rt_src_->D3DResource().get(), &region);
 	}
 
-	void D3D12RenderTargetRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	void D3D12RenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
 		KFL_UNUSED(fb);
 		KFL_UNUSED(att);
 	}
 
-	void D3D12RenderTargetRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	void D3D12RenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
 		KFL_UNUSED(fb);
 		KFL_UNUSED(att);
 	}
 
 
-	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
-		: ds_first_subres_(first_array_index * texture.NumMipMaps() + level), ds_num_subres_(1)
+	D3D12DepthStencilView::D3D12DepthStencilView(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
+		: ds_src_(checked_pointer_cast<D3D12Texture>(texture)),
+			ds_first_subres_(first_array_index * texture->NumMipMaps() + level), ds_num_subres_(1)
 	{
-		width_ = texture.Width(level);
-		height_ = texture.Height(level);
-		pf_ = texture.Format();
-		sample_count_ = texture.SampleCount();
-		sample_quality_ = texture.SampleQuality();
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
-		ds_view_ = d3d_tex->RetrieveD3DDepthStencilView(pf_, first_array_index, array_size, level);
-		ds_src_ = d3d_tex->shared_from_this();
+		tex_ = texture;
+		width_ = texture->Width(level);
+		height_ = texture->Height(level);
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
+		sample_count_ = texture->SampleCount();
+		sample_quality_ = texture->SampleQuality();
+
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture->Depth(0);
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+
+		d3d_ds_view_ = checked_cast<D3D12Texture*>(texture.get())->CreateD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
 	}
 
-	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-		: ds_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), ds_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
+	D3D12DepthStencilView::D3D12DepthStencilView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
+		: ds_src_(checked_pointer_cast<D3D12Texture>(texture_3d)),
+			ds_first_subres_((array_index * texture_3d->Depth(level) + first_slice) * texture_3d->NumMipMaps() + level),
+			ds_num_subres_(num_slices * texture_3d->NumMipMaps() + level)
 	{
-		width_ = texture_3d.Width(level);
-		height_ = texture_3d.Height(level);
-		pf_ = texture_3d.Format();
-		sample_count_ = texture_3d.SampleCount();
-		sample_quality_ = texture_3d.SampleQuality();
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
-		ds_view_ = d3d_tex->RetrieveD3DDepthStencilView(pf_, array_index, first_slice, num_slices, level);
-		ds_src_ = d3d_tex->shared_from_this();
+		tex_ = texture_3d;
+		width_ = texture_3d->Width(level);
+		height_ = texture_3d->Height(level);
+		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
+		sample_count_ = texture_3d->SampleCount();
+		sample_quality_ = texture_3d->SampleQuality();
+
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = first_slice;
+		num_slices_ = num_slices;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+
+		d3d_ds_view_ = checked_cast<D3D12Texture*>(texture_3d.get())->CreateD3DDepthStencilView(pf_, first_array_index_, first_slice_,
+			num_slices_, level_);
 	}
 
-	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
-		: ds_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ds_num_subres_(1)
+	D3D12DepthStencilView::D3D12DepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+		: ds_src_(checked_pointer_cast<D3D12Texture>(texture_cube)),
+			ds_first_subres_((array_index * 6 + face) * texture_cube->NumMipMaps() + level), ds_num_subres_(1)
 	{
-		width_ = texture_cube.Width(level);
-		height_ = texture_cube.Width(level);
-		pf_ = texture_cube.Format();
-		sample_count_ = texture_cube.SampleCount();
-		sample_quality_ = texture_cube.SampleQuality();
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
-		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
-		ds_view_ = d3d_tex->RetrieveD3DDepthStencilView(pf_, array_index, face, level);
-		ds_src_ = d3d_tex->shared_from_this();
+		tex_ = texture_cube;
+		width_ = texture_cube->Width(level);
+		height_ = texture_cube->Width(level);
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
+		sample_count_ = texture_cube->SampleCount();
+		sample_quality_ = texture_cube->SampleQuality();
+
+		first_array_index_ = array_index;
+		array_size_ = 1;
+		level_ = level;
+		first_slice_ = 0;
+		num_slices_ = texture_cube->Depth(0);
+		first_face_ = face;
+		num_faces_ = 1;
+
+		d3d_ds_view_ = checked_cast<D3D12Texture*>(texture_cube.get())->CreateD3DDepthStencilView(pf_, first_array_index_, first_face_,
+			level_);
 	}
 
-	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(uint32_t width, uint32_t height,
+	D3D12DepthStencilView::D3D12DepthStencilView(uint32_t width, uint32_t height,
 											ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 		: ds_first_subres_(0), ds_num_subres_(1)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
+
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		tex_ = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
+		ds_src_ = checked_pointer_cast<D3D12Texture>(tex_);
 
 		width_ = width;
 		height_ = height;
@@ -333,20 +411,18 @@ namespace KlayGE
 		sample_count_ = sample_count;
 		sample_quality_ = sample_quality;
 
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
-		ds_src_ = checked_pointer_cast<D3D12Texture>(ds_tex_);
-		ds_view_ = checked_cast<D3D12Texture*>(ds_src_.get())->RetrieveD3DDepthStencilView(pf_, 0, 1, 0);
+		first_array_index_ = 0;
+		array_size_ = 1;
+		level_ = 0;
+		first_slice_ = 0;
+		num_slices_ = 1;
+		first_face_ = Texture::CF_Positive_X;
+		num_faces_ = 1;
+
+		d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
 	}
 
-	void D3D12DepthStencilRenderView::ClearColor(Color const & clr)
-	{
-		KFL_UNUSED(clr);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void D3D12DepthStencilRenderView::ClearDepth(float depth)
+	void D3D12DepthStencilView::ClearDepth(float depth)
 	{
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
@@ -356,10 +432,10 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.FlushResourceBarriers(d3d_cmd_list_);
 
-		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
+		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 	}
 
-	void D3D12DepthStencilRenderView::ClearStencil(int32_t stencil)
+	void D3D12DepthStencilView::ClearStencil(int32_t stencil)
 	{
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
@@ -369,10 +445,10 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.FlushResourceBarriers(d3d_cmd_list_);
 
-		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
+		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
-	void D3D12DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
+	void D3D12DepthStencilView::ClearDepthStencil(float depth, int32_t stencil)
 	{
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
@@ -382,11 +458,11 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.FlushResourceBarriers(d3d_cmd_list_);
 
-		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 			depth, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
-	void D3D12DepthStencilRenderView::Discard()
+	void D3D12DepthStencilView::Discard()
 	{
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
@@ -404,20 +480,14 @@ namespace KlayGE
 		d3d_cmd_list_->DiscardResource(ds_src_->D3DResource().get(), &region);
 	}
 
-	void D3D12DepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	void D3D12DepthStencilView::OnAttached(FrameBuffer& fb)
 	{
 		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
-
-		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
 
-	void D3D12DepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	void D3D12DepthStencilView::OnDetached(FrameBuffer& fb)
 	{
 		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
-
-		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
 
 
@@ -445,58 +515,7 @@ namespace KlayGE
 		ua_src_ = checked_pointer_cast<D3D12Texture>(texture);
 		counter_offset_ = 0;
 
-		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(pf_);
-		switch (texture->Type())
-		{
-		case Texture::TT_1D:
-			if (array_size_ > 1)
-			{
-				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
-				desc.Texture1DArray.MipSlice = level_;
-				desc.Texture1DArray.ArraySize = array_size_;
-				desc.Texture1DArray.FirstArraySlice = first_array_index_;
-			}
-			else
-			{
-				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
-				desc.Texture1D.MipSlice = level_;
-			}
-			break;
-
-		case Texture::TT_2D:
-			if (array_size_ > 1)
-			{
-				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-				desc.Texture2DArray.MipSlice = level_;
-				desc.Texture2DArray.ArraySize = array_size_;
-				desc.Texture2DArray.FirstArraySlice = first_array_index_;
-				desc.Texture2DArray.PlaneSlice = 0;
-			}
-			else
-			{
-				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-				desc.Texture2D.MipSlice = level_;
-				desc.Texture2D.PlaneSlice = 0;
-			}
-			break;
-
-		case Texture::TT_3D:
-			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
-			desc.Texture3D.MipSlice = level_;
-			desc.Texture3D.FirstWSlice = first_slice_;
-			desc.Texture3D.WSize = num_slices_;
-			break;
-
-		case Texture::TT_Cube:
-			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-			desc.Texture2DArray.MipSlice = level_;
-			desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
-			desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
-			desc.Texture2DArray.PlaneSlice = 0;
-			break;
-		}
-		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
+		d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index, array_size, level);
 	}
 
 	D3D12UnorderedAccessView::D3D12UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
@@ -522,14 +541,9 @@ namespace KlayGE
 
 		ua_src_ = checked_pointer_cast<D3D12Texture>(texture_3d);
 		counter_offset_ = 0;
-		
-		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(pf_);
-		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
-		desc.Texture3D.MipSlice = level_;
-		desc.Texture3D.FirstWSlice = first_slice_;
-		desc.Texture3D.WSize = num_slices_;
-		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
+
+		d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index_, first_slice_,
+			num_slices_, level_);
 	}
 
 	D3D12UnorderedAccessView::D3D12UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
@@ -556,14 +570,7 @@ namespace KlayGE
 		ua_src_ = checked_pointer_cast<D3D12Texture>(texture_cube);
 		counter_offset_ = 0;
 
-		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(pf_);
-		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-		desc.Texture2DArray.MipSlice = level_;
-		desc.Texture2DArray.FirstArraySlice = first_array_index_ * 6 + first_face_;
-		desc.Texture2DArray.ArraySize = array_size_ * 6 + num_faces_;
-		desc.Texture2DArray.PlaneSlice = 0;
-		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), desc);
+		d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index_, first_face_, level_);
 	}
 
 	D3D12UnorderedAccessView::D3D12UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
@@ -571,8 +578,8 @@ namespace KlayGE
 		: ua_first_subres_(0), ua_num_subres_(1)
 	{
 		uint32_t const access_hint = gb->AccessHint();
-
 		BOOST_ASSERT(access_hint & EAH_GPU_Unordered);
+		KFL_UNUSED(access_hint);
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
@@ -596,35 +603,7 @@ namespace KlayGE
 		ua_counter_upload_src_ = d3d_buff->D3DBufferCounterUpload();
 		counter_offset_ = d3d_buff->CounterOffset();
 
-		D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-		if (access_hint & EAH_Raw)
-		{
-			uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
-			uav_desc.Buffer.StructureByteStride = 0;
-		}
-		else if (access_hint & EAH_GPU_Structured)
-		{
-			uav_desc.Format = DXGI_FORMAT_UNKNOWN;
-			uav_desc.Buffer.StructureByteStride = gb->StructureByteStride();
-		}
-		else
-		{
-			uav_desc.Format = D3D12Mapping::MappingFormat(pf);
-			uav_desc.Buffer.StructureByteStride = 0;
-		}
-		uav_desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-		uav_desc.Buffer.FirstElement = first_elem_;
-		uav_desc.Buffer.NumElements = num_elems_;
-		uav_desc.Buffer.CounterOffsetInBytes = counter_offset_;
-		if (access_hint & EAH_Raw)
-		{
-			uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
-		}
-		else
-		{
-			uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-		}
-		d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(ua_src_.get(), uav_desc);
+		d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->CreateD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
 	}
 
 	void D3D12UnorderedAccessView::Clear(float4 const & val)
@@ -695,16 +674,16 @@ namespace KlayGE
 		d3d_cmd_list_->DiscardResource(ua_src_->D3DResource().get(), &region);
 	}
 
-	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t att)
+	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t index)
 	{
 		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
+		KFL_UNUSED(index);
 	}
 
-	void D3D12UnorderedAccessView::OnDetached(FrameBuffer& fb, uint32_t att)
+	void D3D12UnorderedAccessView::OnDetached(FrameBuffer& fb, uint32_t index)
 	{
 		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
+		KFL_UNUSED(index);
 	}
 
 	void D3D12UnorderedAccessView::ResetInitCount()

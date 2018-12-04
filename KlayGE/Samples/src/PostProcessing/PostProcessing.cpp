@@ -6,6 +6,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -235,8 +236,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	color_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
-	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
-	color_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
+	color_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
+	color_fb_->Attach(rf.Make2DDsv(width, height, EF_D16, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, color_fb_, 0);
 
@@ -407,8 +408,8 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 
 		color_tex_->BuildMipSubLevels();
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 		active_pp_->Apply();
 
 		return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;

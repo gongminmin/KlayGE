@@ -7,6 +7,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -709,7 +710,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
 		{
 			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, ds_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+			depth_views_[i] = rf.Make2DDsv(depth_texs_[i], 0, 1, 0);
 		}
 	}
 	else
@@ -720,7 +721,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
 		{
 			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			depth_views_[i] = rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0);
+			depth_views_[i] = rf.Make2DDsv(width, height, ds_format, 1, 0);
 		}
 	}
 
@@ -730,15 +731,15 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0));
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
+		peeling_fbs_[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(peeled_texs_[i], 0, 1, 0));
+		peeling_fbs_[i]->Attach(depth_views_[i % 2]);
 	}
 	if (!depth_texture_support_)
 	{
 		for (size_t i = 0; i < depth_fbs_.size(); ++ i)
 		{
-			depth_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*depth_texs_[i], 0, 1, 0));
-			depth_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i]);
+			depth_fbs_[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(depth_texs_[i], 0, 1, 0));
+			depth_fbs_[i]->Attach(depth_views_[i]);
 		}
 	}
 
@@ -746,8 +747,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		accum_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		weight_tex_ = rf.MakeTexture2D(width, height, 1, 1, caps.mrt_independent_bit_depths_support ? EF_R16F : EF_ABGR16F,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		weighted_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*accum_tex_, 0, 1, 0));
-		weighted_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*weight_tex_, 0, 1, 0));
+		weighted_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(accum_tex_, 0, 1, 0));
+		weighted_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(weight_tex_, 0, 1, 0));
 	}
 
 	if (caps.max_simultaneous_uavs > 0)
@@ -755,18 +756,18 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		auto const opaque_bg_format = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, peel_format }, 1, 0);
 		BOOST_ASSERT(opaque_bg_format != EF_Unknown);
 		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
-		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));
+		opaque_bg_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(opaque_bg_tex_, 0, 1, 0));
+		opaque_bg_fb_->Attach(rf.Make2DDsv(width, height, ds_format, 1, 0));
 		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter,
 			width * height * 8 * sizeof(float4), nullptr, EF_ABGR32F);
 		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
 			width * height * sizeof(uint32_t), nullptr, EF_R32UI);
-		frag_link_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(frag_link_buf_, EF_ABGR32F, 0, width * height * 8);
-		start_offset_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(start_offset_buf_, EF_R32UI, 0, width * height);
-		linked_list_fb_->AttachUAV(0, frag_link_uav_);
-		linked_list_fb_->AttachUAV(1, start_offset_uav_);
+		frag_link_uav_ = rf.MakeGraphicsBufferUav(frag_link_buf_, EF_ABGR32F, 0, width * height * 8);
+		start_offset_uav_ = rf.MakeGraphicsBufferUav(start_offset_buf_, EF_R32UI, 0, width * height);
+		linked_list_fb_->Attach(0, frag_link_uav_);
+		linked_list_fb_->Attach(1, start_offset_uav_);
 		linked_list_fb_->GetViewport()->width = width;
 		linked_list_fb_->GetViewport()->height = height;
 
@@ -780,7 +781,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 			frag_length_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
 				width * height * sizeof(uint32_t), nullptr, EF_R32UI);
-			frag_length_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(frag_length_buf_, EF_R32UI, 0, width * height);
+			frag_length_uav_ = rf.MakeGraphicsBufferUav(frag_length_buf_, EF_R32UI, 0, width * height);
 		}
 	}
 
@@ -878,7 +879,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			{
 				re.BindFrameBuffer(FrameBufferPtr());
 			}
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
@@ -891,12 +892,12 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			{
 				if (OM_RovAdaptiveTransparency == oit_mode_)
 				{
-					linked_list_fb_->AttachUAV(1, frag_length_uav_);
+					linked_list_fb_->Attach(1, frag_length_uav_);
 					frag_length_uav_->Clear(uint4(0, 0, 0, 0));
 				}
 				else
 				{
-					linked_list_fb_->AttachUAV(1, start_offset_uav_);
+					linked_list_fb_->Attach(1, start_offset_uav_);
 					start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
 				}
 			}
@@ -911,7 +912,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(FrameBufferPtr());
 			if (OM_PerPixelLinkedLists == oit_mode_)
 			{
-				re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+				re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 			}
 			checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(0))->RenderQuad();
 			return App3DFramework::URV_Finished;
@@ -923,7 +924,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 		{
 		case 0:
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
@@ -951,7 +952,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 		if (0 == pass)
 		{
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 		}
 		else
@@ -1181,7 +1182,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			});
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+		re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }

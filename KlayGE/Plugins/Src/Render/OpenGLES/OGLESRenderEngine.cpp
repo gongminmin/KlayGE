@@ -249,15 +249,14 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			win->Attach(FrameBuffer::ATT_DepthStencil,
-				rf.Make2DDepthStencilRenderView(win->Width(), win->Height(), settings.depth_stencil_fmt, 1, 0));
+				rf.Make2DDsv(win->Width(), win->Height(), settings.depth_stencil_fmt, 1, 0));
 		}
 #else
-		win->Attach(FrameBuffer::ATT_Color0,
-			MakeSharedPtr<OGLESScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
+		win->Attach(FrameBuffer::Attachment::Color0,
+			MakeSharedPtr<OGLESScreenRenderTargetView>(win->Width(), win->Height(), settings.color_fmt));
 		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
 		{
-			win->Attach(FrameBuffer::ATT_DepthStencil,
-				MakeSharedPtr<OGLESScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
+			win->Attach(MakeSharedPtr<OGLESScreenDepthStencilView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
 		}
 #endif
 

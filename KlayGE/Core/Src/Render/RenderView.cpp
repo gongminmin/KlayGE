@@ -15,9 +15,9 @@
 
 namespace KlayGE
 {
-	RenderView::~RenderView() = default;
+	RenderTargetView::~RenderTargetView() = default;
 
+	DepthStencilView::~DepthStencilView() = default;
 
-	UnorderedAccessView::UnorderedAccessView() = default;
 	UnorderedAccessView::~UnorderedAccessView() = default;
 }

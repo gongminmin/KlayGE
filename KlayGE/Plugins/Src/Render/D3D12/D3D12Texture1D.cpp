@@ -219,6 +219,27 @@ namespace KlayGE
 		return desc;
 	}
 
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture1D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf);
+		if (array_size_ > 1)
+		{
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
+			desc.Texture1DArray.MipSlice = level;
+			desc.Texture1DArray.ArraySize = array_size;
+			desc.Texture1DArray.FirstArraySlice = first_array_index;
+		}
+		else
+		{
+			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+			desc.Texture1D.MipSlice = level;
+		}
+
+		return desc;
+	}
+
 	void D3D12Texture1D::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
 			void*& data)
@@ -254,7 +275,8 @@ namespace KlayGE
 		}
 		else
 		{
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 			ID3D12Device* device = re.D3DDevice();
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -364,7 +386,9 @@ namespace KlayGE
 						D3D12_RESOURCE_STATE_RENDER_TARGET);
 					re.FlushResourceBarriers(cmd_list);
 
-					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetrieveD3DRenderTargetView(format_, index, 1, level)->Handle();
+					auto rtv = rf.Make2DRtv(this->shared_from_this(), index, 1, level);
+					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle
+						= checked_pointer_cast<D3D12RenderTargetView>(rtv)->D3DRenderTargetView()->Handle();
 
 					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
 						= this->RetrieveD3DShaderResourceView(format_, index, 1, level - 1, 1)->Handle();

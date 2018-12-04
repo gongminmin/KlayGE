@@ -406,9 +406,9 @@ namespace KlayGE
 			cmd_list->ClearState(nullptr);
 		}
 
-		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		for (size_t i = 0; i < rt_views_.size(); ++ i)
 		{
-			clr_views_[i].reset();
+			rt_views_[i].reset();
 		}
 		ds_view_.reset();
 
@@ -664,22 +664,22 @@ namespace KlayGE
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
-			render_target_render_views_[i] = rf.Make2DRenderView(*render_targets_[i], 0, 1, 0);
+			render_target_render_views_[i] = rf.Make2DRtv(render_targets_[i], 0, 1, 0);
 		}
 		if (stereo)
 		{
 			for (size_t i = 0; i < render_targets_.size(); ++ i)
 			{
-				render_target_render_views_right_eye_[i] = rf.Make2DRenderView(*render_targets_[i], 1, 1, 0);
+				render_target_render_views_right_eye_[i] = rf.Make2DRtv(render_targets_[i], 1, 1, 0);
 			}
 		}
-		this->Attach(ATT_Color0, render_target_render_views_[0]);
+		this->Attach(Attachment::Color0, render_target_render_views_[0]);
 		if (depth_stencil_fmt_ != EF_Unknown)
 		{
-			this->Attach(ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*depth_stencil_, 0, 1, 0));
+			this->Attach(rf.Make2DDsv(depth_stencil_, 0, 1, 0));
 			if (stereo)
 			{
-				this->Attach(ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*depth_stencil_, 1, 1, 0));
+				this->Attach(rf.Make2DDsv(depth_stencil_, 1, 1, 0));
 			}
 		}
 	}
@@ -749,7 +749,7 @@ namespace KlayGE
 
 			curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 
-			this->Attach(ATT_Color0, render_target_render_views_[curr_back_buffer_]);
+			this->Attach(Attachment::Color0, render_target_render_views_[curr_back_buffer_]);
 		}
 	}
 

@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderView.hpp>
 
 #include <KlayGE/SSSBlur.hpp>
 
@@ -94,14 +95,14 @@ namespace KlayGE
 			blur_y_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(), tex->SampleCount(), tex->SampleQuality(),
 				EAH_GPU_Read | EAH_GPU_Write);
 
-			blur_x_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_x_tex_, 0, 1, 0));
-			blur_x_fb_->Attach(FrameBuffer::ATT_DepthStencil, frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil));
-			blur_y_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_y_tex_, 0, 1, 0));
-			blur_y_fb_->Attach(FrameBuffer::ATT_DepthStencil, frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil));
+			blur_x_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(blur_x_tex_, 0, 1, 0));
+			blur_x_fb_->Attach(frame_buffer_->AttachedDsv());
+			blur_y_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(blur_y_tex_, 0, 1, 0));
+			blur_y_fb_->Attach(frame_buffer_->AttachedDsv());
 
 			if (mrt_blend_support_)
 			{
-				frame_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*blur_y_tex_, 0, 1, 0));
+				frame_buffer_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(blur_y_tex_, 0, 1, 0));
 			}
 		}
 	}
@@ -117,7 +118,7 @@ namespace KlayGE
 
 		{
 			re.BindFrameBuffer(blur_y_fb_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 			technique_ = copy_tech_;
 			*src_tex_param_ = this->InputPin(0);
 			this->Render();
@@ -125,7 +126,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < 3; ++ i)
 		{
 			re.BindFrameBuffer(blur_x_fb_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 			technique_ = blur_x_tech_;
 			*src_tex_param_ = blur_y_tex_;
 			*step_param_ = float2((i + 1) * sss_strength / frame_buffer_->Width(), 0);
@@ -140,7 +141,7 @@ namespace KlayGE
 			else
 			{
 				re.BindFrameBuffer(blur_y_fb_);
-				re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+				re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 				technique_ = blur_y_techs_[0];
 				this->Render();
 

@@ -123,113 +123,125 @@ namespace KlayGE
 		return MakeSharedPtr<OGLESFence>();
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	RenderTargetViewPtr OGLESRenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<OGLESTexture1DRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<OGLESTexture1DRenderTargetView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	RenderTargetViewPtr OGLESRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<OGLESTexture2DRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<OGLESTexture2DRenderTargetView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	RenderTargetViewPtr OGLESRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
 	{
-		return MakeSharedPtr<OGLESTextureCubeRenderView>(texture, array_index, face, level);
+		return MakeSharedPtr<OGLESTextureCubeRenderTargetView>(texture, pf, array_index, face, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	RenderTargetViewPtr OGLESRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
 	{
-		return MakeSharedPtr<OGLESTexture3DRenderView>(texture, array_index, slice, level);
-	}
-	
-	RenderViewPtr OGLESRenderFactory::MakeCubeRenderView(Texture& texture, int array_index, int level)
-	{
-		return MakeSharedPtr<OGLESTextureCubeRenderView>(texture, array_index, level);
+		return MakeSharedPtr<OGLESTexture3DRenderTargetView>(texture, pf, array_index, slice, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	RenderTargetViewPtr OGLESRenderFactory::Make3DRtv(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
 	{
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr OGLESRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/)
+	RenderTargetViewPtr OGLESRenderFactory::MakeCubeRtv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
 	{
-		return RenderViewPtr();
+		return MakeSharedPtr<OGLESTextureCubeRenderTargetView>(texture, pf, array_index, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
+	RenderTargetViewPtr OGLESRenderFactory::MakeGraphicsBufferRtv(GraphicsBufferPtr const & /*gbuffer*/, ElementFormat /*pf*/,
+		uint32_t /*first_elem*/, uint32_t /*num_elems*/)
 	{
-		return MakeSharedPtr<OGLESDepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr OGLESRenderFactory::Make2DDsv(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count,
+		uint32_t sample_quality)
 	{
-		return this->Make2DDepthStencilRenderView(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<OGLESTextureDepthStencilView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr OGLESRenderFactory::Make1DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<OGLESDepthStencilRenderView>(texture, first_array_index, array_size, level);
+		return this->Make2DDsv(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	DepthStencilViewPtr OGLESRenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<OGLESTextureCubeDepthStencilRenderView>(texture, array_index, face, level);
+		return MakeSharedPtr<OGLESTextureDepthStencilView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+	DepthStencilViewPtr OGLESRenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
 	{
-		return RenderViewPtr();
+		return MakeSharedPtr<OGLESTextureCubeFaceDepthStencilView>(texture, pf, array_index, face, level);
 	}
 
-	RenderViewPtr OGLESRenderFactory::MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level)
+	DepthStencilViewPtr OGLESRenderFactory::Make2DDsv(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		uint32_t /*slice*/, int /*level*/)
 	{
-		return MakeSharedPtr<OGLESDepthStencilRenderView>(texture, array_index, 1, level);
+		return DepthStencilViewPtr();
 	}
 
-	RenderViewPtr OGLESRenderFactory::Make3DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	DepthStencilViewPtr OGLESRenderFactory::Make3DDsv(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
 	{
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make1DUnorderedAccessView(TexturePtr const & /*texture*/, int /*first_array_index*/,
-		int /*array_size*/, int /*level*/, ElementFormat /*pf*/)
+	DepthStencilViewPtr OGLESRenderFactory::MakeCubeDsv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
+	{
+		return MakeSharedPtr<OGLESTextureDepthStencilView>(texture, pf, array_index, 1, level);
+	}
+
+	UnorderedAccessViewPtr OGLESRenderFactory::Make1DUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*first_array_index*/,
+		int /*array_size*/, int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*first_array_index*/,
-		int /*array_size*/, int /*level*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*first_array_index*/,
+		int /*array_size*/, int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
-		Texture::CubeFaces /*face*/, int /*level*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		Texture::CubeFaces /*face*/, int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
-		uint32_t /*slice*/, int /*level*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make2DUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		uint32_t /*slice*/, int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::MakeCubeUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
-		int /*level*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::Make3DUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::Make3DUnorderedAccessView(TexturePtr const & /*texture*/, int /*array_index*/,
-		uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/, ElementFormat /*pf*/)
+	UnorderedAccessViewPtr OGLESRenderFactory::MakeCubeUav(TexturePtr const & /*texture*/, ElementFormat /*pf*/, int /*array_index*/,
+		int /*level*/)
 	{
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLESRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBufferPtr const & /*gbuffer*/,
+	UnorderedAccessViewPtr OGLESRenderFactory::MakeGraphicsBufferUav(GraphicsBufferPtr const & /*gbuffer*/,
 		ElementFormat /*pf*/, uint32_t /*first_elem*/, uint32_t /*num_elems*/)
 	{
 		return UnorderedAccessViewPtr();

@@ -69,8 +69,8 @@ namespace KlayGE
 
 	private:
 		void Radix008A(UnorderedAccessViewPtr const & dst_uav,
-				   GraphicsBufferPtr const & src,
-				   uint32_t thread_count, uint32_t istride, bool first);
+					GraphicsBufferPtr const & src,
+					uint32_t thread_count, uint32_t istride, bool first);
 
 	private:
 		GraphicsBufferPtr src_;

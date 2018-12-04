@@ -29,39 +29,25 @@ namespace KlayGE
 	class D3D11TextureCube;
 	class D3D11GraphicsBuffer;
 
-	class D3D11RenderView : public RenderView
+	class D3D11RenderTargetView : public RenderTargetView
 	{
 	public:
-		D3D11RenderView();
-		virtual ~D3D11RenderView();
+		D3D11RenderTargetView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
+		D3D11RenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice, uint32_t num_slices,
+			int level);
+		D3D11RenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
+		D3D11RenderTargetView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 
-	protected:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
-		ID3D11DeviceContext1* d3d_imm_ctx_1_;
-	};
+		void ClearColor(Color const & clr) override;
 
-	class D3D11RenderTargetRenderView : public D3D11RenderView
-	{
-	public:
-		D3D11RenderTargetRenderView(Texture& texture_1d_2d_cube, int first_array_index, int array_size, int level);
-		D3D11RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D11RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		D3D11RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf);
+		void Discard() override;
 
-		void ClearColor(Color const & clr);
-		void ClearDepth(float depth);
-		void ClearStencil(int32_t stencil);
-		void ClearDepthStencil(float depth, int32_t stencil);
-
-		virtual void Discard() override;
-
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 		ID3D11RenderTargetView* D3DRenderTargetView() const
 		{
-			return rt_view_.get();
+			return d3d_rt_view_.get();
 		}
 
 		void* RTSrc() const
@@ -83,7 +69,11 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11RenderTargetViewPtr rt_view_;
+		ID3D11Device* d3d_device_;
+		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11DeviceContext1* d3d_imm_ctx_1_;
+
+		ID3D11RenderTargetViewPtr d3d_rt_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
@@ -91,27 +81,27 @@ namespace KlayGE
 		std::function<void()> discard_func_;
 	};
 
-	class D3D11DepthStencilRenderView : public D3D11RenderView
+	class D3D11DepthStencilView : public DepthStencilView
 	{
 	public:
-		D3D11DepthStencilRenderView(Texture& texture_1d_2d_cube, int first_array_index, int array_size, int level);
-		D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		D3D11DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		D3D11DepthStencilView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
+		D3D11DepthStencilView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice, uint32_t num_slices,
+			int level);
+		D3D11DepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
+		D3D11DepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
 
-		void ClearColor(Color const & clr);
-		void ClearDepth(float depth);
-		void ClearStencil(int32_t stencil);
-		void ClearDepthStencil(float depth, int32_t stencil);
+		void ClearDepth(float depth) override;
+		void ClearStencil(int32_t stencil) override;
+		void ClearDepthStencil(float depth, int32_t stencil) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
 		ID3D11DepthStencilView* D3DDepthStencilView() const
 		{
-			return ds_view_.get();
+			return d3d_ds_view_.get();
 		}
 
 		void* RTSrc() const
@@ -133,7 +123,11 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11DepthStencilViewPtr ds_view_;
+		ID3D11Device* d3d_device_;
+		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11DeviceContext1* d3d_imm_ctx_1_;
+
+		ID3D11DepthStencilViewPtr d3d_ds_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
@@ -155,10 +149,10 @@ namespace KlayGE
 		void Clear(float4 const & val);
 		void Clear(uint4 const & val);
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, uint32_t index) override;
+		void OnDetached(FrameBuffer& fb, uint32_t index) override;
 
 		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
 		{

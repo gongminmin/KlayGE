@@ -36,7 +36,8 @@ namespace KlayGE
 		{
 			return d3d_sr_view_;
 		}
-		ID3D11RenderTargetViewPtr const & D3DRenderTargetView() const;
+		ID3D11RenderTargetViewPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
+		ID3D11UnorderedAccessViewPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
@@ -61,7 +62,6 @@ namespace KlayGE
 
 		ID3D11BufferPtr d3d_buffer_;
 		ID3D11ShaderResourceViewPtr d3d_sr_view_;
-		mutable ID3D11RenderTargetViewPtr d3d_rt_view_;
 
 		uint32_t bind_flags_;
 		ElementFormat fmt_as_shader_res_;

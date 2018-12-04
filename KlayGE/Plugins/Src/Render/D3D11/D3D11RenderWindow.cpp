@@ -578,9 +578,9 @@ namespace KlayGE
 			d3d_imm_ctx->Flush();
 		}
 
-		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		for (size_t i = 0; i < rt_views_.size(); ++ i)
 		{
-			clr_views_[i].reset();
+			rt_views_[i].reset();
 		}
 		ds_view_.reset();
 
@@ -867,13 +867,13 @@ namespace KlayGE
 		TIFHR(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
 		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(MakeCOMPtr(back_buffer));
 
-		render_target_view_ = rf.Make2DRenderView(*back_buffer_, 0, 1, 0);
+		render_target_view_ = rf.Make2DRtv(back_buffer_, 0, 1, 0);
 
 		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 	
 		if (stereo)
 		{
-			render_target_view_right_eye_ = rf.Make2DRenderView(*back_buffer_, 1, 1, 0);
+			render_target_view_right_eye_ = rf.Make2DRtv(back_buffer_, 1, 1, 0);
 		}
 
 		if (depth_stencil_fmt_ != EF_Unknown)
@@ -882,11 +882,11 @@ namespace KlayGE
 				back_buffer_->SampleCount(), back_buffer_->SampleQuality(),
 				EAH_GPU_Read | EAH_GPU_Write);
 
-			depth_stencil_view_ = rf.Make2DDepthStencilRenderView(*depth_stencil_, 0, 1, 0);
+			depth_stencil_view_ = rf.Make2DDsv(depth_stencil_, 0, 1, 0);
 
 			if (stereo)
 			{
-				depth_stencil_view_right_eye_ = rf.Make2DDepthStencilRenderView(*depth_stencil_, 1, 1, 0);
+				depth_stencil_view_right_eye_ = rf.Make2DDsv(depth_stencil_, 1, 1, 0);
 			}
 		}
 
@@ -895,10 +895,10 @@ namespace KlayGE
 			stereo_amd_right_eye_height_ = stereo_amd_qb_ext_->GetLineOffset(swap_chain_.get());
 		}
 
-		this->Attach(ATT_Color0, render_target_view_);
+		this->Attach(Attachment::Color0, render_target_view_);
 		if (depth_stencil_view_)
 		{
-			this->Attach(ATT_DepthStencil, depth_stencil_view_);
+			this->Attach(depth_stencil_view_);
 		}
 	}
 

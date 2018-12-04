@@ -198,6 +198,27 @@ namespace KlayGE
 		return desc;
 	}
 
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture1D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(pf);
+		if (array_size_ > 1)
+		{
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
+			desc.Texture1DArray.MipSlice = level;
+			desc.Texture1DArray.FirstArraySlice = first_array_index;
+			desc.Texture1DArray.ArraySize = array_size;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1D;
+			desc.Texture1D.MipSlice = level;
+		}
+
+		return desc;
+	}
+
 	void D3D11Texture1D::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t /*width*/,
 			void*& data)

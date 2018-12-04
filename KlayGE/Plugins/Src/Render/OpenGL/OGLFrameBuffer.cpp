@@ -79,8 +79,8 @@ namespace KlayGE
 		{
 			if (fbo_ != 0)
 			{
-				gl_targets_.resize(clr_views_.size());
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				gl_targets_.resize(rt_views_.size());
+				for (size_t i = 0; i < rt_views_.size(); ++ i)
 				{
 					gl_targets_[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 				}
@@ -118,7 +118,7 @@ namespace KlayGE
 
 		if (fbo_ != 0)
 		{
-			re.EnableFramebufferSRGB(IsSRGB(clr_views_[0]->Format()));
+			re.EnableFramebufferSRGB(IsSRGB(rt_views_[0]->Format()));
 		}
 		else
 		{
@@ -175,9 +175,9 @@ namespace KlayGE
 		{
 			if (fbo_ != 0)
 			{
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				for (size_t i = 0; i < rt_views_.size(); ++ i)
 				{
-					if (clr_views_[i])
+					if (rt_views_[i])
 					{
 						glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
 					}
@@ -253,9 +253,9 @@ namespace KlayGE
 			{
 				if (flags & CBM_Color)
 				{
-					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					for (size_t i = 0; i < rt_views_.size(); ++ i)
 					{
-						if (clr_views_[i])
+						if (rt_views_[i])
 						{
 							attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
 						}

@@ -313,8 +313,8 @@ private:
 			sizeof(indirect_args), indirect_args, EF_R32UI);
 
 		auto fb = rf.MakeFrameBuffer();
-		auto vb_num_uav = rf.MakeGraphicsBufferUnorderedAccessView(vb_num, EF_R32UI, 0, static_cast<uint32_t>(std::size(indirect_args)));
-		fb->AttachUAV(0, vb_num_uav);
+		auto vb_num_uav = rf.MakeGraphicsBufferUav(vb_num, EF_R32UI, 0, static_cast<uint32_t>(std::size(indirect_args)));
+		fb->Attach(0, vb_num_uav);
 
 		*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
 

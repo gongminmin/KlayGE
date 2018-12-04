@@ -21,6 +21,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/FFT.hpp>
@@ -553,7 +554,7 @@ namespace KlayGE
 
 		FrameBufferPtr fb = bright_pass_pp_->OutputFrameBuffer();
 		re.BindFrameBuffer(fb);
-		fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+		fb->AttachedRtv(FrameBuffer::Attachment::Color0)->ClearColor(Color(0, 0, 0, 0));
 		bright_pass_pp_->Render();
 
 		fft_->Execute(freq_real_tex_, freq_imag_tex_, resized_tex_, empty_tex_);

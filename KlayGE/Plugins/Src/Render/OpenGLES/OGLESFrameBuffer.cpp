@@ -69,8 +69,8 @@ namespace KlayGE
 		{
 			if (fbo_ != 0)
 			{
-				gl_targets_.resize(clr_views_.size());
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				gl_targets_.resize(rt_views_.size());
+				for (size_t i = 0; i < rt_views_.size(); ++ i)
 				{
 					gl_targets_[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 				}
@@ -103,10 +103,10 @@ namespace KlayGE
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
 
-		bool has_color = (flags & CBM_Color) && !!this->Attached(ATT_Color0);
+		bool has_color = (flags & CBM_Color) && !!this->AttachedRtv(Attachment::Color0);
 		bool has_depth = false;
 		bool has_stencil = false;
-		RenderViewPtr const & ds_view = this->Attached(ATT_DepthStencil);
+		auto const & ds_view = this->AttachedDsv();
 		if (ds_view)
 		{
 			has_depth = (flags & CBM_Depth) && IsDepthFormat(ds_view->Format());
@@ -146,9 +146,9 @@ namespace KlayGE
 		{
 			if (fbo_ != 0)
 			{
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				for (size_t i = 0; i < rt_views_.size(); ++ i)
 				{
-					if (clr_views_[i])
+					if (rt_views_[i])
 					{
 						glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
 					}
@@ -216,9 +216,9 @@ namespace KlayGE
 		{
 			if (flags & CBM_Color)
 			{
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				for (size_t i = 0; i < rt_views_.size(); ++ i)
 				{
-					if (clr_views_[i])
+					if (rt_views_[i])
 					{
 						attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
 					}
