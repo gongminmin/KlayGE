@@ -365,17 +365,18 @@ namespace
 			}
 		}
 
-		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
+		void LinkedListBuffer(UnorderedAccessViewPtr const & fragment_link_uav, GraphicsBufferPtr const & fragment_link_buf,
+			UnorderedAccessViewPtr const & start_offset_uav, GraphicsBufferPtr const & start_offset_buf)
 		{
 			if (gen_ppll_tech_)
 			{
-				*(gen_ppll_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_buf;
-				*(gen_ppll_effect_->ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
+				*(gen_ppll_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_uav;
+				*(gen_ppll_effect_->ParameterByName("rw_start_offset_buffer")) = start_offset_uav;
 			}
 			if (gen_rov_ppa_tech_)
 			{
-				*(gen_rov_ppa_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_buf;
-				*(gen_rov_ppa_effect_->ParameterByName("rw_frag_length_buffer")) = start_offset_buf;
+				*(gen_rov_ppa_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_uav;
+				*(gen_rov_ppa_effect_->ParameterByName("rw_frag_length_buffer")) = start_offset_uav;
 			}
 
 			if (ppll_render_tech_)
@@ -864,7 +865,8 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 	{
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_buf_,
+				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_uav_, frag_link_buf_,
+					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_uav_ : start_offset_uav_,
 					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_buf_ : start_offset_buf_);
 			});
 
@@ -888,7 +890,6 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 					checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
 				});
 			
-			re.BindFrameBuffer(linked_list_fb_);
 			{
 				if (OM_RovAdaptiveTransparency == oit_mode_)
 				{
@@ -901,6 +902,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 					start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
 				}
 			}
+			re.BindFrameBuffer(linked_list_fb_);
 			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 
 		default:

@@ -293,22 +293,25 @@ namespace
 					access_hint |=EAH_GPU_Structured;
 				}
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint,
-					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_pos_uav_[0] = rf.MakeGraphicsBufferUav(particle_pos_vb_[0], EF_ABGR32F, 0, max_num_particles_);
 				particle_pos_vb_[1] = particle_pos_vb_[0];
-				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint,
-					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
+				particle_pos_uav_[1] = particle_pos_uav_[0];
+				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), nullptr,
+					EF_ABGR32F);
+				particle_vel_uav_[0] = rf.MakeGraphicsBufferUav(particle_vel_vb_[0], EF_ABGR32F, 0, max_num_particles_);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
+				particle_vel_uav_[1] = particle_vel_uav_[0];
 
 				if (use_typed_uav)
 				{
-					*(effect_->ParameterByName("particle_pos_rw_buff")) = particle_pos_vb_[0];
-					*(effect_->ParameterByName("particle_vel_rw_buff")) = particle_vel_vb_[0];
+					*(effect_->ParameterByName("particle_pos_rw_buff")) = particle_pos_uav_[0];
+					*(effect_->ParameterByName("particle_vel_rw_buff")) = particle_vel_uav_[0];
 				}
 				else
 				{
-					*(effect_->ParameterByName("particle_pos_rw_stru_buff")) = particle_pos_vb_[0];
-					*(effect_->ParameterByName("particle_vel_rw_stru_buff")) = particle_vel_vb_[0];
+					*(effect_->ParameterByName("particle_pos_rw_stru_buff")) = particle_pos_uav_[0];
+					*(effect_->ParameterByName("particle_vel_rw_stru_buff")) = particle_vel_uav_[0];
 				}
 
 				for (int i = 0; i < max_num_particles_; ++ i)
@@ -338,22 +341,18 @@ namespace
 					p[i] = float4(0, 0, 0, -1);
 				}
 
-				particle_rl_[0] = rf.MakeRenderLayout();
-				particle_rl_[1] = rf.MakeRenderLayout();
+				for (int i = 0; i < 2; ++ i)
+				{
+					particle_rl_[i] = rf.MakeRenderLayout();
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
-					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				particle_pos_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
-					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
-					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
-				particle_vel_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
-					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
+					particle_pos_vb_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, max_num_particles_ * sizeof(float4),
+						&p[0], EF_ABGR32F);
+					particle_vel_vb_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, max_num_particles_ * sizeof(float4),
+						nullptr, EF_ABGR32F);
 
-				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], VertexElement(VEU_Position, 0, EF_ABGR32F));
-				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
-				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], VertexElement(VEU_Position, 0, EF_ABGR32F));
-				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
+					particle_rl_[i]->BindVertexStream(particle_pos_vb_[i], VertexElement(VEU_Position, 0, EF_ABGR32F));
+					particle_rl_[i]->BindVertexStream(particle_vel_vb_[i], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
+				}
 
 				for (int i = 0; i < max_num_particles_; ++ i)
 				{
@@ -679,7 +678,9 @@ namespace
 		TexturePtr particle_vel_texture_[2];
 
 		GraphicsBufferPtr particle_pos_vb_[2];
+		UnorderedAccessViewPtr particle_pos_uav_[2];
 		GraphicsBufferPtr particle_vel_vb_[2];
+		UnorderedAccessViewPtr particle_vel_uav_[2];
 		RenderLayoutPtr particle_rl_[2];
 
 		FrameBufferPtr pos_vel_rt_buffer_[2];
