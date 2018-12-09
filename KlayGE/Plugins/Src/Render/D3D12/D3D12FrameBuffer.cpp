@@ -194,7 +194,7 @@ namespace KlayGE
 				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
 
-				d3d_rt_handles_[i] = p->D3DRenderTargetView()->Handle();
+				d3d_rt_handles_[i] = p->RetrieveD3DRenderTargetView()->Handle();
 			}
 			else
 			{
@@ -213,7 +213,7 @@ namespace KlayGE
 			d3d_ds_first_subres_ = p->DSFirstSubRes();
 			d3d_ds_num_subres_ = p->DSNumSubRes();
 
-			d3d_ds_handle_ = p->D3DDepthStencilView()->Handle();
+			d3d_ds_handle_ = p->RetrieveD3DDepthStencilView()->Handle();
 			d3d_ds_handle_ptr_ = &d3d_ds_handle_;
 		}
 		else

@@ -484,7 +484,7 @@ namespace KlayGE
 
 						auto rtv = rf.Make2DRtv(this->shared_from_this(), index * 6 + f, 1, level);
 						D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle
-							= checked_pointer_cast<D3D12RenderTargetView>(rtv)->D3DRenderTargetView()->Handle();
+							= checked_pointer_cast<D3D12RenderTargetView>(rtv)->RetrieveD3DRenderTargetView()->Handle();
 
 						D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
 							= this->RetrieveD3DShaderResourceView(format_, index * 6 + f, 1, level - 1, 1)->Handle();

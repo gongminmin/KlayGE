@@ -127,7 +127,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->TextureResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -156,7 +156,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->BufferResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{

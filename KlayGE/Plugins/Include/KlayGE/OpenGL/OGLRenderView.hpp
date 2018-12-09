@@ -28,47 +28,37 @@ namespace KlayGE
 	class OGLRenderTargetView : public RenderTargetView
 	{
 	public:
-		OGLRenderTargetView();
-		virtual ~OGLRenderTargetView();
-
-		GLuint GLTexture() const
-		{
-			return gl_tex_;
-		}
+		virtual GLuint RetrieveGLTexture() const;
 
 	protected:
 		void DoClearColor(Color const & clr);
 		void DoDiscardColor();
 
 	protected:
-		GLuint gl_tex_;
-		GLuint gl_fbo_;
-		GLuint index_;
+		mutable GLuint gl_tex_ = 0;
+		GLuint gl_fbo_ = 0;
+		GLuint index_ = 0;
 	};
+	typedef std::shared_ptr<OGLRenderTargetView> OGLRenderTargetViewPtr;
 
 	class OGLDepthStencilView : public DepthStencilView
 	{
 	public:
-		OGLDepthStencilView();
-		virtual ~OGLDepthStencilView();
-
 		void ClearDepth(float depth) override;
 		void ClearStencil(int32_t stencil) override;
 		void ClearDepthStencil(float depth, int32_t stencil) override;
 
-		GLuint GLTexture() const
-		{
-			return gl_tex_;
-		}
+		virtual GLuint RetrieveGLTexture() const;
 
 	protected:
 		void DoClearDepthStencil(uint32_t flags, float depth, int32_t stencil);
 		void DoDiscardDepthStencil();
 
 	protected:
-		GLuint gl_tex_;
-		GLuint gl_fbo_;
+		mutable GLuint gl_tex_ = 0;
+		GLuint gl_fbo_ = 0;
 	};
+	typedef std::shared_ptr<OGLDepthStencilView> OGLDepthStencilViewPtr;
 
 	class OGLScreenRenderTargetView : public OGLRenderTargetView
 	{
@@ -81,9 +71,9 @@ namespace KlayGE
 
 		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
-	};
 
-	typedef std::shared_ptr<OGLScreenRenderTargetView> OGLScreenRenderTargetViewPtr;
+		GLuint RetrieveGLTexture() const override;
+	};
 
 
 	class OGLScreenDepthStencilView : public OGLDepthStencilView
@@ -95,9 +85,9 @@ namespace KlayGE
 
 		void OnAttached(FrameBuffer& fb) override;
 		void OnDetached(FrameBuffer& fb) override;
-	};
 
-	typedef std::shared_ptr<OGLScreenDepthStencilView> OGLScreenDepthStencilViewPtr;
+		GLuint RetrieveGLTexture() const override;
+	};
 
 
 	class OGLTexture1DRenderTargetView : public OGLRenderTargetView
@@ -118,8 +108,6 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLTexture1DRenderTargetView> OGLTexture1DRenderTargetViewPtr;
-
 
 	class OGLTexture2DRenderTargetView : public OGLRenderTargetView
 	{
@@ -138,8 +126,6 @@ namespace KlayGE
 		int array_size_;
 		int level_;
 	};
-
-	typedef std::shared_ptr<OGLTexture2DRenderTargetView> OGLTexture2DRenderTargetViewPtr;
 
 
 	class OGLTexture3DRenderTargetView : public OGLRenderTargetView
@@ -167,8 +153,6 @@ namespace KlayGE
 		GLuint gl_tex_2d_;
 	};
 
-	typedef std::shared_ptr<OGLTexture3DRenderTargetView> OGLTexture3DRenderTargetViewPtr;
-
 
 	class OGLTextureCubeRenderTargetView : public OGLRenderTargetView
 	{
@@ -189,8 +173,6 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef std::shared_ptr<OGLTextureCubeRenderTargetView> OGLTextureCubeRenderTargetViewPtr;
-
 
 	class OGLGraphicsBufferRenderTargetView : public OGLRenderTargetView
 	{
@@ -207,11 +189,11 @@ namespace KlayGE
 
 		void OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att);
 
+		GLuint RetrieveGLTexture() const override;
+
 	private:
 		void CopyToGB(FrameBuffer::Attachment att);
 	};
-
-	typedef std::shared_ptr<OGLGraphicsBufferRenderTargetView> OGLGraphicsBufferRenderTargetViewPtr;
 
 
 	class OGLTextureDepthStencilView : public OGLDepthStencilView
@@ -235,8 +217,6 @@ namespace KlayGE
 		GLuint gl_rbo_;
 	};
 
-	typedef std::shared_ptr<OGLTextureDepthStencilView> OGLTextureDepthStencilViewPtr;
-
 	class OGLTextureCubeFaceDepthStencilView : public OGLDepthStencilView
 	{
 	public:
@@ -252,8 +232,6 @@ namespace KlayGE
 		Texture::CubeFaces face_;
 		int level_;
 	};
-
-	typedef std::shared_ptr<OGLTextureCubeFaceDepthStencilView> OGLTextureCubeFaceDepthStencilViewPtr;
 }
 
 #endif			// _OGLRENDERVIEW_HPP

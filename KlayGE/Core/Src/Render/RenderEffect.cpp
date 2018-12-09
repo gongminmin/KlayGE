@@ -6177,11 +6177,11 @@ namespace KlayGE
 		switch (value->Type())
 		{
 		case Texture::TT_1D:
-			val_ = rf.Make1DUav(value, 0, value->ArraySize(), 0);
+			val_ = rf.Make1DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
 			break;
 
 		case Texture::TT_2D:
-			val_ = rf.Make2DUav(value, 0, value->ArraySize(), 0);
+			val_ = rf.Make2DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
 			break;
 
 		case Texture::TT_3D:

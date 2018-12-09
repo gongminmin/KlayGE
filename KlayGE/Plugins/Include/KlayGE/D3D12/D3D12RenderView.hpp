@@ -65,6 +65,7 @@ namespace KlayGE
 	};
 	typedef std::shared_ptr<D3D12ShaderResourceViewSimulation> D3D12ShaderResourceViewSimulationPtr;
 
+
 	class D3D12RenderTargetViewSimulation
 	{
 	public:
@@ -82,6 +83,7 @@ namespace KlayGE
 	};
 	typedef std::shared_ptr<D3D12RenderTargetViewSimulation> D3D12RenderTargetViewSimulationPtr;
 
+
 	class D3D12DepthStencilViewSimulation
 	{
 	public:
@@ -98,6 +100,7 @@ namespace KlayGE
 		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
 	};
 	typedef std::shared_ptr<D3D12DepthStencilViewSimulation> D3D12DepthStencilViewSimulationPtr;
+
 
 	class D3D12UnorderedAccessViewSimulation
 	{
@@ -118,13 +121,11 @@ namespace KlayGE
 	};
 	typedef std::shared_ptr<D3D12UnorderedAccessViewSimulation> D3D12UnorderedAccessViewSimulationPtr;
 
+
 	class D3D12RenderTargetView : public RenderTargetView
 	{
 	public:
-		D3D12RenderTargetView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
-		D3D12RenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D12RenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
-		D3D12RenderTargetView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_first);
+		D3D12RenderTargetView(D3D12ResourcePtr const & src, uint32_t first_subres, uint32_t num_subres);
 
 		void ClearColor(Color const & clr) override;
 
@@ -133,10 +134,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
-		D3D12RenderTargetViewSimulationPtr D3DRenderTargetView() const
-		{
-			return d3d_rt_view_;
-		}
+		virtual D3D12RenderTargetViewSimulation* RetrieveD3DRenderTargetView() const = 0;
 
 		D3D12ResourcePtr const & RTSrc() const
 		{
@@ -151,24 +149,57 @@ namespace KlayGE
 			return rt_num_subres_;
 		}
 
-	private:
+	protected:
 		ID3D12Device* d3d_device_;
 		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
-		D3D12RenderTargetViewSimulationPtr d3d_rt_view_;
+		mutable D3D12RenderTargetViewSimulationPtr d3d_rt_view_;
 		D3D12ResourcePtr rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 	};
 	typedef std::shared_ptr<D3D12RenderTargetView> D3D12RenderTargetRenderViewPtr;
 
+	class D3D12Texture1D2DCubeRenderTargetView : public D3D12RenderTargetView
+	{
+	public:
+		D3D12Texture1D2DCubeRenderTargetView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size,
+			int level);
+
+		D3D12RenderTargetViewSimulation* RetrieveD3DRenderTargetView() const override;
+	};
+
+	class D3D12Texture3DRenderTargetView : public D3D12RenderTargetView
+	{
+	public:
+		D3D12Texture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level);
+
+		D3D12RenderTargetViewSimulation* RetrieveD3DRenderTargetView() const override;
+	};
+
+	class D3D12TextureCubeFaceRenderTargetView : public D3D12RenderTargetView
+	{
+	public:
+		D3D12TextureCubeFaceRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
+
+		D3D12RenderTargetViewSimulation* RetrieveD3DRenderTargetView() const override;
+	};
+
+	class D3D12BufferRenderTargetView : public D3D12RenderTargetView
+	{
+	public:
+		D3D12BufferRenderTargetView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
+
+		D3D12RenderTargetViewSimulation* RetrieveD3DRenderTargetView() const override;
+	};
+
+
 	class D3D12DepthStencilView : public DepthStencilView
 	{
 	public:
-		D3D12DepthStencilView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
-		D3D12DepthStencilView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
-		D3D12DepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
-		D3D12DepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		D3D12DepthStencilView(D3D12ResourcePtr const & src, uint32_t first_subres, uint32_t num_subres);
 
 		void ClearDepth(float depth) override;
 		void ClearStencil(int32_t stencil) override;
@@ -179,10 +210,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb) override;
 		void OnDetached(FrameBuffer& fb) override;
 
-		D3D12DepthStencilViewSimulationPtr D3DDepthStencilView() const
-		{
-			return d3d_ds_view_;
-		}
+		virtual D3D12DepthStencilViewSimulation* RetrieveD3DDepthStencilView() const = 0;
 
 		D3D12ResourcePtr const & DSSrc() const
 		{
@@ -197,26 +225,51 @@ namespace KlayGE
 			return ds_num_subres_;
 		}
 
-	private:
+	protected:
 		ID3D12Device* d3d_device_;
 		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
-		D3D12DepthStencilViewSimulationPtr d3d_ds_view_;
+		mutable D3D12DepthStencilViewSimulationPtr d3d_ds_view_;
 		D3D12ResourcePtr ds_src_;
 		uint32_t ds_first_subres_;
 		uint32_t ds_num_subres_;
 	};
 	typedef std::shared_ptr<D3D12DepthStencilView> D3D12DepthStencilRenderViewPtr;
 
+	class D3D12Texture1D2DCubeDepthStencilView : public D3D12DepthStencilView
+	{
+	public:
+		D3D12Texture1D2DCubeDepthStencilView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size,
+			int level);
+		D3D12Texture1D2DCubeDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count,
+			uint32_t sample_quality);
+
+		D3D12DepthStencilViewSimulation* RetrieveD3DDepthStencilView() const override;
+	};
+
+	class D3D12Texture3DDepthStencilView : public D3D12DepthStencilView
+	{
+	public:
+		D3D12Texture3DDepthStencilView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level);
+
+		D3D12DepthStencilViewSimulation* RetrieveD3DDepthStencilView() const override;
+	};
+
+	class D3D12TextureCubeFaceDepthStencilView : public D3D12DepthStencilView
+	{
+	public:
+		D3D12TextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
+
+		D3D12DepthStencilViewSimulation* RetrieveD3DDepthStencilView() const override;
+	};
+
 
 	class D3D12UnorderedAccessView : public UnorderedAccessView
 	{
 	public:
-		D3D12UnorderedAccessView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index, int array_size, int level);
-		D3D12UnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
-			uint32_t num_slices, int level);
-		D3D12UnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face, int level);
-		D3D12UnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
+		D3D12UnorderedAccessView(D3D12ResourcePtr const & src, uint32_t first_subres, uint32_t num_subres);
 
 		void Clear(float4 const & val) override;
 		void Clear(uint4 const & val) override;
@@ -226,10 +279,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, uint32_t index) override;
 		void OnDetached(FrameBuffer& fb, uint32_t index) override;
 
-		D3D12UnorderedAccessViewSimulationPtr const & D3DUnorderedAccessView() const
-		{
-			return d3d_ua_view_;
-		}
+		virtual D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const = 0;
 
 		D3D12ResourcePtr const & UASrc() const
 		{
@@ -246,11 +296,11 @@ namespace KlayGE
 
 		void ResetInitCount();
 
-	private:
+	protected:
 		ID3D12Device* d3d_device_;
 		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
-		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
+		mutable D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		D3D12ResourcePtr ua_src_;
 		ID3D12ResourcePtr ua_counter_upload_src_;
 		uint32_t ua_first_subres_;
@@ -261,6 +311,41 @@ namespace KlayGE
 		uint4 clear_ui4_val_;
 	};
 	typedef std::shared_ptr<D3D12UnorderedAccessView> D3D12UnorderedAccessViewPtr;
+
+	class D3D12Texture1D2DCubeUnorderedAccessView : public D3D12UnorderedAccessView
+	{
+	public:
+		D3D12Texture1D2DCubeUnorderedAccessView(TexturePtr const & texture_1d_2d_cube, ElementFormat pf, int first_array_index,
+			int array_size, int level);
+
+		D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const override;
+	};
+
+	class D3D12Texture3DUnorderedAccessView : public D3D12UnorderedAccessView
+	{
+	public:
+		D3D12Texture3DUnorderedAccessView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t first_slice,
+			uint32_t num_slices, int level);
+
+		D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const override;
+	};
+
+	class D3D12TextureCubeFaceUnorderedAccessView : public D3D12UnorderedAccessView
+	{
+	public:
+		D3D12TextureCubeFaceUnorderedAccessView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
+
+		D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const override;
+	};
+
+	class D3D12BufferUnorderedAccessView : public D3D12UnorderedAccessView
+	{
+	public:
+		D3D12BufferUnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
+
+		D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const override;
+	};
 }
 
 #endif			// _D3D12RENDERVIEW_HPP

@@ -82,7 +82,7 @@ namespace KlayGE
 		RenderTargetViewPtr Make3DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
 			uint32_t num_slices, int level) override;
 		RenderTargetViewPtr MakeCubeRtv(TexturePtr const & texture, ElementFormat pf, int array_index, int level) override;
-		RenderTargetViewPtr MakeGraphicsBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		RenderTargetViewPtr MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) override;
 
 		DepthStencilViewPtr Make2DDsv(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count,
@@ -108,7 +108,7 @@ namespace KlayGE
 		UnorderedAccessViewPtr Make3DUav(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
 			uint32_t num_slices, int level) override;
 		UnorderedAccessViewPtr MakeCubeUav(TexturePtr const & texture, ElementFormat pf, int array_index, int level) override;
-		UnorderedAccessViewPtr MakeGraphicsBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		UnorderedAccessViewPtr MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) override;
 
 		ShaderObjectPtr MakeShaderObject();

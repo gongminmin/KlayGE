@@ -151,7 +151,7 @@ namespace KlayGE
 		return MakeSharedPtr<OGLTextureCubeRenderTargetView>(texture, pf, array_index, level);
 	}
 
-	RenderTargetViewPtr OGLRenderFactory::MakeGraphicsBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+	RenderTargetViewPtr OGLRenderFactory::MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 		uint32_t num_elems)
 	{
 		return MakeSharedPtr<OGLGraphicsBufferRenderTargetView>(gbuffer, pf, first_elem, num_elems);
@@ -234,7 +234,7 @@ namespace KlayGE
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr OGLRenderFactory::MakeGraphicsBufferUav(GraphicsBufferPtr const & /*gbuffer*/,
+	UnorderedAccessViewPtr OGLRenderFactory::MakeBufferUav(GraphicsBufferPtr const & /*gbuffer*/,
 		ElementFormat /*pf*/, uint32_t /*first_elem*/, uint32_t /*num_elems*/)
 	{
 		return UnorderedAccessViewPtr();

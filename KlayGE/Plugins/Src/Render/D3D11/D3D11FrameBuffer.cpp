@@ -40,7 +40,7 @@ namespace KlayGE
 		{
 			if (rt_views_[n])
 			{
-				return checked_cast<D3D11RenderTargetView*>(rt_views_[n].get())->D3DRenderTargetView();
+				return checked_cast<D3D11RenderTargetView*>(rt_views_[n].get())->RetrieveD3DRenderTargetView();
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace KlayGE
 	{
 		if (ds_view_)
 		{
-			return checked_cast<D3D11DepthStencilView*>(ds_view_.get())->D3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilView*>(ds_view_.get())->RetrieveD3DDepthStencilView();
 		}
 
 		return nullptr;
@@ -63,7 +63,7 @@ namespace KlayGE
 		{
 			if (ua_views_[n])
 			{
-				return checked_cast<D3D11UnorderedAccessView*>(ua_views_[n].get())->D3DUnorderedAccessView();
+				return checked_cast<D3D11UnorderedAccessView*>(ua_views_[n].get())->RetrieveD3DUnorderedAccessView();
 			}
 		}
 

@@ -31,13 +31,13 @@
 
 namespace KlayGE
 {
-	OGLESRenderTargetView::OGLESRenderTargetView()
-		: gl_tex_(0), gl_fbo_(0)
+	GLuint OGLESRenderTargetView::RetrieveGLTexture() const
 	{
-	}
-
-	OGLESRenderTargetView::~OGLESRenderTargetView()
-	{
+		if ((gl_tex_ == 0) && (tex_->HWResourceReady()))
+		{
+			gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
+		}
+		return gl_tex_;
 	}
 
 	void OGLESRenderTargetView::DoClearColor(Color const & clr)
@@ -90,15 +90,6 @@ namespace KlayGE
 	}
 
 
-	OGLESDepthStencilView::OGLESDepthStencilView()
-		: gl_tex_(0), gl_fbo_(0)
-	{
-	}
-
-	OGLESDepthStencilView::~OGLESDepthStencilView()
-	{
-	}
-
 	void OGLESDepthStencilView::ClearDepth(float depth)
 	{
 		this->DoClearDepthStencil(GL_DEPTH_BUFFER_BIT, depth, 0);
@@ -122,6 +113,15 @@ namespace KlayGE
 		}
 
 		this->DoClearDepthStencil(flags, depth, stencil);
+	}
+	
+	GLuint OGLESDepthStencilView::RetrieveGLTexture() const
+	{
+		if ((gl_tex_ == 0) && (tex_->HWResourceReady()))
+		{
+			gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
+		}
+		return gl_tex_;
 	}
 
 	void OGLESDepthStencilView::DoClearDepthStencil(uint32_t flags, float depth, int32_t stencil)
@@ -260,6 +260,11 @@ namespace KlayGE
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
+	
+	GLuint OGLESScreenRenderTargetView::RetrieveGLTexture() const
+	{
+		return gl_tex_;
+	}
 
 
 	OGLESScreenDepthStencilView::OGLESScreenDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf)
@@ -297,6 +302,11 @@ namespace KlayGE
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
+	
+	GLuint OGLESScreenDepthStencilView::RetrieveGLTexture() const
+	{
+		return gl_tex_;
+	}
 
 
 	OGLESTexture1DRenderTargetView::OGLESTexture1DRenderTargetView(TexturePtr const & texture_1d, ElementFormat pf, int array_index,
@@ -312,13 +322,14 @@ namespace KlayGE
 		}
 
 		tex_ = texture_1d;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_1d->Width(level);
 		height_ = 1;
 		pf_ = pf == EF_Unknown ? texture_1d->Format() : pf;
 		sample_count_ = texture_1d->SampleCount();
 		sample_quality_ = texture_1d->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	void OGLESTexture1DRenderTargetView::ClearColor(Color const & clr)
@@ -421,13 +432,14 @@ namespace KlayGE
 		}
 
 		tex_ = texture_2d;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_2d->Width(level);
 		height_ = texture_2d->Height(level);
 		pf_ = pf == EF_Unknown ? texture_2d->Format() : pf;
 		sample_count_ = texture_2d->SampleCount();
 		sample_quality_ = texture_2d->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	void OGLESTexture2DRenderTargetView::ClearColor(Color const & clr)
@@ -528,13 +540,14 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 
 		tex_ = texture_3d;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_3d->Width(level);
 		height_ = texture_3d->Height(level);
 		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
 		sample_count_ = texture_3d->SampleCount();
 		sample_quality_ = texture_3d->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	OGLESTexture3DRenderTargetView::~OGLESTexture3DRenderTargetView()
@@ -673,13 +686,14 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 
 		tex_ = texture_cube;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_cube->Width(level);
 		height_ = texture_cube->Height(level);
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
@@ -692,13 +706,14 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 
 		tex_ = texture_cube;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_cube->Width(level);
 		height_ = texture_cube->Height(level);
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	void OGLESTextureCubeRenderTargetView::ClearColor(Color const & clr)
@@ -828,13 +843,14 @@ namespace KlayGE
 		BOOST_ASSERT(IsDepthFormat(texture->Format()));
 
 		tex_ = texture;
-		gl_tex_ = checked_cast<OGLESTexture*>(texture.get())->GLTexture();
 
 		width_ = texture->Width(level);
 		height_ = texture->Height(level);
 		pf_ = pf == EF_Unknown ? texture->Format() : pf;
 		sample_count_ = texture->SampleCount();
 		sample_quality_ = texture->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	OGLESTextureDepthStencilView::~OGLESTextureDepthStencilView()
@@ -1041,13 +1057,14 @@ namespace KlayGE
 		}
 
 		tex_ = texture_cube;
-		gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
 
 		width_ = texture_cube->Width(level);
 		height_ = texture_cube->Height(level);
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
+
+		this->RetrieveGLTexture();
 	}
 
 	void OGLESTextureCubeFaceDepthStencilView::ClearColor(Color const & /*clr*/)
@@ -1166,6 +1183,11 @@ namespace KlayGE
 	void OGLESEAGLRenderView::BindRenderBuffer()
 	{
 		glBindRenderbuffer(GL_RENDERBUFFER, gl_rf_);
+	}
+
+	GLuint OGLESEAGLRenderView::RetrieveGLTexture() const
+	{
+		return gl_tex_;
 	}
 #endif
 }

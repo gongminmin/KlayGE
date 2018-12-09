@@ -765,8 +765,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
 			width * height * sizeof(uint32_t), nullptr, EF_R32UI);
-		frag_link_uav_ = rf.MakeGraphicsBufferUav(frag_link_buf_, EF_ABGR32F, 0, width * height * 8);
-		start_offset_uav_ = rf.MakeGraphicsBufferUav(start_offset_buf_, EF_R32UI, 0, width * height);
+		frag_link_uav_ = rf.MakeBufferUav(frag_link_buf_, EF_ABGR32F);
+		start_offset_uav_ = rf.MakeBufferUav(start_offset_buf_, EF_R32UI);
 		linked_list_fb_->Attach(0, frag_link_uav_);
 		linked_list_fb_->Attach(1, start_offset_uav_);
 		linked_list_fb_->GetViewport()->width = width;
@@ -782,7 +782,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 			frag_length_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
 				width * height * sizeof(uint32_t), nullptr, EF_R32UI);
-			frag_length_uav_ = rf.MakeGraphicsBufferUav(frag_length_buf_, EF_R32UI, 0, width * height);
+			frag_length_uav_ = rf.MakeBufferUav(frag_length_buf_, EF_R32UI);
 		}
 	}
 

@@ -1447,7 +1447,7 @@ namespace KlayGE
 				D3D12RenderTargetView* rtv = checked_cast<D3D12RenderTargetView*>(
 					(0 == eye) ? win->D3DBackBufferRtv().get() : win->D3DBackBufferRightEyeRtv().get());
 
-				D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = rtv->D3DRenderTargetView()->Handle();
+				D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = rtv->RetrieveD3DRenderTargetView()->Handle();
 				d3d_render_cmd_list_->OMSetRenderTargets(1, &rt_handle, false, nullptr);
 
 				D3D12_VIEWPORT vp;

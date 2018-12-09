@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -163,6 +164,32 @@ namespace KlayGE
 		return this->MakeCubeRtv(texture, texture->Format(), array_index, level);
 	}
 
+	RenderTargetViewPtr RenderFactory::MakeTextureRtv(TexturePtr const & texture, uint32_t level)
+	{
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+			return this->Make1DRtv(texture, 0, static_cast<int>(texture->ArraySize()), level);
+
+		case Texture::TT_2D:
+			return this->Make2DRtv(texture, 0, static_cast<int>(texture->ArraySize()), level);
+
+		case Texture::TT_3D:
+			return this->Make3DRtv(texture, 0, 0, texture->Depth(0), level);
+
+		case Texture::TT_Cube:
+			return this->MakeCubeRtv(texture, 0, level);
+
+		default:
+			KFL_UNREACHABLE("Invalid texture type");
+		}
+	}
+
+	RenderTargetViewPtr RenderFactory::MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf)
+	{
+		return this->MakeBufferRtv(gbuffer, pf, 0, gbuffer->Size() / NumFormatBytes(pf));
+	}
+
 	DepthStencilViewPtr RenderFactory::Make1DDsv(TexturePtr const & texture, int first_array_index, int array_size, int level)
 	{
 		return this->Make1DDsv(texture, texture->Format(), first_array_index, array_size, level);
@@ -194,6 +221,27 @@ namespace KlayGE
 		return this->MakeCubeDsv(texture, texture->Format(), array_index, level);
 	}
 
+	DepthStencilViewPtr RenderFactory::MakeTextureDsv(TexturePtr const & texture, uint32_t level)
+	{
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+			return this->Make1DDsv(texture, 0, static_cast<int>(texture->ArraySize()), level);
+
+		case Texture::TT_2D:
+			return this->Make2DDsv(texture, 0, static_cast<int>(texture->ArraySize()), level);
+
+		case Texture::TT_3D:
+			return this->Make3DDsv(texture, 0, 0, texture->Depth(0), level);
+
+		case Texture::TT_Cube:
+			return this->MakeCubeDsv(texture, 0, level);
+
+		default:
+			KFL_UNREACHABLE("Invalid texture type");
+		}
+	}
+
 	UnorderedAccessViewPtr RenderFactory::Make1DUav(TexturePtr const & texture, int first_array_index, int array_size, int level)
 	{
 		return this->Make1DUav(texture, texture->Format(), first_array_index, array_size, level);
@@ -223,6 +271,32 @@ namespace KlayGE
 	UnorderedAccessViewPtr RenderFactory::MakeCubeUav(TexturePtr const & texture, int array_index, int level)
 	{
 		return this->MakeCubeUav(texture, texture->Format(), array_index, level);
+	}
+
+	UnorderedAccessViewPtr RenderFactory::MakeTextureUav(TexturePtr const & texture, uint32_t level)
+	{
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+			return this->Make1DUav(texture, 0, texture->ArraySize(), level);
+
+		case Texture::TT_2D:
+			return this->Make2DUav(texture, 0, texture->ArraySize(), level);
+
+		case Texture::TT_3D:
+			return this->Make3DUav(texture, 0, 0, texture->Depth(0), level);
+
+		case Texture::TT_Cube:
+			return this->MakeCubeUav(texture, 0, level);
+
+		default:
+			KFL_UNREACHABLE("Invalid texture type");
+		}
+	}
+
+	UnorderedAccessViewPtr RenderFactory::MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf)
+	{
+		return this->MakeBufferUav(gbuffer, pf, 0, gbuffer->Size() / NumFormatBytes(pf));
 	}
 
 	RenderStateObjectPtr RenderFactory::MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,

@@ -217,15 +217,15 @@ namespace KlayGE
 
 		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		src_uav_ = rf.MakeGraphicsBufferUav(src_, EF_GR32F, 0, 3 * width * height);
+		src_uav_ = rf.MakeBufferUav(src_, EF_GR32F);
 
 		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		dst_uav_ = rf.MakeGraphicsBufferUav(dst_, EF_GR32F, 0, 3 * width * height);
+		dst_uav_ = rf.MakeBufferUav(dst_, EF_GR32F);
 
 		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
 			3 * width * height * sizeof(float2), nullptr, EF_GR32F);
-		tmp_buffer_uav_ = rf.MakeGraphicsBufferUav(tmp_buffer_, EF_GR32F, 0, 3 * width * height);
+		tmp_buffer_uav_ = rf.MakeBufferUav(tmp_buffer_, EF_GR32F);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);

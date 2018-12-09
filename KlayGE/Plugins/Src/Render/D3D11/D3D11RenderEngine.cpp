@@ -1365,7 +1365,7 @@ namespace KlayGE
 		case SM_DXGI:
 			{
 				RenderTargetView const * view = (0 == eye) ? win->D3DBackBufferRtv().get() : win->D3DBackBufferRightEyeRtv().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->D3DRenderTargetView();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->RetrieveD3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1418,7 +1418,7 @@ namespace KlayGE
 		case SM_AMDQuadBuffer:
 			{
 				RenderTargetView const * view = win->D3DBackBufferRtv().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->D3DRenderTargetView();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->RetrieveD3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;

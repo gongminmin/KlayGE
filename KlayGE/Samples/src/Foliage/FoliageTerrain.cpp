@@ -249,8 +249,7 @@ namespace KlayGE
 				sizeof(indirect_args), indirect_args, EF_R32UI);
 
 			plant_primitive_written_fb_ = rf.MakeFrameBuffer();
-			plant_primitive_written_buff_uav_ = rf.MakeGraphicsBufferUav(plant_primitive_written_buff_, EF_R32UI,
-				0, static_cast<uint32_t>(std::size(indirect_args)));
+			plant_primitive_written_buff_uav_ = rf.MakeBufferUav(plant_primitive_written_buff_, EF_R32UI);
 			plant_primitive_written_fb_->Attach(0, plant_primitive_written_buff_uav_);
 		}
 		else

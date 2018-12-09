@@ -110,8 +110,10 @@ namespace KlayGE
 			uint32_t num_slices, int level) = 0;
 		RenderTargetViewPtr MakeCubeRtv(TexturePtr const & texture, int array_index, int level);
 		virtual RenderTargetViewPtr MakeCubeRtv(TexturePtr const & texture, ElementFormat pf, int array_index, int level) = 0;
-		virtual RenderTargetViewPtr MakeGraphicsBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		virtual RenderTargetViewPtr MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) = 0;
+		RenderTargetViewPtr MakeTextureRtv(TexturePtr const & texture, uint32_t level);
+		RenderTargetViewPtr MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
 
 		virtual DepthStencilViewPtr Make2DDsv(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count,
 			uint32_t sample_quality) = 0;
@@ -131,6 +133,7 @@ namespace KlayGE
 			uint32_t num_slices, int level) = 0;
 		DepthStencilViewPtr MakeCubeDsv(TexturePtr const & texture, int array_index, int level);
 		virtual DepthStencilViewPtr MakeCubeDsv(TexturePtr const & texture, ElementFormat pf, int array_index, int level) = 0;
+		DepthStencilViewPtr MakeTextureDsv(TexturePtr const & texture, uint32_t level);
 
 		UnorderedAccessViewPtr Make1DUav(TexturePtr const & texture, int first_array_index, int array_size, int level);
 		virtual UnorderedAccessViewPtr Make1DUav(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
@@ -149,8 +152,10 @@ namespace KlayGE
 			uint32_t num_slices, int level) = 0;
 		UnorderedAccessViewPtr MakeCubeUav(TexturePtr const & texture, int array_index, int level);
 		virtual UnorderedAccessViewPtr MakeCubeUav(TexturePtr const & texture, ElementFormat pf, int array_index, int level) = 0;
-		virtual UnorderedAccessViewPtr MakeGraphicsBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		virtual UnorderedAccessViewPtr MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) = 0;
+		UnorderedAccessViewPtr MakeTextureUav(TexturePtr const & texture, uint32_t level);
+		UnorderedAccessViewPtr MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
 
 		RenderStateObjectPtr MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 			BlendStateDesc const & bs_desc);

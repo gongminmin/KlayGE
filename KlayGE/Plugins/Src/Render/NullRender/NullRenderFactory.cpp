@@ -219,7 +219,7 @@ namespace KlayGE
 		return RenderTargetViewPtr();
 	}
 
-	RenderTargetViewPtr NullRenderFactory::MakeGraphicsBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+	RenderTargetViewPtr NullRenderFactory::MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 		uint32_t num_elems)
 	{
 		KFL_UNUSED(gbuffer);
@@ -370,7 +370,7 @@ namespace KlayGE
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::MakeGraphicsBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+	UnorderedAccessViewPtr NullRenderFactory::MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
 		uint32_t first_elem, uint32_t num_elems)
 	{
 		KFL_UNUSED(gbuffer);

@@ -144,7 +144,7 @@ namespace
 			{
 				uavsrc_->first = checked_cast<D3D12Texture*>(uav->TextureResource().get());
 				uavsrc_->second = nullptr; // TODO
-				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView().get();
+				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -176,7 +176,7 @@ namespace
 			{
 				uavsrc_->first = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get());
 				uavsrc_->second = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get())->D3DBufferCounterUpload().get();
-				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->D3DUnorderedAccessView().get();
+				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{

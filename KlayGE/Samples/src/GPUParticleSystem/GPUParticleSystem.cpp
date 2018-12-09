@@ -294,12 +294,12 @@ namespace
 				}
 
 				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				particle_pos_uav_[0] = rf.MakeGraphicsBufferUav(particle_pos_vb_[0], EF_ABGR32F, 0, max_num_particles_);
+				particle_pos_uav_[0] = rf.MakeBufferUav(particle_pos_vb_[0], EF_ABGR32F);
 				particle_pos_vb_[1] = particle_pos_vb_[0];
 				particle_pos_uav_[1] = particle_pos_uav_[0];
 				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), nullptr,
 					EF_ABGR32F);
-				particle_vel_uav_[0] = rf.MakeGraphicsBufferUav(particle_vel_vb_[0], EF_ABGR32F, 0, max_num_particles_);
+				particle_vel_uav_[0] = rf.MakeBufferUav(particle_vel_vb_[0], EF_ABGR32F);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
 				particle_vel_uav_[1] = particle_vel_uav_[0];
 
