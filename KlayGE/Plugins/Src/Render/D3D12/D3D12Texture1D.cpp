@@ -275,8 +275,7 @@ namespace KlayGE
 		}
 		else
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			ID3D12Device* device = re.D3DDevice();
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -386,9 +385,8 @@ namespace KlayGE
 						D3D12_RESOURCE_STATE_RENDER_TARGET);
 					re.FlushResourceBarriers(cmd_list);
 
-					auto rtv = rf.Make2DRtv(this->shared_from_this(), index, 1, level);
 					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle
-						= checked_pointer_cast<D3D12RenderTargetView>(rtv)->RetrieveD3DRenderTargetView()->Handle();
+						= this->RetrieveD3DRenderTargetView(format_, index, 1, level)->Handle();
 
 					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
 						= this->RetrieveD3DShaderResourceView(format_, index, 1, level - 1, 1)->Handle();

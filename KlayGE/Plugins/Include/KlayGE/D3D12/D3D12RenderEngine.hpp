@@ -37,6 +37,7 @@
 #include <KFL/Color.hpp>
 
 #include <bitset>
+#include <list>
 #include <map>
 #include <mutex>
 #include <unordered_map>

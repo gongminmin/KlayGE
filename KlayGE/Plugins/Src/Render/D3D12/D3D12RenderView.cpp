@@ -226,7 +226,8 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DRenderTargetView(pf_, first_array_index_, array_size_, level_);
+			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, array_size_,
+				level_);
 		}
 		return d3d_rt_view_.get();
 	}
@@ -264,7 +265,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DRenderTargetView(pf_, first_array_index_, first_slice_,
+			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_rt_view_.get();
@@ -302,7 +303,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DRenderTargetView(pf_, first_array_index_, first_face_,
+			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, first_face_,
 				level_);
 		}
 		return d3d_rt_view_.get();
@@ -344,7 +345,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && buff_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->CreateD3DRenderTargetView(pf_, first_elem_, num_elems_);
+			d3d_rt_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DRenderTargetView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_rt_view_.get();
 	}
@@ -486,7 +487,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
+			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
 		}
 		return d3d_ds_view_.get();
 	}
@@ -522,7 +523,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DDepthStencilView(pf_, first_array_index_, first_slice_,
+			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_ds_view_.get();
@@ -557,7 +558,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DDepthStencilView(pf_, first_array_index_, first_face_,
+			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, first_face_,
 				level_);
 		}
 		return d3d_ds_view_.get();
@@ -706,7 +707,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index_, array_size_,
+			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, array_size_,
 				level_);
 		}
 		return d3d_ua_view_.get();
@@ -743,7 +744,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index_, first_slice_,
+			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_ua_view_.get();
@@ -779,7 +780,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->CreateD3DUnorderedAccessView(pf_, first_array_index_, first_face_,
+			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_face_,
 				level_);
 		}
 		return d3d_ua_view_.get();
@@ -815,9 +816,9 @@ namespace KlayGE
 
 	D3D12UnorderedAccessViewSimulation* D3D12BufferUnorderedAccessView::RetrieveD3DUnorderedAccessView() const
 	{
-		if (!d3d_ua_view_ && tex_->HWResourceReady())
+		if (!d3d_ua_view_ && buff_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->CreateD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
+			d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_ua_view_.get();
 	}

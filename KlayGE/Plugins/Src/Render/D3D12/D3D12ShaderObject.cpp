@@ -113,7 +113,7 @@ namespace
 			if (buf)
 			{
 				*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(buf.get()), 0, 1);
-				*srv_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
+				*srv_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{

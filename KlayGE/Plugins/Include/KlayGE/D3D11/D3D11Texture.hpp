@@ -56,26 +56,26 @@ namespace KlayGE
 		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
 
-		ID3D11RenderTargetViewPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const;
-		ID3D11RenderTargetViewPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-			uint32_t num_slices, uint32_t level) const;
-		ID3D11RenderTargetViewPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t array_index, CubeFaces face,
-			uint32_t level) const;
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level);
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t level);
 
-		ID3D11DepthStencilViewPtr CreateD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t level) const;
-		ID3D11DepthStencilViewPtr CreateD3DDepthStencilView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-			uint32_t num_slices, uint32_t level) const;
-		ID3D11DepthStencilViewPtr CreateD3DDepthStencilView(ElementFormat pf, uint32_t array_index, CubeFaces face,
-			uint32_t level) const;
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t level);
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11DepthStencilViewPtr const & RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t level);
 
-		ID3D11UnorderedAccessViewPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-			uint32_t array_size, uint32_t level) const;
-		ID3D11UnorderedAccessViewPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-			uint32_t num_slices, uint32_t level) const;
-		ID3D11UnorderedAccessViewPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-			uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level) const;
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+			uint32_t array_size, uint32_t level);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+			uint32_t num_slices, uint32_t level);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+			uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level);
 
 		virtual void DeleteHWResource() override;
 		virtual bool HWResourceReady() const override;
@@ -146,7 +146,12 @@ namespace KlayGE
 		DXGI_FORMAT dxgi_fmt_;
 
 		ID3D11ResourcePtr d3d_texture_;
+
+		// TODO: Not caching those views
 		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
+		std::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
+		std::unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
+		std::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
 	};
 
 

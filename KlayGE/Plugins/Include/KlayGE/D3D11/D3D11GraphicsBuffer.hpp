@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
@@ -32,12 +34,9 @@ namespace KlayGE
 			return d3d_buffer_.get();
 		}
 
-		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
-		{
-			return d3d_sr_view_;
-		}
-		ID3D11RenderTargetViewPtr CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
-		ID3D11UnorderedAccessViewPtr CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems) const;
+		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView();
+		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
+		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
@@ -61,10 +60,14 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx_;
 
 		ID3D11BufferPtr d3d_buffer_;
-		ID3D11ShaderResourceViewPtr d3d_sr_view_;
 
 		uint32_t bind_flags_;
 		ElementFormat fmt_as_shader_res_;
+
+		// TODO: Not caching those views
+		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
+		std::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
+		std::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
 	};
 }
 

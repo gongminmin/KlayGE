@@ -120,118 +120,254 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(pf);
-			HashCombine(hash_val, first_array_index);
-			HashCombine(hash_val, array_size);
-			HashCombine(hash_val, first_level);
-			HashCombine(hash_val, num_levels);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
 
-			auto iter = d3d_sr_views_.find(hash_val);
-			if (iter != d3d_sr_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
-				D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, desc);
-				return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
-			}
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static D3D12ShaderResourceViewSimulationPtr const view;
-			return view;
+			auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
+			auto sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, desc);
+			return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
 		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr D3D12Texture::CreateD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index,
-		uint32_t array_size, uint32_t level) const
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
-		return MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
+			auto rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+			return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr D3D12Texture::CreateD3DRenderTargetView(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
-		auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
-		return MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
+
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
+			auto rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+			return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr D3D12Texture::CreateD3DRenderTargetView(ElementFormat pf, uint32_t array_index, CubeFaces face,
-		uint32_t level) const
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		CubeFaces face, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
-		auto desc = this->FillRTVDesc(pf, array_index, face, level);
-		return MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index * 6 + face);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillRTVDesc(pf, array_index, face, level);
+			auto rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
+			return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr D3D12Texture::CreateD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index,
-		uint32_t array_size, uint32_t level) const
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
-		return MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
+			auto ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+			return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr D3D12Texture::CreateD3DDepthStencilView(ElementFormat pf, uint32_t array_index,uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
-		auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
-		return MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
+
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
+			auto ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+			return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr D3D12Texture::CreateD3DDepthStencilView(ElementFormat pf, uint32_t array_index, CubeFaces face,
-		uint32_t level) const
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index,
+		CubeFaces face, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
-		auto desc = this->FillDSVDesc(pf, array_index, face, level);
-		return MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index * 6 + face);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillDSVDesc(pf, array_index, face, level);
+			auto ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
+			return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr D3D12Texture::CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-		uint32_t array_size, uint32_t level) const
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
-		auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
-		return MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
+			auto ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+			return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr D3D12Texture::CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index,
-		uint32_t first_slice, uint32_t num_slices, uint32_t level) const
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
-		auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
-		return MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
+			auto ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+			return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr D3D12Texture::CreateD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
-		uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level) const
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
-		auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
-		return MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index * 6 + first_face);
+		HashCombine(hash_val, array_size * 6 + num_faces);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
+			auto ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
+			return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+		}
 	}
 
 	void D3D12Texture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -339,6 +475,11 @@ namespace KlayGE
 
 	void D3D12Texture::DeleteHWResource()
 	{
+		d3d_sr_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3d_ua_views_.clear();
+
 		d3d_resource_.reset();
 		d3d_texture_upload_buff_.reset();
 		d3d_texture_readback_buff_.reset();

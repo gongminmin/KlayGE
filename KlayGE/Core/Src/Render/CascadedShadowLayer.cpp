@@ -380,7 +380,7 @@ namespace KlayGE
 
 				float const delta_x = 1.0f / width;
 				float const delta_y = 1.0f / height;
-				float4 const delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);			
+				float4 const delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);
 				reduce_z_bounds_from_depth_mip_map_pp_->SetParam(0, delta_offset);
 
 				reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
