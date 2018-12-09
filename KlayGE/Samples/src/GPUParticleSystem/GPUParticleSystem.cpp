@@ -293,12 +293,13 @@ namespace
 					access_hint |=EAH_GPU_Structured;
 				}
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), &p[0],
+					sizeof(float4));
 				particle_pos_uav_[0] = rf.MakeBufferUav(particle_pos_vb_[0], EF_ABGR32F);
 				particle_pos_vb_[1] = particle_pos_vb_[0];
 				particle_pos_uav_[1] = particle_pos_uav_[0];
 				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint, max_num_particles_ * sizeof(float4), nullptr,
-					EF_ABGR32F);
+					sizeof(float4));
 				particle_vel_uav_[0] = rf.MakeBufferUav(particle_vel_vb_[0], EF_ABGR32F);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
 				particle_vel_uav_[1] = particle_vel_uav_[0];
@@ -323,8 +324,8 @@ namespace
 				}
 
 				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				*(effect_->ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
+					max_num_particles_ * sizeof(float4), &p[0], sizeof(float4));
+				*(effect_->ParameterByName("particle_init_vel_buff")) = rf.MakeBufferSrv(particle_init_vel_buff, EF_ABGR32F);
 			}
 			else if (use_so)
 			{
@@ -346,9 +347,12 @@ namespace
 					particle_rl_[i] = rf.MakeRenderLayout();
 
 					particle_pos_vb_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, max_num_particles_ * sizeof(float4),
-						&p[0], EF_ABGR32F);
+						&p[0], sizeof(float4));
+					particle_pos_srv_[i] = rf.MakeBufferSrv(particle_pos_vb_[i], EF_ABGR32F);
+
 					particle_vel_vb_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, max_num_particles_ * sizeof(float4),
-						nullptr, EF_ABGR32F);
+						nullptr, sizeof(float4));
+					particle_vel_srv_[i] = rf.MakeBufferSrv(particle_vel_vb_[0], EF_ABGR32F);
 
 					particle_rl_[i]->BindVertexStream(particle_pos_vb_[i], VertexElement(VEU_Position, 0, EF_ABGR32F));
 					particle_rl_[i]->BindVertexStream(particle_vel_vb_[i], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
@@ -363,8 +367,8 @@ namespace
 				}
 
 				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				*(effect_->ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
+					max_num_particles_ * sizeof(float4), &p[0], sizeof(float4));
+				*(effect_->ParameterByName("particle_init_vel_buff")) = rf.MakeBufferSrv(particle_init_vel_buff, EF_ABGR32F);
 
 				particle_pos_buff_param_ = effect_->ParameterByName("particle_pos_buff");
 				particle_vel_buff_param_ = effect_->ParameterByName("particle_vel_buff");
@@ -555,8 +559,8 @@ namespace
 			if (use_so || use_cs)
 			{
 				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-					max_num_particles_ * sizeof(half), &time_v[0], EF_R16F);
-				*(effect_->ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
+					max_num_particles_ * sizeof(half), &time_v[0], sizeof(half));
+				*(effect_->ParameterByName("particle_birth_time_buff")) = rf.MakeBufferSrv(particle_birth_time_buff, EF_R16F);
 			}
 			else
 			{
@@ -590,8 +594,8 @@ namespace
 			else if (use_so)
 			{
 				re.BindSOBuffers(particle_rl_[rt_index_]);
-				*particle_pos_buff_param_ = this->PosVB();
-				*particle_vel_buff_param_ = this->VelVB();
+				*particle_pos_buff_param_ = this->PosSrv();
+				*particle_vel_buff_param_ = this->VelSrv();
 
 				technique_ = update_so_tech_;
 			}
@@ -657,9 +661,19 @@ namespace
 			return particle_pos_vb_[!rt_index_];
 		}
 
+		ShaderResourceViewPtr PosSrv() const
+		{
+			return particle_pos_srv_[!rt_index_];
+		}
+
 		GraphicsBufferPtr VelVB() const
 		{
 			return particle_vel_vb_[!rt_index_];
+		}
+
+		ShaderResourceViewPtr VelSrv() const
+		{
+			return particle_vel_srv_[!rt_index_];
 		}
 
 	private:
@@ -679,8 +693,10 @@ namespace
 
 		GraphicsBufferPtr particle_pos_vb_[2];
 		UnorderedAccessViewPtr particle_pos_uav_[2];
+		ShaderResourceViewPtr particle_pos_srv_[2];
 		GraphicsBufferPtr particle_vel_vb_[2];
 		UnorderedAccessViewPtr particle_vel_uav_[2];
+		ShaderResourceViewPtr particle_vel_srv_[2];
 		RenderLayoutPtr particle_rl_[2];
 
 		FrameBufferPtr pos_vel_rt_buffer_[2];

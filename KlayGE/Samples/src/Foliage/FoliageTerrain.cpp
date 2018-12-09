@@ -246,7 +246,7 @@ namespace KlayGE
 		{
 			uint32_t indirect_args[] = { 0, 0, 0, 0 };
 			plant_primitive_written_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
-				sizeof(indirect_args), indirect_args, EF_R32UI);
+				sizeof(indirect_args), indirect_args, sizeof(uint32_t));
 
 			plant_primitive_written_fb_ = rf.MakeFrameBuffer();
 			plant_primitive_written_buff_uav_ = rf.MakeBufferUav(plant_primitive_written_buff_, EF_R32UI);
@@ -375,9 +375,9 @@ namespace KlayGE
 				}
 			}
 			plant_lod_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
-				static_cast<uint32_t>(lod_indirect_args.size() * sizeof(uint32_t)), lod_indirect_args.data(), EF_R32UI);
+				static_cast<uint32_t>(lod_indirect_args.size() * sizeof(uint32_t)), lod_indirect_args.data(), sizeof(uint32_t));
 			plant_impostor_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
-				static_cast<uint32_t>(imposter_indirect_args.size() * sizeof(uint32_t)), imposter_indirect_args.data(), EF_R32UI);
+				static_cast<uint32_t>(imposter_indirect_args.size() * sizeof(uint32_t)), imposter_indirect_args.data(), sizeof(uint32_t));
 
 			uint32_t offset = 0;
 			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)

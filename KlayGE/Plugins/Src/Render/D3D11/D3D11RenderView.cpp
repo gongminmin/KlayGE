@@ -28,6 +28,71 @@
 
 namespace KlayGE
 {
+	D3D11TextureShaderResourceView::D3D11TextureShaderResourceView(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(texture->AccessHint() & EAH_GPU_Read);
+
+		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext();
+
+		tex_ = texture;
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
+
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		first_level_ = first_level;
+		num_levels_ = num_levels;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		sr_src_ = texture.get();
+	}
+
+	ID3D11ShaderResourceView* D3D11TextureShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && tex_ && tex_->HWResourceReady())
+		{
+			d3d_sr_view_ = checked_cast<D3D11Texture*>(tex_.get())->RetrieveD3DShaderResourceView(pf_, first_array_index_, array_size_,
+				first_level_, num_levels_);
+		}
+		return d3d_sr_view_.get();
+	}
+
+
+	D3D11BufferShaderResourceView::D3D11BufferShaderResourceView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		BOOST_ASSERT(gb->AccessHint() & EAH_GPU_Read);
+
+		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext();
+
+		buff_ = gb;
+		pf_ = pf;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		first_level_ = 0;
+		num_levels_ = 0;
+		first_elem_ = first_elem;
+		num_elems_ = num_elems;
+
+		sr_src_ = gb.get();
+	}
+
+	ID3D11ShaderResourceView* D3D11BufferShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && buff_ && buff_->HWResourceReady())
+		{
+			d3d_sr_view_ = checked_cast<D3D11GraphicsBuffer*>(buff_.get())->RetrieveD3DShaderResourceView(pf_, first_elem_, num_elems_);
+		}
+		return d3d_sr_view_.get();
+	}
+
+
 	D3D11RenderTargetView::D3D11RenderTargetView(void* src, uint32_t first_subres, uint32_t num_subres)
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{

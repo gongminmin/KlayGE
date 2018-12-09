@@ -1206,6 +1206,7 @@ namespace KlayGE
 		caps_.explicit_multi_sample_support = true;
 		caps_.load_from_buffer_support = true;
 		caps_.uavs_at_every_stage_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_1);
+		caps_.flexible_srvs_support = true;
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

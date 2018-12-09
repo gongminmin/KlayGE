@@ -128,24 +128,6 @@ namespace KlayGE
 		REDT_count
 	};
 
-	struct KLAYGE_CORE_API TextureSubresource
-	{
-		TexturePtr tex;
-		uint32_t first_array_index;
-		uint32_t num_items;
-		uint32_t first_level;
-		uint32_t num_levels;
-
-		TextureSubresource()
-		{
-		}
-
-		TextureSubresource(TexturePtr const & t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
-			: tex(t), first_array_index(fai), num_items(ni), first_level(fl), num_levels(nl)
-		{
-		}
-	};
-
 	class KLAYGE_CORE_API RenderVariable : boost::noncopyable
 	{
 	public:
@@ -169,10 +151,9 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float4 const & value);
 		virtual RenderVariable& operator=(float4x4 const & value);
 		virtual RenderVariable& operator=(TexturePtr const & value);
-		virtual RenderVariable& operator=(TextureSubresource const & value);
-		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
-		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
+		virtual RenderVariable& operator=(ShaderResourceViewPtr const & value);
 		virtual RenderVariable& operator=(UnorderedAccessViewPtr const & value);
+		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(ShaderDesc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
@@ -205,10 +186,9 @@ namespace KlayGE
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
 		virtual void Value(TexturePtr& val) const;
-		virtual void Value(TextureSubresource& val) const;
+		virtual void Value(ShaderResourceViewPtr& val) const;
+		virtual void Value(UnorderedAccessViewPtr& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
-		virtual void Value(GraphicsBufferPtr& value) const;
-		virtual void Value(UnorderedAccessViewPtr& value) const;
 		virtual void Value(std::string& val) const;
 		virtual void Value(ShaderDesc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
@@ -521,16 +501,16 @@ namespace KlayGE
 	public:
 		std::unique_ptr<RenderVariable> Clone() override;
 
-		virtual RenderVariable& operator=(TexturePtr const & value);
-		virtual RenderVariable& operator=(TextureSubresource const & value);
-		virtual RenderVariable& operator=(std::string const & value);
+		RenderVariable& operator=(TexturePtr const & value) override;
+		RenderVariable& operator=(ShaderResourceViewPtr const & value) override;
+		RenderVariable& operator=(std::string const & value) override;
 
-		virtual void Value(TexturePtr& val) const;
-		virtual void Value(TextureSubresource& val) const;
-		virtual void Value(std::string& val) const;
+		void Value(TexturePtr& val) const override;
+		void Value(ShaderResourceViewPtr& val) const override;
+		void Value(std::string& val) const override;
 
 	protected:
-		mutable TextureSubresource val_;
+		ShaderResourceViewPtr val_;
 		std::string elem_type_;
 	};
 
@@ -557,14 +537,14 @@ namespace KlayGE
 	public:
 		std::unique_ptr<RenderVariable> Clone() override;
 
-		RenderVariable& operator=(GraphicsBufferPtr const & value) override;
+		RenderVariable& operator=(ShaderResourceViewPtr const & value) override;
 		RenderVariable& operator=(std::string const & value) override;
 
-		void Value(GraphicsBufferPtr& val) const override;
+		void Value(ShaderResourceViewPtr& val) const override;
 		void Value(std::string& val) const override;
 
 	protected:
-		GraphicsBufferPtr val_;
+		ShaderResourceViewPtr val_;
 		std::string elem_type_;
 	};
 
@@ -589,12 +569,12 @@ namespace KlayGE
 	public:
 		std::unique_ptr<RenderVariable> Clone() override;
 
-		RenderVariable& operator=(GraphicsBufferPtr const & value) override;
+		RenderVariable& operator=(ShaderResourceViewPtr const & value) override;
 
-		void Value(GraphicsBufferPtr& val) const override;
+		void Value(ShaderResourceViewPtr& val) const override;
 
 	protected:
-		GraphicsBufferPtr val_;
+		ShaderResourceViewPtr val_;
 	};
 
 	class RenderVariableRwByteAddressBuffer : public RenderVariable

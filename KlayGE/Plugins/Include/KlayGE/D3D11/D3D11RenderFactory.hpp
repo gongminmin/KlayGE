@@ -41,11 +41,11 @@ namespace KlayGE
 		RenderLayoutPtr MakeRenderLayout();
 
 		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
+			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
+			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
+			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();
@@ -53,6 +53,11 @@ namespace KlayGE
 		QueryPtr MakeSOStatisticsQuery() override;
 
 		virtual FencePtr MakeFence() override;
+
+		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t first_level, uint32_t num_levels) override;
+		ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+			uint32_t num_elems) override;
 
 		RenderTargetViewPtr Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
 			int level) override;

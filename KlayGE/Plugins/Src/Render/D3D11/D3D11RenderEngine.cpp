@@ -1048,6 +1048,7 @@ namespace KlayGE
 		{
 			caps_.rovs_support = false;
 		}
+		caps_.flexible_srvs_support = true;
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

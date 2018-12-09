@@ -146,6 +146,8 @@ namespace KlayGE
 	typedef std::shared_ptr<JudaTexture> JudaTexturePtr;
 	class FrameBuffer;
 	typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
+	class ShaderResourceView;
+	typedef std::shared_ptr<ShaderResourceView> ShaderResourceViewPtr;
 	class RenderTargetView;
 	typedef std::shared_ptr<RenderTargetView> RenderTargetViewPtr;
 	class DepthStencilView;

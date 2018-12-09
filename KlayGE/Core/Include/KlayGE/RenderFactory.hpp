@@ -79,13 +79,19 @@ namespace KlayGE
 
 		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 
-		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) = 0;
-		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) = 0;
-		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) = 0;
+		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+			uint32_t structure_byte_stride = 0) = 0;
+		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+			uint32_t structure_byte_stride = 0) = 0;
+		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+			uint32_t structure_byte_stride = 0) = 0;
 
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt = EF_Unknown);
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt = EF_Unknown);
-		GraphicsBufferPtr MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt = EF_Unknown);
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data,
+			uint32_t structure_byte_stride = 0);
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data,
+			uint32_t structure_byte_stride = 0);
+		GraphicsBufferPtr MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data,
+			uint32_t structure_byte_stride = 0);
 
 		virtual QueryPtr MakeOcclusionQuery() = 0;
 		virtual QueryPtr MakeConditionalRender() = 0;
@@ -93,6 +99,16 @@ namespace KlayGE
 		virtual QueryPtr MakeSOStatisticsQuery() = 0;
 
 		virtual FencePtr MakeFence() = 0;
+
+		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, uint32_t first_array_index, uint32_t array_size,
+			uint32_t first_level, uint32_t num_levels);
+		virtual ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+			uint32_t array_size, uint32_t first_level, uint32_t num_levels) = 0;
+		virtual ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+			uint32_t num_elems) = 0;
+		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture);
+		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf);
+		ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
 
 		RenderTargetViewPtr Make1DRtv(TexturePtr const & texture, int first_array_index, int array_size, int level);
 		virtual RenderTargetViewPtr Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,

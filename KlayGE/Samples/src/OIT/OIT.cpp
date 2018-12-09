@@ -365,8 +365,8 @@ namespace
 			}
 		}
 
-		void LinkedListBuffer(UnorderedAccessViewPtr const & fragment_link_uav, GraphicsBufferPtr const & fragment_link_buf,
-			UnorderedAccessViewPtr const & start_offset_uav, GraphicsBufferPtr const & start_offset_buf)
+		void LinkedListBuffer(UnorderedAccessViewPtr const & fragment_link_uav, ShaderResourceViewPtr const & fragment_link_srv,
+			UnorderedAccessViewPtr const & start_offset_uav, ShaderResourceViewPtr const & start_offset_srv)
 		{
 			if (gen_ppll_tech_)
 			{
@@ -381,18 +381,18 @@ namespace
 
 			if (ppll_render_tech_)
 			{
-				*(ppll_effect_->ParameterByName("frags_buffer")) = fragment_link_buf;
-				*(ppll_effect_->ParameterByName("start_offset_buffer")) = start_offset_buf;
+				*(ppll_effect_->ParameterByName("frags_buffer")) = fragment_link_srv;
+				*(ppll_effect_->ParameterByName("start_offset_buffer")) = start_offset_srv;
 			}
 			if (at_render_tech_)
 			{
-				*(at_effect_->ParameterByName("frags_buffer")) = fragment_link_buf;
-				*(at_effect_->ParameterByName("start_offset_buffer")) = start_offset_buf;
+				*(at_effect_->ParameterByName("frags_buffer")) = fragment_link_srv;
+				*(at_effect_->ParameterByName("start_offset_buffer")) = start_offset_srv;
 			}
 			if (rov_at_render_tech_)
 			{
-				*(rov_at_effect_->ParameterByName("frags_buffer")) = fragment_link_buf;
-				*(rov_at_effect_->ParameterByName("frag_length_buffer")) = start_offset_buf;
+				*(rov_at_effect_->ParameterByName("frags_buffer")) = fragment_link_srv;
+				*(rov_at_effect_->ParameterByName("frag_length_buffer")) = start_offset_srv;
 			}
 		}
 
@@ -761,12 +761,14 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		opaque_bg_fb_->Attach(rf.Make2DDsv(width, height, ds_format, 1, 0));
 		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter,
-			width * height * 8 * sizeof(float4), nullptr, EF_ABGR32F);
+			width * height * 8 * sizeof(float4), nullptr, sizeof(float4));
 		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
-			width * height * sizeof(uint32_t), nullptr, EF_R32UI);
+			width * height * sizeof(uint32_t), nullptr, sizeof(uint32_t));
 		frag_link_uav_ = rf.MakeBufferUav(frag_link_buf_, EF_ABGR32F);
+		frag_link_srv_ = rf.MakeBufferSrv(frag_link_buf_, EF_ABGR32F);
 		start_offset_uav_ = rf.MakeBufferUav(start_offset_buf_, EF_R32UI);
+		start_offset_srv_ = rf.MakeBufferSrv(start_offset_buf_, EF_R32UI);
 		linked_list_fb_->Attach(0, frag_link_uav_);
 		linked_list_fb_->Attach(1, start_offset_uav_);
 		linked_list_fb_->GetViewport()->width = width;
@@ -781,8 +783,9 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		{
 			frag_length_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
-				width * height * sizeof(uint32_t), nullptr, EF_R32UI);
+				width * height * sizeof(uint32_t), nullptr, sizeof(uint32_t));
 			frag_length_uav_ = rf.MakeBufferUav(frag_length_buf_, EF_R32UI);
+			frag_length_srv_ = rf.MakeBufferSrv(frag_length_buf_, EF_R32UI);
 		}
 	}
 
@@ -865,9 +868,9 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 	{
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_uav_, frag_link_buf_,
+				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_uav_, frag_link_srv_,
 					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_uav_ : start_offset_uav_,
-					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_buf_ : start_offset_buf_);
+					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_srv_ : start_offset_srv_);
 			});
 
 		switch (pass)

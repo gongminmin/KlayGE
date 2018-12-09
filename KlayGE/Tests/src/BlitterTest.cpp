@@ -145,7 +145,7 @@ void TestBlitter2DToBuff(uint32_t array_size, uint32_t mip_levels)
 	}
 	TexturePtr src = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-	GraphicsBufferPtr dst = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Write, WIDTH * HEIGHT * sizeof(float4), nullptr, EF_ABGR32F);
+	GraphicsBufferPtr dst = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Write, WIDTH * HEIGHT * sizeof(float4), nullptr, sizeof(float4));
 
 	std::ranlux24_base gen;
 	std::uniform_int_distribution<uint32_t> dis_index(0, array_size - 1);

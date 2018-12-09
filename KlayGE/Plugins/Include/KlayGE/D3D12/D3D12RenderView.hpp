@@ -121,6 +121,36 @@ namespace KlayGE
 	};
 	typedef std::shared_ptr<D3D12UnorderedAccessViewSimulation> D3D12UnorderedAccessViewSimulationPtr;
 
+	class D3D12ShaderResourceView : public ShaderResourceView
+	{
+	public:
+		virtual D3D12ShaderResourceViewSimulationPtr RetrieveD3DShaderResourceView() const = 0;
+
+	protected:
+		ID3D12Device* d3d_device_;
+		ID3D12GraphicsCommandList* d3d_cmd_list_;
+
+		mutable D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
+		void* sr_src_;
+	};
+	typedef std::shared_ptr<D3D12ShaderResourceView> D3D12ShaderResourceViewPtr;
+
+	class D3D12TextureShaderResourceView : public D3D12ShaderResourceView
+	{
+	public:
+		D3D12TextureShaderResourceView(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t first_level, uint32_t num_levels);
+
+		D3D12ShaderResourceViewSimulationPtr RetrieveD3DShaderResourceView() const override;
+	};
+
+	class D3D12BufferShaderResourceView : public D3D12ShaderResourceView
+	{
+	public:
+		D3D12BufferShaderResourceView(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
+
+		D3D12ShaderResourceViewSimulationPtr RetrieveD3DShaderResourceView() const override;
+	};
 
 	class D3D12RenderTargetView : public RenderTargetView
 	{

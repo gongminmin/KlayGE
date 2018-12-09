@@ -52,6 +52,7 @@
 
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
+#include <KlayGE/OpenGLES/OGLESRenderView.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
@@ -83,12 +84,14 @@ namespace
 
 		void operator()()
 		{
-			buff_param_->Value((*buffers_)[stage_].tex_buff);
+			ShaderResourceViewPtr srv;
+			buff_param_->Value(srv);
+			(*buffers_)[stage_].buff_srv = srv;
 
-			if ((*buffers_)[stage_].tex_buff)
+			auto* gl_srv = checked_cast<OGLESShaderResourceView*>(srv.get());
+			if (srv)
 			{
-				(*gl_bind_targets_)[stage_] = GL_TEXTURE_BUFFER_OES;
-				(*gl_bind_textures_)[stage_] = checked_cast<OGLESGraphicsBuffer*>((*buffers_)[stage_].tex_buff.get())->GLtex();
+				gl_srv->RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
 			}
 			else
 			{
@@ -127,18 +130,20 @@ namespace
 
 		void operator()()
 		{
-			tex_param_->Value((*samplers_)[stage_].tex);
+			ShaderResourceViewPtr srv;
+			tex_param_->Value(srv);
+			(*samplers_)[stage_].tex_srv = srv;
+
 			sampler_param_->Value((*samplers_)[stage_].sampler);
 
-			if ((*samplers_)[stage_].tex)
+			auto* gl_srv = checked_cast<OGLESShaderResourceView*>(srv.get());
+			if (srv)
 			{
-				auto gl_tex = checked_cast<OGLESTexture*>((*samplers_)[stage_].tex.get());
 				auto gl_sampler = checked_cast<OGLESSamplerStateObject*>((*samplers_)[stage_].sampler.get());
 
-				gl_sampler->Active((*samplers_)[stage_].tex);
+				gl_sampler->Active(srv->TextureResource());
 
-				(*gl_bind_targets_)[stage_] = gl_tex->GLType();
-				(*gl_bind_textures_)[stage_] = gl_tex->GLTexture();
+				gl_srv->RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
 				(*gl_bind_samplers_)[stage_] = gl_sampler->GLSampler();
 			}
 			else

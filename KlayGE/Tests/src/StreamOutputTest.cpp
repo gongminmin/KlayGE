@@ -310,7 +310,7 @@ private:
 
 		uint32_t indirect_args[] = { 0, 1, 0, 0 };
 		auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
-			sizeof(indirect_args), indirect_args, EF_R32UI);
+			sizeof(indirect_args), indirect_args, sizeof(uint32_t));
 
 		auto fb = rf.MakeFrameBuffer();
 		auto vb_num_uav = rf.MakeBufferUav(vb_num, EF_R32UI);

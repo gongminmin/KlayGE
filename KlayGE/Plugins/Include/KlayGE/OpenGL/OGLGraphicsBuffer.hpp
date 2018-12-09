@@ -36,7 +36,7 @@ namespace KlayGE
 	{
 	public:
 		explicit OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
-			uint32_t size_in_byte, ElementFormat fmt);
+			uint32_t size_in_byte, uint32_t structure_byte_stride);
 		~OGLGraphicsBuffer();
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
@@ -55,10 +55,7 @@ namespace KlayGE
 		{
 			return vb_;
 		}
-		GLuint GLtex() const
-		{
-			return tex_;
-		}
+		GLuint RetrieveGLTexture(ElementFormat fmt);
 		GLenum GLType() const
 		{
 			return target_;
@@ -70,9 +67,8 @@ namespace KlayGE
 
 	private:
 		GLuint vb_;
-		GLuint tex_;
+		GLuint tex_ = 0;
 		GLenum target_;
-		ElementFormat fmt_as_shader_res_;
 	};
 }
 

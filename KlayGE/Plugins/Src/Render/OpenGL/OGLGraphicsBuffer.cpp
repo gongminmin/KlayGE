@@ -39,9 +39,9 @@
 namespace KlayGE
 {
 	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
-					uint32_t size_in_byte, ElementFormat fmt)
-			: GraphicsBuffer(usage, access_hint, size_in_byte, 0),
-				vb_(0), tex_(0), target_(target), fmt_as_shader_res_(fmt)
+					uint32_t size_in_byte, uint32_t structure_byte_stride)
+			: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
+				vb_(0), tex_(0), target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
 			|| (GL_UNIFORM_BUFFER == target));
@@ -119,28 +119,6 @@ namespace KlayGE
 				}
 
 				glBufferData(target_, static_cast<GLsizeiptr>(size_in_byte_), data, usage);
-			}
-		}
-
-		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
-		{
-			GLint internal_fmt;
-			GLenum gl_fmt;
-			GLenum gl_type;
-			OGLMapping::MappingFormat(internal_fmt, gl_fmt, gl_type, fmt_as_shader_res_);
-
-			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
-			{
-				glCreateTextures(GL_TEXTURE_BUFFER, 1, &tex_);
-				glTextureBuffer(tex_, internal_fmt, vb_);
-			}
-			else
-			{
-				glGenTextures(1, &tex_);
-				// TODO: It could affect the texture binding cache in OGLRenderEngine
-				glBindTexture(GL_TEXTURE_BUFFER, tex_);
-				glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
-				glBindTexture(GL_TEXTURE_BUFFER, 0);
 			}
 		}
 	}
@@ -267,6 +245,35 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_, force);
+	}
+
+	GLuint OGLGraphicsBuffer::RetrieveGLTexture(ElementFormat pf)
+	{
+		if ((tex_ == 0) && this->HWResourceReady())
+		{
+			if ((access_hint_ & EAH_GPU_Read) && (pf != EF_Unknown))
+			{
+				GLint internal_fmt;
+				GLenum gl_fmt;
+				GLenum gl_type;
+				OGLMapping::MappingFormat(internal_fmt, gl_fmt, gl_type, pf);
+
+				if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+				{
+					glCreateTextures(GL_TEXTURE_BUFFER, 1, &tex_);
+					glTextureBuffer(tex_, internal_fmt, vb_);
+				}
+				else
+				{
+					glGenTextures(1, &tex_);
+					// TODO: It could affect the texture binding cache in OGLRenderEngine
+					glBindTexture(GL_TEXTURE_BUFFER, tex_);
+					glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
+					glBindTexture(GL_TEXTURE_BUFFER, 0);
+				}
+			}
+		}
+		return tex_;
 	}
 
 	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)

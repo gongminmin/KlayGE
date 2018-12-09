@@ -1372,7 +1372,7 @@ namespace
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 			var = MakeUniquePtr<RenderVariableBuffer>();
-			*var = GraphicsBufferPtr();
+			*var = ShaderResourceViewPtr();
 			attr = node.Attrib("elem_type");
 			if (attr)
 			{
@@ -1403,7 +1403,7 @@ namespace
 
 		case REDT_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-			*var = GraphicsBufferPtr();
+			*var = ShaderResourceViewPtr();
 			break;
 
 		case REDT_rw_byte_address_buffer:
@@ -1964,7 +1964,7 @@ namespace
 		case REDT_append_structured_buffer:
 			{
 				var = MakeUniquePtr<RenderVariableBuffer>();
-				*var = GraphicsBufferPtr();
+				*var = ShaderResourceViewPtr();
 				*var = ReadShortString(res);
 			}
 			break;
@@ -1982,7 +1982,7 @@ namespace
 
 		case REDT_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-			*var = GraphicsBufferPtr();
+			*var = ShaderResourceViewPtr();
 			break;
 
 		case REDT_rw_byte_address_buffer:
@@ -5680,22 +5680,17 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(TextureSubresource const & /*value*/)
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	RenderVariable& RenderVariable::operator=(GraphicsBufferPtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=(ShaderResourceViewPtr const & /*value*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(UnorderedAccessViewPtr const & /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -5855,22 +5850,17 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(TextureSubresource& /*value*/) const
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
-	{
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	void RenderVariable::Value(GraphicsBufferPtr& /*value*/) const
+	void RenderVariable::Value(ShaderResourceViewPtr& /*value*/) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(UnorderedAccessViewPtr& /*value*/) const
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -6116,12 +6106,18 @@ namespace KlayGE
 		{
 			array_size = value->ArraySize();
 			mipmap = value->NumMipMaps();
+
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			val_ = rf.MakeTextureSrv(value, 0, array_size, 0, mipmap);
 		}
-		val_ = TextureSubresource(value, 0, array_size, 0, mipmap);
+		else
+		{
+			val_.reset();
+		}
 		return *this;
 	}
 
-	RenderVariable& RenderVariableTexture::operator=(TextureSubresource const & value)
+	RenderVariable& RenderVariableTexture::operator=(ShaderResourceViewPtr const & value)
 	{
 		val_ = value;
 		return *this;
@@ -6129,21 +6125,18 @@ namespace KlayGE
 
 	void RenderVariableTexture::Value(TexturePtr& val) const
 	{
-		if (val_.tex)
+		if (val_)
 		{
-			val_.num_items = val_.tex->ArraySize();
-			val_.num_levels = val_.tex->NumMipMaps();
+			val = val_->TextureResource();
 		}
-		val = val_.tex;
+		else
+		{
+			val.reset();
+		}
 	}
 
-	void RenderVariableTexture::Value(TextureSubresource& val) const
+	void RenderVariableTexture::Value(ShaderResourceViewPtr& val) const
 	{
-		if (val_.tex)
-		{
-			val_.num_items = val_.tex->ArraySize();
-			val_.num_levels = val_.tex->NumMipMaps();
-		}
 		val = val_;
 	}
 
@@ -6226,7 +6219,7 @@ namespace KlayGE
 	std::unique_ptr<RenderVariable> RenderVariableBuffer::Clone()
 	{
 		auto ret = MakeUniquePtr<RenderVariableBuffer>();
-		GraphicsBufferPtr val;
+		ShaderResourceViewPtr val;
 		this->Value(val);
 		*ret = val;
 		std::string elem_type;
@@ -6235,13 +6228,13 @@ namespace KlayGE
 		return std::move(ret);
 	}
 
-	RenderVariable& RenderVariableBuffer::operator=(GraphicsBufferPtr const & value)
+	RenderVariable& RenderVariableBuffer::operator=(ShaderResourceViewPtr const & value)
 	{
 		val_ = value;
 		return *this;
 	}
 
-	void RenderVariableBuffer::Value(GraphicsBufferPtr& val) const
+	void RenderVariableBuffer::Value(ShaderResourceViewPtr& val) const
 	{
 		val = val_;
 	}
@@ -6296,19 +6289,19 @@ namespace KlayGE
 	std::unique_ptr<RenderVariable> RenderVariableByteAddressBuffer::Clone()
 	{
 		auto ret = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-		GraphicsBufferPtr val;
+		ShaderResourceViewPtr val;
 		this->Value(val);
 		*ret = val;
 		return std::move(ret);
 	}
 
-	RenderVariable& RenderVariableByteAddressBuffer::operator=(GraphicsBufferPtr const & value)
+	RenderVariable& RenderVariableByteAddressBuffer::operator=(ShaderResourceViewPtr const & value)
 	{
 		val_ = value;
 		return *this;
 	}
 
-	void RenderVariableByteAddressBuffer::Value(GraphicsBufferPtr& val) const
+	void RenderVariableByteAddressBuffer::Value(ShaderResourceViewPtr& val) const
 	{
 		val = val_;
 	}

@@ -144,6 +144,71 @@ namespace KlayGE
 	}
 
 
+	D3D12TextureShaderResourceView::D3D12TextureShaderResourceView(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(texture->AccessHint() & EAH_GPU_Read);
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
+
+		tex_ = texture;
+		pf_ = pf == EF_Unknown ? texture->Format() : pf;
+
+		first_array_index_ = first_array_index;
+		array_size_ = array_size;
+		first_level_ = first_level;
+		num_levels_ = num_levels;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		sr_src_ = texture.get();
+	}
+
+	D3D12ShaderResourceViewSimulationPtr D3D12TextureShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && tex_ && tex_->HWResourceReady())
+		{
+			d3d_sr_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DShaderResourceView(pf_, first_array_index_, array_size_,
+				first_level_, num_levels_);
+		}
+		return d3d_sr_view_;
+	}
+
+
+	D3D12BufferShaderResourceView::D3D12BufferShaderResourceView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		BOOST_ASSERT(gb->AccessHint() & EAH_GPU_Read);
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
+
+		buff_ = gb;
+		pf_ = pf;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		first_level_ = 0;
+		num_levels_ = 0;
+		first_elem_ = first_elem;
+		num_elems_ = num_elems;
+
+		sr_src_ = gb.get();
+	}
+
+	D3D12ShaderResourceViewSimulationPtr D3D12BufferShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && buff_ && buff_->HWResourceReady())
+		{
+			d3d_sr_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DShaderResourceView(pf_, first_elem_, num_elems_);
+		}
+		return d3d_sr_view_;
+	}
+
+
 	D3D12RenderTargetView::D3D12RenderTargetView(D3D12ResourcePtr const & src, uint32_t first_subres, uint32_t num_subres)
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{

@@ -100,32 +100,32 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
@@ -152,6 +152,28 @@ namespace KlayGE
 	FencePtr NullRenderFactory::MakeFence()
 	{
 		return FencePtr();
+	}
+	
+	ShaderResourceViewPtr NullRenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+		return ShaderResourceViewPtr();
+	}
+
+	ShaderResourceViewPtr NullRenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		KFL_UNUSED(gbuffer);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
+		return ShaderResourceViewPtr();
 	}
 
 	RenderTargetViewPtr NullRenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,

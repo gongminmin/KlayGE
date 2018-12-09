@@ -25,6 +25,32 @@
 
 namespace KlayGE
 {
+	class OGLShaderResourceView : public ShaderResourceView
+	{
+	public:
+		virtual void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const = 0;
+
+	protected:
+		mutable GLuint gl_target_;
+		mutable GLuint gl_tex_;
+	};
+	
+	class OGLTextureShaderResourceView : public OGLShaderResourceView
+	{
+	public:
+		explicit OGLTextureShaderResourceView(TexturePtr const & texture);
+
+		void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const override;
+	};
+	
+	class OGLBufferShaderResourceView : public OGLShaderResourceView
+	{
+	public:
+		OGLBufferShaderResourceView(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
+
+		void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const override;
+	};
+
 	class OGLRenderTargetView : public RenderTargetView
 	{
 	public:

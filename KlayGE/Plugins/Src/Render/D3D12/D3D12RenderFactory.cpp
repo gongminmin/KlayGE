@@ -89,24 +89,21 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	QueryPtr D3D12RenderFactory::MakeOcclusionQuery()
@@ -132,6 +129,18 @@ namespace KlayGE
 	FencePtr D3D12RenderFactory::MakeFence()
 	{
 		return MakeSharedPtr<D3D12Fence>();
+	}
+
+	ShaderResourceViewPtr D3D12RenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		return MakeSharedPtr<D3D12TextureShaderResourceView>(texture, pf, first_array_index, array_size, first_level, num_levels);
+	}
+
+	ShaderResourceViewPtr D3D12RenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
+	{
+		return MakeSharedPtr<D3D12BufferShaderResourceView>(gbuffer, pf, first_elem, num_elems);
 	}
 
 	RenderTargetViewPtr D3D12RenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,

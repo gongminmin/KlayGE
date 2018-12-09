@@ -112,31 +112,23 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(pf);
-			HashCombine(hash_val, first_array_index);
-			HashCombine(hash_val, array_size);
-			HashCombine(hash_val, first_level);
-			HashCombine(hash_val, num_levels);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
 
-			auto iter = d3d_sr_views_.find(hash_val);
-			if (iter != d3d_sr_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
-				ID3D11ShaderResourceView* d3d_sr_view;
-				d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
-				return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
-			}
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11ShaderResourceViewPtr const view;
-			return view;
+			auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
+			ID3D11ShaderResourceView* d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
+			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
 		}
 	}
 
@@ -610,7 +602,6 @@ namespace KlayGE
 
 	void D3D11Texture::DeleteHWResource()
 	{
-		d3d_sr_views_.clear();
 		d3d_rt_views_.clear();
 		d3d_ds_views_.clear();
 		d3d_ua_views_.clear();

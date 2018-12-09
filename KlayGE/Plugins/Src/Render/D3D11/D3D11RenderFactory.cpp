@@ -71,21 +71,21 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr D3D11RenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_VERTEX_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_VERTEX_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D11RenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_INDEX_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_INDEX_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D11RenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_CONSTANT_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<D3D11GraphicsBuffer>(usage, access_hint, D3D11_BIND_CONSTANT_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	QueryPtr D3D11RenderFactory::MakeOcclusionQuery()
@@ -123,6 +123,18 @@ namespace KlayGE
 		}
 
 		return ret;
+	}
+
+	ShaderResourceViewPtr D3D11RenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		return MakeSharedPtr<D3D11TextureShaderResourceView>(texture, pf, first_array_index, array_size, first_level, num_levels);
+	}
+
+	ShaderResourceViewPtr D3D11RenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
+	{
+		return MakeSharedPtr<D3D11BufferShaderResourceView>(gbuffer, pf, first_elem, num_elems);
 	}
 
 	RenderTargetViewPtr D3D11RenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,

@@ -112,25 +112,49 @@ namespace KlayGE
 		return ret;
 	}
 
-	GraphicsBufferPtr RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+		void const * init_data, uint32_t structure_byte_stride)
 	{
-		GraphicsBufferPtr ret = this->MakeDelayCreationVertexBuffer(usage, access_hint, size_in_byte, fmt);
+		GraphicsBufferPtr ret = this->MakeDelayCreationVertexBuffer(usage, access_hint, size_in_byte, structure_byte_stride);
 		ret->CreateHWResource(init_data);
 		return ret;
 	}
 
-	GraphicsBufferPtr RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+		void const * init_data, uint32_t structure_byte_stride)
 	{
-		GraphicsBufferPtr ret = this->MakeDelayCreationIndexBuffer(usage, access_hint, size_in_byte, fmt);
+		GraphicsBufferPtr ret = this->MakeDelayCreationIndexBuffer(usage, access_hint, size_in_byte, structure_byte_stride);
 		ret->CreateHWResource(init_data);
 		return ret;
 	}
 
-	GraphicsBufferPtr RenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr RenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte,
+		void const * init_data, uint32_t structure_byte_stride)
 	{
-		GraphicsBufferPtr ret = this->MakeDelayCreationConstantBuffer(usage, access_hint, size_in_byte, fmt);
+		GraphicsBufferPtr ret = this->MakeDelayCreationConstantBuffer(usage, access_hint, size_in_byte, structure_byte_stride);
 		ret->CreateHWResource(init_data);
 		return ret;
+	}
+
+	ShaderResourceViewPtr RenderFactory::MakeTextureSrv(TexturePtr const & texture, uint32_t first_array_index, uint32_t array_size,
+		uint32_t first_level, uint32_t num_levels)
+	{
+		return this->MakeTextureSrv(texture, texture->Format(), first_array_index, array_size, first_level, num_levels);
+	}
+
+	ShaderResourceViewPtr RenderFactory::MakeTextureSrv(TexturePtr const & texture)
+	{
+		return this->MakeTextureSrv(texture, texture->Format());
+	}
+
+	ShaderResourceViewPtr RenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf)
+	{
+		return this->MakeTextureSrv(texture, pf, 0, texture->ArraySize(), 0, texture->NumMipMaps());
+	}
+
+	ShaderResourceViewPtr RenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf)
+	{
+		return this->MakeBufferSrv(gbuffer, pf, 0, gbuffer->Size() / NumFormatBytes(pf));
 	}
 
 	RenderTargetViewPtr RenderFactory::Make1DRtv(TexturePtr const & texture, int first_array_index, int array_size, int level)

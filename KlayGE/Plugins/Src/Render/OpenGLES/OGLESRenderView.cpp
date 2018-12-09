@@ -31,6 +31,65 @@
 
 namespace KlayGE
 {
+	OGLESTextureShaderResourceView::OGLESTextureShaderResourceView(TexturePtr const & texture)
+	{
+		BOOST_ASSERT(texture->AccessHint() & EAH_GPU_Read);
+
+		tex_ = texture;
+		pf_ = texture->Format();
+
+		first_array_index_ = 0;
+		array_size_ = texture->ArraySize();
+		first_level_ = 0;
+		num_levels_ = texture->NumMipMaps();
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		gl_target_ = GL_TEXTURE_2D;
+		gl_tex_ = 0;
+	}
+
+	void OGLESTextureShaderResourceView::RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const
+	{
+		if ((gl_tex_ == 0) && tex_ && tex_->HWResourceReady())
+		{
+			gl_target_ = checked_cast<OGLESTexture*>(tex_.get())->GLType();
+			gl_tex_ = checked_cast<OGLESTexture*>(tex_.get())->GLTexture();
+		}
+		target = gl_target_;
+		tex = gl_tex_;
+	}
+
+
+	OGLESBufferShaderResourceView::OGLESBufferShaderResourceView(GraphicsBufferPtr const & gbuffer, ElementFormat pf)
+	{
+		BOOST_ASSERT(gbuffer->AccessHint() & EAH_GPU_Read);
+
+		buff_ = gbuffer;
+		pf_ = pf;
+
+		first_array_index_ = 0;
+		array_size_ = 0;
+		first_level_ = 0;
+		num_levels_ = 0;
+		first_elem_ = 0;
+		num_elems_ = gbuffer->Size() / NumFormatBytes(pf_);
+
+		gl_target_ = GL_TEXTURE_BUFFER_OES;
+		gl_tex_ = 0;
+	}
+
+	void OGLESBufferShaderResourceView::RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const
+	{
+		if ((gl_tex_ == 0) && tex_ && tex_->HWResourceReady())
+		{
+			gl_tex_ = checked_cast<OGLESGraphicsBuffer*>(buff_.get())->RetrieveGLTexture(pf_);
+		}
+		target = gl_target_;
+		tex = gl_tex_;
+	}
+
+
 	GLuint OGLESRenderTargetView::RetrieveGLTexture() const
 	{
 		if ((gl_tex_ == 0) && (tex_->HWResourceReady()))

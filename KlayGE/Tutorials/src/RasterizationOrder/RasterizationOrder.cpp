@@ -243,7 +243,7 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ras_order_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 		EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
-		width * height * sizeof(uint32_t), nullptr, EF_R32UI);
+		width * height * sizeof(uint32_t), nullptr, sizeof(uint32_t));
 	ras_order_uav_ = rf.MakeBufferUav(ras_order_buff_, EF_R32UI);
 	ras_order_fb_->Attach(0, ras_order_uav_);
 

@@ -23,9 +23,9 @@ namespace KlayGE
 {
 	struct TextureBind
 	{
-		GraphicsBufferPtr tex_buff;
+		ShaderResourceViewPtr buff_srv;
 
-		TexturePtr tex;
+		ShaderResourceViewPtr tex_srv;
 		SamplerStateObjectPtr sampler;
 	};
 

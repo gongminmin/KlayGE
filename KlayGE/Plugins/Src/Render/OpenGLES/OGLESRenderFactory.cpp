@@ -74,21 +74,21 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr OGLESRenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr OGLESRenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr OGLESRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, fmt);
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, structure_byte_stride);
 	}
 
 	QueryPtr OGLESRenderFactory::MakeOcclusionQuery()
@@ -121,6 +121,25 @@ namespace KlayGE
 	FencePtr OGLESRenderFactory::MakeFence()
 	{
 		return MakeSharedPtr<OGLESFence>();
+	}
+
+	ShaderResourceViewPtr OGLESRenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+		return MakeSharedPtr<OGLESTextureShaderResourceView>(texture);
+	}
+
+	ShaderResourceViewPtr OGLESRenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
+	{
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
+		return MakeSharedPtr<OGLESBufferShaderResourceView>(gbuffer, pf);
 	}
 
 	RenderTargetViewPtr OGLESRenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,

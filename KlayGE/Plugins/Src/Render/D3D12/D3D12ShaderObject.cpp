@@ -74,20 +74,26 @@ namespace
 
 		void operator()()
 		{
-			TextureSubresource tex_subres;
-			param_->Value(tex_subres);
-			if (tex_subres.tex)
+			ShaderResourceViewPtr srv;
+			param_->Value(srv);
+			if (srv)
 			{
-				*srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(tex_subres.tex.get()),
-					tex_subres.first_array_index * tex_subres.tex->NumMipMaps() + tex_subres.first_level,
-					tex_subres.num_items * tex_subres.num_levels);
-				*srv_ = checked_cast<D3D12Texture*>(tex_subres.tex.get())->RetrieveD3DShaderResourceView(tex_subres.tex->Format(),
-					tex_subres.first_array_index, tex_subres.num_items,
-					tex_subres.first_level, tex_subres.num_levels).get();
+				if (srv->TextureResource())
+				{
+					*srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(srv->TextureResource().get()),
+						srv->FirstArrayIndex() * srv->TextureResource()->NumMipMaps() + srv->FirstLevel(),
+						srv->ArraySize() * srv->NumLevels());
+				}
+				else
+				{
+					std::get<0>(*srvsrc_) = nullptr;
+				}
+				*srv_ = checked_cast<D3D12ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
 				std::get<0>(*srvsrc_) = nullptr;
+				*srv_ = nullptr;
 			}
 		}
 
@@ -108,16 +114,24 @@ namespace
 
 		void operator()()
 		{
-			GraphicsBufferPtr buf;
-			param_->Value(buf);
-			if (buf)
+			ShaderResourceViewPtr srv;
+			param_->Value(srv);
+			if (srv)
 			{
-				*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(buf.get()), 0, 1);
-				*srv_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->RetrieveD3DShaderResourceView().get();
+				if (srv->BufferResource())
+				{
+					*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(srv->BufferResource().get()), 0, 1);
+				}
+				else
+				{
+					std::get<0>(*srvsrc_) = nullptr;
+				}
+				*srv_ = checked_cast<D3D12ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
 				std::get<0>(*srvsrc_) = nullptr;
+				*srv_ = nullptr;
 			}
 		}
 

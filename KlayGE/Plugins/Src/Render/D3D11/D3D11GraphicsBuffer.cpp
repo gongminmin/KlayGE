@@ -30,11 +30,11 @@
 namespace KlayGE
 {
 	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
-											uint32_t size_in_byte, ElementFormat fmt)
-						: GraphicsBuffer(usage, access_hint, size_in_byte, NumFormatBytes(fmt)),
-							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
+											uint32_t size_in_byte, uint32_t structure_byte_stride)
+						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
+							bind_flags_(bind_flags)
 	{
-		if ((access_hint_ & EAH_GPU_Structured) && (fmt_as_shader_res_ != EF_Unknown))
+		if ((access_hint_ & EAH_GPU_Structured) && (structure_byte_stride != 0))
 		{
 			// Structured buffer can't be vb or ib at the same time.
 			bind_flags_ = 0;
@@ -45,14 +45,15 @@ namespace KlayGE
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11GraphicsBuffer::RetrieveD3DShaderResourceView()
+	ID3D11ShaderResourceViewPtr const & D3D11GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
 	{
 		BOOST_ASSERT(pf != EF_Unknown);
 		BOOST_ASSERT(first_elem + num_elems <= size_in_byte_ / NumFormatBytes(pf));
 
-		size_t hash_val = HashValue(fmt_as_shader_res_);
-		HashCombine(hash_val, 0);
-		HashCombine(hash_val, size_in_byte_ / NumFormatBytes(fmt_as_shader_res_));
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_elem);
+		HashCombine(hash_val, num_elems);
 
 		auto iter = d3d_sr_views_.find(hash_val);
 		if (iter != d3d_sr_views_.end())
@@ -62,10 +63,10 @@ namespace KlayGE
 		else
 		{
 			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(pf);
 			desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-			desc.Buffer.ElementOffset = 0;
-			desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
+			desc.Buffer.ElementOffset = first_elem;
+			desc.Buffer.ElementWidth = num_elems;
 
 			ID3D11ShaderResourceView* d3d_sr_view;
 			TIFHR(d3d_device_->CreateShaderResourceView(d3d_buffer_.get(), &desc, &d3d_sr_view));

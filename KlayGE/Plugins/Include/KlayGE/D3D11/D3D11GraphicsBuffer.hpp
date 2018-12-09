@@ -27,14 +27,14 @@ namespace KlayGE
 	{
 	public:
 		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
-			uint32_t size_in_byte, ElementFormat fmt);
+			uint32_t size_in_byte, uint32_t structure_byte_stride);
 
 		ID3D11Buffer* D3DBuffer() const
 		{
 			return d3d_buffer_.get();
 		}
 
-		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView();
+		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 		ID3D11UnorderedAccessViewPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 
@@ -62,7 +62,6 @@ namespace KlayGE
 		ID3D11BufferPtr d3d_buffer_;
 
 		uint32_t bind_flags_;
-		ElementFormat fmt_as_shader_res_;
 
 		// TODO: Not caching those views
 		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;

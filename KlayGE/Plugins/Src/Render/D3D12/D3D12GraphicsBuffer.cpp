@@ -48,19 +48,19 @@
 namespace KlayGE
 {
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
-							uint32_t size_in_byte, ElementFormat fmt)
-						: GraphicsBuffer(usage, access_hint, size_in_byte, NumFormatBytes(fmt)),
-							counter_offset_(0),
-							fmt_as_shader_res_(fmt)
+							uint32_t size_in_byte, uint32_t structure_byte_stride)
+						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
+							counter_offset_(0)
 	{
 		curr_states_.resize(1, D3D12_RESOURCE_STATE_COMMON);
 	}
 
-	D3D12ShaderResourceViewSimulationPtr const & D3D12GraphicsBuffer::RetrieveD3DShaderResourceView()
+	D3D12ShaderResourceViewSimulationPtr const & D3D12GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
 	{
-		size_t hash_val = HashValue(fmt_as_shader_res_);
-		HashCombine(hash_val, 0);
-		HashCombine(hash_val, size_in_byte_ / NumFormatBytes(fmt_as_shader_res_));
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_elem);
+		HashCombine(hash_val, num_elems);
 
 		auto iter = d3d_sr_views_.find(hash_val);
 		if (iter != d3d_sr_views_.end())
@@ -70,11 +70,11 @@ namespace KlayGE
 		else
 		{
 			D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D12Mapping::MappingFormat(fmt_as_shader_res_);
+			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D12Mapping::MappingFormat(pf);
 			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			desc.Buffer.FirstElement = 0;
-			desc.Buffer.NumElements = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
+			desc.Buffer.FirstElement = first_elem;
+			desc.Buffer.NumElements = num_elems;
 			desc.Buffer.StructureByteStride = (access_hint_ & EAH_GPU_Structured) ? structure_byte_stride_ : 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
@@ -167,7 +167,7 @@ namespace KlayGE
 		{
 			total_size = ((size_in_byte_ + 4 - 1) & ~(4 - 1)) + sizeof(uint64_t);
 		}
-		else if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown)
+		else if ((access_hint_ & EAH_GPU_Unordered) && (structure_byte_stride_ != 0)
 			&& ((access_hint_ & EAH_Append) || (access_hint_ & EAH_Counter)))
 		{
 			total_size = ((size_in_byte_ + D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1))
@@ -236,7 +236,7 @@ namespace KlayGE
 		{
 			counter_offset_ = (size_in_byte_ + 4 - 1) & ~(4 - 1);
 		}
-		else if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
+		else if ((access_hint_ & EAH_GPU_Unordered) && (structure_byte_stride_ != 0))
 		{
 			if ((access_hint_ & EAH_Append) || (access_hint_ & EAH_Counter))
 			{

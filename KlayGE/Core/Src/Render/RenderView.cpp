@@ -15,6 +15,8 @@
 
 namespace KlayGE
 {
+	ShaderResourceView::~ShaderResourceView() = default;
+
 	RenderTargetView::~RenderTargetView() = default;
 
 	DepthStencilView::~DepthStencilView() = default;

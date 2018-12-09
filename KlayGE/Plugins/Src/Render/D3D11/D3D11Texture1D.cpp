@@ -235,7 +235,12 @@ namespace KlayGE
 
 	void D3D11Texture1D::BuildMipSubLevels()
 	{
-		if (d3d_sr_views_.empty())
+		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_Generate_Mips))
+		{
+			auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
+			d3d_imm_ctx_->GenerateMips(srv.get());
+		}
+		else
 		{
 			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
 			{
@@ -245,11 +250,6 @@ namespace KlayGE
 						index, level - 1, 0, this->Width(level - 1), true);
 				}
 			}
-		}
-		else
-		{
-			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
-			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 	}
 
@@ -280,10 +280,5 @@ namespace KlayGE
 		ID3D11Texture1D* d3d_tex;
 		TIFHR(d3d_device_->CreateTexture1D(&desc, subres_data.data(), &d3d_tex));
 		d3d_texture_ = MakeCOMPtr(d3d_tex);
-
-		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
-		{
-			this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
-		}
 	}
 }
