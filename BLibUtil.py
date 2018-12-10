@@ -227,23 +227,18 @@ class BuildInfo:
 				if 0 == target_platform.find("win"):
 					program_files_folder = self.FindProgramFilesFolder()
 
-					if "VS150COMNTOOLS" in env:
+					if len(self.FindVS2017Folder(program_files_folder)) > 0:
 						project_type = "vs2017"
 						compiler = "vc141"
-					else:
-						if len(self.FindVS2017Folder(program_files_folder)) > 0:
-							project_type = "vs2017"
-							compiler = "vc141"
-					if 0 == len(compiler):
-						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
-							project_type = "vs2015"
-							compiler = "vc140"
-						elif len(self.FindClang()) != 0:
-							project_type = "make"
-							compiler = "clang"
-						elif len(self.FindGCC()) != 0:
-							project_type = "make"
-							compiler = "mingw"
+					elif ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
+						project_type = "vs2015"
+						compiler = "vc140"
+					elif len(self.FindClang()) != 0:
+						project_type = "make"
+						compiler = "clang"
+					elif len(self.FindGCC()) != 0:
+						project_type = "make"
+						compiler = "mingw"
 				elif ("linux" == target_platform):
 					project_type = "make"
 					compiler = "gcc"
@@ -273,31 +268,22 @@ class BuildInfo:
 			program_files_folder = self.FindProgramFilesFolder()
 
 			if "vc141" == compiler:
-				if "VS150COMNTOOLS" in env:
-					compiler_root = env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\"
+				try_folder = self.FindVS2017Folder(program_files_folder)
+				if len(try_folder) > 0:
+					compiler_root = try_folder
 					vcvarsall_path = "VCVARSALL.BAT"
 				else:
+					LogError("Could NOT find vc141 compiler.\n")
+				vcvarsall_options = ""
+			elif "vc140" == compiler:
+				if project_type == "vs2017":
 					try_folder = self.FindVS2017Folder(program_files_folder)
 					if len(try_folder) > 0:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
-					else:
-						LogError("Could NOT find vc141 compiler.\n")
-				vcvarsall_options = ""
-			elif "vc140" == compiler:
-				if project_type == "vs2017":
-					if "VS150COMNTOOLS" in env:
-						compiler_root = env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\"
-						vcvarsall_path = "VCVARSALL.BAT"
 						vcvarsall_options = "-vcvars_ver=14.0"
 					else:
-						try_folder = self.FindVS2017Folder(program_files_folder)
-						if len(try_folder) > 0:
-							compiler_root = try_folder
-							vcvarsall_path = "VCVARSALL.BAT"
-							vcvarsall_options = "-vcvars_ver=14.0"
-						else:
-							LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
+						LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
 				else:
 					if "VS140COMNTOOLS" in env:
 						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
@@ -314,20 +300,13 @@ class BuildInfo:
 			elif "clangc2" == compiler:
 				vcvarsall_options = ""
 				found = False
-				if "VS150COMNTOOLS" in env:
-					ret_list = self.FindVS2017ClangC2(env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\")
+				try_folder = self.FindVS2017Folder(program_files_folder)
+				if len(try_folder) > 0:
+					ret_list = self.FindVS2017ClangC2(try_folder)
 					if ret_list[0]:
 						compiler_root = ret_list[1]
 						vcvarsall_path = ret_list[2]
 						found = True
-				else:
-					try_folder = self.FindVS2017Folder(program_files_folder)
-					if len(try_folder) > 0:
-						ret_list = self.FindVS2017ClangC2(try_folder)
-						if ret_list[0]:
-							compiler_root = ret_list[1]
-							vcvarsall_path = ret_list[2]
-							found = True
 				if (not found):
 					if "VS140COMNTOOLS" in env:
 						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"

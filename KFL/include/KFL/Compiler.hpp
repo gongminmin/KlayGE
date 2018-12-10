@@ -146,7 +146,7 @@
 		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT
+		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#else
 		#error "Clang++ on an unknown platform. Only Apple, Android, Linux, and Windows are supported."
 	#endif
@@ -206,7 +206,7 @@
 		#define KLAYGE_SYMBOL_IMPORT __attribute__((__dllimport__))
 	#else
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT
+		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))

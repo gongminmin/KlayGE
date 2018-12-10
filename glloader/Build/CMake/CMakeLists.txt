@@ -30,11 +30,10 @@ SET(KLAYGE_BIN_DIR "${CMAKE_HOME_DIRECTORY}/../../../KlayGE/bin/${KLAYGE_PLATFOR
 
 
 SET(CodeGenOutput "${GLLOADER_PROJECT_DIR}/include/glloader/glloader_gl.h")
-ADD_CUSTOM_COMMAND(OUTPUT ${CodeGenOutput}
+ADD_CUSTOM_TARGET(autogen ALL
 	COMMAND "${PYTHON_EXECUTABLE}" "${GLLOADER_PROJECT_DIR}/autogen.py" "-q"
 	WORKING_DIRECTORY "${GLLOADER_PROJECT_DIR}"
 	COMMENT "Generating loader files...")
-ADD_CUSTOM_TARGET(autogen DEPENDS ${CodeGenOutput})
 
 # The project settings
 
