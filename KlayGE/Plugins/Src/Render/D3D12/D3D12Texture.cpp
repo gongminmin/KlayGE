@@ -36,6 +36,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/TexCompression.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Hash.hpp>
 
@@ -543,12 +544,15 @@ namespace KlayGE
 		dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		dst.SubresourceIndex = dst_subres;
 
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);
+
 		D3D12_BOX src_box;
 		src_box.left = src_x_offset;
 		src_box.top = src_y_offset;
 		src_box.front = src_z_offset;
-		src_box.right = src_x_offset + width;
-		src_box.bottom = src_y_offset + height;
+		src_box.right = src_x_offset + ((width + block_width - 1) & ~(block_width - 1));
+		src_box.bottom = src_y_offset + ((height + block_height - 1) & ~(block_height - 1));
 		src_box.back = src_z_offset + depth;
 
 		cmd_list->CopyTextureRegion(&dst, dst_x_offset, dst_y_offset, dst_z_offset, &src, &src_box);
@@ -744,6 +748,11 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);	
+		width = (width + block_width - 1) & ~(block_width - 1);
+		height = (height + block_height - 1) & ~(block_height - 1);
 
 		mapped_tma_ = tma;
 		mapped_x_offset_ = x_offset;
@@ -1005,11 +1014,15 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t width,
 		void const * data)
 	{
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);
+		width = (width + block_width - 1) & ~(block_width - 1);
+
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 		uint32_t row_size_in_bytes = 0;
 		uint32_t num_row = 0;
 		uint32_t total_bytes = 0;
-		this->GetCopyableFootprints(width, 1, 1, layout, num_row, row_size_in_bytes, total_bytes);
+		this->GetCopyableFootprints(width, block_height, 1, layout, num_row, row_size_in_bytes, total_bytes);
 
 		void* mapped_data;
 		this->Map1D(array_index, level, TMA_Write_Only, x_offset, width, mapped_data);
@@ -1025,6 +1038,11 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);
+		width = (width + block_width - 1) & ~(block_width - 1);
+		height = (height + block_height - 1) & ~(block_height - 1);
+
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 		uint32_t row_size_in_bytes = 0;
 		uint32_t num_row = 0;
@@ -1053,6 +1071,11 @@ namespace KlayGE
 		uint32_t width, uint32_t height, uint32_t depth,
 		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
 	{
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);
+		width = (width + block_width - 1) & ~(block_width - 1);
+		height = (height + block_height - 1) & ~(block_height - 1);
+
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 		uint32_t row_size_in_bytes = 0;
 		uint32_t num_row = 0;
@@ -1085,6 +1108,11 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
+		uint32_t const block_width = BlockWidth(format_);
+		uint32_t const block_height = BlockHeight(format_);
+		width = (width + block_width - 1) & ~(block_width - 1);
+		height = (height + block_height - 1) & ~(block_height - 1);
+
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 		uint32_t row_size_in_bytes = 0;
 		uint32_t num_row = 0;

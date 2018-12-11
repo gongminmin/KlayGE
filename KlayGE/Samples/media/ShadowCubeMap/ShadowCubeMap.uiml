@@ -1,17 +1,17 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="ShadowCubeMap" caption="Shadow Cubemap" x="-140" y="200" align_x="right" width="140" height="260">
-		<control type="static" id="ScaleFactorStatic" caption="ScaleFactor:" x="20" y="20" width="100" height="24" is_default="0"/>
-		<control type="slider" id="ScaleFactorSlider" x="20" y="40" width="100" height="24" min="1" max="300" value="160" is_default="0"/>
+	<dialog id="ShadowCubeMap" caption="Shadow Cubemap" x="-220" y="200" align_x="right" width="220" height="260">
+		<control type="static" id="ScaleFactorStatic" caption="ScaleFactor:" x="20" y="20" width="180" height="24" is_default="0"/>
+		<control type="slider" id="ScaleFactorSlider" x="20" y="40" width="180" height="24" min="1" max="300" value="160" is_default="0"/>
 
-		<control type="static" id="SMStatic" caption="Shadow map type:" x="20" y="100" width="100" height="24" is_default="0"/>
-		<control type="combo_box" id="SMCombo" x="20" y="100" width="120" height="24" selected="0" hotkey="0" is_default="0">
+		<control type="static" id="SMStatic" caption="Shadow map type:" x="20" y="100" width="180" height="24" is_default="0"/>
+		<control type="combo_box" id="SMCombo" x="20" y="100" width="180" height="24" selected="0" hotkey="0" is_default="0">
 			<item name="Cube"/>
 			<item name="Dual Paraboloid"/>
 			<item name="1 pass Cube"/>
-			<item name="1 pass Cube with instance"/>
-			<item name="1 pass Cube with instance GS"/>
+			<item name="1 pass Cube w/ instance"/>
+			<item name="1 pass Cube w/ GS instance"/>
 		</control>
 
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="160" width="120" height="24" checked="0" hotkey="0" is_default="0"/>

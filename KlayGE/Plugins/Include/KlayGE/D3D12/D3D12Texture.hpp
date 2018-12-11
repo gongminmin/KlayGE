@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	class D3D12Texture : public Texture, public D3D12Resource, public std::enable_shared_from_this<D3D12Texture>
+	class D3D12Texture : public Texture, public D3D12Resource
 	{
 	public:
 		explicit D3D12Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);

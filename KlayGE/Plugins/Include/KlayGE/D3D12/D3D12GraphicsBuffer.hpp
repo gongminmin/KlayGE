@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource, public std::enable_shared_from_this<D3D12GraphicsBuffer>
+	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource
 	{
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
