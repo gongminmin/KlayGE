@@ -549,6 +549,8 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo(RenderModel const & model)
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
 		mtl_ = model.GetMaterial(this->MaterialID());
 
 		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
@@ -558,7 +560,7 @@ namespace KlayGE
 				if (!ResLoader::Instance().Locate(mtl_->tex_names[i]).empty()
 					|| !ResLoader::Instance().Locate(mtl_->tex_names[i] + ".dds").empty())
 				{
-					textures_[i] = ASyncLoadTexture(mtl_->tex_names[i], EAH_GPU_Read | EAH_Immutable);
+					textures_[i] = rf.MakeTextureSrv(ASyncLoadTexture(mtl_->tex_names[i], EAH_GPU_Read | EAH_Immutable));
 				}
 			}
 		}

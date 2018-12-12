@@ -25,6 +25,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderMaterial.hpp>
@@ -372,7 +373,7 @@ namespace KlayGE
 		{
 			if (ready && textures_[i])
 			{
-				ready = textures_[i]->HWResourceReady();
+				ready = textures_[i]->TextureResource()->HWResourceReady();
 			}
 		}
 		return ready;

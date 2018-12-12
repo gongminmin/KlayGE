@@ -149,8 +149,9 @@ namespace
 
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
-			textures_[RenderMaterial::TS_Normal] = rt0_tex;
-			textures_[RenderMaterial::TS_Albedo] = rt1_tex;
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(rt0_tex);
+			textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(rt1_tex);
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);

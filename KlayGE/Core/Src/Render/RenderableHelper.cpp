@@ -537,8 +537,8 @@ namespace KlayGE
 		inv_mv_ep_ = effect_->ParameterByName("inv_mv");
 		g_buffer_rt0_tex_param_ = effect_->ParameterByName("g_buffer_rt0_tex");
 
-		textures_[RenderMaterial::TS_Normal] = normal_tex;
-		textures_[RenderMaterial::TS_Albedo] = albedo_tex;
+		textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(normal_tex);
+		textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(albedo_tex);
 		albedo_clr_ = albedo_clr;
 		metalness_ = metalness;
 		glossiness_ = glossiness;

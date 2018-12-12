@@ -339,7 +339,7 @@ namespace KlayGE
 		RenderEffectParameter* reflection_tex_param_;
 		RenderEffectParameter* alpha_test_threshold_param_;
 
-		std::array<TexturePtr, RenderMaterial::TS_NumTextureSlots> textures_;
+		std::array<ShaderResourceViewPtr, RenderMaterial::TS_NumTextureSlots> textures_;
 	};
 }
 
