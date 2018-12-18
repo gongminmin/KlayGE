@@ -238,14 +238,22 @@ namespace KlayGE
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
 			vs_profile_ = "vs_5_1";
 			ps_profile_ = "ps_5_1";
 			gs_profile_ = "gs_5_1";
 			cs_profile_ = "cs_5_1";
 			hs_profile_ = "hs_5_1";
 			ds_profile_ = "ds_5_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			vs_profile_ = "vs_5_0";
+			ps_profile_ = "ps_5_0";
+			gs_profile_ = "gs_5_0";
+			cs_profile_ = "cs_5_0";
+			hs_profile_ = "hs_5_0";
+			ds_profile_ = "ds_5_0";
 			break;
 
 		default:
@@ -1162,8 +1170,6 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			caps_.max_shader_model
-				= (d3d_feature_level_ >= D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D12_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D12_REQ_TEXTURECUBE_DIMENSION;
@@ -1183,6 +1189,7 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid feature level");
 		}
 
+		caps_.max_shader_model = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
 		{
 			D3D12_FEATURE_DATA_ARCHITECTURE arch_feature;
 			arch_feature.NodeIndex = 0;
