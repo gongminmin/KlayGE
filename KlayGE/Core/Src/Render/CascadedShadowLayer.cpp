@@ -259,6 +259,7 @@ namespace KlayGE
 	void SDSMCascadedShadowLayer::DepthTexture(TexturePtr const & depth_tex)
 	{
 		depth_tex_ = depth_tex;
+		depth_tex_srv_ = Context::Instance().RenderFactoryInstance().MakeTextureSrv(depth_tex_, 0, 1, 0, 1);
 
 		if (!cs_support_)
 		{
@@ -313,7 +314,7 @@ namespace KlayGE
 			*cascade_max_buff_read_param_ = cascade_max_buff_srv_;
 			*scale_buff_param_ = scale_buff_uav_;
 			*bias_buff_param_ = bias_buff_uav_;
-			*depth_tex_param_ = depth_tex_;
+			*depth_tex_param_ = depth_tex_srv_;
 			*num_cascades_param_ = static_cast<int32_t>(num_cascades);
 			*inv_depth_width_height_param_ = float2(1.0f / depth_tex_->Width(0), 1.0f / depth_tex_->Height(0));
 			*near_far_param_ = float2(camera.NearPlane(), camera.FarPlane());
@@ -347,12 +348,9 @@ namespace KlayGE
 
 			for (size_t i = 0; i < intervals_.size(); ++ i)
 			{
-				float3 const & scale = scale_ptr[i];
-				float3 const & bias = bias_ptr[i];
-
 				intervals_[i] = interval_ptr[i];
-				scales_[i] = scale;
-				biases_[i] = bias;
+				scales_[i] = scale_ptr[i];
+				biases_[i] = bias_ptr[i];
 			}
 		}
 		else

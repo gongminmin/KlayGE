@@ -116,6 +116,7 @@ namespace KlayGE
 
 	private:
 		TexturePtr depth_tex_;
+		ShaderResourceViewPtr depth_tex_srv_;
 		bool cs_support_;
 
 		// For CS implement
