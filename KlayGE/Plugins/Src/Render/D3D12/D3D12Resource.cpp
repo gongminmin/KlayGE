@@ -65,6 +65,7 @@ namespace KlayGE
 
 		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
+		bool state_changed = false;
 		if (sub_res == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 		{
 			bool same_state = true;
@@ -91,6 +92,8 @@ namespace KlayGE
 					}
 
 					re.AddResourceBarrier(cmd_list, barrier);
+
+					state_changed = true;
 				}
 			}
 			else
@@ -106,6 +109,8 @@ namespace KlayGE
 						curr_states_[i] = target_state;
 
 						re.AddResourceBarrier(cmd_list, barrier);
+
+						state_changed = true;
 					}
 				}
 			}
@@ -121,7 +126,17 @@ namespace KlayGE
 				curr_states_[sub_res] = target_state;
 
 				re.AddResourceBarrier(cmd_list, barrier);
+
+				state_changed = true;
 			}
+		}
+
+		if (!state_changed && (target_state == D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
+		{
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+			barrier.UAV.pResource = d3d_resource_.get();
+
+			re.AddResourceBarrier(cmd_list, barrier);
 		}
 	}
 
