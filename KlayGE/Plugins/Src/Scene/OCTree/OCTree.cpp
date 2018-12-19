@@ -123,8 +123,7 @@ namespace KlayGE
 			{
 				auto const & node = *sn;
 				uint32_t const attr = node.Attrib();
-				if ((attr & SceneNode::SOA_Cullable)
-					&& !(attr & SceneNode::SOA_Moveable))
+				if (node.Updated() && (attr & SceneNode::SOA_Cullable) && !(attr & SceneNode::SOA_Moveable))
 				{
 					bb_root |= node.PosBoundWS();
 					octree_[0].node_ptrs.push_back(sn);
@@ -174,7 +173,7 @@ namespace KlayGE
 			{
 				auto& node = *sn;
 				BoundOverlap visible;
-				if (node.Visible())
+				if (node.Visible() && node.Updated())
 				{
 					uint32_t const attr = node.Attrib();
 					if (attr & SceneNode::SOA_Cullable)
@@ -214,8 +213,8 @@ namespace KlayGE
 			for (auto* sn : all_scene_nodes_)
 			{
 				auto& node = *sn;
-				BoundOverlap visible;
-				if (node.Visible())
+				BoundOverlap visible = node.VisibleMark();
+				if (node.Visible() && (visible != BO_No))
 				{
 					visible = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
 					if (BO_Partial == visible)
@@ -233,13 +232,9 @@ namespace KlayGE
 							visible = BO_Yes;
 						}
 					}
-				}
-				else
-				{
-					visible = BO_No;
-				}
 
-				node.VisibleMark(visible);
+					node.VisibleMark(visible);
+				}
 			}
 		}
 
@@ -415,6 +410,16 @@ namespace KlayGE
 						}
 					}
 					node->VisibleMark(visible);
+
+					if (visible != BO_No)
+					{
+						auto* override_node = node->Parent();
+						while ((override_node != nullptr) && (override_node->VisibleMark() == BO_No))
+						{
+							override_node->VisibleMark(BO_Partial);
+							override_node = override_node->Parent();
+						}
+					}
 				}
 			}
 

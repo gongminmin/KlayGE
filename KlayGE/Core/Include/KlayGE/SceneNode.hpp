@@ -107,6 +107,7 @@ namespace KlayGE
 		virtual AABBox const & PosBoundWS() const;
 		void UpdateTransforms();
 		void UpdatePosBoundSubtree();
+		bool Updated() const;
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
@@ -149,6 +150,7 @@ namespace KlayGE
 		void FindAllNode(std::vector<SceneNode*>& nodes, std::wstring_view name);
 
 		void Parent(SceneNode* so);
+		void EmitSceneChanged();
 
 	protected:
 		std::wstring name_;
@@ -170,6 +172,8 @@ namespace KlayGE
 
 		UpdateEvent sub_thread_update_event_;
 		UpdateEvent main_thread_update_event_;
+
+		bool updated_ = false;
 	};
 }
 

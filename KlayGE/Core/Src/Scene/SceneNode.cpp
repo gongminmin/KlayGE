@@ -153,6 +153,9 @@ namespace KlayGE
 	void SceneNode::Parent(SceneNode* so)
 	{
 		parent_ = so;
+
+		pos_aabb_dirty_ = true;
+		updated_ = false;
 	}
 
 	std::vector<SceneNodePtr> const & SceneNode::Children() const
@@ -179,6 +182,8 @@ namespace KlayGE
 			pos_aabb_dirty_ = true;
 			node->Parent(nullptr);
 			children_.erase(iter);
+
+			this->EmitSceneChanged();
 		}
 	}
 
@@ -191,6 +196,8 @@ namespace KlayGE
 
 		pos_aabb_dirty_ = true;
 		children_.clear();
+
+		this->EmitSceneChanged();
 	}
 
 	void SceneNode::MainThreadUpdateSubtree(float app_time, float elapsed_time)
@@ -322,6 +329,13 @@ namespace KlayGE
 		{
 			xform_to_world_ = xform_to_parent_;
 		}
+
+		pos_aabb_dirty_ = true;
+	}
+
+	bool SceneNode::Updated() const
+	{
+		return updated_ && !pos_aabb_dirty_;
 	}
 
 	void SceneNode::VisibleMark(BoundOverlap vm)
@@ -342,6 +356,13 @@ namespace KlayGE
 	void SceneNode::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		main_thread_update_event_(app_time, elapsed_time);
+
+		if (!updated_)
+		{
+			this->EmitSceneChanged();
+
+			updated_ = true;
+		}
 	}
 
 	uint32_t SceneNode::Attrib() const
@@ -534,6 +555,25 @@ namespace KlayGE
 			}
 
 			pos_aabb_dirty_ = false;
+		}
+	}
+
+	void SceneNode::EmitSceneChanged()
+	{
+		auto& context = Context::Instance();
+		if (context.SceneManagerValid())
+		{
+			auto* node = this;
+			while (node->Parent() != nullptr)
+			{
+				node = node->Parent();
+			}
+
+			auto& scene_mgr = context.SceneManagerInstance();
+			if (node == &scene_mgr.SceneRootNode())
+			{
+				scene_mgr.OnSceneChanged();
+			}
 		}
 	}
 }

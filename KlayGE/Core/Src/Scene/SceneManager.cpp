@@ -132,7 +132,7 @@ namespace KlayGE
 		{
 			auto& node = *sn;
 			BoundOverlap visible;
-			if (node.Visible())
+			if (node.Visible() && node.Updated())
 			{
 				uint32_t const attr = node.Attrib();
 
@@ -474,6 +474,19 @@ namespace KlayGE
 		for (auto const & node : scene_nodes)
 		{
 			node->VisibleMark(BO_No);
+		}
+		if (!(urt & App3DFramework::URV_Overlay))
+		{
+			scene_root_.Traverse([](SceneNode& node)
+				{
+					uint32_t const attr = node.Attrib();
+					if ((node.Parent() == nullptr)
+						|| (node.Visible() && (!(attr & SceneNode::SOA_Cullable) || (attr & SceneNode::SOA_Moveable))))
+					{
+						node.VisibleMark(BO_Partial);
+					}
+					return node.Visible();
+				});
 		}
 		if (urt & App3DFramework::URV_NeedFlush)
 		{
