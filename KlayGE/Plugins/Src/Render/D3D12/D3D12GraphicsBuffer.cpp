@@ -165,7 +165,7 @@ namespace KlayGE
 		if ((access_hint_ & EAH_GPU_Write)
 			&& !((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
 		{
-			total_size = ((size_in_byte_ + 4 - 1) & ~(4 - 1)) + sizeof(uint64_t);
+			total_size = ((size_in_byte_ + sizeof(uint64_t) - 1) & ~(sizeof(uint64_t) - 1)) + sizeof(uint64_t);
 		}
 		else if ((access_hint_ & EAH_GPU_Unordered) && (structure_byte_stride_ != 0)
 			&& ((access_hint_ & EAH_Append) || (access_hint_ & EAH_Counter)))
@@ -234,7 +234,7 @@ namespace KlayGE
 		if ((access_hint_ & EAH_GPU_Write)
 			&& !((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
 		{
-			counter_offset_ = (size_in_byte_ + 4 - 1) & ~(4 - 1);
+			counter_offset_ = (size_in_byte_ + sizeof(uint64_t) - 1) & ~(sizeof(uint64_t) - 1);
 		}
 		else if ((access_hint_ & EAH_GPU_Unordered) && (structure_byte_stride_ != 0))
 		{

@@ -352,7 +352,7 @@ namespace
 
 					particle_vel_vb_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, max_num_particles_ * sizeof(float4),
 						nullptr, sizeof(float4));
-					particle_vel_srv_[i] = rf.MakeBufferSrv(particle_vel_vb_[0], EF_ABGR32F);
+					particle_vel_srv_[i] = rf.MakeBufferSrv(particle_vel_vb_[i], EF_ABGR32F);
 
 					particle_rl_[i]->BindVertexStream(particle_pos_vb_[i], VertexElement(VEU_Position, 0, EF_ABGR32F));
 					particle_rl_[i]->BindVertexStream(particle_vel_vb_[i], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
