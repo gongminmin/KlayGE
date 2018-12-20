@@ -543,19 +543,23 @@ namespace KlayGE
 			std::vector<D3D12_STREAM_OUTPUT_BUFFER_VIEW> sobv(num_buffs);
 			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				D3D12GraphicsBufferPtr d3d12_buf = checked_pointer_cast<D3D12GraphicsBuffer>(rl->GetVertexStream(i));
+				auto d3d12_buf = checked_pointer_cast<D3D12GraphicsBuffer>(rl->GetVertexStream(i));
 
 				so_buffs_[i] = d3d12_buf;
+				d3d12_buf->ResetInitCount(0);
 				sobv[i].BufferLocation = d3d12_buf->GPUVirtualAddress();
 				sobv[i].SizeInBytes = d3d12_buf->Size();
 				sobv[i].BufferFilledSizeLocation = sobv[i].BufferLocation + d3d12_buf->CounterOffset();
 			}
 
-			d3d_render_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), &sobv[0]);
+			d3d_render_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), sobv.data());
 		}
-		else if (so_buffs_.size() > 0)
+		else if (!so_buffs_.empty())
 		{
-			d3d_render_cmd_list_->SOSetTargets(0, 0, nullptr);
+			num_buffs = static_cast<uint32_t>(so_buffs_.size());
+			std::vector<D3D12_STREAM_OUTPUT_BUFFER_VIEW> sobv(num_buffs);
+			memset(sobv.data(), 0, num_buffs * sizeof(D3D12_STREAM_OUTPUT_BUFFER_VIEW));
+			d3d_render_cmd_list_->SOSetTargets(0, num_buffs, sobv.data());
 
 			so_buffs_.clear();
 		}

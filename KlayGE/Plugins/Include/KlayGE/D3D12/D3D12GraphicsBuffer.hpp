@@ -48,6 +48,7 @@ namespace KlayGE
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride);
+		~D3D12GraphicsBuffer() override;
 
 		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
 		{
@@ -79,6 +80,8 @@ namespace KlayGE
 		{
 			return gpu_vaddr_;
 		}
+
+		void ResetInitCount(uint64_t count);
 
 	private:
 		void* Map(BufferAccess ba);

@@ -1026,7 +1026,6 @@ namespace KlayGE
 					so_template_->vs_signature_ = so.so_template_->vs_signature_;
 					if (so.so_template_->vs_so_)
 					{
-						so_template_->shader_code_[ST_GeometryShader] = so.so_template_->shader_code_[ST_GeometryShader];
 						so_template_->vs_so_ = so.so_template_->vs_so_;
 						so_template_->so_decl_ = so.so_template_->so_decl_;
 						so_template_->rasterized_stream_ = so.so_template_->rasterized_stream_;
@@ -1061,7 +1060,6 @@ namespace KlayGE
 
 						if (so.so_template_->ds_so_)
 						{
-							so_template_->shader_code_[ST_GeometryShader] = so.so_template_->shader_code_[ST_GeometryShader];
 							so_template_->ds_so_ = so.so_template_->ds_so_;
 							so_template_->so_decl_ = so.so_template_->so_decl_;
 							so_template_->rasterized_stream_ = so.so_template_->rasterized_stream_;

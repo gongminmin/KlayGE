@@ -718,31 +718,6 @@ namespace KlayGE
 		KFL_UNUSED(index);
 	}
 
-	void D3D12UnorderedAccessView::ResetInitCount()
-	{
-		if (ua_counter_upload_src_)
-		{
-			uint32_t const count = this->InitCount();
-
-			D3D12_RANGE read_range;
-			read_range.Begin = 0;
-			read_range.End = 0;
-
-			void* mapped = nullptr;
-			ua_counter_upload_src_->Map(0, &read_range, &mapped);
-			memcpy(mapped, &count, sizeof(count));
-			ua_counter_upload_src_->Unmap(0, nullptr);
-
-			ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_COPY_DEST);
-
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.FlushResourceBarriers(d3d_cmd_list_);
-
-			d3d_cmd_list_->CopyBufferRegion(ua_src_->D3DResource().get(),
-				counter_offset_, ua_counter_upload_src_.get(), 0, sizeof(count));
-		}
-	}
-
 
 	D3D12Texture1D2DCubeUnorderedAccessView::D3D12Texture1D2DCubeUnorderedAccessView(TexturePtr const & texture, ElementFormat pf,
 		int first_array_index, int array_size, int level)
@@ -762,8 +737,6 @@ namespace KlayGE
 		num_faces_ = 1;
 		first_elem_ = 0;
 		num_elems_ = 0;
-
-		counter_offset_ = 0;
 
 		this->RetrieveD3DUnorderedAccessView();
 	}
@@ -800,8 +773,6 @@ namespace KlayGE
 		first_elem_ = 0;
 		num_elems_ = 0;
 
-		counter_offset_ = 0;
-
 		this->RetrieveD3DUnorderedAccessView();
 	}
 
@@ -835,8 +806,6 @@ namespace KlayGE
 		num_faces_ = 1;
 		first_elem_ = 0;
 		num_elems_ = 0;
-
-		counter_offset_ = 0;
 
 		this->RetrieveD3DUnorderedAccessView();
 	}
@@ -872,10 +841,6 @@ namespace KlayGE
 		first_elem_ = first_elem;
 		num_elems_ = num_elems;
 
-		D3D12GraphicsBufferPtr d3d_buff = checked_pointer_cast<D3D12GraphicsBuffer>(gb);
-		ua_counter_upload_src_ = d3d_buff->D3DBufferCounterUpload();
-		counter_offset_ = d3d_buff->CounterOffset();
-
 		this->RetrieveD3DUnorderedAccessView();
 	}
 
@@ -886,5 +851,10 @@ namespace KlayGE
 			d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_ua_view_.get();
+	}
+
+	void D3D12BufferUnorderedAccessView::ResetInitCount()
+	{
+		checked_pointer_cast<D3D12GraphicsBuffer>(buff_)->ResetInitCount(this->InitCount());
 	}
 }

@@ -55,6 +55,15 @@ namespace KlayGE
 		curr_states_.resize(1, D3D12_RESOURCE_STATE_COMMON);
 	}
 
+	D3D12GraphicsBuffer::~D3D12GraphicsBuffer()
+	{
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.ReleaseAfterSync(d3d_buffer_counter_upload_);
+		}
+	}
+
 	D3D12ShaderResourceViewSimulationPtr const & D3D12GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
 		uint32_t num_elems)
 	{
@@ -242,20 +251,23 @@ namespace KlayGE
 			{
 				counter_offset_ = (size_in_byte_ + D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1)
 					& ~(D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1);
-
-				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-				res_desc.Width = sizeof(uint64_t);
-				res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-				ID3D12Resource* buffer;
-				TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-					&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-					IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
-				d3d_buffer_counter_upload_ = MakeCOMPtr(buffer);
 			}
 			else
 			{
 				counter_offset_ = 0;
 			}
+		}
+
+		if (counter_offset_ > 0)
+		{
+			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+			res_desc.Width = sizeof(uint64_t);
+			res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			ID3D12Resource* buffer;
+			TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
+			d3d_buffer_counter_upload_ = MakeCOMPtr(buffer);
 		}
 	}
 
@@ -419,6 +431,29 @@ namespace KlayGE
 			cmd_list->CopyBufferRegion(d3d_resource_.get(), offset, upload_buff.get(), 0, size);
 
 			re.RecycleTempBuffer(upload_buff, true, size);
+		}
+	}
+
+	void D3D12GraphicsBuffer::ResetInitCount(uint64_t count)
+	{
+		if (d3d_buffer_counter_upload_)
+		{
+			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto* cmd_list = re.D3DRenderCmdList();
+
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
+			void* mapped = nullptr;
+			d3d_buffer_counter_upload_->Map(0, &read_range, &mapped);
+			memcpy(mapped, &count, sizeof(count));
+			d3d_buffer_counter_upload_->Unmap(0, nullptr);
+
+			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
+
+			cmd_list->CopyBufferRegion(d3d_resource_.get(), counter_offset_, d3d_buffer_counter_upload_.get(), 0, sizeof(count));
 		}
 	}
 }

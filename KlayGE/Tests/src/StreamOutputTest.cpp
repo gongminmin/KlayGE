@@ -325,6 +325,87 @@ public:
 		}
 	}
 
+	void TestMultipleBuffers(float tolerance)
+	{
+		if (!stream_output_support_)
+		{
+			return;
+		}
+
+		std::ranlux24_base gen;
+		std::uniform_int_distribution<> dis(-100, 100);
+
+		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+		auto tech = effect->TechniqueByName("MultipleBuffers");
+
+		uint32_t const num_vertices = 1024;
+
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		GraphicsBufferPtr vb_ins[2];
+		GraphicsBufferPtr vb_outs[2];
+		for (uint32_t i = 0; i < 2; ++ i)
+		{
+			uint32_t const size = (i == 0) ? sizeof(float4) : sizeof(float2);
+			vb_ins[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * size, nullptr);
+			vb_outs[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_ins[i]->Size(), nullptr);
+		}
+
+		auto rl_in = rf.MakeRenderLayout();
+		rl_in->TopologyType(RenderLayout::TT_PointList);
+		rl_in->BindVertexStream(vb_ins[0], VertexElement(VEU_Position, 0, EF_ABGR32F));
+		rl_in->BindVertexStream(vb_ins[1], VertexElement(VEU_TextureCoord, 0, EF_GR32F));
+
+		auto rl_out = rf.MakeRenderLayout();
+		rl_out->TopologyType(RenderLayout::TT_PointList);
+		rl_out->BindVertexStream(vb_outs[0], VertexElement(VEU_Position, 0, EF_ABGR32F));
+		rl_out->BindVertexStream(vb_outs[1], VertexElement(VEU_TextureCoord, 0, EF_GR32F));
+
+		auto& re = rf.RenderEngineInstance();
+
+		for (uint32_t t = 0; t < 10; ++ t)
+		{
+			for (uint32_t i = 0; i < 2; ++ i)
+			{
+				GraphicsBuffer::Mapper mapper(*vb_ins[i], BA_Write_Only);
+				if (i == 0)
+				{
+					float4* input_data = mapper.Pointer<float4>();
+					for (uint32_t j = 0; j < num_vertices; ++ j)
+					{
+						float const x = static_cast<float>(dis(gen));
+						float const y = static_cast<float>(dis(gen));
+						float const z = static_cast<float>(dis(gen));
+						float const w = static_cast<float>(dis(gen));
+
+						input_data[j] = float4(x, y, z, w);
+					}
+				}
+				else
+				{
+					float2* input_data = mapper.Pointer<float2>();
+					for (uint32_t j = 0; j < num_vertices; ++ j)
+					{
+						float const x = static_cast<float>(dis(gen));
+						float const y = static_cast<float>(dis(gen));
+
+						input_data[j] = float2(x, y);
+					}
+				}
+			}
+
+			re.BindSOBuffers(rl_out);
+			re.Render(*effect, *tech, *rl_in);
+			re.BindSOBuffers(RenderLayoutPtr());
+
+			for (uint32_t i = 0; i < 2; ++ i)
+			{
+				EXPECT_TRUE(CompareBuffer(*vb_ins[i], 0,
+					*vb_outs[i], 0,
+					num_vertices * ((i == 0) ? 4 : 2), tolerance));
+			}
+		}
+	}
+
 private:
 	bool stream_output_support_;
 	bool draw_indirect_support_;
@@ -350,4 +431,9 @@ TEST_F(StreamOutputTest, ConditionalCopyBuffer)
 TEST_F(StreamOutputTest, DrawIndirectCopyBuffer)
 {
 	TestDrawIndirectCopyBuffer(1.0f / 255);
+}
+
+TEST_F(StreamOutputTest, MultipleBuffers)
+{
+	TestMultipleBuffers(1.0f / 255);
 }

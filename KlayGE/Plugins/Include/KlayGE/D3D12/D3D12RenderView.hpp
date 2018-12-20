@@ -324,7 +324,9 @@ namespace KlayGE
 			return ua_num_subres_;
 		}
 
-		void ResetInitCount();
+		virtual void ResetInitCount()
+		{
+		}
 
 	protected:
 		ID3D12Device* d3d_device_;
@@ -332,10 +334,8 @@ namespace KlayGE
 
 		mutable D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		D3D12ResourcePtr ua_src_;
-		ID3D12ResourcePtr ua_counter_upload_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
-		uint32_t counter_offset_;
 
 		float4 clear_f4_val_;
 		uint4 clear_ui4_val_;
@@ -375,6 +375,8 @@ namespace KlayGE
 		D3D12BufferUnorderedAccessView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem, uint32_t num_elems);
 
 		D3D12UnorderedAccessViewSimulation* RetrieveD3DUnorderedAccessView() const override;
+
+		void ResetInitCount() override;
 	};
 }
 
