@@ -58,8 +58,8 @@ namespace KlayGE
 	private:
 		mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems_;
 
-		std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
-		D3D12_INDEX_BUFFER_VIEW ibv_;
+		mutable std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
+		mutable D3D12_INDEX_BUFFER_VIEW ibv_;
 
 		// For PSOs
 		size_t pso_hash_value_;

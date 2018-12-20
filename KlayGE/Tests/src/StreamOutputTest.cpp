@@ -67,11 +67,25 @@ public:
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
+		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+		auto tech = effect->TechniqueByName("CopyBuffer");
+
 		uint32_t const num_vertices = 1024;
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto vb_in = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
+		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
 
+		auto rl_in = rf.MakeRenderLayout();
+		rl_in->TopologyType(RenderLayout::TT_PointList);
+		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto rl_out = rf.MakeRenderLayout();
+		rl_out->TopologyType(RenderLayout::TT_PointList);
+		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto& re = rf.RenderEngineInstance();
+		
 		for (uint32_t i = 0; i < 10; ++ i)
 		{
 			{
@@ -88,7 +102,9 @@ public:
 				}
 			}
 
-			auto vb_out = CopyBuffer(vb_in);
+			re.BindSOBuffers(rl_out);
+			re.Render(*effect, *tech, *rl_in);
+			re.BindSOBuffers(RenderLayoutPtr());
 
 			EXPECT_TRUE(CompareBuffer(*vb_in, 0,
 				*vb_out, 0,
@@ -104,7 +120,25 @@ public:
 		}
 
 		uint32_t const num_vertices = 1024;
-		auto vb_out = VertexIDToBuffer(num_vertices);
+
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
+		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+		auto tech = effect->TechniqueByName("VertexIDToBuffer");
+
+		auto rl_in = rf.MakeRenderLayout();
+		rl_in->TopologyType(RenderLayout::TT_PointList);
+		rl_in->NumVertices(num_vertices);
+
+		auto rl_out = rf.MakeRenderLayout();
+		rl_out->TopologyType(RenderLayout::TT_PointList);
+		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, num_vertices * sizeof(float4), nullptr);
+		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto& re = rf.RenderEngineInstance();
+		re.BindSOBuffers(rl_out);
+		re.Render(*effect, *tech, *rl_in);
+		re.BindSOBuffers(RenderLayoutPtr());
 
 		std::vector<float4> sanity_data(num_vertices);
 		for (uint32_t i = 0; i < num_vertices; ++ i)
@@ -112,7 +146,6 @@ public:
 			sanity_data[i] = float4(i + 0.0f, i + 0.25f, i + 0.5f, i + 0.75f);
 		}
 
-		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto vb_sanity = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, num_vertices * sizeof(float4), sanity_data.data());
 
 		EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
@@ -130,11 +163,27 @@ public:
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
+		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+		auto tech = effect->TechniqueByName("ConditionalCopyBuffer");
+
 		uint32_t const num_vertices = 1024;
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto vb_in = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
-		auto vb_sanity = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
+		auto vb_sanity = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, vb_in->Size(), nullptr);
+
+		auto rl_in = rf.MakeRenderLayout();
+		rl_in->TopologyType(RenderLayout::TT_PointList);
+		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto rl_out = rf.MakeRenderLayout();
+		rl_out->TopologyType(RenderLayout::TT_PointList);
+		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
+		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto query = rf.MakeSOStatisticsQuery();
+
+		auto& re = rf.RenderEngineInstance();
 
 		for (uint32_t i = 0; i < 10; ++ i)
 		{
@@ -161,8 +210,13 @@ public:
 				}
 			}
 
-			uint64_t output_primitives;
-			auto vb_out = ConditionalCopyBuffer(vb_in, output_primitives);
+			re.BindSOBuffers(rl_out);
+			query->Begin();
+			re.Render(*effect, *tech, *rl_in);
+			query->End();
+			re.BindSOBuffers(RenderLayoutPtr());
+
+			uint64_t const output_primitives = checked_pointer_cast<SOStatisticsQuery>(query)->NumPrimitivesWritten();
 
 			EXPECT_TRUE(output_primitives == sanity_size);
 			EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
@@ -187,6 +241,22 @@ public:
 		auto vb_in = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
 		auto vb_sanity = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
 
+		auto rl_in = rf.MakeRenderLayout();
+		rl_in->TopologyType(RenderLayout::TT_PointList);
+		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto rl_out = rf.MakeRenderLayout();
+		rl_out->TopologyType(RenderLayout::TT_PointList);
+		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
+		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto rl_intermediate = rf.MakeRenderLayout();
+		rl_intermediate->TopologyType(RenderLayout::TT_PointList);
+		auto vb_intermediate = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
+		rl_intermediate->BindVertexStream(vb_intermediate, VertexElement(VEU_Position, 0, EF_ABGR32F));
+
+		auto& re = rf.RenderEngineInstance();
+
 		for (uint32_t i = 0; i < 10; ++ i)
 		{
 			uint32_t sanity_size = 0;
@@ -213,148 +283,46 @@ public:
 			}
 
 			uint64_t output_primitives;
-			auto vb_out = DrawIndirectCopyBuffer(vb_in, output_primitives);
+
+			auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+			auto tech = effect->TechniqueByName("ConditionalCopyBufferRw");
+
+			uint32_t const indirect_args[] = { 0, 1, 0, 0 };
+			auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
+				sizeof(indirect_args), indirect_args, sizeof(uint32_t));
+
+			auto fb = rf.MakeFrameBuffer();
+			auto vb_num_uav = rf.MakeBufferUav(vb_num, EF_R32UI);
+			fb->Attach(0, vb_num_uav);
+
+			*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
+
+			re.BindSOBuffers(rl_intermediate);
+			re.BindFrameBuffer(fb);
+			re.Render(*effect, *tech, *rl_in);
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.BindSOBuffers(RenderLayoutPtr());
+
+			tech = effect->TechniqueByName("CopyBuffer");
+
+			rl_intermediate->BindIndirectArgs(vb_num);
+			rl_intermediate->IndirectArgsOffset(0);
+			re.BindSOBuffers(rl_out);
+			re.Render(*effect, *tech, *rl_intermediate);
+			re.BindSOBuffers(RenderLayoutPtr());
+
+			auto vb_num_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb_num->Size(), nullptr);
+			vb_num->CopyToBuffer(*vb_num_cpu);
+			{
+				GraphicsBuffer::Mapper mapper(*vb_num_cpu, BA_Read_Only);
+				output_primitives = *mapper.Pointer<uint32_t>();
+			}
 
 			EXPECT_TRUE(output_primitives == sanity_size);
 			EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
 				*vb_out, 0,
 				sanity_size * 4, tolerance));
 		}
-	}
-
-private:
-	GraphicsBufferPtr CopyBuffer(GraphicsBufferPtr const & vb_in)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
-		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
-		auto tech = effect->TechniqueByName("CopyBuffer");
-
-		auto rl_in = rf.MakeRenderLayout();
-		rl_in->TopologyType(RenderLayout::TT_PointList);
-		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto rl_out = rf.MakeRenderLayout();
-		rl_out->TopologyType(RenderLayout::TT_PointList);
-		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
-		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto& re = rf.RenderEngineInstance();
-		re.BindSOBuffers(rl_out);
-		re.Render(*effect, *tech, *rl_in);
-		re.BindSOBuffers(RenderLayoutPtr());
-
-		return vb_out;
-	}
-
-	GraphicsBufferPtr VertexIDToBuffer(uint32_t num_vertices)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
-		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
-		auto tech = effect->TechniqueByName("VertexIDToBuffer");
-
-		auto rl_in = rf.MakeRenderLayout();
-		rl_in->TopologyType(RenderLayout::TT_PointList);
-		rl_in->NumVertices(num_vertices);
-
-		auto rl_out = rf.MakeRenderLayout();
-		rl_out->TopologyType(RenderLayout::TT_PointList);
-		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, num_vertices * sizeof(float4), nullptr);
-		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto& re = rf.RenderEngineInstance();
-		re.BindSOBuffers(rl_out);
-		re.Render(*effect, *tech, *rl_in);
-		re.BindSOBuffers(RenderLayoutPtr());
-
-		return vb_out;
-	}
-
-	GraphicsBufferPtr ConditionalCopyBuffer(GraphicsBufferPtr const & vb_in, uint64_t& output_primitives)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
-		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
-		auto tech = effect->TechniqueByName("ConditionalCopyBuffer");
-
-		auto rl_in = rf.MakeRenderLayout();
-		rl_in->TopologyType(RenderLayout::TT_PointList);
-		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto rl_out = rf.MakeRenderLayout();
-		rl_out->TopologyType(RenderLayout::TT_PointList);
-		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
-		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto query = rf.MakeSOStatisticsQuery();
-
-		auto& re = rf.RenderEngineInstance();
-		re.BindSOBuffers(rl_out);
-		query->Begin();
-		re.Render(*effect, *tech, *rl_in);
-		query->End();
-		re.BindSOBuffers(RenderLayoutPtr());
-
-		output_primitives = checked_pointer_cast<SOStatisticsQuery>(query)->NumPrimitivesWritten();
-
-		return vb_out;
-	}
-
-	GraphicsBufferPtr DrawIndirectCopyBuffer(GraphicsBufferPtr const & vb_in, uint64_t& output_primitives)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
-		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
-		auto tech = effect->TechniqueByName("ConditionalCopyBufferRw");
-
-		uint32_t indirect_args[] = { 0, 1, 0, 0 };
-		auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
-			sizeof(indirect_args), indirect_args, sizeof(uint32_t));
-
-		auto fb = rf.MakeFrameBuffer();
-		auto vb_num_uav = rf.MakeBufferUav(vb_num, EF_R32UI);
-		fb->Attach(0, vb_num_uav);
-
-		*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
-
-		auto rl_in = rf.MakeRenderLayout();
-		rl_in->TopologyType(RenderLayout::TT_PointList);
-		rl_in->BindVertexStream(vb_in, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto rl_intermediate = rf.MakeRenderLayout();
-		rl_intermediate->TopologyType(RenderLayout::TT_PointList);
-		auto vb_intermediate = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
-		rl_intermediate->BindVertexStream(vb_intermediate, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		auto& re = rf.RenderEngineInstance();
-		re.BindSOBuffers(rl_intermediate);
-		re.BindFrameBuffer(fb);
-		re.Render(*effect, *tech, *rl_in);
-		re.BindFrameBuffer(FrameBufferPtr());
-		re.BindSOBuffers(RenderLayoutPtr());
-
-		tech = effect->TechniqueByName("CopyBuffer");
-
-		auto rl_out = rf.MakeRenderLayout();
-		rl_out->TopologyType(RenderLayout::TT_PointList);
-		auto vb_out = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
-		rl_out->BindVertexStream(vb_out, VertexElement(VEU_Position, 0, EF_ABGR32F));
-
-		rl_intermediate->BindIndirectArgs(vb_num);
-		rl_intermediate->IndirectArgsOffset(0);
-		re.BindSOBuffers(rl_out);
-		re.Render(*effect, *tech, *rl_intermediate);
-		re.BindSOBuffers(RenderLayoutPtr());
-
-		auto vb_num_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb_num->Size(), nullptr);
-		vb_num->CopyToBuffer(*vb_num_cpu);
-		{
-			GraphicsBuffer::Mapper mapper(*vb_num_cpu, BA_Read_Only);
-			output_primitives = *mapper.Pointer<uint32_t>();
-		}
-
-		return vb_out;
 	}
 
 private:

@@ -89,6 +89,26 @@ namespace KlayGE
 		uint32_t const num_vertex_streams = this->NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (this->InstanceStream() ? 1 : 0);
 
+		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
+		{
+			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->GetVertexStream(i).get());
+			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
+		}
+
+		if (this->InstanceStream())
+		{
+			uint32_t const number = num_vertex_streams;
+
+			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->InstanceStream().get());
+			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
+		}
+
+		if (this->UseIndices())
+		{
+			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(this->GetIndexStream().get());
+			ibv_.BufferLocation = ib.GPUVirtualAddress();
+		}
+
 		auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (all_num_vertex_stream != 0)
 		{
