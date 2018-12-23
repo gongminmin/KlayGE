@@ -37,15 +37,8 @@
 #include <istream>
 #include <string>
 #include <vector>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'x', 'alloc'
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
+
 #include <boost/lockfree/spsc_queue.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>

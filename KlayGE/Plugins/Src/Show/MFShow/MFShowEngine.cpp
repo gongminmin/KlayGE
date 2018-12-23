@@ -47,30 +47,16 @@
 #include "TinyMFMediaEngine.hpp"
 #endif
 #include <KlayGE/SALWrapper.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore int enum
-#endif
 #include <dxgi1_6.h>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-const-init" // Ignore const init (a Microsoft extension)
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore int enum
-#pragma clang diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
 #endif
 #include <d3d11_4.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
 #endif
-#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANGC2)
+#if defined(KLAYGE_COMPILER_GCC)
 #undef __out
 #endif
 

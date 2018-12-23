@@ -1370,9 +1370,6 @@ namespace KlayGE
 					for (auto const & srvsrc : srvsrcs_[st])
 					{
 						BOOST_ASSERT(std::get<0>(srvsrc) != uavsrc);
-#if defined(KLAYGE_COMPILER_CLANGC2)
-						KFL_UNUSED(srvsrc);
-#endif
 					}
 #endif
 

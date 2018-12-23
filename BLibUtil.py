@@ -297,28 +297,6 @@ class BuildInfo:
 						else:
 							LogError("Could NOT find vc140 compiler.\n")
 					vcvarsall_options = ""
-			elif "clangc2" == compiler:
-				vcvarsall_options = ""
-				found = False
-				try_folder = self.FindVS2017Folder(program_files_folder)
-				if len(try_folder) > 0:
-					ret_list = self.FindVS2017ClangC2(try_folder)
-					if ret_list[0]:
-						compiler_root = ret_list[1]
-						vcvarsall_path = ret_list[2]
-						found = True
-				if (not found):
-					if "VS140COMNTOOLS" in env:
-						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"
-						vcvarsall_path = "..\\..\\..\\VCVARSALL.BAT"
-					else:
-						try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\ClangC2\\bin\\x86\\"
-						try_vcvarsall = "..\\..\\..\\VCVARSALL.BAT"
-						if os.path.exists(try_folder + try_vcvarsall):
-							compiler_root = try_folder
-							vcvarsall_path = try_vcvarsall
-						else:
-							LogError("Could NOT find clangc2 compiler toolset.\n")
 			elif "clang" == compiler:
 				clang_loc = self.FindClang()
 				compiler_root = clang_loc[0:clang_loc.rfind("\\clang++") + 1]
@@ -358,9 +336,6 @@ class BuildInfo:
 			elif "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
-			elif "clangc2" == compiler:
-				compiler_name = "clang"
-				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
@@ -371,9 +346,6 @@ class BuildInfo:
 			if "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
-			elif "clangc2" == compiler:
-				compiler_name = "clang"
-				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
@@ -496,19 +468,6 @@ class BuildInfo:
 				break
 		return int(clang_ver_components[0] + clang_ver_components[1])
 
-	def FindVS2017ClangC2(self, folder):
-		found = False
-		compiler_root = ""
-		vcvarsall_path = ""
-		if os.path.exists(folder + "Microsoft.ClangC2Version.default.txt"):
-			version_file = open(folder + "Microsoft.ClangC2Version.default.txt")
-			version = version_file.read().strip()
-			compiler_root = "%s\\..\\..\\Tools\\ClangC2\\%s\\bin\\HostX86\\" % (folder, version)
-			vcvarsall_path = "..\\..\\..\\..\\..\\Auxiliary\\Build\\VCVARSALL.BAT"
-			found = True
-			version_file.close()
-		return (found, compiler_root, vcvarsall_path)
-
 	def FindProgramFilesFolder(self):
 		env = os.environ
 		if "64bit" == platform.architecture()[0]:
@@ -626,15 +585,10 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if (0 == build_info.project_type.find("vs")) and (not build_info.is_windows_store):
-		if "vc" == build_info.compiler_name:
-			toolset_name = "v%s" % build_info.compiler_version
-		else:
-			if "vs2017" == build_info.project_type:
-				toolset_name = "v141_clang_c2"
-			else:
-				toolset_name = "v140_clang_c2"
-		toolset_name = "-T %s,host=x64" % toolset_name
+	if 0 == build_info.project_type.find("vs"):
+		if not build_info.is_windows_store:
+			toolset_name = "-T v%s" % build_info.compiler_version
+		toolset_name += ",host=x64"
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"

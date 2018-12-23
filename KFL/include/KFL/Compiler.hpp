@@ -66,6 +66,7 @@
 	#if __cplusplus > 201402L
 		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 	#endif
+	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 
 	#if defined(__APPLE__)
 		#if CLANG_VERSION >= 61
@@ -77,7 +78,6 @@
 		#if CLANG_VERSION >= 80
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#endif
-		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#if CLANG_VERSION >= 90
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 		#endif
@@ -85,9 +85,6 @@
 			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 		#endif
-
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT
 	#elif defined(__ANDROID__)
 		#if CLANG_VERSION >= 50
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -98,35 +95,7 @@
 		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT
-	#elif defined(__c2__)
-		#if CLANG_VERSION >= 36
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
-		#else
-			#error "Unsupported compiler version. Please install clang++ 3.6 or up."
-		#endif
-
-		#define KLAYGE_COMPILER_CLANGC2
-
-		#if CLANG_VERSION >= 39
-			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#endif
-		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
-
-		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
-		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
-
-		#ifndef _CRT_SECURE_NO_DEPRECATE
-			#define _CRT_SECURE_NO_DEPRECATE
-		#endif
-		#ifndef _SCL_SECURE_NO_DEPRECATE
-			#define _SCL_SECURE_NO_DEPRECATE
-		#endif
 	#elif defined(linux) || defined(__linux) || defined(__linux__)
 		#if CLANG_VERSION >= 50
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -137,19 +106,18 @@
 		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 		#if CLANG_VERSION >= 70
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 		#else
 			#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 		#endif
-
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#else
 		#error "Clang++ on an unknown platform. Only Apple, Android, Linux, and Windows are supported."
 	#endif
+
+	#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+	#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()

@@ -27,16 +27,10 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore D3DBUSIMPL_MODIFIER_NON_STANDARD definition
 #endif
 #include <d3d9.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
 #endif
 #ifdef KLAYGE_COMPILER_GCC
 #define _WIN32_WINNT_BACKUP _WIN32_WINNT

@@ -35,7 +35,7 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#if defined(KLAYGE_SSE_SUPPORT) && !defined(KLAYGE_COMPILER_CLANGC2)
+#if defined(KLAYGE_SSE_SUPPORT)
 	#define SIMD_MATH_SSE
 	#include <xmmintrin.h>
 #else

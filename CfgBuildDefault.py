@@ -20,7 +20,7 @@ class CfgBuildDefault:
 		self.project = "auto"
 
 		# Compiler name.
-		#   On Windows desktop, could be "vc141", "vc140", "clangc2", "mingw", "auto".
+		#   On Windows desktop, could be "vc141", "vc140", "mingw", "auto".
 		#   On Windows store, could be "vc141", "vc140", "auto".
 		#   On Android, could be "clang", "auto".
 		#   On Linux, could be "gcc", "auto".
