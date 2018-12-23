@@ -222,7 +222,7 @@ namespace KlayGE
 		std::array<std::vector<D3D12_SAMPLER_DESC>, ST_NumShaderTypes> samplers_;
 		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
 		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, ST_NumShaderTypes> srvs_;
-		std::array<std::vector<std::pair<D3D12Resource*, ID3D12Resource*>>, ST_NumShaderTypes> uavsrcs_;
+		std::array<std::vector<D3D12Resource*>, ST_NumShaderTypes> uavsrcs_;
 		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, ST_NumShaderTypes> uavs_;
 		std::array<std::vector<GraphicsBuffer*>, ST_NumShaderTypes> d3d_cbuffs_;
 

@@ -46,14 +46,7 @@ namespace KlayGE
 	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource
 	{
 	public:
-		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, uint32_t structure_byte_stride);
-		~D3D12GraphicsBuffer() override;
-
-		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
-		{
-			return d3d_buffer_counter_upload_;
-		}
+		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride);
 
 		D3D12ShaderResourceViewSimulationPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems);
@@ -88,7 +81,6 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D12ResourcePtr d3d_buffer_counter_upload_;
 		uint32_t counter_offset_;
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 

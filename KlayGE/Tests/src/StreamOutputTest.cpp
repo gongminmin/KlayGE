@@ -235,11 +235,20 @@ public:
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
+		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
+		auto conditional_copy_buffer_tech = effect->TechniqueByName("ConditionalCopyBufferRw");
+		auto copy_buffer_tech = effect->TechniqueByName("CopyBuffer");
+
 		uint32_t const num_vertices = 1024;
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto vb_in = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
 		auto vb_sanity = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
+
+		uint32_t const indirect_args[] = { 0, 1, 0, 0 };
+		auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
+			sizeof(indirect_args), indirect_args, sizeof(uint32_t));
+		auto vb_num_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb_num->Size(), nullptr);
 
 		auto rl_in = rf.MakeRenderLayout();
 		rl_in->TopologyType(RenderLayout::TT_PointList);
@@ -254,7 +263,15 @@ public:
 		rl_intermediate->TopologyType(RenderLayout::TT_PointList);
 		auto vb_intermediate = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write, vb_in->Size(), nullptr);
 		rl_intermediate->BindVertexStream(vb_intermediate, VertexElement(VEU_Position, 0, EF_ABGR32F));
+		rl_intermediate->BindIndirectArgs(vb_num);
+		rl_intermediate->IndirectArgsOffset(0);
 
+		auto fb = rf.MakeFrameBuffer();
+		auto vb_num_uav = rf.MakeBufferUav(vb_num, EF_R32UI);
+		fb->Attach(0, vb_num_uav);
+
+		*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
+		
 		auto& re = rf.RenderEngineInstance();
 
 		for (uint32_t i = 0; i < 10; ++ i)
@@ -282,37 +299,20 @@ public:
 				}
 			}
 
-			uint64_t output_primitives;
-
-			auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
-			auto tech = effect->TechniqueByName("ConditionalCopyBufferRw");
-
-			uint32_t const indirect_args[] = { 0, 1, 0, 0 };
-			auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
-				sizeof(indirect_args), indirect_args, sizeof(uint32_t));
-
-			auto fb = rf.MakeFrameBuffer();
-			auto vb_num_uav = rf.MakeBufferUav(vb_num, EF_R32UI);
-			fb->Attach(0, vb_num_uav);
-
-			*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
+			vb_num->UpdateSubresource(0, sizeof(indirect_args), indirect_args);
 
 			re.BindSOBuffers(rl_intermediate);
 			re.BindFrameBuffer(fb);
-			re.Render(*effect, *tech, *rl_in);
+			re.Render(*effect, *conditional_copy_buffer_tech, *rl_in);
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.BindSOBuffers(RenderLayoutPtr());
 
-			tech = effect->TechniqueByName("CopyBuffer");
-
-			rl_intermediate->BindIndirectArgs(vb_num);
-			rl_intermediate->IndirectArgsOffset(0);
 			re.BindSOBuffers(rl_out);
-			re.Render(*effect, *tech, *rl_intermediate);
+			re.Render(*effect, *copy_buffer_tech, *rl_intermediate);
 			re.BindSOBuffers(RenderLayoutPtr());
 
-			auto vb_num_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb_num->Size(), nullptr);
 			vb_num->CopyToBuffer(*vb_num_cpu);
+			uint64_t output_primitives;
 			{
 				GraphicsBuffer::Mapper mapper(*vb_num_cpu, BA_Read_Only);
 				output_primitives = *mapper.Pointer<uint32_t>();
