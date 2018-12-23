@@ -81,7 +81,7 @@ namespace KlayGE
 
 	void OGLESBufferShaderResourceView::RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const
 	{
-		if ((gl_tex_ == 0) && tex_ && tex_->HWResourceReady())
+		if ((gl_tex_ == 0) && buff_ && buff_->HWResourceReady())
 		{
 			gl_tex_ = checked_cast<OGLESGraphicsBuffer*>(buff_.get())->RetrieveGLTexture(pf_);
 		}
