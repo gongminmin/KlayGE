@@ -4722,7 +4722,14 @@ namespace KlayGE
 				sd.macros_hash = macros_hash;
 				sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + type;
 				shader_desc_ids_[type] = effect.AddShaderDesc(sd);
-				
+			}
+		}
+
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids_[type]);
+			if (!sd.func_name.empty())
+			{
 				auto const & tech = *effect.TechniqueByIndex(tech_index);
 				shader_obj->AttachShader(static_cast<ShaderObject::ShaderType>(type),
 					effect, tech, *this, shader_desc_ids_);

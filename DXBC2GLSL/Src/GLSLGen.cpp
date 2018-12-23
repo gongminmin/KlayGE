@@ -712,7 +712,9 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 			if (output_var)
 			{
 				int num_comps = 4;
-				if (((ST_GS == shader_type_) && !has_ps_) || ((ST_DS == shader_type_) && !has_gs_ && !has_ps_) || (ST_PS == shader_type_))
+				if (((ST_VS == shader_type_) && !has_gs_ && !has_ps_) || ((ST_DS == shader_type_) && !has_gs_ && !has_ps_)
+					|| ((ST_GS == shader_type_) && !has_ps_)
+					|| (ST_PS == shader_type_))
 				{
 					num_comps = bitcount32(program_->params_out[i].mask);
 				}
