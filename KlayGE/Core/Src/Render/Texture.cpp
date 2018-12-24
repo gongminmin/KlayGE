@@ -3595,7 +3595,7 @@ namespace KlayGE
 		uint32_t const src_elem_size = NumFormatBytes(src_cpu_format);
 		uint32_t const dst_elem_size = NumFormatBytes(dst_cpu_format);
 
-		if ((!linear || ((src_width == dst_width) && (src_height == dst_height) && (src_height == dst_height)))
+		if ((!linear || ((src_width == dst_width) && (src_height == dst_height) && (src_depth == dst_depth)))
 			&& (src_cpu_format == dst_cpu_format))
 		{
 			for (uint32_t z = 0; z < dst_depth; ++ z)

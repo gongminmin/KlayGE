@@ -43,6 +43,7 @@ KlayGE/bin/*/*.so
 KlayGE/bin/*/*.dylib
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.exe.config
+KlayGE/bin/*/*.gta.testdurations
 KlayGE/bin/*/*.manifest
 KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.pri

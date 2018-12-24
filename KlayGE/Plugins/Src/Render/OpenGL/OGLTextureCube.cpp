@@ -344,6 +344,7 @@ namespace KlayGE
 		row_pitch = w * texel_size;
 
 		uint8_t* p;
+		GLintptr const subres_offset = (array_index * 6 + face) * mipmap_start_offset_.back() + mipmap_start_offset_[level];
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (tma)
 		{
@@ -361,11 +362,12 @@ namespace KlayGE
 				re.BindTexture(0, target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
-					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, nullptr);
+					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, reinterpret_cast<GLvoid*>(subres_offset));
 				}
 				else
 				{
-					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, nullptr);
+					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type,
+						reinterpret_cast<GLvoid*>(subres_offset));
 				}
 				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 			}
@@ -383,7 +385,7 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid texture map access mode");
 		}
 
-		p += (array_index * 6 + face) * mipmap_start_offset_.back() + mipmap_start_offset_[level];
+		p += subres_offset;
 		if (IsCompressedFormat(format_))
 		{
 			uint32_t const block_size = NumFormatBytes(format_) * 4;

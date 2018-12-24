@@ -1713,7 +1713,9 @@ namespace KlayGE
 				texture_formats.insert(texture_formats.end(),
 					{
 						EF_BC6,
-						EF_BC7
+						EF_SIGNED_BC6,
+						EF_BC7,
+						EF_BC7_SRGB
 					});
 			}
 			if (glloader_GL_EXT_texture_compression_s3tc())

@@ -789,6 +789,58 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
+		case EF_BC6:
+			if (glloader_GL_ARB_texture_compression_bptc())
+			{
+				internalFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB;
+				glformat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				TERRC(std::errc::function_not_supported);
+			}
+			break;
+
+		case EF_SIGNED_BC6:
+			if (glloader_GL_ARB_texture_compression_bptc())
+			{
+				internalFormat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB;
+				glformat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				TERRC(std::errc::function_not_supported);
+			}
+			break;
+
+		case EF_BC7:
+			if (glloader_GL_ARB_texture_compression_bptc())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+				glformat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				TERRC(std::errc::function_not_supported);
+			}
+			break;
+
+		case EF_BC7_SRGB:
+			if (glloader_GL_ARB_texture_compression_bptc())
+			{
+				internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
+				glformat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				TERRC(std::errc::function_not_supported);
+			}
+			break;
+
 		case EF_D16:
 			internalFormat = GL_DEPTH_COMPONENT16;
 			glformat = GL_DEPTH_COMPONENT;
