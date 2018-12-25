@@ -109,11 +109,28 @@ namespace KlayGE
 			normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps(), 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-			depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-				multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write);
-			normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-				multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write);
-	
+			if (caps.flexible_srvs_support)
+			{
+				depth_deriative_srvs_.resize(depth_deriative_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < depth_deriative_tex_->NumMipMaps(); ++ i)
+				{
+					depth_deriative_srvs_[i] = rf.MakeTextureSrv(depth_deriative_tex_, 0, 1, i, 1);
+				}
+
+				normal_cone_srvs_.resize(normal_cone_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < normal_cone_tex_->NumMipMaps(); ++i)
+				{
+					normal_cone_srvs_[i] = rf.MakeTextureSrv(normal_cone_tex_, 0, 1, i, 1);
+				}
+			}
+			else
+			{
+				depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+					multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write);
+				normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+					multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write);
+			}
+
 			multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write);
 		}
@@ -150,6 +167,9 @@ namespace KlayGE
 
 	void MultiResLayer::CreateDepthDerivativeMipMap()
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
+
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_rt0_tex_);
 		gbuffer_to_depth_derivate_pp_->InputPin(1, g_buffer_depth_tex_);
 		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
@@ -159,7 +179,10 @@ namespace KlayGE
 		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
 		gbuffer_to_depth_derivate_pp_->Apply();
 
-		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
+		if (!caps.flexible_srvs_support)
+		{
+			depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
+		}
 		for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
 		{
 			uint32_t const width = depth_deriative_tex_->Width(i - 1);
@@ -172,16 +195,28 @@ namespace KlayGE
 			delta_offset = float4(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
 
-			depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
-			depth_derivate_mipmap_pp_->Apply();
+			if (caps.flexible_srvs_support)
+			{
+				depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_srvs_[i - 1]);
+				depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_tex_, i);
+				depth_derivate_mipmap_pp_->Apply();
+			}
+			else
+			{
+				depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
+				depth_derivate_mipmap_pp_->Apply();
 
-			depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, lower_width, lower_height,
-				0, i - 1, 0, 0, lower_width, lower_height);
+				depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, lower_width, lower_height,
+					0, i - 1, 0, 0, lower_width, lower_height);
+			}
 		}
 	}
 
 	void MultiResLayer::CreateNormalConeMipMap()
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
+
 		gbuffer_to_normal_cone_pp_->InputPin(0, g_buffer_rt0_tex_);
 		gbuffer_to_normal_cone_pp_->OutputPin(0, normal_cone_tex_);
 		float delta_x = 1.0f / g_buffer_rt0_tex_->Width(0);
@@ -190,7 +225,10 @@ namespace KlayGE
 		gbuffer_to_normal_cone_pp_->SetParam(0, delta_offset);
 		gbuffer_to_normal_cone_pp_->Apply();
 
-		normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
+		if (!caps.flexible_srvs_support)
+		{
+			normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
+		}
 		for (uint32_t i = 1; i < normal_cone_tex_->NumMipMaps(); ++ i)
 		{
 			uint32_t const width = normal_cone_tex_->Width(i - 1);
@@ -204,11 +242,20 @@ namespace KlayGE
 
 			normal_cone_mipmap_pp_->SetParam(0, delta_offset);
 
-			normal_cone_mipmap_pp_->OutputPin(0, normal_cone_small_tex_, i - 1);
-			normal_cone_mipmap_pp_->Apply();
+			if (caps.flexible_srvs_support)
+			{
+				normal_cone_mipmap_pp_->InputPin(0, normal_cone_srvs_[i - 1]);
+				normal_cone_mipmap_pp_->OutputPin(0, normal_cone_tex_, i);
+				normal_cone_mipmap_pp_->Apply();
+			}
+			else
+			{
+				normal_cone_mipmap_pp_->OutputPin(0, normal_cone_small_tex_, i - 1);
+				normal_cone_mipmap_pp_->Apply();
 
-			normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, lower_width, lower_height,
-				0, i - 1, 0, 0, lower_width, lower_height);
+				normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, lower_width, lower_height,
+					0, i - 1, 0, 0, lower_width, lower_height);
+			}
 		}
 	}
 
@@ -233,6 +280,7 @@ namespace KlayGE
 
 	void MultiResLayer::UpsampleMultiRes()
 	{
+		upsampling_pp_->InputPin(0, multi_res_tex_);
 		for (int i = multi_res_tex_->NumMipMaps() - 2; i >= 0; -- i)
 		{
 			uint32_t const width = multi_res_tex_->Width(i);
@@ -244,7 +292,6 @@ namespace KlayGE
 				1.0f / lower_width, 1.0f / lower_height));
 			upsampling_pp_->SetParam(1, int2(i + 1, i));
 			
-			upsampling_pp_->InputPin(0, multi_res_tex_);
 			upsampling_pp_->OutputPin(0, multi_res_pingpong_tex_, i);
 			upsampling_pp_->Apply();
 
