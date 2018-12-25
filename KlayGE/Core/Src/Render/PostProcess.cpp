@@ -27,6 +27,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/XMLDom.hpp>
@@ -702,11 +703,25 @@ namespace KlayGE
 
 	void PostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
-		input_pins_[index].second = tex;
-		*(input_pins_ep_[index]) = tex;
-
-		if (0 == index)
+		if (tex)
 		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			this->InputPin(index, rf.MakeTextureSrv(tex));
+		}
+		else
+		{
+			this->InputPin(index, ShaderResourceViewPtr());
+		}
+	}
+
+	void PostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const & srv)
+	{
+		input_pins_[index].second = srv;
+		*(input_pins_ep_[index]) = srv;
+
+		if ((0 == index) && srv)
+		{
+			auto const & tex = srv->TextureResource();
 			float const width = static_cast<float>(tex->Width(0));
 			float const height = static_cast<float>(tex->Height(0));
 			if (width_height_ep_)
@@ -723,7 +738,15 @@ namespace KlayGE
 	TexturePtr const & PostProcess::InputPin(uint32_t index) const
 	{
 		BOOST_ASSERT(index < input_pins_.size());
-		return input_pins_[index].second;
+		if (input_pins_[index].second)
+		{
+			return input_pins_[index].second->TextureResource();
+		}
+		else
+		{
+			static TexturePtr null_tex;
+			return null_tex;
+		}
 	}
 
 	uint32_t PostProcess::NumOutputPins() const

@@ -117,6 +117,7 @@ namespace KlayGE
 		virtual uint32_t InputPinByName(std::string_view name) const;
 		virtual std::string const & InputPinName(uint32_t index) const;
 		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		virtual void InputPin(uint32_t index, ShaderResourceViewPtr const & tex);
 		virtual TexturePtr const & InputPin(uint32_t index) const;
 
 		virtual uint32_t NumOutputPins() const;
@@ -176,7 +177,7 @@ namespace KlayGE
 		uint32_t cs_pixel_per_thread_y_;
 		uint32_t cs_pixel_per_thread_z_;
 
-		std::vector<std::pair<std::string, TexturePtr>> input_pins_;
+		std::vector<std::pair<std::string, ShaderResourceViewPtr>> input_pins_;
 		std::vector<std::pair<std::string, TexturePtr>> output_pins_;
 		uint32_t num_bind_output_;
 		std::vector<std::pair<std::string, RenderEffectParameter*>> params_;
