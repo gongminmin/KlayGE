@@ -61,12 +61,7 @@ namespace KlayGE
 	public:
 		explicit StaticMesh(std::wstring_view name);
 
-		void BuildMeshInfo(RenderModel const & model)
-		{
-			this->DoBuildMeshInfo(model);
-
-			hw_res_ready_ = true;
-		}
+		void BuildMeshInfo(RenderModel const & model);
 
 		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 		{
@@ -167,13 +162,7 @@ namespace KlayGE
 			return root_node_;
 		}
 
-		void BuildModelInfo()
-		{
-			this->DoBuildModelInfo();
-			root_node_->UpdatePosBoundSubtree();
-
-			hw_res_ready_ = true;
-		}
+		void BuildModelInfo();
 
 		virtual bool IsSkinned() const
 		{

@@ -139,7 +139,14 @@ void TutorFramework::OnCreate()
 	model->BuildModelInfo();
 
 	renderableMesh_ = model->RootNode();
+	for (size_t i = 0; i < meshes.size(); ++ i)
+	{
+		renderableMesh_->AddRenderable(meshes[i]);
+	}
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableMesh_);
+
+	auto& node = KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode();
+	KFL_UNUSED(node);
 
 	this->LookAt(KlayGE::float3(0, 0,-4.0f), KlayGE::float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);

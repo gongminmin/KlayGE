@@ -373,6 +373,14 @@ namespace KlayGE
 	{
 	}
 
+	void RenderModel::BuildModelInfo()
+	{
+		this->DoBuildModelInfo();
+		root_node_->UpdatePosBoundSubtree();
+
+		hw_res_ready_ = true;
+	}
+
 	uint32_t RenderModel::NumLods() const
 	{
 		uint32_t max_lod = 0;
@@ -526,6 +534,13 @@ namespace KlayGE
 		: Renderable(name),
 			hw_res_ready_(false)
 	{
+	}
+	
+	void StaticMesh::BuildMeshInfo(RenderModel const & model)
+	{
+		this->DoBuildMeshInfo(model);
+
+		hw_res_ready_ = true;
 	}
 
 	void StaticMesh::NumLods(uint32_t lods)
