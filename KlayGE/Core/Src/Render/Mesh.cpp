@@ -979,8 +979,19 @@ namespace KlayGE
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
-			access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+		// Hacky code. During model creation, shaders are created, too. On devices without multirhead resource creating support, shaeder
+		// creation will failed. It can be removed once we have async effect loading.
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (caps.multithread_res_creating_support)
+		{
+			return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
+				access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+		}
+		else
+		{
+			return SyncLoadModel(model_name, access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc);
+		}
 	}
 
 	RenderModelPtr LoadSoftwareModel(std::string_view model_name)
