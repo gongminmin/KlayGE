@@ -86,7 +86,6 @@ void SSSSSApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->SSVOEnabled(0, false);
 	  
 	this->LookAt(float3(0.5f, 5, -0.5f), float3(0, 5, 0));
 	this->Proj(0.05f, 200.0f);

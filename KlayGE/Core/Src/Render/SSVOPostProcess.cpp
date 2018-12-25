@@ -66,12 +66,14 @@ namespace KlayGE
 		auto const & viewport = *re.CurFrameBuffer()->GetViewport();
 
 		Camera const & camera = *viewport.camera;
+		auto const & inv_proj = camera.InverseProjMatrix();
 		*proj_param_ = camera.ProjMatrix();
-		*inv_proj_param_ = camera.InverseProjMatrix();
+		*inv_proj_param_ = inv_proj;
 
-		float3 const upper_left = MathLib::transform_coord(float3(-1, +1, 1), camera.InverseProjMatrix());
-		float3 const upper_right = MathLib::transform_coord(float3(+1, +1, 1), camera.InverseProjMatrix());
-		float3 const lower_left = MathLib::transform_coord(float3(-1, -1, 1), camera.InverseProjMatrix());
+		float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+		float3 const upper_left = MathLib::transform_coord(float3(-1, -flipping, 1), inv_proj);
+		float3 const upper_right = MathLib::transform_coord(float3(+1, -flipping, 1), inv_proj);
+		float3 const lower_left = MathLib::transform_coord(float3(-1, flipping, 1), inv_proj);
 		*upper_left_param_ = upper_left;
 		*x_dir_param_ = upper_right - upper_left;
 		*y_dir_param_ = lower_left - upper_left;

@@ -119,22 +119,12 @@ float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 normal, float depth
 	return saturate(obscurance / SAMPLES_COUNT);
 }
 
-void SSVOVS(float4 pos : POSITION,
-					out float2 oTex : TEXCOORD0,
-					out float3 oViewDir : TEXCOORD1,
-					out float4 oPos : SV_Position)
-{
-	oTex = TexCoordFromPos(pos);
-	oPos = pos;
-	oViewDir = mul(pos, inv_proj).xyz;
-}
-
-float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 SSVOPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float depth = depth_tex.Sample(point_sampler, tc).x;
 	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(point_sampler, tc));
 
-	view_dir = normalize(view_dir);
+	float3 view_dir = normalize(TexcoordToView(tc));
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
 	float ao = 1 - CalcAlchemyObscurance(tc, pos_es, normal, depth);
@@ -150,7 +140,7 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="SSVOVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SSVOPS()"/>
 		</pass>
 	</technique>

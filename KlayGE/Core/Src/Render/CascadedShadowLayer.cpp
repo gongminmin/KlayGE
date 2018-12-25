@@ -319,9 +319,10 @@ namespace KlayGE
 			*inv_depth_width_height_param_ = float2(1.0f / depth_tex_->Width(0), 1.0f / depth_tex_->Height(0));
 			*near_far_param_ = float2(camera.NearPlane(), camera.FarPlane());
 			float4x4 const & inv_proj = camera.InverseProjMatrix();
-			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
-			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
-			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+			float3 const upper_left = MathLib::transform_coord(float3(-1, -flipping, 1), inv_proj);
+			float3 const upper_right = MathLib::transform_coord(float3(+1, -flipping, 1), inv_proj);
+			float3 const lower_left = MathLib::transform_coord(float3(-1, flipping, 1), inv_proj);
 			*upper_left_param_ = upper_left;
 			*xy_dir_param_ = float2(upper_right.x() - upper_left.x(), lower_left.y() - upper_left.y());
 			*view_to_light_view_proj_param_ = camera.InverseViewMatrix() * light_view_proj;

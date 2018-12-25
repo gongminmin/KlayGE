@@ -2455,9 +2455,10 @@ namespace KlayGE
 		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
 		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
 
-		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
-		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
-		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
+		float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+		float3 const upper_left = MathLib::transform_coord(float3(-1, -flipping, 1), pvp.inv_proj);
+		float3 const upper_right = MathLib::transform_coord(float3(+1, -flipping, 1), pvp.inv_proj);
+		float3 const lower_left = MathLib::transform_coord(float3(-1, flipping, 1), pvp.inv_proj);
 		*upper_left_param_ = upper_left;
 		*x_dir_param_ = upper_right - upper_left;
 		*y_dir_param_ = lower_left - upper_left;
@@ -3585,9 +3586,10 @@ namespace KlayGE
 		}
 		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
-		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
-		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
-		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
+		float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+		float3 const upper_left = MathLib::transform_coord(float3(-1, -flipping, 1), pvp.inv_proj);
+		float3 const upper_right = MathLib::transform_coord(float3(+1, -flipping, 1), pvp.inv_proj);
+		float3 const lower_left = MathLib::transform_coord(float3(-1, flipping, 1), pvp.inv_proj);
 		*upper_left_param_ = upper_left;
 		*x_dir_param_ = upper_right - upper_left;
 		*y_dir_param_ = lower_left - upper_left;
