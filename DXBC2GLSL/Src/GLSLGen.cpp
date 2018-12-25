@@ -1720,7 +1720,28 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			switch (cbuffer.vars[0].type_desc.var_class)
 			{
 			case SVC_VECTOR:
-				out << cbuffer.vars[0].type_desc.name << cbuffer.vars[0].type_desc.columns;
+				{
+					std::string name;
+					switch (cbuffer.vars[0].type_desc.type)
+					{
+					case SVT_INT:
+						name = "ivec";
+						break;
+
+					case SVT_UINT:
+						name = "uvec";
+						break;
+
+					case SVT_FLOAT:
+						name = "vec";
+						break;
+
+					default:
+						name = cbuffer.vars[0].type_desc.name;
+						break;
+					}
+					out << name << cbuffer.vars[0].type_desc.columns;
+				}
 				break;
 
 			case SVC_SCALAR:
