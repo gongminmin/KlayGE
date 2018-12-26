@@ -864,6 +864,9 @@ namespace KlayGE
 		case EF_D24S8:
 			return DXGI_FORMAT_D24_UNORM_S8_UINT;
 
+		case EF_X24G8:
+			return DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+
 		case EF_D32F:
 			return DXGI_FORMAT_D32_FLOAT;
 			
@@ -1073,6 +1076,9 @@ namespace KlayGE
 
 		case DXGI_FORMAT_D24_UNORM_S8_UINT:
 			return EF_D24S8;
+
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return EF_X24G8;
 
 		case DXGI_FORMAT_D32_FLOAT:
 			return EF_D32F;

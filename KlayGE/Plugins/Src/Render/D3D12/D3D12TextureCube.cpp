@@ -237,7 +237,7 @@ namespace KlayGE
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.ArraySize = array_size * 6;
 		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
-		desc.Texture2DArray.PlaneSlice = 0;
+		desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 
 		return desc;
 	}
@@ -247,20 +247,24 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
+		uint32_t const first_slice = array_index * 6 + face - CF_Positive_X;
+
 		D3D12_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D12Mapping::MappingFormat(pf);
 		if (this->SampleCount() > 1)
 		{
 			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
+			desc.Texture2DMSArray.FirstArraySlice = first_slice;
+			desc.Texture2DMSArray.ArraySize = 1;
 		}
 		else
 		{
 			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.FirstArraySlice = first_slice;
+			desc.Texture2DArray.ArraySize = 1;
+			desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 		}
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
-		desc.Texture2DArray.ArraySize = 1;
-		desc.Texture2DArray.PlaneSlice = 0;
 
 		return desc;
 	}
@@ -274,14 +278,16 @@ namespace KlayGE
 		if (this->SampleCount() > 1)
 		{
 			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+			desc.Texture2DMSArray.FirstArraySlice = first_array_index * 6;
+			desc.Texture2DMSArray.ArraySize = array_size * 6;
 		}
 		else
 		{
 			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
+			desc.Texture2DArray.ArraySize = array_size * 6;
 		}
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_size * 6;
-		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
 
 		return desc;
 	}
@@ -291,20 +297,24 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
+		uint32_t const first_slice = array_index * 6 + face - CF_Positive_X;
+
 		D3D12_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = D3D12Mapping::MappingFormat(pf);
 		desc.Flags = D3D12_DSV_FLAG_NONE;
 		if (this->SampleCount() > 1)
 		{
 			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+			desc.Texture2DMSArray.FirstArraySlice = first_slice;
+			desc.Texture2DMSArray.ArraySize = 1;
 		}
 		else
 		{
 			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.FirstArraySlice = first_slice;
+			desc.Texture2DArray.ArraySize = 1;
 		}
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = 1;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
 
 		return desc;
 	}
@@ -326,7 +336,7 @@ namespace KlayGE
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.ArraySize = array_size * 6 + num_faces;
 		desc.Texture2DArray.FirstArraySlice = first_array_index * 6 + first_face;
-		desc.Texture2DArray.PlaneSlice = 0;
+		desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 
 		return desc;
 	}

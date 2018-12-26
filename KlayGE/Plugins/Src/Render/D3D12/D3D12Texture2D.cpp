@@ -269,7 +269,7 @@ namespace KlayGE
 				desc.Texture2DArray.MipLevels = num_levels;
 				desc.Texture2DArray.ArraySize = array_size;
 				desc.Texture2DArray.FirstArraySlice = first_array_index;
-				desc.Texture2DArray.PlaneSlice = 0;
+				desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 				desc.Texture2DArray.ResourceMinLODClamp = 0;
 			}
 		}
@@ -284,7 +284,7 @@ namespace KlayGE
 				desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 				desc.Texture2D.MostDetailedMip = first_level;
 				desc.Texture2D.MipLevels = num_levels;
-				desc.Texture2D.PlaneSlice = 0;
+				desc.Texture2D.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 				desc.Texture2D.ResourceMinLODClamp = 0;
 			}
 		}
@@ -309,7 +309,7 @@ namespace KlayGE
 			desc.Texture2DArray.MipSlice = level;
 			desc.Texture2DArray.FirstArraySlice = first_array_index;
 			desc.Texture2DArray.ArraySize = array_size;
-			desc.Texture2DArray.PlaneSlice = 0;
+			desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 		}
 
 		return desc;
@@ -349,13 +349,13 @@ namespace KlayGE
 			desc.Texture2DArray.MipSlice = level;
 			desc.Texture2DArray.ArraySize = array_size;
 			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.PlaneSlice = 0;
+			desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 		}
 		else
 		{
 			desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 			desc.Texture2D.MipSlice = level;
-			desc.Texture2D.PlaneSlice = 0;
+			desc.Texture2D.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 		}
 
 		return desc;

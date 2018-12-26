@@ -87,6 +87,7 @@ namespace KlayGE
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
+		ShaderResourceViewPtr g_buffer_stencil_srv;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
 		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_views;
@@ -142,9 +143,6 @@ namespace KlayGE
 		FrameBufferPtr temp_shading_fb;
 
 		TexturePtr temp_shading_tex_array;
-
-		TexturePtr lighting_mask_tex;
-		FrameBufferPtr lighting_mask_fb;
 
 		TexturePtr multi_sample_mask_tex;
 
@@ -550,7 +548,6 @@ namespace KlayGE
 		RenderTechnique* technique_cldr_unified_[2];
 
 		RenderTechnique* technique_depth_to_tiled_min_max_[2];
-		RenderTechnique* technique_cldr_lighting_mask_;
 		RenderTechnique* technique_resolve_g_buffers_;
 		RenderTechnique* technique_resolve_merged_depth_;
 		RenderTechnique* technique_array_to_multiSample_;
@@ -619,6 +616,8 @@ namespace KlayGE
 		RenderEffectParameter* g_buffer_rt1_tex_ms_param_;
 		RenderEffectParameter* g_buffer_ds_tex_ms_param_;
 		RenderEffectParameter* g_buffer_depth_tex_ms_param_;
+		RenderEffectParameter* g_buffer_stencil_tex_param_;
+		RenderEffectParameter* g_buffer_stencil_tex_ms_param_;
 		RenderEffectParameter* src_2d_tex_array_param_;
 
 		RenderEffectParameter* min_max_depth_tex_param_;
@@ -651,8 +650,6 @@ namespace KlayGE
 		RenderEffectParameter* upper_left_param_;
 		RenderEffectParameter* x_dir_param_;
 		RenderEffectParameter* y_dir_param_;
-		RenderEffectParameter* lighting_mask_tex_param_;
-		RenderEffectParameter* lighting_mask_tex_ms_param_;
 		RenderEffectParameter* multi_sample_mask_tex_param_;
 		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_in_tex_ms_param_;

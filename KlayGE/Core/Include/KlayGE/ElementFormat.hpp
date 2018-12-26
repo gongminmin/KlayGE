@@ -43,7 +43,8 @@ namespace KlayGE
 		EC_S = 5UL,
 		EC_BC = 6UL,
 		EC_E = 7UL,
-		EC_ETC = 8UL
+		EC_ETC = 8UL,
+		EC_X = 9UL
 	};
 
 	enum ElementChannelType
@@ -293,6 +294,8 @@ namespace KlayGE
 		EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value,
 		// 32-bit element format, 24 bits depth and 8 bits stencil
 		EF_D24S8 = MakeElementFormat2<EC_D, EC_S, 24, 8, ECT_UNorm, ECT_UInt>::value,
+		// 32-bit element format, 24 bits unused and 8 bits stencil as green
+		EF_X24G8 = MakeElementFormat2<EC_X, EC_G, 24, 8, ECT_Typeless, ECT_UInt>::value,
 		// 32-bit element format, 32 bits depth
 		EF_D32F = MakeElementFormat1<EC_D, 32, ECT_Float>::value,
 
