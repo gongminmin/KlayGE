@@ -434,10 +434,15 @@ namespace KlayGE
 			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
 			cs_cldr_ = true;
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
+			// Shaders are compiled to d3d11_0 for Windows store apps. No typed UAV support.
+			typed_uav_ = false;
+#else
 			if (caps.UavFormatSupport(EF_ABGR16F) && caps.UavFormatSupport(EF_B10G11R11F) && caps.UavFormatSupport(EF_ABGR8))
 			{
 				typed_uav_ = true;
 			}
+#endif
 		}
 		else
 		{

@@ -15,6 +15,8 @@
 	<fp_color_support value="1"/>
 	<pack_to_rgba_required value="0"/>
 	<render_to_texture_array_support value="1"/>
+	<uavs_at_every_stage_support value="0"/>
+	<explicit_multi_sample_support value="1"/>
 
 	<gs_support value="1"/>
 	<cs_support value="1"/>

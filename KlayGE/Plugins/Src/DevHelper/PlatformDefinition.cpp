@@ -106,28 +106,6 @@ namespace KlayGE
 			= (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
 		native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
 
-		XMLNodePtr max_shader_model_node = root->FirstNode("max_shader_model");
-		device_caps.max_shader_model = ShaderModel(
-			static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
-			static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "minor", 0)));
-
-		device_caps.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
-		device_caps.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
-		device_caps.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
-		device_caps.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
-
-		device_caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
-		device_caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
-		device_caps.render_to_texture_array_support
-			= RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
-
-		device_caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
-		device_caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
-		device_caps.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
-		device_caps.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
-
-		frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
-
 		bool const srgb_support = RetrieveNodeValue(root, "srgb_support", 0) ? true : false;
 
 		std::vector<ElementFormat> texture_formats =
@@ -224,5 +202,29 @@ namespace KlayGE
 
 		device_caps.AssignTextureFormats(std::move(texture_formats));
 		device_caps.AssignUavFormats(std::move(uav_formats));
+
+		XMLNodePtr max_shader_model_node = root->FirstNode("max_shader_model");
+		device_caps.max_shader_model = ShaderModel(
+			static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
+			static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "minor", 0)));
+
+		device_caps.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
+		device_caps.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
+		device_caps.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
+		device_caps.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
+
+		device_caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
+		device_caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
+		device_caps.render_to_texture_array_support
+			= RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
+		device_caps.uavs_at_every_stage_support = RetrieveNodeValue(root, "uavs_at_every_stage_support", 0) ? true : false;
+		device_caps.explicit_multi_sample_support = RetrieveNodeValue(root, "explicit_multi_sample_support", 0) ? true : false;
+
+		device_caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
+		device_caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
+		device_caps.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
+		device_caps.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
+
+		frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
 	}
 }
