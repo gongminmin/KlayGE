@@ -62,6 +62,14 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 	for fname in glob.iglob("KlayGE/bin/win_%s/wrap_oal.%s" % (compiler_arch, dll_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
+	print("Deploying assimp...\n")
+	for fname in glob.iglob("KlayGE/bin/win_%s/assimp%s" % (compiler_arch, lib_suffix)):
+		CopyToDst(fname, bin_dst_dir);
+
+	print("Deploying FreeImage...\n")
+	for fname in glob.iglob("KlayGE/bin/win_%s/FreeImage%s" % (compiler_arch, lib_suffix)):
+		CopyToDst(fname, bin_dst_dir);
+
 	print("Deploying glloader...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/glloader%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
@@ -72,6 +80,8 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 
 	print("Deploying KlayGE...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core%s" % (compiler_arch, lib_suffix)):
+		CopyToDst(fname, bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_DevHelper%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, "%sAudio/" % bin_dst_dir);
@@ -85,7 +95,9 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 		CopyToDst(fname, "%sScript/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT*" % compiler_arch):
+	for fname in glob.iglob("KlayGE/bin/win_%s/PlatformDeployer*" % compiler_arch):
+		CopyToDst(fname, bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/ToolCommon*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
@@ -96,6 +108,8 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 		os.mkdir("%s/media/Fonts" % target_dir);
 	if not os.path.exists("%s/media/Models" % target_dir):
 		os.mkdir("%s/media/Models" % target_dir);
+	if not os.path.exists("%s/media/PlatConf" % target_dir):
+		os.mkdir("%s/media/PlatConf" % target_dir);
 	if not os.path.exists("%s/media/PostProcessors" % target_dir):
 		os.mkdir("%s/media/PostProcessors" % target_dir);
 	if not os.path.exists("%s/media/RenderFX" % target_dir):
@@ -112,13 +126,15 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 		os.mkdir("%s/media/Textures/Juda" % target_dir);
 
 	CopyToDst("KlayGE/media/Fonts/gkai00mp.kfont", "%s/media/Fonts/" % target_dir);
-	CopyToDst("KlayGE/media/Models/ambient_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/directional_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/indirect_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/point_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/spot_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/camera_proxy.meshml", "%s/media/Models/" % target_dir);
-	CopyToDst("KlayGE/media/Models/tube_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/AmbientLightProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/CameraProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/DirectionalLightProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/IndirectLightProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/PointLightProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/SpotLightProxy.glb", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/TubeLightProxy.glb", "%s/media/Models/" % target_dir);
+	for fname in glob.iglob("KlayGE/media/PlatConf/*.plat"):
+		CopyToDst(fname, "%s/media/PlatConf" % target_dir);
 	for fname in glob.iglob("KlayGE/media/PostProcessors/*.ppml"):
 		CopyToDst(fname, "%s/media/PostProcessors" % target_dir);
 	for fname in glob.iglob("KlayGE/media/RenderFX/*.fxml"):
