@@ -349,10 +349,14 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				std::regex const filter(DosWildcardToRegex(arg));
+				filesystem::path arg_path(arg);
+				auto const parent = arg_path.parent_path();
+				auto const file_name = arg_path.filename();
+
+				std::regex const filter(DosWildcardToRegex(file_name.string()));
 
 				filesystem::directory_iterator end_itr;
-				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
+				for (filesystem::directory_iterator i(parent); i != end_itr; ++ i)
 				{
 					if (filesystem::is_regular_file(i->status()))
 					{
@@ -360,7 +364,7 @@ int main(int argc, char* argv[])
 						std::string const name = i->path().filename().string();
 						if (std::regex_match(name, what, filter))
 						{
-							tex_names.push_back(name);
+							tex_names.push_back((parent / name).string());
 						}
 					}
 				}
