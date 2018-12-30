@@ -1,9 +1,9 @@
-import os, zipfile
+import os, shutil, zipfile
 
 try:
-    os.unlink("@MEDIA_DIR@@EXE_NAME@Py.zip")
+	os.unlink("@MEDIA_DIR@@EXE_NAME@Py.zip")
 except Exception:
-    pass
+	pass
 out = zipfile.ZipFile("@MEDIA_DIR@@EXE_NAME@Py.zip", 'w')#, compression = zipfile.ZIP_DEFLATED)
 
 prefix = "@KLAYGE_ROOT_DIR@/External/Python/Lib/"
@@ -35,3 +35,6 @@ for file in file_list:
 	out.write(prefix + file + ".py", file + ".py")
 
 out.close()
+
+if len(@TARGET_DIR@) > 0:
+	shutil.copy2("@MEDIA_DIR@@EXE_NAME@Py.zip", @TARGET_DIR@)

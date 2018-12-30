@@ -589,7 +589,7 @@ class BatchCommand:
 		os.remove(batch_file)
 		return ret_code
 
-def BuildAProject(name, build_path, build_info, compiler_info, need_install = False, additional_options = ""):
+def BuildAProject(name, build_path, build_info, compiler_info, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
@@ -691,12 +691,8 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 			for config in build_info.cfg:
 				if 0 == build_info.project_type.find("vs"):
 					build_info.MSBuildAddBuildCommand(build_cmd, name, "ALL_BUILD", config, vc_arch)
-					if need_install:
-						build_info.MSBuildAddBuildCommand(build_cmd, name, "INSTALL", config, vc_arch)
 				elif "xcode" == build_info.project_type:
 					build_info.XCodeBuildAddBuildCommand(build_cmd, "ALL_BUILD", config)
-					if need_install and (not build_info.prefer_static):
-						build_info.XCodeBuildAddBuildCommand(build_cmd, "install", config)
 			if build_cmd.Execute() != 0:
 				LogError("Build %s failed.\n" % name)
 
@@ -759,15 +755,12 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 						if cmake_cmd.Execute() != 0:
 							LogError("Config %s failed.\n" % name)
 
-				install_str = ""
-				if need_install and (not build_info.prefer_static):
-					install_str = "install"
 				build_cmd = BatchCommand(build_info.host_platform)
 				if "win" == build_info.host_platform:
-					build_cmd.AddCommand("@%s %s" % (make_name, install_str))
+					build_cmd.AddCommand("@%s" % make_name)
 					build_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 				else:
-					build_cmd.AddCommand("%s %s" % (make_name, install_str))
+					build_cmd.AddCommand("%s" % make_name)
 					build_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
 				if build_cmd.Execute() != 0:
 					LogError("Build %s failed.\n" % name)

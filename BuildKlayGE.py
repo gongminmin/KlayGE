@@ -13,7 +13,7 @@ def BuildKlayGE(build_info):
 		if build_info.libovr_path != "auto":
 			additional_options += " -DKLAYGE_LibOVR_PATH:STRING=\"%s\"" % build_info.libovr_path
 	for compiler_info in build_info.compilers:
-		BuildAProject("KlayGE", "KlayGE", build_info, compiler_info, False, additional_options)
+		BuildAProject("KlayGE", "KlayGE", build_info, compiler_info, additional_options)
 
 if __name__ == "__main__":
 	BuildKlayGE(BuildInfo.FromArgv(sys.argv))
