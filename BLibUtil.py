@@ -401,6 +401,8 @@ class BuildInfo:
 		self.gles_include_dir = cfg_build.gles_include_dir
 		self.libovr_path = cfg_build.libovr_path
 
+		self.jobs = multiprocessing.cpu_count()
+
 		self.DisplayInfo();
 
 	def MSBuildAddBuildCommand(self, batch_cmd, sln_name, proj_name, config, arch = ""):
@@ -412,11 +414,11 @@ class BuildInfo:
 		config_str = "Configuration=%s" % config
 		if len(arch) != 0:
 			config_str = "%s,Platform=%s" % (config_str, arch)
-		batch_cmd.AddCommand('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
+		batch_cmd.AddCommand('@MSBuild %s /nologo /m:%d /v:m /p:%s' % (file_name, self.jobs, config_str))
 		batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
-		
+
 	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
-		batch_cmd.AddCommand('xcodebuild -quiet -target %s -configuration %s' % (target_name, config))
+		batch_cmd.AddCommand('xcodebuild -quiet -target %s -jobs %d -configuration %s' % (target_name, self.jobs, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
 
 	def FindGCC(self):
@@ -531,7 +533,7 @@ class BuildInfo:
 			print("\tTarget API level: %d" % self.target_api_level)
 		elif self.is_windows_store:
 			print("\tTarget API level: %s" % self.target_api_level)
-		print("\tCPU count: %d" % multiprocessing.cpu_count())
+		print("\tCPU count: %d" % self.jobs)
 		print("\tPrefer static library: %s" % self.prefer_static)
 		print("\tShader platform: %s" % self.shader_platform_name)
 		print("\tIs dev platform: %s" % self.is_dev_platform)
@@ -555,6 +557,12 @@ class BuildInfo:
 		
 		print("")
 		sys.stdout.flush()
+
+	def GetBuildDir(self, arch, config = None):
+		build_dir_name = "%s_%s%d_%s_%s" % (self.project_type, self.compiler_name, self.compiler_version, self.target_platform, arch)
+		if not (config is None):
+			build_dir_name += "-" + config
+		return build_dir_name
 
 class BatchCommand:
 	def __init__(self, host_platform):
@@ -640,7 +648,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
 
-		build_dir = "%s/Build/%s_%s%d_%s_%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+		build_dir = "%s/Build/%s" % (build_path, build_info.GetBuildDir(compiler_info.arch))
 		if build_info.is_clean:
 			print("Cleaning %s..." % name)
 			sys.stdout.flush()
@@ -702,10 +710,10 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				make_name = "mingw32-make.exe"
 		else:
 			make_name = "make"
-		make_name += " -j%d" % multiprocessing.cpu_count()
+		make_name += " -j%d" % build_info.jobs
 
 		for config in build_info.cfg:
-			build_dir = "%s/Build/%s_%s%d_%s_%s-%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
+			build_dir = "%s/Build/%s" % (build_path, build_info.GetBuildDir(compiler_info.arch, config))
 			if build_info.is_clean:
 				print("Cleaning %s %s..." % (name, config))
 				sys.stdout.flush()

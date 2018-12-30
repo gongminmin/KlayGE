@@ -13,6 +13,10 @@
 *.png
 *.3ds
 *.glb
+*.iobj
+*.ipdb
+*.pdb
+*.ilk
 KlayGE.log
 __pycache__
 CfgBuild.py
@@ -45,15 +49,11 @@ KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.exe.config
 KlayGE/bin/*/*.gta.testdurations
 KlayGE/bin/*/*.manifest
-KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.pri
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*Py.zip
 KlayGE/bin/*/GL*CompatibilityReport.html
 KlayGE/bin/*/HWCollect.txt
-KlayGE/bin/*/*.iobj
-KlayGE/bin/*/*.ipdb
-KlayGE/bin/*/*.ilk
 KlayGE/Core/Src/Base/TableGen
 KlayGE/media/Fonts
 KlayGE/media/Models
