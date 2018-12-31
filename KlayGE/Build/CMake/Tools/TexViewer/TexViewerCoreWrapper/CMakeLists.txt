@@ -53,6 +53,7 @@ SET_TARGET_PROPERTIES(TexViewerCoreWrapper PROPERTIES
 	OUTPUT_NAME TexViewerCoreWrapper
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
 	VS_DOTNET_REFERENCES "System;System.Windows;PresentationCore"
+	FOLDER "KlayGE/Tools/TexViewer"
 )
 IF(ADD_COMMON_LANGUAGE_RUNTIME)
 	SET_TARGET_PROPERTIES(TexViewerCoreWrapper PROPERTIES
@@ -62,5 +63,3 @@ ADD_DEPENDENCIES(TexViewerCoreWrapper TexViewerCore)
 
 TARGET_LINK_LIBRARIES(TexViewerCoreWrapper
 	debug TexViewerCore_d optimized TexViewerCore)
-
-SET_TARGET_PROPERTIES(TexViewerCoreWrapper PROPERTIES FOLDER "Tools/TexViewer")

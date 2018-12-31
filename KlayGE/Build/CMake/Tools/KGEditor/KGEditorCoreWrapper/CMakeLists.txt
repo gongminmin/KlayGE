@@ -52,6 +52,7 @@ SET_TARGET_PROPERTIES(KGEditorCoreWrapper PROPERTIES
 	OUTPUT_NAME KGEditorCoreWrapper
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
 	VS_DOTNET_REFERENCES "System;System.Windows;PresentationCore"
+	FOLDER "KlayGE/Tools/KGEditor"
 )
 IF(ADD_COMMON_LANGUAGE_RUNTIME)
 	SET_TARGET_PROPERTIES(KGEditorCoreWrapper PROPERTIES
@@ -61,5 +62,3 @@ ADD_DEPENDENCIES(KGEditorCoreWrapper KGEditorCore)
 
 TARGET_LINK_LIBRARIES(KGEditorCoreWrapper
 	debug KGEditorCore_d optimized KGEditorCore)
-
-SET_TARGET_PROPERTIES(KGEditorCoreWrapper PROPERTIES FOLDER "Tools/KGEditor")

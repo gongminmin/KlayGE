@@ -1,4 +1,4 @@
-SET(LIBOGG_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../libogg")
+SET(LIBOGG_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/libogg")
 SET(LIBOGG_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/libogg/${KLAYGE_PLATFORM_NAME}")
 
 UpdateExternalLib("libogg" "libogg" "https://github.com/xiph/ogg.git" "0acd32d7cabf7e41cc29ea7c2bbffde969ff1ba0")

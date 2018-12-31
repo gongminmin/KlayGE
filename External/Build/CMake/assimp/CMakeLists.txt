@@ -1,4 +1,4 @@
-SET(ASSIMP_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../assimp")
+SET(ASSIMP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/assimp")
 SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME}")
 
 UpdateExternalLib("assimp" "assimp" "https://github.com/assimp/assimp.git" "8c15a35609e8582945aec966f263d0ee821d63ae")

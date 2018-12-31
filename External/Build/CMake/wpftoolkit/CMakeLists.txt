@@ -2,7 +2,7 @@ SET(WPFTOOLKIT_MAJOR_VERSION 2)
 SET(WPFTOOLKIT_MINOR_VERSION 8)
 SET(WPFTOOLKIT_VERSION ${WPFTOOLKIT_MAJOR_VERSION}.${WPFTOOLKIT_MINOR_VERSION})
 
-SET(WPFTOOLKIT_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../wpftoolkit")
+SET(WPFTOOLKIT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/wpftoolkit")
 
 SET(REL_PATH "External/Downloads/wpftoolkit-${WPFTOOLKIT_VERSION}.patched.7z")
 SET(PACKAGE_FILE_ID "8f25248ff7d2a31f9f99eaddc5d8fc1072ee33d4")
@@ -24,6 +24,9 @@ INCLUDE_EXTERNAL_MSPROJECT(
 INCLUDE_EXTERNAL_MSPROJECT(
 	Xceed.Wpf.Toolkit ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
+
+add_dependencies(Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock
+	Xceed.Wpf.AvalonDock.Themes.Aero Xceed.Wpf.AvalonDock.Themes.Metro Xceed.Wpf.AvalonDock.Themes.VS2010)
 
 foreach(target
 	"Xceed.Wpf.AvalonDock" "Xceed.Wpf.Toolkit")

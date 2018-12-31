@@ -6,6 +6,7 @@ git:
 
 cache:
   directories:
+    - Build/${BUILD_DIR}/External
     - External
     - KlayGE/media
     - KlayGE/Samples/media
@@ -32,7 +33,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" COMPILER="gcc"
+      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: xenial
@@ -51,7 +52,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" COMPILER="gcc"
+      env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: trusty
@@ -70,7 +71,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: xenial
@@ -91,7 +92,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" COMPILER="clang"
+      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode9.4
@@ -103,7 +104,7 @@ matrix:
             - wine
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode10.1
@@ -115,7 +116,7 @@ matrix:
             - wine
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
 before_install:
   - eval "${MATRIX_EVAL}"
@@ -128,4 +129,4 @@ before_install:
 script:
   # Reset the repo to restore changes in External
   - git reset --hard
-  - python BuildAll.py $COMPILER x64 Release
+  - python Build.py $COMPILER x64 Release

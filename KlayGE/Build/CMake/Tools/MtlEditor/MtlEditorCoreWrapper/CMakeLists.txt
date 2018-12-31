@@ -53,6 +53,7 @@ SET_TARGET_PROPERTIES(MtlEditorCoreWrapper PROPERTIES
 	OUTPUT_NAME MtlEditorCoreWrapper
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
 	VS_DOTNET_REFERENCES "System;System.Windows;PresentationCore"
+	FOLDER "KlayGE/Tools/MtlEditor"
 )
 IF(ADD_COMMON_LANGUAGE_RUNTIME)
 	SET_TARGET_PROPERTIES(MtlEditorCoreWrapper PROPERTIES
@@ -62,5 +63,3 @@ ADD_DEPENDENCIES(MtlEditorCoreWrapper MtlEditorCore)
 
 TARGET_LINK_LIBRARIES(MtlEditorCoreWrapper
 	debug MtlEditorCore_d optimized MtlEditorCore)
-
-SET_TARGET_PROPERTIES(MtlEditorCoreWrapper PROPERTIES FOLDER "Tools/MtlEditor")

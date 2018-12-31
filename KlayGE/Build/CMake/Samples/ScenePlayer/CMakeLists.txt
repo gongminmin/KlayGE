@@ -10,7 +10,7 @@ else()
 	set(TARGET_DIR "\"${KLAYGE_BIN_DIR}\"")
 endif()
 CONFIGURE_FILE(
-	${KLAYGE_ROOT_DIR}/CMake/MakePyZip.py.in
+	${KLAYGE_CMAKE_MODULE_DIR}/MakePyZip.py.in
 	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/MakePyZip.py
 	@ONLY
 )

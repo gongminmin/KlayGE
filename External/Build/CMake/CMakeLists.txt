@@ -1,19 +1,6 @@
-project(KlayGE_External)
+set(EXTERNAL_PROJECT_DIR "${KLAYGE_ROOT_DIR}/External")
 
-cmake_minimum_required(VERSION 3.9)
-
-set(EXTERNAL_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-set(KLAYGE_ROOT_DIR "${EXTERNAL_PROJECT_DIR}/..")
-
-include(${KLAYGE_ROOT_DIR}/CMake/Common.cmake)
-include(${KLAYGE_ROOT_DIR}/CMake/Platform.cmake)
-include(${KLAYGE_ROOT_DIR}/CMake/Compiler.cmake)
-
-set(KLAYGE_BIN_DIR "${KLAYGE_ROOT_DIR}/KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set(EXTERNAL_VS_FOLDER_PREFIX "")
+set(EXTERNAL_VS_FOLDER_PREFIX "External")
 
 FUNCTION(DOWNLOAD_7Z)
 	IF(KLAYGE_HOST_PLATFORM_WINDOWS)

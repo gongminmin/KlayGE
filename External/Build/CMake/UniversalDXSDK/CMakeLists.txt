@@ -1,4 +1,4 @@
-SET(DXSDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../UniversalDXSDK")
+SET(DXSDK_DIR "${EXTERNAL_PROJECT_DIR}/UniversalDXSDK")
 
 SET(D3DCOMPILER_NAME "d3dcompiler_47.dll")
 SET(REL_PATH "External/Downloads/UniversalDXSDK.7z")

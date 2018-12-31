@@ -107,7 +107,7 @@ SET_SOURCE_FILES_PROPERTIES(${IMAGE_FILES} PROPERTIES
 )
 
 ADD_EXECUTABLE(${EXE_NAME} WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
-ADD_DEPENDENCIES(${EXE_NAME} MtlEditorCoreWrapper)
+ADD_DEPENDENCIES(${EXE_NAME} MtlEditorCoreWrapper Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock)
 
 SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${KLAYGE_BIN_DIR}
@@ -124,8 +124,7 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Data.DataSetExtensions;System.Windows.Controls.Ribbon;System.Windows.Forms;System.Xaml;System.Xml;System.Xml.Linq;WindowsBase;WindowsFormsIntegration"
 	VS_DOTNET_REFERENCE_Xceed.Wpf.AvalonDock "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/bin/Xceed.Wpf.AvalonDock.dll"
 	VS_DOTNET_REFERENCE_Xceed.Wpf.Toolkit "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/bin/Xceed.Wpf.Toolkit.dll"
+	FOLDER "KlayGE/Tools/MtlEditor"
 )
 
 TARGET_LINK_LIBRARIES(${EXE_NAME} ${EXTRA_LINKED_LIBRARIES})
-
-SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES FOLDER "Tools/MtlEditor")

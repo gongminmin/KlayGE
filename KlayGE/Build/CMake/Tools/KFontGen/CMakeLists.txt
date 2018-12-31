@@ -18,3 +18,5 @@ SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
 	debug freetype${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized freetype${KLAYGE_OUTPUT_SUFFIX})
 
 SETUP_TOOL(KFontGen)
+
+add_dependencies(KFontGen freetype)

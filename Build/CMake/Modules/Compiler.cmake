@@ -242,7 +242,7 @@ IF(MSVC)
 		SET(USER_NAME $ENV{USERNAME})
 
 		CONFIGURE_FILE(
-			${KLAYGE_ROOT_DIR}/CMake/VisualStudio2010UserFile.vcxproj.user.in
+			${KLAYGE_CMAKE_MODULE_DIR}/VisualStudio2010UserFile.vcxproj.user.in
 			${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcxproj.user
 			@ONLY
 		)
@@ -256,7 +256,7 @@ IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
 			SET(USER_NAME $ENV{USER})
 
 			CONFIGURE_FILE(
-				${KLAYGE_ROOT_DIR}/CMake/xcode.xcscheme.in
+				${KLAYGE_CMAKE_MODULE_DIR}/xcode.xcscheme.in
 				${PROJECT_BINARY_DIR}/${PROJECTNAME}.xcodeproj/xcuserdata/${USER_NAME}.xcuserdatad/xcschemes/${TARGETNAME}.xcscheme
 				@ONLY
 			)

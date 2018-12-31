@@ -552,6 +552,7 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	PROJECT_LABEL ${LIB_NAME}
 	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 	OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
+	FOLDER "KlayGE/Engine/Core"
 )
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "KlayGE/KlayGE.hpp" "${KLAYGE_PROJECT_DIR}/Core/Include" "${KLAYGE_PROJECT_DIR}/Core/Src/Base/KlayGE.cpp")
@@ -563,8 +564,19 @@ TARGET_LINK_LIBRARIES(${LIB_NAME}
 	${KLAYGE_FILESYSTEM_LIBRARY}
 )
 
-ADD_DEPENDENCIES(${LIB_NAME} TableGen)
-
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES FOLDER "Engine/Core")
+add_dependencies(${LIB_NAME} KFL kfont 7zxa LZMA TableGen)
+if(KLAYGE_IS_DEV_PLATFORM)
+	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
+		add_dependencies(${LIB_NAME} UniversalDXSDKRedist)
+	endif()
+endif()
+if(KLAYGE_PLATFORM_LINUX)
+	add_dependencies(${LIB_NAME} glloader)
+elseif(KLAYGE_PLATFORM_ANDROID)
+	add_dependencies(${LIB_NAME} android_native_app_glue)
+endif()
+if(WITH_FILESYSTEM)
+	add_dependencies(${LIB_NAME} filesystem)
+endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

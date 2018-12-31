@@ -559,9 +559,13 @@ class BuildInfo:
 		sys.stdout.flush()
 
 	def GetBuildDir(self, arch, config = None):
-		build_dir_name = "%s_%s%d_%s_%s" % (self.project_type, self.compiler_name, self.compiler_version, self.target_platform, arch)
-		if not (config is None):
-			build_dir_name += "-" + config
+		env = os.environ
+		if "BUILD_DIR" in env:
+			build_dir_name = env["BUILD_DIR"]
+		else:
+			build_dir_name = "%s_%s%d_%s_%s" % (self.project_type, self.compiler_name, self.compiler_version, self.target_platform, arch)
+			if not (config is None):
+				build_dir_name += "-" + config
 		return build_dir_name
 
 class BatchCommand:
@@ -605,7 +609,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if "android" == build_info.target_platform:
-		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/CMake/android.toolchain.cmake\"" % curdir
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
 		if "win" == build_info.host_platform:
 			android_ndk_path = os.environ["ANDROID_NDK"]
@@ -620,7 +624,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 		else:
 			LogError("Unsupported Darwin architecture.\n")
 	elif "ios" == build_info.target_platform:
-		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/CMake/iOS.cmake\"" % curdir
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/iOS.cmake\"" % curdir
 		if "arm" == compiler_info.arch:
 			additional_options += " -DIOS_PLATFORM=OS"
 		elif "x86" == compiler_info.arch:
@@ -769,3 +773,22 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 
 				print("")
 				sys.stdout.flush()
+
+if __name__ == "__main__":
+	build_info = BuildInfo.FromArgv(sys.argv)
+
+	additional_options = " -DKLAYGE_SHADER_PLATFORM_NAME:STRING=\"%s\"" % build_info.shader_platform_name
+	if build_info.gles_include_dir != "auto":
+		additional_options += " -DKLAYGE_GLES_INCLUDE_DIR:STRING=\"%s\"" % build_info.gles_include_dir
+	if build_info.is_windows_desktop:
+		if build_info.libovr_path != "auto":
+			additional_options += " -DKLAYGE_LibOVR_PATH:STRING=\"%s\"" % build_info.libovr_path
+	for compiler_info in build_info.compilers:
+		BuildAProject("KlayGE", ".", build_info, compiler_info, additional_options)
+
+	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
+		clean_dir_list = [ "assimp", "cxxopts", "libogg", "nanosvg", "rapidjson" ]
+		for dir in clean_dir_list:
+			dir_name = "External/" + dir
+			if os.path.isdir(dir_name):
+				shutil.rmtree(dir_name)
