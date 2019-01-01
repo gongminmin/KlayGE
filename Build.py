@@ -37,6 +37,7 @@ class CompilerInfo:
 class BuildInfo:
 	@classmethod
 	def FromArgv(BuildInfo, argv, base = 0):
+		project = ""
 		compiler = ""
 		archs = ""
 		cfg = ""
@@ -44,17 +45,19 @@ class BuildInfo:
 
 		argc = len(argv)
 		if argc > base + 1:
-			compiler = argv[base + 1]
+			project = argv[base + 1]
 		if argc > base + 2:
-			archs = (argv[base + 2], )
+			compiler = argv[base + 2]
 		if argc > base + 3:
-			cfg = (argv[base + 3], )
+			archs = (argv[base + 3], )
 		if argc > base + 4:
-			target = argv[base + 4]
+			cfg = (argv[base + 4], )
+		if argc > base + 5:
+			target = argv[base + 5]
 
-		return BuildInfo(compiler, archs, cfg, target)
+		return BuildInfo(project, compiler, archs, cfg, target)
 
-	def __init__(self, compiler, archs, cfg, target):
+	def __init__(self, project, compiler, archs, cfg, target):
 		try:
 			import cfg_build
 			GenerateCfgBuildFromDefault()
@@ -76,10 +79,13 @@ class BuildInfo:
 			cfg_build.cmake_path
 		except:
 			cfg_build.cmake_path = "auto"
-		try:
-			cfg_build.project
-		except:
-			cfg_build.project = "auto"
+		if len(project) > 0:
+			cfg_build.project = project
+		else:
+			try:
+				cfg_build.project
+			except:
+				cfg_build.project = "auto"
 		if (len(compiler) > 0) and (compiler.lower() != "clean"):
 			cfg_build.compiler = compiler
 		else:
@@ -220,7 +226,10 @@ class BuildInfo:
 
 		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
 
-		project_type = ""
+		if len(cfg_build.project) > 0:
+			project_type = cfg_build.project
+		else:
+			project_type = ""
 		if ("" == compiler) or self.is_clean:
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
@@ -350,7 +359,7 @@ class BuildInfo:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
-				compilers.append(CompilerInfo(arch, "Visual Studio 14", compiler_root, vcvarsall_path))
+				compilers.append(CompilerInfo(arch, "Visual Studio 14", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
@@ -420,6 +429,14 @@ class BuildInfo:
 	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
 		batch_cmd.AddCommand('xcodebuild -quiet -target %s -jobs %d -configuration %s' % (target_name, self.jobs, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
+
+	def MakeAddBuildCommand(self, batch_cmd, make_name):
+		if "win" == self.host_platform:
+			batch_cmd.AddCommand("@%s -j%d" % (make_name, self.jobs))
+			batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
+		else:
+			batch_cmd.AddCommand("%s -j%d" % (make_name, self.jobs))
+			batch_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
 
 	def FindGCC(self):
 		if self.host_platform != "win":
@@ -611,13 +628,6 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
-		if "win" == build_info.host_platform:
-			android_ndk_path = os.environ["ANDROID_NDK"]
-			prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
-			if not os.path.isdir(prebuilt_make_path):
-				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
-			make_name = prebuilt_make_path + "\\bin\\make.exe"
-			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
 	elif "darwin" == build_info.target_platform:
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -706,11 +716,15 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 			sys.stdout.flush()
 	else:
 		if "win" == build_info.host_platform:
-			if build_info.target_platform != "android":
+			if build_info.target_platform == "android":
+				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
+				if not os.path.isdir(prebuilt_make_path):
+					prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
+				make_name = prebuilt_make_path + "\\bin\\make.exe"
+			else:
 				make_name = "mingw32-make.exe"
 		else:
 			make_name = "make"
-		make_name += " -j%d" % build_info.jobs
 
 		for config in build_info.cfg:
 			build_dir = "%s/Build/%s" % (build_path, build_info.GetBuildDir(compiler_info.arch, config))
@@ -733,9 +747,10 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 						if not ("CXX" in env):
 							additional_options += " -DCMAKE_CXX_COMPILER=clang++"
 
+				build_dir = os.path.abspath(build_dir)
 				os.chdir(build_dir)
 
-				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+				additional_options += " -DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 				if "android" == build_info.target_platform:
 					if "x86" == compiler_info.arch:
 						abi_arch = "x86"
@@ -748,10 +763,18 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 						toolchain_arch = "aarch64-linux-android"
 					else:
 						LogError("Unsupported Android architecture.\n")
-					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
+					additional_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
-				cmake_cmd.AddCommand('"%s" -G "%s" %s %s ../CMake' % (build_info.cmake_path, compiler_info.generator, additional_options, config_options))
+				new_path = sys.exec_prefix
+				if len(compiler_info.compiler_root) > 0:
+					new_path += ";" + compiler_info.compiler_root
+				if build_info.compiler_name == "vc":
+					cmake_cmd.AddCommand('@SET PATH=%s;%%PATH%%' % new_path)
+					cmake_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
+					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
+					additional_options += " -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe"
+				cmake_cmd.AddCommand('"%s" -G "%s" %s ../CMake' % (build_info.cmake_path, compiler_info.generator, additional_options))
 				if cmake_cmd.Execute() != 0:
 					LogWarning("Config %s failed, retry 1...\n" % name)
 					if cmake_cmd.Execute() != 0:
@@ -760,12 +783,10 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 							LogError("Config %s failed.\n" % name)
 
 				build_cmd = BatchCommand(build_info.host_platform)
-				if "win" == build_info.host_platform:
-					build_cmd.AddCommand("@%s" % make_name)
-					build_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
-				else:
-					build_cmd.AddCommand("%s" % make_name)
-					build_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
+				if build_info.compiler_name == "vc":
+					build_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
+					build_cmd.AddCommand('@CD /d "%s"' % build_dir)
+				build_info.MakeAddBuildCommand(build_cmd, make_name)
 				if build_cmd.Execute() != 0:
 					LogError("Build %s failed.\n" % name)
 

@@ -8,12 +8,15 @@ platform:
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PROJECT: vs2017
       COMPILER: vc141
       BUILD_DIR: vc141
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PROJECT: vs2015
       COMPILER: vc140
       BUILD_DIR: vc140
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PROJECT: make
       COMPILER: mingw
       BUILD_DIR: mingw
       MINGW_PATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
@@ -38,4 +41,4 @@ before_build:
 build_script:
   # Reset the repo to restore changes in External
   - git reset --hard
-  - python Build.py %COMPILER% %PLATFORM% %CONFIGURATION%
+  - python Build.py %PROJECT% %COMPILER% %PLATFORM% %CONFIGURATION%
