@@ -7,6 +7,7 @@ git:
 cache:
   directories:
     - Build/${BUILD_DIR}/External
+    - Build/${BUILD_DIR}/Ninja
     - External
     - KlayGE/media
     - KlayGE/Samples/media
@@ -25,6 +26,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
+            - ninja-build
             - wine
             - wine-dev
             - winetricks
@@ -33,7 +35,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" PROJECT="make" COMPILER="gcc" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: xenial
@@ -44,6 +46,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
+            - ninja-build
             - wine
             - wine-dev
             - winetricks
@@ -52,7 +55,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="make" COMPILER="gcc" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: trusty
@@ -63,6 +66,7 @@ matrix:
             - llvm-toolchain-trusty-5.0
           packages:
             - clang-5.0
+            - ninja-build
             - wine
             - wine-dev
             - winetricks
@@ -71,7 +75,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="make" COMPILER="clang" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: xenial
@@ -84,6 +88,7 @@ matrix:
             - clang-7
             - libc++-7-dev
             - libc++abi-7-dev
+            - ninja-build
             - wine
             - wine-dev
             - winetricks
@@ -92,7 +97,7 @@ matrix:
             - libopenal-dev
           update:
             - true
-      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" PROJECT="make" COMPILER="clang" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode9.4
@@ -101,10 +106,11 @@ matrix:
           casks:
             - xquartz
           packages:
+            - ninja
             - wine
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="xcode" COMPILER="clang" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode10.1
@@ -113,20 +119,39 @@ matrix:
           casks:
             - xquartz
           packages:
+            - ninja
             - wine
           update:
             - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="xcode" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
 before_install:
   - eval "${MATRIX_EVAL}"
   # Linux
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       export WINEARCH=win32;
       winetricks;
     fi
 
 script:
+  # Restore ninja files
+  - if [ "$PROJECT" == "ninja" ]; then
+      if [ -d Build/${BUILD_DIR}/Ninja ]; then
+        if [ -f Build/${BUILD_DIR}/Ninja/.ninja_deps ]; then
+          mv -f Build/${BUILD_DIR}/Ninja/.ninja_* Build/${BUILD_DIR}/;
+        fi
+      fi
+    fi
+  - if [ -d Build/${BUILD_DIR}/Ninja ]; then
+      rm -rf Build/${BUILD_DIR}/Ninja;
+    fi
   # Reset the repo to restore changes in External
   - git reset --hard
   - python Build.py $PROJECT $COMPILER x64 Release
+
+before_cache:
+  # Backup ninja files to a folder
+  - mkdir Build/${BUILD_DIR}/Ninja
+  - if [ "$PROJECT" == "ninja" ]; then
+      mv -f Build/${BUILD_DIR}/.ninja_* Build/${BUILD_DIR}/Ninja;
+    fi

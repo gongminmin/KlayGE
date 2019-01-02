@@ -370,11 +370,14 @@ class BuildInfo:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
-		elif "make" == project_type:
-			if "win" == host_platform:
-				gen_name = "MinGW Makefiles"
+		elif ("make" == project_type) or ("ninja" == project_type):
+			if "ninja" == project_type:
+				gen_name = "Ninja"
 			else:
-				gen_name = "Unix Makefiles"
+				if "win" == host_platform:
+					gen_name = "MinGW Makefiles"
+				else:
+					gen_name = "Unix Makefiles"
 			if "clang" == compiler:
 				compiler_name = "clang"
 				compiler_version = self.RetrieveClangVersion()
@@ -390,6 +393,16 @@ class BuildInfo:
 				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+			elif "vc141" == compiler:
+				compiler_name = "vc"
+				compiler_version = 141
+				for arch in archs:
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
+			elif "vc140" == compiler:
+				compiler_name = "vc"
+				compiler_version = 140
+				for arch in archs:
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 		else:
@@ -623,7 +636,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
 		toolset_name = "clang"
 
-	if build_info.compiler_name != "vc":
+	if (build_info.compiler_name != "vc") or (build_info.project_type == "ninja"):
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
@@ -642,21 +655,23 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 		else:
 			LogError("Unsupported iOS architecture.\n")
 
+	if build_info.compiler_name == "vc":
+		if "x64" == compiler_info.arch:
+			vc_option = "amd64"
+			vc_arch = "x64"
+		elif "arm" == compiler_info.arch:
+			vc_option = "amd64_arm"
+			vc_arch = "ARM"
+		elif "arm64" == compiler_info.arch:
+			vc_option = "amd64_arm64"
+			vc_arch = "ARM64"
+		else:
+			LogError("Unsupported VS architecture.\n")
+		if len(compiler_info.vcvarsall_options) > 0:
+			vc_option += " %s" % compiler_info.vcvarsall_options
+
 	if build_info.multi_config:
 		if 0 == build_info.project_type.find("vs"):
-			if "x64" == compiler_info.arch:
-				vc_option = "amd64"
-				vc_arch = "x64"
-			elif "arm" == compiler_info.arch:
-				vc_option = "amd64_arm"
-				vc_arch = "ARM"
-			elif "arm64" == compiler_info.arch:
-				vc_option = "amd64_arm64"
-				vc_arch = "ARM64"
-			else:
-				LogError("Unsupported VS architecture.\n")
-			if len(compiler_info.vcvarsall_options) > 0:
-				vc_option += " %s" % compiler_info.vcvarsall_options
 			additional_options += " -A %s" % vc_arch
 
 		if build_info.is_windows_store:
@@ -715,16 +730,19 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 			print("")
 			sys.stdout.flush()
 	else:
-		if "win" == build_info.host_platform:
-			if build_info.target_platform == "android":
-				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
-				if not os.path.isdir(prebuilt_make_path):
-					prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
-				make_name = prebuilt_make_path + "\\bin\\make.exe"
-			else:
-				make_name = "mingw32-make.exe"
+		if build_info.project_type == "ninja":
+			make_name = "ninja"
 		else:
-			make_name = "make"
+			if "win" == build_info.host_platform:
+				if build_info.target_platform == "android":
+					prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
+					if not os.path.isdir(prebuilt_make_path):
+						prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
+					make_name = prebuilt_make_path + "\\bin\\make.exe"
+				else:
+					make_name = "mingw32-make.exe"
+			else:
+				make_name = "make"
 
 		for config in build_info.cfg:
 			build_dir = "%s/Build/%s" % (build_path, build_info.GetBuildDir(compiler_info.arch, config))

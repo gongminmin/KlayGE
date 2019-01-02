@@ -3,19 +3,19 @@
 
 class CfgBuildDefault:
 	def __init__(self):
-		################################################
-		# !!!! DO NOT DELETE ANY FIELD OF THIS FILE !!!!
-		################################################
+		#################################################
+		# !!!! DO NOT DELETE ANY FIELD OF THIS CLASS !!!!
+		#################################################
 
 		# The path of cmake executable. Could fill in the path, or "auto".
 		self.cmake_path = "auto"
 
 		# Project type.
-		#   On Windows desktop, could be "vs2017", "vs2015", "make", "auto".
+		#   On Windows desktop, could be "vs2017", "vs2015", "make", "ninja", "auto".
 		#   On Windows store, could be "vs2017", "vs2015", "auto".
 		#   On Android, could be "make", "auto".
-		#   On Linux, could be "make", "auto".
-		#   On macOS, could be "xcode", "auto".
+		#   On Linux, could be "make", "ninja", "auto".
+		#   On macOS, could be "xcode", "ninja", "auto".
 		#   On iOS, could be "xcode", "auto".
 		self.project = "auto"
 
