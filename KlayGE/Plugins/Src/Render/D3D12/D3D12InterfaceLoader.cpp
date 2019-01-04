@@ -50,6 +50,10 @@ namespace KlayGE
 			::MessageBoxW(nullptr, L"Can't load d3d12.dll", L"Error", MB_OK);
 		}
 
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 		if (mod_dxgi_ != nullptr)
 		{
 			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
@@ -60,6 +64,9 @@ namespace KlayGE
 			DynamicD3D12GetDebugInterface_ = reinterpret_cast<D3D12GetDebugInterfaceFunc>(::GetProcAddress(mod_d3d12_, "D3D12GetDebugInterface"));
 			DynamicD3D12SerializeRootSignature_ = reinterpret_cast<D3D12SerializeRootSignatureFunc>(::GetProcAddress(mod_d3d12_, "D3D12SerializeRootSignature"));
 		}
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic pop
+#endif
 #else
 		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
 		DynamicD3D12CreateDevice_ = ::D3D12CreateDevice;

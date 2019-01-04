@@ -114,6 +114,10 @@ namespace KlayGE
 			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
 		}
 
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 		if (mod_dxgi_ != nullptr)
 		{
 			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
@@ -122,6 +126,9 @@ namespace KlayGE
 		{
 			DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDevice"));
 		}
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic pop
+#endif
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
 		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;

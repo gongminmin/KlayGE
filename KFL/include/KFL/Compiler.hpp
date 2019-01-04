@@ -161,10 +161,10 @@
 	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#if GCC_VERSION >= 80
-		#if defined(__MINGW32__)
-			#error "MinGW-w64 8.x is not supported due to a bug in filesystem: https://sourceforge.net/p/mingw-w64/bugs/737/"
+		#if !defined(__MINGW32__) || (GCC_VERSION != 81)
+			// MinGW-w64 8.1 can't use built-in filesystem due to a bug: https://sourceforge.net/p/mingw-w64/bugs/737/
+			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 		#endif
-		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 	#else
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif

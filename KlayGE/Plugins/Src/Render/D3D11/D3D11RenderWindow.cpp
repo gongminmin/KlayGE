@@ -480,7 +480,14 @@ namespace KlayGE
 				HMODULE dll = ::GetModuleHandle(ati_driver);
 				if (dll != nullptr)
 				{
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 					PFNAmdDxExtCreate11 AmdDxExtCreate11 = reinterpret_cast<PFNAmdDxExtCreate11>(::GetProcAddress(dll, "AmdDxExtCreate11"));
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic pop
+#endif
 					if (AmdDxExtCreate11 != nullptr)
 					{
 						IAmdDxExt* amd_dx_ext;

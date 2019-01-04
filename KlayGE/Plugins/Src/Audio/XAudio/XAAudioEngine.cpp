@@ -98,6 +98,10 @@ namespace KlayGE
 
 		if (mod_xaudio2_ != nullptr)
 		{
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 #if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
 			DynamicXAudio2Create_ = reinterpret_cast<XAudio2CreateFunc>(::GetProcAddress(mod_xaudio2_, "XAudio2Create"));
 #else
@@ -105,6 +109,9 @@ namespace KlayGE
 #endif
 			DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioInitialize"));
 			DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioCalculate"));
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic pop
+#endif
 		}
 #else
 		DynamicXAudio2Create_ = ::XAudio2Create;

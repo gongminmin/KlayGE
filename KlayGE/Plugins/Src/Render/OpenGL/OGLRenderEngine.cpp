@@ -205,9 +205,16 @@ namespace KlayGE
 		mod_opengl32_ = ::LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
 		KLAYGE_ASSUME(mod_opengl32_ != nullptr);
 
-		DynamicWglCreateContext_ = (wglCreateContextFUNC)::GetProcAddress(mod_opengl32_, "wglCreateContext");
-		DynamicWglDeleteContext_ = (wglDeleteContextFUNC)::GetProcAddress(mod_opengl32_, "wglDeleteContext");
-		DynamicWglMakeCurrent_ = (wglMakeCurrentFUNC)::GetProcAddress(mod_opengl32_, "wglMakeCurrent");
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+		DynamicWglCreateContext_ = reinterpret_cast<wglCreateContextFUNC>(::GetProcAddress(mod_opengl32_, "wglCreateContext"));
+		DynamicWglDeleteContext_ = reinterpret_cast<wglDeleteContextFUNC>(::GetProcAddress(mod_opengl32_, "wglDeleteContext"));
+		DynamicWglMakeCurrent_ = reinterpret_cast<wglMakeCurrentFUNC>(::GetProcAddress(mod_opengl32_, "wglMakeCurrent"));
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#pragma GCC diagnostic pop
+#endif
 #endif
 	}
 

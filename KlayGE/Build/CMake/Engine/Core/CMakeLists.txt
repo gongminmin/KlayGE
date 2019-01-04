@@ -574,7 +574,7 @@ if(KLAYGE_PLATFORM_LINUX)
 elseif(KLAYGE_PLATFORM_ANDROID)
 	add_dependencies(${LIB_NAME} android_native_app_glue)
 endif()
-if(WITH_FILESYSTEM)
+if(KLAYGE_WITH_BOOST_FILESYSTEM)
 	add_dependencies(${LIB_NAME} filesystem)
 endif()
 
