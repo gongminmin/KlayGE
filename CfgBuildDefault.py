@@ -16,7 +16,7 @@ class CfgBuildDefault:
 		#   On Android, could be "make", "auto".
 		#   On Linux, could be "make", "ninja", "auto".
 		#   On macOS, could be "xcode", "ninja", "auto".
-		#   On iOS, could be "xcode", "auto".
+		#   On iOS, could be "xcode", "ninja", "auto".
 		self.project = "auto"
 
 		# Compiler name.
