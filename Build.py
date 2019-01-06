@@ -826,7 +826,7 @@ if __name__ == "__main__":
 		BuildAProject("KlayGE", ".", build_info, compiler_info, additional_options)
 
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
-		clean_dir_list = [ "assimp", "cxxopts", "freetype", "libogg", "nanosvg", "rapidjson", "rapidxml" ]
+		clean_dir_list = [ "assimp", "cxxopts", "freetype", "googletest", "libogg", "nanosvg", "python-cmake-buildsystem", "rapidjson", "rapidxml" ]
 		for dir in clean_dir_list:
 			dir_name = "External/" + dir
 			if os.path.isdir(dir_name):
