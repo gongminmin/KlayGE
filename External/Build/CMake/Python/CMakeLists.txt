@@ -10,9 +10,7 @@ SET(PACKAGE_FILE_ID "4EA1271AA716BA0BD70E41D3B8112F3C645283B8")
 
 DOWNLOAD_PACKAGE("Python" ${REL_PATH} ${PACKAGE_FILE_ID})
 
-SET(PACKAGE_FILE_ID "bf083f45d8723febb6ae3dc004f30db107eb33f7")
-
-DOWNLOAD_PACKAGE("Build/CMake/Python/python-cmake-buildsystem" "External/Downloads/python-cmake-buildsystem.patched.7z" ${PACKAGE_FILE_ID})
+UpdateExternalLib("python-cmake-buildsystem" "python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "c5a6b8196f4504b57c3f928be66a35cab056cc0a")
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})
 
@@ -133,7 +131,7 @@ ENDIF()
 
 ADD_DEFINITIONS(-DPy_BUILD_CORE)
 
-ADD_SUBDIRECTORY("python-cmake-buildsystem" "${CMAKE_CURRENT_BINARY_DIR}/python")
+ADD_SUBDIRECTORY("${EXTERNAL_PROJECT_DIR}/python-cmake-buildsystem" "${CMAKE_CURRENT_BINARY_DIR}/python")
 
 SET_TARGET_PROPERTIES(libpython-static PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIR}

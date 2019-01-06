@@ -91,6 +91,7 @@ External/libvorbis
 External/nanosvg
 External/OpenALSDK
 External/Python
+External/python-cmake-buildsystem
 External/rapidjson
 External/rapidxml
 External/UniversalDXSDK
