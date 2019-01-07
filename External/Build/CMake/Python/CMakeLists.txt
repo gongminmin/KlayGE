@@ -10,7 +10,7 @@ SET(PACKAGE_FILE_ID "4EA1271AA716BA0BD70E41D3B8112F3C645283B8")
 
 DOWNLOAD_PACKAGE("Python" ${REL_PATH} ${PACKAGE_FILE_ID})
 
-UpdateExternalLib("python-cmake-buildsystem" "python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "c5a6b8196f4504b57c3f928be66a35cab056cc0a")
+UpdateExternalLib("python-cmake-buildsystem" "python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "f6f5b9f5ca63bc72c56aab2740c68df2cb3209e8")
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})
 
