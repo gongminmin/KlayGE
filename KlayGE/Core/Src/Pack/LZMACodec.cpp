@@ -131,7 +131,7 @@ namespace KlayGE
 		is->read(input.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Encode(output, MakeArrayRef(input.get(), len));
+		this->Encode(output, MakeArrayRef(input.get(), static_cast<size_t>(len)));
 		os.write(reinterpret_cast<char*>(&output[0]), output.size() * sizeof(output[0]));
 
 		return output.size();
@@ -150,7 +150,7 @@ namespace KlayGE
 		auto input = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
 		is->read(input.get(), static_cast<size_t>(len));
 
-		this->Encode(output, MakeArrayRef(input.get(), len));
+		this->Encode(output, MakeArrayRef(input.get(), static_cast<size_t>(len)));
 	}
 
 	void LZMACodec::Encode(std::vector<uint8_t>& output, ArrayRef<uint8_t> input)
@@ -171,7 +171,7 @@ namespace KlayGE
 		is->read(in_data.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Decode(output, MakeArrayRef(in_data.get(), len), original_len);
+		this->Decode(output, MakeArrayRef(in_data.get(), static_cast<size_t>(len)), original_len);
 
 		os.write(reinterpret_cast<char*>(&output[0]), static_cast<std::streamsize>(output.size()));
 
@@ -193,7 +193,7 @@ namespace KlayGE
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
 		is->read(&in_data[0], static_cast<size_t>(len));
 
-		this->Decode(output, MakeArrayRef(in_data.data(), len), original_len);
+		this->Decode(output, MakeArrayRef(in_data.data(), static_cast<size_t>(len)), original_len);
 	}
 
 	void LZMACodec::Decode(std::vector<uint8_t>& output, ArrayRef<uint8_t> input, uint64_t original_len)
