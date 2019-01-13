@@ -118,8 +118,8 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	VS_GLOBAL_ApplicationIcon "${KLAYGE_PROJECT_DIR}/klayge_logo.ico"
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
 	VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Data.DataSetExtensions;System.Windows.Controls.Ribbon;System.Windows.Forms;System.Xaml;System.Xml;System.Xml.Linq;WindowsBase;WindowsFormsIntegration"
-	VS_DOTNET_REFERENCE_Xceed.Wpf.AvalonDock "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/bin/Xceed.Wpf.AvalonDock.dll"
-	VS_DOTNET_REFERENCE_Xceed.Wpf.Toolkit "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/bin/Xceed.Wpf.Toolkit.dll"
+	VS_DOTNET_REFERENCE_Xceed.Wpf.AvalonDock "${KLAYGE_ROOT_DIR}/External/wpftoolkit/bin/${CMAKE_CFG_INTDIR}/Xceed.Wpf.AvalonDock.dll"
+	VS_DOTNET_REFERENCE_Xceed.Wpf.Toolkit "${KLAYGE_ROOT_DIR}/External/wpftoolkit/bin/${CMAKE_CFG_INTDIR}/Xceed.Wpf.Toolkit.dll"
 	FOLDER "KlayGE/Tools/KGEditor"
 )
 
