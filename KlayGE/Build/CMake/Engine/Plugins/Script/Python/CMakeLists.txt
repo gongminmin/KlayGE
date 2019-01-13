@@ -14,8 +14,19 @@ SOURCE_GROUP("Header Files" FILES ${PYTHON_SE_HEADER_FILES})
 
 ADD_DEFINITIONS(-DPy_NO_ENABLE_SHARED)
 
+if(KLAYGE_PLATFORM_WINDOWS)
+	if(KLAYGE_COMPILER_MSVC)
+		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/Python/PC)
+	else()
+		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/python-cmake-buildsystem/cmake/config-mingw)
+	endif()
+else()
+	set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../Build/${KLAYGE_BUILD_FOLDER}/External/Python/python/bin)
+endif()
+
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/Include)
+INCLUDE_DIRECTORIES(${PYCONFIG_BUILD_DIR})
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Plugins/Include)
@@ -59,10 +70,18 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "KlayGE/KlayGE.hpp" "${KLAYGE_PROJECT_DIR}/Core/Include" "${KLAYGE_PROJECT_DIR}/Plugins/Src/Script/Python/PythonScriptFactory.cpp")
 
+set(libpython_target_libraries "")
+if(KLAYGE_PLATFORM_WINDOWS)
+	list(APPEND libpython_target_libraries ws2_32) # Required by signalmodule
+	list(APPEND libpython_target_libraries version) # Required by sysmodule
+	list(APPEND libpython_target_libraries shlwapi) # Required by PC/getpathp
+endif()
+
 TARGET_LINK_LIBRARIES(${LIB_NAME}
 	debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
 	debug KFL${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized KFL${KLAYGE_OUTPUT_SUFFIX}
 	debug python${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized python${KLAYGE_OUTPUT_SUFFIX}
+	${libpython_target_libraries}
 )
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
