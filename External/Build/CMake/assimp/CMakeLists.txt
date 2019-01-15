@@ -22,9 +22,24 @@ set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
 set(IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
+
+set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB TRUE CACHE BOOL "" FORCE)
+set(ZLIB_INCLUDE_DIR
+	${EXTERNAL_PROJECT_DIR}/zlib
+	${KLAYGE_ROOT_DIR}/Build/${KLAYGE_BUILD_FOLDER}/External/zlib/zlib
+)
+set(ZLIB_LIBRARIES
+	debug zlib${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized zlib${KLAYGE_OUTPUT_SUFFIX}
+)
+set(ZLIB_FOUND TRUE)
+if(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
+	link_directories(${KLAYGE_BIN_DIR})
+else()
+	link_directories(${EXTERNAL_PROJECT_DIR}/lib/zlib/${KLAYGE_PLATFORM_NAME})
+endif()
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
 
@@ -48,16 +63,12 @@ SET_TARGET_PROPERTIES(assimp PROPERTIES
 	OUTPUT_NAME assimp${KLAYGE_OUTPUT_SUFFIX}
 )
 
+add_dependencies(assimp zlib)
+
 foreach(target
 	"assimp" "IrrXML" "uninstall")
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
 endforeach()
-if(TARGET zlib)
-	foreach(target
-		"zlib" "zlibstatic")
-		set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
-	endforeach()
-endif()
 if(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs)
 	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
 endif()

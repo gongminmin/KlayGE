@@ -19,6 +19,14 @@ ELSE()
 	ADD_DEFINITIONS(-D__ANSI__)
 ENDIF()
 
+set(ZLIB_INCLUDE_DIRS
+	${EXTERNAL_PROJECT_DIR}/zlib
+	${KLAYGE_ROOT_DIR}/Build/${KLAYGE_BUILD_FOLDER}/External/zlib/zlib
+)
+set(ZLIB_LIBRARIES
+	debug zlib${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized zlib${KLAYGE_OUTPUT_SUFFIX}
+)
+
 ADD_SUBDIRECTORY(FreeImage)
 ADD_SUBDIRECTORY(LibJPEG)
 ADD_SUBDIRECTORY(LibJXR)
@@ -28,9 +36,8 @@ ADD_SUBDIRECTORY(LibRaw)
 ADD_SUBDIRECTORY(LibTIFF4)
 ADD_SUBDIRECTORY(LibWebP)
 ADD_SUBDIRECTORY(OpenEXR)
-ADD_SUBDIRECTORY(ZLib)
 
 foreach(target
-	"FreeImage" "LibJPEG" "LibJXR" "LibOpenJPEG" "LibPNG" "LibRaw" "LibTIFF4" "LibWebP" "OpenEXR" "ZLib")
+	"FreeImage" "LibJPEG" "LibJXR" "LibOpenJPEG" "LibPNG" "LibRaw" "LibTIFF4" "LibWebP" "OpenEXR")
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/FreeImage")
 endforeach()
