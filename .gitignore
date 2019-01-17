@@ -89,7 +89,7 @@ External/googletest
 External/libogg
 External/libvorbis
 External/nanosvg
-External/OpenALSDK
+External/openal-soft
 External/Python
 External/python-cmake-buildsystem
 External/rapidjson

@@ -189,7 +189,10 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../glloader/lib/${KLAYGE_PLATFORM_NAME})
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/7z/${KLAYGE_PLATFORM_NAME})
-		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/android_native_app_glue/${KLAYGE_PLATFORM_NAME})
+		if(KLAYGE_PLATFORM_ANDROID)
+			LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/android_native_app_glue/${KLAYGE_PLATFORM_NAME})
+			LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/openal-soft/${KLAYGE_PLATFORM_NAME})
+		endif()
 	ENDIF()
 	LINK_DIRECTORIES(${EXTRA_LINKED_DIRS})
 
@@ -256,7 +259,7 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 			debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_AudioEngine_OpenAL${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_OpenAL${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
@@ -269,6 +272,7 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 			debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
 			${KLAYGE_FILESYSTEM_LIBRARY}
 			debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX}
+			debug OpenAL${KLAYGE_OUTPUT_SUFFIX}_d optimized OpenAL${KLAYGE_OUTPUT_SUFFIX}
 			log android atomic)
 	ELSEIF(KLAYGE_PLATFORM_IOS)
 		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}

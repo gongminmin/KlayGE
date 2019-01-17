@@ -78,7 +78,7 @@ IF(CMAKE_C_COMPILER_ID MATCHES MSVC)
 		IF(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 			FOREACH(flag_var
 				CMAKE_C_STANDARD_LIBRARIES CMAKE_CXX_STANDARD_LIBRARIES)
-				SET(${flag_var} "${${flag_var}} gdi32.lib ole32.lib oleaut32.lib comdlg32.lib advapi32.lib")
+				SET(${flag_var} "${${flag_var}} gdi32.lib ole32.lib oleaut32.lib comdlg32.lib advapi32.lib shell32.lib")
 			ENDFOREACH()
 		ENDIF()
 	ENDIF()
