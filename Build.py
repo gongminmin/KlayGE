@@ -236,7 +236,10 @@ class BuildInfo:
 				if 0 == target_platform.find("win"):
 					program_files_folder = self.FindProgramFilesFolder()
 
-					if len(self.FindVS2017Folder(program_files_folder)) > 0:
+					if len(self.FindVS2019Folder(program_files_folder)) > 0:
+						project_type = "vs2019"
+						compiler = "vc141"
+					elif len(self.FindVS2017Folder(program_files_folder)) > 0:
 						project_type = "vs2017"
 						compiler = "vc141"
 					elif ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
@@ -266,7 +269,9 @@ class BuildInfo:
 					compiler = cfg_build.compiler
 
 		if (project_type != "") and (compiler == ""):
-			if project_type == "vs2017":
+			if project_type == "vs2019":
+				compiler = "vc141"
+			elif project_type == "vs2017":
 				compiler = "vc141"
 			elif project_type == "vs2015":
 				compiler = "vc140"
@@ -277,15 +282,32 @@ class BuildInfo:
 			program_files_folder = self.FindProgramFilesFolder()
 
 			if "vc141" == compiler:
-				try_folder = self.FindVS2017Folder(program_files_folder)
-				if len(try_folder) > 0:
-					compiler_root = try_folder
-					vcvarsall_path = "VCVARSALL.BAT"
+				if project_type == "vs2019":
+					try_folder = self.FindVS2019Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = "-vcvars_ver=14.1"
+					else:
+						LogError("Could NOT find vc141 compiler toolset for VS2019.\n")
 				else:
-					LogError("Could NOT find vc141 compiler.\n")
-				vcvarsall_options = ""
+					try_folder = self.FindVS2017Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+					else:
+						LogError("Could NOT find vc141 compiler.\n")
+					vcvarsall_options = ""
 			elif "vc140" == compiler:
-				if project_type == "vs2017":
+				if project_type == "vs2019":
+					try_folder = self.FindVS2019Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = "-vcvars_ver=14.0"
+					else:
+						LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
+				elif project_type == "vs2017":
 					try_folder = self.FindVS2017Folder(program_files_folder)
 					if len(try_folder) > 0:
 						compiler_root = try_folder
@@ -337,7 +359,20 @@ class BuildInfo:
 
 		multi_config = False
 		compilers = []
-		if "vs2017" == project_type:
+		if "vs2019" == project_type:
+			self.vs_version = 16
+			if "vc141" == compiler:
+				compiler_name = "vc"
+				compiler_version = 141
+			elif "vc140" == compiler:
+				compiler_name = "vc"
+				compiler_version = 140
+			else:
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
+			multi_config = True
+			for arch in archs:
+				compilers.append(CompilerInfo(arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
+		elif "vs2017" == project_type:
 			self.vs_version = 15
 			if "vc141" == compiler:
 				compiler_name = "vc"
@@ -514,7 +549,13 @@ class BuildInfo:
 				program_files_folder = "C:\Program Files"
 		return program_files_folder
 
+	def FindVS2019Folder(self, program_files_folder):
+		return self.FindVS2017PlusFolder(program_files_folder, 16, "2019")
+
 	def FindVS2017Folder(self, program_files_folder):
+		return self.FindVS2017PlusFolder(program_files_folder, 15, "2017")
+
+	def FindVS2017PlusFolder(self, program_files_folder, vs_version, vs_name):
 		try_vswhere_location = program_files_folder + "\\Microsoft Visual Studio\\Installer\\vswhere.exe"
 		if os.path.exists(try_vswhere_location):
 			vs_location = subprocess.check_output([try_vswhere_location,
@@ -522,14 +563,14 @@ class BuildInfo:
 				"-latest",
 				"-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
 				"-property", "installationPath",
-				"-version", "[15.0,16.0)",
+				"-version", "[%d.0,%d.0)" % (vs_version, vs_version + 1),
 				"-prerelease"]).decode().split("\r\n")[0]
 			try_folder = vs_location + "\\VC\\Auxiliary\\Build\\"
 			try_vcvarsall = "VCVARSALL.BAT"
 			if os.path.exists(try_folder + try_vcvarsall):
 				return try_folder
 		else:
-			names = ("Preview", "2017")
+			names = ("Preview", vs_name)
 			skus = ("Community", "Professional", "Enterprise", "BuildTools")
 			for name in names:
 				for sku in skus:
