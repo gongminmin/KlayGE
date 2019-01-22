@@ -24,8 +24,6 @@
 #include <KFL/Thread.hpp>
 #include <KlayGE/Socket.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
-
 namespace KlayGE
 {
 	struct LobbyDes
@@ -68,7 +66,5 @@ namespace KlayGE
 		std::list<std::vector<char>> sendQueue_;
 	};
 }
-
-#endif
 
 #endif			// _PLAYER_HPP

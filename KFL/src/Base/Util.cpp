@@ -33,9 +33,6 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
-#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-	#include <KFL/Thread.hpp>
-#endif
 #else
 	#include <KFL/Thread.hpp>
 	#include <cerrno>
@@ -150,7 +147,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if defined KLAYGE_PLATFORM_WINDOWS
 		::Sleep(ms);
 #else
 		std::this_thread::sleep_for(std::chrono::milliseconds(ms));

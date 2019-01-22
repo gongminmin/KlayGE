@@ -22,8 +22,6 @@
 #include <list>
 #include <KlayGE/Socket.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
-
 namespace KlayGE
 {
 	uint32_t const Max_Buffer(64);
@@ -107,8 +105,6 @@ namespace KlayGE
 		std::string		name_;
 	};
 }
-
-#endif
 
 #endif			// _LOBBY_HPP
 
