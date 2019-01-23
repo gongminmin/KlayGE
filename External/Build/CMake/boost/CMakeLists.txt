@@ -35,6 +35,51 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 	ENDIF()
 ENDIF()
 
+set(Boost_INCLUDE_DIR "${EXTERNAL_PROJECT_DIR}/boost" CACHE INTERNAL "" FORCE)
+if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
+	set(boost_lib_dir ${EXTERNAL_PROJECT_DIR}/lib/boost/${KLAYGE_PLATFORM_NAME})
+else()
+	set(boost_lib_dir ${KLAYGE_BIN_DIR})
+endif()
+GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" FALSE debug_filesystem_name)
+GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}" FALSE optimized_filesystem_name)
+set(Boost_FILESYSTEM_LIBRARY
+	debug ${boost_lib_dir}/${debug_filesystem_name} optimized ${boost_lib_dir}/${optimized_filesystem_name}
+)
+GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" FALSE debug_system_name)
+GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}" FALSE optimized_system_name)
+set(Boost_SYSTEM_LIBRARY
+	debug ${boost_lib_dir}/${debug_system_name} optimized ${boost_lib_dir}/${optimized_system_name}
+)
+
+if(KLAYGE_COMPILER_MSVC)
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		set(KLAYGE_FILESYSTEM_LIBRARY "kernel32")
+	else()
+		set(KLAYGE_FILESYSTEM_LIBRARY "")
+	endif()
+else()
+	if(KLAYGE_COMPILER_GCC AND (NOT KLAYGE_PLATFORM_WINDOWS OR NOT (KLAYGE_COMPILER_VERSION EQUAL 81)))
+		set(KLAYGE_FILESYSTEM_LIBRARY "stdc++fs")
+	elseif(KLAYGE_COMPILER_CLANG AND KLAYGE_PLATFORM_LINUX)
+		if(KLAYGE_COMPILER_VERSION LESS 70)
+			set(KLAYGE_FILESYSTEM_LIBRARY "c++experimental")
+		else()
+			set(KLAYGE_FILESYSTEM_LIBRARY "c++fs")
+		endif()
+	else()
+		if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
+			set(boost_lib_dir ${EXTERNAL_PROJECT_DIR}/lib/boost/${KLAYGE_PLATFORM_NAME})
+		else()
+			set(boost_lib_dir ${KLAYGE_BIN_DIR})
+		endif()
+		set(KLAYGE_FILESYSTEM_LIBRARY
+			${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+		)
+	endif()
+endif()
+set(KLAYGE_FILESYSTEM_LIBRARY "${KLAYGE_FILESYSTEM_LIBRARY}" CACHE INTERNAL "" FORCE)
+
 MACRO(SETUP_BOOST_LIBRARY LIB_NAME)
 	SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
 
