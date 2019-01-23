@@ -21,7 +21,7 @@ if(KLAYGE_PLATFORM_WINDOWS)
 		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/python-cmake-buildsystem/cmake/config-mingw)
 	endif()
 else()
-	set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../Build/${KLAYGE_BUILD_FOLDER}/External/Python/python/bin)
+	set(PYCONFIG_BUILD_DIR ${PROJECT_BINARY_DIR}/External/Python/python/bin)
 endif()
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})

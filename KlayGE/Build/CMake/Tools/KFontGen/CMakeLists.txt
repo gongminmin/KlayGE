@@ -3,6 +3,7 @@ SET(SOURCE_FILES
 )
 
 SET(EXTRA_INCLUDE_DIRS
+	${PROJECT_BINARY_DIR}/External/freetype/freetype/include
 	${KLAYGE_PROJECT_DIR}/../External/freetype/include
 	${KLAYGE_PROJECT_DIR}/../kfont/include
 )
