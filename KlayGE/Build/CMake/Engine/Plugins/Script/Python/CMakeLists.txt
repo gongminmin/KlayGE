@@ -68,7 +68,7 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "KlayGE/Engine/Plugins/Script"
 )
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "KlayGE/KlayGE.hpp" "${KLAYGE_PROJECT_DIR}/Core/Include" "${KLAYGE_PROJECT_DIR}/Plugins/Src/Script/Python/PythonScriptFactory.cpp")
+KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
 
 set(libpython_target_libraries "")
 if(KLAYGE_PLATFORM_WINDOWS)

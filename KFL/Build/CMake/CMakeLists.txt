@@ -47,7 +47,6 @@ SET(BASE_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Base/CustomizedStreamBuf.cpp
 	${KFL_PROJECT_DIR}/src/Base/DllLoader.cpp
 	${KFL_PROJECT_DIR}/src/Base/ErrorHandling.cpp
-	${KFL_PROJECT_DIR}/src/Base/KFL.cpp
 	${KFL_PROJECT_DIR}/src/Base/Log.cpp
 	${KFL_PROJECT_DIR}/src/Base/Thread.cpp
 	${KFL_PROJECT_DIR}/src/Base/Timer.cpp
@@ -127,6 +126,6 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "KFL"
 )
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "KFL/KFL.hpp" "${KFL_PROJECT_DIR}/include" "${KFL_PROJECT_DIR}/src/Base/KFL.cpp")
+KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KFL_PROJECT_DIR}/include/KFL/KFL.hpp")
 
 TARGET_LINK_LIBRARIES(${LIB_NAME})
