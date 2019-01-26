@@ -74,7 +74,11 @@ SET(SOURCE_FILES
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.hpp
 )
-SET(RESOURCE_FILES "")
+if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+	set(RESOURCE_FILES $<TARGET_OBJECTS:KlayGE_RC>)
+else()
+	set(RESOURCE_FILES "")
+endif()
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/media/RenderToTexture/RenderToTextureTest.fxml
 	${KLAYGE_PROJECT_DIR}/Tests/media/StreamOutput/StreamOutputTest.fxml

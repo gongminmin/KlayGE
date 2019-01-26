@@ -576,3 +576,16 @@ if(KLAYGE_WITH_BOOST_FILESYSTEM)
 endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
+
+if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+	set(rc_lib_name "KlayGE_RC")
+	add_library(${rc_lib_name} OBJECT 
+		${KLAYGE_PROJECT_DIR}/media/KlayGE.rc
+		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
+	)
+	set_target_properties(${rc_lib_name} PROPERTIES
+		FOLDER "KlayGE/Engine/Core"
+	)
+
+	add_dependencies(AllInEngine ${rc_lib_name})
+endif()

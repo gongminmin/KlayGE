@@ -22,5 +22,5 @@ ELSE()
 		COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp" "${KLAYGE_BIN_DIR}/D3DCompilerWrapper$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>" "-I${KLAYGE_PROJECT_DIR}/Core/Include"
 	)
 
-	SET_TARGET_PROPERTIES(D3DCompilerWrapper PROPERTIES FOLDER "Tools")
+	SET_TARGET_PROPERTIES(D3DCompilerWrapper PROPERTIES FOLDER "KlayGE/Tools")
 ENDIF()
