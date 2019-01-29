@@ -168,7 +168,7 @@ void AreaLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -185,27 +185,27 @@ void AreaLightingApp::OnCreate()
 	id_length_slider_ = dialog_->IDFromName("LengthSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->LightTypeChangedHandler(sender);
 		});
 	this->LightTypeChangedHandler(*dialog_->Control<UIComboBox>(id_light_type_combo_));
 
-	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->RadiusChangedHandler(sender);
 		});
 	this->RadiusChangedHandler(*dialog_->Control<UISlider>(id_radius_slider_));
-	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->LengthChangedHandler(sender);
 		});
 	this->LengthChangedHandler(*dialog_->Control<UISlider>(id_length_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);

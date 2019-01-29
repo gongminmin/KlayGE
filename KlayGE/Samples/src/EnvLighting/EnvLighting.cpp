@@ -904,7 +904,7 @@ void EnvLightingApp::OnCreate()
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
 
-	sphere_group_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
@@ -959,7 +959,7 @@ void EnvLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -971,7 +971,7 @@ void EnvLightingApp::OnCreate()
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
 
-	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->TypeChangedHandler(sender);

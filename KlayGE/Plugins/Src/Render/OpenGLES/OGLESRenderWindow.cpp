@@ -55,12 +55,12 @@ namespace KlayGE
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();		
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().Connect(
 			[this](Window const & win)
 			{
 				this->OnExitSizeMove(win);
 			});
-		on_size_connect_ = main_wnd->OnSize().connect(
+		on_size_connect_ = main_wnd->OnSize().Connect(
 			[this](Window const & win, bool active)
 			{
 				this->OnSize(win, active);
@@ -300,8 +300,8 @@ namespace KlayGE
 
 	OGLESRenderWindow::~OGLESRenderWindow()
 	{
-		on_exit_size_move_connect_.disconnect();
-		on_size_connect_.disconnect();
+		on_exit_size_move_connect_.Disconnect();
+		on_size_connect_.Disconnect();
 
 		this->Destroy();
 	}

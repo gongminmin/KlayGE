@@ -880,7 +880,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::Register()
 	{
-		Context::Instance().AppInstance().OnConfirmDevice().connect(DeferredRenderingLayer::ConfirmDevice);
+		Context::Instance().AppInstance().OnConfirmDevice().Connect(DeferredRenderingLayer::ConfirmDevice);
 	}
 
 	bool DeferredRenderingLayer::ConfirmDevice()

@@ -86,12 +86,12 @@ namespace KlayGE
 #else
 		wnd_ = main_wnd->GetWindow();
 #endif
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().Connect(
 			[this](Window const & win)
 			{
 				this->OnExitSizeMove(win);
 			});
-		on_size_connect_ = main_wnd->OnSize().connect(
+		on_size_connect_ = main_wnd->OnSize().Connect(
 			[this](Window const & win, bool active)
 			{
 				this->OnSize(win, active);
@@ -369,8 +369,8 @@ namespace KlayGE
 
 	D3D12RenderWindow::~D3D12RenderWindow()
 	{
-		on_exit_size_move_connect_.disconnect();
-		on_size_connect_.disconnect();
+		on_exit_size_move_connect_.Disconnect();
+		on_size_connect_.Disconnect();
 
 		this->Destroy();
 	}

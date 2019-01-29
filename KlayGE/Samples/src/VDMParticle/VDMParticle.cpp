@@ -130,7 +130,7 @@ VDMParticleApp::VDMParticleApp()
 {
 	ResLoader::Instance().AddPath("../../Samples/media/VDMParticle");
 
-	this->OnConfirmDevice().connect([]
+	this->OnConfirmDevice().Connect([]
 		{
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			if ((caps.max_simultaneous_rts < 3) || !caps.depth_texture_support || caps.pack_to_rgba_required)
@@ -199,7 +199,7 @@ void VDMParticleApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -213,12 +213,12 @@ void VDMParticleApp::OnCreate()
 	id_particle_rendering_type_combo_ = dialog_->IDFromName("ParticleRenderingTypeCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_particle_rendering_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_particle_rendering_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->ParticleRenderingTypeChangedHandler(sender);
 		});
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);

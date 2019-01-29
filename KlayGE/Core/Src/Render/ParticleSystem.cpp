@@ -608,14 +608,14 @@ namespace KlayGE
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
 		this->AddRenderable(MakeSharedPtr<RenderParticles>(gs_support_));
 
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
 				this->MainThreadUpdateFunc();
 			});
-		this->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->OnSubThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 

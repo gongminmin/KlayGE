@@ -267,7 +267,7 @@ namespace KlayGE
 		}
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_char_connect_ = main_wnd->OnChar().connect(
+		on_char_connect_ = main_wnd->OnChar().Connect(
 			[this](Window const & win, wchar_t ch)
 			{
 				this->CharHandler(win, ch);
@@ -288,7 +288,7 @@ namespace KlayGE
 
 	UIEditBox::~UIEditBox()
 	{
-		on_char_connect_.disconnect();
+		on_char_connect_.Disconnect();
 	}
 
 	// PlaceCaret: Set the caret to a character position, and adjust the scrolling if

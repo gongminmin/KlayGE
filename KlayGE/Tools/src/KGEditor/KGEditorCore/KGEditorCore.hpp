@@ -13,6 +13,8 @@
 #include "PreDeclare.hpp"
 #include "Common.hpp"
 
+#include <map>
+
 namespace KlayGE
 {
 	class KLAYGE_KGEDITOR_CORE_API KGEditorCore : public App3DFramework

@@ -135,7 +135,7 @@ void TessellationApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -155,31 +155,31 @@ void TessellationApp::OnCreate()
 	id_inside_static_ = dialog_->IDFromName("InsideStatic");
 	id_inside_slider_ = dialog_->IDFromName("InsideSlider");
 
-	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->TessellationOnHandler(sender);
 		});
 	this->TessellationOnHandler(*dialog_->Control<UICheckBox>(id_tess_enabled_));
-	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge0ChangedHandler(sender);
 		});
 	this->Edge0ChangedHandler(*dialog_->Control<UISlider>(id_edge0_slider_));
-	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge1ChangedHandler(sender);
 		});
 	this->Edge1ChangedHandler(*dialog_->Control<UISlider>(id_edge1_slider_));
-	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge2ChangedHandler(sender);
 		});
 	this->Edge2ChangedHandler(*dialog_->Control<UISlider>(id_edge2_slider_));
-	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->InsideChangedHandler(sender);

@@ -145,7 +145,7 @@ void ParticleEditorApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -214,112 +214,112 @@ void ParticleEditorApp::OnCreate()
 
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
 		{
 			this->OpenHandler(sender);
 		});
-	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(
+	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
 		{
 			this->SaveAsHandler(sender);
 		});
 
-	dialog_->Control<UISlider>(id_gravity_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_gravity_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->GravityChangedHandler(sender);
 		});
 	this->GravityChangedHandler(*dialog_->Control<UISlider>(id_gravity_slider_));
-	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DensityChangedHandler(sender);
 		});
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
-	dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->FreqChangedHandler(sender);
 		});
 	this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
-	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->AngleChangedHandler(sender);
 		});
 	this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
-	dialog_->Control<UISlider>(id_detail_x_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_detail_x_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DetailXChangedHandler(sender);
 		});
 	this->DetailXChangedHandler(*dialog_->Control<UISlider>(id_detail_x_slider_));
-	dialog_->Control<UISlider>(id_detail_y_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_detail_y_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DetailYChangedHandler(sender);
 		});
 	this->DetailYChangedHandler(*dialog_->Control<UISlider>(id_detail_y_slider_));
-	dialog_->Control<UISlider>(id_detail_z_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_detail_z_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DetailZChangedHandler(sender);
 		});
 	this->DetailZChangedHandler(*dialog_->Control<UISlider>(id_detail_z_slider_));
-	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MinVelocityChangedHandler(sender);
 		});
 	this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
-	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MaxVelocityChangedHandler(sender);
 		});
 	this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
-	dialog_->Control<UISlider>(id_min_life_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_min_life_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MinLifeChangedHandler(sender);
 		});
 	this->MinLifeChangedHandler(*dialog_->Control<UISlider>(id_min_life_slider_));
-	dialog_->Control<UISlider>(id_max_life_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_max_life_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MaxLifeChangedHandler(sender);
 		});
 	this->MaxLifeChangedHandler(*dialog_->Control<UISlider>(id_max_life_slider_));
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->FPSCameraHandler(sender);
 		});
 
-	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().connect(
+	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeParticleAlphaFromHandler(sender);
 		});
-	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().connect(
+	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeParticleAlphaToHandler(sender);
 		});
-	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().connect(
+	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeParticleColorFromHandler(sender);
 		});
-	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().connect(
+	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeParticleColorToHandler(sender);
 		});
 
-	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->CurveTypeChangedHandler(sender);

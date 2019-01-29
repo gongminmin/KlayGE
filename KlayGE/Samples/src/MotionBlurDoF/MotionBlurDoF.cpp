@@ -222,7 +222,7 @@ namespace
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 6, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
 
-			this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(app_time);
 
@@ -708,7 +708,7 @@ void MotionBlurDoFApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -750,31 +750,31 @@ void MotionBlurDoFApp::OnCreate()
 
 	if (depth_of_field_)
 	{
-		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(
+		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().Connect(
 			[this](UICheckBox const & sender)
 			{
 				this->DoFOnHandler(sender);
 			});
 		this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
-		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(
+		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().Connect(
 			[this](UICheckBox const & sender)
 			{
 				this->BokehOnHandler(sender);
 			});
 		this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
-		dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->OnValueChangedEvent().connect(
+		dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->OnValueChangedEvent().Connect(
 			[this](UISlider const & sender)
 			{
 				this->DoFFocusPlaneChangedHandler(sender);
 			});
 		this->DoFFocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_));
-		dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->OnValueChangedEvent().connect(
+		dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->OnValueChangedEvent().Connect(
 			[this](UISlider const & sender)
 			{
 				this->DoFFocusRangeChangedHandler(sender);
 			});
 		this->DoFFocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_));
-		dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->OnChangedEvent().connect(
+		dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->OnChangedEvent().Connect(
 			[this](UICheckBox const & sender)
 			{
 				this->DoFBlurFactorHandler(sender);
@@ -791,42 +791,42 @@ void MotionBlurDoFApp::OnCreate()
 		dof_on_ = false;
 	}
 
-	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(
+	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->MBOnHandler(sender);
 		});
-	mb_dialog_->Control<UISlider>(id_mb_exposure_slider_)->OnValueChangedEvent().connect(
+	mb_dialog_->Control<UISlider>(id_mb_exposure_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MBExposureChangedHandler(sender);
 		});
 	this->MBExposureChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_exposure_slider_));
-	mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_)->OnValueChangedEvent().connect(
+	mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MBBlurRadiusChangedHandler(sender);
 		});
 	this->MBBlurRadiusChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_));
-	mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_)->OnValueChangedEvent().connect(
+	mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MBReconstructionSamplesChangedHandler(sender);
 		});
 	this->MBReconstructionSamplesChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_));
-	mb_dialog_->Control<UIComboBox>(id_motion_blur_type_)->OnSelectionChangedEvent().connect(
+	mb_dialog_->Control<UIComboBox>(id_motion_blur_type_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->MotionBlurChangedHandler(sender);
 		});
 
-	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);
 		});
 
-	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(
+	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->UseInstancingHandler(sender);

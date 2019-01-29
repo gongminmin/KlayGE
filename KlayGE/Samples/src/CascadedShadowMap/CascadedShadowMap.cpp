@@ -105,7 +105,7 @@ void CascadedShadowMapApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -121,28 +121,28 @@ void CascadedShadowMapApp::OnCreate()
 	id_pssm_factor_slider_ = dialog_->IDFromName("PSSMFactorSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_csm_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_csm_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->CSMTypeChangedHandler(sender);
 		});
 	this->CSMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_csm_type_combo_));
 
-	dialog_->Control<UIComboBox>(id_cascades_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_cascades_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->CascadesChangedHandler(sender);
 		});
 	this->CascadesChangedHandler(*dialog_->Control<UIComboBox>(id_cascades_combo_));
 
-	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->PSSMFactorChangedHandler(sender);
 		});
 	this->PSSMFactorChangedHandler(*dialog_->Control<UISlider>(id_pssm_factor_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);

@@ -208,26 +208,26 @@ void AtmosphericScatteringApp::OnCreate()
 	id_beta_button_ = dialog_param_->IDFromName("beta_button");
 	id_absorb_button_ = dialog_param_->IDFromName("absorb_button");
 
-	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(
+	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->AtmosphereTopHandler(sender);
 		});
 	this->AtmosphereTopHandler(*(dialog_param_->Control<UISlider>(id_atmosphere_top_)));
 
-	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(
+	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DensityHandler(sender);
 		});
 	this->DensityHandler(*(dialog_param_->Control<UISlider>(id_density_)));
 
-	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(
+	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeBetaHandler(sender);
 		});
-	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(
+	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().Connect(
 		[this](UITexButton const & sender)
 		{
 			this->ChangeAbsorbHandler(sender);
@@ -249,7 +249,7 @@ void AtmosphericScatteringApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);

@@ -89,7 +89,7 @@ void PostProcessingApp::OnCreate()
 		[](RenderModel& model)
 		{
 			auto& node = *model.RootNode();
-			node.OnMainThreadUpdate().connect([&node](float app_time, float elapsed_time)
+			node.OnMainThreadUpdate().Connect([&node](float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(elapsed_time);
 					node.TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
@@ -129,7 +129,7 @@ void PostProcessingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -162,57 +162,57 @@ void PostProcessingApp::OnCreate()
 	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
 	id_black_hole_ = dialog_->IDFromName("BlackHolePP");
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->FPSCameraHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->CopyHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->AsciiArtsHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->CartoonHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->TilingHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->HDRHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->NightVisionHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->SepiaHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->CrossStitchingHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->FrostedGlassHandler(sender);
 		});
-	dialog_->Control<UIRadioButton>(id_black_hole_)->OnChangedEvent().connect(
+	dialog_->Control<UIRadioButton>(id_black_hole_)->OnChangedEvent().Connect(
 		[this](UIRadioButton const & sender)
 		{
 			this->BlackHoleHandler(sender);

@@ -19,9 +19,8 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Signal.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
-
-#include <boost/signals2.hpp>
 
 namespace KlayGE
 {
@@ -71,8 +70,8 @@ namespace KlayGE
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_exit_size_move_connect_;
-		boost::signals2::connection on_size_connect_;
+		Signal::Connection on_exit_size_move_connect_;
+		Signal::Connection on_size_connect_;
 	};
 }
 

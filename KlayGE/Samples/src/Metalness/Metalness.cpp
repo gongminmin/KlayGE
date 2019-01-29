@@ -139,7 +139,7 @@ void MetalnessApp::OnCreate()
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
 
-	sphere_group_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
@@ -198,7 +198,7 @@ void MetalnessApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -214,19 +214,19 @@ void MetalnessApp::OnCreate()
 	id_metalness_static_ = dialog_->IDFromName("MetalnessStatic");
 	id_metalness_ = dialog_->IDFromName("MetalnessSlider");
 
-	dialog_->Control<UICheckBox>(id_single_object_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_single_object_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->SingleObjectHandler(sender);
 		});
 	this->SingleObjectHandler(*dialog_->Control<UICheckBox>(id_single_object_));
-	dialog_->Control<UISlider>(id_glossiness_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_glossiness_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->GlossinessChangedHandler(sender);
 		});
 	this->GlossinessChangedHandler(*dialog_->Control<UISlider>(id_glossiness_));
-	dialog_->Control<UISlider>(id_metalness_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_metalness_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MetalnessChangedHandler(sender);

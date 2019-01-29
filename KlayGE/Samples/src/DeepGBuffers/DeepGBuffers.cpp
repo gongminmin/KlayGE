@@ -216,7 +216,7 @@ void DeepGBuffersApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -231,7 +231,7 @@ void DeepGBuffersApp::OnCreate()
 	id_simple_forward_ = dialog_->IDFromName("SimpleForward");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UICheckBox>(id_receives_lighting_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_receives_lighting_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->ReceivesLightingHandler(sender);
@@ -239,21 +239,21 @@ void DeepGBuffersApp::OnCreate()
 	this->ReceivesLightingHandler(*dialog_->Control<UICheckBox>(id_receives_lighting_));
 
 	dialog_->Control<UISlider>(id_transparency_slider_)->SetValue(static_cast<int>(transparency_ * 20));
-	dialog_->Control<UISlider>(id_transparency_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_transparency_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->TransparencyChangedHandler(sender);
 		});
 	this->TransparencyChangedHandler(*dialog_->Control<UISlider>(id_transparency_slider_));
 
-	dialog_->Control<UICheckBox>(id_simple_forward_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_simple_forward_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->SimpleForwardHandler(sender);
 		});
 	this->SimpleForwardHandler(*dialog_->Control<UICheckBox>(id_simple_forward_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);

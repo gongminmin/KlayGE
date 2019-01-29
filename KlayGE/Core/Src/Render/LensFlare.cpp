@@ -89,7 +89,7 @@ namespace KlayGE
 	LensFlareSceneObject::LensFlareSceneObject()
 		: SceneNode(MakeSharedPtr<LensFlareRenderable>(), 0)
 	{
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);

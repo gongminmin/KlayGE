@@ -56,7 +56,7 @@ namespace KlayGE
 			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
 		}
 
-		this->RootNode()->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
@@ -146,7 +146,7 @@ namespace KlayGE
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 
-		this->RootNode()->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);

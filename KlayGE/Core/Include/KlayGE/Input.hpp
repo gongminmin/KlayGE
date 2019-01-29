@@ -37,6 +37,7 @@
 
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
+#include <KlayGE/Signal.hpp>
 
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
@@ -46,7 +47,6 @@
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
-#include <boost/signals2.hpp>
 
 #include <vector>
 #include <string>
@@ -360,7 +360,7 @@ namespace KlayGE
 		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
 	};
 
-	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
+	typedef Signal::Signal<void(InputEngine const& sender, InputAction const& action)> input_signal;
 	typedef std::shared_ptr<input_signal> action_handler_t;
 	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
 

@@ -575,7 +575,7 @@ void CausticsMapApp::OnCreate()
 	InputActionMap action_map;
 	action_map.AddActions(actions, actions + std::size(actions));
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -778,7 +778,7 @@ void CausticsMapApp::InitUI()
 
 	int ui_id = 0;
 	ui_id = dialog_->IDFromName("Light_Density_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->LightDensityHandler(sender);
@@ -786,7 +786,7 @@ void CausticsMapApp::InitUI()
 	LightDensityHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Refraction_Index_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->RefractIndexHandler(sender);
@@ -794,7 +794,7 @@ void CausticsMapApp::InitUI()
 	RefractIndexHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Point_Size_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->PointSizeHandler(sender);
@@ -802,7 +802,7 @@ void CausticsMapApp::InitUI()
 	PointSizeHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Dual_Caustics_Checkbox");
-	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->DualFaceCausticsCheckBoxHandler(sender);
@@ -810,7 +810,7 @@ void CausticsMapApp::InitUI()
 	DualFaceCausticsCheckBoxHandler(*(dialog_->Control<UICheckBox>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Model_Combobox");
-	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->ModelSelectionComboBox(sender);

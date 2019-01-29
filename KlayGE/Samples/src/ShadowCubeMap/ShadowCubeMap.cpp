@@ -470,7 +470,7 @@ void ShadowCubeMap::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -486,17 +486,17 @@ void ShadowCubeMap::OnCreate()
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->ScaleFactorChangedHandler(sender);
 		});
-	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->SMTypeChangedHandler(sender);
 		});
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);
@@ -611,7 +611,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				auto const & teapot = teapot_model_->Mesh(0);
 				auto so = MakeSharedPtr<SceneNode>(teapot, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-				so->OnSubThreadUpdate().connect([so](float app_time, float elapsed_time)
+				so->OnSubThreadUpdate().Connect(
+					[so](float app_time, float elapsed_time)
 					{
 						KFL_UNUSED(elapsed_time);
 

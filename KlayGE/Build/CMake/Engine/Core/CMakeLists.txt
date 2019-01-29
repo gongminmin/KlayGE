@@ -38,6 +38,7 @@ SET(BASE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/HWDetect.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/PerfProfiler.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/ResLoader.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Base/Signal.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/Tables.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/TableGen.py
 )
@@ -50,6 +51,7 @@ SET(BASE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PerfProfiler.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SALWrapper.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Signal.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/Tables.hpp
 )
 

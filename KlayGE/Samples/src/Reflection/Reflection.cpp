@@ -256,7 +256,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -268,7 +268,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
 	id_min_sample_num_slider_ = parameter_dialog_->IDFromName("min_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().connect(
+	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MinSampleNumHandler(sender);
@@ -277,7 +277,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	id_max_sample_num_static_ = parameter_dialog_->IDFromName("max_sample_num_static");
 	id_max_sample_num_slider_ = parameter_dialog_->IDFromName("max_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().connect(
+	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->MaxSampleNumHandler(sender);
@@ -285,7 +285,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
 
 	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
-	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().connect(
+	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->EnbleReflectionHandler(sender);

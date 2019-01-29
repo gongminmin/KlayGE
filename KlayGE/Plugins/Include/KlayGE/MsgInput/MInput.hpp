@@ -260,23 +260,23 @@ namespace KlayGE
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		boost::signals2::connection on_raw_input_;
+		Signal::Connection on_raw_input_;
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
-		boost::signals2::connection on_key_down_;
-		boost::signals2::connection on_key_up_;
+		Signal::Connection on_key_down_;
+		Signal::Connection on_key_up_;
 #if defined KLAYGE_PLATFORM_ANDROID
-		boost::signals2::connection on_mouse_down_;
-		boost::signals2::connection on_mouse_up_;
-		boost::signals2::connection on_mouse_move_;
-		boost::signals2::connection on_mouse_wheel_;
-		boost::signals2::connection on_joystick_axis_;
-		boost::signals2::connection on_joystick_buttons_;
+		Signal::Connection on_mouse_down_;
+		Signal::Connection on_mouse_up_;
+		Signal::Connection on_mouse_move_;
+		Signal::Connection on_mouse_wheel_;
+		Signal::Connection on_joystick_axis_;
+		Signal::Connection on_joystick_buttons_;
 #endif
 #endif
-		boost::signals2::connection on_pointer_down_;
-		boost::signals2::connection on_pointer_up_;
-		boost::signals2::connection on_pointer_update_;
-		boost::signals2::connection on_pointer_wheel_;
+		Signal::Connection on_pointer_down_;
+		Signal::Connection on_pointer_up_;
+		Signal::Connection on_pointer_update_;
+		Signal::Connection on_pointer_wheel_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_hid_;

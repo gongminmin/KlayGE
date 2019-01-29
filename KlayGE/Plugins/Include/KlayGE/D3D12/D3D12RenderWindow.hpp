@@ -33,22 +33,21 @@
 
 #pragma once
 
+#include <KlayGE/Signal.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#pragma warning(disable : 4471) // A forward declaration of an unscoped enumeration must have an underlying type
 #endif
-#include <windows.ui.core.h>
 #include <windows.graphics.display.h>
+#include <windows.ui.core.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
 #endif
 #endif
-
-#include <boost/signals2.hpp>
 
 namespace KlayGE
 {
@@ -58,7 +57,7 @@ namespace KlayGE
 	class D3D12RenderWindow : public D3D12FrameBuffer
 	{
 	public:
-		D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings);
+		D3D12RenderWindow(D3D12Adapter* adapter, std::string const& name, RenderSettings const& settings);
 		~D3D12RenderWindow();
 
 		void Destroy();
@@ -66,7 +65,7 @@ namespace KlayGE
 		void SwapBuffers() override;
 		void WaitOnSwapBuffers() override;
 
-		std::wstring const & Description() const;
+		std::wstring const& Description() const;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);
@@ -74,20 +73,20 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		D3D12Adapter const & Adapter() const
+		D3D12Adapter const& Adapter() const
 		{
 			return *adapter_;
 		}
 
-		TexturePtr const & D3DDepthStencilBuffer() const
+		TexturePtr const& D3DDepthStencilBuffer() const
 		{
 			return depth_stencil_;
 		}
-		RenderTargetViewPtr const & D3DBackBufferRtv() const
+		RenderTargetViewPtr const& D3DBackBufferRtv() const
 		{
 			return render_target_render_views_[curr_back_buffer_];
 		}
-		RenderTargetViewPtr const & D3DBackBufferRightEyeRtv() const
+		RenderTargetViewPtr const& D3DBackBufferRightEyeRtv() const
 		{
 			return render_target_render_views_right_eye_[curr_back_buffer_];
 		}
@@ -101,12 +100,11 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		void OnExitSizeMove(Window const & win);
-		void OnSize(Window const & win, bool active);
+		void OnExitSizeMove(Window const& win);
+		void OnSize(Window const& win, bool active);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
-			IInspectable* args);
+		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
 #endif
 
 	private:
@@ -114,15 +112,15 @@ namespace KlayGE
 		void CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue, bool try_hdr_display);
 
 	private:
-		std::string	name_;
+		std::string name_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HWND	hWnd_;				// Win32 Window handle
+		HWND hWnd_; // Win32 Window handle
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
 		EventRegistrationToken stereo_enabled_changed_token_;
 #endif
-		bool	isFullScreen_;
+		bool isFullScreen_;
 		uint32_t sync_interval_;
 
 		D3D12Adapter* adapter_;
@@ -135,8 +133,8 @@ namespace KlayGE
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
 #endif
-		IDXGISwapChain3Ptr		swap_chain_;
-		bool					main_wnd_;
+		IDXGISwapChain3Ptr swap_chain_;
+		bool main_wnd_;
 		HANDLE frame_latency_waitable_obj_;
 
 		std::array<TexturePtr, NUM_BACK_BUFFERS> render_targets_;
@@ -147,16 +145,16 @@ namespace KlayGE
 
 		uint32_t curr_back_buffer_;
 
-		DXGI_FORMAT					back_buffer_format_;
-		ElementFormat				depth_stencil_fmt_;
+		DXGI_FORMAT back_buffer_format_;
+		ElementFormat depth_stencil_fmt_;
 
-		std::wstring			description_;
+		std::wstring description_;
 
-		boost::signals2::connection on_exit_size_move_connect_;
-		boost::signals2::connection on_size_connect_;
+		Signal::Connection on_exit_size_move_connect_;
+		Signal::Connection on_size_connect_;
 	};
 
 	typedef std::shared_ptr<D3D12RenderWindow> D3D12RenderWindowPtr;
-}
+} // namespace KlayGE
 
-#endif			// _D3D12RENDERWINDOW_HPP
+#endif // _D3D12RENDERWINDOW_HPP

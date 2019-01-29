@@ -151,7 +151,7 @@ namespace KlayGE
 	InfTerrainSceneObject::InfTerrainSceneObject()
 		: SceneNode(SOA_Moveable)
 	{
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
@@ -721,7 +721,7 @@ namespace KlayGE
 
 		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
 
-		this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);

@@ -250,7 +250,7 @@ void JudaTexViewer::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -261,7 +261,7 @@ void JudaTexViewer::OnCreate()
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
 		{
 			this->OpenHandler(sender);

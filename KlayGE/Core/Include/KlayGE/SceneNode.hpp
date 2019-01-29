@@ -36,8 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Renderable.hpp>
-
-#include <boost/signals2.hpp>
+#include <KlayGE/Signal.hpp>
 
 namespace KlayGE
 {
@@ -103,7 +102,7 @@ namespace KlayGE
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
-		using UpdateEvent = boost::signals2::signal<void(float, float)>;
+		using UpdateEvent = Signal::Signal<void(float, float)>;
 		UpdateEvent& OnSubThreadUpdate()
 		{
 			return sub_thread_update_event_;

@@ -100,7 +100,7 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(
+			input_handler->Connect(
 				[this](InputEngine const & ie, InputAction const & action)
 				{
 					this->InputHandler(ie, action);
@@ -293,7 +293,7 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(
+			input_handler->Connect(
 				[this](InputEngine const & ie, InputAction const & action)
 				{
 					this->InputHandler(ie, action);

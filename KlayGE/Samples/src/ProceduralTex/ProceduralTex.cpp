@@ -212,7 +212,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			polygon_model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 				SceneNode::SOA_Cullable, AddToSceneRootHelper,
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
-			polygon_model_->RootNode()->OnSubThreadUpdate().connect([this](float app_time, float elapsed_time)
+			polygon_model_->RootNode()->OnSubThreadUpdate().Connect([this](float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(elapsed_time);
 
@@ -260,7 +260,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(
+			input_handler->Connect(
 				[this](InputEngine const & sender, InputAction const & action)
 				{
 					this->InputHandler(sender, action);
@@ -278,7 +278,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			id_freq_static_ = dialog_->IDFromName("FreqStatic");
 			id_freq_slider_ = dialog_->IDFromName("FreqSlider");
 
-			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(
+			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().Connect(
 				[this](UIComboBox const & sender)
 				{
 					this->TypeChangedHandler(sender);
@@ -286,7 +286,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 
 			dialog_->Control<UISlider>(id_freq_slider_)->SetValue(static_cast<int>(procedural_freq_));
-			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(
+			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().Connect(
 				[this](UISlider const & sender)
 				{
 					this->FreqChangedHandler(sender);

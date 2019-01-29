@@ -185,7 +185,7 @@ RasterizationOrderApp::RasterizationOrderApp()
 {
 	ResLoader::Instance().AddPath("../../Tutorials/media/RasterizationOrder");
 
-	this->OnConfirmDevice().connect([]
+	this->OnConfirmDevice().Connect([]
 		{
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			if (caps.max_shader_model < ShaderModel(5, 0))
@@ -213,7 +213,7 @@ void RasterizationOrderApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -225,13 +225,13 @@ void RasterizationOrderApp::OnCreate()
 	id_color_map_ = dialog_params_->IDFromName("ColorMap");
 	id_capture_ = dialog_params_->IDFromName("Capture");
 
-	dialog_params_->Control<UICheckBox>(id_color_map_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_color_map_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->ColorMapHandler(sender);
 		});
 	this->ColorMapHandler(*dialog_params_->Control<UICheckBox>(id_color_map_));
-	dialog_params_->Control<UIButton>(id_capture_)->OnClickedEvent().connect(
+	dialog_params_->Control<UIButton>(id_capture_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
 		{
 			this->CaptureHandler(sender);

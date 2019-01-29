@@ -362,7 +362,7 @@ namespace
 				}
 			}
 
-			this->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+			this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(elapsed_time);
 
@@ -874,7 +874,7 @@ void OceanApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -902,69 +902,69 @@ void OceanApp::OnCreate()
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
-	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->DMapDimChangedHandler(sender);
 		});
 	this->DMapDimChangedHandler(*dialog_params_->Control<UISlider>(id_dmap_dim_slider_));
 
-	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->PatchLengthChangedHandler(sender);
 		});
 	this->PatchLengthChangedHandler(*dialog_params_->Control<UISlider>(id_patch_length_slider_));
 
-	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->TimeScaleChangedHandler(sender);
 		});
 	this->TimeScaleChangedHandler(*dialog_params_->Control<UISlider>(id_time_scale_slider_));
 
-	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->WaveAmplitudeChangedHandler(sender);
 		});
 	this->WaveAmplitudeChangedHandler(*dialog_params_->Control<UISlider>(id_wave_amplitude_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->WindSpeedXChangedHandler(sender);
 		});
 	this->WindSpeedXChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_x_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->WindSpeedYChangedHandler(sender);
 		});
 	this->WindSpeedYChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_y_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->WindDependencyChangedHandler(sender);
 		});
 	this->WindDependencyChangedHandler(*dialog_params_->Control<UISlider>(id_wind_dependency_slider_));
 
-	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->ChoppyScaleChangedHandler(sender);
 		});
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
-	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->LightShaftHandler(sender);
 		});
 
-	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->FPSCameraHandler(sender);

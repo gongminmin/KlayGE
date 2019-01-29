@@ -36,7 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Timer.hpp>
 
-#include <boost/signals2.hpp>
+#include <KlayGE/Signal.hpp>
 
 namespace KlayGE
 {
@@ -109,21 +109,24 @@ namespace KlayGE
 	public:
 		struct AndCombiner
 		{
-			typedef bool result_type;
+			using ResultType = bool;
 
-			template <typename InputIterator>
-			bool operator()(InputIterator first, InputIterator last) const
+			bool operator()(bool result)
 			{
-				bool ret = true;
-				for (auto iter = first; iter != last; ++ iter)
-				{
-					ret &= static_cast<bool>(*iter);
-				}
-				return ret;
+				combined_result_ &= result;
+				return true;
 			}
+
+			ResultType Result()
+			{
+				return combined_result_;
+			}
+
+		private:
+			bool combined_result_ = true;
 		};
 
-		using ConfirmDeviceSignal = boost::signals2::signal<bool(), AndCombiner>;
+		using ConfirmDeviceSignal = Signal::Signal<bool(), AndCombiner>;
 
 		ConfirmDeviceSignal& OnConfirmDevice()
 		{

@@ -101,7 +101,7 @@ void VertexDisplacement::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	flag_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<FlagRenderable>(8, 6), SceneNode::SOA_Cullable);
-	flag_->OnMainThreadUpdate().connect([this](float app_time, float elapsed_time)
+	flag_->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(elapsed_time);
 
@@ -120,7 +120,7 @@ void VertexDisplacement::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);

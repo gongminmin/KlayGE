@@ -153,7 +153,7 @@ void FoliageApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -165,13 +165,13 @@ void FoliageApp::OnCreate()
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
-	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->LightShaftHandler(sender);
 		});
 
-	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->FPSCameraHandler(sender);

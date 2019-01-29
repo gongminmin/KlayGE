@@ -188,7 +188,7 @@ void DeferredRenderingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -214,14 +214,14 @@ void DeferredRenderingApp::OnCreate()
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(9);
 #endif
 
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->BufferChangedHandler(sender);
 		});
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
-	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->IllumChangedHandler(sender);
@@ -229,39 +229,39 @@ void DeferredRenderingApp::OnCreate()
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
 
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
-	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->ILScaleChangedHandler(sender);
 		});
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
-	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->SSVOHandler(sender);
 		});
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
-	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->HDRHandler(sender);
 		});
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
-	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->AntiAliasHandler(sender);
 		});
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
-	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->NumLightsChangedHandler(sender);
 		});
 	this->NumLightsChangedHandler(*dialog_->Control<UISlider>(id_num_lights_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);

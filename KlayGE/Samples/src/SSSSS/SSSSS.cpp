@@ -127,7 +127,7 @@ void SSSSSApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -145,31 +145,31 @@ void SSSSSApp::OnCreate()
 	id_translucency_strength_static_ = dialog_params_->IDFromName("TranslucencyStrengthStatic");
 	id_translucency_strength_slider_ = dialog_params_->IDFromName("TranslucencyStrengthSlider");
 
-	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->SSSHandler(sender);
 		});
 	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_sss_));
-	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->SSSStrengthChangedHandler(sender);
 		});
 	this->SSSStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_sss_strength_slider_));
-	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->SSSCorrectionChangedHandler(sender);
 		});
 	this->SSSCorrectionChangedHandler(*dialog_params_->Control<UISlider>(id_sss_correction_slider_));
-	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(
+	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->TranslucencyHandler(sender);
 		});
 	this->TranslucencyHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
-	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(
+	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->TranslucencyStrengthChangedHandler(sender);
