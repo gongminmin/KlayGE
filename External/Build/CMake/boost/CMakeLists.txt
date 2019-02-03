@@ -41,13 +41,17 @@ if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
 else()
 	set(boost_lib_dir ${KLAYGE_BIN_DIR})
 endif()
-GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" FALSE debug_filesystem_name)
-GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}" FALSE optimized_filesystem_name)
+set(is_static_lib FALSE)
+if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC")
+	set(is_static_lib TRUE)
+endif()
+GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" ${is_static_lib} debug_filesystem_name)
+GenerateLibFileName("boost_filesystem${KLAYGE_OUTPUT_SUFFIX}" ${is_static_lib} optimized_filesystem_name)
 set(Boost_FILESYSTEM_LIBRARY
 	debug ${boost_lib_dir}/${debug_filesystem_name} optimized ${boost_lib_dir}/${optimized_filesystem_name}
 )
-GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" FALSE debug_system_name)
-GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}" FALSE optimized_system_name)
+GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" ${is_static_lib} debug_system_name)
+GenerateLibFileName("boost_system${KLAYGE_OUTPUT_SUFFIX}" ${is_static_lib} optimized_system_name)
 set(Boost_SYSTEM_LIBRARY
 	debug ${boost_lib_dir}/${debug_system_name} optimized ${boost_lib_dir}/${optimized_system_name}
 )

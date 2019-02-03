@@ -28,8 +28,12 @@ if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
 else()
 	set(zlib_lib_dir ${KLAYGE_BIN_DIR})
 endif()
-GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" FALSE debug_lib_name)
-GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}" FALSE optimized_lib_name)
+set(is_static_lib FALSE)
+if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC")
+	set(is_static_lib TRUE)
+endif()
+GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" ${is_static_lib} debug_lib_name)
+GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}" ${is_static_lib} optimized_lib_name)
 set(ZLIB_LIBRARY
 	debug ${zlib_lib_dir}/${debug_lib_name} optimized ${zlib_lib_dir}/${optimized_lib_name}
 	CACHE INTERNAL "" FORCE
