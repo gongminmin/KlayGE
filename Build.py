@@ -238,7 +238,7 @@ class BuildInfo:
 
 					if len(self.FindVS2019Folder(program_files_folder)) > 0:
 						project_type = "vs2019"
-						compiler = "vc141"
+						compiler = "vc142"
 					elif len(self.FindVS2017Folder(program_files_folder)) > 0:
 						project_type = "vs2017"
 						compiler = "vc141"
@@ -270,7 +270,7 @@ class BuildInfo:
 
 		if (project_type != "") and (compiler == ""):
 			if project_type == "vs2019":
-				compiler = "vc141"
+				compiler = "vc142"
 			elif project_type == "vs2017":
 				compiler = "vc141"
 			elif project_type == "vs2015":
@@ -281,7 +281,18 @@ class BuildInfo:
 		if 0 == target_platform.find("win"):
 			program_files_folder = self.FindProgramFilesFolder()
 
-			if "vc141" == compiler:
+			if "vc142" == compiler:
+				if project_type == "vs2019":
+					try_folder = self.FindVS2019Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = ""
+					else:
+						LogError("Could NOT find vc142 compiler toolset for VS2019.\n")
+				else:
+					LogError("Could NOT find vc142 compiler.\n")
+			elif "vc141" == compiler:
 				if project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
 					if len(try_folder) > 0:
@@ -338,7 +349,9 @@ class BuildInfo:
 			compiler_root = ""
 
 		if "" == project_type:
-			if "vc141" == compiler:
+			if "vc142" == compiler:
+				project_type = "vs2019"
+			elif "vc141" == compiler:
 				project_type = "vs2017"
 			elif "vc140" == compiler:
 				project_type = "vs2015"
@@ -361,7 +374,10 @@ class BuildInfo:
 		compilers = []
 		if "vs2019" == project_type:
 			self.vs_version = 16
-			if "vc141" == compiler:
+			if "vc142" == compiler:
+				compiler_name = "vc"
+				compiler_version = 142
+			elif "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141
 			elif "vc140" == compiler:
@@ -371,7 +387,7 @@ class BuildInfo:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
-				compilers.append(CompilerInfo(arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
+				compilers.append(CompilerInfo(arch, "Visual Studio 16", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2017" == project_type:
 			self.vs_version = 15
 			if "vc141" == compiler:
@@ -428,6 +444,11 @@ class BuildInfo:
 				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+			elif "vc142" == compiler:
+				compiler_name = "vc"
+				compiler_version = 142
+				for arch in archs:
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			elif "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141

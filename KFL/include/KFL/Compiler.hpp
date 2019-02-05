@@ -189,7 +189,9 @@
 	#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
 	#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 
-	#if _MSC_VER >= 1910
+	#if _MSC_VER >= 1920
+		#define KLAYGE_COMPILER_VERSION 142
+	#elif _MSC_VER >= 1910
 		#define KLAYGE_COMPILER_VERSION 141
 	#elif _MSC_VER >= 1900
 		#define KLAYGE_COMPILER_VERSION 140

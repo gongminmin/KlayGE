@@ -1,7 +1,7 @@
 set(OPENALSOFT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/openal-soft")
 set(OPENALSOFT_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/openal-soft/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "5b382a69b6da10717daa8de388246053df0d27a4")
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "05cdc2cb3002e0c9a20764a1e4e6a0e4de5e809e")
 
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	set(ALSOFT_BACKEND_DSOUND ON CACHE BOOL "" FORCE)
