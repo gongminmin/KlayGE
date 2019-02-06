@@ -1,7 +1,7 @@
 SET(SEVENZIP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/7z")
 SET(SEVENZIP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/7z/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("7z" "https://github.com/gongminmin/7z" "a62a5efdcc718c54c207a55326b4ccbffaa60fa1" "FixForKlayGE" "original")
+UpdateExternalLib("7z" "https://github.com/gongminmin/7z" "85057a26f88d0fdbc88342251ebeb09ddf84dc87" "FixForKlayGE" "original")
 
 ADD_SUBDIRECTORY(7zxa)
 ADD_SUBDIRECTORY(LZMA)

@@ -19,10 +19,8 @@ SET(7ZIP_COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/OutBuffer.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/ProgressUtils.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/PropId.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamBinder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamObjects.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamUtils.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/VirtThread.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/CreateCoder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/CWrappers.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/FilterCoder.h
@@ -34,10 +32,8 @@ SET(7ZIP_COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/ProgressUtils.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/RegisterArc.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/RegisterCodec.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamBinder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamObjects.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamUtils.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/VirtThread.h
 )
 SET(ARCHIVE_7Z_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zCompressionMode.cpp
@@ -92,7 +88,6 @@ SET(C_FILES
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd7.c
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd7Dec.c
 	${SEVENZIP_PROJECT_DIR}/C/Sha256.c
-	${SEVENZIP_PROJECT_DIR}/C/Threads.c
 	${SEVENZIP_PROJECT_DIR}/C/7zCrc.h
 	${SEVENZIP_PROJECT_DIR}/C/Aes.h
 	${SEVENZIP_PROJECT_DIR}/C/Alloc.h
@@ -206,13 +201,10 @@ SET(SPEC_FILES
 )
 SET(WINDOWS_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/PropVariant.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Synchronization.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/System.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Defs.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/PropVariant.h
-	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Synchronization.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/System.h
-	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Thread.h
 )
 
 SOURCE_GROUP("7zip" FILES ${7ZIP_FILES})
