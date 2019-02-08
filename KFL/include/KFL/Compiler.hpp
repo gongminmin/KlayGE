@@ -222,13 +222,6 @@
 	#pragma warning(disable: 4251) // STL classes are not dllexport.
 	#pragma warning(disable: 4819) // Allow non-ANSI characters.
 
-	#ifndef _CRT_SECURE_NO_DEPRECATE
-		#define _CRT_SECURE_NO_DEPRECATE
-	#endif
-	#ifndef _SCL_SECURE_NO_DEPRECATE
-		#define _SCL_SECURE_NO_DEPRECATE
-	#endif
-
 	#define KLAYGE_ATTRIBUTE_NORETURN __declspec(noreturn)
 	#define KLAYGE_BUILTIN_UNREACHABLE __assume(false)
 #else

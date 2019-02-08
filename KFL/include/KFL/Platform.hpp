@@ -69,12 +69,8 @@
 
 	#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		#include <winapifamily.h>
-		#if defined(WINAPI_FAMILY)
-			#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
-				#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			#else
-				#define KLAYGE_PLATFORM_WINDOWS_STORE
-			#endif
+		#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP)
+			#define KLAYGE_PLATFORM_WINDOWS_STORE
 		#else
 			#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		#endif
