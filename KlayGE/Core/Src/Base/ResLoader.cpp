@@ -783,7 +783,7 @@ namespace KlayGE
 			}
 			else
 			{
-				res = res_desc->CreateResource();
+				res_desc->CreateResource();
 			}
 
 			if (res_desc->HasSubThreadStage())

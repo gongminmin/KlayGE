@@ -716,8 +716,8 @@ namespace KlayGE
 		: SceneNode(renderable, SOA_Moveable),
 			reset_terrain_(true)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		last_eye_pos_ = re.DefaultFrameBuffer()->GetViewport()->camera->EyePos();
+		last_eye_pos_ =
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera->EyePos();
 
 		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
 

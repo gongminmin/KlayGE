@@ -2196,8 +2196,6 @@ namespace
 				recompute_pos_bb, recompute_tc_bb);
 		}
 
-		std::vector<uint8_t> triangle_indices;
-
 		XMLNodePtr triangles_chunk = lod_node->FirstNode("triangles_chunk");
 		if (triangles_chunk)
 		{

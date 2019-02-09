@@ -133,16 +133,9 @@ namespace KlayGE
 		}
 		else
 		{
-			for (auto const & child : children_)
-			{
-				if (child->IsNodeInSubTree(node))
-				{
-					return true;
-				}
-			}
+			return std::any_of(
+				children_.begin(), children_.end(), [node](SceneNodePtr const& child) { return child->IsNodeInSubTree(node); });
 		}
-
-		return false;
 	}
 
 	SceneNode* SceneNode::Parent() const

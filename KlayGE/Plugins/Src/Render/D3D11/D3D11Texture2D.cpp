@@ -134,11 +134,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D11Texture2D& other(*checked_cast<D3D11Texture2D*>(&target));
-
 		if ((this->Width(0) == target.Width(0)) && (this->Height(0) == target.Height(0)) && (this->Format() == target.Format())
 			&& (this->ArraySize() == target.ArraySize()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
+			auto& other = *checked_cast<D3D11Texture2D*>(&target);
+
 			if ((this->SampleCount() > 1) && (1 == target.SampleCount()))
 			{
 				for (uint32_t l = 0; l < this->NumMipMaps(); ++ l)
@@ -173,10 +173,10 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D11Texture& other(*checked_cast<D3D11Texture*>(&target));
-
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
+			auto& other = *checked_cast<D3D11Texture*>(&target);
+
 			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;
 			if ((sample_count_ != 1) || IsDepthFormat(format_))
@@ -217,10 +217,10 @@ namespace KlayGE
 		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
-		D3D11Texture& other(*checked_cast<D3D11Texture*>(&target));
-
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
+			auto& other = *checked_cast<D3D11Texture*>(&target);
+
 			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;
 			if ((sample_count_ != 1) || IsDepthFormat(format_))

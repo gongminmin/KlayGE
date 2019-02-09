@@ -130,16 +130,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	char Lobby::NumPlayer() const
 	{
-		char n = 0;
-		for (auto const & player : players_)
-		{
-			if (player.first != 0)
-			{
-				++ n;
-			}
-		}
-
-		return n;
+		return static_cast<char>(std::count_if(
+			players_.begin(), players_.end(), [](std::pair<uint32_t, PlayerDes> const& player) { return (player.first != 0); }));
 	}
 
 	// ÉèÖÃ´óÌüÃû³Æ

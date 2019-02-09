@@ -1433,10 +1433,10 @@ namespace KlayGE
 
 	void D3D11ShaderObject::Unbind()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		if (so_template_->compute_shader_ && !uavs_.empty())
 		{
+			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_.size(), nullptr);
 			std::vector<UINT> uav_init_counts(uavs_.size(), 0);
 			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs.size()), &uavs[0], &uav_init_counts[0]);

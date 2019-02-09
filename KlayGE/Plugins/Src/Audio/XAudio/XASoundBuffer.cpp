@@ -218,14 +218,7 @@ namespace KlayGE
 
 	bool XASoundBuffer::IsPlaying() const
 	{
-		for (auto const & src : sources_)
-		{
-			if (src.is_playing)
-			{
-				return true;
-			}
-		}
-		return false;
+		return std::any_of(sources_.begin(), sources_.end(), [](SourceVoice const& src) { return src.is_playing; });
 	}
 
 	void XASoundBuffer::Volume(float vol)

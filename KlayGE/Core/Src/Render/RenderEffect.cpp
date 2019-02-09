@@ -6093,12 +6093,10 @@ namespace KlayGE
 
 	RenderVariable& RenderVariableTexture::operator=(TexturePtr const & value)
 	{
-		uint32_t array_size = 1;
-		uint32_t mipmap = 1;
 		if (value)
 		{
-			array_size = value->ArraySize();
-			mipmap = value->NumMipMaps();
+			uint32_t array_size = value->ArraySize();
+			uint32_t mipmap = value->NumMipMaps();
 
 			auto& rf = Context::Instance().RenderFactoryInstance();
 			val_ = rf.MakeTextureSrv(value, 0, array_size, 0, mipmap);

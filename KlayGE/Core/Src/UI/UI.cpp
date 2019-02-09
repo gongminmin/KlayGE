@@ -1531,15 +1531,8 @@ namespace KlayGE
 		if (!inside)
 		{
 			int2 const local_pt = this->ToLocal(pt);
-
-			for (auto const & control : controls_)
-			{
-				if (control->ContainsPoint(local_pt))
-				{
-					inside = true;
-					break;
-				}
-			}
+			inside = std::any_of(
+				controls_.begin(), controls_.end(), [local_pt](UIControlPtr const& control) { return control->ContainsPoint(local_pt); });
 		}
 		return inside;
 	}

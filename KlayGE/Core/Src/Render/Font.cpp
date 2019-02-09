@@ -286,34 +286,26 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<float> sx;
-			sx.reserve(lines.size());
-			std::vector<float> sy;
-			sy.reserve(lines.size());
-
+			std::vector<float> sx(lines.size());
 			if (align & Font::FA_Hor_Left)
 			{
-				sx.resize(lines.size(), rc.left());
+				std::fill(sx.begin(), sx.end(), rc.left());
+			}
+			else if (align & Font::FA_Hor_Right)
+			{
+				std::transform(lines.begin(), lines.end(), sx.begin(),
+					[&rc](std::pair<float, std::wstring> const& p) { return rc.right() - p.first; });
 			}
 			else
 			{
-				if (align & Font::FA_Hor_Right)
-				{
-					for (auto const & p : lines)
-					{
-						sx.push_back(rc.right() - p.first);
-					}
-				}
-				else
-				{
-					// Font::FA_Hor_Center
-					for (auto const & p : lines)
-					{
-						sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
-					}
-				}
+				BOOST_ASSERT(align & Font::FA_Hor_Center);
+
+				std::transform(lines.begin(), lines.end(), sx.begin(),
+					[&rc](std::pair<float, std::wstring> const& p) { return (rc.left() + rc.right()) / 2 - p.first / 2; });
 			}
 
+			std::vector<float> sy;
+			sy.reserve(lines.size());
 			if (align & Font::FA_Ver_Top)
 			{
 				for (auto iter = lines.begin(); iter != lines.end(); ++ iter)
@@ -321,23 +313,20 @@ namespace KlayGE
 					sy.push_back(rc.top() + (iter - lines.begin()) * h);
 				}
 			}
+			else if (align & Font::FA_Ver_Bottom)
+			{
+				for (auto iter = lines.begin(); iter != lines.end(); ++ iter)
+				{
+					sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
+				}
+			}
 			else
 			{
-				if (align & Font::FA_Ver_Bottom)
+				BOOST_ASSERT(align & Font::FA_Ver_Middle);
+
+				for (auto iter = lines.begin(); iter != lines.end(); ++ iter)
 				{
-					for (auto iter = lines.begin(); iter != lines.end(); ++ iter)
-					{
-						sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
-					}
-				}
-				else
-				{
-					// Font::FA_Ver_Middle
-					for (auto iter = lines.begin(); iter != lines.end(); ++ iter)
-					{
-						sy.push_back((rc.top() + rc.bottom()) / 2
-							- lines.size() * h / 2 + (iter - lines.begin()) * h);
-					}
+					sy.push_back((rc.top() + rc.bottom()) / 2 - lines.size() * h / 2 + (iter - lines.begin()) * h);
 				}
 			}
 
