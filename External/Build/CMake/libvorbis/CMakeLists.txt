@@ -1,7 +1,7 @@
 SET(VORBIS_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/libvorbis")
 SET(VORBIS_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/libvorbis/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("libvorbis" "https://github.com/gongminmin/vorbis.git" "f969b6525b6bae7cc4c36963ffde4b459e331f77" "FixForKlayGE" "master")
+UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "9eadeccdc4247127d91ac70555074239f5ce3529")
 
 SET(BUILD_SHARED_LIBS OFF)
 SET(BUILD_FRAMEWORK OFF)
