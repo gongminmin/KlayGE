@@ -178,14 +178,11 @@ float4 SSVOUpsamplePS(float2 tc : TEXCOORD0) : SV_Target
 	float2 coord = tc * width_height.xy;
 	float2 frac_coord = frac(coord);
 
-	float4 ao = 0.0f;
-	float weights_sum = 0.0f;
-
 	const float EPSILON = 0.0001f;
 
 	float weight_00 = (1 - frac_coord.x) * (1 - frac_coord.y) / (depths_diffs.x + EPSILON);
-	ao += weight_00 * aos_half.x;
-	weights_sum += weight_00;
+	float4 ao = weight_00 * aos_half.x;
+	float weights_sum = weight_00;
 
 	float weight_01 = frac_coord.x * (1.0f - frac_coord.y) / (depths_diffs.y + EPSILON);
 	ao += weight_01 * aos_half.y;
