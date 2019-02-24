@@ -129,7 +129,7 @@ namespace KlayGE
 
 		size_t hash_val = 0;
 		HashCombine(hash_val, d3d12_rl.PsoHashValue());
-		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_so.GetD3D12ShaderObjectTemplate());
 		HashCombine(hash_val, d3d12_fb.PsoHashValue());
 		HashCombine(hash_val, has_tessellation);
 
@@ -158,7 +158,7 @@ namespace KlayGE
 		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
 
 		size_t hash_val = 0;
-		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_so.GetD3D12ShaderObjectTemplate());
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())

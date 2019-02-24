@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 #include <KlayGE/NullRender/NullRenderStateObject.hpp>
@@ -405,6 +406,119 @@ namespace KlayGE
 	ShaderObjectPtr NullRenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<NullShaderObject>();
+	}
+
+	ShaderStageObjectPtr NullRenderFactory::MakeShaderStageObject(ShaderStage stage)
+	{
+		bool as_d3d11 = false;
+		bool as_d3d12 = false;
+		bool as_gl = false;
+		bool as_gles = false;
+
+		auto const& re = *checked_cast<NullRenderEngine const *>(&this->RenderEngineInstance());
+		std::string_view const platform_name = re.NativeShaderPlatformName();
+		if (platform_name.find("d3d_11_") == 0)
+		{
+			as_d3d11 = true;
+		}
+		else if (platform_name.find("d3d_12_") == 0)
+		{
+			as_d3d12 = true;
+		}
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
+		else if (platform_name.find("gl_") == 0)
+		{
+			as_gl = true;
+		}
+		else if (platform_name.find("gles_") == 0)
+		{
+			as_gles = true;
+		}
+#endif
+
+		std::shared_ptr<ShaderStageObject> ret;
+		if (as_d3d11 || as_d3d12)
+		{
+			switch (stage)
+			{
+			case ShaderStage::Vertex:
+				if (as_d3d11)
+				{
+					ret = MakeSharedPtr<D3D11VertexShaderStageObject>();
+				}
+				else
+				{
+					BOOST_ASSERT(as_d3d12);
+					ret = MakeSharedPtr<D3D12VertexShaderStageObject>();
+				}
+				break;
+
+			case ShaderStage::Pixel:
+				ret = MakeSharedPtr<D3DPixelShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Geometry:
+				ret = MakeSharedPtr<D3DGeometryShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Compute:
+				ret = MakeSharedPtr<D3DComputeShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Hull:
+				ret = MakeSharedPtr<D3DHullShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Domain:
+				ret = MakeSharedPtr<D3DDomainShaderStageObject>(as_d3d12);
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid shader stage");
+			}
+		}
+		else
+		{
+			switch (stage)
+			{
+			case ShaderStage::Vertex:
+				ret = MakeSharedPtr<OGLVertexShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Pixel:
+				ret = MakeSharedPtr<OGLPixelShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Geometry:
+				if (as_gl)
+				{
+					ret = MakeSharedPtr<OGLGeometryShaderStageObject>();
+				}
+				else
+				{
+					BOOST_ASSERT(as_gles);
+					ret = MakeSharedPtr<OGLESGeometryShaderStageObject>();
+				}
+				break;
+
+			case ShaderStage::Compute:
+				ret = MakeSharedPtr<OGLComputeShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Hull:
+				ret = MakeSharedPtr<OGLHullShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Domain:
+				ret = MakeSharedPtr<OGLDomainShaderStageObject>(as_gles);
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid shader stage");
+			}
+		}
+
+		return ret;
 	}
 
 	std::unique_ptr<RenderEngine> NullRenderFactory::DoMakeRenderEngine()

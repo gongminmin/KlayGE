@@ -113,29 +113,9 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		char const * VertexShaderProfile() const
+		char const * DefaultShaderProfile(ShaderStage stage) const
 		{
-			return vs_profile_;
-		}
-		char const * PixelShaderProfile() const
-		{
-			return ps_profile_;
-		}
-		char const * GeometryShaderProfile() const
-		{
-			return gs_profile_;
-		}
-		char const * ComputeShaderProfile() const
-		{
-			return cs_profile_;
-		}
-		char const * HullShaderProfile() const
-		{
-			return hs_profile_;
-		}
-		char const * DomainShaderProfile() const
-		{
-			return ds_profile_;
+			return shader_profiles_[static_cast<uint32_t>(stage)];
 		}
 
 		void OMSetStencilRef(uint16_t stencil_ref);
@@ -198,7 +178,7 @@ namespace KlayGE
 		}
 
 		ID3D12RootSignaturePtr const & CreateRootSignature(
-			std::array<uint32_t, ShaderObject::ST_NumShaderTypes * 4> const & num,
+			std::array<uint32_t, NumShaderStages * 4> const & num,
 			bool has_vs, bool has_stream_output);
 		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
@@ -315,12 +295,7 @@ namespace KlayGE
 		D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_uav_handle_;
 
-		char const * vs_profile_;
-		char const * ps_profile_;
-		char const * gs_profile_;
-		char const * cs_profile_;
-		char const * hs_profile_;
-		char const * ds_profile_;
+		char const* shader_profiles_[NumShaderStages];
 
 		enum StereoMethod
 		{

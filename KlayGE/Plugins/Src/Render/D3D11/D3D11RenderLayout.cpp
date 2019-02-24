@@ -85,7 +85,7 @@ namespace KlayGE
 		if (!vertex_elems_.empty())
 		{
 			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject const *>(so);
-			auto const signature = shader.VSSignature();
+			auto const signature = shader.VsSignature();
 
 			for (auto const & il : input_layouts_)
 			{
@@ -95,7 +95,7 @@ namespace KlayGE
 				}
 			}
 
-			auto vs_code = shader.VSCode();
+			auto vs_code = shader.VsCode();
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();

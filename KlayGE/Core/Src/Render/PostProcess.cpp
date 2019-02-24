@@ -324,7 +324,7 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(effect);
 
-			cs_based_ = (technique_->Pass(0).GetShaderObject(*effect_)->CSBlockSizeX() > 0);
+			cs_based_ = !!technique_->Pass(0).GetShaderObject(*effect_)->Stage(ShaderStage::Compute);
 
 			BOOST_ASSERT(!(cs_based_ && volumetric_));
 
@@ -822,10 +822,10 @@ namespace KlayGE
 			re.BindFrameBuffer(re.DefaultFrameBuffer());
 			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
-			ShaderObjectPtr const & so = technique_->Pass(0).GetShaderObject(*effect_);
-			uint32_t const bx = so->CSBlockSizeX() * cs_pixel_per_thread_x_;
-			uint32_t const by = so->CSBlockSizeY() * cs_pixel_per_thread_y_;
-			uint32_t const bz = so->CSBlockSizeZ() * cs_pixel_per_thread_z_;
+			auto const& cs_stage = technique_->Pass(0).GetShaderObject(*effect_)->Stage(ShaderStage::Compute);
+			uint32_t const bx = cs_stage->BlockSizeX() * cs_pixel_per_thread_x_;
+			uint32_t const by = cs_stage->BlockSizeY() * cs_pixel_per_thread_y_;
+			uint32_t const bz = cs_stage->BlockSizeZ() * cs_pixel_per_thread_z_;
 			
 			BOOST_ASSERT(bx > 0);
 			BOOST_ASSERT(by > 0);

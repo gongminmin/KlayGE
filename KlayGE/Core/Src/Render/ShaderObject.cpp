@@ -1,14 +1,32 @@
-// ShaderObject.cpp
-// KlayGE shader对象类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
-// Homepage: http://www.klayge.org
-//
-// 3.5.0
-// 初次建立 (2006.11.2)
-//
-// 修改记录
-//////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file ShaderObject.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
@@ -299,17 +317,17 @@ namespace
 
 namespace KlayGE
 {
-	ShaderObject::ShaderObject()
-		: has_discard_(false), has_tessellation_(false),
-			cs_block_size_x_(0), cs_block_size_y_(0), cs_block_size_z_(0)
+	ShaderStageObject::ShaderStageObject(ShaderStage stage) : stage_(stage)
 	{
 	}
 
+	ShaderStageObject::~ShaderStageObject() = default;
+
 #if KLAYGE_IS_DEV_PLATFORM
-	std::vector<uint8_t> ShaderObject::CompileToDXBC(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass,
-			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-			char const * func_name, char const * shader_profile, uint32_t flags)
+	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const & effect,
+		RenderTechnique const & tech, RenderPass const & pass,
+		std::vector<std::pair<char const *, char const *>> const & api_special_macros,
+		char const * func_name, char const * shader_profile, uint32_t flags)
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -328,7 +346,7 @@ namespace KlayGE
 		std::string err_msg;
 		std::vector<D3D_SHADER_MACRO> macros;
 
-		for (uint32_t i = 0; i < api_special_macros.size(); ++ i)
+		for (uint32_t i = 0; i < api_special_macros.size(); ++i)
 		{
 			D3D_SHADER_MACRO macro = { api_special_macros[i].first, api_special_macros[i].second };
 			macros.push_back(macro);
@@ -385,46 +403,46 @@ namespace KlayGE
 		}
 		{
 			D3D_SHADER_MACRO macro_shader_type = { "", "1" };
-			switch (type)
+			switch (stage)
 			{
-			case ST_VertexShader:
+			case ShaderStage::Vertex:
 				macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
 				break;
 
-			case ST_PixelShader:
+			case ShaderStage::Pixel:
 				macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
 				break;
 
-			case ST_GeometryShader:
+			case ShaderStage::Geometry:
 				macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
 				break;
 
-			case ST_ComputeShader:
+			case ShaderStage::Compute:
 				macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
 				break;
 
-			case ST_HullShader:
+			case ShaderStage::Hull:
 				macro_shader_type.Name = "KLAYGE_HULL_SHADER";
 				break;
 
-			case ST_DomainShader:
+			case ShaderStage::Domain:
 				macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
 				break;
 
 			default:
-				KFL_UNREACHABLE("Invalid shader type");
+				KFL_UNREACHABLE("Invalid shader stage");
 			}
 			macros.push_back(macro_shader_type);
 		}
 
-		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		for (uint32_t i = 0; i < tech.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
 			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
 			macros.push_back(macro);
 		}
 
-		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		for (uint32_t i = 0; i < pass.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
 			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
@@ -492,7 +510,7 @@ namespace KlayGE
 				}
 			}
 
-			for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
+			for (auto iter = err_lines.begin(); iter != err_lines.end(); ++iter)
 			{
 				if (iter->first >= 0)
 				{
@@ -506,7 +524,7 @@ namespace KlayGE
 					while (iss && ((iter->first - line) >= 3))
 					{
 						std::getline(iss, s);
-						++ line;
+						++line;
 					}
 					while (iss && (abs(line - iter->first) < 3))
 					{
@@ -519,7 +537,7 @@ namespace KlayGE
 
 						LogInfo() << line << ' ' << s << std::endl;
 
-						++ line;
+						++line;
 					}
 					LogInfo() << "..." << std::endl;
 				}
@@ -534,16 +552,92 @@ namespace KlayGE
 		return code;
 	}
 
-	void ShaderObject::ReflectDXBC(std::vector<uint8_t> const & code, void** reflector)
+	void ShaderStageObject::ReflectDXBC(std::vector<uint8_t> const & code, void** reflector)
 	{
 		D3DCompilerLoader::Instance().D3DReflect(code, reflector);
 	}
 
-	std::vector<uint8_t> ShaderObject::StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags)
+	std::vector<uint8_t> ShaderStageObject::StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags)
 	{
 		std::vector<uint8_t> ret;
 		D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, ret);
 		return ret;
 	}
 #endif
+
+
+	ShaderObject::ShaderObject() : ShaderObject(MakeSharedPtr<ShaderObjectTemplate>())
+	{
+	}
+
+	ShaderObject::ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template) : so_template_(std::move(so_template))
+	{
+	}
+
+	ShaderObject::~ShaderObject() = default;
+
+	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage, RenderEffect const& effect)
+	{
+		so_template_->shader_stages_[static_cast<uint32_t>(stage)] = shader_stage;
+		if (shader_stage->Validate())
+		{
+			this->CreateHwResources(stage, effect);
+		}
+	}
+	
+	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const
+	{
+		return so_template_->shader_stages_[static_cast<uint32_t>(stage)];
+	}
+	
+	bool ShaderObject::StreamIn(ResIdentifierPtr const& res, ShaderStage stage, RenderEffect const& effect,
+		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+	{
+		uint32_t len;
+		res->read(&len, sizeof(len));
+		len = LE2Native(len);
+		std::vector<uint8_t> native_shader_block(len);
+		if (len > 0)
+		{
+			res->read(&native_shader_block[0], len * sizeof(native_shader_block[0]));
+		}
+
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto shader_stage = rf.MakeShaderStageObject(stage);
+		shader_stage->StreamIn(effect, shader_desc_ids, native_shader_block);
+
+		this->AttachStage(stage, shader_stage, effect);
+
+		return shader_stage->Validate();
+	}
+
+	void ShaderObject::StreamOut(std::ostream& os, ShaderStage stage)
+	{
+		this->Stage(stage)->StreamOut(os);
+	}
+
+	void ShaderObject::AttachShader(ShaderStage stage, RenderEffect const & effect,
+		RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, NumShaderStages> const & shader_desc_ids)
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto shader_stage = rf.MakeShaderStageObject(stage);
+		shader_stage->AttachShader(effect, tech, pass, shader_desc_ids);
+
+		this->AttachStage(stage, shader_stage, effect);
+	}
+
+	void ShaderObject::LinkShaders(RenderEffect const & effect)
+	{
+		is_validate_ = true;
+		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+		{
+			auto const& shader_stage = this->Stage(static_cast<ShaderStage>(stage));
+			if (shader_stage)
+			{
+				is_validate_ &= shader_stage->Validate();
+			}
+		}
+
+		this->DoLinkShaders(effect);
+	}
 }

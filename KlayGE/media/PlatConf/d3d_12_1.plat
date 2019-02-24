@@ -3,7 +3,7 @@
 <platform name="d3d_12_1" major_version="12" minor_version="1">
 	<requires_flipping value="1"/>
 	<native_shader_fourcc value="DXBC"/>
-	<native_shader_version value="5"/>
+	<native_shader_version value="6"/>
 
 	<max_shader_model major="5" minor="0"/>
 

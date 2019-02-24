@@ -34,6 +34,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/ShaderObject.hpp>
 #include <KFL/ArrayRef.hpp>
 
 #include <string>
@@ -177,6 +178,7 @@ namespace KlayGE
 			BlendStateDesc const & bs_desc);
 		SamplerStateObjectPtr MakeSamplerStateObject(SamplerStateDesc const & desc);
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
+		virtual ShaderStageObjectPtr MakeShaderStageObject(ShaderStage stage) = 0;
 
 	private:
 		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() = 0;

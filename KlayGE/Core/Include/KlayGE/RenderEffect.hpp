@@ -664,9 +664,9 @@ namespace KlayGE
 		void StreamOut(std::ostream& os) const;
 #endif
 
-		ShaderObject::ShaderType Type() const
+		ShaderStage Stage() const
 		{
-			return type_;
+			return stage_;
 		}
 
 		ShaderModel Version() const
@@ -680,7 +680,7 @@ namespace KlayGE
 		}
 
 	private:
-		ShaderObject::ShaderType type_;
+		ShaderStage stage_;
 		ShaderModel ver_;
 		std::string str_;
 	};
@@ -1077,7 +1077,7 @@ namespace KlayGE
 		size_t name_hash_;
 		std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
 		std::shared_ptr<std::vector<std::pair<std::string, std::string>>> macros_;
-		std::array<uint32_t, ShaderObject::ST_NumShaderTypes> shader_desc_ids_;
+		std::array<uint32_t, NumShaderStages> shader_desc_ids_;
 
 		RenderStateObjectPtr render_state_obj_;
 		uint32_t shader_obj_index_;

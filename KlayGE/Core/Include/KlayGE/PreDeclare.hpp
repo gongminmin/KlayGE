@@ -110,6 +110,8 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderStateObject> RenderStateObjectPtr;
 	class SamplerStateObject;
 	typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectPtr;
+	class ShaderStageObject;
+	typedef std::shared_ptr<ShaderStageObject> ShaderStageObjectPtr;
 	class ShaderObject;
 	typedef std::shared_ptr<ShaderObject> ShaderObjectPtr;
 	class Texture;

@@ -101,6 +101,7 @@ namespace KlayGE
 			uint32_t num_elems) override;
 
 		ShaderObjectPtr MakeShaderObject();
+		ShaderStageObjectPtr MakeShaderStageObject(ShaderStage stage) override;
 
 	private:
 		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
