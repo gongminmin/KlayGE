@@ -88,6 +88,16 @@ namespace
 		"ds_5_0",
 	};
 
+	GLenum gl_shader_types[] =
+	{
+		GL_VERTEX_SHADER,
+		GL_FRAGMENT_SHADER,
+		GL_GEOMETRY_SHADER,
+		GL_COMPUTE_SHADER,
+		GL_TESS_CONTROL_SHADER,
+		GL_TESS_EVALUATION_SHADER,
+	};
+
 	template <typename SrcType>
 	class SetOGLESShaderParameter
 	{
@@ -256,8 +266,7 @@ namespace
 
 namespace KlayGE
 {
-	OGLESShaderStageObject::OGLESShaderStageObject(ShaderStage stage, GLenum gl_shader_type)
-		: ShaderStageObject(stage), gl_shader_type_(gl_shader_type)
+	OGLESShaderStageObject::OGLESShaderStageObject(ShaderStage stage) : ShaderStageObject(stage)
 	{
 	}
 
@@ -668,7 +677,7 @@ namespace KlayGE
 		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		char const* glsl = glsl_src_.c_str();
-		gl_shader_ = glCreateShader(gl_shader_type_);
+		gl_shader_ = glCreateShader(gl_shader_types[static_cast<uint32_t>(stage_)]);
 		if (0 == gl_shader_)
 		{
 			is_validate_ = false;
@@ -702,7 +711,7 @@ namespace KlayGE
 	}
 
 
-	OGLESVertexShaderStageObject::OGLESVertexShaderStageObject() : OGLESShaderStageObject(ShaderStage::Vertex, GL_VERTEX_SHADER)
+	OGLESVertexShaderStageObject::OGLESVertexShaderStageObject() : OGLESShaderStageObject(ShaderStage::Vertex)
 	{
 		is_available_ = true;
 	}
@@ -853,27 +862,27 @@ namespace KlayGE
 	}
 
 
-	OGLESPixelShaderStageObject::OGLESPixelShaderStageObject() : OGLESShaderStageObject(ShaderStage::Pixel, GL_FRAGMENT_SHADER)
+	OGLESPixelShaderStageObject::OGLESPixelShaderStageObject() : OGLESShaderStageObject(ShaderStage::Pixel)
 	{
 		is_available_ = true;
 	}
 
 
-	OGLESGeometryShaderStageObject::OGLESGeometryShaderStageObject() : OGLESShaderStageObject(ShaderStage::Geometry, GL_GEOMETRY_SHADER)
+	OGLESGeometryShaderStageObject::OGLESGeometryShaderStageObject() : OGLESShaderStageObject(ShaderStage::Geometry)
 	{
 		is_available_ = false;
 		is_validate_ = false;
 	}
 
 
-	OGLESComputeShaderStageObject::OGLESComputeShaderStageObject() : OGLESShaderStageObject(ShaderStage::Compute, GL_COMPUTE_SHADER)
+	OGLESComputeShaderStageObject::OGLESComputeShaderStageObject() : OGLESShaderStageObject(ShaderStage::Compute)
 	{
 		is_available_ = false;
 		is_validate_ = false;
 	}
 
 
-	OGLESHullShaderStageObject::OGLESHullShaderStageObject() : OGLESShaderStageObject(ShaderStage::Hull, GL_TESS_CONTROL_SHADER)
+	OGLESHullShaderStageObject::OGLESHullShaderStageObject() : OGLESShaderStageObject(ShaderStage::Hull)
 	{
 		auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		auto const& caps = re.DeviceCaps();
@@ -889,7 +898,7 @@ namespace KlayGE
 #endif
 
 
-	OGLESDomainShaderStageObject::OGLESDomainShaderStageObject() : OGLESShaderStageObject(ShaderStage::Domain, GL_TESS_EVALUATION_SHADER)
+	OGLESDomainShaderStageObject::OGLESDomainShaderStageObject() : OGLESShaderStageObject(ShaderStage::Domain)
 	{
 		auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		auto const& caps = re.DeviceCaps();

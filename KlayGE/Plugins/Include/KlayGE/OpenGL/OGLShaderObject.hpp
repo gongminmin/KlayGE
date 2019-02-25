@@ -55,7 +55,7 @@ namespace KlayGE
 	class OGLShaderStageObject : public ShaderStageObject
 	{
 	public:
-		OGLShaderStageObject(ShaderStage stage, GLenum gl_shader_type);
+		explicit OGLShaderStageObject(ShaderStage stage);
 		~OGLShaderStageObject() override;
 		
 		void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
@@ -131,8 +131,6 @@ namespace KlayGE
 		}
 
 	protected:
-		const GLenum gl_shader_type_;
-
 		bool is_available_;
 
 		std::string shader_func_name_;
