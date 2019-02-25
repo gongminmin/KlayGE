@@ -611,11 +611,13 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				auto const & teapot = teapot_model_->Mesh(0);
 				auto so = MakeSharedPtr<SceneNode>(teapot, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-				so->OnSubThreadUpdate().connect([so](float app_time, float elapsed_time)
+				auto* so_ptr = so.get();
+				so->OnSubThreadUpdate().connect(
+					[so_ptr](float app_time, float elapsed_time)
 					{
 						KFL_UNUSED(elapsed_time);
 
-						so->TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
+						so_ptr->TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
 							* MathLib::rotation_y(-app_time / 1.5f));
 					});
 				{
