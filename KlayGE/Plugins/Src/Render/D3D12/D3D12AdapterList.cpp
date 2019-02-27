@@ -117,13 +117,13 @@ namespace KlayGE
 			TERRC(std::errc::function_not_supported);
 		}
 	}
-	
+
 	void D3D12AdapterList::Enumerate(IDXGIFactory6Ptr const & gi_factory)
 	{
 		UINT adapter_no = 0;
 		IDXGIAdapter1* dxgi_adapter = nullptr;
-		while (gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter)) != DXGI_ERROR_NOT_FOUND)
+		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter))))
 		{
 			if (dxgi_adapter != nullptr)
 			{
@@ -140,6 +140,14 @@ namespace KlayGE
 			}
 
 			++ adapter_no;
+		}
+
+		if (adapters_.empty())
+		{
+			IDXGIFactory4* gif4;
+			gi_factory->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gif4));
+			IDXGIFactory4Ptr gi_factory4 = MakeCOMPtr<IDXGIFactory4>(gif4);
+			this->Enumerate(gi_factory4);
 		}
 
 		if (adapters_.empty())
