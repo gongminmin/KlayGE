@@ -458,6 +458,7 @@ namespace KlayGE
 		uint32_t MergeShadingAndDepthDRJob(PerViewport& pvp, PassTargetBuffer pass_tb);
 		uint32_t PostEffectsDRJob(PerViewport& pvp);
 		uint32_t SimpleForwardDRJob();
+		uint32_t FinishingViewportDRJob(PerViewport& pvp);
 		uint32_t FinishingDRJob();
 		uint32_t SwitchViewportDRJob(uint32_t vp_index);
 		uint32_t VisualizeGBufferDRJob();
@@ -523,7 +524,6 @@ namespace KlayGE
 		RenderTechnique* technique_merge_shading_[2];
 		RenderTechnique* technique_merge_depth_[2];
 		RenderTechnique* technique_copy_shading_depth_;
-		RenderTechnique* technique_copy_depth_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		std::array<RenderTechnique*, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechnique* technique_light_depth_only_;

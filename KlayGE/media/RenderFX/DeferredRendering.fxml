@@ -766,24 +766,11 @@ void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 	oClr = shading_tex.Sample(point_sampler, tc);
 	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
 }
-
-void CopyDepthPS(float2 tc : TEXCOORD0,
-		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
-{
-	oClr = 0;
-	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
-}
 #else
 void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 		out float4 oClr : SV_Target0)
 {
 	oClr = shading_tex.Sample(point_sampler, tc);
-}
-
-void CopyDepthPS(float2 tc : TEXCOORD0,
-		out float4 oClr : SV_Target0)
-{
-	oClr = 0;
 }
 #endif
 		]]>
@@ -895,18 +882,6 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="CopyShadingDepthPS()"/>
-		</pass>
-	</technique>
-	<technique name="CopyDepthTech">
-		<pass name="p0">
-			<state name="cull_mode" value="front"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="always_pass"/>
-
-			<state name="color_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="CopyDepthPS()"/>
 		</pass>
 	</technique>
 </effect>
