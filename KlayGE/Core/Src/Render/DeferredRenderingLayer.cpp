@@ -614,7 +614,6 @@ namespace KlayGE
 		technique_merge_depth_[0] = dr_effect->TechniqueByName("MergeDepthAlphaBlendTech");
 		technique_merge_depth_[1] = dr_effect->TechniqueByName("MergeDepthAlphaBlendMSTech");
 		technique_copy_shading_depth_ = dr_effect->TechniqueByName("CopyShadingDepthTech");
-		technique_copy_depth_ = dr_effect->TechniqueByName("CopyDepthTech");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
@@ -1703,6 +1702,8 @@ namespace KlayGE
 				{
 					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->SimpleForwardDRJob(); }));
 				}
+
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
 			}
 		}
 
@@ -2852,28 +2853,11 @@ namespace KlayGE
 		}
 #endif
 
-		re.BindFrameBuffer(pvp.frame_buffer);
-		pvp.frame_buffer->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
-		{
-			*depth_tex_param_ = pvp.merged_depth_resolved_texs[pvp.curr_merged_buffer_index];
-
-			Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
-			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			float2 near_q(camera.NearPlane() * q, q);
-			*near_q_param_ = near_q;
-		}
 		App3DFramework& app = Context::Instance().AppInstance();
 		if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
 		{
-			taa_pp_->InputPin(0, pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index]);
-			taa_pp_->InputPin(1, pvp.merged_shading_resolved_texs[!pvp.curr_merged_buffer_index]);
+			taa_pp_->InputPin(0, pvp.merged_shading_resolved_texs[!pvp.curr_merged_buffer_index]);
 			taa_pp_->Render();
-			re.Render(*dr_effect_, *technique_copy_depth_, *rl_quad_);
-		}
-		else
-		{
-			*shading_tex_param_ = pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index];
-			re.Render(*dr_effect_, *technique_copy_shading_depth_, *rl_quad_);
 		}
 	}
 
@@ -4426,8 +4410,6 @@ namespace KlayGE
 		taa_pp_perf_->End();
 #endif
 
-		pvp.curr_merged_buffer_index = !pvp.curr_merged_buffer_index;
-
 		return 0;
 	}
 
@@ -4442,6 +4424,30 @@ namespace KlayGE
 		}
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_SimpleForwardOnly;
+	}
+
+	uint32_t DeferredRenderingLayer::FinishingViewportDRJob(PerViewport& pvp)
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& re = rf.RenderEngineInstance();
+
+		re.BindFrameBuffer(pvp.frame_buffer);
+		pvp.frame_buffer->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+		{
+			*depth_tex_param_ = pvp.merged_depth_resolved_texs[pvp.curr_merged_buffer_index];
+
+			Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
+			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+			float2 near_q(camera.NearPlane() * q, q);
+			*near_q_param_ = near_q;
+
+			*shading_tex_param_ = pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index];
+			re.Render(*dr_effect_, *technique_copy_shading_depth_, *rl_quad_);
+		}
+
+		pvp.curr_merged_buffer_index = !pvp.curr_merged_buffer_index;
+
+		return 0;
 	}
 
 	uint32_t DeferredRenderingLayer::FinishingDRJob()
