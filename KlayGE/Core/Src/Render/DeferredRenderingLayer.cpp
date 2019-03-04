@@ -1700,7 +1700,9 @@ namespace KlayGE
 					}));
 				if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->SimpleForwardDRJob(); }));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SimpleForwardDRJob(viewports_[vpi]); }));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] {
+						return this->PostSimpleForwardDRJob(viewports_[vpi]); }));
 				}
 
 				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
@@ -2837,22 +2839,6 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AddTAA(PerViewport const & pvp)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (pvp.sample_count != 1)
-		{
-			pvp.merged_shading_texs[pvp.curr_merged_buffer_index]->CopyToTexture(
-				*pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index]);
-
-			// Borrow g_buffer_ds_tex_ms_param_
-			*g_buffer_ds_tex_ms_param_ = pvp.merged_depth_texs[pvp.curr_merged_buffer_index];
-
-			re.BindFrameBuffer(pvp.merged_depth_resolved_fbs[pvp.curr_merged_buffer_index]);
-			re.Render(*dr_effect_, *technique_resolve_merged_depth_, *rl_quad_);
-		}
-#endif
-
 		App3DFramework& app = Context::Instance().AppInstance();
 		if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
 		{
@@ -4413,8 +4399,12 @@ namespace KlayGE
 		return 0;
 	}
 
-	uint32_t DeferredRenderingLayer::SimpleForwardDRJob()
+	uint32_t DeferredRenderingLayer::SimpleForwardDRJob(PerViewport& pvp)
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& re = rf.RenderEngineInstance();
+
+		re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
 		for (auto const & node : visible_scene_nodes_)
 		{
 			if (node->SimpleForward())
@@ -4426,10 +4416,36 @@ namespace KlayGE
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_SimpleForwardOnly;
 	}
 
+	uint32_t DeferredRenderingLayer::PostSimpleForwardDRJob(PerViewport& pvp)
+	{
+		uint32_t const index = (pvp.sample_count != 1);
+		depth_to_linear_pps_[index]->InputPin(0, pvp.g_buffer_ds_tex);
+		depth_to_linear_pps_[index]->OutputPin(0, pvp.merged_depth_texs[pvp.curr_merged_buffer_index]);
+		depth_to_linear_pps_[index]->Apply();
+
+		pvp.g_buffer_depth_tex->BuildMipSubLevels();
+
+		return 0;
+	}
+
 	uint32_t DeferredRenderingLayer::FinishingViewportDRJob(PerViewport& pvp)
 	{
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto& re = rf.RenderEngineInstance();
+
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		if (pvp.sample_count != 1)
+		{
+			pvp.merged_shading_texs[pvp.curr_merged_buffer_index]->CopyToTexture(
+				*pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index]);
+
+			// Borrow g_buffer_ds_tex_ms_param_
+			*g_buffer_ds_tex_ms_param_ = pvp.merged_depth_texs[pvp.curr_merged_buffer_index];
+
+			re.BindFrameBuffer(pvp.merged_depth_resolved_fbs[pvp.curr_merged_buffer_index]);
+			re.Render(*dr_effect_, *technique_resolve_merged_depth_, *rl_quad_);
+		}
+#endif
 
 		re.BindFrameBuffer(pvp.frame_buffer);
 		pvp.frame_buffer->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
