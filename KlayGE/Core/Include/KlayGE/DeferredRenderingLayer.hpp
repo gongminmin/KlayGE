@@ -457,7 +457,8 @@ namespace KlayGE
 		uint32_t SpecialShadingDRJob(PerViewport& pvp, PassType pass_type);
 		uint32_t MergeShadingAndDepthDRJob(PerViewport& pvp, PassTargetBuffer pass_tb);
 		uint32_t PostEffectsDRJob(PerViewport& pvp);
-		uint32_t SimpleForwardDRJob();
+		uint32_t SimpleForwardDRJob(PerViewport& pvp);
+		uint32_t PostSimpleForwardDRJob(PerViewport& pvp);
 		uint32_t FinishingViewportDRJob(PerViewport& pvp);
 		uint32_t FinishingDRJob();
 		uint32_t SwitchViewportDRJob(uint32_t vp_index);
