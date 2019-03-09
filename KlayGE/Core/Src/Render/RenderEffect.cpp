@@ -4665,17 +4665,17 @@ namespace KlayGE
 			if (!sd.func_name.empty())
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
-				if (sd.tech_pass_type != 0xFFFFFFFF)
-				{
-					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
-					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
-				}
-				else
+				if (sd.tech_pass_type == 0xFFFFFFFF)
 				{
 					auto const & tech = *effect.TechniqueByIndex(tech_index);
 					shader_obj->AttachShader(stage, effect, tech, *this, shader_desc_ids_);
 					sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + stage_index;
+				}
+				else
+				{
+					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
+					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
+					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
 				}
 			}
 		}
@@ -4721,25 +4721,35 @@ namespace KlayGE
 
 		render_state_obj_ = inherit_pass->render_state_obj_;
 
-		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+		for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 		{
-			ShaderDesc sd = effect.GetShaderDesc(inherit_pass->shader_desc_ids_[stage]);
+			ShaderDesc sd = effect.GetShaderDesc(inherit_pass->shader_desc_ids_[stage_index]);
 			if (!sd.func_name.empty())
 			{
 				sd.macros_hash = macros_hash;
-				sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + stage;
-				shader_desc_ids_[stage] = effect.AddShaderDesc(sd);
+				sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + stage_index;
+				shader_desc_ids_[stage_index] = effect.AddShaderDesc(sd);
 			}
 		}
 
-		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+		for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 		{
-			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids_[stage]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
 			if (!sd.func_name.empty())
 			{
-				auto const & tech = *effect.TechniqueByIndex(tech_index);
-				shader_obj->AttachShader(static_cast<ShaderStage>(stage),
-					effect, tech, *this, shader_desc_ids_);
+				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
+				{
+					auto const & tech = *effect.TechniqueByIndex(tech_index);
+					shader_obj->AttachShader(static_cast<ShaderStage>(stage_index),
+						effect, tech, *this, shader_desc_ids_);
+				}
+				else
+				{
+					ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+					auto const& tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
+					auto const& pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
+					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
+				}
 			}
 		}
 
@@ -4852,16 +4862,16 @@ namespace KlayGE
 				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
 
 				bool this_native_accepted;
-				if (sd.tech_pass_type != (tech_index << 16) + (pass_index << 8) + stage_index)
+				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
+				{
+					this_native_accepted = shader_obj->StreamIn(res, stage, effect, shader_desc_ids_);
+				}
+				else
 				{
 					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
 					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
 					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
 					this_native_accepted = true;
-				}
-				else
-				{
-					this_native_accepted = shader_obj->StreamIn(res, stage, effect, shader_desc_ids_);
 				}
 
 				native_accepted &= this_native_accepted;
