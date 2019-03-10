@@ -769,7 +769,6 @@ namespace KlayGE
 					if (lrq.first->Match(*res_desc))
 					{
 						res_desc->CopyDataFrom(*lrq.first);
-						res = lrq.first->Resource();
 						async_is_done = lrq.second;
 						found = true;
 						break;
@@ -803,8 +802,8 @@ namespace KlayGE
 	{
 		this->RemoveUnrefResources();
 
-		std::shared_ptr<void> res;
 		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+		std::shared_ptr<void> res;
 		if (loaded_res)
 		{
 			if (res_desc->StateLess())
@@ -832,7 +831,6 @@ namespace KlayGE
 					if (lrq.first->Match(*res_desc))
 					{
 						res_desc->CopyDataFrom(*lrq.first);
-						res = lrq.first->Resource();
 						async_is_done = lrq.second;
 						found = true;
 						break;
@@ -842,6 +840,8 @@ namespace KlayGE
 
 			if (found)
 			{
+				res = res_desc->Resource();
+
 				if (!res_desc->StateLess())
 				{
 					std::lock_guard<std::mutex> lock(loading_mutex_);
@@ -973,7 +973,12 @@ namespace KlayGE
 					res = res_desc->Resource();
 					this->AddLoadedResource(res_desc, res);
 				}
-
+			}
+		}
+		for (auto& lrq : tmp_loading_res)
+		{
+			if (LS_Complete == *lrq.second)
+			{
 				*lrq.second = LS_CanBeRemoved;
 			}
 		}
