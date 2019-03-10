@@ -5,7 +5,7 @@ SET(ANAG_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/android_native_app_glue/${KLAYG
 SET(REL_PATH "External/Downloads/android_native_app_glue_${NDK_VERSION}.patched.7z")
 SET(PACKAGE_FILE_ID "b32103ef58937c827b9a1dba3070f49d8c9ec1c0")
 
-DOWNLOAD_PACKAGE("android_native_app_glue" ${REL_PATH} ${PACKAGE_FILE_ID})
+DOWNLOAD_PACKAGE("android_native_app_glue" ${REL_PATH} ${PACKAGE_FILE_ID} "${ANAG_PROJECT_DIR}/android_native_app_glue.c")
 
 SET(ANAG_SOURCES
 	${ANAG_PROJECT_DIR}/android_native_app_glue.c
