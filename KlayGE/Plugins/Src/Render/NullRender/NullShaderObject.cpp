@@ -71,102 +71,100 @@ namespace KlayGE
 	{
 	}
 
-	void D3DShaderStageObject::StreamIn(RenderEffect const& effect,
-		std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::vector<uint8_t> const& native_shader_block)
+	void D3DShaderStageObject::StreamIn(
+		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res)
 	{
+		uint32_t native_shader_block_len;
+		res.read(&native_shader_block_len, sizeof(native_shader_block_len));
+		native_shader_block_len = LE2Native(native_shader_block_len);
+
 		is_validate_ = false;
 		std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[static_cast<uint32_t>(stage_)]);
-		if (native_shader_block.size() >= 25 + shader_profile.size())
+		if (native_shader_block_len >= 25 + shader_profile.size())
 		{
-			MemInputStreamBuf native_shader_buff(native_shader_block.data(), native_shader_block.size());
-			std::istream native_shader_stream(&native_shader_buff);
-
 			uint8_t len;
-			native_shader_stream.read(reinterpret_cast<char*>(&len), sizeof(len));
+			res.read(reinterpret_cast<char*>(&len), sizeof(len));
 			std::string& profile = shader_profile_;
 			profile.resize(len);
-			native_shader_stream.read(&profile[0], len);
+			res.read(&profile[0], len);
 			if (profile == shader_profile)
 			{
 				is_validate_ = true;
 
 				uint32_t blob_size;
-				native_shader_stream.read(reinterpret_cast<char*>(&blob_size), sizeof(blob_size));
+				res.read(reinterpret_cast<char*>(&blob_size), sizeof(blob_size));
 				shader_code_.resize(blob_size);
 
-				native_shader_stream.read(reinterpret_cast<char*>(shader_code_.data()), blob_size);
+				res.read(reinterpret_cast<char*>(shader_code_.data()), blob_size);
 
 				uint16_t cb_desc_size;
-				native_shader_stream.read(reinterpret_cast<char*>(&cb_desc_size), sizeof(cb_desc_size));
+				res.read(reinterpret_cast<char*>(&cb_desc_size), sizeof(cb_desc_size));
 				cb_desc_size = LE2Native(cb_desc_size);
 				shader_desc_.cb_desc.resize(cb_desc_size);
 				for (size_t i = 0; i < shader_desc_.cb_desc.size(); ++i)
 				{
-					native_shader_stream.read(reinterpret_cast<char*>(&len), sizeof(len));
+					res.read(reinterpret_cast<char*>(&len), sizeof(len));
 					shader_desc_.cb_desc[i].name.resize(len);
-					native_shader_stream.read(&shader_desc_.cb_desc[i].name[0], len);
+					res.read(&shader_desc_.cb_desc[i].name[0], len);
 
 					shader_desc_.cb_desc[i].name_hash = RT_HASH(shader_desc_.cb_desc[i].name.c_str());
 
-					native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].size), sizeof(shader_desc_.cb_desc[i].size));
+					res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].size), sizeof(shader_desc_.cb_desc[i].size));
 					shader_desc_.cb_desc[i].size = LE2Native(shader_desc_.cb_desc[i].size);
 
 					uint16_t var_desc_size;
-					native_shader_stream.read(reinterpret_cast<char*>(&var_desc_size), sizeof(var_desc_size));
+					res.read(reinterpret_cast<char*>(&var_desc_size), sizeof(var_desc_size));
 					var_desc_size = LE2Native(var_desc_size);
 					shader_desc_.cb_desc[i].var_desc.resize(var_desc_size);
 					for (size_t j = 0; j < shader_desc_.cb_desc[i].var_desc.size(); ++j)
 					{
-						native_shader_stream.read(reinterpret_cast<char*>(&len), sizeof(len));
+						res.read(reinterpret_cast<char*>(&len), sizeof(len));
 						shader_desc_.cb_desc[i].var_desc[j].name.resize(len);
-						native_shader_stream.read(&shader_desc_.cb_desc[i].var_desc[j].name[0], len);
+						res.read(&shader_desc_.cb_desc[i].var_desc[j].name[0], len);
 
-						native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].start_offset),
+						res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].start_offset),
 							sizeof(shader_desc_.cb_desc[i].var_desc[j].start_offset));
 						shader_desc_.cb_desc[i].var_desc[j].start_offset = LE2Native(shader_desc_.cb_desc[i].var_desc[j].start_offset);
-						native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].type),
+						res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].type),
 							sizeof(shader_desc_.cb_desc[i].var_desc[j].type));
-						native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].rows),
+						res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].rows),
 							sizeof(shader_desc_.cb_desc[i].var_desc[j].rows));
-						native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].columns),
+						res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].columns),
 							sizeof(shader_desc_.cb_desc[i].var_desc[j].columns));
-						native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].elements),
+						res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].var_desc[j].elements),
 							sizeof(shader_desc_.cb_desc[i].var_desc[j].elements));
 						shader_desc_.cb_desc[i].var_desc[j].elements = LE2Native(shader_desc_.cb_desc[i].var_desc[j].elements);
 					}
 				}
 
-				native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.num_samplers), sizeof(shader_desc_.num_samplers));
+				res.read(reinterpret_cast<char*>(&shader_desc_.num_samplers), sizeof(shader_desc_.num_samplers));
 				shader_desc_.num_samplers = LE2Native(shader_desc_.num_samplers);
-				native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.num_srvs), sizeof(shader_desc_.num_srvs));
+				res.read(reinterpret_cast<char*>(&shader_desc_.num_srvs), sizeof(shader_desc_.num_srvs));
 				shader_desc_.num_srvs = LE2Native(shader_desc_.num_srvs);
-				native_shader_stream.read(reinterpret_cast<char*>(&shader_desc_.num_uavs), sizeof(shader_desc_.num_uavs));
+				res.read(reinterpret_cast<char*>(&shader_desc_.num_uavs), sizeof(shader_desc_.num_uavs));
 				shader_desc_.num_uavs = LE2Native(shader_desc_.num_uavs);
 
 				uint16_t res_desc_size;
-				native_shader_stream.read(reinterpret_cast<char*>(&res_desc_size), sizeof(res_desc_size));
+				res.read(reinterpret_cast<char*>(&res_desc_size), sizeof(res_desc_size));
 				res_desc_size = LE2Native(res_desc_size);
 				shader_desc_.res_desc.resize(res_desc_size);
 				for (size_t i = 0; i < shader_desc_.res_desc.size(); ++i)
 				{
-					native_shader_stream.read(reinterpret_cast<char*>(&len), sizeof(len));
+					res.read(reinterpret_cast<char*>(&len), sizeof(len));
 					shader_desc_.res_desc[i].name.resize(len);
-					native_shader_stream.read(&shader_desc_.res_desc[i].name[0], len);
+					res.read(&shader_desc_.res_desc[i].name[0], len);
 
-					native_shader_stream.read(
-						reinterpret_cast<char*>(&shader_desc_.res_desc[i].type), sizeof(shader_desc_.res_desc[i].type));
+					res.read(reinterpret_cast<char*>(&shader_desc_.res_desc[i].type), sizeof(shader_desc_.res_desc[i].type));
 
-					native_shader_stream.read(
-						reinterpret_cast<char*>(&shader_desc_.res_desc[i].dimension), sizeof(shader_desc_.res_desc[i].dimension));
+					res.read(reinterpret_cast<char*>(&shader_desc_.res_desc[i].dimension), sizeof(shader_desc_.res_desc[i].dimension));
 
-					native_shader_stream.read(
-						reinterpret_cast<char*>(&shader_desc_.res_desc[i].bind_point), sizeof(shader_desc_.res_desc[i].bind_point));
+					res.read(reinterpret_cast<char*>(&shader_desc_.res_desc[i].bind_point), sizeof(shader_desc_.res_desc[i].bind_point));
 					shader_desc_.res_desc[i].bind_point = LE2Native(shader_desc_.res_desc[i].bind_point);
 				}
 
 				this->FillCBufferIndices(effect);
 
-				this->StageSpecificStreamIn(native_shader_stream);
+				this->StageSpecificStreamIn(res);
 			}
 		}
 	}
@@ -478,9 +476,9 @@ namespace KlayGE
 		is_available_ = true;
 	}
 
-	void D3D11VertexShaderStageObject::StageSpecificStreamIn(std::istream& native_shader_stream)
+	void D3D11VertexShaderStageObject::StageSpecificStreamIn(ResIdentifier& res)
 	{
-		native_shader_stream.read(reinterpret_cast<char*>(&vs_signature_), sizeof(vs_signature_));
+		res.read(reinterpret_cast<char*>(&vs_signature_), sizeof(vs_signature_));
 		vs_signature_ = LE2Native(vs_signature_);
 	}
 
@@ -547,15 +545,15 @@ namespace KlayGE
 		is_available_ = caps.cs_support;
 	}
 
-	void D3DComputeShaderStageObject::StageSpecificStreamIn(std::istream& native_shader_stream)
+	void D3DComputeShaderStageObject::StageSpecificStreamIn(ResIdentifier& res)
 	{
-		native_shader_stream.read(reinterpret_cast<char*>(&block_size_x_), sizeof(block_size_x_));
+		res.read(reinterpret_cast<char*>(&block_size_x_), sizeof(block_size_x_));
 		block_size_x_ = LE2Native(block_size_x_);
 
-		native_shader_stream.read(reinterpret_cast<char*>(&block_size_y_), sizeof(block_size_y_));
+		res.read(reinterpret_cast<char*>(&block_size_y_), sizeof(block_size_y_));
 		block_size_y_ = LE2Native(block_size_y_);
 
-		native_shader_stream.read(reinterpret_cast<char*>(&block_size_z_), sizeof(block_size_z_));
+		res.read(reinterpret_cast<char*>(&block_size_z_), sizeof(block_size_z_));
 		block_size_z_ = LE2Native(block_size_z_);
 	}
 
@@ -600,73 +598,74 @@ namespace KlayGE
 	{
 	}
 
-	void OGLShaderStageObject::StreamIn(RenderEffect const& effect,
-		std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::vector<uint8_t> const& native_shader_block)
+	void OGLShaderStageObject::StreamIn(
+		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res)
 	{
+		uint32_t native_shader_block_len;
+		res.read(&native_shader_block_len, sizeof(native_shader_block_len));
+		native_shader_block_len = LE2Native(native_shader_block_len);
+
 		auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
 
 		shader_func_name_ = sd.func_name;
 
 		is_validate_ = false;
-		if (native_shader_block.size() >= 24)
+		if (native_shader_block_len >= 24)
 		{
-			MemInputStreamBuf native_shader_buff(native_shader_block.data(), native_shader_block.size());
-			std::istream native_shader_stream(&native_shader_buff);
-
 			is_validate_ = true;
 
 			uint32_t len32;
-			native_shader_stream.read(reinterpret_cast<char*>(&len32), sizeof(len32));
+			res.read(reinterpret_cast<char*>(&len32), sizeof(len32));
 			len32 = LE2Native(len32);
 			glsl_src_.resize(len32, '\0');
-			native_shader_stream.read(&glsl_src_[0], len32);
+			res.read(&glsl_src_[0], len32);
 
 			uint16_t num16;
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			pnames_.resize(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				pnames_[i].resize(len8);
-				native_shader_stream.read(&pnames_[i][0], len8);
+				res.read(&pnames_[i][0], len8);
 			}
 
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			glsl_res_names_.resize(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				glsl_res_names_[i].resize(len8);
-				native_shader_stream.read(&glsl_res_names_[i][0], len8);
+				res.read(&glsl_res_names_[i][0], len8);
 			}
 
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				std::string tex_name;
 				tex_name.resize(len8);
-				native_shader_stream.read(&tex_name[0], len8);
+				res.read(&tex_name[0], len8);
 
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				std::string sampler_name;
 				sampler_name.resize(len8);
-				native_shader_stream.read(&sampler_name[0], len8);
+				res.read(&sampler_name[0], len8);
 
 				tex_sampler_pairs_.push_back({ tex_name, sampler_name });
 			}
 
-			this->StageSpecificStreamIn(native_shader_stream);
+			this->StageSpecificStreamIn(res);
 		}
 	}
 
@@ -1017,35 +1016,35 @@ namespace KlayGE
 		is_available_ = true;
 	}
 
-	void OGLVertexShaderStageObject::StageSpecificStreamIn(std::istream& native_shader_stream)
+	void OGLVertexShaderStageObject::StageSpecificStreamIn(ResIdentifier& res)
 	{
 		uint8_t num8;
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		usages_.resize(num8);
 		for (size_t i = 0; i < num8; ++i)
 		{
 			uint8_t veu;
-			native_shader_stream.read(reinterpret_cast<char*>(&veu), sizeof(veu));
+			res.read(reinterpret_cast<char*>(&veu), sizeof(veu));
 
 			usages_[i] = static_cast<VertexElementUsage>(veu);
 		}
 
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		if (num8 > 0)
 		{
 			usage_indices_.resize(num8);
-			native_shader_stream.read(reinterpret_cast<char*>(&usage_indices_[0]), num8 * sizeof(usage_indices_[0]));
+			res.read(reinterpret_cast<char*>(&usage_indices_[0]), num8 * sizeof(usage_indices_[0]));
 		}
 
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		glsl_attrib_names_.resize(num8);
 		for (size_t i = 0; i < num8; ++i)
 		{
 			uint8_t len8;
-			native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+			res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 			glsl_attrib_names_[i].resize(len8);
-			native_shader_stream.read(&glsl_attrib_names_[i][0], len8);
+			res.read(&glsl_attrib_names_[i][0], len8);
 		}
 	}
 
@@ -1169,15 +1168,15 @@ namespace KlayGE
 		is_available_ = caps.gs_support;
 	}
 
-	void OGLGeometryShaderStageObject::StageSpecificStreamIn(std::istream& native_shader_stream)
+	void OGLGeometryShaderStageObject::StageSpecificStreamIn(ResIdentifier& res)
 	{
-		native_shader_stream.read(reinterpret_cast<char*>(&gs_input_type_), sizeof(gs_input_type_));
+		res.read(reinterpret_cast<char*>(&gs_input_type_), sizeof(gs_input_type_));
 		gs_input_type_ = LE2Native(gs_input_type_);
 
-		native_shader_stream.read(reinterpret_cast<char*>(&gs_output_type_), sizeof(gs_output_type_));
+		res.read(reinterpret_cast<char*>(&gs_output_type_), sizeof(gs_output_type_));
 		gs_output_type_ = LE2Native(gs_output_type_);
 
-		native_shader_stream.read(reinterpret_cast<char*>(&gs_max_output_vertex_), sizeof(gs_max_output_vertex_));
+		res.read(reinterpret_cast<char*>(&gs_max_output_vertex_), sizeof(gs_max_output_vertex_));
 		gs_max_output_vertex_ = LE2Native(gs_max_output_vertex_);
 	}
 

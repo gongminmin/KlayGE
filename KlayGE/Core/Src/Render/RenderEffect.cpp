@@ -4675,7 +4675,7 @@ namespace KlayGE
 				{
 					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
 					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
+					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
 				}
 			}
 		}
@@ -4748,7 +4748,7 @@ namespace KlayGE
 					ShaderStage const stage = static_cast<ShaderStage>(stage_index);
 					auto const& tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
 					auto const& pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
+					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
 				}
 			}
 		}
@@ -4870,7 +4870,7 @@ namespace KlayGE
 				{
 					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
 					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage), effect);
+					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
 					this_native_accepted = true;
 				}
 

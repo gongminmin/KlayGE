@@ -85,8 +85,8 @@ namespace KlayGE
 	public:
 		explicit D3D11ShaderStageObject(ShaderStage stage);
 
-		void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
-			std::vector<uint8_t> const& native_shader_block) override;
+		void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
 		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
@@ -186,7 +186,7 @@ namespace KlayGE
 	private:
 		void ClearHwShader() override;
 
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 #if KLAYGE_IS_DEV_PLATFORM
 		void StageSpecificReflection(ID3D11ShaderReflection* reflection) override;
@@ -273,7 +273,7 @@ namespace KlayGE
 		void StageSpecificCreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 #if KLAYGE_IS_DEV_PLATFORM
 		void StageSpecificReflection(ID3D11ShaderReflection* reflection) override;

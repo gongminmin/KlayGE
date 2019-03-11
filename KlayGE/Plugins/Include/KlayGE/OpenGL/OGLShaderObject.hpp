@@ -58,8 +58,8 @@ namespace KlayGE
 		explicit OGLShaderStageObject(ShaderStage stage);
 		~OGLShaderStageObject() override;
 		
-		void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
-			std::vector<uint8_t> const& native_shader_block) override;
+		void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
 		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
@@ -171,7 +171,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
@@ -206,7 +206,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);

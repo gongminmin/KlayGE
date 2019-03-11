@@ -110,8 +110,8 @@ namespace KlayGE
 		explicit ShaderStageObject(ShaderStage stage);
 		virtual ~ShaderStageObject();
 
-		virtual void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
-			std::vector<uint8_t> const& native_shader_block) = 0;
+		virtual void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) = 0;
 		virtual void StreamOut(std::ostream& os) = 0;
 		virtual void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
@@ -153,9 +153,9 @@ namespace KlayGE
 		virtual void CreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
 
-		virtual void StageSpecificStreamIn(std::istream& native_shader_stream)
+		virtual void StageSpecificStreamIn(ResIdentifier& res)
 		{
-			KFL_UNUSED(native_shader_stream);
+			KFL_UNUSED(res);
 		}
 		virtual void StageSpecificStreamOut(std::ostream& os)
 		{
@@ -180,7 +180,7 @@ namespace KlayGE
 		ShaderObject();
 		virtual ~ShaderObject();
 
-		void AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage, RenderEffect const& effect);
+		void AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage);
 		ShaderStageObjectPtr const& Stage(ShaderStage stage) const;
 
 		bool StreamIn(ResIdentifierPtr const & res, ShaderStage stage, RenderEffect const & effect,
@@ -218,6 +218,7 @@ namespace KlayGE
 		const std::shared_ptr<ShaderObjectTemplate> so_template_;
 		
 		bool is_validate_;
+		bool shader_stages_dirty_ = true;
 	};
 }
 

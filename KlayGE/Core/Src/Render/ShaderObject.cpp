@@ -576,12 +576,13 @@ namespace KlayGE
 
 	ShaderObject::~ShaderObject() = default;
 
-	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage, RenderEffect const& effect)
+	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage)
 	{
-		so_template_->shader_stages_[static_cast<uint32_t>(stage)] = shader_stage;
-		if (shader_stage->Validate())
+		auto& curr_shader_stage = so_template_->shader_stages_[static_cast<uint32_t>(stage)];
+		if (curr_shader_stage != shader_stage)
 		{
-			this->CreateHwResources(stage, effect);
+			curr_shader_stage = shader_stage;
+			shader_stages_dirty_ = true;
 		}
 	}
 	
@@ -593,20 +594,11 @@ namespace KlayGE
 	bool ShaderObject::StreamIn(ResIdentifierPtr const& res, ShaderStage stage, RenderEffect const& effect,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		uint32_t len;
-		res->read(&len, sizeof(len));
-		len = LE2Native(len);
-		std::vector<uint8_t> native_shader_block(len);
-		if (len > 0)
-		{
-			res->read(&native_shader_block[0], len * sizeof(native_shader_block[0]));
-		}
-
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto shader_stage = rf.MakeShaderStageObject(stage);
-		shader_stage->StreamIn(effect, shader_desc_ids, native_shader_block);
+		shader_stage->StreamIn(effect, shader_desc_ids, *res);
 
-		this->AttachStage(stage, shader_stage, effect);
+		this->AttachStage(stage, shader_stage);
 
 		return shader_stage->Validate();
 	}
@@ -623,21 +615,31 @@ namespace KlayGE
 		auto shader_stage = rf.MakeShaderStageObject(stage);
 		shader_stage->AttachShader(effect, tech, pass, shader_desc_ids);
 
-		this->AttachStage(stage, shader_stage, effect);
+		this->AttachStage(stage, shader_stage);
 	}
 
 	void ShaderObject::LinkShaders(RenderEffect const & effect)
 	{
-		is_validate_ = true;
-		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+		if (shader_stages_dirty_)
 		{
-			auto const& shader_stage = this->Stage(static_cast<ShaderStage>(stage));
-			if (shader_stage)
+			is_validate_ = true;
+			for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 			{
-				is_validate_ &= shader_stage->Validate();
+				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				auto const& shader_stage = this->Stage(stage);
+				if (shader_stage)
+				{
+					if (shader_stage->Validate())
+					{
+						this->CreateHwResources(stage, effect);
+					}
+					is_validate_ &= shader_stage->Validate();
+				}
 			}
-		}
 
-		this->DoLinkShaders(effect);
+			this->DoLinkShaders(effect);
+
+			shader_stages_dirty_ = false;
+		}
 	}
 }

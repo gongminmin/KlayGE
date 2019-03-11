@@ -87,8 +87,8 @@ namespace KlayGE
 	public:
 		D3DShaderStageObject(ShaderStage stage, bool as_d3d12);
 
-		void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
-			std::vector<uint8_t> const& native_shader_block) override;
+		void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
 		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
@@ -152,7 +152,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void StageSpecificReflection(ID3D11ShaderReflection* reflection) override;
@@ -199,7 +199,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void StageSpecificReflection(ID3D11ShaderReflection* reflection) override;
@@ -227,8 +227,8 @@ namespace KlayGE
 	public:
 		OGLShaderStageObject(ShaderStage stage, GLenum gl_shader_type, bool as_gles);
 
-		void StreamIn(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids,
-			std::vector<uint8_t> const& native_shader_block) override;
+		void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
 		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
@@ -314,7 +314,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 
@@ -344,7 +344,7 @@ namespace KlayGE
 		OGLGeometryShaderStageObject();
 
 	private:
-		void StageSpecificStreamIn(std::istream& native_shader_stream) override;
+		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 

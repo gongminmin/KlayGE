@@ -278,73 +278,74 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESShaderStageObject::StreamIn(RenderEffect const& effect,
-		std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::vector<uint8_t> const& native_shader_block)
+	void OGLESShaderStageObject::StreamIn(
+		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res)
 	{
+		uint32_t native_shader_block_len;
+		res.read(&native_shader_block_len, sizeof(native_shader_block_len));
+		native_shader_block_len = LE2Native(native_shader_block_len);
+
 		auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
 
 		shader_func_name_ = sd.func_name;
 
 		is_validate_ = false;
-		if (native_shader_block.size() >= 24)
+		if (native_shader_block_len >= 24)
 		{
-			MemInputStreamBuf native_shader_buff(native_shader_block.data(), native_shader_block.size());
-			std::istream native_shader_stream(&native_shader_buff);
-
 			is_validate_ = true;
 
 			uint32_t len32;
-			native_shader_stream.read(reinterpret_cast<char*>(&len32), sizeof(len32));
+			res.read(reinterpret_cast<char*>(&len32), sizeof(len32));
 			len32 = LE2Native(len32);
 			glsl_src_.resize(len32, '\0');
-			native_shader_stream.read(&glsl_src_[0], len32);
+			res.read(&glsl_src_[0], len32);
 
 			uint16_t num16;
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			pnames_.resize(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				pnames_[i].resize(len8);
-				native_shader_stream.read(&pnames_[i][0], len8);
+				res.read(&pnames_[i][0], len8);
 			}
 
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			glsl_res_names_.resize(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				glsl_res_names_[i].resize(len8);
-				native_shader_stream.read(&glsl_res_names_[i][0], len8);
+				res.read(&glsl_res_names_[i][0], len8);
 			}
 
-			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
+			res.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			for (size_t i = 0; i < num16; ++i)
 			{
 				uint8_t len8;
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				std::string tex_name;
 				tex_name.resize(len8);
-				native_shader_stream.read(&tex_name[0], len8);
+				res.read(&tex_name[0], len8);
 
-				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+				res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				std::string sampler_name;
 				sampler_name.resize(len8);
-				native_shader_stream.read(&sampler_name[0], len8);
+				res.read(&sampler_name[0], len8);
 
 				tex_sampler_pairs_.push_back({tex_name, sampler_name});
 			}
 
-			this->StageSpecificStreamIn(native_shader_stream);
+			this->StageSpecificStreamIn(res);
 
 			this->CreateHwShader(effect, shader_desc_ids);
 		}
@@ -676,38 +677,45 @@ namespace KlayGE
 	void OGLESShaderStageObject::CreateHwShader(
 		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		char const* glsl = glsl_src_.c_str();
-		gl_shader_ = glCreateShader(gl_shader_types[static_cast<uint32_t>(stage_)]);
-		if (0 == gl_shader_)
+		if (!glsl_src_.empty())
 		{
-			is_validate_ = false;
+			char const* glsl = glsl_src_.c_str();
+			gl_shader_ = glCreateShader(gl_shader_types[static_cast<uint32_t>(stage_)]);
+			if (0 == gl_shader_)
+			{
+				is_validate_ = false;
+			}
+			else
+			{
+				glShaderSource(gl_shader_, 1, &glsl, nullptr);
+
+				glCompileShader(gl_shader_);
+
+				GLint compiled = false;
+				glGetShaderiv(gl_shader_, GL_COMPILE_STATUS, &compiled);
+				if (!compiled)
+				{
+					LogError() << "Error when compiling ESSL " << shader_func_name_ << ":" << std::endl;
+
+					GLint len = 0;
+					glGetShaderiv(gl_shader_, GL_INFO_LOG_LENGTH, &len);
+					if (len > 0)
+					{
+						std::vector<char> info(len + 1, 0);
+						glGetShaderInfoLog(gl_shader_, len, &len, &info[0]);
+						PrintGLSLError(glsl_src_, &info[0]);
+					}
+
+					is_validate_ = false;
+				}
+			}
+
+			this->StageSpecificCreateHwShader(effect, shader_desc_ids);
 		}
 		else
 		{
-			glShaderSource(gl_shader_, 1, &glsl, nullptr);
-
-			glCompileShader(gl_shader_);
-
-			GLint compiled = false;
-			glGetShaderiv(gl_shader_, GL_COMPILE_STATUS, &compiled);
-			if (!compiled)
-			{
-				LogError() << "Error when compiling ESSL " << shader_func_name_ << ":" << std::endl;
-
-				GLint len = 0;
-				glGetShaderiv(gl_shader_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetShaderInfoLog(gl_shader_, len, &len, &info[0]);
-					PrintGLSLError(glsl_src_, &info[0]);
-				}
-
-				is_validate_ = false;
-			}
+			is_validate_ = false;
 		}
-
-		this->StageSpecificCreateHwShader(effect, shader_desc_ids);
 	}
 
 
@@ -716,35 +724,35 @@ namespace KlayGE
 		is_available_ = true;
 	}
 
-	void OGLESVertexShaderStageObject::StageSpecificStreamIn(std::istream& native_shader_stream)
+	void OGLESVertexShaderStageObject::StageSpecificStreamIn(ResIdentifier& res)
 	{
 		uint8_t num8;
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		usages_.resize(num8);
 		for (size_t i = 0; i < num8; ++i)
 		{
 			uint8_t veu;
-			native_shader_stream.read(reinterpret_cast<char*>(&veu), sizeof(veu));
+			res.read(reinterpret_cast<char*>(&veu), sizeof(veu));
 
 			usages_[i] = static_cast<VertexElementUsage>(veu);
 		}
 
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		if (num8 > 0)
 		{
 			usage_indices_.resize(num8);
-			native_shader_stream.read(reinterpret_cast<char*>(&usage_indices_[0]), num8 * sizeof(usage_indices_[0]));
+			res.read(reinterpret_cast<char*>(&usage_indices_[0]), num8 * sizeof(usage_indices_[0]));
 		}
 
-		native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
+		res.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 		glsl_attrib_names_.resize(num8);
 		for (size_t i = 0; i < num8; ++i)
 		{
 			uint8_t len8;
-			native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+			res.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 			glsl_attrib_names_[i].resize(len8);
-			native_shader_stream.read(&glsl_attrib_names_[i][0], len8);
+			res.read(&glsl_attrib_names_[i][0], len8);
 		}
 	}
 
