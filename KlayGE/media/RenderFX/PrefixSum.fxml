@@ -23,6 +23,7 @@ SCAN_TYPE ScanWarp(bool inclusive, uint GI, uint size = 32)
 		{
 			forscan_sh[GI] += forscan_sh[GI - i];
 		}
+		GroupMemoryBarrierWithGroupSync();
 	}
 	return inclusive ? forscan_sh[GI] : ((lane > 0) ? forscan_sh[GI - 1] : 0);
 }
@@ -44,10 +45,7 @@ SCAN_TYPE ScanBlock(bool inclusive, uint GI, SCAN_TYPE input)
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	if (0 == warp_id)
-	{
-		ScanWarp(true, GI, BLOCK_SIZE / 32);
-	}
+	ScanWarp(true, GI, BLOCK_SIZE / 32);
 	GroupMemoryBarrierWithGroupSync();
 
 	if (warp_id > 0)

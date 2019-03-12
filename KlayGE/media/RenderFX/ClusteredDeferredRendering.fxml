@@ -488,7 +488,7 @@ void ScanIntersectedLight(uint GI)
 		intersected_lights_sh[index] |= num;
 
 		sum = num_intersected_lights_sh;
-		AllMemoryBarrierWithGroupSync();
+		GroupMemoryBarrierWithGroupSync();
 	}
 }
 
