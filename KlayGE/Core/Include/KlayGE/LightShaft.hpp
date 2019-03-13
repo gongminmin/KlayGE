@@ -32,6 +32,8 @@ namespace KlayGE
 	private:
 		std::vector<PostProcessPtr> radial_blur_pps_;
 		PostProcessPtr apply_pp_;
+
+		TexturePtr blur_tex_[2];
 	};
 }
 
