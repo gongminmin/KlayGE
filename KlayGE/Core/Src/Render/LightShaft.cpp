@@ -57,22 +57,22 @@ namespace KlayGE
 				uint32_t const tex_width = tex->Width(0) / 4;
 				uint32_t const tex_height = tex->Height(0) / 4;
 
-				TexturePtr blur_tex[2];
-				blur_tex[0] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F,
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				blur_tex[1] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F,
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				if (!blur_tex_[0] || (blur_tex_[0]->Width(0) != tex_width) || (blur_tex_[0]->Height(0) != tex_height))
+				{
+					blur_tex_[0] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					blur_tex_[1] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				}
 
 				bool active_idx = false;
-				radial_blur_pps_[0]->OutputPin(0, blur_tex[active_idx]);
+				radial_blur_pps_[0]->OutputPin(0, blur_tex_[active_idx]);
 				for (uint32_t i = 1; i < BLUR_ITERATE_NUM; ++ i)
 				{
-					radial_blur_pps_[i]->InputPin(0, blur_tex[active_idx]);
-					radial_blur_pps_[i]->OutputPin(0, blur_tex[!active_idx]);
+					radial_blur_pps_[i]->InputPin(0, blur_tex_[active_idx]);
+					radial_blur_pps_[i]->OutputPin(0, blur_tex_[!active_idx]);
 					active_idx = !active_idx;
 				}
 
-				apply_pp_->InputPin(0, blur_tex[active_idx]);
+				apply_pp_->InputPin(0, blur_tex_[active_idx]);
 				apply_pp_->SetParam(5, static_cast<float>(tex_width) / tex_height);
 			}
 		}
