@@ -656,11 +656,14 @@ namespace KlayGE
 		pso_desc.VS.pShaderBytecode = shader_code_.data();
 		pso_desc.VS.BytecodeLength = static_cast<UINT>(shader_code_.size());
 
-		pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
-		pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
-		pso_desc.StreamOutput.pBufferStrides = nullptr;
-		pso_desc.StreamOutput.NumStrides = 0;
-		pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		if (pso_desc.StreamOutput.pSODeclaration == nullptr)
+		{
+			pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
+			pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
+			pso_desc.StreamOutput.pBufferStrides = nullptr;
+			pso_desc.StreamOutput.NumStrides = 0;
+			pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		}
 	}
 
 	void D3D12VertexShaderStageObject::StageSpecificCreateHwShader(
@@ -710,11 +713,14 @@ namespace KlayGE
 		pso_desc.GS.pShaderBytecode = shader_code_.data();
 		pso_desc.GS.BytecodeLength = static_cast<UINT>(shader_code_.size());
 
-		pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
-		pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
-		pso_desc.StreamOutput.pBufferStrides = nullptr;
-		pso_desc.StreamOutput.NumStrides = 0;
-		pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		if (pso_desc.StreamOutput.pSODeclaration == nullptr)
+		{
+			pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
+			pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
+			pso_desc.StreamOutput.pBufferStrides = nullptr;
+			pso_desc.StreamOutput.NumStrides = 0;
+			pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		}
 	}
 
 	void D3D12GeometryShaderStageObject::StageSpecificCreateHwShader(
@@ -837,11 +843,14 @@ namespace KlayGE
 		pso_desc.DS.pShaderBytecode = shader_code_.data();
 		pso_desc.DS.BytecodeLength = static_cast<UINT>(shader_code_.size());
 
-		pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
-		pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
-		pso_desc.StreamOutput.pBufferStrides = nullptr;
-		pso_desc.StreamOutput.NumStrides = 0;
-		pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		if (pso_desc.StreamOutput.pSODeclaration == nullptr)
+		{
+			pso_desc.StreamOutput.pSODeclaration = so_decl_.data();
+			pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decl_.size());
+			pso_desc.StreamOutput.pBufferStrides = nullptr;
+			pso_desc.StreamOutput.NumStrides = 0;
+			pso_desc.StreamOutput.RasterizedStream = rasterized_stream_;
+		}
 	}
 
 	void D3D12DomainShaderStageObject::StageSpecificCreateHwShader(
@@ -1253,6 +1262,12 @@ namespace KlayGE
 	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc)
 	{
 		pso_desc.pRootSignature = d3d_so_template_->root_signature_.get();
+
+		pso_desc.StreamOutput.pSODeclaration = nullptr;
+		pso_desc.StreamOutput.NumEntries = 0;
+		pso_desc.StreamOutput.pBufferStrides = nullptr;
+		pso_desc.StreamOutput.NumStrides = 0;
+		pso_desc.StreamOutput.RasterizedStream = 0;
 
 		{
 			auto const* ps_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(ShaderStage::Pixel).get());
