@@ -2189,7 +2189,7 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(std::wstring_view name)
 		: StaticMesh(name)
 	{
-		auto effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
+		auto effect = ASyncLoadRenderEffect("LightSourceProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("LightSourceProxy"));
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -2276,7 +2276,7 @@ namespace KlayGE
 	RenderableCameraProxy::RenderableCameraProxy(std::wstring_view name)
 		: StaticMesh(name)
 	{
-		auto effect = SyncLoadRenderEffect("CameraProxy.fxml");
+		auto effect = ASyncLoadRenderEffect("CameraProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("CameraProxy"));
 		effect_attrs_ |= EA_SimpleForward;
 	}

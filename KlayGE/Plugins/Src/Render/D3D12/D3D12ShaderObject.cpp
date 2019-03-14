@@ -316,8 +316,6 @@ namespace KlayGE
 				this->FillCBufferIndices(effect);
 
 				this->StageSpecificStreamIn(res);
-
-				this->CreateHwShader(effect, shader_desc_ids);
 			}
 		}
 	}
@@ -409,7 +407,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12ShaderStageObject::AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+	void D3D12ShaderStageObject::CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		shader_code_.clear();
@@ -574,8 +572,6 @@ namespace KlayGE
 		KFL_UNUSED(pass);
 		KFL_UNUSED(shader_desc_ids);
 #endif
-
-		this->CreateHwShader(effect, shader_desc_ids);
 	}
 	
 	void D3D12ShaderStageObject::CreateHwShader(
@@ -603,6 +599,8 @@ namespace KlayGE
 		{
 			is_validate_ = false;
 		}
+
+		hw_res_ready_ = true;
 	}
 
 	void D3D12ShaderStageObject::FillCBufferIndices(RenderEffect const& effect)
@@ -1080,6 +1078,7 @@ namespace KlayGE
 		D3D12ShaderObjectPtr ret = MakeSharedPtr<D3D12ShaderObject>(so_template_, d3d_so_template_);
 
 		ret->is_validate_ = is_validate_;
+		ret->hw_res_ready_ = hw_res_ready_;
 
 		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t i = 0; i < NumShaderStages; ++ i)

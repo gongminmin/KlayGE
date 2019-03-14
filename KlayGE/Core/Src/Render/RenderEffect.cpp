@@ -2524,6 +2524,7 @@ namespace KlayGE
 		{
 			std::vector<std::string> res_name;
 
+			bool cloned;
 			RenderEffectPtr effect;
 		};
 
@@ -2531,6 +2532,8 @@ namespace KlayGE
 		explicit EffectLoadingDesc(ArrayRef<std::string> name)
 		{
 			effect_desc_.res_name = std::vector<std::string>(name.begin(), name.end());
+			effect_desc_.cloned = false;
+			effect_desc_.effect = MakeSharedPtr<RenderEffect>();
 		}
 
 		uint64_t Type() const override
@@ -2544,19 +2547,43 @@ namespace KlayGE
 			return false;
 		}
 
+		std::shared_ptr<void> CreateResource() override
+		{
+			effect_desc_.effect->Open(effect_desc_.res_name);
+			return effect_desc_.effect;
+		}
+
 		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
+			RenderEffectPtr const& effect = effect_desc_.effect;
+			if (effect && effect->HWResourceReady())
+			{
+				return;
+			}
+
+#if KLAYGE_IS_DEV_PLATFORM
+			effect->CompileShaders();
+#endif
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStageNoLock();
+			}
 		}
 
 		void MainThreadStage() override
 		{
-			effect_desc_.effect = MakeSharedPtr<RenderEffect>();
-			effect_desc_.effect->Load(effect_desc_.res_name);
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			this->MainThreadStageNoLock();
 		}
 
 		bool HasSubThreadStage() const override
 		{
-			return false;
+			return true;
 		}
 
 		bool Match(ResLoadingDesc const & rhs) const override
@@ -2575,11 +2602,21 @@ namespace KlayGE
 
 			EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
 			effect_desc_.res_name = eld.effect_desc_.res_name;
+			effect_desc_.effect = eld.effect_desc_.effect->Clone();
+			effect_desc_.cloned = true;
 		}
 
 		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
-			effect_desc_.effect = std::static_pointer_cast<RenderEffect>(resource)->Clone();
+			auto rhs_effect = std::static_pointer_cast<RenderEffect>(resource);
+			if (effect_desc_.cloned)
+			{
+				rhs_effect->Reclone(*effect_desc_.effect);
+			}
+			else
+			{
+				rhs_effect->CloneInPlace(*effect_desc_.effect);
+			}
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
@@ -2589,7 +2626,18 @@ namespace KlayGE
 		}
 
 	private:
+		void MainThreadStageNoLock()
+		{
+			RenderEffectPtr const& effect = effect_desc_.effect;
+			if (!effect || !effect->HWResourceReady())
+			{
+				effect->CreateHwShaders();
+			}
+		}
+
+	private:
 		EffectDesc effect_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 
 
@@ -2621,37 +2669,85 @@ namespace KlayGE
 #endif
 
 
-	void RenderEffect::Load(ArrayRef<std::string> names)
+	void RenderEffect::Open(ArrayRef<std::string> names)
 	{
 		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
-		effect_template_->Load(names, *this);
+		effect_template_->Open(names, *this);
+	}
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffect::CompileShaders()
+	{
+		effect_template_->CompileShaders(*this);
+	}
+#endif
+
+	void RenderEffect::CreateHwShaders()
+	{
+		effect_template_->CreateHwShaders(*this);
 	}
 
 	RenderEffectPtr RenderEffect::Clone()
 	{
 		RenderEffectPtr ret = MakeSharedPtr<RenderEffect>();
-
-		ret->effect_template_ = effect_template_;
-
-		ret->params_.resize(params_.size());
-		for (size_t i = 0; i < params_.size(); ++ i)
-		{
-			ret->params_[i] = params_[i]->Clone();
-		}
-
-		ret->cbuffers_.resize(cbuffers_.size());
-		for (size_t i = 0; i < cbuffers_.size(); ++ i)
-		{
-			ret->cbuffers_[i] = cbuffers_[i]->Clone(*this, *ret);
-		}
-
-		ret->shader_objs_.resize(shader_objs_.size());
-		for (size_t i = 0; i < shader_objs_.size(); ++ i)
-		{
-			ret->shader_objs_[i] = shader_objs_[i]->Clone(*ret);
-		}
-
+		this->CloneInPlace(*ret);
 		return ret;
+	}
+
+	void RenderEffect::CloneInPlace(RenderEffect& dst_effect)
+	{
+		dst_effect.effect_template_ = effect_template_;
+
+		dst_effect.params_.resize(params_.size());
+		for (size_t i = 0; i < params_.size(); ++i)
+		{
+			dst_effect.params_[i] = params_[i]->Clone();
+		}
+
+		dst_effect.cbuffers_.resize(cbuffers_.size());
+		for (size_t i = 0; i < cbuffers_.size(); ++i)
+		{
+			dst_effect.cbuffers_[i] = cbuffers_[i]->Clone(*this, dst_effect);
+		}
+
+		dst_effect.shader_objs_.resize(shader_objs_.size());
+		for (size_t i = 0; i < shader_objs_.size(); ++i)
+		{
+			if (shader_objs_[i]->HWResourceReady())
+			{
+				dst_effect.shader_objs_[i] = shader_objs_[i]->Clone(dst_effect);
+			}
+		}
+	}
+
+	void RenderEffect::Reclone(RenderEffect& dst_effect)
+	{
+		for (size_t i = 0; i < cbuffers_.size(); ++i)
+		{
+			cbuffers_[i]->Reclone(*dst_effect.cbuffers_[i], *this, dst_effect);
+		}
+
+		for (size_t i = 0; i < shader_objs_.size(); ++i)
+		{
+			if (shader_objs_[i]->HWResourceReady())
+			{
+				dst_effect.shader_objs_[i] = shader_objs_[i]->Clone(dst_effect);
+			}
+		}
+	}
+
+	bool RenderEffect::HWResourceReady() const
+	{
+		if (!hw_res_ready_)
+		{
+			hw_res_ready_ = true;
+			for (uint32_t i = 0; i < effect_template_->NumTechniques(); ++i)
+			{
+				hw_res_ready_ &= effect_template_->TechniqueByIndex(i)->HWResourceReady(*this);
+			}
+		}
+
+		return hw_res_ready_;
 	}
 
 	std::string const & RenderEffect::ResName() const
@@ -3126,12 +3222,12 @@ namespace KlayGE
 		for (XMLNodePtr node = root.FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 		{
 			techniques_.push_back(MakeUniquePtr<RenderTechnique>());
-			techniques_.back()->Load(effect, node, index);
+			techniques_.back()->Open(effect, node, index);
 		}
 	}
 #endif
 
-	void RenderEffectTemplate::Load(ArrayRef<std::string> names, RenderEffect& effect)
+	void RenderEffectTemplate::Open(ArrayRef<std::string> names, RenderEffect& effect)
 	{
 		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(names.back()));
 		std::filesystem::path last_fxml_directory = last_fxml_path.parent_path();
@@ -3178,6 +3274,9 @@ namespace KlayGE
 		}
 #endif
 
+#if KLAYGE_IS_DEV_PLATFORM
+		need_compile_ = false;
+#endif
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
 		if (!this->StreamIn(kfx_source, effect))
 		{
@@ -3203,7 +3302,7 @@ namespace KlayGE
 				frag_docs[0] = MakeUniquePtr<XMLDocument>();
 				XMLNodePtr root = frag_docs[0]->Parse(main_source);
 				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
-			
+
 				for (size_t i = 1; i < names.size(); ++ i)
 				{
 					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
@@ -3224,11 +3323,39 @@ namespace KlayGE
 				this->ResolveOverrideTechs(*frag_docs[0], *root);
 
 				this->Load(*root, effect);
+
+				kfx_name_ = kfx_name;
+				need_compile_ = true;
+			}
+#endif
+		}
+	}
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectTemplate::CompileShaders(RenderEffect& effect)
+	{
+		if (need_compile_)
+		{
+			uint32_t tech_index = 0;
+			for (auto const& tech : techniques_)
+			{
+				tech->CompileShaders(effect, tech_index);
+				++tech_index;
 			}
 
-			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
+			std::ofstream ofs(kfx_name_.c_str(), std::ios_base::binary | std::ios_base::out);
 			this->StreamOut(ofs, effect);
+		}
+	}
 #endif
+
+	void RenderEffectTemplate::CreateHwShaders(RenderEffect& effect)
+	{
+		uint32_t tech_index = 0;
+		for (auto const& tech : techniques_)
+		{
+			tech->CreateHwShaders(effect, tech_index);
+			++tech_index;
 		}
 	}
 
@@ -3926,7 +4053,7 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderTechnique::Load(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index)
+	void RenderTechnique::Open(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index)
 	{
 		name_ = std::string(node->Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
@@ -4021,7 +4148,7 @@ namespace KlayGE
 
 					auto inherit_pass = parent_tech->passes_[index].get();
 
-					pass->Load(effect, tech_index, index, inherit_pass);
+					pass->Open(effect, tech_index, index, inherit_pass);
 					is_validate_ &= pass->Validate();
 				}
 			}
@@ -4054,7 +4181,7 @@ namespace KlayGE
 					inherit_pass = parent_tech->passes_[index].get();
 				}
 
-				pass->Load(effect, pass_node, tech_index, index, inherit_pass);
+				pass->Open(effect, pass_node, tech_index, index, inherit_pass);
 
 				is_validate_ &= pass->Validate();
 
@@ -4086,7 +4213,27 @@ namespace KlayGE
 			}
 		}
 	}
+
+	void RenderTechnique::CompileShaders(RenderEffect& effect, uint32_t tech_index)
+	{
+		uint32_t pass_index = 0;
+		for (auto& pass : passes_)
+		{
+			pass->CompileShaders(effect, tech_index, pass_index);
+			++pass_index;
+		}
+	}
 #endif
+
+	void RenderTechnique::CreateHwShaders(RenderEffect& effect, uint32_t tech_index)
+	{
+		uint32_t pass_index = 0;
+		for (auto& pass : passes_)
+		{
+			pass->CreateHwShaders(effect, tech_index, pass_index);
+			++pass_index;
+		}
+	}
 
 	bool RenderTechnique::StreamIn(RenderEffect& effect, ResIdentifierPtr const & res, uint32_t tech_index)
 	{
@@ -4207,9 +4354,29 @@ namespace KlayGE
 	}
 #endif
 
+	bool RenderTechnique::HWResourceReady(RenderEffect const& effect) const
+	{
+		bool hw_res_ready = true;
+		for (auto const& pass : passes_)
+		{
+			auto const* shader_obj = pass->GetShaderObject(effect).get();
+			if (shader_obj)
+			{
+				hw_res_ready &= shader_obj->HWResourceReady();
+			}
+			else
+			{
+				hw_res_ready = false;
+				break;
+			}
+		}
+
+		return hw_res_ready;
+	}
+
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderPass::Load(RenderEffect& effect, XMLNodePtr const & node,
+	void RenderPass::Open(RenderEffect& effect, XMLNodePtr const & node,
 		uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
 		name_ = std::string(node->Attrib("name")->ValueString());
@@ -4665,28 +4832,25 @@ namespace KlayGE
 			if (!sd.func_name.empty())
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				ShaderStageObjectPtr shader_stage;
 				if (sd.tech_pass_type == 0xFFFFFFFF)
 				{
-					auto const & tech = *effect.TechniqueByIndex(tech_index);
-					shader_obj->AttachShader(stage, effect, tech, *this, shader_desc_ids_);
+					shader_stage = rf.MakeShaderStageObject(stage);
 					sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + stage_index;
 				}
 				else
 				{
-					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
-					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
+					auto const& tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
+					auto const& pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
+					shader_stage = pass.GetShaderObject(effect)->Stage(stage);
 				}
+
+				shader_obj->AttachStage(stage, shader_stage);
 			}
 		}
-
-		shader_obj->LinkShaders(effect);
-
-		is_validate_ = shader_obj->Validate();
 	}
 
-	void RenderPass::Load(RenderEffect& effect,
-		uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
+	void RenderPass::Open(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
 		BOOST_ASSERT(inherit_pass);
 
@@ -4737,18 +4901,56 @@ namespace KlayGE
 			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
 			if (!sd.func_name.empty())
 			{
+				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				ShaderStageObjectPtr shader_stage;
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
 				{
-					auto const & tech = *effect.TechniqueByIndex(tech_index);
-					shader_obj->AttachShader(static_cast<ShaderStage>(stage_index),
-						effect, tech, *this, shader_desc_ids_);
+					auto& rf = Context::Instance().RenderFactoryInstance();
+					shader_stage = rf.MakeShaderStageObject(stage);
 				}
 				else
 				{
-					ShaderStage const stage = static_cast<ShaderStage>(stage_index);
 					auto const& tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
 					auto const& pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
+					shader_stage = pass.GetShaderObject(effect)->Stage(stage);
+				}
+
+				shader_obj->AttachStage(stage, shader_stage);
+			}
+		}
+	}
+
+	void RenderPass::CompileShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index)
+	{
+		auto const & shader_obj = this->GetShaderObject(effect);
+		for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
+		{
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
+			if (!sd.func_name.empty())
+			{
+				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
+				{
+					auto const & tech = *effect.TechniqueByIndex(tech_index);
+					shader_obj->Stage(stage)->CompileShader(effect, tech, *this, shader_desc_ids_);
+				}
+			}
+		}
+	}
+#endif
+
+	void RenderPass::CreateHwShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index)
+	{
+		auto const & shader_obj = this->GetShaderObject(effect);
+		for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
+		{
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
+			if (!sd.func_name.empty())
+			{
+				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
+				{
+					shader_obj->Stage(stage)->CreateHwShader(effect, shader_desc_ids_);
 				}
 			}
 		}
@@ -4757,10 +4959,8 @@ namespace KlayGE
 
 		is_validate_ = shader_obj->Validate();
 	}
-#endif
 
-	bool RenderPass::StreamIn(RenderEffect& effect,
-		ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index)
+	bool RenderPass::StreamIn(RenderEffect& effect, ResIdentifierPtr const& res, uint32_t tech_index, uint32_t pass_index)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -4848,39 +5048,35 @@ namespace KlayGE
 			shader_desc_ids_[stage] = LE2Native(shader_desc_ids_[stage]);
 		}
 
-		
 		shader_obj_index_ = effect.AddShaderObject();
-		auto const & shader_obj = this->GetShaderObject(effect);
+		auto const& shader_obj = this->GetShaderObject(effect);
 
 		bool native_accepted = true;
-
 		for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 		{
-			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids_[stage_index]);
 			if (!sd.func_name.empty())
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
 
-				bool this_native_accepted;
+				ShaderStageObjectPtr shader_stage;
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
 				{
-					this_native_accepted = shader_obj->StreamIn(res, stage, effect, shader_desc_ids_);
+					shader_stage = rf.MakeShaderStageObject(stage);
+					shader_stage->StreamIn(effect, shader_desc_ids_, *res);
 				}
 				else
 				{
-					auto const & tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
-					auto const & pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj->AttachStage(stage, pass.GetShaderObject(effect)->Stage(stage));
-					this_native_accepted = true;
+					auto const& tech = *effect.TechniqueByIndex(sd.tech_pass_type >> 16);
+					auto const& pass = tech.Pass((sd.tech_pass_type >> 8) & 0xFF);
+					shader_stage = pass.GetShaderObject(effect)->Stage(stage);
 				}
 
-				native_accepted &= this_native_accepted;
+				shader_obj->AttachStage(stage, shader_stage);
+
+				native_accepted &= shader_stage->Validate();
 			}
 		}
-
-		shader_obj->LinkShaders(effect);
-
-		is_validate_ = shader_obj->Validate();
 
 		return native_accepted;
 	}
@@ -4981,7 +5177,7 @@ namespace KlayGE
 			{
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage)
 				{
-					this->GetShaderObject(effect)->StreamOut(os, static_cast<ShaderStage>(stage));
+					this->GetShaderObject(effect)->Stage(static_cast<ShaderStage>(stage))->StreamOut(os);
 				}
 			}
 		}
@@ -5065,6 +5261,31 @@ namespace KlayGE
 		}
 
 		return ret;
+	}
+
+	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& src_effect, RenderEffect& dst_effect)
+	{
+		dst_cbuffer.name_ = name_;
+		dst_cbuffer.param_indices_ = param_indices_;
+		dst_cbuffer.buff_ = buff_;
+		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
+
+		for (size_t i = 0; i < param_indices_->size(); ++i)
+		{
+			RenderEffectParameter* src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
+			if (src_param->InCBuffer())
+			{
+				RenderEffectParameter* dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
+				if (dst_param->InCBuffer())
+				{
+					dst_param->RebindToCBuffer(dst_cbuffer);
+				}
+				else
+				{
+					dst_param->BindToCBuffer(dst_cbuffer, src_param->CBufferOffset(), src_param->Stride());
+				}
+			}
+		}
 	}
 
 	void RenderEffectConstantBuffer::AddParameter(uint32_t index)
@@ -6348,13 +6569,11 @@ namespace KlayGE
 
 	RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name)
 	{
-		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names)
 	{
-		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 }

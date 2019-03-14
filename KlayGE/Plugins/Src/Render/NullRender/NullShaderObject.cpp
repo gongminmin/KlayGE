@@ -256,7 +256,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3DShaderStageObject::AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+	void D3DShaderStageObject::CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		shader_code_.clear();
@@ -428,6 +428,14 @@ namespace KlayGE
 		KFL_UNUSED(pass);
 		KFL_UNUSED(shader_desc_ids);
 #endif
+	}
+
+	void D3DShaderStageObject::CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+	{
+		KFL_UNUSED(effect);
+		KFL_UNUSED(shader_desc_ids);
+
+		hw_res_ready_ = true;
 	}
 
 	void D3DShaderStageObject::FillCBufferIndices(RenderEffect const& effect)
@@ -727,7 +735,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderStageObject::AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+	void OGLShaderStageObject::CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
@@ -987,6 +995,14 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	void OGLShaderStageObject::CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+	{
+		KFL_UNUSED(effect);
+		KFL_UNUSED(shader_desc_ids);
+
+		hw_res_ready_ = true;
 	}
 
 	std::string_view OGLShaderStageObject::GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const

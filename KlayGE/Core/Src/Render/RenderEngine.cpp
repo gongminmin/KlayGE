@@ -563,18 +563,27 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		this->DoRender(effect, tech, rl);
+		if (tech.HWResourceReady(effect))
+		{
+			this->DoRender(effect, tech, rl);
+		}
 	}
 
 	void RenderEngine::Dispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		this->DoDispatch(effect, tech, tgx, tgy, tgz);
+		if (tech.HWResourceReady(effect))
+		{
+			this->DoDispatch(effect, tech, tgx, tgy, tgz);
+		}
 	}
 
 	void RenderEngine::DispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
-		this->DoDispatchIndirect(effect, tech, buff_args, offset);
+		if (tech.HWResourceReady(effect))
+		{
+			this->DoDispatchIndirect(effect, tech, buff_args, offset);
+		}
 	}
 
 	// 上次Render()所渲染的图元数

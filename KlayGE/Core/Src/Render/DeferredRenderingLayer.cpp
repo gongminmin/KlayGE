@@ -342,7 +342,7 @@ namespace
 				{ "out_tex" },
 				RenderEffectPtr(), nullptr)
 		{
-			auto effect = SyncLoadRenderEffect("DeferredRenderingDebug.fxml");
+			auto effect = ASyncLoadRenderEffect("DeferredRenderingDebug.fxml");
 			this->Technique(effect, effect->TechniqueByName("ShowPosition"));
 		}
 
@@ -554,19 +554,19 @@ namespace KlayGE
 		merged_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
+		dr_effect_ = ASyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
 			num_depth_slices_ = 4;
 			depth_slices_.resize(num_depth_slices_ + 1);
 			light_batch_ = 1024;
-			dr_effect_ = SyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
+			dr_effect_ = ASyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
 		}
 		else
 		{
 			light_batch_ = 32;
-			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering.fxml");
+			dr_effect_ = ASyncLoadRenderEffect("LightIndexedDeferredRendering.fxml");
 		}
 #endif
 
@@ -1341,7 +1341,7 @@ namespace KlayGE
 				KFL_UNREACHABLE("Invalid detail mode");
 			}
 
-			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num));
+			g_buffer_effects_[effect_index.index] = ASyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num));
 		}
 
 		return g_buffer_effects_[effect_index.index];
@@ -1586,149 +1586,156 @@ namespace KlayGE
 	{
 		jobs_.clear();
 
-#ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
-#endif
-		for (uint32_t i = 0; i < lights_.size(); ++ i)
+		if (dr_effect_->HWResourceReady())
 		{
-			auto const & light = *lights_[i];
-			if (light.Enabled())
-			{
-				this->AppendShadowPassScanCode(i);
-			}
-		}
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); } ));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
-
-#ifdef KLAYGE_DEBUG
-		bool no_viewport = true;
-#endif
-		for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
-		{
-			PerViewport& pvp = viewports_[vpi];
-			if (pvp.attrib & VPAM_Enabled)
+			for (uint32_t i = 0; i < lights_.size(); ++ i)
 			{
-#ifdef KLAYGE_DEBUG
-				no_viewport = false;
-#endif
-
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SwitchViewportDRJob(vpi); }));
-
-				pvp.g_buffer_enables[PTB_Opaque] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
-				pvp.g_buffer_enables[PTB_TransparencyBack] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
-				pvp.g_buffer_enables[PTB_TransparencyFront]
-					= (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
-
-				pvp.light_visibles.resize(lights_.size());
-				for (uint32_t li = 0; li < lights_.size(); ++ li)
+				auto const & light = *lights_[i];
+				if (light.Enabled())
 				{
-					auto const & light = *lights_[li];
-					if (light.Enabled())
-					{
-						this->CheckLightVisible(vpi, li);
-					}
-					else
-					{
-						pvp.light_visibles[li] = false;
-					}
+					this->AppendShadowPassScanCode(i);
 				}
+			}
+#ifndef KLAYGE_SHIP
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
+#endif
 
-				for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
+#ifdef KLAYGE_DEBUG
+			bool no_viewport = true;
+#endif
+			for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
+			{
+				PerViewport& pvp = viewports_[vpi];
+				if (pvp.attrib & VPAM_Enabled)
 				{
-					PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
+#ifdef KLAYGE_DEBUG
+					no_viewport = false;
+#endif
 
-					if (pvp.g_buffer_enables[i])
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SwitchViewportDRJob(vpi); }));
+
+					pvp.g_buffer_enables[PTB_Opaque] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
+					pvp.g_buffer_enables[PTB_TransparencyBack] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
+					pvp.g_buffer_enables[PTB_TransparencyFront]
+						= (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
+
+					pvp.light_visibles.resize(lights_.size());
+					for (uint32_t li = 0; li < lights_.size(); ++ li)
 					{
-						this->AppendGBufferPassScanCode(vpi, pass_tb);
-					}
-					if (PTB_Opaque == i)
-					{
-						if (cascaded_shadow_index_ >= 0)
+						auto const & light = *lights_[li];
+						if (light.Enabled())
 						{
-							this->AppendCascadedShadowPassScanCode(vpi, cascaded_shadow_index_);
+							this->CheckLightVisible(vpi, li);
+						}
+						else
+						{
+							pvp.light_visibles[li] = false;
 						}
 					}
 
-					if (pvp.g_buffer_enables[i])
+					for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
 					{
-						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
-							[this, vpi, pass_tb]
+						PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
+
+						if (pvp.g_buffer_enables[i])
+						{
+							this->AppendGBufferPassScanCode(vpi, pass_tb);
+						}
+						if (PTB_Opaque == i)
+						{
+							if (cascaded_shadow_index_ >= 0)
+							{
+								this->AppendCascadedShadowPassScanCode(vpi, cascaded_shadow_index_);
+							}
+						}
+
+						if (pvp.g_buffer_enables[i])
+						{
+							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+								[this, vpi, pass_tb]
 							{
 								return this->ShadowingDRJob(viewports_[vpi], pass_tb);
 							}));
-						if (!(pvp.attrib & VPAM_NoGI))
-						{
+							if (!(pvp.attrib & VPAM_NoGI))
+							{
 #ifndef KLAYGE_SHIP
-							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
-								[this, pass_tb]
+								jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+									[this, pass_tb]
 								{
 									return this->BeginPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
 								}));
 #endif
-							for (uint32_t li = 0; li < lights_.size(); ++ li)
-							{
-								auto const & light = *lights_[li];
-								if (light.Enabled())
+								for (uint32_t li = 0; li < lights_.size(); ++ li)
 								{
-									if ((LightSource::LT_Spot == light.Type()) && (PTB_Opaque == pass_tb)
-										&& (light.Attrib() & LightSource::LSA_IndirectLighting)
-										&& rsm_fb_ && (illum_ != 1)
-										&& pvp.light_visibles[li])
+									auto const & light = *lights_[li];
+									if (light.Enabled())
 									{
-										this->AppendIndirectLightingPassScanCode(vpi, li);
+										if ((LightSource::LT_Spot == light.Type()) && (PTB_Opaque == pass_tb)
+											&& (light.Attrib() & LightSource::LSA_IndirectLighting)
+											&& rsm_fb_ && (illum_ != 1)
+											&& pvp.light_visibles[li])
+										{
+											this->AppendIndirectLightingPassScanCode(vpi, li);
+										}
 									}
 								}
-							}
 #ifndef KLAYGE_SHIP
-							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
-								[this, pass_tb]
+								jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+									[this, pass_tb]
 								{
 									return this->EndPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
 								}));
 #endif
+							}
+
+							this->AppendShadingPassScanCode(vpi, pass_tb);
 						}
-
-						this->AppendShadingPassScanCode(vpi, pass_tb);
 					}
-				}
 
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
-					[this, vpi]
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+						[this, vpi]
 					{
 						return this->PostEffectsDRJob(viewports_[vpi]);
 					}));
-				if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
-				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SimpleForwardDRJob(viewports_[vpi]); }));
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] {
-						return this->PostSimpleForwardDRJob(viewports_[vpi]); }));
+					if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
+					{
+						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SimpleForwardDRJob(viewports_[vpi]); }));
+						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] {
+							return this->PostSimpleForwardDRJob(viewports_[vpi]); }));
+					}
+
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
 				}
-
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
 			}
-		}
 
-		if ((DT_SSVO == display_type_)
+			if ((DT_SSVO == display_type_)
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-			|| (DT_DiffuseLighting == display_type_)
-			|| (DT_SpecularLighting == display_type_)
+				|| (DT_DiffuseLighting == display_type_)
+				|| (DT_SpecularLighting == display_type_)
 #endif
-			)
-		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeLightingDRJob(); }));
+				)
+			{
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeLightingDRJob(); }));
+			}
+			else
+			{
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->FinishingDRJob(); }));
+			}
+
+#ifdef KLAYGE_DEBUG
+			if (no_viewport)
+			{
+				LogDebug() << "No viewport available." << std::endl;
+			}
+#endif
 		}
 		else
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->FinishingDRJob(); }));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->ClearOnlyDRJob(); }));
 		}
-
-#ifdef KLAYGE_DEBUG
-		if (no_viewport)
-		{
-			LogDebug() << "No viewport available." << std::endl;
-		}
-#endif
 	}
 
 	void DeferredRenderingLayer::CheckLightVisible(uint32_t vp_index, uint32_t light_index)
@@ -4499,5 +4506,16 @@ namespace KlayGE
 		dr_debug_pp_->Apply();
 
 		return App3DFramework::URV_Finished | App3DFramework::URV_SkipPostProcess;
+	}
+
+	uint32_t DeferredRenderingLayer::ClearOnlyDRJob()
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& re = rf.RenderEngineInstance();
+
+		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+
+		return App3DFramework::URV_Finished;
 	}
 }

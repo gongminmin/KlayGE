@@ -464,6 +464,7 @@ namespace KlayGE
 		uint32_t SwitchViewportDRJob(uint32_t vp_index);
 		uint32_t VisualizeGBufferDRJob();
 		uint32_t VisualizeLightingDRJob();
+		uint32_t ClearOnlyDRJob();
 
 	private:
 		bool tex_array_support_;

@@ -583,39 +583,13 @@ namespace KlayGE
 		{
 			curr_shader_stage = shader_stage;
 			shader_stages_dirty_ = true;
+			hw_res_ready_ = false;
 		}
 	}
 	
 	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const
 	{
 		return so_template_->shader_stages_[static_cast<uint32_t>(stage)];
-	}
-	
-	bool ShaderObject::StreamIn(ResIdentifierPtr const& res, ShaderStage stage, RenderEffect const& effect,
-		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		auto shader_stage = rf.MakeShaderStageObject(stage);
-		shader_stage->StreamIn(effect, shader_desc_ids, *res);
-
-		this->AttachStage(stage, shader_stage);
-
-		return shader_stage->Validate();
-	}
-
-	void ShaderObject::StreamOut(std::ostream& os, ShaderStage stage)
-	{
-		this->Stage(stage)->StreamOut(os);
-	}
-
-	void ShaderObject::AttachShader(ShaderStage stage, RenderEffect const & effect,
-		RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, NumShaderStages> const & shader_desc_ids)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		auto shader_stage = rf.MakeShaderStageObject(stage);
-		shader_stage->AttachShader(effect, tech, pass, shader_desc_ids);
-
-		this->AttachStage(stage, shader_stage);
 	}
 
 	void ShaderObject::LinkShaders(RenderEffect const & effect)
@@ -640,6 +614,7 @@ namespace KlayGE
 			this->DoLinkShaders(effect);
 
 			shader_stages_dirty_ = false;
+			hw_res_ready_ = true;
 		}
 	}
 }

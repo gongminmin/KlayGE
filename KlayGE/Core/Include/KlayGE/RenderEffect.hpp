@@ -752,9 +752,17 @@ namespace KlayGE
 		friend class RenderEffectTemplate;
 
 	public:
-		void Load(ArrayRef<std::string> names);
+		void Open(ArrayRef<std::string> names);
+#if KLAYGE_IS_DEV_PLATFORM
+		void CompileShaders();
+#endif
+		void CreateHwShaders();
 
 		RenderEffectPtr Clone();
+		void CloneInPlace(RenderEffect& dst_effect);
+		void Reclone(RenderEffect& dst_effect);
+
+		bool HWResourceReady() const;
 
 		std::string const & ResName() const;
 		size_t ResNameHash() const;
@@ -814,12 +822,18 @@ namespace KlayGE
 		std::vector<std::unique_ptr<RenderEffectParameter>> params_;
 		std::vector<std::unique_ptr<RenderEffectConstantBuffer>> cbuffers_;
 		std::vector<ShaderObjectPtr> shader_objs_;
+
+		mutable bool hw_res_ready_ = false;
 	};
 
 	class KLAYGE_CORE_API RenderEffectTemplate : boost::noncopyable
 	{
 	public:
-		void Load(ArrayRef<std::string> names, RenderEffect& effect);
+		void Open(ArrayRef<std::string> names, RenderEffect& effect);
+#if KLAYGE_IS_DEV_PLATFORM
+		void CompileShaders(RenderEffect& effect);
+#endif
+		void CreateHwShaders(RenderEffect& effect);
 
 		bool StreamIn(ResIdentifierPtr const & source, RenderEffect& effect);
 #if KLAYGE_IS_DEV_PLATFORM
@@ -906,6 +920,9 @@ namespace KlayGE
 		size_t res_name_hash_;
 #if KLAYGE_IS_DEV_PLATFORM
 		uint64_t timestamp_;
+
+		std::string kfx_name_;
+		bool need_compile_;
 #endif
 
 		std::vector<std::unique_ptr<RenderTechnique>> techniques_;
@@ -925,8 +942,10 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index);
+		void Open(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index);
+		void CompileShaders(RenderEffect& effect, uint32_t tech_index);
 #endif
+		void CreateHwShaders(RenderEffect& effect, uint32_t tech_index);
 
 		bool StreamIn(RenderEffect& effect, ResIdentifierPtr const & res, uint32_t tech_index);
 #if KLAYGE_IS_DEV_PLATFORM
@@ -977,6 +996,8 @@ namespace KlayGE
 			return is_validate_;
 		}
 
+		bool HWResourceReady(RenderEffect const& effect) const;
+
 		float Weight() const
 		{
 			return weight_;
@@ -1016,10 +1037,11 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index,
-			RenderPass const * inherit_pass);
-		void Load(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass);
+		void Open(RenderEffect& effect, XMLNodePtr const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
+		void Open(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
+		void CompileShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index);
 #endif
+		void CreateHwShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index);
 
 		bool StreamIn(RenderEffect& effect, ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index);
 #if KLAYGE_IS_DEV_PLATFORM
@@ -1103,6 +1125,7 @@ namespace KlayGE
 #endif
 
 		std::unique_ptr<RenderEffectConstantBuffer> Clone(RenderEffect& src_effect, RenderEffect& dst_effect);
+		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& src_effect, RenderEffect& dst_effect);
 
 		std::string const & Name() const
 		{

@@ -367,8 +367,6 @@ namespace KlayGE
 			}
 
 			this->StageSpecificStreamIn(res);
-
-			this->CreateHwShader(effect, shader_desc_ids);
 		}
 	}
 
@@ -430,7 +428,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderStageObject::AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+	void OGLShaderStageObject::CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
@@ -593,8 +591,6 @@ namespace KlayGE
 						}
 
 						this->StageSpecificAttachShader(dxbc2glsl);
-
-						this->CreateHwShader(effect, shader_desc_ids);
 					}
 					catch (std::exception& ex)
 					{
@@ -735,6 +731,8 @@ namespace KlayGE
 		{
 			is_validate_ = false;
 		}
+
+		hw_res_ready_ = true;
 	}
 
 
@@ -1141,6 +1139,7 @@ namespace KlayGE
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>(so_template_, gl_so_template_);
 
 		ret->is_validate_ = is_validate_;
+		ret->hw_res_ready_ = hw_res_ready_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)

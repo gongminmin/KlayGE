@@ -113,8 +113,10 @@ namespace KlayGE
 		virtual void StreamIn(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) = 0;
 		virtual void StreamOut(std::ostream& os) = 0;
-		virtual void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+		virtual void CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
+		virtual void CreateHwShader(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
 
 		bool Validate() const
 		{
@@ -141,6 +143,11 @@ namespace KlayGE
 			return 0;
 		}
 
+		bool HWResourceReady() const
+		{
+			return hw_res_ready_;
+		}
+
 	protected:
 		static std::vector<uint8_t> CompileToDXBC(ShaderStage stage, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass,
@@ -150,8 +157,6 @@ namespace KlayGE
 		static std::vector<uint8_t> StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags);
 
 		virtual std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const = 0;
-		virtual void CreateHwShader(
-			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
 
 		virtual void StageSpecificStreamIn(ResIdentifier& res)
 		{
@@ -172,6 +177,7 @@ namespace KlayGE
 		const ShaderStage stage_;
 
 		bool is_validate_;
+		bool hw_res_ready_ = false;
 	};
 
 	class KLAYGE_CORE_API ShaderObject : boost::noncopyable
@@ -183,13 +189,6 @@ namespace KlayGE
 		void AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage);
 		ShaderStageObjectPtr const& Stage(ShaderStage stage) const;
 
-		bool StreamIn(ResIdentifierPtr const & res, ShaderStage stage, RenderEffect const & effect,
-			std::array<uint32_t, NumShaderStages> const & shader_desc_ids);
-		void StreamOut(std::ostream& os, ShaderStage stage);
-
-		void AttachShader(ShaderStage stage, RenderEffect const& effect, RenderTechnique const& tech,
-			RenderPass const& pass, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
-
 		void LinkShaders(RenderEffect const & effect);
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
@@ -199,6 +198,11 @@ namespace KlayGE
 		bool Validate() const
 		{
 			return is_validate_;
+		}
+
+		bool HWResourceReady() const
+		{
+			return hw_res_ready_;
 		}
 
 	protected:
@@ -219,6 +223,8 @@ namespace KlayGE
 		
 		bool is_validate_;
 		bool shader_stages_dirty_ = true;
+
+		bool hw_res_ready_ = false;
 	};
 }
 

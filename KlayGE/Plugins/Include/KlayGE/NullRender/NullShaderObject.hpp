@@ -90,8 +90,9 @@ namespace KlayGE
 		void StreamIn(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
-		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+		void CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
+		void CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 		std::vector<uint8_t> const& ShaderCodeBlob() const
 		{
@@ -115,12 +116,6 @@ namespace KlayGE
 
 	private:
 		std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const override;
-		void CreateHwShader(
-			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
-		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(shader_desc_ids);
-		}
 		void FillCBufferIndices(RenderEffect const& effect);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -230,8 +225,9 @@ namespace KlayGE
 		void StreamIn(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) override;
 		void StreamOut(std::ostream& os) override;
-		void AttachShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+		void CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
+		void CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 		std::string const& GlslSource() const
 		{
@@ -269,12 +265,6 @@ namespace KlayGE
 
 	private:
 		std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const override;
-		void CreateHwShader(
-			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
-		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(shader_desc_ids);
-		}
 
 		virtual void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl)
 		{
