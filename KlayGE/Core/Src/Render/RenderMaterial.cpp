@@ -391,6 +391,8 @@ namespace
 			{
 				RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 
+				mtl->name = mtl_desc_.mtl_data->name;
+
 				mtl->albedo = mtl_desc_.mtl_data->albedo;
 				mtl->metalness = mtl_desc_.mtl_data->metalness;
 				mtl->glossiness = mtl_desc_.mtl_data->glossiness;

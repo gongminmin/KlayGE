@@ -117,6 +117,11 @@ namespace KlayGE
 		std::string_view LodFileName(uint32_t lod) const;
 		void LodFileName(uint32_t lod, std::string_view lod_name);
 
+		uint32_t NumMaterials() const;
+		void NumMaterials(uint32_t materials);
+		std::string_view MaterialFileName(uint32_t mtl_index) const;
+		void MaterialFileName(uint32_t mtl_index, std::string_view mtlml_name);
+
 		float4x4 const & Transform() const
 		{
 			return transform_;
@@ -138,6 +143,7 @@ namespace KlayGE
 		uint8_t axis_mapping_[3] = { 0, 1, 2 };
 		bool flip_winding_order_ = false;
 		std::vector<std::string> lod_file_names_;
+		std::vector<std::string> material_file_names_;
 
 		float4x4 transform_ = float4x4::Identity();
 		float4x4 transform_it_ = float4x4::Identity();

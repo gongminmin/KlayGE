@@ -71,7 +71,7 @@ void SSSSSApp::OnCreate()
 {
 	auto scene_model = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper);
-	auto sss_model = ASyncLoadModel("Infinite-Level_02.meshml", EAH_GPU_Read | EAH_Immutable,
+	auto sss_model = ASyncLoadModel("Infinite-Level_02.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[](RenderModel& model)
 		{

@@ -224,6 +224,19 @@ namespace KlayGE
 				}
 			}
 
+			if (document.HasMember("materials"))
+			{
+				auto const & materials_val = document["materials"];
+				BOOST_ASSERT(materials_val.IsArray());
+				new_metadata.material_file_names_.resize(materials_val.Size());
+				uint32_t index = 0;
+				for (auto iter = materials_val.Begin(); iter != materials_val.End(); ++iter, ++index)
+				{
+					BOOST_ASSERT(iter->IsString());
+					new_metadata.material_file_names_[index] = iter->GetString();
+				}
+			}
+
 			new_metadata.UpdateTransforms();
 		}
 		else if(!name.empty())
@@ -332,6 +345,20 @@ namespace KlayGE
 			document.AddMember("lod", array_names_val, allocator);
 		}
 
+		if (!material_file_names_.empty())
+		{
+			rapidjson::Value mtl_names_val;
+			mtl_names_val.SetArray();
+
+			for (size_t i = 0; i < material_file_names_.size(); ++i)
+			{
+				auto const & str = material_file_names_[i];
+				mtl_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+			}
+
+			document.AddMember("materials", mtl_names_val, allocator);
+		}
+
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
 		document.Accept(writer);
@@ -357,6 +384,26 @@ namespace KlayGE
 	void MeshMetadata::LodFileName(uint32_t lod, std::string_view lod_name)
 	{
 		lod_file_names_[lod] = std::string(lod_name);
+	}
+
+	uint32_t MeshMetadata::NumMaterials() const
+	{
+		return static_cast<uint32_t>(material_file_names_.size());
+	}
+
+	void MeshMetadata::NumMaterials(uint32_t materials)
+	{
+		material_file_names_.resize(materials);
+	}
+
+	std::string_view MeshMetadata::MaterialFileName(uint32_t mtl_index) const
+	{
+		return material_file_names_[mtl_index];
+	}
+
+	void MeshMetadata::MaterialFileName(uint32_t mtl_index, std::string_view mtlml_name)
+	{
+		material_file_names_[mtl_index] = std::string(mtlml_name);
 	}
 
 	void MeshMetadata::UpdateTransforms()

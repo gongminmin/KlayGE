@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<material name="Material 0">
+	<albedo color="0.55 0.55 0.55 1" texture="Map-COL.jpg"/>
+	<normal texture="Infinite-Level_02_Tangent_SmoothUV.jpg"/>
+	<metalness value="0"/>
+	<glossiness value="0.377453119"/>
+	<sss value="1"/>
+</material>

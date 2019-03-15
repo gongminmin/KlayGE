@@ -3194,6 +3194,15 @@ namespace
 			return RenderModelPtr();
 		}
 
+		for (uint32_t i = 0; i < metadata.NumMaterials(); ++i)
+		{
+			std::string_view mtlml_name = metadata.MaterialFileName(i);
+			if (!mtlml_name.empty())
+			{
+				render_model_->GetMaterial(i) = SyncLoadRenderMaterial(metadata.MaterialFileName(i));
+			}
+		}
+
 		uint32_t const num_lods = static_cast<uint32_t>(meshes_[0].lods.size());
 		bool const skinned = !joints_.empty();
 
