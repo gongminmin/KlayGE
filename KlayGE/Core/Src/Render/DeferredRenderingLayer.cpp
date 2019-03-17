@@ -1341,7 +1341,7 @@ namespace KlayGE
 				KFL_UNREACHABLE("Invalid detail mode");
 			}
 
-			g_buffer_effects_[effect_index.index] = ASyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num));
+			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num));
 		}
 
 		return g_buffer_effects_[effect_index.index];

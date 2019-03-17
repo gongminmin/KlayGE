@@ -4227,10 +4227,25 @@ namespace KlayGE
 
 	void RenderTechnique::CreateHwShaders(RenderEffect& effect, uint32_t tech_index)
 	{
+		is_validate_ = true;
+
+		has_discard_ = false;
+		has_tessellation_ = false;
+
 		uint32_t pass_index = 0;
 		for (auto& pass : passes_)
 		{
 			pass->CreateHwShaders(effect, tech_index, pass_index);
+
+			is_validate_ &= pass->Validate();
+
+			auto const* shader_obj = pass->GetShaderObject(effect).get();
+			if (auto const* ps_stage = shader_obj->Stage(ShaderStage::Pixel).get())
+			{
+				has_discard_ |= ps_stage->HasDiscard();
+			}
+			has_tessellation_ |= !!shader_obj->Stage(ShaderStage::Hull);
+
 			++pass_index;
 		}
 	}
@@ -4269,11 +4284,6 @@ namespace KlayGE
 			}
 		}
 
-		is_validate_ = true;
-
-		has_discard_ = false;
-		has_tessellation_ = false;
-		
 		res->read(&transparent_, sizeof(transparent_));
 		res->read(&weight_, sizeof(weight_));
 		weight_ = LE2Native(weight_);
@@ -4288,15 +4298,6 @@ namespace KlayGE
 			passes_[pass_index] = pass;
 
 			ret &= pass->StreamIn(effect, res, tech_index, pass_index);
-
-			is_validate_ &= pass->Validate();
-
-			auto const* shader_obj = pass->GetShaderObject(effect).get();
-			if (auto const* ps_stage = shader_obj->Stage(ShaderStage::Pixel).get())
-			{
-				has_discard_ |= ps_stage->HasDiscard();
-			}
-			has_tessellation_ |= !!shader_obj->Stage(ShaderStage::Hull);
 		}
 
 		return ret;
