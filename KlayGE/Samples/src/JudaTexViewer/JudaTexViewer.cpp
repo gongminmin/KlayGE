@@ -85,19 +85,11 @@ namespace
 				RenderLayout::ST_Instance);
 		}
 
-		void SetModel(float4x4 const & model)
-		{
-			model_ = model;
-		}
-
 		void OnRenderBegin()
 		{
 			FrameBufferPtr const & fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-			*(effect_->ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
+			*(effect_->ParameterByName("world_mat")) = model_mat_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
 		}
-
-	private:
-		float4x4 model_;
 	};
 	
 	class RenderGridBorder : public Renderable
@@ -141,53 +133,11 @@ namespace
 				RenderLayout::ST_Instance);
 		}
 
-		void SetModel(float4x4 const & model)
-		{
-			model_ = model;
-		}
-
 		void OnRenderBegin()
 		{
 			FrameBufferPtr const & fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-			*(effect_->ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
+			*(effect_->ParameterByName("world_mat")) = model_mat_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
 		}
-
-	private:
-		float4x4 model_;
-	};
-
-	template <typename RenderableType>
-	class GridObject : public SceneNode
-	{
-	public:
-		GridObject()
-			: SceneNode(0)
-		{
-			this->AddRenderable(MakeSharedPtr<RenderableType>());
-		}
-
-		void TileSize(uint32_t tile_size)
-		{
-			mat_tile_scaling_ = MathLib::scaling(1.0f, -1.0f, 1.0f)
-				* MathLib::scaling(static_cast<float>(tile_size), static_cast<float>(tile_size), 1.0f);
-		}
-
-		void Position(float2 const & pos)
-		{
-			mat_translation_ = MathLib::translation(+pos.x(), -pos.y(), 0.0f);
-			checked_pointer_cast<RenderableType>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
-		}
-
-		void Scale(float scale)
-		{
-			mat_scaling_ = MathLib::scaling(scale, scale, 1.0f);
-			checked_pointer_cast<RenderableType>(renderables_[0])->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
-		}
-
-	private:
-		float4x4 mat_tile_scaling_;
-		float4x4 mat_translation_;
-		float4x4 mat_scaling_;
 	};
 
 
@@ -237,11 +187,13 @@ void JudaTexViewer::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	tile_ = MakeSharedPtr<GridObject<RenderTile>>();
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tile_);
+	tile_renderable_ = MakeSharedPtr<RenderTile>();
+	grid_border_renderable_ = MakeSharedPtr<RenderGridBorder>();
 
-	grid_border_ = MakeSharedPtr<GridObject<RenderGridBorder>>();
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_border_);
+	node_ = MakeSharedPtr<SceneNode>(0);
+	node_->AddRenderable(tile_renderable_);
+	node_->AddRenderable(grid_border_renderable_);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(node_);
 
 	this->OpenJudaTex("klayge_logo.jdt");
 
@@ -293,8 +245,11 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 				{
 					position_ += float2(this_mouse_pt - last_mouse_pt_) / scale_;
 
-					checked_pointer_cast<GridObject<RenderTile>>(tile_)->Position(position_);
-					checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->Position(position_);
+					mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
+
+					float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
+					checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
+					checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
 				}
 			}
 
@@ -314,11 +269,12 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 				position_ = new_position;
 				scale_ = new_scale;
 
-				checked_pointer_cast<GridObject<RenderTile>>(tile_)->Position(position_);
-				checked_pointer_cast<GridObject<RenderTile>>(tile_)->Scale(scale_);
+				mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
+				mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
 
-				checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->Position(position_);
-				checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->Scale(scale_);
+				float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
+				checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
+				checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
 			}
 		}
 		break;
@@ -341,15 +297,16 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 	position_ = float2(0, 0);
 	scale_ = 1;
 
-	juda_tex_->SetParams(*tile_->GetRenderable()->GetRenderEffect());
+	juda_tex_->SetParams(*tile_renderable_->GetRenderEffect());
 
-	checked_pointer_cast<GridObject<RenderTile>>(tile_)->TileSize(tile_size_);
-	checked_pointer_cast<GridObject<RenderTile>>(tile_)->Position(position_);
-	checked_pointer_cast<GridObject<RenderTile>>(tile_)->Scale(scale_);
+	mat_tile_scaling_ = MathLib::scaling(1.0f, -1.0f, 1.0f)
+		* MathLib::scaling(static_cast<float>(tile_size_), static_cast<float>(tile_size_), 1.0f);
+	mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
+	mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
 
-	checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->TileSize(tile_size_);
-	checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->Position(position_);
-	checked_pointer_cast<GridObject<RenderGridBorder>>(grid_border_)->Scale(scale_);
+	float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
+	checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
+	checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
 }
 
 void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
@@ -457,16 +414,16 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 		}
 	}
 
-	checked_pointer_cast<RenderTile>(tile_->GetRenderable())->SetPosBuffer(tile_pos_vb_);
-	checked_pointer_cast<RenderGridBorder>(grid_border_->GetRenderable())->SetPosBuffer(tile_pos_vb_);
+	checked_cast<RenderTile*>(tile_renderable_.get())->SetPosBuffer(tile_pos_vb_);
+	checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->SetPosBuffer(tile_pos_vb_);
 
-	RenderLayout& rl_tile = tile_->GetRenderable()->GetRenderLayout();
+	RenderLayout& rl_tile = tile_renderable_->GetRenderLayout();
 	for (uint32_t i = 0; i < rl_tile.NumVertexStreams(); ++ i)
 	{
 		rl_tile.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
 	}
 
-	RenderLayout& rl_border = grid_border_->GetRenderable()->GetRenderLayout();
+	RenderLayout& rl_border = checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->GetRenderLayout();
 	for (uint32_t i = 0; i < rl_border.NumVertexStreams(); ++ i)
 	{
 		rl_border.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);

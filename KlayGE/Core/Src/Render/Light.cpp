@@ -146,7 +146,7 @@ namespace KlayGE
 	
 	void LightSource::Direction(float3 const & dir)
 	{
-		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
+		quat_ = MathLib::axis_to_axis(float3(0, 0, 1), dir);
 	}
 
 	Quaternion const & LightSource::Rotation() const
