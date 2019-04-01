@@ -212,8 +212,9 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			polygon_model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 				SceneNode::SOA_Cullable, AddToSceneRootHelper,
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
-			polygon_model_->RootNode()->OnSubThreadUpdate().Connect([this](float app_time, float elapsed_time)
+			polygon_model_->RootNode()->OnSubThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 				{
+					KFL_UNUSED(node);
 					KFL_UNUSED(elapsed_time);
 
 					for (uint32_t i = 0; i < polygon_model_->NumMeshes(); ++ i)

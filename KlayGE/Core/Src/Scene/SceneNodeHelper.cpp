@@ -56,26 +56,29 @@ namespace KlayGE
 			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
 		}
 
-		this->RootNode()->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().Connect([this](SceneNode& root_node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto const & node = this->RootNode();
-
-				node->TransformToParent(model_scaling_ * MathLib::to_matrix(light_->Rotation())
+				root_node.TransformToParent(model_scaling_ * MathLib::to_matrix(light_->Rotation())
 					* MathLib::translation(light_->Position()));
 				if (LightSource::LT_Spot == light_->Type())
 				{
 					float radius = light_->CosOuterInner().w();
-					node->TransformToParent(MathLib::scaling(radius, radius, 1.0f) * node->TransformToParent());
+					root_node.TransformToParent(MathLib::scaling(radius, radius, 1.0f) * root_node.TransformToParent());
 				}
 
-				node->ForEachRenderable([](Renderable& mesh)
+				root_node.Traverse([](SceneNode& node)
+				{
+					node.ForEachRenderable([](Renderable& mesh)
 					{
 						auto& light_mesh = *checked_cast<RenderableLightSourceProxy*>(&mesh);
 						light_mesh.Update();
 					});
+
+					return true;
+				});
 			});
 	}
 
@@ -146,14 +149,12 @@ namespace KlayGE
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 
-		this->RootNode()->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
+		this->RootNode()->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto const & node = this->RootNode();
-
-				node->TransformToParent(model_scaling_ * camera_->InverseViewMatrix());
+				node.TransformToParent(model_scaling_ * camera_->InverseViewMatrix());
 			});
 	}
 

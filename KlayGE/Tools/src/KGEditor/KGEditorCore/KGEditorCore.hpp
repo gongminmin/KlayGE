@@ -191,7 +191,7 @@ namespace KlayGE
 		uint32_t selected_entity_;
 		SceneNodePtr axis_;
 		SceneNodePtr grid_;
-		SceneNodePtr sky_box_;
+		SceneNodePtr skybox_;
 		SceneNodePtr selected_bb_;
 		SceneNodePtr translation_axis_;
 		SceneNodePtr rotation_axis_;

@@ -21,12 +21,9 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr refractor_model_;
 	KlayGE::SceneNodePtr refractor_;
-	KlayGE::SceneNodePtr sky_box_;
+	KlayGE::SceneNodePtr skybox_;
 
 	KlayGE::TrackballCameraController tb_controller_;
-
-	KlayGE::TexturePtr y_cube_map_;
-	KlayGE::TexturePtr c_cube_map_;
 
 	bool depth_texture_support_;
 	KlayGE::FrameBufferPtr backface_buffer_;

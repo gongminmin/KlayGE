@@ -897,14 +897,16 @@ void EnvLightingApp::OnCreate()
 		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_);
 	}
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
 	ambient_light->AddToSceneManager();
 
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_group_);
+	root_node.AddChild(sphere_group_);
 
-	sphere_group_->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 		{
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
@@ -912,7 +914,7 @@ void EnvLightingApp::OnCreate()
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
-			sphere_group_->TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
+			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
 		});
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable,
@@ -944,9 +946,9 @@ void EnvLightingApp::OnCreate()
 		sphere_group_->AddChild(sphere_models_[i]->RootNode());
 	}
 
-	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube_map, c_cube_map);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
 
 	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);

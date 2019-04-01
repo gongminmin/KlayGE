@@ -22,7 +22,6 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::SceneNodePtr sphere_group_;
 	std::vector<KlayGE::RenderModelPtr> sphere_models_;
-	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::TrackballCameraController obj_controller_;
 

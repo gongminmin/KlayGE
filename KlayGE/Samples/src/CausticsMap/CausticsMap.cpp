@@ -179,7 +179,7 @@ namespace
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 				float4x4 first_light_view = light_->SMCamera(0)->ViewMatrix();
 
-				*(effect_->ParameterByName("light_pos")) = float3(MathLib::transform(light_->Position(), MathLib::inverse(MathLib::rotation_x(DEG90))));
+				*(effect_->ParameterByName("light_pos")) = float3(MathLib::transform(light_->Position(), MathLib::rotation_x(-DEG90)));
 				*(effect_->ParameterByName("light_color")) = float3(light_->Color());
 				*(effect_->ParameterByName("light_falloff")) = light_->Falloff();
 				*(effect_->ParameterByName("light_vp")) = caustics_light_->SMCamera(0)->ViewMatrix() * caustics_light_->SMCamera(0)->ProjMatrix();
@@ -546,6 +546,8 @@ void CausticsMapApp::OnCreate()
 	trackball_controller_.AttachCamera(this->ActiveCamera());
 	trackball_controller_.Scalers(0.05f, 0.1f);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	//Light
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
@@ -568,7 +570,7 @@ void CausticsMapApp::OnCreate()
 	dummy_light_env_->Position(float3(0.0f, 20.0f, 0.0f));
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_proxy_->RootNode());
 
 	//Input Bind
 	InputEngine& ie(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -585,12 +587,12 @@ void CausticsMapApp::OnCreate()
 	// Model
 	plane_renderable_ = MakeSharedPtr<ReceivePlane>(50.0f, 50.0f);
 	plane_obj_ = MakeSharedPtr<SceneNode>(plane_renderable_, SceneNode::SOA_Moveable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(plane_obj_);
+	root_node.AddChild(plane_obj_);
 
 	sphere_obj_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	sphere_obj_->TransformToParent(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_obj_->Visible(false);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_obj_);
+	root_node.AddChild(sphere_obj_);
 	sphere_model_ = ASyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[this](RenderModel& model)
@@ -602,7 +604,7 @@ void CausticsMapApp::OnCreate()
 	bunny_obj_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	bunny_obj_->TransformToParent(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_obj_->Visible(false);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(bunny_obj_);
+	root_node.AddChild(bunny_obj_);
 	bunny_model_ = ASyncLoadModel("bunny.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable,
 		[this](RenderModel& model)
@@ -617,11 +619,12 @@ void CausticsMapApp::OnCreate()
 	caustics_grid_ = MakeSharedPtr<CausticsGrid>();
 
 	// Sky Box
-	y_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	c_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube_map_, c_cube_map_);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+	auto y_cube_map = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	auto c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
+	skybox_renderable->CompressedCubeMap(y_cube_map, c_cube_map);
+	skybox_ = MakeSharedPtr<SceneNode>(skybox_renderable, SceneNode::SOA_NotCastShadow);
+	root_node.AddChild(skybox_);
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 	if (depth_texture_support_)
@@ -927,7 +930,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	sky_box_->Visible(false);
+	skybox_->Visible(false);
 	refract_obj_->Visible(false);
 
 	uint32_t sm_start_pass = 4;
@@ -1167,7 +1170,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		refract_obj_->Visible(false);
 		plane_obj_->Visible(true);
-		sky_box_->Visible(true);
+		skybox_->Visible(true);
 
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->CausticsPass(Default_Pass);
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->BindLight(dummy_light_);
@@ -1192,7 +1195,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		refract_obj_->Visible(false);
 		plane_obj_->Visible(true);
-		sky_box_->Visible(true);
+		skybox_->Visible(true);
 
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->CausticsPass(Default_Pass);
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->BindLight(dummy_light_);
@@ -1209,7 +1212,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	{
 		//Scene
 
-		sky_box_->Visible(false);
+		skybox_->Visible(false);
 		refract_obj_->Visible(true);
 		plane_obj_->Visible(true);
 

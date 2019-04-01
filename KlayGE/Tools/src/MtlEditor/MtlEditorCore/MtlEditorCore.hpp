@@ -143,7 +143,7 @@ namespace KlayGE
 		SceneNodePtr imposter_;
 		SceneNodePtr axis_;
 		SceneNodePtr grid_;
-		SceneNodePtr sky_box_;
+		SceneNodePtr skybox_;
 
 		FirstPersonCameraController fps_controller_;
 		TrackballCameraController tb_controller_;

@@ -872,10 +872,10 @@ namespace MtlEditor
 				{
 					case SystemProperties.SP_SystemSkyBox:
 						{
-							string sky_box_name = RelativePath(system_properties_obj_.SkyBox);
-							if (core_.SkyboxName() != sky_box_name)
+							string skybox_name = RelativePath(system_properties_obj_.SkyBox);
+							if (core_.SkyboxName() != skybox_name)
 							{
-								this.ExecuteCommand(new MtlEditorCommandSetSkyboxName(core_, sky_box_name));
+								this.ExecuteCommand(new MtlEditorCommandSetSkyboxName(core_, skybox_name));
 							}
 						}
 						break;

@@ -32,8 +32,6 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectLightSourceProxyPtr spot_light_src_[3];
 
-	KlayGE::SceneNodePtr sky_box_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;

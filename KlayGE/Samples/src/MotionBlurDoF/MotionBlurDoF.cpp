@@ -222,8 +222,9 @@ namespace
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 6, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
 
-			this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
+			this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 				{
+					KFL_UNUSED(node);
 					KFL_UNUSED(app_time);
 
 					this->MainThreadUpdateFunc(elapsed_time);

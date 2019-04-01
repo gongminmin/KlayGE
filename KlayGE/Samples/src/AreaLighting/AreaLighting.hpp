@@ -27,8 +27,6 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneNodePtr sky_box_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;

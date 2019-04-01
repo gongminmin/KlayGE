@@ -362,8 +362,9 @@ namespace
 				}
 			}
 
-			this->OnMainThreadUpdate().Connect([this](float app_time, float elapsed_time)
+			this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 				{
+					KFL_UNUSED(node);
 					KFL_UNUSED(elapsed_time);
 
 					this->MainThreadUpdateFunc(app_time);
@@ -810,6 +811,8 @@ void OceanApp::OnCreate()
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	// TODO: Fix the shadow flicking
 	sun_light_->Attrib(LightSource::LSA_NoShadow);
@@ -835,23 +838,23 @@ void OceanApp::OnCreate()
 	terrain_renderable->TextureScale(1, float2(1, 1));
 	terrain_renderable->TextureScale(2, float2(3, 3));
 	terrain_renderable->TextureScale(3, float2(1, 1));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
+	root_node.AddChild(terrain_);
 
 	ocean_ = MakeSharedPtr<OceanObject>();
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ocean_);
+	root_node.AddChild(ocean_);
 	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->SkylightTex(y_cube, c_cube);
 	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->FogColor(fog_color);
 
 	terrain_renderable->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
 
-	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableFoggySkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
-	checked_pointer_cast<RenderableFoggySkyBox>(sky_box_->GetRenderable())->FogColor(fog_color);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+	auto skybox = MakeSharedPtr<RenderableFoggySkyBox>();
+	skybox->CompressedCubeMap(y_cube, c_cube);
+	skybox->FogColor(fog_color);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
 
-	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();
-	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sun_flare_);
+	auto sun_flare = MakeSharedPtr<LensFlareSceneObject>();
+	sun_flare->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	root_node.AddChild(sun_flare);
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));

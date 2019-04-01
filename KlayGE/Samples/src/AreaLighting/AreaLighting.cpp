@@ -98,6 +98,8 @@ void AreaLightingApp::OnCreate()
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
@@ -106,15 +108,15 @@ void AreaLightingApp::OnCreate()
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(0);
 	point_light_->Color(float3(0.8f, 0.96f, 1.0f) * 40.0f);
-	point_light_->Position(float3(0, 0, 0));
+	point_light_->Position(float3(0, 10, 0));
 	point_light_->Falloff(float3(1, 0, 1));
-	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
+	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, point_light_->Position()));
 	point_light_->AddToSceneManager();
 	point_light_->Enabled(false);
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
 	point_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(point_light_src_->RootNode());
+	root_node.AddChild(point_light_src_->RootNode());
 	point_light_src_->RootNode()->Visible(false);
 
 	sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
@@ -122,13 +124,13 @@ void AreaLightingApp::OnCreate()
 	sphere_area_light_->Color(point_light_->Color());
 	sphere_area_light_->Position(point_light_->Position());
 	sphere_area_light_->Falloff(point_light_->Falloff());
-	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
+	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, sphere_area_light_->Position()));
 	sphere_area_light_->AddToSceneManager();
 	sphere_area_light_->Enabled(false);
 
 	sphere_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sphere_area_light_);
 	sphere_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_area_light_src_->RootNode());
+	root_node.AddChild(sphere_area_light_src_->RootNode());
 	sphere_area_light_src_->RootNode()->Visible(false);
 
 	tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
@@ -136,13 +138,13 @@ void AreaLightingApp::OnCreate()
 	tube_area_light_->Color(point_light_->Color());
 	tube_area_light_->Position(point_light_->Position());
 	tube_area_light_->Falloff(point_light_->Falloff());
-	tube_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
+	tube_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, tube_area_light_->Position()));
 	tube_area_light_->AddToSceneManager();
 	tube_area_light_->Enabled(false);
 
 	tube_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(tube_area_light_);
 	tube_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(tube_area_light_src_->RootNode());
+	root_node.AddChild(tube_area_light_src_->RootNode());
 	tube_area_light_src_->RootNode()->Visible(false);
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable);
@@ -157,7 +159,7 @@ void AreaLightingApp::OnCreate()
 			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
 			sphere_mesh->RootNode()->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
 				* MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sphere_mesh->RootNode());
+			root_node.AddChild(sphere_mesh->RootNode());
 		}
 	}
 
@@ -212,9 +214,9 @@ void AreaLightingApp::OnCreate()
 		});
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
-	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube, c_cube);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
 }
 
 void AreaLightingApp::OnResize(uint32_t width, uint32_t height)

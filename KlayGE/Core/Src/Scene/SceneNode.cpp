@@ -343,12 +343,12 @@ namespace KlayGE
 
 	void SceneNode::SubThreadUpdate(float app_time, float elapsed_time)
 	{
-		sub_thread_update_event_(app_time, elapsed_time);
+		sub_thread_update_event_(*this, app_time, elapsed_time);
 	}
 
 	void SceneNode::MainThreadUpdate(float app_time, float elapsed_time)
 	{
-		main_thread_update_event_(app_time, elapsed_time);
+		main_thread_update_event_(*this, app_time, elapsed_time);
 
 		if (!updated_)
 		{

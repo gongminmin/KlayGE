@@ -83,9 +83,7 @@ private:
 	KlayGE::LightSourcePtr light_;
 	KlayGE::LightSourcePtr dummy_light_;
 
-	KlayGE::TexturePtr y_cube_map_;
-	KlayGE::TexturePtr c_cube_map_;
-	KlayGE::SceneNodePtr sky_box_;
+	KlayGE::SceneNodePtr skybox_;
 
 	KlayGE::TexturePtr refract_obj_N_texture_f_;
 	KlayGE::TexturePtr refract_obj_N_texture_b_;

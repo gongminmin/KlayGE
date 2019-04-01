@@ -567,11 +567,11 @@ namespace KlayGE
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_);
 
-		sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-		checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(
+		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+		checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(
 			SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable),
 			SyncLoadTexture("default_bg_c.dds", EAH_GPU_Read | EAH_Immutable));
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 
 		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableLineBox>(),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
@@ -614,7 +614,7 @@ namespace KlayGE
 
 		axis_.reset();
 		grid_.reset();
-		sky_box_.reset();
+		skybox_.reset();
 		selected_bb_.reset();
 		translation_axis_.reset();
 		rotation_axis_.reset();
@@ -672,7 +672,7 @@ namespace KlayGE
 			{
 				axis_->Visible(false);
 				grid_->Visible(false);
-				sky_box_->Visible(false);
+				skybox_->Visible(false);
 				selected_bb_->Visible(false);
 				translation_axis_->Visible(false);
 				rotation_axis_->Visible(false);
@@ -695,7 +695,7 @@ namespace KlayGE
 			{
 				axis_->Visible(true);
 				grid_->Visible(true);
-				sky_box_->Visible(true);
+				skybox_->Visible(true);
 				this->UpdateHelperObjs();
 				for (auto iter = entities_.begin(); iter != entities_.end(); ++ iter)
 				{
@@ -798,7 +798,7 @@ namespace KlayGE
 
 			if (c_tex)
 			{
-				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
+				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
 				if (ambient_light_)
 				{
 					ambient_light_->SkylightTex(y_tex, c_tex);
@@ -806,7 +806,7 @@ namespace KlayGE
 			}
 			else
 			{
-				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(y_tex);
+				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(y_tex);
 				if (ambient_light_)
 				{
 					ambient_light_->SkylightTex(y_tex);
@@ -817,8 +817,7 @@ namespace KlayGE
 		{
 			TexturePtr y_cube = SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable);
 			TexturePtr c_cube = SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable);
-			checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(
-				y_cube, c_cube);
+			checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
 			if (ambient_light_)
 			{
 				ambient_light_->SkylightTex(y_cube, c_cube);

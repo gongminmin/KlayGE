@@ -96,6 +96,13 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Attrib(0);
 	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
 	sun_light_->Color(float3(1, 1, 1));
+	sun_light_->BindUpdateFunc([this](LightSource& light, float app_time, float elapsed_time)
+	{
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
+
+		light.Direction(light_ctrl_camera_.ForwardVec());
+	});
 	sun_light_->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -149,9 +156,9 @@ void CascadedShadowMapApp::OnCreate()
 		});
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
-	sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube, c_cube);
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < ShaderModel(5, 0))
@@ -242,10 +249,5 @@ void CascadedShadowMapApp::DoUpdateOverlay()
 
 uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		sun_light_->Direction(light_ctrl_camera_.ForwardVec());
-	}
-
 	return deferred_rendering_->Update(pass);
 }

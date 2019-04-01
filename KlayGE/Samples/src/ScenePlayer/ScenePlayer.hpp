@@ -37,7 +37,7 @@ private:
 
 	std::vector<KlayGE::RenderModelPtr> scene_models_;
 	std::vector<KlayGE::SceneNodePtr> scene_objs_;
-	KlayGE::SceneNodePtr sky_box_;
+	KlayGE::SceneNodePtr skybox_;
 
 	std::vector<KlayGE::LightSourcePtr> lights_;
 	std::vector<KlayGE::SceneObjectLightSourceProxyPtr> light_proxies_;

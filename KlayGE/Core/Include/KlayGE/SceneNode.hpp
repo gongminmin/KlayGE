@@ -102,7 +102,7 @@ namespace KlayGE
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
-		using UpdateEvent = Signal::Signal<void(float, float)>;
+		using UpdateEvent = Signal::Signal<void(SceneNode&, float, float)>;
 		UpdateEvent& OnSubThreadUpdate()
 		{
 			return sub_thread_update_event_;

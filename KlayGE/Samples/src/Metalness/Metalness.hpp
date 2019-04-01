@@ -27,7 +27,6 @@ private:
 	KlayGE::SceneNodePtr sphere_group_;
 	KlayGE::SceneNodePtr single_object_;
 	KlayGE::RenderModelPtr single_model_;
-	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::float3 albedo_;
 	float glossiness_;

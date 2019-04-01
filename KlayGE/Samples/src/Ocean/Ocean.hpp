@@ -33,8 +33,6 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::SceneNodePtr terrain_;
 	KlayGE::SceneNodePtr ocean_;
-	KlayGE::SceneNodePtr sky_box_;
-	KlayGE::SceneNodePtr sun_flare_;
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;

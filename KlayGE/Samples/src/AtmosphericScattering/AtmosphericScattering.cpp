@@ -241,8 +241,11 @@ void AtmosphericScatteringApp::OnCreate()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
+	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	sun_light_node->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f));
 	sun_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sun_light_);
-	sun_light_src_->Scaling(0.1f, 0.1f, 0.1f);
+	sun_light_node->AddChild(sun_light_src_->RootNode());
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sun_light_node);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

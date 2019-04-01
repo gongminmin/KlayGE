@@ -267,9 +267,9 @@ namespace KlayGE
 		}
 		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-		sky_box_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-		checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(default_cube_map_);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box_);
+		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+		checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(default_cube_map_);
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 
 		ambient_light_->SkylightTex(default_cube_map_);
 
@@ -298,7 +298,7 @@ namespace KlayGE
 		fps_controller_.DetachCamera();
 
 		model_.reset();
-		sky_box_.reset();
+		skybox_.reset();
 		grid_.reset();
 		axis_.reset();
 		main_light_.reset();
@@ -464,7 +464,7 @@ namespace KlayGE
 			{
 				axis_->Visible(false);
 				grid_->Visible(false);
-				sky_box_->Visible(false);
+				skybox_->Visible(false);
 				selected_bb_->Visible(false);
 				if (imposter_)
 				{
@@ -484,7 +484,7 @@ namespace KlayGE
 			{
 				axis_->Visible(true);
 				grid_->Visible(true);
-				sky_box_->Visible(true);
+				skybox_->Visible(true);
 				selected_bb_->Visible(selected_obj_ > 0);
 				if (imposter_)
 				{
@@ -569,18 +569,18 @@ namespace KlayGE
 
 			if (!!c_tex)
 			{
-				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
+				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
 				ambient_light_->SkylightTex(y_tex, c_tex);
 			}
 			else
 			{
-				checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(y_tex);
+				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(y_tex);
 				ambient_light_->SkylightTex(y_tex);
 			}
 		}
 		else
 		{
-			checked_pointer_cast<RenderableSkyBox>(sky_box_->GetRenderable())->CubeMap(default_cube_map_);
+			checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(default_cube_map_);
 			ambient_light_->SkylightTex(default_cube_map_);
 		}
 	}

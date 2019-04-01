@@ -35,7 +35,6 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr polygon_model_;
-	KlayGE::SceneNodePtr sky_box_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 

@@ -27,8 +27,6 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneNodePtr sky_box_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 	KlayGE::TrackballCameraController light_controller_;
 	KlayGE::Camera light_ctrl_camera_;

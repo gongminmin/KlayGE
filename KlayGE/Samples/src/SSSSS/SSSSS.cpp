@@ -90,24 +90,41 @@ void SSSSSApp::OnCreate()
 	this->LookAt(float3(0.5f, 5, -0.5f), float3(0, 5, 0));
 	this->Proj(0.05f, 200.0f);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.3f, 0.3f, 0.3f));
 	ambient_light->AddToSceneManager();
 	
-	light_ = MakeSharedPtr<SpotLightSource>();
-	light_->Attrib(0);
-	light_->Color(float3(5.0f, 5.0f, 5.0f));
-	light_->Falloff(float3(1, 1, 0));
-	light_->Position(float3(0, 0, -2));
-	light_->Direction(float3(0, 0, 1));
-	light_->OuterAngle(PI / 6);
-	light_->InnerAngle(PI / 8);
-	light_->AddToSceneManager();
+	auto light = MakeSharedPtr<SpotLightSource>();
+	light->Attrib(0);
+	light->Color(float3(5.0f, 5.0f, 5.0f));
+	light->Falloff(float3(1, 1, 0));
+	light->Position(float3(0, 0, -2));
+	light->Direction(float3(0, 0, 1));
+	light->OuterAngle(PI / 6);
+	light->InnerAngle(PI / 8);
+	light->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	light_camera_ = MakeSharedPtr<Camera>();
+	light_controller_.AttachCamera(*light_camera_);
+	light_controller_.Scalers(0.01f, 0.005f);
+	light_camera_->ViewParams(light->SMCamera(0)->EyePos(), light->SMCamera(0)->LookAt(), light->SMCamera(0)->UpVec());
+	light_camera_->ProjParams(
+		light->SMCamera(0)->FOV(), light->SMCamera(0)->Aspect(), light->SMCamera(0)->NearPlane(), light->SMCamera(0)->FarPlane());
+
+	light->BindUpdateFunc([this](LightSource& light, float app_time, float elapse_time) {
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapse_time);
+
+		light.Position(float3(0, 5, 0) - light_camera_->ForwardVec() * 2.0f);
+		light.Direction(light_camera_->ForwardVec());
+	});
+
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
 	light_proxy_->Scaling(0.1f, 0.1f, 0.1f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_proxy_->RootNode());
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -115,12 +132,6 @@ void SSSSSApp::OnCreate()
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);
-
-	light_camera_ = MakeSharedPtr<Camera>();
-	light_controller_.AttachCamera(*light_camera_);
-	light_controller_.Scalers(0.01f, 0.005f);
-	light_camera_->ViewParams(light_->SMCamera(0)->EyePos(), light_->SMCamera(0)->LookAt(), light_->SMCamera(0)->UpVec());
-	light_camera_->ProjParams(light_->SMCamera(0)->FOV(), light_->SMCamera(0)->Aspect(), light_->SMCamera(0)->NearPlane(), light_->SMCamera(0)->FarPlane());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -176,9 +187,9 @@ void SSSSSApp::OnCreate()
 		});
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
-	auto sky_box = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-	checked_pointer_cast<RenderableSkyBox>(sky_box->GetRenderable())->CompressedCubeMap(y_cube, c_cube);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sky_box);
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube, c_cube);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
 }
 
 void SSSSSApp::OnResize(uint32_t width, uint32_t height)
@@ -255,11 +266,5 @@ void SSSSSApp::DoUpdateOverlay()
 
 uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		light_->Position(float3(0, 5, 0) - light_camera_->ForwardVec() * 2.0f);
-		light_->Direction(light_camera_->ForwardVec());
-	}
-
 	return deferred_rendering_->Update(pass);
 }
