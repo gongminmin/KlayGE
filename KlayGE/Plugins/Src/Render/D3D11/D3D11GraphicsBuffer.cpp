@@ -40,9 +40,9 @@ namespace KlayGE
 			bind_flags_ = 0;
 		}
 
-		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 	}
 
 	ID3D11ShaderResourceViewPtr const & D3D11GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
@@ -325,7 +325,7 @@ namespace KlayGE
 		BOOST_ASSERT(src_offset + size <= this->Size());
 		BOOST_ASSERT(dst_offset + size <= target.Size());
 
-		auto& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&target);
+		auto& d3d_gb = checked_cast<D3D11GraphicsBuffer&>(target);
 		if ((src_offset == 0) && (dst_offset == 0) && (size == this->Size()) && (size == target.Size()))
 		{
 			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer(), d3d_buffer_.get());

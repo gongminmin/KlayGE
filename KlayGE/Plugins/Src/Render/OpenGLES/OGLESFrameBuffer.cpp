@@ -47,7 +47,7 @@ namespace KlayGE
 		{
 			if (Context::Instance().RenderFactoryValid())
 			{
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.DeleteFramebuffers(1, &fbo_);
 			}
 			else
@@ -84,7 +84,7 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
 		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
@@ -98,7 +98,7 @@ namespace KlayGE
 
 	void OGLESFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
@@ -255,7 +255,7 @@ namespace KlayGE
 			}
 		}
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);

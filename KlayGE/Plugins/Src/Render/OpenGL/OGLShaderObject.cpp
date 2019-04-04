@@ -133,7 +133,7 @@ namespace
 			}
 			(*gl_bind_samplers_)[stage_] = 0;
 
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform1i(location_, stage_);
 		}
 
@@ -184,7 +184,7 @@ namespace
 				(*gl_bind_samplers_)[stage_] = 0;
 			}
 
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform1i(location_, stage_);
 		}
 
@@ -220,7 +220,7 @@ namespace
 
 	void PrintGlslError(std::string const& glsl, std::string_view info)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		if (re.HackForIntel())
 		{
@@ -1359,7 +1359,7 @@ namespace KlayGE
 				std::vector<char> info(len);
 				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
 
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				if (re.HackForNV())
 				{
 					MemInputStreamBuf info_buff(info.data(), info.size());
@@ -1508,7 +1508,7 @@ namespace KlayGE
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
 
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
 		for (auto const & pb : param_binds_)

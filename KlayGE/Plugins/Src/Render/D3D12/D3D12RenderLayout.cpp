@@ -91,7 +91,7 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->GetVertexStream(i).get());
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
 			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
 		}
 
@@ -99,17 +99,17 @@ namespace KlayGE
 		{
 			uint32_t const number = num_vertex_streams;
 
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->InstanceStream().get());
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
 			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
 		}
 
 		if (this->UseIndices())
 		{
-			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(this->GetIndexStream().get());
+			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
 			ibv_.BufferLocation = ib.GPUVirtualAddress();
 		}
 
-		auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (all_num_vertex_stream != 0)
 		{
 			d3d12_re.IASetVertexBuffers(0, MakeArrayRef(&vbvs_[0], all_num_vertex_stream));
@@ -128,7 +128,7 @@ namespace KlayGE
 		vbvs_.resize(all_num_vertex_stream);
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->GetVertexStream(i).get());
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
 			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
 			vbvs_[i].SizeInBytes = d3dvb.Size();
 			vbvs_[i].StrideInBytes = this->VertexSize(i);
@@ -138,7 +138,7 @@ namespace KlayGE
 		{
 			uint32_t const number = num_vertex_streams;
 
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->InstanceStream().get());
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
 			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
 			vbvs_[number].SizeInBytes = d3dvb.Size();
 			vbvs_[number].StrideInBytes = this->InstanceSize();
@@ -146,7 +146,7 @@ namespace KlayGE
 
 		if (this->UseIndices())
 		{
-			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(this->GetIndexStream().get());
+			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
 			ibv_.BufferLocation = ib.GPUVirtualAddress();
 			ibv_.SizeInBytes = ib.Size();
 			ibv_.Format = D3D12Mapping::MappingFormat(index_format_);

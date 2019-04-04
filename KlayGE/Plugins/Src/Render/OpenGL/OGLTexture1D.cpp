@@ -124,7 +124,7 @@ namespace KlayGE
 		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && (glloader_GL_VERSION_4_3() || glloader_GL_ARB_copy_image())
 			&& (src_width == dst_width) && (1 == sample_count_))
 		{
-			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+			auto& ogl_target = checked_cast<OGLTexture&>(target);
 			glCopyImageSubData(
 				texture_, target_type_, src_level,
 				src_x_offset, 0, src_array_index,
@@ -135,7 +135,7 @@ namespace KlayGE
 		{
 			if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))))
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -161,7 +161,7 @@ namespace KlayGE
 					}
 				}
 
-				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+				auto& ogl_target = checked_cast<OGLTexture&>(target);
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 				if (array_size_ > 1)
 				{
@@ -226,7 +226,7 @@ namespace KlayGE
 
 		uint8_t* p;
 		GLintptr const subres_offset = array_index * mipmap_start_offset_.back() + mipmap_start_offset_[level];
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (tma)
 		{
 		case TMA_Read_Only:
@@ -277,7 +277,7 @@ namespace KlayGE
 
 	void OGLTexture1D::Unmap1D(uint32_t array_index, uint32_t level)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
@@ -412,7 +412,7 @@ namespace KlayGE
 			}
 			else
 			{
-				auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				
 				re.BindTexture(0, target_type_, texture_);
 				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
@@ -555,7 +555,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t width,
 		void const * data)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

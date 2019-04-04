@@ -158,7 +158,7 @@ namespace KlayGE
 
 	void D3D12GraphicsBuffer::CreateHWResource(void const * subres_init)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
 		uint32_t total_size = size_in_byte_;
@@ -270,7 +270,7 @@ namespace KlayGE
 
 		mapped_ba_ = ba;
 
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (ba)
 		{
 		case BA_Read_Only:
@@ -329,9 +329,9 @@ namespace KlayGE
 		BOOST_ASSERT(src_offset + size <= this->Size());
 		BOOST_ASSERT(dst_offset + size <= target.Size());
 
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* cmd_list = re.D3DRenderCmdList();
-		auto& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&target);
+		auto& d3d_gb = checked_cast<D3D12GraphicsBuffer&>(target);
 
 		D3D12_HEAP_TYPE src_heap_type;
 		if (EAH_CPU_Read == access_hint_)
@@ -389,7 +389,7 @@ namespace KlayGE
 		}
 		else
 		{
-			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto cmd_list = re.D3DRenderCmdList();
 
 			auto upload_buff = re.AllocTempBuffer(true, size);

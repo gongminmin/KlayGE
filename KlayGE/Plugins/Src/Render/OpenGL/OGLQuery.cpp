@@ -81,7 +81,7 @@ namespace KlayGE
 
 	void OGLConditionalRender::BeginConditionalRender()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (!re.HackForAMD())
 		{
 			glBeginConditionalRender(query_, GL_QUERY_WAIT);
@@ -90,7 +90,7 @@ namespace KlayGE
 
 	void OGLConditionalRender::EndConditionalRender()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (!re.HackForAMD())
 		{
 			glEndConditionalRender();

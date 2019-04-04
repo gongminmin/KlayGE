@@ -387,7 +387,7 @@ namespace KlayGE
 				{
 					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
-						auto& mesh = *checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
+						auto& mesh = checked_cast<FoliageMesh&>(*plant_meshes_[plant_type]->Mesh(i));
 						auto& rl = mesh.GetRenderLayout(lod);
 
 						rl.BindIndirectArgs(plant_lod_primitive_indirect_args_);
@@ -397,7 +397,7 @@ namespace KlayGE
 				}
 
 				{
-					auto& mesh = *checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+					auto& mesh = checked_cast<FoliageImpostorMesh&>(*plant_impostor_meshes_[plant_type]);
 					auto& rl = mesh.GetRenderLayout();
 
 					rl.BindIndirectArgs(plant_impostor_primitive_indirect_args_);
@@ -608,7 +608,7 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 			{
-				auto& mesh = *checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Mesh(i).get());
+				auto& mesh = checked_cast<FoliageMesh&>(*plant_meshes_[plant_type]->Mesh(i));
 				for (uint32_t lod = 0; lod < mesh.NumLods(); ++ lod)
 				{
 					mesh.Pass(type_);
@@ -622,7 +622,7 @@ namespace KlayGE
 		{
 			for (size_t plant_type = 0; plant_type < plant_impostor_meshes_.size(); ++ plant_type)
 			{
-				auto& mesh = *checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+				auto& mesh = checked_cast<FoliageImpostorMesh&>(*plant_impostor_meshes_[plant_type]);
 				mesh.Pass(type_);
 				mesh.Render();
 			}

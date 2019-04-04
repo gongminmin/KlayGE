@@ -260,7 +260,7 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 
 		model_->ForEachMesh([this](Renderable& mesh)
 			{
-				auto& detailed_mesh = *checked_cast<DetailedMesh*>(&mesh);
+				auto& detailed_mesh = checked_cast<DetailedMesh&>(mesh);
 
 				detailed_mesh.LightPos(light_->Position());
 				detailed_mesh.LightColor(light_->Color());

@@ -616,7 +616,7 @@ namespace KlayGE
 		BOOST_ASSERT(!code_blob.empty());
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
-		auto const& d3d11_re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+		auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		auto d3d_device = d3d11_re.D3DDevice();
 		auto const& caps = d3d11_re.DeviceCaps();
 
@@ -651,7 +651,7 @@ namespace KlayGE
 			if (shader_profile == "auto")
 			{
 				auto const& re =
-					*checked_cast<D3D11RenderEngine const*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+					checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				shader_profile = re.DefaultShaderProfile(stage_);
 			}
 		}
@@ -678,7 +678,7 @@ namespace KlayGE
 		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 
 		ID3D11VertexShader* vs;
@@ -765,7 +765,7 @@ namespace KlayGE
 		KFL_UNUSED(shader_desc_ids);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 
 		ID3D11PixelShader* ps;
@@ -801,7 +801,7 @@ namespace KlayGE
 			if (sd.so_decl.empty())
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+				auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 				ID3D11Device* d3d_device = re.D3DDevice();
 		
 				ID3D11GeometryShader* gs;
@@ -847,7 +847,7 @@ namespace KlayGE
 		if (is_available_)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
 			ID3D11ComputeShader* cs;
@@ -919,7 +919,7 @@ namespace KlayGE
 		if (is_available_)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
 			ID3D11HullShader* hs;
@@ -958,7 +958,7 @@ namespace KlayGE
 		if (is_available_)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine const& re = *checked_cast<D3D11RenderEngine const*>(&rf.RenderEngineInstance());
+			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
 			ID3D11DomainShader* ds;
@@ -1230,7 +1230,7 @@ namespace KlayGE
 
 	void D3D11ShaderObject::Bind()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		if (this->Stage(ShaderStage::Compute))
 		{
@@ -1326,7 +1326,7 @@ namespace KlayGE
 	{
 		if (this->Stage(ShaderStage::Compute) && !uavs_.empty())
 		{
-			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_.size(), nullptr);
 			std::vector<UINT> uav_init_counts(uavs_.size(), 0);

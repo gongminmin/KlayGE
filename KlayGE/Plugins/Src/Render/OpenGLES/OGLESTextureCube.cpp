@@ -105,7 +105,7 @@ namespace KlayGE
 
 		if (!IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -196,7 +196,7 @@ namespace KlayGE
 
 		if (!IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -319,7 +319,7 @@ namespace KlayGE
 
 				uint32_t const w = this->Width(level);
 
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
@@ -354,7 +354,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 
 		if (!re.HackForAdreno())
@@ -534,7 +534,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

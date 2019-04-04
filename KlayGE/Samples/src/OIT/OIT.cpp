@@ -1062,7 +1062,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 
 					polygon_model_->ForEachMesh([depth_pass](Renderable& mesh)
 						{
-							auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+							auto& polygon_mesh = checked_cast<RenderPolygon&>(mesh);
 
 							polygon_mesh.FirstPass(true);
 							polygon_mesh.DepthPass(depth_pass);
@@ -1083,7 +1083,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 				{
 					polygon_model_->ForEachMesh([depth_pass](Renderable& mesh)
 						{
-							auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+							auto& polygon_mesh = checked_cast<RenderPolygon&>(mesh);
 
 							polygon_mesh.FirstPass(false);
 							polygon_mesh.DepthPass(depth_pass);

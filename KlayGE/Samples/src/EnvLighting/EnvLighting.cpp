@@ -938,7 +938,7 @@ void EnvLightingApp::OnCreate()
 
 		sphere_models_[i]->ForEachMesh([i, this](Renderable& mesh)
 			{
-				auto& sphere_mesh = *checked_cast<SphereRenderable*>(&mesh);
+				auto& sphere_mesh = checked_cast<SphereRenderable&>(mesh);
 				sphere_mesh.Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
 				sphere_mesh.IntegratedBRDFTex(integrated_brdf_tex_);
 			});

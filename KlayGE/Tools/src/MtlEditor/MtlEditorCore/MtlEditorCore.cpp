@@ -1189,7 +1189,7 @@ namespace KlayGE
 	{
 		model_->ForEachMesh([mtl_id](Renderable& mesh)
 			{
-				auto& detailed_mesh = *checked_cast<DetailedSkinnedMesh*>(&mesh);
+				auto& detailed_mesh = checked_cast<DetailedSkinnedMesh&>(mesh);
 				if (detailed_mesh.MaterialID() == static_cast<int32_t>(mtl_id))
 				{
 					detailed_mesh.UpdateEffectAttrib();
@@ -1201,7 +1201,7 @@ namespace KlayGE
 	{
 		model_->ForEachMesh([mtl_id](Renderable& mesh)
 			{
-				auto& detailed_mesh = *checked_cast<DetailedSkinnedMesh*>(&mesh);
+				auto& detailed_mesh = checked_cast<DetailedSkinnedMesh&>(mesh);
 				if (detailed_mesh.MaterialID() == static_cast<int32_t>(mtl_id))
 				{
 					detailed_mesh.UpdateMaterial();
@@ -1213,7 +1213,7 @@ namespace KlayGE
 	{
 		model_->ForEachMesh([mtl_id](Renderable& mesh)
 			{
-				auto& detailed_mesh = *checked_cast<DetailedSkinnedMesh*>(&mesh);
+				auto& detailed_mesh = checked_cast<DetailedSkinnedMesh&>(mesh);
 				if (detailed_mesh.MaterialID() == static_cast<int32_t>(mtl_id))
 				{
 					detailed_mesh.UpdateTechniques();

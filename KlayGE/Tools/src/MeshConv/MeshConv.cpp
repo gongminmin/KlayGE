@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 					size_t num_triangles = 0;
 					for (uint32_t mindex = 0; mindex < model->NumMeshes(); ++ mindex)
 					{
-						auto const & mesh = *checked_cast<StaticMesh*>(model->Mesh(mindex).get());
+						auto const& mesh = checked_cast<StaticMesh&>(*model->Mesh(mindex));
 
 						num_vertices += mesh.NumVertices(lod);
 						num_triangles += mesh.NumIndices(lod) / 3;

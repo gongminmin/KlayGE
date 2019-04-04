@@ -73,7 +73,7 @@ namespace KlayGE
 				{
 					node.ForEachRenderable([](Renderable& mesh)
 					{
-						auto& light_mesh = *checked_cast<RenderableLightSourceProxy*>(&mesh);
+						auto& light_mesh = checked_cast<RenderableLightSourceProxy&>(mesh);
 						light_mesh.Update();
 					});
 

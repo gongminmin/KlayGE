@@ -48,7 +48,7 @@ namespace KlayGE
 
 	void OGLESRenderStateObject::Active()
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		RasterizerStateDesc const & cur_rs_desc = re.CurRenderStateObject()->GetRasterizerStateDesc();
 		DepthStencilStateDesc const & cur_dss_desc = re.CurRenderStateObject()->GetDepthStencilStateDesc();
@@ -378,7 +378,7 @@ namespace KlayGE
 	{
 		if (Context::Instance().RenderFactoryValid())
 		{
-			auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteSamplers(1, &sampler_);
 		}
 		else

@@ -83,7 +83,7 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()),
@@ -160,7 +160,7 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)

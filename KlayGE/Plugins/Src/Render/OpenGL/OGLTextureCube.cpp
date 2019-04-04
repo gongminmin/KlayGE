@@ -131,12 +131,12 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(TT_2D == target.Type());
 
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && (glloader_GL_VERSION_4_3() || glloader_GL_ARB_copy_image())
 			&& (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_))
 		{
-			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+			OGLTexture& ogl_target = checked_cast<OGLTexture&>(target);
 			glCopyImageSubData(
 				texture_, target_type_, src_level,
 				src_x_offset, src_y_offset, src_array_index,
@@ -238,7 +238,7 @@ namespace KlayGE
 		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && (glloader_GL_VERSION_4_3() || glloader_GL_ARB_copy_image())
 			&& (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_))
 		{
-			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+			OGLTexture& ogl_target = checked_cast<OGLTexture&>(target);
 			glCopyImageSubData(
 				texture_, target_type_, src_level,
 				src_x_offset, src_y_offset, src_array_index * 6 + src_face - CF_Positive_X,
@@ -249,7 +249,7 @@ namespace KlayGE
 		{
 			if (!IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))))
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -346,7 +346,7 @@ namespace KlayGE
 
 		uint8_t* p;
 		GLintptr const subres_offset = (array_index * 6 + face) * mipmap_start_offset_.back() + mipmap_start_offset_[level];
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (tma)
 		{
 		case TMA_Read_Only:
@@ -400,7 +400,7 @@ namespace KlayGE
 
 	void OGLTextureCube::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
@@ -504,7 +504,7 @@ namespace KlayGE
 							GLvoid const * data = init_data[(array_index * 6 + face) * num_mip_maps_ + level].data;
 
 							// An AMD bug. glTextureSubImage3D/glCompressedTextureSubImage3D can't work with cube map. https://community.amd.com/thread/194748.
-							auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+							auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 							if (re.HackForAMD())
 							{
 								re.BindTexture(0, target_type_, texture_);
@@ -577,7 +577,7 @@ namespace KlayGE
 		}
 		else
 		{
-			auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			re.BindTexture(0, target_type_, texture_);
 			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
@@ -722,7 +722,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

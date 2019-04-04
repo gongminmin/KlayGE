@@ -153,7 +153,7 @@ namespace KlayGE
 		::SetWindowPos(hWnd_, nullptr, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_SHOWWINDOW | SWP_NOZORDER);
 
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		uint32_t sample_count = settings.sample_count;
 		int requested_pixel_format = -1;
@@ -576,7 +576,7 @@ namespace KlayGE
 		{
 			if (hDC_ != nullptr)
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 				re.wglMakeCurrent(hDC_, nullptr);
 				if (hRC_ != nullptr)

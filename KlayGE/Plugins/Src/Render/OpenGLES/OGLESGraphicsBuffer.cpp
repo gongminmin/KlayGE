@@ -61,7 +61,7 @@ namespace KlayGE
 			flags |= GL_MAP_WRITE_BIT;
 		}
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
 		if (glloader_GLES_EXT_buffer_storage())
 		{
@@ -90,7 +90,7 @@ namespace KlayGE
 		{
 			if (Context::Instance().RenderFactoryValid())
 			{
-				auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.DeleteTextures(1, &tex_);
 			}
 			else
@@ -105,7 +105,7 @@ namespace KlayGE
 		{
 			if (Context::Instance().RenderFactoryValid())
 			{
-				auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.DeleteBuffers(1, &vb_);
 			}
 			else
@@ -130,7 +130,7 @@ namespace KlayGE
 		{
 		case BA_Write_Only:
 			{
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
 				uint32_t flags = GL_MAP_WRITE_BIT;
 				if (BU_Dynamic == usage_)
@@ -152,7 +152,7 @@ namespace KlayGE
 		case BA_Write_Only:
 		case BA_Read_Write:
 			{
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
 				glUnmapBuffer(target_);
 			}
@@ -165,7 +165,7 @@ namespace KlayGE
 
 	void OGLESGraphicsBuffer::Active(bool force)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_, force);
 	}
 
@@ -225,7 +225,7 @@ namespace KlayGE
 
 	void OGLESGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
 		glBufferSubData(target_, offset, size, data);
 	}

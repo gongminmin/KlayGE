@@ -500,7 +500,7 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 	std::vector<uint32_t> bone_indices;
 	std::vector<uint16_t> indices;
 
-	auto const & skinned_model = *checked_cast<DetailedSkinnedModel const *>(&model);
+	auto const& skinned_model = checked_cast<DetailedSkinnedModel const&>(model);
 	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++ i)
 	{
 		auto& joint = skinned_model.GetJoint(i);

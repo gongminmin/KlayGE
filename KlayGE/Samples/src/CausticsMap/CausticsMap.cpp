@@ -255,7 +255,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
+			CausticsMapApp& app = checked_cast<CausticsMapApp&>(Context::Instance().AppInstance());
 			Camera const & camera = app.ActiveCamera();
 
 			*(scene_effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
@@ -457,7 +457,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
+			CausticsMapApp& app = checked_cast<CausticsMapApp&>(Context::Instance().AppInstance());
 			Camera const & camera = app.ActiveCamera();
 			float4x4 const & light_view = camera.ViewMatrix();
 			float4x4 const & light_proj = camera.ProjMatrix();
@@ -1140,7 +1140,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->BindLight(dummy_light_);
 		refract_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				auto& refract_mesh = *checked_cast<RefractMesh*>(&mesh);
+				auto& refract_mesh = checked_cast<RefractMesh&>(mesh);
 
 				refract_mesh.CausticsPass(Gen_Shadow_Pass);
 				refract_mesh.BindLight(dummy_light_);
@@ -1219,7 +1219,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		checked_pointer_cast<ReceivePlane>(plane_renderable_)->CausticsPass(Default_Pass);
 		refract_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				auto& refract_mesh = *checked_cast<RefractMesh*>(&mesh);
+				auto& refract_mesh = checked_cast<RefractMesh&>(mesh);
 
 				refract_mesh.CausticsPass(Refract_Pass);
 				refract_mesh.SceneTexture(scene_texture_);

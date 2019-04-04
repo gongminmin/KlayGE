@@ -114,8 +114,7 @@ namespace KlayGE
 
 		back_buffer_format_ = D3D12Mapping::MappingFormat(format);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		dxgi_stereo_support_ = d3d12_re.DXGIFactory4()->IsWindowedStereoEnabled() ? true : false;
 		if (d3d12_re.DXGISubVer() >= 5)
@@ -398,8 +397,7 @@ namespace KlayGE
 		viewport_->width = width_;
 		viewport_->height = height_;
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = d3d12_re.D3DRenderCmdList();
 		if (cmd_list)
 		{
@@ -561,8 +559,7 @@ namespace KlayGE
 			this->Reposition(new_left, new_top);
 		}
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		bool stereo_changed = ((d3d12_re.DXGIFactory4()->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_);
 
 		uint32_t new_width = rect.right - rect.left;
@@ -575,8 +572,7 @@ namespace KlayGE
 
 	void D3D12RenderWindow::Destroy()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		d3d12_re.ForceFinish();
 
@@ -686,8 +682,7 @@ namespace KlayGE
 
 	void D3D12RenderWindow::CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue, bool try_hdr_display)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& d3d12_re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		IDXGISwapChain1* sc = nullptr;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -730,8 +725,7 @@ namespace KlayGE
 	{
 		if (swap_chain_)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto* cmd_list = d3d12_re.D3DRenderCmdList();
 
 			auto* rt_tex = checked_cast<D3D12Texture*>(render_targets_[curr_back_buffer_].get());
@@ -783,8 +777,7 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 		KFL_UNUSED(args);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& d3d12_re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((d3d12_re.DXGIFactory4()->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)
 		{
 			swap_chain_.reset();

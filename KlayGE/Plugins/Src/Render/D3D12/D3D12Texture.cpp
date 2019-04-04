@@ -493,10 +493,10 @@ namespace KlayGE
 
 	void D3D12Texture::DoHWCopyToTexture(Texture& target)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		D3D12Texture& other = *checked_cast<D3D12Texture*>(&target);
+		D3D12Texture& other = checked_cast<D3D12Texture&>(target);
 
 		uint32_t const num_subres = array_size_ * num_mip_maps_;
 		bool const need_resolve = (this->SampleCount() > 1) && (1 == target.SampleCount());
@@ -525,10 +525,10 @@ namespace KlayGE
 			uint32_t src_subres, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
 			uint32_t width, uint32_t height, uint32_t depth)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		D3D12Texture& other = *checked_cast<D3D12Texture2D*>(&target);
+		D3D12Texture& other = checked_cast<D3D12Texture2D&>(target);
 
 		this->UpdateResourceBarrier(cmd_list, src_subres, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		other.UpdateResourceBarrier(cmd_list, dst_subres, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -562,7 +562,7 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
 			ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_CLEAR_VALUE clear_value;
@@ -747,7 +747,7 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		uint32_t const block_width = BlockWidth(format_);
 		uint32_t const block_height = BlockHeight(format_);	
@@ -844,7 +844,7 @@ namespace KlayGE
 
 	void D3D12Texture::DoUnmap(uint32_t subres)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		ID3D12ResourcePtr d3d_texture_map_buff;
 		switch (mapped_tma_)
@@ -1141,8 +1141,8 @@ namespace KlayGE
 		uint32_t& num_row, uint32_t& row_size_in_bytes,
 		uint32_t& total_bytes)
 	{
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto device = re.D3DDevice();
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* device = re.D3DDevice();
 
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = (type_ == Texture::TT_2D) ? D3D12_RESOURCE_DIMENSION_TEXTURE2D : D3D12_RESOURCE_DIMENSION_TEXTURE3D;

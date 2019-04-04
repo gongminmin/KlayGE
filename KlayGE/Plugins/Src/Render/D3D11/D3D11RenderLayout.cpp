@@ -53,9 +53,7 @@ namespace KlayGE
 				D3D11Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i), vertex_streams_[i].type, vertex_streams_[i].freq);
 				vertex_elems_.insert(vertex_elems_.end(), stream_elems.begin(), stream_elems.end());
 
-				GraphicsBuffer const * stream = this->GetVertexStream(i).get();
-
-				D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
+				D3D11GraphicsBuffer const& d3dvb = checked_cast<D3D11GraphicsBuffer const&>(*this->GetVertexStream(i));
 				vbs_[i] = d3dvb.D3DBuffer();
 				strides_[i] = this->VertexSize(i);
 				offsets_[i] = 0;
@@ -67,10 +65,9 @@ namespace KlayGE
 					instance_stream_.type, instance_stream_.freq);
 				vertex_elems_.insert(vertex_elems_.end(), stream_elems.begin(), stream_elems.end());
 
-				uint32_t number = num_vertex_streams;
-				GraphicsBuffer const * stream = this->InstanceStream().get();
+				uint32_t const number = num_vertex_streams;
 
-				D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
+				D3D11GraphicsBuffer const& d3dvb = checked_cast<D3D11GraphicsBuffer const&>(*this->InstanceStream());
 				vbs_[number] = d3dvb.D3DBuffer();
 				strides_[number] = this->InstanceSize();
 				offsets_[number] = 0;
@@ -84,7 +81,7 @@ namespace KlayGE
 	{
 		if (!vertex_elems_.empty())
 		{
-			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject const *>(so);
+			D3D11ShaderObject const& shader = checked_cast<D3D11ShaderObject const&>(*so);
 			auto const signature = shader.VsSignature();
 
 			for (auto const & il : input_layouts_)
@@ -96,8 +93,7 @@ namespace KlayGE
 			}
 
 			auto vs_code = shader.VsCode();
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+			auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 			ID3D11InputLayout* ia;
 			TIFHR(d3d_device->CreateInputLayout(&vertex_elems_[0], static_cast<UINT>(vertex_elems_.size()),

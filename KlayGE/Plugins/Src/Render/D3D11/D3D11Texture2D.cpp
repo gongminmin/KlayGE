@@ -137,7 +137,7 @@ namespace KlayGE
 		if ((this->Width(0) == target.Width(0)) && (this->Height(0) == target.Height(0)) && (this->Format() == target.Format())
 			&& (this->ArraySize() == target.ArraySize()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
-			auto& other = *checked_cast<D3D11Texture2D*>(&target);
+			auto& other = checked_cast<D3D11Texture2D&>(target);
 
 			if ((this->SampleCount() > 1) && (1 == target.SampleCount()))
 			{
@@ -175,7 +175,7 @@ namespace KlayGE
 
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
-			auto& other = *checked_cast<D3D11Texture*>(&target);
+			auto& other = checked_cast<D3D11Texture&>(target);
 
 			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;
@@ -219,7 +219,7 @@ namespace KlayGE
 
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
-			auto& other = *checked_cast<D3D11Texture*>(&target);
+			auto& other = checked_cast<D3D11Texture&>(target);
 
 			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;

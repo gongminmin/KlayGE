@@ -573,7 +573,7 @@ namespace KlayGE
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
 
-		D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
+		D3D11RenderLayout const& d3d_rl = checked_cast<D3D11RenderLayout const&>(rl);
 		d3d_rl.Active();
 
 		auto const & vbs = d3d_rl.VBs();

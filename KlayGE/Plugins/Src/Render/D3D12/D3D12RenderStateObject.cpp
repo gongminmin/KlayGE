@@ -54,7 +54,7 @@ namespace KlayGE
 			BlendStateDesc const & bs_desc)
 		: RenderStateObject(rs_desc, dss_desc, bs_desc)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphics_ps_desc = ps_desc_.graphics_ps_desc;
@@ -115,7 +115,7 @@ namespace KlayGE
 
 	void D3D12RenderStateObject::Active()
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.OMSetStencilRef(dss_desc_.front_stencil_ref);
 		re.OMSetBlendFactor(bs_desc_.blend_factor);
 	}
@@ -123,9 +123,9 @@ namespace KlayGE
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObject const & so,
 		FrameBuffer const & fb, bool has_tessellation) const
 	{
-		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
-		auto& d3d12_rl = *checked_cast<D3D12RenderLayout*>(const_cast<RenderLayout*>(&rl));
-		auto& d3d12_fb = *checked_cast<D3D12FrameBuffer*>(const_cast<FrameBuffer*>(&fb));
+		auto& d3d12_so = checked_cast<D3D12ShaderObject&>(const_cast<ShaderObject&>(so));
+		auto& d3d12_rl = checked_cast<D3D12RenderLayout&>(const_cast<RenderLayout&>(rl));
+		auto& d3d12_fb = checked_cast<D3D12FrameBuffer&>(const_cast<FrameBuffer&>(fb));
 
 		size_t hash_val = 0;
 		HashCombine(hash_val, d3d12_rl.PsoHashValue());
@@ -142,7 +142,7 @@ namespace KlayGE
 			d3d12_so.UpdatePsoDesc(pso_desc);
 			d3d12_fb.UpdatePsoDesc(pso_desc);
 		
-			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;
@@ -155,7 +155,7 @@ namespace KlayGE
 
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveComputePSO(ShaderObject const & so) const
 	{
-		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
+		auto& d3d12_so = checked_cast<D3D12ShaderObject&>(const_cast<ShaderObject&>(so));
 
 		size_t hash_val = 0;
 		HashCombine(hash_val, d3d12_so.GetD3D12ShaderObjectTemplate());
@@ -170,7 +170,7 @@ namespace KlayGE
 			pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		
-			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;

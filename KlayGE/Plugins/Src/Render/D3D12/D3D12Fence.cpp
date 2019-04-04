@@ -43,8 +43,7 @@ namespace KlayGE
 	D3D12Fence::D3D12Fence()
 			: last_completed_val_(0), fence_val_(1)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
 		ID3D12Fence* fence;
@@ -61,8 +60,7 @@ namespace KlayGE
 
 	uint64_t D3D12Fence::Signal(FenceType ft)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12CommandQueue* cmd_queue;
 		switch (ft)
 		{

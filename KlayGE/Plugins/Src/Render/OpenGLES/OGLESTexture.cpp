@@ -70,7 +70,7 @@ namespace KlayGE
 
 		if (Context::Instance().RenderFactoryValid())
 		{
-			auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteTextures(1, &texture_);
 		}
 		else
@@ -306,7 +306,7 @@ namespace KlayGE
 
 	void OGLESTexture::BuildMipSubLevels()
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmap(target_type_);
 	}
@@ -316,7 +316,7 @@ namespace KlayGE
 		auto iter = tex_param_i_.find(pname);
 		if ((iter == tex_param_i_.end()) || (iter->second != param))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindTexture(0, target_type_, texture_);
 			glTexParameteri(target_type_, pname, param);
 
@@ -329,7 +329,7 @@ namespace KlayGE
 		auto iter = tex_param_f_.find(pname);
 		if ((iter == tex_param_f_.end()) || (iter->second != param))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindTexture(0, target_type_, texture_);
 			glTexParameterf(target_type_, pname, param);
 

@@ -30,7 +30,7 @@ namespace KlayGE
 			BlendStateDesc const & bs_desc)
 		: RenderStateObject(rs_desc, dss_desc, bs_desc)
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -148,7 +148,7 @@ namespace KlayGE
 
 	void D3D11RenderStateObject::Active()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.RSSetState(rasterizer_state_.get());
 		re.OMSetDepthStencilState(depth_stencil_state_.get(), dss_desc_.front_stencil_ref);
 		re.OMSetBlendState(blend_state_.get(), bs_desc_.blend_factor, bs_desc_.sample_mask);
@@ -158,8 +158,8 @@ namespace KlayGE
 	D3D11SamplerStateObject::D3D11SamplerStateObject(SamplerStateDesc const & desc)
 		: SamplerStateObject(desc)
 	{
-		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = render_eng.D3DDevice();
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11Device* d3d_device = re.D3DDevice();
 
 		D3D11_SAMPLER_DESC d3d_desc;
 		d3d_desc.Filter = D3D11Mapping::Mapping(desc.filter);

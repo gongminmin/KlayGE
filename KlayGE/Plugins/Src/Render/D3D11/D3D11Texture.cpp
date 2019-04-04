@@ -40,9 +40,9 @@ namespace KlayGE
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Write));
 		}
 
-		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		auto const& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 	}
 
 	D3D11Texture::~D3D11Texture()

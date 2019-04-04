@@ -135,7 +135,7 @@ namespace
 			}
 			(*gl_bind_samplers_)[stage_] = 0;
 
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform1i(location_, stage_);
 		}
 
@@ -188,7 +188,7 @@ namespace
 				(*gl_bind_samplers_)[stage_] = 0;
 			}
 
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform1i(location_, stage_);
 		}
 
@@ -205,7 +205,7 @@ namespace
 
 	void PrintGLSLError(std::string const& glsl, std::string_view info)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		if (re.HackForMali())
 		{
@@ -1364,7 +1364,7 @@ namespace KlayGE
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
 		for (auto const & pb : param_binds_)

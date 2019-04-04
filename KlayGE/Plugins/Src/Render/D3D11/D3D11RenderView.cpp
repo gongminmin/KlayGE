@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(texture->AccessHint() & EAH_GPU_Read);
 
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 
@@ -66,7 +66,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gb->AccessHint() & EAH_GPU_Read);
 
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 
@@ -96,7 +96,7 @@ namespace KlayGE
 	D3D11RenderTargetView::D3D11RenderTargetView(void* src, uint32_t first_subres, uint32_t num_subres)
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
@@ -116,7 +116,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetView::BindDiscardFunc()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = [this] { this->HWDiscard(); };
@@ -303,7 +303,7 @@ namespace KlayGE
 	D3D11DepthStencilView::D3D11DepthStencilView(void* src, uint32_t first_subres, uint32_t num_subres)
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
@@ -334,7 +334,7 @@ namespace KlayGE
 	
 	void D3D11DepthStencilView::BindDiscardFunc()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = [this] { this->HWDiscard(); };
@@ -501,7 +501,7 @@ namespace KlayGE
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(void* src, uint32_t first_subres, uint32_t num_subres)
 		: ua_src_(src), ua_first_subres_(first_subres), ua_num_subres_(num_subres)
 	{
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
 		d3d_imm_ctx_ = re.D3DDeviceImmContext();
 		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
@@ -526,7 +526,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::BindDiscardFunc()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = [this] { this->HWDiscard(); };

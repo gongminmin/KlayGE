@@ -466,8 +466,7 @@ namespace KlayGE
 		{
 			if (shader_profile == "auto")
 			{
-				auto const& re =
-					*checked_cast<NullRenderEngine const*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto const& re = checked_cast<NullRenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				shader_profile = re.DefaultShaderProfile(stage_);
 			}
 		}
@@ -1012,8 +1011,7 @@ namespace KlayGE
 		{
 			if (shader_profile == "auto")
 			{
-				auto const& re =
-					*checked_cast<NullRenderEngine const*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto const& re = checked_cast<NullRenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				shader_profile = re.DefaultShaderProfile(stage_);
 			}
 		}
@@ -1307,7 +1305,7 @@ namespace KlayGE
 	NullShaderObject::NullShaderObject()
 		: NullShaderObject(MakeSharedPtr<ShaderObjectTemplate>(), MakeSharedPtr<NullShaderObjectTemplate>())
 	{
-		auto const & re = *checked_cast<NullRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<NullRenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		std::string_view const platform_name = re.NativeShaderPlatformName();
 		if (platform_name.find("d3d_11_") == 0)
 		{

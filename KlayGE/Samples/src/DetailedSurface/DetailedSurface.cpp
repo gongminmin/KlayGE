@@ -497,7 +497,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				auto& polygon_mesh = *checked_cast<RenderPolygon*>(&mesh);
+				auto& polygon_mesh = checked_cast<RenderPolygon&>(mesh);
 
 				polygon_mesh.LightPos(light_->Position());
 				polygon_mesh.LightColor(light_->Color());

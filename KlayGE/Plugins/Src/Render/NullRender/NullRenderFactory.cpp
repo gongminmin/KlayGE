@@ -415,7 +415,7 @@ namespace KlayGE
 		bool as_gl = false;
 		bool as_gles = false;
 
-		auto const& re = *checked_cast<NullRenderEngine const *>(&this->RenderEngineInstance());
+		auto const& re = checked_cast<NullRenderEngine const&>(this->RenderEngineInstance());
 		std::string_view const platform_name = re.NativeShaderPlatformName();
 		if (platform_name.find("d3d_11_") == 0)
 		{

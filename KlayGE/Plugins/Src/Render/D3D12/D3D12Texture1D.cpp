@@ -275,7 +275,7 @@ namespace KlayGE
 		}
 		else
 		{
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			ID3D12Device* device = re.D3DDevice();
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -283,9 +283,9 @@ namespace KlayGE
 			auto const & tech = *re.BilinearBlitTech();
 			auto& pass = tech.Pass(0);
 			pass.Bind(effect);
-			D3D12ShaderObject& d3d12_so = *checked_cast<D3D12ShaderObject*>(pass.GetShaderObject(effect).get());
+			auto& d3d12_so = checked_cast<D3D12ShaderObject&>(*pass.GetShaderObject(effect));
 
-			D3D12RenderLayout& d3d12_rl = *checked_cast<D3D12RenderLayout*>(re.PostProcessRenderLayout().get());
+			auto& d3d12_rl = checked_cast<D3D12RenderLayout&>(*re.PostProcessRenderLayout());
 
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
 			d3d12_so.UpdatePsoDesc(pso_desc);
@@ -349,7 +349,7 @@ namespace KlayGE
 				cmd_list->SetGraphicsRootDescriptorTable(1, gpu_sampler_handle);
 			}
 
-			D3D12GraphicsBuffer& d3d12_vb = *checked_cast<D3D12GraphicsBuffer*>(d3d12_rl.GetVertexStream(0).get());
+			auto& d3d12_vb = checked_cast<D3D12GraphicsBuffer&>(*d3d12_rl.GetVertexStream(0));
 
 			D3D12_VERTEX_BUFFER_VIEW vbv;
 			vbv.BufferLocation = d3d12_vb.GPUVirtualAddress();
@@ -411,7 +411,7 @@ namespace KlayGE
 
 			pass.Unbind(effect);
 
-			auto& fb = *checked_cast<D3D12FrameBuffer*>(re.CurFrameBuffer().get());
+			auto& fb = checked_cast<D3D12FrameBuffer&>(*re.CurFrameBuffer());
 			fb.SetRenderTargets();
 		}
 	}

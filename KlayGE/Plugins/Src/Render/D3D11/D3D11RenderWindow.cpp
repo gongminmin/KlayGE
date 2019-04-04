@@ -104,7 +104,7 @@ namespace KlayGE
 		viewport_->height	= height_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
 		ID3D11Device* d3d_device = d3d11_re.D3DDevice();
 		ID3D11DeviceContext* d3d_imm_ctx = nullptr;
 
@@ -577,7 +577,7 @@ namespace KlayGE
 		viewport_->height = height_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
 		if (d3d_imm_ctx)
 		{
@@ -702,7 +702,7 @@ namespace KlayGE
 			::SetWindowPos(hWnd_, nullptr, left_, top_, width_, height_, SWP_NOZORDER);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+			auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
 			if (d3d11_re.DXGISubVer() >= 2)
 			{
 				sc_desc1_.Width = width_;
@@ -772,7 +772,7 @@ namespace KlayGE
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
 
 		bool stereo_changed = false;
 		if (d3d11_re.DXGISubVer() >= 2)
@@ -784,7 +784,7 @@ namespace KlayGE
 		uint32_t new_height = std::max(rect.bottom - rect.top, 16L);
 		if ((new_width != width_) || (new_height != height_) || stereo_changed)
 		{
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
+			d3d11_re.Resize(new_width, new_height);
 		}
 	}
 
@@ -797,7 +797,7 @@ namespace KlayGE
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
 			d3d11_re.DXGIFactory2()->UnregisterStereoStatus(stereo_cookie_);
@@ -835,7 +835,7 @@ namespace KlayGE
 		if (dxgi_allow_tearing_)
 #endif
 		{
-			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+			auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			if (d3d11_re.DXGISubVer() >= 2)
 			{
 				BOOST_ASSERT(swap_chain_1_);
@@ -911,8 +911,7 @@ namespace KlayGE
 
 	void D3D11RenderWindow::CreateSwapChain(ID3D11Device* d3d_device, bool try_hdr_display)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& d3d11_re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (d3d11_re.DXGISubVer() >= 2)
@@ -992,7 +991,7 @@ namespace KlayGE
 			TIFHR(swap_chain_->Present(sync_interval_, present_flags));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+			auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
 			if (d3d11_re.DXGISubVer() >= 2)
 			{
 				render_target_view_->Discard();
@@ -1048,8 +1047,7 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 		KFL_UNUSED(args);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)
 		{
 			swap_chain_.reset();

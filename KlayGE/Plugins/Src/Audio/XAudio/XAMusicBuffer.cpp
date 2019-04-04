@@ -99,7 +99,7 @@ namespace KlayGE
 		audio_data_.resize(wfx.nAvgBytesPerSec * buffer_seconds);
 		buffer_size_ = wfx.nAvgBytesPerSec / BUFFERS_PER_SECOND;
 
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		auto xaudio = ae.XAudio();
 
@@ -182,7 +182,7 @@ namespace KlayGE
 
 	void XAMusicBuffer::DoPlay(bool loop)
 	{
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		ae.X3DAudioCalculate(&emitter_, X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER, &dsp_settings_);
 

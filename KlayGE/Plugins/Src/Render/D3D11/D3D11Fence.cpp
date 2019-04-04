@@ -49,7 +49,7 @@ namespace KlayGE
 	{
 		KFL_UNUSED(ft);
 
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
@@ -74,7 +74,7 @@ namespace KlayGE
 		auto iter = fences_.find(id);
 		if (iter != fences_.end())
 		{
-			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			uint32_t ret;
@@ -92,7 +92,7 @@ namespace KlayGE
 		}
 		else
 		{
-			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			uint32_t ret;
@@ -105,7 +105,7 @@ namespace KlayGE
 	D3D11_4Fence::D3D11_4Fence()
 		: last_completed_val_(0), fence_val_(1)
 	{
-		auto const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_device = re.D3DDevice5();
 		BOOST_ASSERT(d3d_device != nullptr);
 
@@ -125,7 +125,7 @@ namespace KlayGE
 	{
 		KFL_UNUSED(ft);
 
-		auto const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_imm_ctx = re.D3DDeviceImmContext4();
 		BOOST_ASSERT(d3d_imm_ctx != nullptr);
 

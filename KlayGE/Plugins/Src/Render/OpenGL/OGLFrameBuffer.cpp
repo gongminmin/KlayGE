@@ -57,7 +57,7 @@ namespace KlayGE
 		{
 			if (Context::Instance().RenderFactoryValid())
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.DeleteFramebuffers(1, &fbo_);
 			}
 			else
@@ -94,7 +94,7 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
 		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
@@ -134,7 +134,7 @@ namespace KlayGE
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
@@ -298,7 +298,7 @@ namespace KlayGE
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 				GLuint old_fbo = re.BindFramebuffer();
 				re.BindFramebuffer(fbo_);

@@ -140,7 +140,7 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{

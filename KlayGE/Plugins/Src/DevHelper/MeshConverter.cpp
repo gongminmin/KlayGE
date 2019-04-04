@@ -790,7 +790,7 @@ namespace
 
 	void MeshLoader::BuildActions(aiScene const * scene)
 	{
-		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
 		struct Animation
 		{
@@ -1262,7 +1262,7 @@ namespace
 			ai_scene.mMeshes = new aiMesh*[ai_scene.mNumMeshes];
 			for (uint32_t i = 0; i < ai_scene.mNumMeshes; ++ i)
 			{
-				auto const & mesh = *checked_cast<StaticMesh*>(model.Mesh(i).get());
+				auto const& mesh = checked_cast<StaticMesh const&>(*model.Mesh(i));
 
 				ai_scene.mMeshes[i] = new aiMesh;
 				auto& ai_mesh = *ai_scene.mMeshes[i];
@@ -2671,7 +2671,7 @@ namespace
 
 	void MeshLoader::CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk)
 	{
-		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
 		XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
 		if (nf_attr)
@@ -2793,8 +2793,8 @@ namespace
 
 	void MeshLoader::CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index)
 	{
-		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
-		auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(skinned_model.Mesh(mesh_index));
+		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
+		auto& skinned_mesh = checked_cast<SkinnedMesh&>(*skinned_model.Mesh(mesh_index));
 
 		auto bb_kfs = MakeSharedPtr<AABBKeyFrameSet>();
 		if (bb_kfs_chunk)
@@ -2865,7 +2865,7 @@ namespace
 
 	void MeshLoader::CompileActionsChunk(XMLNodePtr const & actions_chunk)
 	{
-		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
 		XMLNodePtr action_node;
 		if (actions_chunk)
@@ -2944,7 +2944,7 @@ namespace
 		{
 			this->CompileKeyFramesChunk(key_frames_chunk);
 
-			auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+			auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 			auto& kfs = *skinned_model.GetKeyFrameSets();
 
 			for (size_t i = 0; i < kfs.size(); ++ i)
@@ -3032,7 +3032,7 @@ namespace
 			}
 		}
 
-		auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 		auto& kfs = *skinned_model.GetKeyFrameSets();
 
 		for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
@@ -3550,7 +3550,7 @@ namespace
 
 		if (skinned)
 		{
-			auto& skinned_model = *checked_pointer_cast<SkinnedModel>(render_model_);
+			auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
 			for (auto& joint : joints_)
 			{
@@ -3562,7 +3562,7 @@ namespace
 			// TODO: Run skinning on CPU to get the bounding box
 			for (uint32_t mesh_index = 0; mesh_index < render_meshes.size(); ++ mesh_index)
 			{
-				auto& skinned_mesh = *checked_pointer_cast<SkinnedMesh>(render_meshes[mesh_index]);
+				auto& skinned_mesh = checked_cast<SkinnedMesh&>(*render_meshes[mesh_index]);
 
 				auto frame_pos_aabbs = MakeSharedPtr<AABBKeyFrameSet>();
 

@@ -631,8 +631,7 @@ namespace KlayGE
 		{
 			if (shader_profile == "auto")
 			{
-				auto const& re =
-					*checked_cast<D3D12RenderEngine const*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				shader_profile = re.DefaultShaderProfile(stage_);
 			}
 		}
@@ -859,8 +858,7 @@ namespace KlayGE
 			auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
 			if (!sd.so_decl.empty())
 			{
-				auto const& re =
-					*checked_cast<D3D12RenderEngine const*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				auto const& caps = re.DeviceCaps();
 				if (caps.gs_support)
 				{
@@ -1012,7 +1010,7 @@ namespace KlayGE
 
 	void D3D12ShaderObject::CreateRootSignature()
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
 		std::array<uint32_t, NumShaderStages * 4> num;
@@ -1205,7 +1203,7 @@ namespace KlayGE
 
 	void D3D12ShaderObject::Bind()
 	{
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* cmd_list = re.D3DRenderCmdList();
 
 		for (size_t stage = 0; stage < NumShaderStages; ++stage)

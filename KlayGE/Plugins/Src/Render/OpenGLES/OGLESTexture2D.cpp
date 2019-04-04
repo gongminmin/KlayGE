@@ -105,7 +105,7 @@ namespace KlayGE
 
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -131,7 +131,7 @@ namespace KlayGE
 				}
 			}
 
-			OGLESTexture& ogl_target = *checked_cast<OGLESTexture*>(&target);
+			auto& ogl_target = checked_cast<OGLESTexture&>(target);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 			if (array_size_ > 1)
 			{
@@ -205,7 +205,7 @@ namespace KlayGE
 
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -338,7 +338,7 @@ namespace KlayGE
 				uint32_t const w = this->Width(level);
 				uint32_t const h = this->Height(level);
 
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
@@ -389,7 +389,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 
 		if (!re.HackForAdreno())
@@ -565,7 +565,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

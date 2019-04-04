@@ -92,7 +92,7 @@ namespace KlayGE
 			&& (this->Depth(0) == target.Depth(0)) && (this->Format() == target.Format())
 			&& (this->ArraySize() == target.ArraySize()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
-			auto& other = *checked_cast<D3D11Texture3D*>(&target);
+			auto& other = checked_cast<D3D11Texture3D&>(target);
 			d3d_imm_ctx_->CopyResource(other.d3d_texture_.get(), d3d_texture_.get());
 		}
 		else
@@ -126,7 +126,7 @@ namespace KlayGE
 			src_box.bottom = src_y_offset + src_height;
 			src_box.back = src_z_offset + src_depth;
 
-			auto& other = *checked_cast<D3D11Texture*>(&target);
+			auto& other = checked_cast<D3D11Texture&>(target);
 			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
 				dst_x_offset, dst_y_offset, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
 		}

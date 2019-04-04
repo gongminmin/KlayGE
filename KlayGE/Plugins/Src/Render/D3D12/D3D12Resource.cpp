@@ -47,7 +47,7 @@ namespace KlayGE
 	{
 		if (Context::Instance().RenderFactoryValid())
 		{
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.ReleaseAfterSync(d3d_resource_);
 		}
 	}
@@ -63,7 +63,7 @@ namespace KlayGE
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		bool state_changed = false;
 		if (sub_res == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
@@ -132,8 +132,8 @@ namespace KlayGE
 
 	ID3D12ResourcePtr D3D12Resource::CreateBuffer(uint32_t access_hint, uint32_t size_in_byte)
 	{
-		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto device = re.D3DDevice();
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* device = re.D3DDevice();
 
 		D3D12_RESOURCE_STATES init_state;
 		D3D12_HEAP_PROPERTIES heap_prop;

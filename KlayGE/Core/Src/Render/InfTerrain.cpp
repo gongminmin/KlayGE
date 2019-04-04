@@ -156,8 +156,8 @@ namespace KlayGE
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto& inf_terrain = *checked_cast<InfTerrainSceneObject*>(&node);
-				auto& inf_terrain_renderable = *checked_cast<InfTerrainRenderable*>(node.GetRenderable(0).get());
+				auto& inf_terrain = checked_cast<InfTerrainSceneObject&>(node);
+				auto& inf_terrain_renderable = checked_cast<InfTerrainRenderable&>(*node.GetRenderable(0));
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -729,8 +729,8 @@ namespace KlayGE
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto& hq_inf_terrain = *checked_cast<HQTerrainSceneObject*>(&node);
-				auto& hq_inf_terrain_renderable = *checked_cast<HQTerrainRenderable*>(node.GetRenderable(0).get());
+				auto& hq_inf_terrain = checked_cast<HQTerrainSceneObject&>(node);
+				auto& hq_inf_terrain_renderable = checked_cast<HQTerrainRenderable&>(*node.GetRenderable(0));
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;

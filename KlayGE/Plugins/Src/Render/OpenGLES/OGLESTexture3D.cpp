@@ -216,7 +216,7 @@ namespace KlayGE
 				uint32_t const h = this->Height(level);
 				uint32_t const d = this->Depth(level);
 
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
@@ -250,7 +250,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 
 		if (!re.HackForAdreno())
@@ -365,7 +365,7 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 		KFL_UNUSED(array_index);
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

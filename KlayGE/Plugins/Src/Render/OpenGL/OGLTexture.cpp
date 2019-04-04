@@ -114,7 +114,7 @@ namespace KlayGE
 
 		if (Context::Instance().RenderFactoryValid())
 		{
-			auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteBuffers(1, &pbo_);
 		}
 		else
@@ -126,7 +126,7 @@ namespace KlayGE
 		{
 			if (Context::Instance().RenderFactoryValid())
 			{
-				auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.DeleteTextures(1, &texture_);
 			}
 			else
@@ -367,7 +367,7 @@ namespace KlayGE
 
 	void OGLTexture::BuildMipSubLevels()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmap(target_type_);
 	}
@@ -387,7 +387,7 @@ namespace KlayGE
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 				glTexParameteri(target_type_, pname, param);
 			}
@@ -411,7 +411,7 @@ namespace KlayGE
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 				glTexParameterf(target_type_, pname, param);
 			}
@@ -436,7 +436,7 @@ namespace KlayGE
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 				glTexParameterfv(target_type_, pname, param);
 			}

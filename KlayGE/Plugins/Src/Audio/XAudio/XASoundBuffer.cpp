@@ -100,7 +100,7 @@ namespace KlayGE
 		audio_data_.resize(data_source_->Size());
 		data_source_->Read(audio_data_.data(), audio_data_.size());
 
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		auto xaudio = ae.XAudio();
 
@@ -170,7 +170,7 @@ namespace KlayGE
 			emitter.Position = { pos_.x(), pos_.y(), pos_.z() };
 			emitter.Velocity = { vel_.x(), vel_.y(), vel_.z() };
 
-			auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+			auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 			ae.X3DAudioCalculate(&emitter, X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER, &source.dsp_settings);
 
