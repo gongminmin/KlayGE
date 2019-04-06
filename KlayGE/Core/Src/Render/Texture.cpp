@@ -1355,13 +1355,13 @@ namespace
 				tex_data.array_size = tex->ArraySize();
 				tex_data.format = tex->Format();
 
-				auto* sw_tex = checked_cast<SoftwareTexture*>(tex.get());
-				tex_data.init_data = sw_tex->SubresourceData();
-				tex_data.data_block = sw_tex->DataBlock();
+				auto& sw_tex = checked_cast<SoftwareTexture&>(*tex);
+				tex_data.init_data = sw_tex.SubresourceData();
+				tex_data.data_block = sw_tex.DataBlock();
 
 				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					size_t const offset = static_cast<uint8_t const *>(tex_data.init_data[i].data) - sw_tex->DataBlock().data();
+					size_t const offset = static_cast<uint8_t const *>(tex_data.init_data[i].data) - sw_tex.DataBlock().data();
 					tex_data.init_data[i].data = tex_data.data_block.data() + offset;
 				}
 			}

@@ -1013,7 +1013,7 @@ void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 	{
 		sphere_models_[i]->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<SphereRenderable*>(&mesh)->RenderingType(rendering_type_);
+				checked_cast<SphereRenderable&>(mesh).RenderingType(rendering_type_);
 			});
 	}
 }

@@ -728,8 +728,8 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto* cmd_list = d3d12_re.D3DRenderCmdList();
 
-			auto* rt_tex = checked_cast<D3D12Texture*>(render_targets_[curr_back_buffer_].get());
-			rt_tex->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_PRESENT);
+			auto& rt_tex = checked_cast<D3D12Texture&>(*render_targets_[curr_back_buffer_]);
+			rt_tex.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_PRESENT);
 			d3d12_re.FlushResourceBarriers(cmd_list);
 
 			d3d12_re.CommitRenderCmd();

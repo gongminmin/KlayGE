@@ -235,12 +235,12 @@ void FoliageApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	auto* terrain_renderable = checked_cast<ProceduralTerrain*>(terrain_renderable_.get());
-	if (!terrain_renderable->UseDrawIndirect())
+	auto& terrain_renderable = checked_cast<ProceduralTerrain&>(*terrain_renderable_);
+	if (!terrain_renderable.UseDrawIndirect())
 	{
 		stream.str(L"");
-		stream << terrain_renderable->Num3DPlants() << " 3D plants "
-			<< terrain_renderable->NumImpostorPlants() << " impostor plants";
+		stream << terrain_renderable.Num3DPlants() << " 3D plants "
+			<< terrain_renderable.NumImpostorPlants() << " impostor plants";
 		font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 	}
 }

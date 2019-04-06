@@ -102,8 +102,8 @@ public:
 			}
 		}
 
-		auto const & rl = checked_cast<StaticMesh*>(target->Mesh(0).get())->GetRenderLayout();
-		auto const & sanity_rl = checked_cast<StaticMesh*>(sanity_model->Mesh(0).get())->GetRenderLayout();
+		auto const& rl = checked_cast<StaticMesh&>(*target->Mesh(0)).GetRenderLayout();
+		auto const& sanity_rl = checked_cast<StaticMesh&>(*sanity_model->Mesh(0)).GetRenderLayout();
 
 		EXPECT_EQ(rl.NumVertexStreams(), sanity_rl.NumVertexStreams());
 

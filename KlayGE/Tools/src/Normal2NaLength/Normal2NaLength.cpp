@@ -152,7 +152,7 @@ namespace
 		auto const in_num_mipmaps = in_tex->NumMipMaps();
 		auto const in_array_size = in_tex->ArraySize();
 		auto const in_format = in_tex->Format();
-		auto const & in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto const & in_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
 
 		TexCompressionBC4 bc4_codec;
 

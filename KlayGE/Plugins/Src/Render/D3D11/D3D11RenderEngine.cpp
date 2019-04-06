@@ -455,11 +455,11 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRenderStateObject(default_rs_desc, default_dss_desc, default_bs_desc);
 
-		auto d3d_cur_rs_obj = checked_cast<D3D11RenderStateObject*>(cur_rs_obj_.get());
-		rasterizer_state_cache_ = d3d_cur_rs_obj->D3DRasterizerState();
-		depth_stencil_state_cache_ = d3d_cur_rs_obj->D3DDepthStencilState();
+		auto& d3d_cur_rs_obj = checked_cast<D3D11RenderStateObject&>(*cur_rs_obj_);
+		rasterizer_state_cache_ = d3d_cur_rs_obj.D3DRasterizerState();
+		depth_stencil_state_cache_ = d3d_cur_rs_obj.D3DDepthStencilState();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = d3d_cur_rs_obj->D3DBlendState();
+		blend_state_cache_ = d3d_cur_rs_obj.D3DBlendState();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
@@ -538,10 +538,10 @@ namespace KlayGE
 			std::vector<UINT> d3d11_buff_offsets(num_buffs, 0);
 			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				D3D11GraphicsBuffer* d3d11_buf = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get());
+				auto& d3d11_buf = checked_cast<D3D11GraphicsBuffer&>(*rl->GetVertexStream(i));
 
-				so_src[i] = d3d11_buf;
-				d3d11_buffs[i] = d3d11_buf->D3DBuffer();
+				so_src[i] = &d3d11_buf;
+				d3d11_buffs[i] = d3d11_buf.D3DBuffer();
 			}
 
 			for (uint32_t i = 0; i < num_buffs; ++ i)
@@ -691,7 +691,7 @@ namespace KlayGE
 
 		if (rl.UseIndices())
 		{
-			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer();
+			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer&>(*rl.GetIndexStream()).D3DBuffer();
 			if (ib_cache_ != d3dib)
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
@@ -719,8 +719,7 @@ namespace KlayGE
 
 					pass.Bind(effect);
 					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
-						rl.IndirectArgsOffset());
+						checked_cast<D3D11GraphicsBuffer const&>(*indirect_buff).D3DBuffer(), rl.IndirectArgsOffset());
 					pass.Unbind(effect);
 				}
 			}
@@ -732,8 +731,7 @@ namespace KlayGE
 
 					pass.Bind(effect);
 					d3d_imm_ctx_->DrawInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
-						rl.IndirectArgsOffset());
+						checked_cast<D3D11GraphicsBuffer const&>(*indirect_buff).D3DBuffer(), rl.IndirectArgsOffset());
 					pass.Unbind(effect);
 				}
 			}
@@ -793,7 +791,7 @@ namespace KlayGE
 			auto& pass = tech.Pass(i);
 
 			pass.Bind(effect);
-			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer(), offset);
+			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer&>(*buff_args).D3DBuffer(), offset);
 			pass.Unbind(effect);
 		}
 
@@ -807,7 +805,7 @@ namespace KlayGE
 
 	TexturePtr const & D3D11RenderEngine::ScreenDepthStencilTexture() const
 	{
-		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->D3DDepthStencilBuffer();
+		return checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_).D3DDepthStencilBuffer();
 	}
 
 	// 设置剪除矩阵
@@ -842,7 +840,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->Resize(width, height);
+		checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_).Resize(width, height);
 	}
 
 	void D3D11RenderEngine::DoDestroy()
@@ -945,12 +943,12 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::FullScreen() const
 	{
-		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen();
+		return checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_).FullScreen();
 	}
 
 	void D3D11RenderEngine::FullScreen(bool fs)
 	{
-		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen(fs);
+		checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_).FullScreen(fs);
 	}
 
 	// 填充设备能力
@@ -1366,14 +1364,14 @@ namespace KlayGE
 	{
 		uint32_t const width = mono_tex_->Width(0);
 		uint32_t const height = mono_tex_->Height(0);
-		D3D11RenderWindow* win = checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get());
+		auto& win = checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_);
 
 		switch (stereo_method_)
 		{
 		case SM_DXGI:
 			{
-				RenderTargetView const * view = (0 == eye) ? win->D3DBackBufferRtv().get() : win->D3DBackBufferRightEyeRtv().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->RetrieveD3DRenderTargetView();
+				auto const& view = (0 == eye) ? *win.D3DBackBufferRtv() : *win.D3DBackBufferRightEyeRtv();
+				auto* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1408,8 +1406,8 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource();
-					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource();
+					ID3D11Resource* back = checked_cast<D3D11Texture2D&>(*win.D3DBackBuffer()).D3DResource();
+					ID3D11Resource* stereo = checked_cast<D3D11Texture2D&>(*stereo_nv_3d_vision_tex_).D3DResource();
 
 					D3D11_BOX box;
 					box.left = 0;
@@ -1425,13 +1423,13 @@ namespace KlayGE
 
 		case SM_AMDQuadBuffer:
 			{
-				RenderTargetView const * view = win->D3DBackBufferRtv().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const *>(view)->RetrieveD3DRenderTargetView();
+				RenderTargetView const& view = *win.D3DBackBufferRtv();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
 				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
 				vp.TopLeftX = 0;
-				vp.TopLeftY = (0 == eye) ? 0 : static_cast<float>(win->StereoRightEyeHeight());
+				vp.TopLeftY = (0 == eye) ? 0 : static_cast<float>(win.StereoRightEyeHeight());
 				vp.Width = static_cast<float>(width);
 				vp.Height = static_cast<float>(height);
 				vp.MinDepth = 0;

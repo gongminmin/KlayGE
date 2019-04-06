@@ -389,10 +389,10 @@ namespace KlayGE
 
 	void OGLESSamplerStateObject::Active(TexturePtr const & texture)
 	{
-		auto tex = checked_cast<OGLESTexture*>(texture.get());
+		auto& tex = checked_cast<OGLESTexture&>(*texture);
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
-			tex->TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
+			tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
 		}
 	}
 }

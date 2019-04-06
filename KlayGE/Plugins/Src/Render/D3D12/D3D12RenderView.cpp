@@ -170,7 +170,7 @@ namespace KlayGE
 	{
 		if (!d3d_sr_view_ && tex_ && tex_->HWResourceReady())
 		{
-			d3d_sr_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DShaderResourceView(pf_, first_array_index_, array_size_,
+			d3d_sr_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DShaderResourceView(pf_, first_array_index_, array_size_,
 				first_level_, num_levels_);
 		}
 		return d3d_sr_view_;
@@ -203,7 +203,7 @@ namespace KlayGE
 	{
 		if (!d3d_sr_view_ && buff_ && buff_->HWResourceReady())
 		{
-			d3d_sr_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DShaderResourceView(pf_, first_elem_, num_elems_);
+			d3d_sr_view_ = checked_cast<D3D12GraphicsBuffer&>(*buff_).RetrieveD3DShaderResourceView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_sr_view_;
 	}
@@ -291,8 +291,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, array_size_,
-				level_);
+			d3d_rt_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DRenderTargetView(pf_, first_array_index_, array_size_, level_);
 		}
 		return d3d_rt_view_.get();
 	}
@@ -330,7 +329,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, first_slice_,
+			d3d_rt_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DRenderTargetView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_rt_view_.get();
@@ -368,8 +367,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && tex_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DRenderTargetView(pf_, first_array_index_, first_face_,
-				level_);
+			d3d_rt_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DRenderTargetView(pf_, first_array_index_, first_face_, level_);
 		}
 		return d3d_rt_view_.get();
 	}
@@ -410,7 +408,7 @@ namespace KlayGE
 	{
 		if (!d3d_rt_view_ && buff_->HWResourceReady())
 		{
-			d3d_rt_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DRenderTargetView(pf_, first_elem_, num_elems_);
+			d3d_rt_view_ = checked_cast<D3D12GraphicsBuffer&>(*buff_).RetrieveD3DRenderTargetView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_rt_view_.get();
 	}
@@ -552,7 +550,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
+			d3d_ds_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DDepthStencilView(pf_, first_array_index_, array_size_, level_);
 		}
 		return d3d_ds_view_.get();
 	}
@@ -588,7 +586,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, first_slice_,
+			d3d_ds_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DDepthStencilView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_ds_view_.get();
@@ -623,8 +621,7 @@ namespace KlayGE
 	{
 		if (!d3d_ds_view_ && tex_->HWResourceReady())
 		{
-			d3d_ds_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DDepthStencilView(pf_, first_array_index_, first_face_,
-				level_);
+			d3d_ds_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DDepthStencilView(pf_, first_array_index_, first_face_, level_);
 		}
 		return d3d_ds_view_.get();
 	}
@@ -745,8 +742,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, array_size_,
-				level_);
+			d3d_ua_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DUnorderedAccessView(pf_, first_array_index_, array_size_, level_);
 		}
 		return d3d_ua_view_.get();
 	}
@@ -780,7 +776,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_slice_,
+			d3d_ua_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_slice_,
 				num_slices_, level_);
 		}
 		return d3d_ua_view_.get();
@@ -814,8 +810,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && tex_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12Texture*>(tex_.get())->RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_face_,
-				level_);
+			d3d_ua_view_ = checked_cast<D3D12Texture&>(*tex_).RetrieveD3DUnorderedAccessView(pf_, first_array_index_, first_face_, level_);
 		}
 		return d3d_ua_view_.get();
 	}
@@ -848,7 +843,7 @@ namespace KlayGE
 	{
 		if (!d3d_ua_view_ && buff_->HWResourceReady())
 		{
-			d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer*>(buff_.get())->RetrieveD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
+			d3d_ua_view_ = checked_cast<D3D12GraphicsBuffer&>(*buff_).RetrieveD3DUnorderedAccessView(pf_, first_elem_, num_elems_);
 		}
 		return d3d_ua_view_.get();
 	}

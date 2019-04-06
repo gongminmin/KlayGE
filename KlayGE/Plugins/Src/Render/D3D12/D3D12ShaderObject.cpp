@@ -88,7 +88,7 @@ namespace
 				{
 					std::get<0>(*srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D12ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView().get();
+				*srv_ = checked_cast<D3D12ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
@@ -126,7 +126,7 @@ namespace
 				{
 					std::get<0>(*srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D12ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView().get();
+				*srv_ = checked_cast<D3D12ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
@@ -157,7 +157,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = checked_cast<D3D12Texture*>(uav->TextureResource().get());
-				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -188,7 +188,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get());
-				*uav_ = checked_cast<D3D12UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -900,10 +900,10 @@ namespace KlayGE
 
 	void D3D12ShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
 	{
-		auto* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(stage).get());
-		if (!shader_stage->ShaderCodeBlob().empty())
+		auto& shader_stage = checked_cast<D3D12ShaderStageObject&>(*this->Stage(stage));
+		if (!shader_stage.ShaderCodeBlob().empty())
 		{
-			auto const & shader_desc = shader_stage->GetD3D12ShaderDesc();
+			auto const & shader_desc = shader_stage.GetD3D12ShaderDesc();
 
 			uint32_t const stage_idnex = static_cast<uint32_t>(stage);
 
@@ -926,7 +926,7 @@ namespace KlayGE
 					p->Value(sampler);
 					if (sampler)
 					{
-						samplers_[stage_idnex][offset] = checked_cast<D3D12SamplerStateObject*>(sampler.get())->D3DDesc();
+						samplers_[stage_idnex][offset] = checked_cast<D3D12SamplerStateObject&>(*sampler).D3DDesc();
 					}
 				}
 				else
@@ -1027,17 +1027,17 @@ namespace KlayGE
 
 		bool has_stream_output = false;
 		if (this->Stage(ShaderStage::Geometry) &&
-			checked_cast<D3D12ShaderStageObject*>(this->Stage(ShaderStage::Geometry).get())->HasStreamOutput())
+			checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Geometry)).HasStreamOutput())
 		{
 			has_stream_output = true;
 		}
 		else if (this->Stage(ShaderStage::Domain) &&
-				 checked_cast<D3D12ShaderStageObject*>(this->Stage(ShaderStage::Domain).get())->HasStreamOutput())
+				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Domain)).HasStreamOutput())
 		{
 			has_stream_output = true;
 		}
 		else if (this->Stage(ShaderStage::Vertex) &&
-				 checked_cast<D3D12ShaderStageObject*>(this->Stage(ShaderStage::Vertex).get())->HasStreamOutput())
+				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).HasStreamOutput())
 		{
 			has_stream_output = true;
 		}

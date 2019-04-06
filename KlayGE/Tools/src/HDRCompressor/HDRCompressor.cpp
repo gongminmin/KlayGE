@@ -299,8 +299,8 @@ namespace
 		auto in_num_mipmaps = in_tex->NumMipMaps();
 		auto const in_array_size = in_tex->ArraySize();
 		auto in_format = in_tex->Format();
-		auto in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
-		auto in_data_block = checked_cast<SoftwareTexture*>(in_tex.get())->DataBlock();
+		auto in_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
+		auto in_data_block = checked_cast<SoftwareTexture&>(*in_tex).DataBlock();
 
 		if (EF_ABGR16F == in_format)
 		{

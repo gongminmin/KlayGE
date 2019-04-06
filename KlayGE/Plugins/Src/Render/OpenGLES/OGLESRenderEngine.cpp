@@ -1046,7 +1046,7 @@ namespace KlayGE
 		BOOST_ASSERT(num_instances != 0);
 
 		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0).GetShaderObject(effect));
-		checked_cast<OGLESRenderLayout const *>(&rl)->Active(cur_shader);
+		checked_cast<OGLESRenderLayout const&>(rl).Active(cur_shader);
 
 		uint32_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;

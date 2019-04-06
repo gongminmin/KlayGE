@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 		ras_height = in_tex->Height(0);
 		auto const depth = in_tex->Depth(0);
 		format = in_tex->Format();
-		auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto const& init_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
 
 		if (NumComponents(format) != num_channels)
 		{

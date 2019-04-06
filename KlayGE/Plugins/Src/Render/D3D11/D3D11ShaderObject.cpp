@@ -87,7 +87,7 @@ namespace
 				{
 					std::get<0>(*srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D11ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView();
+				*srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
 			}
 			else
 			{
@@ -125,7 +125,7 @@ namespace
 				{
 					std::get<0>(*srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D11ShaderResourceView*>(srv.get())->RetrieveD3DShaderResourceView();
+				*srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
 			}
 			else
 			{
@@ -155,7 +155,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->TextureResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -184,7 +184,7 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->BufferResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView*>(uav.get())->RetrieveD3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
@@ -1002,10 +1002,10 @@ namespace KlayGE
 
 	void D3D11ShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
 	{
-		auto* shader_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(stage).get());
-		if (!shader_stage->ShaderCodeBlob().empty())
+		auto& shader_stage = checked_cast<D3D11ShaderStageObject&>(*this->Stage(stage));
+		if (!shader_stage.ShaderCodeBlob().empty())
 		{
-			auto const & shader_desc = shader_stage->GetD3D11ShaderDesc();
+			auto const & shader_desc = shader_stage.GetD3D11ShaderDesc();
 
 			uint32_t const stage_index = static_cast<uint32_t>(stage);
 
@@ -1028,7 +1028,7 @@ namespace KlayGE
 					p->Value(sampler);
 					if (sampler)
 					{
-						samplers_[stage_index][offset] = checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
+						samplers_[stage_index][offset] = checked_cast<D3D11SamplerStateObject&>(*sampler).D3DSamplerState();
 					}
 				}
 				else
@@ -1128,7 +1128,7 @@ namespace KlayGE
 				for (size_t j = 0; j < cbuff_indices.size(); ++ j)
 				{
 					auto cbuff = effect.CBufferByIndex(cbuff_indices[j]);
-					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
+					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer&>(*cbuff->HWBuff()).D3DBuffer();
 				}
 			}
 
@@ -1234,25 +1234,22 @@ namespace KlayGE
 
 		if (this->Stage(ShaderStage::Compute))
 		{
-			re.CSSetShader(checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Compute).get())
-							   ->HwComputeShader());
+			re.CSSetShader(checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Compute)).HwComputeShader());
 		}
 		else
 		{
-			auto const* vs_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Vertex).get());
-			re.VSSetShader(vs_stage ? vs_stage->HwVertexShader() : nullptr);
+			auto const& vs_stage = this->Stage(ShaderStage::Vertex);
+			re.VSSetShader(vs_stage ? checked_cast<D3D11ShaderStageObject&>(*vs_stage).HwVertexShader() : nullptr);
 
-			auto const* ps_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Pixel).get());
-			re.PSSetShader(ps_stage ? ps_stage->HwPixelShader() : nullptr);
+			auto const& ps_stage = this->Stage(ShaderStage::Pixel);
+			re.PSSetShader(ps_stage ? checked_cast<D3D11ShaderStageObject&>(*ps_stage).HwPixelShader() : nullptr);
 
 			ID3D11HullShader* hull_shader = nullptr;
 			ID3D11DomainShader* domain_shader = nullptr;
 			if (this->Stage(ShaderStage::Hull))
 			{
-				hull_shader =
-					checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Hull).get())->HwHullShader();
-				domain_shader = checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Domain).get())
-									->HwDomainShader();
+				hull_shader = checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Hull)).HwHullShader();
+				domain_shader = checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Domain)).HwDomainShader();
 			}
 			re.HSSetShader(hull_shader);
 			re.DSSetShader(domain_shader);
@@ -1271,7 +1268,7 @@ namespace KlayGE
 				stream_output_stage = ShaderStage::Vertex;
 			}
 			re.GSSetShader((stream_output_stage != ShaderStage::NumStages)
-							   ? checked_cast<D3D11ShaderStageObject*>(this->Stage(stream_output_stage).get())->HwGeometryShader()
+							   ? checked_cast<D3D11ShaderStageObject&>(*this->Stage(stream_output_stage)).HwGeometryShader()
 							   : nullptr);
 		}
 
@@ -1336,11 +1333,11 @@ namespace KlayGE
 
 	ArrayRef<uint8_t> D3D11ShaderObject::VsCode() const
 	{
-		return MakeArrayRef(checked_cast<D3D11ShaderStageObject*>(this->Stage(ShaderStage::Vertex).get())->ShaderCodeBlob());
+		return MakeArrayRef(checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).ShaderCodeBlob());
 	}
 
 	uint32_t D3D11ShaderObject::VsSignature() const
 	{
-		return checked_cast<D3D11VertexShaderStageObject*>(this->Stage(ShaderStage::Vertex).get())->VsSignature();
+		return checked_cast<D3D11VertexShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).VsSignature();
 	}
 }

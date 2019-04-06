@@ -121,10 +121,10 @@ namespace
 			buff_param_->Value(srv);
 			(*buffers_)[stage_].buff_srv = srv;
 
-			auto* gl_srv = checked_cast<OGLShaderResourceView*>(srv.get());
 			if (srv)
 			{
-				gl_srv->RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
+				auto& gl_srv = checked_cast<OGLShaderResourceView&>(*srv);
+				gl_srv.RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
 			}
 			else
 			{
@@ -169,13 +169,13 @@ namespace
 
 			sampler_param_->Value((*samplers_)[stage_].sampler);
 
-			auto* gl_srv = checked_cast<OGLShaderResourceView*>(srv.get());
 			if (srv)
 			{
-				auto* gl_sampler = checked_cast<OGLSamplerStateObject*>((*samplers_)[stage_].sampler.get());
+				auto& gl_srv = checked_cast<OGLShaderResourceView&>(*srv);
+				auto& gl_sampler = checked_cast<OGLSamplerStateObject&>(*(*samplers_)[stage_].sampler);
 
-				gl_srv->RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
-				(*gl_bind_samplers_)[stage_] = gl_sampler->GLSampler();
+				gl_srv.RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
+				(*gl_bind_samplers_)[stage_] = gl_sampler.GLSampler();
 			}
 			else
 			{
@@ -1123,12 +1123,11 @@ namespace KlayGE
 			}
 
 			{
-				auto const* vs_shader_stage =
-					checked_cast<OGLVertexShaderStageObject const*>(this->Stage(ShaderStage::Vertex).get());
-				for (size_t pi = 0; pi < vs_shader_stage->GlslAttribNames().size(); ++pi)
+				auto const& vs_shader_stage = checked_cast<OGLVertexShaderStageObject const&>(*this->Stage(ShaderStage::Vertex));
+				for (size_t pi = 0; pi < vs_shader_stage.GlslAttribNames().size(); ++pi)
 				{
-					attrib_locs_.emplace(std::make_pair(vs_shader_stage->Usages()[pi], vs_shader_stage->UsageIndices()[pi]),
-						glGetAttribLocation(glsl_program_, vs_shader_stage->GlslAttribNames()[pi].c_str()));
+					attrib_locs_.emplace(std::make_pair(vs_shader_stage.Usages()[pi], vs_shader_stage.UsageIndices()[pi]),
+						glGetAttribLocation(glsl_program_, vs_shader_stage.GlslAttribNames()[pi].c_str()));
 				}
 			}
 		}
@@ -1256,7 +1255,7 @@ namespace KlayGE
 
 	void OGLShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
 	{
-		this->AppendTexSamplerBinds(stage, effect, checked_cast<OGLShaderStageObject*>(this->Stage(stage).get())->TexSamplerPairs());
+		this->AppendTexSamplerBinds(stage, effect, checked_cast<OGLShaderStageObject&>(*this->Stage(stage)).TexSamplerPairs());
 	}
 
 	void OGLShaderObject::AppendTexSamplerBinds(
@@ -1339,7 +1338,7 @@ namespace KlayGE
 			for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
 			{
 				std::string const& func_name =
-					checked_cast<OGLShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get())->ShaderFuncName();
+					checked_cast<OGLShaderStageObject&>(*this->Stage(static_cast<ShaderStage>(stage))).ShaderFuncName();
 				if (!func_name.empty())
 				{
 					shader_names += func_name + '/';
@@ -1398,7 +1397,7 @@ namespace KlayGE
 
 					if (stage != ShaderStage::NumStages)
 					{
-						PrintGlslError(checked_cast<OGLShaderStageObject*>(this->Stage(stage).get())->GlslSource(),
+						PrintGlslError(checked_cast<OGLShaderStageObject&>(*this->Stage(stage)).GlslSource(),
 							std::string_view(info.data(), info.size()));
 					}
 					else
@@ -1439,7 +1438,7 @@ namespace KlayGE
 			GLint ubo_size = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
 			cbuff->Resize(ubo_size);
-			gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer*>(cbuff->HWBuff().get())->GLvbo();
+			gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer&>(*cbuff->HWBuff()).GLvbo();
 
 			GLint uniforms = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
@@ -1503,7 +1502,7 @@ namespace KlayGE
 	void OGLShaderObject::Bind()
 	{
 		if (!this->Stage(ShaderStage::Pixel) ||
-			checked_cast<OGLShaderStageObject*>(this->Stage(ShaderStage::Pixel).get())->GlslSource().empty())
+			checked_cast<OGLShaderStageObject&>(*this->Stage(ShaderStage::Pixel)).GlslSource().empty())
 		{
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
@@ -1558,7 +1557,7 @@ namespace KlayGE
 	void OGLShaderObject::Unbind()
 	{
 		if (!this->Stage(ShaderStage::Pixel) ||
-			checked_cast<OGLShaderStageObject*>(this->Stage(ShaderStage::Pixel).get())->GlslSource().empty())
+			checked_cast<OGLShaderStageObject&>(*this->Stage(ShaderStage::Pixel)).GlslSource().empty())
 		{
 			glDisable(GL_RASTERIZER_DISCARD);
 		}

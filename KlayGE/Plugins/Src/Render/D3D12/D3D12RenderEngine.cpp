@@ -149,7 +149,7 @@ namespace KlayGE
 	{
 		RenderEngine::EndFrame();
 
-		render_cmd_fence_val_ = checked_cast<D3D12Fence*>(render_cmd_fence_.get())->Signal(d3d_render_cmd_queue_.get());
+		render_cmd_fence_val_ = checked_cast<D3D12Fence&>(*render_cmd_fence_).Signal(d3d_render_cmd_queue_.get());
 		this->RecycleCmdAllocator(curr_render_cmd_allocator_, render_cmd_fence_val_);
 		curr_render_cmd_allocator_ = this->AllocCmdAllocator();
 
@@ -461,7 +461,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::SyncRenderCmd()
 	{
-		render_cmd_fence_val_ = checked_cast<D3D12Fence*>(render_cmd_fence_.get())->Signal(d3d_render_cmd_queue_.get());
+		render_cmd_fence_val_ = checked_cast<D3D12Fence&>(*render_cmd_fence_).Signal(d3d_render_cmd_queue_.get());
 		render_cmd_fence_->Wait(render_cmd_fence_val_);
 	}
 
@@ -678,7 +678,7 @@ namespace KlayGE
 					D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr;
 					if (cbuffer != nullptr)
 					{
-						gpu_vaddr = checked_cast<D3D12GraphicsBuffer*>(cbuffer)->GPUVirtualAddress();
+						gpu_vaddr = checked_cast<D3D12GraphicsBuffer&>(*cbuffer).GPUVirtualAddress();
 					}
 					else
 					{
@@ -861,7 +861,7 @@ namespace KlayGE
 
 		this->FlushResourceBarriers(d3d_render_cmd_list_.get());
 
-		checked_cast<D3D12RenderLayout const *>(&rl)->Active();
+		checked_cast<D3D12RenderLayout const&>(rl).Active();
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
@@ -938,7 +938,7 @@ namespace KlayGE
 		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
 		if (indirect_buff)
 		{
-			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get();
+			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const&>(*indirect_buff).D3DResource().get();
 
 			if (rl.UseIndices())
 			{
@@ -1063,7 +1063,7 @@ namespace KlayGE
 
 	TexturePtr const & D3D12RenderEngine::ScreenDepthStencilTexture() const
 	{
-		return checked_cast<D3D12RenderWindow*>(screen_frame_buffer_.get())->D3DDepthStencilBuffer();
+		return checked_cast<D3D12RenderWindow&>(*screen_frame_buffer_).D3DDepthStencilBuffer();
 	}
 
 	// 设置剪除矩阵
@@ -1078,7 +1078,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_cast<D3D12RenderWindow*>(screen_frame_buffer_.get())->Resize(width, height);
+		checked_cast<D3D12RenderWindow&>(*screen_frame_buffer_).Resize(width, height);
 	}
 
 	void D3D12RenderEngine::DoDestroy()
@@ -1149,12 +1149,12 @@ namespace KlayGE
 
 	bool D3D12RenderEngine::FullScreen() const
 	{
-		return checked_cast<D3D12RenderWindow*>(screen_frame_buffer_.get())->FullScreen();
+		return checked_cast<D3D12RenderWindow&>(*screen_frame_buffer_).FullScreen();
 	}
 
 	void D3D12RenderEngine::FullScreen(bool fs)
 	{
-		checked_cast<D3D12RenderWindow*>(screen_frame_buffer_.get())->FullScreen(fs);
+		checked_cast<D3D12RenderWindow&>(*screen_frame_buffer_).FullScreen(fs);
 	}
 
 	// 填充设备能力
@@ -1451,10 +1451,9 @@ namespace KlayGE
 		{
 		case SM_DXGI:
 			{
-				D3D12RenderTargetView* rtv = checked_cast<D3D12RenderTargetView*>(
-					(0 == eye) ? win->D3DBackBufferRtv().get() : win->D3DBackBufferRightEyeRtv().get());
+				auto& rtv = checked_cast<D3D12RenderTargetView&>((0 == eye) ? *win->D3DBackBufferRtv() : *win->D3DBackBufferRightEyeRtv());
 
-				D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = rtv->RetrieveD3DRenderTargetView()->Handle();
+				D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = rtv.RetrieveD3DRenderTargetView()->Handle();
 				d3d_render_cmd_list_->OMSetRenderTargets(1, &rt_handle, false, nullptr);
 
 				D3D12_VIEWPORT vp;

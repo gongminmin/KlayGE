@@ -290,16 +290,16 @@ namespace KlayGE
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 		{
-			glCopyNamedBufferSubData(vb_, checked_cast<OGLGraphicsBuffer*>(&target)->vb_, src_offset, dst_offset, size);
+			glCopyNamedBufferSubData(vb_, checked_cast<OGLGraphicsBuffer&>(target).vb_, src_offset, dst_offset, size);
 		}
 		else if (glloader_GL_EXT_direct_state_access())
 		{
-			glNamedCopyBufferSubDataEXT(vb_, checked_cast<OGLGraphicsBuffer*>(&target)->vb_, src_offset, dst_offset, size);
+			glNamedCopyBufferSubDataEXT(vb_, checked_cast<OGLGraphicsBuffer&>(target).vb_, src_offset, dst_offset, size);
 		}
 		else
 		{
 			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
-			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&target)->vb_);
+			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer&>(target).vb_);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, src_offset, dst_offset, size);
 		}
 	}

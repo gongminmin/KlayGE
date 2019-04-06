@@ -31,7 +31,6 @@ private:
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneNodePtr terrain_;
 	KlayGE::SceneNodePtr ocean_;
 	KlayGE::FirstPersonCameraController fpcController_;
 

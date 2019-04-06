@@ -580,7 +580,7 @@ void OITApp::OnCreate()
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 	polygon_model_->ForEachMesh([](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->LightPos(float3(-1, 2, 1));
+			checked_cast<RenderPolygon&>(mesh).LightPos(float3(-1, 2, 1));
 		});
 
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
@@ -776,7 +776,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->BackgroundTex(opaque_bg_tex_);
+				checked_cast<RenderPolygon&>(mesh).BackgroundTex(opaque_bg_tex_);
 			});
 
 		if (caps.rovs_support)
@@ -807,7 +807,7 @@ void OITApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
 	polygon_model_->ForEachMesh([this](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->SetOITMode(oit_mode_);
+			checked_cast<RenderPolygon&>(mesh).SetOITMode(oit_mode_);
 		});
 	dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
 }
@@ -817,7 +817,7 @@ void OITApp::AlphaHandler(KlayGE::UISlider const & sender)
 	float alpha = sender.GetValue() * 0.01f;
 	polygon_model_->ForEachMesh([alpha](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->SetAlpha(alpha);
+			checked_cast<RenderPolygon&>(mesh).SetAlpha(alpha);
 		});
 	std::wostringstream stream;
 	stream.precision(2);
@@ -868,7 +868,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 	{
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->LinkedListBuffer(frag_link_uav_, frag_link_srv_,
+				checked_cast<RenderPolygon&>(mesh).LinkedListBuffer(frag_link_uav_, frag_link_srv_,
 					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_uav_ : start_offset_uav_,
 					(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_srv_ : start_offset_srv_);
 			});
@@ -890,7 +890,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 		case 1:
 			polygon_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+					checked_cast<RenderPolygon&>(mesh).FirstPass(true);
 				});
 			
 			{
@@ -911,7 +911,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 		default:
 			polygon_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RenderPolygon*>(&mesh)->FirstPass(false);
+					checked_cast<RenderPolygon&>(mesh).FirstPass(false);
 				});
 
 			re.BindFrameBuffer(FrameBufferPtr());
@@ -935,7 +935,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 		case 1:
 			polygon_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+					checked_cast<RenderPolygon&>(mesh).FirstPass(true);
 				});
 
 			re.BindFrameBuffer(weighted_fb_);
@@ -946,7 +946,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(FrameBufferPtr());
 			polygon_model_->ForEachMesh([this](Renderable& mesh)
 				{
-					checked_cast<RenderPolygon*>(&mesh)->AccumWeightTextures(accum_tex_, weight_tex_);
+					checked_cast<RenderPolygon&>(mesh).AccumWeightTextures(accum_tex_, weight_tex_);
 				});
 			checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(0))->RenderQuad();
 			return App3DFramework::URV_Finished;
@@ -970,7 +970,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 
 					polygon_model_->ForEachMesh([](Renderable& mesh)
 						{
-							checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+							checked_cast<RenderPolygon&>(mesh).FirstPass(true);
 						});
 					re.BindFrameBuffer(peeling_fbs_[0]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
@@ -980,7 +980,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 				{
 					polygon_model_->ForEachMesh([](Renderable& mesh)
 						{
-							checked_cast<RenderPolygon*>(&mesh)->FirstPass(false);
+							checked_cast<RenderPolygon&>(mesh).FirstPass(false);
 						});
 
 					bool finished = false;
@@ -1019,7 +1019,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						{
 							polygon_model_->ForEachMesh([this, layer](Renderable& mesh)
 								{
-									checked_cast<RenderPolygon*>(&mesh)->LastDepth(depth_texs_[(layer - 1) % 2]);
+									checked_cast<RenderPolygon&>(mesh).LastDepth(depth_texs_[(layer - 1) % 2]);
 								});
 
 							re.BindFrameBuffer(peeling_fbs_[layer]);
@@ -1129,7 +1129,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						{
 							polygon_model_->ForEachMesh([this, layer](Renderable& mesh)
 								{
-									checked_cast<RenderPolygon*>(&mesh)->LastDepth(depth_texs_[(layer - 1) % 2]);
+									checked_cast<RenderPolygon&>(mesh).LastDepth(depth_texs_[(layer - 1) % 2]);
 								});
 
 							if (depth_pass)
@@ -1183,7 +1183,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 	{
 		polygon_model_->ForEachMesh([](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->FirstPass(true);
+				checked_cast<RenderPolygon&>(mesh).FirstPass(true);
 			});
 
 		re.BindFrameBuffer(FrameBufferPtr());

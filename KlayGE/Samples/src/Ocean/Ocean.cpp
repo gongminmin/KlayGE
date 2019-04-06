@@ -203,7 +203,8 @@ namespace
 			base_level_ = 0;
 			strength_ = 10;
 
-			this->AddRenderable(MakeSharedPtr<RenderOcean>(base_level_, strength_));
+			auto ocean_renderable = MakeSharedPtr<RenderOcean>(base_level_, strength_);
+			this->AddRenderable(ocean_renderable);
 
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
 			reflect_mat_ = MathLib::reflect(ocean_plane_);
@@ -235,7 +236,7 @@ namespace
 
 			use_tex_array_ = re.DeviceCaps().max_texture_array_length >= ocean_param_.num_frames;
 
-			checked_pointer_cast<RenderOcean>(renderables_[0])->PatchLength(ocean_param_.patch_length);
+			ocean_renderable->PatchLength(ocean_param_.patch_length);
 
 			TexturePtr disp_tex = LoadSoftwareTexture("OceanDisplacement.dds");
 			TexturePtr grad_tex = LoadSoftwareTexture("OceanGradient.dds");
@@ -252,7 +253,7 @@ namespace
 				&& (disp_param_tex->Width(0) == ocean_param_.num_frames)
 				&& (disp_param_tex->Height(0) >= 2))
 			{
-				auto const & disp_param_init_data = checked_cast<SoftwareTexture*>(disp_param_tex.get())->SubresourceData();
+				auto const& disp_param_init_data = checked_cast<SoftwareTexture&>(*disp_param_tex).SubresourceData();
 				float4 const * row0 = static_cast<float4 const *>(disp_param_init_data[0].data);
 				float4 const * row1 = row0 + disp_param_init_data[0].row_pitch / sizeof(float4);
 				displacement_params_.resize(ocean_param_.num_frames * 2);
@@ -277,8 +278,8 @@ namespace
 				ArrayRef<ElementInitData> gid;
 				if (use_load_tex)
 				{
-					did = checked_cast<SoftwareTexture*>(disp_tex.get())->SubresourceData();
-					gid = checked_cast<SoftwareTexture*>(grad_tex.get())->SubresourceData();
+					did = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
+					gid = checked_cast<SoftwareTexture&>(*grad_tex).SubresourceData();
 				}
 
 				displacement_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -296,8 +297,8 @@ namespace
 				}
 				gradient_tex_array_->BuildMipSubLevels();
 
-				checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementMapArray(displacement_tex_array_);
-				checked_pointer_cast<RenderOcean>(renderables_[0])->GradientMapArray(gradient_tex_array_);
+				ocean_renderable->DisplacementMapArray(displacement_tex_array_);
+				ocean_renderable->GradientMapArray(gradient_tex_array_);
 			}
 			else
 			{
@@ -311,7 +312,7 @@ namespace
 					ArrayRef<ElementInitData> did;
 					if (use_load_tex)
 					{
-						auto const & disp_init_data = checked_cast<SoftwareTexture*>(disp_tex.get())->SubresourceData();
+						auto const& disp_init_data = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
 						did = disp_init_data[i * disp_tex->NumMipMaps()];
 					}
 
@@ -322,7 +323,7 @@ namespace
 
 					if (use_load_tex)
 					{
-						auto const & grad_init_data = checked_cast<SoftwareTexture*>(grad_tex.get())->SubresourceData();
+						auto const & grad_init_data = checked_cast<SoftwareTexture&>(*grad_tex).SubresourceData();
 
 						TexturePtr gta;
 						if (EF_GR8 == fmt)
@@ -385,29 +386,32 @@ namespace
 				dirty_ = false;
 			}
 
+			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+
 			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
 			int frame0 = static_cast<int>(frame);
 			int frame1 = frame0 + 1;
-			checked_pointer_cast<RenderOcean>(renderables_[0])->InterpolateFrac(frame - frame0);
+			ocean_renderable.InterpolateFrac(frame - frame0);
 			frame0 %= ocean_param_.num_frames;
 			frame1 %= ocean_param_.num_frames;
 			if (use_tex_array_)
 			{
-				checked_pointer_cast<RenderOcean>(renderables_[0])->Frames(int2(frame0, frame1));
+				ocean_renderable.Frames(int2(frame0, frame1));
 			}
 			else
 			{
-				checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
-				checked_pointer_cast<RenderOcean>(renderables_[0])->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
+				ocean_renderable.DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
+				ocean_renderable.GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
 			}
-			checked_pointer_cast<RenderOcean>(renderables_[0])->DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
+			ocean_renderable.DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
 		}
 
 		void ReflectionTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderOcean>(renderables_[0])->ReflectionTex(tex);
+			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+			ocean_renderable.ReflectionTex(tex);
 		}
 
 		void ReflectViewParams(float3& reflect_eye, float3& reflect_at, float3& reflect_up,
@@ -526,7 +530,8 @@ namespace
 	private:
 		void GenWaveTextures()
 		{
-			checked_pointer_cast<RenderOcean>(renderables_[0])->PatchLength(ocean_param_.patch_length);
+			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+			ocean_renderable.PatchLength(ocean_param_.patch_length);
 
 			ocean_simulator_->Parameters(ocean_param_);
 
@@ -829,7 +834,6 @@ void OceanApp::OnCreate()
 	}
 
 	auto terrain_renderable = MakeSharedPtr<ProceduralTerrain>();
-	terrain_ = MakeSharedPtr<HQTerrainSceneObject>(terrain_renderable);
 	terrain_renderable->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
 	terrain_renderable->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
 	terrain_renderable->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
@@ -838,7 +842,7 @@ void OceanApp::OnCreate()
 	terrain_renderable->TextureScale(1, float2(1, 1));
 	terrain_renderable->TextureScale(2, float2(3, 3));
 	terrain_renderable->TextureScale(3, float2(1, 1));
-	root_node.AddChild(terrain_);
+	root_node.AddChild(MakeSharedPtr<HQTerrainSceneObject>(terrain_renderable));
 
 	ocean_ = MakeSharedPtr<OceanObject>();
 	root_node.AddChild(ocean_);

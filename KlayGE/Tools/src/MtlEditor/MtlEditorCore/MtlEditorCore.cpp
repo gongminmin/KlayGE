@@ -991,7 +991,7 @@ namespace KlayGE
 			{
 				model_->ForEachMesh([](Renderable& mesh)
 					{
-						checked_cast<DetailedSkinnedMesh*>(&mesh)->VisualizeLighting();
+						checked_cast<DetailedSkinnedMesh&>(mesh).VisualizeLighting();
 					});
 
 				deferred_rendering_->SSVOEnabled(0, false);
@@ -1006,7 +1006,7 @@ namespace KlayGE
 					VertexElementUsage const veu = static_cast<VertexElementUsage>(index - 1);
 					model_->ForEachMesh([veu](Renderable& mesh)
 						{
-							checked_cast<DetailedSkinnedMesh*>(&mesh)->VisualizeVertex(veu, 0);
+							checked_cast<DetailedSkinnedMesh&>(mesh).VisualizeVertex(veu, 0);
 						});
 				}
 				else
@@ -1014,7 +1014,7 @@ namespace KlayGE
 					int const slot = index - 10;
 					model_->ForEachMesh([slot](Renderable& mesh)
 						{
-							checked_cast<DetailedSkinnedMesh*>(&mesh)->VisualizeTexture(slot);
+							checked_cast<DetailedSkinnedMesh&>(mesh).VisualizeTexture(slot);
 						});
 				}
 

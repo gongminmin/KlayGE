@@ -873,7 +873,7 @@ namespace KlayGE
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
 		this->ForEachMesh([&pos_aabb, frame](Renderable& mesh)
 			{
-				pos_aabb |= checked_cast<SkinnedMesh*>(&mesh)->FramePosBound(frame);
+				pos_aabb |= checked_cast<SkinnedMesh&>(mesh).FramePosBound(frame);
 			});
 
 		return pos_aabb;

@@ -285,7 +285,7 @@ void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 	height_scale_ = sender.GetValue() / 100.0f;
 	polygon_model_->ForEachMesh([this](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->HeightScale(height_scale_);
+			checked_cast<RenderPolygon&>(mesh).HeightScale(height_scale_);
 		});
 
 	std::wostringstream stream;
@@ -298,7 +298,7 @@ void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sen
 	int const index = sender.GetSelectedIndex();
 	polygon_model_->ForEachMesh([index](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->DetailType(index);
+			checked_cast<RenderPolygon&>(mesh).DetailType(index);
 		});
 }
 
@@ -307,7 +307,7 @@ void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const & sender)
 	bool const na = sender.GetChecked();
 	polygon_model_->ForEachMesh([na](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->NaLength(na);
+			checked_cast<RenderPolygon&>(mesh).NaLength(na);
 		});
 }
 
@@ -316,7 +316,7 @@ void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 	bool const wf = sender.GetChecked();
 	polygon_model_->ForEachMesh([wf](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->Wireframe(wf);
+			checked_cast<RenderPolygon&>(mesh).Wireframe(wf);
 		});
 }
 
@@ -366,7 +366,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 				CreateModelFactory<RenderModel>, CreateMeshFactory<RenderPolygon>);
 			polygon_model_->ForEachMesh([this](Renderable& mesh)
 				{
-					checked_cast<RenderPolygon*>(&mesh)->BindJudaTexture(juda_tex_);
+					checked_cast<RenderPolygon&>(mesh).BindJudaTexture(juda_tex_);
 				});
 			juda_tex_->UpdateCache(checked_pointer_cast<RenderPolygon>(polygon_model_->Mesh(0))->JudaTexTileIDs());
 

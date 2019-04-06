@@ -722,7 +722,7 @@ namespace KlayGE
 		last_eye_pos_ =
 			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera->EyePos();
 
-		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
+		BOOST_ASSERT(dynamic_cast<HQTerrainRenderable*>(renderable.get()) != nullptr);
 
 		this->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time)
 			{

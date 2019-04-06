@@ -234,11 +234,13 @@ namespace KlayGE
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 			if (target.ArraySize() > 1)
 			{
-				glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
+				glFramebufferTextureLayer(
+					GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
 			}
 			else
 			{
-				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + dst_face, checked_cast<OGLESTexture*>(&target)->GLTexture(), dst_level);
+				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + dst_face,
+					checked_cast<OGLESTexture&>(target).GLTexture(), dst_level);
 			}
 
 			glBlitFramebuffer(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,

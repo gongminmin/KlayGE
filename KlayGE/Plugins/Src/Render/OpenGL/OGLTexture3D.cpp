@@ -173,7 +173,8 @@ namespace KlayGE
 					glFramebufferTexture3D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target_type_, texture_, src_level, src_z_offset + depth);
 
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
-					glFramebufferTexture3D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), dst_level, dst_z_offset + depth);
+					glFramebufferTexture3D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target_type_,
+						checked_cast<OGLTexture&>(target).GLTexture(), dst_level, dst_z_offset + depth);
 
 					glBlitFramebuffer(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
 									dst_x_offset, dst_y_offset, dst_x_offset + dst_width, dst_y_offset + dst_height,

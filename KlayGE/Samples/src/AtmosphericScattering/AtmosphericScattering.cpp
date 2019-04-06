@@ -273,11 +273,11 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 
 	planet_model_->ForEachMesh([clr](Renderable& renderable)
 		{
-			checked_cast<PlanetMesh*>(&renderable)->Beta(clr);
+			checked_cast<PlanetMesh&>(renderable).Beta(clr);
 		});
 	atmosphere_model_->ForEachMesh([clr](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh*>(&renderable)->Beta(clr);
+			checked_cast<AtmosphereMesh&>(renderable).Beta(clr);
 		});
 
 	Color f4_clr = clr / 250.0f;
@@ -299,11 +299,11 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 
 	planet_model_->ForEachMesh([clr](Renderable& renderable)
 		{
-			checked_cast<PlanetMesh*>(&renderable)->Absorb(clr);
+			checked_cast<PlanetMesh&>(renderable).Absorb(clr);
 		});
 	atmosphere_model_->ForEachMesh([clr](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh*>(&renderable)->Absorb(clr);
+			checked_cast<AtmosphereMesh&>(renderable).Absorb(clr);
 		});
 
 	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
@@ -332,7 +332,7 @@ void AtmosphericScatteringApp::AtmosphereTopHandler(KlayGE::UISlider const & sen
 	float value = 1 + sender.GetValue() / 1000.0f;
 	atmosphere_model_->ForEachMesh([value](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh*>(&renderable)->AtmosphereTop(value);
+			checked_cast<AtmosphereMesh&>(renderable).AtmosphereTop(value);
 		});
 }
 
@@ -341,11 +341,11 @@ void AtmosphericScatteringApp::DensityHandler(KlayGE::UISlider const & sender)
 	float value = sender.GetValue() / 100000.0f;
 	planet_model_->ForEachMesh([value](Renderable& renderable)
 		{
-			checked_cast<PlanetMesh*>(&renderable)->Density(value);
+			checked_cast<PlanetMesh&>(renderable).Density(value);
 		});
 	atmosphere_model_->ForEachMesh([value](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh*>(&renderable)->Density(value);
+			checked_cast<AtmosphereMesh&>(renderable).Density(value);
 		});
 }
 
@@ -432,11 +432,11 @@ uint32_t AtmosphericScatteringApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	sun_light_->Direction(light_ctrl_camera_.ForwardVec());
 	planet_model_->ForEachMesh([this](Renderable& renderable)
 		{
-			checked_cast<PlanetMesh*>(&renderable)->LightDir(-sun_light_->Direction());
+			checked_cast<PlanetMesh&>(renderable).LightDir(-sun_light_->Direction());
 		});
 	atmosphere_model_->ForEachMesh([this](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh*>(&renderable)->LightDir(-sun_light_->Direction());
+			checked_cast<AtmosphereMesh&>(renderable).LightDir(-sun_light_->Direction());
 		});
 
 	re.BindFrameBuffer(FrameBufferPtr());

@@ -152,7 +152,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		model_->ForEachMesh([back_face_ds_tex](Renderable& mesh)
 			{
-				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthTex(back_face_ds_tex);
+				checked_cast<DetailedMesh&>(mesh).BackFaceDepthTex(back_face_ds_tex);
 			});
 	}
 	else
@@ -171,7 +171,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		model_->ForEachMesh([back_face_depth_tex](Renderable& mesh)
 			{
-				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthTex(back_face_depth_tex);
+				checked_cast<DetailedMesh&>(mesh).BackFaceDepthTex(back_face_depth_tex);
 			});
 	}
 
@@ -196,7 +196,7 @@ void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
 	float sigma_t = sender.GetValue() * 0.2f;
 	model_->ForEachMesh([sigma_t](Renderable& mesh)
 		{
-			checked_cast<DetailedMesh*>(&mesh)->SigmaT(sigma_t);
+			checked_cast<DetailedMesh&>(mesh).SigmaT(sigma_t);
 		});
 
 	std::wostringstream stream;
@@ -209,7 +209,7 @@ void SubSurfaceApp::MtlThicknessChangedHandler(KlayGE::UISlider const & sender)
 	float mtl_thickness = sender.GetValue() * 0.1f;
 	model_->ForEachMesh([mtl_thickness](Renderable& mesh)
 		{
-			checked_cast<DetailedMesh*>(&mesh)->MtlThickness(mtl_thickness);
+			checked_cast<DetailedMesh&>(mesh).MtlThickness(mtl_thickness);
 		});
 
 	std::wostringstream stream;
@@ -243,7 +243,7 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 0.0f, 0);
 		model_->ForEachMesh([](Renderable& mesh)
 			{
-				checked_cast<DetailedMesh*>(&mesh)->BackFaceDepthPass(true);
+				checked_cast<DetailedMesh&>(mesh).BackFaceDepthPass(true);
 			});
 		return App3DFramework::URV_NeedFlush;
 

@@ -1604,10 +1604,10 @@ namespace KlayGE
 		{
 			if (UICT_RadioButton == control->GetType())
 			{
-				UIRadioButton* pRadioButton = checked_cast<UIRadioButton*>(control.get());
-				if (pRadioButton->GetButtonGroup() == nButtonGroup)
+				auto& radio_button = checked_cast<UIRadioButton&>(*control);
+				if (radio_button.GetButtonGroup() == nButtonGroup)
 				{
-					pRadioButton->SetChecked(false, false);
+					radio_button.SetChecked(false, false);
 				}
 			}
 		}

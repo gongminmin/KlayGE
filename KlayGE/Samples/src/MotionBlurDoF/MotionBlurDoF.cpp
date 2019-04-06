@@ -212,8 +212,6 @@ namespace
 		Teapot()
 			: SceneNode(SOA_Moveable | SOA_Cullable)
 		{
-			this->AddRenderable(RenderablePtr());
-
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 3, EF_ABGR32F));

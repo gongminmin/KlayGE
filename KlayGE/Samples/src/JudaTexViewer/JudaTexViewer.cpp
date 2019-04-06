@@ -248,8 +248,8 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 					mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
 
 					float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
-					checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
-					checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
+					checked_cast<RenderTile&>(*tile_renderable_).ModelMatrix(mat);
+					checked_cast<RenderGridBorder&>(*grid_border_renderable_).ModelMatrix(mat);
 				}
 			}
 
@@ -273,8 +273,8 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 				mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
 
 				float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
-				checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
-				checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
+				checked_cast<RenderTile&>(*tile_renderable_).ModelMatrix(mat);
+				checked_cast<RenderGridBorder&>(*grid_border_renderable_).ModelMatrix(mat);
 			}
 		}
 		break;
@@ -305,8 +305,8 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 	mat_scaling_ = MathLib::scaling(scale_, scale_, 1.0f);
 
 	float4x4 const mat = mat_tile_scaling_ * mat_translation_ * mat_scaling_;
-	checked_cast<RenderTile*>(tile_renderable_.get())->ModelMatrix(mat);
-	checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->ModelMatrix(mat);
+	checked_cast<RenderTile&>(*tile_renderable_).ModelMatrix(mat);
+	checked_cast<RenderGridBorder&>(*grid_border_renderable_).ModelMatrix(mat);
 }
 
 void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
@@ -414,8 +414,8 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 		}
 	}
 
-	checked_cast<RenderTile*>(tile_renderable_.get())->SetPosBuffer(tile_pos_vb_);
-	checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->SetPosBuffer(tile_pos_vb_);
+	checked_cast<RenderTile&>(*tile_renderable_).SetPosBuffer(tile_pos_vb_);
+	checked_cast<RenderGridBorder&>(*grid_border_renderable_).SetPosBuffer(tile_pos_vb_);
 
 	RenderLayout& rl_tile = tile_renderable_->GetRenderLayout();
 	for (uint32_t i = 0; i < rl_tile.NumVertexStreams(); ++ i)
@@ -423,7 +423,7 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 		rl_tile.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
 	}
 
-	RenderLayout& rl_border = checked_cast<RenderGridBorder*>(grid_border_renderable_.get())->GetRenderLayout();
+	RenderLayout& rl_border = checked_cast<RenderGridBorder&>(*grid_border_renderable_).GetRenderLayout();
 	for (uint32_t i = 0; i < rl_border.NumVertexStreams(); ++ i)
 	{
 		rl_border.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);

@@ -66,7 +66,7 @@ void TestEncodeDecodeTex(std::string_view input_name, std::string_view tc_name,
 		TexturePtr in_tex = LoadSoftwareTexture(input_name);
 		width = in_tex->Width(0);
 		height = in_tex->Height(0);
-		auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto const & init_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
 
 		BOOST_ASSERT(pixel_size == NumFormatBytes(in_tex->Format()));
 
@@ -140,7 +140,7 @@ void TestEncodeDecodeTex(std::string_view input_name, std::string_view tc_name,
 		TexturePtr in_tex = LoadSoftwareTexture(tc_name);
 		width = in_tex->Width(0);
 		height = in_tex->Height(0);
-		auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto const & init_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
 
 		uint8_t const * src = static_cast<uint8_t const *>(init_data[0].data);
 		uint32_t const pitch = init_data[0].row_pitch;

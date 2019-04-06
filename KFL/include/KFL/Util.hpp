@@ -196,7 +196,7 @@ namespace KlayGE
 	inline std::shared_ptr<To>
 	checked_pointer_cast(std::shared_ptr<From> const & p) noexcept
 	{
-		BOOST_ASSERT(std::dynamic_pointer_cast<To>(p) == std::static_pointer_cast<To>(p));
+		BOOST_ASSERT(dynamic_cast<To*>(p.get()) == static_cast<To*>(p.get()));
 		return std::static_pointer_cast<To>(p);
 	}
 

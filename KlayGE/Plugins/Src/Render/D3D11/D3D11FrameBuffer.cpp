@@ -40,7 +40,7 @@ namespace KlayGE
 		{
 			if (rt_views_[n])
 			{
-				return checked_cast<D3D11RenderTargetView*>(rt_views_[n].get())->RetrieveD3DRenderTargetView();
+				return checked_cast<D3D11RenderTargetView&>(*rt_views_[n]).RetrieveD3DRenderTargetView();
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace KlayGE
 	{
 		if (ds_view_)
 		{
-			return checked_cast<D3D11DepthStencilView*>(ds_view_.get())->RetrieveD3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilView&>(*ds_view_).RetrieveD3DDepthStencilView();
 		}
 
 		return nullptr;
@@ -63,7 +63,7 @@ namespace KlayGE
 		{
 			if (ua_views_[n])
 			{
-				return checked_cast<D3D11UnorderedAccessView*>(ua_views_[n].get())->RetrieveD3DUnorderedAccessView();
+				return checked_cast<D3D11UnorderedAccessView&>(*ua_views_[n]).RetrieveD3DUnorderedAccessView();
 			}
 		}
 
@@ -88,10 +88,10 @@ namespace KlayGE
 			{
 				if (rt_views_[i])
 				{
-					D3D11RenderTargetView* p = checked_cast<D3D11RenderTargetView*>(rt_views_[i].get());
-					d3d_rt_src_.push_back(p->RTSrc());
-					d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
-					d3d_rt_num_subres_.push_back(p->RTNumSubRes());
+					auto& p = checked_cast<D3D11RenderTargetView&>(*rt_views_[i]);
+					d3d_rt_src_.push_back(p.RTSrc());
+					d3d_rt_first_subres_.push_back(p.RTFirstSubRes());
+					d3d_rt_num_subres_.push_back(p.RTNumSubRes());
 					d3d_rt_view_[i] = this->D3DRTView(i);
 				}
 				else
@@ -101,10 +101,10 @@ namespace KlayGE
 			}
 			if (ds_view_)
 			{
-				D3D11DepthStencilView* p = checked_cast<D3D11DepthStencilView*>(ds_view_.get());
-				d3d_rt_src_.push_back(p->RTSrc());
-				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
-				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
+				auto& p = checked_cast<D3D11DepthStencilView&>(*ds_view_);
+				d3d_rt_src_.push_back(p.RTSrc());
+				d3d_rt_first_subres_.push_back(p.RTFirstSubRes());
+				d3d_rt_num_subres_.push_back(p.RTNumSubRes());
 				d3d_ds_view_ = this->D3DDSView();
 			}
 			else
@@ -118,10 +118,10 @@ namespace KlayGE
 			{
 				if (ua_views_[i])
 				{
-					D3D11UnorderedAccessView* p = checked_cast<D3D11UnorderedAccessView*>(ua_views_[i].get());
-					d3d_rt_src_.push_back(p->UASrc());
-					d3d_rt_first_subres_.push_back(p->UAFirstSubRes());
-					d3d_rt_num_subres_.push_back(p->UANumSubRes());
+					auto& p = checked_cast<D3D11UnorderedAccessView&>(*ua_views_[i]);
+					d3d_rt_src_.push_back(p.UASrc());
+					d3d_rt_first_subres_.push_back(p.UAFirstSubRes());
+					d3d_rt_num_subres_.push_back(p.UANumSubRes());
 					d3d_ua_view_[i] = this->D3DUAView(i);
 					d3d_ua_init_count_[i] = ua_views_[i]->InitCount();
 				}

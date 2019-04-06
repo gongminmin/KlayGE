@@ -282,7 +282,8 @@ void Refract::DoUpdateOverlay()
 
 uint32_t Refract::DoUpdate(uint32_t pass)
 {
-	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& refractor_renderable = checked_cast<RefractorRenderable&>(*refractor_->GetRenderable());
 
 	switch (pass)
 	{
@@ -293,7 +294,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_buffer_);
 			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -303,7 +304,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_depth_buffer_);
 			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_GenShadowMap);
+			refractor_renderable.Pass(PT_GenShadowMap);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -318,9 +319,9 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceDepthTexture(backface_depth_tex_);
+			refractor_renderable.Pass(PT_TransparencyFrontShading);
+			refractor_renderable.BackFaceTexture(backface_tex_);
+			refractor_renderable.BackFaceDepthTexture(backface_depth_tex_);
 
 			skybox_->Visible(true);
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
@@ -330,7 +331,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			// Pass 1: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
 
-			checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -342,9 +343,9 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
 
-		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->Pass(PT_TransparencyFrontShading);
-		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceTexture(backface_tex_);
-		checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->BackFaceDepthTexture(backface_depth_tex_);
+		refractor_renderable.Pass(PT_TransparencyFrontShading);
+		refractor_renderable.BackFaceTexture(backface_tex_);
+		refractor_renderable.BackFaceDepthTexture(backface_depth_tex_);
 
 		skybox_->Visible(true);
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;

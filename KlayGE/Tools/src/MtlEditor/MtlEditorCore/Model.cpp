@@ -603,7 +603,7 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 
 	effect_attrs_ |= EA_SimpleForward;
 
-	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const *>(&model)->Effect());
+	this->BindDeferredEffect(checked_cast<DetailedSkinnedModel const&>(model).Effect());
 	simple_forward_tech_ = effect_->TechniqueByName("SkeletonTech");
 
 	{

@@ -975,7 +975,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		{
 			refract_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RefractMesh*>(&mesh)->CausticsPass(Position_Normal_Front_Pass);
+					checked_cast<RefractMesh&>(mesh).CausticsPass(Position_Normal_Front_Pass);
 				});
 
 			depth_to_linear_pp_->InputPin(0, background_ds_tex_);
@@ -990,7 +990,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		{
 			refract_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RefractMesh*>(&mesh)->CausticsPass(Depth_Front_WODT_Pass);
+					checked_cast<RefractMesh&>(mesh).CausticsPass(Depth_Front_WODT_Pass);
 				});
 
 			re.BindFrameBuffer(refract_obj_fb_d_f_);
@@ -1013,7 +1013,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				refract_obj_->Visible(true);
 				refract_model_->ForEachMesh([](Renderable& mesh)
 					{
-						checked_cast<RefractMesh*>(&mesh)->CausticsPass(Position_Normal_Back_Pass);
+						checked_cast<RefractMesh&>(mesh).CausticsPass(Position_Normal_Back_Pass);
 					});
 
 				re.BindFrameBuffer(refract_obj_fb_b_);
@@ -1031,7 +1031,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			refract_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RefractMesh*>(&mesh)->CausticsPass(Normal_Front_WODT_Pass);
+					checked_cast<RefractMesh&>(mesh).CausticsPass(Normal_Front_WODT_Pass);
 				});
 
 			re.BindFrameBuffer(refract_obj_fb_f_);
@@ -1072,7 +1072,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				refract_obj_->Visible(true);
 				refract_model_->ForEachMesh([](Renderable& mesh)
 					{
-						checked_cast<RefractMesh*>(&mesh)->CausticsPass(Depth_Back_WODT_Pass);
+						checked_cast<RefractMesh&>(mesh).CausticsPass(Depth_Back_WODT_Pass);
 					});
 
 				re.BindFrameBuffer(refract_obj_fb_d_b_);
@@ -1091,7 +1091,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			refract_obj_->Visible(true);
 			refract_model_->ForEachMesh([](Renderable& mesh)
 				{
-					checked_cast<RefractMesh*>(&mesh)->CausticsPass(Normal_Back_WODT_Pass);
+					checked_cast<RefractMesh&>(mesh).CausticsPass(Normal_Back_WODT_Pass);
 				});
 
 			re.BindFrameBuffer(refract_obj_fb_b_);

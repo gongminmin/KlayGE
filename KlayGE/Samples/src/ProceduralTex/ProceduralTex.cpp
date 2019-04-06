@@ -150,7 +150,7 @@ void ProceduralTexApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 	procedural_type_ = sender.GetSelectedIndex();
 	polygon_model_->ForEachMesh([this](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->ProceduralType(procedural_type_);
+			checked_cast<RenderPolygon&>(mesh).ProceduralType(procedural_type_);
 		});
 }
 
@@ -159,7 +159,7 @@ void ProceduralTexApp::FreqChangedHandler(KlayGE::UISlider const & sender)
 	procedural_freq_ = static_cast<float>(sender.GetValue());
 	polygon_model_->ForEachMesh([this](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon*>(&mesh)->ProceduralFreq(procedural_freq_);
+			checked_cast<RenderPolygon&>(mesh).ProceduralFreq(procedural_freq_);
 		});
 
 	std::wostringstream stream;
@@ -323,9 +323,11 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
-				checked_cast<RenderPolygon*>(&mesh)->LightPos(light_->Position());
-				checked_cast<RenderPolygon*>(&mesh)->LightColor(light_->Color());
-				checked_cast<RenderPolygon*>(&mesh)->LightFalloff(light_->Falloff());
+				auto& polygon_mesh = checked_cast<RenderPolygon&>(mesh);
+
+				polygon_mesh.LightPos(light_->Position());
+				polygon_mesh.LightColor(light_->Color());
+				polygon_mesh.LightFalloff(light_->Falloff());
 			});
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
