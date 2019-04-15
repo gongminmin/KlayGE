@@ -144,6 +144,8 @@ namespace KlayGE
 		PointLightSource();
 		virtual ~PointLightSource();
 
+		void Update(float app_time, float elapsed_time) override;
+
 		using LightSource::Position;
 		virtual void Position(float3 const & pos) override;
 		using LightSource::Direction;
@@ -173,6 +175,8 @@ namespace KlayGE
 	public:
 		SpotLightSource();
 		virtual ~SpotLightSource();
+
+		void Update(float app_time, float elapsed_time) override;
 
 		using LightSource::Position;
 		virtual void Position(float3 const & pos) override;
@@ -214,12 +218,15 @@ namespace KlayGE
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
 
+		void Update(float app_time, float elapsed_time) override;
+
 		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) override;
 
 		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
-		void UpdateSMCamera(Camera const & scene_camera);
+	protected:
+		void UpdateCamera();
 
 	protected:
 		CameraPtr sm_camera_;

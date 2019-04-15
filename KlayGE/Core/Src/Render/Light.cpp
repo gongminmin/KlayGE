@@ -345,45 +345,51 @@ namespace KlayGE
 	{
 	}
 
+	void PointLightSource::Update(float app_time, float elapsed_time)
+	{
+		LightSource::Update(app_time, elapsed_time);
+
+		if (!(attrib_ & LSA_NoShadow))
+		{
+			this->UpdateCameras();
+		}
+	}
+
 	void PointLightSource::Position(float3 const & pos)
 	{
 		LightSource::Position(pos);
-		this->UpdateCameras();
 	}
 	
 	void PointLightSource::Direction(float3 const & dir)
 	{
 		LightSource::Direction(dir);
-		this->UpdateCameras();
 	}
 
 	void PointLightSource::Rotation(Quaternion const & quat)
 	{
 		LightSource::Rotation(quat);
-		this->UpdateCameras();
 	}
 	
 	void PointLightSource::ModelMatrix(float4x4 const & model)
 	{
 		LightSource::ModelMatrix(model);
-		this->UpdateCameras();
 	}
 
 	void PointLightSource::UpdateCameras()
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
-		for (int j = 0; j < 6; ++ j)
+		for (uint32_t i = 0; i < 6; ++i)
 		{
 			float3 d, u;
-			std::tie(d, u) = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+			std::tie(d, u) = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(i));
 
 			float3 lookat = MathLib::transform_quat(d, quat_);
 			float3 up = MathLib::transform_quat(u, quat_);
 
-			sm_cameras_[j]->ViewParams(pos_, pos_ + lookat, up);
-			sm_cameras_[j]->ProjParams(PI / 2, 1, camera.NearPlane(), camera.FarPlane());
+			sm_cameras_[i]->ViewParams(pos_, pos_ + lookat, up);
+			sm_cameras_[i]->ProjParams(PI / 2, 1, scene_camera.NearPlane(), scene_camera.FarPlane());
 		}
 	}
 
@@ -422,28 +428,34 @@ namespace KlayGE
 	{
 	}
 
+	void SpotLightSource::Update(float app_time, float elapsed_time)
+	{
+		LightSource::Update(app_time, elapsed_time);
+
+		if (!(attrib_ & LSA_NoShadow))
+		{
+			this->UpdateCamera();
+		}
+	}
+
 	void SpotLightSource::Position(float3 const & pos)
 	{
 		LightSource::Position(pos);
-		this->UpdateCamera();
 	}
 	
 	void SpotLightSource::Direction(float3 const & dir)
 	{
 		LightSource::Direction(dir);
-		this->UpdateCamera();
 	}
 
 	void SpotLightSource::Rotation(Quaternion const & quat)
 	{
 		LightSource::Rotation(quat);
-		this->UpdateCamera();
 	}
 
 	void SpotLightSource::ModelMatrix(float4x4 const & model)
 	{
 		LightSource::ModelMatrix(model);
-		this->UpdateCamera();
 	}
 
 	void SpotLightSource::UpdateCamera()
@@ -453,9 +465,9 @@ namespace KlayGE
 
 		sm_camera_->ViewParams(pos_, pos_ + lookat, up);
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
-		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, camera.NearPlane(), camera.FarPlane());
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, scene_camera.NearPlane(), scene_camera.FarPlane());
 	}
 
 	float SpotLightSource::CosInnerAngle() const
@@ -478,8 +490,6 @@ namespace KlayGE
 		cos_outer_inner_.x() = cos(angle);
 		cos_outer_inner_.z() = angle * 2;
 		cos_outer_inner_.w() = tan(angle);
-
-		this->UpdateCamera();
 	}
 
 	float4 const & SpotLightSource::CosOuterInner() const
@@ -527,13 +537,26 @@ namespace KlayGE
 		attrib_ &= ~LSA_IndirectLighting;
 	}
 
+	void DirectionalLightSource::Update(float app_time, float elapsed_time)
+	{
+		LightSource::Update(app_time, elapsed_time);
+
+		if (!(attrib_ & LSA_NoShadow))
+		{
+			this->UpdateCamera();
+		}
+	}
+
 	CameraPtr const & DirectionalLightSource::SMCamera(uint32_t /*index*/) const
 	{
 		return sm_camera_;
 	}
 
-	void DirectionalLightSource::UpdateSMCamera(Camera const & scene_camera)
+	void DirectionalLightSource::UpdateCamera()
 	{
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
+
 		float3 const dir = this->Direction();
 
 		float3 up_vec;

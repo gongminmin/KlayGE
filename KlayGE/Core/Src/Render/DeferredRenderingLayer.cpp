@@ -4084,8 +4084,6 @@ namespace KlayGE
 			Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
 			Camera const & light_camera = *lights_[cascaded_shadow_index_]->SMCamera(0);
 
-			checked_cast<DirectionalLightSource&>(*lights_[cascaded_shadow_index_]).UpdateSMCamera(scene_camera);
-
 			float const BLUR_FACTOR = 0.2f;
 			blur_size_light_space_.x() = BLUR_FACTOR * 0.5f * light_camera.ProjMatrix()(0, 0);
 			blur_size_light_space_.y() = BLUR_FACTOR * 0.5f * light_camera.ProjMatrix()(1, 1);
