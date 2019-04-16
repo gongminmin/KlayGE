@@ -50,15 +50,15 @@ namespace KlayGE
 		void DelCamera(CameraPtr const & camera);
 
 		uint32_t NumCameras() const;
-		CameraPtr& GetCamera(uint32_t index);
-		CameraPtr const & GetCamera(uint32_t index) const;
+		Camera* GetCamera(uint32_t index);
+		Camera const* GetCamera(uint32_t index) const;
 
 		void AddLight(LightSourcePtr const & light);
 		void DelLight(LightSourcePtr const & light);
 
 		uint32_t NumLights() const;
-		LightSourcePtr& GetLight(uint32_t index);
-		LightSourcePtr const & GetLight(uint32_t index) const;
+		LightSource* GetLight(uint32_t index);
+		LightSource const* GetLight(uint32_t index) const;
 
 		SceneNode& SceneRootNode()
 		{

@@ -1410,7 +1410,7 @@ namespace KlayGE
 		
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			auto light = scene_mgr.GetLight(i).get();
+			auto* light = scene_mgr.GetLight(i);
 			if (light->Enabled() && (LightSource::LT_Ambient == light->Type()))
 			{
 				merged_ambient_light_->SkylightTex(light->SkylightTexY(), light->SkylightTexC());
@@ -1434,7 +1434,7 @@ namespace KlayGE
 		uint32_t num_sm_cube_lights = 0;
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			auto light = scene_mgr.GetLight(i).get();
+			auto* light = scene_mgr.GetLight(i);
 			if (light->Enabled())
 			{
 				if (LightSource::LT_Ambient == light->Type())
@@ -2749,7 +2749,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AddTranslucency(uint32_t org_no, PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
-		auto & light = lights_[org_no];
+		auto const* light = lights_[org_no];
 		LightSource::LightType const type = light->Type();
 		int32_t const light_index = sm_light_indices_[org_no].first;
 		if (light->Enabled() && pvp.light_visibles[org_no] && (0 == (light->Attrib() & LightSource::LSA_NoShadow))

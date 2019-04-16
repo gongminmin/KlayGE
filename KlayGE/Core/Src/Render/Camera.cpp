@@ -35,11 +35,38 @@ namespace KlayGE
 	// 构造函数
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: view_proj_mat_dirty_(true), view_proj_mat_wo_adjust_dirty_(true), frustum_dirty_(true),
-			mode_(0), cur_jitter_index_(0)
 	{
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
 		this->ProjParams(PI / 4, 1, 1, 1000);
+	}
+
+	float3 const& Camera::EyePos() const
+	{
+		float4x4 const& inv_view_mat = this->InverseViewMatrix();
+		return *reinterpret_cast<float3 const *>(&inv_view_mat.Row(3));
+	}
+
+	float3 Camera::LookAt() const
+	{
+		return this->EyePos() + this->ForwardVec() * this->LookAtDist();
+	}
+
+	float3 const& Camera::RightVec() const
+	{
+		float4x4 const& inv_view_mat = this->InverseViewMatrix();
+		return *reinterpret_cast<float3 const *>(&inv_view_mat.Row(0));
+	}
+
+	float3 const& Camera::UpVec() const
+	{
+		float4x4 const& inv_view_mat = this->InverseViewMatrix();
+		return *reinterpret_cast<float3 const *>(&inv_view_mat.Row(1));
+	}
+
+	float3 const& Camera::ForwardVec() const
+	{
+		float4x4 const& inv_view_mat = this->InverseViewMatrix();
+		return *reinterpret_cast<float3 const *>(&inv_view_mat.Row(2));
 	}
 
 	// 设置摄像机的观察矩阵
@@ -124,7 +151,7 @@ namespace KlayGE
 
 	void Camera::Update(float app_time, float elapsed_time)
 	{
-		prev_view_mat_ = view_mat_;
+		prev_view_mat_ = this->ViewMatrix();
 		prev_proj_mat_ = proj_mat_;
 
 		if (update_func_)
@@ -192,8 +219,8 @@ namespace KlayGE
 	{
 		if (view_proj_mat_dirty_)
 		{
-			view_proj_mat_ = view_mat_ * proj_mat_;
-			inv_view_proj_mat_ = inv_proj_mat_ * inv_view_mat_;
+			view_proj_mat_ = this->ViewMatrix() * this->ProjMatrix();
+			inv_view_proj_mat_ = this->InverseProjMatrix() * this->InverseViewMatrix();
 			view_proj_mat_dirty_ = false;
 		}
 		return view_proj_mat_;
@@ -203,8 +230,8 @@ namespace KlayGE
 	{
 		if (view_proj_mat_wo_adjust_dirty_)
 		{
-			view_proj_mat_wo_adjust_ = view_mat_ * proj_mat_wo_adjust_;
-			inv_view_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_ * inv_view_mat_;
+			view_proj_mat_wo_adjust_ = this->ViewMatrix() * this->ProjMatrixWOAdjust();
+			inv_view_proj_mat_wo_adjust_ = this->InverseProjMatrixWOAdjust() * this->InverseViewMatrix();
 			view_proj_mat_wo_adjust_dirty_ = false;
 		}
 		return view_proj_mat_wo_adjust_;
@@ -229,8 +256,8 @@ namespace KlayGE
 	{
 		if (view_proj_mat_dirty_)
 		{
-			view_proj_mat_ = view_mat_ * proj_mat_;
-			inv_view_proj_mat_ = inv_proj_mat_ * inv_view_mat_;
+			view_proj_mat_ = this->ViewMatrix() * this->ProjMatrix();
+			inv_view_proj_mat_ = this->InverseProjMatrix() * this->InverseViewMatrix();
 			view_proj_mat_dirty_ = false;
 		}
 		return inv_view_proj_mat_;
@@ -240,8 +267,8 @@ namespace KlayGE
 	{
 		if (view_proj_mat_wo_adjust_dirty_)
 		{
-			view_proj_mat_wo_adjust_ = view_mat_ * proj_mat_wo_adjust_;
-			inv_view_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_ * inv_view_mat_;
+			view_proj_mat_wo_adjust_ = this->ViewMatrix() * this->ProjMatrixWOAdjust();
+			inv_view_proj_mat_wo_adjust_ = this->InverseProjMatrixWOAdjust() * this->InverseViewMatrix();
 			view_proj_mat_wo_adjust_dirty_ = false;
 		}
 		return inv_view_proj_mat_wo_adjust_;

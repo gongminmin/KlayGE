@@ -75,9 +75,6 @@ namespace KlayGE
 		void RemoveChild(SceneNodePtr const & node);
 		void ClearChildren();
 
-		void MainThreadUpdateSubtree(float app_time, float elapsed_time);
-		void SubThreadUpdateSubtree(float app_time, float elapsed_time);
-
 		void Traverse(std::function<bool(SceneNode&)> const & callback);
 
 		uint32_t NumRenderables() const;
@@ -90,12 +87,14 @@ namespace KlayGE
 
 		void ForEachRenderable(std::function<void(Renderable&)> const & callback) const;
 
-		virtual void TransformToParent(float4x4 const & mat);
-		virtual void TransformToWorld(float4x4 const & mat);
-		virtual float4x4 const & TransformToParent() const;
-		virtual float4x4 const & TransformToWorld() const;
-		virtual AABBox const & PosBoundOS() const;
-		virtual AABBox const & PosBoundWS() const;
+		void TransformToParent(float4x4 const& mat);
+		void TransformToWorld(float4x4 const& mat);
+		float4x4 const& TransformToParent() const;
+		float4x4 const& InverseTransformToParent() const;
+		float4x4 const& TransformToWorld() const;
+		float4x4 const& InverseTransformToWorld() const;
+		AABBox const& PosBoundOS() const;
+		AABBox const& PosBoundWS() const;
 		void UpdateTransforms();
 		void UpdatePosBoundSubtree();
 		bool Updated() const;
@@ -112,8 +111,8 @@ namespace KlayGE
 			return main_thread_update_event_;
 		}
 
-		void SubThreadUpdate(float app_time, float elapsed_time);
-		void MainThreadUpdate(float app_time, float elapsed_time);
+		virtual void SubThreadUpdate(float app_time, float elapsed_time);
+		virtual void MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
@@ -156,6 +155,8 @@ namespace KlayGE
 
 		float4x4 xform_to_parent_  = float4x4::Identity();
 		float4x4 xform_to_world_ = float4x4::Identity();
+		float4x4 inv_xform_to_parent_ = float4x4::Identity();
+		float4x4 inv_xform_to_world_ = float4x4::Identity();
 		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
 		bool pos_aabb_dirty_ = true;

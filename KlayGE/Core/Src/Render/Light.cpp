@@ -26,11 +26,7 @@
 namespace KlayGE
 {
 	LightSource::LightSource(LightType type)
-		: type_(type), attrib_(0), enabled_(true),
-			color_(0, 0, 0, 0),
-			quat_(Quaternion::Identity()),
-			pos_(float3::Zero()),
-			range_(-1)
+		: type_(type)
 	{
 	}
 

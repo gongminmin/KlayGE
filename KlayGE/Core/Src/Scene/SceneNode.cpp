@@ -193,27 +193,6 @@ namespace KlayGE
 		this->EmitSceneChanged();
 	}
 
-	void SceneNode::MainThreadUpdateSubtree(float app_time, float elapsed_time)
-	{
-		this->Traverse([app_time, elapsed_time](SceneNode& node)
-			{
-				node.MainThreadUpdate(app_time, elapsed_time);
-				node.UpdateTransforms();
-
-				return true;
-			});
-	}
-
-	void SceneNode::SubThreadUpdateSubtree(float app_time, float elapsed_time)
-	{
-		this->Traverse([app_time, elapsed_time](SceneNode& node)
-			{
-				node.SubThreadUpdate(app_time, elapsed_time);
-
-				return true;
-			});
-	}
-
 	void SceneNode::Traverse(std::function<bool(SceneNode&)> const & callback)
 	{
 		if (callback(*this))
@@ -273,41 +252,54 @@ namespace KlayGE
 		}
 	}
 
-	void SceneNode::TransformToParent(float4x4 const & mat)
+	void SceneNode::TransformToParent(float4x4 const& mat)
 	{
 		xform_to_parent_ = mat;
+		inv_xform_to_parent_ = MathLib::inverse(mat);
 		pos_aabb_dirty_ = true;
 	}
 
-	void SceneNode::TransformToWorld(float4x4 const & mat)
+	void SceneNode::TransformToWorld(float4x4 const& mat)
 	{
 		if (parent_)
 		{
-			xform_to_parent_ = mat * MathLib::inverse(parent_->TransformToWorld());
+			xform_to_parent_ = mat * parent_->InverseTransformToWorld();
 		}
 		else
 		{
 			xform_to_parent_ = mat;
 		}
+		inv_xform_to_parent_ = MathLib::inverse(mat);
+
 		pos_aabb_dirty_ = true;
 	}
 
-	float4x4 const & SceneNode::TransformToParent() const
+	float4x4 const& SceneNode::TransformToParent() const
 	{
 		return xform_to_parent_;
 	}
 
-	float4x4 const & SceneNode::TransformToWorld() const
+	float4x4 const& SceneNode::InverseTransformToParent() const
+	{
+		return inv_xform_to_parent_;
+	}
+
+	float4x4 const& SceneNode::TransformToWorld() const
 	{
 		return xform_to_world_;
 	}
 
-	AABBox const & SceneNode::PosBoundOS() const
+	float4x4 const& SceneNode::InverseTransformToWorld() const
+	{
+		return inv_xform_to_world_;
+	}
+
+	AABBox const& SceneNode::PosBoundOS() const
 	{
 		return *pos_aabb_os_;
 	}
 
-	AABBox const & SceneNode::PosBoundWS() const
+	AABBox const& SceneNode::PosBoundWS() const
 	{
 		return *pos_aabb_ws_;
 	}
@@ -322,6 +314,7 @@ namespace KlayGE
 		{
 			xform_to_world_ = xform_to_parent_;
 		}
+		inv_xform_to_world_ = MathLib::inverse(xform_to_world_);
 
 		pos_aabb_dirty_ = true;
 	}

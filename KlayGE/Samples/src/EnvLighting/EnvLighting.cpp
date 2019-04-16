@@ -62,13 +62,13 @@ namespace
 			SceneManager& sm = Context::Instance().SceneManagerInstance();
 			for (uint32_t i = 0; i < sm.NumLights(); ++ i)
 			{
-				LightSourcePtr const & light = sm.GetLight(i);
-				if (LightSource::LT_Ambient == light->Type())
+				LightSource const& light = *sm.GetLight(i);
+				if (LightSource::LT_Ambient == light.Type())
 				{
-					*(effect_->ParameterByName("skybox_Ycube_tex")) = light->SkylightTexY();
-					*(effect_->ParameterByName("skybox_Ccube_tex")) = light->SkylightTexC();
+					*(effect_->ParameterByName("skybox_Ycube_tex")) = light.SkylightTexY();
+					*(effect_->ParameterByName("skybox_Ccube_tex")) = light.SkylightTexC();
 
-					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+					uint32_t const mip = light.SkylightTexY()->NumMipMaps();
 					*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
 					break;
 				}

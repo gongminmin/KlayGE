@@ -32,19 +32,18 @@ namespace KlayGE
 	public:
 		Camera();
 
-		float3 const & EyePos() const
-			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(3)); }
-		float3 LookAt() const
-			{ return this->EyePos() + this->ForwardVec() * look_at_dist_; }
-		float3 const & RightVec() const
-			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(0)); }
-		float3 const & UpVec() const
-			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(1)); }
-		float3 const & ForwardVec() const
-			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(2)); }
+		float3 const& EyePos() const;
+		float3 LookAt() const;
+		float3 const& RightVec() const;
+		float3 const& UpVec() const;
+		float3 const& ForwardVec() const;
 		float LookAtDist() const
 		{
 			return look_at_dist_;
+		}
+		void LookAtDist(float look_at_dist)
+		{
+			look_at_dist_ = look_at_dist;
 		}
 
 		float FOV() const
@@ -109,16 +108,16 @@ namespace KlayGE
 
 		mutable float4x4	view_proj_mat_;
 		mutable float4x4	inv_view_proj_mat_;
-		mutable bool		view_proj_mat_dirty_;
+		mutable bool		view_proj_mat_dirty_ = true;
 		mutable float4x4	view_proj_mat_wo_adjust_;
 		mutable float4x4	inv_view_proj_mat_wo_adjust_;
-		mutable bool		view_proj_mat_wo_adjust_dirty_;
+		mutable bool		view_proj_mat_wo_adjust_dirty_ = true;
 
 		mutable Frustum	frustum_;
-		mutable bool	frustum_dirty_;
+		mutable bool	frustum_dirty_ = true;
 
-		uint32_t	mode_;
-		int cur_jitter_index_;
+		uint32_t	mode_ = 0;
+		int cur_jitter_index_ = 0;
 
 		std::function<void(Camera&, float, float)> update_func_;
 	};

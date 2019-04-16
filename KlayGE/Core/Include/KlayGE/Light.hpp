@@ -107,13 +107,13 @@ namespace KlayGE
 
 	protected:
 		LightType type_;
-		int32_t attrib_;
-		bool enabled_;
-		float4 color_;
-		Quaternion quat_;
-		float3 pos_;
+		int32_t attrib_ = 0;
+		bool enabled_ = true;
+		float4 color_ = float4(0, 0, 0, 0);
+		Quaternion quat_ = Quaternion::Identity();
+		float3 pos_ = float3::Zero();
 		float3 falloff_;
-		float range_;
+		float range_ = -1;
 
 		std::function<void(LightSource&, float, float)> update_func_;
 	};

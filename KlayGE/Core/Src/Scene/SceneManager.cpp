@@ -195,14 +195,14 @@ namespace KlayGE
 		return static_cast<uint32_t>(cameras_.size());
 	}
 
-	CameraPtr& SceneManager::GetCamera(uint32_t index)
+	Camera* SceneManager::GetCamera(uint32_t index)
 	{
-		return cameras_[index];
+		return cameras_[index].get();
 	}
 
-	CameraPtr const & SceneManager::GetCamera(uint32_t index) const
+	Camera const* SceneManager::GetCamera(uint32_t index) const
 	{
-		return cameras_[index];
+		return cameras_[index].get();
 	}
 
 	void SceneManager::AddLight(LightSourcePtr const & light)
@@ -227,14 +227,14 @@ namespace KlayGE
 		return static_cast<uint32_t>(lights_.size());
 	}
 
-	LightSourcePtr& SceneManager::GetLight(uint32_t index)
+	LightSource* SceneManager::GetLight(uint32_t index)
 	{
-		return lights_[index];
+		return lights_[index].get();
 	}
 
-	LightSourcePtr const & SceneManager::GetLight(uint32_t index) const
+	LightSource const* SceneManager::GetLight(uint32_t index) const
 	{
-		return lights_[index];
+		return lights_[index].get();
 	}
 
 	// 加入渲染队列
@@ -396,7 +396,12 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
-			scene_root_.MainThreadUpdateSubtree(app_time, frame_time);
+			scene_root_.Traverse([app_time, frame_time](SceneNode& node) {
+				node.MainThreadUpdate(app_time, frame_time);
+				node.UpdateTransforms();
+
+				return true;
+			});
 			scene_root_.UpdatePosBoundSubtree();
 
 			overlay_root_.ClearChildren();
@@ -728,8 +733,12 @@ namespace KlayGE
 				{
 					std::lock_guard<std::mutex> lock(update_mutex_);
 
-					scene_root_.SubThreadUpdateSubtree(app_time, frame_time);
-					overlay_root_.SubThreadUpdateSubtree(app_time, frame_time);
+					auto updater = [app_time, frame_time](SceneNode& node) {
+						node.SubThreadUpdate(app_time, frame_time);
+						return true;
+					};
+					scene_root_.Traverse(updater);
+					overlay_root_.Traverse(updater);
 				}
 
 				if (frame_time < update_elapse_)
