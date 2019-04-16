@@ -220,6 +220,7 @@
 	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.
+	#pragma warning(disable: 4275) // boost::noncopyable is a non dll-interface class.
 	#pragma warning(disable: 4819) // Allow non-ANSI characters.
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __declspec(noreturn)
