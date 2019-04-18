@@ -502,11 +502,11 @@ void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
 		num_intersected_lights_sh = 0;
 
 		float2 tile_min_max = min_max_depth_tex.Load(uint3(gid.xy, 0)).xy;
-		float2 min_max = float2(max(depth_slices[gid.z], tile_min_max.x), min(depth_slices[gid.z + 1], tile_min_max.y));
-		empty_frustum_sh = (min_max.x >= min_max.y);
+		empty_frustum_sh = (tile_min_max.x > depth_slices[gid.z + 1]) || (tile_min_max.y <= depth_slices[gid.z]);
 		[branch]
 		if (!empty_frustum_sh)
 		{
+			float2 min_max = float2(max(depth_slices[gid.z], tile_min_max.x), min(depth_slices[gid.z + 1], tile_min_max.y));
 			CalcTileViewFrustum(gid.xy, min_max, planes_sh);
 		}
 	}
