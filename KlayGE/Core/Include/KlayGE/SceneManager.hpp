@@ -105,6 +105,11 @@ namespace KlayGE
 
 		virtual void OnSceneChanged() = 0;
 
+		bool NodesUpdated() const
+		{
+			return nodes_updated_;
+		}
+
 	protected:
 		void Flush(uint32_t urt);
 
@@ -153,6 +158,8 @@ namespace KlayGE
 		volatile bool quit_;
 
 		bool deferred_mode_;
+
+		bool nodes_updated_ = false;
 	};
 }
 

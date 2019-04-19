@@ -286,11 +286,27 @@ namespace KlayGE
 
 	float4x4 const& SceneNode::TransformToWorld() const
 	{
+		auto& scene_mgr = Context::Instance().SceneManagerInstance();
+		if (!scene_mgr.NodesUpdated())
+		{
+			auto* parent = this->Parent();
+			xform_to_world_ = xform_to_parent_;
+			while (parent != nullptr)
+			{
+				xform_to_world_ *= parent->TransformToParent();
+				parent = parent->Parent();
+			}
+		}
 		return xform_to_world_;
 	}
 
 	float4x4 const& SceneNode::InverseTransformToWorld() const
 	{
+		auto& scene_mgr = Context::Instance().SceneManagerInstance();
+		if (!scene_mgr.NodesUpdated())
+		{
+			inv_xform_to_world_ = MathLib::inverse(this->TransformToWorld());
+		}
 		return inv_xform_to_world_;
 	}
 

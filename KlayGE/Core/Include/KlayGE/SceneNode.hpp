@@ -154,9 +154,9 @@ namespace KlayGE
 		std::vector<VertexElement> instance_format_;
 
 		float4x4 xform_to_parent_  = float4x4::Identity();
-		float4x4 xform_to_world_ = float4x4::Identity();
+		mutable float4x4 xform_to_world_ = float4x4::Identity();
 		float4x4 inv_xform_to_parent_ = float4x4::Identity();
-		float4x4 inv_xform_to_world_ = float4x4::Identity();
+		mutable float4x4 inv_xform_to_world_ = float4x4::Identity();
 		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
 		bool pos_aabb_dirty_ = true;

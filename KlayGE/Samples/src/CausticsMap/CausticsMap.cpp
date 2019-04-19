@@ -568,6 +568,7 @@ void CausticsMapApp::OnCreate()
 	//for env map generating
 	dummy_light_env_ = MakeSharedPtr<PointLightSource>();
 	dummy_light_env_->Position(float3(0.0f, 20.0f, 0.0f));
+	dummy_light_env_->AddToSceneManager();
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	root_node.AddChild(light_proxy_->RootNode());

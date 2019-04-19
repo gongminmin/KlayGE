@@ -431,6 +431,8 @@ namespace KlayGE
 			}
 		}
 
+		nodes_updated_ = true;
+
 		this->FlushScene();
 
 		FrameBuffer& fb = *re.ScreenFrameBuffer();
@@ -442,6 +444,8 @@ namespace KlayGE
 		fb.WaitOnSwapBuffers();
 
 		re.EndFrame();
+
+		nodes_updated_ = false;
 	}
 
 	// 把渲染队列中的物体渲染出来

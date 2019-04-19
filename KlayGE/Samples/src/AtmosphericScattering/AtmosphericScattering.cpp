@@ -189,7 +189,7 @@ void AtmosphericScatteringApp::OnCreate()
 	obj_controller_.AttachCamera(this->ActiveCamera());
 	obj_controller_.Scalers(0.003f, 0.003f);
 
-	light_ctrl_camera_.ViewParams(float3(0, 0, 0), float3(1, 0, 0), float3(0, -1, 0));
+	light_ctrl_camera_.ViewParams(float3(-0.01f, 0, 0), float3(0, 0, 0), float3(0, -1, 0));
 	light_controller_.AttachCamera(light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
