@@ -71,6 +71,14 @@ namespace KlayGE
 
 	SceneNode::~SceneNode()
 	{
+		for (auto& child : children_)
+		{
+			child->Parent(nullptr);
+		}
+		if (parent_)
+		{
+			parent_->RemoveChild(this);
+		}
 	}
 
 	std::wstring_view SceneNode::Name() const
@@ -169,7 +177,12 @@ namespace KlayGE
 
 	void SceneNode::RemoveChild(SceneNodePtr const & node)
 	{
-		auto iter = std::find(children_.begin(), children_.end(), node);
+		this->RemoveChild(node.get());
+	}
+
+	void SceneNode::RemoveChild(SceneNode* node)
+	{
+		auto iter = std::find_if(children_.begin(), children_.end(), [node](SceneNodePtr const& child) { return child.get() == node; });
 		if (iter != children_.end())
 		{
 			pos_aabb_dirty_ = true;
@@ -227,7 +240,13 @@ namespace KlayGE
 
 	void SceneNode::DelRenderable(RenderablePtr const & renderable)
 	{
-		auto iter = std::find(renderables_.begin(), renderables_.end(), renderable);
+		this->DelRenderable(renderable.get());
+	}
+
+	void SceneNode::DelRenderable(Renderable* renderable)
+	{
+		auto iter =
+			std::find_if(renderables_.begin(), renderables_.end(), [renderable](RenderablePtr const& r) { return r.get() == renderable; });
 		if (iter != renderables_.end())
 		{
 			renderables_.erase(iter);

@@ -73,6 +73,7 @@ namespace KlayGE
 		std::vector<SceneNodePtr> const & Children() const;
 		void AddChild(SceneNodePtr const & node);
 		void RemoveChild(SceneNodePtr const & node);
+		void RemoveChild(SceneNode* node);
 		void ClearChildren();
 
 		void Traverse(std::function<bool(SceneNode&)> const & callback);
@@ -83,6 +84,7 @@ namespace KlayGE
 
 		void AddRenderable(RenderablePtr const & renderable);
 		void DelRenderable(RenderablePtr const & renderable);
+		void DelRenderable(Renderable* renderable);
 		void ClearRenderables();
 
 		void ForEachRenderable(std::function<void(Renderable&)> const & callback) const;
