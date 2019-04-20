@@ -83,7 +83,10 @@ namespace KlayGE
 	SceneManager::~SceneManager()
 	{
 		quit_ = true;
-		(*update_thread_)();
+		if (update_thread_)
+		{
+			(*update_thread_)();
+		}
 
 		this->ClearLight();
 		this->ClearCamera();
