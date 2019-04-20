@@ -133,10 +133,10 @@ void FoliageApp::OnCreate()
 	auto skybox = MakeSharedPtr<RenderableFoggySkyBox>();
 	skybox->CompressedCubeMap(y_cube, c_cube);
 	skybox->FogColor(fog_color);
-	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	auto sun_flare = MakeSharedPtr<LensFlareSceneObject>();
-	sun_flare->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	sun_flare->Direction(-sun_light_->Direction());
 	root_node.AddChild(sun_flare);
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");

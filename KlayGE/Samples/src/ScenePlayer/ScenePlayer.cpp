@@ -345,23 +345,21 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = root->Attrib("skybox");
 		if (attr)
 		{
-			skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
+			auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
+			skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
 
 			std::string const skybox_name = std::string(attr->ValueString());
 			if (!ResLoader::Instance().Locate(skybox_name).empty())
 			{
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(ASyncLoadTexture(skybox_name,
-					EAH_GPU_Read | EAH_Immutable));
+				skybox_renderable->CubeMap(ASyncLoadTexture(skybox_name, EAH_GPU_Read | EAH_Immutable));
 			}
 			else if (!ResLoader::Instance().Locate(skybox_name + ".dds").empty())
 			{
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(ASyncLoadTexture(skybox_name + ".dds",
-					EAH_GPU_Read | EAH_Immutable));
+				skybox_renderable->CubeMap(ASyncLoadTexture(skybox_name + ".dds", EAH_GPU_Read | EAH_Immutable));
 			}
 			else if (!ResLoader::Instance().Locate(skybox_name + "_y.dds").empty())
 			{
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(
-					ASyncLoadTexture(skybox_name + "_y.dds", EAH_GPU_Read | EAH_Immutable),
+				skybox_renderable->CompressedCubeMap(ASyncLoadTexture(skybox_name + "_y.dds", EAH_GPU_Read | EAH_Immutable),
 					ASyncLoadTexture(skybox_name + "_c.dds", EAH_GPU_Read | EAH_Immutable));
 			}
 			else
@@ -381,8 +379,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					init_data[i].slice_pitch = init_data[i].row_pitch;
 				}
 
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0,
-					EAH_GPU_Read | EAH_Immutable, init_data));
+				skybox_renderable->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 			}
 
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);

@@ -87,7 +87,7 @@ namespace KlayGE
 
 
 	LensFlareSceneObject::LensFlareSceneObject()
-		: SceneNode(MakeSharedPtr<LensFlareRenderable>(), 0)
+		: SceneNode(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<LensFlareRenderable>()), 0)
 	{
 		this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 			{
@@ -125,10 +125,12 @@ namespace KlayGE
 
 		float angle = MathLib::dot(view_vec, sun_vec);
 
+		auto* renderable_comp = this->FirstComponentOfType<RenderableComponent>();
+
 		// update flare
 		if (angle > FLARE_RENDERANGLE)
 		{
-			renderables_[0]->Enabled(true);
+			renderable_comp->Enabled(true);
 
 			// get angle amount by current angle
 			float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE);	// convert angle to percent 
@@ -160,11 +162,11 @@ namespace KlayGE
 				flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
 			}
 
-			checked_pointer_cast<LensFlareRenderable>(renderables_[0])->FlareParam(flare_param, alpha_fac);
+			renderable_comp->BoundRenderableOfType<LensFlareRenderable>().FlareParam(flare_param, alpha_fac);
 		}
 		else
 		{
-			renderables_[0]->Enabled(false);
+			renderable_comp->Enabled(false);
 		}
 	}
 }

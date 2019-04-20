@@ -829,13 +829,14 @@ void GPUParticleSystemApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	particles_renderable_ = MakeSharedPtr<RenderParticles>(NUM_PARTICLE);
-	particles_ = MakeSharedPtr<SceneNode>(particles_renderable_, SceneNode::SOA_Moveable);
+	particles_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(particles_renderable_), SceneNode::SOA_Moveable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(particles_);
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);
 
-	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex),
+	terrain_ = MakeSharedPtr<SceneNode>(
+		MakeSharedPtr<RenderableComponent>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex)),
 		SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 

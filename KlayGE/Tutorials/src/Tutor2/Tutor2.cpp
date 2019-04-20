@@ -73,7 +73,8 @@ void TutorFramework::OnCreate()
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);
 
 	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(
-		KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor), KlayGE::SceneNode::SOA_Cullable);
+		KlayGE::MakeSharedPtr<KlayGE::RenderableComponent>(KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor)),
+		KlayGE::SceneNode::SOA_Cullable);
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableBox_);
 
 	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.glb", KlayGE::EAH_GPU_Read,
@@ -141,7 +142,7 @@ void TutorFramework::OnCreate()
 	renderableMesh_ = model->RootNode();
 	for (size_t i = 0; i < meshes.size(); ++ i)
 	{
-		renderableMesh_->AddRenderable(meshes[i]);
+		renderableMesh_->AddComponent(KlayGE::MakeSharedPtr<KlayGE::RenderableComponent>(meshes[i]));
 	}
 	KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(renderableMesh_);
 

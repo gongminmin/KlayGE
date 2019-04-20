@@ -187,7 +187,7 @@ void MetalnessApp::OnCreate()
 
 	auto skybox = MakeSharedPtr<RenderableSkyBox>();
 	skybox->CompressedCubeMap(y_cube_map, c_cube_map);
-	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	this->LookAt(float3(0.0f, 0.3f, -0.9f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);

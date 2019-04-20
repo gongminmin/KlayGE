@@ -222,7 +222,7 @@ void DistanceMapping::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_renderable_ = MakeSharedPtr<RenderPolygon>();
-	polygon_ = MakeSharedPtr<SceneNode>(polygon_renderable_, SceneNode::SOA_Cullable);
+	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(polygon_renderable_), SceneNode::SOA_Cullable);
 	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
@@ -232,6 +232,8 @@ void DistanceMapping::OnCreate()
 	fpcController_.RequiresLeftButtonDown(true);
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
+
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
@@ -243,7 +245,7 @@ void DistanceMapping::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	light_proxy_->Scaling(0.05f, 0.05f, 0.05f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_proxy_->RootNode());
 
 	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 

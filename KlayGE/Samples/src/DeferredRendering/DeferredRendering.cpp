@@ -273,7 +273,7 @@ void DeferredRenderingApp::OnCreate()
 
 	auto skybox = MakeSharedPtr<RenderableSkyBox>();
 	skybox->CompressedCubeMap(y_cube, c_cube);
-	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	ps_ = SyncLoadParticleSystem("Fire.psml");
 	ps_->Gravity(0.5f);

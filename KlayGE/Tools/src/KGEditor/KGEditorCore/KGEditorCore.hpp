@@ -49,7 +49,7 @@ namespace KlayGE
 			float3 trf_pos;
 			float3 trf_scale;
 			Quaternion trf_rotate;
-			SceneNodePtr scene_obj;
+			SceneNodePtr scene_node;
 			SceneObjectLightSourceProxyPtr light_proxy;
 			SceneObjectCameraProxyPtr camera_proxy;
 		};

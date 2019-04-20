@@ -91,11 +91,12 @@ namespace
 			*(effect_->ParameterByName("model")) = model_mat_;
 			*(effect_->ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
-			auto const & light_src = Context::Instance().SceneManagerInstance().GetLight(0);
+			auto& scene_mgr = Context::Instance().SceneManagerInstance();
+			auto const& light_src = *scene_mgr.GetLight(0);
 
-			*(effect_->ParameterByName("light_pos")) = light_src->Position();
-			*(effect_->ParameterByName("light_color")) = light_src->Color();
-			*(effect_->ParameterByName("light_falloff")) = light_src->Falloff();
+			*(effect_->ParameterByName("light_pos")) = light_src.Position();
+			*(effect_->ParameterByName("light_color")) = light_src.Color();
+			*(effect_->ParameterByName("light_falloff")) = light_src.Falloff();
 		}
 
 	private:
@@ -166,6 +167,8 @@ void VDMParticleApp::OnCreate()
 	this->LookAt(float3(1.47f, 2.35f, -5.75f), float3(-2.18f, 0.71f, 2.20f));
 	this->Proj(0.1f, 200);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(1.0f, 0.67f, 0.55f) * 20.0f);
@@ -179,7 +182,7 @@ void VDMParticleApp::OnCreate()
 	ps_ = SyncLoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(ps_);
+	root_node.AddChild(ps_);
 
 	float const SCALE = 6;
 	ps_->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));

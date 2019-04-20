@@ -27,7 +27,7 @@ public:
 	{
 		return point_size_;
 	}
-	KlayGE::LightSourcePtr GetLightSource()
+	KlayGE::LightSourcePtr const& GetLightSource()
 	{
 		return light_;
 	}

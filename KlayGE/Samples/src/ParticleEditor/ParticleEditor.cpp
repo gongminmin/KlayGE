@@ -152,7 +152,7 @@ void ParticleEditorApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<TerrainRenderable>(), SceneNode::SOA_Cullable);
+	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<TerrainRenderable>()), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

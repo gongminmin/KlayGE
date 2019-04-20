@@ -124,11 +124,10 @@ void VectorTexApp::OnCreate()
 	model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
-	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);
+	object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(model_->Mesh(0)), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
-	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->VectorTexture(
-		ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
+	checked_cast<RenderTeapot&>(*model_->Mesh(0)).VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
 }

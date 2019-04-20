@@ -97,22 +97,22 @@ namespace
 			BOOST_ASSERT(gen_cube_sm_tech_->Validate());
 		}
 
-		void BindLight(LightSourcePtr light)
+		void BindLight(LightSourcePtr const& light)
 		{
 			light_ = light;
 		}
 
-		void CausticsLight(LightSourcePtr light)
+		void CausticsLight(LightSourcePtr const& light)
 		{
 			caustics_light_ = light;
 		}
 
-		void SetSMTexture(TexturePtr sm_texture)
+		void SetSMTexture(TexturePtr const& sm_texture)
 		{
 			sm_texture_ = sm_texture;
 		}
 
-		void SetCausticsMap(TexturePtr caustics_map)
+		void SetCausticsMap(TexturePtr const& caustics_map)
 		{
 			caustics_map_ = caustics_map;
 		}
@@ -179,7 +179,7 @@ namespace
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 				float4x4 first_light_view = light_->SMCamera(0)->ViewMatrix();
 
-				*(effect_->ParameterByName("light_pos")) = float3(MathLib::transform(light_->Position(), MathLib::rotation_x(-DEG90)));
+				*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_->Position(), MathLib::rotation_x(-DEG90));
 				*(effect_->ParameterByName("light_color")) = float3(light_->Color());
 				*(effect_->ParameterByName("light_falloff")) = light_->Falloff();
 				*(effect_->ParameterByName("light_vp")) = caustics_light_->SMCamera(0)->ViewMatrix() * caustics_light_->SMCamera(0)->ProjMatrix();
@@ -587,7 +587,7 @@ void CausticsMapApp::OnCreate()
 
 	// Model
 	plane_renderable_ = MakeSharedPtr<ReceivePlane>(50.0f, 50.0f);
-	plane_obj_ = MakeSharedPtr<SceneNode>(plane_renderable_, SceneNode::SOA_Moveable);
+	plane_obj_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(plane_renderable_), SceneNode::SOA_Moveable);
 	root_node.AddChild(plane_obj_);
 
 	sphere_obj_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
@@ -624,7 +624,7 @@ void CausticsMapApp::OnCreate()
 	auto c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 	skybox_renderable->CompressedCubeMap(y_cube_map, c_cube_map);
-	skybox_ = MakeSharedPtr<SceneNode>(skybox_renderable, SceneNode::SOA_NotCastShadow);
+	skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
 	root_node.AddChild(skybox_);
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");

@@ -157,7 +157,8 @@ namespace KlayGE
 				KFL_UNUSED(elapsed_time);
 
 				auto& inf_terrain = checked_cast<InfTerrainSceneObject&>(node);
-				auto& inf_terrain_renderable = checked_cast<InfTerrainRenderable&>(*node.GetRenderable(0));
+				auto& inf_terrain_renderable =
+					node.FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<InfTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -716,7 +717,7 @@ namespace KlayGE
 
 
 	HQTerrainSceneObject::HQTerrainSceneObject(RenderablePtr const & renderable)
-		: SceneNode(renderable, SOA_Moveable),
+		: SceneNode(MakeSharedPtr<RenderableComponent>(renderable), SOA_Moveable),
 			reset_terrain_(true)
 	{
 		last_eye_pos_ =
@@ -730,7 +731,8 @@ namespace KlayGE
 				KFL_UNUSED(elapsed_time);
 
 				auto& hq_inf_terrain = checked_cast<HQTerrainSceneObject&>(node);
-				auto& hq_inf_terrain_renderable = checked_cast<HQTerrainRenderable&>(*node.GetRenderable(0));
+				auto& hq_inf_terrain_renderable =
+					node.FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<HQTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;

@@ -445,6 +445,8 @@ void ShadowCubeMap::OnCreate()
 	}
 	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(20, 20, 20));
@@ -454,7 +456,7 @@ void ShadowCubeMap::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	light_proxy_->Scaling(0.5f, 0.5f, 0.5f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_proxy_->RootNode());
 
 	for (int i = 0; i < 6; ++ i)
 	{
@@ -610,7 +612,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			else
 			{
 				auto const & teapot = teapot_model_->Mesh(0);
-				auto so = MakeSharedPtr<SceneNode>(teapot, SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+				auto so =
+					MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(teapot), SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 				so->OnSubThreadUpdate().Connect(
 					[](SceneNode& node, float app_time, float elapsed_time)
 					{
@@ -645,8 +648,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		case 0:
 		case 1:
 			{
-				float3 pos = light_->Position();
-				float3 lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
+				float3 const pos = light_->Position();
+				float3 const lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
 				shadow_dual_buffers_[pass]->GetViewport()->camera->ViewParams(pos, lookat);
 
 				renderEngine.BindFrameBuffer(shadow_dual_buffers_[pass]);

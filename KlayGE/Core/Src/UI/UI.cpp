@@ -934,7 +934,7 @@ namespace KlayGE
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				auto ui_rect_obj = MakeSharedPtr<SceneNode>(rect.second, SceneNode::SOA_Overlay);
+				auto ui_rect_obj = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(rect.second), SceneNode::SOA_Overlay);
 				Context::Instance().SceneManagerInstance().OverlayRootNode().AddChild(ui_rect_obj);
 			}
 		}

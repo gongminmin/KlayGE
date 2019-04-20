@@ -71,10 +71,9 @@ namespace KlayGE
 
 				root_node.Traverse([](SceneNode& node)
 				{
-					node.ForEachRenderable([](Renderable& mesh)
+					node.ForEachComponentOfType<RenderableComponent>([](RenderableComponent& renderable_comp)
 					{
-						auto& light_mesh = checked_cast<RenderableLightSourceProxy&>(mesh);
-						light_mesh.Update();
+						renderable_comp.BoundRenderableOfType<RenderableLightSourceProxy>().Update();
 					});
 
 					return true;

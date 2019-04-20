@@ -124,6 +124,8 @@ void VideoTextureApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.0001f);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(2, 2, 2));
@@ -133,7 +135,7 @@ void VideoTextureApp::OnCreate()
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
 	light_proxy_->Scaling(0.01f, 0.01f, 0.01f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_proxy_->RootNode());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -150,7 +152,7 @@ void VideoTextureApp::OnCreate()
 	model_ = SyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
-	object_ = MakeSharedPtr<SceneNode>(model_->Mesh(0), SceneNode::SOA_Cullable);
+	object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(model_->Mesh(0)), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
 
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
@@ -203,10 +205,11 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	}		
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->VideoTexture(se.PresentTexture());
-	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->LightPos(light_->Position());
-	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->LightColor(light_->Color());
-	checked_pointer_cast<RenderTeapot>(object_->GetRenderable())->LightFalloff(light_->Falloff());
+	auto& teapot_renderable = object_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTeapot>();
+	teapot_renderable.VideoTexture(se.PresentTexture());
+	teapot_renderable.LightPos(light_->Position());
+	teapot_renderable.LightColor(light_->Color());
+	teapot_renderable.LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

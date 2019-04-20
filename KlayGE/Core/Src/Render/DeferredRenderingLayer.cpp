@@ -1543,7 +1543,7 @@ namespace KlayGE
 			{
 				if (node.Visible())
 				{
-					if (node.NumRenderables() > 0)
+					if (node.NumComponents() > 0)
 					{
 						visible_scene_nodes_.push_back(&node);
 

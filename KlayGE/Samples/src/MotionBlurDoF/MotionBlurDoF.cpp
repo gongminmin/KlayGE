@@ -983,7 +983,7 @@ void MotionBlurDoFApp::MBExposureChangedHandler(KlayGE::UISlider const & sender)
 
 	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 	{
-		checked_pointer_cast<MotionBlurRenderMesh>(scene_nodes_[i]->GetRenderable())->Exposure(exposure_);
+		scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().Exposure(exposure_);
 	}
 }
 
@@ -998,7 +998,8 @@ void MotionBlurDoFApp::MBBlurRadiusChangedHandler(KlayGE::UISlider const & sende
 
 	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 	{
-		checked_pointer_cast<MotionBlurRenderMesh>(scene_nodes_[i]->GetRenderable())->BlurRadius(blur_radius_);
+		scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().BlurRadius(
+			blur_radius_);
 	}
 }
 
@@ -1025,16 +1026,16 @@ void MotionBlurDoFApp::UseInstancingHandler(UICheckBox const & /*sender*/)
 	{
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearRenderables();
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddRenderable(renderInstance_);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearComponents();
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
 		}
 	}
 	else
 	{
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearRenderables();
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddRenderable(renderMesh_);
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearComponents();
+			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddComponent(MakeSharedPtr<RenderableComponent>(renderMesh_));
 		}
 	}
 }
@@ -1133,10 +1134,10 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					auto so = MakeSharedPtr<Teapot>();
 					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
-					checked_pointer_cast<Teapot>(so)->ClearRenderables();
-					checked_pointer_cast<Teapot>(so)->AddRenderable(renderInstance_);
-					checked_pointer_cast<MotionBlurRenderMesh>(so->GetRenderable())->Exposure(exposure_);
-					checked_pointer_cast<MotionBlurRenderMesh>(so->GetRenderable())->BlurRadius(blur_radius_);
+					checked_pointer_cast<Teapot>(so)->ClearComponents();
+					checked_pointer_cast<Teapot>(so)->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
+					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).Exposure(exposure_);
+					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).BlurRadius(blur_radius_);
 					scene_nodes_.push_back(so);
 
 					so->SubThreadUpdate(0, 0);
@@ -1186,7 +1187,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		}
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(scene_nodes_[i]->GetRenderable())->VelocityPass(false);
+			scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(false);
 		}
 		return App3DFramework::URV_NeedFlush;
 
@@ -1200,7 +1201,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
 		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(scene_nodes_[i]->GetRenderable())->VelocityPass(true);
+			scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(true);
 		}
 		return App3DFramework::URV_NeedFlush;
 

@@ -108,6 +108,8 @@ void PostProcessingApp::OnCreate()
 	re.PPAAEnabled(0);
 	re.ColorGradingEnabled(false);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
@@ -220,7 +222,7 @@ void PostProcessingApp::OnCreate()
 	
 	auto skybox = MakeSharedPtr<RenderableSkyBox>();
 	skybox->CompressedCubeMap(y_cube, c_cube);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	color_fb_ = rf.MakeFrameBuffer();
 	color_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;

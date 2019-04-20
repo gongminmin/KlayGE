@@ -495,11 +495,11 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		light_pos = MathLib::normalize(light_pos);
 		light_->Position(light_pos);
 
-		polygon_model_->ForEachMesh([this](Renderable& mesh)
+		polygon_model_->ForEachMesh([this, &light_pos](Renderable& mesh)
 			{
 				auto& polygon_mesh = checked_cast<RenderPolygon&>(mesh);
 
-				polygon_mesh.LightPos(light_->Position());
+				polygon_mesh.LightPos(light_pos);
 				polygon_mesh.LightColor(light_->Color());
 				polygon_mesh.LightFalloff(light_->Falloff());
 			});

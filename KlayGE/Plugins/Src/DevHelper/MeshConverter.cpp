@@ -1580,21 +1580,22 @@ namespace
 
 						ai_node.mNumChildren = static_cast<uint32_t>(node.Children().size());
 						ai_node.mChildren = ai_node.mNumChildren > 0 ? new aiNode*[ai_node.mNumChildren] : nullptr;
-						ai_node.mNumMeshes = node.NumRenderables();
+						ai_node.mNumMeshes = node.NumComponentsOfType<RenderableComponent>();
 						ai_node.mMeshes = ai_node.mNumMeshes > 0 ? new unsigned int[ai_node.mNumMeshes] : nullptr;
 
-						for (uint32_t i = 0; i < node.NumRenderables(); ++ i)
-						{
-							auto const & mesh = node.GetRenderable(i);
-							for (uint32_t j = 0; j < model.NumMeshes(); ++ j)
+						uint32_t mesh_index = 0;
+						node.ForEachComponentOfType<RenderableComponent>([&model, &ai_node, &mesh_index](RenderableComponent& renderable_comp) {
+							auto const* mesh = &renderable_comp.BoundRenderable();
+							for (uint32_t j = 0; j < model.NumMeshes(); ++j)
 							{
-								if (mesh == model.Mesh(j))
+								if (mesh == model.Mesh(j).get())
 								{
-									ai_node.mMeshes[i] = j;
+									ai_node.mMeshes[mesh_index] = j;
+									++mesh_index;
 									break;
 								}
 							}
-						}
+						});
 
 						for (uint32_t i = 0; i < node.Children().size(); ++ i)
 						{
@@ -3585,7 +3586,7 @@ namespace
 		{
 			for (auto const mesh_index : node.mesh_indices)
 			{
-				node.node->AddRenderable(render_meshes[mesh_index]);
+				node.node->AddComponent(MakeSharedPtr<RenderableComponent>(render_meshes[mesh_index]));
 			}
 		}
 

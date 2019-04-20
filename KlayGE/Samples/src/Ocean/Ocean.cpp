@@ -204,7 +204,7 @@ namespace
 			strength_ = 10;
 
 			auto ocean_renderable = MakeSharedPtr<RenderOcean>(base_level_, strength_);
-			this->AddRenderable(ocean_renderable);
+			this->AddComponent(MakeSharedPtr<RenderableComponent>(ocean_renderable));
 
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
 			reflect_mat_ = MathLib::reflect(ocean_plane_);
@@ -386,7 +386,7 @@ namespace
 				dirty_ = false;
 			}
 
-			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+			auto& ocean_renderable = checked_cast<RenderableComponent&>(*components_[0]).BoundRenderableOfType<RenderOcean>();
 
 			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
@@ -410,7 +410,7 @@ namespace
 
 		void ReflectionTex(TexturePtr const & tex)
 		{
-			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+			auto& ocean_renderable = checked_cast<RenderableComponent&>(*components_[0]).BoundRenderableOfType<RenderOcean>();
 			ocean_renderable.ReflectionTex(tex);
 		}
 
@@ -530,7 +530,7 @@ namespace
 	private:
 		void GenWaveTextures()
 		{
-			auto& ocean_renderable = checked_cast<RenderOcean&>(*renderables_[0]);
+			auto& ocean_renderable = checked_cast<RenderableComponent&>(*components_[0]).BoundRenderableOfType<RenderOcean>();
 			ocean_renderable.PatchLength(ocean_param_.patch_length);
 
 			ocean_simulator_->Parameters(ocean_param_);
@@ -846,18 +846,18 @@ void OceanApp::OnCreate()
 
 	ocean_ = MakeSharedPtr<OceanObject>();
 	root_node.AddChild(ocean_);
-	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->SkylightTex(y_cube, c_cube);
-	checked_pointer_cast<RenderOcean>(ocean_->GetRenderable())->FogColor(fog_color);
+	ocean_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderOcean>().SkylightTex(y_cube, c_cube);
+	ocean_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderOcean>().FogColor(fog_color);
 
 	terrain_renderable->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
 
 	auto skybox = MakeSharedPtr<RenderableFoggySkyBox>();
 	skybox->CompressedCubeMap(y_cube, c_cube);
 	skybox->FogColor(fog_color);
-	root_node.AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	auto sun_flare = MakeSharedPtr<LensFlareSceneObject>();
-	sun_flare->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	sun_flare->Direction(-sun_light_->Direction());
 	root_node.AddChild(sun_flare);
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");

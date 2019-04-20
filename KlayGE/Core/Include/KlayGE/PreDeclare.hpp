@@ -46,8 +46,10 @@ namespace KlayGE
 	typedef std::shared_ptr<PerfProfiler> PerfProfilerPtr;
 
 	class SceneManager;
+	class SceneComponent;
+	using SceneComponentPtr = std::shared_ptr<SceneComponent>;
 	class SceneNode;
-	typedef std::shared_ptr<SceneNode> SceneNodePtr;
+	using SceneNodePtr = std::shared_ptr<SceneNode>;
 	class SceneObjectLightSourceProxy;
 	using SceneObjectLightSourceProxyPtr = std::shared_ptr<SceneObjectLightSourceProxy>;
 	class SceneObjectCameraProxy;

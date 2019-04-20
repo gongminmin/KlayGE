@@ -165,14 +165,15 @@ void Refract::OnCreate()
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractorRenderable>);
 
-	refractor_ = MakeSharedPtr<SceneNode>(refractor_model_->Mesh(0), SceneNode::SOA_Cullable);
+	refractor_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(refractor_model_->Mesh(0)), SceneNode::SOA_Cullable);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(refractor_);
 
-	checked_pointer_cast<RefractorRenderable>(refractor_->GetRenderable())->CompressedCubeMap(y_cube_map, c_cube_map);
+	refractor_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RefractorRenderable>().CompressedCubeMap(
+		y_cube_map, c_cube_map);
 
 	auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 	skybox_renderable->CompressedCubeMap(y_cube_map, c_cube_map);
-	skybox_ = MakeSharedPtr<SceneNode>(skybox_renderable, SceneNode::SOA_NotCastShadow);
+	skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -283,7 +284,7 @@ void Refract::DoUpdateOverlay()
 uint32_t Refract::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	auto& refractor_renderable = checked_cast<RefractorRenderable&>(*refractor_->GetRenderable());
+	auto& refractor_renderable = refractor_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RefractorRenderable>();
 
 	switch (pass)
 	{

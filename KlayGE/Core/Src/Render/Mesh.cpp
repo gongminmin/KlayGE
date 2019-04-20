@@ -510,13 +510,14 @@ namespace KlayGE
 				}
 				new_nodes.push_back(new_node);
 
-				for (uint32_t i = 0; i < node.NumRenderables(); ++ i)
+				for (uint32_t i = 0; i < node.NumComponents(); ++ i)
 				{
 					for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++ mesh_index)
 					{
-						if (node.GetRenderable(i) == source.Mesh(mesh_index))
+						if (&checked_cast<RenderableComponent&>(*node.ComponentByIndex(i)).BoundRenderable() ==
+							source.Mesh(mesh_index).get())
 						{
-							new_node->AddRenderable(this->Mesh(mesh_index));
+							new_node->AddComponent(MakeSharedPtr<RenderableComponent>(this->Mesh(mesh_index)));
 							break;
 						}
 					}
@@ -1567,7 +1568,7 @@ namespace KlayGE
 		{
 			for (auto mesh_index : node.second)
 			{
-				node.first->AddRenderable(meshes[mesh_index]);
+				node.first->AddComponent(MakeSharedPtr<RenderableComponent>(meshes[mesh_index]));
 			}
 		}
 
@@ -1746,8 +1747,9 @@ namespace KlayGE
 			os.write(reinterpret_cast<char*>(&node_parent), sizeof(node_parent));
 
 			std::vector<uint16_t> mesh_indices;
-			nodes[i]->ForEachRenderable([&renderables, &mesh_indices](Renderable& mesh)
+			nodes[i]->ForEachComponentOfType<RenderableComponent>([&renderables, &mesh_indices](RenderableComponent& mesh_comp)
 				{
+					auto& mesh = mesh_comp.BoundRenderable();
 					for (size_t i = 0; i < renderables.size(); ++ i)
 					{
 						if (renderables[i] == &mesh)

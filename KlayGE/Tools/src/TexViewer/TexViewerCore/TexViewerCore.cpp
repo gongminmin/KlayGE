@@ -122,7 +122,7 @@ namespace KlayGE
 		font_ = SyncLoadFont("gkai00mp.kfont");
 
 		quad_ = MakeSharedPtr<RenderQuad>();
-		quad_so_ = MakeSharedPtr<SceneNode>(quad_,
+		quad_so_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(quad_),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		quad_so_->Visible(false);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(quad_so_);

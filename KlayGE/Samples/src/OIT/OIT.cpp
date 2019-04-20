@@ -594,7 +594,8 @@ void OITApp::OnCreate()
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	auto skybox = MakeSharedPtr<RenderableSkyBox>();
 	skybox->CompressedCubeMap(y_cube_map, c_cube_map);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(MakeSharedPtr<SceneNode>(skybox, SceneNode::SOA_NotCastShadow));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(
+		MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	depth_texture_support_ = caps.depth_texture_support;
 

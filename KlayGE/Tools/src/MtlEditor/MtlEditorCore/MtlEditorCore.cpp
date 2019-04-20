@@ -229,6 +229,8 @@ namespace KlayGE
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 		deferred_rendering_->SSVOEnabled(0, false);
 
+		SceneNode& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 		ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 		ambient_light_->Color(float3(0.1f, 0.1f, 0.1f));
 		ambient_light_->AddToSceneManager();
@@ -239,13 +241,13 @@ namespace KlayGE
 		main_light_->BindUpdateFunc(LightSourceUpdate());
 		main_light_->AddToSceneManager();
 
-		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderAxis>(),
+		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderAxis>()),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(axis_);
+		root_node.AddChild(axis_);
 
-		grid_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderGrid>(),
+		grid_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderGrid>()),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_);
+		root_node.AddChild(grid_);
 
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 		if (Context::Instance().Config().graphics_cfg.gamma)
@@ -267,17 +269,18 @@ namespace KlayGE
 		}
 		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableSkyBox>(), SceneNode::SOA_NotCastShadow);
-		checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(default_cube_map_);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
+		auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
+		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
+		skybox_renderable->CubeMap(default_cube_map_);
+		root_node.AddChild(skybox_);
 
 		ambient_light_->SkylightTex(default_cube_map_);
 
-		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableLineBox>(),
+		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderableLineBox>()),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(selected_bb_);
-		checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetColor(Color(1, 1, 1, 1));
+		root_node.AddChild(selected_bb_);
+		selected_bb_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderableLineBox>().SetColor(Color(1, 1, 1, 1));
 
 		this->LookAt(float3(-5, 5, -5), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 		this->Proj(0.1f, 100);
@@ -331,9 +334,11 @@ namespace KlayGE
 		imposter_path.replace_extension(".impml");
 		std::string imposter_name = imposter_path.string();
 
+		auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 		if (object_)
 		{
-			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(object_);
+			root_node.RemoveChild(object_);
 			object_.reset();
 
 			ResLoader::Instance().Unload(model_);
@@ -341,14 +346,14 @@ namespace KlayGE
 		}
 		if (skeleton_object_)
 		{
-			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(skeleton_object_);
+			root_node.RemoveChild(skeleton_object_);
 			skeleton_object_.reset();
 
 			skeleton_model_.reset();
 		}
 		if (imposter_)
 		{
-			Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(imposter_);
+			root_node.RemoveChild(imposter_);
 			imposter_.reset();
 		}
 
@@ -366,15 +371,15 @@ namespace KlayGE
 		if (checked_pointer_cast<DetailedSkinnedModel>(model_)->NumJoints() > 0)
 		{
 			skeleton_model_ = MakeSharedPtr<SkeletonMesh>(*model_);
-			skeleton_object_ = MakeSharedPtr<SceneNode>(skeleton_model_, 0);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skeleton_object_);
+			skeleton_object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skeleton_model_), 0);
+			root_node.AddChild(skeleton_object_);
 		}
 
 		if (!ResLoader::Instance().Locate(imposter_name).empty())
 		{
 			imposter_ = MakeSharedPtr<SceneNode>(
-				MakeSharedPtr<RenderImpostor>(imposter_name, model_->RootNode()->PosBoundOS()), 0);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(imposter_);
+				MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderImpostor>(imposter_name, model_->RootNode()->PosBoundOS())), 0);
+			root_node.AddChild(imposter_);
 			imposter_->Visible(false);
 		}
 
@@ -431,8 +436,9 @@ namespace KlayGE
 
 			if (model_)
 			{
-				AABBox bb = MathLib::transform_aabb(model_->RootNode()->PosBoundWS(), camera.ViewMatrix())
-					| MathLib::transform_aabb(grid_->GetRenderable()->PosBound(), camera.ViewMatrix());
+				AABBox bb = MathLib::transform_aabb(model_->RootNode()->PosBoundWS(), camera.ViewMatrix()) |
+							MathLib::transform_aabb(
+								grid_->FirstComponentOfType<RenderableComponent>()->BoundRenderable().PosBound(), camera.ViewMatrix());
 				float near_plane = std::max(0.01f, bb.Min().z() * 0.8f);
 				float far_plane = std::max(near_plane + 0.1f, bb.Max().z() * 1.2f);
 				this->Proj(near_plane, far_plane);
@@ -569,18 +575,19 @@ namespace KlayGE
 
 			if (!!c_tex)
 			{
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CompressedCubeMap(y_tex, c_tex);
+				skybox_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderableSkyBox>().CompressedCubeMap(
+					y_tex, c_tex);
 				ambient_light_->SkylightTex(y_tex, c_tex);
 			}
 			else
 			{
-				checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(y_tex);
+				skybox_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderableSkyBox>().CubeMap(y_tex);
 				ambient_light_->SkylightTex(y_tex);
 			}
 		}
 		else
 		{
-			checked_pointer_cast<RenderableSkyBox>(skybox_->GetRenderable())->CubeMap(default_cube_map_);
+			skybox_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderableSkyBox>().CubeMap(default_cube_map_);
 			ambient_light_->SkylightTex(default_cube_map_);
 		}
 	}
@@ -1175,7 +1182,7 @@ namespace KlayGE
 			{
 				obb = MathLib::convert_to_obbox(mesh->PosBound());
 			}
-			checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetBox(obb);
+			selected_bb_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderableLineBox>().SetBox(obb);
 			selected_bb_->TransformToParent(object_->TransformToParent());
 			selected_bb_->Visible(true);
 		}

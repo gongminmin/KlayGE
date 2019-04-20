@@ -315,19 +315,20 @@ public:
 				float4x4 const & mat = node.TransformToWorld();
 				float4x4 const mat_it = MathLib::transpose(MathLib::inverse(mat));
 
-				node.ForEachRenderable([&](Renderable& renderable)
+				node.ForEachComponentOfType<RenderableComponent>([&](RenderableComponent& renderable_comp)
 					{
+						auto const& mesh = renderable_comp.BoundRenderableOfType<StaticMesh>();
+
 						uint32_t mesh_index = 0;
 						for (uint32_t i = 0; i < target->NumMeshes(); ++ i)
 						{
-							if (target->Mesh(i).get() == &renderable)
+							if (target->Mesh(i).get() == &mesh)
 							{
 								mesh_index = i;
 								break;
 							}
 						}
 
-						auto const& mesh = checked_cast<StaticMesh&>(renderable);
 						auto const& sanity_mesh = checked_cast<StaticMesh&>(*sanity_model->Mesh(mesh_index));
 
 						EXPECT_EQ(mesh.MaterialID(), sanity_mesh.MaterialID());

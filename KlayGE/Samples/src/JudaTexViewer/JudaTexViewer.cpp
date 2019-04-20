@@ -191,8 +191,8 @@ void JudaTexViewer::OnCreate()
 	grid_border_renderable_ = MakeSharedPtr<RenderGridBorder>();
 
 	node_ = MakeSharedPtr<SceneNode>(0);
-	node_->AddRenderable(tile_renderable_);
-	node_->AddRenderable(grid_border_renderable_);
+	node_->AddComponent(MakeSharedPtr<RenderableComponent>(tile_renderable_));
+	node_->AddComponent(MakeSharedPtr<RenderableComponent>(grid_border_renderable_));
 	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(node_);
 
 	this->OpenJudaTex("klayge_logo.jdt");

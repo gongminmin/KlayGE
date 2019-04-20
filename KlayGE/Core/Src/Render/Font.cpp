@@ -871,7 +871,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(font_renderable_), fsn_attrib_);
 			font_renderable_->AddText2D(x, y, z, xScale, yScale, clr, text, font_size);
 			Context::Instance().SceneManagerInstance().OverlayRootNode().AddChild(font_node);
 		}
@@ -885,7 +885,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(font_renderable_), fsn_attrib_);
 			font_renderable_->AddText2D(rc, z, xScale, yScale, clr, text, font_size, align);
 			Context::Instance().SceneManagerInstance().OverlayRootNode().AddChild(font_node);
 		}
@@ -897,7 +897,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			auto font_node = MakeSharedPtr<SceneNode>(font_renderable_, fsn_attrib_);
+			auto font_node = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(font_renderable_), fsn_attrib_);
 			font_renderable_->AddText3D(mvp, clr, text, font_size);
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(font_node);
 		}
