@@ -201,9 +201,6 @@ namespace KlayGE
 		}
 		bool AllHWResourceReady() const;
 
-		bool Enabled() const;
-		void Enabled(bool enabled);
-
 		// For select mode
 
 		virtual void ObjectID(uint32_t id);
@@ -276,8 +273,6 @@ namespace KlayGE
 		std::vector<RenderLayoutPtr> rls_;
 
 		int32_t active_lod_ = 0;
-
-		bool enabled_ = true;
 
 		// For select mode
 

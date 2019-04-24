@@ -157,8 +157,8 @@ namespace KlayGE
 				KFL_UNUSED(elapsed_time);
 
 				auto& inf_terrain = checked_cast<InfTerrainSceneObject&>(node);
-				auto& inf_terrain_renderable =
-					node.FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<InfTerrainRenderable>();
+				auto& inf_terrain_renderable_comp = *node.FirstComponentOfType<RenderableComponent>();
+				auto& inf_terrain_renderable = inf_terrain_renderable_comp.BoundRenderableOfType<InfTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -216,7 +216,7 @@ namespace KlayGE
 				}
 				inf_terrain_renderable.OffsetY(sy);
 
-				inf_terrain_renderable.Enabled(intersect);
+				inf_terrain_renderable_comp.Enabled(intersect);
 			});
 	}
 

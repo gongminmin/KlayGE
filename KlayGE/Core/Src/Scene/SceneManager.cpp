@@ -483,7 +483,7 @@ namespace KlayGE
 		Camera& camera = app.ActiveCamera();
 		auto& scene_nodes = (urt & App3DFramework::URV_Overlay) ? all_overlay_nodes_ : all_scene_nodes_;
 
-		for (auto const & node : scene_nodes)
+		for (auto* node : scene_nodes)
 		{
 			node->VisibleMark(BO_No);
 		}
@@ -547,7 +547,7 @@ namespace KlayGE
 			}
 		}
 
-		for (auto const & node : scene_nodes)
+		for (auto* node : scene_nodes)
 		{
 			if (node->VisibleMark() != BO_No)
 			{
@@ -562,7 +562,7 @@ namespace KlayGE
 			{
 				node->ForEachComponentOfType<RenderableComponent>([node](RenderableComponent& renderable_comp) {
 					auto& renderable = renderable_comp.BoundRenderable();
-					if (renderable.Enabled() && (renderable.GetRenderTechnique() != nullptr))
+					if (renderable_comp.Enabled() && (renderable.GetRenderTechnique() != nullptr))
 					{
 						if (0 == renderable.NumInstances())
 						{

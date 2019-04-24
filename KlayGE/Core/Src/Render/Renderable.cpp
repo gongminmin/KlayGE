@@ -379,16 +379,6 @@ namespace KlayGE
 		return ready;
 	}
 
-	bool Renderable::Enabled() const
-	{
-		return enabled_;
-	}
-
-	void Renderable::Enabled(bool enabled)
-	{
-		enabled_ = enabled;
-	}
-
 	void Renderable::ObjectID(uint32_t id)
 	{
 		select_mode_object_id_ = float4(((id & 0xFF) + 0.5f) / 255.0f,
