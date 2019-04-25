@@ -34,6 +34,7 @@
 #include <KFL/Color.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KFL/Hash.hpp>
@@ -217,10 +218,10 @@ namespace KlayGE
 			float3 movement(x, y, z);
 			movement *= moveScaler_;
 
-			float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(MathLib::translation(movement) * camera_node.TransformToParent());
 
-			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ForwardVec() * camera_->LookAtDist(),
-				camera_->UpVec());
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -249,7 +250,11 @@ namespace KlayGE
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec)));
+
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -268,7 +273,11 @@ namespace KlayGE
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec)));
+
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -386,7 +395,11 @@ namespace KlayGE
 		pos += offset;
 		target_ += offset;
 
-		camera_->ViewParams(pos, target_, camera_->UpVec());
+		camera_->LookAtDist(MathLib::length(target_ - pos));
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, target_, camera_->UpVec())));
+
+		camera_->DirtyTransforms();
 	}
 
 	void TrackballCameraController::Rotate(float offset_x, float offset_y)
@@ -414,7 +427,11 @@ namespace KlayGE
 		dir /= dist;
 		float3 up = MathLib::cross(dir, right_);
 
-		camera_->ViewParams(pos, pos + dir * dist, up);
+		camera_->LookAtDist(dist);
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, pos + dir * dist, up)));
+
+		camera_->DirtyTransforms();
 	}
 
 	void TrackballCameraController::Zoom(float offset_x, float offset_y)
@@ -431,7 +448,11 @@ namespace KlayGE
 			reverse_target_ = false;
 		}
 
-		camera_->ViewParams(pos, pos + camera_->ForwardVec() * camera_->LookAtDist(), camera_->UpVec());
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(pos, pos + camera_->ForwardVec() * camera_->LookAtDist(), camera_->UpVec())));
+
+		camera_->DirtyTransforms();
 	}
 
 
@@ -616,16 +637,16 @@ namespace KlayGE
 		CameraController::AttachCamera(camera);
 
 		start_time_ = Context::Instance().AppInstance().AppTime();
-		camera.BindUpdateFunc(
-			[this](Camera& camera, float app_time, float elapsed_time)
+		connection_ = camera.OnMainThreadUpdate().Connect(
+			[this](SceneComponent& component, float app_time, float elapsed_time)
 			{
-				this->UpdateCameraFunc(camera, app_time, elapsed_time);
+				this->UpdateCameraFunc(checked_cast<Camera&>(component), app_time, elapsed_time);
 			});
 	}
 
 	void CameraPathController::DetachCamera()
 	{
-		camera_->BindUpdateFunc(std::function<void(Camera&, float, float)>());
+		camera_->OnMainThreadUpdate().Disconnect(connection_);
 
 		CameraController::DetachCamera();
 	}
@@ -667,7 +688,9 @@ namespace KlayGE
 							float3 up = MathLib::lerp(curve.up_ctrl_pts[j + 0],
 								curve.up_ctrl_pts[j + 1], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -692,7 +715,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -717,7 +742,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -742,7 +769,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -760,6 +789,8 @@ namespace KlayGE
 				frame -= curve.num_frames;
 			}
 		}
+
+		camera_->DirtyTransforms();
 	}
 
 	CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res)

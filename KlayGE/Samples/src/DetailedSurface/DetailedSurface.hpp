@@ -29,7 +29,6 @@ private:
 
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::JudaTexturePtr juda_tex_;

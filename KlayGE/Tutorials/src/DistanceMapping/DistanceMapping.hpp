@@ -24,7 +24,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 };
 

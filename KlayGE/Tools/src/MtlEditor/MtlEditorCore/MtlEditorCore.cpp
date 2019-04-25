@@ -178,15 +178,6 @@ namespace
 	private:
 		ImposterPtr imposter_;
 	};
-
-	class LightSourceUpdate
-	{
-	public:
-		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
-		{
-			light.Direction(Context::Instance().AppInstance().ActiveCamera().ForwardVec());
-		}
-	};
 }
 
 namespace KlayGE
@@ -233,13 +224,21 @@ namespace KlayGE
 
 		ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 		ambient_light_->Color(float3(0.1f, 0.1f, 0.1f));
-		ambient_light_->AddToSceneManager();
+		root_node.AddComponent(ambient_light_);
 
 		main_light_ = MakeSharedPtr<DirectionalLightSource>();
 		main_light_->Attrib(LightSource::LSA_NoShadow);
 		main_light_->Color(float3(1.0f, 1.0f, 1.0f));
-		main_light_->BindUpdateFunc(LightSourceUpdate());
-		main_light_->AddToSceneManager();
+
+		auto main_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		main_light_node->AddComponent(main_light_);
+		main_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			node.TransformToParent(Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix());
+		});
+		root_node.AddChild(main_light_node);
 
 		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderAxis>()),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);

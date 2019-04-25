@@ -168,14 +168,14 @@ namespace
 			}
 			else if (Gen_Shadow_Pass == pass_)
 			{
-				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+				float4x4 light_model = light_->BoundSceneNode()->TransformToParent();
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
 				*(effect_->ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 			}
 			else
 			{
-				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+				float4x4 light_model = light_->BoundSceneNode()->TransformToParent();
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 				float4x4 first_light_view = light_->SMCamera(0)->ViewMatrix();
 
@@ -277,7 +277,7 @@ namespace
 
 			case Gen_Shadow_Pass:
 				{
-					float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+					float4x4 light_model = light_->BoundSceneNode()->TransformToParent();
 					float4x4 inv_light_model = MathLib::inverse(light_model);
 
 					*(scene_effect_->ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
@@ -548,30 +548,39 @@ void CausticsMapApp::OnCreate()
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	light_node->TransformToParent(MathLib::inverse(MathLib::look_at_lh(float3(0, 30, 0), float3(0, 0, 0), float3(0, 0, 1))));
+	root_node.AddChild(light_node);
+
 	//Light
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(10, 10, 10));
 	light_->Falloff(float3(1, 0, 0.01f));
-	light_->Position(float3(0, 30, 0));
-	light_->Direction(MathLib::normalize(-light_->Position()));
 	light_->OuterAngle(PI / 8);
-	light_->AddToSceneManager();
+	light_node->AddComponent(light_);
+
+	auto light_proxy = LoadLightSourceProxyModel(light_);
+	light_node->AddChild(light_proxy->RootNode());
 
 	//dummy light for Shadow
 	dummy_light_ = MakeSharedPtr<PointLightSource>();
 	dummy_light_->Attrib(0);
 	dummy_light_->Color(light_->Color());
 	dummy_light_->Falloff(light_->Falloff());
-	dummy_light_->Position(light_->Position());
+	light_node->AddComponent(dummy_light_);
 
 	//for env map generating
+	auto dummy_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	dummy_light_env_ = MakeSharedPtr<PointLightSource>();
-	dummy_light_env_->Position(float3(0.0f, 20.0f, 0.0f));
-	dummy_light_env_->AddToSceneManager();
+	dummy_light_node->AddComponent(dummy_light_env_);
+	dummy_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	root_node.AddChild(light_proxy_->RootNode());
+		node.TransformToParent(MathLib::translation(refract_model_->RootNode()->PosBoundWS().Center()));
+	});
+	root_node.AddChild(dummy_light_node);
 
 	//Input Bind
 	InputEngine& ie(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -946,8 +955,6 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	//Pass 0 ~ 3 Caustics Map
 	if (0 == pass)
 	{
-		dummy_light_env_->Position(refract_model_->RootNode()->PosBoundWS().Center());
-
 		if (depth_texture_support_)
 		{
 			checked_pointer_cast<ReceivePlane>(plane_renderable_)->CausticsPass(Position_Pass);

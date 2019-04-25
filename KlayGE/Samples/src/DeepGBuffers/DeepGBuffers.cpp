@@ -98,28 +98,6 @@ namespace
 		RenderEffectPtr no_lighting_gbuffers_effect_;
 	};
 
-	class SpotLightSourceUpdate
-	{
-	public:
-		explicit SpotLightSourceUpdate(float3 const & pos)
-			: init_pos_(pos)
-		{
-		}
-
-		void operator()(LightSource& light, float app_time, float elapsed_time)
-		{
-			KFL_UNUSED(elapsed_time);
-
-			float3 new_pos = MathLib::transform_coord(float3(init_pos_.x(), 0, init_pos_.z()), MathLib::rotation_y(app_time));
-			new_pos.y() = init_pos_.y();
-			light.Position(new_pos);
-			light.Direction(-new_pos);
-		}
-
-	private:
-		float3 init_pos_;
-	};
-
 
 	enum
 	{
@@ -180,36 +158,36 @@ void DeepGBuffersApp::OnCreate()
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-	ambient_light->AddToSceneManager();
-	
-	spot_light_[0] = MakeSharedPtr<SpotLightSource>();
-	spot_light_[0]->Attrib(LightSource::LSA_NoShadow);
-	spot_light_[0]->Color(float3(100, 0, 0));
-	spot_light_[0]->Falloff(float3(1, 0, 1));
-	spot_light_[0]->Position(float3(10, 5, 10));
-	spot_light_[0]->Direction(float3(0, 1, 0));
-	spot_light_[0]->OuterAngle(PI / 2.5f);
-	spot_light_[0]->InnerAngle(PI / 4);
-	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate(spot_light_[0]->Position()));
-	spot_light_[0]->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
-	spot_light_[1] = MakeSharedPtr<SpotLightSource>();
-	spot_light_[1]->Attrib(LightSource::LSA_NoShadow);
-	spot_light_[1]->Color(float3(0, 100, 0));
-	spot_light_[1]->Falloff(float3(1, 0, 1));
-	spot_light_[1]->Position(float3(-10, 5, -10));
-	spot_light_[1]->Direction(float3(0, 1, 0));
-	spot_light_[1]->OuterAngle(PI / 2.5f);
-	spot_light_[1]->InnerAngle(PI / 4);
-	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate(spot_light_[1]->Position()));
-	spot_light_[1]->AddToSceneManager();
+	float3 const light_colors[] = {{100, 0, 0}, {0, 100, 0}};
+	float3 const light_positions[] = {{10, 5, 10}, {-10, 5, -10}};
+	for (uint32_t i = 0; i < 2; ++i)
+	{
+		auto spot_light = MakeSharedPtr<SpotLightSource>();
+		spot_light->Attrib(LightSource::LSA_NoShadow);
+		spot_light->Color(light_colors[i]);
+		spot_light->Falloff(float3(1, 0, 1));
+		spot_light->OuterAngle(PI / 2.5f);
+		spot_light->InnerAngle(PI / 4);
+		float3 const light_pos = light_positions[i];
+		auto spot_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		spot_light_node->OnMainThreadUpdate().Connect([light_pos](SceneNode& node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(elapsed_time);
 
-	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
-	spot_light_src_[0]->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(spot_light_src_[0]->RootNode());
-	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
-	spot_light_src_[1]->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(spot_light_src_[1]->RootNode());
+			float3 new_pos = MathLib::transform_coord(float3(light_pos.x(), 0, light_pos.z()), MathLib::rotation_y(app_time));
+			new_pos.y() = light_pos.y();
+			node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(new_pos, float3(0, 0, 0))));
+		});
+		spot_light_node->AddComponent(spot_light);
+		root_node.AddChild(spot_light_node);
+
+		auto spot_light_proxy = LoadLightSourceProxyModel(spot_light);
+		spot_light_proxy->RootNode()->TransformToParent(
+			MathLib::scaling(0.1f, 0.1f, 0.1f) * spot_light_proxy->RootNode()->TransformToParent());
+		spot_light_node->AddChild(spot_light_proxy->RootNode());
+	}
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

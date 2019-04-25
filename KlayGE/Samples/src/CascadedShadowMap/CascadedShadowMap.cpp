@@ -66,8 +66,17 @@ void CascadedShadowMapApp::OnCreate()
 	this->LookAt(float3(-25.72f, 29.65f, 24.57f), float3(-24.93f, 29.09f, 24.32f));
 	this->Proj(0.05f, 300.0f);
 
-	light_ctrl_camera_.ViewParams(float3(-50, 50, -50), float3(0, 0, 0), float3(0, 1, 0));
-	light_controller_.AttachCamera(light_ctrl_camera_);
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
+	auto light_ctrl_camera_node =
+		MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	light_ctrl_camera_ = MakeSharedPtr<Camera>();
+	light_ctrl_camera_node->AddComponent(light_ctrl_camera_);
+	float3 const light_pos = float3(-50, 50, -50);
+	light_ctrl_camera_->LookAtDist(MathLib::length(light_pos));
+	light_ctrl_camera_node->TransformToParent(MathLib::inverse(MathLib::look_at_lh(light_pos, float3(0, 0, 0), float3(0, 1, 0))));
+	root_node.AddChild(light_ctrl_camera_node);
+	light_controller_.AttachCamera(*light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
@@ -87,25 +96,23 @@ void CascadedShadowMapApp::OnCreate()
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
-
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-	ambient_light->AddToSceneManager();
-	
-	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(0);
-	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
-	sun_light_->Color(float3(1, 1, 1));
-	sun_light_->BindUpdateFunc([this](LightSource& light, float app_time, float elapsed_time)
-	{
+	root_node.AddComponent(ambient_light);
+
+	auto sun_light = MakeSharedPtr<DirectionalLightSource>();
+	sun_light->Attrib(0);
+	sun_light->Color(float3(1, 1, 1));
+	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	sun_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
 		KFL_UNUSED(app_time);
 		KFL_UNUSED(elapsed_time);
 
-		light.Direction(light_ctrl_camera_.ForwardVec());
+		node.TransformToParent(light_ctrl_camera_->InverseViewMatrix());
 	});
-	sun_light_->AddToSceneManager();
+	sun_light_node->AddComponent(sun_light);
+	root_node.AddChild(sun_light_node);
 
 	fpcController_.Scalers(0.05f, 1.0f);
 

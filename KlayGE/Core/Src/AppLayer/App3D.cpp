@@ -773,7 +773,11 @@ namespace KlayGE
 	void App3DFramework::LookAt(float3 const & vEye, float3 const & vLookAt,
 												float3 const & vUp)
 	{
-		this->ActiveCamera().ViewParams(vEye, vLookAt, vUp);
+		auto& camera = this->ActiveCamera();
+		camera.LookAtDist(MathLib::length(vLookAt - vEye));
+
+		auto& camera_node = *camera.BoundSceneNode();
+		camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(vEye, vLookAt, vUp)));
 	}
 
 	// …Ë÷√Õ∂…‰æÿ’Û

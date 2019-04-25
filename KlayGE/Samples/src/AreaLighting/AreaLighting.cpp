@@ -32,18 +32,19 @@ using namespace KlayGE;
 
 namespace
 {
-	class PointLightSourceUpdate
+	class LightNodeUpdate
 	{
 	public:
-		PointLightSourceUpdate(float move_speed, float3 const & pos)
+		LightNodeUpdate(float move_speed, float3 const& pos)
 			: move_speed_(move_speed), pos_(pos)
 		{
 		}
 
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			light.ModelMatrix(MathLib::translation(sin(app_time * 1000 * move_speed_), 0.0f, 0.0f)
-				* MathLib::translation(pos_));
+			KFL_UNUSED(elapsed_time);
+
+			node.TransformToParent(MathLib::translation(sin(app_time * 1000 * move_speed_) + pos_.x(), pos_.y(), pos_.z()));
 		}
 
 	private:
@@ -103,49 +104,68 @@ void AreaLightingApp::OnCreate()
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-	ambient_light->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
-	point_light_ = MakeSharedPtr<PointLightSource>();
-	point_light_->Attrib(0);
-	point_light_->Color(float3(0.8f, 0.96f, 1.0f) * 40.0f);
-	point_light_->Position(float3(0, 10, 0));
-	point_light_->Falloff(float3(1, 0, 1));
-	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, point_light_->Position()));
-	point_light_->AddToSceneManager();
-	point_light_->Enabled(false);
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	float3 const light_pos(0, 10, 0);
+	light_node->TransformToParent(MathLib::translation(light_pos));
+	light_node->OnMainThreadUpdate().Connect(LightNodeUpdate(1 / 1000.0f, light_pos));
+	root_node.AddChild(light_node);
 
-	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
-	point_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(point_light_src_->RootNode());
-	point_light_src_->RootNode()->Visible(false);
+	float3 const light_color = float3(0.8f, 0.96f, 1.0f) * 40.0f;
+	float3 const light_falloff = float3(1, 0, 1);
 
-	sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
-	sphere_area_light_->Attrib(0);
-	sphere_area_light_->Color(point_light_->Color());
-	sphere_area_light_->Position(point_light_->Position());
-	sphere_area_light_->Falloff(point_light_->Falloff());
-	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, sphere_area_light_->Position()));
-	sphere_area_light_->AddToSceneManager();
-	sphere_area_light_->Enabled(false);
+	{
+		point_light_node_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		point_light_node_->Visible(false);
 
-	sphere_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sphere_area_light_);
-	sphere_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(sphere_area_light_src_->RootNode());
-	sphere_area_light_src_->RootNode()->Visible(false);
+		point_light_ = MakeSharedPtr<PointLightSource>();
+		point_light_->Attrib(0);
+		point_light_->Color(light_color);
+		point_light_->Falloff(light_falloff);
+		point_light_node_->AddComponent(point_light_);
 
-	tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
-	tube_area_light_->Attrib(0);
-	tube_area_light_->Color(point_light_->Color());
-	tube_area_light_->Position(point_light_->Position());
-	tube_area_light_->Falloff(point_light_->Falloff());
-	tube_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, tube_area_light_->Position()));
-	tube_area_light_->AddToSceneManager();
-	tube_area_light_->Enabled(false);
+		auto point_light_proxy_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		point_light_proxy_node->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f));
+		point_light_proxy_node->AddChild(LoadLightSourceProxyModel(point_light_)->RootNode());
+		point_light_node_->AddChild(point_light_proxy_node);
 
-	tube_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(tube_area_light_);
-	tube_area_light_src_->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(tube_area_light_src_->RootNode());
-	tube_area_light_src_->RootNode()->Visible(false);
+		light_node->AddChild(point_light_node_);
+	}
+	{
+		sphere_area_light_node_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		sphere_area_light_node_->Visible(false);
+
+		sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
+		sphere_area_light_->Attrib(0);
+		sphere_area_light_->Color(light_color);
+		sphere_area_light_->Falloff(light_falloff);
+		sphere_area_light_node_->AddComponent(sphere_area_light_);
+
+		sphere_area_light_proxy_node_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		sphere_area_light_proxy_node_->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f));
+		sphere_area_light_proxy_node_->AddChild(LoadLightSourceProxyModel(sphere_area_light_)->RootNode());
+		sphere_area_light_node_->AddChild(sphere_area_light_proxy_node_);
+
+		light_node->AddChild(sphere_area_light_node_);
+	}
+	{
+		tube_area_light_node_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		tube_area_light_node_->Visible(false);
+
+		tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
+		tube_area_light_->Attrib(0);
+		tube_area_light_->Color(light_color);
+		tube_area_light_->Falloff(light_falloff);
+		tube_area_light_node_->AddComponent(tube_area_light_);
+
+		tube_area_light_proxy_node_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+		tube_area_light_proxy_node_->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f));
+		tube_area_light_proxy_node_->AddChild(LoadLightSourceProxyModel(tube_area_light_)->RootNode());
+		tube_area_light_node_->AddChild(tube_area_light_proxy_node_);
+
+		light_node->AddChild(tube_area_light_node_);
+	}
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable);
 
@@ -250,12 +270,9 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 	switch (sender.GetSelectedIndex())
 	{
 	case 0:
-		point_light_->Enabled(true);
-		point_light_src_->RootNode()->Visible(true);
-		sphere_area_light_->Enabled(false);
-		sphere_area_light_src_->RootNode()->Visible(false);
-		tube_area_light_->Enabled(false);
-		tube_area_light_src_->RootNode()->Visible(false);
+		point_light_node_->Visible(true);
+		sphere_area_light_node_->Visible(false);
+		tube_area_light_node_->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
@@ -263,12 +280,9 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		break;
 
 	case 1:
-		point_light_->Enabled(false);
-		point_light_src_->RootNode()->Visible(false);
-		sphere_area_light_->Enabled(true);
-		sphere_area_light_src_->RootNode()->Visible(true);
-		tube_area_light_->Enabled(false);
-		tube_area_light_src_->RootNode()->Visible(false);
+		point_light_node_->Visible(false);
+		sphere_area_light_node_->Visible(true);
+		tube_area_light_node_->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(true);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(true);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
@@ -276,12 +290,9 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		break;
 
 	case 2:
-		point_light_->Enabled(false);
-		point_light_src_->RootNode()->Visible(false);
-		sphere_area_light_->Enabled(false);
-		sphere_area_light_src_->RootNode()->Visible(false);
-		tube_area_light_->Enabled(true);
-		tube_area_light_src_->RootNode()->Visible(true);
+		point_light_node_->Visible(false);
+		sphere_area_light_node_->Visible(false);
+		tube_area_light_node_->Visible(true);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
 		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(true);
@@ -298,7 +309,7 @@ void AreaLightingApp::RadiusChangedHandler(UISlider const & sender)
 	float radius = sender.GetValue() / 100.0f;
 
 	checked_pointer_cast<SphereAreaLightSource>(sphere_area_light_)->Radius(radius);
-	sphere_area_light_src_->Scaling(radius, radius, radius);
+	sphere_area_light_proxy_node_->TransformToParent(MathLib::scaling(radius, radius, radius));
 
 	std::wostringstream stream;
 	stream << L"Radius: " << radius;
@@ -310,7 +321,7 @@ void AreaLightingApp::LengthChangedHandler(UISlider const & sender)
 	float length = sender.GetValue() / 100.0f;
 
 	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, length));
-	tube_area_light_src_->Scaling(0.1f, 0.1f, length);
+	tube_area_light_proxy_node_->TransformToParent(MathLib::scaling(0.1f, 0.1f, length));
 
 	std::wostringstream stream;
 	stream << L"Length: " << length;

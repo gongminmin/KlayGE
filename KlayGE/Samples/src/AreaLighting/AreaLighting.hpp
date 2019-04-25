@@ -32,11 +32,13 @@ private:
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::LightSourcePtr point_light_;
-	KlayGE::SceneObjectLightSourceProxyPtr point_light_src_;
+	KlayGE::SceneNodePtr point_light_node_;
 	KlayGE::LightSourcePtr sphere_area_light_;
-	KlayGE::SceneObjectLightSourceProxyPtr sphere_area_light_src_;
+	KlayGE::SceneNodePtr sphere_area_light_node_;
+	KlayGE::SceneNodePtr sphere_area_light_proxy_node_;
 	KlayGE::LightSourcePtr tube_area_light_;
-	KlayGE::SceneObjectLightSourceProxyPtr tube_area_light_src_;
+	KlayGE::SceneNodePtr tube_area_light_node_;
+	KlayGE::SceneNodePtr tube_area_light_proxy_node_;
 
 	KlayGE::UIDialogPtr dialog_;
 

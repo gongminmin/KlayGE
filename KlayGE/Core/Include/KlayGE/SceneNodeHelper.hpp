@@ -28,65 +28,11 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObjectLightSourceProxy
-	{
-	public:
-		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
-		SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model);
-		SceneObjectLightSourceProxy(LightSourcePtr const & light, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
+	KLAYGE_CORE_API RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light,
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableLightSourceProxy>);
 
-		void Scaling(float x, float y, float z);
-		void Scaling(float3 const & s);
-
-		RenderModelPtr const & LightModel() const
-		{
-			return light_model_;
-		}
-
-		SceneNodePtr const & RootNode() const
-		{
-			return light_model_->RootNode();
-		}
-
-	private:
-		RenderModelPtr LoadModel(LightSourcePtr const & light, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
-
-	protected:
-		float4x4 model_scaling_;
-
-		LightSourcePtr light_;
-		RenderModelPtr light_model_;
-	};
-
-	class KLAYGE_CORE_API SceneObjectCameraProxy
-	{
-	public:
-		explicit SceneObjectCameraProxy(CameraPtr const & camera);
-		SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model);
-		SceneObjectCameraProxy(CameraPtr const & camera, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
-
-		void Scaling(float x, float y, float z);
-		void Scaling(float3 const & s);
-
-		RenderModelPtr const & CameraModel() const
-		{
-			return camera_model_;
-		}
-
-		SceneNodePtr const & RootNode() const
-		{
-			return camera_model_->RootNode();
-		}
-
-	private:
-		RenderModelPtr LoadModel(std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc);
-
-	protected:
-		float4x4 model_scaling_;
-
-		CameraPtr camera_;
-		RenderModelPtr camera_model_;
-	};
+	KLAYGE_CORE_API RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera,
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableCameraProxy>);
 }
 
 #endif		// _RENDERABLEHELPER_HPP

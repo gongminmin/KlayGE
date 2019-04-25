@@ -189,8 +189,17 @@ void AtmosphericScatteringApp::OnCreate()
 	obj_controller_.AttachCamera(this->ActiveCamera());
 	obj_controller_.Scalers(0.003f, 0.003f);
 
-	light_ctrl_camera_.ViewParams(float3(-0.01f, 0, 0), float3(0, 0, 0), float3(0, -1, 0));
-	light_controller_.AttachCamera(light_ctrl_camera_);
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
+	auto light_ctrl_camera_node =
+		MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	light_ctrl_camera_ = MakeSharedPtr<Camera>();
+	light_ctrl_camera_node->AddComponent(light_ctrl_camera_);
+	light_ctrl_camera_->LookAtDist(0.01f);
+	light_ctrl_camera_node->TransformToParent(
+		MathLib::inverse(MathLib::look_at_lh(float3(-0.01f, 0, 0), float3(0, 0, 0), float3(0, -1, 0))));
+	root_node.AddChild(light_ctrl_camera_node);
+	light_controller_.AttachCamera(*light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
 	planet_model_ = SyncLoadModel("geosphere.glb", EAH_GPU_Read | EAH_Immutable,
@@ -236,16 +245,21 @@ void AtmosphericScatteringApp::OnCreate()
 	this->LoadBeta(Color(38.05f, 82.36f, 214.65f, 1));
 	this->LoadAbsorb(Color(0.75f, 0.85f, 1, 1));
 
-	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(LightSource::LSA_NoShadow);
-	sun_light_->Color(float3(1, 1, 1));
-	sun_light_->AddToSceneManager();
+	auto sun_light = MakeSharedPtr<DirectionalLightSource>();
+	sun_light->Attrib(LightSource::LSA_NoShadow);
+	sun_light->Color(float3(1, 1, 1));
+	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	auto sun_light_proxy = LoadLightSourceProxyModel(sun_light);
+	sun_light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f) * sun_light_proxy->RootNode()->TransformToParent());
+	sun_light_node->AddChild(sun_light_proxy->RootNode());
+	sun_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
 
-	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-	sun_light_node->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f));
-	sun_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sun_light_);
-	sun_light_node->AddChild(sun_light_src_->RootNode());
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(sun_light_node);
+		node.TransformToParent(light_ctrl_camera_->InverseViewMatrix());
+	});
+	sun_light_node->AddComponent(sun_light);
+	root_node.AddChild(sun_light_node);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -429,14 +443,14 @@ uint32_t AtmosphericScatteringApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-	sun_light_->Direction(light_ctrl_camera_.ForwardVec());
-	planet_model_->ForEachMesh([this](Renderable& renderable)
+	float3 const& dir = light_ctrl_camera_->ForwardVec();
+	planet_model_->ForEachMesh([&dir](Renderable& renderable)
 		{
-			checked_cast<PlanetMesh&>(renderable).LightDir(-sun_light_->Direction());
+			checked_cast<PlanetMesh&>(renderable).LightDir(-dir);
 		});
-	atmosphere_model_->ForEachMesh([this](Renderable& renderable)
+	atmosphere_model_->ForEachMesh([&dir](Renderable& renderable)
 		{
-			checked_cast<AtmosphereMesh&>(renderable).LightDir(-sun_light_->Direction());
+			checked_cast<AtmosphereMesh&>(renderable).LightDir(-dir);
 		});
 
 	re.BindFrameBuffer(FrameBufferPtr());

@@ -55,7 +55,6 @@ private:
 
 	KlayGE::TexturePtr lamp_tex_;
 
-	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::uint32_t loading_percentage_;

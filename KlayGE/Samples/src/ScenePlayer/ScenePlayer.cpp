@@ -70,16 +70,18 @@ namespace
 		std::shared_ptr<std::string> script_;
 	};
 
-	class LightSourceUpdate : public PyScriptUpdate
+	class LightSourceNodeUpdate : public PyScriptUpdate
 	{
 	public:
-		explicit LightSourceUpdate(std::string const & script)
+		explicit LightSourceNodeUpdate(std::string const & script)
 			: PyScriptUpdate(script)
 		{
 		}
 
-		void operator()(LightSource& light, float app_time, float elapsed_time)
+		void operator()(SceneComponent& component, float app_time, float elapsed_time)
 		{
+			LightSource& light = checked_cast<LightSource&>(component);
+
 			std::any py_ret = this->Run(app_time, elapsed_time);
 			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
 			{
@@ -99,7 +101,7 @@ namespace
 							{
 								light_mat[i] = std::any_cast<float>(mat[i]);
 							}
-							light.ModelMatrix(light_mat);
+							light.BoundSceneNode()->TransformToParent(light_mat);
 						}
 					}
 				}
@@ -204,8 +206,10 @@ namespace
 		{
 		}
 
-		void operator()(Camera& camera, float app_time, float elapsed_time)
+		void operator()(SceneComponent& component, float app_time, float elapsed_time)
 		{
+			Camera& camera = checked_cast<Camera&>(component);
+
 			std::any py_ret = this->Run(app_time, elapsed_time);
 			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
 			{
@@ -282,7 +286,8 @@ namespace
 					}
 				}
 
-				camera.ViewParams(cam_eye, cam_lookat, cam_up);
+				camera.LookAtDist(MathLib::length(cam_lookat - cam_eye));
+				camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(cam_eye, cam_lookat, cam_up)));
 				camera.ProjParams(cam_fov, cam_aspect, cam_np, cam_fp);
 			}
 		}
@@ -324,7 +329,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 {
 	Context& context = Context::Instance();
 	SceneManager& sceneMgr(context.SceneManagerInstance());
-	sceneMgr.ClearLight();
 	sceneMgr.ClearObject();
 
 	RenderFactory& rf = context.RenderFactoryInstance();
@@ -334,7 +338,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	skybox_.reset();
 
 	lights_.clear();
-	light_proxies_.clear();
 
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
@@ -389,6 +392,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	for (XMLNodePtr light_node = root->FirstNode("light"); light_node; light_node = light_node->NextSibling("light"))
 	{
 		LightSourcePtr light;
+		SceneNodePtr scene_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 
 		std::string_view const lt_str = light_node->Attrib("type")->ValueString();
 		if ("ambient" == lt_str)
@@ -458,17 +462,16 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			light->Color(color);
 		}
 
-
+		float3 light_pos(0, 0, 0);
+		float3 light_dir(0, 0, 1);
 		if (light->Type() != LightSource::LT_Ambient)
 		{
 			XMLNodePtr dir_node = light_node->FirstNode("dir");
 			if (dir_node)
 			{
-				float3 dir;
 				auto v = dir_node->Attrib("v")->ValueString();
 				MemInputStreamBuf stream_buff(v.data(), v.size());
-				std::istream(&stream_buff) >> dir.x() >> dir.y() >> dir.z();
-				light->Direction(dir);
+				std::istream(&stream_buff) >> light_dir.x() >> light_dir.y() >> light_dir.z();
 			}
 		}
 		if ((LightSource::LT_Point == light->Type()) || (LightSource::LT_Spot == light->Type())
@@ -477,11 +480,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr pos_node = light_node->FirstNode("pos");
 			if (pos_node)
 			{
-				float3 pos;
 				auto v = pos_node->Attrib("v")->ValueString();
 				MemInputStreamBuf stream_buff(v.data(), v.size());
-				std::istream(&stream_buff) >> pos.x() >> pos.y() >> pos.z();
-				light->Position(pos);
+				std::istream(&stream_buff) >> light_pos.x() >> light_pos.y() >> light_pos.z();
 			}
 
 			XMLNodePtr fall_off_node = light_node->FirstNode("fall_off");
@@ -521,6 +522,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			// TODO: sphere area light and tube area light
 		}
 
+		scene_node->TransformToParent(
+			MathLib::to_matrix(MathLib::axis_to_axis(float3(0, 0, 1), light_dir)) * MathLib::translation(light_pos));
+		scene_node->AddComponent(light);
+
 		XMLNodePtr update_node = light_node->FirstNode("update");
 		if (update_node)
 		{
@@ -530,12 +535,12 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				std::string const update_script = std::string(update_node->ValueString());
 				if (!update_script.empty())
 				{
-					light->BindUpdateFunc(LightSourceUpdate(update_script));
+					light->OnMainThreadUpdate().Connect(LightSourceNodeUpdate(update_script));
 				}
 			}
 		}
 
-		light->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_node);
 		lights_.push_back(light);
 
 		XMLNodePtr scale_node = light_node->FirstNode("scale");
@@ -548,11 +553,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				std::istream(&stream_buff) >> scale.x() >> scale.y() >> scale.z();
 			}
 
-			auto light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
-			light_proxy->Scaling(scale);
-			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy->RootNode());
-
-			light_proxies_.push_back(light_proxy);
+			auto light_proxy = LoadLightSourceProxyModel(light);
+			light_proxy->RootNode()->TransformToParent(MathLib::scaling(scale) * light_proxy->RootNode()->TransformToParent());
+			scene_node->AddChild(light_proxy->RootNode());
 		}
 	}
 
@@ -729,11 +732,12 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		}
 
 		auto& camera = this->ActiveCamera();
-		camera.ViewParams(eye_pos, look_at, up);
+		camera.LookAtDist(MathLib::length(look_at - eye_pos));
+		camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye_pos, look_at, up)));
 		camera.ProjParams(fov, aspect, near_plane, far_plane);
 		if (!update_script.empty())
 		{
-			camera.BindUpdateFunc(CameraUpdate(update_script));
+			camera.OnMainThreadUpdate().Connect(CameraUpdate(update_script));
 		}
 	}
 }

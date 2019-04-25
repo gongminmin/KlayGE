@@ -818,12 +818,15 @@ void OceanApp::OnCreate()
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
+	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	// TODO: Fix the shadow flicking
 	sun_light_->Attrib(LightSource::LSA_NoShadow);
-	sun_light_->Direction(float3(0.267835f, -0.0517653f, -0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));
-	sun_light_->AddToSceneManager();
+	sun_light_node->TransformToParent(
+		MathLib::to_matrix(MathLib::axis_to_axis(float3(0, 0, 1), float3(0.267835f, -0.0517653f, -0.960315f))));
+	sun_light_node->AddComponent(sun_light_);
+	root_node.AddChild(sun_light_node);
 	
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
 	if (Context::Instance().Config().graphics_cfg.gamma)
@@ -873,6 +876,11 @@ void OceanApp::OnCreate()
 	reflection_fb_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 		scene_camera.NearPlane(), scene_camera.FarPlane());
+
+	auto reflection_camera_node =
+		MakeSharedPtr<SceneNode>(L"ReflectionCameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	reflection_camera_node->AddComponent(reflection_fb_->GetViewport()->camera);
+	root_node.AddChild(reflection_camera_node);
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
@@ -1145,7 +1153,9 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		float3 reflect_eye, reflect_at, reflect_up;
 		checked_pointer_cast<OceanObject>(ocean_)->ReflectViewParams(reflect_eye, reflect_at, reflect_up,
 			screen_camera_->EyePos(), screen_camera_->LookAt(), screen_camera_->UpVec());
-		reflection_fb_->GetViewport()->camera->ViewParams(reflect_eye, reflect_at, reflect_up);
+		reflection_fb_->GetViewport()->camera->LookAtDist(MathLib::length(reflect_at - reflect_eye));
+		reflection_fb_->GetViewport()->camera->BoundSceneNode()->TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(reflect_eye, reflect_at, reflect_up)));
 	}
 	else
 	{

@@ -142,7 +142,9 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 			}
 
 			float3 imposter_eye_pos = aabbox.Center() + eye_vec * diag_length * 0.5f;
-			imposter_camera->ViewParams(imposter_eye_pos, aabbox.Center(), up_vec);
+			imposter_camera->LookAtDist(MathLib::length(aabbox.Center() - imposter_eye_pos));
+			imposter_camera->BoundSceneNode()->TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(imposter_eye_pos, aabbox.Center(), up_vec)));
 
 			AABBox const aabb_es = MathLib::transform_aabb(aabbox, imposter_camera->ViewMatrix());
 			imposter_camera->ProjOrthoOffCenterParams(aabb_es.Min().x(), aabb_es.Max().y(), aabb_es.Max().x(), aabb_es.Min().y(),

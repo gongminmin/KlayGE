@@ -30,7 +30,6 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectLightSourceProxyPtr spot_light_src_[3];
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -55,9 +54,7 @@ private:
 	int id_num_lights_slider_;
 	int id_ctrl_camera_;
 
-	KlayGE::SpotLightSourcePtr spot_light_[3];
-	std::vector<KlayGE::LightSourcePtr> particle_lights_;
-	std::vector<KlayGE::SceneObjectLightSourceProxyPtr> particle_light_srcs_;
+	std::vector<KlayGE::SceneNodePtr> particle_light_nodes_;
 
 	KlayGE::ParticleSystemPtr ps_;
 };

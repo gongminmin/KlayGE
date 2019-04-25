@@ -186,6 +186,8 @@ namespace KlayGE
 		float start_time_;
 		float curr_frame_;
 		uint32_t frame_rate_;
+
+		Signal::Connection connection_;
 	};
 
 	KLAYGE_CORE_API CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res);

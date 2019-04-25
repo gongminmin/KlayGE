@@ -1166,7 +1166,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		{
 			Camera& camera = this->ActiveCamera();
 
-			camera.Update(app.AppTime(), app.FrameTime());
+			camera.MainThreadUpdate(app.AppTime(), app.FrameTime());
 
 			if (depth_texture_support_)
 			{

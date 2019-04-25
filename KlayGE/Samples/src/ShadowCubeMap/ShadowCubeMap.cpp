@@ -57,11 +57,11 @@ namespace
 			pass_index_ = pass_index;
 		}
 
-		void LightSrc(LightSourcePtr const & light_src)
+		void LightSrc(LightSourcePtr const& light_src)
 		{
 			light_pos_ = light_src->Position();
 
-			float4x4 light_model = MathLib::to_matrix(light_src->Rotation()) * MathLib::translation(light_src->Position());
+			float4x4 const light_model = light_src->BoundSceneNode()->TransformToParent();
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -343,14 +343,15 @@ namespace
 	};
 
 
-	class PointLightSourceUpdate
+	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			light.ModelMatrix(MathLib::rotation_z(0.4f)
-				* MathLib::rotation_y(app_time / 1.4f)
-				* MathLib::translation(2.0f, 12.0f, 4.0f));
+			KFL_UNUSED(elapsed_time);
+
+			node.TransformToParent(
+				MathLib::rotation_z(0.4f) * MathLib::rotation_y(app_time / 1.4f) * MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 	};
 
@@ -451,12 +452,15 @@ void ShadowCubeMap::OnCreate()
 	light_->Attrib(0);
 	light_->Color(float3(20, 20, 20));
 	light_->Falloff(float3(1, 1, 0));
-	light_->BindUpdateFunc(PointLightSourceUpdate());
-	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	light_proxy_->Scaling(0.5f, 0.5f, 0.5f);
-	root_node.AddChild(light_proxy_->RootNode());
+	auto light_proxy = LoadLightSourceProxyModel(light_);
+	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.5f, 0.5f, 0.5f) * light_proxy->RootNode()->TransformToParent());
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	light_node->AddComponent(light_);
+	light_node->AddChild(light_proxy->RootNode());
+	light_node->OnMainThreadUpdate().Connect(PointLightNodeUpdate());
+	root_node.AddChild(light_node);
 
 	for (int i = 0; i < 6; ++ i)
 	{
@@ -650,7 +654,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				float3 const pos = light_->Position();
 				float3 const lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
-				shadow_dual_buffers_[pass]->GetViewport()->camera->ViewParams(pos, lookat);
+
+				auto& camera = *shadow_dual_buffers_[pass]->GetViewport()->camera;
+				camera.LookAtDist(MathLib::length(lookat - pos));
+				camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
 
 				renderEngine.BindFrameBuffer(shadow_dual_buffers_[pass]);
 				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
@@ -747,7 +754,12 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 			case 0:
 				{
-					shadow_cube_one_buffer_->GetViewport()->camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
+					float3 const& pos = light_->Position();
+					float3 const lookat = pos + light_->Direction();
+
+					auto& camera = *shadow_cube_one_buffer_->GetViewport()->camera;
+					camera.LookAtDist(MathLib::length(lookat - pos));
+					camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
 
 					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
 					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);

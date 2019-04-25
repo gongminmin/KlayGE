@@ -205,6 +205,7 @@ void RasterizationOrderApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	ras_order_fb_ = rf.MakeFrameBuffer();
+	ras_order_fb_->GetViewport()->camera = rf.RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera;
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 

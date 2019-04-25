@@ -1406,11 +1406,11 @@ namespace KlayGE
 		lights_.clear();
 		sm_light_indices_.clear();
 
-		uint32_t const num_lights = scene_mgr.NumLights();
+		uint32_t const num_lights = scene_mgr.NumFrameLights();
 		
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			auto* light = scene_mgr.GetLight(i);
+			auto* light = scene_mgr.GetFrameLight(i);
 			if (light->Enabled() && (LightSource::LT_Ambient == light->Type()))
 			{
 				merged_ambient_light_->SkylightTex(light->SkylightTexY(), light->SkylightTexC());
@@ -1434,7 +1434,7 @@ namespace KlayGE
 		uint32_t num_sm_cube_lights = 0;
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			auto* light = scene_mgr.GetLight(i);
+			auto* light = scene_mgr.GetFrameLight(i);
 			if (light->Enabled())
 			{
 				if (LightSource::LT_Ambient == light->Type())
@@ -1750,10 +1750,9 @@ namespace KlayGE
 		{
 		case LightSource::LT_Spot:
 			{
-				float4x4 const & inv_light_view = light.SMCamera(0)->InverseViewMatrix();
 				float const scale = light.CosOuterInner().w();
 				float4x4 mat = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
-				float4x4 light_model = mat * inv_light_view;
+				float4x4 light_model = mat * light.BoundSceneNode()->TransformToWorld();
 				pvp.light_visibles[light_index] = (scene_mgr.AABBVisible(MathLib::transform_aabb(cone_aabb_, light_model)) != BO_No);
 			}
 			break;
@@ -3690,8 +3689,16 @@ namespace KlayGE
 					*reinterpret_cast<float4*>(lights_color
 						+ offset * lights_color_param_->Stride()) = light.Color();
 
-					float3 const & p = light.Position();
-					float3 loc_es = MathLib::transform_coord(p, pvp.view);
+					float3 loc_es;
+					if (type != LightSource::LT_Ambient)
+					{
+						float3 const& p = light.Position();
+						loc_es = MathLib::transform_coord(p, pvp.view);
+					}
+					else
+					{
+						loc_es = float3(0, 0, 0);
+					}
 					*reinterpret_cast<float4*>(lights_pos_es
 						+ offset * lights_pos_es_param_->Stride()) = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
@@ -3747,7 +3754,7 @@ namespace KlayGE
 					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 					if (LightSource::LT_Spot == type)
 					{
-						float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
+						float4x4 light_to_view = light.BoundSceneNode()->TransformToWorld() * pvp.view;
 						float const scale = light.CosOuterInner().w();
 						float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 						float4x4 light_mv = light_model * light_to_view;

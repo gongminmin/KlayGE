@@ -73,12 +73,15 @@ void SubSurfaceApp::OnCreate()
 	light_->Attrib(0);
 	light_->Color(float3(1.5f, 1.5f, 1.5f));
 	light_->Falloff(float3(1, 0.5f, 0.0f));
-	light_->Position(float3(0, 2, -3));
-	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	light_proxy_->Scaling(0.05f, 0.05f, 0.05f);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_proxy_->RootNode());
+	auto light_proxy = LoadLightSourceProxyModel(light_);
+	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.05f, 0.05f, 0.05f) * light_proxy->RootNode()->TransformToParent());
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	light_node->TransformToParent(MathLib::translation(0.0f, 2.0f, -3.0f));
+	light_node->AddComponent(light_);
+	light_node->AddChild(light_proxy->RootNode());
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_node);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

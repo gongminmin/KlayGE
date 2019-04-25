@@ -59,19 +59,14 @@ namespace
 			techs_[5] = effect_->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 
-			SceneManager& sm = Context::Instance().SceneManagerInstance();
-			for (uint32_t i = 0; i < sm.NumLights(); ++ i)
 			{
-				LightSource const& light = *sm.GetLight(i);
-				if (LightSource::LT_Ambient == light.Type())
-				{
-					*(effect_->ParameterByName("skybox_Ycube_tex")) = light.SkylightTexY();
-					*(effect_->ParameterByName("skybox_Ccube_tex")) = light.SkylightTexC();
+				auto* ambient_light = Context::Instance().SceneManagerInstance().SceneRootNode().FirstComponentOfType<AmbientLightSource>();
 
-					uint32_t const mip = light.SkylightTexY()->NumMipMaps();
-					*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
-					break;
-				}
+				*(effect_->ParameterByName("skybox_Ycube_tex")) = ambient_light->SkylightTexY();
+				*(effect_->ParameterByName("skybox_Ccube_tex")) = ambient_light->SkylightTexC();
+
+				uint32_t const mip = ambient_light->SkylightTexY()->NumMipMaps();
+				*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
 			}
 
 			// From https://github.com/BIDS/colormap/blob/master/parula.py
@@ -901,7 +896,7 @@ void EnvLightingApp::OnCreate()
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
-	ambient_light->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	root_node.AddChild(sphere_group_);

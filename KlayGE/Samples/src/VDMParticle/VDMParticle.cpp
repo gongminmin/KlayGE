@@ -92,7 +92,7 @@ namespace
 			*(effect_->ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			auto& scene_mgr = Context::Instance().SceneManagerInstance();
-			auto const& light_src = *scene_mgr.GetLight(0);
+			auto const& light_src = *scene_mgr.GetFrameLight(0);
 
 			*(effect_->ParameterByName("light_pos")) = light_src.Position();
 			*(effect_->ParameterByName("light_color")) = light_src.Color();
@@ -173,11 +173,13 @@ void VDMParticleApp::OnCreate()
 	light_->Attrib(0);
 	light_->Color(float3(1.0f, 0.67f, 0.55f) * 20.0f);
 	light_->Falloff(float3(1, 0.5f, 0));
-	light_->Position(float3(0, 0, 0));
-	light_->Direction(float3(0, 1, 0));
 	light_->OuterAngle(PI / 2.5f);
 	light_->InnerAngle(PI / 4);
-	light_->AddToSceneManager();
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	light_node->TransformToParent(MathLib::inverse(MathLib::look_at_lh(float3(0, 0, 0), float3(0, 1, 0), float3(0, 0, 1))));
+	light_node->AddComponent(light_);
+	root_node.AddChild(light_node);
 
 	ps_ = SyncLoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 	ps_->Gravity(0.5f);

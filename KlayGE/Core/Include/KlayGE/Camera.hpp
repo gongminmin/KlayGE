@@ -22,12 +22,13 @@
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
+#include <KlayGE/SceneComponent.hpp>
 
 namespace KlayGE
 {
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Camera : boost::noncopyable, public std::enable_shared_from_this<Camera>
+	class KLAYGE_CORE_API Camera : public SceneComponent, public std::enable_shared_from_this<Camera>
 	{
 	public:
 		Camera();
@@ -55,18 +56,13 @@ namespace KlayGE
 		float FarPlane() const
 			{ return far_plane_; }
 
-		void ViewParams(float3 const & eye_pos, float3 const & look_at);
-		void ViewParams(float3 const & eye_pos, float3 const & look_at, float3 const & up_vec);
 		void ProjParams(float fov, float aspect, float near_plane, float far_plane);
 		void ProjOrthoParams(float w, float h, float near_plane, float far_plane);
 		void ProjOrthoOffCenterParams(float left, float top, float right, float bottom, float near_plane, float far_plane);
 
-		void BindUpdateFunc(std::function<void(Camera&, float, float)> const & update_func);
+		void MainThreadUpdate(float app_time, float elapsed_time) override;
 
-		void Update(float app_time, float elapsed_time);
-
-		void AddToSceneManager();
-		void DelFromSceneManager();
+		void DirtyTransforms();
 
 		float4x4 const & ViewMatrix() const;
 		float4x4 const & ProjMatrix() const;
@@ -90,9 +86,7 @@ namespace KlayGE
 		void JitterMode(bool jitter);
 
 	private:
-		float		look_at_dist_;
-		float4x4	view_mat_;
-		float4x4	inv_view_mat_;
+		float		look_at_dist_ = 1;
 
 		float		fov_;
 		float		aspect_;
@@ -118,8 +112,6 @@ namespace KlayGE
 
 		uint32_t	mode_ = 0;
 		int cur_jitter_index_ = 0;
-
-		std::function<void(Camera&, float, float)> update_func_;
 	};
 }
 

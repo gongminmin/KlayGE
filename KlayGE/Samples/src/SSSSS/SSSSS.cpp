@@ -95,36 +95,37 @@ void SSSSSApp::OnCreate()
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.3f, 0.3f, 0.3f));
-	ambient_light->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 	
 	auto light = MakeSharedPtr<SpotLightSource>();
 	light->Attrib(0);
 	light->Color(float3(5.0f, 5.0f, 5.0f));
 	light->Falloff(float3(1, 1, 0));
-	light->Position(float3(0, 0, -2));
-	light->Direction(float3(0, 0, 1));
 	light->OuterAngle(PI / 6);
 	light->InnerAngle(PI / 8);
-	light->AddToSceneManager();
+
+	auto light_proxy = LoadLightSourceProxyModel(light);
+	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f) * light_proxy->RootNode()->TransformToParent());
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	light_node->AddComponent(light);
 
 	light_camera_ = MakeSharedPtr<Camera>();
+	auto light_camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	light_camera_node->AddComponent(light_camera_);
 	light_controller_.AttachCamera(*light_camera_);
 	light_controller_.Scalers(0.01f, 0.005f);
-	light_camera_->ViewParams(light->SMCamera(0)->EyePos(), light->SMCamera(0)->LookAt(), light->SMCamera(0)->UpVec());
-	light_camera_->ProjParams(
-		light->SMCamera(0)->FOV(), light->SMCamera(0)->Aspect(), light->SMCamera(0)->NearPlane(), light->SMCamera(0)->FarPlane());
+	root_node.AddChild(light_camera_node);
 
-	light->BindUpdateFunc([this](LightSource& light, float app_time, float elapse_time) {
+	light_node->AddChild(light_proxy->RootNode());
+	light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapse_time) {
 		KFL_UNUSED(app_time);
 		KFL_UNUSED(elapse_time);
 
-		light.Position(float3(0, 5, 0) - light_camera_->ForwardVec() * 2.0f);
-		light.Direction(light_camera_->ForwardVec());
+		float3 const light_pos = float3(0, 5, 0) - light_camera_->ForwardVec() * 2.0f;
+		node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(light_pos, light_pos + light_camera_->ForwardVec())));
 	});
-
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
-	light_proxy_->Scaling(0.1f, 0.1f, 0.1f);
-	root_node.AddChild(light_proxy_->RootNode());
+	root_node.AddChild(light_node);
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 

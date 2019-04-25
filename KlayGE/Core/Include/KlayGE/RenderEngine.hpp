@@ -285,6 +285,7 @@ namespace KlayGE
 	protected:
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
+		SceneNodePtr screen_frame_buffer_camera_node_;
 		TexturePtr ds_tex_;
 		FrameBufferPtr hdr_frame_buffer_;
 		TexturePtr hdr_tex_;

@@ -88,8 +88,6 @@ namespace KlayGE
 			(*update_thread_)();
 		}
 
-		this->ClearLight();
-		this->ClearCamera();
 		this->ClearObject();
 	}
 
@@ -176,68 +174,34 @@ namespace KlayGE
 		}
 	}
 
-	void SceneManager::AddCamera(CameraPtr const & camera)
+	uint32_t SceneManager::NumFrameCameras() const
 	{
-		cameras_.push_back(camera);
-	}
-	
-	void SceneManager::DelCamera(CameraPtr const & camera)
-	{
-		auto iter = std::find(cameras_.begin(), cameras_.end(), camera);
-		cameras_.erase(iter);
+		return static_cast<uint32_t>(frame_cameras_.size());
 	}
 
-	std::vector<CameraPtr>::iterator SceneManager::DelCamera(std::vector<CameraPtr>::iterator iter)
+	Camera* SceneManager::GetFrameCamera(uint32_t index)
 	{
-		std::lock_guard<std::mutex> lock(update_mutex_);
-		return cameras_.erase(iter);
+		return frame_cameras_[index].get();
 	}
 
-	uint32_t SceneManager::NumCameras() const
+	Camera const* SceneManager::GetFrameCamera(uint32_t index) const
 	{
-		return static_cast<uint32_t>(cameras_.size());
+		return frame_cameras_[index].get();
 	}
 
-	Camera* SceneManager::GetCamera(uint32_t index)
+	uint32_t SceneManager::NumFrameLights() const
 	{
-		return cameras_[index].get();
+		return static_cast<uint32_t>(frame_lights_.size());
 	}
 
-	Camera const* SceneManager::GetCamera(uint32_t index) const
+	LightSource* SceneManager::GetFrameLight(uint32_t index)
 	{
-		return cameras_[index].get();
+		return frame_lights_[index].get();
 	}
 
-	void SceneManager::AddLight(LightSourcePtr const & light)
+	LightSource const* SceneManager::GetFrameLight(uint32_t index) const
 	{
-		lights_.push_back(light);
-	}
-	
-	void SceneManager::DelLight(LightSourcePtr const & light)
-	{
-		auto iter = std::find(lights_.begin(), lights_.end(), light);
-		lights_.erase(iter);
-	}
-
-	std::vector<LightSourcePtr>::iterator SceneManager::DelLight(std::vector<LightSourcePtr>::iterator iter)
-	{
-		std::lock_guard<std::mutex> lock(update_mutex_);
-		return lights_.erase(iter);
-	}
-
-	uint32_t SceneManager::NumLights() const
-	{
-		return static_cast<uint32_t>(lights_.size());
-	}
-
-	LightSource* SceneManager::GetLight(uint32_t index)
-	{
-		return lights_[index].get();
-	}
-
-	LightSource const* SceneManager::GetLight(uint32_t index) const
-	{
-		return lights_[index].get();
+		return frame_lights_[index].get();
 	}
 
 	// 加入渲染队列
@@ -360,16 +324,6 @@ namespace KlayGE
 		}
 	}
 
-	void SceneManager::ClearCamera()
-	{
-		cameras_.clear();
-	}
-
-	void SceneManager::ClearLight()
-	{
-		lights_.clear();
-	}
-
 	void SceneManager::ClearObject()
 	{
 		std::lock_guard<std::mutex> lock(update_mutex_);
@@ -399,39 +353,26 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
-			scene_root_.Traverse([app_time, frame_time](SceneNode& node) {
+			scene_root_.Traverse([this, app_time, frame_time](SceneNode& node) {
 				node.MainThreadUpdate(app_time, frame_time);
 				node.UpdateTransforms();
+
+				if (node.Visible())
+				{
+					node.ForEachComponentOfType<Camera>([this](Camera& camera) {
+						frame_cameras_.push_back(camera.shared_from_this());
+					});
+
+					node.ForEachComponentOfType<LightSource>([this](LightSource& light) {
+						frame_lights_.push_back(light.shared_from_this());
+					});
+				}
 
 				return true;
 			});
 			scene_root_.UpdatePosBoundSubtree();
 
 			overlay_root_.ClearChildren();
-			for (auto iter = lights_.begin(); iter != lights_.end();)
-			{
-				if ((*iter)->Attrib() & LightSource::LSA_Temporary)
-				{
-					iter = this->DelLight(iter);
-				}
-				else
-				{
-					++ iter;
-				}
-			}
-		}
-
-		for (auto const & camera : cameras_)
-		{
-			camera->Update(app_time, frame_time);
-		}
-
-		for (auto const & light : lights_)
-		{
-			if (light->Enabled())
-			{
-				light->Update(app_time, frame_time);
-			}
 		}
 
 		nodes_updated_ = true;
@@ -443,6 +384,9 @@ namespace KlayGE
 
 		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 		ie.Update();
+
+		frame_cameras_.clear();
+		frame_lights_.clear();
 
 		fb.WaitOnSwapBuffers();
 

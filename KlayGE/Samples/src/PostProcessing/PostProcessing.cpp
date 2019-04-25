@@ -37,13 +37,16 @@ using namespace KlayGE;
 
 namespace
 {
-	class PointLightSourceUpdate
+	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			float4x4 inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
-			light.Position(MathLib::transform_coord(float3(2, 2, -3), inv_view));
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			float4x4 const inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
+			node.TransformToParent(MathLib::translation(MathLib::transform_coord(float3(2, 2, -3), inv_view)));
 		}
 	};
 
@@ -113,15 +116,17 @@ void PostProcessingApp::OnCreate()
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-	ambient_light->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
 	auto point_light = MakeSharedPtr<PointLightSource>();
 	point_light->Attrib(LightSource::LSA_NoShadow);
 	point_light->Color(float3(18, 18, 18));
-	point_light->Position(float3(0, 0, 0));
 	point_light->Falloff(float3(1, 0, 1));
-	point_light->BindUpdateFunc(PointLightSourceUpdate());
-	point_light->AddToSceneManager();
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	light_node->AddComponent(point_light);
+	light_node->OnMainThreadUpdate().Connect(PointLightNodeUpdate());
+	root_node.AddChild(light_node);
 
 	fpcController_.Scalers(0.05f, 0.1f);
 

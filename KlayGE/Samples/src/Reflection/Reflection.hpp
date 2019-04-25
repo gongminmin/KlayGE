@@ -28,8 +28,6 @@ private:
 
 	KlayGE::SceneNodePtr teapot_;
 
-	KlayGE::LightSourcePtr point_light_;
-
 	KlayGE::FontPtr font_;
 
 	KlayGE::RenderablePtr skybox_;

@@ -31,7 +31,6 @@ private:
 	bool depth_texture_support_;
 	KlayGE::FrameBufferPtr back_face_depth_fb_;
 
-	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::UIDialogPtr dialog_params_;

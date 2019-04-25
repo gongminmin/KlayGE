@@ -279,7 +279,9 @@ namespace KlayGE
 		float x = look_at[0];
 		float y = look_at[1];
 		float z = look_at[2];
-		camera->ViewParams(camera->EyePos(), float3(x, y, z), camera->UpVec());
+		camera->LookAtDist(MathLib::length(float3(x, y, z) - camera->EyePos()));
+		camera->BoundSceneNode()->TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(camera->EyePos(), float3(x, y, z), camera->UpVec())));
 	}
 	
 	array<float>^ KGEditorCoreWrapper::CameraUpVec(uint32_t id)
@@ -296,7 +298,9 @@ namespace KlayGE
 		float x = up_vec[0];
 		float y = up_vec[1];
 		float z = up_vec[2];
-		camera->ViewParams(camera->EyePos(), camera->LookAt(), float3(x, y, z));
+		camera->LookAtDist(MathLib::length(camera->LookAt() - camera->EyePos()));
+		camera->BoundSceneNode()->TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(camera->EyePos(), camera->LookAt(), float3(x, y, z))));
 	}
 
 	float KGEditorCoreWrapper::CameraFoV(uint32_t id)

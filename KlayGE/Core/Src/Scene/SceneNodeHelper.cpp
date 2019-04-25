@@ -41,66 +41,10 @@
 
 namespace KlayGE
 {
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
-		: SceneObjectLightSourceProxy(light, CreateMeshFactory<RenderableLightSourceProxy>)
+	RenderModelPtr LoadLightSourceProxyModel(
+		LightSourcePtr const& light, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
 	{
-	}
-
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
-		: light_(light), light_model_(light_model)
-	{
-		model_scaling_ = float4x4::Identity();
-
-		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
-		{
-			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
-		}
-
-		this->RootNode()->OnMainThreadUpdate().Connect([this](SceneNode& root_node, float app_time, float elapsed_time)
-			{
-				KFL_UNUSED(app_time);
-				KFL_UNUSED(elapsed_time);
-
-				root_node.TransformToParent(model_scaling_ * MathLib::to_matrix(light_->Rotation())
-					* MathLib::translation(light_->Position()));
-				if (LightSource::LT_Spot == light_->Type())
-				{
-					float radius = light_->CosOuterInner().w();
-					root_node.TransformToParent(MathLib::scaling(radius, radius, 1.0f) * root_node.TransformToParent());
-				}
-
-				root_node.Traverse([](SceneNode& node)
-				{
-					node.ForEachComponentOfType<RenderableComponent>([](RenderableComponent& renderable_comp)
-					{
-						renderable_comp.BoundRenderableOfType<RenderableLightSourceProxy>().Update();
-					});
-
-					return true;
-				});
-			});
-	}
-
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
-		: SceneObjectLightSourceProxy(light, this->LoadModel(light, CreateMeshFactoryFunc))
-	{
-	}
-
-	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
-	{
-		model_scaling_ = MathLib::scaling(x, y, z);
-	}
-
-	void SceneObjectLightSourceProxy::Scaling(float3 const & s)
-	{
-		model_scaling_ = MathLib::scaling(s);
-	}
-
-	RenderModelPtr SceneObjectLightSourceProxy::LoadModel(LightSourcePtr const & light,
-		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
-	{
-		char const * mesh_name;
+		char const* mesh_name;
 		switch (light->Type())
 		{
 		case LightSource::LT_Ambient:
@@ -127,56 +71,61 @@ namespace KlayGE
 		default:
 			KFL_UNREACHABLE("Invalid light type");
 		}
-		return SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
+
+		auto light_model = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow, nullptr, CreateModelFactory<RenderModel>,
+			CreateMeshFactoryFunc);
+
+		for (uint32_t i = 0; i < light_model->NumMeshes(); ++i)
+		{
+			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
+		}
+
+		if (light->Type() == LightSource::LT_Spot)
+		{
+			float const radius = light->CosOuterInner().w();
+			light_model->RootNode()->TransformToParent(
+				MathLib::scaling(radius, radius, 1.0f) * light_model->RootNode()->TransformToParent());
+		}
+
+		light_model->RootNode()->OnMainThreadUpdate().Connect([](SceneNode& root_node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			root_node.Traverse([](SceneNode& node)
+			{
+				node.ForEachComponentOfType<RenderableComponent>([](RenderableComponent& renderable_comp)
+				{
+					renderable_comp.BoundRenderableOfType<RenderableLightSourceProxy>().Update();
+				});
+
+				return true;
+			});
+		});
+
+		return light_model;
+	}
+
+	RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera, std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
+	{
+		auto camera_model = SyncLoadModel("CameraProxy.glb", EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
 			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
-	}
 
-
-	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera)
-		: SceneObjectCameraProxy(camera, CreateMeshFactory<RenderableCameraProxy>)
-	{
-	}
-
-	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
-		: camera_(camera), camera_model_(camera_model)
-	{
-		model_scaling_ = float4x4::Identity();
-
-		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++ i)
+		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++i)
 		{
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 
-		this->RootNode()->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
-			{
-				KFL_UNUSED(app_time);
-				KFL_UNUSED(elapsed_time);
+		camera_model->RootNode()->OnMainThreadUpdate().Connect([&camera](SceneNode& node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
 
-				node.TransformToParent(model_scaling_ * camera_->InverseViewMatrix());
-			});
-	}
+			node.TransformToParent(camera->InverseViewMatrix());
+		});
 
-	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
-			std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
-		: SceneObjectCameraProxy(camera, this->LoadModel(CreateMeshFactoryFunc))
-	{
-	}
-
-	void SceneObjectCameraProxy::Scaling(float x, float y, float z)
-	{
-		model_scaling_ = MathLib::scaling(x, y, z);
-	}
-
-	void SceneObjectCameraProxy::Scaling(float3 const & s)
-	{
-		model_scaling_ = MathLib::scaling(s);
-	}
-
-	RenderModelPtr SceneObjectCameraProxy::LoadModel(std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc)
-	{
-		return SyncLoadModel("CameraProxy.glb", EAH_GPU_Read | EAH_Immutable,
-			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow,
-			nullptr, CreateModelFactory<RenderModel>, CreateMeshFactoryFunc);
+		return camera_model;
 	}
 }
