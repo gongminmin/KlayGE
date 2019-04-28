@@ -814,7 +814,7 @@ void OceanApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->SSVOEnabled(0, false);
+	deferred_rendering_->SSVOEnabled(1, false);
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
