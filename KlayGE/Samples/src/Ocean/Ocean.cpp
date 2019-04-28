@@ -808,7 +808,7 @@ void OceanApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->SSVOEnabled(0, false);
+	deferred_rendering_->SSVOEnabled(1, false);
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	// TODO: Fix the shadow flicking
