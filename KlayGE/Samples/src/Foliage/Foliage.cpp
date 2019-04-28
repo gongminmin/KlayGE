@@ -104,13 +104,14 @@ void FoliageApp::OnCreate()
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 	root_node.AddComponent(ambient_light);
 
-	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	auto sun_light_node = MakeSharedPtr<SceneNode>(0);
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(LightSource::LSA_NoShadow);
 	sun_light_->Color(float3(3, 3, 3));
 	sun_light_node->TransformToParent(
 		MathLib::to_matrix(MathLib::axis_to_axis(float3(0, 0, 1), float3(0.267835f, -0.0517653f, -0.960315f))));
 	sun_light_node->AddComponent(sun_light_);
+	sun_light_node->AddComponent(MakeSharedPtr<LensFlareRenderableComponent>());
 	root_node.AddChild(sun_light_node);
 
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
@@ -131,16 +132,14 @@ void FoliageApp::OnCreate()
 	terrain_renderable->TextureScale(2, float2(3, 3));
 	terrain_renderable->TextureScale(3, float2(11, 11));
 	terrain_renderable_ = terrain_renderable;
-	root_node.AddChild(MakeSharedPtr<HQTerrainSceneObject>(terrain_renderable));
+	auto terrain_node =
+		MakeSharedPtr<SceneNode>(MakeSharedPtr<HQTerrainRenderableComponent>(terrain_renderable), L"TerrainNode", SceneNode::SOA_Moveable);
+	root_node.AddChild(terrain_node);
 
 	auto skybox = MakeSharedPtr<RenderableFoggySkyBox>();
 	skybox->CompressedCubeMap(y_cube, c_cube);
 	skybox->FogColor(fog_color);
 	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
-
-	auto sun_flare = MakeSharedPtr<LensFlareSceneObject>();
-	sun_flare->Direction(-sun_light_->Direction());
-	root_node.AddChild(sun_flare);
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));

@@ -86,87 +86,73 @@ namespace KlayGE
 	}
 
 
-	LensFlareSceneObject::LensFlareSceneObject()
-		: SceneNode(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<LensFlareRenderable>()), 0)
+	LensFlareRenderableComponent::LensFlareRenderableComponent()
+		: RenderableComponent(MakeSharedPtr<LensFlareRenderable>())
 	{
-		this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
-			{
-				KFL_UNUSED(node);
-				KFL_UNUSED(app_time);
-				KFL_UNUSED(elapsed_time);
-
-				this->MainThreadUpdateFunc();
-			});
-	}
-
-	void LensFlareSceneObject::Direction(float3 const & dir)
-	{
-		dir_ = dir;
-	}
-
-	float3 const & LensFlareSceneObject::Direction() const
-	{
-		return dir_;
-	}
-
-	void LensFlareSceneObject::MainThreadUpdateFunc()
-	{
-		float const FLARE_RENDERANGLE = 0.9f;
-		float const FLARE_SCALEAMOUNT = 0.2f;
-
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-
-		float3 sun_vec = MathLib::normalize(dir_);
-		float3 const & view_vec = camera.ForwardVec();
-
-		float angle = MathLib::dot(view_vec, sun_vec);
-
-		auto* renderable_comp = this->FirstComponentOfType<RenderableComponent>();
-
-		// update flare
-		if (angle > FLARE_RENDERANGLE)
+		this->OnMainThreadUpdate().Connect([this](SceneComponent& component, float app_time, float elapsed_time)
 		{
-			renderable_comp->Enabled(true);
+			KFL_UNUSED(component);
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
 
-			// get angle amount by current angle
-			float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE);	// convert angle to percent 
-			float inv_angle_amount = std::max(0.85f, (1 - angle) / (1 - FLARE_RENDERANGLE));
+			float const FLARE_RENDERANGLE = 0.9f;
+			float const FLARE_SCALEAMOUNT = 0.2f;
 
-			float alpha_fac;
-			if (angle_amount < 0.5f)
+			App3DFramework const& app = Context::Instance().AppInstance();
+			Camera const& camera = app.ActiveCamera();
+
+			float4x4 const& view = camera.ViewMatrix();
+			float4x4 const& proj = camera.ProjMatrix();
+
+			float4x4 const& mat = this->BoundSceneNode()->TransformToWorld();
+			float3 const dir = -*reinterpret_cast<float3 const*>(&mat.Row(2));
+
+			float3 sun_vec = MathLib::normalize(dir);
+			float3 const& view_vec = camera.ForwardVec();
+
+			float angle = MathLib::dot(view_vec, sun_vec);
+
+			// update flare
+			if (angle > FLARE_RENDERANGLE)
 			{
-				alpha_fac = angle_amount;
+				this->Enabled(true);
+
+				// get angle amount by current angle
+				float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE); // convert angle to percent
+				float inv_angle_amount = std::max(0.85f, (1 - angle) / (1 - FLARE_RENDERANGLE));
+
+				float alpha_fac;
+				if (angle_amount < 0.5f)
+				{
+					alpha_fac = angle_amount;
+				}
+				else
+				{
+					alpha_fac = 1 - angle_amount;
+				}
+
+				// calculate flare pos
+				float2 center_pos(0, 0);
+				float3 sun_vec_es = MathLib::transform_normal(dir, view);
+				float3 sun_pos_es = camera.FarPlane() / sun_vec_es.z() * sun_vec_es;
+				float2 axis_vec = MathLib::transform_coord(sun_pos_es, proj);
+
+				// update flare pos and scale matrix by pos and angle amount
+				std::vector<float3> flare_param(SUN_FLARENUM);
+				for (int flare = 0; flare < SUN_FLARENUM; ++flare)
+				{
+					float2 flare_pos = center_pos + (flare - SUN_FLARENUM * 0.2f) / ((SUN_FLARENUM - 1.0f) * 1.5f) * axis_vec;
+					float scale_fac = FLARE_SCALEAMOUNT * inv_angle_amount * ((SUN_FLARENUM - flare) / (SUN_FLARENUM - 1.0f));
+
+					flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
+				}
+
+				this->BoundRenderableOfType<LensFlareRenderable>().FlareParam(flare_param, alpha_fac);
 			}
 			else
 			{
-				alpha_fac = 1 - angle_amount;
+				this->Enabled(false);
 			}
-
-			// calculate flare pos
-			float2 center_pos(0, 0);
-			float3 sun_vec_es = MathLib::transform_normal(dir_, view);
-			float3 sun_pos_es = camera.FarPlane() / sun_vec_es.z() * sun_vec_es;
-			float2 axis_vec = MathLib::transform_coord(sun_pos_es, proj);
-
-			// update flare pos and scale matrix by pos and angle amount
-			std::vector<float3> flare_param(SUN_FLARENUM);
-			for (int flare = 0; flare < SUN_FLARENUM; ++ flare)
-			{
-				float2 flare_pos = center_pos + (flare - SUN_FLARENUM * 0.2f) / ((SUN_FLARENUM - 1.0f) * 1.5f) * axis_vec;
-				float scale_fac = FLARE_SCALEAMOUNT * inv_angle_amount * ((SUN_FLARENUM - flare) / (SUN_FLARENUM - 1.0f));
-
-				flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
-			}
-
-			renderable_comp->BoundRenderableOfType<LensFlareRenderable>().FlareParam(flare_param, alpha_fac);
-		}
-		else
-		{
-			renderable_comp->Enabled(false);
-		}
+		});
 	}
 }

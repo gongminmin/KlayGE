@@ -58,7 +58,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleEmitter
 	{
 	public:
-		explicit ParticleEmitter(SceneNodePtr const & ps);
+		explicit ParticleEmitter(ParticleSystemPtr const& ps);
 		virtual ~ParticleEmitter()
 		{
 		}
@@ -207,7 +207,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleUpdater
 	{
 	public:
-		explicit ParticleUpdater(SceneNodePtr const & ps);
+		explicit ParticleUpdater(ParticleSystemPtr const& ps);
 		virtual ~ParticleUpdater()
 		{
 		}
@@ -225,12 +225,17 @@ namespace KlayGE
 		std::weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem : public SceneNode
+	class KLAYGE_CORE_API ParticleSystem : public std::enable_shared_from_this<ParticleSystem>
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles, bool sort_particles = false);
 
-		virtual ParticleSystemPtr Clone();
+		ParticleSystemPtr Clone();
+
+		SceneNodePtr const& RootNode() const
+		{
+			return root_node_;
+		}
 
 		void Gravity(float gravity)
 		{
@@ -286,9 +291,6 @@ namespace KlayGE
 			return updaters_[index];
 		}
 
-		void SubThreadUpdateFunc(float elapsed_time);
-		void MainThreadUpdateFunc();
-
 		uint32_t NumParticles() const
 		{
 			return static_cast<uint32_t>(particles_.size());
@@ -334,7 +336,10 @@ namespace KlayGE
 		void UpdateParticlesNoLock(float elapsed_time);
 		void UpdateParticleBufferNoLock();
 
-	protected:
+	private:
+		SceneNodePtr root_node_;
+		RenderablePtr render_particles_;
+
 		std::vector<ParticleEmitterPtr> emitters_;
 		std::vector<ParticleUpdaterPtr> updaters_;
 
@@ -365,7 +370,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API PointParticleEmitter : public ParticleEmitter
 	{
 	public:
-		explicit PointParticleEmitter(SceneNodePtr const & ps);
+		explicit PointParticleEmitter(ParticleSystemPtr const& ps);
 
 		virtual std::string const & Type() const override;
 		virtual ParticleEmitterPtr Clone() override;
@@ -383,7 +388,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
 	{
 	public:
-		explicit PolylineParticleUpdater(SceneNodePtr const & ps);
+		explicit PolylineParticleUpdater(ParticleSystemPtr const& ps);
 
 		virtual std::string const & Type() const override;
 		virtual ParticleUpdaterPtr Clone() override;

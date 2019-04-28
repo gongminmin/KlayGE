@@ -36,7 +36,7 @@ private:
 	KlayGE::RenderablePtr renderInstance_;
 	KlayGE::RenderablePtr renderMesh_;
 
-	std::vector<KlayGE::SceneNodePtr> scene_nodes_;
+	std::vector<std::shared_ptr<void>> teapots_;
 
 	bool use_instance_;
 	float exposure_;

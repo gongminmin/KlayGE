@@ -552,8 +552,8 @@ namespace
 
 namespace KlayGE
 {
-	ParticleEmitter::ParticleEmitter(SceneNodePtr const & ps)
-			: ps_(checked_pointer_cast<ParticleSystem>(ps)),
+	ParticleEmitter::ParticleEmitter(ParticleSystemPtr const& ps)
+			: ps_(ps),
 				model_mat_(float4x4::Identity()),
 				min_spin_(-PI / 2), max_spin_(+PI / 2)
 	{
@@ -586,8 +586,8 @@ namespace KlayGE
 	}
 
 
-	ParticleUpdater::ParticleUpdater(SceneNodePtr const & ps)
-		: ps_(checked_pointer_cast<ParticleSystem>(ps))
+	ParticleUpdater::ParticleUpdater(ParticleSystemPtr const& ps)
+		: ps_(ps)
 	{
 	}
 
@@ -598,7 +598,7 @@ namespace KlayGE
 
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles, bool sort_particles)
-		: SceneNode(SOA_Moveable | SOA_NotCastShadow),
+		: root_node_(MakeSharedPtr<SceneNode>(L"ParticleSystemRootNode", SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow)),
 			particles_(max_num_particles),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f),
 			sort_particles_(sort_particles)
@@ -607,22 +607,38 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
-		this->AddComponent(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderParticles>(gs_support_)));
+		render_particles_ = MakeSharedPtr<RenderParticles>(gs_support_);
+		root_node_->AddComponent(MakeSharedPtr<RenderableComponent>(render_particles_));
 
-		this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+		root_node_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(node);
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				this->MainThreadUpdateFunc();
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				auto const& caps = rf.RenderEngineInstance().DeviceCaps();
+				if (!caps.arbitrary_multithread_rendering_support)
+				{
+					std::lock_guard<std::mutex> lock(actived_particles_mutex_);
+					this->UpdateParticleBufferNoLock();
+				}
 			});
-		this->OnSubThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+		root_node_->OnSubThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(node);
 				KFL_UNUSED(app_time);
 
-				this->SubThreadUpdateFunc(elapsed_time);
+				std::lock_guard<std::mutex> lock(actived_particles_mutex_);
+
+				this->UpdateParticlesNoLock(elapsed_time);
+
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				auto const& caps = rf.RenderEngineInstance().DeviceCaps();
+				if (caps.arbitrary_multithread_rendering_support)
+				{
+					this->UpdateParticleBufferNoLock();
+				}
 			});
 	}
 
@@ -832,7 +848,7 @@ namespace KlayGE
 					});
 			}
 
-			this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().PosBound(AABBox(min_bb, max_bb));
+			checked_cast<RenderParticles&>(*render_particles_).PosBound(AABBox(min_bb, max_bb));
 		}
 	}
 
@@ -840,7 +856,7 @@ namespace KlayGE
 	{
 		if (!actived_particles_.empty())
 		{
-			RenderLayout& rl = this->FirstComponentOfType<RenderableComponent>()->BoundRenderable().GetRenderLayout();
+			RenderLayout& rl = render_particles_->GetRenderLayout();
 
 			GraphicsBufferPtr instance_gb;
 			if (gs_support_)
@@ -899,60 +915,33 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::SubThreadUpdateFunc(float elapsed_time)
-	{
-		std::lock_guard<std::mutex> lock(actived_particles_mutex_);
-
-		this->UpdateParticlesNoLock(elapsed_time);
-
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (caps.arbitrary_multithread_rendering_support)
-		{
-			this->UpdateParticleBufferNoLock();
-		}
-	}
-
-	void ParticleSystem::MainThreadUpdateFunc()
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (!caps.arbitrary_multithread_rendering_support)
-		{
-			std::lock_guard<std::mutex> lock(actived_particles_mutex_);
-			this->UpdateParticleBufferNoLock();
-		}
-	}
-
 	void ParticleSystem::ParticleAlphaFromTex(std::string const & tex_name)
 	{
 		particle_alpha_from_tex_name_ = tex_name;
-		this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().ParticleAlphaFrom(
-			SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
+		checked_cast<RenderParticles&>(*render_particles_).ParticleAlphaFrom(SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
 	}
 
 	void ParticleSystem::ParticleAlphaToTex(std::string const & tex_name)
 	{
 		particle_alpha_to_tex_name_ = tex_name;
-		this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().ParticleAlphaTo(
-			SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
+		checked_cast<RenderParticles&>(*render_particles_).ParticleAlphaTo(SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable));
 	}
 
 	void ParticleSystem::ParticleColorFrom(Color const & clr)
 	{
 		particle_color_from_ = clr;
-		this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().ParticleColorFrom(clr);
+		checked_cast<RenderParticles&>(*render_particles_).ParticleColorFrom(clr);
 	}
 
 	void ParticleSystem::ParticleColorTo(Color const & clr)
 	{
 		particle_color_to_ = clr;
-		this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().ParticleColorTo(clr);
+		checked_cast<RenderParticles&>(*render_particles_).ParticleColorTo(clr);
 	}
 
 	void ParticleSystem::SceneDepthTexture(TexturePtr const & depth_tex)
 	{
-		this->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderParticles>().SceneDepthTexture(depth_tex);
+		checked_cast<RenderParticles&>(*render_particles_).SceneDepthTexture(depth_tex);
 	}
 
 
@@ -1122,7 +1111,7 @@ namespace KlayGE
 	}
 
 
-	PointParticleEmitter::PointParticleEmitter(SceneNodePtr const & ps)
+	PointParticleEmitter::PointParticleEmitter(ParticleSystemPtr const& ps)
 		: ParticleEmitter(ps),
 			random_dis_(0, 10000)
 	{
@@ -1166,7 +1155,7 @@ namespace KlayGE
 	}
 
 
-	PolylineParticleUpdater::PolylineParticleUpdater(SceneNodePtr const & ps)
+	PolylineParticleUpdater::PolylineParticleUpdater(ParticleSystemPtr const& ps)
 		: ParticleUpdater(ps)
 	{
 	}

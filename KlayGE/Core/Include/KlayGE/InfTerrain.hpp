@@ -20,7 +20,6 @@
 #include <array>
 
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
 
 namespace KlayGE
 {
@@ -50,10 +49,12 @@ namespace KlayGE
 		float2 x_dir_, y_dir_;
 	};
 
-	class KLAYGE_CORE_API InfTerrainSceneObject : public SceneNode
+	class KLAYGE_CORE_API InfTerrainRenderableComponent : public RenderableComponent
 	{
 	public:
-		InfTerrainSceneObject();
+		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((RenderableComponent))
+
+		InfTerrainRenderableComponent(RenderablePtr const& renderable);
 
 	protected:
 		float base_level_;
@@ -63,7 +64,7 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API HQTerrainRenderable : public Renderable
 	{
-		friend class HQTerrainSceneObject;
+		friend class HQTerrainRenderableComponent;
 
 	private:
 #pragma pack(push, 1)
@@ -240,10 +241,12 @@ namespace KlayGE
 		TexturePtr mask_map_cpu_tex_;
 	};
 
-	class KLAYGE_CORE_API HQTerrainSceneObject : public SceneNode
+	class KLAYGE_CORE_API HQTerrainRenderableComponent : public RenderableComponent
 	{
 	public:
-		explicit HQTerrainSceneObject(RenderablePtr const & renderable);
+		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((RenderableComponent))
+
+		explicit HQTerrainRenderableComponent(RenderablePtr const& renderable);
 
 	private:
 		bool reset_terrain_;

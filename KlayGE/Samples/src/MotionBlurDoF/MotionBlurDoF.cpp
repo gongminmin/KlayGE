@@ -198,7 +198,7 @@ namespace
 		}
 	};
 
-	class Teapot : public SceneNode
+	class Teapot
 	{
 	private:
 		struct InstData
@@ -209,56 +209,56 @@ namespace
 		};
 
 	public:
-		Teapot()
-			: SceneNode(SOA_Moveable | SOA_Cullable)
+		Teapot() : node_(MakeSharedPtr<SceneNode>(L"TeapotNode", SceneNode::SOA_Moveable | SceneNode::SOA_Cullable))
 		{
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 3, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 4, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 5, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
+			auto& instance_format = node_->InstanceFormat();
+			instance_format.assign({
+				VertexElement(VEU_TextureCoord, 1, EF_ABGR32F),
+				VertexElement(VEU_TextureCoord, 2, EF_ABGR32F),
+				VertexElement(VEU_TextureCoord, 3, EF_ABGR32F),
+				VertexElement(VEU_TextureCoord, 4, EF_ABGR32F),
+				VertexElement(VEU_TextureCoord, 5, EF_ABGR32F),
+				VertexElement(VEU_TextureCoord, 6, EF_ABGR32F),
+				VertexElement(VEU_Diffuse, 0, EF_ABGR8)
+			});
 
-			this->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+			node_->InstanceData(&inst_);
+
+			node_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
 				{
 					KFL_UNUSED(node);
 					KFL_UNUSED(app_time);
 
-					this->MainThreadUpdateFunc(elapsed_time);
+					last_xform_to_parent_ = node.TransformToParent();
+
+					float4x4 mat_t = MathLib::transpose(last_xform_to_parent_);
+					inst_.last_mat[0] = mat_t.Row(0);
+					inst_.last_mat[1] = mat_t.Row(1);
+					inst_.last_mat[2] = mat_t.Row(2);
+
+					float e = elapsed_time * 0.3f * -node.TransformToParent()(3, 1);
+					node.TransformToParent(node.TransformToParent() * MathLib::rotation_y(e));
+
+					mat_t = MathLib::transpose(node.TransformToParent());
+					inst_.mat[0] = mat_t.Row(0);
+					inst_.mat[1] = mat_t.Row(1);
+					inst_.mat[2] = mat_t.Row(2);
 				});
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
-			xform_to_parent_ = mat;
+			node_->TransformToParent(mat);
 			inst_.clr = clr.ABGR();
 		}
 
-		void const * InstanceData() const
+		SceneNodePtr const& RootNode() const
 		{
-			return &inst_;
-		}
-
-		void MainThreadUpdateFunc(float elapsed_time)
-		{
-			last_xform_to_parent_ = xform_to_parent_;
-
-			float4x4 mat_t = MathLib::transpose(last_xform_to_parent_);
-			inst_.last_mat[0] = mat_t.Row(0);
-			inst_.last_mat[1] = mat_t.Row(1);
-			inst_.last_mat[2] = mat_t.Row(2);
-
-			float e = elapsed_time * 0.3f * -xform_to_parent_(3, 1);
-			xform_to_parent_ *= MathLib::rotation_y(e);
-
-			mat_t = MathLib::transpose(xform_to_parent_);
-			inst_.mat[0] = mat_t.Row(0);
-			inst_.mat[1] = mat_t.Row(1);
-			inst_.mat[2] = mat_t.Row(2);
+			return node_;
 		}
 
 	private:
+		SceneNodePtr node_;
 		InstData inst_;
 		float4x4 last_xform_to_parent_;
 	};
@@ -981,9 +981,10 @@ void MotionBlurDoFApp::MBExposureChangedHandler(KlayGE::UISlider const & sender)
 	stream << "Exposure: " << exposure_;
 	mb_dialog_->Control<UIStatic>(id_mb_exposure_static_)->SetText(stream.str());
 
-	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+	for (size_t i = 0; i < teapots_.size(); ++i)
 	{
-		scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().Exposure(exposure_);
+		static_pointer_cast<Teapot>(teapots_[i])->RootNode()->FirstComponentOfType<RenderableComponent>()
+			->BoundRenderableOfType<MotionBlurRenderMesh>().Exposure(exposure_);
 	}
 }
 
@@ -996,10 +997,10 @@ void MotionBlurDoFApp::MBBlurRadiusChangedHandler(KlayGE::UISlider const & sende
 	stream << "Blur Radius: " << blur_radius_;
 	mb_dialog_->Control<UIStatic>(id_mb_blur_radius_static_)->SetText(stream.str());
 
-	for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+	for (size_t i = 0; i < teapots_.size(); ++i)
 	{
-		scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().BlurRadius(
-			blur_radius_);
+		static_pointer_cast<Teapot>(teapots_[i])->RootNode()->FirstComponentOfType<RenderableComponent>()
+			->BoundRenderableOfType<MotionBlurRenderMesh>().BlurRadius(blur_radius_);
 	}
 }
 
@@ -1024,18 +1025,20 @@ void MotionBlurDoFApp::UseInstancingHandler(UICheckBox const & /*sender*/)
 
 	if (use_instance_)
 	{
-		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+		for (size_t i = 0; i < teapots_.size(); ++i)
 		{
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearComponents();
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
+			auto& node = *static_pointer_cast<Teapot>(teapots_[i])->RootNode();
+			node.ClearComponents();
+			node.AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
 		}
 	}
 	else
 	{
-		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+		for (size_t i = 0; i < teapots_.size(); ++i)
 		{
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->ClearComponents();
-			checked_pointer_cast<Teapot>(scene_nodes_[i])->AddComponent(MakeSharedPtr<RenderableComponent>(renderMesh_));
+			auto& node = *static_pointer_cast<Teapot>(teapots_[i])->RootNode();
+			node.ClearComponents();
+			node.AddComponent(MakeSharedPtr<RenderableComponent>(renderMesh_));
 		}
 	}
 }
@@ -1131,20 +1134,20 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 						LogWarn() << "Wrong callings to script engine" << std::endl;
 					}
 
-					auto so = MakeSharedPtr<Teapot>();
-					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
+					auto teapot = MakeSharedPtr<Teapot>();
+					teapot->Instance(MathLib::translation(pos), clr);
 
-					checked_pointer_cast<Teapot>(so)->ClearComponents();
-					checked_pointer_cast<Teapot>(so)->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
+					teapot->RootNode()->ClearComponents();
+					teapot->RootNode()->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
 					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).Exposure(exposure_);
 					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).BlurRadius(blur_radius_);
-					scene_nodes_.push_back(so);
+					teapots_.push_back(teapot);
 
-					so->SubThreadUpdate(0, 0);
-					so->MainThreadUpdate(0, 0);
+					teapot->RootNode()->SubThreadUpdate(0, 0);
+					teapot->RootNode()->MainThreadUpdate(0, 0);
 
 					std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
-					scene_mgr.SceneRootNode().AddChild(so);
+					scene_mgr.SceneRootNode().AddChild(teapot->RootNode());
 				}
 
 				++ loading_percentage_;
@@ -1185,9 +1188,10 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 		}
-		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+		for (size_t i = 0; i < teapots_.size(); ++i)
 		{
-			scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(false);
+			static_pointer_cast<Teapot>(teapots_[i])->RootNode()->FirstComponentOfType<RenderableComponent>()
+				->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(false);
 		}
 		return App3DFramework::URV_NeedFlush;
 
@@ -1199,9 +1203,10 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(velocity_fb_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
-		for (size_t i = 0; i < scene_nodes_.size(); ++ i)
+		for (size_t i = 0; i < teapots_.size(); ++i)
 		{
-			scene_nodes_[i]->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(true);
+			static_pointer_cast<Teapot>(teapots_[i])->RootNode()->FirstComponentOfType<RenderableComponent>()
+				->BoundRenderableOfType<MotionBlurRenderMesh>().VelocityPass(true);
 		}
 		return App3DFramework::URV_NeedFlush;
 

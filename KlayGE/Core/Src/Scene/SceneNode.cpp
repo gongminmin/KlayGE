@@ -460,14 +460,24 @@ namespace KlayGE
 		}
 	}
 
+	std::vector<VertexElement>& SceneNode::InstanceFormat()
+	{
+		return instance_format_;
+	}
+
 	std::vector<VertexElement> const & SceneNode::InstanceFormat() const
 	{
 		return instance_format_;
 	}
 
+	void SceneNode::InstanceData(void* data)
+	{
+		instance_data_ = data;
+	}
+
 	void const * SceneNode::InstanceData() const
 	{
-		return nullptr;
+		return instance_data_;
 	}
 
 	void SceneNode::SelectMode(bool select_mode)

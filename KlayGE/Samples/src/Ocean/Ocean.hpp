@@ -31,7 +31,7 @@ private:
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneNodePtr ocean_;
+	KlayGE::RenderableComponentPtr ocean_;
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;

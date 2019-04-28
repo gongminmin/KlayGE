@@ -30,18 +30,12 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class KLAYGE_CORE_API LensFlareSceneObject : public SceneNode
+	class KLAYGE_CORE_API LensFlareRenderableComponent : public RenderableComponent
 	{
 	public:
-		LensFlareSceneObject();
+		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((RenderableComponent))
 
-		void Direction(float3 const & dir);
-		float3 const & Direction() const;
-
-		void MainThreadUpdateFunc();
-
-	private:
-		float3 dir_;
+		LensFlareRenderableComponent();
 	};
 }
 

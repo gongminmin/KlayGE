@@ -148,17 +148,15 @@ namespace KlayGE
 	}
 
 
-	InfTerrainSceneObject::InfTerrainSceneObject()
-		: SceneNode(SOA_Moveable)
+	InfTerrainRenderableComponent::InfTerrainRenderableComponent(RenderablePtr const& renderable) : RenderableComponent(renderable)
 	{
-		this->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([](SceneComponent& component, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto& inf_terrain = checked_cast<InfTerrainSceneObject&>(node);
-				auto& inf_terrain_renderable_comp = *node.FirstComponentOfType<RenderableComponent>();
-				auto& inf_terrain_renderable = inf_terrain_renderable_comp.BoundRenderableOfType<InfTerrainRenderable>();
+				auto& inf_terrain = checked_cast<InfTerrainRenderableComponent&>(component);
+				auto& inf_terrain_renderable = inf_terrain.BoundRenderableOfType<InfTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -216,7 +214,7 @@ namespace KlayGE
 				}
 				inf_terrain_renderable.OffsetY(sy);
 
-				inf_terrain_renderable_comp.Enabled(intersect);
+				component.Enabled(intersect);
 			});
 	}
 
@@ -716,8 +714,8 @@ namespace KlayGE
 	}
 
 
-	HQTerrainSceneObject::HQTerrainSceneObject(RenderablePtr const & renderable)
-		: SceneNode(MakeSharedPtr<RenderableComponent>(renderable), SOA_Moveable),
+	HQTerrainRenderableComponent::HQTerrainRenderableComponent(RenderablePtr const& renderable)
+		: RenderableComponent(renderable),
 			reset_terrain_(true)
 	{
 		last_eye_pos_ =
@@ -725,14 +723,13 @@ namespace KlayGE
 
 		BOOST_ASSERT(dynamic_cast<HQTerrainRenderable*>(renderable.get()) != nullptr);
 
-		this->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect([](SceneComponent& component, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto& hq_inf_terrain = checked_cast<HQTerrainSceneObject&>(node);
-				auto& hq_inf_terrain_renderable =
-					node.FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<HQTerrainRenderable>();
+				auto& hq_inf_terrain = checked_cast<HQTerrainRenderableComponent&>(component);
+				auto& hq_inf_terrain_renderable = hq_inf_terrain.BoundRenderableOfType<HQTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;

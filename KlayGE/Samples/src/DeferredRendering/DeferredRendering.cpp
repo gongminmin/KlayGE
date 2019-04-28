@@ -344,10 +344,10 @@ void DeferredRenderingApp::OnCreate()
 	ps_ = SyncLoadParticleSystem("Fire.psml");
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	root_node.AddChild(ps_);
+	root_node.AddChild(ps_->RootNode());
 
 	float const SCALE = 3;
-	ps_->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
+	ps_->RootNode()->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
 
 	ParticleEmitterPtr emitter0 = ps_->Emitter(0);
 	emitter0->ModelMatrix(MathLib::translation(torch_pos[0] / SCALE));

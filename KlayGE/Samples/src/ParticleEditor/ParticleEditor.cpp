@@ -814,7 +814,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	if (ps_)
 	{
-		Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(ps_);
+		Context::Instance().SceneManagerInstance().SceneRootNode().RemoveChild(ps_->RootNode());
 	}
 	ps_ = SyncLoadParticleSystem(name);
 	ps_->Gravity(0.5f);
@@ -822,7 +822,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	{
 		auto& scene_mgr = Context::Instance().SceneManagerInstance();
 		std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
-		scene_mgr.SceneRootNode().AddChild(ps_);
+		scene_mgr.SceneRootNode().AddChild(ps_->RootNode());
 	}
 
 	if (scene_depth_tex_)
@@ -921,7 +921,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
 
 				terrain_->Visible(true);
-				ps_->Visible(false);
+				ps_->RootNode()->Visible(false);
 			}
 			return App3DFramework::URV_NeedFlush;
 
@@ -934,7 +934,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			copy_pp_->Apply();
 
 			terrain_->Visible(false);
-			ps_->Visible(true);
+			ps_->RootNode()->Visible(true);
 
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
@@ -954,7 +954,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 
 				terrain_->Pass(PT_OpaqueGBufferMRT);
 				terrain_->Visible(true);
-				ps_->Visible(false);
+				ps_->RootNode()->Visible(false);
 			}
 			return App3DFramework::URV_NeedFlush;
 
@@ -973,7 +973,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 
 				terrain_->Pass(PT_OpaqueShading);
 				terrain_->Visible(true);
-				ps_->Visible(false);
+				ps_->RootNode()->Visible(false);
 			}
 			return App3DFramework::URV_NeedFlush;
 
@@ -984,7 +984,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			copy_pp_->Apply();
 
 			terrain_->Visible(false);
-			ps_->Visible(true);
+			ps_->RootNode()->Visible(true);
 
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}

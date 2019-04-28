@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneNode : boost::noncopyable, public std::enable_shared_from_this<SceneNode>
+	class KLAYGE_CORE_API SceneNode final : boost::noncopyable, public std::enable_shared_from_this<SceneNode>
 	{
 	public:
 		enum SOAttrib
@@ -59,7 +59,7 @@ namespace KlayGE
 		SceneNode(std::wstring_view name, uint32_t attrib);
 		SceneNode(SceneComponentPtr const& component, uint32_t attrib);
 		SceneNode(SceneComponentPtr const& component, std::wstring_view name, uint32_t attrib);
-		virtual ~SceneNode();
+		~SceneNode();
 
 		std::wstring_view Name() const;
 		void Name(std::wstring_view name);
@@ -163,23 +163,25 @@ namespace KlayGE
 			return main_thread_update_event_;
 		}
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time);
-		virtual void MainThreadUpdate(float app_time, float elapsed_time);
+		void SubThreadUpdate(float app_time, float elapsed_time);
+		void MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
 		void Visible(bool vis);
 
+		std::vector<VertexElement>& InstanceFormat();
 		std::vector<VertexElement> const & InstanceFormat() const;
-		virtual void const * InstanceData() const;
+		void InstanceData(void* data);
+		void const * InstanceData() const;
 
 		// For select mode
-		virtual void ObjectID(uint32_t id);
-		virtual void SelectMode(bool select_mode);
+		void ObjectID(uint32_t id);
+		void SelectMode(bool select_mode);
 		bool SelectMode() const;
 
 		// For deferred only
-		virtual void Pass(PassType type);
+		void Pass(PassType type);
 
 		bool TransparencyBackFace() const;
 		bool TransparencyFrontFace() const;
@@ -204,6 +206,7 @@ namespace KlayGE
 
 		std::vector<SceneComponentPtr> components_;
 		std::vector<VertexElement> instance_format_;
+		void* instance_data_;
 
 		float4x4 xform_to_parent_  = float4x4::Identity();
 		mutable float4x4 xform_to_world_ = float4x4::Identity();

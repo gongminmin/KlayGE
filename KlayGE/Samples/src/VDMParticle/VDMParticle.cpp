@@ -184,10 +184,10 @@ void VDMParticleApp::OnCreate()
 	ps_ = SyncLoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
-	root_node.AddChild(ps_);
+	root_node.AddChild(ps_->RootNode());
 
 	float const SCALE = 6;
-	ps_->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
+	ps_->RootNode()->TransformToParent(MathLib::scaling(SCALE, SCALE, SCALE));
 	ps_->Emitter(0)->ModelMatrix(MathLib::translation(light_->Position() / SCALE));
 
 	scene_fb_ = rf.MakeFrameBuffer();
@@ -336,11 +336,11 @@ void VDMParticleApp::ParticleRenderingTypeChangedHandler(KlayGE::UIComboBox cons
 	particle_rendering_type_ = static_cast<ParticleRenderingType>(sender.GetSelectedIndex());
 	if (PRT_VDMQuarterRes == particle_rendering_type_)
 	{
-		ps_->Pass(PT_VDM);
+		ps_->RootNode()->Pass(PT_VDM);
 	}
 	else
 	{
-		ps_->Pass(PT_SimpleForward);
+		ps_->RootNode()->Pass(PT_SimpleForward);
 	}
 }
 
@@ -394,7 +394,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 			{
 				so->Visible(true);
 			}
-			ps_->Visible(false);
+			ps_->RootNode()->Visible(false);
 
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -405,7 +405,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 			{
 				so->Visible(false);
 			}
-			ps_->Visible(true);
+			ps_->RootNode()->Visible(true);
 
 			depth_to_linear_pp_->Apply();
 
@@ -465,7 +465,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 
 	case 2:
 	default:
-		ps_->Visible(false);
+		ps_->RootNode()->Visible(false);
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1, 0);
