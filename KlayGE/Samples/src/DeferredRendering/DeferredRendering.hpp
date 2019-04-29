@@ -55,6 +55,8 @@ private:
 	int id_ctrl_camera_;
 
 	std::vector<KlayGE::SceneNodePtr> particle_light_nodes_;
+	std::vector<KlayGE::Signal::Connection> particle_light_node_update_connections_;
+	std::vector<KlayGE::Signal::Connection> particle_light_update_connections_;
 
 	KlayGE::ParticleSystemPtr ps_;
 };

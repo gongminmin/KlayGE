@@ -455,11 +455,17 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 
 void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & sender)
 {
-	int num_lights = sender.GetValue();
+	int const num_lights = sender.GetValue();
 
 	auto& scene_mgr = Context::Instance().SceneManagerInstance();
 
 	std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+
+	for (uint32_t i = 0; i < particle_light_node_update_connections_.size(); ++i)
+	{
+		particle_light_node_update_connections_[i].Disconnect();
+		particle_light_update_connections_[i].Disconnect();
+	}
 
 	auto& root_node = scene_mgr.SceneRootNode();
 
@@ -468,10 +474,10 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 		root_node.RemoveChild(particle_light_nodes_[i]);
 	}
 
-	size_t old_size = particle_light_nodes_.size();
+	size_t const old_size = particle_light_nodes_.size();
 
 	particle_light_nodes_.resize(num_lights);
-	for (size_t i = old_size; i < particle_light_nodes_.size(); ++ i)
+	for (size_t i = old_size; i < particle_light_nodes_.size(); ++i)
 	{
 		auto particle_light = MakeSharedPtr<PointLightSource>();
 		particle_light->Attrib(LightSource::LSA_NoShadow);
@@ -488,13 +494,15 @@ void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & send
 		root_node.AddChild(particle_light_nodes_[i]);
 	}
 
+	particle_light_node_update_connections_.resize(num_lights);
+	particle_light_update_connections_.resize(num_lights);
 	for (uint32_t i = 0; i < particle_light_nodes_.size(); ++i)
 	{
-		particle_light_nodes_[i]->OnMainThreadUpdate().Connect(
+		particle_light_node_update_connections_[i] = particle_light_nodes_[i]->OnMainThreadUpdate().Connect(
 			PointLightNodeUpdate(i, static_cast<uint32_t>(particle_light_nodes_.size())));
 
 		auto light = particle_light_nodes_[i]->FirstComponentOfType<LightSource>();
-		light->OnMainThreadUpdate().Connect(PointLightSourceUpdate(i));
+		particle_light_update_connections_[i] = light->OnMainThreadUpdate().Connect(PointLightSourceUpdate(i));
 	}
 
 	std::wostringstream stream;

@@ -59,11 +59,11 @@ namespace KlayGE
 		public:
 			Connection();
 			Connection(Connection const& rhs);
-			Connection(Connection&& rhs);
+			Connection(Connection&& rhs) noexcept;
 			Connection(Detail::SignalBase& signal, std::shared_ptr<void> const& slot);
 
 			Connection& operator=(Connection const& rhs);
-			Connection& operator=(Connection&& rhs);
+			Connection& operator=(Connection&& rhs) noexcept;
 
 			void Disconnect();
 
@@ -131,14 +131,6 @@ namespace KlayGE
 				using CombinerResultType = typename Combiner::ResultType;
 
 			public:
-				explicit SignalTemplateBase(CallbackFunction const& cb)
-				{
-					if (cb)
-					{
-						this->Connect(cb);
-					}
-				}
-
 				Connection Connect(CallbackFunction const& cb)
 				{
 #ifndef __CLR_VER
@@ -272,10 +264,6 @@ namespace KlayGE
 		public:
 			using SignalTemplateBase = Detail::SignalTemplateBase<SignalSignature, Combiner>;
 			using CallbackFunction = typename SignalTemplateBase::CallbackFunction;
-
-			explicit Signal(CallbackFunction const& method = CallbackFunction()) : SignalTemplateBase(method)
-			{
-			}
 		};
 	} // namespace Signal
 } // namespace KlayGE
