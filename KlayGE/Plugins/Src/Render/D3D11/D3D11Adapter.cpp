@@ -22,11 +22,6 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11Adapter::D3D11Adapter()
-					: adapter_no_(0)
-	{
-	}
-
 	D3D11Adapter::D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter)
 					: adapter_no_(adapter_no)
 	{

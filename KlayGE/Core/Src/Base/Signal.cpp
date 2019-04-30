@@ -43,26 +43,12 @@ namespace KlayGE
 
 		Connection::Connection() = default;
 
-		Connection::Connection(Connection const& rhs) : signal_(rhs.signal_), slot_(rhs.slot_)
-		{
-		}
-
 		Connection::Connection(Connection&& rhs) noexcept : signal_(std::move(rhs.signal_)), slot_(std::move(rhs.slot_))
 		{
 		}
 
 		Connection::Connection(Detail::SignalBase& signal, std::shared_ptr<void> const& slot) : signal_(&signal), slot_(slot)
 		{
-		}
-
-		Connection& Connection::operator=(Connection const& rhs)
-		{
-			if (this != &rhs)
-			{
-				signal_ = rhs.signal_;
-				slot_ = rhs.slot_;
-			}
-			return *this;
 		}
 
 		Connection& Connection::operator=(Connection&& rhs) noexcept

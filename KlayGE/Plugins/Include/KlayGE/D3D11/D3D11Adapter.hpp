@@ -27,7 +27,6 @@ namespace KlayGE
 	class D3D11Adapter
 	{
 	public:
-		D3D11Adapter();
 		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter);
 
 		void Enumerate();
@@ -59,8 +58,8 @@ namespace KlayGE
 		uint32_t			adapter_no_;
 
 		// 适配器信息
-		IDXGIAdapter1Ptr	adapter_;
-		DXGI_ADAPTER_DESC1	adapter_desc_;
+		IDXGIAdapter1Ptr adapter_;
+		DXGI_ADAPTER_DESC1 adapter_desc_{};
 
 		// 显示模式列表
 		std::vector<D3D11VideoMode> modes_;

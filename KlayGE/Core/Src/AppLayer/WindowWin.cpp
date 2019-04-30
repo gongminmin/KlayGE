@@ -111,6 +111,7 @@ namespace KlayGE
 		{
 			wnd_ = static_cast<HWND>(native_wnd);
 			default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
+			win_style_ = static_cast<uint32_t>(GetWindowLongPtrW(wnd_, GWL_STYLE));
 			::SetWindowLongPtrW(wnd_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc));
 			external_wnd_ = true;
 		}

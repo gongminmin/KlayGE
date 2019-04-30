@@ -76,7 +76,7 @@ namespace KlayGE
 		virtual std::shared_ptr<void> Resource() const = 0;
 	};
 
-	class KLAYGE_CORE_API ResLoader : boost::noncopyable
+	class KLAYGE_CORE_API ResLoader final : boost::noncopyable
 	{
 	public:
 		ResLoader();

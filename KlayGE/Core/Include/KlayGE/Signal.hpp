@@ -54,15 +54,13 @@ namespace KlayGE
 			class SignalBase;
 		}
 
-		class KLAYGE_CORE_API Connection final
+		class KLAYGE_CORE_API Connection final : boost::noncopyable
 		{
 		public:
 			Connection();
-			Connection(Connection const& rhs);
 			Connection(Connection&& rhs) noexcept;
 			Connection(Detail::SignalBase& signal, std::shared_ptr<void> const& slot);
 
-			Connection& operator=(Connection const& rhs);
 			Connection& operator=(Connection&& rhs) noexcept;
 
 			void Disconnect();

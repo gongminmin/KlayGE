@@ -303,7 +303,7 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API SMBios : boost::noncopyable
+	class KLAYGE_CORE_API SMBios final : boost::noncopyable
 	{
 	public:
 		static SMBios& Instance();

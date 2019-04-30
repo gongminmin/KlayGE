@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API PerfRange : boost::noncopyable
+	class KLAYGE_CORE_API PerfRange final : boost::noncopyable
 	{
 	public:
 		PerfRange();

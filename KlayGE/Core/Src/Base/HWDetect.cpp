@@ -73,7 +73,7 @@ namespace KlayGE
 	};
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	class WMI : boost::noncopyable
+	class WMI final : boost::noncopyable
 	{
 	public:
 		bool Init()
