@@ -29,9 +29,11 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/DepthOfField.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -703,6 +705,12 @@ namespace KlayGE
 		vdm_composition_pp_ = SyncLoadPostProcess("VarianceDepthMap.ppml", "VDMComposition");
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "Taa");
 
+		if (caps.fp_color_support && caps.TextureRenderTargetFormatSupport(EF_ABGR32F, 1, 0))
+		{
+			depth_of_field_pp_ = MakeSharedPtr<DepthOfField>();
+			bokeh_filter_pp_ = MakeSharedPtr<BokehFilter>();
+		}
+
 		rsm_fb_ = rf.MakeFrameBuffer();
 
 		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
@@ -874,6 +882,8 @@ namespace KlayGE
 		taa_pp_perf_ = profiler.CreatePerfRange(0, "TAA PP");
 		vdm_perf_ = profiler.CreatePerfRange(0, "VDM");
 		vdm_composition_pp_perf_ = profiler.CreatePerfRange(0, "VDM composition PP");
+		depth_of_field_perf_ = profiler.CreatePerfRange(0, "Depth of Field PP");
+		bokeh_filter_perf_ = profiler.CreatePerfRange(0, "Bokeh Filter PP");
 #endif
 	}
 
@@ -960,6 +970,43 @@ namespace KlayGE
 	void DeferredRenderingLayer::TemporalAAEnabled(bool taa)
 	{
 		taa_enabled_ = taa;
+	}
+
+	void DeferredRenderingLayer::DepthOfFieldEnabled(bool dof, bool bokeh)
+	{
+		if (depth_of_field_pp_)
+		{
+			depth_of_field_enabled_ = dof;
+		}
+		if (bokeh_filter_pp_)
+		{
+			bokeh_filter_enabled_ = dof && bokeh;
+		}
+	}
+
+	void DeferredRenderingLayer::DepthFocus(float plane, float range)
+	{
+		if (depth_of_field_pp_)
+		{
+			auto& dof_pp = checked_cast<DepthOfField&>(*depth_of_field_pp_);
+			dof_pp.FocusPlane(plane);
+			dof_pp.FocusRange(range);
+		}
+		if (bokeh_filter_pp_)
+		{
+			auto& bokeh_pp = checked_cast<BokehFilter&>(*bokeh_filter_pp_);
+			bokeh_pp.FocusPlane(plane);
+			bokeh_pp.FocusRange(range);
+		}
+	}
+
+	void DeferredRenderingLayer::BokehLuminanceThreshold(float lum_threshold)
+	{
+		if (bokeh_filter_pp_)
+		{
+			auto& bokeh_pp = checked_cast<BokehFilter&>(*bokeh_filter_pp_);
+			bokeh_pp.LuminanceThreshold(lum_threshold);
+		}
 	}
 
 	void DeferredRenderingLayer::AddDecal(RenderDecalPtr const & decal)
@@ -1200,6 +1247,12 @@ namespace KlayGE
 				pvp.merged_depth_resolved_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			}
 		}
+
+		if (!(attrib & VPAM_NoDoF))
+		{
+			pvp.dof_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		}
+
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
@@ -1707,7 +1760,8 @@ namespace KlayGE
 							return this->PostSimpleForwardDRJob(viewports_[vpi]); }));
 					}
 
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
+					jobs_.push_back(
+						MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
 				}
 			}
 
@@ -4459,17 +4513,38 @@ namespace KlayGE
 		}
 #endif
 
+		TexturePtr color_tex = pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index];
+		TexturePtr const& depth_tex = pvp.merged_depth_resolved_texs[pvp.curr_merged_buffer_index];
+
+		if (!(pvp.attrib & VPAM_NoDoF) && depth_of_field_enabled_)
+		{
+			depth_of_field_pp_->InputPin(0, color_tex);
+			depth_of_field_pp_->InputPin(1, depth_tex);
+			depth_of_field_pp_->OutputPin(0, pvp.dof_tex);
+			depth_of_field_pp_->Apply();
+
+			if (bokeh_filter_enabled_)
+			{
+				bokeh_filter_pp_->InputPin(0, color_tex);
+				bokeh_filter_pp_->InputPin(1, depth_tex);
+				bokeh_filter_pp_->OutputPin(0, pvp.dof_tex);
+				bokeh_filter_pp_->Apply();
+			}
+
+			color_tex = pvp.dof_tex;
+		}
+
 		re.BindFrameBuffer(pvp.frame_buffer);
 		pvp.frame_buffer->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
 		{
-			*depth_tex_param_ = pvp.merged_depth_resolved_texs[pvp.curr_merged_buffer_index];
+			*depth_tex_param_ = depth_tex;
 
 			Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 			float2 near_q(camera.NearPlane() * q, q);
 			*near_q_param_ = near_q;
 
-			*shading_tex_param_ = pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index];
+			*shading_tex_param_ = color_tex;
 			re.Render(*dr_effect_, *technique_copy_shading_depth_, *rl_quad_);
 		}
 

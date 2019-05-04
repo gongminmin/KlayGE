@@ -191,6 +191,8 @@ void DeferredRenderingApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	deferred_rendering_->DepthFocus(10, 75);
+	deferred_rendering_->BokehLuminanceThreshold(2.5f);
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
@@ -274,6 +276,8 @@ void DeferredRenderingApp::OnCreate()
 	id_ssvo_ = dialog_->IDFromName("SSVO");
 	id_hdr_ = dialog_->IDFromName("HDR");
 	id_aa_ = dialog_->IDFromName("AA");
+	id_dof_ = dialog_->IDFromName("DoF");
+	id_bokeh_ = dialog_->IDFromName("Bokeh");
 	id_num_lights_static_ = dialog_->IDFromName("NumLightsStatic");
 	id_num_lights_slider_ = dialog_->IDFromName("NumLightsSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
@@ -323,6 +327,11 @@ void DeferredRenderingApp::OnCreate()
 			this->AntiAliasHandler(sender);
 		});
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
+	dialog_->Control<UICheckBox>(id_dof_)->OnChangedEvent().Connect(
+		[this](UICheckBox const& sender) { this->DepthOfFieldHandler(sender); });
+	this->DepthOfFieldHandler(*dialog_->Control<UICheckBox>(id_dof_));
+	dialog_->Control<UICheckBox>(id_bokeh_)->OnChangedEvent().Connect([this](UICheckBox const& sender) { this->BokehHandler(sender); });
+	this->BokehHandler(*dialog_->Control<UICheckBox>(id_bokeh_));
 	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
@@ -450,6 +459,24 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 		anti_alias_enabled_ = sender.GetChecked();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.PPAAEnabled(anti_alias_enabled_);
+	}
+}
+
+void DeferredRenderingApp::DepthOfFieldHandler(UICheckBox const& sender)
+{
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
+	{
+		dof_enabled_ = sender.GetChecked();
+		deferred_rendering_->DepthOfFieldEnabled(dof_enabled_, bokeh_enabled_);
+	}
+}
+
+void DeferredRenderingApp::BokehHandler(UICheckBox const& sender)
+{
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
+	{
+		bokeh_enabled_ = sender.GetChecked();
+		deferred_rendering_->DepthOfFieldEnabled(dof_enabled_, bokeh_enabled_);
 	}
 }
 

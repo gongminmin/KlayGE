@@ -1,0 +1,379 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="focus_plane_inv_range"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="sat_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 DepthOfFieldBlurFactorPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return saturate(abs(depth_tex.Sample(point_sampler, tc).x * focus_plane_inv_range.z + focus_plane_inv_range.y));
+}
+		]]>
+	</shader>
+
+	<technique name="DepthOfFieldBlurFactor">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldBlurFactorPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float4" name="in_width_height"/>
+	<parameter type="float" name="max_radius"/>
+	<parameter type="texture2D" name="src_tex"/>
+
+	<shader>
+		<![CDATA[
+float4 DepthOfFieldSpreadingPS(float2 tc : TEXCOORD0, float4 vpos : SV_Position) : SV_Target
+{
+	float4 ret = 0;
+	
+	float2 pos = tc * in_width_height.xy - max_radius * 2;
+	float2 original_size = in_width_height.xy - max_radius * 4 - 1;
+	
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
+	float4 offset[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
+	float scale[4] = { +1, -1, -1, +1 };
+	int radius = 8;
+	// TODO: DXBC2GLSL has a problem in min(int, int)
+	if (max_radius < radius)
+	{
+		radius = max_radius;
+	}
+	for (int i = 0; i <= radius; ++ i)
+	{
+		for (int dir = 0; dir < 4; ++ dir)
+		{
+			float4 o = offset[dir];
+			float s = scale[dir];
+		
+			float2 target_coord = pos + o.xy * i + o.zw;
+			float2 original_coord = target_coord / original_size;
+			if (all(target_coord >= -max_radius) && all(target_coord < original_size + max_radius))
+			{
+				float radius = floor(saturate(abs(depth_tex.SampleGrad(point_sampler, original_coord, tc_ddx, tc_ddy).x
+					* focus_plane_inv_range.z + focus_plane_inv_range.y)) * max_radius);
+				if (radius == i)
+				{
+					float area = (radius * 2 + 1) * (radius * 2 + 1);
+					ret += s * float4(color_tex.SampleGrad(point_sampler, original_coord, tc_ddx, tc_ddy).xyz, 1) / area;
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+void DepthOfFieldNormalizationVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oTex = pos.zw;
+	oTex.y = KLAYGE_FLIPPING > 0 ? 1 - oTex.y : oTex.y;
+	oPos = float4(pos.xy, 0, 1);
+}
+
+float4 DepthOfFieldNormalizationPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float4 input = src_tex.Sample(point_sampler, tc);
+	return input / input.w;
+}
+		]]>
+	</shader>
+
+	<technique name="DepthOfFieldSpreading">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldSpreadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthOfFieldNormalization">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="DepthOfFieldNormalizationVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldNormalizationPS()"/>
+		</pass>
+	</technique>
+
+	<macro name="BLOCK_SIZE_X" value="16"/>
+	<macro name="BLOCK_SIZE_Y" value="16"/>
+	<macro name="MAX_RADIUS" value="8"/>
+
+	<parameter type="rw_texture2D" elem_type="float4" name="spread_tex"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+groupshared float2 shared_radius[(BLOCK_SIZE_X + MAX_RADIUS * 2 + 1) * (BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1)];
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID, 
+				uint3 dtid : SV_DispatchThreadID, 
+				uint3 gtid : SV_GroupThreadID, 
+				uint GI : SV_GroupIndex)
+{
+	float2 original_size = in_width_height.xy - max_radius * 4 - 1;
+	float2 inv_original_size = 1 / original_size;
+	const uint shared_width = BLOCK_SIZE_X + MAX_RADIUS * 2 + 1;
+
+	int2 start_coord = gid.xy * int2(BLOCK_SIZE_X, BLOCK_SIZE_Y) - MAX_RADIUS - 1;
+	for (uint t = 0; t < (shared_width * shared_width + BLOCK_SIZE_X * BLOCK_SIZE_Y - 1) / (BLOCK_SIZE_X * BLOCK_SIZE_Y); ++ t)
+	{
+		uint index = GI + t * (BLOCK_SIZE_X * BLOCK_SIZE_Y);
+		if (index < shared_width * shared_width)
+		{
+			uint y = index / shared_width;
+			uint x = index - y * shared_width;
+			int2 addr = start_coord - 2 * max_radius + int2(x, y);
+			if (all(addr >= -max_radius) && all(addr < original_size + max_radius))
+			{
+				float2 original_coord = (addr + 0.5f) * inv_original_size;
+				float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.z
+					+ focus_plane_inv_range.y)) * max_radius);
+				float area = (radius * 2 + 1) * (radius * 2 + 1);
+				shared_radius[y * shared_width + x] = float2(radius, 1 / area);
+			}
+			else
+			{
+				shared_radius[y * shared_width + x] = float2(max_radius + 1, 0);
+			}
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	float4 ret = 0;
+	
+	float4 offsets[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
+	float scales[4] = { +1, -1, -1, +1 };
+	float2 center_coord = gtid.xy + MAX_RADIUS + 1;
+	float2 global_center_coord = dtid.xy - max_radius * 2 + 0.5f;
+	for (int i = 0; i <= max_radius; ++ i)
+	{
+		for (int dir = 0; dir < 4; ++ dir)
+		{
+			float4 o = offsets[dir];
+			float s = scales[dir];
+
+			float2 offset = o.xy * i + o.zw;
+			float2 target_coord = center_coord + offset;
+			float2 radius = shared_radius[target_coord.y * shared_width + target_coord.x];
+			if (radius.x == i)
+			{
+				float2 original_coord = (global_center_coord + offset) * inv_original_size;
+				ret += s * float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) * radius.y;
+			}
+		}
+	}
+	
+	spread_tex[dtid.xy] = ret;
+}
+		]]>
+	</shader>
+
+	<technique name="DepthOfFieldSpreadingCS">
+		<pass name="p0">
+			<state name="compute_shader" value="DepthOfFieldSpreadingCS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float4" name="bokeh_width_height"/>
+	<parameter type="float" name="background_offset"/>
+	<parameter type="float" name="lum_threshold"/>
+
+	<parameter type="texture2D" name="bokeh_pattern_tex">
+		<annotation type="string" name="SasResourceAddress" value="BokehPattern.dds"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="bokeh_tex"/>
+
+	<shader>
+		<![CDATA[
+void CalcBokeh(float2 pos,
+				out float3 oClr,
+				out float4 oPos)
+{
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+
+	oClr = color_tex.SampleLevel(point_sampler, pos, 1).xyz;
+	float lum = dot(oClr, RGB_TO_LUM);
+	if (lum > lum_threshold)
+	{
+		float depth = depth_tex.SampleLevel(point_sampler, pos, 1).x;
+		float radius = abs(depth * focus_plane_inv_range.z + focus_plane_inv_range.y) * max_radius;
+		if (radius > 1.5f)
+		{
+			float2 center_pos = pos * in_width_height.xy;
+			if (depth > focus_plane_inv_range.x)
+			{
+				center_pos.x += background_offset;
+			}
+		
+			oPos = float4(center_pos, 0, 1);
+		}
+		else
+		{
+			oPos = float4(1, 1, 1, 0);
+		}
+	}
+	else
+	{
+		oPos = float4(1, 1, 1, 0);
+	}
+}
+
+float4 ExtendPos(float4 center_pos, float2 offset)
+{
+	float4 pos = float4(((center_pos.xy + offset * max_radius) * bokeh_width_height.zw) * 2 - 1, center_pos.zw);
+	pos.y *= KLAYGE_FLIPPING;
+	return pos;
+}
+
+void SeparateBokehVS(float4 pos : POSITION,
+						out float2 oTc : TEXCOORD0,
+						out float3 oClr : TEXCOORD1,
+						out float4 oPos : SV_Position)
+{
+	float4 center_pos;
+	CalcBokeh(pos.xy, oClr, center_pos);
+
+	oPos = ExtendPos(center_pos, pos.zw);
+	oTc = pos.zw * 0.5f + 0.5f;
+}
+
+float4 SeparateBokehPS(float2 tc : TEXCOORD0, float3 clr : TEXCOORD1) : SV_Target
+{
+	float bokeh_pattern = bokeh_pattern_tex.Sample(linear_sampler, tc).x;
+	return float4(clr, bokeh_pattern);
+}
+
+float4 MergeBokehPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float depth = depth_tex.Sample(point_sampler, tc).x;
+	float radius = abs(depth * focus_plane_inv_range.z + focus_plane_inv_range.y) * max_radius;
+	float2 bokeh_tc = tc * in_width_height.xy;
+	if ((radius > 1) && (depth > focus_plane_inv_range.x))
+	{
+		bokeh_tc.x += background_offset;
+	}
+	
+	return bokeh_tex.Sample(linear_sampler, bokeh_tc * bokeh_width_height.zw);
+}
+		]]>
+	</shader>
+
+	<shader version="4">
+		<![CDATA[
+struct PS_IN
+{
+	float2 tc : TEXCOORD0;
+	float3 clr : TEXCOORD1;
+	float4 pos : SV_Position;
+};
+
+void SeparateBokehVS4(float2 pos : POSITION,
+						out float3 oClr : TEXCOORD0,
+						out float4 oPos : SV_Position)
+{
+	CalcBokeh(pos.xy, oClr, oPos);
+}
+
+[maxvertexcount(4)]
+void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1] : SV_Position, inout TriangleStream<PS_IN> out_stream)
+{
+	if (in_pos[0].w > 0.5f)
+	{
+		float2 center_pos = in_pos[0].xy;
+		float3 clr = in_clr[0];
+		[unroll]
+		for (int index = 0; index < 4; ++ index)
+		{
+			float2 offset = float2((index & 1) ? +1 : -1, ((index & 2) ? -1 : +1) * KLAYGE_FLIPPING);
+			
+			PS_IN gs_out;
+
+			gs_out.pos = ExtendPos(float4(center_pos, 0, 1), offset);
+			gs_out.clr = clr;
+			gs_out.tc = offset * 0.5f + 0.5f;
+		
+			out_stream.Append(gs_out);
+		}
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="SeparateBokeh">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="SeparateBokehVS()"/>
+			<state name="pixel_shader" value="SeparateBokehPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SeparateBokeh4" inherit="SeparateBokeh">
+		<pass name="p0">
+			<state name="vertex_shader" value="SeparateBokehVS4()"/>
+			<state name="geometry_shader" value="SeparateBokehGS4()"/>
+		</pass>
+	</technique>
+
+	<technique name="MergeBokeh">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MergeBokehPS()"/>
+		</pass>
+	</technique>
+</effect>

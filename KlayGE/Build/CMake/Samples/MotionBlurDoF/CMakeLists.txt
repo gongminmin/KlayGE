@@ -1,5 +1,3 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/MotionBlurDoF/bokeh_pattern.dds" "a0841e627bca18d05c2f6d9c0e714b1b20a8604a")
-
 FIND_PACKAGE(PythonInterp)
 
 SET(EXE_NAME "MotionBlurDoF")
@@ -27,12 +25,7 @@ SET(HEADER_FILES
 )
 
 SET(EFFECT_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/DepthOfFieldPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF.fxml
-)
-
-SET(POST_PROCESSORS
-	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/DepthOfField.ppml
 )
 
 SET(UI_FILES
@@ -47,6 +40,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Models/SpotLightProxy.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthOfField.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MotionBlur.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
@@ -57,6 +51,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthOfField.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.kfx
@@ -67,14 +62,13 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/BokehPattern.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAAAreaTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAASearchTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/bokeh_pattern.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/DepthOfFieldPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoFPy.zip
 )
