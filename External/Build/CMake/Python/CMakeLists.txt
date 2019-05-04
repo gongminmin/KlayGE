@@ -6,7 +6,7 @@ SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/gongminmin/cpython.git" "4c5a3aff175e3161c6e5c60d634a2e5ea260989b" "FixForKlayGE" "v${PY_VERSION}")
+UpdateExternalLib("Python" "https://github.com/gongminmin/cpython.git" "1e77e85097cfc6ff5ac52aeb5f8afc63b384a599" "FixForKlayGE" "v${PY_VERSION}")
 UpdateExternalLib("python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "f6810df467b99a769696003097081462d4fb6ecd" "FixForKlayGE" "master")
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})

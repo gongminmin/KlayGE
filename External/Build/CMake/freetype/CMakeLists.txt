@@ -1,7 +1,7 @@
 SET(FREETYPE_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/freetype")
 SET(FREETYPE_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/freetype/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("freetype" "https://git.savannah.gnu.org/git/freetype/freetype2.git" "86bc8a95056c97a810986434a3f268cbe67f2902")
+UpdateExternalLib("freetype" "https://git.savannah.gnu.org/git/freetype/freetype2.git" "81725773800029731617b95cee57cd32a8b46756")
 
 SET(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
