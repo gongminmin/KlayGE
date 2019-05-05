@@ -11,8 +11,8 @@ class CfgBuildDefault:
 		self.cmake_path = "auto"
 
 		# Project type.
-		#   On Windows desktop, could be "vs2017", "vs2015", "make", "ninja", "auto".
-		#   On Windows store, could be "vs2017", "vs2015", "auto".
+		#   On Windows desktop, could be "vs2019", "vs2017", "vs2015", "make", "ninja", "auto".
+		#   On Windows store, could be "vs2019", "vs2017", "vs2015", "auto".
 		#   On Android, could be "make", "auto".
 		#   On Linux, could be "make", "ninja", "auto".
 		#   On macOS, could be "xcode", "ninja", "auto".
@@ -20,8 +20,8 @@ class CfgBuildDefault:
 		self.project = "auto"
 
 		# Compiler name.
-		#   On Windows desktop, could be "vc141", "vc140", "mingw", "auto".
-		#   On Windows store, could be "vc141", "vc140", "auto".
+		#   On Windows desktop, could be "vc142", "vc141", "vc140", "mingw", "auto".
+		#   On Windows store, could be "vc142", "vc141", "vc140", "auto".
 		#   On Android, could be "clang", "auto".
 		#   On Linux, could be "gcc", "auto".
 		#   On macOS, could be "clang", "auto".
@@ -30,7 +30,7 @@ class CfgBuildDefault:
 
 		# Target CPU architecture.
 		#   On Windows desktop, could be "arm64", "x64".
-		#   On Windows store, could be "arm", "x64".
+		#   On Windows store, could be "arm64", "arm", "x64".
 		#   On Android, cound be "arm64-v8a", "x86", "x86_64".
 		#   On Linux, could be "x64".
 		#   On macOS, could be "x64".
