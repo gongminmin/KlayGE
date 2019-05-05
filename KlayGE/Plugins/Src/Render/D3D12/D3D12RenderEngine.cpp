@@ -1085,12 +1085,15 @@ namespace KlayGE
 	{
 		adapterList_.Destroy();
 
-		uint64_t max_fence_val = 0;
-		for (auto const & item : d3d_render_cmd_allocators_)
+		if (render_cmd_fence_)
 		{
-			max_fence_val = std::max(max_fence_val, item.second);
+			uint64_t max_fence_val = 0;
+			for (auto const& item : d3d_render_cmd_allocators_)
+			{
+				max_fence_val = std::max(max_fence_val, item.second);
+			}
+			render_cmd_fence_->Wait(max_fence_val);
 		}
-		render_cmd_fence_->Wait(max_fence_val);
 
 		res_cmd_fence_.reset();
 		render_cmd_fence_.reset();

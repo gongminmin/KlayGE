@@ -893,8 +893,11 @@ namespace KlayGE
 		stereo_nv_3d_vision_fb_.reset();
 		stereo_nv_3d_vision_tex_.reset();
 
-		d3d_imm_ctx_->ClearState();
-		d3d_imm_ctx_->Flush();
+		if (d3d_imm_ctx_)
+		{
+			d3d_imm_ctx_->ClearState();
+			d3d_imm_ctx_->Flush();
+		}
 
 		d3d_imm_ctx_.reset();
 		d3d_imm_ctx_1_.reset();

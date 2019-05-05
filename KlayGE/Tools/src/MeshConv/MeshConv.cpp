@@ -52,6 +52,15 @@ using namespace KlayGE;
 
 int main(int argc, char* argv[])
 {
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hide_win = true;
+	context_cfg.graphics_cfg.hdr = false;
+	context_cfg.graphics_cfg.ppaa = false;
+	context_cfg.graphics_cfg.gamma = false;
+	context_cfg.graphics_cfg.color_grading = false;
+	Context::Instance().Config(context_cfg);
+
 	std::string input_name;
 	std::string metadata_name;
 	std::string output_name;
