@@ -1,4 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Context.hpp>
@@ -92,7 +94,11 @@ void PackJTML(std::string const & jtml_name)
 {
 	Timer timer;
 
-	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_name);
+	std::filesystem::path jtml_path = ResLoader::Instance().Locate(jtml_name);
+	std::string const jtml_folder = jtml_path.parent_path().string() + '/';
+	ResLoader::Instance().AddPath(jtml_folder);
+
+	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_path.string());
 
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(jtml);
@@ -118,6 +124,7 @@ void PackJTML(std::string const & jtml_name)
 	uint32_t pixel_size = NumFormatBytes(format);
 
 	JudaTexturePtr juda_tex = MakeSharedPtr<JudaTexture>(num_tiles, tile_size, format);
+	juda_tex->CacheProperty(1024, format, 4);
 
 	uint32_t level = juda_tex->TreeLevels() - 1;
 
@@ -289,6 +296,8 @@ void PackJTML(std::string const & jtml_name)
 	timer.restart();
 	SaveJudaTexture(juda_tex, base_name + ".jdt");
 	cout << "Takes " << timer.elapsed() << "s" << endl << endl;
+
+	ResLoader::Instance().DelPath(jtml_folder);
 }
 
 int main(int argc, char* argv[])
