@@ -176,6 +176,16 @@ TEST_F(TexConverterTest, Bump2Normal_0_4)
 	RunTest("background.jpg", "background_bump2normal_0_4.kmeta", "background_normal_0_4.dds", 1.0f / 255);
 }
 
+TEST_F(TexConverterTest, Bump2Occlusion)
+{
+	RunTest("background.jpg", "background_bump2occlusion.kmeta", "background_occlusion.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, Bump2Occlusion_0_6)
+{
+	RunTest("background.jpg", "background_bump2occlusion_0_6.kmeta", "background_occlusion_0_6.dds", 1.0f / 255);
+}
+
 TEST_F(TexConverterTest, Rgb2Lum)
 {
 	RunTest("background.jpg", "background_rgb2lum.kmeta", "background_lum.dds", 1.0f / 255);

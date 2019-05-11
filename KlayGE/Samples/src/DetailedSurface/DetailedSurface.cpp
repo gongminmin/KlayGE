@@ -55,10 +55,12 @@ namespace
 			tile_bb_[0] = int4(0, 0, 4, 4);
 			tile_bb_[1] = int4(4, 0, 4, 4);
 			tile_bb_[2] = int4(0, 4, 4, 4);
+			tile_bb_[3] = int4(4, 4, 4, 4);
 
 			*(effect_->ParameterByName("diffuse_tex_bb")) = tile_bb_[0];
 			*(effect_->ParameterByName("normal_tex_bb")) = tile_bb_[1];
 			*(effect_->ParameterByName("height_tex_bb")) = tile_bb_[2];
+			*(effect_->ParameterByName("occlusion_tex_bb")) = tile_bb_[3];
 			*(effect_->ParameterByName("tex_size")) = int2(512, 512);
 			*(effect_->ParameterByName("na_length_tex")) = ASyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
@@ -148,6 +150,11 @@ namespace
 			*(effect_->ParameterByName("use_na_length")) = len;
 		}
 
+		void UseOcclusionMap(bool om)
+		{
+			*(effect_->ParameterByName("use_occlusion_map")) = om;
+		}
+
 		void Wireframe(bool wf)
 		{
 			wireframe_ = wf;
@@ -213,7 +220,7 @@ namespace
 		}
 
 	private:
-		int4 tile_bb_[3];
+		int4 tile_bb_[4];
 		std::vector<uint32_t> tile_ids_;
 		uint32_t detail_type_;
 		bool wireframe_;
@@ -303,6 +310,12 @@ void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sen
 		{
 			checked_cast<RenderPolygon&>(mesh).DetailType(index);
 		});
+}
+
+void DetailedSurfaceApp::OcclusionHandler(KlayGE::UICheckBox const& sender)
+{
+	bool const om = sender.GetChecked();
+	polygon_model_->ForEachMesh([om](Renderable& mesh) { checked_cast<RenderPolygon&>(mesh).UseOcclusionMap(om); });
 }
 
 void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const & sender)
@@ -430,6 +443,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
 			id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
 			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
+			id_occlusion_ = dialog_->IDFromName("Occlusion");
 			id_na_length_ = dialog_->IDFromName("NaLength");
 			id_wireframe_ = dialog_->IDFromName("Wireframe");
 
@@ -449,6 +463,10 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 				});
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
+			dialog_->Control<UICheckBox>(id_occlusion_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
+				this->OcclusionHandler(sender);
+			});
+			this->OcclusionHandler(*dialog_->Control<UICheckBox>(id_occlusion_));
 			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().Connect(
 				[this](UICheckBox const & sender)
 				{

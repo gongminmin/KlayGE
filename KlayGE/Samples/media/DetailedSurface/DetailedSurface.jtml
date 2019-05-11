@@ -4,4 +4,5 @@
 	<image name="diffuse.dds" x="0" y="0" w="4" h="4" address_u="wrap" address_v="wrap"/>
 	<image name="normal.dds" x="4" y="0" w="4" h="4" address_u="wrap" address_v="wrap"/>
 	<image name="height.dds" x="0" y="4" w="4" h="4" address_u="wrap" address_v="wrap"/>
+	<image name="occlusion.dds" x="4" y="4" w="4" h="4" address_u="wrap" address_v="wrap"/>
 </juda_tex>

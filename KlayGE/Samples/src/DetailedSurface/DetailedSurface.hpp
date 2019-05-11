@@ -21,7 +21,8 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void ScaleChangedHandler(KlayGE::UISlider const & sender);
 	void DetailTypeChangedHandler(KlayGE::UIComboBox const & sender);
-	void NaLengthHandler(KlayGE::UICheckBox const & sender);
+	void OcclusionHandler(KlayGE::UICheckBox const& sender);
+	void NaLengthHandler(KlayGE::UICheckBox const& sender);
 	void WireframeHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -40,6 +41,7 @@ private:
 	int id_scale_slider_;
 	int id_detail_type_static_;
 	int id_detail_type_combo_;
+	int id_occlusion_;
 	int id_na_length_;
 	int id_wireframe_;
 

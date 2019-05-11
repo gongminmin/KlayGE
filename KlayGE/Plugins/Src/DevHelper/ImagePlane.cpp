@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/CXX17/filesystem.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
@@ -550,7 +551,36 @@ namespace KlayGE
 		}
 	}
 
-	void ImagePlane::BumpToNormal(float scale)
+	void ImagePlane::AlphaToLum()
+	{
+		compressed_tex_.reset();
+
+		uint32_t const width = uncompressed_tex_->Width(0);
+		uint32_t const height = uncompressed_tex_->Height(0);
+		ElementFormat const format = uncompressed_tex_->Format();
+		uint32_t const elem_size = NumFormatBytes(format);
+
+		Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0, uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+		uint8_t* ptr = mapper.Pointer<uint8_t>();
+
+		for (uint32_t y = 0; y < height; ++y)
+		{
+			for (uint32_t x = 0; x < width; ++x)
+			{
+				Color color_32f;
+				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
+
+				float const lum = color_32f.a();
+
+				Color const color_f32(lum, lum, lum, 1);
+				ConvertFromABGR32F(format, &color_f32, 1, ptr + x * elem_size);
+			}
+
+			ptr += mapper.RowPitch();
+		}
+	}
+
+	void ImagePlane::BumpToNormal(float scale, float amplitude)
 	{
 		compressed_tex_.reset();
 
@@ -603,7 +633,37 @@ namespace KlayGE
 				float3 normal = MathLib::normalize(float3(-dx, -dy, scale));
 				normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
 
-				Color const color_f32(normal.x(), normal.y(), normal.z(), 1);
+				float occlusion = 1;
+				if (amplitude > 0)
+				{
+					float delta = 0;
+					float const c = height_map[y * width + x];
+					for (int oy = -1; oy < 2; ++oy)
+					{
+						int const sy = (y + oy) % height;
+						for (int ox = -1; ox < 2; ++ox)
+						{
+							int const sx = (x + ox) % width;
+							if ((ox != 0) && (oy != 0))
+							{
+								float const t = height_map[sy * width + sx] - c;
+								if (t > 0)
+								{
+									delta += t;
+								}
+							}
+						}
+					}
+
+					delta *= amplitude / 8;
+					if (delta > 0)
+					{
+						float const r = MathLib::sqrt(1 + delta * delta);
+						occlusion = (r - delta) / r;
+					}
+				}
+
+				Color const color_f32(normal.x(), normal.y(), normal.z(), occlusion);
 				ConvertFromABGR32F(format, &color_f32, 1, ptr + x * elem_size);
 			}
 

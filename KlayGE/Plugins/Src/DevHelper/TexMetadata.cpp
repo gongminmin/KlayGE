@@ -192,6 +192,10 @@ namespace KlayGE
 					new_metadata.slot_ = RenderMaterial::TS_Height;
 					break;
 
+				case CT_HASH("occlusion"):
+					new_metadata.slot_ = RenderMaterial::TS_Occlusion;
+					break;
+
 				default:
 					KFL_UNREACHABLE("Invalid texture slot.");
 				}
@@ -334,8 +338,9 @@ namespace KlayGE
 				new_metadata.mipmap_.auto_gen = true;
 			}
 
-			if (((new_metadata.slot_ == RenderMaterial::TS_Normal) || (new_metadata.slot_ == RenderMaterial::TS_Height))
-				&& document.HasMember("bump"))
+			if (((new_metadata.slot_ == RenderMaterial::TS_Normal) || (new_metadata.slot_ == RenderMaterial::TS_Height) ||
+					(new_metadata.slot_ == RenderMaterial::TS_Occlusion)) &&
+				document.HasMember("bump"))
 			{
 				auto const & bump_val = document["bump"];
 
@@ -350,6 +355,18 @@ namespace KlayGE
 					auto const & scale_val = bump_val["scale"];
 					BOOST_ASSERT(scale_val.IsNumber());
 					new_metadata.bump_.scale = GetFloat(scale_val);
+				}
+				if (bump_val.HasMember("to_occlusion"))
+				{
+					auto const& to_occlusion_val = bump_val["to_occlusion"];
+					BOOST_ASSERT(to_occlusion_val.IsBool());
+					new_metadata.bump_.to_occlusion = to_occlusion_val.GetBool();
+				}
+				if (bump_val.HasMember("occlusion_amplitude"))
+				{
+					auto const& occlusion_amplitude_val = bump_val["occlusion_amplitude"];
+					BOOST_ASSERT(occlusion_amplitude_val.IsNumber());
+					new_metadata.bump_.occlusion_amplitude = GetFloat(occlusion_amplitude_val);
 				}
 
 				if (bump_val.HasMember("from_normal"))
@@ -553,8 +570,8 @@ namespace KlayGE
 			document.AddMember("mipmap", mipmap_val, allocator);
 		}
 
-		if (((slot_ == RenderMaterial::TS_Normal) || (slot_ == RenderMaterial::TS_Height))
-			&& (bump_.to_normal || bump_.from_normal))
+		if (((slot_ == RenderMaterial::TS_Normal) || (slot_ == RenderMaterial::TS_Height) || (slot_ == RenderMaterial::TS_Occlusion)) &&
+			(bump_.to_normal || bump_.from_normal || bump_.to_occlusion))
 		{
 			rapidjson::Value bump_val;
 			bump_val.SetObject();
@@ -563,6 +580,11 @@ namespace KlayGE
 			{
 				bump_val.AddMember("to_normal", bump_.to_normal, allocator);
 				bump_val.AddMember("scale", bump_.scale, allocator);
+			}
+			if ((slot_ == RenderMaterial::TS_Occlusion) && bump_.to_occlusion)
+			{
+				bump_val.AddMember("to_occlusion", bump_.to_normal, allocator);
+				bump_val.AddMember("occlusion_amplitude", bump_.occlusion_amplitude, allocator);
 			}
 			if ((slot_ == RenderMaterial::TS_Height) && bump_.from_normal)
 			{

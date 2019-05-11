@@ -304,14 +304,20 @@ namespace
 			}
 		}
 
-		if ((metadata_.Slot() == RenderMaterial::TS_Normal) && metadata_.BumpToNormal())
+		if (((metadata_.Slot() == RenderMaterial::TS_Normal) || (metadata_.Slot() == RenderMaterial::TS_Occlusion)) &&
+			(metadata_.BumpToNormal() || metadata_.BumpToOcclusion()))
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
 				uint32_t const num = need_gen_mipmaps ? 1 : num_mipmaps_;
 				for (uint32_t m = 0; m < num; ++ m)
 				{
-					planes_[arr][m]->BumpToNormal(metadata_.BumpScale());
+					planes_[arr][m]->BumpToNormal(metadata_.BumpScale(), metadata_.BumpToOcclusion() ? metadata_.OcclusionAmplitude() : 0);
+
+					if (metadata_.Slot() == RenderMaterial::TS_Occlusion)
+					{
+						planes_[arr][m]->AlphaToLum();
+					}
 				}
 			}
 		}

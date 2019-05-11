@@ -49,6 +49,7 @@ namespace KlayGE
 			TS_Emissive,
 			TS_Normal,
 			TS_Height,
+			TS_Occlusion,
 
 			TS_NumTextureSlots
 		};
@@ -62,21 +63,24 @@ namespace KlayGE
 
 		std::string name;
 
-		float4 albedo;
-		float metalness;
-		float glossiness;
-		float3 emissive;
+		float4 albedo = float4(0, 0, 0, 0);
+		float metalness = 0;
+		float glossiness = 0;
+		float3 emissive = float3(0, 0, 0);
 
-		bool transparent;
-		float alpha_test;
-		bool sss;
-		bool two_sided;
+		bool transparent = false;
+		float alpha_test = 0;
+		bool sss = false;
+		bool two_sided = false;
+
+		float normal_scale = 1;
+		float occlusion_strength = 1;
 
 		std::array<std::string, TS_NumTextureSlots> tex_names;
 
-		SurfaceDetailMode detail_mode;
-		float2 height_offset_scale;
-		float4 tess_factors;
+		SurfaceDetailMode detail_mode = SDM_Parallax;
+		float2 height_offset_scale = float2(0, 1);
+		float4 tess_factors = float4(1, 1, 1, 1);
 	};
 
 	float const MAX_SHININESS = 8192;

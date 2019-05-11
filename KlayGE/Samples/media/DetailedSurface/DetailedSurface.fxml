@@ -28,8 +28,10 @@
 	<parameter type="int4" name="diffuse_tex_bb"/>
 	<parameter type="int4" name="normal_tex_bb"/>
 	<parameter type="int4" name="height_tex_bb"/>
+	<parameter type="int4" name="occlusion_tex_bb"/>
 	<parameter type="int2" name="tex_size"/>
 
+	<parameter type="bool" name="use_occlusion_map"/>
 	<parameter type="bool" name="use_na_length"/>
 	<parameter type="texture2D" name="na_length_tex"/>
 	<parameter type="sampler" name="linear_sampler">
@@ -88,7 +90,7 @@ void CalcTBNVS(float4 pos				: POSITION,
 		oL, oH, oV, oPos);
 }
 
-float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool nl)
+float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool nl, bool om)
 {
 	float atten = AttenuationTerm(0, -L.xyz, light_falloff);
 
@@ -105,21 +107,28 @@ float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool 
 		shininess *= ft;
 	}
 
-	return float4(0.1f * diffuse + shadow * atten * light_color * CalcBRDFShading(diffuse, 0.2f, shininess, light_vec, halfway, normal), 1);
+	float occlusion = 1;
+	if (om)
+	{
+		occlusion = get_x_channel(judatex2d_wrap(occlusion_tex_bb, uv));
+	}
+	
+	float3 shading = 0.1f * diffuse + shadow * atten * light_color * CalcBRDFShading(diffuse, 0.2f, shininess, light_vec, halfway, normal);
+	return float4(shading * occlusion, 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,
 					float4 H		: TEXCOORD1) : SV_Target
 {
 	float2 uv = float2(L.w, H.w);
-	return Shading(L.xyz, H.xyz, uv, float3(0, 0, 1), 1, 0);
+	return Shading(L.xyz, H.xyz, uv, float3(0, 0, 1), 1, 0, 0);
 }
 
 float4 BumpMappingPS(float4 L		: TEXCOORD0,
 					float4 H		: TEXCOORD1) : SV_Target
 {
 	float2 uv = float2(L.w, H.w);
-	return Shading(L.xyz, H.xyz, uv, restore_normal(judatex2d_wrap(normal_tex_bb, uv).rg * 2 - 1), 1, use_na_length);
+	return Shading(L.xyz, H.xyz, uv, restore_normal(judatex2d_wrap(normal_tex_bb, uv).rg * 2 - 1), 1, use_na_length, use_occlusion_map);
 }
 
 float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
@@ -133,7 +142,8 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	float height = (judatex2d_wrap(height_tex_bb, texCoord0).r - 1) * height_scale;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	return Shading(L.xyz, H.xyz, texUV, restore_normal(judatex2d_wrap(normal_tex_bb, texUV).rg * 2 - 1), 1, use_na_length);
+	return Shading(L.xyz, H.xyz, texUV, restore_normal(judatex2d_wrap(normal_tex_bb, texUV).rg * 2 - 1), 1,
+		use_na_length, use_occlusion_map);
 }
 
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
@@ -256,7 +266,8 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		}
 	}
 
-	return Shading(L.xyz, H.xyz, texUV, restore_normal(judatex2d_level_wrap(normal_tex_bb, texUV, level).rg * 2 - 1), fOcclusionShadow, use_na_length);
+	return Shading(L.xyz, H.xyz, texUV, restore_normal(judatex2d_level_wrap(normal_tex_bb, texUV, level).rg * 2 - 1), fOcclusionShadow,
+		use_na_length, use_occlusion_map);
 }
 		]]>
 	</shader>

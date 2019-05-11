@@ -155,6 +155,22 @@ namespace KlayGE
 		{
 			bump_.scale = scale;
 		}
+		bool BumpToOcclusion() const
+		{
+			return bump_.to_occlusion;
+		}
+		void BumpToOcclusion(bool to_occlusion)
+		{
+			bump_.to_occlusion = to_occlusion;
+		}
+		float OcclusionAmplitude() const
+		{
+			return bump_.occlusion_amplitude;
+		}
+		void OcclusionAmplitude(float amplitude)
+		{
+			bump_.occlusion_amplitude = amplitude;
+		}
 
 		bool NormalToHeight() const
 		{
@@ -201,6 +217,8 @@ namespace KlayGE
 		{
 			bool to_normal = false;
 			float scale = 1.0f;
+			bool to_occlusion = false;
+			float occlusion_amplitude = 1.0f;
 
 			bool from_normal = false;
 			float min_z = 1e-6f;
