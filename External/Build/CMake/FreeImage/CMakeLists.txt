@@ -1,7 +1,7 @@
 SET(FREEIMAGE_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/FreeImage")
 SET(FREEIMAGE_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/FreeImage/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("FreeImage" "https://github.com/gongminmin/FreeImage.git" "886cf150fa0a58b1457e971dd02463b3296980d7" "FixForKlayGE" "master")
+UpdateExternalLib("FreeImage" "https://github.com/gongminmin/FreeImage.git" "44a48402469b9440532cb688f73e8069ac84bf1f" "FixForKlayGE" "master")
 
 IF(KLAYGE_COMPILER_MSVC)
 	STRING(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
