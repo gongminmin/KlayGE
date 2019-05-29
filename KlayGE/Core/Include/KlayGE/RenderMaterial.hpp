@@ -44,8 +44,7 @@ namespace KlayGE
 		enum TextureSlot
 		{
 			TS_Albedo,
-			TS_Metalness,
-			TS_Glossiness,
+			TS_MetalnessGlossiness,
 			TS_Emissive,
 			TS_Normal,
 			TS_Height,

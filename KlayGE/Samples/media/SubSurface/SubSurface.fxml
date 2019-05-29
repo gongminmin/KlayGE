@@ -27,12 +27,12 @@
 	</parameter>
 
 	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float2" name="glossiness_clr"/>
+	<parameter type="float3" name="metalness_glossiness_factor"/>
 	<parameter type="int" name="albedo_map_enabled"/>
 	
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="metalness_glossiness_tex"/>
 	<parameter type="int" name="normal_map_enabled"/>
 
 	<shader>
@@ -149,10 +149,10 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	float3 diffuse = DiffuseColor(albedo, 0.5f);
 	float3 specular = SpecularColor(albedo, 0.5f);
 	
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		glossiness *= glossiness_tex.Sample(linear_sampler, uv).r;
+		glossiness *= get_xy_channel(metalness_glossiness_tex.Sample(linear_sampler, uv)).y;
 	}
 	float shininess = Glossiness2Shininess(glossiness);
 

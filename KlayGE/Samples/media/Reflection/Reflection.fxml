@@ -151,10 +151,10 @@ float4 ReflectSpecialShadingPS(
 	{
 		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
+		metalness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).x;
 	}
 	
 	float3 specular = SpecularColor(albedo, metalness);

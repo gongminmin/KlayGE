@@ -88,11 +88,11 @@ namespace KlayGE
 			force_srgb_ = srgb;
 		}
 
-		uint8_t ChannelMapping(uint32_t channel) const
+		int8_t ChannelMapping(uint32_t channel) const
 		{
 			return channel_mapping_[channel];
 		}
-		void ChannelMapping(uint32_t channel, uint8_t mapping)
+		void ChannelMapping(uint32_t channel, int8_t mapping)
 		{
 			channel_mapping_[channel] = mapping;
 		}
@@ -201,7 +201,7 @@ namespace KlayGE
 
 		ElementFormat prefered_format_ = EF_Unknown;
 		bool force_srgb_ = false;
-		uint8_t channel_mapping_[4] = { 0, 1, 2, 3 };
+		int8_t channel_mapping_[4] = { 0, 1, 2, 3 };
 		bool rgb_to_lum_ = false;
 
 		struct Mipmap

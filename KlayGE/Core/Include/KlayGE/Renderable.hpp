@@ -320,10 +320,8 @@ namespace KlayGE
 		RenderEffectParameter* albedo_map_enabled_param_;
 		RenderEffectParameter* albedo_tex_param_;
 		RenderEffectParameter* albedo_clr_param_;
-		RenderEffectParameter* metalness_tex_param_;
-		RenderEffectParameter* metalness_clr_param_;
-		RenderEffectParameter* glossiness_tex_param_;
-		RenderEffectParameter* glossiness_clr_param_;
+		RenderEffectParameter* metalness_glossiness_tex_param_;
+		RenderEffectParameter* metalness_glossiness_factor_param_;
 		RenderEffectParameter* emissive_tex_param_;
 		RenderEffectParameter* emissive_clr_param_;
 		RenderEffectParameter* normal_map_enabled_param_;
@@ -334,6 +332,8 @@ namespace KlayGE
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
 		RenderEffectParameter* alpha_test_threshold_param_;
+		RenderEffectParameter* normal_scale_param_;
+		RenderEffectParameter* occlusion_strength_param_;
 
 		std::array<ShaderResourceViewPtr, RenderMaterial::TS_NumTextureSlots> textures_;
 	};

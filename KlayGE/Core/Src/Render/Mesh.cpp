@@ -50,7 +50,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 16;
+	uint32_t const MODEL_BIN_VERSION = 17;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{

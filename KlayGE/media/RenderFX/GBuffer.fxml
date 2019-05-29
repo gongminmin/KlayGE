@@ -21,25 +21,27 @@
 		<parameter type="float2" name="tc_center"/>
 		<parameter type="float2" name="tc_extent"/>
 		<parameter type="float4" name="albedo_clr"/>
-		<parameter type="float2" name="metalness_clr"/>
-		<parameter type="float2" name="glossiness_clr"/>
+		<parameter type="float3" name="metalness_glossiness_factor"/>
 		<parameter type="float4" name="emissive_clr"/>
 		<parameter type="int" name="albedo_map_enabled"/>
 		<parameter type="int" name="normal_map_enabled"/>
 		<parameter type="int" name="height_map_parallax_enabled"/>
 		<parameter type="int" name="height_map_tess_enabled"/>
+		<parameter type="int" name="occlusion_map_enabled"/>
 		<parameter type="float" name="alpha_test_threshold"/>
+		<parameter type="float" name="normal_scale"/>
+		<parameter type="float" name="occlusion_strength"/>
 		<parameter type="float2" name="height_offset_scale"/>
 		<parameter type="float4" name="tess_factors"/>
 		<parameter type="float4" name="object_id"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="metalness_glossiness_tex"/>
 	<parameter type="texture2D" name="emissive_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="height_tex"/>
+	<parameter type="texture2D" name="occlusion_tex"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -101,6 +103,10 @@
 			<param type="float2" name="texcoord"/>
 		</node>
 		<node name="HeightForTessellationNode" return="float" impl="StaticHeightForTessellationNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+
+		<node name="OcclusionNode" return="float3" impl="StaticOcclusionNode">
 			<param type="float2" name="texcoord"/>
 		</node>
 
@@ -180,7 +186,7 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	ts_to_view[0] = normalize(ts_to_view0_2z.xyz);
 	ts_to_view[1] = normalize(ts_to_view1);
 	ts_to_view[2] = normal;
-	normal = normalize(mul(NormalNode(texcoord_2xy.xy), ts_to_view));
+	normal = normalize(mul(NormalNode(texcoord_2xy.xy) * float3(normal_scale.xx, 1), ts_to_view));
 
 	return normal;
 }
@@ -459,20 +465,20 @@ float3 StaticAlbedoNode(float2 texcoord)
 
 float StaticMetalnessNode(float2 texcoord)
 {
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
+		metalness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).x;
 	}
 	return metalness;
 }
 
 float StaticGlossinessNode(float2 texcoord)
 {
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		glossiness *= glossiness_tex.Sample(aniso_sampler, texcoord).r;
+		glossiness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).y;
 	}
 	return glossiness;
 }
@@ -525,6 +531,16 @@ float StaticHeightForTessellationNode(float2 texcoord)
 		height = (height_tex.SampleLevel(bilinear_sampler, texcoord, 0).x + height_offset_scale.x) * 0.1f * height_offset_scale.y;
 	}
 	return height;
+}
+
+float StaticOcclusionNode(float2 texcoord)
+{
+	float occlusion = 1;
+	if (occlusion_map_enabled)
+	{
+		occlusion = occlusion_tex.Sample(trilinear_sampler, texcoord).x;
+	}
+	return occlusion;
 }
 
 float3 DefaultPositionAdjustmentNode(float3 position, float4 tangent_quat)

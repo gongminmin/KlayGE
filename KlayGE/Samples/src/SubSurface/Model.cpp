@@ -36,12 +36,13 @@ void DetailedMesh::DoBuildMeshInfo(RenderModel const & model)
 
 	*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
 	*(effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-	*(effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
+	*(effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
 	*(effect_->ParameterByName("normal_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Normal]);
 
 	*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
 	*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
-	*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!textures_[RenderMaterial::TS_Glossiness]);
+	*(effect_->ParameterByName("metalness_glossiness_factor")) =
+		float3(0, mtl_->glossiness, !!textures_[RenderMaterial::TS_MetalnessGlossiness]);
 
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)

@@ -174,33 +174,55 @@ namespace
 				}
 			}
 
-			XMLNodePtr metalness_node = root->FirstNode("metalness");
-			if (metalness_node)
+			XMLNodePtr metalness_glossiness_node = root->FirstNode("metalness_glossiness");
+			if (metalness_glossiness_node)
 			{
-				XMLAttributePtr attr = metalness_node->Attrib("value");
+				XMLAttributePtr attr = metalness_glossiness_node->Attrib("metalness");
 				if (attr)
 				{
 					mtl_desc_.mtl_data->metalness = attr->ValueFloat();
 				}
-				attr = metalness_node->Attrib("texture");
-				if (attr)
-				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Metalness] = std::string(attr->ValueString());
-				}
-			}
-
-			XMLNodePtr glossiness_node = root->FirstNode("glossiness");
-			if (glossiness_node)
-			{
-				XMLAttributePtr attr = glossiness_node->Attrib("value");
+				attr = metalness_glossiness_node->Attrib("glossiness");
 				if (attr)
 				{
 					mtl_desc_.mtl_data->glossiness = attr->ValueFloat();
 				}
-				attr = glossiness_node->Attrib("texture");
+				attr = metalness_glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Glossiness] = std::string(attr->ValueString());
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+				}
+			}
+			else
+			{
+				XMLNodePtr metalness_node = root->FirstNode("metalness");
+				if (metalness_node)
+				{
+					XMLAttributePtr attr = metalness_node->Attrib("value");
+					if (attr)
+					{
+						mtl_desc_.mtl_data->metalness = attr->ValueFloat();
+					}
+					attr = metalness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+					}
+				}
+
+				XMLNodePtr glossiness_node = root->FirstNode("glossiness");
+				if (glossiness_node)
+				{
+					XMLAttributePtr attr = glossiness_node->Attrib("value");
+					if (attr)
+					{
+						mtl_desc_.mtl_data->glossiness = attr->ValueFloat();
+					}
+					attr = glossiness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+					}
 				}
 			}
 
@@ -456,36 +478,25 @@ namespace KlayGE
 			root->AppendNode(albedo_node);
 		}
 
-		if ((mtl->metalness > 0) || !mtl->tex_names[RenderMaterial::TS_Metalness].empty())
+		if ((mtl->metalness > 0) || (mtl->glossiness > 0) || !mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
 		{
-			XMLNodePtr metalness_node = doc.AllocNode(XNT_Element, "metalness");
+			XMLNodePtr metalness_glossiness_node = doc.AllocNode(XNT_Element, "metalness_glossiness");
 
 			if (mtl->metalness > 0)
 			{
-				metalness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->metalness));
+				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->metalness));
 			}
-			if (!mtl->tex_names[RenderMaterial::TS_Metalness].empty())
-			{
-				metalness_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Metalness]));
-			}
-
-			root->AppendNode(metalness_node);
-		}
-
-		if ((mtl->glossiness > 0) || !mtl->tex_names[RenderMaterial::TS_Glossiness].empty())
-		{
-			XMLNodePtr glossiness_node = doc.AllocNode(XNT_Element, "glossiness");
-
 			if (mtl->glossiness > 0)
 			{
-				glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->glossiness));
+				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->glossiness));
 			}
-			if (!mtl->tex_names[RenderMaterial::TS_Glossiness].empty())
+			if (!mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
 			{
-				glossiness_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Glossiness]));
+				metalness_glossiness_node->AppendAttrib(
+					doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness]));
 			}
 
-			root->AppendNode(glossiness_node);
+			root->AppendNode(metalness_glossiness_node);
 		}
 
 		if ((mtl->emissive.x() > 0) || (mtl->emissive.y() > 0) || (mtl->emissive.z() > 0)
@@ -603,4 +614,4 @@ namespace KlayGE
 		}
 		doc.Print(ofs);
 	}
-}
+} // namespace KlayGE

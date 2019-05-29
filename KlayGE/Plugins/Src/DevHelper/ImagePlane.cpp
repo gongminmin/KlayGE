@@ -406,7 +406,7 @@ namespace KlayGE
 		}
 
 		uint32_t const num_channels = NumComponents(uncompressed_tex_->Format());
-		uint32_t channel_mapping[4];
+		int32_t channel_mapping[4];
 		for (uint32_t ch = 0; ch < num_channels; ++ ch)
 		{
 			channel_mapping[ch] = metadata.ChannelMapping(ch);
@@ -415,7 +415,7 @@ namespace KlayGE
 		bool need_swizzle = false;
 		for (uint32_t ch = 0; ch < num_channels; ++ ch)
 		{
-			if (channel_mapping[ch] != ch)
+			if (channel_mapping[ch] != static_cast<int32_t>(ch))
 			{
 				need_swizzle = true;
 				break;
@@ -444,7 +444,14 @@ namespace KlayGE
 					original_clr = line_32f[x];
 					for (uint32_t ch = 0; ch < num_channels; ++ ch)
 					{
-						swizzled_clr[ch] = original_clr[channel_mapping[ch]];
+						if (channel_mapping[ch] >= 0)
+						{
+							swizzled_clr[ch] = original_clr[channel_mapping[ch]];
+						}
+						else
+						{
+							swizzled_clr[ch] = 0;
+						}
 					}
 					line_32f[x] = swizzled_clr;
 				}

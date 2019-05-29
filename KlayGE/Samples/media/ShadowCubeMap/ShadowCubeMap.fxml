@@ -412,14 +412,12 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	<parameter type="float3" name="light_pos"/>
 
 	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float2" name="metalness_clr"/>
-	<parameter type="float2" name="glossiness_clr"/>
+	<parameter type="float3" name="metalness_glossiness_factor"/>
 	<parameter type="float4" name="emissive_clr"/>
 	<parameter type="int" name="albedo_map_enabled"/>
 
 	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="metalness_glossiness_tex"/>
 	<parameter type="texture2D" name="emissive_tex"/>
 
 	<parameter type="textureCUBE" name="light_projective_tex"/>
@@ -470,20 +468,17 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		albedo *= albedo_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(linear_wrap_sampler, Texcoord).r;
+		float2 mg_tex = get_xy_channel(metalness_glossiness_tex.Sample(linear_wrap_sampler, Texcoord));
+		metalness *= mg_tex.x;
+		glossiness *= mg_tex.y;
 	}
 	
 	float3 c_diff = DiffuseColor(albedo, metalness);
 	float3 c_spec = SpecularColor(albedo, metalness);
-	
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(linear_wrap_sampler, Texcoord).r;
-	}
 	float shininess = Glossiness2Shininess(glossiness);
 	
 	float3 emissive = emissive_clr.rgb;

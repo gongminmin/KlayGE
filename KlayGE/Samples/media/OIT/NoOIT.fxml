@@ -18,16 +18,14 @@
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 
 		<parameter type="float4" name="albedo_clr"/>
-		<parameter type="float2" name="metalness_clr"/>
-		<parameter type="float2" name="glossiness_clr"/>
+		<parameter type="float3" name="metalness_glossiness_factor"/>
 		<parameter type="float4" name="emissive_clr"/>
 		<parameter type="int" name="albedo_map_enabled"/>
 		<parameter type="int" name="normal_map_enabled"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="metalness_glossiness_tex"/>
 	<parameter type="texture2D" name="emissive_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 
@@ -73,15 +71,13 @@ float4 Shading(float4 L, float4 H)
 	{
 		albedo *= albedo_tex.Sample(linear_sampler, uv).xyz;
 	}
-	float metalness = metalness_clr.x;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(linear_sampler, uv).x;
-	}
-	float glossiness = glossiness_clr.x;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(linear_sampler, uv).x;
+		float2 mg_tex = get_xy_channel(metalness_glossiness_tex.Sample(linear_sampler, uv));
+		metalness *= mg_tex.x;
+		glossiness *= mg_tex.y;
 	}
 	float3 emissive = emissive_clr.xyz;
 	if (emissive_clr.w > 0.5f)

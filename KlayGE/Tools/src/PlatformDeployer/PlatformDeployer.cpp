@@ -73,9 +73,8 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 		default_metadata.ForceSRGB(true);
 		break;
 
-	case CT_HASH("glossiness"):
-	case CT_HASH("metalness"):
-		default_metadata.Slot((res_type_hash == CT_HASH("glossiness")) ? RenderMaterial::TS_Glossiness : RenderMaterial::TS_Metalness);
+	case CT_HASH("metalness_glossiness"):
+		default_metadata.Slot(RenderMaterial::TS_MetalnessGlossiness);
 		default_metadata.ForceSRGB(false);
 		break;
 

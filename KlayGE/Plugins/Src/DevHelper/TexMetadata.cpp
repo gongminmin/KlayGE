@@ -172,12 +172,8 @@ namespace KlayGE
 					new_metadata.slot_ = RenderMaterial::TS_Albedo;
 					break;
 
-				case CT_HASH("metalness"):
-					new_metadata.slot_ = RenderMaterial::TS_Metalness;
-					break;
-
-				case CT_HASH("glossiness"):
-					new_metadata.slot_ = RenderMaterial::TS_Glossiness;
+				case CT_HASH("metalness_glossiness"):
+					new_metadata.slot_ = RenderMaterial::TS_MetalnessGlossiness;
 					break;
 
 				case CT_HASH("emissive"):
@@ -282,7 +278,7 @@ namespace KlayGE
 				for (auto iter = channel_mapping_val.Begin(); (iter != channel_mapping_val.End()) && (index < 4); ++ iter, ++ index)
 				{
 					BOOST_ASSERT(iter->IsInt() || iter->IsUint() || iter->IsInt64() || iter->IsUint64());
-					new_metadata.channel_mapping_[index] = static_cast<uint8_t>(GetInt(*iter));
+					new_metadata.channel_mapping_[index] = static_cast<int8_t>(GetInt(*iter));
 				}
 			}
 
@@ -294,9 +290,7 @@ namespace KlayGE
 			}
 			else if (assign_default_values)
 			{
-				new_metadata.rgb_to_lum_
-					= ((new_metadata.slot_ == RenderMaterial::TS_Glossiness) || (new_metadata.slot_ == RenderMaterial::TS_Metalness)
-						|| (new_metadata.slot_ == RenderMaterial::TS_Height));
+				new_metadata.rgb_to_lum_ = (new_metadata.slot_ == RenderMaterial::TS_Height);
 			}
 
 			if (document.HasMember("mipmap"))
@@ -441,12 +435,8 @@ namespace KlayGE
 			slot_str = "albedo";
 			break;
 
-		case RenderMaterial::TS_Metalness:
-			slot_str = "metalness";
-			break;
-
-		case RenderMaterial::TS_Glossiness:
-			slot_str = "glossiness";
+		case RenderMaterial::TS_MetalnessGlossiness:
+			slot_str = "metalness_glossiness";
 			break;
 
 		case RenderMaterial::TS_Emissive:
@@ -535,7 +525,7 @@ namespace KlayGE
 		bool need_swizzle = false;
 		for (size_t i = 0; i < std::size(channel_mapping_); ++ i)
 		{
-			if (channel_mapping_[i] != i)
+			if (channel_mapping_[i] != static_cast<int8_t>(i))
 			{
 				need_swizzle = true;
 				break;
@@ -641,13 +631,9 @@ namespace KlayGE
 				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1 });
 				break;
 
-			case RenderMaterial::TS_Glossiness:
-			case RenderMaterial::TS_Metalness:
-				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 });
-				break;
-
+			case RenderMaterial::TS_MetalnessGlossiness:
 			case RenderMaterial::TS_Normal:
-				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC5, EF_BC3, EF_GR8 });
+				prefered_format_ = caps.BestMatchTextureFormat({EF_BC5, EF_BC3, EF_GR8});
 				break;
 
 			case RenderMaterial::TS_Height:

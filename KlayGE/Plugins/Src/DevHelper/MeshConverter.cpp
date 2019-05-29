@@ -457,7 +457,6 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-
 				render_mtl.tex_names[RenderMaterial::TS_Albedo] = str.C_Str();
 			}
 
@@ -466,8 +465,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, 0, 0, 0, 0, 0, 0);
-
-				render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+				render_mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = str.C_Str();
 			}
 			else
 			{
@@ -476,8 +474,7 @@ namespace
 				{
 					aiString str;
 					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
-
-					render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+					render_mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = str.C_Str();
 				}
 			}
 
@@ -486,7 +483,6 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
-
 				render_mtl.tex_names[RenderMaterial::TS_Emissive] = str.C_Str();
 			}
 
@@ -495,8 +491,9 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
-
 				render_mtl.tex_names[RenderMaterial::TS_Normal] = str.C_Str();
+
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_SCALE(aiTextureType_NORMALS, 0), &render_mtl.normal_scale);
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
@@ -504,8 +501,17 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
-
 				render_mtl.tex_names[RenderMaterial::TS_Height] = str.C_Str();
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_LIGHTMAP);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_LIGHTMAP, 0, &str, 0, 0, 0, 0, 0, 0);
+				render_mtl.tex_names[RenderMaterial::TS_Occlusion] = str.C_Str();
+
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_STRENGTH(aiTextureType_LIGHTMAP, 0), &render_mtl.occlusion_strength);
 			}
 
 			render_mtl.detail_mode = RenderMaterial::SDM_Parallax;
@@ -1216,10 +1222,10 @@ namespace
 					}
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Glossiness].empty())
+				if (!mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Glossiness]);
+					name.Set(mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness]);
 					if (is_gltf)
 					{
 						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
@@ -1597,7 +1603,7 @@ namespace
 							}
 						});
 
-						for (uint32_t i = 0; i < node.Children().size(); ++ i)
+						for (uint32_t i = 0; i < ai_node.mNumChildren; ++i)
 						{
 							ai_node.mChildren[i] = new aiNode;
 							ai_node.mChildren[i]->mParent = &ai_node;
@@ -1724,43 +1730,65 @@ namespace
 				}
 			}
 
-			XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
-			if (metalness_node)
+			XMLNodePtr metalness_glossiness_node = mtl_node->FirstNode("metalness_glossiness");
+			if (metalness_glossiness_node)
 			{
-				XMLAttributePtr attr = metalness_node->Attrib("value");
+				XMLAttributePtr attr = metalness_glossiness_node->Attrib("metalness");
 				if (attr)
 				{
 					mtl.metalness = attr->ValueFloat();
 				}
-				attr = metalness_node->Attrib("texture");
-				if (attr)
-				{
-					mtl.tex_names[RenderMaterial::TS_Metalness] = std::string(attr->ValueString());
-				}
-			}
-
-			XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
-			if (glossiness_node)
-			{
-				XMLAttributePtr attr = glossiness_node->Attrib("value");
+				attr = metalness_glossiness_node->Attrib("glossiness");
 				if (attr)
 				{
 					mtl.glossiness = attr->ValueFloat();
 				}
-				attr = glossiness_node->Attrib("texture");
+				attr = metalness_glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Glossiness] = std::string(attr->ValueString());
+					mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
 				}
 			}
 			else
 			{
-				XMLAttributePtr attr = mtl_node->Attrib("shininess");
-				if (attr)
+				XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
+				if (metalness_node)
 				{
-					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
-					shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
-					mtl.glossiness = Shininess2Glossiness(shininess);
+					XMLAttributePtr attr = metalness_node->Attrib("value");
+					if (attr)
+					{
+						mtl.metalness = attr->ValueFloat();
+					}
+					attr = metalness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+					}
+				}
+
+				XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
+				if (glossiness_node)
+				{
+					XMLAttributePtr attr = glossiness_node->Attrib("value");
+					if (attr)
+					{
+						mtl.glossiness = attr->ValueFloat();
+					}
+					attr = glossiness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+					}
+				}
+				else
+				{
+					XMLAttributePtr attr = mtl_node->Attrib("shininess");
+					if (attr)
+					{
+						float shininess = mtl_node->Attrib("shininess")->ValueFloat();
+						shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
+						mtl.glossiness = Shininess2Glossiness(shininess);
+					}
 				}
 			}
 
@@ -1992,13 +2020,10 @@ namespace
 					{
 						mtl.tex_names[RenderMaterial::TS_Albedo] = name;
 					}
-					else if (CT_HASH("Metalness") == type_hash)
+					else if ((CT_HASH("MetalnessGlossiness") == type_hash) || (CT_HASH("Metalness") == type_hash) ||
+							 (CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Metalness] = name;
-					}
-					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
-					{
-						mtl.tex_names[RenderMaterial::TS_Glossiness] = name;
+						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = name;
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{

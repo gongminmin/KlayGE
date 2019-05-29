@@ -134,8 +134,7 @@ namespace
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_parallax_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
-				*metalness_clr_param_ = float2(1, 0);
-				*glossiness_clr_param_ = float2(0.5f, 0);
+				*metalness_glossiness_factor_param_ = float3(1, 0.5f, 0);
 				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 				break;
 
