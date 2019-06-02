@@ -570,11 +570,6 @@ TARGET_LINK_LIBRARIES(${LIB_NAME}
 )
 
 add_dependencies(${LIB_NAME} KFL kfont 7zxa LZMA TableGen)
-if(KLAYGE_IS_DEV_PLATFORM)
-	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
-		add_dependencies(${LIB_NAME} UniversalDXSDKRedist)
-	endif()
-endif()
 if(KLAYGE_PLATFORM_LINUX)
 	add_dependencies(${LIB_NAME} glloader)
 elseif(KLAYGE_PLATFORM_ANDROID)
