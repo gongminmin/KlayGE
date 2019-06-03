@@ -206,11 +206,19 @@ namespace KlayGE
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
 
-		virtual void BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset, uint32_t stride);
-		virtual void RebindToCBuffer(RenderEffectConstantBuffer& cbuff);
+		virtual void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
+		virtual void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
 		virtual bool InCBuffer() const
 		{
 			return false;
+		}
+		virtual RenderEffectConstantBuffer* CBuffer() const
+		{
+			return nullptr;
+		}
+		virtual uint32_t CBufferIndex() const
+		{
+			return 0;
 		}
 		virtual uint32_t CBufferOffset() const
 		{
@@ -224,7 +232,8 @@ namespace KlayGE
 	protected:
 		struct CBufferDesc
 		{
-			RenderEffectConstantBuffer* cbuff;
+			RenderEffect const* effect;
+			uint32_t cbuff_index;
 			uint32_t offset;
 			uint32_t stride;
 		};
@@ -272,11 +281,12 @@ namespace KlayGE
 			if (in_cbuff_)
 			{
 				auto& cbuff_desc = this->RetriveCBufferDesc();
-				T& val_in_cbuff = *(cbuff_desc.cbuff->template VariableInBuff<T>(cbuff_desc.offset));
+				auto* cbuff = this->CBuffer();
+				T& val_in_cbuff = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 				if (val_in_cbuff != value)
 				{
 					val_in_cbuff = value;
-					cbuff_desc.cbuff->Dirty(true);
+					cbuff->Dirty(true);
 				}
 			}
 			else
@@ -291,7 +301,8 @@ namespace KlayGE
 			if (in_cbuff_)
 			{
 				auto const & cbuff_desc = this->RetriveCBufferDesc();
-				val = *(cbuff_desc.cbuff->template VariableInBuff<T>(cbuff_desc.offset));
+				auto* cbuff = this->CBuffer();
+				val = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 			}
 			else
 			{
@@ -299,7 +310,7 @@ namespace KlayGE
 			}
 		}
 
-		virtual void BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset, uint32_t stride) override
+		virtual void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride) override
 		{
 			if (!in_cbuff_)
 			{
@@ -307,7 +318,8 @@ namespace KlayGE
 				this->RetriveT().~T();
 				in_cbuff_ = true;
 				CBufferDesc cbuff_desc;
-				cbuff_desc.cbuff = &cbuff;
+				cbuff_desc.effect = &effect;
+				cbuff_desc.cbuff_index = cbuff_index;
 				cbuff_desc.offset = offset;
 				cbuff_desc.stride = stride;
 				this->RetriveCBufferDesc() = std::move(cbuff_desc);
@@ -315,21 +327,32 @@ namespace KlayGE
 			}
 		}
 
-		virtual void RebindToCBuffer(RenderEffectConstantBuffer& cbuff) override
+		virtual void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index) override
 		{
 			BOOST_ASSERT(in_cbuff_);
-			this->RetriveCBufferDesc().cbuff = &cbuff;
+			auto& cbuff_desc = this->RetriveCBufferDesc();
+			cbuff_desc.effect = &effect;
+			cbuff_desc.cbuff_index = cbuff_index;
 		}
 
-		virtual bool InCBuffer() const override
+		bool InCBuffer() const override
 		{
 			return in_cbuff_;
 		}
-		virtual uint32_t CBufferOffset() const override
+		RenderEffectConstantBuffer* CBuffer() const override
+		{
+			auto& cbuff_desc = this->RetriveCBufferDesc();
+			return cbuff_desc.effect->CBufferByIndex(cbuff_desc.cbuff_index);
+		}
+		uint32_t CBufferIndex() const override
+		{
+			return this->RetriveCBufferDesc().cbuff_index;
+		}
+		uint32_t CBufferOffset() const override
 		{
 			return this->RetriveCBufferDesc().offset;
 		}
-		virtual uint32_t Stride() const override
+		uint32_t Stride() const override
 		{
 			return this->RetriveCBufferDesc().stride;
 		}
@@ -409,10 +432,10 @@ namespace KlayGE
 				ret->size_ = this->size_;
 
 				auto const & src_cbuff_desc = this->RetriveCBufferDesc();
-				uint8_t const * src = src_cbuff_desc.cbuff->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
+				uint8_t const * src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
 
 				auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
-				uint8_t* dst = dst_cbuff_desc.cbuff->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
+				uint8_t* dst = ret->CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
 
 				for (size_t i = 0; i < size_; ++ i)
 				{
@@ -421,7 +444,7 @@ namespace KlayGE
 					dst += dst_cbuff_desc.stride;
 				}
 
-				dst_cbuff_desc.cbuff->Dirty(true);
+				ret->CBuffer()->Dirty(true);
 			}
 			else
 			{
@@ -437,7 +460,7 @@ namespace KlayGE
 				uint8_t const * src = reinterpret_cast<uint8_t const *>(value.data());
 
 				auto& cbuff_desc = this->RetriveCBufferDesc();
-				uint8_t* dst = cbuff_desc.cbuff->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
@@ -447,7 +470,7 @@ namespace KlayGE
 					dst += cbuff_desc.stride;
 				}
 
-				cbuff_desc.cbuff->Dirty(true);
+				this->CBuffer()->Dirty(true);
 			}
 			else
 			{
@@ -461,7 +484,7 @@ namespace KlayGE
 			if (this->in_cbuff_)
 			{
 				auto const & cbuff_desc = this->RetriveCBufferDesc();
-				uint8_t const * src = cbuff_desc.cbuff->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				val.resize(size_);
 
@@ -784,10 +807,16 @@ namespace KlayGE
 			return static_cast<uint32_t>(cbuffers_.size());
 		}
 		RenderEffectConstantBuffer* CBufferByName(std::string_view name) const;
-		RenderEffectConstantBuffer* CBufferByIndex(uint32_t n) const
+		RenderEffectConstantBuffer* CBufferByIndex(uint32_t index) const
 		{
-			BOOST_ASSERT(n < this->NumCBuffers());
-			return cbuffers_[n].get();
+			BOOST_ASSERT(index < this->NumCBuffers());
+			return cbuffers_[index].get();
+		}
+		void BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff);
+		void BindCBufferByIndex(uint32_t index, RenderEffectConstantBufferPtr const& cbuff)
+		{
+			BOOST_ASSERT(index < this->NumCBuffers());
+			cbuffers_[index] = cbuff;
 		}
 
 		uint32_t NumTechniques() const;
@@ -820,7 +849,7 @@ namespace KlayGE
 		RenderEffectTemplatePtr effect_template_;
 
 		std::vector<std::unique_ptr<RenderEffectParameter>> params_;
-		std::vector<std::unique_ptr<RenderEffectConstantBuffer>> cbuffers_;
+		std::vector<RenderEffectConstantBufferPtr> cbuffers_;
 		std::vector<ShaderObjectPtr> shader_objs_;
 
 		mutable bool hw_res_ready_ = false;
@@ -1124,8 +1153,8 @@ namespace KlayGE
 		void StreamOut(std::ostream& os) const;
 #endif
 
-		std::unique_ptr<RenderEffectConstantBuffer> Clone(RenderEffect& src_effect, RenderEffect& dst_effect);
-		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& src_effect, RenderEffect& dst_effect);
+		RenderEffectConstantBufferPtr Clone(RenderEffect const& src_effect, RenderEffect const& dst_effect);
+		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& src_effect, RenderEffect const& dst_effect);
 
 		std::string const & Name() const
 		{
@@ -1148,6 +1177,10 @@ namespace KlayGE
 		}
 
 		void Resize(uint32_t size);
+		uint32_t Size() const
+		{
+			return static_cast<uint32_t>(buff_.size());
+		}
 
 		template <typename T>
 		T const * VariableInBuff(uint32_t offset) const
@@ -1187,6 +1220,9 @@ namespace KlayGE
 			return hw_buff_;
 		}
 		void BindHWBuff(GraphicsBufferPtr const & buff);
+
+	private:
+		void RebindParameters(RenderEffect const& src_effect, RenderEffect const& dst_effect);
 
 	private:
 		std::shared_ptr<std::pair<std::string, size_t>> name_;
@@ -1265,16 +1301,20 @@ namespace KlayGE
 			var_->Value(val);
 		}
 
-		void BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset, uint32_t stride);
-		void RebindToCBuffer(RenderEffectConstantBuffer& cbuff);
+		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
+		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
 		RenderEffectConstantBuffer& CBuffer() const
 		{
-			BOOST_ASSERT(cbuff_);
-			return *cbuff_;
+			BOOST_ASSERT(this->InCBuffer());
+			return *var_->CBuffer();
 		}
 		bool InCBuffer() const
 		{
 			return var_->InCBuffer();
+		}
+		uint32_t CBufferIndex() const
+		{
+			return var_->CBufferIndex();
 		}
 		uint32_t CBufferOffset() const
 		{
@@ -1287,12 +1327,12 @@ namespace KlayGE
 		template <typename T>
 		T const * MemoryInCBuff() const
 		{
-			return cbuff_->VariableInBuff<T>(var_->CBufferOffset());
+			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
 		}
 		template <typename T>
 		T* MemoryInCBuff()
 		{
-			return cbuff_->VariableInBuff<T>(var_->CBufferOffset());
+			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
 		}
 
 	private:
@@ -1304,8 +1344,6 @@ namespace KlayGE
 		std::shared_ptr<std::string> array_size_;
 
 		std::shared_ptr<std::vector<std::unique_ptr<RenderEffectAnnotation>>> annotations_;
-
-		RenderEffectConstantBuffer* cbuff_;
 	};
 
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_names);

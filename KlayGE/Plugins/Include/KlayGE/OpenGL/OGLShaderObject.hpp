@@ -292,8 +292,8 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind();
-		void Unbind();
+		void Bind(RenderEffect const& effect) override;
+		void Unbind() override;
 
 		GLint GetAttribLocation(VertexElementUsage usage, uint8_t usage_index);
 
@@ -342,13 +342,12 @@ namespace KlayGE
 		std::vector<GLuint> gl_bind_targets_;
 		std::vector<GLuint> gl_bind_textures_;
 		std::vector<GLuint> gl_bind_samplers_;
-		std::vector<GLuint> gl_bind_cbuffs_;
 
 		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
+		std::vector<uint32_t> all_cbuff_indices_;
 	};
 
 	typedef std::shared_ptr<OGLShaderObject> OGLShaderObjectPtr;

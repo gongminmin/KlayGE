@@ -1339,8 +1339,9 @@ namespace KlayGE
 		return MakeSharedPtr<NullShaderObject>();
 	}
 
-	void NullShaderObject::Bind()
+	void NullShaderObject::Bind(RenderEffect const& effect)
 	{
+		KFL_UNUSED(effect);
 	}
 
 	void NullShaderObject::Unbind()

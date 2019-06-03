@@ -1419,8 +1419,7 @@ namespace KlayGE
 	{
 		GLint active_ubos = 0;
 		glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
-		all_cbuffs_.resize(active_ubos);
-		gl_bind_cbuffs_.resize(active_ubos);
+		all_cbuff_indices_.resize(active_ubos);
 		for (int i = 0; i < active_ubos; ++ i)
 		{
 			GLint length = 0;
@@ -1429,16 +1428,24 @@ namespace KlayGE
 			std::vector<GLchar> ubo_name(length, '\0');
 			glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
 
-			auto cbuff = effect.CBufferByName(&ubo_name[0]);
+			auto* cbuff = effect.CBufferByName(&ubo_name[0]);
 			BOOST_ASSERT(cbuff);
-			all_cbuffs_[i] = cbuff;
+			uint32_t cb_index = 0;
+			for (uint32_t j = 0; j < effect.NumCBuffers(); ++j)
+			{
+				if (effect.CBufferByIndex(j) == cbuff)
+				{
+					cb_index = j;
+					break;
+				}
+			}
+			all_cbuff_indices_[i] = cb_index;
 
 			glUniformBlockBinding(glsl_program_, glGetUniformBlockIndex(glsl_program_, &ubo_name[0]), i);
 
 			GLint ubo_size = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
 			cbuff->Resize(ubo_size);
-			gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer&>(*cbuff->HWBuff()).GLvbo();
 
 			GLint uniforms = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
@@ -1494,12 +1501,12 @@ namespace KlayGE
 						stride = uniform_matrix_strides[j];
 					}
 				}
-				param->BindToCBuffer(*cbuff, uniform_offsets[j], stride);
+				param->BindToCBuffer(effect, cb_index, uniform_offsets[j], stride);
 			}
 		}
 	}
 
-	void OGLShaderObject::Bind()
+	void OGLShaderObject::Bind(RenderEffect const& effect)
 	{
 		if (!this->Stage(ShaderStage::Pixel) ||
 			checked_cast<OGLShaderStageObject&>(*this->Stage(ShaderStage::Pixel)).GlslSource().empty())
@@ -1515,14 +1522,18 @@ namespace KlayGE
 			pb.func();
 		}
 
-		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
+		if (!all_cbuff_indices_.empty())
 		{
-			all_cbuffs_[i]->Update();
-		}
+			std::vector<GLuint> gl_bind_cbuffs;
+			gl_bind_cbuffs.reserve(all_cbuff_indices_.size());
+			for (auto cb_index : all_cbuff_indices_)
+			{
+				auto* cbuff = effect.CBufferByIndex(cb_index);
+				cbuff->Update();
+				gl_bind_cbuffs.push_back(checked_cast<OGLGraphicsBuffer&>(*cbuff->HWBuff()).GLvbo());	
+			}
 
-		if (!gl_bind_cbuffs_.empty())
-		{
-			re.BindBuffersBase(GL_UNIFORM_BUFFER, 0, static_cast<GLsizei>(all_cbuffs_.size()), &gl_bind_cbuffs_[0]);
+			re.BindBuffersBase(GL_UNIFORM_BUFFER, 0, static_cast<GLsizei>(gl_bind_cbuffs.size()), gl_bind_cbuffs.data());
 		}
 
 		if (!gl_bind_textures_.empty())

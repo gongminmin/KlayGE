@@ -192,7 +192,7 @@ namespace KlayGE
 		void LinkShaders(RenderEffect const & effect);
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
-		virtual void Bind() = 0;
+		virtual void Bind(RenderEffect const& effect) = 0;
 		virtual void Unbind() = 0;
 
 		bool Validate() const

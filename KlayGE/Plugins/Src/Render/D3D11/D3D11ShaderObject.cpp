@@ -803,7 +803,7 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 				ID3D11Device* d3d_device = re.D3DDevice();
-		
+
 				ID3D11GeometryShader* gs;
 				if (FAILED(d3d_device->CreateGeometryShader(shader_code_.data(), shader_code_.size(), nullptr, &gs)))
 				{
@@ -1009,7 +1009,6 @@ namespace KlayGE
 
 			uint32_t const stage_index = static_cast<uint32_t>(stage);
 
-			d3d11_cbuffs_[stage_index].resize(shader_desc.cb_desc.size());
 			samplers_[stage_index].resize(shader_desc.num_samplers);
 			srvsrcs_[stage_index].resize(shader_desc.num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[stage_index].resize(shader_desc.num_srvs);
@@ -1041,7 +1040,6 @@ namespace KlayGE
 
 	void D3D11ShaderObject::DoLinkShaders(RenderEffect const & effect)
 	{
-		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t stage = 0; stage < NumShaderStages; ++stage)
 		{
 			auto const* shader_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
@@ -1052,7 +1050,6 @@ namespace KlayGE
 					auto const& shader_desc = shader_stage->GetD3D11ShaderDesc();
 					auto const& cbuff_indices = shader_stage->CBufferIndices();
 
-					all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices.begin(), cbuff_indices.end());
 					for (size_t i = 0; i < cbuff_indices.size(); ++i)
 					{
 						auto cbuff = effect.CBufferByIndex(cbuff_indices[i]);
@@ -1084,21 +1081,11 @@ namespace KlayGE
 									stride = 16;
 								}
 							}
-							param->BindToCBuffer(*cbuff, shader_desc.cb_desc[i].var_desc[j].start_offset, stride);
+							param->BindToCBuffer(effect, cbuff_indices[i], shader_desc.cb_desc[i].var_desc[j].start_offset, stride);
 						}
-
-						d3d11_cbuffs_[stage][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 					}
 				}
 			}
-		}
-
-		std::sort(all_cbuff_indices.begin(), all_cbuff_indices.end());
-		all_cbuff_indices.erase(std::unique(all_cbuff_indices.begin(), all_cbuff_indices.end()), all_cbuff_indices.end());
-		all_cbuffs_.resize(all_cbuff_indices.size());
-		for (size_t i = 0; i < all_cbuff_indices.size(); ++i)
-		{
-			all_cbuffs_[i] = effect.CBufferByIndex(all_cbuff_indices[i]);
 		}
 	}
 
@@ -1111,26 +1098,11 @@ namespace KlayGE
 		ret->uavsrcs_.resize(uavsrcs_.size(), nullptr);
 		ret->uavs_.resize(uavs_.size());
 
-		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t i = 0; i < NumShaderStages; ++ i)
 		{
 			ret->samplers_[i] = samplers_[i];
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
-
-			auto const* shader_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(i)).get());
-			if (shader_stage && !shader_stage->CBufferIndices().empty())
-			{
-				auto const& cbuff_indices = shader_stage->CBufferIndices();
-
-				ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_[i].size());
-				all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices.begin(), cbuff_indices.end());
-				for (size_t j = 0; j < cbuff_indices.size(); ++ j)
-				{
-					auto cbuff = effect.CBufferByIndex(cbuff_indices[j]);
-					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer&>(*cbuff->HWBuff()).D3DBuffer();
-				}
-			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			for (auto const & pb : param_binds_[i])
@@ -1138,14 +1110,6 @@ namespace KlayGE
 				ret->param_binds_[i].push_back(ret->GetBindFunc(static_cast<ShaderStage>(i), pb.offset,
 					effect.ParameterByName(pb.param->Name())));
 			}
-		}
-
-		std::sort(all_cbuff_indices.begin(), all_cbuff_indices.end());
-		all_cbuff_indices.erase(std::unique(all_cbuff_indices.begin(), all_cbuff_indices.end()), all_cbuff_indices.end());
-		ret->all_cbuffs_.resize(all_cbuff_indices.size());
-		for (size_t i = 0; i < all_cbuff_indices.size(); ++ i)
-		{
-			ret->all_cbuffs_[i] = effect.CBufferByIndex(all_cbuff_indices[i]);
 		}
 
 		return ret;
@@ -1228,7 +1192,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void D3D11ShaderObject::Bind()
+	void D3D11ShaderObject::Bind(RenderEffect const& effect)
 	{
 		auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -1280,27 +1244,36 @@ namespace KlayGE
 			}
 		}
 
-		for (auto cb : all_cbuffs_)
-		{
-			cb->Update();
-		}
-
 		for (size_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 		{
 			ShaderStage const stage = static_cast<ShaderStage>(stage_index);
-			if (!srvs_[stage_index].empty())
+			auto const* shader_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
+			if (shader_stage)
 			{
-				re.SetShaderResources(stage, srvsrcs_[stage_index], srvs_[stage_index]);
-			}
+				if (!srvs_[stage_index].empty())
+				{
+					re.SetShaderResources(stage, srvsrcs_[stage_index], srvs_[stage_index]);
+				}
 
-			if (!samplers_[stage_index].empty())
-			{
-				re.SetSamplers(stage, samplers_[stage_index]);
-			}
+				if (!samplers_[stage_index].empty())
+				{
+					re.SetSamplers(stage, samplers_[stage_index]);
+				}
 
-			if (!d3d11_cbuffs_[stage_index].empty())
-			{
-				re.SetConstantBuffers(stage, d3d11_cbuffs_[stage_index]);
+				auto const& cbuff_indices = shader_stage->CBufferIndices();
+				if (!cbuff_indices.empty())
+				{
+					std::vector<ID3D11Buffer*> d3d11_cbuffs;
+					d3d11_cbuffs.reserve(cbuff_indices.size());
+					for (auto cb_index : cbuff_indices)
+					{
+						auto* cb = effect.CBufferByIndex(cb_index);
+						cb->Update();
+						d3d11_cbuffs.push_back(checked_cast<D3D11GraphicsBuffer*>(cb->HWBuff().get())->D3DBuffer());
+					}
+
+					re.SetConstantBuffers(stage, d3d11_cbuffs);
+				}
 			}
 		}
 

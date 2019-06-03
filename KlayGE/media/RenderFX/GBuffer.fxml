@@ -4,13 +4,13 @@
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
-	<include name="Tessellation.fxml"/>
 	<include name="Lighting.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mv"/>
+		<parameter type="float4" name="object_id"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
 	</cbuffer>
@@ -20,6 +20,9 @@
 		<parameter type="float3" name="pos_extent"/>
 		<parameter type="float2" name="tc_center"/>
 		<parameter type="float2" name="tc_extent"/>
+	</cbuffer>
+
+	<cbuffer name="per_material">
 		<parameter type="float4" name="albedo_clr"/>
 		<parameter type="float3" name="metalness_glossiness_factor"/>
 		<parameter type="float4" name="emissive_clr"/>
@@ -33,7 +36,6 @@
 		<parameter type="float" name="occlusion_strength"/>
 		<parameter type="float2" name="height_offset_scale"/>
 		<parameter type="float4" name="tess_factors"/>
-		<parameter type="float4" name="object_id"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="albedo_tex"/>

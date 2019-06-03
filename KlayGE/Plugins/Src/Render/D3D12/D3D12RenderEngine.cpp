@@ -594,7 +594,7 @@ namespace KlayGE
 		}
 		this->RSSetScissorRects(scissor_rc);
 
-		this->UpdateCbvSrvUavSamplerHeaps(so);
+		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
 	}
 
 	void D3D12RenderEngine::UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass)
@@ -608,10 +608,10 @@ namespace KlayGE
 		auto root_signature = so.RootSignature();
 		this->SetComputeRootSignature(root_signature);
 
-		this->UpdateCbvSrvUavSamplerHeaps(so);
+		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
 	}
 
-	void D3D12RenderEngine::UpdateCbvSrvUavSamplerHeaps(ShaderObject const & so)
+	void D3D12RenderEngine::UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so)
 	{
 		auto const& d3d12_so = checked_cast<D3D12ShaderObject const&>(so);
 
@@ -670,31 +670,28 @@ namespace KlayGE
 		for (uint32_t i = 0; i < NumShaderStages; ++i)
 		{
 			ShaderStage const stage = static_cast<ShaderStage>(i);
-			auto const & cbuffers = d3d12_so.CBuffers(stage);
-			if (!cbuffers.empty())
+			auto const cbuffers = d3d12_so.CBuffers(effect, stage);
+			for (auto cbuffer : cbuffers)
 			{
-				for (auto cbuffer : cbuffers)
+				D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr;
+				if (cbuffer != nullptr)
 				{
-					D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr;
-					if (cbuffer != nullptr)
-					{
-						gpu_vaddr = checked_cast<D3D12GraphicsBuffer&>(*cbuffer).GPUVirtualAddress();
-					}
-					else
-					{
-						gpu_vaddr = 0;
-					}
-
-					if (stage != ShaderStage::Compute)
-					{
-						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, gpu_vaddr);
-					}
-					else
-					{
-						d3d_render_cmd_list_->SetComputeRootConstantBufferView(root_param_index, gpu_vaddr);
-					}
-					++ root_param_index;
+					gpu_vaddr = checked_cast<D3D12GraphicsBuffer&>(*cbuffer).GPUVirtualAddress();
 				}
+				else
+				{
+					gpu_vaddr = 0;
+				}
+
+				if (stage != ShaderStage::Compute)
+				{
+					d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, gpu_vaddr);
+				}
+				else
+				{
+					d3d_render_cmd_list_->SetComputeRootConstantBufferView(root_param_index, gpu_vaddr);
+				}
+				++root_param_index;
 			}
 		}
 

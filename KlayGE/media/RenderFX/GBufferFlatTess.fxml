@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Tessellation.fxml"/>
+
 	<shader version="5">
 		<![CDATA[
 struct VS_CONTROL_POINT_OUTPUT

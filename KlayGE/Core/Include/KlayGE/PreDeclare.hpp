@@ -102,6 +102,7 @@ namespace KlayGE
 	class RenderPass;
 	typedef std::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectConstantBuffer;
+	typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 	class RenderEffectParameter;
 	class RenderVariable;
 	class RenderEffectAnnotation;

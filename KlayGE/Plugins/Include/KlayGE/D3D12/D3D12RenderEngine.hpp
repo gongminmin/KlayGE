@@ -228,7 +228,7 @@ namespace KlayGE
 		void UpdateRenderPSO(RenderEffect const & effect, RenderPass const & pass, RenderLayout const & rl,
 			bool has_tessellation);
 		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
-		void UpdateCbvSrvUavSamplerHeaps(ShaderObject const & so);
+		void UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so);
 
 		std::shared_ptr<CmdAllocatorDependencies> AllocCmdAllocator();
 		void RecycleCmdAllocator(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);

@@ -2799,6 +2799,18 @@ namespace KlayGE
 		return nullptr;
 	}
 
+	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff)
+	{
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (auto& cbuffer : cbuffers_)
+		{
+			if (name_hash == cbuffer->NameHash())
+			{
+				cbuffer = cbuff;
+			}
+		}
+	}
+
 	uint32_t RenderEffect::NumTechniques() const
 	{
 		return effect_template_->NumTechniques();
@@ -3167,7 +3179,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					effect.cbuffers_.push_back(MakeUniquePtr<RenderEffectConstantBuffer>());
+					effect.cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>());
 					cbuff = effect.cbuffers_.back().get();
 					cbuff->Load(cbuff_name);
 				}
@@ -3422,7 +3434,7 @@ namespace KlayGE
 							effect.cbuffers_.resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								effect.cbuffers_[i] = MakeUniquePtr<RenderEffectConstantBuffer>();
+								effect.cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>();
 								effect.cbuffers_[i]->StreamIn(source);
 							}
 						}
@@ -5190,7 +5202,7 @@ namespace KlayGE
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		render_eng.SetStateObject(render_state_obj_);
 
-		this->GetShaderObject(effect)->Bind();
+		this->GetShaderObject(effect)->Bind(effect);
 	}
 
 	void RenderPass::Unbind(RenderEffect const & effect) const
@@ -5242,48 +5254,51 @@ namespace KlayGE
 	}
 #endif
 
-	std::unique_ptr<RenderEffectConstantBuffer> RenderEffectConstantBuffer::Clone(RenderEffect& src_effect, RenderEffect& dst_effect)
+	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect const& src_effect, RenderEffect const& dst_effect)
 	{
-		auto ret = MakeUniquePtr<RenderEffectConstantBuffer>();
+		auto ret = MakeSharedPtr<RenderEffectConstantBuffer>();
 
 		ret->name_ = name_;
 		ret->param_indices_ = param_indices_;
 		ret->buff_ = buff_;
 		ret->Resize(static_cast<uint32_t>(buff_.size()));
 
-		for (size_t i = 0; i < param_indices_->size(); ++ i)
-		{
-			RenderEffectParameter* src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
-			if (src_param->InCBuffer())
-			{
-				RenderEffectParameter* dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
-				dst_param->RebindToCBuffer(*ret);
-			}
-		}
+		this->RebindParameters(src_effect, dst_effect);
 
 		return ret;
 	}
 
-	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& src_effect, RenderEffect& dst_effect)
+	void RenderEffectConstantBuffer::Reclone(
+		RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& src_effect, RenderEffect const& dst_effect)
 	{
 		dst_cbuffer.name_ = name_;
 		dst_cbuffer.param_indices_ = param_indices_;
 		dst_cbuffer.buff_ = buff_;
 		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
+		
+		this->RebindParameters(src_effect, dst_effect);
+	}
 
-		for (size_t i = 0; i < param_indices_->size(); ++i)
+	void RenderEffectConstantBuffer::RebindParameters(RenderEffect const& src_effect, RenderEffect const& dst_effect)
+	{
+		if (&src_effect != &dst_effect)
 		{
-			RenderEffectParameter* src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
-			if (src_param->InCBuffer())
+			for (uint32_t param_index : *param_indices_)
 			{
-				RenderEffectParameter* dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
-				if (dst_param->InCBuffer())
+				RenderEffectParameter* src_param = src_effect.ParameterByIndex(param_index);
+				if (src_param->InCBuffer())
 				{
-					dst_param->RebindToCBuffer(dst_cbuffer);
-				}
-				else
-				{
-					dst_param->BindToCBuffer(dst_cbuffer, src_param->CBufferOffset(), src_param->Stride());
+					RenderEffectParameter* dst_param = (src_effect.ResNameHash() == dst_effect.ResNameHash())
+														   ? dst_effect.ParameterByIndex(param_index)
+														   : dst_effect.ParameterByName(src_param->Name());
+					if (dst_param->InCBuffer())
+					{
+						dst_param->RebindToCBuffer(dst_effect, src_param->CBufferIndex());
+					}
+					else
+					{
+						dst_param->BindToCBuffer(dst_effect, src_param->CBufferIndex(), src_param->CBufferOffset(), src_param->Stride());
+					}
 				}
 			}
 		}
@@ -5565,16 +5580,14 @@ namespace KlayGE
 		return this->HasSemantic() ? semantic_->second : 0;
 	}
 
-	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset, uint32_t stride)
+	void RenderEffectParameter::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
 	{
-		cbuff_ = &cbuff;
-		var_->BindToCBuffer(cbuff, offset, stride);
+		var_->BindToCBuffer(effect, cbuff_index, offset, stride);
 	}
 
-	void RenderEffectParameter::RebindToCBuffer(RenderEffectConstantBuffer& cbuff)
+	void RenderEffectParameter::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
 	{
-		cbuff_ = &cbuff;
-		var_->RebindToCBuffer(cbuff);
+		var_->RebindToCBuffer(effect, cbuff_index);
 	}
 
 
@@ -6177,19 +6190,20 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset,
-			uint32_t stride)
+	void RenderVariable::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
 	{
-		KFL_UNUSED(cbuff);
+		KFL_UNUSED(effect);
+		KFL_UNUSED(cbuff_index);
 		KFL_UNUSED(offset);
 		KFL_UNUSED(stride);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::RebindToCBuffer(RenderEffectConstantBuffer& cbuff)
+	void RenderVariable::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
 	{
-		KFL_UNUSED(cbuff);
+		KFL_UNUSED(effect);
+		KFL_UNUSED(cbuff_index);
 		
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -6251,15 +6265,15 @@ namespace KlayGE
 			ret->data_ = data_;
 			ret->size_ = size_;
 
-			auto const & src_cbuff_desc = this->RetriveCBufferDesc();
-			uint8_t const * src = src_cbuff_desc.cbuff->VariableInBuff<uint8_t>(src_cbuff_desc.offset);
+			auto const& src_cbuff_desc = this->RetriveCBufferDesc();
+			uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
 
-			auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
-			uint8_t* dst = dst_cbuff_desc.cbuff->VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
+			auto const& dst_cbuff_desc = ret->RetriveCBufferDesc();
+			uint8_t* dst = ret->CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
 
 			memcpy(dst, src, size_ * sizeof(float4x4));
 
-			dst_cbuff_desc.cbuff->Dirty(true);
+			ret->CBuffer()->Dirty(true);
 		}
 		else
 		{
@@ -6275,7 +6289,7 @@ namespace KlayGE
 			float4x4 const * src = value.data();
 
 			auto& cbuff_desc = this->RetriveCBufferDesc();
-			float4x4* dst = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
+			float4x4* dst = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
 
 			size_ = static_cast<uint32_t>(value.size());
 			for (size_t i = 0; i < value.size(); ++ i)
@@ -6285,7 +6299,7 @@ namespace KlayGE
 				++ dst;
 			}
 
-			cbuff_desc.cbuff->Dirty(true);
+			this->CBuffer()->Dirty(true);
 		}
 		else
 		{
@@ -6299,7 +6313,7 @@ namespace KlayGE
 		if (in_cbuff_)
 		{
 			auto const & cbuff_desc = this->RetriveCBufferDesc();
-			float4x4 const * src = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
+			float4x4 const* src = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
 
 			val.resize(size_);
 			float4x4* dst = val.data();

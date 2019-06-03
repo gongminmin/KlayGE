@@ -271,7 +271,7 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind();
+		void Bind(RenderEffect const& effect);
 		void Unbind();
 
 		std::vector<D3D12_SAMPLER_DESC> const & Samplers(ShaderStage stage) const
@@ -289,10 +289,7 @@ namespace KlayGE
 			return uavs_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<GraphicsBuffer*> const & CBuffers(ShaderStage stage) const
-		{
-			return d3d_cbuffs_[static_cast<uint32_t>(stage)];
-		}
+		std::vector<GraphicsBuffer*> CBuffers(RenderEffect const& effect, ShaderStage stage) const;
 
 		ID3D12RootSignature* RootSignature() const
 		{
@@ -356,9 +353,6 @@ namespace KlayGE
 		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, NumShaderStages> srvs_;
 		std::array<std::vector<D3D12Resource*>, NumShaderStages> uavsrcs_;
 		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, NumShaderStages> uavs_;
-		std::array<std::vector<GraphicsBuffer*>, NumShaderStages> d3d_cbuffs_;
-
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
 
 		uint32_t num_handles_;
 	};

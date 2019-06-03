@@ -407,7 +407,7 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind() override;
+		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
 	private:

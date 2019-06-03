@@ -335,7 +335,7 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind() override;
+		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
 		ArrayRef<uint8_t> VsCode() const;
@@ -364,11 +364,8 @@ namespace KlayGE
 		std::array<std::vector<ID3D11SamplerState*>, NumShaderStages> samplers_;
 		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
 		std::array<std::vector<ID3D11ShaderResourceView*>, NumShaderStages> srvs_;
-		std::array<std::vector<ID3D11Buffer*>, NumShaderStages> d3d11_cbuffs_;
 		std::vector<void*> uavsrcs_;
 		std::vector<ID3D11UnorderedAccessView*> uavs_;
-
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
 	};
 
 	typedef std::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
