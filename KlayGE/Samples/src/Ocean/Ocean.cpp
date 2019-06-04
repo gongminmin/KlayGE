@@ -53,6 +53,12 @@ namespace
 			this->SetBaseLevel(base_level);
 
 			model_mat_ = float4x4::Identity();
+
+			mtl_ = MakeSharedPtr<RenderMaterial>();
+			mtl_->albedo = float4(0.07f, 0.15f, 0.2f, 1);
+			mtl_->metalness = 1;
+			mtl_->glossiness = 0.5f;
+
 			effect_attrs_ |= EA_TransparencyFront;
 			effect_attrs_ |= EA_SpecialShading;
 		}
@@ -129,22 +135,12 @@ namespace
 			case PT_OpaqueGBufferMRT:
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
-				*albedo_clr_param_ = float4(0.07f, 0.15f, 0.2f, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*normal_map_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_parallax_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
-				*metalness_glossiness_factor_param_ = float3(1, 0.5f, 0);
 				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*albedo_tex_param_ = TexturePtr();
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*emissive_tex_param_ = TexturePtr();
-				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
@@ -166,10 +162,6 @@ namespace
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*albedo_tex_param_ = TexturePtr();
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*emissive_tex_param_ = TexturePtr();
-				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
 				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{

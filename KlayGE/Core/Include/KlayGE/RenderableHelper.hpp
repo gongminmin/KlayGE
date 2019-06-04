@@ -169,9 +169,6 @@ namespace KlayGE
 	private:
 		RenderEffectParameter* inv_mv_ep_;
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
-		float3 albedo_clr_;
-		float metalness_;
-		float glossiness_;
 	};
 }
 

@@ -532,6 +532,12 @@ namespace KlayGE
 		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 		model_mat_ = float4x4::Identity();
+
+		mtl_ = MakeSharedPtr<RenderMaterial>();
+		mtl_->albedo = float4(albedo_clr.x(), albedo_clr.y(), albedo_clr.z(), 1);
+		mtl_->metalness = metalness;
+		mtl_->glossiness = glossiness;
+
 		effect_attrs_ |= EA_AlphaTest;
 
 		inv_mv_ep_ = effect_->ParameterByName("inv_mv");
@@ -539,9 +545,6 @@ namespace KlayGE
 
 		textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(normal_tex);
 		textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(albedo_tex);
-		albedo_clr_ = albedo_clr;
-		metalness_ = metalness;
-		glossiness_ = glossiness;
 	}
 
 	void RenderDecal::OnRenderBegin()
@@ -559,10 +562,6 @@ namespace KlayGE
 		case PT_OpaqueGBufferMRT:
 		case PT_TransparencyBackGBufferMRT:
 		case PT_TransparencyFrontGBufferMRT:
-			*albedo_clr_param_ = float4(albedo_clr_.x(), albedo_clr_.y(), albedo_clr_.z(), 1);
-			*albedo_map_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
-			*metalness_glossiness_factor_param_ = float3(metalness_, MathLib::clamp(glossiness_, 1e-6f, 0.999f),
-				static_cast<float>(!!textures_[RenderMaterial::TS_MetalnessGlossiness]));
 			*inv_mv_ep_ = view_to_decal;
 			*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
