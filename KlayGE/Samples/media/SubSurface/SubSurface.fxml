@@ -4,6 +4,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="Material.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="eye_pos"/>
@@ -25,15 +26,6 @@
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
-
-	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float3" name="metalness_glossiness_factor"/>
-	<parameter type="int" name="albedo_map_enabled"/>
-	
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
-	<parameter type="texture2D" name="metalness_glossiness_tex"/>
-	<parameter type="int" name="normal_map_enabled"/>
 
 	<shader>
 		<![CDATA[

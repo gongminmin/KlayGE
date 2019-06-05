@@ -1342,9 +1342,9 @@ namespace KlayGE
 		effect_index.index = 0;
 		if (material)
 		{
-			effect_index.flags.sss = material->sss;
-			effect_index.flags.two_sided = material->two_sided;
-			effect_index.flags.detail_mode = material->detail_mode;
+			effect_index.flags.sss = material->Sss();
+			effect_index.flags.two_sided = material->TwoSided();
+			effect_index.flags.detail_mode = material->DetailMode();
 		}
 		effect_index.flags.line = line;
 		effect_index.flags.skinning = skinning;

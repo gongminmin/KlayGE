@@ -121,96 +121,46 @@ namespace KlayGE
 			*pos_extent_param_ = pos_bb.HalfSize();
 			*select_mode_object_id_param_ = select_mode_object_id_;
 		}
-		else if (drl)
+		else
 		{
-			*mvp_param_ = mvp;
-			*model_view_param_ = mv;
-			*forward_vec_param_ = camera.ForwardVec();
+			auto const& mtl = mtl_ ? mtl_ : Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultMaterial();
+			mtl->Active(*effect_);
 
-			FrameBufferPtr const & fb = re.CurFrameBuffer();
-			*frame_size_param_ = int2(fb->Width(), fb->Height());
-
-			*height_offset_scale_param_ = mtl_ ? mtl_->height_offset_scale : float2(-0.5f, 0.06f);
-			*tess_factors_param_ = mtl_ ? mtl_->tess_factors : float4(5, 5, 1, 9);
-
-			*pos_center_param_ = pos_bb.Center();
-			*pos_extent_param_ = pos_bb.HalfSize();
-			*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-
-			*albedo_tex_param_ = textures_[RenderMaterial::TS_Albedo];
-			*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-			*albedo_map_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
-
-			switch (type_)
+			if (drl)
 			{
-			case PT_OpaqueGBufferMRT:
-			case PT_TransparencyBackGBufferMRT:
-			case PT_TransparencyFrontGBufferMRT:
-			case PT_GenReflectiveShadowMap:
-				*metalness_glossiness_factor_param_ =
-					float3(mtl_ ? mtl_->metalness : 0, MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
-						static_cast<float>(!!textures_[RenderMaterial::TS_MetalnessGlossiness]));
-				*metalness_glossiness_tex_param_ = textures_[RenderMaterial::TS_MetalnessGlossiness];
-				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*normal_map_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Normal]);
-				*normal_tex_param_ = textures_[RenderMaterial::TS_Normal];
-				*normal_scale_param_ = mtl_ ? mtl_->normal_scale : 1;
-				*occlusion_strength_param_ = mtl_ ? mtl_->occlusion_strength : 1;
-				if (!mtl_ || (RenderMaterial::SDM_Parallax == mtl_->detail_mode))
+				*mvp_param_ = mvp;
+				*model_view_param_ = mv;
+				*forward_vec_param_ = camera.ForwardVec();
+
+				FrameBufferPtr const & fb = re.CurFrameBuffer();
+				*frame_size_param_ = int2(fb->Width(), fb->Height());
+
+				*pos_center_param_ = pos_bb.Center();
+				*pos_extent_param_ = pos_bb.HalfSize();
+				*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
+				*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+
+				switch (type_)
 				{
-					*height_map_parallax_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Height]);
+				case PT_OpaqueGBufferMRT:
+				case PT_TransparencyBackGBufferMRT:
+				case PT_TransparencyFrontGBufferMRT:
+				case PT_GenReflectiveShadowMap:
+					*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+					break;
+
+				case PT_OpaqueSpecialShading:
+				case PT_TransparencyBackSpecialShading:
+				case PT_TransparencyFrontSpecialShading:
+					if (reflection_tex_param_)
+					{
+						*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
+					}
+					break;
+
+				default:
+					break;
 				}
-				else
-				{
-					*height_map_tess_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Height]);
-				}
-				*height_tex_param_ = textures_[RenderMaterial::TS_Height];
-				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
-				break;
-
-			case PT_GenShadowMap:
-			case PT_GenCascadedShadowMap:
-				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				break;
-
-			case PT_OpaqueShading:
-			case PT_TransparencyBackShading:
-			case PT_TransparencyFrontShading:
-				*metalness_glossiness_factor_param_ =
-					float3(mtl_ ? mtl_->metalness : 0, MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
-						static_cast<float>(!!textures_[RenderMaterial::TS_MetalnessGlossiness]));
-				*metalness_glossiness_tex_param_ = textures_[RenderMaterial::TS_MetalnessGlossiness];
-				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*emissive_tex_param_ = textures_[RenderMaterial::TS_Emissive];
-				*emissive_clr_param_ = float4(
-					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
-					static_cast<float>(!!textures_[RenderMaterial::TS_Emissive]));
-				*occlusion_strength_param_ = mtl_ ? mtl_->occlusion_strength : 1;
-				break;
-
-			case PT_OpaqueReflection:
-			case PT_TransparencyBackReflection:
-			case PT_TransparencyFrontReflection:
-				break;
-
-			case PT_OpaqueSpecialShading:
-			case PT_TransparencyBackSpecialShading:
-			case PT_TransparencyFrontSpecialShading:
-				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*emissive_tex_param_ = textures_[RenderMaterial::TS_Emissive];
-				*emissive_clr_param_ = float4(
-					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
-					static_cast<float>(!!textures_[RenderMaterial::TS_Emissive]));
-				*occlusion_strength_param_ = mtl_ ? mtl_->occlusion_strength : 1;
-				if (reflection_tex_param_)
-				{
-					*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
-				}
-				break;
-
-			default:
-				break;
 			}
 		}
 	}
@@ -373,9 +323,10 @@ namespace KlayGE
 		bool ready = this->HWResourceReady();
 		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
-			if (ready && textures_[i])
+			auto const& srv = mtl_ ? mtl_->Texture(static_cast<RenderMaterial::TextureSlot>(i)) : ShaderResourceViewPtr();
+			if (ready && srv)
 			{
-				ready = textures_[i]->TextureResource()->HWResourceReady();
+				ready = srv->TextureResource()->HWResourceReady();
 			}
 		}
 		return ready;
@@ -412,29 +363,12 @@ namespace KlayGE
 		model_view_param_ = effect_->ParameterByName("model_view");
 		forward_vec_param_ = effect_->ParameterByName("forward_vec");
 		frame_size_param_ = effect_->ParameterByName("frame_size");
-		height_offset_scale_param_ = effect_->ParameterByName("height_offset_scale");
-		tess_factors_param_ = effect_->ParameterByName("tess_factors");
 		pos_center_param_ = effect_->ParameterByName("pos_center");
 		pos_extent_param_ = effect_->ParameterByName("pos_extent");
 		tc_center_param_ = effect_->ParameterByName("tc_center");
 		tc_extent_param_ = effect_->ParameterByName("tc_extent");
-		albedo_map_enabled_param_ = effect_->ParameterByName("albedo_map_enabled");
-		albedo_tex_param_ = effect_->ParameterByName("albedo_tex");
-		albedo_clr_param_ = effect_->ParameterByName("albedo_clr");
-		metalness_glossiness_factor_param_ = effect_->ParameterByName("metalness_glossiness_factor");
-		metalness_glossiness_tex_param_ = effect_->ParameterByName("metalness_glossiness_tex");
-		emissive_tex_param_ = effect_->ParameterByName("emissive_tex");
-		emissive_clr_param_ = effect_->ParameterByName("emissive_clr");
-		normal_map_enabled_param_ = effect_->ParameterByName("normal_map_enabled");
-		normal_tex_param_ = effect_->ParameterByName("normal_tex");
-		height_map_parallax_enabled_param_ = effect_->ParameterByName("height_map_parallax_enabled");
-		height_map_tess_enabled_param_ = effect_->ParameterByName("height_map_tess_enabled");
-		height_tex_param_ = effect_->ParameterByName("height_tex");
 		opaque_depth_tex_param_ = effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
-		alpha_test_threshold_param_ = effect_->ParameterByName("alpha_test_threshold");
-		normal_scale_param_ = effect_->ParameterByName("normal_scale");
-		occlusion_strength_param_ = effect_->ParameterByName("occlusion_strength");
 		select_mode_object_id_param_ = effect_->ParameterByName("object_id");
 	}
 

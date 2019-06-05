@@ -4,6 +4,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Material.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="model"/>
@@ -118,7 +119,6 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 
 
 	<parameter type="bool" name="adaptive_tess"/>
-	<parameter type="float4" name="tess_factors"/>
 	<parameter type="float2" name="tess_edge_length_scale"/>
 
 	<shader>
@@ -410,15 +410,6 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	
 	
 	<parameter type="float3" name="light_pos"/>
-
-	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float3" name="metalness_glossiness_factor"/>
-	<parameter type="float4" name="emissive_clr"/>
-	<parameter type="int" name="albedo_map_enabled"/>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
 
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>

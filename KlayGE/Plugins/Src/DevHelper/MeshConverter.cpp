@@ -442,22 +442,22 @@ namespace
 
 			render_model_->GetMaterial(mi) = MakeSharedPtr<RenderMaterial>();
 			auto& render_mtl = *render_model_->GetMaterial(mi);
-			render_mtl.name = name;
-			render_mtl.albedo = float4(albedo.x(), albedo.y(), albedo.z(), opacity);
-			render_mtl.metalness = metalness;
-			render_mtl.glossiness = Shininess2Glossiness(shininess);
-			render_mtl.emissive = emissive;
-			render_mtl.transparent = transparent;
-			render_mtl.alpha_test = alpha_test;
-			render_mtl.sss = false;
-			render_mtl.two_sided = two_sided;
+			render_mtl.Name(name);
+			render_mtl.Albedo(float4(albedo.x(), albedo.y(), albedo.z(), opacity));
+			render_mtl.Metalness(metalness);
+			render_mtl.Glossiness(Shininess2Glossiness(shininess));
+			render_mtl.Emissive(emissive);
+			render_mtl.Transparent(transparent);
+			render_mtl.AlphaTestThreshold(alpha_test);
+			render_mtl.Sss(false);
+			render_mtl.TwoSided(two_sided);
 
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_Albedo] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Albedo, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_UNKNOWN);
@@ -465,7 +465,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 			}
 			else
 			{
@@ -474,7 +474,7 @@ namespace
 				{
 					aiString str;
 					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
-					render_mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = str.C_Str();
+					render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 				}
 			}
 
@@ -483,7 +483,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_Emissive] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Emissive, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
@@ -491,9 +491,11 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_Normal] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Normal, str.C_Str());
 
-				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_SCALE(aiTextureType_NORMALS, 0), &render_mtl.normal_scale);
+				float normal_scale;
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_SCALE(aiTextureType_NORMALS, 0), &normal_scale);
+				render_mtl.NormalScale(normal_scale);
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
@@ -501,7 +503,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_Height] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Height, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_LIGHTMAP);
@@ -509,27 +511,34 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_LIGHTMAP, 0, &str, 0, 0, 0, 0, 0, 0);
-				render_mtl.tex_names[RenderMaterial::TS_Occlusion] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Occlusion, str.C_Str());
 
-				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_STRENGTH(aiTextureType_LIGHTMAP, 0), &render_mtl.occlusion_strength);
+				float occlusion_strength;
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_STRENGTH(aiTextureType_LIGHTMAP, 0), &occlusion_strength);
+				render_mtl.OcclusionStrength(occlusion_strength);
 			}
 
-			render_mtl.detail_mode = RenderMaterial::SDM_Parallax;
-			if (render_mtl.tex_names[RenderMaterial::TS_Height].empty())
+			render_mtl.DetailMode(RenderMaterial::SDM_Parallax);
+			if (render_mtl.TextureName(RenderMaterial::TS_Height).empty())
 			{
-				render_mtl.height_offset_scale = float2(0, 0);
+				render_mtl.HeightOffset(0);
+				render_mtl.HeightScale(0);
 			}
 			else
 			{
-				render_mtl.height_offset_scale = float2(-0.5f, 0.06f);
+				render_mtl.HeightOffset(-0.5f);
+				render_mtl.HeightScale(0.06f);
 
-				float ai_bumpscaling = 0;
+				float ai_bumpscaling;
 				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_BUMPSCALING, &ai_bumpscaling))
 				{
-					render_mtl.height_offset_scale.y() = ai_bumpscaling;
+					render_mtl.HeightScale(ai_bumpscaling);
 				}
 			}
-			render_mtl.tess_factors = float4(5, 5, 1, 9);
+			render_mtl.EdgeTessHint(5);
+			render_mtl.InsideTessHint(5);
+			render_mtl.MinTessFactor(1);
+			render_mtl.MaxTessFactor(9);
 		}
 	}
 
@@ -1133,29 +1142,29 @@ namespace
 
 				{
 					aiString name;
-					name.Set(mtl.name.c_str());
+					name.Set(mtl.Name().c_str());
 					ai_mtl.AddProperty(&name, AI_MATKEY_NAME);
 				}
 
 				{
 					if (is_gltf)
 					{
-						aiColor4D const ai_albedo(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z(), mtl.albedo.w());
+						aiColor4D const ai_albedo(mtl.Albedo().x(), mtl.Albedo().y(), mtl.Albedo().z(), mtl.Albedo().w());
 						ai_mtl.AddProperty(&ai_albedo, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
 
-						float ai_metallic = mtl.metalness;
+						float ai_metallic = mtl.Metalness();
 						ai_mtl.AddProperty(&ai_metallic, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
 					}
 					else
 					{
-						float3 const diffuse = mtl.albedo * (1 - mtl.metalness);
+						float3 const diffuse = mtl.Albedo() * (1 - mtl.Metalness());
 
 						aiColor3D const ai_diffuse(diffuse.x(), diffuse.y(), diffuse.z());
 						ai_mtl.AddProperty(&ai_diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 					}
 
 					float3 const specular = MathLib::lerp(float3(0.04f, 0.04f, 0.04f),
-						float3(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z()), mtl.metalness);
+						float3(mtl.Albedo().x(), mtl.Albedo().y(), mtl.Albedo().z()), mtl.Metalness());
 
 					float const ai_shininess_strength = MathLib::max3(specular.x(), specular.y(), specular.z());
 					ai_mtl.AddProperty(&ai_shininess_strength, 1, AI_MATKEY_SHININESS_STRENGTH);
@@ -1165,36 +1174,36 @@ namespace
 					ai_mtl.AddProperty(&ai_specular, 1, AI_MATKEY_COLOR_SPECULAR);
 				}
 				{
-					aiColor3D const ai_emissive(mtl.emissive.x(), mtl.emissive.y(), mtl.emissive.z());
+					aiColor3D const ai_emissive(mtl.Emissive().x(), mtl.Emissive().y(), mtl.Emissive().z());
 					ai_mtl.AddProperty(&ai_emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 				}
 
 				{
-					ai_real const ai_opacity = mtl.albedo.w();
+					ai_real const ai_opacity = mtl.Albedo().w();
 					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_OPACITY);
 				}
 
 				{
-					ai_real const ai_shininess = Glossiness2Shininess(mtl.glossiness);
+					ai_real const ai_shininess = Glossiness2Shininess(mtl.Glossiness());
 					ai_mtl.AddProperty(&ai_shininess, 1, AI_MATKEY_SHININESS);
 				}
 
 				{
-					int const ai_two_sided = mtl.two_sided;
+					int const ai_two_sided = mtl.TwoSided();
 					ai_mtl.AddProperty(&ai_two_sided, 1, AI_MATKEY_TWOSIDED);
 				}
 
 				if (is_gltf)
 				{
 					aiString ai_alpha_mode;
-					if (mtl.alpha_test > 0)
+					if (mtl.AlphaTestThreshold() > 0)
 					{
 						ai_alpha_mode.Set("MASK");
 
-						ai_real const ai_opacity = mtl.alpha_test;
+						ai_real const ai_opacity = mtl.AlphaTestThreshold();
 						ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 					}
-					else if (mtl.albedo.w() < 1)
+					else if (mtl.Albedo().w() < 1)
 					{
 						ai_alpha_mode.Set("BLEND");
 					}
@@ -1208,10 +1217,10 @@ namespace
 
 				// TODO: SSS
 
-				if (!mtl.tex_names[RenderMaterial::TS_Albedo].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Albedo).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Albedo]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Albedo));
 					if (is_gltf)
 					{
 						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
@@ -1222,10 +1231,10 @@ namespace
 					}
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness));
 					if (is_gltf)
 					{
 						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
@@ -1236,29 +1245,29 @@ namespace
 					}
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Emissive].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Emissive).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Emissive]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Emissive));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_EMISSIVE(0));
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Normal].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Normal).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Normal]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Normal));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_NORMALS(0));
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Height).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Height]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Height));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_HEIGHT(0));
 
-					if (!MathLib::equal<float>(mtl.height_offset_scale.y(), 0.06f))
+					if (!MathLib::equal<float>(mtl.HeightScale(), 0.06f))
 					{
-						ai_real const ai_bump_scaling = mtl.height_offset_scale.y();
+						ai_real const ai_bump_scaling = mtl.HeightScale();
 						ai_mtl.AddProperty(&ai_bump_scaling, 1, AI_MATKEY_BUMPSCALING);
 					}
 				}
@@ -1660,26 +1669,30 @@ namespace
 			render_model_->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>();
 			auto& mtl = *render_model_->GetMaterial(mtl_index);
 
-			mtl.name = "Material " + std::to_string(mtl_index);
+			mtl.Name("Material " + std::to_string(mtl_index));
 
-			mtl.albedo = float4(0, 0, 0, 1);
-			mtl.metalness = 0;
-			mtl.glossiness = 0;
-			mtl.emissive = float3(0, 0, 0);
-			mtl.transparent = false;
-			mtl.alpha_test = 0;
-			mtl.sss = false;
-			mtl.two_sided = false;
+			mtl.Albedo(float4(0, 0, 0, 1));
+			mtl.Metalness(0);
+			mtl.Glossiness(0);
+			mtl.Emissive(float3(0, 0, 0));
+			mtl.Transparent(false);
+			mtl.AlphaTestThreshold(0);
+			mtl.Sss(false);
+			mtl.TwoSided(false);
 
-			mtl.detail_mode = RenderMaterial::SDM_Parallax;
-			mtl.height_offset_scale = float2(-0.5f, 0.06f);
-			mtl.tess_factors = float4(5, 5, 1, 9);
+			mtl.DetailMode(RenderMaterial::SDM_Parallax);
+			mtl.HeightOffset(-0.5f);
+			mtl.HeightScale(0.06f);
+			mtl.EdgeTessHint(5);
+			mtl.InsideTessHint(5);
+			mtl.MinTessFactor(1);
+			mtl.MaxTessFactor(9);
 
 			{
 				XMLAttributePtr attr = mtl_node->Attrib("name");
 				if (attr)
 				{
-					mtl.name = std::string(attr->ValueString());
+					mtl.Name(attr->ValueString());
 				}
 			}
 
@@ -1689,45 +1702,51 @@ namespace
 				XMLAttributePtr attr = albedo_node->Attrib("color");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &mtl.albedo[0]);
+					float4 albedo;
+					ExtractFVector<4>(attr->ValueString(), &albedo[0]);
+					mtl.Albedo(albedo);
 				}
 				attr = albedo_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Albedo] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Albedo, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
+				float4 albedo;
+
 				XMLAttributePtr attr = mtl_node->Attrib("diffuse");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.albedo[0]);
+					ExtractFVector<3>(attr->ValueString(), &albedo[0]);
 				}
 				else
 				{
 					attr = mtl_node->Attrib("diffuse_r");
 					if (attr)
 					{
-						mtl.albedo.x() = attr->ValueFloat();
+						albedo.x() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("diffuse_g");
 					if (attr)
 					{
-						mtl.albedo.y() = attr->ValueFloat();
+						albedo.y() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("diffuse_b");
 					if (attr)
 					{
-						mtl.albedo.z() = attr->ValueFloat();
+						albedo.z() = attr->ValueFloat();
 					}
 				}
 
 				attr = mtl_node->Attrib("opacity");
 				if (attr)
 				{
-					mtl.albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
+					albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
 				}
+
+				mtl.Albedo(albedo);
 			}
 
 			XMLNodePtr metalness_glossiness_node = mtl_node->FirstNode("metalness_glossiness");
@@ -1736,17 +1755,17 @@ namespace
 				XMLAttributePtr attr = metalness_glossiness_node->Attrib("metalness");
 				if (attr)
 				{
-					mtl.metalness = attr->ValueFloat();
+					mtl.Metalness(attr->ValueFloat());
 				}
 				attr = metalness_glossiness_node->Attrib("glossiness");
 				if (attr)
 				{
-					mtl.glossiness = attr->ValueFloat();
+					mtl.Glossiness(attr->ValueFloat());
 				}
 				attr = metalness_glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 				}
 			}
 			else
@@ -1757,12 +1776,12 @@ namespace
 					XMLAttributePtr attr = metalness_node->Attrib("value");
 					if (attr)
 					{
-						mtl.metalness = attr->ValueFloat();
+						mtl.Metalness(attr->ValueFloat());
 					}
 					attr = metalness_node->Attrib("texture");
 					if (attr)
 					{
-						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 					}
 				}
 
@@ -1772,12 +1791,12 @@ namespace
 					XMLAttributePtr attr = glossiness_node->Attrib("value");
 					if (attr)
 					{
-						mtl.glossiness = attr->ValueFloat();
+						mtl.Glossiness(attr->ValueFloat());
 					}
 					attr = glossiness_node->Attrib("texture");
 					if (attr)
 					{
-						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = std::string(attr->ValueString());
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 					}
 				}
 				else
@@ -1787,7 +1806,7 @@ namespace
 					{
 						float shininess = mtl_node->Attrib("shininess")->ValueFloat();
 						shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
-						mtl.glossiness = Shininess2Glossiness(shininess);
+						mtl.Glossiness(Shininess2Glossiness(shininess));
 					}
 				}
 			}
@@ -1798,39 +1817,45 @@ namespace
 				XMLAttributePtr attr = emissive_node->Attrib("color");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+					float3 emissive;
+					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
+					mtl.Emissive(emissive);
 				}
 				attr = emissive_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Emissive] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Emissive, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
+				float3 emissive;
+
 				XMLAttributePtr attr = mtl_node->Attrib("emit");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
 				}
 				else
 				{
 					attr = mtl_node->Attrib("emit_r");
 					if (attr)
 					{
-						mtl.emissive.x() = attr->ValueFloat();
+						emissive.x() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("emit_g");
 					if (attr)
 					{
-						mtl.emissive.y() = attr->ValueFloat();
+						emissive.y() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("emit_b");
 					if (attr)
 					{
-						mtl.emissive.z() = attr->ValueFloat();
+						emissive.z() = attr->ValueFloat();
 					}
 				}
+
+				mtl.Emissive(emissive);
 			}
 			
 			XMLNodePtr normal_node = mtl_node->FirstNode("normal");
@@ -1839,7 +1864,7 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Normal] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Normal, std::string(attr->ValueString()));
 				}
 			}
 
@@ -1853,19 +1878,19 @@ namespace
 				XMLAttributePtr attr = height_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Height] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Height, std::string(attr->ValueString()));
 				}
 
 				attr = height_node->Attrib("offset");
 				if (attr)
 				{
-					mtl.height_offset_scale.x() = attr->ValueFloat();
+					mtl.HeightOffset(attr->ValueFloat());
 				}
 
 				attr = height_node->Attrib("scale");
 				if (attr)
 				{
-					mtl.height_offset_scale.y() = attr->ValueFloat();
+					mtl.HeightScale(attr->ValueFloat());
 				}
 			}
 
@@ -1879,24 +1904,24 @@ namespace
 					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
 					if (CT_HASH("Flat Tessellation") == mode_hash)
 					{
-						mtl.detail_mode = RenderMaterial::SDM_FlatTessellation;
+						mtl.DetailMode(RenderMaterial::SDM_FlatTessellation);
 					}
 					else if (CT_HASH("Smooth Tessellation") == mode_hash)
 					{
-						mtl.detail_mode = RenderMaterial::SDM_SmoothTessellation;
+						mtl.DetailMode(RenderMaterial::SDM_SmoothTessellation);
 					}
 				}
 
 				attr = detail_node->Attrib("height_offset");
 				if (attr)
 				{
-					mtl.height_offset_scale.x() = attr->ValueFloat();
+					mtl.HeightOffset(attr->ValueFloat());
 				}
 
 				attr = detail_node->Attrib("height_scale");
 				if (attr)
 				{
-					mtl.height_offset_scale.y() = attr->ValueFloat();
+					mtl.HeightScale(attr->ValueFloat());
 				}
 
 				XMLNodePtr tess_node = detail_node->FirstNode("tess");
@@ -1905,22 +1930,22 @@ namespace
 					attr = tess_node->Attrib("edge_hint");
 					if (attr)
 					{
-						mtl.tess_factors.x() = attr->ValueFloat();
+						mtl.EdgeTessHint(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("inside_hint");
 					if (attr)
 					{
-						mtl.tess_factors.y() = attr->ValueFloat();
+						mtl.InsideTessHint(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("min");
 					if (attr)
 					{
-						mtl.tess_factors.z() = attr->ValueFloat();
+						mtl.MinTessFactor(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("max");
 					if (attr)
 					{
-						mtl.tess_factors.w() = attr->ValueFloat();
+						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 				else
@@ -1928,22 +1953,22 @@ namespace
 					attr = detail_node->Attrib("edge_tess_hint");
 					if (attr)
 					{
-						mtl.tess_factors.x() = attr->ValueFloat();
+						mtl.EdgeTessHint(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("inside_tess_hint");
 					if (attr)
 					{
-						mtl.tess_factors.y() = attr->ValueFloat();
+						mtl.InsideTessHint(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("min_tess");
 					if (attr)
 					{
-						mtl.tess_factors.z() = attr->ValueFloat();
+						mtl.MinTessFactor(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("max_tess");
 					if (attr)
 					{
-						mtl.tess_factors.w() = attr->ValueFloat();
+						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 			}
@@ -1954,7 +1979,7 @@ namespace
 				XMLAttributePtr attr = transparent_node->Attrib("value");
 				if (attr)
 				{
-					mtl.transparent = attr->ValueInt() ? true : false;
+					mtl.Transparent(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -1964,7 +1989,7 @@ namespace
 				XMLAttributePtr attr = alpha_test_node->Attrib("value");
 				if (attr)
 				{
-					mtl.alpha_test = attr->ValueFloat();
+					mtl.AlphaTestThreshold(attr->ValueFloat());
 				}
 			}
 
@@ -1974,7 +1999,7 @@ namespace
 				XMLAttributePtr attr = sss_node->Attrib("value");
 				if (attr)
 				{
-					mtl.sss = attr->ValueInt() ? true : false;
+					mtl.Sss(attr->ValueInt() ? true : false);
 				}
 			}
 			else
@@ -1982,7 +2007,7 @@ namespace
 				XMLAttributePtr attr = mtl_node->Attrib("sss");
 				if (attr)
 				{
-					mtl.sss = attr->ValueInt() ? true : false;
+					mtl.Sss(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -1992,7 +2017,7 @@ namespace
 				XMLAttributePtr attr = two_sided_node->Attrib("value");
 				if (attr)
 				{
-					mtl.two_sided = attr->ValueInt() ? true : false;
+					mtl.TwoSided(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -2018,25 +2043,25 @@ namespace
 						|| (CT_HASH("Diffuse Color Map") == type_hash)
 						|| (CT_HASH("Albedo") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Albedo] = name;
+						mtl.TextureName(RenderMaterial::TS_Albedo, name);
 					}
 					else if ((CT_HASH("MetalnessGlossiness") == type_hash) || (CT_HASH("Metalness") == type_hash) ||
 							 (CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_MetalnessGlossiness] = name;
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, name);
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Emissive] = name;
+						mtl.TextureName(RenderMaterial::TS_Emissive, name);
 					}
 					else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Normal] = name;
+						mtl.TextureName(RenderMaterial::TS_Normal, name);
 					}
 					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
 						|| (CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Height] = name;
+						mtl.TextureName(RenderMaterial::TS_Height, name);
 					}
 				}
 			}

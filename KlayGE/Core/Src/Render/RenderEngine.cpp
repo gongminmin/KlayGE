@@ -1352,6 +1352,9 @@ namespace KlayGE
 
 	void RenderEngine::Destroy()
 	{
+		default_material_.reset();
+		pmcb_.reset();
+
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		ds_tex_.reset();
@@ -1407,5 +1410,123 @@ namespace KlayGE
 #endif
 
 		this->DoDestroy();
+	}
+
+	RenderMaterialPtr const& RenderEngine::DefaultMaterial() const
+	{
+		if (!default_material_)
+		{
+			default_material_ = MakeSharedPtr<RenderMaterial>();
+		}
+		return default_material_;
+	}
+
+	RenderEngine::PredefinedMaterialCBuffer const& RenderEngine::PredefinedMaterialCBufferInstance() const
+	{
+		if (!pmcb_)
+		{
+			pmcb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
+		}
+		return *pmcb_;
+	}
+
+
+	RenderEngine::PredefinedMaterialCBuffer::PredefinedMaterialCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("Material.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_material");
+
+		albedo_clr_offset_ = effect_->ParameterByName("albedo_clr")->CBufferOffset();
+		metalness_glossiness_factor_offset_ = effect_->ParameterByName("metalness_glossiness_factor")->CBufferOffset();
+		emissive_clr_offset_ = effect_->ParameterByName("emissive_clr")->CBufferOffset();
+		albedo_map_enabled_offset_ = effect_->ParameterByName("albedo_map_enabled")->CBufferOffset();
+		normal_map_enabled_offset_ = effect_->ParameterByName("normal_map_enabled")->CBufferOffset();
+		height_map_parallax_enabled_offset_ = effect_->ParameterByName("height_map_parallax_enabled")->CBufferOffset();
+		height_map_tess_enabled_offset_ = effect_->ParameterByName("height_map_tess_enabled")->CBufferOffset();
+		occlusion_map_enabled_offset_ = effect_->ParameterByName("occlusion_map_enabled")->CBufferOffset();
+		alpha_test_threshold_offset_ = effect_->ParameterByName("alpha_test_threshold")->CBufferOffset();
+		normal_scale_offset_ = effect_->ParameterByName("normal_scale")->CBufferOffset();
+		occlusion_strength_offset_ = effect_->ParameterByName("occlusion_strength")->CBufferOffset();
+		height_offset_scale_offset_ = effect_->ParameterByName("height_offset_scale")->CBufferOffset();
+		tess_factors_offset_ = effect_->ParameterByName("tess_factors")->CBufferOffset();
+
+		this->AlbedoClr(predefined_cbuffer_) = float4(0, 0, 0, 1);
+		this->MetalnessGlossinessFactor(predefined_cbuffer_) = float3(0, 0, 0);
+		this->EmissiveClr(predefined_cbuffer_) = float4(0, 0, 0, 0);
+		this->AlbedoMapEnabled(predefined_cbuffer_) = 0;
+		this->NormalMapEnabled(predefined_cbuffer_) = 0;
+		this->HeightMapParallaxEnabled(predefined_cbuffer_) = 0;
+		this->HeightMapTessEnabled(predefined_cbuffer_) = 0;
+		this->OcclusionMapEnabled(predefined_cbuffer_) = 0;
+		this->AlphaTestThreshold(predefined_cbuffer_) = 0;
+		this->NormalScale(predefined_cbuffer_) = 1;
+		this->OcclusionStrength(predefined_cbuffer_) = 1;
+		this->HeightOffsetScale(predefined_cbuffer_) = float2(-0.5f, 0.06f);
+		this->TessFactors(predefined_cbuffer_) = float4(5, 5, 1, 9);
+	}
+
+	float4& RenderEngine::PredefinedMaterialCBuffer::AlbedoClr(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float4>(albedo_clr_offset_);
+	}
+
+	float3& RenderEngine::PredefinedMaterialCBuffer::MetalnessGlossinessFactor(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float3>(metalness_glossiness_factor_offset_);
+	}
+	
+	float4& RenderEngine::PredefinedMaterialCBuffer::EmissiveClr(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float4>(emissive_clr_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::AlbedoMapEnabled(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<int32_t>(albedo_map_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::NormalMapEnabled(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<int32_t>(normal_map_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapParallaxEnabled(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<int32_t>(height_map_parallax_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapTessEnabled(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<int32_t>(height_map_tess_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::OcclusionMapEnabled(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<int32_t>(occlusion_map_enabled_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::AlphaTestThreshold(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float>(alpha_test_threshold_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::NormalScale(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float>(normal_scale_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::OcclusionStrength(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float>(occlusion_strength_offset_);
+	}
+
+	float2& RenderEngine::PredefinedMaterialCBuffer::HeightOffsetScale(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float2>(height_offset_scale_offset_);
+	}
+
+	float4& RenderEngine::PredefinedMaterialCBuffer::TessFactors(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float4>(tess_factors_offset_);
 	}
 }

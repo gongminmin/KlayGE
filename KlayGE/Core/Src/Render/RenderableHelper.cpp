@@ -534,17 +534,17 @@ namespace KlayGE
 		model_mat_ = float4x4::Identity();
 
 		mtl_ = MakeSharedPtr<RenderMaterial>();
-		mtl_->albedo = float4(albedo_clr.x(), albedo_clr.y(), albedo_clr.z(), 1);
-		mtl_->metalness = metalness;
-		mtl_->glossiness = glossiness;
+		mtl_->Albedo(float4(albedo_clr.x(), albedo_clr.y(), albedo_clr.z(), 1));
+		mtl_->Metalness(metalness);
+		mtl_->Glossiness(glossiness);
 
 		effect_attrs_ |= EA_AlphaTest;
 
 		inv_mv_ep_ = effect_->ParameterByName("inv_mv");
 		g_buffer_rt0_tex_param_ = effect_->ParameterByName("g_buffer_rt0_tex");
 
-		textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(normal_tex);
-		textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(albedo_tex);
+		mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(normal_tex));
+		mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(albedo_tex));
 	}
 
 	void RenderDecal::OnRenderBegin()

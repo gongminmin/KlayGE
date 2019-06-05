@@ -34,6 +34,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderEffect.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
@@ -88,6 +89,9 @@ namespace
 				float alpha_test;
 				bool sss;
 				bool two_sided;
+
+				float normal_scale;
+				float occlusion_strength;
 
 				std::array<std::string, RenderMaterial::TS_NumTextureSlots> tex_names;
 
@@ -154,6 +158,9 @@ namespace
 			mtl_desc_.mtl_data->alpha_test = 0;
 			mtl_desc_.mtl_data->sss = false;
 			mtl_desc_.mtl_data->two_sided = false;
+
+			mtl_desc_.mtl_data->normal_scale = 1;
+			mtl_desc_.mtl_data->occlusion_strength = 1;
 
 			mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_Parallax;
 			mtl_desc_.mtl_data->height_offset_scale = float2(-0.5f, 0.06f);
@@ -249,6 +256,12 @@ namespace
 				{
 					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Normal] = std::string(attr->ValueString());
 				}
+
+				attr = normal_node->Attrib("scale");
+				if (attr)
+				{
+					mtl_desc_.mtl_data->normal_scale = attr->ValueFloat();
+				}
 			}
 
 			XMLNodePtr height_node = root->FirstNode("height");
@@ -270,6 +283,22 @@ namespace
 				if (attr)
 				{
 					mtl_desc_.mtl_data->height_offset_scale.y() = attr->ValueFloat();
+				}
+			}
+
+			XMLNodePtr occlusion_node = root->FirstNode("occlusion");
+			if (normal_node)
+			{
+				XMLAttributePtr attr = occlusion_node->Attrib("texture");
+				if (attr)
+				{
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Occlusion] = std::string(attr->ValueString());
+				}
+
+				attr = normal_node->Attrib("strength");
+				if (attr)
+				{
+					mtl_desc_.mtl_data->occlusion_strength = attr->ValueFloat();
 				}
 			}
 
@@ -413,23 +442,33 @@ namespace
 			{
 				RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 
-				mtl->name = mtl_desc_.mtl_data->name;
+				mtl->Name(mtl_desc_.mtl_data->name);
 
-				mtl->albedo = mtl_desc_.mtl_data->albedo;
-				mtl->metalness = mtl_desc_.mtl_data->metalness;
-				mtl->glossiness = mtl_desc_.mtl_data->glossiness;
-				mtl->emissive = mtl_desc_.mtl_data->emissive;
+				mtl->Albedo(mtl_desc_.mtl_data->albedo);
+				mtl->Metalness(mtl_desc_.mtl_data->metalness);
+				mtl->Glossiness(mtl_desc_.mtl_data->glossiness);
+				mtl->Emissive(mtl_desc_.mtl_data->emissive);
 
-				mtl->transparent = mtl_desc_.mtl_data->transparent;
-				mtl->alpha_test = mtl_desc_.mtl_data->alpha_test;
-				mtl->sss = mtl_desc_.mtl_data->sss;
-				mtl->two_sided = mtl_desc_.mtl_data->two_sided;
+				mtl->Transparent(mtl_desc_.mtl_data->transparent);
+				mtl->AlphaTestThreshold(mtl_desc_.mtl_data->alpha_test);
+				mtl->Sss(mtl_desc_.mtl_data->sss);
+				mtl->TwoSided(mtl_desc_.mtl_data->two_sided);
 
-				mtl->tex_names = mtl_desc_.mtl_data->tex_names;
+				mtl->NormalScale(mtl_desc_.mtl_data->normal_scale);
+				mtl->OcclusionStrength(mtl_desc_.mtl_data->occlusion_strength);
 
-				mtl->detail_mode = mtl_desc_.mtl_data->detail_mode;
-				mtl->height_offset_scale = mtl_desc_.mtl_data->height_offset_scale;
-				mtl->tess_factors = mtl_desc_.mtl_data->tess_factors;
+				for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++i)
+				{
+					mtl->TextureName(static_cast<RenderMaterial::TextureSlot>(i), mtl_desc_.mtl_data->tex_names[i]);
+				}
+
+				mtl->DetailMode(mtl_desc_.mtl_data->detail_mode);
+				mtl->HeightOffset(mtl_desc_.mtl_data->height_offset_scale.x());
+				mtl->HeightScale(mtl_desc_.mtl_data->height_offset_scale.y());
+				mtl->EdgeTessHint(mtl_desc_.mtl_data->tess_factors.x());
+				mtl->InsideTessHint(mtl_desc_.mtl_data->tess_factors.y());
+				mtl->MinTessFactor(mtl_desc_.mtl_data->tess_factors.z());
+				mtl->MaxTessFactor(mtl_desc_.mtl_data->tess_factors.w());
 
 				*mtl_desc_.mtl = mtl;
 			}
@@ -439,10 +478,277 @@ namespace
 		RenderMaterialDesc mtl_desc_;
 		std::mutex main_thread_stage_mutex_;
 	};
+
+	RenderEngine::PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance()
+	{
+		return Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedMaterialCBufferInstance();
+	}
 }
 
 namespace KlayGE
 {
+	RenderMaterial::RenderMaterial()
+	{
+		auto* curr_cbuff = PredefinedMaterialCBufferInstance().CBuffer();
+		cbuffer_ = curr_cbuff->Clone(curr_cbuff->OwnerEffect());
+	}
+
+	RenderMaterialPtr RenderMaterial::Clone() const
+	{
+		RenderMaterialPtr ret = MakeSharedPtr<RenderMaterial>();
+
+		ret->Name(this->Name());
+		ret->cbuffer_ = cbuffer_->Clone(cbuffer_->OwnerEffect());
+
+		ret->transparent_ = transparent_;
+		ret->sss_ = sss_;
+		ret->two_sided_ = two_sided_;
+		ret->detail_mode_ = detail_mode_;
+		ret->textures_ = textures_;
+
+		return ret;
+	}
+
+	void RenderMaterial::Albedo(float4 const& value)
+	{
+		PredefinedMaterialCBufferInstance().AlbedoClr(cbuffer_.get()) = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float4 const& RenderMaterial::Albedo() const
+	{
+		return PredefinedMaterialCBufferInstance().AlbedoClr(cbuffer_.get());
+	}
+
+	void RenderMaterial::Metalness(float value)
+	{
+		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).x() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::Metalness() const
+	{
+		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).x();
+	}
+
+	void RenderMaterial::Glossiness(float value)
+	{
+		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).y() = MathLib::clamp(value, 1e-6f, 0.999f);
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::Glossiness() const
+	{
+		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).y();
+	}
+
+	void RenderMaterial::Emissive(float3 const& value)
+	{
+		reinterpret_cast<float3&>(PredefinedMaterialCBufferInstance().EmissiveClr(cbuffer_.get())) = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float3 const& RenderMaterial::Emissive() const
+	{
+		return reinterpret_cast<float3 const&>(PredefinedMaterialCBufferInstance().EmissiveClr(cbuffer_.get()));
+	}
+
+	void RenderMaterial::AlphaTestThreshold(float value)
+	{
+		PredefinedMaterialCBufferInstance().AlphaTestThreshold(cbuffer_.get()) = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::AlphaTestThreshold() const
+	{
+		return PredefinedMaterialCBufferInstance().AlphaTestThreshold(cbuffer_.get());
+	}
+
+	void RenderMaterial::NormalScale(float value)
+	{
+		PredefinedMaterialCBufferInstance().NormalScale(cbuffer_.get()) = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::NormalScale() const
+	{
+		return PredefinedMaterialCBufferInstance().NormalScale(cbuffer_.get());
+	}
+
+	void RenderMaterial::OcclusionStrength(float value)
+	{
+		PredefinedMaterialCBufferInstance().OcclusionStrength(cbuffer_.get()) = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::OcclusionStrength() const
+	{
+		return PredefinedMaterialCBufferInstance().OcclusionStrength(cbuffer_.get());
+	}
+
+	void RenderMaterial::TextureName(TextureSlot slot, std::string_view name)
+	{
+		textures_[slot].first = std::string(name);
+	}
+
+	void RenderMaterial::Texture(TextureSlot slot, ShaderResourceViewPtr srv)
+	{
+		auto const& pmcb = PredefinedMaterialCBufferInstance();
+		switch (slot)
+		{
+		case TS_Albedo:
+			pmcb.AlbedoMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			break;
+
+		case TS_MetalnessGlossiness:
+			pmcb.MetalnessGlossinessFactor(cbuffer_.get()).z() = srv ? 1.0f : 0.0f;
+			break;
+
+		case TS_Emissive:
+			pmcb.EmissiveClr(cbuffer_.get()).w() = srv ? 1.0f : 0.0f;
+			break;
+
+		case TS_Normal:
+			pmcb.NormalMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			break;
+
+		case TS_Height:
+			if (detail_mode_ == RenderMaterial::SDM_Parallax)
+			{
+				pmcb.HeightMapParallaxEnabled(cbuffer_.get()) = srv ? 1 : 0;
+				pmcb.HeightMapTessEnabled(cbuffer_.get()) = 0;
+			}
+			else
+			{
+				pmcb.HeightMapParallaxEnabled(cbuffer_.get()) = 0;
+				pmcb.HeightMapTessEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			}
+			break;
+
+		case TS_Occlusion:
+			pmcb.OcclusionMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			break;
+
+		default:
+			KFL_UNREACHABLE("Invalid texture slot");
+			break;
+		}
+
+		cbuffer_->Dirty(true);
+
+		textures_[slot].second = std::move(srv);
+	}
+
+	void RenderMaterial::HeightOffset(float value)
+	{
+		PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).x() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::HeightOffset() const
+	{
+		return PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).x();
+	}
+
+	void RenderMaterial::HeightScale(float value)
+	{
+		PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).y() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::HeightScale() const
+	{
+		return PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).y();
+	}
+
+	void RenderMaterial::EdgeTessHint(float value)
+	{
+		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).x() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::EdgeTessHint() const
+	{
+		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).x();
+	}
+
+	void RenderMaterial::InsideTessHint(float value)
+	{
+		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).y() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::InsideTessHint() const
+	{
+		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).y();
+	}
+
+	void RenderMaterial::MinTessFactor(float value)
+	{
+		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::MinTessFactor() const
+	{
+		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z();
+	}
+
+	void RenderMaterial::MaxTessFactor(float value)
+	{
+		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z() = value;
+		cbuffer_->Dirty(true);
+	}
+
+	float RenderMaterial::MaxTessFactor() const
+	{
+		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z();
+	}
+
+	void RenderMaterial::Active(RenderEffect& effect)
+	{
+		if (effect.CBufferByName("klayge_material"))
+		{
+			if (&cbuffer_->OwnerEffect() != &effect)
+			{
+				cbuffer_ = cbuffer_->Clone(effect);
+			}
+
+			effect.BindCBufferByName("klayge_material", cbuffer_);
+		}
+
+		auto* param = effect.ParameterByName("albedo_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_Albedo);
+		}
+		param = effect.ParameterByName("metalness_glossiness_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_MetalnessGlossiness);
+		}
+		param = effect.ParameterByName("emissive_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_Emissive);
+		}
+		param = effect.ParameterByName("normal_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_Normal);
+		}
+		param = effect.ParameterByName("height_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_Height);
+		}
+		param = effect.ParameterByName("occlusion_tex");
+		if (param)
+		{
+			*param = this->Texture(RenderMaterial::TS_Occlusion);
+		}
+	}
+
 	RenderMaterialPtr SyncLoadRenderMaterial(std::string_view mtlml_name)
 	{
 		return ResLoader::Instance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
@@ -464,87 +770,100 @@ namespace KlayGE
 		{
 			XMLNodePtr albedo_node = doc.AllocNode(XNT_Element, "albedo");
 
-			std::string color_str = std::to_string(mtl->albedo.x())
-				+ ' ' + std::to_string(mtl->albedo.y())
-				+ ' ' + std::to_string(mtl->albedo.z())
-				+ ' ' + std::to_string(mtl->albedo.w());
+			float4 const& albedo = mtl->Albedo();
+			std::string color_str = std::to_string(albedo.x())
+				+ ' ' + std::to_string(albedo.y())
+				+ ' ' + std::to_string(albedo.z())
+				+ ' ' + std::to_string(albedo.w());
 			albedo_node->AppendAttrib(doc.AllocAttribString("color", color_str));
 
-			if (!mtl->tex_names[RenderMaterial::TS_Albedo].empty())
+			if (!mtl->TextureName(RenderMaterial::TS_Albedo).empty())
 			{
-				albedo_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Albedo]));
+				albedo_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Albedo)));
 			}
 
 			root->AppendNode(albedo_node);
 		}
 
-		if ((mtl->metalness > 0) || (mtl->glossiness > 0) || !mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
+		if ((mtl->Metalness() > 0) || (mtl->Glossiness() > 0) || !mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 		{
 			XMLNodePtr metalness_glossiness_node = doc.AllocNode(XNT_Element, "metalness_glossiness");
 
-			if (mtl->metalness > 0)
+			if (mtl->Metalness() > 0)
 			{
-				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->metalness));
+				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->Metalness()));
 			}
-			if (mtl->glossiness > 0)
+			if (mtl->Glossiness() > 0)
 			{
-				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->glossiness));
+				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->Glossiness()));
 			}
-			if (!mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness].empty())
+			if (!mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 			{
 				metalness_glossiness_node->AppendAttrib(
-					doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_MetalnessGlossiness]));
+					doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness)));
 			}
 
 			root->AppendNode(metalness_glossiness_node);
 		}
 
-		if ((mtl->emissive.x() > 0) || (mtl->emissive.y() > 0) || (mtl->emissive.z() > 0)
-			|| (!mtl->tex_names[RenderMaterial::TS_Emissive].empty()))
+		float3 const& emissive = mtl->Emissive();
+		if ((emissive.x() > 0) || (emissive.y() > 0) || (emissive.z() > 0)
+			|| (!mtl->TextureName(RenderMaterial::TS_Emissive).empty()))
 		{
 			XMLNodePtr emissive_node = doc.AllocNode(XNT_Element, "emissive");
 
-			if ((mtl->emissive.x() > 0) || (mtl->emissive.y() > 0) || (mtl->emissive.z() > 0))
+			if ((emissive.x() > 0) || (emissive.y() > 0) || (emissive.z() > 0))
 			{
-				std::string color_str = std::to_string(mtl->emissive.x())
-					+ ' ' + std::to_string(mtl->emissive.y())
-					+ ' ' + std::to_string(mtl->emissive.z());
+				std::string color_str = std::to_string(emissive.x())
+					+ ' ' + std::to_string(emissive.y())
+					+ ' ' + std::to_string(emissive.z());
 				emissive_node->AppendAttrib(doc.AllocAttribString("color", color_str));
 			}
-			if (!mtl->tex_names[RenderMaterial::TS_Emissive].empty())
+			if (!mtl->TextureName(RenderMaterial::TS_Emissive).empty())
 			{
-				emissive_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Emissive]));
+				emissive_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Emissive)));
 			}
 
 			root->AppendNode(emissive_node);
 		}
 
-		if (!mtl->tex_names[RenderMaterial::TS_Normal].empty())
+		if (!mtl->TextureName(RenderMaterial::TS_Normal).empty())
 		{
 			XMLNodePtr normal_node = doc.AllocNode(XNT_Element, "normal");
 
-			normal_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Normal]));
+			normal_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Normal)));
+			normal_node->AppendAttrib(doc.AllocAttribFloat("scale", mtl->NormalScale()));
 
 			root->AppendNode(normal_node);
 		}
 
-		if (!mtl->tex_names[RenderMaterial::TS_Height].empty())
+		if (!mtl->TextureName(RenderMaterial::TS_Height).empty())
 		{
 			XMLNodePtr height_node = doc.AllocNode(XNT_Element, "height");
 
-			height_node->AppendAttrib(doc.AllocAttribString("texture", mtl->tex_names[RenderMaterial::TS_Height]));
-			height_node->AppendAttrib(doc.AllocAttribFloat("offset", mtl->height_offset_scale.x()));
-			height_node->AppendAttrib(doc.AllocAttribFloat("scale", mtl->height_offset_scale.y()));
+			height_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Height)));
+			height_node->AppendAttrib(doc.AllocAttribFloat("offset", mtl->HeightOffset()));
+			height_node->AppendAttrib(doc.AllocAttribFloat("scale", mtl->HeightScale()));
 
 			root->AppendNode(height_node);
 		}
 
-		if (mtl->detail_mode != RenderMaterial::SDM_Parallax)
+		if (!mtl->TextureName(RenderMaterial::TS_Occlusion).empty())
+		{
+			XMLNodePtr occlusion_node = doc.AllocNode(XNT_Element, "occlusion");
+
+			occlusion_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Occlusion)));
+			occlusion_node->AppendAttrib(doc.AllocAttribFloat("strength", mtl->OcclusionStrength()));
+
+			root->AppendNode(occlusion_node);
+		}
+
+		if (mtl->DetailMode() != RenderMaterial::SDM_Parallax)
 		{
 			XMLNodePtr detail_node = doc.AllocNode(XNT_Element, "detail");
 
 			std::string detail_mode_str;
-			switch (mtl->detail_mode)
+			switch (mtl->DetailMode())
 			{
 			case RenderMaterial::SDM_FlatTessellation:
 				detail_mode_str = "Flat Tessellation";
@@ -561,17 +880,17 @@ namespace KlayGE
 
 			{
 				XMLNodePtr tess_node = doc.AllocNode(XNT_Element, "tess");
-				tess_node->AppendAttrib(doc.AllocAttribFloat("edge_hint", mtl->tess_factors.x()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("inside_hint", mtl->tess_factors.y()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("min", mtl->tess_factors.z()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("max", mtl->tess_factors.w()));
+				tess_node->AppendAttrib(doc.AllocAttribFloat("edge_hint", mtl->EdgeTessHint()));
+				tess_node->AppendAttrib(doc.AllocAttribFloat("inside_hint", mtl->InsideTessHint()));
+				tess_node->AppendAttrib(doc.AllocAttribFloat("min", mtl->MinTessFactor()));
+				tess_node->AppendAttrib(doc.AllocAttribFloat("max", mtl->MaxTessFactor()));
 				detail_node->AppendNode(tess_node);
 			}
 
 			root->AppendNode(detail_node);
 		}
 
-		if (mtl->transparent)
+		if (mtl->Transparent())
 		{
 			XMLNodePtr transparent_node = doc.AllocNode(XNT_Element, "transparent");
 
@@ -580,16 +899,16 @@ namespace KlayGE
 			root->AppendNode(transparent_node);
 		}
 
-		if (mtl->alpha_test > 0)
+		if (mtl->AlphaTestThreshold() > 0)
 		{
 			XMLNodePtr alpha_test_node = doc.AllocNode(XNT_Element, "alpha_test");
 
-			alpha_test_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->alpha_test));
+			alpha_test_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->AlphaTestThreshold()));
 
 			root->AppendNode(alpha_test_node);
 		}
 
-		if (mtl->sss)
+		if (mtl->Sss())
 		{
 			XMLNodePtr sss_node = doc.AllocNode(XNT_Element, "sss");
 
@@ -598,7 +917,7 @@ namespace KlayGE
 			root->AppendNode(sss_node);
 		}
 
-		if (mtl->two_sided)
+		if (mtl->TwoSided())
 		{
 			XMLNodePtr two_sided_node = doc.AllocNode(XNT_Element, "two_sided");
 

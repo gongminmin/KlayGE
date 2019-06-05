@@ -59,7 +59,8 @@ namespace
 
 		void Transparency(float alpha)
 		{
-			mtl_->albedo.w() = alpha;
+			float4 const& albedo = mtl_->Albedo();
+			mtl_->Albedo(float4(albedo.x(), albedo.y(), albedo.z(), alpha));
 
 			if (!simple_forward_)
 			{
@@ -86,7 +87,7 @@ namespace
 				effect_attrs_ &= ~EA_SimpleForward;
 
 				this->ReceivesLighting(lighting_);
-				this->Transparency(mtl_->albedo.w());
+				this->Transparency(mtl_->Albedo().w());
 			}
 		}
 

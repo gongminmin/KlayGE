@@ -4,6 +4,7 @@
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="Material.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -26,18 +27,6 @@
 	<parameter type="float3" name="pos_extent"/>
 	<parameter type="float2" name="tc_center"/>
 	<parameter type="float2" name="tc_extent"/>
-
-	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float3" name="metalness_glossiness_factor"/>
-	<parameter type="float4" name="emissive_clr"/>
-	<parameter type="int" name="albedo_map_enabled"/>
-
-	<parameter type="int" name="normal_map_enabled"/>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
 
 	<shader>
 		<![CDATA[

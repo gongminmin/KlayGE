@@ -174,9 +174,9 @@ void AreaLightingApp::OnCreate()
 		for (int j = -5; j < 5; ++ j)
 		{
 			auto sphere_mesh = sphere_model_unique->Clone();
-			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
-			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
-			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
+			sphere_mesh->GetMaterial(0)->Albedo(float4(0.799102738f, 0.496932995f, 0.048171824f, 1));
+			sphere_mesh->GetMaterial(0)->Metalness((4 - i) / 9.0f);
+			sphere_mesh->GetMaterial(0)->Glossiness((4 - j) / 9.0f);
 			sphere_mesh->RootNode()->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
 				* MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
 			root_node.AddChild(sphere_mesh->RootNode());

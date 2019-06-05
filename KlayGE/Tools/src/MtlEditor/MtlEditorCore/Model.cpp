@@ -74,22 +74,22 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 	effect_attrs_ &= ~EA_SSS;
 	effect_attrs_ &= ~EA_SpecialShading;
 
-	if (mtl_->transparent)
+	if (mtl_->Transparent())
 	{
 		effect_attrs_ |= EA_TransparencyBack;
 		effect_attrs_ |= EA_TransparencyFront;
 	}
-	if (mtl_->alpha_test > 0)
+	if (mtl_->AlphaTestThreshold() > 0)
 	{
 		effect_attrs_ |= EA_AlphaTest;
 	}
-	if (mtl_->sss)
+	if (mtl_->Sss())
 	{
 		effect_attrs_ |= EA_SSS;
 	}
-	if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || textures_[RenderMaterial::TS_Emissive]
-		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
-		|| (effect_attrs_ & EA_Reflection))
+	if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
+		mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
+		(effect_attrs_ & EA_Reflection))
 	{
 		effect_attrs_ |= EA_SpecialShading;
 	}
@@ -103,9 +103,9 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	for (size_t i = 0; i < textures_.size(); ++ i)
+	for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 	{
-		textures_[i].reset();
+		mtl_->Texture(static_cast<RenderMaterial::TextureSlot>(i), ShaderResourceViewPtr());
 	}
 
 	StaticMesh::BuildMeshInfo(*model_);
@@ -480,7 +480,7 @@ void DetailedSkinnedModel::SetTime(float time)
 uint32_t DetailedSkinnedModel::CopyMaterial(uint32_t mtl_index)
 {
 	uint32_t new_index = static_cast<uint32_t>(materials_.size());
-	materials_.push_back(MakeSharedPtr<RenderMaterial>(*materials_[mtl_index]));
+	materials_.push_back(materials_[mtl_index]->Clone());
 	return new_index;
 }
 

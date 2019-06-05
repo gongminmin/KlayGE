@@ -309,31 +309,12 @@ namespace KlayGE
 		RenderEffectParameter* model_view_param_;
 		RenderEffectParameter* forward_vec_param_;
 		RenderEffectParameter* frame_size_param_;
-		RenderEffectParameter* height_offset_scale_param_;
-		RenderEffectParameter* tess_factors_param_;
 		RenderEffectParameter* pos_center_param_;
 		RenderEffectParameter* pos_extent_param_;
 		RenderEffectParameter* tc_center_param_;
 		RenderEffectParameter* tc_extent_param_;
-		RenderEffectParameter* albedo_map_enabled_param_;
-		RenderEffectParameter* albedo_tex_param_;
-		RenderEffectParameter* albedo_clr_param_;
-		RenderEffectParameter* metalness_glossiness_tex_param_;
-		RenderEffectParameter* metalness_glossiness_factor_param_;
-		RenderEffectParameter* emissive_tex_param_;
-		RenderEffectParameter* emissive_clr_param_;
-		RenderEffectParameter* normal_map_enabled_param_;
-		RenderEffectParameter* normal_tex_param_;
-		RenderEffectParameter* height_map_parallax_enabled_param_;
-		RenderEffectParameter* height_map_tess_enabled_param_;
-		RenderEffectParameter* height_tex_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
-		RenderEffectParameter* alpha_test_threshold_param_;
-		RenderEffectParameter* normal_scale_param_;
-		RenderEffectParameter* occlusion_strength_param_;
-
-		std::array<ShaderResourceViewPtr, RenderMaterial::TS_NumTextureSlots> textures_;
 	};
 
 	// TODO: Consider merging this with Renderable

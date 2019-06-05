@@ -50,7 +50,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 17;
+	uint32_t const MODEL_BIN_VERSION = 18;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -445,9 +445,7 @@ namespace KlayGE
 		this->NumMaterials(source.NumMaterials());
 		for (uint32_t mtl_index = 0; mtl_index < source.NumMaterials(); ++ mtl_index)
 		{
-			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
-			*mtl = *source.GetMaterial(mtl_index);
-			this->GetMaterial(mtl_index) = mtl;
+			this->GetMaterial(mtl_index) = source.GetMaterial(mtl_index)->Clone();
 		}
 
 		if (source.NumMeshes() > 0)
@@ -571,33 +569,34 @@ namespace KlayGE
 
 		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
-			if (!mtl_->tex_names[i].empty())
+			auto slot = static_cast<RenderMaterial::TextureSlot>(i);
+			if (!mtl_->TextureName(slot).empty())
 			{
-				if (!ResLoader::Instance().Locate(mtl_->tex_names[i]).empty()
-					|| !ResLoader::Instance().Locate(mtl_->tex_names[i] + ".dds").empty())
+				if (!ResLoader::Instance().Locate(mtl_->TextureName(slot)).empty()
+					|| !ResLoader::Instance().Locate(mtl_->TextureName(slot) + ".dds").empty())
 				{
-					textures_[i] = rf.MakeTextureSrv(ASyncLoadTexture(mtl_->tex_names[i], EAH_GPU_Read | EAH_Immutable));
+					mtl_->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(mtl_->TextureName(slot), EAH_GPU_Read | EAH_Immutable)));
 				}
 			}
 		}
 
-		if (mtl_->transparent)
+		if (mtl_->Transparent())
 		{
 			effect_attrs_ |= EA_TransparencyBack;
 			effect_attrs_ |= EA_TransparencyFront;
 		}
-		if (mtl_->alpha_test > 0)
+		if (mtl_->AlphaTestThreshold() > 0)
 		{
 			effect_attrs_ |= EA_AlphaTest;
 		}
-		if (mtl_->sss)
+		if (mtl_->Sss())
 		{
 			effect_attrs_ |= EA_SSS;
 		}
 
-		if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || textures_[RenderMaterial::TS_Emissive]
-			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
-			|| (effect_attrs_ & EA_Reflection))
+		if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
+			mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
+			(effect_attrs_ & EA_Reflection))
 		{
 			effect_attrs_ |= EA_SpecialShading;
 		}
@@ -1122,73 +1121,96 @@ namespace KlayGE
 			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 			mtls[mtl_index] = mtl;
 
-			mtl->name = ReadShortString(decoded);
+			mtl->Name(ReadShortString(decoded));
 
-			decoded->read(&mtl->albedo, sizeof(mtl->albedo));
-			mtl->albedo.x() = LE2Native(mtl->albedo.x());
-			mtl->albedo.y() = LE2Native(mtl->albedo.y());
-			mtl->albedo.z() = LE2Native(mtl->albedo.z());
-			mtl->albedo.w() = LE2Native(mtl->albedo.w());
+			float4 albedo;
+			decoded->read(&albedo, sizeof(albedo));
+			albedo.x() = LE2Native(albedo.x());
+			albedo.y() = LE2Native(albedo.y());
+			albedo.z() = LE2Native(albedo.z());
+			albedo.w() = LE2Native(albedo.w());
+			mtl->Albedo(albedo);
 
-			decoded->read(&mtl->metalness, sizeof(float));
-			mtl->metalness = LE2Native(mtl->metalness);
+			float metalness;
+			decoded->read(&metalness, sizeof(metalness));
+			metalness = LE2Native(metalness);
+			mtl->Metalness(metalness);
 
-			decoded->read(&mtl->glossiness, sizeof(float));
-			mtl->glossiness = LE2Native(mtl->glossiness);
+			float glossiness;
+			decoded->read(&glossiness, sizeof(glossiness));
+			glossiness = LE2Native(glossiness);
+			mtl->Glossiness(glossiness);
 
-			decoded->read(&mtl->emissive, sizeof(mtl->emissive));
-			mtl->emissive.x() = LE2Native(mtl->emissive.x());
-			mtl->emissive.y() = LE2Native(mtl->emissive.y());
-			mtl->emissive.z() = LE2Native(mtl->emissive.z());
+			float3 emissive;
+			decoded->read(&emissive, sizeof(emissive));
+			emissive.x() = LE2Native(emissive.x());
+			emissive.y() = LE2Native(emissive.y());
+			emissive.z() = LE2Native(emissive.z());
+			mtl->Emissive(emissive);
 
 			uint8_t transparent;
 			decoded->read(&transparent, sizeof(transparent));
-			mtl->transparent = transparent ? true : false;
+			mtl->Transparent(transparent ? true : false);
 
 			uint8_t alpha_test;
 			decoded->read(&alpha_test, sizeof(uint8_t));
-			mtl->alpha_test = alpha_test / 255.0f;
+			mtl->AlphaTestThreshold(alpha_test / 255.0f);
 
 			uint8_t sss;
 			decoded->read(&sss, sizeof(sss));
-			mtl->sss = sss ? true : false;
+			mtl->Sss(sss ? true : false);
 
 			uint8_t two_sided;
 			decoded->read(&two_sided, sizeof(two_sided));
-			mtl->two_sided = two_sided ? true : false;
+			mtl->TwoSided(two_sided ? true : false);
 
 			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 			{
-				mtl->tex_names[i] = ReadShortString(decoded);
+				mtl->TextureName(static_cast<RenderMaterial::TextureSlot>(i), ReadShortString(decoded));
 			}
-			if (!mtl->tex_names[RenderMaterial::TS_Height].empty())
+			if (!mtl->TextureName(RenderMaterial::TS_Normal).empty())
+			{
+				float normal_scale;
+				decoded->read(&normal_scale, sizeof(normal_scale));
+				mtl->NormalScale(LE2Native(normal_scale));
+			}
+			if (!mtl->TextureName(RenderMaterial::TS_Height).empty())
 			{
 				float height_offset;
 				decoded->read(&height_offset, sizeof(height_offset));
-				mtl->height_offset_scale.x() = LE2Native(height_offset);
+				mtl->HeightOffset(LE2Native(height_offset));
 				float height_scale;
 				decoded->read(&height_scale, sizeof(height_scale));
-				mtl->height_offset_scale.y() = LE2Native(height_scale);
+				mtl->HeightScale(LE2Native(height_scale));
+			}
+			if (!mtl->TextureName(RenderMaterial::TS_Occlusion).empty())
+			{
+				float occlusion_strength;
+				decoded->read(&occlusion_strength, sizeof(occlusion_strength));
+				mtl->OcclusionStrength(LE2Native(occlusion_strength));
 			}
 
 			uint8_t detail_mode;
 			decoded->read(&detail_mode, sizeof(detail_mode));
-			mtl->detail_mode = static_cast<RenderMaterial::SurfaceDetailMode>(detail_mode);
-			if (mtl->detail_mode != RenderMaterial::SDM_Parallax)
+			mtl->DetailMode(static_cast<RenderMaterial::SurfaceDetailMode>(detail_mode));
+			if (mtl->DetailMode() != RenderMaterial::SDM_Parallax)
 			{
 				float tess_factor;
 				decoded->read(&tess_factor, sizeof(tess_factor));
-				mtl->tess_factors.x() = LE2Native(tess_factor);
+				mtl->EdgeTessHint(LE2Native(tess_factor));
 				decoded->read(&tess_factor, sizeof(tess_factor));
-				mtl->tess_factors.y() = LE2Native(tess_factor);
+				mtl->InsideTessHint(LE2Native(tess_factor));
 				decoded->read(&tess_factor, sizeof(tess_factor));
-				mtl->tess_factors.z() = LE2Native(tess_factor);
+				mtl->MinTessFactor(LE2Native(tess_factor));
 				decoded->read(&tess_factor, sizeof(tess_factor));
-				mtl->tess_factors.w() = LE2Native(tess_factor);
+				mtl->MaxTessFactor(LE2Native(tess_factor));
 			}
 			else
 			{
-				mtl->tess_factors = float4(5, 5, 1, 9);
+				mtl->EdgeTessHint(5);
+				mtl->InsideTessHint(5);
+				mtl->MinTessFactor(1);
+				mtl->MaxTessFactor(9);
 			}
 		}
 
@@ -1583,61 +1605,71 @@ namespace KlayGE
 		{
 			auto& mtl = *mtls[i];
 
-			WriteShortString(os, mtl.name);
+			WriteShortString(os, mtl.Name());
 
 			for (uint32_t j = 0; j < 4; ++ j)
 			{
-				float const value = Native2LE(mtl.albedo[j]);
+				float const value = Native2LE(mtl.Albedo()[j]);
 				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
 			}
 
-			float metalness = Native2LE(mtl.metalness);
+			float metalness = Native2LE(mtl.Metalness());
 			os.write(reinterpret_cast<char*>(&metalness), sizeof(metalness));
 
-			float glossiness = Native2LE(mtl.glossiness);
+			float glossiness = Native2LE(mtl.Glossiness());
 			os.write(reinterpret_cast<char*>(&glossiness), sizeof(glossiness));
 
 			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				float const value = Native2LE(mtl.emissive[j]);
+				float const value = Native2LE(mtl.Emissive()[j]);
 				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
 			}
 
-			uint8_t transparent = mtl.transparent;
+			uint8_t transparent = mtl.Transparent();
 			os.write(reinterpret_cast<char*>(&transparent), sizeof(transparent));
 
-			uint8_t alpha_test = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.alpha_test * 255.0f + 0.5f), 0, 255));
+			uint8_t alpha_test = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.AlphaTestThreshold() * 255.0f + 0.5f), 0, 255));
 			os.write(reinterpret_cast<char*>(&alpha_test), sizeof(alpha_test));
 
-			uint8_t sss = mtl.sss;
+			uint8_t sss = mtl.Sss();
 			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
 
-			uint8_t two_sided = mtl.two_sided;
+			uint8_t two_sided = mtl.TwoSided();
 			os.write(reinterpret_cast<char*>(&two_sided), sizeof(two_sided));
 
 			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
 			{
-				WriteShortString(os, mtl.tex_names[j]);
+				WriteShortString(os, mtl.TextureName(static_cast<RenderMaterial::TextureSlot>(j)));
 			}
-			if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
+			if (!mtl.TextureName(RenderMaterial::TS_Normal).empty())
 			{
-				float height_offset = Native2LE(mtl.height_offset_scale.x());
+				float normal_scale = Native2LE(mtl.NormalScale());
+				os.write(reinterpret_cast<char*>(&normal_scale), sizeof(normal_scale));
+			}
+			if (!mtl.TextureName(RenderMaterial::TS_Height).empty())
+			{
+				float height_offset = Native2LE(mtl.HeightOffset());
 				os.write(reinterpret_cast<char*>(&height_offset), sizeof(height_offset));
-				float height_scale = Native2LE(mtl.height_offset_scale.y());
+				float height_scale = Native2LE(mtl.HeightScale());
 				os.write(reinterpret_cast<char*>(&height_scale), sizeof(height_scale));
 			}
-
-			uint8_t detail_mode = static_cast<uint8_t>(mtl.detail_mode);
-			os.write(reinterpret_cast<char*>(&detail_mode), sizeof(detail_mode));
-			if (mtl.detail_mode != RenderMaterial::SDM_Parallax)
+			if (!mtl.TextureName(RenderMaterial::TS_Occlusion).empty())
 			{
-				float tess_factor = Native2LE(mtl.tess_factors.x());
+				float occlusion_strength = Native2LE(mtl.OcclusionStrength());
+				os.write(reinterpret_cast<char*>(&occlusion_strength), sizeof(occlusion_strength));
+			}
+
+			uint8_t detail_mode = static_cast<uint8_t>(mtl.DetailMode());
+			os.write(reinterpret_cast<char*>(&detail_mode), sizeof(detail_mode));
+			if (mtl.DetailMode() != RenderMaterial::SDM_Parallax)
+			{
+				float tess_factor = Native2LE(mtl.EdgeTessHint());
 				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-				tess_factor = Native2LE(mtl.tess_factors.y());
+				tess_factor = Native2LE(mtl.InsideTessHint());
 				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-				tess_factor = Native2LE(mtl.tess_factors.z());
+				tess_factor = Native2LE(mtl.MinTessFactor());
 				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-				tess_factor = Native2LE(mtl.tess_factors.w());
+				tess_factor = Native2LE(mtl.MaxTessFactor());
 				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
 			}
 		}

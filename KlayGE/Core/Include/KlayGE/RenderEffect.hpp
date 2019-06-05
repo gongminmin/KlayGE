@@ -1139,8 +1139,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectConstantBuffer : boost::noncopyable
 	{
 	public:
-		RenderEffectConstantBuffer()
-			: dirty_(true)
+		explicit RenderEffectConstantBuffer(RenderEffect const& effect) : effect_(&effect), dirty_(true)
 		{
 		}
 
@@ -1153,8 +1152,12 @@ namespace KlayGE
 		void StreamOut(std::ostream& os) const;
 #endif
 
-		RenderEffectConstantBufferPtr Clone(RenderEffect const& src_effect, RenderEffect const& dst_effect);
-		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& src_effect, RenderEffect const& dst_effect);
+		RenderEffectConstantBufferPtr Clone(RenderEffect const& dst_effect);
+		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect);
+		RenderEffect const& OwnerEffect() const
+		{
+			return *effect_;
+		}
 
 		std::string const & Name() const
 		{
@@ -1222,9 +1225,11 @@ namespace KlayGE
 		void BindHWBuff(GraphicsBufferPtr const & buff);
 
 	private:
-		void RebindParameters(RenderEffect const& src_effect, RenderEffect const& dst_effect);
+		void RebindParameters(RenderEffect const& dst_effect);
 
 	private:
+		RenderEffect const* effect_;
+
 		std::shared_ptr<std::pair<std::string, size_t>> name_;
 		std::shared_ptr<std::vector<uint32_t>> param_indices_;
 

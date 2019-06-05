@@ -53,7 +53,7 @@ namespace KlayGE
 			std::string g_buffer_files[2];
 			g_buffer_files[0] = "GBufferFoliage.fxml";
 			uint32_t num = 1;
-			if (mtl_->two_sided)
+			if (mtl_->TwoSided())
 			{
 				g_buffer_files[1] = "GBufferTwoSided.fxml";
 				++ num;
@@ -105,8 +105,8 @@ namespace KlayGE
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
 			auto& rf = Context::Instance().RenderFactoryInstance();
-			textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(rt0_tex);
-			textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(rt1_tex);
+			mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(rt0_tex));
+			mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(rt1_tex));
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);

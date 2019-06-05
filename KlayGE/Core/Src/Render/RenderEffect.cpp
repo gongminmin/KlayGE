@@ -2707,7 +2707,7 @@ namespace KlayGE
 		dst_effect.cbuffers_.resize(cbuffers_.size());
 		for (size_t i = 0; i < cbuffers_.size(); ++i)
 		{
-			dst_effect.cbuffers_[i] = cbuffers_[i]->Clone(*this, dst_effect);
+			dst_effect.cbuffers_[i] = cbuffers_[i]->Clone(dst_effect);
 		}
 
 		dst_effect.shader_objs_.resize(shader_objs_.size());
@@ -2724,7 +2724,7 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < cbuffers_.size(); ++i)
 		{
-			cbuffers_[i]->Reclone(*dst_effect.cbuffers_[i], *this, dst_effect);
+			cbuffers_[i]->Reclone(*dst_effect.cbuffers_[i], dst_effect);
 		}
 
 		for (size_t i = 0; i < shader_objs_.size(); ++i)
@@ -3179,7 +3179,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					effect.cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>());
+					effect.cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>(effect));
 					cbuff = effect.cbuffers_.back().get();
 					cbuff->Load(cbuff_name);
 				}
@@ -3434,7 +3434,7 @@ namespace KlayGE
 							effect.cbuffers_.resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								effect.cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>();
+								effect.cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>(effect);
 								effect.cbuffers_[i]->StreamIn(source);
 							}
 						}
@@ -5254,41 +5254,40 @@ namespace KlayGE
 	}
 #endif
 
-	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect const& src_effect, RenderEffect const& dst_effect)
+	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect const& dst_effect)
 	{
-		auto ret = MakeSharedPtr<RenderEffectConstantBuffer>();
+		auto ret = MakeSharedPtr<RenderEffectConstantBuffer>(dst_effect);
 
 		ret->name_ = name_;
 		ret->param_indices_ = param_indices_;
 		ret->buff_ = buff_;
 		ret->Resize(static_cast<uint32_t>(buff_.size()));
 
-		this->RebindParameters(src_effect, dst_effect);
+		this->RebindParameters(dst_effect);
 
 		return ret;
 	}
 
-	void RenderEffectConstantBuffer::Reclone(
-		RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& src_effect, RenderEffect const& dst_effect)
+	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
 		dst_cbuffer.name_ = name_;
 		dst_cbuffer.param_indices_ = param_indices_;
 		dst_cbuffer.buff_ = buff_;
 		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
 		
-		this->RebindParameters(src_effect, dst_effect);
+		this->RebindParameters(dst_effect);
 	}
 
-	void RenderEffectConstantBuffer::RebindParameters(RenderEffect const& src_effect, RenderEffect const& dst_effect)
+	void RenderEffectConstantBuffer::RebindParameters(RenderEffect const& dst_effect)
 	{
-		if (&src_effect != &dst_effect)
+		if (effect_ != &dst_effect)
 		{
 			for (uint32_t param_index : *param_indices_)
 			{
-				RenderEffectParameter* src_param = src_effect.ParameterByIndex(param_index);
+				RenderEffectParameter* src_param = effect_->ParameterByIndex(param_index);
 				if (src_param->InCBuffer())
 				{
-					RenderEffectParameter* dst_param = (src_effect.ResNameHash() == dst_effect.ResNameHash())
+					RenderEffectParameter* dst_param = (effect_->ResNameHash() == dst_effect.ResNameHash())
 														   ? dst_effect.ParameterByIndex(param_index)
 														   : dst_effect.ParameterByName(src_param->Name());
 					if (dst_param->InCBuffer())

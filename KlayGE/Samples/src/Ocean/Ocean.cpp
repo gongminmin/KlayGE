@@ -55,9 +55,9 @@ namespace
 			model_mat_ = float4x4::Identity();
 
 			mtl_ = MakeSharedPtr<RenderMaterial>();
-			mtl_->albedo = float4(0.07f, 0.15f, 0.2f, 1);
-			mtl_->metalness = 1;
-			mtl_->glossiness = 0.5f;
+			mtl_->Albedo(float4(0.07f, 0.15f, 0.2f, 1));
+			mtl_->Metalness(1);
+			mtl_->Glossiness(0.5f);
 
 			effect_attrs_ |= EA_TransparencyFront;
 			effect_attrs_ |= EA_SpecialShading;

@@ -72,7 +72,7 @@ namespace KlayGE
 	typedef std::shared_ptr<Font> FontPtr;
 	class RenderEngine;
 	struct RenderSettings;
-	struct RenderMaterial;
+	class RenderMaterial;
 	typedef std::shared_ptr<RenderMaterial> RenderMaterialPtr;
 	class Renderable;
 	typedef std::shared_ptr<Renderable> RenderablePtr;

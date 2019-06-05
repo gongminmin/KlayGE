@@ -137,80 +137,79 @@ namespace
 				*(gen_rov_ppa_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			}
 
-			*(no_oit_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+			*(no_oit_effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
 			*(no_oit_effect_->ParameterByName("metalness_glossiness_factor")) =
-				float3(mtl_->metalness, mtl_->glossiness, textures_[RenderMaterial::TS_MetalnessGlossiness].get() ? 1.0f : 0.0f);
-			*(no_oit_effect_->ParameterByName("emissive_clr")) = float4(
-				mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+				float3(mtl_->Metalness(), mtl_->Glossiness(), mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness).get() ? 1.0f : 0.0f);
+			*(no_oit_effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
+				mtl_->Texture(RenderMaterial::TS_Emissive).get() ? 1.0f : 0.0f);
 			*(no_oit_effect_->ParameterByName("albedo_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Albedo).get() ? 1 : 0);
 			*(no_oit_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(no_oit_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(no_oit_effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
-			*(no_oit_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(no_oit_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Normal).get() ? 1 : 0);
+			*(no_oit_effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
+			*(no_oit_effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
+			*(no_oit_effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
+			*(no_oit_effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
 
-			*(dp_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+			*(dp_effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
 			*(dp_effect_->ParameterByName("metalness_glossiness_factor")) =
-				float3(mtl_->metalness, mtl_->glossiness, textures_[RenderMaterial::TS_MetalnessGlossiness].get() ? 1.0f : 0.0f);
-			*(dp_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+				float3(mtl_->Metalness(), mtl_->Glossiness(), mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness).get() ? 1.0f : 0.0f);
+			*(dp_effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
+				mtl_->Texture(RenderMaterial::TS_Emissive).get() ? 1.0f : 0.0f);
 			*(dp_effect_->ParameterByName("albedo_map_enabled")) 
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Albedo).get() ? 1 : 0);
 			*(dp_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(dp_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(dp_effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
-			*(dp_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(dp_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Normal).get() ? 1 : 0);
+			*(dp_effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
+			*(dp_effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
+			*(dp_effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
+			*(dp_effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
 
-			*(wb_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+			*(wb_effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
 			*(wb_effect_->ParameterByName("metalness_glossiness_factor")) =
-				float3(mtl_->metalness, mtl_->glossiness, textures_[RenderMaterial::TS_MetalnessGlossiness].get() ? 1.0f : 0.0f);
-			*(wb_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+				float3(mtl_->Metalness(), mtl_->Glossiness(), mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness).get() ? 1.0f : 0.0f);
+			*(wb_effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
+				mtl_->Texture(RenderMaterial::TS_Emissive).get() ? 1.0f : 0.0f);
 			*(wb_effect_->ParameterByName("albedo_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Albedo).get() ? 1 : 0);
 			*(wb_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(wb_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(wb_effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
-			*(wb_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(wb_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+				= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Normal).get() ? 1 : 0);
+			*(wb_effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
+			*(wb_effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
+			*(wb_effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
+			*(wb_effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
 
 			if (gen_ppll_tech_)
 			{
-				*(gen_ppll_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+				*(gen_ppll_effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
 				*(gen_ppll_effect_->ParameterByName("metalness_glossiness_factor")) =
-					float3(mtl_->metalness, mtl_->glossiness, textures_[RenderMaterial::TS_MetalnessGlossiness].get() ? 1.0f : 0.0f);
-				*(gen_ppll_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-					textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+					float3(mtl_->Metalness(), mtl_->Glossiness(), mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness).get() ? 1.0f : 0.0f);
+				*(gen_ppll_effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
+					mtl_->Texture(RenderMaterial::TS_Emissive).get() ? 1.0f : 0.0f);
 				*(gen_ppll_effect_->ParameterByName("albedo_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+					= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Albedo).get() ? 1 : 0);
 				*(gen_ppll_effect_->ParameterByName("normal_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-				*(gen_ppll_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-				*(gen_ppll_effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
-				*(gen_ppll_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-				*(gen_ppll_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+					= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Normal).get() ? 1 : 0);
+				*(gen_ppll_effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
+				*(gen_ppll_effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
+				*(gen_ppll_effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
+				*(gen_ppll_effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
 			}
 			if (gen_rov_ppa_tech_)
 			{
-				*(gen_rov_ppa_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+				*(gen_rov_ppa_effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
 				*(gen_rov_ppa_effect_->ParameterByName("metalness_glossiness_factor")) =
-					float3(mtl_->metalness, mtl_->glossiness, textures_[RenderMaterial::TS_MetalnessGlossiness].get() ? 1.0f : 0.0f);
-				*(gen_rov_ppa_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-					textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+					float3(mtl_->Metalness(), mtl_->Glossiness(), mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness).get() ? 1.0f : 0.0f);
+				*(gen_rov_ppa_effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
+					mtl_->Texture(RenderMaterial::TS_Emissive).get() ? 1.0f : 0.0f);
 				*(gen_rov_ppa_effect_->ParameterByName("albedo_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+					= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Albedo).get() ? 1 : 0);
 				*(gen_rov_ppa_effect_->ParameterByName("normal_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-				*(gen_rov_ppa_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-				*(gen_rov_ppa_effect_->ParameterByName("metalness_glossiness_tex")) = textures_[RenderMaterial::TS_MetalnessGlossiness];
-				*(gen_rov_ppa_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-				*(gen_rov_ppa_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+					= static_cast<int32_t>(mtl_->Texture(RenderMaterial::TS_Normal).get() ? 1 : 0);
+				*(gen_rov_ppa_effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
+				*(gen_rov_ppa_effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
+				*(gen_rov_ppa_effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
+				*(gen_rov_ppa_effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
 			}
 		}
 

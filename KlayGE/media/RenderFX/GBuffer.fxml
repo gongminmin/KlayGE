@@ -5,6 +5,7 @@
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="Material.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -21,29 +22,6 @@
 		<parameter type="float2" name="tc_center"/>
 		<parameter type="float2" name="tc_extent"/>
 	</cbuffer>
-
-	<cbuffer name="per_material">
-		<parameter type="float4" name="albedo_clr"/>
-		<parameter type="float3" name="metalness_glossiness_factor"/>
-		<parameter type="float4" name="emissive_clr"/>
-		<parameter type="int" name="albedo_map_enabled"/>
-		<parameter type="int" name="normal_map_enabled"/>
-		<parameter type="int" name="height_map_parallax_enabled"/>
-		<parameter type="int" name="height_map_tess_enabled"/>
-		<parameter type="int" name="occlusion_map_enabled"/>
-		<parameter type="float" name="alpha_test_threshold"/>
-		<parameter type="float" name="normal_scale"/>
-		<parameter type="float" name="occlusion_strength"/>
-		<parameter type="float2" name="height_offset_scale"/>
-		<parameter type="float4" name="tess_factors"/>
-	</cbuffer>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
-	<parameter type="texture2D" name="height_tex"/>
-	<parameter type="texture2D" name="occlusion_tex"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
