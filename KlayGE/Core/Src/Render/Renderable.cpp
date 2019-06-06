@@ -404,64 +404,63 @@ namespace KlayGE
 
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
 	{
-		deferred_effect_ = deferred_effect;
 		effect_ = deferred_effect;
 
 		this->UpdateTechniques();
 
-		mvp_param_ = deferred_effect_->ParameterByName("mvp");
-		model_view_param_ = deferred_effect_->ParameterByName("model_view");
-		forward_vec_param_ = deferred_effect_->ParameterByName("forward_vec");
-		frame_size_param_ = deferred_effect_->ParameterByName("frame_size");
-		height_offset_scale_param_ = deferred_effect_->ParameterByName("height_offset_scale");
-		tess_factors_param_ = deferred_effect_->ParameterByName("tess_factors");
-		pos_center_param_ = deferred_effect_->ParameterByName("pos_center");
-		pos_extent_param_ = deferred_effect_->ParameterByName("pos_extent");
-		tc_center_param_ = deferred_effect_->ParameterByName("tc_center");
-		tc_extent_param_ = deferred_effect_->ParameterByName("tc_extent");
-		albedo_map_enabled_param_ = deferred_effect_->ParameterByName("albedo_map_enabled");
-		albedo_tex_param_ = deferred_effect_->ParameterByName("albedo_tex");
-		albedo_clr_param_ = deferred_effect_->ParameterByName("albedo_clr");
-		metalness_glossiness_factor_param_ = deferred_effect_->ParameterByName("metalness_glossiness_factor");
-		metalness_glossiness_tex_param_ = deferred_effect_->ParameterByName("metalness_glossiness_tex");
-		emissive_tex_param_ = deferred_effect_->ParameterByName("emissive_tex");
-		emissive_clr_param_ = deferred_effect_->ParameterByName("emissive_clr");
-		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
-		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-		height_map_parallax_enabled_param_ = deferred_effect_->ParameterByName("height_map_parallax_enabled");
-		height_map_tess_enabled_param_ = deferred_effect_->ParameterByName("height_map_tess_enabled");
-		height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");
+		mvp_param_ = effect_->ParameterByName("mvp");
+		model_view_param_ = effect_->ParameterByName("model_view");
+		forward_vec_param_ = effect_->ParameterByName("forward_vec");
+		frame_size_param_ = effect_->ParameterByName("frame_size");
+		height_offset_scale_param_ = effect_->ParameterByName("height_offset_scale");
+		tess_factors_param_ = effect_->ParameterByName("tess_factors");
+		pos_center_param_ = effect_->ParameterByName("pos_center");
+		pos_extent_param_ = effect_->ParameterByName("pos_extent");
+		tc_center_param_ = effect_->ParameterByName("tc_center");
+		tc_extent_param_ = effect_->ParameterByName("tc_extent");
+		albedo_map_enabled_param_ = effect_->ParameterByName("albedo_map_enabled");
+		albedo_tex_param_ = effect_->ParameterByName("albedo_tex");
+		albedo_clr_param_ = effect_->ParameterByName("albedo_clr");
+		metalness_glossiness_factor_param_ = effect_->ParameterByName("metalness_glossiness_factor");
+		metalness_glossiness_tex_param_ = effect_->ParameterByName("metalness_glossiness_tex");
+		emissive_tex_param_ = effect_->ParameterByName("emissive_tex");
+		emissive_clr_param_ = effect_->ParameterByName("emissive_clr");
+		normal_map_enabled_param_ = effect_->ParameterByName("normal_map_enabled");
+		normal_tex_param_ = effect_->ParameterByName("normal_tex");
+		height_map_parallax_enabled_param_ = effect_->ParameterByName("height_map_parallax_enabled");
+		height_map_tess_enabled_param_ = effect_->ParameterByName("height_map_tess_enabled");
+		height_tex_param_ = effect_->ParameterByName("height_tex");
+		opaque_depth_tex_param_ = effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
-		alpha_test_threshold_param_ = deferred_effect_->ParameterByName("alpha_test_threshold");
-		normal_scale_param_ = deferred_effect_->ParameterByName("normal_scale");
-		occlusion_strength_param_ = deferred_effect_->ParameterByName("occlusion_strength");
-		select_mode_object_id_param_ = deferred_effect_->ParameterByName("object_id");
+		alpha_test_threshold_param_ = effect_->ParameterByName("alpha_test_threshold");
+		normal_scale_param_ = effect_->ParameterByName("normal_scale");
+		occlusion_strength_param_ = effect_->ParameterByName("occlusion_strength");
+		select_mode_object_id_param_ = effect_->ParameterByName("object_id");
 	}
 
 	void Renderable::UpdateTechniques()
 	{
 		if (this->AlphaTest())
 		{
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			gen_cascaded_sm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 		}
 		else
 		{
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
+			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapTech");
+			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMapTech");
+			gen_cascaded_sm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapTech");
 		}
-		gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-		gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
+		gbuffer_alpha_blend_back_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+		gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+		special_shading_tech_ = effect_->TechniqueByName("SpecialShadingTech");
+		special_shading_alpha_blend_back_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+		special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
 
-		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
+		select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 	}
 
 	RenderTechnique* Renderable::PassTech(PassType type) const

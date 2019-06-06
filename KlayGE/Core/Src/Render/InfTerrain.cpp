@@ -126,7 +126,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
-		if (deferred_effect_)
+		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
 			Renderable::OnRenderBegin();
 		}
@@ -440,7 +440,7 @@ namespace KlayGE
 	{
 		Renderable::UpdateTechniques();
 
-		auto deferred_effect = deferred_effect_.get();
+		auto* deferred_effect = effect_.get();
 
 		terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
 		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");

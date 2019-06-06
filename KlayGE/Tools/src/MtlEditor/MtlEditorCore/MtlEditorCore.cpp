@@ -138,7 +138,7 @@ namespace
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Imposter.fxml"));
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
 			technique_ = gbuffer_mrt_tech_;
 
 			pos_aabb_ = aabbox;
@@ -167,10 +167,10 @@ namespace
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
-			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
+			*(effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
 			float2 start_tc = imposter_->StartTexCoord(camera->EyePos() - pos_aabb_.Center());
-			*(deferred_effect_->ParameterByName("start_tc")) = start_tc;
+			*(effect_->ParameterByName("start_tc")) = start_tc;
 
 			Renderable::OnRenderBegin();
 		}

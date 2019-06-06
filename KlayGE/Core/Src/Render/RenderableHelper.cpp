@@ -499,7 +499,7 @@ namespace KlayGE
 	{
 		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
 
-		gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
+		gbuffer_mrt_tech_ = effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
 		technique_ = gbuffer_mrt_tech_;
 
 		pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));

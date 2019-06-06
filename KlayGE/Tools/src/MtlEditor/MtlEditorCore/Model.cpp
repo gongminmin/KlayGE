@@ -40,8 +40,8 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	
 	if (model_->IsSkinned())
 	{
-		*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-		*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
+		*(effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
+		*(effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 	}
 }
 
@@ -53,15 +53,15 @@ void DetailedSkinnedMesh::VisualizeLighting()
 
 void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
-	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
+	*(effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
+	*(effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
 	visualize_ = 0;
 	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
-	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
+	*(effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
 	visualize_ = 1;
 	this->UpdateTechniques();
 }
@@ -692,6 +692,6 @@ void SkeletonMesh::OnRenderBegin()
 {
 	SkinnedMesh::OnRenderBegin();
 
-	*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-	*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
+	*(effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
+	*(effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 }

@@ -42,9 +42,9 @@ namespace
 			: InfTerrainRenderable(L"Ocean", 384)
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
-			reflection_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
-			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
+			gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
+			reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
+			special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
 			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
 
 			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");

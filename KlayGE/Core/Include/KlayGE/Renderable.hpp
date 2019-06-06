@@ -283,8 +283,6 @@ namespace KlayGE
 
 		// For deferred only
 
-		RenderEffectPtr deferred_effect_;
-
 		RenderTechnique* gbuffer_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_back_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_front_mrt_tech_;

@@ -50,7 +50,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
-		if (deferred_effect_)
+		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
 			effect_attrs_ |= EA_SpecialShading;
 

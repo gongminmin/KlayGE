@@ -96,7 +96,7 @@ namespace KlayGE
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("GBufferFoliageImpostor.fxml"));
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaTestMRTTech");
 			technique_ = gbuffer_mrt_tech_;
 
 			pos_aabb_ = aabbox;
@@ -133,7 +133,7 @@ namespace KlayGE
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
-			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
+			*(effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
 			Renderable::OnRenderBegin();
 		}
