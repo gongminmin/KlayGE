@@ -75,17 +75,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthInstanced");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
-		}
-
 		void OnRenderBegin()
 		{
+			MotionBlurRenderMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -134,17 +127,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
-		}
-
 		void OnRenderBegin()
 		{
+			MotionBlurRenderMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 

@@ -306,6 +306,33 @@ namespace KlayGE
 
 		PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance() const;
 
+		class PredefinedModelCBuffer
+		{
+		public:
+			PredefinedModelCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			float3& PosCenter(RenderEffectConstantBuffer* cbuff) const;
+			float3& PosExtent(RenderEffectConstantBuffer* cbuff) const;
+			float2& TcCenter(RenderEffectConstantBuffer* cbuff) const;
+			float2& TcExtent(RenderEffectConstantBuffer* cbuff) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t pos_center_offset_;
+			uint32_t pos_extent_offset_;
+			uint32_t tc_center_offset_;
+			uint32_t tc_extent_offset_;
+		};
+
+		PredefinedModelCBuffer const& PredefinedModelCBufferInstance() const;
+
 	protected:
 		void Destroy();
 
@@ -415,7 +442,8 @@ namespace KlayGE
 #endif
 
 		mutable RenderMaterialPtr default_material_;
-		mutable std::unique_ptr<PredefinedMaterialCBuffer> pmcb_;
+		mutable std::unique_ptr<PredefinedMaterialCBuffer> predefined_material_cb_;
+		mutable std::unique_ptr<PredefinedModelCBuffer> predefined_model_cb_;
 	};
 }
 

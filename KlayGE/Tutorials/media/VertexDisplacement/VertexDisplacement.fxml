@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="float4x4" name="modelview" semantic="WORLDVIEW"/>
 	<parameter type="float4x4" name="proj"/>
@@ -11,9 +12,6 @@
 
 	<parameter type="float" name="half_length"/>
 	<parameter type="float" name="half_width"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
 
 	<parameter type="texture2D" name="flag_tex"/>
 	<parameter type="sampler" name="flagSampler">

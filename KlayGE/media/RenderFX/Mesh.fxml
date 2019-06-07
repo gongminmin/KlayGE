@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<effect>
+	<cbuffer name="klayge_mesh">
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		<parameter type="float2" name="tc_center"/>
+		<parameter type="float2" name="tc_extent"/>
+	</cbuffer>
+</effect>

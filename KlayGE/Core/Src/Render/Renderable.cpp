@@ -48,6 +48,10 @@ namespace KlayGE
 		{
 			this->BindDeferredEffect(drl->GBufferEffect(nullptr, false, false));
 		}
+
+		auto const& pmcb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCBufferInstance();
+		auto* curr_cbuff = pmcb.CBuffer();
+		model_cbuffer_ = curr_cbuff->Clone(curr_cbuff->OwnerEffect());
 	}
 
 	Renderable::~Renderable()
@@ -100,8 +104,6 @@ namespace KlayGE
 		float4x4 const & proj = camera.ProjMatrix();
 		float4x4 mv = model_mat_ * view;
 		float4x4 mvp = mv * proj;
-		AABBox const & pos_bb = this->PosBound();
-		AABBox const & tc_bb = this->TexcoordBound();
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 
@@ -114,11 +116,19 @@ namespace KlayGE
 			}
 		}
 
+		if (effect_->CBufferByName("klayge_mesh"))
+		{
+			if (&model_cbuffer_->OwnerEffect() != effect_.get())
+			{
+				model_cbuffer_ = model_cbuffer_->Clone(*effect_);
+			}
+
+			effect_->BindCBufferByName("klayge_mesh", model_cbuffer_);
+		}
+
 		if (select_mode_on_)
 		{
 			*mvp_param_ = mvp;
-			*pos_center_param_ = pos_bb.Center();
-			*pos_extent_param_ = pos_bb.HalfSize();
 			*select_mode_object_id_param_ = select_mode_object_id_;
 		}
 		else
@@ -134,11 +144,6 @@ namespace KlayGE
 
 				FrameBufferPtr const & fb = re.CurFrameBuffer();
 				*frame_size_param_ = int2(fb->Width(), fb->Height());
-
-				*pos_center_param_ = pos_bb.Center();
-				*pos_extent_param_ = pos_bb.HalfSize();
-				*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
-				*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 
 				switch (type_)
 				{
@@ -306,6 +311,17 @@ namespace KlayGE
 
 	void Renderable::UpdateBoundBox()
 	{
+		auto const& pmcb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCBufferInstance();
+
+		AABBox const & pos_bb = this->PosBound();
+		AABBox const & tc_bb = this->TexcoordBound();
+
+		pmcb.PosCenter(model_cbuffer_.get()) = pos_bb.Center();
+		pmcb.PosExtent(model_cbuffer_.get()) = pos_bb.HalfSize();
+		pmcb.TcCenter(model_cbuffer_.get()) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+		pmcb.TcExtent(model_cbuffer_.get()) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+
+		model_cbuffer_->Dirty(true);
 	}
 
 	float Renderable::CalcLod(float3 const & eye_pos, float fov_scale) const
@@ -363,10 +379,6 @@ namespace KlayGE
 		model_view_param_ = effect_->ParameterByName("model_view");
 		forward_vec_param_ = effect_->ParameterByName("forward_vec");
 		frame_size_param_ = effect_->ParameterByName("frame_size");
-		pos_center_param_ = effect_->ParameterByName("pos_center");
-		pos_extent_param_ = effect_->ParameterByName("pos_extent");
-		tc_center_param_ = effect_->ParameterByName("tc_center");
-		tc_extent_param_ = effect_->ParameterByName("tc_extent");
 		opaque_depth_tex_param_ = effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
 		select_mode_object_id_param_ = effect_->ParameterByName("object_id");

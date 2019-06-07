@@ -1225,7 +1225,7 @@ namespace KlayGE
 		void BindHWBuff(GraphicsBufferPtr const & buff);
 
 	private:
-		void RebindParameters(RenderEffect const& dst_effect);
+		void RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect);
 
 	private:
 		RenderEffect const* effect_;

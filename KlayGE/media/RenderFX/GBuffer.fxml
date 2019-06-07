@@ -6,6 +6,7 @@
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -14,13 +15,6 @@
 		<parameter type="float4" name="object_id"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
-	</cbuffer>
-
-	<cbuffer name="per_model">
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
-		<parameter type="float2" name="tc_center"/>
-		<parameter type="float2" name="tc_extent"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">

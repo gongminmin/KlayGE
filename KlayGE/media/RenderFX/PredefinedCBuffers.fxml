@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
+
+	<shader>
+		<![CDATA[
+void PredefinedCBuffersNoopVS(out float4 oPosition : SV_Position)
+{
+	oPosition = float4(pos_center, 1);
+}
+
+float4 PredefinedCBuffersNoopPS() : SV_Target0
+{
+	return albedo_clr;
+}
+		]]>
+	</shader>
+
+	<technique name="PredefinedCBuffersNoopTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="PredefinedCBuffersNoopVS()"/>
+			<state name="pixel_shader" value="PredefinedCBuffersNoopPS()"/>
+		</pass>
+	</technique>
+</effect>

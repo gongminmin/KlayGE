@@ -72,6 +72,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+
+		this->UpdateBoundBox();
 	}
 
 	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr)
@@ -128,6 +130,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+
+		this->UpdateBoundBox();
 	}
 	
 	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr)
@@ -191,6 +195,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+
+		this->UpdateBoundBox();
 	}
 
 	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr)
@@ -273,6 +279,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+
+		this->UpdateBoundBox();
 	}
 
 	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr)
@@ -353,6 +361,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+
+		this->UpdateBoundBox();
 	}
 	
 	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr)
@@ -490,6 +500,8 @@ namespace KlayGE
 
 		pos_aabb_ = AABBox(float3(-length / 2, -width / 2, 0), float3(+length / 2, +width / 2, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
+
+		this->UpdateBoundBox();
 	}
 
 
@@ -545,6 +557,8 @@ namespace KlayGE
 
 		mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(normal_tex));
 		mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(albedo_tex));
+
+		this->UpdateBoundBox();
 	}
 
 	void RenderDecal::OnRenderBegin()

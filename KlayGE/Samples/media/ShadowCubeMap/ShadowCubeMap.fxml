@@ -5,16 +5,12 @@
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 	<parameter type="float2" name="far_plane"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>

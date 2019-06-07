@@ -23,25 +23,4 @@
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="height_tex"/>
 	<parameter type="texture2D" name="occlusion_tex"/>
-
-	<shader>
-		<![CDATA[
-void MaterialNoopVS(out float4 oPosition : SV_Position)
-{
-	oPosition = 0;
-}
-
-float4 MaterialNoopPS() : SV_Target0
-{
-	return albedo_clr;
-}
-		]]>
-	</shader>
-
-	<technique name="MaterialNoopTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MaterialNoopVS()"/>
-			<state name="pixel_shader" value="MaterialNoopPS()"/>
-		</pass>
-	</technique>
 </effect>

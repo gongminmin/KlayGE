@@ -223,6 +223,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Material.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mesh.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
@@ -230,6 +231,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PrefixSum.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml

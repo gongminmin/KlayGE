@@ -6,15 +6,12 @@
 	<include name="Lighting.fxml"/>
 	<include name="JudaTexture.fxml"/>
 	<include name="Tessellation.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float4x4" name="world"/>
 		<parameter type="float4x4" name="model_view"/>
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
-		<parameter type="float2" name="tc_center"/>
-		<parameter type="float2" name="tc_extent"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="float3" name="light_pos"/>

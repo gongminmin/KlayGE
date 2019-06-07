@@ -739,14 +739,13 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderablePlane::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
 			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
 			*(effect_->ParameterByName("inv_far")) = 1 / camera.FarPlane();
-
-			*(effect_->ParameterByName("pos_center")) = pos_aabb_.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 		}
 	};
 

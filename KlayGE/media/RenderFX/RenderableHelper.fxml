@@ -1,11 +1,10 @@
 <?xml version='1.0'?>
 
-<effect>	
+<effect>
+	<include name="Mesh.fxml"/>
+
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4" name="color"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
 
 	<parameter type="float3" name="v0"/>
 	<parameter type="float3" name="v1"/>

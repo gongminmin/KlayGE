@@ -4,11 +4,11 @@
 	<include name="util.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="Lighting.fxml"/>
-	
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
+
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="mvp"/>
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
 	<parameter type="float2" name="far_plane"/>
 
 	<shader>
@@ -139,8 +139,6 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 	<parameter type="float3" name="light_falloff"/>
 	<parameter type="float4x4" name="light_vp"/>
 
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture3D" name="distance_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -262,7 +260,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	float4 caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz, 1);
 
-	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
+	float3 diffuse = albedo_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
 	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten + caustics;
 }
@@ -304,7 +302,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	float4 caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz, 1);
 
-	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
+	float3 diffuse = albedo_tex.Sample(linear_sampler, texUV.xy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
 	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten + caustics;
 }

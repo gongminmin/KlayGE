@@ -5,6 +5,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -22,11 +23,6 @@
 		<state name="address_v" value="wrap"/>
 		<state name="max_anisotropy" value="8"/>
 	</parameter>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<shader>
 		<![CDATA[

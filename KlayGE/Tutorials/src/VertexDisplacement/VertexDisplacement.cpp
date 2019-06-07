@@ -46,10 +46,6 @@ namespace
 			*(effect_->ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(effect_->ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(effect_->ParameterByName("lightDir")) = float3(1, 0, -1);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void SetAngle(float angle)
@@ -59,6 +55,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderablePlane::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 

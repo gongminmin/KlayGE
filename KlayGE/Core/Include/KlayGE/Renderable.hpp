@@ -309,12 +309,10 @@ namespace KlayGE
 		RenderEffectParameter* model_view_param_;
 		RenderEffectParameter* forward_vec_param_;
 		RenderEffectParameter* frame_size_param_;
-		RenderEffectParameter* pos_center_param_;
-		RenderEffectParameter* pos_extent_param_;
-		RenderEffectParameter* tc_center_param_;
-		RenderEffectParameter* tc_extent_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
+
+		RenderEffectConstantBufferPtr model_cbuffer_;
 	};
 
 	// TODO: Consider merging this with Renderable

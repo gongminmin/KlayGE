@@ -48,33 +48,6 @@ namespace
 			technique_ = effect_->TechniqueByName("Mesh");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			StaticMesh::DoBuildMeshInfo(model);
-
-			*(effect_->ParameterByName("albedo_tex")) = mtl_->Texture(RenderMaterial::TS_Albedo);
-			*(effect_->ParameterByName("metalness_glossiness_tex")) = mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness);
-			*(effect_->ParameterByName("emissive_tex")) = mtl_->Texture(RenderMaterial::TS_Emissive);
-			*(effect_->ParameterByName("normal_tex")) = mtl_->Texture(RenderMaterial::TS_Normal);
-
-			*(effect_->ParameterByName("albedo_clr")) = mtl_->Albedo();
-			*(effect_->ParameterByName("metalness_glossiness_factor")) =
-				float3(mtl_->Metalness(), mtl_->Glossiness(), !!mtl_->Texture(RenderMaterial::TS_MetalnessGlossiness));
-			*(effect_->ParameterByName("emissive_clr")) = float4(mtl_->Emissive().x(), mtl_->Emissive().y(), mtl_->Emissive().z(),
-				!!mtl_->Texture(RenderMaterial::TS_Emissive));
-			*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!mtl_->Texture(RenderMaterial::TS_Albedo));
-
-			*(effect_->ParameterByName("normal_map_enabled")) = static_cast<int32_t>(!!mtl_->Texture(RenderMaterial::TS_Normal));
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
-
 		void ModelMatrix(float4x4 const & mat) override
 		{
 			StaticMesh::ModelMatrix(mat);
@@ -84,6 +57,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			*(effect_->ParameterByName("mvp")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();

@@ -5257,39 +5257,50 @@ namespace KlayGE
 	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect const& dst_effect)
 	{
 		auto ret = MakeSharedPtr<RenderEffectConstantBuffer>(dst_effect);
-
-		ret->name_ = name_;
-		ret->param_indices_ = param_indices_;
-		ret->buff_ = buff_;
-		ret->Resize(static_cast<uint32_t>(buff_.size()));
-
-		this->RebindParameters(dst_effect);
-
+		this->Reclone(*ret, dst_effect);
 		return ret;
 	}
 
 	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
 		dst_cbuffer.name_ = name_;
-		dst_cbuffer.param_indices_ = param_indices_;
+		if (effect_->ResNameHash() == dst_effect.ResNameHash())
+		{
+			dst_cbuffer.param_indices_ = param_indices_;
+		}
+		else
+		{
+			dst_cbuffer.param_indices_ = MakeSharedPtr<std::vector<uint32_t>>(param_indices_->size());
+		}
 		dst_cbuffer.buff_ = buff_;
 		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
-		
-		this->RebindParameters(dst_effect);
+
+		this->RebindParameters(dst_cbuffer, dst_effect);
 	}
 
-	void RenderEffectConstantBuffer::RebindParameters(RenderEffect const& dst_effect)
+	void RenderEffectConstantBuffer::RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
 		if (effect_ != &dst_effect)
 		{
-			for (uint32_t param_index : *param_indices_)
+			for (uint32_t i = 0; i < param_indices_->size(); ++i)
 			{
+				uint32_t param_index = (*param_indices_)[i];
 				RenderEffectParameter* src_param = effect_->ParameterByIndex(param_index);
 				if (src_param->InCBuffer())
 				{
-					RenderEffectParameter* dst_param = (effect_->ResNameHash() == dst_effect.ResNameHash())
-														   ? dst_effect.ParameterByIndex(param_index)
-														   : dst_effect.ParameterByName(src_param->Name());
+					if (effect_->ResNameHash() != dst_effect.ResNameHash())
+					{
+						for (uint32_t j = 0; j < dst_effect.NumParameters(); ++j)
+						{
+							if (dst_effect.ParameterByIndex(j)->NameHash() == src_param->NameHash())
+							{
+								param_index = j;
+								break;
+							}
+						}
+					}
+
+					RenderEffectParameter* dst_param = dst_effect.ParameterByIndex(param_index);
 					if (dst_param->InCBuffer())
 					{
 						dst_param->RebindToCBuffer(dst_effect, src_param->CBufferIndex());
@@ -5298,6 +5309,8 @@ namespace KlayGE
 					{
 						dst_param->BindToCBuffer(dst_effect, src_param->CBufferIndex(), src_param->CBufferOffset(), src_param->Stride());
 					}
+
+					(*dst_cbuffer.param_indices_)[i] = param_index;
 				}
 			}
 		}

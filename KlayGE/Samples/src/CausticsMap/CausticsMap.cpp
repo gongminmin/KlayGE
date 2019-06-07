@@ -74,6 +74,8 @@ namespace
 		ReceivePlane(float length, float width)
 			: RenderablePlane(length, width, 1, 1, true, true)
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 			scene_effect_ = SyncLoadRenderEffect("Scene.fxml");
 			technique_ = scene_effect_->TechniqueByName("DistanceMapping2a");
 			default_tech_ = technique_;
@@ -83,8 +85,11 @@ namespace
 				BOOST_ASSERT(technique_->Validate());
 			}
 
-			*(scene_effect_->ParameterByName("diffuse_tex")) = ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable);
-			*(scene_effect_->ParameterByName("normal_tex")) = ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable);
+			mtl_ = MakeSharedPtr<RenderMaterial>();
+			mtl_->Albedo(float4(1, 1, 1, 1));
+			mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable)));
+			mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable)));
+
 			*(scene_effect_->ParameterByName("distance_tex")) = ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable);
 
 			depth_wodt_pass_ = scene_effect_->TechniqueByName("DepthTexWODT");
@@ -144,6 +149,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderablePlane::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -152,9 +159,6 @@ namespace
 			*(effect_->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(effect_->ParameterByName("model")) = model;
 			*(effect_->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
-
-			*(effect_->ParameterByName("pos_center")) = pos_aabb_.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 
 			if (light_)
 			{

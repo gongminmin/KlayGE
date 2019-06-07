@@ -538,6 +538,7 @@ namespace KlayGE
 	void StaticMesh::BuildMeshInfo(RenderModel const & model)
 	{
 		this->DoBuildMeshInfo(model);
+		this->UpdateBoundBox();
 
 		hw_res_ready_ = true;
 	}
@@ -2237,10 +2238,6 @@ namespace KlayGE
 		{
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_param_ = effect_->ParameterByName("model");
-			pos_center_param_ = effect_->ParameterByName("pos_center");
-			pos_extent_param_ = effect_->ParameterByName("pos_extent");
-			tc_center_param_ = effect_->ParameterByName("tc_center");
-			tc_extent_param_ = effect_->ParameterByName("tc_extent");
 
 			light_color_param_ = effect_->ParameterByName("light_color");
 			light_is_projective_param_ = effect_->ParameterByName("light_is_projective");
@@ -2291,14 +2288,6 @@ namespace KlayGE
 		float4x4 mv = model_mat_ * view;
 		*mvp_param_ = mv * proj;
 		*model_param_ = model_mat_;
-
-		AABBox const & pos_bb = this->PosBound();
-		*pos_center_param_ = pos_bb.Center();
-		*pos_extent_param_ = pos_bb.HalfSize();
-
-		AABBox const & tc_bb = this->TexcoordBound();
-		*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
-		*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
@@ -2323,10 +2312,6 @@ namespace KlayGE
 		if (tech)
 		{
 			mvp_param_ = effect_->ParameterByName("mvp");
-			pos_center_param_ = effect_->ParameterByName("pos_center");
-			pos_extent_param_ = effect_->ParameterByName("pos_extent");
-			tc_center_param_ = effect_->ParameterByName("tc_center");
-			tc_extent_param_ = effect_->ParameterByName("tc_extent");
 
 			select_mode_object_id_param_ = effect_->ParameterByName("object_id");
 			select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");

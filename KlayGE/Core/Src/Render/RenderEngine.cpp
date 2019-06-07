@@ -1353,7 +1353,8 @@ namespace KlayGE
 	void RenderEngine::Destroy()
 	{
 		default_material_.reset();
-		pmcb_.reset();
+		predefined_material_cb_.reset();
+		predefined_model_cb_.reset();
 
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
@@ -1423,17 +1424,26 @@ namespace KlayGE
 
 	RenderEngine::PredefinedMaterialCBuffer const& RenderEngine::PredefinedMaterialCBufferInstance() const
 	{
-		if (!pmcb_)
+		if (!predefined_material_cb_)
 		{
-			pmcb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
+			predefined_material_cb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
 		}
-		return *pmcb_;
+		return *predefined_material_cb_;
+	}
+
+	RenderEngine::PredefinedModelCBuffer const& RenderEngine::PredefinedModelCBufferInstance() const
+	{
+		if (!predefined_model_cb_)
+		{
+			predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
+		}
+		return *predefined_model_cb_;
 	}
 
 
 	RenderEngine::PredefinedMaterialCBuffer::PredefinedMaterialCBuffer()
 	{
-		effect_ = SyncLoadRenderEffect("Material.fxml");
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
 		predefined_cbuffer_ = effect_->CBufferByName("klayge_material");
 
 		albedo_clr_offset_ = effect_->ParameterByName("albedo_clr")->CBufferOffset();
@@ -1528,5 +1538,42 @@ namespace KlayGE
 	float4& RenderEngine::PredefinedMaterialCBuffer::TessFactors(RenderEffectConstantBuffer* cbuff) const
 	{
 		return *cbuff->template VariableInBuff<float4>(tess_factors_offset_);
+	}
+
+
+	RenderEngine::PredefinedModelCBuffer::PredefinedModelCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_mesh");
+
+		pos_center_offset_ = effect_->ParameterByName("pos_center")->CBufferOffset();
+		pos_extent_offset_ = effect_->ParameterByName("pos_extent")->CBufferOffset();
+		tc_center_offset_ = effect_->ParameterByName("tc_center")->CBufferOffset();
+		tc_extent_offset_ = effect_->ParameterByName("tc_extent")->CBufferOffset();
+
+		this->PosCenter(predefined_cbuffer_) = float3(0, 0, 0);
+		this->PosExtent(predefined_cbuffer_) = float3(1, 1, 1);
+		this->TcCenter(predefined_cbuffer_) = float2(0.5f, 0.5f);
+		this->TcExtent(predefined_cbuffer_) = float2(0.5f, 0.5f);
+	}
+
+	float3& RenderEngine::PredefinedModelCBuffer::PosCenter(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float3>(pos_center_offset_);
+	}
+
+	float3& RenderEngine::PredefinedModelCBuffer::PosExtent(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float3>(pos_extent_offset_);
+	}
+
+	float2& RenderEngine::PredefinedModelCBuffer::TcCenter(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float2>(tc_center_offset_);
+	}
+
+	float2& RenderEngine::PredefinedModelCBuffer::TcExtent(RenderEffectConstantBuffer* cbuff) const
+	{
+		return *cbuff->template VariableInBuff<float2>(tc_extent_offset_);
 	}
 }
