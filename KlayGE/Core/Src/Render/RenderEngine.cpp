@@ -181,8 +181,8 @@ namespace KlayGE
 
 		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ * eff_dpi_scale + 0.5f);
-		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ * eff_dpi_scale + 0.5f);
+		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ / eff_dpi_scale + 0.5f);
+		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ / eff_dpi_scale + 0.5f);
 
 		hdr_enabled_ = settings.hdr;
 		if (settings.hdr)
@@ -651,8 +651,8 @@ namespace KlayGE
 
 		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_width_scale_ * eff_dpi_scale + 0.5f);
-		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ * eff_dpi_scale + 0.5f);
+		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_width_scale_ / eff_dpi_scale + 0.5f);
+		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ / eff_dpi_scale + 0.5f);
 
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{

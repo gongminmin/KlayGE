@@ -576,7 +576,10 @@ namespace KlayGE
 		Context::Instance().Config(cfg);
 
 		this->OnCreate();
-		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
+
+		float const eff_dpi_scale = main_wnd_->EffectiveDPIScale();
+		this->OnResize(static_cast<uint32_t>(cfg.graphics_cfg.width / eff_dpi_scale + 0.5f),
+			static_cast<uint32_t>(cfg.graphics_cfg.height / eff_dpi_scale + 0.5f));
 	}
 
 	void App3DFramework::Destroy()
