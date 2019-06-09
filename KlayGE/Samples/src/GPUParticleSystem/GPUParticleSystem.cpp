@@ -533,7 +533,7 @@ namespace
 
 		void ModelMatrix(float4x4 const & model)
 		{
-			model_mat_ = model;
+			Renderable::ModelMatrix(model);
 			*(effect_->ParameterByName("ps_model_mat")) = model;
 		}
 

@@ -85,6 +85,9 @@ namespace KlayGE
 		bool JitterMode() const;
 		void JitterMode(bool jitter);
 
+		void Active(RenderEffectConstantBuffer& model_camera_cbuffer_, float4x4 const& model_mat, float4x4 const& inv_model_mat,
+			bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const;
+
 	private:
 		float		look_at_dist_ = 1;
 
@@ -106,6 +109,7 @@ namespace KlayGE
 		mutable float4x4	view_proj_mat_wo_adjust_;
 		mutable float4x4	inv_view_proj_mat_wo_adjust_;
 		mutable bool		view_proj_mat_wo_adjust_dirty_ = true;
+		mutable bool		camera_dirty_ = true;
 
 		mutable Frustum	frustum_;
 		mutable bool	frustum_dirty_ = true;

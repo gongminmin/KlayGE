@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<effect>
+	<cbuffer name="klayge_model_camera">
+		<parameter type="float4x4" name="model"/>
+		<parameter type="float4x4" name="model_view"/>
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="inv_model"/>
+		<parameter type="float4x4" name="inv_mv"/>
+		<parameter type="float4x4" name="inv_mvp"/>
+		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="forward_vec"/>
+		<parameter type="float3" name="up_vec"/>
+	</cbuffer>
+</effect>

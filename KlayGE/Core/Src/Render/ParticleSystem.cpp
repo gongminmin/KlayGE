@@ -570,7 +570,7 @@ namespace KlayGE
 
 		rhs->emit_freq_ = emit_freq_;
 
-		rhs->model_mat_ = model_mat_;
+		rhs->ModelMatrix(model_mat_);
 		rhs->emit_angle_ = emit_angle_;
 
 		rhs->min_pos_ = min_pos_;

@@ -57,7 +57,6 @@ namespace KlayGE
 		technique_ = simple_forward_tech_ = effect_->TechniqueByName("PointTec");
 		v0_ep_ = effect_->ParameterByName("v0");
 		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
 
 		rls_[0] = rf.MakeRenderLayout();
 		rls_[0]->TopologyType(RenderLayout::TT_PointList);
@@ -94,12 +93,6 @@ namespace KlayGE
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
-	void RenderablePoint::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-	}
-
 
 	RenderableLine::RenderableLine()
 		: Renderable(L"Line")
@@ -111,7 +104,6 @@ namespace KlayGE
 		v0_ep_ = effect_->ParameterByName("v0");
 		v1_ep_ = effect_->ParameterByName("v1");
 		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -158,12 +150,6 @@ namespace KlayGE
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
-	void RenderableLine::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-	}
-
 
 	RenderableTriangle::RenderableTriangle()
 		: Renderable(L"Triangle")
@@ -176,7 +162,6 @@ namespace KlayGE
 		v1_ep_ = effect_->ParameterByName("v1");
 		v2_ep_ = effect_->ParameterByName("v2");
 		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -224,12 +209,6 @@ namespace KlayGE
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
-	void RenderableTriangle::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-	}
-
 
 	RenderableTriBox::RenderableTriBox()
 		: Renderable(L"TriBox")
@@ -247,7 +226,6 @@ namespace KlayGE
 		v6_ep_ = effect_->ParameterByName("v6");
 		v7_ep_ = effect_->ParameterByName("v7");
 		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -309,12 +287,6 @@ namespace KlayGE
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
-	void RenderableTriBox::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-	}
-
 
 	RenderableLineBox::RenderableLineBox()
 		: Renderable(L"LineBox")
@@ -332,7 +304,6 @@ namespace KlayGE
 		v6_ep_ = effect_->ParameterByName("v6");
 		v7_ep_ = effect_->ParameterByName("v7");
 		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -389,12 +360,6 @@ namespace KlayGE
 	void RenderableLineBox::SetColor(Color const & clr)
 	{
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
-	}
-
-	void RenderableLineBox::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 
@@ -543,7 +508,7 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rls_[0]->BindIndexStream(ib, EF_R16UI);
 
-		model_mat_ = float4x4::Identity();
+		this->ModelMatrix(float4x4::Identity());
 
 		mtl_ = MakeSharedPtr<RenderMaterial>();
 		mtl_->Albedo(float4(albedo_clr.x(), albedo_clr.y(), albedo_clr.z(), 1));
@@ -552,7 +517,6 @@ namespace KlayGE
 
 		effect_attrs_ |= EA_AlphaTest;
 
-		inv_mv_ep_ = effect_->ParameterByName("inv_mv");
 		g_buffer_rt0_tex_param_ = effect_->ParameterByName("g_buffer_rt0_tex");
 
 		mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(normal_tex));
@@ -566,17 +530,12 @@ namespace KlayGE
 		Renderable::OnRenderBegin();
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
-		float4x4 const & view_to_decal = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-					
 		switch (type_)
 		{
 		case PT_OpaqueGBufferMRT:
 		case PT_TransparencyBackGBufferMRT:
 		case PT_TransparencyFrontGBufferMRT:
-			*inv_mv_ep_ = view_to_decal;
 			*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
 			break;

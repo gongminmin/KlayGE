@@ -170,9 +170,6 @@ namespace
 			*(effect_->ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
 			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
-
-	private:
-		float4x4 inv_model_mat_;
 	};
 
 

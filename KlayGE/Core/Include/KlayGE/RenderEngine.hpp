@@ -261,7 +261,7 @@ namespace KlayGE
 
 		RenderMaterialPtr const& DefaultMaterial() const;
 
-		class PredefinedMaterialCBuffer
+		class KLAYGE_CORE_API PredefinedMaterialCBuffer
 		{
 		public:
 			PredefinedMaterialCBuffer();
@@ -271,19 +271,19 @@ namespace KlayGE
 				return predefined_cbuffer_;
 			}
 
-			float4& AlbedoClr(RenderEffectConstantBuffer* cbuff) const;
-			float3& MetalnessGlossinessFactor(RenderEffectConstantBuffer* cbuff) const;
-			float4& EmissiveClr(RenderEffectConstantBuffer* cbuff) const;
-			int32_t& AlbedoMapEnabled(RenderEffectConstantBuffer* cbuff) const;
-			int32_t& NormalMapEnabled(RenderEffectConstantBuffer* cbuff) const;
-			int32_t& HeightMapParallaxEnabled(RenderEffectConstantBuffer* cbuff) const;
-			int32_t& HeightMapTessEnabled(RenderEffectConstantBuffer* cbuff) const;
-			int32_t& OcclusionMapEnabled(RenderEffectConstantBuffer* cbuff) const;
-			float& AlphaTestThreshold(RenderEffectConstantBuffer* cbuff) const;
-			float& NormalScale(RenderEffectConstantBuffer* cbuff) const;
-			float& OcclusionStrength(RenderEffectConstantBuffer* cbuff) const;
-			float2& HeightOffsetScale(RenderEffectConstantBuffer* cbuff) const;
-			float4& TessFactors(RenderEffectConstantBuffer* cbuff) const;
+			float4& AlbedoClr(RenderEffectConstantBuffer& cbuff) const;
+			float3& MetalnessGlossinessFactor(RenderEffectConstantBuffer& cbuff) const;
+			float4& EmissiveClr(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& AlbedoMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& NormalMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& HeightMapParallaxEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& HeightMapTessEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& OcclusionMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			float& AlphaTestThreshold(RenderEffectConstantBuffer& cbuff) const;
+			float& NormalScale(RenderEffectConstantBuffer& cbuff) const;
+			float& OcclusionStrength(RenderEffectConstantBuffer& cbuff) const;
+			float2& HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const;
+			float4& TessFactors(RenderEffectConstantBuffer& cbuff) const;
 
 		private:
 			RenderEffectPtr effect_;
@@ -306,20 +306,20 @@ namespace KlayGE
 
 		PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance() const;
 
-		class PredefinedModelCBuffer
+		class KLAYGE_CORE_API PredefinedMeshCBuffer
 		{
 		public:
-			PredefinedModelCBuffer();
+			PredefinedMeshCBuffer();
 
 			RenderEffectConstantBuffer* CBuffer() const
 			{
 				return predefined_cbuffer_;
 			}
 
-			float3& PosCenter(RenderEffectConstantBuffer* cbuff) const;
-			float3& PosExtent(RenderEffectConstantBuffer* cbuff) const;
-			float2& TcCenter(RenderEffectConstantBuffer* cbuff) const;
-			float2& TcExtent(RenderEffectConstantBuffer* cbuff) const;
+			float3& PosCenter(RenderEffectConstantBuffer& cbuff) const;
+			float3& PosExtent(RenderEffectConstantBuffer& cbuff) const;
+			float2& TcCenter(RenderEffectConstantBuffer& cbuff) const;
+			float2& TcExtent(RenderEffectConstantBuffer& cbuff) const;
 
 		private:
 			RenderEffectPtr effect_;
@@ -331,7 +331,44 @@ namespace KlayGE
 			uint32_t tc_extent_offset_;
 		};
 
-		PredefinedModelCBuffer const& PredefinedModelCBufferInstance() const;
+		PredefinedMeshCBuffer const& PredefinedMeshCBufferInstance() const;
+
+		class KLAYGE_CORE_API PredefinedModelCameraCBuffer
+		{
+		public:
+			PredefinedModelCameraCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			float4x4& Model(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& ModelView(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& Mvp(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& InvModel(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& InvMv(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& InvMvp(RenderEffectConstantBuffer& cbuff) const;
+			float3& EyePos(RenderEffectConstantBuffer& cbuff) const;
+			float3& ForwardVec(RenderEffectConstantBuffer& cbuff) const;
+			float3& UpVec(RenderEffectConstantBuffer& cbuff) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t model_offset_;
+			uint32_t model_view_offset_;
+			uint32_t mvp_offset_;
+			uint32_t inv_model_offset_;
+			uint32_t inv_mv_offset_;
+			uint32_t inv_mvp_offset_;
+			uint32_t eye_pos_offset_;
+			uint32_t forward_vec_offset_;
+			uint32_t up_vec_offset_;
+		};
+
+		PredefinedModelCameraCBuffer const& PredefinedModelCameraCBufferInstance() const;
 
 	protected:
 		void Destroy();
@@ -443,7 +480,8 @@ namespace KlayGE
 
 		mutable RenderMaterialPtr default_material_;
 		mutable std::unique_ptr<PredefinedMaterialCBuffer> predefined_material_cb_;
-		mutable std::unique_ptr<PredefinedModelCBuffer> predefined_model_cb_;
+		mutable std::unique_ptr<PredefinedMeshCBuffer> predefined_mesh_cb_;
+		mutable std::unique_ptr<PredefinedModelCameraCBuffer> predefined_model_camera_cb_;
 	};
 }
 

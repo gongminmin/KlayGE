@@ -48,8 +48,6 @@ namespace KlayGE
 		void SetPoint(float3 const & v);
 		void SetColor(Color const & clr);
 
-		void OnRenderBegin();
-
 	private:
 		RenderEffectParameter* v0_ep_;
 		RenderEffectParameter* color_ep_;
@@ -66,8 +64,6 @@ namespace KlayGE
 
 		void SetLine(float3 const & v0, float3 const & v1);
 		void SetColor(Color const & clr);
-
-		void OnRenderBegin();
 
 	private:
 		RenderEffectParameter* v0_ep_;
@@ -87,8 +83,6 @@ namespace KlayGE
 		void SetTriangle(float3 const & v0, float3 const & v1, float3 const & v2);
 		void SetColor(Color const & clr);
 
-		void OnRenderBegin();
-
 	private:
 		RenderEffectParameter* v0_ep_;
 		RenderEffectParameter* v1_ep_;
@@ -107,8 +101,6 @@ namespace KlayGE
 
 		void SetBox(OBBox const & obb);
 		void SetColor(Color const & clr);
-
-		void OnRenderBegin();
 
 	private:
 		RenderEffectParameter* v0_ep_;
@@ -133,8 +125,6 @@ namespace KlayGE
 
 		void SetBox(OBBox const & obb);
 		void SetColor(Color const & clr);
-
-		void OnRenderBegin();
 
 	private:
 		RenderEffectParameter* v0_ep_;
@@ -167,7 +157,6 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		RenderEffectParameter* inv_mv_ep_;
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
 	};
 }

@@ -44,7 +44,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("SimpleAxisTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float4 xyzs[] =
 			{
@@ -68,12 +67,6 @@ namespace
 
 			effect_attrs_ |= EA_SimpleForward;
 		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-		}
 	};
 
 	class RenderableTranslationAxis : public Renderable
@@ -87,8 +80,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -190,15 +181,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -213,8 +196,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -296,15 +277,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -319,8 +292,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -459,15 +430,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -481,7 +444,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("GridTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			int const GRID_SIZE = 50;
 
@@ -505,12 +467,6 @@ namespace
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 			effect_attrs_ |= EA_SimpleForward;
-		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 }

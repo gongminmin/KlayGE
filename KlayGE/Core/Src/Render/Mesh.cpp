@@ -2236,9 +2236,6 @@ namespace KlayGE
 		simple_forward_tech_ = tech;
 		if (tech)
 		{
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_param_ = effect_->ParameterByName("model");
-
 			light_color_param_ = effect_->ParameterByName("light_color");
 			light_is_projective_param_ = effect_->ParameterByName("light_is_projective");
 			projective_map_2d_tex_param_ = effect_->ParameterByName("projective_map_2d_tex");
@@ -2276,20 +2273,6 @@ namespace KlayGE
 		}
 	}
 
-	void RenderableLightSourceProxy::OnRenderBegin()
-	{
-		StaticMesh::OnRenderBegin();
-
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-
-		float4x4 mv = model_mat_ * view;
-		*mvp_param_ = mv * proj;
-		*model_param_ = model_mat_;
-	}
-
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
 	{
 		light_ = light;
@@ -2311,8 +2294,6 @@ namespace KlayGE
 		simple_forward_tech_ = tech;
 		if (tech)
 		{
-			mvp_param_ = effect_->ParameterByName("mvp");
-
 			select_mode_object_id_param_ = effect_->ParameterByName("object_id");
 			select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 		}

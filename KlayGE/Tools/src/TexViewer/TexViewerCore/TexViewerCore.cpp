@@ -37,7 +37,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("TexViewer.fxml");
 			technique_ = effect_->TechniqueByName("TexViewerTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 			texture_2d_param_ = effect_->ParameterByName("texture_2d");
 			zoom_param_ = effect_->ParameterByName("zoom");
 			rgb_scale_param_ = effect_->ParameterByName("rgb_scale");
@@ -65,7 +64,11 @@ namespace
 
 		void OnRenderBegin()
 		{
-			*mvp_param_ = model_mat_;
+			Renderable::OnRenderBegin();
+
+			auto const& pmccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCameraCBufferInstance();
+			pmccb.Mvp(*model_camera_cbuffer_) = MathLib::transpose(model_mat_);
+			model_camera_cbuffer_->Dirty(true);
 		}
 
 		void Texture(TexturePtr const & tex)

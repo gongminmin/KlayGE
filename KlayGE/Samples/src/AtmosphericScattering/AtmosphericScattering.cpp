@@ -64,20 +64,6 @@ namespace
 		{
 			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
-		
-		void OnRenderBegin()
-		{
-			StaticMesh::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
-		}
 	};
 
 	class AtmosphereMesh : public StaticMesh
@@ -121,20 +107,6 @@ namespace
 		void Absorb(Color const & clr)
 		{
 			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
-		}
-		
-		void OnRenderBegin()
-		{
-			StaticMesh::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}
 	};
 

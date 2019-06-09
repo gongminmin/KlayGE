@@ -3,12 +3,13 @@
 <effect>
 	<include name="Material.fxml"/>
 	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
 	<shader>
 		<![CDATA[
 void PredefinedCBuffersNoopVS(out float4 oPosition : SV_Position)
 {
-	oPosition = float4(pos_center, 1);
+	oPosition = mul(float4(pos_center, 1), mvp);
 }
 
 float4 PredefinedCBuffersNoopPS() : SV_Target0

@@ -299,20 +299,20 @@ namespace KlayGE
 		RenderTechnique* vdm_tech_;
 
 		float4x4 model_mat_ = float4x4::Identity();
+		float4x4 inv_model_mat_ = float4x4::Identity();
+		bool model_mat_dirty_ = true;
 
 		PassType type_;
 		uint32_t effect_attrs_ = 0;
 
 		RenderMaterialPtr mtl_;
 
-		RenderEffectParameter* mvp_param_;
-		RenderEffectParameter* model_view_param_;
-		RenderEffectParameter* forward_vec_param_;
 		RenderEffectParameter* frame_size_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
 
-		RenderEffectConstantBufferPtr model_cbuffer_;
+		RenderEffectConstantBufferPtr mesh_cbuffer_;
+		RenderEffectConstantBufferPtr model_camera_cbuffer_;
 	};
 
 	// TODO: Consider merging this with Renderable

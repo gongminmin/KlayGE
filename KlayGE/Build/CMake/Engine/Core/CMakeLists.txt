@@ -224,6 +224,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Material.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mesh.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ModelCamera.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml

@@ -18,6 +18,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderEffect.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -85,6 +86,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -103,6 +105,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -121,6 +124,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -165,6 +169,7 @@ namespace KlayGE
 	{
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -299,6 +304,39 @@ namespace KlayGE
 		else
 		{
 			mode_ &= ~CM_Jitter;
+		}
+	}
+
+	void Camera::Active(RenderEffectConstantBuffer& model_camera_cbuffer, float4x4 const& model_mat, float4x4 const& inv_model_mat,
+		bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& pmccb = re.PredefinedModelCameraCBufferInstance();
+
+		if (model_mat_dirty)
+		{
+			pmccb.Model(model_camera_cbuffer) = MathLib::transpose(model_mat);
+			pmccb.InvModel(model_camera_cbuffer) = MathLib::transpose(inv_model_mat);
+
+			model_camera_cbuffer.Dirty(true);
+		}
+		if (camera_dirty_)
+		{
+			float4x4 mvp = model_mat * this->ViewProjMatrix();
+			if (need_cascade_crop_mat)
+			{
+				mvp *= cascade_crop_mat;
+			}
+
+			pmccb.ModelView(model_camera_cbuffer) = MathLib::transpose(model_mat * this->ViewMatrix());
+			pmccb.Mvp(model_camera_cbuffer) = MathLib::transpose(mvp);
+			pmccb.InvMv(model_camera_cbuffer) = MathLib::transpose(this->InverseViewMatrix() * inv_model_mat);
+			pmccb.InvMvp(model_camera_cbuffer) = MathLib::transpose(this->InverseViewProjMatrix() * inv_model_mat);
+			pmccb.EyePos(model_camera_cbuffer) = this->EyePos();
+			pmccb.ForwardVec(model_camera_cbuffer) = this->ForwardVec();
+			pmccb.UpVec(model_camera_cbuffer) = this->UpVec();
+
+			model_camera_cbuffer.Dirty(true);
 		}
 	}
 }

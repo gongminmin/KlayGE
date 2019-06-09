@@ -7,13 +7,10 @@
 	<include name="Lighting.fxml"/>
 	<include name="Material.fxml"/>
 	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4x4" name="model_view"/>
-		<parameter type="float4x4" name="inv_mv"/>
 		<parameter type="float4" name="object_id"/>
-		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
 	</cbuffer>
 

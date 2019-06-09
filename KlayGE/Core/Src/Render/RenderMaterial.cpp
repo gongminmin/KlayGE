@@ -511,79 +511,79 @@ namespace KlayGE
 
 	void RenderMaterial::Albedo(float4 const& value)
 	{
-		PredefinedMaterialCBufferInstance().AlbedoClr(cbuffer_.get()) = value;
+		PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_) = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float4 const& RenderMaterial::Albedo() const
 	{
-		return PredefinedMaterialCBufferInstance().AlbedoClr(cbuffer_.get());
+		return PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_);
 	}
 
 	void RenderMaterial::Metalness(float value)
 	{
-		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).x() = value;
+		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::Metalness() const
 	{
-		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).x();
+		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x();
 	}
 
 	void RenderMaterial::Glossiness(float value)
 	{
-		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).y() = MathLib::clamp(value, 1e-6f, 0.999f);
+		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y() = MathLib::clamp(value, 1e-6f, 0.999f);
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::Glossiness() const
 	{
-		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(cbuffer_.get()).y();
+		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y();
 	}
 
 	void RenderMaterial::Emissive(float3 const& value)
 	{
-		reinterpret_cast<float3&>(PredefinedMaterialCBufferInstance().EmissiveClr(cbuffer_.get())) = value;
+		reinterpret_cast<float3&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_)) = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float3 const& RenderMaterial::Emissive() const
 	{
-		return reinterpret_cast<float3 const&>(PredefinedMaterialCBufferInstance().EmissiveClr(cbuffer_.get()));
+		return reinterpret_cast<float3 const&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_));
 	}
 
 	void RenderMaterial::AlphaTestThreshold(float value)
 	{
-		PredefinedMaterialCBufferInstance().AlphaTestThreshold(cbuffer_.get()) = value;
+		PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_) = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::AlphaTestThreshold() const
 	{
-		return PredefinedMaterialCBufferInstance().AlphaTestThreshold(cbuffer_.get());
+		return PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_);
 	}
 
 	void RenderMaterial::NormalScale(float value)
 	{
-		PredefinedMaterialCBufferInstance().NormalScale(cbuffer_.get()) = value;
+		PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_) = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::NormalScale() const
 	{
-		return PredefinedMaterialCBufferInstance().NormalScale(cbuffer_.get());
+		return PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_);
 	}
 
 	void RenderMaterial::OcclusionStrength(float value)
 	{
-		PredefinedMaterialCBufferInstance().OcclusionStrength(cbuffer_.get()) = value;
+		PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_) = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::OcclusionStrength() const
 	{
-		return PredefinedMaterialCBufferInstance().OcclusionStrength(cbuffer_.get());
+		return PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_);
 	}
 
 	void RenderMaterial::TextureName(TextureSlot slot, std::string_view name)
@@ -597,36 +597,36 @@ namespace KlayGE
 		switch (slot)
 		{
 		case TS_Albedo:
-			pmcb.AlbedoMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			pmcb.AlbedoMapEnabled(*cbuffer_) = srv ? 1 : 0;
 			break;
 
 		case TS_MetalnessGlossiness:
-			pmcb.MetalnessGlossinessFactor(cbuffer_.get()).z() = srv ? 1.0f : 0.0f;
+			pmcb.MetalnessGlossinessFactor(*cbuffer_).z() = srv ? 1.0f : 0.0f;
 			break;
 
 		case TS_Emissive:
-			pmcb.EmissiveClr(cbuffer_.get()).w() = srv ? 1.0f : 0.0f;
+			pmcb.EmissiveClr(*cbuffer_).w() = srv ? 1.0f : 0.0f;
 			break;
 
 		case TS_Normal:
-			pmcb.NormalMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			pmcb.NormalMapEnabled(*cbuffer_) = srv ? 1 : 0;
 			break;
 
 		case TS_Height:
 			if (detail_mode_ == RenderMaterial::SDM_Parallax)
 			{
-				pmcb.HeightMapParallaxEnabled(cbuffer_.get()) = srv ? 1 : 0;
-				pmcb.HeightMapTessEnabled(cbuffer_.get()) = 0;
+				pmcb.HeightMapParallaxEnabled(*cbuffer_) = srv ? 1 : 0;
+				pmcb.HeightMapTessEnabled(*cbuffer_) = 0;
 			}
 			else
 			{
-				pmcb.HeightMapParallaxEnabled(cbuffer_.get()) = 0;
-				pmcb.HeightMapTessEnabled(cbuffer_.get()) = srv ? 1 : 0;
+				pmcb.HeightMapParallaxEnabled(*cbuffer_) = 0;
+				pmcb.HeightMapTessEnabled(*cbuffer_) = srv ? 1 : 0;
 			}
 			break;
 
 		case TS_Occlusion:
-			pmcb.OcclusionMapEnabled(cbuffer_.get()) = srv ? 1 : 0;
+			pmcb.OcclusionMapEnabled(*cbuffer_) = srv ? 1 : 0;
 			break;
 
 		default:
@@ -641,68 +641,68 @@ namespace KlayGE
 
 	void RenderMaterial::HeightOffset(float value)
 	{
-		PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).x() = value;
+		PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::HeightOffset() const
 	{
-		return PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).x();
+		return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x();
 	}
 
 	void RenderMaterial::HeightScale(float value)
 	{
-		PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).y() = value;
+		PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::HeightScale() const
 	{
-		return PredefinedMaterialCBufferInstance().HeightOffsetScale(cbuffer_.get()).y();
+		return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y();
 	}
 
 	void RenderMaterial::EdgeTessHint(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).x() = value;
+		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::EdgeTessHint() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).x();
+		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x();
 	}
 
 	void RenderMaterial::InsideTessHint(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).y() = value;
+		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::InsideTessHint() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).y();
+		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y();
 	}
 
 	void RenderMaterial::MinTessFactor(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z() = value;
+		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::MinTessFactor() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z();
+		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z();
 	}
 
 	void RenderMaterial::MaxTessFactor(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z() = value;
+		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z() = value;
 		cbuffer_->Dirty(true);
 	}
 
 	float RenderMaterial::MaxTessFactor() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(cbuffer_.get()).z();
+		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z();
 	}
 
 	void RenderMaterial::Active(RenderEffect& effect)

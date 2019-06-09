@@ -617,7 +617,7 @@ namespace KlayGE
 		snapped_z_ = eye.z() - 2 * dz;
 		float4x4 trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
 		float4x4 scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
-		model_mat_ = scale * trans;
+		Renderable::ModelMatrix(scale * trans);
 
 		*proj_mat_param_ = proj;
 

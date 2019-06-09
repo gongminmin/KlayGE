@@ -4,11 +4,7 @@
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Mesh.fxml"/>
-
-	<parameter type="float4x4" name="mvp"/>
-
-	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float3" name="look_at_vec"/>
+	<include name="ModelCamera.fxml"/>
 
 	<parameter type="texture2D" name="earth_day_tex">
 		<annotation type="string" name="SasResourceAddress" value="earth_day.dds"/>

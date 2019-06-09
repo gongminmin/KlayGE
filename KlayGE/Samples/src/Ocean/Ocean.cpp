@@ -52,7 +52,7 @@ namespace
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
 
-			model_mat_ = float4x4::Identity();
+			this->ModelMatrix(float4x4::Identity());
 
 			mtl_ = MakeSharedPtr<RenderMaterial>();
 			mtl_->Albedo(float4(0.07f, 0.15f, 0.2f, 1));

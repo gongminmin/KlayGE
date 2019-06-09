@@ -410,8 +410,6 @@ namespace KlayGE
 
 		virtual void Update();
 
-		void OnRenderBegin() override;
-
 		void AttachLightSrc(LightSourcePtr const & light);
 
 	protected:
@@ -423,7 +421,6 @@ namespace KlayGE
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameter* model_param_;
 		RenderEffectParameter* light_color_param_;
 		RenderEffectParameter* light_is_projective_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;

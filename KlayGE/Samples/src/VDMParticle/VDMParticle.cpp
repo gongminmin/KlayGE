@@ -48,22 +48,9 @@ namespace
 			technique_ = effect_->TechniqueByName("Mesh");
 		}
 
-		void ModelMatrix(float4x4 const & mat) override
-		{
-			StaticMesh::ModelMatrix(mat);
-
-			inv_model_mat_ = MathLib::inverse(model_mat_);
-		}
-
 		void OnRenderBegin()
 		{
 			StaticMesh::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			*(effect_->ParameterByName("mvp")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-			*(effect_->ParameterByName("model")) = model_mat_;
-			*(effect_->ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			auto& scene_mgr = Context::Instance().SceneManagerInstance();
 			auto const& light_src = *scene_mgr.GetFrameLight(0);
@@ -72,9 +59,6 @@ namespace
 			*(effect_->ParameterByName("light_color")) = light_src.Color();
 			*(effect_->ParameterByName("light_falloff")) = light_src.Falloff();
 		}
-
-	private:
-		float4x4 inv_model_mat_;
 	};
 
 

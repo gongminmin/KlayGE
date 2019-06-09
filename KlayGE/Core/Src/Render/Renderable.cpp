@@ -49,9 +49,15 @@ namespace KlayGE
 			this->BindDeferredEffect(drl->GBufferEffect(nullptr, false, false));
 		}
 
-		auto const& pmcb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCBufferInstance();
-		auto* curr_cbuff = pmcb.CBuffer();
-		model_cbuffer_ = curr_cbuff->Clone(curr_cbuff->OwnerEffect());
+		auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		auto const& mesh_cb = re.PredefinedMeshCBufferInstance();
+		auto* mesh_cbuff = mesh_cb.CBuffer();
+		mesh_cbuffer_ = mesh_cbuff->Clone(mesh_cbuff->OwnerEffect());
+
+		auto const& model_camera_cb = re.PredefinedModelCameraCBufferInstance();
+		auto* model_camera_cbuff = model_camera_cb.CBuffer();
+		model_camera_cbuffer_ = model_camera_cbuff->Clone(model_camera_cbuff->OwnerEffect());
 	}
 
 	Renderable::~Renderable()
@@ -100,48 +106,54 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-		float4x4 mv = model_mat_ * view;
-		float4x4 mvp = mv * proj;
-
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-
-		if (drl)
-		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
-		}
+		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		if (effect_->CBufferByName("klayge_mesh"))
 		{
-			if (&model_cbuffer_->OwnerEffect() != effect_.get())
+			if (&mesh_cbuffer_->OwnerEffect() != effect_.get())
 			{
-				model_cbuffer_ = model_cbuffer_->Clone(*effect_);
+				mesh_cbuffer_ = mesh_cbuffer_->Clone(*effect_);
 			}
 
-			effect_->BindCBufferByName("klayge_mesh", model_cbuffer_);
+			effect_->BindCBufferByName("klayge_mesh", mesh_cbuffer_);
+		}
+
+		if (effect_->CBufferByName("klayge_model_camera"))
+		{
+			if (&model_camera_cbuffer_->OwnerEffect() != effect_.get())
+			{
+				model_camera_cbuffer_ = model_camera_cbuffer_->Clone(*effect_);
+			}
+
+			float4x4 cascade_crop_mat = float4x4::Identity();
+			bool need_cascade_crop_mat = false;
+			if (drl)
+			{
+				int32_t cas_index = drl->CurrCascadeIndex();
+				if (cas_index >= 0)
+				{
+					cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+					need_cascade_crop_mat = true;
+				}
+			}
+
+			camera.Active(*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
+			model_mat_dirty_ = false;
+
+			effect_->BindCBufferByName("klayge_model_camera", model_camera_cbuffer_);
 		}
 
 		if (select_mode_on_)
 		{
-			*mvp_param_ = mvp;
 			*select_mode_object_id_param_ = select_mode_object_id_;
 		}
 		else
 		{
-			auto const& mtl = mtl_ ? mtl_ : Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultMaterial();
+			auto const& mtl = mtl_ ? mtl_ : re.DefaultMaterial();
 			mtl->Active(*effect_);
 
 			if (drl)
 			{
-				*mvp_param_ = mvp;
-				*model_view_param_ = mv;
-				*forward_vec_param_ = camera.ForwardVec();
-
 				FrameBufferPtr const & fb = re.CurFrameBuffer();
 				*frame_size_param_ = int2(fb->Width(), fb->Height());
 
@@ -301,6 +313,8 @@ namespace KlayGE
 	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
 		model_mat_ = mat;
+		inv_model_mat_ = MathLib::transpose(model_mat_);
+		model_mat_dirty_ = true;
 	}
 
 	void Renderable::BindSceneNode(SceneNode const * node)
@@ -311,17 +325,17 @@ namespace KlayGE
 
 	void Renderable::UpdateBoundBox()
 	{
-		auto const& pmcb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCBufferInstance();
+		auto const& pmcb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedMeshCBufferInstance();
 
 		AABBox const & pos_bb = this->PosBound();
 		AABBox const & tc_bb = this->TexcoordBound();
 
-		pmcb.PosCenter(model_cbuffer_.get()) = pos_bb.Center();
-		pmcb.PosExtent(model_cbuffer_.get()) = pos_bb.HalfSize();
-		pmcb.TcCenter(model_cbuffer_.get()) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-		pmcb.TcExtent(model_cbuffer_.get()) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+		pmcb.PosCenter(*mesh_cbuffer_) = pos_bb.Center();
+		pmcb.PosExtent(*mesh_cbuffer_) = pos_bb.HalfSize();
+		pmcb.TcCenter(*mesh_cbuffer_) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+		pmcb.TcExtent(*mesh_cbuffer_) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 
-		model_cbuffer_->Dirty(true);
+		mesh_cbuffer_->Dirty(true);
 	}
 
 	float Renderable::CalcLod(float3 const & eye_pos, float fov_scale) const
@@ -375,9 +389,6 @@ namespace KlayGE
 
 		this->UpdateTechniques();
 
-		mvp_param_ = effect_->ParameterByName("mvp");
-		model_view_param_ = effect_->ParameterByName("model_view");
-		forward_vec_param_ = effect_->ParameterByName("forward_vec");
 		frame_size_param_ = effect_->ParameterByName("frame_size");
 		opaque_depth_tex_param_ = effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
