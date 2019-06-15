@@ -63,9 +63,9 @@ namespace KlayGE
 		PostProcess::OnRenderBegin();
 
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const & viewport = *re.CurFrameBuffer()->GetViewport();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
 
-		Camera const & camera = *viewport.camera;
+		Camera const& camera = *viewport.Camera();
 		auto const & inv_proj = camera.InverseProjMatrix();
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = inv_proj;
@@ -78,6 +78,6 @@ namespace KlayGE
 		*x_dir_param_ = upper_right - upper_left;
 		*y_dir_param_ = lower_left - upper_left;
 
-		*aspect_param_ = static_cast<float>(viewport.width) / viewport.height;
+		*aspect_param_ = static_cast<float>(viewport.Width()) / viewport.Height();
 	}
 }

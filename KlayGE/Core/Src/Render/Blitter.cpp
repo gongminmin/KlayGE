@@ -83,10 +83,10 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		uint32_t const src_w = src->Width(src_level);
 		uint32_t const src_h = src->Height(src_level);
@@ -125,10 +125,10 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		uint32_t const src_w = src->Width(src_level);
 		uint32_t const src_h = src->Height(src_level);
@@ -233,10 +233,10 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		*dst_width_height_param_ = float4(static_cast<float>(dst_width), static_cast<float>(dst_height),
 			1.0f / dst_width, 1.0f / dst_height);

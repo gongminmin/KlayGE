@@ -848,14 +848,14 @@ namespace KlayGE
 			{
 				BOOST_ASSERT(pp_mvp_param_);
 
-				*pp_mvp_param_ = model_mat_ * frame_buffer_->GetViewport()->camera->ViewProjMatrix();
+				*pp_mvp_param_ = model_mat_ * frame_buffer_->Viewport()->Camera()->ViewProjMatrix();
 			}
 			else
 			{
-				ViewportPtr const & vp = fb->GetViewport();
-				if ((!technique_->Transparent()) && (0 == vp->left) && (0 == vp->top)
-					&& (fb->Width() == static_cast<uint32_t>(vp->width))
-					&& (fb->Height() == static_cast<uint32_t>(vp->height)))
+				ViewportPtr const& vp = fb->Viewport();
+				if ((!technique_->Transparent()) && (0 == vp->Left()) && (0 == vp->Top())
+					&& (fb->Width() == static_cast<uint32_t>(vp->Width()))
+					&& (fb->Height() == static_cast<uint32_t>(vp->Height())))
 				{
 					fb->Discard(FrameBuffer::CBM_Color);
 				}
@@ -895,7 +895,7 @@ namespace KlayGE
 				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 
 				frame_buffer_ = rf.MakeFrameBuffer();
-				frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;
+				frame_buffer_->Viewport()->Camera(rf.RenderEngineInstance().CurFrameBuffer()->Viewport()->Camera());
 			}
 		}
 	}

@@ -127,10 +127,10 @@ namespace KlayGE
 			}
 		}
 
-		viewport_->left		= 0;
-		viewport_->top		= 0;
-		viewport_->width	= width_;
-		viewport_->height	= height_;
+		viewport_->Left(0);
+		viewport_->Top(0);
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 
 		ID3D12Device* d3d_device = nullptr;
 		ID3D12CommandQueue* d3d_cmd_queue = nullptr;
@@ -394,8 +394,8 @@ namespace KlayGE
 		}
 
 		// Notify viewports of resize
-		viewport_->width = width_;
-		viewport_->height = height_;
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = d3d12_re.D3DRenderCmdList();

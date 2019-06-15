@@ -147,15 +147,15 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
-			Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+			Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
-			float4x4 billboard_mat = camera->InverseViewMatrix();
+			float4x4 billboard_mat = camera.InverseViewMatrix();
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
 			*(effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
-			float2 start_tc = imposter_->StartTexCoord(camera->EyePos() - pos_aabb_.Center());
+			float2 start_tc = imposter_->StartTexCoord(camera.EyePos() - pos_aabb_.Center());
 			*(effect_->ParameterByName("start_tc")) = start_tc;
 
 			Renderable::OnRenderBegin();
@@ -273,7 +273,7 @@ namespace KlayGE
 		tb_controller_.AttachCamera(this->ActiveCamera());
 
 		selective_fb_ = rf.MakeFrameBuffer();
-		selective_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		selective_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 
 	void MtlEditorCore::OnDestroy()

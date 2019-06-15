@@ -859,12 +859,12 @@ void OceanApp::OnCreate()
 
 	Camera& scene_camera = this->ActiveCamera();
 	reflection_fb_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
+	reflection_fb_->Viewport()->Camera()->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 		scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	auto reflection_camera_node =
 		MakeSharedPtr<SceneNode>(L"ReflectionCameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-	reflection_camera_node->AddComponent(reflection_fb_->GetViewport()->camera);
+	reflection_camera_node->AddComponent(reflection_fb_->Viewport()->Camera());
 	root_node.AddChild(reflection_camera_node);
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -992,7 +992,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	deferred_rendering_->SetupViewport(0, reflection_fb_,
 		VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
 
-	screen_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
 
 void OceanApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -1138,8 +1138,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		float3 reflect_eye, reflect_at, reflect_up;
 		checked_pointer_cast<OceanRenderableComponent>(ocean_)->ReflectViewParams(
 			reflect_eye, reflect_at, reflect_up, screen_camera_->EyePos(), screen_camera_->LookAt(), screen_camera_->UpVec());
-		reflection_fb_->GetViewport()->camera->LookAtDist(MathLib::length(reflect_at - reflect_eye));
-		reflection_fb_->GetViewport()->camera->BoundSceneNode()->TransformToWorld(
+		reflection_fb_->Viewport()->Camera()->LookAtDist(MathLib::length(reflect_at - reflect_eye));
+		reflection_fb_->Viewport()->Camera()->BoundSceneNode()->TransformToWorld(
 			MathLib::inverse(MathLib::look_at_lh(reflect_eye, reflect_at, reflect_up)));
 	}
 	else

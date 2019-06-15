@@ -476,8 +476,9 @@ namespace
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[1], 0, 1, 0));
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
-					pos_vel_rt_buffer_[0]->GetViewport()->camera = pos_vel_rt_buffer_[1]->GetViewport()->camera
-						= screen_buffer->GetViewport()->camera;
+					auto const& camera = screen_buffer->Viewport()->Camera();
+					pos_vel_rt_buffer_[0]->Viewport()->Camera(camera);
+					pos_vel_rt_buffer_[1]->Viewport()->Camera(camera);
 				}
 				else
 				{
@@ -493,9 +494,11 @@ namespace
 					vel_rt_buffer_[1] = rf.MakeFrameBuffer();
 					vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
-					pos_rt_buffer_[0]->GetViewport()->camera = pos_rt_buffer_[1]->GetViewport()->camera
-						= vel_rt_buffer_[0]->GetViewport()->camera = vel_rt_buffer_[1]->GetViewport()->camera
-						= screen_buffer->GetViewport()->camera;
+					auto const& camera = screen_buffer->Viewport()->Camera();
+					pos_rt_buffer_[0]->Viewport()->Camera(camera);
+					pos_rt_buffer_[1]->Viewport()->Camera(camera);
+					vel_rt_buffer_[0]->Viewport()->Camera(camera);
+					vel_rt_buffer_[1]->Viewport()->Camera(camera);
 				}
 
 				{
@@ -842,9 +845,9 @@ void GPUParticleSystemApp::OnCreate()
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 	
 	scene_buffer_ = rf.MakeFrameBuffer();
-	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	scene_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	fog_buffer_ = rf.MakeFrameBuffer();
-	fog_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	fog_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 

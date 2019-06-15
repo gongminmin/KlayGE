@@ -125,7 +125,7 @@ namespace KlayGE
 
 		screen_frame_buffer_camera_node_ =
 			MakeSharedPtr<SceneNode>(L"CameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		screen_frame_buffer_camera_node_->AddComponent(screen_frame_buffer_->GetViewport()->camera);
+		screen_frame_buffer_camera_node_->AddComponent(screen_frame_buffer_->Viewport()->Camera());
 
 		uint32_t const screen_width = screen_frame_buffer_->Width();
 		uint32_t const screen_height = screen_frame_buffer_->Height();
@@ -293,7 +293,7 @@ namespace KlayGE
 		if ((settings.stereo_method != STM_None) || (settings.display_output_method != DOM_sRGB))
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
-			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			mono_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			ElementFormat const backup_fmts[] = { EF_B10G11R11F, settings.color_fmt, EF_ABGR8, EF_ARGB8 };
 			ArrayRef<ElementFormat> fmt_options = backup_fmts;
@@ -311,7 +311,7 @@ namespace KlayGE
 				= default_frame_buffers_[2] = mono_frame_buffer_;
 
 			overlay_frame_buffer_ = rf.MakeFrameBuffer();
-			overlay_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			overlay_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
@@ -335,7 +335,7 @@ namespace KlayGE
 			if (need_resize)
 			{
 				resize_frame_buffer_ = rf.MakeFrameBuffer();
-				resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+				resize_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 				auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
 				BOOST_ASSERT(fmt != EF_Unknown);
@@ -385,7 +385,7 @@ namespace KlayGE
 		if (post_tone_mapping_pp_)
 		{
 			post_tone_mapping_frame_buffer_ = rf.MakeFrameBuffer();
-			post_tone_mapping_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			post_tone_mapping_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			auto const fmt = caps.BestMatchTextureRenderTargetFormat((settings.display_output_method == DOM_sRGB)
 				? MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }), 1, 0);
@@ -401,7 +401,7 @@ namespace KlayGE
 		if (hdr_pp_)
 		{
 			hdr_frame_buffer_ = rf.MakeFrameBuffer();
-			hdr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			hdr_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			auto const fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
 				: MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }), 1, 0);
@@ -715,7 +715,7 @@ namespace KlayGE
 					if (!resize_frame_buffer_)
 					{
 						resize_frame_buffer_ = rf.MakeFrameBuffer();
-						resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+						resize_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 					}
 
 					ElementFormat fmt;
@@ -863,7 +863,7 @@ namespace KlayGE
 		{
 			if (!skip)
 			{
-				CameraPtr const & camera = cur_frame_buffer_->GetViewport()->camera;
+				CameraPtr const& camera = cur_frame_buffer_->Viewport()->Camera();
 				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
 				float2 near_q(camera->NearPlane() * q, q);
 				smaa_edge_detection_pp_->SetParam(0, near_q);
@@ -1040,7 +1040,7 @@ namespace KlayGE
 			this->BindFrameBuffer(screen_frame_buffer_);
 			if (stereoscopic_pp_)
 			{
-				Camera const & camera = *screen_frame_buffer_->GetViewport()->camera;
+				Camera const& camera = *screen_frame_buffer_->Viewport()->Camera();
 
 				stereoscopic_pp_->SetParam(0, stereo_separation_);
 				stereoscopic_pp_->SetParam(1, camera.NearPlane());
@@ -1053,7 +1053,7 @@ namespace KlayGE
 			{
 				if (STM_OculusVR == stereo_method_)
 				{
-					Viewport const & vp = *screen_frame_buffer_->GetViewport();
+					Viewport const& vp = *screen_frame_buffer_->Viewport();
 
 					float w = 0.5f;
 					float h = 1;
@@ -1061,7 +1061,7 @@ namespace KlayGE
 					float x_right = 0.5f;
 					float y = 0;
 
-					float aspect = static_cast<float>(vp.width / 2) / vp.height;
+					float aspect = static_cast<float>(vp.Width() / 2) / vp.Height();
 
 					float3 lens_center(x_left + (w + ovr_x_center_offset_ * 0.5f) * 0.5f,
 						x_right + (w - ovr_x_center_offset_ * 0.5f) * 0.5f, y + h * 0.5f);

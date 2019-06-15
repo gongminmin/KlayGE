@@ -19,17 +19,61 @@
 
 namespace KlayGE
 {
-	struct KLAYGE_CORE_API Viewport : boost::noncopyable
+	class KLAYGE_CORE_API Viewport : boost::noncopyable
 	{
+	public:
 		Viewport();
-		Viewport(int _left, int _top, int _width, int _height);
+		Viewport(int left, int top, int width, int height);
 
-		int left;
-		int top;
-		int width;
-		int height;
+		void Left(int left)
+		{
+			left_ = left;
+		}
+		int Left() const
+		{
+			return left_;
+		}
+		void Top(int top)
+		{
+			top_ = top;
+		}
+		int Top() const
+		{
+			return top_;
+		}
+		void Width(int width)
+		{
+			width_ = width;
+		}
+		int Width() const
+		{
+			return width_;
+		}
+		void Height(int height)
+		{
+			height_ = height;
+		}
+		int Height() const
+		{
+			return height_;
+		}
 
-		CameraPtr camera;
+		void Camera(CameraPtr const& camera)
+		{
+			camera_ = camera;
+		}
+		CameraPtr const& Camera() const
+		{
+			return camera_;
+		}
+
+	private:
+		int left_;
+		int top_;
+		int width_;
+		int height_;
+
+		CameraPtr camera_;
 	};
 }
 

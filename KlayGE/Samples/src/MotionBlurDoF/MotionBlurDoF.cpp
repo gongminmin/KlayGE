@@ -306,8 +306,8 @@ void MotionBlurDoFApp::OnCreate()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
 	velocity_fb_ = rf.MakeFrameBuffer();
-	clr_depth_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
-	velocity_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	clr_depth_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
+	velocity_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

@@ -1038,7 +1038,7 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[index];
 		pvp.attrib = attrib;
 		pvp.frame_buffer = fb;
-		pvp.frame_buffer->GetViewport()->camera->JitterMode(true);
+		pvp.frame_buffer->Viewport()->Camera()->JitterMode(true);
 		pvp.sample_count = sample_count;
 		pvp.sample_quality = sample_quality;
 
@@ -1049,8 +1049,8 @@ namespace KlayGE
 			BOOST_ASSERT(fb->AttachedRtv(FrameBuffer::Attachment::Color0)->SampleCount() == 1);
 		}
 
-		uint32_t const width = pvp.frame_buffer->GetViewport()->width;
-		uint32_t const height = pvp.frame_buffer->GetViewport()->height;
+		uint32_t const width = pvp.frame_buffer->Viewport()->Width();
+		uint32_t const height = pvp.frame_buffer->Viewport()->Height();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -1061,10 +1061,12 @@ namespace KlayGE
 		BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, sample_quality, EAH_GPU_Read | EAH_GPU_Write);
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
 			pvp.g_buffer_stencil_srv = rf.MakeTextureSrv(pvp.g_buffer_ds_tex, EF_X24G8, 0, 1, 0, 1);
 		}
+#endif
 		auto ds_view = rf.Make2DDsv(pvp.g_buffer_ds_tex, 0, 1, 0);
 
 		pvp.g_buffer_resolved_rt0_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0,
@@ -2057,7 +2059,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::PreparePVP(PerViewport& pvp)
 	{
-		Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
+		Camera const & camera = *pvp.frame_buffer->Viewport()->Camera();
 		pvp.inv_view = camera.InverseViewMatrix();
 		pvp.inv_proj = camera.InverseProjMatrix();
 		pvp.proj_to_prev = pvp.inv_proj * pvp.inv_view * pvp.view * pvp.proj;
@@ -2071,18 +2073,18 @@ namespace KlayGE
 
 		if (PTB_Opaque == pass_tb)
 		{
-			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-			pvp.g_buffer_fb->GetViewport()->camera = camera;
+			CameraPtr const & camera = pvp.frame_buffer->Viewport()->Camera();
+			pvp.g_buffer_fb->Viewport()->Camera(camera);
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-			pvp.lighting_fb->GetViewport()->camera = camera;
+			pvp.lighting_fb->Viewport()->Camera(camera);
 #endif
-			pvp.vdm_fb->GetViewport()->camera = camera;
-			pvp.shading_fb->GetViewport()->camera = camera;
+			pvp.vdm_fb->Viewport()->Camera(camera);
+			pvp.shading_fb->Viewport()->Camera(camera);
 			for (size_t i = 0; i < pvp.merged_shading_fbs.size(); ++ i)
 			{
-				pvp.merged_shading_fbs[i]->GetViewport()->camera = camera;
-				pvp.merged_depth_fbs[i]->GetViewport()->camera = camera;
-				pvp.merged_depth_resolved_fbs[i]->GetViewport()->camera = camera;
+				pvp.merged_shading_fbs[i]->Viewport()->Camera(camera);
+				pvp.merged_depth_fbs[i]->Viewport()->Camera(camera);
+				pvp.merged_depth_resolved_fbs[i]->Viewport()->Camera(camera);
 			}
 		}
 
@@ -2105,7 +2107,7 @@ namespace KlayGE
 			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_tex;
 			*g_buffer_ds_tex_ms_param_ = pvp.g_buffer_ds_tex;
 
-			*near_q_far_param_ = pvp.frame_buffer->GetViewport()->camera->NearQFarParam();
+			*near_q_far_param_ = pvp.frame_buffer->Viewport()->Camera()->NearQFarParam();
 
 			re.BindFrameBuffer(pvp.g_buffer_resolved_fb);
 			re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color3)->ClearColor(Color(0, 0, 0, 0));
@@ -2191,7 +2193,7 @@ namespace KlayGE
 				}
 				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-				sm_fb_->GetViewport()->camera = sm_camera;
+				sm_fb_->Viewport()->Camera(sm_camera);
 
 				if ((LightSource::LT_Directional == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
 				{
@@ -2343,7 +2345,7 @@ namespace KlayGE
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
-		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *sm_fb_->GetViewport()->camera);
+		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *sm_fb_->Viewport()->Camera());
 		pp_chain->Apply();
 
 		if (LightSource::LT_Directional == type)
@@ -2834,7 +2836,7 @@ namespace KlayGE
 				trans_pp->OutputPin(0,
 					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
 
-				Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
+				Camera const& scene_camera = *pvp.frame_buffer->Viewport()->Camera();
 
 				trans_pp->SetParam(0, pvp.inv_view * light_camera->ViewProjMatrix());
 				trans_pp->SetParam(1, pvp.inv_view * light_camera->ViewMatrix());
@@ -3876,7 +3878,7 @@ namespace KlayGE
 			}
 
 			{
-				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+				CameraPtr const& camera = pvp.frame_buffer->Viewport()->Camera();
 
 				float const near_plane = camera->NearPlane();
 				float const far_plane = camera->FarPlane();
@@ -3974,7 +3976,7 @@ namespace KlayGE
 		}
 		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
 		*linear_depth_rw_tex_param_ = pvp.g_buffer_resolved_depth_tex;
-		*near_q_far_param_ = pvp.frame_buffer->GetViewport()->camera->NearQFarParam();
+		*near_q_far_param_ = pvp.frame_buffer->Viewport()->Camera()->NearQFarParam();
 
 		re.Dispatch(*dr_effect_, *technique_depth_to_tiled_min_max_[pvp.sample_count != 1], out_tex->Width(0), out_tex->Height(0), 1);
 
@@ -4100,10 +4102,10 @@ namespace KlayGE
 
 		re.ForceLineMode(force_line_mode_);
 
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		pvp.shadowing_fb->GetViewport()->camera = camera;
-		pvp.projective_shadowing_fb->GetViewport()->camera = camera;
-		pvp.reflection_fb->GetViewport()->camera = camera;
+		CameraPtr const& camera = pvp.frame_buffer->Viewport()->Camera();
+		pvp.shadowing_fb->Viewport()->Camera(camera);
+		pvp.projective_shadowing_fb->Viewport()->Camera(camera);
+		pvp.reflection_fb->Viewport()->Camera(camera);
 
 		this->PreparePVP(pvp);
 
@@ -4111,8 +4113,8 @@ namespace KlayGE
 
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_resolved_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_resolved_depth_tex;
-		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
-			1.0f / pvp.frame_buffer->GetViewport()->height);
+		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->Viewport()->Width(),
+			1.0f / pvp.frame_buffer->Viewport()->Height());
 		*shadowing_tex_param_ = pvp.shadowing_tex;
 		*projective_shadowing_tex_param_ = pvp.projective_shadowing_tex;
 
@@ -4137,12 +4139,12 @@ namespace KlayGE
 	{
 		if (indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI))
 		{
-			pvp.il_layer->UpdateGBuffer(*pvp.frame_buffer->GetViewport()->camera);
+			pvp.il_layer->UpdateGBuffer(*pvp.frame_buffer->Viewport()->Camera());
 		}
 
 		if (cascaded_shadow_index_ >= 0)
 		{
-			Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
+			Camera const & scene_camera = *pvp.frame_buffer->Viewport()->Camera();
 			Camera const & light_camera = *lights_[cascaded_shadow_index_]->SMCamera(0);
 
 			float const BLUR_FACTOR = 0.2f;
@@ -4212,8 +4214,8 @@ namespace KlayGE
 
 			case PRT_CascadedShadowMap:
 				{
-					CameraPtr const & light_camera = sm_fb_->GetViewport()->camera;
-					csm_fb_->GetViewport()->camera = light_camera;
+					CameraPtr const& light_camera = sm_fb_->Viewport()->Camera();
+					csm_fb_->Viewport()->Camera(light_camera);
 					re.BindFrameBuffer(csm_fb_);
 					float const far_plane = light_camera->FarPlane();
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(far_plane, 0, 0, 0), 1.0f, 0);
@@ -4223,7 +4225,7 @@ namespace KlayGE
 			default:
 				BOOST_ASSERT(PRT_ReflectiveShadowMap == pass_rt);
 
-				rsm_fb_->GetViewport()->camera = sm_fb_->GetViewport()->camera;
+				rsm_fb_->Viewport()->Camera(sm_fb_->Viewport()->Camera());
 				re.BindFrameBuffer(rsm_fb_);
 				rsm_fb_->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
 				rsm_fb_->AttachedRtv(FrameBuffer::Attachment::Color1)->Discard();
@@ -4238,7 +4240,7 @@ namespace KlayGE
 	uint32_t DeferredRenderingLayer::IndirectLightingDRJob(PerViewport const & pvp, int32_t org_no)
 	{
 		depth_to_esm_pp_->Apply();
-		pvp.il_layer->UpdateRSM(*rsm_fb_->GetViewport()->camera, *lights_[org_no]);
+		pvp.il_layer->UpdateRSM(*rsm_fb_->Viewport()->Camera(), *lights_[org_no]);
 		return 0;
 	}
 
@@ -4539,7 +4541,7 @@ namespace KlayGE
 		{
 			*depth_tex_param_ = depth_tex;
 
-			Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
+			Camera const& camera = *pvp.frame_buffer->Viewport()->Camera();
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 			float2 near_q(camera.NearPlane() * q, q);
 			*near_q_param_ = near_q;

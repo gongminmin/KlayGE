@@ -149,7 +149,7 @@ void VDMParticleApp::OnCreate()
 	ps_->Emitter(0)->ModelMatrix(MathLib::translation(light_->Position() / SCALE));
 
 	scene_fb_ = rf.MakeFrameBuffer();
-	scene_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	scene_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 	add_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "AddBilinearCopy");
@@ -191,13 +191,13 @@ void VDMParticleApp::OnCreate()
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	half_res_fb_ = rf.MakeFrameBuffer();
-	half_res_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	half_res_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	quarter_res_fb_ = rf.MakeFrameBuffer();
-	quarter_res_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	quarter_res_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	vdm_quarter_res_fb_ = rf.MakeFrameBuffer();
-	vdm_quarter_res_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	vdm_quarter_res_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	depth_to_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMax");
 	copy_to_depth_pp_ = SyncLoadPostProcess("Depth.ppml", "CopyToDepth");

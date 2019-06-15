@@ -730,7 +730,7 @@ void CausticsMapApp::InitBuffer()
 	caustics_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(caustics_texture_, 0, 1, 0));
 
 	scene_fb_ = rf.MakeFrameBuffer();
-	scene_fb_->GetViewport()->camera = re.DefaultFrameBuffer()->GetViewport()->camera;
+	scene_fb_->Viewport()->Camera(re.DefaultFrameBuffer()->Viewport()->Camera());
 }
 
 void CausticsMapApp::InitEnvCube()
@@ -970,7 +970,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(background_fb_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-		re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+		re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 
 		if (depth_texture_support_)
 		{
@@ -996,7 +996,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			re.BindFrameBuffer(refract_obj_fb_f_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+			re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 		}
 		else
 		{
@@ -1007,7 +1007,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			re.BindFrameBuffer(refract_obj_fb_d_f_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(light_->SMCamera(0)->FarPlane(), 0.0f, 0.0f, 0.0f), 1.0f, 0);
-			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+			re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 		}
 
 		return App3DFramework::URV_NeedFlush;
@@ -1030,7 +1030,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 				re.BindFrameBuffer(refract_obj_fb_b_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-				re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+				re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 				return App3DFramework::URV_NeedFlush;
 			}
 
@@ -1048,7 +1048,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			re.BindFrameBuffer(refract_obj_fb_f_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+			re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -1072,7 +1072,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			re.BindFrameBuffer(caustics_fb_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+			re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 
 			caustics_grid_->Render();
 			caustics_map_pps_->Apply();
@@ -1089,7 +1089,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 				re.BindFrameBuffer(refract_obj_fb_d_b_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(light_->SMCamera(0)->FarPlane(), 0.0f, 0.0f, 0.0f), 1.0f, 0);
-				re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+				re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 				return App3DFramework::URV_NeedFlush;
 			}
 		}
@@ -1108,7 +1108,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 			re.BindFrameBuffer(refract_obj_fb_b_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+			re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 			return App3DFramework::URV_NeedFlush;
 		}
 
@@ -1127,7 +1127,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(caustics_fb_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-		re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
+		re.CurFrameBuffer()->Viewport()->Camera(light_->SMCamera(0));
 
 		caustics_grid_->Render();
 		caustics_map_pps_->Apply();
@@ -1160,7 +1160,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(shadow_cube_buffer_);
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
-		shadow_cube_buffer_->GetViewport()->camera = dummy_light_->SMCamera(pass - sm_start_pass);
+		shadow_cube_buffer_->Viewport()->Camera(dummy_light_->SMCamera(pass - sm_start_pass));
 
 		return App3DFramework::URV_NeedFlush;
 	}
@@ -1192,7 +1192,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(env_cube_buffer_);
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);
-		env_cube_buffer_->GetViewport()->camera = dummy_light_env_->SMCamera(pass - env_start_pass);
+		env_cube_buffer_->Viewport()->Camera(dummy_light_env_->SMCamera(pass - env_start_pass));
 		
 		return App3DFramework::URV_NeedFlush;
 	}

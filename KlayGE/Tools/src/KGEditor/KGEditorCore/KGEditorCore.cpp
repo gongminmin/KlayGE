@@ -556,9 +556,9 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
-		system_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+		system_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 		selective_fb_ = rf.MakeFrameBuffer();
-		selective_fb_->GetViewport()->camera = system_camera_;
+		selective_fb_->Viewport()->Camera(system_camera_);
 
 		this->UpdateSceneAABB();
 	}
@@ -1205,9 +1205,9 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		CameraPtr camera = (0 == id) ? system_camera_ : this->GetCamera(id);
 
-		re.CurFrameBuffer()->GetViewport()->camera = camera;
-		re.DefaultFrameBuffer()->GetViewport()->camera = camera;
-		selective_fb_->GetViewport()->camera = camera;
+		re.CurFrameBuffer()->Viewport()->Camera(camera);
+		re.DefaultFrameBuffer()->Viewport()->Camera(camera);
+		selective_fb_->Viewport()->Camera(camera);
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
 	}

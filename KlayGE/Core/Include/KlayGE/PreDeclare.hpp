@@ -167,7 +167,7 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderLayout> RenderLayoutPtr;
 	class RenderGraphicsBuffer;
 	typedef std::shared_ptr<RenderGraphicsBuffer> RenderGraphicsBufferPtr;
-	struct Viewport;
+	class Viewport;
 	typedef std::shared_ptr<Viewport> ViewportPtr;
 	class RenderFactory;
 	class RenderModel;

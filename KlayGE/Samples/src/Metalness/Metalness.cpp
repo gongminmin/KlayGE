@@ -131,7 +131,7 @@ void MetalnessApp::OnCreate()
 			KFL_UNUSED(elapsed_time);
 
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			node.TransformToParent(camera.InverseViewMatrix());
 		});

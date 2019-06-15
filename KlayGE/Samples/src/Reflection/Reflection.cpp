@@ -260,7 +260,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	auto back_refl_camera_node = MakeSharedPtr<SceneNode>(
 		L"BackReflectionCameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-	back_refl_camera_node->AddComponent(back_refl_fb_->GetViewport()->camera);
+	back_refl_camera_node->AddComponent(back_refl_fb_->Viewport()->Camera());
 	root_node.AddChild(back_refl_camera_node);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -325,7 +325,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 
 	deferred_rendering_->SetupViewport(0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
 
-	screen_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
 
 void ScreenSpaceReflectionApp::InputHandler(KlayGE::InputEngine const & /*sender*/, KlayGE::InputAction const & action)
@@ -425,7 +425,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 		}
 		else
 		{
-			CameraPtr const & back_camera = back_refl_fb_->GetViewport()->camera;
+			CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
 
 			float3 eye = screen_camera_->EyePos();
 			float3 at = screen_camera_->LookAt();

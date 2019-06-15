@@ -988,15 +988,15 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(fb);
 
-		Viewport const & vp = *fb->GetViewport();
-		if ((vp_x_ != vp.left) || (vp_y_ != vp.top) || (vp_width_ != vp.width) || (vp_height_ != vp.height))
+		Viewport const & vp = *fb->Viewport();
+		if ((vp_x_ != vp.Left()) || (vp_y_ != vp.Top()) || (vp_width_ != vp.Width()) || (vp_height_ != vp.Height()))
 		{
-			glViewport(vp.left, vp.top, vp.width, vp.height);
+			glViewport(vp.Left(), vp.Top(), vp.Width(), vp.Height());
 
-			vp_x_ = vp.left;
-			vp_y_ = vp.top;
-			vp_width_ = vp.width;
-			vp_height_ = vp.height;
+			vp_x_ = vp.Left();
+			vp_y_ = vp.Top();
+			vp_width_ = vp.Width();
+			vp_height_ = vp.Height();
 		}
 	}
 

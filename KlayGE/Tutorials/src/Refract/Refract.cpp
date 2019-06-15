@@ -190,11 +190,11 @@ void Refract::OnCreate()
 
 	backface_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
-	backface_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	backface_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	if (!depth_texture_support_)
 	{
 		backface_depth_buffer_ = rf.MakeFrameBuffer();
-		backface_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+		backface_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Refract.uiml"));

@@ -98,10 +98,10 @@ namespace KlayGE
 
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
-		viewport_->left		= 0;
-		viewport_->top		= 0;
-		viewport_->width	= width_;
-		viewport_->height	= height_;
+		viewport_->Left(0);
+		viewport_->Top(0);
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
@@ -573,8 +573,8 @@ namespace KlayGE
 		}
 
 		// Notify viewports of resize
-		viewport_->width = width_;
-		viewport_->height = height_;
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());

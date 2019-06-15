@@ -113,7 +113,7 @@ namespace KlayGE
 		float sss_strength;
 		params_[0].second->Value(sss_strength);
 
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 		*far_plane_param_ = camera.FarPlane();
 
 		{

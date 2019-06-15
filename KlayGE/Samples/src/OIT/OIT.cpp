@@ -305,7 +305,7 @@ namespace
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			if ((OM_PerPixelLinkedLists == mode_) || (OM_AdaptiveTransparency == mode_) || (OM_RovAdaptiveTransparency == mode_))
 			{
-				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Viewport()->Width());
 			}
 
 			re.Render(*effect, *tech, *rl);
@@ -347,7 +347,7 @@ namespace
 			case OM_RovAdaptiveTransparency:
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					*(effect_->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+					*(effect_->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Viewport()->Width());
 					break;
 				}
 
@@ -466,7 +466,7 @@ void OITApp::OnCreate()
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeling_fbs_[i] = rf.MakeFrameBuffer();
-		peeling_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		peeling_fbs_[i]->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
 
@@ -475,7 +475,7 @@ void OITApp::OnCreate()
 		for (size_t i = 0; i < depth_fbs_.size(); ++ i)
 		{
 			depth_fbs_[i] = rf.MakeFrameBuffer();
-			depth_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+			depth_fbs_[i]->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 		}
 	}
 
@@ -485,14 +485,14 @@ void OITApp::OnCreate()
 	}
 
 	weighted_fb_ = rf.MakeFrameBuffer();
-	weighted_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	weighted_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	if (caps.max_simultaneous_uavs > 0)
 	{
 		opaque_bg_fb_ = rf.MakeFrameBuffer();
-		opaque_bg_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		opaque_bg_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 		linked_list_fb_ = rf.MakeFrameBuffer();
-		linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		linked_list_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 
 	tb_controller_.AttachCamera(this->ActiveCamera());
@@ -635,8 +635,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		start_offset_srv_ = rf.MakeBufferSrv(start_offset_buf_, EF_R32UI);
 		linked_list_fb_->Attach(0, frag_link_uav_);
 		linked_list_fb_->Attach(1, start_offset_uav_);
-		linked_list_fb_->GetViewport()->width = width;
-		linked_list_fb_->GetViewport()->height = height;
+		linked_list_fb_->Viewport()->Width(width);
+		linked_list_fb_->Viewport()->Height(height);
 
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{

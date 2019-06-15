@@ -127,9 +127,9 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
-			Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+			Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
-			float4x4 billboard_mat = camera->InverseViewMatrix();
+			float4x4 billboard_mat = camera.InverseViewMatrix();
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
@@ -449,19 +449,19 @@ namespace KlayGE
 
 		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
 
-		Camera const * camera = fb->GetViewport()->camera.get();
+		Camera const& camera = *fb->Viewport()->Camera();
 		
-		auto const & frustum = camera->ViewFrustum();
+		auto const & frustum = camera.ViewFrustum();
 		std::vector<float4> view_frustum_planes(6);
 		for (size_t i = 0; i < view_frustum_planes.size(); ++ i)
 		{
 			view_frustum_planes[i] = float4(&frustum.FrustumPlane(static_cast<uint32_t>(i)).a());
 		}
 		*(foliage_dist_effect_->ParameterByName("model_mat")) = model_mat_;
-		*(foliage_dist_effect_->ParameterByName("eye_pos")) = camera->EyePos();
+		*(foliage_dist_effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		*(foliage_dist_effect_->ParameterByName("view_frustum_planes")) = view_frustum_planes;
 		*(foliage_dist_effect_->ParameterByName("foliage_texture_world_offset")) = texture_world_offset_;
-		*(foliage_dist_effect_->ParameterByName("fov_scale")) = camera->ProjMatrix()(0, 0);
+		*(foliage_dist_effect_->ParameterByName("fov_scale")) = camera.ProjMatrix()(0, 0);
 
 		uint32_t offset = sizeof(uint32_t);
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
@@ -596,8 +596,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
-		float2 const eye_pos_xz(camera->EyePos().x(), camera->EyePos().z());
+		Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
+		float2 const eye_pos_xz(camera.EyePos().x(), camera.EyePos().z());
 
 		*(effect_->ParameterByName("model_mat")) = model_mat_;
 		*(effect_->ParameterByName("eye_pos_xz")) = eye_pos_xz;

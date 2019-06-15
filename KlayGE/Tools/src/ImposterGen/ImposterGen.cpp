@@ -100,9 +100,9 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	imposter_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(impostors_g_buffer_rt0, 0, 1, 0));
 	imposter_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(impostors_g_buffer_rt1, 0, 1, 0));
 	imposter_fb->Attach(rf.Make2DDsv(size * num_azimuth, size * num_elevation, EF_D24S8, 1, 0));
-	auto const & imposter_camera = imposter_fb->GetViewport()->camera;
-	imposter_fb->GetViewport()->width = size;
-	imposter_fb->GetViewport()->height = size;
+	auto const& imposter_camera = imposter_fb->Viewport()->Camera();
+	imposter_fb->Viewport()->Width(size);
+	imposter_fb->Viewport()->Height(size);
 
 	imposter_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 		Color(0, 0, 0, 0), 1, 0);
@@ -120,7 +120,7 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	{
 		float const azimuth = azimuth_index * azimuth_angle_step;
 
-		imposter_fb->GetViewport()->left = static_cast<int>(azimuth_index * size);
+		imposter_fb->Viewport()->Left(static_cast<int>(azimuth_index * size));
 
 		for (size_t elevation_index = 0; elevation_index < num_elevation; ++ elevation_index)
 		{
@@ -150,7 +150,7 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 			imposter_camera->ProjOrthoOffCenterParams(aabb_es.Min().x(), aabb_es.Max().y(), aabb_es.Max().x(), aabb_es.Min().y(),
 				0.01f, diag_length);
 
-			imposter_fb->GetViewport()->top = static_cast<int>(elevation_index * size);
+			imposter_fb->Viewport()->Top(static_cast<int>(elevation_index * size));
 
 			re.BindFrameBuffer(imposter_fb);
 

@@ -230,7 +230,7 @@ void PostProcessingApp::OnCreate()
 	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	color_fb_ = rf.MakeFrameBuffer();
-	color_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	color_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 }
 
 void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
@@ -398,7 +398,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	{
 		if (active_pp_ == black_hole_)
 		{
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), camera.InverseViewProjMatrix());
 			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), camera.InverseViewProjMatrix());

@@ -19,14 +19,14 @@
 namespace KlayGE
 {
 	Viewport::Viewport()
-		: camera(MakeSharedPtr<Camera>())
+		: camera_(MakeSharedPtr<KlayGE::Camera>())
 	{
 	}
 
-	Viewport::Viewport(int _left, int _top, int _width, int _height)
-		: left(_left), top(_top),
-			width(_width), height(_height),
-			camera(MakeSharedPtr<Camera>())
+	Viewport::Viewport(int left, int top, int width, int height)
+		: left_(left), top_(top),
+			width_(width), height_(height),
+			camera_(MakeSharedPtr<KlayGE::Camera>())
 	{
 	}
 }

@@ -764,7 +764,7 @@ namespace KlayGE
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const& camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		auto const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 		float4x4 const& view_mat = camera.ViewMatrix();
 
 		actived_particles_.clear();

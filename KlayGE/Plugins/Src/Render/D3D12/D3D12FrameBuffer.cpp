@@ -225,10 +225,10 @@ namespace KlayGE
 			d3d_ds_handle_ptr_ = nullptr;
 		}
 
-		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
-		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
-		d3d_viewport_.Width = static_cast<float>(viewport_->width);
-		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->Left());
+		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->Top());
+		d3d_viewport_.Width = static_cast<float>(viewport_->Width());
+		d3d_viewport_.Height = static_cast<float>(viewport_->Height());
 
 		pso_hash_value_ = 0;
 		num_rts_ = 0;

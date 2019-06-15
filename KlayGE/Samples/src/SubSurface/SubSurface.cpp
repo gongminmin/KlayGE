@@ -123,7 +123,7 @@ void SubSurfaceApp::OnCreate()
 
 	back_face_depth_fb_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
-	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	back_face_depth_fb_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 }
 
 void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)

@@ -347,7 +347,7 @@ namespace KlayGE
 	void PointLightSource::UpdateCameras()
 	{
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		auto const& scene_camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 		for (uint32_t i = 0; i < 6; ++i)
 		{
@@ -435,7 +435,7 @@ namespace KlayGE
 	void SpotLightSource::UpdateCamera()
 	{
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		auto const& scene_camera = *re.CurFrameBuffer()->Viewport()->Camera();
 		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, scene_camera.NearPlane(), scene_camera.FarPlane());
 	}
 
@@ -553,7 +553,7 @@ namespace KlayGE
 	void DirectionalLightSource::UpdateCamera()
 	{
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const& scene_camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		auto const& scene_camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 		float3 const& dir = this->Direction();
 

@@ -105,7 +105,7 @@ namespace KlayGE
 	void Renderable::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		if (effect_->CBufferByName("klayge_mesh"))
@@ -210,7 +210,7 @@ namespace KlayGE
 		int32_t lod;
 		if (active_lod_ < 0)
 		{
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 			lod = MathLib::clamp(static_cast<int32_t>(this->CalcLod(camera.EyePos(), camera.ProjMatrix()(0, 0)) + 0.5f),
 				0, static_cast<int32_t>(this->NumLods() - 1));
 		}

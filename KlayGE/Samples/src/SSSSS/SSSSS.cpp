@@ -129,7 +129,7 @@ void SSSSSApp::OnCreate()
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-	scene_camera_ = re.DefaultFrameBuffer()->GetViewport()->camera;
+	scene_camera_ = re.DefaultFrameBuffer()->Viewport()->Camera();
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);

@@ -34,7 +34,7 @@ namespace KlayGE
 		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 		float far_plane = camera.FarPlane();
 
@@ -124,7 +124,7 @@ namespace KlayGE
 	void InfTerrainRenderable::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
@@ -159,7 +159,7 @@ namespace KlayGE
 				auto& inf_terrain_renderable = inf_terrain.BoundRenderableOfType<InfTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+				Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 				float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
 				if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
@@ -719,7 +719,7 @@ namespace KlayGE
 			reset_terrain_(true)
 	{
 		last_eye_pos_ =
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera->EyePos();
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->Viewport()->Camera()->EyePos();
 
 		BOOST_ASSERT(dynamic_cast<HQTerrainRenderable*>(renderable.get()) != nullptr);
 
@@ -732,7 +732,7 @@ namespace KlayGE
 				auto& hq_inf_terrain_renderable = hq_inf_terrain.BoundRenderableOfType<HQTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+				Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 				hq_inf_terrain_renderable.SetMatrices(camera);
 

@@ -403,8 +403,8 @@ void ShadowCubeMap::OnCreate()
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-		shadow_cube_one_buffer_->GetViewport()->camera->OmniDirectionalMode(true);
-		shadow_cube_one_buffer_->GetViewport()->camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+		shadow_cube_one_buffer_->Viewport()->Camera()->OmniDirectionalMode(true);
+		shadow_cube_one_buffer_->Viewport()->Camera()->ProjParams(PI / 2, 1, 0.1f, 500.0f);
 		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));
 		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
 		shadow_cube_one_buffer_->Attach(rf.MakeCubeDsv(shadow_one_depth_tex, 0, 0));
@@ -416,7 +416,7 @@ void ShadowCubeMap::OnCreate()
 		shadow_dual_view_[i] = rf.Make2DRtv(shadow_dual_texs_[i], 0, 1, 0);
 
 		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_dual_buffers_[i]->GetViewport()->camera->ProjParams(PI, 1, 0.1f, 500.0f);
+		shadow_dual_buffers_[i]->Viewport()->Camera()->ProjParams(PI, 1, 0.1f, 500.0f);
 		shadow_dual_buffers_[i]->Attach(FrameBuffer::Attachment::Color0, shadow_dual_view_[i]);
 		shadow_dual_buffers_[i]->Attach(depth_view);
 	}
@@ -631,7 +631,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				float3 const pos = light_->Position();
 				float3 const lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
 
-				auto& camera = *shadow_dual_buffers_[pass]->GetViewport()->camera;
+				auto& camera = *shadow_dual_buffers_[pass]->Viewport()->Camera();
 				camera.LookAtDist(MathLib::length(lookat - pos));
 				camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
 
@@ -691,7 +691,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				renderEngine.BindFrameBuffer(shadow_cube_buffer_);
 				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
-				shadow_cube_buffer_->GetViewport()->camera = light_->SMCamera(pass);
+				shadow_cube_buffer_->Viewport()->Camera(light_->SMCamera(pass));
 
 				for (auto const & mesh : scene_meshes_)
 				{
@@ -733,7 +733,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					float3 const& pos = light_->Position();
 					float3 const lookat = pos + light_->Direction();
 
-					auto& camera = *shadow_cube_one_buffer_->GetViewport()->camera;
+					auto& camera = *shadow_cube_one_buffer_->Viewport()->Camera();
 					camera.LookAtDist(MathLib::length(lookat - pos));
 					camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
 

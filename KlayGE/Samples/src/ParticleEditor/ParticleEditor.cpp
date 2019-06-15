@@ -162,7 +162,7 @@ void ParticleEditorApp::OnCreate()
 
 	scene_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	scene_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
@@ -170,7 +170,7 @@ void ParticleEditorApp::OnCreate()
 	else
 	{
 		scene_depth_buffer_ = rf.MakeFrameBuffer();
-		scene_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+		scene_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
