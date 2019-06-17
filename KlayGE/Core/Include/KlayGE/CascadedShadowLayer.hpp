@@ -166,9 +166,9 @@ namespace KlayGE
 		GraphicsBufferPtr bias_cpu_buff_;
 
 		// For PS implement
-		TexturePtr depth_deriative_tex_;
-		std::vector<ShaderResourceViewPtr> depth_deriative_srvs_;
-		TexturePtr depth_deriative_small_tex_;
+		TexturePtr depth_derivative_tex_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_srvs_;
+		TexturePtr depth_derivative_small_tex_;
 		PostProcessPtr reduce_z_bounds_from_depth_pp_;
 		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;
 		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;

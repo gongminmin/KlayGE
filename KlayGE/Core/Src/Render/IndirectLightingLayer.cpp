@@ -103,6 +103,16 @@ namespace KlayGE
 	{
 		std::string RSM2VPLsSpotName = "RSM2VPLsSpot";
 
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(
+			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R32F, EF_R16F }), 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
+
+		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write);
+
 		rsm_texs_[0] = rt0_tex;
 		rsm_texs_[1] = rt1_tex;
 		rsm_depth_tex_ = depth_tex;
@@ -113,16 +123,6 @@ namespace KlayGE
 		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(2, rsm_depth_tex_);
 		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(3, rsm_depth_derivative_tex_);
 		rsm_to_vpls_pps_[LightSource::LT_Spot]->OutputPin(0, vpl_tex_);
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R32F, EF_R16F }), 1, 0);
-		BOOST_ASSERT(fmt != EF_Unknown);
-
-		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write);
 
 		rsm_to_depth_derivate_pp_ = SyncLoadPostProcess("MultiRes.ppml", "GBuffer2DepthDerivate");
 		rsm_to_depth_derivate_pp_->InputPin(1, rsm_depth_tex_);

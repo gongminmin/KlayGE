@@ -104,17 +104,17 @@ namespace KlayGE
 				caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
 			BOOST_ASSERT(depth_fmt != EF_Unknown);
 
-			depth_deriative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
+			depth_derivative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps(), 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps(), 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 			if (caps.flexible_srvs_support)
 			{
-				depth_deriative_srvs_.resize(depth_deriative_tex_->NumMipMaps());
-				for (uint32_t i = 0; i < depth_deriative_tex_->NumMipMaps(); ++ i)
+				depth_derivative_srvs_.resize(depth_derivative_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < depth_derivative_tex_->NumMipMaps(); ++ i)
 				{
-					depth_deriative_srvs_[i] = rf.MakeTextureSrv(depth_deriative_tex_, 0, 1, i, 1);
+					depth_derivative_srvs_[i] = rf.MakeTextureSrv(depth_derivative_tex_, 0, 1, i, 1);
 				}
 
 				normal_cone_srvs_.resize(normal_cone_tex_->NumMipMaps());
@@ -125,7 +125,7 @@ namespace KlayGE
 			}
 			else
 			{
-				depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+				depth_derivative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
 					multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write);
 				normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
 					multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write);
@@ -172,7 +172,7 @@ namespace KlayGE
 
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_rt0_tex_);
 		gbuffer_to_depth_derivate_pp_->InputPin(1, g_buffer_depth_tex_);
-		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
+		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_derivative_tex_);
 		float delta_x = 1.0f / g_buffer_rt0_tex_->Width(0);
 		float delta_y = 1.0f / g_buffer_rt0_tex_->Height(0);
 		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
@@ -181,14 +181,14 @@ namespace KlayGE
 
 		if (!caps.flexible_srvs_support)
 		{
-			depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
+			depth_derivate_mipmap_pp_->InputPin(0, depth_derivative_tex_);
 		}
-		for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
+		for (uint32_t i = 1; i < depth_derivative_tex_->NumMipMaps(); ++ i)
 		{
-			uint32_t const width = depth_deriative_tex_->Width(i - 1);
-			uint32_t const height = depth_deriative_tex_->Height(i - 1);
-			uint32_t const lower_width = depth_deriative_tex_->Width(i);
-			uint32_t const lower_height = depth_deriative_tex_->Height(i);
+			uint32_t const width = depth_derivative_tex_->Width(i - 1);
+			uint32_t const height = depth_derivative_tex_->Height(i - 1);
+			uint32_t const lower_width = depth_derivative_tex_->Width(i);
+			uint32_t const lower_height = depth_derivative_tex_->Height(i);
 
 			delta_x = 1.0f / width;
 			delta_y = 1.0f / height;
@@ -197,16 +197,16 @@ namespace KlayGE
 
 			if (caps.flexible_srvs_support)
 			{
-				depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_srvs_[i - 1]);
-				depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_tex_, i);
+				depth_derivate_mipmap_pp_->InputPin(0, depth_derivative_srvs_[i - 1]);
+				depth_derivate_mipmap_pp_->OutputPin(0, depth_derivative_tex_, i);
 				depth_derivate_mipmap_pp_->Apply();
 			}
 			else
 			{
-				depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
+				depth_derivate_mipmap_pp_->OutputPin(0, depth_derivative_small_tex_, i - 1);
 				depth_derivate_mipmap_pp_->Apply();
 
-				depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, lower_width, lower_height,
+				depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0, lower_width, lower_height,
 					0, i - 1, 0, 0, lower_width, lower_height);
 			}
 		}
@@ -261,7 +261,7 @@ namespace KlayGE
 
 	void MultiResLayer::SetSubsplatStencil(Camera const & vp_camera)
 	{
-		*subsplat_depth_deriv_tex_param_ = depth_deriative_tex_;
+		*subsplat_depth_deriv_tex_param_ = depth_derivative_tex_;
 		*subsplat_normal_cone_tex_param_ = normal_cone_tex_;
 		*subsplat_depth_normal_threshold_param_ = float2(0.001f * vp_camera.FarPlane(), 0.77f);
 

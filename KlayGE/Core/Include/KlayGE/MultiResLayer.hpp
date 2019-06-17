@@ -64,9 +64,9 @@ namespace KlayGE
 		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
 
-		TexturePtr depth_deriative_tex_;
-		std::vector<ShaderResourceViewPtr> depth_deriative_srvs_;
-		TexturePtr depth_deriative_small_tex_;
+		TexturePtr depth_derivative_tex_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_srvs_;
+		TexturePtr depth_derivative_small_tex_;
 		TexturePtr normal_cone_tex_;
 		std::vector<ShaderResourceViewPtr> normal_cone_srvs_;
 		TexturePtr normal_cone_small_tex_;
