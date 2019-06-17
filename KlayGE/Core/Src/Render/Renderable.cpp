@@ -108,39 +108,45 @@ namespace KlayGE
 		Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
 
-		if (effect_->CBufferByName("klayge_mesh"))
 		{
-			if (&mesh_cbuffer_->OwnerEffect() != effect_.get())
+			auto const* mesh_cbuff = effect_->CBufferByName("klayge_mesh");
+			if (mesh_cbuff && (mesh_cbuff->Size() > 0))
 			{
-				mesh_cbuffer_ = mesh_cbuffer_->Clone(*effect_);
-			}
+				if (&mesh_cbuffer_->OwnerEffect() != effect_.get())
+				{
+					mesh_cbuffer_ = mesh_cbuffer_->Clone(*effect_);
+				}
 
-			effect_->BindCBufferByName("klayge_mesh", mesh_cbuffer_);
+				effect_->BindCBufferByName("klayge_mesh", mesh_cbuffer_);
+			}
 		}
 
-		if (effect_->CBufferByName("klayge_model_camera"))
 		{
-			if (&model_camera_cbuffer_->OwnerEffect() != effect_.get())
+			auto const* model_camera_cbuff = effect_->CBufferByName("klayge_model_camera");
+			if (model_camera_cbuff && (model_camera_cbuff->Size() > 0))
 			{
-				model_camera_cbuffer_ = model_camera_cbuffer_->Clone(*effect_);
-			}
-
-			float4x4 cascade_crop_mat = float4x4::Identity();
-			bool need_cascade_crop_mat = false;
-			if (drl)
-			{
-				int32_t cas_index = drl->CurrCascadeIndex();
-				if (cas_index >= 0)
+				if (&model_camera_cbuffer_->OwnerEffect() != effect_.get())
 				{
-					cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-					need_cascade_crop_mat = true;
+					model_camera_cbuffer_ = model_camera_cbuffer_->Clone(*effect_);
 				}
+
+				float4x4 cascade_crop_mat = float4x4::Identity();
+				bool need_cascade_crop_mat = false;
+				if (drl)
+				{
+					int32_t cas_index = drl->CurrCascadeIndex();
+					if (cas_index >= 0)
+					{
+						cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+						need_cascade_crop_mat = true;
+					}
+				}
+
+				camera.Active(*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
+				model_mat_dirty_ = false;
+
+				effect_->BindCBufferByName("klayge_model_camera", model_camera_cbuffer_);
 			}
-
-			camera.Active(*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
-			model_mat_dirty_ = false;
-
-			effect_->BindCBufferByName("klayge_model_camera", model_camera_cbuffer_);
 		}
 
 		if (select_mode_on_)

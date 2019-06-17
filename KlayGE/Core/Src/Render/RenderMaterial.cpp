@@ -707,7 +707,8 @@ namespace KlayGE
 
 	void RenderMaterial::Active(RenderEffect& effect)
 	{
-		if (effect.CBufferByName("klayge_material"))
+		auto const* mtl_cbuff = effect.CBufferByName("klayge_material");
+		if (mtl_cbuff && (mtl_cbuff->Size() > 0))
 		{
 			if (&cbuffer_->OwnerEffect() != &effect)
 			{
