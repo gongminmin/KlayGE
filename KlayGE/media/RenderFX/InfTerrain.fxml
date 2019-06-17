@@ -7,7 +7,7 @@
 	<parameter type="float" name="base_level"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="culling_eye_pos"/>
 		<parameter type="float4x4" name="inv_virtual_view"/>
 		<parameter type="float" name="offset_y"/>
 	</cbuffer>
@@ -16,8 +16,8 @@
 		<![CDATA[
 float4 GetInfTerrainPosOS(float2 pos, float strength)
 {
-	pos *= 1 + (eye_pos.y - 20) / 80;
-	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y - strength, 1);
+	pos *= 1 + (culling_eye_pos.y - 20) / 80;
+	float4 pos_es = float4(pos.x, -culling_eye_pos.y, pos.y - offset_y - strength, 1);
 	return mul(pos_es, inv_virtual_view);
 }
 		]]>
@@ -354,7 +354,7 @@ TERRAIN_HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<TERR
 	float side_len = max(abs(ip[1].position.x - ip[0].position.x), abs(ip[1].position.x - ip[2].position.x));		// assume square & uniform
 	float diag_len = sqrt(side_len * side_len * 2);
 
-	if (InFrustum(center, eye_pos / world_scale, view_dir, diag_len))
+	if (InFrustum(center, culling_eye_pos / world_scale, view_dir, diag_len))
 	{
 		output.edges[0] = SphereToScreenSpaceTessellation(ip[0].position, ip[1].position, side_len);
 		output.edges[3] = SphereToScreenSpaceTessellation(ip[1].position, ip[2].position, side_len);

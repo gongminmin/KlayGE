@@ -144,7 +144,7 @@ namespace KlayGE
 		float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
 
 		*(effect_->ParameterByName("inv_virtual_view")) = inv_virtual_view;
-		*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
+		*(effect_->ParameterByName("culling_eye_pos")) = camera.EyePos();
 	}
 
 
@@ -462,7 +462,7 @@ namespace KlayGE
 		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
 		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
 
-		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
+		culling_eye_pos_param_ = deferred_effect->ParameterByName("culling_eye_pos");
 		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
 		proj_mat_param_ = deferred_effect->ParameterByName("proj_mat");
 		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
@@ -637,7 +637,7 @@ namespace KlayGE
 		float3 culling_eye = camera.EyePos();
 		culling_eye.x() -= snapped_x_;
 		culling_eye.z() -= snapped_z_;
-		*eye_pos_param_ = culling_eye;
+		*culling_eye_pos_param_ = culling_eye;
 		*view_dir_param_ = camera.ForwardVec();
 	}
 

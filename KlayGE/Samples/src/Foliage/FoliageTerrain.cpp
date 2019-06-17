@@ -100,6 +100,9 @@ namespace KlayGE
 			technique_ = gbuffer_mrt_tech_;
 
 			pos_aabb_ = aabbox;
+
+			mtl_ = MakeSharedPtr<RenderMaterial>();
+			mtl_->Albedo(float4(1, 1, 1, 1));
 		}
 
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
@@ -110,6 +113,8 @@ namespace KlayGE
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);
+
+			this->UpdateBoundBox();
 		}
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)

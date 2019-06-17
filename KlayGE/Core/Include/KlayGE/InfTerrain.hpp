@@ -215,7 +215,7 @@ namespace KlayGE
 		RenderEffectParameter* height_map_param_;
 		RenderEffectParameter* gradient_map_param_;
 		RenderEffectParameter* mask_map_param_;
-		RenderEffectParameter* eye_pos_param_;
+		RenderEffectParameter* culling_eye_pos_param_;
 		RenderEffectParameter* view_dir_param_;
 		RenderEffectParameter* proj_mat_param_;
 		RenderEffectParameter* texture_world_offset_param_;

@@ -287,7 +287,7 @@ namespace
 			}
 
 			XMLNodePtr occlusion_node = root->FirstNode("occlusion");
-			if (normal_node)
+			if (occlusion_node)
 			{
 				XMLAttributePtr attr = occlusion_node->Attrib("texture");
 				if (attr)
@@ -295,7 +295,7 @@ namespace
 					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Occlusion] = std::string(attr->ValueString());
 				}
 
-				attr = normal_node->Attrib("strength");
+				attr = occlusion_node->Attrib("strength");
 				if (attr)
 				{
 					mtl_desc_.mtl_data->occlusion_strength = attr->ValueFloat();
