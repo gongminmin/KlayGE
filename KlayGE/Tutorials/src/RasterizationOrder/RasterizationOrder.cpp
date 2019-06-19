@@ -253,7 +253,7 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	ras_order_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(ras_order_tex_, 0, 1, 0));
 
-	copy_pp_->InputPin(0, ras_order_tex_);
+	copy_pp_->InputPin(0, rf.MakeTextureSrv(ras_order_tex_));
 
 	App3DFramework::OnResize(width, height);
 	UIManager::Instance().SettleCtrls();

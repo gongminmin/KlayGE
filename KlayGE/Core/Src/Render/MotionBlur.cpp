@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/RenderView.hpp>
 
 #include <random>
 
@@ -63,29 +64,31 @@ namespace KlayGE
 		motion_blur_visualize_pp_ = SyncLoadPostProcess("MotionBlur.ppml", "MotionBlurVisualize");
 	}
 
-	void MotionBlurPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void MotionBlurPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		if ((index == 2) && tex)
+		if ((index == 2) && srv)
 		{
 			uint32_t old_width = 0;
 			uint32_t old_height = 0;
-			Texture const * velocity_tex = motion_blur_gather_pp_->InputPin(2).get();
-			if (velocity_tex)
+			auto const* velocity_srv = motion_blur_gather_pp_->InputPin(2).get();
+			if (velocity_srv)
 			{
+				auto const* velocity_tex = velocity_srv->TextureResource().get();
 				old_width = velocity_tex->Width(0);
 				old_height = velocity_tex->Height(0);
 			}
 
-			motion_blur_gather_pp_->InputPin(index, tex);
+			motion_blur_gather_pp_->InputPin(index, srv);
+			auto const& tex = srv->TextureResource();
 			if ((tex->Width(0) != old_width) || (tex->Height(0) != old_height))
 			{
-				this->RecreateTextures(tex);
+				this->RecreateTextures(tex, srv);
 			}
 
 			motion_blur_gather_pp_->SetParam(3, (2 * tex->Height(0) + 1056) / 416.0f);
 		}
 
-		motion_blur_gather_pp_->InputPin(index, tex);
+		motion_blur_gather_pp_->InputPin(index, srv);
 	}
 
 	void MotionBlurPostProcess::SetParam(uint32_t index, uint32_t const & value)
@@ -96,10 +99,10 @@ namespace KlayGE
 			if (value != blur_radius_)
 			{
 				blur_radius_ = value;
-				TexturePtr const & tex = motion_blur_gather_pp_->InputPin(2);
-				if (tex)
+				auto const& srv = motion_blur_gather_pp_->InputPin(2);
+				if (srv)
 				{
-					this->RecreateTextures(tex);
+					this->RecreateTextures(srv->TextureResource(), srv);
 				}
 				motion_blur_tile_max_x_dir_pp_->SetParam(0, static_cast<float>(value));
 				motion_blur_tile_max_y_dir_pp_->SetParam(0, static_cast<float>(value));
@@ -151,7 +154,7 @@ namespace KlayGE
 		}
 	}
 
-	void MotionBlurPostProcess::RecreateTextures(TexturePtr const & tex)
+	void MotionBlurPostProcess::RecreateTextures(TexturePtr const& tex, ShaderResourceViewPtr const& srv)
 	{
 		BOOST_ASSERT(tex);
 
@@ -159,10 +162,13 @@ namespace KlayGE
 		uint32_t const tile_height = tex->Height(0) / blur_radius_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		velocity_tile_max_x_dir_tex_ = rf.MakeTexture2D(tile_width, tex->Height(0), 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		velocity_tile_max_tex_ = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		velocity_neighbor_max_tex_ = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0,
+		auto velocity_tile_max_x_dir_tex = rf.MakeTexture2D(tile_width, tex->Height(0), 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		velocity_tile_max_x_dir_srv_ = rf.MakeTextureSrv(velocity_tile_max_x_dir_tex);
+		auto velocity_tile_max_tex = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		velocity_tile_max_srv_ = rf.MakeTextureSrv(velocity_tile_max_tex);
+		auto velocity_neighbor_max_tex = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
+		velocity_neighbor_max_srv_ = rf.MakeTextureSrv(velocity_neighbor_max_tex);
 
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> random_dis(0, 255);
@@ -178,19 +184,19 @@ namespace KlayGE
 		init_data.data = &rand_data[0];
 		init_data.row_pitch = tile_width;
 		init_data.slice_pitch = tile_width * tile_height;
-		random_tex_ = rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		random_srv_ = rf.MakeTextureSrv(rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 
-		motion_blur_tile_max_x_dir_pp_->InputPin(0, tex);
-		motion_blur_tile_max_x_dir_pp_->OutputPin(0, velocity_tile_max_x_dir_tex_);
+		motion_blur_tile_max_x_dir_pp_->InputPin(0, srv);
+		motion_blur_tile_max_x_dir_pp_->OutputPin(0, velocity_tile_max_x_dir_tex);
 
-		motion_blur_tile_max_y_dir_pp_->InputPin(0, velocity_tile_max_x_dir_tex_);
-		motion_blur_tile_max_y_dir_pp_->OutputPin(0, velocity_tile_max_tex_);
+		motion_blur_tile_max_y_dir_pp_->InputPin(0, velocity_tile_max_x_dir_srv_);
+		motion_blur_tile_max_y_dir_pp_->OutputPin(0, velocity_tile_max_tex);
 
-		motion_blur_neighbor_max_pp_->InputPin(0, velocity_tile_max_tex_);
-		motion_blur_neighbor_max_pp_->OutputPin(0, velocity_neighbor_max_tex_);
+		motion_blur_neighbor_max_pp_->InputPin(0, velocity_tile_max_srv_);
+		motion_blur_neighbor_max_pp_->OutputPin(0, velocity_neighbor_max_tex);
 
-		motion_blur_gather_pp_->InputPin(3, velocity_neighbor_max_tex_);
-		motion_blur_gather_pp_->InputPin(4, random_tex_);
+		motion_blur_gather_pp_->InputPin(3, velocity_neighbor_max_srv_);
+		motion_blur_gather_pp_->InputPin(4, random_srv_);
 
 		this->BindVisualizeTextures();
 	}
@@ -200,11 +206,11 @@ namespace KlayGE
 		switch (visualize_velocity_type_)
 		{
 		case VT_VelocityTileMax:
-			motion_blur_visualize_pp_->InputPin(0, velocity_tile_max_tex_);
+			motion_blur_visualize_pp_->InputPin(0, velocity_tile_max_srv_);
 			break;
 
 		case VT_VelocityNeighborMax:
-			motion_blur_visualize_pp_->InputPin(0, velocity_neighbor_max_tex_);
+			motion_blur_visualize_pp_->InputPin(0, velocity_neighbor_max_srv_);
 			break;
 
 		case VT_Velocity:

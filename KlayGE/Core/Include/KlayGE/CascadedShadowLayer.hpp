@@ -116,7 +116,7 @@ namespace KlayGE
 
 	private:
 		TexturePtr depth_tex_;
-		ShaderResourceViewPtr depth_tex_srv_;
+		ShaderResourceViewPtr depth_srv_;
 		bool cs_support_;
 
 		// For CS implement
@@ -167,7 +167,7 @@ namespace KlayGE
 
 		// For PS implement
 		TexturePtr depth_derivative_tex_;
-		std::vector<ShaderResourceViewPtr> depth_derivative_srvs_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
 		TexturePtr depth_derivative_small_tex_;
 		PostProcessPtr reduce_z_bounds_from_depth_pp_;
 		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;

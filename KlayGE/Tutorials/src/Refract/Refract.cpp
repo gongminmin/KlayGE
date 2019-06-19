@@ -236,7 +236,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-		depth_to_linear_pp_->InputPin(0, backface_ds_tex_);
+		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(backface_ds_tex_));
 		depth_to_linear_pp_->OutputPin(0, backface_depth_tex_);
 	}
 	else

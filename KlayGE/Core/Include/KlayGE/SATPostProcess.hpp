@@ -45,7 +45,7 @@ namespace KlayGE
 	public:
 		SATPostProcess();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcessChain::InputPin;
 	};
 
@@ -55,7 +55,7 @@ namespace KlayGE
 	public:
 		SATPostProcessCS();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcessChain::InputPin;
 	};
 }

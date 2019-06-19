@@ -61,7 +61,9 @@ namespace KlayGE
 		TexturePtr omega_tex_;
 
 		TexturePtr out_real_tex_;
+		ShaderResourceViewPtr out_real_srv_;
 		TexturePtr out_imag_tex_;
+		ShaderResourceViewPtr out_imag_srv_;
 		FrameBufferPtr tex_fb_;
 
 		RenderEffectPtr effect_;

@@ -1155,8 +1155,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		if (light_shaft_on_)
 		{
 			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
-			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingTex(deferred_rendering_->ActiveViewport()));
-			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthTex(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingSrv(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthSrv(deferred_rendering_->ActiveViewport()));
 			light_shaft_pp_->Apply();
 		}
 	}

@@ -242,32 +242,33 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	color_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto color_srv = rf.MakeTextureSrv(color_tex_);
 	color_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
 	color_fb_->Attach(rf.Make2DDsv(width, height, EF_D16, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, color_fb_, 0);
 
-	copy_->InputPin(0, color_tex_);
+	copy_->InputPin(0, color_srv);
 
-	ascii_arts_->InputPin(0, color_tex_);
+	ascii_arts_->InputPin(0, color_srv);
 
-	cartoon_->InputPin(0, deferred_rendering_->GBufferResolvedRT0Tex(0));
-	cartoon_->InputPin(1, deferred_rendering_->ResolvedDepthTex(0));
-	cartoon_->InputPin(2, color_tex_);
+	cartoon_->InputPin(0, deferred_rendering_->GBufferResolvedRT0Srv(0));
+	cartoon_->InputPin(1, deferred_rendering_->ResolvedDepthSrv(0));
+	cartoon_->InputPin(2, color_srv);
 
-	tiling_->InputPin(0, color_tex_);
+	tiling_->InputPin(0, color_srv);
 
-	hdr_->InputPin(0, color_tex_);
+	hdr_->InputPin(0, color_srv);
 
-	night_vision_->InputPin(0, color_tex_);
+	night_vision_->InputPin(0, color_srv);
 
-	sepia_->InputPin(0, color_tex_);
+	sepia_->InputPin(0, color_srv);
 
-	cross_stitching_->InputPin(0, color_tex_);
+	cross_stitching_->InputPin(0, color_srv);
 
-	frosted_glass_->InputPin(0, color_tex_);
+	frosted_glass_->InputPin(0, color_srv);
 
-	black_hole_->InputPin(0, color_tex_);
+	black_hole_->InputPin(0, color_srv);
 
 	UIManager::Instance().SettleCtrls();
 }

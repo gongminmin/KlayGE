@@ -469,6 +469,7 @@ void OITApp::OnCreate()
 		peeling_fbs_[i]->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
+	peeled_srvs_.resize(peeling_fbs_.size());
 
 	if (!depth_texture_support_)
 	{
@@ -595,6 +596,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		peeled_srvs_[i] = rf.MakeTextureSrv(peeled_texs_[i]);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(peeled_texs_[i], 0, 1, 0));
 		peeling_fbs_[i]->Attach(depth_views_[i % 2]);
@@ -905,7 +907,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						re.BindFrameBuffer(FrameBufferPtr());
 						for (size_t i = 0; i < num_layers_; ++ i)
 						{
-							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->InputPin(0, peeled_srvs_[num_layers_ - 1 - i]);
 							blend_pp_->Apply();
 						}
 
@@ -1029,7 +1031,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						re.BindFrameBuffer(FrameBufferPtr());
 						for (size_t i = 0; i < num_layers_; ++ i)
 						{
-							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->InputPin(0, peeled_srvs_[num_layers_ - 1 - i]);
 							blend_pp_->Apply();
 						}
 

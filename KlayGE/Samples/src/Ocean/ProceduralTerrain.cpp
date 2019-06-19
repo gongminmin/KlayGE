@@ -24,6 +24,7 @@ namespace KlayGE
 		BOOST_ASSERT(height_fmt != EF_Unknown);
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		height_map_srv_ = rf.MakeTextureSrv(height_map_tex_);
 		height_map_cpu_tex_ = rf.MakeTexture2D(height_map_tex_->Width(0), height_map_tex_->Height(0),
 			1, 1, height_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
@@ -42,6 +43,7 @@ namespace KlayGE
 		}
 		gradient_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, gradient_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		gradient_map_srv_ = rf.MakeTextureSrv(gradient_map_tex_);
 		gradient_map_cpu_tex_ = rf.MakeTexture2D(gradient_map_tex_->Width(0), gradient_map_tex_->Height(0),
 			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
@@ -58,11 +60,11 @@ namespace KlayGE
 
 		height_pp_->OutputPin(0, height_map_tex_);
 
-		gradient_pp_->InputPin(0, height_map_tex_);
+		gradient_pp_->InputPin(0, height_map_srv_);
 		gradient_pp_->OutputPin(0, gradient_map_tex_);
 
-		mask_pp_->InputPin(0, height_map_tex_);
-		mask_pp_->InputPin(1, gradient_map_tex_);
+		mask_pp_->InputPin(0, height_map_srv_);
+		mask_pp_->InputPin(1, gradient_map_srv_);
 		mask_pp_->OutputPin(0, mask_map_tex_);
 
 		mvp_wo_oblique_param_ = effect_->ParameterByName("mvp_wo_oblique");

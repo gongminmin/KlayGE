@@ -52,7 +52,7 @@ namespace KlayGE
 		MotionBlurPostProcess();
 
 		using PostProcess::InputPin;
-		void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 
 		using PostProcess::SetParam;
 		void SetParam(uint32_t index, uint32_t const & value) override;
@@ -61,7 +61,7 @@ namespace KlayGE
 		void Apply() override;
 
 	private:
-		void RecreateTextures(TexturePtr const & tex);
+		void RecreateTextures(TexturePtr const& tex, ShaderResourceViewPtr const& srv);
 		void BindVisualizeTextures();
 
 	private:
@@ -71,17 +71,16 @@ namespace KlayGE
 		uint32_t blur_radius_;
 		uint32_t reconstruction_samples_;
 
-		TexturePtr velocity_tile_max_x_dir_tex_;
-		TexturePtr velocity_tile_max_tex_;
-		TexturePtr velocity_neighbor_max_tex_;
-		TexturePtr random_tex_;
+		ShaderResourceViewPtr velocity_tile_max_x_dir_srv_;
+		ShaderResourceViewPtr velocity_tile_max_srv_;
+		ShaderResourceViewPtr velocity_neighbor_max_srv_;
+		ShaderResourceViewPtr random_srv_;
 
 		PostProcessPtr motion_blur_tile_max_x_dir_pp_;
 		PostProcessPtr motion_blur_tile_max_y_dir_pp_;
 		PostProcessPtr motion_blur_neighbor_max_pp_;
 		PostProcessPtr motion_blur_gather_pp_;
 		PostProcessPtr motion_blur_visualize_pp_;
-
 	};
 }
 

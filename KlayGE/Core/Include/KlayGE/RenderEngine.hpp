@@ -398,21 +398,29 @@ namespace KlayGE
 		FrameBufferPtr screen_frame_buffer_;
 		SceneNodePtr screen_frame_buffer_camera_node_;
 		TexturePtr ds_tex_;
+		ShaderResourceViewPtr ds_srv_;
 		FrameBufferPtr hdr_frame_buffer_;
 		TexturePtr hdr_tex_;
+		ShaderResourceViewPtr hdr_srv_;
 		FrameBufferPtr post_tone_mapping_frame_buffer_;
 		TexturePtr post_tone_mapping_tex_;
+		ShaderResourceViewPtr post_tone_mapping_srv_;
 		FrameBufferPtr resize_frame_buffer_;
 		TexturePtr resize_tex_;
+		ShaderResourceViewPtr resize_srv_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
+		ShaderResourceViewPtr mono_srv_;
 		FrameBufferPtr default_frame_buffers_[4];
 
 		FrameBufferPtr overlay_frame_buffer_;
 		TexturePtr overlay_tex_;
+		ShaderResourceViewPtr overlay_srv_;
 
 		TexturePtr smaa_edges_tex_;
+		ShaderResourceViewPtr smaa_edges_srv_;
 		TexturePtr smaa_blend_tex_;
+		ShaderResourceViewPtr smaa_blend_srv_;
 
 		RenderLayoutPtr so_buffers_;
 

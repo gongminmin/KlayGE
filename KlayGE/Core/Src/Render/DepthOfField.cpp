@@ -112,12 +112,13 @@ namespace KlayGE
 		return show_blur_factor_;
 	}
 
-	void DepthOfField::InputPin(uint32_t index, TexturePtr const& tex)
+	void DepthOfField::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 			if (!spread_tex_ || spread_tex_->Width(0) != width || spread_tex_->Height(0) != height)
@@ -144,7 +145,7 @@ namespace KlayGE
 					normalization_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 				}
 
-				sat_pp_->InputPin(0, spread_tex_);
+				sat_pp_->InputPin(0, rf.MakeTextureSrv(spread_tex_));
 				sat_pp_->OutputPin(0, spread_tex_);
 			}
 		}
@@ -237,12 +238,13 @@ namespace KlayGE
 		return lum_threshold_;
 	}
 
-	void BokehFilter::InputPin(uint32_t index, TexturePtr const& tex)
+	void BokehFilter::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			uint32_t const in_width = tex->Width(0) / 2;
 			uint32_t const in_height = tex->Height(0) / 2;
 			uint32_t const out_width = in_width * 2 + max_radius_ * 4;
@@ -349,12 +351,12 @@ namespace KlayGE
 				merge_bokeh_pp_->SetParam(
 					1, float4(static_cast<float>(out_width), static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height));
 				merge_bokeh_pp_->SetParam(4, static_cast<float>(in_width + max_radius_ * 4));
-				merge_bokeh_pp_->InputPin(0, bokeh_tex_);
+				merge_bokeh_pp_->InputPin(0, rf.MakeTextureSrv(bokeh_tex_));
 			}
 		}
 		else
 		{
-			merge_bokeh_pp_->InputPin(index, tex);
+			merge_bokeh_pp_->InputPin(index, srv);
 		}
 	}
 

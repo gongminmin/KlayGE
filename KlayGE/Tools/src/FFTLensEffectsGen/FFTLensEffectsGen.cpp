@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 	TexturePtr pattern_imag_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	GpuFftPS fft(WIDTH, HEIGHT, true);
-	fft.Execute(pattern_real_tex, pattern_imag_tex, real_tex, empty_tex);
+	fft.Execute(pattern_real_tex, pattern_imag_tex, rf.MakeTextureSrv(real_tex), rf.MakeTextureSrv(empty_tex));
 
 	SaveTexture(pattern_real_tex, "lens_effects_real.dds");
 	SaveTexture(pattern_imag_tex, "lens_effects_imag.dds");

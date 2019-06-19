@@ -872,12 +872,13 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(ds_view);
 
 	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	fog_srv_ = rf.MakeTextureSrv(fog_tex_);
 	fog_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_renderable_)->SceneTexture(scene_tex_);
 
-	blend_pp_->InputPin(0, scene_tex_);
+	blend_pp_->InputPin(0, rf.MakeTextureSrv(scene_tex_));
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -962,7 +963,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(false);
 			particles_->Visible(false);
 
-			blend_pp_->InputPin(1, fog_tex_);
+			blend_pp_->InputPin(1, fog_srv_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);

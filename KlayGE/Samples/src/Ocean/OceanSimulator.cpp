@@ -128,7 +128,7 @@ namespace KlayGE
 		re.BindFrameBuffer(tex_fb_);
 		re.Render(*effect_, *update_spectrum_tech_, *quad_layout_);
 
-		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_tex_, out_imag_tex_);
+		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_srv_, out_imag_srv_);
 
 		re.BindFrameBuffer(displacement_fb_);
 		re.Render(*effect_, *update_displacement_tech_, *quad_layout_);
@@ -186,7 +186,9 @@ namespace KlayGE
 		gradient_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(gradient_tex_, 0, 1, 0));
 
 		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_real_srv_ = rf.MakeTextureSrv(out_real_tex_);
 		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_imag_srv_ = rf.MakeTextureSrv(out_imag_tex_);
 		tex_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(out_real_tex_, 0, 1, 0));
 		tex_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(out_imag_tex_, 0, 1, 0));
 

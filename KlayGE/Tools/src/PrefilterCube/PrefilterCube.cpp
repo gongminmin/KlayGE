@@ -40,10 +40,12 @@ namespace
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		auto in_srv = rf.MakeTextureSrv(in_tex);
+
 		PostProcessPtr diff_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeDiffuse");
 		PostProcessPtr spec_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeSpecular");
-		diff_pp->InputPin(0, in_tex);
-		spec_pp->InputPin(0, in_tex);
+		diff_pp->InputPin(0, in_srv);
+		spec_pp->InputPin(0, in_srv);
 
 		TexturePtr out_tex = rf.MakeTextureCube(in_width, out_num_mipmaps, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write);
 

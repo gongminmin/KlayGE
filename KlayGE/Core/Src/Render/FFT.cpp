@@ -37,7 +37,9 @@ namespace KlayGE
 		log_y_ = static_cast<uint32_t>(log(static_cast<float>(height_)) / log(2.0f));
 
 		lookup_i_wr_wi_x_tex_.resize(log_x_);
+		lookup_i_wr_wi_x_srv_.resize(log_x_);
 		lookup_i_wr_wi_y_tex_.resize(log_y_);
+		lookup_i_wr_wi_y_srv_.resize(log_y_);
 
 		std::vector<half> lookup_i_wr_wi_x(log_x_ * width_ * 4);
 		std::vector<half> lookup_i_wr_wi_y(log_y_ * height_ * 4);
@@ -56,6 +58,7 @@ namespace KlayGE
 			init_data.row_pitch = width_ * sizeof(half) * 4;
 			init_data.slice_pitch = init_data.row_pitch;
 			lookup_i_wr_wi_x_tex_[i] = rf.MakeTexture2D(width_, 1, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			lookup_i_wr_wi_x_srv_[i] = rf.MakeTextureSrv(lookup_i_wr_wi_x_tex_[i]);
 			ptr += width_ * 4;
 		}
 
@@ -68,20 +71,25 @@ namespace KlayGE
 			init_data.row_pitch = sizeof(half) * 4;
 			init_data.slice_pitch = init_data.row_pitch * height_;
 			lookup_i_wr_wi_y_tex_[i] = rf.MakeTexture2D(1, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			lookup_i_wr_wi_y_srv_[i] = rf.MakeTextureSrv(lookup_i_wr_wi_y_tex_[i]);
 			ptr += height_ * 4;
 		}
 
-		tmp_real_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		tmp_real_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		for (uint32_t i = 0; i < 2; ++i)
+		{
+			tmp_real_tex_[i] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			tmp_real_srv_[i] = rf.MakeTextureSrv(tmp_real_tex_[i]);
+
+			tmp_imag_tex_[i] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			tmp_imag_srv_[i] = rf.MakeTextureSrv(tmp_imag_tex_[i]);
+		}
 
 		fft_x_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_x");
 		fft_y_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_y");
 	}
 
-	void GpuFftPS::Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag)
+	void GpuFftPS::Execute(TexturePtr const& out_real, TexturePtr const& out_imag,
+		ShaderResourceViewPtr const& in_real, ShaderResourceViewPtr const& in_imag)
 	{
 		int active = 0;
 
@@ -94,10 +102,10 @@ namespace KlayGE
 			}
 			else
 			{
-				fft_x_pp_->InputPin(0, tmp_real_tex_[active]);
-				fft_x_pp_->InputPin(1, tmp_imag_tex_[active]);
+				fft_x_pp_->InputPin(0, tmp_real_srv_[active]);
+				fft_x_pp_->InputPin(1, tmp_imag_srv_[active]);
 			}
-			fft_x_pp_->InputPin(2, lookup_i_wr_wi_x_tex_[i]);
+			fft_x_pp_->InputPin(2, lookup_i_wr_wi_x_srv_[i]);
 			fft_x_pp_->OutputPin(0, tmp_real_tex_[!active]);
 			fft_x_pp_->OutputPin(1, tmp_imag_tex_[!active]);
 			fft_x_pp_->Apply();
@@ -107,9 +115,9 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < log_y_; ++ i)
 		{
-			fft_y_pp_->InputPin(0, tmp_real_tex_[active]);
-			fft_y_pp_->InputPin(1, tmp_imag_tex_[active]);
-			fft_y_pp_->InputPin(2, lookup_i_wr_wi_y_tex_[i]);
+			fft_y_pp_->InputPin(0, tmp_real_srv_[active]);
+			fft_y_pp_->InputPin(1, tmp_imag_srv_[active]);
+			fft_y_pp_->InputPin(2, lookup_i_wr_wi_y_srv_[i]);
 			if (log_y_ - 1 == i)
 			{
 				if (forward_)
@@ -263,8 +271,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
 	}
 
-	void GpuFftCS4::Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag)
+	void GpuFftCS4::Execute(
+		TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real, ShaderResourceViewPtr const& in_imag)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -393,11 +401,14 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		tmp_real_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
-		tmp_imag_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+		for (uint32_t i = 0; i < 2; ++i)
+		{
+			tmp_real_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+			tmp_real_srv_[i] = rf.MakeTextureSrv(tmp_real_tex_[i]);
 
-		tmp_real_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
-		tmp_imag_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+			tmp_imag_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+			tmp_imag_srv_[i] = rf.MakeTextureSrv(tmp_imag_tex_[i]);
+		}
 
 		effect_ = SyncLoadRenderEffect("FFT.fxml");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A5");
@@ -410,8 +421,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
 	}
 
-	void GpuFftCS5::Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag)
+	void GpuFftCS5::Execute(
+		TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real, ShaderResourceViewPtr const& in_imag)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -442,7 +453,7 @@ namespace KlayGE
 				phase_base *= 8;
 				*(effect_->ParameterByName("istride2")) = uint4(istride, 0, istride - 1, static_cast<uint32_t>(-1));
 				*(effect_->ParameterByName("phase_base2")) = phase_base;
-				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_ / 8, height_, 1 == istride, false);
+				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_srv_[!index], tmp_imag_srv_[!index], width_ / 8, height_, 1 == istride, false);
 				index = !index;
 
 				t /= 8;
@@ -462,11 +473,11 @@ namespace KlayGE
 			*(effect_->ParameterByName("phase_base2")) = phase_base;
 			if (1 == istride)
 			{
-				this->Radix008A(out_real, out_imag, tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+				this->Radix008A(out_real, out_imag, tmp_real_srv_[!index], tmp_imag_srv_[!index], width_, height_ / 8, false, 1 == istride);
 			}
 			else
 			{
-				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_srv_[!index], tmp_imag_srv_[!index], width_, height_ / 8, false, 1 == istride);
 			}
 			index = !index;
 
@@ -479,11 +490,11 @@ namespace KlayGE
 				*(effect_->ParameterByName("phase_base2")) = phase_base;
 				if (1 == istride)
 				{
-					this->Radix008A(out_real, out_imag, tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+					this->Radix008A(out_real, out_imag, tmp_real_srv_[!index], tmp_imag_srv_[!index], width_, height_ / 8, false, 1 == istride);
 				}
 				else
 				{
-					this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+					this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_srv_[!index], tmp_imag_srv_[!index], width_, height_ / 8, false, 1 == istride);
 				}
 				index = !index;
 
@@ -494,17 +505,16 @@ namespace KlayGE
 		re.BindFrameBuffer(old_fb);
 	}
 
-	void GpuFftCS5::Radix008A(TexturePtr const & dst_real_tex, TexturePtr const & dst_imag_tex,
-					TexturePtr const & src_real_tex, TexturePtr const & src_imag_tex,
-					uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y)
+	void GpuFftCS5::Radix008A(TexturePtr const& dst_real_tex, TexturePtr const& dst_imag_tex, ShaderResourceViewPtr const& src_real_srv,
+		ShaderResourceViewPtr const& src_imag_srv, uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y)
 	{
 		// Setup execution configuration
 		uint32_t grid_x = (thread_x + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
 		uint32_t grid_y = (thread_y + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
 
 		// Buffers
-		*(effect_->ParameterByName("src_real_tex")) = src_real_tex;
-		*(effect_->ParameterByName("src_imag_tex")) = src_imag_tex;
+		*(effect_->ParameterByName("src_real_tex")) = src_real_srv;
+		*(effect_->ParameterByName("src_imag_tex")) = src_imag_srv;
 		*(effect_->ParameterByName("dst_real_tex")) = dst_real_tex;
 		*(effect_->ParameterByName("dst_imag_tex")) = dst_imag_tex;
 

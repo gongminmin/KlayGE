@@ -466,11 +466,12 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto depth_srv = rf.MakeTextureSrv(depth_tex_);
 
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-		depth_to_linear_pp_->InputPin(0, ds_tex_);
+		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(ds_tex_));
 		depth_to_linear_pp_->OutputPin(0, depth_tex_);
 	}
 
@@ -479,37 +480,40 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	BOOST_ASSERT(color_fmt != EF_Unknown);
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto color_srv = rf.MakeTextureSrv(color_tex_);
 	clr_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(ds_view);
 
 	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
 	BOOST_ASSERT(motion_fmt != EF_Unknown);
 	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto velocity_srv = rf.MakeTextureSrv(velocity_tex_);
 	velocity_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(velocity_tex_, 0, 1, 0));
 	velocity_fb_->Attach(ds_view);
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto dof_srv = rf.MakeTextureSrv(dof_tex_);
 
 	if (depth_of_field_)
 	{
-		depth_of_field_->InputPin(0, color_tex_);
-		depth_of_field_->InputPin(1, depth_tex_);
+		depth_of_field_->InputPin(0, color_srv);
+		depth_of_field_->InputPin(1, depth_srv);
 		depth_of_field_->OutputPin(0, dof_tex_);
 	}
-	depth_of_field_copy_pp_->InputPin(0, color_tex_);
+	depth_of_field_copy_pp_->InputPin(0, color_srv);
 	depth_of_field_copy_pp_->OutputPin(0, dof_tex_);
 
 	if (bokeh_filter_)
 	{
-		bokeh_filter_->InputPin(0, color_tex_);
-		bokeh_filter_->InputPin(1, depth_tex_);
+		bokeh_filter_->InputPin(0, color_srv);
+		bokeh_filter_->InputPin(1, depth_srv);
 		bokeh_filter_->OutputPin(0, dof_tex_);
 	}
 
-	motion_blur_->InputPin(0, dof_tex_);
-	motion_blur_->InputPin(1, depth_tex_);
-	motion_blur_->InputPin(2, velocity_tex_);
-	motion_blur_copy_pp_->InputPin(0, dof_tex_);
+	motion_blur_->InputPin(0, dof_srv);
+	motion_blur_->InputPin(1, depth_srv);
+	motion_blur_->InputPin(2, velocity_srv);
+	motion_blur_copy_pp_->InputPin(0, dof_srv);
 
 	UIManager::Instance().SettleCtrls();
 }

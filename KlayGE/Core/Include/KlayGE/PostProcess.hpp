@@ -33,6 +33,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {
@@ -116,9 +117,8 @@ namespace KlayGE
 		virtual uint32_t NumInputPins() const;
 		virtual uint32_t InputPinByName(std::string_view name) const;
 		virtual std::string const & InputPinName(uint32_t index) const;
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
-		virtual void InputPin(uint32_t index, ShaderResourceViewPtr const & tex);
-		virtual TexturePtr const & InputPin(uint32_t index) const;
+		virtual void InputPin(uint32_t index, ShaderResourceViewPtr const& srv);
+		virtual ShaderResourceViewPtr const& InputPin(uint32_t index) const;
 
 		virtual uint32_t NumOutputPins() const;
 		virtual uint32_t OutputPinByName(std::string_view name) const;
@@ -273,19 +273,19 @@ namespace KlayGE
 		virtual void GetParam(uint32_t index, std::vector<float4>& value);
 		virtual void GetParam(uint32_t index, std::vector<float4x4>& value);
 
-		virtual uint32_t NumInputPins() const;
-		virtual uint32_t InputPinByName(std::string_view name) const;
-		virtual std::string const & InputPinName(uint32_t index) const;
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
-		virtual TexturePtr const & InputPin(uint32_t index) const;
+		uint32_t NumInputPins() const override;
+		uint32_t InputPinByName(std::string_view name) const override;
+		std::string const& InputPinName(uint32_t index) const override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
+		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 
-		virtual uint32_t NumOutputPins() const;
-		virtual uint32_t OutputPinByName(std::string_view name) const;
-		virtual std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		virtual TexturePtr const & OutputPin(uint32_t index) const;
+		uint32_t NumOutputPins() const override;
+		uint32_t OutputPinByName(std::string_view name) const override;
+		std::string const& OutputPinName(uint32_t index) const override;
+		void OutputPin(uint32_t index, TexturePtr const& tex, int level = 0, int array_index = 0, int face = 0) override;
+		TexturePtr const& OutputPin(uint32_t index) const override;
 
-		virtual void Apply();
+		void Apply() override;
 
 	protected:
 		std::vector<PostProcessPtr> pp_chain_;
@@ -299,7 +299,7 @@ namespace KlayGE
 			int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableBoxFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -325,7 +325,7 @@ namespace KlayGE
 			int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableGaussianFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -352,7 +352,7 @@ namespace KlayGE
 			int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableBilateralFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -379,7 +379,7 @@ namespace KlayGE
 		SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir);
 		virtual ~SeparableLogGaussianFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -414,21 +414,22 @@ namespace KlayGE
 			this->Append(MakeSharedPtr<T>(effect_y, tech_y, kernel_radius, multiplier, false));
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex)
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override
 		{
-			pp_chain_[0]->InputPin(index, tex);
+			pp_chain_[0]->InputPin(index, srv);
 
 			if (0 == index)
 			{
+				auto const* tex = srv->TextureResource().get();
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
 						1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				pp_chain_[0]->OutputPin(0, blur_x);
-				pp_chain_[1]->InputPin(0, blur_x);
+				pp_chain_[1]->InputPin(0, rf.MakeTextureSrv(blur_x));
 			}
 			else
 			{
-				pp_chain_[1]->InputPin(index, tex);
+				pp_chain_[1]->InputPin(index, srv);
 			}
 		}
 
@@ -441,10 +442,10 @@ namespace KlayGE
 	public:
 		BicubicFilteringPostProcess();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		virtual void SetParam(uint32_t index, float2 const & value) override;
+		void SetParam(uint32_t index, float2 const& value) override;
 		using PostProcess::SetParam;
 	};
 
@@ -455,7 +456,7 @@ namespace KlayGE
 
 		void ESMScaleFactor(float factor, Camera const & camera);
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 	};
 }

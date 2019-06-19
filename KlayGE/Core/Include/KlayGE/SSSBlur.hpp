@@ -46,7 +46,7 @@ namespace KlayGE
 	public:
 		explicit SSSBlurPP(bool multi_sample);
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
 		virtual void Apply() override;

@@ -83,12 +83,13 @@ namespace KlayGE
 		far_plane_param_ = effect->ParameterByName("far_plane");
 	}
 
-	void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
+	void SSSBlurPP::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			blur_x_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(), tex->SampleCount(), tex->SampleQuality(),
 				EAH_GPU_Read | EAH_GPU_Write);

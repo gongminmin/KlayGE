@@ -245,13 +245,14 @@ namespace KlayGE
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
 
-		DepthStencilViewPtr ds_view;
+		DepthStencilViewPtr ds_dsv;
 		if (hdr_pp_ || post_tone_mapping_pp_ || (settings.stereo_method != STM_None))
 		{
 			ds_tex_ = this->ScreenDepthStencilTexture();
 			if (ds_tex_ && (screen_width == render_width) && (screen_height == render_height))
 			{
-				ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+				ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+				ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 			}
 			else
 			{
@@ -270,7 +271,8 @@ namespace KlayGE
 						fmt = EF_D16;
 					}
 					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-					ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+					ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+					ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 				}
 				else
 				{
@@ -285,7 +287,7 @@ namespace KlayGE
 
 						fmt = EF_D16;
 					}
-					ds_view = rf.Make2DDsv(render_width, render_height, fmt, 1, 0);
+					ds_dsv = rf.Make2DDsv(render_width, render_height, fmt, 1, 0);
 				}
 			}
 		}
@@ -303,8 +305,8 @@ namespace KlayGE
 			}
 			auto fmt = caps.BestMatchTextureRenderTargetFormat(fmt_options, 1, 0);
 
-			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
-				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			mono_srv_ = rf.MakeTextureSrv(mono_tex_);
 			mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(mono_tex_, 0, 1, 0));
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
@@ -317,18 +319,19 @@ namespace KlayGE
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			overlay_srv_ = rf.MakeTextureSrv(overlay_tex_);
 			overlay_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(overlay_tex_, 0, 1, 0));
 
-			DepthStencilViewPtr screen_size_ds_view;
+			DepthStencilViewPtr screen_size_ds_dsv;
 			if (need_resize)
 			{
-				screen_size_ds_view = rf.Make2DDsv(screen_width, screen_height, ds_view->Format(), 1, 0);
+				screen_size_ds_dsv = rf.Make2DDsv(screen_width, screen_height, ds_dsv->Format(), 1, 0);
 			}
 			else
 			{
-				screen_size_ds_view = ds_view;
+				screen_size_ds_dsv = ds_dsv;
 			}
-			overlay_frame_buffer_->Attach(screen_size_ds_view);
+			overlay_frame_buffer_->Attach(screen_size_ds_dsv);
 		}
 		else
 		{
@@ -342,6 +345,7 @@ namespace KlayGE
 
 				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
 					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				resize_srv_ = rf.MakeTextureSrv(resize_tex_);
 				resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(resize_tex_, 0, 1, 0));
 
 				ElementFormat ds_fmt;
@@ -367,19 +371,21 @@ namespace KlayGE
 			auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_edges_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
 
 			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_blend_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
 
-			auto smaa_ds_view = rf.Make2DDsv(render_width, render_height, EF_D24S8, 1, 0);
+			auto smaa_ds_dsv = rf.Make2DDsv(render_width, render_height, EF_D24S8, 1, 0);
 
 			smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
-			smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+			smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 
-			smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
+			smaa_blending_weight_pp_->InputPin(0, smaa_edges_srv_);
 			smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
-			smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+			smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 		}
 		
 		if (post_tone_mapping_pp_)
@@ -392,8 +398,9 @@ namespace KlayGE
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
 			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0));
-			post_tone_mapping_frame_buffer_->Attach(ds_view);
+			post_tone_mapping_frame_buffer_->Attach(ds_dsv);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 		}
@@ -407,8 +414,9 @@ namespace KlayGE
 				: MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+			hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 			hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
-			hdr_frame_buffer_->Attach(ds_view);
+			hdr_frame_buffer_->Attach(ds_dsv);
 
 			default_frame_buffers_[0] = hdr_frame_buffer_;
 		}
@@ -463,12 +471,17 @@ namespace KlayGE
 		hdr_frame_buffer_.reset();
 
 		overlay_tex_.reset();
+		overlay_tex_.reset();
+		mono_tex_.reset();
 		mono_tex_.reset();
 		resize_tex_.reset();
+		resize_srv_.reset();
 		hdr_tex_.reset();
-		hdr_tex_.reset();
+		hdr_srv_.reset();
 		ds_tex_.reset();
+		ds_srv_.reset();
 		post_tone_mapping_tex_.reset();
+		post_tone_mapping_srv_.reset();
 
 		for (int i = 3; i >= 0; -- i)
 		{
@@ -662,21 +675,23 @@ namespace KlayGE
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			DepthStencilViewPtr ds_view;
+			DepthStencilViewPtr ds_dsv;
 			if (hdr_pp_ || post_tone_mapping_pp_ || (stereo_method_ != STM_None))
 			{
 				ElementFormat fmt = ds_tex_->Format();
 				ds_tex_ = this->ScreenDepthStencilTexture();
 				if (ds_tex_ && (new_screen_width == new_render_width) && (new_screen_height == new_render_height))
 				{
-					ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+					ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+					ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 				}
 				else
 				{
 					if (caps.depth_texture_support)
 					{
 						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-						ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+						ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+						ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 					}
 					else
 					{
@@ -691,7 +706,7 @@ namespace KlayGE
 
 							fmt = EF_D16;
 						}
-						ds_view = rf.Make2DDsv(new_render_width, new_render_height, fmt, 1, 0);
+						ds_dsv = rf.Make2DDsv(new_render_width, new_render_height, fmt, 1, 0);
 					}
 				}
 			}
@@ -703,6 +718,7 @@ namespace KlayGE
 			{
 				ElementFormat fmt = mono_tex_->Format();
 				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				mono_srv_ = rf.MakeTextureSrv(mono_tex_);
 				mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(mono_tex_, 0, 1, 0));
 
 				default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = mono_frame_buffer_;
@@ -730,6 +746,7 @@ namespace KlayGE
 					}
 
 					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					resize_srv_ = rf.MakeTextureSrv(resize_tex_);
 					resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(resize_tex_, 0, 1, 0));
 
 					ElementFormat ds_fmt;
@@ -772,25 +789,28 @@ namespace KlayGE
 			{
 				smaa_edges_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_edges_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
 				smaa_blend_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_blend_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
 
-				auto smaa_ds_view = rf.Make2DDsv(new_render_width, new_render_height, EF_D24S8, 1, 0);
+				auto smaa_ds_dsv = rf.Make2DDsv(new_render_width, new_render_height, EF_D24S8, 1, 0);
 
 				smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
-				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 
-				smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
+				smaa_blending_weight_pp_->InputPin(0, smaa_edges_srv_);
 				smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
-				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 			}
 			if (post_tone_mapping_pp_)
 			{
 				ElementFormat fmt = post_tone_mapping_tex_->Format();
 				post_tone_mapping_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write);
+				post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
 				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0));
-				post_tone_mapping_frame_buffer_->Attach(ds_view);
+				post_tone_mapping_frame_buffer_->Attach(ds_dsv);
 
 				default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 			}
@@ -799,8 +819,9 @@ namespace KlayGE
 				ElementFormat fmt = hdr_tex_->Format();
 				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+				hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 				hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
-				hdr_frame_buffer_->Attach(ds_view);
+				hdr_frame_buffer_->Attach(ds_dsv);
 
 				default_frame_buffers_[0] = hdr_frame_buffer_;
 			}
@@ -945,10 +966,10 @@ namespace KlayGE
 
 		if (!this->ScreenDepthStencilTexture() || need_resize)
 		{
-			auto const & ds_view = this->DefaultFrameBuffer()->AttachedDsv();
-			if (ds_view)
+			auto const & ds_dsv = this->DefaultFrameBuffer()->AttachedDsv();
+			if (ds_dsv)
 			{
-				ds_view->ClearDepth(1.0f);
+				ds_dsv->ClearDepth(1.0f);
 			}
 		}
 
@@ -1236,9 +1257,9 @@ namespace KlayGE
 					skip_hdr_pp_->OutputPin(0, mono_tex_);
 				}
 
-				stereoscopic_pp_->InputPin(0, mono_tex_);
-				stereoscopic_pp_->InputPin(1, ds_tex_);
-				stereoscopic_pp_->InputPin(2, overlay_tex_);
+				stereoscopic_pp_->InputPin(0, mono_srv_);
+				stereoscopic_pp_->InputPin(1, ds_srv_);
+				stereoscopic_pp_->InputPin(2, overlay_srv_);
 			}
 		}
 		else if (display_output_method_ != DOM_sRGB)
@@ -1260,8 +1281,8 @@ namespace KlayGE
 					skip_hdr_pp_->OutputPin(0, mono_tex_);
 				}
 
-				hdr_display_pp_->InputPin(0, mono_tex_);
-				hdr_display_pp_->InputPin(1, overlay_tex_);
+				hdr_display_pp_->InputPin(0, mono_srv_);
+				hdr_display_pp_->InputPin(1, overlay_srv_);
 			}
 		}
 		else
@@ -1290,7 +1311,7 @@ namespace KlayGE
 				{
 					for (size_t i = 0; i < 2; ++ i)
 					{
-						resize_pps_[i]->InputPin(0, resize_tex_);
+						resize_pps_[i]->InputPin(0, resize_srv_);
 					}
 				}
 			}
@@ -1306,22 +1327,22 @@ namespace KlayGE
 
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_tex_);
-				post_tone_mapping_pps_[i]->InputPin(1, smaa_blend_tex_);
-				post_tone_mapping_pps_[i]->InputPin(2, smaa_edges_tex_);
+				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_srv_);
+				post_tone_mapping_pps_[i]->InputPin(1, smaa_blend_srv_);
+				post_tone_mapping_pps_[i]->InputPin(2, smaa_edges_srv_);
 			}
 
 			if (smaa_edge_detection_pp_)
 			{
-				smaa_edge_detection_pp_->InputPin(0, post_tone_mapping_tex_);
-				smaa_edge_detection_pp_->InputPin(1, ds_tex_);
+				smaa_edge_detection_pp_->InputPin(0, post_tone_mapping_srv_);
+				smaa_edge_detection_pp_->InputPin(1, ds_srv_);
 			}
 		}
 
 		if (hdr_pp_)
 		{
-			hdr_pp_->InputPin(0, hdr_tex_);
-			skip_hdr_pp_->InputPin(0, hdr_tex_);
+			hdr_pp_->InputPin(0, hdr_srv_);
+			skip_hdr_pp_->InputPin(0, hdr_srv_);
 		}
 	}
 
@@ -1360,14 +1381,19 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		ds_tex_.reset();
+		ds_srv_.reset();
 		hdr_frame_buffer_.reset();
 		hdr_tex_.reset();
+		hdr_srv_.reset();
 		post_tone_mapping_frame_buffer_.reset();
 		post_tone_mapping_tex_.reset();
+		post_tone_mapping_srv_.reset();
 		resize_frame_buffer_.reset();
 		resize_tex_.reset();
+		resize_srv_.reset();
 		mono_frame_buffer_.reset();
 		mono_tex_.reset();
+		mono_srv_.reset();
 		for (int i = 0; i < 4; ++ i)
 		{
 			default_frame_buffers_[i].reset();
@@ -1375,9 +1401,12 @@ namespace KlayGE
 
 		overlay_frame_buffer_.reset();
 		overlay_tex_.reset();
+		overlay_srv_.reset();
 
 		smaa_edges_tex_.reset();
+		smaa_edges_srv_.reset();
 		smaa_blend_tex_.reset();
+		smaa_blend_srv_.reset();
 
 		so_buffers_.reset();
 

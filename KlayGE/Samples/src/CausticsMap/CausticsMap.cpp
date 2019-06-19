@@ -655,7 +655,7 @@ void CausticsMapApp::OnCreate()
 	this->InitEnvCube();
 
 	caustics_map_pps_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(5, 1.0f);
-	caustics_map_pps_->InputPin(0, caustics_texture_);
+	caustics_map_pps_->InputPin(0, caustics_srv_);
 	caustics_map_pps_->OutputPin(0, caustics_texture_filtered_);
 }
 
@@ -672,27 +672,29 @@ void CausticsMapApp::InitBuffer()
 		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 
-	DepthStencilViewPtr refract_obj_ds_view_f;
-	DepthStencilViewPtr refract_obj_ds_view_b;
-	DepthStencilViewPtr background_ds_view;
+	DepthStencilViewPtr refract_obj_ds_dsv_f;
+	DepthStencilViewPtr refract_obj_ds_dsv_b;
+	DepthStencilViewPtr background_ds_dsv;
 	if (depth_texture_support_)
 	{
 		auto const ds_fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 
 		refract_obj_ds_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		refract_obj_ds_srv_f_ = rf.MakeTextureSrv(refract_obj_ds_tex_f_);
+		refract_obj_ds_dsv_f = rf.Make2DDsv(refract_obj_ds_tex_f_, 0, 1, 0);
 		refract_obj_ds_tex_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		refract_obj_ds_srv_b_ = rf.MakeTextureSrv(refract_obj_ds_tex_b_);
+		refract_obj_ds_dsv_b = rf.Make2DDsv(refract_obj_ds_tex_b_, 0, 1, 0);
 		background_ds_tex_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-
-		refract_obj_ds_view_f = rf.Make2DDsv(refract_obj_ds_tex_f_, 0, 1, 0);
-		refract_obj_ds_view_b = rf.Make2DDsv(refract_obj_ds_tex_b_, 0, 1, 0);
-		background_ds_view = rf.Make2DDsv(background_ds_tex_, 0, 1, 0);
+		background_ds_srv_ = rf.MakeTextureSrv(background_ds_tex_);
+		background_ds_dsv = rf.Make2DDsv(background_ds_tex_, 0, 1, 0);
 	}
 	else
 	{
-		refract_obj_ds_view_f = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
-		refract_obj_ds_view_b = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
-		background_ds_view = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
+		refract_obj_ds_dsv_f = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
+		refract_obj_ds_dsv_b = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
+		background_ds_dsv = rf.Make2DDsv(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, EF_D16, 1, 0);
 	}
 
 	refract_obj_N_texture_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -703,28 +705,29 @@ void CausticsMapApp::InitBuffer()
 
 	background_fb_ = rf.MakeFrameBuffer();
 	background_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(background_depth_tex_, 0, 1, 0));
-	background_fb_->Attach(background_ds_view);
+	background_fb_->Attach(background_ds_dsv);
 
 	refract_obj_fb_d_f_ = rf.MakeFrameBuffer();
 	refract_obj_fb_d_f_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_depth_tex_f_, 0, 1, 0));
-	refract_obj_fb_d_f_->Attach(refract_obj_ds_view_f);
+	refract_obj_fb_d_f_->Attach(refract_obj_ds_dsv_f);
 
 	refract_obj_fb_d_b_ = rf.MakeFrameBuffer();
 	refract_obj_fb_d_b_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_depth_tex_b_, 0, 1, 0));
-	refract_obj_fb_d_b_->Attach(refract_obj_ds_view_b);
+	refract_obj_fb_d_b_->Attach(refract_obj_ds_dsv_b);
 
 	refract_obj_fb_f_ = rf.MakeFrameBuffer();
 	refract_obj_fb_f_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_N_texture_f_, 0, 1, 0));
-	refract_obj_fb_f_->Attach(refract_obj_ds_view_f);
+	refract_obj_fb_f_->Attach(refract_obj_ds_dsv_f);
 	
 	refract_obj_fb_b_ = rf.MakeFrameBuffer();
 	refract_obj_fb_b_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_N_texture_b_, 0, 1, 0));
-	refract_obj_fb_b_->Attach(refract_obj_ds_view_b);
+	refract_obj_fb_b_->Attach(refract_obj_ds_dsv_b);
 
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
 		caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }) : MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	caustics_texture_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	caustics_srv_ = rf.MakeTextureSrv(caustics_texture_);
 	caustics_texture_filtered_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, caustics_texture_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	caustics_fb_ = rf.MakeFrameBuffer();
 	caustics_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(caustics_texture_, 0, 1, 0));
@@ -745,17 +748,18 @@ void CausticsMapApp::InitEnvCube()
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
 		caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }) : MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
-	env_tex_ = rf.MakeTexture2D(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	env_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(env_tex_, 0, 1, 0));
+	auto env_tex = rf.MakeTexture2D(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto env_srv = rf.MakeTextureSrv(env_tex);
+	env_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(env_tex, 0, 1, 0));
 	env_cube_buffer_->Attach(depth_view);
 
-	env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, env_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, env_tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	for (int i = 0; i < 6; ++ i)
 	{
 		env_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-		env_filter_pps_[i]->InputPin(0, env_tex_);
+		env_filter_pps_[i]->InputPin(0, env_srv);
 		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);
 	}
 }
@@ -773,16 +777,17 @@ void CausticsMapApp::InitCubeSM()
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
 		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
-	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	shadow_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(shadow_tex_, 0, 1, 0));
+	auto shadow_tex = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto shadow_srv = rf.MakeTextureSrv(shadow_tex);
+	shadow_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(shadow_tex, 0, 1, 0));
 	shadow_cube_buffer_->Attach(depth_view);
 
-	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	for (int i = 0; i < 6; ++ i)
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
-		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
+		sm_filter_pps_[i]->InputPin(0, shadow_srv);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
 	}
 }
@@ -853,7 +858,7 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_fb_->Attach(rf.Make2DDsv(width, height, fmt, 1, 0));
 
-	copy_pp_->InputPin(0, scene_texture_);
+	copy_pp_->InputPin(0, rf.MakeTextureSrv(scene_texture_));
 }
 
 void CausticsMapApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -990,7 +995,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 					checked_cast<RefractMesh&>(mesh).CausticsPass(Position_Normal_Front_Pass);
 				});
 
-			depth_to_linear_pp_->InputPin(0, background_ds_tex_);
+			depth_to_linear_pp_->InputPin(0, background_ds_srv_);
 			depth_to_linear_pp_->OutputPin(0, background_depth_tex_);
 			depth_to_linear_pp_->Apply();
 
@@ -1016,7 +1021,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	{
 		if (depth_texture_support_)
 		{
-			depth_to_linear_pp_->InputPin(0, refract_obj_ds_tex_f_);
+			depth_to_linear_pp_->InputPin(0, refract_obj_ds_srv_f_);
 			depth_to_linear_pp_->OutputPin(0, refract_obj_depth_tex_f_);
 			depth_to_linear_pp_->Apply();
 
@@ -1061,7 +1066,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			{
 				checked_pointer_cast<CausticsGrid>(caustics_grid_)->CausticsPass(Dual_Caustics_Pass);
 
-				depth_to_linear_pp_->InputPin(0, refract_obj_ds_tex_b_);
+				depth_to_linear_pp_->InputPin(0, refract_obj_ds_srv_b_);
 				depth_to_linear_pp_->OutputPin(0, refract_obj_depth_tex_b_);
 				depth_to_linear_pp_->Apply();
 			}

@@ -393,6 +393,7 @@ void ShadowCubeMap::OnCreate()
 		fmt = EF_R16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto shadow_srv = rf.MakeTextureSrv(shadow_tex_);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	shadow_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(shadow_tex_, 0, 1, 0));
 	shadow_cube_buffer_->Attach(depth_view);
@@ -441,7 +442,7 @@ void ShadowCubeMap::OnCreate()
 	for (int i = 0; i < 6; ++ i)
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
-		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
+		sm_filter_pps_[i]->InputPin(0, shadow_srv);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
 	}
 

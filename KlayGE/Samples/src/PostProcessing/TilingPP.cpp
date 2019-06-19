@@ -33,20 +33,21 @@ TilingPostProcess::TilingPostProcess()
 	tile_per_row_line_ep_ = effect->ParameterByName("tile_per_row_line");
 }
 
-void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+void TilingPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	auto const* tex = srv->TextureResource().get();
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
 		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
-	downsampler_->InputPin(index, tex);
+	downsampler_->InputPin(index, srv);
 	downsampler_->OutputPin(index, downsample_tex_);
 
-	PostProcess::InputPin(index, downsample_tex_);
+	PostProcess::InputPin(index, rf.MakeTextureSrv(downsample_tex_));
 }
 
-TexturePtr const & TilingPostProcess::InputPin(uint32_t index) const
+ShaderResourceViewPtr const& TilingPostProcess::InputPin(uint32_t index) const
 {
 	return downsampler_->InputPin(index);
 }

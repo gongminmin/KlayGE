@@ -221,14 +221,16 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	auto fmt = caps.BestMatchRenderTargetFormat(fmt_options, 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto scene_srv = rf.MakeTextureSrv(scene_tex_);
 
 	fmt = caps.BestMatchRenderTargetFormat({ EF_R16F, EF_R32F }, 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	scene_ds_srv_ = rf.MakeTextureSrv(scene_ds_tex_);
 
-	depth_to_linear_pp_->InputPin(0, scene_ds_tex_);
+	depth_to_linear_pp_->InputPin(0, scene_ds_srv_);
 	depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
 
 	scene_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_tex_, 0, 1, 0));
@@ -247,7 +249,9 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 		for (uint32_t i = 0; i < 2; ++ i)
 		{
 			low_res_color_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
+			low_res_color_srvs_.push_back(rf.MakeTextureSrv(low_res_color_texs_.back()));
 			low_res_max_ds_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
+			low_res_max_ds_srvs_.push_back(rf.MakeTextureSrv(low_res_max_ds_texs_.back()));
 			low_res_max_ds_views_.push_back(rf.Make2DDsv(low_res_max_ds_texs_.back(), 0, 1, 0));
 			w /= 2;
 			h /= 2;
@@ -268,13 +272,13 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	vdm_quarter_res_fb_->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(vdm_count_tex_, 0, 1, 0));
 	vdm_quarter_res_fb_->Attach(low_res_max_ds_views_[1]);
 
-	copy_pp_->InputPin(0, scene_tex_);
-	copy_to_depth_pp_->InputPin(0, scene_ds_tex_);
+	copy_pp_->InputPin(0, scene_srv);
+	copy_to_depth_pp_->InputPin(0, scene_ds_srv_);
 
-	vdm_composition_pp_->InputPin(0, low_res_color_texs_[1]);
-	vdm_composition_pp_->InputPin(1, vdm_transition_tex_);
-	vdm_composition_pp_->InputPin(2, vdm_count_tex_);
-	vdm_composition_pp_->InputPin(3, scene_depth_tex_);
+	vdm_composition_pp_->InputPin(0, low_res_color_srvs_[1]);
+	vdm_composition_pp_->InputPin(1, rf.MakeTextureSrv(vdm_transition_tex_));
+	vdm_composition_pp_->InputPin(2, rf.MakeTextureSrv(vdm_count_tex_));
+	vdm_composition_pp_->InputPin(3, rf.MakeTextureSrv(scene_depth_tex_));
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -380,7 +384,8 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 				uint32_t t = (PRT_NaiveHalfRes == particle_rendering_type_) ? 0 : 1;
 				for (uint32_t i = 0; i <= t; ++ i)
 				{
-					TexturePtr const & input_tex = (0 == i) ? scene_ds_tex_ : low_res_max_ds_texs_[i - 1];
+					auto const& input_srv = (0 == i) ? scene_ds_srv_ : low_res_max_ds_srvs_[i - 1];
+					auto const* input_tex = input_srv->TextureResource().get();
 
 					uint32_t const w = input_tex->Width(0);
 					uint32_t const h = input_tex->Height(0);
@@ -388,7 +393,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 					depth_to_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
 					depth_to_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 						static_cast<float>((h + 1) & ~1) / h));
-					depth_to_max_pp_->InputPin(0, input_tex);
+					depth_to_max_pp_->InputPin(0, input_srv);
 					depth_to_max_pp_->OutputPin(0, low_res_color_texs_[i]);
 					depth_to_max_pp_->OutputFrameBuffer()->Attach(low_res_max_ds_views_[i]);
 					depth_to_max_pp_->Apply();
@@ -433,12 +438,12 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 		switch (particle_rendering_type_)
 		{
 		case PRT_NaiveHalfRes:
-			add_copy_pp_->InputPin(0, low_res_color_texs_[0]);
+			add_copy_pp_->InputPin(0, low_res_color_srvs_[0]);
 			add_copy_pp_->Apply();
 			break;
 
 		case PRT_NaiveQuarterRes:
-			add_copy_pp_->InputPin(0, low_res_color_texs_[1]);
+			add_copy_pp_->InputPin(0, low_res_color_srvs_[1]);
 			add_copy_pp_->Apply();
 			break;
 

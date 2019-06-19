@@ -254,22 +254,23 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 	*(effect->ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromKFont("gkai00mp.kfont")));
 }
 
-void AsciiArtsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+void AsciiArtsPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	auto const* tex = srv->TextureResource().get();
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
 		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
-	downsampler_->InputPin(index, tex);
+	downsampler_->InputPin(index, srv);
 	downsampler_->OutputPin(index, downsample_tex_);
 
-	PostProcess::InputPin(index, downsample_tex_);
+	PostProcess::InputPin(index, rf.MakeTextureSrv(downsample_tex_));
 
 	*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / tex->Width(0), static_cast<float>(CELL_HEIGHT) / tex->Height(0));
 }
 
-TexturePtr const & AsciiArtsPostProcess::InputPin(uint32_t index) const
+ShaderResourceViewPtr const& AsciiArtsPostProcess::InputPin(uint32_t index) const
 {
 	return downsampler_->InputPin(index);
 }

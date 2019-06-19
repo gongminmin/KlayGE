@@ -43,6 +43,7 @@ private:
 	// Depth Peeling
 	std::vector<KlayGE::FrameBufferPtr> peeling_fbs_;
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
+	std::vector<KlayGE::ShaderResourceViewPtr> peeled_srvs_;
 	std::array<KlayGE::FrameBufferPtr, 2> depth_fbs_;
 	std::array<KlayGE::TexturePtr, 2> depth_texs_;
 	std::array<KlayGE::DepthStencilViewPtr, 2> depth_views_;

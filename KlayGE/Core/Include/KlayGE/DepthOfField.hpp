@@ -53,7 +53,7 @@ namespace KlayGE
 		void ShowBlurFactor(bool show);
 		bool ShowBlurFactor() const;
 
-		void InputPin(uint32_t index, TexturePtr const& tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
 		void Apply();
@@ -98,7 +98,7 @@ namespace KlayGE
 		void LuminanceThreshold(float lum_threshold);
 		float LuminanceThreshold() const;
 
-		void InputPin(uint32_t index, TexturePtr const& tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
 		void OutputPin(uint32_t index, TexturePtr const& tex, int level, int array_index, int face);

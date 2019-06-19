@@ -646,9 +646,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		*height_map_param_ = height_map_tex_;
-		*gradient_map_param_ = gradient_map_tex_;
-		*mask_map_param_ = mask_map_tex_;
+		*height_map_param_ = height_map_srv_;
+		*gradient_map_param_ = gradient_map_srv_;
+		*mask_map_param_ = mask_map_srv_;
 		*frame_size_param_ = int2(static_cast<int>(re.CurFrameBuffer()->Width()),
 			static_cast<int>(re.CurFrameBuffer()->Height()));
 

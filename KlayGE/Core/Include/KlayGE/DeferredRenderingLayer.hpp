@@ -79,19 +79,28 @@ namespace KlayGE
 		FrameBufferPtr g_buffer_fb;
 		FrameBufferPtr g_buffer_resolved_fb;
 		TexturePtr g_buffer_rt0_tex;
+		ShaderResourceViewPtr g_buffer_rt0_srv;
 		TexturePtr g_buffer_rt1_tex;
+		ShaderResourceViewPtr g_buffer_rt1_srv;
 		TexturePtr g_buffer_ds_tex;
+		ShaderResourceViewPtr g_buffer_ds_srv;
 		TexturePtr g_buffer_depth_tex;
+		ShaderResourceViewPtr g_buffer_depth_srv;
 		TexturePtr g_buffer_resolved_rt0_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt0_srv;
 		TexturePtr g_buffer_resolved_rt1_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt1_srv;
 		TexturePtr g_buffer_resolved_depth_tex;
+		ShaderResourceViewPtr g_buffer_resolved_depth_srv;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
+		std::vector<ShaderResourceViewPtr> g_buffer_min_max_depth_srvs;
 		ShaderResourceViewPtr g_buffer_stencil_srv;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
-		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_views;
+		std::vector<ShaderResourceViewPtr> g_buffer_vdm_max_ds_srvs;
+		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_dsvs;
 
 		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;
@@ -104,8 +113,11 @@ namespace KlayGE
 
 		FrameBufferPtr vdm_fb;
 		TexturePtr vdm_color_tex;
+		ShaderResourceViewPtr vdm_color_srv;
 		TexturePtr vdm_transition_tex;
+		ShaderResourceViewPtr vdm_transition_srv;
 		TexturePtr vdm_count_tex;
+		ShaderResourceViewPtr vdm_count_srv;
 
 		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
@@ -115,16 +127,22 @@ namespace KlayGE
 
 		std::array<FrameBufferPtr, 2> merged_shading_fbs;
 		std::array<TexturePtr, 2> merged_shading_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_shading_srvs;
 		std::array<FrameBufferPtr, 2> merged_depth_fbs;
 		std::array<TexturePtr, 2> merged_depth_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_depth_srvs;
 		std::array<TexturePtr, 2> merged_shading_resolved_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_shading_resolved_srvs;
 		std::array<FrameBufferPtr, 2> merged_depth_resolved_fbs;
 		std::array<TexturePtr, 2> merged_depth_resolved_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_depth_resolved_srvs;
 		uint32_t curr_merged_buffer_index;
 
 		TexturePtr dof_tex;
+		ShaderResourceViewPtr dof_srv;
 
 		TexturePtr small_ssvo_tex;
+		ShaderResourceViewPtr small_ssvo_srv;
 		bool ssvo_enabled;
 
 		float4x4 view, proj;
@@ -138,12 +156,14 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		FrameBufferPtr lighting_fb;
 		TexturePtr lighting_tex;
+		ShaderResourceViewPtr lighting_srv;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
 
-		TexturePtr temp_shading_tex;
 		FrameBufferPtr temp_shading_fb;
+		TexturePtr temp_shading_tex;
+		ShaderResourceViewPtr temp_shading_srv;
 
 		TexturePtr temp_shading_tex_array;
 
@@ -229,9 +249,9 @@ namespace KlayGE
 		RenderEffectPtr const & GBufferEffect(RenderMaterial const * material, bool line, bool skinning) const;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		TexturePtr const & LightingTex(uint32_t vp) const
+		ShaderResourceViewPtr const & LightingSrv(uint32_t vp) const
 		{
-			return viewports_[vp].lighting_tex;
+			return viewports_[vp].lighting_srv;
 		}
 #endif
 		TexturePtr const & ShadingTex(uint32_t vp) const
@@ -262,18 +282,34 @@ namespace KlayGE
 		{
 			return viewports_[vp].merged_shading_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
+		ShaderResourceViewPtr const & PrevFrameResolvedShadingSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_shading_resolved_srvs[!viewports_[vp].curr_merged_buffer_index];
+		}
 		TexturePtr const & PrevFrameDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_texs[!viewports_[vp].curr_merged_buffer_index];
+		}
+		ShaderResourceViewPtr const & PrevFrameDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_srvs[!viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & PrevFrameResolvedDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
+		ShaderResourceViewPtr const & PrevFrameResolvedDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_resolved_srvs[!viewports_[vp].curr_merged_buffer_index];
+		}
 
 		TexturePtr const & SmallSSVOTex(uint32_t vp) const
 		{
 			return viewports_[vp].small_ssvo_tex;
+		}
+		ShaderResourceViewPtr const & SmallSSVOSrv(uint32_t vp) const
+		{
+			return viewports_[vp].small_ssvo_srv;
 		}
 
 		TexturePtr const & GBufferRT0Tex(uint32_t vp) const
@@ -292,13 +328,25 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_resolved_rt0_tex;
 		}
+		ShaderResourceViewPtr const& GBufferResolvedRT0Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt0_srv;
+		}
 		TexturePtr const & GBufferResolvedRT1Tex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_resolved_rt1_tex;
 		}
+		ShaderResourceViewPtr const& GBufferResolvedRT1Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt1_srv;
+		}
 		TexturePtr const & ResolvedDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_resolved_depth_tex;
+		}
+		ShaderResourceViewPtr const& ResolvedDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_depth_srv;
 		}
 		TexturePtr const & GBufferRT0BackupTex(uint32_t vp) const
 		{
@@ -580,6 +628,7 @@ namespace KlayGE
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
 		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_texs_;
+		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_srvs_;
 		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_texs_;
 		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_texs_;
 
