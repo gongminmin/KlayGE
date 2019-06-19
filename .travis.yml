@@ -119,8 +119,7 @@ matrix:
           packages:
             - ninja
             - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
@@ -132,8 +131,7 @@ matrix:
           packages:
             - ninja
             - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
 before_install:
