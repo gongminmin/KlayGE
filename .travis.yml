@@ -101,8 +101,7 @@ matrix:
             - xquartz
           packages:
             - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
 
     - os: osx
@@ -113,8 +112,7 @@ matrix:
             - xquartz
           packages:
             - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14"
 
 before_install:
