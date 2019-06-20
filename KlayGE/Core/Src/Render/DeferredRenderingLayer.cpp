@@ -2194,6 +2194,7 @@ namespace KlayGE
 	{
 		LightSource::LightType const type = light.Type();
 		PassCategory const pass_cat = GetPassCategory(pass_type);
+		int32_t const attr = light.Attrib();
 
 		switch (type)
 		{
@@ -2218,13 +2219,48 @@ namespace KlayGE
 				else
 				{
 					int32_t face = std::min(index_in_pass, 5);
-					std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(face));
-					dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light.Rotation()), pvp.view);
+					float3 lookat, up;
+					std::tie(lookat, up) = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(face));
+					dir_es = MathLib::transform_normal(MathLib::transform_quat(lookat, light.Rotation()), pvp.view);
 					sm_camera = light.SMCamera(face);
 				}
 				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-				sm_fb_->Viewport()->Camera(sm_camera);
+				float4x4 inv_light_camera_view;
+				if (0 == (attr & LightSource::LSA_NoShadow))
+				{
+					sm_fb_->Viewport()->Camera(sm_camera);
+					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
+
+					if ((index_in_pass > 0) && ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type)))
+					{
+						depth_to_esm_pp_->SetParam(0, sm_camera->NearQFarParam());
+
+						float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
+						depth_to_esm_pp_->SetParam(1, inv_sm_proj);
+					}
+
+					inv_light_camera_view = sm_camera->InverseViewMatrix();
+				}
+				else
+				{
+					float3 lookat, up;
+					switch (type)
+					{
+					case LightSource::LT_Spot:
+					case LightSource::LT_Directional:
+						lookat = float3(0, 0, 1);
+						up = float3(0, 1, 0);
+						break;
+
+					default:
+						std::tie(lookat, up) = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(std::min(index_in_pass, 5)));
+						break;
+					}
+					lookat = MathLib::transform_quat(lookat, light.Rotation());
+					up = MathLib::transform_quat(up, light.Rotation());
+					inv_light_camera_view = MathLib::inverse(MathLib::look_at_lh(light.Position(), light.Position() + lookat, up));
+				}
 
 				if ((LightSource::LT_Directional == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
 				{
@@ -2235,18 +2271,8 @@ namespace KlayGE
 					curr_cascade_index_ = -1;
 				}
 
-				*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
-
-				float4x4 light_to_view = sm_camera->InverseViewMatrix() * pvp.view;
+				float4x4 light_to_view = inv_light_camera_view * pvp.view;
 				float4x4 light_to_proj = light_to_view * pvp.proj;
-
-				if ((index_in_pass > 0) && ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type)))
-				{
-					depth_to_esm_pp_->SetParam(0, sm_camera->NearQFarParam());
-
-					float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
-					depth_to_esm_pp_->SetParam(1, inv_sm_proj);
-				}
 
 				float3 const & p = light.Position();
 				float3 loc_es = MathLib::transform_coord(p, pvp.view);
@@ -4332,10 +4358,7 @@ namespace KlayGE
 				LightSource::LightType type = light.Type();
 				int32_t attr = light.Attrib();
 
-				if (0 == (attr & LightSource::LSA_NoShadow))
-				{
-					this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
-				}
+				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
