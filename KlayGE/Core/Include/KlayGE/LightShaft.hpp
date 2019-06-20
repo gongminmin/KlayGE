@@ -35,6 +35,7 @@ namespace KlayGE
 
 		TexturePtr blur_tex_[2];
 		ShaderResourceViewPtr blur_srv_[2];
+		RenderTargetViewPtr blur_rtv_[2];
 	};
 }
 

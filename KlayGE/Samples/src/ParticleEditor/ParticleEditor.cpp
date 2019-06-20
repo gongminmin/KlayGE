@@ -353,7 +353,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 		ds_view = rf.Make2DDsv(scene_ds_tex_, 0, 1, 0);
 
 		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(scene_ds_tex_));
-		depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
+		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(scene_depth_tex_, 0, 1, 0));
 	}
 	else
 	{

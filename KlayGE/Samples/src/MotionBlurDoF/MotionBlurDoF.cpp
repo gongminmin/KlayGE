@@ -472,7 +472,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(ds_tex_));
-		depth_to_linear_pp_->OutputPin(0, depth_tex_);
+		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(depth_tex_, 0, 1, 0));
 	}
 
 	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
@@ -493,21 +493,22 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	auto dof_srv = rf.MakeTextureSrv(dof_tex_);
+	auto dof_rtv = rf.Make2DRtv(dof_tex_, 0, 1, 0);
 
 	if (depth_of_field_)
 	{
 		depth_of_field_->InputPin(0, color_srv);
 		depth_of_field_->InputPin(1, depth_srv);
-		depth_of_field_->OutputPin(0, dof_tex_);
+		depth_of_field_->OutputPin(0, dof_rtv);
 	}
 	depth_of_field_copy_pp_->InputPin(0, color_srv);
-	depth_of_field_copy_pp_->OutputPin(0, dof_tex_);
+	depth_of_field_copy_pp_->OutputPin(0, dof_rtv);
 
 	if (bokeh_filter_)
 	{
 		bokeh_filter_->InputPin(0, color_srv);
 		bokeh_filter_->InputPin(1, depth_srv);
-		bokeh_filter_->OutputPin(0, dof_tex_);
+		bokeh_filter_->OutputPin(0, dof_rtv);
 	}
 
 	motion_blur_->InputPin(0, dof_srv);

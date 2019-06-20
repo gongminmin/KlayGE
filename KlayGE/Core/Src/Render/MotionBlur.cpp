@@ -162,13 +162,16 @@ namespace KlayGE
 		uint32_t const tile_height = tex->Height(0) / blur_radius_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		auto velocity_tile_max_x_dir_tex = rf.MakeTexture2D(tile_width, tex->Height(0), 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		velocity_tile_max_x_dir_srv_ = rf.MakeTextureSrv(velocity_tile_max_x_dir_tex);
+		auto velocity_tile_max_x_dir_tex =
+			rf.MakeTexture2D(tile_width, tex->Height(0), 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		auto velocity_tile_max_x_dir_srv = rf.MakeTextureSrv(velocity_tile_max_x_dir_tex);
+		auto velocity_tile_max_x_dir_rtv = rf.Make2DRtv(velocity_tile_max_x_dir_tex, 0, 1, 0);
 		auto velocity_tile_max_tex = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		velocity_tile_max_srv_ = rf.MakeTextureSrv(velocity_tile_max_tex);
-		auto velocity_neighbor_max_tex = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write);
-		velocity_neighbor_max_srv_ = rf.MakeTextureSrv(velocity_neighbor_max_tex);
+		auto velocity_tile_max_srv = rf.MakeTextureSrv(velocity_tile_max_tex);
+		auto velocity_tile_max_rtv = rf.Make2DRtv(velocity_tile_max_tex, 0, 1, 0);
+		auto velocity_neighbor_max_tex = rf.MakeTexture2D(tile_width, tile_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		auto velocity_neighbor_max_srv = rf.MakeTextureSrv(velocity_neighbor_max_tex);
+		auto velocity_neighbor_max_rtv = rf.Make2DRtv(velocity_neighbor_max_tex, 0, 1, 0);
 
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> random_dis(0, 255);
@@ -184,19 +187,19 @@ namespace KlayGE
 		init_data.data = &rand_data[0];
 		init_data.row_pitch = tile_width;
 		init_data.slice_pitch = tile_width * tile_height;
-		random_srv_ = rf.MakeTextureSrv(rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
+		auto random_srv = rf.MakeTextureSrv(rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 
 		motion_blur_tile_max_x_dir_pp_->InputPin(0, srv);
-		motion_blur_tile_max_x_dir_pp_->OutputPin(0, velocity_tile_max_x_dir_tex);
+		motion_blur_tile_max_x_dir_pp_->OutputPin(0, velocity_tile_max_x_dir_rtv);
 
-		motion_blur_tile_max_y_dir_pp_->InputPin(0, velocity_tile_max_x_dir_srv_);
-		motion_blur_tile_max_y_dir_pp_->OutputPin(0, velocity_tile_max_tex);
+		motion_blur_tile_max_y_dir_pp_->InputPin(0, velocity_tile_max_x_dir_srv);
+		motion_blur_tile_max_y_dir_pp_->OutputPin(0, velocity_tile_max_rtv);
 
-		motion_blur_neighbor_max_pp_->InputPin(0, velocity_tile_max_srv_);
-		motion_blur_neighbor_max_pp_->OutputPin(0, velocity_neighbor_max_tex);
+		motion_blur_neighbor_max_pp_->InputPin(0, velocity_tile_max_srv);
+		motion_blur_neighbor_max_pp_->OutputPin(0, velocity_neighbor_max_rtv);
 
-		motion_blur_gather_pp_->InputPin(3, velocity_neighbor_max_srv_);
-		motion_blur_gather_pp_->InputPin(4, random_srv_);
+		motion_blur_gather_pp_->InputPin(3, velocity_neighbor_max_srv);
+		motion_blur_gather_pp_->InputPin(4, random_srv);
 
 		this->BindVisualizeTextures();
 	}
@@ -206,11 +209,11 @@ namespace KlayGE
 		switch (visualize_velocity_type_)
 		{
 		case VT_VelocityTileMax:
-			motion_blur_visualize_pp_->InputPin(0, velocity_tile_max_srv_);
+			motion_blur_visualize_pp_->InputPin(0, motion_blur_neighbor_max_pp_->InputPin(0));
 			break;
 
 		case VT_VelocityNeighborMax:
-			motion_blur_visualize_pp_->InputPin(0, velocity_neighbor_max_srv_);
+			motion_blur_visualize_pp_->InputPin(0, motion_blur_gather_pp_->InputPin(3));
 			break;
 
 		case VT_Velocity:

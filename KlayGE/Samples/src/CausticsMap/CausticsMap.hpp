@@ -94,8 +94,11 @@ private:
 	KlayGE::TexturePtr background_ds_tex_;
 	KlayGE::ShaderResourceViewPtr background_ds_srv_;
 	KlayGE::TexturePtr refract_obj_depth_tex_f_;
+	KlayGE::RenderTargetViewPtr refract_obj_depth_rtv_f_;
 	KlayGE::TexturePtr refract_obj_depth_tex_b_;
+	KlayGE::RenderTargetViewPtr refract_obj_depth_rtv_b_;
 	KlayGE::TexturePtr background_depth_tex_;
+	KlayGE::RenderTargetViewPtr background_depth_rtv_;
 	KlayGE::FrameBufferPtr background_fb_;	
 	KlayGE::FrameBufferPtr refract_obj_fb_d_f_;
 	KlayGE::FrameBufferPtr refract_obj_fb_d_b_;

@@ -263,7 +263,7 @@ void AsciiArtsPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const&
 		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
 	downsampler_->InputPin(index, srv);
-	downsampler_->OutputPin(index, downsample_tex_);
+	downsampler_->OutputPin(index, rf.Make2DRtv(downsample_tex_, 0, 1, 0));
 
 	PostProcess::InputPin(index, rf.MakeTextureSrv(downsample_tex_));
 

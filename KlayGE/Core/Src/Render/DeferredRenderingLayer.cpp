@@ -653,7 +653,8 @@ namespace KlayGE
 		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		sm_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(sm_tex_, 0, 1, 0));
+		auto sm_rtv = rf.Make2DRtv(sm_tex_, 0, 1, 0);
+		sm_fb_->Attach(FrameBuffer::Attachment::Color0, sm_rtv);
 		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto sm_depth_view = rf.Make2DDsv(sm_depth_tex_, 0, 1, 0);
 		sm_fb_->Attach(sm_depth_view);
@@ -672,17 +673,29 @@ namespace KlayGE
 		{
 			filtered_sm_2d_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint32_t>(filtered_sm_2d_texs_.size()),
 				sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			filtered_sm_2d_srvs_[0] = rf.MakeTextureSrv(filtered_sm_2d_texs_[0]);
+			for (uint32_t slice = 0; slice < filtered_sm_2d_texs_[0]->ArraySize(); ++slice)
+			{
+				filtered_sm_2d_slice_rtvs_[slice] = rf.Make2DRtv(filtered_sm_2d_texs_[0], slice, 1, 0);
+			}
 		}
 		else
 		{
-			for (auto& tex : filtered_sm_2d_texs_)
+			for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++i)
 			{
-				tex = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				filtered_sm_2d_srvs_[i] = rf.MakeTextureSrv(filtered_sm_2d_texs_[i]);
+				filtered_sm_2d_slice_rtvs_[i] = rf.Make2DRtv(filtered_sm_2d_texs_[i], 0, 1, 0);
 			}
 		}
-		for (auto& tex : filtered_sm_cube_texs_)
+		for (uint32_t i = 0; i < filtered_sm_cube_texs_.size(); ++i)
 		{
-			tex = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			filtered_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			filtered_sm_cube_srvs_[i] = rf.MakeTextureSrv(filtered_sm_cube_texs_[i]);
+			for (uint32_t face = 0; face < 6; ++face)
+			{
+				filtered_sm_cube_face_rtvs_[i * 6 + face] = rf.Make2DRtv(filtered_sm_cube_texs_[i], 0, static_cast<Texture::CubeFaces>(face), 0);
+			}
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
@@ -733,7 +746,7 @@ namespace KlayGE
 		csm_filter_pp_->InputPin(0, rf.MakeTextureSrv(csm_tex_));
 		depth_to_esm_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToESM");
 		depth_to_esm_pp_->InputPin(0, rf.MakeTextureSrv(sm_depth_tex_));
-		depth_to_esm_pp_->OutputPin(0, sm_tex_);
+		depth_to_esm_pp_->OutputPin(0, sm_rtv);
 		for (int i = 0; i < 2; ++ i)
 		{
 			depth_to_linear_pps_[i] = SyncLoadPostProcess("Depth.ppml", (i == 0) ? "DepthToLinear" : "DepthToLinearMS");
@@ -1103,14 +1116,19 @@ namespace KlayGE
 #endif
 		pvp.g_buffer_resolved_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0, hint);
 		pvp.g_buffer_resolved_depth_srv = rf.MakeTextureSrv(pvp.g_buffer_resolved_depth_tex);
+		pvp.g_buffer_resolved_depth_rtv = rf.Make2DRtv(pvp.g_buffer_resolved_depth_tex, 0, 1, 0);
 		if (sample_count == 1)
 		{
 			pvp.g_buffer_depth_tex = pvp.g_buffer_resolved_depth_tex;
+			pvp.g_buffer_depth_srv = pvp.g_buffer_resolved_depth_srv;
+			pvp.g_buffer_depth_rtv = pvp.g_buffer_resolved_depth_rtv;
 		}
 		else
 		{
 			pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, sample_count, sample_quality,
 				EAH_GPU_Read | EAH_GPU_Write);
+			pvp.g_buffer_depth_srv = rf.MakeTextureSrv(pvp.g_buffer_depth_tex);
+			pvp.g_buffer_depth_rtv = rf.Make2DRtv(pvp.g_buffer_depth_tex, 0, 1, 0);
 		}
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -1145,7 +1163,15 @@ namespace KlayGE
 					w = std::max(1U, (w + 1) / 2);
 					h = std::max(1U, (h + 1) / 2);
 				}
+
+				pvp.g_buffer_min_max_depth_rtvs.clear();
+				pvp.g_buffer_min_max_depth_rtvs.reserve(pvp.g_buffer_min_max_depth_texs.size());
+				for (auto const& tex : pvp.g_buffer_min_max_depth_texs)
+				{
+					pvp.g_buffer_min_max_depth_rtvs.push_back(rf.Make2DRtv(tex, 0, 1, 0));
+				}
 			}
+
 			pvp.g_buffer_min_max_depth_srvs.clear();
 			pvp.g_buffer_min_max_depth_srvs.reserve(pvp.g_buffer_min_max_depth_texs.size());
 			for (auto const& tex : pvp.g_buffer_min_max_depth_texs)
@@ -1183,6 +1209,11 @@ namespace KlayGE
 		{
 			pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
 				CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+			pvp.filtered_csm_srvs[0] = rf.MakeTextureSrv(pvp.filtered_csm_texs[0]);
+			for (uint32_t slice = 0; slice < pvp.filtered_csm_texs[0]->ArraySize(); ++slice)
+			{
+				pvp.filtered_csm_slice_rtvs[slice] = rf.Make2DRtv(pvp.filtered_csm_texs[0], slice, 1, 0);
+			}
 		}
 		else
 		{
@@ -1190,6 +1221,8 @@ namespace KlayGE
 			{
 				pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+				pvp.filtered_csm_srvs[i] = rf.MakeTextureSrv(pvp.filtered_csm_texs[i]);
+				pvp.filtered_csm_slice_rtvs[i] = rf.Make2DRtv(pvp.filtered_csm_texs[i], 0, 1, 0);
 			}
 		}
 
@@ -1228,11 +1261,12 @@ namespace KlayGE
 		uint32_t const vdm_height = std::max(1U, height / 4);
 		pvp.vdm_color_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_color_srv = rf.MakeTextureSrv(pvp.vdm_color_tex);
+		pvp.vdm_color_rtv = rf.Make2DRtv(pvp.vdm_color_tex, 0, 1, 0);
 		pvp.vdm_transition_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_transition_srv = rf.MakeTextureSrv(pvp.vdm_transition_tex);
 		pvp.vdm_count_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_count_srv = rf.MakeTextureSrv(pvp.vdm_count_tex);
-		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.vdm_color_tex, 0, 1, 0));
+		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color0, pvp.vdm_color_rtv);
 		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.vdm_transition_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.vdm_count_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(pvp.g_buffer_vdm_max_ds_dsvs[1]);
@@ -1248,14 +1282,18 @@ namespace KlayGE
 #endif
 		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, sample_count, sample_quality,
 			(sample_count == 1) ? hint : (EAH_GPU_Read | EAH_GPU_Write));
+		pvp.shading_srv = rf.MakeTextureSrv(pvp.shading_tex);
+		pvp.shading_rtv = rf.Make2DRtv(pvp.shading_tex, 0, 1, 0);
 		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++ i)
 		{
 			pvp.merged_shading_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, sample_count, sample_quality,
 				(sample_count == 1) ? hint : (EAH_GPU_Read | EAH_GPU_Write));
 			pvp.merged_shading_srvs[i] = rf.MakeTextureSrv(pvp.merged_shading_texs[i]);
+			pvp.merged_shading_rtvs[i] = rf.Make2DRtv(pvp.merged_shading_texs[i], 0, 1, 0);
 			pvp.merged_depth_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, sample_count, sample_quality,
 				EAH_GPU_Read | EAH_GPU_Write);
 			pvp.merged_depth_srvs[i] = rf.MakeTextureSrv(pvp.merged_depth_texs[i]);
+			pvp.merged_depth_rtvs[i] = rf.Make2DRtv(pvp.merged_depth_texs[i], 0, 1, 0);
 		}
 		if (sample_count == 1)
 		{
@@ -1263,8 +1301,10 @@ namespace KlayGE
 			{
 				pvp.merged_shading_resolved_texs[i] = pvp.merged_shading_texs[i];
 				pvp.merged_shading_resolved_srvs[i] = pvp.merged_shading_srvs[i];
+				pvp.merged_shading_resolved_rtvs[i] = pvp.merged_shading_rtvs[i];
 				pvp.merged_depth_resolved_texs[i] = pvp.merged_depth_texs[i];
 				pvp.merged_depth_resolved_srvs[i] = pvp.merged_depth_srvs[i];
+				pvp.merged_depth_resolved_rtvs[i] = pvp.merged_depth_rtvs[i];
 			}
 		}
 		else
@@ -1273,8 +1313,10 @@ namespace KlayGE
 			{
 				pvp.merged_shading_resolved_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				pvp.merged_shading_resolved_srvs[i] = rf.MakeTextureSrv(pvp.merged_shading_resolved_texs[i]);
+				pvp.merged_shading_resolved_rtvs[i] = rf.Make2DRtv(pvp.merged_shading_resolved_texs[i], 0, 1, 0);
 				pvp.merged_depth_resolved_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				pvp.merged_depth_resolved_srvs[i] = rf.MakeTextureSrv(pvp.merged_depth_resolved_texs[i]);
+				pvp.merged_depth_resolved_rtvs[i] = rf.Make2DRtv(pvp.merged_depth_resolved_texs[i], 0, 1, 0);
 			}
 		}
 
@@ -1282,6 +1324,7 @@ namespace KlayGE
 		{
 			pvp.dof_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pvp.dof_srv = rf.MakeTextureSrv(pvp.dof_tex);
+			pvp.dof_rtv = rf.Make2DRtv(pvp.dof_tex, 0, 1, 0);
 		}
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -1310,7 +1353,7 @@ namespace KlayGE
 
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.g_buffer_resolved_rt0_tex, 0, 1, 0));
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.g_buffer_resolved_rt1_tex, 0, 1, 0));
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.g_buffer_resolved_depth_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color2, pvp.g_buffer_resolved_depth_rtv);
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color3, rf.Make2DRtv(pvp.multi_sample_mask_tex, 0, 1, 0));
 			}
 
@@ -1333,22 +1376,21 @@ namespace KlayGE
 		}
 #endif
 
-		pvp.shading_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.shading_tex, 0, 1, 0));
+		pvp.shading_fb->Attach(FrameBuffer::Attachment::Color0, pvp.shading_rtv);
 		pvp.shading_fb->Attach(ds_view);
 
 		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++ i)
 		{
-			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.merged_shading_texs[i], 0, 1, 0));
+			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::Attachment::Color0, pvp.merged_shading_rtvs[i]);
 			pvp.merged_shading_fbs[i]->Attach(ds_view);
-			pvp.merged_depth_fbs[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.merged_depth_texs[i], 0, 1, 0));
+			pvp.merged_depth_fbs[i]->Attach(FrameBuffer::Attachment::Color0, pvp.merged_depth_rtvs[i]);
 			pvp.merged_depth_fbs[i]->Attach(ds_view);
 		}
 		if (pvp.sample_count != 1)
 		{
 			for (size_t i = 0; i < pvp.merged_depth_resolved_fbs.size(); ++ i)
 			{
-				pvp.merged_depth_resolved_fbs[i]->Attach(FrameBuffer::Attachment::Color0,
-					rf.Make2DRtv(pvp.merged_depth_resolved_texs[i], 0, 1, 0));
+				pvp.merged_depth_resolved_fbs[i]->Attach(FrameBuffer::Attachment::Color0, pvp.merged_depth_resolved_rtvs[i]);
 			}
 		}
 
@@ -1356,6 +1398,7 @@ namespace KlayGE
 		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.small_ssvo_srv = rf.MakeTextureSrv(pvp.small_ssvo_tex);
+		pvp.small_ssvo_rtv = rf.Make2DRtv(pvp.small_ssvo_tex, 0, 1, 0);
 
 		if (0 == index)
 		{
@@ -2166,7 +2209,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::BuildLinearDepthMipmap(PerViewport const & pvp)
 	{
 		depth_to_linear_pps_[0]->InputPin(0, pvp.g_buffer_ds_srv);
-		depth_to_linear_pps_[0]->OutputPin(0, pvp.g_buffer_depth_tex);
+		depth_to_linear_pps_[0]->OutputPin(0, pvp.g_buffer_depth_rtv);
 		depth_to_linear_pps_[0]->Apply();
 
 		pvp.g_buffer_depth_tex->BuildMipSubLevels();
@@ -2352,14 +2395,7 @@ namespace KlayGE
 		if (LightSource::LT_Directional == type)
 		{
 			pp_chain = checked_pointer_cast<PostProcessChain>(csm_filter_pp_);
-			if (tex_array_support_)
-			{
-				pp_chain->OutputPin(0, pvp.filtered_csm_texs[0], 0, index_in_pass - 1, 0);
-			}
-			else
-			{
-				pp_chain->OutputPin(0, pvp.filtered_csm_texs[index_in_pass - 1]);
-			}
+			pp_chain->OutputPin(0, pvp.filtered_csm_slice_rtvs[index_in_pass - 1]);
 		}
 		else
 		{
@@ -2367,18 +2403,11 @@ namespace KlayGE
 			if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
 				|| (LightSource::LT_TubeArea == type))
 			{
-				pp_chain->OutputPin(0, filtered_sm_cube_texs_[sm_light_indices_[org_no].first], 0, 0, index_in_pass - 1);
+				pp_chain->OutputPin(0, filtered_sm_cube_face_rtvs_[sm_light_indices_[org_no].first * 6 + index_in_pass - 1]);
 			}
 			else 
 			{
-				if (tex_array_support_)
-				{
-					pp_chain->OutputPin(0, filtered_sm_2d_texs_[0], 0, sm_light_indices_[org_no].first);
-				}
-				else
-				{
-					pp_chain->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
-				}
+				pp_chain->OutputPin(0, filtered_sm_2d_slice_rtvs_[sm_light_indices_[org_no].first]);
 				if (has_sss_objs_ && translucency_enabled_)
 				{
 					sm_tex_->CopyToTexture(*unfiltered_sm_2d_texs_[sm_light_indices_[org_no].first]);
@@ -2462,12 +2491,12 @@ namespace KlayGE
 						sm_camera = light.SMCamera(0).get();
 						if (tex_array_support_)
 						{
-							*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_texs_[0];
+							*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_srvs_[0];
 							*filtered_sm_2d_light_index_param_ = light_index;
 						}
 						else
 						{
-							*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
+							*filtered_sm_2d_tex_param_ = filtered_sm_2d_srvs_[light_index];
 						}
 						break;
 
@@ -2475,7 +2504,7 @@ namespace KlayGE
 					case LightSource::LT_SphereArea:
 					case LightSource::LT_TubeArea:
 						sm_camera = light.SMCamera(0).get();
-						*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
+						*filtered_sm_cube_tex_param_ = filtered_sm_cube_srvs_[light_index];
 						break;
 
 					case LightSource::LT_Directional:
@@ -2503,13 +2532,13 @@ namespace KlayGE
 						}
 						if (tex_array_support_)
 						{
-							*filtered_csm_texs_param_[0] = pvp.filtered_csm_texs[0];
+							*filtered_csm_texs_param_[0] = pvp.filtered_csm_srvs[0];
 						}
 						else
 						{
 							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
-								*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
+								*filtered_csm_texs_param_[i] = pvp.filtered_csm_srvs[i];
 							}
 						}
 						break;
@@ -2612,11 +2641,11 @@ namespace KlayGE
 						sm_camera = light.SMCamera(0).get();
 						if (tex_array_support_)
 						{
-							*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_texs_[0];
+							*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_srvs_[0];
 						}
 						else
 						{
-							*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
+							*filtered_sm_2d_tex_param_ = filtered_sm_2d_srvs_[light_index];
 						}
 						break;
 
@@ -2624,7 +2653,7 @@ namespace KlayGE
 					case LightSource::LT_SphereArea:
 					case LightSource::LT_TubeArea:
 						sm_camera = light.SMCamera(0).get();
-						*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
+						*filtered_sm_cube_tex_param_ = filtered_sm_cube_srvs_[light_index];
 						break;
 
 					case LightSource::LT_Directional:
@@ -2648,13 +2677,13 @@ namespace KlayGE
 						}
 						if (tex_array_support_)
 						{
-							*filtered_csm_texs_param_[0] = pvp.filtered_csm_texs[0];
+							*filtered_csm_texs_param_[0] = pvp.filtered_csm_srvs[0];
 						}
 						else
 						{
 							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
-								*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
+								*filtered_csm_texs_param_[i] = pvp.filtered_csm_srvs[i];
 							}
 						}
 						break;
@@ -2844,17 +2873,17 @@ namespace KlayGE
 		{
 			ssvo_pp_->InputPin(0, pvp.g_buffer_resolved_rt0_srv);
 			ssvo_pp_->InputPin(1, pvp.g_buffer_resolved_depth_srv);
-			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
+			ssvo_pp_->OutputPin(0, pvp.small_ssvo_rtv);
 			ssvo_pp_->Apply();
 
 			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_srv);
 			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_resolved_depth_srv);
-			ssvo_blur_pp_->OutputPin(0, pvp.small_ssvo_tex);
+			ssvo_blur_pp_->OutputPin(0, pvp.small_ssvo_rtv);
 			ssvo_blur_pp_->Apply();
 
 			ssvo_upsample_pp_->InputPin(0, pvp.small_ssvo_srv);
 			ssvo_upsample_pp_->OutputPin(0,
-				(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+				(PTB_Opaque == pass_tb) ? pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index] : pvp.shading_rtv);
 			ssvo_upsample_pp_->Apply();
 		}
 	}
@@ -2891,7 +2920,7 @@ namespace KlayGE
 				trans_pp->InputPin(1, pvp.g_buffer_rt1_srv);
 				trans_pp->InputPin(2, pvp.g_buffer_depth_srv);
 				trans_pp->OutputPin(0,
-					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+					(PTB_Opaque == pass_tb) ? pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index] : pvp.shading_rtv);
 
 				Camera const& scene_camera = *pvp.frame_buffer->Viewport()->Camera();
 
@@ -2915,7 +2944,7 @@ namespace KlayGE
 		sss_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_fb->AttachedDsv());
 		sss_pp->InputPin(0, pvp.merged_shading_srvs[pvp.curr_merged_buffer_index]);
 		sss_pp->InputPin(1, pvp.g_buffer_depth_srv);
-		sss_pp->OutputPin(0, pvp.merged_shading_texs[pvp.curr_merged_buffer_index]);
+		sss_pp->OutputPin(0, pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index]);
 		sss_pp->Apply();
 	}
 
@@ -2975,11 +3004,11 @@ namespace KlayGE
 			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
 			if (pvp.sample_count == 1)
 			{
-				*shading_tex_param_ = pvp.shading_tex;
+				*shading_tex_param_ = pvp.shading_srv;
 			}
 			else
 			{
-				*shading_tex_ms_param_ = pvp.shading_tex;
+				*shading_tex_ms_param_ = pvp.shading_srv;
 			}
 			re.Render(*dr_effect_, *technique_merge_shading_[pvp.sample_count != 1], *rl_quad_);
 		}
@@ -3085,7 +3114,7 @@ namespace KlayGE
 		copy_to_light_buffer_pp->InputPin(2, pvp.g_buffer_resolved_rt1_srv);
 		copy_to_light_buffer_pp->InputPin(3, pvp.g_buffer_resolved_depth_srv);
 		copy_to_light_buffer_pp->OutputPin(0,
-			(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+			(PTB_Opaque == pass_tb) ? pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index] : pvp.shading_rtv);
 		copy_to_light_buffer_pp->Apply();
 	}
 
@@ -3132,7 +3161,7 @@ namespace KlayGE
 				static_cast<float>((h + 1) & ~1) / h));
 			depth_to_max_pp->InputPin(0, input_srv);
 			// Borrow the small_ssvo_tex
-			depth_to_max_pp->OutputPin(0, (0 == i) ? pvp.small_ssvo_tex : pvp.vdm_color_tex);
+			depth_to_max_pp->OutputPin(0, (0 == i) ? pvp.small_ssvo_rtv : pvp.vdm_color_rtv);
 			depth_to_max_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_vdm_max_ds_dsvs[i]);
 			depth_to_max_pp->Apply();
 		}
@@ -3624,7 +3653,7 @@ namespace KlayGE
 		depth_to_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 			static_cast<float>((h + 1) & ~1) / h));
 		depth_to_min_max_pp_->InputPin(0, pvp.g_buffer_depth_srv);
-		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[0]);
+		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_rtvs[0]);
 		depth_to_min_max_pp_->Apply();
 
 		for (uint32_t i = 1; i < pvp.g_buffer_min_max_depth_texs.size(); ++ i)
@@ -3635,7 +3664,7 @@ namespace KlayGE
 			reduce_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 				static_cast<float>((h + 1) & ~1) / h));
 			reduce_min_max_pp_->InputPin(0, pvp.g_buffer_min_max_depth_srvs[i - 1]);
-			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
+			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_rtvs[i]);
 			reduce_min_max_pp_->Apply();
 		}
 	}
@@ -4001,7 +4030,7 @@ namespace KlayGE
 			{
 				copy_pps_[pvp.sample_count != 1]->InputPin(0, pvp.temp_shading_srv);
 				copy_pps_[pvp.sample_count != 1]->OutputPin(0,
-					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+					(PTB_Opaque == pass_tb) ? pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index] : pvp.shading_rtv);
 				copy_pps_[pvp.sample_count != 1]->Apply();
 			}
 		}
@@ -4014,7 +4043,7 @@ namespace KlayGE
 		if (pvp.sample_count != 1)
 		{
 			depth_to_linear_pps_[1]->InputPin(0, pvp.g_buffer_ds_srv);
-			depth_to_linear_pps_[1]->OutputPin(0, pvp.g_buffer_depth_tex);
+			depth_to_linear_pps_[1]->OutputPin(0, pvp.g_buffer_depth_rtv);
 			depth_to_linear_pps_[1]->Apply();
 		}
 
@@ -4057,7 +4086,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer_fb->Width(), viewports_[0].g_buffer_fb->Height(),
 			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write);
-		pp->OutputPin(0, temp_tex);
+		pp->OutputPin(0, rf.Make2DRtv(temp_tex, 0, 1, 0));
 
 		std::string const index_str = std::to_string(index);
 
@@ -4096,7 +4125,7 @@ namespace KlayGE
 #endif
 
 		pp->Display(display_type_);
-		pp->OutputPin(0, TexturePtr());
+		pp->OutputPin(0, RenderTargetViewPtr());
 
 		++ index;
 	}
@@ -4546,7 +4575,7 @@ namespace KlayGE
 	{
 		uint32_t const index = (pvp.sample_count != 1);
 		depth_to_linear_pps_[index]->InputPin(0, pvp.g_buffer_ds_srv);
-		depth_to_linear_pps_[index]->OutputPin(0, pvp.merged_depth_texs[pvp.curr_merged_buffer_index]);
+		depth_to_linear_pps_[index]->OutputPin(0, pvp.merged_depth_rtvs[pvp.curr_merged_buffer_index]);
 		depth_to_linear_pps_[index]->Apply();
 
 		pvp.g_buffer_depth_tex->BuildMipSubLevels();
@@ -4566,7 +4595,7 @@ namespace KlayGE
 				*pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index]);
 
 			// Borrow g_buffer_ds_tex_ms_param_
-			*g_buffer_ds_tex_ms_param_ = pvp.merged_depth_texs[pvp.curr_merged_buffer_index];
+			*g_buffer_ds_tex_ms_param_ = pvp.merged_depth_srvs[pvp.curr_merged_buffer_index];
 
 			re.BindFrameBuffer(pvp.merged_depth_resolved_fbs[pvp.curr_merged_buffer_index]);
 			re.Render(*dr_effect_, *technique_resolve_merged_depth_, *rl_quad_);
@@ -4580,14 +4609,14 @@ namespace KlayGE
 		{
 			depth_of_field_pp_->InputPin(0, color_srv);
 			depth_of_field_pp_->InputPin(1, depth_srv);
-			depth_of_field_pp_->OutputPin(0, pvp.dof_tex);
+			depth_of_field_pp_->OutputPin(0, pvp.dof_rtv);
 			depth_of_field_pp_->Apply();
 
 			if (bokeh_filter_enabled_)
 			{
 				bokeh_filter_pp_->InputPin(0, color_srv);
 				bokeh_filter_pp_->InputPin(1, depth_srv);
-				bokeh_filter_pp_->OutputPin(0, pvp.dof_tex);
+				bokeh_filter_pp_->OutputPin(0, pvp.dof_rtv);
 				bokeh_filter_pp_->Apply();
 			}
 

@@ -69,15 +69,20 @@ namespace KlayGE
 		TexturePtr depth_derivative_tex_;
 		ShaderResourceViewPtr depth_derivative_srv_;
 		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
+		std::vector<RenderTargetViewPtr> depth_derivative_mip_rtvs_;
 		TexturePtr depth_derivative_small_tex_;
+		std::vector<RenderTargetViewPtr> depth_derivative_small_mip_rtvs_;
 		TexturePtr normal_cone_tex_;
 		ShaderResourceViewPtr normal_cone_srv_;
 		std::vector<ShaderResourceViewPtr> normal_cone_mip_srvs_;
+		std::vector<RenderTargetViewPtr> normal_cone_mip_rtvs_;
 		TexturePtr normal_cone_small_tex_;
+		std::vector<RenderTargetViewPtr> normal_cone_small_mip_rtvs_;
 
 		TexturePtr multi_res_tex_;
 		ShaderResourceViewPtr multi_res_srv_;
 		TexturePtr multi_res_pingpong_tex_;
+		std::vector<RenderTargetViewPtr> multi_res_pingpong_mip_rtvs_;
 		std::vector<FrameBufferPtr> multi_res_fbs_;
 
 		RenderEffectPtr subsplat_stencil_effect_;

@@ -144,9 +144,12 @@ namespace KlayGE
 		auto effect = SyncLoadRenderEffect("SumLum.fxml");
 		this->Technique(effect, effect->TechniqueByName("AdaptedLum"));
 
-		adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, init_data);
-		adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, init_data);
-		this->OutputPin(0, adapted_textures_[last_index_]);
+		for (size_t i = 0; i < 2; ++i)
+		{
+			adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, init_data);
+			adapted_rtvs_[i] = rf.Make2DRtv(adapted_textures_[i], 0, 1, 0);
+		}
+		this->OutputPin(0, adapted_rtvs_[last_index_]);
 
 		last_lum_tex_ep_ = effect_->ParameterByName("last_lum_tex");
 		frame_delta_ep_ = effect_->ParameterByName("frame_delta");
@@ -154,7 +157,7 @@ namespace KlayGE
 
 	void AdaptedLumPostProcess::Apply()
 	{
-		this->OutputPin(0, adapted_textures_[!last_index_]);
+		this->OutputPin(0, adapted_rtvs_[!last_index_]);
 
 		PostProcess::Apply();
 	}
@@ -221,6 +224,7 @@ namespace KlayGE
 
 		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
 		std::vector<ShaderResourceViewPtr> lum_srvs(lum_texs.size());
+		std::vector<RenderTargetViewPtr> lum_rtvs(lum_texs.size());
 		ElementFormat fmt;
 		if (caps.pack_to_rgba_required)
 		{
@@ -238,17 +242,18 @@ namespace KlayGE
 			lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write);
 			lum_srvs[sum_lums_.size() - i] = rf.MakeTextureSrv(lum_texs[sum_lums_.size() - i]);
+			lum_rtvs[sum_lums_.size() - i] = rf.Make2DRtv(lum_texs[sum_lums_.size() - i], 0, 1, 0);
 			len *= 4;
 		}
 
 		{
 			sum_lums_1st_->InputPin(index, srv);
-			sum_lums_1st_->OutputPin(index, lum_texs[0]);
+			sum_lums_1st_->OutputPin(index, lum_rtvs[0]);
 		}
 		for (size_t i = 0; i < sum_lums_.size(); ++ i)
 		{
 			sum_lums_[i]->InputPin(index, lum_srvs[i]);
-			sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
+			sum_lums_[i]->OutputPin(index, lum_rtvs[i + 1]);
 		}
 
 		{
@@ -261,14 +266,14 @@ namespace KlayGE
 		return sum_lums_1st_->InputPin(index);
 	}
 
-	void ImageStatPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void ImageStatPostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		adapted_lum_->OutputPin(index, tex, level, array_index, face);
+		adapted_lum_->OutputPin(index, rtv);
 	}
 
-	TexturePtr const & ImageStatPostProcess::OutputPin(uint32_t index) const
+	RenderTargetViewPtr const& ImageStatPostProcess::RtvOutputPin(uint32_t index) const
 	{
-		return adapted_lum_->OutputPin(index);
+		return adapted_lum_->RtvOutputPin(index);
 	}
 
 	void ImageStatPostProcess::Apply()
@@ -298,7 +303,6 @@ namespace KlayGE
 
 		TexturePtr lum_tex = rf.MakeTexture2D(2, 2, 1, 1, EF_R16F, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
-		auto lum_srv = rf.MakeTextureSrv(lum_tex);
 
 		float init_lum = 0;
 		ElementInitData init_data;
@@ -309,9 +313,9 @@ namespace KlayGE
 					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, init_data);
 
 		sum_lums_1st_->InputPin(index, srv);
-		sum_lums_1st_->OutputPin(index, lum_tex);
-		adapted_lum_->InputPin(index, lum_srv);
-		adapted_lum_->OutputPin(index, adapted_lum_tex);
+		sum_lums_1st_->OutputPin(index, rf.Make2DUav(lum_tex, 0, 1, 0));
+		adapted_lum_->InputPin(index, rf.MakeTextureSrv(lum_tex));
+		adapted_lum_->OutputPin(index, rf.Make2DUav(adapted_lum_tex, 0, 1, 0));
 	}
 
 	ShaderResourceViewPtr const& ImageStatPostProcessCS::InputPin(uint32_t index) const
@@ -319,14 +323,14 @@ namespace KlayGE
 		return sum_lums_1st_->InputPin(index);
 	}
 
-	void ImageStatPostProcessCS::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void ImageStatPostProcessCS::OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav)
 	{
-		adapted_lum_->OutputPin(index, tex, level, array_index, face);
+		adapted_lum_->OutputPin(index, uav);
 	}
 
-	TexturePtr const & ImageStatPostProcessCS::OutputPin(uint32_t index) const
+	UnorderedAccessViewPtr const& ImageStatPostProcessCS::UavOutputPin(uint32_t index) const
 	{
-		return adapted_lum_->OutputPin(index);
+		return adapted_lum_->UavOutputPin(index);
 	}
 
 	void ImageStatPostProcessCS::Apply()
@@ -360,8 +364,10 @@ namespace KlayGE
 
 		std::array<TexturePtr, 3> downsample_texs;
 		std::array<ShaderResourceViewPtr, 3> downsample_srvs;
+		std::array<RenderTargetViewPtr, 3> downsample_rtvs;
 		std::array<TexturePtr, 3> glow_texs;
 		std::array<ShaderResourceViewPtr, 3> glow_srvs;
+		std::array<RenderTargetViewPtr, 3> glow_rtvs;
 
 		ElementFormat fmt = tex->Format();
 		for (size_t i = 0; i < downsample_texs.size(); ++ i)
@@ -369,25 +375,27 @@ namespace KlayGE
 			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write);
 			downsample_srvs[i] = rf.MakeTextureSrv(downsample_texs[i]);
+			downsample_rtvs[i] = rf.Make2DRtv(downsample_texs[i], 0, 1, 0);
 		
 			glow_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write);
 			glow_srvs[i] = rf.MakeTextureSrv(glow_texs[i]);
+			glow_rtvs[i] = rf.Make2DRtv(glow_texs[i], 0, 1, 0);
 		}
 		
 		{
 			bright_pass_downsampler_->InputPin(index, srv);
-			bright_pass_downsampler_->OutputPin(index, downsample_texs[0]);
+			bright_pass_downsampler_->OutputPin(index, downsample_rtvs[0]);
 		}
 		for (size_t i = 0; i < downsamplers_.size(); ++ i)
 		{
 			downsamplers_[i]->InputPin(0, downsample_srvs[i]);
-			downsamplers_[i]->OutputPin(0, downsample_texs[i + 1]);
+			downsamplers_[i]->OutputPin(0, downsample_rtvs[i + 1]);
 		}
 		for (size_t i = 0; i < blurs_.size(); ++ i)
 		{
 			blurs_[i]->InputPin(0, downsample_srvs[i]);
-			blurs_[i]->OutputPin(0, glow_texs[i]);
+			blurs_[i]->OutputPin(0, glow_rtvs[i]);
 		}
 
 		glow_merger_->InputPin(0, glow_srvs[0]);
@@ -396,7 +404,7 @@ namespace KlayGE
 
 		TexturePtr lens_effects_tex = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2, 1, 1, fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write);
-		glow_merger_->OutputPin(0, lens_effects_tex);
+		glow_merger_->OutputPin(0, rf.Make2DRtv(lens_effects_tex, 0, 1, 0));
 	}
 
 	ShaderResourceViewPtr const& LensEffectsPostProcess::InputPin(uint32_t index) const
@@ -404,14 +412,14 @@ namespace KlayGE
 		return bright_pass_downsampler_->InputPin(index);
 	}
 
-	void LensEffectsPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void LensEffectsPostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		glow_merger_->OutputPin(index, tex, level, array_index, face);
+		glow_merger_->OutputPin(index, rtv);
 	}
 
-	TexturePtr const & LensEffectsPostProcess::OutputPin(uint32_t index) const
+	RenderTargetViewPtr const & LensEffectsPostProcess::RtvOutputPin(uint32_t index) const
 	{
-		return glow_merger_->OutputPin(index);
+		return glow_merger_->RtvOutputPin(index);
 	}
 
 	void LensEffectsPostProcess::Apply()
@@ -488,18 +496,18 @@ namespace KlayGE
 		bilinear_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
 		bright_pass_pp_ = SyncLoadPostProcess("LensEffects.ppml", "scaled_bright_pass");
-		bright_pass_pp_->OutputPin(0, resized_tex);
+		bright_pass_pp_->OutputPin(0, rf.Make2DRtv(resized_tex, 0, 1, 0));
 
 		complex_mul_pp_ = SyncLoadPostProcess("LensEffects.ppml", "complex_mul");
 		complex_mul_pp_->InputPin(0, rf.MakeTextureSrv(freq_real_tex_));
 		complex_mul_pp_->InputPin(1, rf.MakeTextureSrv(freq_imag_tex_));
 		complex_mul_pp_->InputPin(2, rf.MakeTextureSrv(pattern_real_tex_));
 		complex_mul_pp_->InputPin(3, rf.MakeTextureSrv(pattern_imag_tex_));
-		complex_mul_pp_->OutputPin(0, mul_real_tex_);
-		complex_mul_pp_->OutputPin(1, mul_imag_tex_);
+		complex_mul_pp_->OutputPin(0, rf.Make2DRtv(mul_real_tex_, 0, 1, 0));
+		complex_mul_pp_->OutputPin(1, rf.Make2DRtv(mul_imag_tex_, 0, 1, 0));
 
 		scaled_copy_pp_ = SyncLoadPostProcess("LensEffects.ppml", "scaled_copy");
-		scaled_copy_pp_->InputPin(0, rf.MakeTextureSrv(mul_real_tex_));
+		scaled_copy_pp_->InputPin(0, mul_real_srv_);
 	}
 
 	void FFTLensEffectsPostProcess::InputPin(uint32_t /*index*/, ShaderResourceViewPtr const & srv)
@@ -528,11 +536,13 @@ namespace KlayGE
 
 		restore_chain_texs_.resize(n - 1);
 		restore_chain_srvs_.resize(n - 1);
+		restore_chain_rtvs_.resize(n - 1);
 		for (size_t i = 1; i < n; ++ i)
 		{
 			restore_chain_texs_[i - 1] = rf.MakeTexture2D(std::max(1U, tex->Width(0) >> i), std::max(1U, tex->Height(0) >> i),
 				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			restore_chain_srvs_[i - 1] = rf.MakeTextureSrv(restore_chain_texs_[i - 1]);
+			restore_chain_rtvs_[i - 1] = rf.Make2DRtv(restore_chain_texs_[i - 1], 0, 1, 0);
 		}
 
 		uint32_t const final_width = restore_chain_texs_.back()->Width(0);
@@ -543,7 +553,7 @@ namespace KlayGE
 		bright_pass_pp_->InputPin(0, input_srv_);
 
 		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(final_width) / WIDTH, static_cast<float>(final_height) / HEIGHT, 1, 1));
-		scaled_copy_pp_->OutputPin(0, restore_chain_texs_.back());
+		scaled_copy_pp_->OutputPin(0, restore_chain_rtvs_.back());
 	}
 
 	ShaderResourceViewPtr const& FFTLensEffectsPostProcess::InputPin(uint32_t /*index*/) const
@@ -551,13 +561,15 @@ namespace KlayGE
 		return input_srv_;
 	}
 
-	void FFTLensEffectsPostProcess::OutputPin(uint32_t /*index*/, TexturePtr const & /*tex*/, int /*level*/, int /*array_index*/, int /*face*/)
+	void FFTLensEffectsPostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
+		KFL_UNUSED(index);
+		KFL_UNUSED(rtv);
 	}
 
-	TexturePtr const & FFTLensEffectsPostProcess::OutputPin(uint32_t /*index*/) const
+	RenderTargetViewPtr const & FFTLensEffectsPostProcess::RtvOutputPin(uint32_t /*index*/) const
 	{
-		return restore_chain_texs_[0];
+		return restore_chain_rtvs_[0];
 	}
 		
 	void FFTLensEffectsPostProcess::Apply()
@@ -579,7 +591,7 @@ namespace KlayGE
 		for (size_t i = restore_chain_texs_.size() - 1; i > 0; -- i)
 		{
 			bilinear_copy_pp_->InputPin(0, restore_chain_srvs_[i]);
-			bilinear_copy_pp_->OutputPin(0, restore_chain_texs_[i - 1]);
+			bilinear_copy_pp_->OutputPin(0, restore_chain_rtvs_[i - 1]);
 			bilinear_copy_pp_->Apply();
 		}
 	}
@@ -637,9 +649,9 @@ namespace KlayGE
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		if (fp_texture_support_ && cs_support_)
 		{
-			tone_mapping_->InputPin(1, rf.MakeTextureSrv(image_stat_->OutputPin(0)));
+			tone_mapping_->InputPin(1, rf.MakeTextureSrv(image_stat_->UavOutputPin(0)->TextureResource()));
 		}
-		tone_mapping_->InputPin(2, rf.MakeTextureSrv(lens_effects_->OutputPin(0)));
+		tone_mapping_->InputPin(2, rf.MakeTextureSrv(lens_effects_->RtvOutputPin(0)->TextureResource()));
 	}
 
 	ShaderResourceViewPtr const& HDRPostProcess::InputPin(uint32_t index) const
@@ -647,14 +659,14 @@ namespace KlayGE
 		return lens_effects_->InputPin(index);
 	}
 
-	void HDRPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void HDRPostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		tone_mapping_->OutputPin(index, tex, level, array_index, face);
+		tone_mapping_->OutputPin(index, rtv);
 	}
 
-	TexturePtr const & HDRPostProcess::OutputPin(uint32_t index) const
+	RenderTargetViewPtr const & HDRPostProcess::RtvOutputPin(uint32_t index) const
 	{
-		return tone_mapping_->OutputPin(index);
+		return tone_mapping_->RtvOutputPin(index);
 	}
 
 	void HDRPostProcess::Apply()
@@ -667,7 +679,7 @@ namespace KlayGE
 
 			if (!cs_support_)
 			{
-				tone_mapping_->InputPin(1, rf.MakeTextureSrv(image_stat_->OutputPin(0)));
+				tone_mapping_->InputPin(1, rf.MakeTextureSrv(image_stat_->RtvOutputPin(0)->TextureResource()));
 			}
 		}
 

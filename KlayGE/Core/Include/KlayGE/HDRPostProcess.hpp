@@ -73,6 +73,7 @@ namespace KlayGE
 
 	private:
 		TexturePtr adapted_textures_[2];
+		RenderTargetViewPtr adapted_rtvs_[2];
 		bool last_index_;
 
 		RenderEffectParameter* last_lum_tex_ep_;
@@ -98,8 +99,8 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply();
 
 	private:
@@ -115,8 +116,8 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 		void Apply();
 
 	private:
@@ -131,8 +132,8 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply();
 
 	private:
@@ -149,8 +150,8 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply();
 
 	private:
@@ -161,6 +162,7 @@ namespace KlayGE
 
 		std::vector<TexturePtr> restore_chain_texs_;
 		std::vector<ShaderResourceViewPtr> restore_chain_srvs_;
+		std::vector<RenderTargetViewPtr> restore_chain_rtvs_;
 
 		ShaderResourceViewPtr input_srv_;
 
@@ -188,8 +190,8 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply();
 
 	private:

@@ -235,10 +235,13 @@ namespace KlayGE
 		GraphicsBufferPtr tile_tess_ib_;
 		TexturePtr height_map_tex_;
 		ShaderResourceViewPtr height_map_srv_;
+		RenderTargetViewPtr height_map_rtv_;
 		TexturePtr gradient_map_tex_;
 		ShaderResourceViewPtr gradient_map_srv_;
+		RenderTargetViewPtr gradient_map_rtv_;
 		TexturePtr mask_map_tex_;
 		ShaderResourceViewPtr mask_map_srv_;
+		RenderTargetViewPtr mask_map_rtv_;
 		TexturePtr height_map_cpu_tex_;
 		TexturePtr gradient_map_cpu_tex_;
 		TexturePtr mask_map_cpu_tex_;

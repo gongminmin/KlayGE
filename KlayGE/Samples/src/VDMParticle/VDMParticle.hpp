@@ -53,6 +53,7 @@ private:
 
 	std::vector<KlayGE::TexturePtr> low_res_color_texs_;
 	std::vector<KlayGE::ShaderResourceViewPtr> low_res_color_srvs_;
+	std::vector<KlayGE::RenderTargetViewPtr> low_res_color_rtvs_;
 	std::vector<KlayGE::TexturePtr> low_res_max_ds_texs_;
 	std::vector<KlayGE::ShaderResourceViewPtr> low_res_max_ds_srvs_;
 	std::vector<KlayGE::DepthStencilViewPtr> low_res_max_ds_views_;

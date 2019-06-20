@@ -56,8 +56,10 @@ namespace KlayGE
 
 		TexturePtr tmp_real_tex_[2];
 		ShaderResourceViewPtr tmp_real_srv_[2];
+		RenderTargetViewPtr tmp_real_rtv_[2];
 		TexturePtr tmp_imag_tex_[2];
 		ShaderResourceViewPtr tmp_imag_srv_[2];
+		RenderTargetViewPtr tmp_imag_rtv_[2];
 
 		PostProcessPtr fft_x_pp_;
 		PostProcessPtr fft_y_pp_;

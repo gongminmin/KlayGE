@@ -64,15 +64,16 @@ namespace KlayGE
 					{
 						blur_tex_[i] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 						blur_srv_[i] = rf.MakeTextureSrv(blur_tex_[i]);
+						blur_rtv_[i] = rf.Make2DRtv(blur_tex_[i], 0, 1, 0);
 					}
 				}
 
 				bool active_idx = false;
-				radial_blur_pps_[0]->OutputPin(0, blur_tex_[active_idx]);
+				radial_blur_pps_[0]->OutputPin(0, blur_rtv_[active_idx]);
 				for (uint32_t i = 1; i < BLUR_ITERATE_NUM; ++ i)
 				{
 					radial_blur_pps_[i]->InputPin(0, blur_srv_[active_idx]);
-					radial_blur_pps_[i]->OutputPin(0, blur_tex_[!active_idx]);
+					radial_blur_pps_[i]->OutputPin(0, blur_rtv_[!active_idx]);
 					active_idx = !active_idx;
 				}
 

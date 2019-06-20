@@ -123,8 +123,10 @@ namespace KlayGE
 		virtual uint32_t NumOutputPins() const;
 		virtual uint32_t OutputPinByName(std::string_view name) const;
 		virtual std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		virtual TexturePtr const & OutputPin(uint32_t index) const;
+		virtual void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv);
+		virtual void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav);
+		virtual RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const;
+		virtual UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const;
 
 		bool Volumetric() const
 		{
@@ -178,7 +180,7 @@ namespace KlayGE
 		uint32_t cs_pixel_per_thread_z_;
 
 		std::vector<std::pair<std::string, ShaderResourceViewPtr>> input_pins_;
-		std::vector<std::pair<std::string, TexturePtr>> output_pins_;
+		std::vector<std::tuple<std::string, RenderTargetViewPtr, UnorderedAccessViewPtr>> output_pins_;
 		uint32_t num_bind_output_;
 		std::vector<std::pair<std::string, RenderEffectParameter*>> params_;
 		RenderEffectParameter* pp_mvp_param_;
@@ -282,8 +284,10 @@ namespace KlayGE
 		uint32_t NumOutputPins() const override;
 		uint32_t OutputPinByName(std::string_view name) const override;
 		std::string const& OutputPinName(uint32_t index) const override;
-		void OutputPin(uint32_t index, TexturePtr const& tex, int level = 0, int array_index = 0, int face = 0) override;
-		TexturePtr const& OutputPin(uint32_t index) const override;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
+		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 
 		void Apply() override;
 
@@ -424,7 +428,7 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
 						1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				pp_chain_[0]->OutputPin(0, blur_x);
+				pp_chain_[0]->OutputPin(0, rf.Make2DRtv(blur_x, 0, 1, 0));
 				pp_chain_[1]->InputPin(0, rf.MakeTextureSrv(blur_x));
 			}
 			else

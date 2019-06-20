@@ -443,7 +443,7 @@ void ShadowCubeMap::OnCreate()
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
 		sm_filter_pps_[i]->InputPin(0, shadow_srv);
-		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
+		sm_filter_pps_[i]->OutputPin(0, rf.Make2DRtv(shadow_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0));
 	}
 
 	fpcController_.Scalers(0.05f, 1.0f);

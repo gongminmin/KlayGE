@@ -130,10 +130,10 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ =
 					rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
-				spread_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(spread_tex_, 0, 1, 0));
+				auto spread_rtv = rf.Make2DRtv(spread_tex_, 0, 1, 0);
+				spread_fb_->Attach(FrameBuffer::Attachment::Color0, spread_rtv);
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width), static_cast<float>(height), 1.0f / width, 1.0f / height));
-				spreading_pp_->OutputPin(0, spread_tex_);
 
 				{
 					float4 const pos[] = {float4(-1, +1, 0 + (max_radius_ * 2 + 0.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
@@ -146,7 +146,18 @@ namespace KlayGE
 				}
 
 				sat_pp_->InputPin(0, rf.MakeTextureSrv(spread_tex_));
-				sat_pp_->OutputPin(0, spread_tex_);
+
+				if (cs_support_)
+				{
+					auto spread_uav = rf.Make2DUav(spread_tex_, 0, 1, 0);
+					spreading_pp_->OutputPin(0, spread_uav);
+					sat_pp_->OutputPin(0, spread_uav);
+				}
+				else
+				{
+					spreading_pp_->OutputPin(0, spread_rtv);
+					sat_pp_->OutputPin(0, spread_rtv);
+				}
 			}
 		}
 	}
@@ -360,9 +371,24 @@ namespace KlayGE
 		}
 	}
 
-	void BokehFilter::OutputPin(uint32_t index, TexturePtr const& tex, int level, int array_index, int face)
+	void BokehFilter::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		merge_bokeh_pp_->OutputPin(index, tex, level, array_index, face);
+		merge_bokeh_pp_->OutputPin(index, rtv);
+	}
+
+	void BokehFilter::OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav)
+	{
+		merge_bokeh_pp_->OutputPin(index, uav);
+	}
+
+	RenderTargetViewPtr const& BokehFilter::RtvOutputPin(uint32_t index) const
+	{
+		return merge_bokeh_pp_->RtvOutputPin(index);
+	}
+
+	UnorderedAccessViewPtr const& BokehFilter::UavOutputPin(uint32_t index) const
+	{
+		return merge_bokeh_pp_->UavOutputPin(index);
 	}
 
 	void BokehFilter::Apply()

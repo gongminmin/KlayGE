@@ -58,14 +58,14 @@ namespace
 			{
 				float shininess = Glossiness2Shininess(static_cast<float>(out_num_mipmaps - 2 - level) / (out_num_mipmaps - 2));
 
-				spec_pp->OutputPin(0, out_tex, level, 0, face);
+				spec_pp->OutputPin(0, rf.Make2DRtv(out_tex, 0, static_cast<Texture::CubeFaces>(face), level));
 				spec_pp->SetParam(0, face);
 				spec_pp->SetParam(1, shininess);
 				spec_pp->Apply();
 			}
 
 			{
-				diff_pp->OutputPin(0, out_tex, out_num_mipmaps - 1, 0, face);
+				diff_pp->OutputPin(0, rf.Make2DRtv(out_tex, 0, static_cast<Texture::CubeFaces>(face), out_num_mipmaps - 1));
 				diff_pp->SetParam(0, face);
 				diff_pp->Apply();
 			}

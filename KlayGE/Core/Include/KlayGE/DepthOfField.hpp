@@ -101,8 +101,10 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void OutputPin(uint32_t index, TexturePtr const& tex, int level, int array_index, int face);
-		using PostProcess::OutputPin;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
+		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 
 		void Apply();
 

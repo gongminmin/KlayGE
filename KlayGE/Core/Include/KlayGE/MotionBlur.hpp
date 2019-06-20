@@ -71,11 +71,6 @@ namespace KlayGE
 		uint32_t blur_radius_;
 		uint32_t reconstruction_samples_;
 
-		ShaderResourceViewPtr velocity_tile_max_x_dir_srv_;
-		ShaderResourceViewPtr velocity_tile_max_srv_;
-		ShaderResourceViewPtr velocity_neighbor_max_srv_;
-		ShaderResourceViewPtr random_srv_;
-
 		PostProcessPtr motion_blur_tile_max_x_dir_pp_;
 		PostProcessPtr motion_blur_tile_max_y_dir_pp_;
 		PostProcessPtr motion_blur_neighbor_max_pp_;

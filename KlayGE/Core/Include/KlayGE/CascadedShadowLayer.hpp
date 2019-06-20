@@ -168,12 +168,15 @@ namespace KlayGE
 		// For PS implement
 		TexturePtr depth_derivative_tex_;
 		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
+		std::vector<RenderTargetViewPtr> depth_derivative_mip_rtvs_;
 		TexturePtr depth_derivative_small_tex_;
+		std::vector<RenderTargetViewPtr> depth_derivative_small_mip_rtvs_;
 		PostProcessPtr reduce_z_bounds_from_depth_pp_;
 		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;
 		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;
 
 		TexturePtr interval_tex_;
+		RenderTargetViewPtr interval_rtv_;
 		TexturePtr interval_cpu_tex_;
 	};
 }

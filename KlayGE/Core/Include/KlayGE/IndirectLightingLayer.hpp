@@ -95,6 +95,7 @@ namespace KlayGE
 
 		std::array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
+		RenderTargetViewPtr vpl_rtv_;
 
 		RenderEffectPtr vpls_lighting_effect_;
 		RenderTechnique* vpls_lighting_instance_id_tech_;
@@ -139,6 +140,8 @@ namespace KlayGE
 
 		TexturePtr small_ssgi_tex_;
 		ShaderResourceViewPtr small_ssgi_srv_;
+
+		RenderTargetViewPtr indirect_lighting_rtv_;
 	};
 }
 

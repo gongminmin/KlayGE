@@ -86,16 +86,19 @@ namespace KlayGE
 		ShaderResourceViewPtr g_buffer_ds_srv;
 		TexturePtr g_buffer_depth_tex;
 		ShaderResourceViewPtr g_buffer_depth_srv;
+		RenderTargetViewPtr g_buffer_depth_rtv;
 		TexturePtr g_buffer_resolved_rt0_tex;
 		ShaderResourceViewPtr g_buffer_resolved_rt0_srv;
 		TexturePtr g_buffer_resolved_rt1_tex;
 		ShaderResourceViewPtr g_buffer_resolved_rt1_srv;
 		TexturePtr g_buffer_resolved_depth_tex;
 		ShaderResourceViewPtr g_buffer_resolved_depth_srv;
+		RenderTargetViewPtr g_buffer_resolved_depth_rtv;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 		std::vector<ShaderResourceViewPtr> g_buffer_min_max_depth_srvs;
+		std::vector<RenderTargetViewPtr> g_buffer_min_max_depth_rtvs;
 		ShaderResourceViewPtr g_buffer_stencil_srv;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
@@ -114,6 +117,7 @@ namespace KlayGE
 		FrameBufferPtr vdm_fb;
 		TexturePtr vdm_color_tex;
 		ShaderResourceViewPtr vdm_color_srv;
+		RenderTargetViewPtr vdm_color_rtv;
 		TexturePtr vdm_transition_tex;
 		ShaderResourceViewPtr vdm_transition_srv;
 		TexturePtr vdm_count_tex;
@@ -121,28 +125,38 @@ namespace KlayGE
 
 		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
+		ShaderResourceViewPtr shading_srv;
+		RenderTargetViewPtr shading_rtv;
 
 		uint32_t num_cascades;
 		std::array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs;
+		std::array<ShaderResourceViewPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_srvs;
+		std::array<RenderTargetViewPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_slice_rtvs;
 
 		std::array<FrameBufferPtr, 2> merged_shading_fbs;
 		std::array<TexturePtr, 2> merged_shading_texs;
 		std::array<ShaderResourceViewPtr, 2> merged_shading_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_shading_rtvs;
 		std::array<FrameBufferPtr, 2> merged_depth_fbs;
 		std::array<TexturePtr, 2> merged_depth_texs;
 		std::array<ShaderResourceViewPtr, 2> merged_depth_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_depth_rtvs;
 		std::array<TexturePtr, 2> merged_shading_resolved_texs;
 		std::array<ShaderResourceViewPtr, 2> merged_shading_resolved_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_shading_resolved_rtvs;
 		std::array<FrameBufferPtr, 2> merged_depth_resolved_fbs;
 		std::array<TexturePtr, 2> merged_depth_resolved_texs;
 		std::array<ShaderResourceViewPtr, 2> merged_depth_resolved_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_depth_resolved_rtvs;
 		uint32_t curr_merged_buffer_index;
 
 		TexturePtr dof_tex;
 		ShaderResourceViewPtr dof_srv;
+		RenderTargetViewPtr dof_rtv;
 
 		TexturePtr small_ssvo_tex;
 		ShaderResourceViewPtr small_ssvo_srv;
+		RenderTargetViewPtr small_ssvo_rtv;
 		bool ssvo_enabled;
 
 		float4x4 view, proj;
@@ -630,7 +644,11 @@ namespace KlayGE
 		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_texs_;
 		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_srvs_;
 		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_texs_;
+		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_srvs_;
+		std::array<RenderTargetViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_slice_rtvs_;
 		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_texs_;
+		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_srvs_;
+		std::array<RenderTargetViewPtr, (MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS) * 6> filtered_sm_cube_face_rtvs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr csm_filter_pp_;

@@ -231,7 +231,7 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	scene_ds_srv_ = rf.MakeTextureSrv(scene_ds_tex_);
 
 	depth_to_linear_pp_->InputPin(0, scene_ds_srv_);
-	depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
+	depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(scene_depth_tex_, 0, 1, 0));
 
 	scene_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_tex_, 0, 1, 0));
 	scene_fb_->Attach(rf.Make2DDsv(scene_ds_tex_, 0, 1, 0));
@@ -250,6 +250,7 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 		{
 			low_res_color_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
 			low_res_color_srvs_.push_back(rf.MakeTextureSrv(low_res_color_texs_.back()));
+			low_res_color_rtvs_.push_back(rf.Make2DRtv(low_res_color_texs_.back(), 0, 1, 0));
 			low_res_max_ds_texs_.push_back(rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write));
 			low_res_max_ds_srvs_.push_back(rf.MakeTextureSrv(low_res_max_ds_texs_.back()));
 			low_res_max_ds_views_.push_back(rf.Make2DDsv(low_res_max_ds_texs_.back(), 0, 1, 0));
@@ -394,7 +395,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 					depth_to_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 						static_cast<float>((h + 1) & ~1) / h));
 					depth_to_max_pp_->InputPin(0, input_srv);
-					depth_to_max_pp_->OutputPin(0, low_res_color_texs_[i]);
+					depth_to_max_pp_->OutputPin(0, low_res_color_rtvs_[i]);
 					depth_to_max_pp_->OutputFrameBuffer()->Attach(low_res_max_ds_views_[i]);
 					depth_to_max_pp_->Apply();
 				}

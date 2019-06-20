@@ -405,12 +405,15 @@ namespace KlayGE
 		FrameBufferPtr post_tone_mapping_frame_buffer_;
 		TexturePtr post_tone_mapping_tex_;
 		ShaderResourceViewPtr post_tone_mapping_srv_;
+		RenderTargetViewPtr post_tone_mapping_rtv_;
 		FrameBufferPtr resize_frame_buffer_;
 		TexturePtr resize_tex_;
 		ShaderResourceViewPtr resize_srv_;
+		RenderTargetViewPtr resize_rtv_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
 		ShaderResourceViewPtr mono_srv_;
+		RenderTargetViewPtr mono_rtv_;
 		FrameBufferPtr default_frame_buffers_[4];
 
 		FrameBufferPtr overlay_frame_buffer_;
@@ -419,8 +422,10 @@ namespace KlayGE
 
 		TexturePtr smaa_edges_tex_;
 		ShaderResourceViewPtr smaa_edges_srv_;
+		RenderTargetViewPtr smaa_edges_rtv_;
 		TexturePtr smaa_blend_tex_;
 		ShaderResourceViewPtr smaa_blend_srv_;
+		RenderTargetViewPtr smaa_blend_rtv_;
 
 		RenderLayoutPtr so_buffers_;
 

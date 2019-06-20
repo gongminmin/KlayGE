@@ -656,7 +656,7 @@ void CausticsMapApp::OnCreate()
 
 	caustics_map_pps_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(5, 1.0f);
 	caustics_map_pps_->InputPin(0, caustics_srv_);
-	caustics_map_pps_->OutputPin(0, caustics_texture_filtered_);
+	caustics_map_pps_->OutputPin(0, rf.Make2DRtv(caustics_texture_filtered_, 0, 1, 0));
 }
 
 void CausticsMapApp::InitBuffer()
@@ -700,19 +700,22 @@ void CausticsMapApp::InitBuffer()
 	refract_obj_N_texture_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	refract_obj_N_texture_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	refract_obj_depth_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	refract_obj_depth_rtv_f_ = rf.Make2DRtv(refract_obj_depth_tex_f_, 0, 1, 0);
 	refract_obj_depth_tex_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	refract_obj_depth_rtv_b_ = rf.Make2DRtv(refract_obj_depth_tex_b_, 0, 1, 0);
 	background_depth_tex_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	background_depth_rtv_ = rf.Make2DRtv(background_depth_tex_, 0, 1, 0);
 
 	background_fb_ = rf.MakeFrameBuffer();
-	background_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(background_depth_tex_, 0, 1, 0));
+	background_fb_->Attach(FrameBuffer::Attachment::Color0, background_depth_rtv_);
 	background_fb_->Attach(background_ds_dsv);
 
 	refract_obj_fb_d_f_ = rf.MakeFrameBuffer();
-	refract_obj_fb_d_f_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_depth_tex_f_, 0, 1, 0));
+	refract_obj_fb_d_f_->Attach(FrameBuffer::Attachment::Color0, refract_obj_depth_rtv_f_);
 	refract_obj_fb_d_f_->Attach(refract_obj_ds_dsv_f);
 
 	refract_obj_fb_d_b_ = rf.MakeFrameBuffer();
-	refract_obj_fb_d_b_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(refract_obj_depth_tex_b_, 0, 1, 0));
+	refract_obj_fb_d_b_->Attach(FrameBuffer::Attachment::Color0, refract_obj_depth_rtv_b_);
 	refract_obj_fb_d_b_->Attach(refract_obj_ds_dsv_b);
 
 	refract_obj_fb_f_ = rf.MakeFrameBuffer();
@@ -760,7 +763,7 @@ void CausticsMapApp::InitEnvCube()
 		env_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "Copy");
 
 		env_filter_pps_[i]->InputPin(0, env_srv);
-		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);
+		env_filter_pps_[i]->OutputPin(0, rf.Make2DRtv(env_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0));
 	}
 }
 
@@ -788,7 +791,7 @@ void CausticsMapApp::InitCubeSM()
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
 		sm_filter_pps_[i]->InputPin(0, shadow_srv);
-		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
+		sm_filter_pps_[i]->OutputPin(0, rf.Make2DRtv(shadow_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0));
 	}
 }
 
@@ -996,7 +999,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				});
 
 			depth_to_linear_pp_->InputPin(0, background_ds_srv_);
-			depth_to_linear_pp_->OutputPin(0, background_depth_tex_);
+			depth_to_linear_pp_->OutputPin(0, background_depth_rtv_);
 			depth_to_linear_pp_->Apply();
 
 			re.BindFrameBuffer(refract_obj_fb_f_);
@@ -1022,7 +1025,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		if (depth_texture_support_)
 		{
 			depth_to_linear_pp_->InputPin(0, refract_obj_ds_srv_f_);
-			depth_to_linear_pp_->OutputPin(0, refract_obj_depth_tex_f_);
+			depth_to_linear_pp_->OutputPin(0, refract_obj_depth_rtv_f_);
 			depth_to_linear_pp_->Apply();
 
 			if (enable_dual_face_caustics_)
@@ -1067,7 +1070,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<CausticsGrid>(caustics_grid_)->CausticsPass(Dual_Caustics_Pass);
 
 				depth_to_linear_pp_->InputPin(0, refract_obj_ds_srv_b_);
-				depth_to_linear_pp_->OutputPin(0, refract_obj_depth_tex_b_);
+				depth_to_linear_pp_->OutputPin(0, refract_obj_depth_rtv_b_);
 				depth_to_linear_pp_->Apply();
 			}
 			else

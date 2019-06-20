@@ -79,9 +79,11 @@ namespace KlayGE
 		{
 			tmp_real_tex_[i] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			tmp_real_srv_[i] = rf.MakeTextureSrv(tmp_real_tex_[i]);
+			tmp_real_rtv_[i] = rf.Make2DRtv(tmp_real_tex_[i], 0, 1, 0);
 
 			tmp_imag_tex_[i] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			tmp_imag_srv_[i] = rf.MakeTextureSrv(tmp_imag_tex_[i]);
+			tmp_imag_rtv_[i] = rf.Make2DRtv(tmp_imag_tex_[i], 0, 1, 0);
 		}
 
 		fft_x_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_x");
@@ -91,6 +93,8 @@ namespace KlayGE
 	void GpuFftPS::Execute(TexturePtr const& out_real, TexturePtr const& out_imag,
 		ShaderResourceViewPtr const& in_real, ShaderResourceViewPtr const& in_imag)
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
 		int active = 0;
 
 		for (uint32_t i = 0; i < log_x_; ++ i)
@@ -106,8 +110,8 @@ namespace KlayGE
 				fft_x_pp_->InputPin(1, tmp_imag_srv_[active]);
 			}
 			fft_x_pp_->InputPin(2, lookup_i_wr_wi_x_srv_[i]);
-			fft_x_pp_->OutputPin(0, tmp_real_tex_[!active]);
-			fft_x_pp_->OutputPin(1, tmp_imag_tex_[!active]);
+			fft_x_pp_->OutputPin(0, tmp_real_rtv_[!active]);
+			fft_x_pp_->OutputPin(1, tmp_imag_rtv_[!active]);
 			fft_x_pp_->Apply();
 
 			active = !active;
@@ -128,14 +132,14 @@ namespace KlayGE
 				{
 					fft_y_pp_->SetParam(0, 1.0f / (width_ * height_));
 				}
-				fft_y_pp_->OutputPin(0, out_real);
-				fft_y_pp_->OutputPin(1, out_imag);
+				fft_y_pp_->OutputPin(0, rf.Make2DRtv(out_real, 0, 1, 0));
+				fft_y_pp_->OutputPin(1, rf.Make2DRtv(out_imag, 0, 1, 0));
 			}
 			else
 			{
 				fft_y_pp_->SetParam(0, -1.0f);
-				fft_y_pp_->OutputPin(0, tmp_real_tex_[!active]);
-				fft_y_pp_->OutputPin(1, tmp_imag_tex_[!active]);
+				fft_y_pp_->OutputPin(0, tmp_real_rtv_[!active]);
+				fft_y_pp_->OutputPin(1, tmp_imag_rtv_[!active]);
 			}
 			fft_y_pp_->Apply();
 

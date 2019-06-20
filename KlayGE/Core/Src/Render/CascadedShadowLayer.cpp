@@ -252,6 +252,7 @@ namespace KlayGE
 			compute_log_cascades_from_z_bounds_pp_ = SyncLoadPostProcess("CascadedShadow.ppml", "compute_log_cascades_from_z_bounds");
 
 			interval_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			interval_rtv_ = rf.Make2DRtv(interval_tex_, 0, 1, 0);
 			interval_cpu_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read);
 		}
 	}
@@ -270,17 +271,25 @@ namespace KlayGE
 
 			depth_derivative_tex_ = rf.MakeTexture2D(width / 2, height / 2, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			auto depth_derivative_srv = rf.MakeTextureSrv(depth_derivative_tex_);
+			auto depth_derivative_rtv = rf.Make2DRtv(depth_derivative_tex_, 0, 1, 0);
 			if (rf.RenderEngineInstance().DeviceCaps().flexible_srvs_support)
 			{
 				depth_derivative_mip_srvs_.resize(depth_derivative_tex_->NumMipMaps());
+				depth_derivative_mip_rtvs_.resize(depth_derivative_tex_->NumMipMaps());
 				for (uint32_t i = 0; i < depth_derivative_tex_->NumMipMaps(); ++ i)
 				{
 					depth_derivative_mip_srvs_[i] = rf.MakeTextureSrv(depth_derivative_tex_, 0, 1, i, 1);
+					depth_derivative_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_tex_, 0, 1, i);
 				}
 			}
 			else
 			{
 				depth_derivative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Write);
+				depth_derivative_small_mip_rtvs_.resize(depth_derivative_small_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < depth_derivative_small_tex_->NumMipMaps(); ++i)
+				{
+					depth_derivative_small_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_small_tex_, 0, 1, i);
+				}
 				reduce_z_bounds_from_depth_mip_map_pp_->InputPin(0, depth_derivative_srv);
 			}
 
@@ -288,10 +297,10 @@ namespace KlayGE
 			float delta_y = 1.0f / depth_tex_->Height(0);
 			reduce_z_bounds_from_depth_pp_->SetParam(0, float4(delta_x, delta_y, -delta_x / 2, -delta_y / 2));
 			reduce_z_bounds_from_depth_pp_->InputPin(0, depth_srv_);
-			reduce_z_bounds_from_depth_pp_->OutputPin(0, depth_derivative_tex_);
+			reduce_z_bounds_from_depth_pp_->OutputPin(0, depth_derivative_rtv);
 			compute_log_cascades_from_z_bounds_pp_->SetParam(0, static_cast<float>(depth_derivative_tex_->NumMipMaps() - 1));
 			compute_log_cascades_from_z_bounds_pp_->InputPin(0, depth_derivative_srv);
-			compute_log_cascades_from_z_bounds_pp_->OutputPin(0, interval_tex_);
+			compute_log_cascades_from_z_bounds_pp_->OutputPin(0, interval_rtv_);
 		}
 	}
 
@@ -388,12 +397,12 @@ namespace KlayGE
 				if (re.DeviceCaps().flexible_srvs_support)
 				{
 					reduce_z_bounds_from_depth_mip_map_pp_->InputPin(0, depth_derivative_mip_srvs_[i - 1]);
-					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_tex_, i);
+					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_mip_rtvs_[i]);
 					reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 				}
 				else
 				{
-					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_small_tex_, i - 1);
+					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_small_mip_rtvs_[i - 1]);
 					reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 
 					depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0,
