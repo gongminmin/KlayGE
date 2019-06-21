@@ -72,6 +72,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/StreamOutputTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/TexConverterTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/TextureTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/UavOutputTest.cpp
 )
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.hpp
@@ -84,6 +85,7 @@ endif()
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/media/RenderToTexture/RenderToTextureTest.fxml
 	${KLAYGE_PROJECT_DIR}/Tests/media/StreamOutput/StreamOutputTest.fxml
+	${KLAYGE_PROJECT_DIR}/Tests/media/UavOutput/UavOutputTest.fxml
 )
 SET(POST_PROCESSORS "")
 SET(UI_FILES "")
