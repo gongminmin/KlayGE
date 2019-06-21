@@ -5,6 +5,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="int" name="frame_width"/>
+		<parameter type="int" name="num_vertices"/>
 	</cbuffer>
 
 	<parameter type="rw_structured_buffer" elem_type="float4" name="rw_output_buffer"/>
@@ -67,6 +68,24 @@ void UavToCsCS(uint3 dtid : SV_DispatchThreadID)
 	<technique name="UavToCs">
 		<pass name="p0">
 			<state name="compute_shader" value="UavToCsCS()"/>
+		</pass>
+	</technique>
+
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(32, 32, 1)]
+void CounterUavToCsCS(uint3 dtid : SV_DispatchThreadID)
+{
+	uint index = rw_output_buffer.IncrementCounter();
+	rw_output_buffer[index] = rw_output_buffer[index - num_vertices] * float4(1, 2, 3, 4);
+}
+		]]>
+	</shader>
+
+	<technique name="CounterUavToCs">
+		<pass name="p0">
+			<state name="compute_shader" value="CounterUavToCsCS()"/>
 		</pass>
 	</technique>
 </effect>

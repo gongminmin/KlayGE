@@ -143,8 +143,9 @@ namespace
 	class SetD3D11ShaderParameterTextureUAV
 	{
 	public:
-		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameter* param)
-			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
+		SetD3D11ShaderParameterTextureUAV(
+			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter* param)
+			: uavsrc_(&uavsrc), uav_(&uav), uav_init_count_(&uav_init_count), param_(param)
 		{
 		}
 
@@ -155,25 +156,31 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->TextureResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
+				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
+				*uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
+				*uav_init_count_ = d3d11_uav.InitCount();
 			}
 			else
 			{
 				*uavsrc_ = nullptr;
+				*uav_ = nullptr;
+				*uav_init_count_ = 0;
 			}
 		}
 
 	private:
 		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
+		uint32_t* uav_init_count_;
 		RenderEffectParameter* param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferUAV
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameter* param)
-			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
+		SetD3D11ShaderParameterGraphicsBufferUAV(
+			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter* param)
+			: uavsrc_(&uavsrc), uav_(&uav), uav_init_count_(&uav_init_count), param_(param)
 		{
 		}
 
@@ -184,17 +191,22 @@ namespace
 			if (uav)
 			{
 				*uavsrc_ = uav->BufferResource().get();
-				*uav_ = checked_cast<D3D11UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
+				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
+				*uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
+				*uav_init_count_ = d3d11_uav.InitCount();
 			}
 			else
 			{
 				*uavsrc_ = nullptr;
+				*uav_ = nullptr;
+				*uav_init_count_ = 0;
 			}
 		}
 
 	private:
 		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
+		uint32_t* uav_init_count_;
 		RenderEffectParameter* param_;
 	};
 }
@@ -1014,6 +1026,7 @@ namespace KlayGE
 			srvs_[stage_index].resize(shader_desc.num_srvs);
 			uavsrcs_.resize(shader_desc.num_uavs, nullptr);
 			uavs_.resize(shader_desc.num_uavs);
+			uav_init_counts_.resize(shader_desc.num_uavs);
 
 			for (size_t i = 0; i < shader_desc.res_desc.size(); ++ i)
 			{
@@ -1097,6 +1110,7 @@ namespace KlayGE
 		ret->hw_res_ready_ = hw_res_ready_;
 		ret->uavsrcs_.resize(uavsrcs_.size(), nullptr);
 		ret->uavs_.resize(uavs_.size());
+		ret->uav_init_counts_.resize(uav_init_counts_.size());
 
 		for (size_t i = 0; i < NumShaderStages; ++ i)
 		{
@@ -1173,7 +1187,7 @@ namespace KlayGE
 		case REDT_rasterizer_ordered_texture2D:
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
-			ret.func = SetD3D11ShaderParameterTextureUAV(uavsrcs_[offset], uavs_[offset], param);
+			ret.func = SetD3D11ShaderParameterTextureUAV(uavsrcs_[offset], uavs_[offset], uav_init_counts_[offset], param);
 			break;
 
 		case REDT_rw_buffer:
@@ -1182,7 +1196,7 @@ namespace KlayGE
 		case REDT_rasterizer_ordered_buffer:
 		case REDT_rasterizer_ordered_structured_buffer:
 		case REDT_rasterizer_ordered_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameterGraphicsBufferUAV(uavsrcs_[offset], uavs_[offset], param);
+			ret.func = SetD3D11ShaderParameterGraphicsBufferUAV(uavsrcs_[offset], uavs_[offset], uav_init_counts_[offset], param);
 			break;
 
 		default:
@@ -1287,8 +1301,7 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<UINT> uav_init_counts(uavs_.size(), 0);
-			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_.size()), &uavs_[0], &uav_init_counts[0]);
+			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_.size()), &uavs_[0], &uav_init_counts_[0]);
 		}
 	}
 

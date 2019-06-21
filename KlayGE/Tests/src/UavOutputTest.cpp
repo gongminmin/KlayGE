@@ -35,6 +35,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include "KlayGETests.hpp"
@@ -162,8 +163,68 @@ public:
 		auto sanity_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, num_vertices * sizeof(float4), sanity_data.data());
 
 		EXPECT_TRUE(CompareBuffer(*sanity_vb, 0, *cs_out_vb, 0, num_vertices * 4, tolerance));
+	}
+
+	void TestRasterizeCounter(float tolerance)
+	{
+		if (!uav_output_support_)
+		{
+			return;
+		}
+
+		auto effect = SyncLoadRenderEffect("UavOutput/UavOutputTest.fxml");
+		auto ps_tech = effect->TechniqueByName("RasterizeToCounterUav");
+		auto cs_tech = effect->TechniqueByName("CounterUavToCs");
+
+		uint32_t const width = 32;
+		uint32_t const height = 32;
+		uint32_t const num_vertices = width * height;
+
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& re = rf.RenderEngineInstance();
+
+		auto ps_out_vb =
+			rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter,
+				num_vertices * 2 * sizeof(float4), nullptr, sizeof(float4));
+		auto ps_out_srv = rf.MakeBufferSrv(ps_out_vb, EF_ABGR32F);
+		auto ps_out_uav = rf.MakeBufferUav(ps_out_vb, EF_ABGR32F);
+		ps_out_uav->InitCount(static_cast<uint32_t>(-1));
+
+		auto fb = rf.MakeFrameBuffer();
+		fb->Attach(0, ps_out_uav);
+		fb->Viewport()->Width(width);
+		fb->Viewport()->Height(height);
+
+		re.BindFrameBuffer(fb);
+
+		re.Render(*effect, *ps_tech, *re.PostProcessRenderLayout());
+
+		std::vector<float4> sanity_data(num_vertices * 2);
+		{
+			auto ps_out_cpu_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, ps_out_vb->Size() / 2, nullptr);
+			ps_out_vb->CopyToSubBuffer(*ps_out_cpu_vb, 0, 0, ps_out_vb->Size() / 2);
+
+			GraphicsBuffer::Mapper mapper(*ps_out_cpu_vb, BA_Read_Only);
+			float4* ps_out_data = mapper.Pointer<float4>();
+
+			for (uint32_t i = 0; i < num_vertices; ++i)
+			{
+				sanity_data[i] = ps_out_data[i];
+			}
+			for (uint32_t i = 0; i < num_vertices; ++i)
+			{
+				sanity_data[i + num_vertices] = ps_out_data[i] * float4(1, 2, 3, 4);
+			}
+		}
 
 		re.BindFrameBuffer(FrameBufferPtr());
+		*effect->ParameterByName("rw_output_buffer") = ps_out_uav;
+		*effect->ParameterByName("num_vertices") = static_cast<int32_t>(num_vertices);
+		re.Dispatch(*effect, *cs_tech, width, height, 1);
+
+		auto sanity_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, num_vertices * 2 * sizeof(float4), sanity_data.data());
+
+		EXPECT_TRUE(CompareBuffer(*sanity_vb, 0, *ps_out_vb, 0, num_vertices * 2 * 4, tolerance));
 	}
 
 private:
@@ -180,3 +241,9 @@ TEST_F(UavOutputTest, RasterizeToCs)
 {
 	TestRasterizeToCs(1.0f / 255);
 }
+
+TEST_F(UavOutputTest, RasterizeCounter)
+{
+	TestRasterizeCounter(1.0f / 255);
+}
+

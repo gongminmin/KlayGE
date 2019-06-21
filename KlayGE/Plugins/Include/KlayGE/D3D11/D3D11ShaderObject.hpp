@@ -366,6 +366,7 @@ namespace KlayGE
 		std::array<std::vector<ID3D11ShaderResourceView*>, NumShaderStages> srvs_;
 		std::vector<void*> uavsrcs_;
 		std::vector<ID3D11UnorderedAccessView*> uavs_;
+		std::vector<uint32_t> uav_init_counts_;
 	};
 
 	typedef std::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
