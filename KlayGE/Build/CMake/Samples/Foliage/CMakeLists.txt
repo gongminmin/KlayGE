@@ -91,6 +91,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthOfField.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferFoliage+GBufferTwoSided.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
@@ -101,6 +102,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SAT.kfx
