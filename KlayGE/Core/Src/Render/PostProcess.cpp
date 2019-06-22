@@ -755,7 +755,7 @@ namespace KlayGE
 		{
 			++num_bind_output_;
 		}
-		if ((std::get<1>(output_pins_[index]) || !std::get<2>(output_pins_[index])) && !rtv)
+		if ((std::get<1>(output_pins_[index]) || std::get<2>(output_pins_[index])) && !rtv)
 		{
 			--num_bind_output_;
 		}
@@ -775,7 +775,7 @@ namespace KlayGE
 		{
 			++num_bind_output_;
 		}
-		if ((std::get<1>(output_pins_[index]) || !std::get<2>(output_pins_[index])) && !uav)
+		if ((std::get<1>(output_pins_[index]) || std::get<2>(output_pins_[index])) && !uav)
 		{
 			--num_bind_output_;
 		}
