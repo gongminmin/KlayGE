@@ -1182,7 +1182,8 @@ namespace KlayGE
 		if (face_ >= 0)
 		{
 			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
-			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (!re.HackForIntel() && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 			{
 				glNamedFramebufferTextureLayer(gl_fbo_,
 						GL_COLOR_ATTACHMENT0 + index_,
@@ -1196,7 +1197,6 @@ namespace KlayGE
 			}
 			else
 			{
-				auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindFramebuffer(gl_fbo_);
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER,
