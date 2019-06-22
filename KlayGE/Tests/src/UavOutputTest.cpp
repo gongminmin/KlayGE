@@ -81,6 +81,7 @@ public:
 
 		re.BindFrameBuffer(fb);
 
+		*effect->ParameterByName("rw_output_buffer") = out_uav;
 		*effect->ParameterByName("frame_width") = static_cast<int32_t>(width);
 		re.Render(*effect, *tech, *re.PostProcessRenderLayout());
 

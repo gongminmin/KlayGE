@@ -1714,7 +1714,7 @@ namespace
 			}
 			else
 			{
-				float4 albedo;
+				float4 albedo(0, 0, 0, 1);
 
 				XMLAttributePtr attr = mtl_node->Attrib("diffuse");
 				if (attr)
@@ -1829,7 +1829,7 @@ namespace
 			}
 			else
 			{
-				float3 emissive;
+				float3 emissive(0, 0, 0);
 
 				XMLAttributePtr attr = mtl_node->Attrib("emit");
 				if (attr)
