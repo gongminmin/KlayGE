@@ -49,8 +49,6 @@ namespace KlayGE
 	{
 		// Store info
 		name_				= name;
-		width_				= settings.width;
-		height_				= settings.height;
 		isFullScreen_		= settings.full_screen;
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
@@ -65,6 +63,10 @@ namespace KlayGE
 			{
 				this->OnSize(win, active);
 			});
+
+		float const dpi_scale = main_wnd->DPIScale();
+		width_ = static_cast<uint32_t>(settings.width * dpi_scale + 0.5f);
+		height_ = static_cast<uint32_t>(settings.height * dpi_scale + 0.5f);
 
 		if (isFullScreen_)
 		{
@@ -388,9 +390,9 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESRenderWindow::WindowMovedOrResized(Window const & win)
+	void OGLESRenderWindow::WindowMovedOrResized(Window const& win)
 	{
-		KFL_UNUSED(win);
+		float const dpi_scale = win.DPIScale();
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
@@ -417,18 +419,19 @@ namespace KlayGE
 		uint32_t new_width = w;
 		uint32_t new_height = h;
 #elif defined KLAYGE_PLATFORM_DARWIN
-		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
+		uint2 screen = win.GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #elif defined KLAYGE_PLATFORM_IOS
-		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetGLKViewSize();
+		uint2 screen = win.GetGLKViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
 		{
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(
+				static_cast<uint32_t>(new_width / dpi_scale + 0.5f), static_cast<uint32_t>(new_height / dpi_scale + 0.5f));
 		}
 	}
 
@@ -472,12 +475,12 @@ namespace KlayGE
 #endif
 	}
 
-	void OGLESRenderWindow::OnExitSizeMove(Window const & win)
+	void OGLESRenderWindow::OnExitSizeMove(Window const& win)
 	{
 		this->WindowMovedOrResized(win);
 	}
 
-	void OGLESRenderWindow::OnSize(Window const & win, bool active)
+	void OGLESRenderWindow::OnSize(Window const& win, bool active)
 	{
 		if (active)
 		{

@@ -544,10 +544,12 @@ namespace KlayGE
 
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg, native_wnd);
 #ifndef KLAYGE_PLATFORM_WINDOWS_STORE
-		cfg.graphics_cfg.left = main_wnd_->Left();
-		cfg.graphics_cfg.top = main_wnd_->Top();
-		cfg.graphics_cfg.width = main_wnd_->Width();
-		cfg.graphics_cfg.height = main_wnd_->Height();
+		auto const & win = Context::Instance().AppInstance().MainWnd();
+		float const eff_dpi_scale = win->EffectiveDPIScale();
+		cfg.graphics_cfg.left = static_cast<uint32_t>(main_wnd_->Left() / eff_dpi_scale + 0.5f);
+		cfg.graphics_cfg.top = static_cast<uint32_t>(main_wnd_->Top() / eff_dpi_scale + 0.5f);
+		cfg.graphics_cfg.width = static_cast<uint32_t>(main_wnd_->Width() / eff_dpi_scale + 0.5f);
+		cfg.graphics_cfg.height = static_cast<uint32_t>(main_wnd_->Height() / eff_dpi_scale + 0.5f);
 		Context::Instance().Config(cfg);
 #endif
 	}
@@ -577,9 +579,7 @@ namespace KlayGE
 
 		this->OnCreate();
 
-		float const eff_dpi_scale = main_wnd_->EffectiveDPIScale();
-		this->OnResize(static_cast<uint32_t>(cfg.graphics_cfg.width / eff_dpi_scale + 0.5f),
-			static_cast<uint32_t>(cfg.graphics_cfg.height / eff_dpi_scale + 0.5f));
+		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 	}
 
 	void App3DFramework::Destroy()

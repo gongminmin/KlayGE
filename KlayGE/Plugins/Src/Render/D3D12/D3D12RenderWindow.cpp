@@ -80,7 +80,7 @@ namespace KlayGE
 
 		ElementFormat format = settings.color_fmt;
 
-		auto main_wnd = Context::Instance().AppInstance().MainWnd().get();
+		auto const& main_wnd = Context::Instance().AppInstance().MainWnd().get();
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		hWnd_ = main_wnd->HWnd();
 #else
@@ -99,10 +99,12 @@ namespace KlayGE
 
 		if (this->FullScreen())
 		{
+			float const dpi_scale = main_wnd->DPIScale();
+
 			left_ = 0;
 			top_ = 0;
-			width_ = settings.width;
-			height_ = settings.height;
+			width_ = static_cast<uint32_t>(settings.width * dpi_scale + 0.5f);
+			height_ = static_cast<uint32_t>(settings.height * dpi_scale + 0.5f);
 		}
 		else
 		{
@@ -537,13 +539,13 @@ namespace KlayGE
 
 	void D3D12RenderWindow::WindowMovedOrResized()
 	{
+		auto const& main_wnd = Context::Instance().AppInstance().MainWnd();
+		float const dpi_scale = main_wnd->DPIScale();
+
 		::RECT rect;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		float const dpi_scale = main_wnd->DPIScale();
-
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
 		rect.left = static_cast<LONG>(rc.X * dpi_scale + 0.5f);
@@ -566,7 +568,7 @@ namespace KlayGE
 		uint32_t new_height = rect.bottom - rect.top;
 		if ((new_width != width_) || (new_height != height_) || stereo_changed)
 		{
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
+			d3d12_re.Resize(static_cast<uint32_t>(new_width / dpi_scale + 0.5f), static_cast<uint32_t>(new_height / dpi_scale + 0.5f));
 		}
 	}
 

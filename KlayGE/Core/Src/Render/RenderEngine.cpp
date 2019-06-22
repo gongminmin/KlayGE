@@ -179,10 +179,8 @@ namespace KlayGE
 		GraphicsBufferPtr vpp_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vpp_indices), &vpp_indices[0]);
 		vpp_rl_->BindIndexStream(vpp_ib, EF_R16UI);
 
-		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
-		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ / eff_dpi_scale + 0.5f);
-		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ / eff_dpi_scale + 0.5f);
+		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
+		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
 
 		hdr_enabled_ = settings.hdr;
 		if (settings.hdr)
@@ -667,13 +665,13 @@ namespace KlayGE
 		uint32_t const old_screen_width = default_frame_buffers_[3]->Width();
 		uint32_t const old_screen_height = default_frame_buffers_[3]->Height();
 
-		uint32_t const new_screen_width = width;
-		uint32_t const new_screen_height = height;
-
 		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_width_scale_ / eff_dpi_scale + 0.5f);
-		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ / eff_dpi_scale + 0.5f);
+		uint32_t const new_screen_width = static_cast<uint32_t>(width * eff_dpi_scale + 0.5f);
+		uint32_t const new_screen_height = static_cast<uint32_t>(height * eff_dpi_scale + 0.5f);
+
+		uint32_t const new_render_width = static_cast<uint32_t>(width * default_render_width_scale_ + 0.5f);
+		uint32_t const new_render_height = static_cast<uint32_t>(height * default_render_height_scale_ + 0.5f);
 
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
@@ -849,7 +847,7 @@ namespace KlayGE
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 
 		App3DFramework& app = Context::Instance().AppInstance();
-		app.OnResize(width, height);
+		app.OnResize(new_render_width, new_render_height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)

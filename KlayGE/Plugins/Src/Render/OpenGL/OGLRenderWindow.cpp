@@ -53,8 +53,6 @@ namespace KlayGE
 	{
 		// Store info
 		name_				= name;
-		width_				= settings.width;
-		height_				= settings.height;
 		isFullScreen_		= settings.full_screen;
 		color_bits_ = NumFormatBits(settings.color_fmt);
 
@@ -69,6 +67,10 @@ namespace KlayGE
 			{
 				this->OnSize(win, active);
 			});
+
+		float const dpi_scale = main_wnd->DPIScale();
+		width_ = static_cast<uint32_t>(settings.width * dpi_scale + 0.5f);
+		height_ = static_cast<uint32_t>(settings.height * dpi_scale + 0.5f);
 
 		static std::pair<int, int> constexpr all_versions[] =
 		{
@@ -538,8 +540,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderWindow::WindowMovedOrResized()
+	void OGLRenderWindow::WindowMovedOrResized(Window const& win)
 	{
+		float const dpi_scale = win.DPIScale();
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
@@ -558,14 +562,15 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_DARWIN
-		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
+		uint2 screen = win.GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
 		{
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(
+				static_cast<uint32_t>(new_width / dpi_scale + 0.5f), static_cast<uint32_t>(new_height / dpi_scale + 0.5f));
 		}
 	}
 
@@ -616,18 +621,18 @@ namespace KlayGE
 #endif
 	}
 
-	void OGLRenderWindow::OnExitSizeMove(Window const & /*win*/)
+	void OGLRenderWindow::OnExitSizeMove(Window const& win)
 	{
-		this->WindowMovedOrResized();
+		this->WindowMovedOrResized(win);
 	}
 
-	void OGLRenderWindow::OnSize(Window const & win, bool active)
+	void OGLRenderWindow::OnSize(Window const& win, bool active)
 	{
 		if (active)
 		{
 			if (win.Ready())
 			{
-				this->WindowMovedOrResized();
+				this->WindowMovedOrResized(win);
 			}
 		}
 	}

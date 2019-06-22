@@ -132,7 +132,7 @@ namespace KlayGE
 		void CreateGLESView();
 		static void PumpEvents();
 		void FlushBuffer();
-		uint2 GetNSViewSize();
+		uint2 GetNSViewSize() const;
 		void* NSView()
 		{
 			return ns_view_;
@@ -141,7 +141,7 @@ namespace KlayGE
 		static void PumpEvents();
 		void CreateColorRenderBuffer(ElementFormat pf);
 		void FlushBuffer();
-		uint2 GetGLKViewSize();
+		uint2 GetGLKViewSize() const;
 #endif
 
 		int32_t Left() const
