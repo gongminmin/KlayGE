@@ -1718,7 +1718,7 @@ namespace KlayGE
 		if (dr_effect_->HWResourceReady())
 		{
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 			for (uint32_t i = 0; i < lights_.size(); ++ i)
 			{
@@ -1729,7 +1729,7 @@ namespace KlayGE
 				}
 			}
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 
 #ifdef KLAYGE_DEBUG
@@ -1744,7 +1744,7 @@ namespace KlayGE
 					no_viewport = false;
 #endif
 
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SwitchViewportDRJob(vpi); }));
+					jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this, vpi] { return this->SwitchViewportDRJob(vpi); }));
 
 					pvp.g_buffer_enables[PTB_Opaque] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
 					pvp.g_buffer_enables[PTB_TransparencyBack] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
@@ -1783,7 +1783,7 @@ namespace KlayGE
 
 						if (pvp.g_buffer_enables[i])
 						{
-							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+							jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 								[this, vpi, pass_tb]
 							{
 								return this->ShadowingDRJob(viewports_[vpi], pass_tb);
@@ -1791,7 +1791,7 @@ namespace KlayGE
 							if (!(pvp.attrib & VPAM_NoGI))
 							{
 #ifndef KLAYGE_SHIP
-								jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+								jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 									[this, pass_tb]
 								{
 									return this->BeginPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
@@ -1812,7 +1812,7 @@ namespace KlayGE
 									}
 								}
 #ifndef KLAYGE_SHIP
-								jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+								jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 									[this, pass_tb]
 								{
 									return this->EndPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
@@ -1824,20 +1824,20 @@ namespace KlayGE
 						}
 					}
 
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+					jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 						[this, vpi]
 					{
 						return this->PostEffectsDRJob(viewports_[vpi]);
 					}));
 					if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 					{
-						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SimpleForwardDRJob(viewports_[vpi]); }));
-						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] {
+						jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this, vpi] { return this->SimpleForwardDRJob(viewports_[vpi]); }));
+						jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this, vpi] {
 							return this->PostSimpleForwardDRJob(viewports_[vpi]); }));
 					}
 
 					jobs_.push_back(
-						MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
+						MakeUniquePtr<DeferredRenderingJob>([this, vpi] { return this->FinishingViewportDRJob(viewports_[vpi]); }));
 				}
 			}
 
@@ -1848,11 +1848,11 @@ namespace KlayGE
 #endif
 				)
 			{
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeLightingDRJob(); }));
+				jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->VisualizeLightingDRJob(); }));
 			}
 			else
 			{
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->FinishingDRJob(); }));
+				jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->FinishingDRJob(); }));
 			}
 
 #ifdef KLAYGE_DEBUG
@@ -1864,7 +1864,7 @@ namespace KlayGE
 		}
 		else
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->ClearOnlyDRJob(); }));
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->ClearOnlyDRJob(); }));
 		}
 	}
 
@@ -1907,26 +1907,26 @@ namespace KlayGE
 	void DeferredRenderingLayer::AppendGBufferPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, pass_tb]
 			{
 				return this->BeginPerfProfileDRJob(*gbuffer_perfs_[pass_tb]);
 			}));
 #endif
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, pass_tb]
 			{
 				return this->GBufferGenerationDRJob(viewports_[vp_index], ComposePassType(PRT_MRT, pass_tb, PC_GBuffer));
 			}));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->RenderingStatsDRJob(); }));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->RenderingStatsDRJob(); }));
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index]
 			{
 				return this->GBufferProcessingDRJob(viewports_[vp_index]);
 			}));
 		if (pass_tb == PTB_Opaque)
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, vp_index]
 				{
 					return this->OpaqueGBufferProcessingDRJob(viewports_[vp_index]);
@@ -1938,11 +1938,11 @@ namespace KlayGE
 				|| (DeferredRenderingLayer::DT_Specular == display_type_)
 				|| (DeferredRenderingLayer::DT_Shininess == display_type_))
 			{
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeGBufferDRJob(); }));
+				jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->VisualizeGBufferDRJob(); }));
 			}
 		}
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, pass_tb]
 			{
 				return this->EndPerfProfileDRJob(*gbuffer_perfs_[pass_tb]);
@@ -1988,12 +1988,12 @@ namespace KlayGE
 
 				if (sm_seq != 0)
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+					jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 						[this, shadow_pt, light_index]
 						{
 							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, 0);
 						}));
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+					jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 						[this, shadow_pt, light_index]
 						{
 							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, 1);
@@ -2009,7 +2009,7 @@ namespace KlayGE
 			{
 				for (int j = 0; j < 7; ++ j)
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+					jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 						[this, shadow_pt, light_index, j]
 						{
 							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, j);
@@ -2032,13 +2032,13 @@ namespace KlayGE
 		BOOST_ASSERT(LightSource::LT_Directional == lights_[light_index]->Type());
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 
 		PerViewport& pvp = viewports_[vp_index];
 		for (uint32_t i = 0; i < pvp.num_cascades + 1; ++ i)
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, vp_index, light_index, i]
 				{
 					return this->ShadowMapGenerationDRJob(viewports_[vp_index], PT_GenCascadedShadowMap, light_index, i);
@@ -2046,13 +2046,13 @@ namespace KlayGE
 		}
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 	}
 
 	void DeferredRenderingLayer::AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, light_index]
 			{
 				return this->IndirectLightingDRJob(viewports_[vp_index], light_index);
@@ -2061,7 +2061,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, pass_tb]
 			{
 				return this->ShadingDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_Shading), 0);
@@ -2070,19 +2070,19 @@ namespace KlayGE
 		if (has_reflective_objs_)
 		{
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, pass_tb]
 				{
 					return this->BeginPerfProfileDRJob(*reflection_perfs_[pass_tb]);
 				}));
 #endif
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, vp_index, pass_tb]
 				{
 					return this->ReflectionDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_Reflection));
 				}));
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, pass_tb]
 				{
 					return this->EndPerfProfileDRJob(*reflection_perfs_[pass_tb]);
@@ -2093,37 +2093,37 @@ namespace KlayGE
 		if (has_vdm_objs_)
 		{
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*vdm_perf_); }));
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*vdm_perf_); }));
 #endif
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, vp_index]
 				{
 					return this->VDMDRJob(viewports_[vp_index]);
 				}));
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*vdm_perf_); }));
+			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*vdm_perf_); }));
 #endif
 		}
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, pass_tb]
 			{
 				return this->BeginPerfProfileDRJob(*special_shading_perfs_[pass_tb]);
 			}));
 #endif
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, pass_tb]
 			{
 				return this->SpecialShadingDRJob(viewports_[vp_index] , ComposePassType(PRT_None, pass_tb, PC_SpecialShading));
 			}));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, pass_tb]
 			{
 				return this->MergeShadingAndDepthDRJob(viewports_[vp_index] , pass_tb);
 			}));
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, pass_tb]
 			{
 				return this->EndPerfProfileDRJob(*special_shading_perfs_[pass_tb]);
@@ -2838,9 +2838,9 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*lighting_tex_param_ = pvp.lighting_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
@@ -3430,8 +3430,8 @@ namespace KlayGE
 			tech = technique_lidr_ambient_;
 		}
 
-		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		if (PTB_Opaque == pass_tb)
@@ -3472,9 +3472,9 @@ namespace KlayGE
 		*lights_dir_es_param_ = lights_dir_es;
 		*lights_attrib_param_ = lights_attrib;
 
-		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -3608,9 +3608,9 @@ namespace KlayGE
 		re.Render(*dr_effect_, *tech, *rl_quad_);
 
 		*light_index_tex_param_ = pvp.light_index_tex;
-		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		if (PTB_Opaque == pass_tb)
@@ -3684,16 +3684,16 @@ namespace KlayGE
 
 		if (pvp.sample_count == 1)
 		{
-			*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
-			*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
+			*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
+			*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
 			*g_buffer_stencil_tex_param_ = pvp.g_buffer_stencil_srv;
-			*depth_tex_param_ = pvp.g_buffer_depth_tex;
+			*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		}
 		else
 		{
-			*g_buffer_rt0_tex_ms_param_ = pvp.g_buffer_rt0_tex;
-			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_tex;
-			*g_buffer_depth_tex_ms_param_ = pvp.g_buffer_depth_tex;
+			*g_buffer_rt0_tex_ms_param_ = pvp.g_buffer_rt0_srv;
+			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_srv;
+			*g_buffer_depth_tex_ms_param_ = pvp.g_buffer_depth_srv;
 			*g_buffer_stencil_tex_ms_param_ = pvp.g_buffer_stencil_srv;
 			*multi_sample_mask_tex_param_ = pvp.multi_sample_mask_tex;
 		}
@@ -4198,8 +4198,8 @@ namespace KlayGE
 
 		depth_to_linear_pps_[pvp.sample_count != 1]->SetParam(0, camera->NearQFarParam());
 
-		*g_buffer_rt0_tex_param_ = pvp.g_buffer_resolved_rt0_tex;
-		*depth_tex_param_ = pvp.g_buffer_resolved_depth_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_resolved_rt0_srv;
+		*depth_tex_param_ = pvp.g_buffer_resolved_depth_srv;
 		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->Viewport()->Width(),
 			1.0f / pvp.frame_buffer->Viewport()->Height());
 		*shadowing_tex_param_ = pvp.shadowing_tex;

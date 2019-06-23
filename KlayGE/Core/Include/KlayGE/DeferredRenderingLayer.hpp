@@ -591,8 +591,8 @@ namespace KlayGE
 		std::vector<LightSource*> lights_;
 		std::vector<RenderablePtr> decals_;
 
-		std::vector<std::shared_ptr<DeferredRenderingJob>> jobs_;
-		std::vector<std::shared_ptr<DeferredRenderingJob>>::iterator curr_job_iter_;
+		std::vector<std::unique_ptr<DeferredRenderingJob>> jobs_;
+		std::vector<std::unique_ptr<DeferredRenderingJob>>::iterator curr_job_iter_;
 
 		std::array<std::array<RenderTechnique*, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechnique* technique_no_lighting_;
