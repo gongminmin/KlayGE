@@ -271,7 +271,7 @@ public:
 		fb->Attach(0, vb_num_uav);
 
 		*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
-		
+
 		auto& re = rf.RenderEngineInstance();
 
 		for (uint32_t i = 0; i < 10; ++ i)
@@ -307,18 +307,19 @@ public:
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.BindSOBuffers(RenderLayoutPtr());
 
-			re.BindSOBuffers(rl_out);
-			re.Render(*effect, *copy_buffer_tech, *rl_intermediate);
-			re.BindSOBuffers(RenderLayoutPtr());
-
 			vb_num->CopyToBuffer(*vb_num_cpu);
-			uint64_t output_primitives;
+			uint32_t output_primitives;
 			{
 				GraphicsBuffer::Mapper mapper(*vb_num_cpu, BA_Read_Only);
 				output_primitives = *mapper.Pointer<uint32_t>();
 			}
 
 			EXPECT_TRUE(output_primitives == sanity_size);
+
+			re.BindSOBuffers(rl_out);
+			re.Render(*effect, *copy_buffer_tech, *rl_intermediate);
+			re.BindSOBuffers(RenderLayoutPtr());
+
 			EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
 				*vb_out, 0,
 				sanity_size * 4, tolerance));
