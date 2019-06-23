@@ -128,6 +128,11 @@ namespace KlayGE
 
 		void Update();
 
+		uint32_t NumLoadingResources() const
+		{
+			return static_cast<uint32_t>(loading_res_.size());
+		}
+
 	private:
 		std::string RealPath(std::string_view path);
 		std::string RealPath(std::string_view path,

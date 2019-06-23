@@ -388,6 +388,14 @@ void PostProcessingApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
