@@ -8,6 +8,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Imposter.hpp>
+#include <KlayGE/Mesh.hpp>
 
 #include "FoliageTerrain.hpp"
 

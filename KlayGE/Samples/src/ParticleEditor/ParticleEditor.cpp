@@ -13,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Window.hpp>

@@ -4,7 +4,6 @@
 	<include name="Lighting.fxml"/>
 	<include name="GBuffer.fxml"/>
 
-	<parameter type="float4" name="light_color"/>
 	<parameter type="int2" name="light_is_projective"/>
 
 	<parameter type="texture2D" name="projective_map_2d_tex"/>
@@ -34,7 +33,7 @@ void LightSourceProxyVS(float4 pos : POSITION,
 
 float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 {
-	float4 clr = light_color;
+	float4 clr = albedo_clr;
 	if (light_is_projective.x)
 	{
 		float4 proj_clr;

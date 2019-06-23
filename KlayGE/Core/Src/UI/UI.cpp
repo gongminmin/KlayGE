@@ -29,7 +29,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/TransientBuffer.hpp>

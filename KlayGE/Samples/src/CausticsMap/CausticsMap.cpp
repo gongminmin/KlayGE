@@ -12,7 +12,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/Query.hpp>

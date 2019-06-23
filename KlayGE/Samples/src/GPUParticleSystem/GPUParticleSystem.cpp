@@ -15,7 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>

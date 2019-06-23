@@ -13,7 +13,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Show.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>

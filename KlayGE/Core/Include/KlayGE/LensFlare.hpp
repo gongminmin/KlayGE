@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 
 namespace KlayGE
 {

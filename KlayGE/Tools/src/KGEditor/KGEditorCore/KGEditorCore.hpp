@@ -8,7 +8,7 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 
 #include "PreDeclare.hpp"
 #include "Common.hpp"

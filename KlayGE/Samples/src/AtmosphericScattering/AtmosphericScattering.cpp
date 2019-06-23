@@ -8,7 +8,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneNode.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/PostProcess.hpp>

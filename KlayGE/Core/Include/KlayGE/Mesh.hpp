@@ -408,9 +408,9 @@ namespace KlayGE
 
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
-		virtual void Update();
-
 		void AttachLightSrc(LightSourcePtr const & light);
+
+		void OnRenderBegin() override;
 
 	protected:
 		void DoBuildMeshInfo(RenderModel const & model) override
@@ -421,7 +421,6 @@ namespace KlayGE
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameter* light_color_param_;
 		RenderEffectParameter* light_is_projective_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
@@ -445,6 +444,9 @@ namespace KlayGE
 	private:
 		CameraPtr camera_;
 	};
+
+	KLAYGE_CORE_API RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light);
+	KLAYGE_CORE_API RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera);
 }
 
 #endif			// _MESH_HPP

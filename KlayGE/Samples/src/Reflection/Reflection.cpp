@@ -9,7 +9,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/SceneNode.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>

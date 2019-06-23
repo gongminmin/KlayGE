@@ -2227,6 +2227,8 @@ namespace KlayGE
 		auto effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("LightSourceProxy"));
 		effect_attrs_ |= EA_SimpleForward;
+
+		mtl_ = MakeSharedPtr<RenderMaterial>();
 	}
 
 	void RenderableLightSourceProxy::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
@@ -2236,7 +2238,6 @@ namespace KlayGE
 		simple_forward_tech_ = tech;
 		if (tech)
 		{
-			light_color_param_ = effect_->ParameterByName("light_color");
 			light_is_projective_param_ = effect_->ParameterByName("light_is_projective");
 			projective_map_2d_tex_param_ = effect_->ParameterByName("projective_map_2d_tex");
 			projective_map_cube_tex_param_ = effect_->ParameterByName("projective_map_cube_tex");
@@ -2246,16 +2247,17 @@ namespace KlayGE
 		}
 	}
 
-	void RenderableLightSourceProxy::Update()
+	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
 	{
-		if (light_color_param_)
-		{
-			*light_color_param_ = light_->Color();
-		}
+		light_ = light;
+	}
+
+	void RenderableLightSourceProxy::OnRenderBegin()
+	{
+		mtl_->Albedo(light_->Color());
 		if (light_is_projective_param_)
 		{
-			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0,
-				LightSource::LT_Point == light_->Type());
+			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0, LightSource::LT_Point == light_->Type());
 		}
 		if (LightSource::LT_Point == light_->Type())
 		{
@@ -2271,11 +2273,8 @@ namespace KlayGE
 				*projective_map_2d_tex_param_ = light_->ProjectiveTexture();
 			}
 		}
-	}
 
-	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
-	{
-		light_ = light;
+		StaticMesh::OnRenderBegin();
 	}
 
 
@@ -2285,6 +2284,9 @@ namespace KlayGE
 		auto effect = SyncLoadRenderEffect("CameraProxy.fxml");
 		this->Technique(effect, effect->TechniqueByName("CameraProxy"));
 		effect_attrs_ |= EA_SimpleForward;
+
+		mtl_ = MakeSharedPtr<RenderMaterial>();
+		mtl_->Albedo(float4(1, 1, 1, 1));
 	}
 
 	void RenderableCameraProxy::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
@@ -2302,5 +2304,76 @@ namespace KlayGE
 	void RenderableCameraProxy::AttachCamera(CameraPtr const & camera)
 	{
 		camera_ = camera;
+	}
+
+
+	RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light)
+	{
+		char const* mesh_name;
+		switch (light->Type())
+		{
+		case LightSource::LT_Ambient:
+			mesh_name = "AmbientLightProxy.glb";
+			break;
+
+		case LightSource::LT_Point:
+		case LightSource::LT_SphereArea:
+			mesh_name = "PointLightProxy.glb";
+			break;
+
+		case LightSource::LT_Directional:
+			mesh_name = "DirectionalLightProxy.glb";
+			break;
+
+		case LightSource::LT_Spot:
+			mesh_name = "SpotLightProxy.glb";
+			break;
+
+		case LightSource::LT_TubeArea:
+			mesh_name = "TubeLightProxy.glb";
+			break;
+
+		default:
+			KFL_UNREACHABLE("Invalid light type");
+		}
+
+		auto light_model = SyncLoadModel(mesh_name, EAH_GPU_Read | EAH_Immutable,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow, nullptr, CreateModelFactory<RenderModel>,
+			CreateMeshFactory<RenderableLightSourceProxy>);
+
+		for (uint32_t i = 0; i < light_model->NumMeshes(); ++i)
+		{
+			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
+		}
+
+		if (light->Type() == LightSource::LT_Spot)
+		{
+			float const radius = light->CosOuterInner().w();
+			light_model->RootNode()->TransformToParent(
+				MathLib::scaling(radius, radius, 1.0f) * light_model->RootNode()->TransformToParent());
+		}
+
+		return light_model;
+	}
+
+	RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera)
+	{
+		auto camera_model = SyncLoadModel("CameraProxy.glb", EAH_GPU_Read | EAH_Immutable,
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow, nullptr, CreateModelFactory<RenderModel>,
+			CreateMeshFactory<RenderableCameraProxy>);
+
+		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++i)
+		{
+			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
+		}
+
+		camera_model->RootNode()->OnMainThreadUpdate().Connect([&camera](SceneNode& node, float app_time, float elapsed_time) {
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			node.TransformToParent(camera->InverseViewMatrix());
+		});
+
+		return camera_model;
 	}
 }

@@ -44,7 +44,7 @@
 #include <KFL/AABBox.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
