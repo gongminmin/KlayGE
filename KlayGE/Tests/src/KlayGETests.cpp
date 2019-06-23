@@ -173,7 +173,7 @@ namespace KlayGE
 			uint8_t const * tex1_p = tex1_mapper.Pointer<uint8_t>();
 			uint32_t const tex1_row_pitch = tex1_mapper.RowPitch();
 
-			Texture::Mapper diff_mapper(*diff_cpu, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper diff_mapper(*diff_cpu, 0, 0, TMA_Write_Only, 0, 0, width, height);
 			uint8_t* diff_p = diff_mapper.Pointer<uint8_t>();
 			uint32_t const diff_row_pitch = diff_mapper.RowPitch();
 
