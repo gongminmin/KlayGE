@@ -362,19 +362,24 @@ namespace KlayGE
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+				uint32_t const slice_size = (mipmap_start_offset_[level + 1] - mipmap_start_offset_[level]);
+				std::vector<uint8_t> array_data(this->ArraySize() * 6 * slice_size);
 
 				re.BindTexture(0, target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
-					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, reinterpret_cast<GLvoid*>(subres_offset));
+					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, array_data.data());
 				}
 				else
 				{
-					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type,
-						reinterpret_cast<GLvoid*>(subres_offset));
+					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, array_data.data());
 				}
+
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
 				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
+				memcpy(p + subres_offset, &array_data[(array_index * 6 + face) * slice_size], slice_size);
 			}
 			break;
 

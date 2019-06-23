@@ -238,18 +238,24 @@ namespace KlayGE
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+				uint32_t const slice_size = (mipmap_start_offset_[level + 1] - mipmap_start_offset_[level]);
+				std::vector<uint8_t> array_data(this->ArraySize() * slice_size);
 
 				re.BindTexture(0, target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
-					glGetCompressedTexImage(target_type_, level, reinterpret_cast<GLvoid*>(subres_offset));
+					glGetCompressedTexImage(target_type_, level, array_data.data());
 				}
 				else
 				{
-					glGetTexImage(target_type_, level, gl_format, gl_type, reinterpret_cast<GLvoid*>(subres_offset));
+					glGetTexImage(target_type_, level, gl_format, gl_type, array_data.data());
 				}
+
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
 				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
+				memcpy(p + subres_offset, &array_data[array_index * slice_size], slice_size);
 			}
 			break;
 
