@@ -193,8 +193,8 @@ namespace KlayGE
 		class DeferredRenderingJob : boost::noncopyable
 		{
 		public:
-			explicit DeferredRenderingJob(std::function<uint32_t()> const & job_func)
-				: func_(job_func)
+			explicit DeferredRenderingJob(std::function<uint32_t()> job_func)
+				: func_(std::move(job_func))
 			{
 			}
 

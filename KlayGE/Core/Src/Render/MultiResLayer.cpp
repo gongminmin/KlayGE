@@ -93,7 +93,6 @@ namespace KlayGE
 
 		g_buffer_rt0_tex_ = rt0_tex;
 		g_buffer_rt0_srv_ = rf.MakeTextureSrv(rt0_tex);
-		g_buffer_depth_tex_ = depth_tex;
 		g_buffer_depth_srv_ = rf.MakeTextureSrv(depth_tex);
 
 		multi_res_tex_ = multi_res_tex;
@@ -115,26 +114,18 @@ namespace KlayGE
 			if (caps.flexible_srvs_support)
 			{
 				depth_derivative_mip_srvs_.resize(depth_derivative_tex_->NumMipMaps());
-				for (uint32_t i = 0; i < depth_derivative_tex_->NumMipMaps(); ++ i)
-				{
-					depth_derivative_mip_srvs_[i] = rf.MakeTextureSrv(depth_derivative_tex_, 0, 1, i, 1);
-				}
-
 				depth_derivative_mip_rtvs_.resize(depth_derivative_tex_->NumMipMaps());
 				for (uint32_t i = 0; i < depth_derivative_tex_->NumMipMaps(); ++i)
 				{
+					depth_derivative_mip_srvs_[i] = rf.MakeTextureSrv(depth_derivative_tex_, 0, 1, i, 1);
 					depth_derivative_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_tex_, 0, 1, i);
 				}
 
 				normal_cone_mip_srvs_.resize(normal_cone_tex_->NumMipMaps());
-				for (uint32_t i = 0; i < normal_cone_tex_->NumMipMaps(); ++i)
-				{
-					normal_cone_mip_srvs_[i] = rf.MakeTextureSrv(normal_cone_tex_, 0, 1, i, 1);
-				}
-
 				normal_cone_mip_rtvs_.resize(normal_cone_tex_->NumMipMaps());
 				for (uint32_t i = 0; i < normal_cone_tex_->NumMipMaps(); ++i)
 				{
+					normal_cone_mip_srvs_[i] = rf.MakeTextureSrv(normal_cone_tex_, 0, 1, i, 1);
 					normal_cone_mip_rtvs_[i] = rf.Make2DRtv(normal_cone_tex_, 0, 1, i);
 				}
 			}
@@ -155,10 +146,10 @@ namespace KlayGE
 				{
 					normal_cone_small_mip_rtvs_[i] = rf.Make2DRtv(normal_cone_small_tex_, 0, 1, i);
 				}
-			}
 
-			depth_derivative_srv_ = rf.MakeTextureSrv(depth_derivative_tex_);
-			normal_cone_srv_ = rf.MakeTextureSrv(normal_cone_tex_);
+				depth_derivative_srv_ = rf.MakeTextureSrv(depth_derivative_tex_);
+				normal_cone_srv_ = rf.MakeTextureSrv(normal_cone_tex_);
+			}
 
 			multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write);

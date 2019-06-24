@@ -63,7 +63,6 @@ namespace KlayGE
 
 		TexturePtr g_buffer_rt0_tex_;
 		ShaderResourceViewPtr g_buffer_rt0_srv_;
-		TexturePtr g_buffer_depth_tex_;
 		ShaderResourceViewPtr g_buffer_depth_srv_;
 
 		TexturePtr depth_derivative_tex_;
