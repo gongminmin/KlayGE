@@ -157,7 +157,7 @@ namespace KlayGE
 		tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height,
 			tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width, height);
 
-		TexturePtr diff_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read);
+		TexturePtr diff_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 
 		bool match = true;
 		{
