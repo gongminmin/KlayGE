@@ -118,6 +118,16 @@ namespace KlayGE
 		{
 		}
 
+		ArrayRef& operator=(ArrayRef const& rhs)
+		{
+			if (this != &rhs)
+			{
+				data_ = rhs.data();
+				size_ = rhs.size();
+			}
+			return *this;
+		}
+
 		constexpr iterator begin() const
 		{
 			return data_;

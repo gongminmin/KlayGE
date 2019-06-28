@@ -85,8 +85,11 @@ namespace KlayGE
 			: value_()
 		{
 		}
-
 		explicit half(float f) noexcept;
+		half(half const& rhs) noexcept
+			: value_(rhs.value_)
+		{
+		}
 
 		operator float() const noexcept;
 
