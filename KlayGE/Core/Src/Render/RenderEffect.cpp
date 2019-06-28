@@ -6245,7 +6245,7 @@ namespace KlayGE
 		{
 			ret->RetriveT() = this->RetriveT();
 		}
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableFloat4x4::operator=(float4x4 const & value)
@@ -6291,7 +6291,7 @@ namespace KlayGE
 		{
 			ret->RetriveT() = this->RetriveT();
 		}
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableFloat4x4Array::operator=(std::vector<float4x4> const & value)
@@ -6353,7 +6353,7 @@ namespace KlayGE
 		std::string elem_type;
 		this->Value(elem_type);
 		*ret = elem_type;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableTexture::operator=(TexturePtr const & value)
@@ -6417,7 +6417,7 @@ namespace KlayGE
 		std::string elem_type;
 		this->Value(elem_type);
 		*ret = elem_type;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableRwTexture::operator=(TexturePtr const & value)
@@ -6481,7 +6481,7 @@ namespace KlayGE
 		std::string elem_type;
 		this->Value(elem_type);
 		*ret = elem_type;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableBuffer::operator=(ShaderResourceViewPtr const & value)
@@ -6516,7 +6516,7 @@ namespace KlayGE
 		std::string elem_type;
 		this->Value(elem_type);
 		*ret = elem_type;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableRwBuffer::operator=(UnorderedAccessViewPtr const & value)
@@ -6548,7 +6548,7 @@ namespace KlayGE
 		ShaderResourceViewPtr val;
 		this->Value(val);
 		*ret = val;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableByteAddressBuffer::operator=(ShaderResourceViewPtr const & value)
@@ -6569,7 +6569,7 @@ namespace KlayGE
 		UnorderedAccessViewPtr val;
 		this->Value(val);
 		*ret = val;
-		return std::move(ret);
+		return ret;
 	}
 
 	RenderVariable& RenderVariableRwByteAddressBuffer::operator=(UnorderedAccessViewPtr const & value)

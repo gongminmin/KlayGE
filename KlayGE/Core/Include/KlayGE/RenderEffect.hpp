@@ -273,7 +273,7 @@ namespace KlayGE
 			T val;
 			this->Value(val);
 			*ret = val;
-			return std::move(ret);
+			return ret;
 		}
 
 		virtual RenderVariable& operator=(T const & value) override
@@ -450,7 +450,7 @@ namespace KlayGE
 			{
 				ret->RetriveT() = this->RetriveT();
 			}
-			return std::move(ret);
+			return ret;
 		}
 
 		virtual RenderVariable& operator=(std::vector<T> const & value) override
