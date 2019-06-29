@@ -2788,15 +2788,28 @@ namespace KlayGE
 
 	RenderEffectConstantBuffer* RenderEffect::CBufferByName(std::string_view name) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
-		for (auto const & cbuffer : cbuffers_)
+		uint32_t index = this->FindCBuffer(name);
+		if (index != static_cast<uint32_t>(-1))
 		{
-			if (name_hash == cbuffer->NameHash())
+			return this->CBufferByIndex(index);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	uint32_t RenderEffect::FindCBuffer(std::string_view name) const
+	{
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (uint32_t i = 0; i < cbuffers_.size(); ++i)
+		{
+			if (name_hash == cbuffers_[i]->NameHash())
 			{
-				return cbuffer.get();
+				return i;
 			}
 		}
-		return nullptr;
+		return static_cast<uint32_t>(-1);
 	}
 
 	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff)

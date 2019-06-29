@@ -1611,15 +1611,14 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderStage stage,
-			std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs,
-			std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(
+		ShaderStage stage, ArrayRef<std::tuple<void*, uint32_t, uint32_t>> srvsrcs, ArrayRef<ID3D11ShaderResourceView*> srvs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_srv_ptr_cache_[stage_index] != srvs)
+		if (MakeArrayRef(shader_srv_ptr_cache_[stage_index]) != srvs)
 		{
 			size_t const old_size = shader_srv_ptr_cache_[stage_index].size();
-			shader_srv_ptr_cache_[stage_index] = srvs;
+			shader_srv_ptr_cache_[stage_index] = srvs.ToVector();
 			if (old_size > srvs.size())
 			{
 				shader_srv_ptr_cache_[stage_index].resize(old_size, nullptr);
@@ -1628,30 +1627,30 @@ namespace KlayGE
 			ShaderSetShaderResources[stage_index](d3d_imm_ctx_.get(), 0,
 				static_cast<UINT>(shader_srv_ptr_cache_[stage_index].size()), &shader_srv_ptr_cache_[stage_index][0]);
 
-			shader_srvsrc_cache_[stage_index] = srvsrcs;
+			shader_srvsrc_cache_[stage_index] = srvsrcs.ToVector();
 			shader_srv_ptr_cache_[stage_index].resize(srvs.size());
 		}
 	}
 
-	void D3D11RenderEngine::SetSamplers(ShaderStage stage, std::vector<ID3D11SamplerState*> const & samplers)
+	void D3D11RenderEngine::SetSamplers(ShaderStage stage, ArrayRef<ID3D11SamplerState*> samplers)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_sampler_ptr_cache_[stage_index] != samplers)
+		if (MakeArrayRef(shader_sampler_ptr_cache_[stage_index]) != samplers)
 		{
 			ShaderSetSamplers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
 
-			shader_sampler_ptr_cache_[stage_index] = samplers;
+			shader_sampler_ptr_cache_[stage_index] = samplers.ToVector();
 		}
 	}
 
-	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, std::vector<ID3D11Buffer*> const & cbs)
+	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, ArrayRef<ID3D11Buffer*> cbs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_cb_ptr_cache_[stage_index] != cbs)
+		if (MakeArrayRef(shader_cb_ptr_cache_[stage_index]) != cbs)
 		{
 			ShaderSetConstantBuffers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
 
-			shader_cb_ptr_cache_[stage_index] = cbs;
+			shader_cb_ptr_cache_[stage_index] = cbs.ToVector();
 		}
 	}
 

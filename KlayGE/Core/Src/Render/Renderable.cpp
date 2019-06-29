@@ -109,21 +109,21 @@ namespace KlayGE
 		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		{
-			auto const* mesh_cbuff = effect_->CBufferByName("klayge_mesh");
-			if (mesh_cbuff && (mesh_cbuff->Size() > 0))
+			uint32_t const mesh_cbuff_index = effect_->FindCBuffer("klayge_mesh");
+			if (mesh_cbuff_index != static_cast<uint32_t>(-1) && (effect_->CBufferByIndex(mesh_cbuff_index)->Size() > 0))
 			{
 				if (&mesh_cbuffer_->OwnerEffect() != effect_.get())
 				{
 					mesh_cbuffer_ = mesh_cbuffer_->Clone(*effect_);
 				}
 
-				effect_->BindCBufferByName("klayge_mesh", mesh_cbuffer_);
+				effect_->BindCBufferByIndex(mesh_cbuff_index, mesh_cbuffer_);
 			}
 		}
 
 		{
-			auto const* model_camera_cbuff = effect_->CBufferByName("klayge_model_camera");
-			if (model_camera_cbuff && (model_camera_cbuff->Size() > 0))
+			uint32_t const model_camera_cbuff_index = effect_->FindCBuffer("klayge_model_camera");
+			if (model_camera_cbuff_index != static_cast<uint32_t>(-1) && (effect_->CBufferByIndex(model_camera_cbuff_index)->Size() > 0))
 			{
 				if (&model_camera_cbuffer_->OwnerEffect() != effect_.get())
 				{
@@ -142,10 +142,11 @@ namespace KlayGE
 					}
 				}
 
-				camera.Active(*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
+				camera.Active(
+					*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
 				model_mat_dirty_ = false;
 
-				effect_->BindCBufferByName("klayge_model_camera", model_camera_cbuffer_);
+				effect_->BindCBufferByIndex(model_camera_cbuff_index, model_camera_cbuffer_);
 			}
 		}
 
@@ -318,9 +319,12 @@ namespace KlayGE
 
 	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
-		model_mat_ = mat;
-		inv_model_mat_ = MathLib::transpose(model_mat_);
-		model_mat_dirty_ = true;
+		if (memcmp(&model_mat_, &mat, sizeof(mat)) != 0)
+		{
+			model_mat_ = mat;
+			inv_model_mat_ = MathLib::transpose(model_mat_);
+			model_mat_dirty_ = true;
+		}
 	}
 
 	void Renderable::BindSceneNode(SceneNode const * node)

@@ -807,6 +807,7 @@ namespace KlayGE
 			return static_cast<uint32_t>(cbuffers_.size());
 		}
 		RenderEffectConstantBuffer* CBufferByName(std::string_view name) const;
+		uint32_t FindCBuffer(std::string_view name) const;
 		RenderEffectConstantBuffer* CBufferByIndex(uint32_t index) const
 		{
 			BOOST_ASSERT(index < this->NumCBuffers());

@@ -104,10 +104,10 @@ namespace KlayGE
 		void CSSetShader(ID3D11ComputeShader* shader);
 		void HSSetShader(ID3D11HullShader* shader);
 		void DSSetShader(ID3D11DomainShader* shader);
-		void SetShaderResources(ShaderStage stage, std::vector<std::tuple<void*, uint32_t, uint32_t>> const& srvsrcs,
-			std::vector<ID3D11ShaderResourceView*> const& srvs);
-		void SetSamplers(ShaderStage stage, std::vector<ID3D11SamplerState*> const& samplers);
-		void SetConstantBuffers(ShaderStage stage, std::vector<ID3D11Buffer*> const& cbs);
+		void SetShaderResources(
+			ShaderStage stage, ArrayRef<std::tuple<void*, uint32_t, uint32_t>> srvsrcs, ArrayRef<ID3D11ShaderResourceView*> srvs);
+		void SetSamplers(ShaderStage stage, ArrayRef<ID3D11SamplerState*> samplers);
+		void SetConstantBuffers(ShaderStage stage, ArrayRef<ID3D11Buffer*> cbs);
 		void RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports);
 		void OMSetRenderTargets(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs, ID3D11DepthStencilView* dsv);
 		void OMSetRenderTargetsAndUnorderedAccessViews(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs,

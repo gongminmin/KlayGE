@@ -1277,16 +1277,15 @@ namespace KlayGE
 				auto const& cbuff_indices = shader_stage->CBufferIndices();
 				if (!cbuff_indices.empty())
 				{
-					std::vector<ID3D11Buffer*> d3d11_cbuffs;
-					d3d11_cbuffs.reserve(cbuff_indices.size());
-					for (auto cb_index : cbuff_indices)
+					ID3D11Buffer* d3d11_cbuffs[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
+					for (uint32_t i = 0; i < cbuff_indices.size(); ++i)
 					{
-						auto* cb = effect.CBufferByIndex(cb_index);
+						auto* cb = effect.CBufferByIndex(cbuff_indices[i]);
 						cb->Update();
-						d3d11_cbuffs.push_back(checked_cast<D3D11GraphicsBuffer*>(cb->HWBuff().get())->D3DBuffer());
+						d3d11_cbuffs[i] = checked_cast<D3D11GraphicsBuffer*>(cb->HWBuff().get())->D3DBuffer();
 					}
 
-					re.SetConstantBuffers(stage, d3d11_cbuffs);
+					re.SetConstantBuffers(stage, MakeArrayRef(d3d11_cbuffs, cbuff_indices.size()));
 				}
 			}
 		}

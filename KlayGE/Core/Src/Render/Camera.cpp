@@ -320,7 +320,7 @@ namespace KlayGE
 
 			model_camera_cbuffer.Dirty(true);
 		}
-		if (camera_dirty_)
+		if (model_mat_dirty || camera_dirty_)
 		{
 			float4x4 mvp = model_mat * this->ViewProjMatrix();
 			if (need_cascade_crop_mat)

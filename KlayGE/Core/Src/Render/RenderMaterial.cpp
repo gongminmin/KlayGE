@@ -707,46 +707,47 @@ namespace KlayGE
 
 	void RenderMaterial::Active(RenderEffect& effect)
 	{
-		auto const* mtl_cbuff = effect.CBufferByName("klayge_material");
-		if (mtl_cbuff && (mtl_cbuff->Size() > 0))
+		uint32_t const index = effect.FindCBuffer("klayge_material");
+		if (index != static_cast<uint32_t>(-1) && (effect.CBufferByIndex(index)->Size() > 0))
 		{
 			if (&cbuffer_->OwnerEffect() != &effect)
 			{
 				cbuffer_ = cbuffer_->Clone(effect);
+
+				albedo_tex_param_ = effect.ParameterByName("albedo_tex");
+				metalness_glossiness_tex_param_ = effect.ParameterByName("metalness_glossiness_tex");
+				emissive_tex_param_ = effect.ParameterByName("emissive_tex");
+				normal_tex_param_ = effect.ParameterByName("normal_tex");
+				height_tex_param_ = effect.ParameterByName("height_tex");
+				occlusion_tex_param_ = effect.ParameterByName("occlusion_tex");
 			}
 
-			effect.BindCBufferByName("klayge_material", cbuffer_);
+			effect.BindCBufferByIndex(index, cbuffer_);
 		}
 
-		auto* param = effect.ParameterByName("albedo_tex");
-		if (param)
+		if (albedo_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_Albedo);
+			*albedo_tex_param_ = this->Texture(RenderMaterial::TS_Albedo);
 		}
-		param = effect.ParameterByName("metalness_glossiness_tex");
-		if (param)
+		if (metalness_glossiness_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_MetalnessGlossiness);
+			*metalness_glossiness_tex_param_ = this->Texture(RenderMaterial::TS_MetalnessGlossiness);
 		}
-		param = effect.ParameterByName("emissive_tex");
-		if (param)
+		if (emissive_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_Emissive);
+			*emissive_tex_param_ = this->Texture(RenderMaterial::TS_Emissive);
 		}
-		param = effect.ParameterByName("normal_tex");
-		if (param)
+		if (normal_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_Normal);
+			*normal_tex_param_ = this->Texture(RenderMaterial::TS_Normal);
 		}
-		param = effect.ParameterByName("height_tex");
-		if (param)
+		if (height_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_Height);
+			*height_tex_param_ = this->Texture(RenderMaterial::TS_Height);
 		}
-		param = effect.ParameterByName("occlusion_tex");
-		if (param)
+		if (occlusion_tex_param_)
 		{
-			*param = this->Texture(RenderMaterial::TS_Occlusion);
+			*occlusion_tex_param_ = this->Texture(RenderMaterial::TS_Occlusion);
 		}
 	}
 
