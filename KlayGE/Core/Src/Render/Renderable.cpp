@@ -49,15 +49,18 @@ namespace KlayGE
 			this->BindDeferredEffect(drl->GBufferEffect(nullptr, false, false));
 		}
 
-		auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		auto const& mesh_cb = re.PredefinedMeshCBufferInstance();
-		auto* mesh_cbuff = mesh_cb.CBuffer();
-		mesh_cbuffer_ = mesh_cbuff->Clone(mesh_cbuff->OwnerEffect());
+			auto const& mesh_cb = re.PredefinedMeshCBufferInstance();
+			auto* mesh_cbuff = mesh_cb.CBuffer();
+			mesh_cbuffer_ = mesh_cbuff->Clone(mesh_cbuff->OwnerEffect());
 
-		auto const& model_camera_cb = re.PredefinedModelCameraCBufferInstance();
-		auto* model_camera_cbuff = model_camera_cb.CBuffer();
-		model_camera_cbuffer_ = model_camera_cbuff->Clone(model_camera_cbuff->OwnerEffect());
+			auto const& model_camera_cb = re.PredefinedModelCameraCBufferInstance();
+			auto* model_camera_cbuff = model_camera_cb.CBuffer();
+			model_camera_cbuffer_ = model_camera_cbuff->Clone(model_camera_cbuff->OwnerEffect());
+		}
 	}
 
 	Renderable::~Renderable()

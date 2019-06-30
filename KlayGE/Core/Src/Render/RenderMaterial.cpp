@@ -386,11 +386,14 @@ namespace
 				}
 			}
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			if (caps.multithread_res_creating_support)
+			if (Context::Instance().RenderFactoryValid())
 			{
-				this->MainThreadStageNoLock();
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderDeviceCaps const& caps = rf.RenderEngineInstance().DeviceCaps();
+				if (caps.multithread_res_creating_support)
+				{
+					this->MainThreadStageNoLock();
+				}
 			}
 		}
 
@@ -479,6 +482,23 @@ namespace
 		std::mutex main_thread_stage_mutex_;
 	};
 
+	// TODO: Need refactors
+
+	uint32_t constexpr sw_albedo_clr_offset_ = 0;
+	uint32_t constexpr sw_metalness_glossiness_factor_offset_ = sw_albedo_clr_offset_ + sizeof(float4);
+	uint32_t constexpr sw_emissive_clr_offset_ = sw_metalness_glossiness_factor_offset_ + sizeof(float4);
+	uint32_t constexpr sw_albedo_map_enabled_offset_ = sw_emissive_clr_offset_ + sizeof(float4);
+	uint32_t constexpr sw_normal_map_enabled_offset_ = sw_albedo_map_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_height_map_parallax_enabled_offset_ = sw_normal_map_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_height_map_tess_enabled_offset_ = sw_height_map_parallax_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_occlusion_map_enabled_offset_ = sw_height_map_tess_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_alpha_test_threshold_offset_ = sw_occlusion_map_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_normal_scale_offset_ = sw_alpha_test_threshold_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_occlusion_strength_offset_ = sw_normal_scale_offset_ + sizeof(float);
+	uint32_t constexpr sw_height_offset_scale_offset_ = sw_occlusion_strength_offset_ + sizeof(float);
+	uint32_t constexpr sw_tess_factors_offset_ = sw_occlusion_strength_offset_ + sizeof(float4);
+	uint32_t constexpr sw_pdmc_size = sw_tess_factors_offset_ + sizeof(float4);
+
 	RenderEngine::PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance()
 	{
 		return Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedMaterialCBufferInstance();
@@ -489,8 +509,17 @@ namespace KlayGE
 {
 	RenderMaterial::RenderMaterial()
 	{
-		auto* curr_cbuff = PredefinedMaterialCBufferInstance().CBuffer();
-		cbuffer_ = curr_cbuff->Clone(curr_cbuff->OwnerEffect());
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto* curr_cbuff = PredefinedMaterialCBufferInstance().CBuffer();
+			cbuffer_ = curr_cbuff->Clone(curr_cbuff->OwnerEffect());
+			is_sw_mode_ = false;
+		}
+		else
+		{
+			sw_cbuffer_.resize(sw_pdmc_size);
+			is_sw_mode_ = true;
+		}
 	}
 
 	RenderMaterialPtr RenderMaterial::Clone() const
@@ -498,7 +527,15 @@ namespace KlayGE
 		RenderMaterialPtr ret = MakeSharedPtr<RenderMaterial>();
 
 		ret->Name(this->Name());
-		ret->cbuffer_ = cbuffer_->Clone(cbuffer_->OwnerEffect());
+		ret->is_sw_mode_ = is_sw_mode_;
+		if (is_sw_mode_)
+		{
+			ret->sw_cbuffer_ = sw_cbuffer_;
+		}
+		else
+		{
+			ret->cbuffer_ = cbuffer_->Clone(cbuffer_->OwnerEffect());
+		}
 
 		ret->transparent_ = transparent_;
 		ret->sss_ = sss_;
@@ -511,79 +548,177 @@ namespace KlayGE
 
 	void RenderMaterial::Albedo(float4 const& value)
 	{
-		PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_) = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float4&>(sw_cbuffer_[sw_albedo_clr_offset_]) = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_) = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float4 const& RenderMaterial::Albedo() const
 	{
-		return PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_);
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float4 const&>(sw_cbuffer_[sw_albedo_clr_offset_]);
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().AlbedoClr(*cbuffer_);
+		}
 	}
 
 	void RenderMaterial::Metalness(float value)
 	{
-		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float2&>(sw_cbuffer_[sw_metalness_glossiness_factor_offset_]).x() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::Metalness() const
 	{
-		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float2 const&>(sw_cbuffer_[sw_metalness_glossiness_factor_offset_]).x();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).x();
+		}
 	}
 
 	void RenderMaterial::Glossiness(float value)
 	{
-		PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y() = MathLib::clamp(value, 1e-6f, 0.999f);
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float2&>(sw_cbuffer_[sw_metalness_glossiness_factor_offset_]).y() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y() = MathLib::clamp(value, 1e-6f, 0.999f);
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::Glossiness() const
 	{
-		return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float2 const&>(sw_cbuffer_[sw_metalness_glossiness_factor_offset_]).y();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().MetalnessGlossinessFactor(*cbuffer_).y();
+		}
 	}
 
 	void RenderMaterial::Emissive(float3 const& value)
 	{
-		reinterpret_cast<float3&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_)) = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float3&>(sw_cbuffer_[sw_emissive_clr_offset_]) = value;
+		}
+		else
+		{
+			reinterpret_cast<float3&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_)) = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float3 const& RenderMaterial::Emissive() const
 	{
-		return reinterpret_cast<float3 const&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_));
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float3 const&>(sw_cbuffer_[sw_emissive_clr_offset_]);
+		}
+		else
+		{
+			return reinterpret_cast<float3 const&>(PredefinedMaterialCBufferInstance().EmissiveClr(*cbuffer_));
+		}
 	}
 
 	void RenderMaterial::AlphaTestThreshold(float value)
 	{
-		PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_) = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float&>(sw_cbuffer_[sw_alpha_test_threshold_offset_]) = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_) = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::AlphaTestThreshold() const
 	{
-		return PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_);
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float const&>(sw_cbuffer_[sw_alpha_test_threshold_offset_]);
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().AlphaTestThreshold(*cbuffer_);
+		}
 	}
 
 	void RenderMaterial::NormalScale(float value)
 	{
-		PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_) = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float&>(sw_cbuffer_[sw_normal_scale_offset_]) = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_) = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::NormalScale() const
 	{
-		return PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_);
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float const&>(sw_cbuffer_[sw_normal_scale_offset_]);
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().NormalScale(*cbuffer_);
+		}
 	}
 
 	void RenderMaterial::OcclusionStrength(float value)
 	{
-		PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_) = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float&>(sw_cbuffer_[sw_occlusion_strength_offset_]) = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_) = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::OcclusionStrength() const
 	{
-		return PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_);
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float const&>(sw_cbuffer_[sw_occlusion_strength_offset_]);
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().OcclusionStrength(*cbuffer_);
+		}
 	}
 
 	void RenderMaterial::TextureName(TextureSlot slot, std::string_view name)
@@ -597,36 +732,87 @@ namespace KlayGE
 		switch (slot)
 		{
 		case TS_Albedo:
-			pmcb.AlbedoMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			if (is_sw_mode_)
+			{
+				reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_albedo_map_enabled_offset_]) = srv ? 1 : 0;
+			}
+			else
+			{
+				pmcb.AlbedoMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			}
 			break;
 
 		case TS_MetalnessGlossiness:
-			pmcb.MetalnessGlossinessFactor(*cbuffer_).z() = srv ? 1.0f : 0.0f;
+			if (is_sw_mode_)
+			{
+				reinterpret_cast<float3&>(sw_cbuffer_[sw_metalness_glossiness_factor_offset_]).z() = srv ? 1.0f : 0.0f;
+			}
+			else
+			{
+				pmcb.MetalnessGlossinessFactor(*cbuffer_).z() = srv ? 1.0f : 0.0f;
+			}
 			break;
 
 		case TS_Emissive:
-			pmcb.EmissiveClr(*cbuffer_).w() = srv ? 1.0f : 0.0f;
+			if (is_sw_mode_)
+			{
+				reinterpret_cast<float4&>(sw_cbuffer_[sw_emissive_clr_offset_]).w() = srv ? 1.0f : 0.0f;
+			}
+			else
+			{
+				pmcb.EmissiveClr(*cbuffer_).w() = srv ? 1.0f : 0.0f;
+			}
 			break;
 
 		case TS_Normal:
-			pmcb.NormalMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			if (is_sw_mode_)
+			{
+				reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_normal_map_enabled_offset_]) = srv ? 1 : 0;
+			}
+			else
+			{
+				pmcb.NormalMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			}
 			break;
 
 		case TS_Height:
 			if (detail_mode_ == RenderMaterial::SDM_Parallax)
 			{
-				pmcb.HeightMapParallaxEnabled(*cbuffer_) = srv ? 1 : 0;
-				pmcb.HeightMapTessEnabled(*cbuffer_) = 0;
+				if (is_sw_mode_)
+				{
+					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_parallax_enabled_offset_]) = srv ? 1 : 0;
+					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_tess_enabled_offset_]) = 0;
+				}
+				else
+				{
+					pmcb.HeightMapParallaxEnabled(*cbuffer_) = srv ? 1 : 0;
+					pmcb.HeightMapTessEnabled(*cbuffer_) = 0;
+				}
 			}
 			else
 			{
-				pmcb.HeightMapParallaxEnabled(*cbuffer_) = 0;
-				pmcb.HeightMapTessEnabled(*cbuffer_) = srv ? 1 : 0;
+				if (is_sw_mode_)
+				{
+					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_parallax_enabled_offset_]) = 0;
+					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_tess_enabled_offset_]) = srv ? 1 : 0;
+				}
+				else
+				{
+					pmcb.HeightMapParallaxEnabled(*cbuffer_) = 0;
+					pmcb.HeightMapTessEnabled(*cbuffer_) = srv ? 1 : 0;
+				}
 			}
 			break;
 
 		case TS_Occlusion:
-			pmcb.OcclusionMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			if (is_sw_mode_)
+			{
+				reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_occlusion_map_enabled_offset_]) = 0;
+			}
+			else
+			{
+				pmcb.OcclusionMapEnabled(*cbuffer_) = srv ? 1 : 0;
+			}
 			break;
 
 		default:
@@ -641,85 +827,172 @@ namespace KlayGE
 
 	void RenderMaterial::HeightOffset(float value)
 	{
-		PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float2&>(sw_cbuffer_[sw_height_offset_scale_offset_]).x() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::HeightOffset() const
 	{
-		return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float2 const&>(sw_cbuffer_[sw_height_offset_scale_offset_]).x();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).x();
+		}
 	}
 
 	void RenderMaterial::HeightScale(float value)
 	{
-		PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float2&>(sw_cbuffer_[sw_height_offset_scale_offset_]).y() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::HeightScale() const
 	{
-		return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float2 const&>(sw_cbuffer_[sw_height_offset_scale_offset_]).y();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().HeightOffsetScale(*cbuffer_).y();
+		}
 	}
 
 	void RenderMaterial::EdgeTessHint(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float4&>(sw_cbuffer_[sw_tess_factors_offset_]).x() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::EdgeTessHint() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float4 const&>(sw_cbuffer_[sw_tess_factors_offset_]).x();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).x();
+		}
 	}
 
 	void RenderMaterial::InsideTessHint(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float4&>(sw_cbuffer_[sw_tess_factors_offset_]).y() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::InsideTessHint() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float4 const&>(sw_cbuffer_[sw_tess_factors_offset_]).y();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).y();
+		}
 	}
 
 	void RenderMaterial::MinTessFactor(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float4&>(sw_cbuffer_[sw_tess_factors_offset_]).z() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::MinTessFactor() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float4 const&>(sw_cbuffer_[sw_tess_factors_offset_]).z();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z();
+		}
 	}
 
 	void RenderMaterial::MaxTessFactor(float value)
 	{
-		PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z() = value;
-		cbuffer_->Dirty(true);
+		if (is_sw_mode_)
+		{
+			reinterpret_cast<float4&>(sw_cbuffer_[sw_tess_factors_offset_]).w() = value;
+		}
+		else
+		{
+			PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).w() = value;
+			cbuffer_->Dirty(true);
+		}
 	}
 
 	float RenderMaterial::MaxTessFactor() const
 	{
-		return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).z();
+		if (is_sw_mode_)
+		{
+			return reinterpret_cast<float4 const&>(sw_cbuffer_[sw_tess_factors_offset_]).w();
+		}
+		else
+		{
+			return PredefinedMaterialCBufferInstance().TessFactors(*cbuffer_).w();
+		}
 	}
 
 	void RenderMaterial::Active(RenderEffect& effect)
 	{
+		if (&cbuffer_->OwnerEffect() != &effect)
+		{
+			albedo_tex_param_ = effect.ParameterByName("albedo_tex");
+			metalness_glossiness_tex_param_ = effect.ParameterByName("metalness_glossiness_tex");
+			emissive_tex_param_ = effect.ParameterByName("emissive_tex");
+			normal_tex_param_ = effect.ParameterByName("normal_tex");
+			height_tex_param_ = effect.ParameterByName("height_tex");
+			occlusion_tex_param_ = effect.ParameterByName("occlusion_tex");
+		}
+
 		uint32_t const index = effect.FindCBuffer("klayge_material");
 		if (index != static_cast<uint32_t>(-1) && (effect.CBufferByIndex(index)->Size() > 0))
 		{
 			if (&cbuffer_->OwnerEffect() != &effect)
 			{
 				cbuffer_ = cbuffer_->Clone(effect);
-
-				albedo_tex_param_ = effect.ParameterByName("albedo_tex");
-				metalness_glossiness_tex_param_ = effect.ParameterByName("metalness_glossiness_tex");
-				emissive_tex_param_ = effect.ParameterByName("emissive_tex");
-				normal_tex_param_ = effect.ParameterByName("normal_tex");
-				height_tex_param_ = effect.ParameterByName("height_tex");
-				occlusion_tex_param_ = effect.ParameterByName("occlusion_tex");
 			}
 
 			effect.BindCBufferByIndex(index, cbuffer_);

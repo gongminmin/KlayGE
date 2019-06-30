@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 import os, sys
-from BLibUtil import *
+from Build import BuildInfo
 
 def CopyToDst(src_name, dst_dir):
 	print("Copy %s to %s" % (src_name, dst_dir))
@@ -57,9 +57,7 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying OpenAL...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL32.%s" % (compiler_arch, dll_suffix)):
-		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/wrap_oal.%s" % (compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying assimp...\n")
@@ -68,6 +66,10 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 
 	print("Deploying FreeImage...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/FreeImage%s" % (compiler_arch, lib_suffix)):
+		CopyToDst(fname, bin_dst_dir);
+
+	print("Deploying zlib...\n")
+	for fname in glob.iglob("KlayGE/bin/win_%s/zlib%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying glloader...\n")

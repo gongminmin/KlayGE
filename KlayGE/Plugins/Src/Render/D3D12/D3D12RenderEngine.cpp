@@ -1127,6 +1127,7 @@ namespace KlayGE
 
 		gi_factory_4_.reset();
 		gi_factory_5_.reset();
+		gi_factory_6_.reset();
 
 		D3D12InterfaceLoader::Instance().Destroy();
 	}

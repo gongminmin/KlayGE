@@ -154,13 +154,15 @@ namespace KlayGE
 	private:
 		std::string name_;
 
+		bool is_sw_mode_ = false;
 		RenderEffectConstantBufferPtr cbuffer_;
-		RenderEffectParameter* albedo_tex_param_;
-		RenderEffectParameter* metalness_glossiness_tex_param_;
-		RenderEffectParameter* emissive_tex_param_;
-		RenderEffectParameter* normal_tex_param_;
-		RenderEffectParameter* height_tex_param_;
-		RenderEffectParameter* occlusion_tex_param_;
+		std::vector<uint32_t> sw_cbuffer_;
+		RenderEffectParameter* albedo_tex_param_ = nullptr;
+		RenderEffectParameter* metalness_glossiness_tex_param_ = nullptr;
+		RenderEffectParameter* emissive_tex_param_ = nullptr;
+		RenderEffectParameter* normal_tex_param_ = nullptr;
+		RenderEffectParameter* height_tex_param_ = nullptr;
+		RenderEffectParameter* occlusion_tex_param_ = nullptr;
 
 		bool transparent_ = false;
 		bool sss_ = false;

@@ -915,6 +915,7 @@ namespace KlayGE
 		gi_factory_3_.reset();
 		gi_factory_4_.reset();
 		gi_factory_5_.reset();
+		gi_factory_6_.reset();
 
 		DynamicCreateDXGIFactory1_ = nullptr;
 		DynamicD3D11CreateDevice_ = nullptr;
