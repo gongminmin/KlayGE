@@ -99,10 +99,17 @@ namespace KlayGE
 		{
 		}
 
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 90)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winit-list-lifetime"
+#endif
 		constexpr ArrayRef(std::initializer_list<T> const & v)
 			: data_(v.begin() == v.end() ? nullptr : v.begin()), size_(v.size())
 		{
 		}
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 90)
+#pragma GCC diagnostic pop
+#endif
 
 		template <typename U>
 		KFL_IMPLICIT constexpr ArrayRef(ArrayRef<U*> const & rhs,

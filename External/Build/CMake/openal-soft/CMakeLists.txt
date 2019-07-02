@@ -1,7 +1,7 @@
 set(OPENALSOFT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/openal-soft")
 set(OPENALSOFT_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/openal-soft/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "05cdc2cb3002e0c9a20764a1e4e6a0e4de5e809e")
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "cee8100f1917ce21052b9cf255eeefdc839ae550")
 
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	set(ALSOFT_BACKEND_DSOUND ON CACHE BOOL "" FORCE)
@@ -61,6 +61,6 @@ set_target_properties(OpenAL PROPERTIES
 )
 
 foreach(target
-	"build_version" "common" "native-tools" "OpenAL")
+	"build_version" "native-tools" "OpenAL")
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/openal-soft")
 endforeach()

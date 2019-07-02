@@ -51,6 +51,9 @@
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
+#if KLAYGE_COMPILER_VERSION >= 90
+#pragma GCC diagnostic ignored "-Wclass-conversion" // Ignore conversion from class to parent struct
+#endif
 #endif
 #include <d3d11_4.h>
 #if defined(KLAYGE_COMPILER_GCC)

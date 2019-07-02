@@ -29,26 +29,6 @@ matrix:
       env: MATRIX_EVAL="CC=gcc && CXX=g++" PROJECT="ninja" COMPILER="mingw" BUILD_DIR="$COMPILER"
 
     - os: linux
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-            - ninja-build
-            - wine
-            - wine-dev
-            - winetricks
-            - libx11-dev
-            - libgl1-mesa-dev
-            - libopenal-dev
-          update:
-            - true
-      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
-
-    - os: linux
       dist: xenial
       sudo: required
       addons:
@@ -67,6 +47,26 @@ matrix:
           update:
             - true
       env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
+
+    - os: linux
+      dist: xenial
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+            - ninja-build
+            - wine
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update:
+            - true
+      env: MATRIX_EVAL="CC=gcc-9 && CXX=g++-9" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: trusty

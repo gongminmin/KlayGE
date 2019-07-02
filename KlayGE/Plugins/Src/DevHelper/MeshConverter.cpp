@@ -41,6 +41,10 @@
 #include <cstring>
 #include <iostream>
 
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 90)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy" // Ignore comparison between int and uint
+#endif
 #include <assimp/cimport.h>
 #include <assimp/cexport.h>
 #include <assimp/postprocess.h>
@@ -3651,6 +3655,10 @@ namespace
 		return render_model_;
 	}
 }
+
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 namespace KlayGE
 {
