@@ -7,6 +7,10 @@ platform:
 
 environment:
   matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PROJECT: vs2019
+      COMPILER: vc142
+      BUILD_DIR: vc142
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       PROJECT: vs2015
       COMPILER: vc140
