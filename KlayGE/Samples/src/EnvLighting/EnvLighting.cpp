@@ -144,7 +144,7 @@ namespace
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			auto& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
@@ -608,14 +608,14 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 		return ret;
 	}
 
 #ifdef CALC_FITTING_TABLE
 	void GenFittedBRDF(uint32_t width, uint32_t height, std::vector<float2>& fitted_brdf_f32,
-		ArrayRef<float4> r_factors, ArrayRef<float4> g_factors)
+		std::span<float4 const> r_factors, std::span<float4 const> g_factors)
 	{
 		fitted_brdf_f32.resize(width * height);
 		for (uint32_t y = 0; y < height; ++ y)
@@ -654,8 +654,8 @@ namespace
 		};
 
 		GenFittedBRDF(width, height, fitted_brdf_f32,
-			ArrayRef<float4>(r_min_factors_base.data(), r_min_factors_base.size()),
-			ArrayRef<float4>(g_min_factors_base.data(), g_min_factors_base.size()));
+			MakeSpan(r_min_factors_base.data(), r_min_factors_base.size()),
+			MakeSpan(g_min_factors_base.data(), g_min_factors_base.size()));
 	}
 
 	TexturePtr GenFittedBRDF(uint32_t width, uint32_t height)
@@ -683,7 +683,7 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan(init_data), nullptr);
 
 		return ret;
 	}
@@ -868,7 +868,7 @@ void EnvLightingApp::OnCreate()
 
 	auto& rf = Context::Instance().RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-	ElementFormat const fmt = caps.BestMatchTextureFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 });
+	ElementFormat const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}));
 	if (fmt == EF_GR8)
 	{
 		integrated_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);

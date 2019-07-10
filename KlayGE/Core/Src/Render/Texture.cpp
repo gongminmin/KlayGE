@@ -2362,7 +2362,7 @@ namespace KlayGE
 
 	void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
-		ElementFormat format, ArrayRef<ElementInitData> init_data)
+		ElementFormat format, std::span<ElementInitData const> init_data)
 	{
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
 		if (!file)
@@ -4235,7 +4235,7 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void SoftwareTexture::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

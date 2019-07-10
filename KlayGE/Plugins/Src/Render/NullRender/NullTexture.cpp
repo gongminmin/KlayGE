@@ -251,7 +251,7 @@ namespace KlayGE
 		KFL_UNUSED(level);
 	}
 
-	void NullTexture::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void NullTexture::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(init_data);
 		KFL_UNUSED(clear_value_hint);

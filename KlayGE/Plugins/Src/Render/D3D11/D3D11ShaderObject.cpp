@@ -622,7 +622,7 @@ namespace KlayGE
 	}
 
 	ID3D11GeometryShaderPtr D3D11ShaderStageObject::CreateGeometryShaderWithStreamOutput(RenderEffect const& effect,
-		std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ArrayRef<uint8_t> code_blob,
+		std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::span<uint8_t const> code_blob,
 		std::vector<ShaderDesc::StreamOutputDecl> const& so_decl)
 	{
 		BOOST_ASSERT(!code_blob.empty());
@@ -1285,7 +1285,7 @@ namespace KlayGE
 						d3d11_cbuffs[i] = checked_cast<D3D11GraphicsBuffer*>(cb->HWBuff().get())->D3DBuffer();
 					}
 
-					re.SetConstantBuffers(stage, MakeArrayRef(d3d11_cbuffs, cbuff_indices.size()));
+					re.SetConstantBuffers(stage, MakeSpan(d3d11_cbuffs, cbuff_indices.size()));
 				}
 			}
 		}
@@ -1316,9 +1316,9 @@ namespace KlayGE
 		}
 	}
 
-	ArrayRef<uint8_t> D3D11ShaderObject::VsCode() const
+	std::span<uint8_t const> D3D11ShaderObject::VsCode() const
 	{
-		return MakeArrayRef(checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).ShaderCodeBlob());
+		return MakeSpan(checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).ShaderCodeBlob());
 	}
 
 	uint32_t D3D11ShaderObject::VsSignature() const

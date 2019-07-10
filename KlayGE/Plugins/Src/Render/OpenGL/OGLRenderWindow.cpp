@@ -33,7 +33,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <map>
 #include <string>
@@ -82,7 +82,7 @@ namespace KlayGE
 			std::make_pair(4, 1)
 		};
 
-		ArrayRef<std::pair<int, int>> available_versions;
+		std::span<std::pair<int, int> const> available_versions;
 		{
 			static std::string_view const all_version_names[] =
 			{
@@ -113,7 +113,7 @@ namespace KlayGE
 				}
 			}
 
-			available_versions = MakeArrayRef(all_versions).Slice(version_start_index);
+			available_versions = MakeSpan(all_versions).subspan(version_start_index);
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -316,7 +316,7 @@ namespace KlayGE
 				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			for (size_t i = 0; i < available_versions.size(); ++ i)
+			for (int i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;
@@ -372,7 +372,7 @@ namespace KlayGE
 				GLX_CONTEXT_MINOR_VERSION_ARB, 0,
 				0
 			};
-			for (size_t i = 0; i < available_versions.size(); ++ i)
+			for (int i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;

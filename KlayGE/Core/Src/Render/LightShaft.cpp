@@ -26,9 +26,9 @@ namespace KlayGE
 
 	LightShaftPostProcess::LightShaftPostProcess()
 		: PostProcess(L"LightShaft", false,
-			{ "light_pos", "light_shaft_clr", "light_intensity", "shadow_intensity", "depth_clip", "cutoff_decay_weight" },
-			{ "color_tex", "depth_tex" },
-			{},
+			MakeSpan<std::string>({"light_pos", "light_shaft_clr", "light_intensity", "shadow_intensity", "depth_clip", "cutoff_decay_weight"}),
+			MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			MakeSpan<std::string>(),
 			RenderEffectPtr(), nullptr)
 	{
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");

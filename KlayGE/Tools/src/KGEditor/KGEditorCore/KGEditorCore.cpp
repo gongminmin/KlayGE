@@ -492,7 +492,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-		auto const fmt = re.DeviceCaps().BestMatchRenderTargetFormat({ EF_ABGR8, EF_ABGR8 }, 1, 0);
+		auto const fmt = re.DeviceCaps().BestMatchRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ABGR8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);

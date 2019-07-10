@@ -10,9 +10,9 @@ using namespace KlayGE;
 
 CartoonPostProcess::CartoonPostProcess()
 		: PostProcess(L"Cartoon", false,
-			{},
-			{ "normal_tex", "depth_tex", "color_tex" },
-			{ "output" },
+			MakeSpan<std::string>(),
+			MakeSpan<std::string>({"normal_tex", "depth_tex", "color_tex"}),
+			MakeSpan<std::string>({"output"}),
 			RenderEffectPtr(), nullptr)
 {
 	auto effect = SyncLoadRenderEffect("CartoonPP.fxml");

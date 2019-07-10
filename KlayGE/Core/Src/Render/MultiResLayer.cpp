@@ -99,11 +99,11 @@ namespace KlayGE
 		multi_res_srv_ = rf.MakeTextureSrv(multi_res_tex);
 		if (multi_res_tex->NumMipMaps() > 1)
 		{
-			auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			auto const fmt8 = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt8 != EF_Unknown);
 
 			auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
-				caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+				caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 			BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 			depth_derivative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),

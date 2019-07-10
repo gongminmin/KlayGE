@@ -62,7 +62,7 @@ namespace
 		{
 			module_->RunString(*script_);
 
-			return module_->Call("update", { app_time, elapsed_time });
+			return module_->Call("update", MakeSpan<std::any>({app_time, elapsed_time}));
 		}
 
 	private:
@@ -371,7 +371,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				MemInputStreamBuf stream_buff(skybox_name.data(), skybox_name.size());
 				std::istream(&stream_buff) >> color.r() >> color.g() >> color.b();
 
-				auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+				auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 				BOOST_ASSERT(fmt != EF_Unknown);
 				uint32_t texel = (fmt == EF_ABGR8) ? color.ABGR() : color.ARGB();
 				ElementInitData init_data[6];
@@ -382,7 +382,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					init_data[i].slice_pitch = init_data[i].row_pitch;
 				}
 
-				skybox_renderable->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
+				skybox_renderable->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan(init_data)));
 			}
 
 			Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);

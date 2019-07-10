@@ -35,7 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
@@ -140,7 +140,7 @@ namespace KlayGE
 
 	protected:
 		ID3D11GeometryShaderPtr CreateGeometryShaderWithStreamOutput(RenderEffect const& effect,
-			std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ArrayRef<uint8_t> code_blob,
+			std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::span<uint8_t const> code_blob,
 			std::vector<ShaderDesc::StreamOutputDecl> const& so_decl);
 
 	private:
@@ -338,7 +338,7 @@ namespace KlayGE
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
-		ArrayRef<uint8_t> VsCode() const;
+		std::span<uint8_t const> VsCode() const;
 		uint32_t VsSignature() const;
 
 	private:

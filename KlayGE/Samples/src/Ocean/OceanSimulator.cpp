@@ -170,12 +170,14 @@ namespace KlayGE
 		init_data.data = &h0_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float2);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		h0_tex_ = rf.MakeTexture2D(
+			params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 		init_data.data = &omega_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		omega_tex_ = rf.MakeTexture2D(
+			params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);

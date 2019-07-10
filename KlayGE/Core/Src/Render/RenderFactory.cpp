@@ -78,7 +78,7 @@ namespace KlayGE
 
 	TexturePtr RenderFactory::MakeTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-		ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+		std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		TexturePtr ret = this->MakeDelayCreationTexture1D(width, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 		ret->CreateHWResource(init_data, clear_value_hint);
@@ -87,7 +87,7 @@ namespace KlayGE
 
 	TexturePtr RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-		ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+		std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		TexturePtr ret = this->MakeDelayCreationTexture2D(width, height, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 		ret->CreateHWResource(init_data, clear_value_hint);
@@ -96,7 +96,7 @@ namespace KlayGE
 
 	TexturePtr RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-		ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+		std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		TexturePtr ret = this->MakeDelayCreationTexture3D(width, height, depth, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 		ret->CreateHWResource(init_data, clear_value_hint);
@@ -105,7 +105,7 @@ namespace KlayGE
 
 	TexturePtr RenderFactory::MakeTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-		ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+		std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		TexturePtr ret = this->MakeDelayCreationTextureCube(size, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 		ret->CreateHWResource(init_data, clear_value_hint);

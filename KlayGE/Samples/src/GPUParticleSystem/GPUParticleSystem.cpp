@@ -110,7 +110,7 @@ namespace
 		TexturePtr ret;
 		if (caps.max_texture_depth >= vol_size)
 		{
-			auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+			auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			if (fmt == EF_ARGB8)
@@ -121,7 +121,7 @@ namespace
 				}
 			}
 
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 		}
 
 		return ret;
@@ -422,7 +422,7 @@ namespace
 
 				{
 					RenderDeviceCaps const & caps = re.DeviceCaps();
-					auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
+					auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR32F, EF_ABGR16F}), 1, 0);
 					BOOST_ASSERT(fmt != EF_Unknown);
 
 					std::vector<uint8_t> pos;
@@ -459,8 +459,10 @@ namespace
 						pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
 						pos_init.slice_pitch = 0;
 					}
-					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
-					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_pos_texture_[0] =
+						rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(pos_init));
+					particle_pos_texture_[1] =
+						rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(pos_init));
 					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				}
@@ -518,7 +520,8 @@ namespace
 					vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 					vel_init.slice_pitch = 0;
 
-					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, vel_init);
+					TexturePtr particle_init_vel = rf.MakeTexture2D(
+						tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(vel_init));
 					*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 				}
 
@@ -572,7 +575,8 @@ namespace
 				init_data.row_pitch = tex_width_ * sizeof(half);
 				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				TexturePtr particle_birth_time_tex =
+					rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 				*(effect_->ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}

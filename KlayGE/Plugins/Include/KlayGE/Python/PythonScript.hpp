@@ -94,7 +94,7 @@ namespace KlayGE
 		~PythonScriptModule() override;
 
 		std::any Value(std::string const & name) override;
-		std::any Call(std::string const & func_name, ArrayRef<std::any> args) override;
+		std::any Call(std::string const & func_name, std::span<std::any const> args) override;
 		std::any RunString(std::string const & script) override;
 
 	private:

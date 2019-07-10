@@ -337,7 +337,7 @@ namespace KlayGE
 		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R16UI);
 		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
 		tile_non_tess_rl_->BindVertexStream(vb_,
-			{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
+			MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F)}),
 			RenderLayout::ST_Instance);
 		tile_non_tess_rl_->BindVertexStream(tile_non_tess_vid_vb_, VertexElement(VEU_TextureCoord, 2, EF_R32F));
 		tile_non_tess_rl_->NumInstances(num_tiles_);
@@ -347,7 +347,7 @@ namespace KlayGE
 		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R16UI);
 		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
 		tile_tess_rl_->BindVertexStream(vb_,
-			{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
+			MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F)}),
 			RenderLayout::ST_Instance);
 		tile_tess_rl_->NumInstances(num_tiles_);
 	}

@@ -41,9 +41,9 @@ namespace KlayGE
 {
 	MotionBlurPostProcess::MotionBlurPostProcess()
 		: PostProcess(L"MotionBlur", false,
-			{ "exposure", "blur_radius", "reconstruction_samples", "display_type" },
-			{ "color_tex", "depth_tex", "velocity_tex" },
-			{ "output" },
+			MakeSpan<std::string>({"exposure", "blur_radius", "reconstruction_samples", "display_type"}),
+			MakeSpan<std::string>({"color_tex", "depth_tex", "velocity_tex"}),
+			MakeSpan<std::string>({"output"}),
 			RenderEffectPtr(), nullptr),
 			visualize_velocity_type_(VT_Result),
 			exposure_(1), blur_radius_(2), reconstruction_samples_(15)
@@ -187,7 +187,8 @@ namespace KlayGE
 		init_data.data = &rand_data[0];
 		init_data.row_pitch = tile_width;
 		init_data.slice_pitch = tile_width * tile_height;
-		auto random_srv = rf.MakeTextureSrv(rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
+		auto random_srv = rf.MakeTextureSrv(
+			rf.MakeTexture2D(tile_width, tile_height, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data)));
 
 		motion_blur_tile_max_x_dir_pp_->InputPin(0, srv);
 		motion_blur_tile_max_x_dir_pp_->OutputPin(0, velocity_tile_max_x_dir_rtv);

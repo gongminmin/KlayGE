@@ -29,7 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 
 #include <cstdarg>
@@ -86,7 +86,7 @@ namespace
 	class MultiOStreamsCallback : boost::noncopyable
 	{
 	public:
-		explicit MultiOStreamsCallback(ArrayRef<std::ostream*> oss)
+		explicit MultiOStreamsCallback(std::span<std::ostream*> oss)
 			: oss_(oss)
 		{
 		}
@@ -105,7 +105,7 @@ namespace
 		}
 
 	private:
-		ArrayRef<std::ostream*> oss_;
+		std::span<std::ostream*> oss_;
 	};
 
 	std::ostream& Log()

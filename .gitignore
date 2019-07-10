@@ -82,10 +82,11 @@ External/assimp
 External/boost
 External/cxxopts
 External/d3dcompiler
-External/FreeImage
 External/Downloads
+External/FreeImage
 External/freetype
 External/googletest
+External/GSL
 External/libogg
 External/libvorbis
 External/nanosvg

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <vector>
 
@@ -149,7 +149,12 @@ namespace KlayGE
 		void NumVertices(uint32_t n);
 		uint32_t NumVertices() const;
 
-		void BindVertexStream(GraphicsBufferPtr const & buffer, ArrayRef<VertexElement> vet,
+		void BindVertexStream(GraphicsBufferPtr const & buffer, VertexElement const& vet,
+			stream_type type = ST_Geometry, uint32_t freq = 1)
+		{
+			this->BindVertexStream(buffer, MakeSpan<1>(vet), type, freq);
+		}
+		void BindVertexStream(GraphicsBufferPtr const & buffer, std::span<VertexElement const> vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
 
 		uint32_t NumVertexStreams() const
@@ -165,11 +170,11 @@ namespace KlayGE
 			vertex_streams_[index].stream = gb;
 			streams_dirty_ = true;
 		}
-		void VertexStreamFormat(uint32_t index, ArrayRef<VertexElement> vet)
+		void VertexStreamFormat(uint32_t index, std::span<VertexElement const> vet)
 		{
-			vertex_streams_[index].format = vet.ToVector();
+			vertex_streams_[index].format.assign(vet.begin(), vet.end());
 			uint32_t size = 0;
-			for (size_t i = 0; i < vet.size(); ++ i)
+			for (int i = 0; i < vet.size(); ++ i)
 			{
 				size += vet[i].element_size();
 			}

@@ -463,7 +463,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 	auto depth_srv = rf.MakeTextureSrv(depth_tex_);
@@ -475,8 +475,8 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(depth_tex_, 0, 1, 0));
 	}
 
-	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
-		: MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
+	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F})
+		: MakeSpan({ EF_ABGR8, EF_ARGB8 }), 1, 0);
 	BOOST_ASSERT(color_fmt != EF_Unknown);
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
@@ -484,7 +484,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	clr_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(ds_view);
 
-	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(motion_fmt != EF_Unknown);
 	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	auto velocity_srv = rf.MakeTextureSrv(velocity_tex_);
@@ -729,14 +729,14 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					try
 					{
 						std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-							{ i, j, NUM_INSTANCE, NUM_LINE }));
+							MakeSpan<std::any>({i, j, NUM_INSTANCE, NUM_LINE})));
 
 						pos.x() = std::any_cast<float>(scr_pos[0]);
 						pos.y() = std::any_cast<float>(scr_pos[1]);
 						pos.z() = std::any_cast<float>(scr_pos[2]);
 
 						std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-							{i, j, NUM_INSTANCE, NUM_LINE }));
+							MakeSpan<std::any>({i, j, NUM_INSTANCE, NUM_LINE})));
 
 						clr.r() = std::any_cast<float>(scr_clr[0]);
 						clr.g() = std::any_cast<float>(scr_clr[1]);

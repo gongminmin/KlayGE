@@ -29,9 +29,9 @@ namespace KlayGE
 	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech)
 			: PostProcess(L"SATSeparableScanSweep", false,
-					{},
-					{ "src_tex" },
-					{ "output" },
+					MakeSpan<std::string>(),
+					MakeSpan<std::string>({"src_tex"}),
+					MakeSpan<std::string>({"output"}),
 					effect, tech)
 	{
 		if (technique_)
@@ -121,7 +121,7 @@ namespace KlayGE
 			std::vector<RenderTargetViewPtr> inter_rtv_y_down(inter_tex_y_down.size());
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
+			auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR32F, EF_ABGR16F}), 1, 0);
 
 			{
 				inter_tex_x_up[0] = tex;

@@ -39,12 +39,12 @@ namespace KlayGE
 {
 	SSSBlurPP::SSSBlurPP(bool multi_sample)
 			: PostProcess(L"SSSBlurPP", false,
-				{ "strength", "correction" },
-				{
+				MakeSpan<std::string>({"strength", "correction"}),
+				MakeSpan<std::string>({
 					multi_sample ? "src_tex_ms" : "src_tex",
 					multi_sample ? "depth_tex_ms" : "depth_tex"
-				},
-				{ "output" },
+				}),
+				MakeSpan<std::string>({"output"}),
 				RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();

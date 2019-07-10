@@ -255,7 +255,7 @@ void DetailedSurfaceApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_BC1, EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	juda_tex_->CacheProperty(1024, fmt, 4);
 

@@ -133,7 +133,7 @@ namespace
 			init_data.row_pitch = sizeof(color_map);
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 

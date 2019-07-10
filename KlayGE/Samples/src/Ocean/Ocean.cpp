@@ -264,8 +264,8 @@ namespace
 
 			if (use_tex_array_)
 			{
-				ArrayRef<ElementInitData> did;
-				ArrayRef<ElementInitData> gid;
+				std::span<ElementInitData const> did;
+				std::span<ElementInitData const> gid;
 				if (use_load_tex)
 				{
 					did = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
@@ -296,14 +296,14 @@ namespace
 				gradient_tex_.resize(ocean_param_.num_frames);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8 }, 1, 0);
+					auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8}), 1, 0);
 					BOOST_ASSERT(fmt != EF_Unknown);
 
-					ArrayRef<ElementInitData> did;
+					std::span<ElementInitData const> did;
 					if (use_load_tex)
 					{
 						auto const& disp_init_data = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
-						did = disp_init_data[i * disp_tex->NumMipMaps()];
+						did = MakeSpan<1>(disp_init_data[i * disp_tex->NumMipMaps()]);
 					}
 
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -319,7 +319,7 @@ namespace
 						if (EF_GR8 == fmt)
 						{
 							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, grad_init_data[i * grad_tex->NumMipMaps()]);
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, MakeSpan<1>(grad_init_data[i * grad_tex->NumMipMaps()]));
 						}
 						else
 						{
@@ -576,7 +576,7 @@ namespace
 				init_data.row_pitch = ocean_param_.dmap_dim * sizeof(uint32_t);
 				init_data.slice_pitch = init_data.row_pitch * ocean_param_.dmap_dim;
 				TexturePtr disp_8 = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, init_data);
+					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, MakeSpan<1>(init_data));
 
 				if (use_tex_array_)
 				{
@@ -634,7 +634,7 @@ namespace
 			param_init_data.slice_pitch = param_init_data.row_pitch * 2;
 			TexturePtr ocean_displacement_param_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, ocean_param_.num_frames, 2, 1,
 				1, 1, EF_ABGR32F, true);
-			ocean_displacement_param_tex->CreateHWResource(param_init_data, nullptr);
+			ocean_displacement_param_tex->CreateHWResource(MakeSpan<1>(param_init_data), nullptr);
 			SaveTexture(ocean_displacement_param_tex, PREFIX + "OceanDisplacementParam.dds");
 
 			if (use_tex_array_)

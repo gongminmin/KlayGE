@@ -660,7 +660,7 @@ namespace KlayGE
 					auto comed_data = MakeUniquePtr<uint8_t[]>(comed_len);
 					input_file_->seekg(offsets[0], std::ios_base::beg);
 					input_file_->read(comed_data.get(), comed_len);
-					lzma_dec_.Decode(data.get(), MakeArrayRef(comed_data.get(), comed_len), full_tile_bytes);
+					lzma_dec_.Decode(data.get(), MakeSpan(comed_data.get(), comed_len), full_tile_bytes);
 				}
 				else
 				{

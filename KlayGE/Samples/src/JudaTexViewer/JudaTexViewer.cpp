@@ -81,7 +81,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rls_[0]->BindVertexStream(pos_vb,
-				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
+				MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -129,7 +129,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rls_[0]->BindVertexStream(pos_vb,
-				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
+				MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -287,7 +287,7 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 
 	juda_tex_ = LoadJudaTexture(name);
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_BC1, EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	juda_tex_->CacheProperty(1024, fmt, BORDER_SIZE);
 

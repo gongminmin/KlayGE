@@ -664,7 +664,7 @@ namespace KlayGE
 			++ num_heaps;
 		}
 
-		this->SetDescriptorHeaps(MakeArrayRef(heaps.data(), num_heaps));
+		this->SetDescriptorHeaps(MakeSpan(heaps.data(), num_heaps));
 
 		uint32_t root_param_index = 0;
 		for (uint32_t i = 0; i < NumShaderStages; ++i)
@@ -1557,12 +1557,12 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*> descriptor_heaps)
+	void D3D12RenderEngine::SetDescriptorHeaps(std::span<ID3D12DescriptorHeap* const> descriptor_heaps)
 	{
 		if ((descriptor_heaps.size() != curr_num_desc_heaps_)
-			|| (descriptor_heaps != MakeArrayRef(curr_desc_heaps_.data(), curr_num_desc_heaps_)))
+			|| (descriptor_heaps != MakeSpan(curr_desc_heaps_.data(), curr_num_desc_heaps_)))
 		{
-			BOOST_ASSERT(descriptor_heaps.size() <= curr_desc_heaps_.size());
+			BOOST_ASSERT(static_cast<uint32_t>(descriptor_heaps.size()) <= curr_desc_heaps_.size());
 			curr_num_desc_heaps_ = static_cast<uint32_t>(descriptor_heaps.size());
 			for (uint32_t i = 0; i < curr_num_desc_heaps_; ++ i)
 			{
@@ -1573,12 +1573,12 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::IASetVertexBuffers(uint32_t start_slot, ArrayRef<D3D12_VERTEX_BUFFER_VIEW> views)
+	void D3D12RenderEngine::IASetVertexBuffers(uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views)
 	{
-		if ((start_slot + views.size() > curr_vbvs_.size())
+		if ((start_slot + static_cast<size_t>(views.size()) > curr_vbvs_.size())
 			|| (memcmp(&curr_vbvs_[start_slot], views.data(), views.size() * sizeof(views[0])) != 0))
 		{
-			curr_vbvs_.resize(std::max(curr_vbvs_.size(), start_slot + views.size()));
+			curr_vbvs_.resize(std::max(curr_vbvs_.size(), static_cast<size_t>(start_slot + views.size())));
 			memcpy(&curr_vbvs_[start_slot], views.data(), views.size() * sizeof(views[0]));
 			d3d_render_cmd_list_->IASetVertexBuffers(start_slot, static_cast<uint32_t>(views.size()), views.data());
 		}
@@ -2044,7 +2044,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void D3D12RenderEngine::AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, ArrayRef<D3D12_RESOURCE_BARRIER> barriers)
+	void D3D12RenderEngine::AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers)
 	{
 		auto* res_barriers = this->FindResourceBarriers(cmd_list, true);
 		BOOST_ASSERT(res_barriers != nullptr);

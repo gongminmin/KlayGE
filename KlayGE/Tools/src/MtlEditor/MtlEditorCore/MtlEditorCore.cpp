@@ -185,7 +185,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-		auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
@@ -242,7 +242,7 @@ namespace KlayGE
 			clear_clr.b() = 0.325f;
 		}
 		;
-		auto const fmt = re.DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+		auto const fmt = re.DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 		BOOST_ASSERT(fmt != EF_Unknown);
 		uint32_t texel = ((fmt == EF_ABGR8) ? clear_clr.ABGR() : clear_clr.ARGB());
 		ElementInitData init_data[6];

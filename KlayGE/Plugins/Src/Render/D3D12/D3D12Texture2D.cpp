@@ -461,7 +461,7 @@ namespace KlayGE
 				heaps[num_heaps] = sampler_heap;
 				++ num_heaps;
 			}
-			re.SetDescriptorHeaps(MakeArrayRef(heaps.data(), num_heaps));
+			re.SetDescriptorHeaps(MakeSpan(heaps.data(), num_heaps));
 
 			if (sampler_heap)
 			{
@@ -476,7 +476,7 @@ namespace KlayGE
 			vbv.SizeInBytes = vb.Size();
 			vbv.StrideInBytes = d3d12_rl.VertexSize(0);
 
-			re.IASetVertexBuffers(0, vbv);
+			re.IASetVertexBuffers(0, MakeSpan<1>(vbv));
 
 			re.IASetPrimitiveTopology(tt);
 
@@ -536,7 +536,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Texture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D12Texture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 			width_, height_, 1, array_size_, init_data, clear_value_hint);

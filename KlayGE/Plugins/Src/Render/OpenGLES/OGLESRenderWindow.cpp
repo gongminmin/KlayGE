@@ -137,7 +137,7 @@ namespace KlayGE
 			std::make_pair(3, 0)
 		};
 
-		ArrayRef<std::pair<int, int>> available_versions;
+		std::span<std::pair<int, int> const> available_versions;
 		{
 			static std::string_view const all_version_names[] =
 			{
@@ -186,7 +186,7 @@ namespace KlayGE
 				}
 			}
 
-			available_versions = MakeArrayRef(all_versions).Slice(version_start_index);
+			available_versions = MakeSpan(all_versions).subspan(version_start_index);
 		}
 
 		std::vector<EGLint> visual_attr =
@@ -250,7 +250,7 @@ namespace KlayGE
 			EGL_CONTEXT_MINOR_VERSION, available_versions[0].second,
 			EGL_NONE
 		};
-		size_t test_version_index = 0;
+		int test_version_index = 0;
 		while ((nullptr == context_) && (test_version_index < available_versions.size()))
 		{
 			ctx_attr[1] = available_versions[test_version_index].first;

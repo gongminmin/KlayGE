@@ -285,7 +285,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Texture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D12Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE3D,
 			width_, height_, depth_, array_size_, init_data, clear_value_hint);

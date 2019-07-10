@@ -360,7 +360,7 @@ namespace KlayGE
 				init_data.row_pitch = mapper_3d.RowPitch();
 				init_data.slice_pitch = mapper_3d.SlicePitch();
 				TexturePtr texture_2d_cpu = rf.MakeTexture2D(width, height, 1, 1, texture_original_->Format(),
-					1, 0, EAH_CPU_Write, init_data);
+					1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 				texture_2d_cpu->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height,
 					0, 0, 0, 0, width, height);
 			}

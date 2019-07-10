@@ -1701,7 +1701,7 @@ namespace KlayGE
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
 
 			std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
-			auto add_render_target_format = [&render_target_formats, &max_samples](ArrayRef<ElementFormat> fmts)
+			auto add_render_target_format = [&render_target_formats, &max_samples](std::span<ElementFormat const> fmts)
 			{
 				for (auto fmt : fmts)
 				{
@@ -1713,7 +1713,7 @@ namespace KlayGE
 			};
 
 			add_render_target_format(
-				{
+				MakeSpan({
 					EF_R8,
 					EF_GR8,
 					EF_ABGR8,
@@ -1735,36 +1735,36 @@ namespace KlayGE
 					EF_D24S8,
 					EF_D32F,
 					EF_ABGR8_SRGB
-				});
+				}));
 			if (glloader_GLES_EXT_texture_format_BGRA8888())
 			{
-				add_render_target_format(EF_ARGB8);
+				add_render_target_format(MakeSpan<1>(EF_ARGB8));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
 			{
 				add_render_target_format(
-					{
+					MakeSpan({
 						EF_R16F,
 						EF_GR16F
-					});
+					}));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float()
 				|| this->HackForTegra())
 			{
-				add_render_target_format(EF_ABGR16F);
+				add_render_target_format(MakeSpan<1>(EF_ABGR16F));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_APPLE_color_buffer_packed_float() || glloader_GLES_NV_packed_float())
 			{
-				add_render_target_format(EF_B10G11R11F);
+				add_render_target_format(MakeSpan<1>(EF_B10G11R11F));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_float())
 			{
 				add_render_target_format(
-					{
+					MakeSpan({
 						EF_R32F,
 						EF_GR32F,
 						EF_ABGR32F
-					});
+					}));
 			}
 
 			caps_.AssignRenderTargetFormats(std::move(render_target_formats));

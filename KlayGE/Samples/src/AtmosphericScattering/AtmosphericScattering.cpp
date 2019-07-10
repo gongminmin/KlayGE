@@ -255,14 +255,14 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 
 	Color f4_clr = clr / 250.0f;
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? f4_clr.ABGR() : f4_clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	dialog_param_->Control<UITexButton>(id_beta_button_)->SetTexture(tex_for_button);
 }
 
@@ -279,14 +279,14 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 			checked_cast<AtmosphereMesh&>(renderable).Absorb(clr);
 		});
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? clr.ABGR() : clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	dialog_param_->Control<UITexButton>(id_absorb_button_)->SetTexture(tex_for_button);
 }
 

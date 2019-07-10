@@ -131,13 +131,13 @@ namespace KlayGE
 		is->read(input.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Encode(output, MakeArrayRef(input.get(), static_cast<size_t>(len)));
+		this->Encode(output, MakeSpan(input.get(), static_cast<size_t>(len)));
 		os.write(reinterpret_cast<char*>(&output[0]), output.size() * sizeof(output[0]));
 
 		return output.size();
 	}
 
-	uint64_t LZMACodec::Encode(std::ostream& os, ArrayRef<uint8_t> input)
+	uint64_t LZMACodec::Encode(std::ostream& os, std::span<uint8_t const> input)
 	{
 		std::vector<uint8_t> output;
 		this->Encode(output, input);
@@ -150,12 +150,12 @@ namespace KlayGE
 		auto input = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
 		is->read(input.get(), static_cast<size_t>(len));
 
-		this->Encode(output, MakeArrayRef(input.get(), static_cast<size_t>(len)));
+		this->Encode(output, MakeSpan(input.get(), static_cast<size_t>(len)));
 	}
 
-	void LZMACodec::Encode(std::vector<uint8_t>& output, ArrayRef<uint8_t> input)
+	void LZMACodec::Encode(std::vector<uint8_t>& output, std::span<uint8_t const> input)
 	{
-		SizeT out_len = static_cast<SizeT>(std::max(input.size() * 11 / 10, static_cast<size_t>(32)));
+		SizeT out_len = static_cast<SizeT>(std::max(input.size() * 11 / 10, static_cast<std::ptrdiff_t>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
 		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len,
@@ -171,14 +171,14 @@ namespace KlayGE
 		is->read(in_data.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Decode(output, MakeArrayRef(in_data.get(), static_cast<size_t>(len)), original_len);
+		this->Decode(output, MakeSpan(in_data.get(), static_cast<size_t>(len)), original_len);
 
 		os.write(reinterpret_cast<char*>(&output[0]), static_cast<std::streamsize>(output.size()));
 
 		return output.size();
 	}
 
-	uint64_t LZMACodec::Decode(std::ostream& os, ArrayRef<uint8_t> input, uint64_t original_len)
+	uint64_t LZMACodec::Decode(std::ostream& os, std::span<uint8_t const> input, uint64_t original_len)
 	{
 		std::vector<uint8_t> output;
 		this->Decode(output, input, original_len);
@@ -193,16 +193,16 @@ namespace KlayGE
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
 		is->read(&in_data[0], static_cast<size_t>(len));
 
-		this->Decode(output, MakeArrayRef(in_data.data(), static_cast<size_t>(len)), original_len);
+		this->Decode(output, MakeSpan(in_data.data(), static_cast<size_t>(len)), original_len);
 	}
 
-	void LZMACodec::Decode(std::vector<uint8_t>& output, ArrayRef<uint8_t> input, uint64_t original_len)
+	void LZMACodec::Decode(std::vector<uint8_t>& output, std::span<uint8_t const> input, uint64_t original_len)
 	{
 		output.resize(static_cast<uint32_t>(original_len));
 		this->Decode(&output[0], input, original_len);
 	}
 
-	void LZMACodec::Decode(void* output, ArrayRef<uint8_t> input, uint64_t original_len)
+	void LZMACodec::Decode(void* output, std::span<uint8_t const> input, uint64_t original_len)
 	{
 		uint8_t const * p = static_cast<uint8_t const *>(input.data());
 

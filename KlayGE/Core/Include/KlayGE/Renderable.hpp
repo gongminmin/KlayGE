@@ -22,7 +22,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/ArrayRef.hpp>
 #include <vector>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/SceneComponent.hpp>

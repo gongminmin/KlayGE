@@ -434,10 +434,10 @@ namespace KlayGE
 		return MakePyObjectPtr(p);
 	}
 
-	std::any PythonScriptModule::Call(std::string const & func_name, ArrayRef<std::any> args)
+	std::any PythonScriptModule::Call(std::string const & func_name, std::span<std::any const> args)
 	{
 		PyObjectPtr py_args = MakePyObjectPtr(PyTuple_New(args.size()));
-		for (size_t i = 0; i < args.size(); ++ i)
+		for (int i = 0; i < args.size(); ++i)
 		{
 			PyObjectPtr value = CppType2PyObjectPtr(args[i]);
 			Py_IncRef(value.get());

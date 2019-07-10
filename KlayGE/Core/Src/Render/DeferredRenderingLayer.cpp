@@ -339,9 +339,9 @@ namespace
 	public:
 		DeferredRenderingDebugPostProcess()
 			: PostProcess(L"DeferredRenderingDebug", false,
-				{},
-				{ "g_buffer_rt0_tex", "g_buffer_rt1_tex", "depth_tex", "lighting_tex", "ssvo_tex" },
-				{ "out_tex" },
+				MakeSpan<std::string>(),
+				MakeSpan<std::string>({"g_buffer_rt0_tex", "g_buffer_rt1_tex", "depth_tex", "lighting_tex", "ssvo_tex"}),
+				MakeSpan<std::string>({"out_tex"}),
 				RenderEffectPtr(), nullptr)
 		{
 			auto effect = ASyncLoadRenderEffect("DeferredRenderingDebug.fxml");
@@ -650,7 +650,7 @@ namespace KlayGE
 #endif
 
 		sm_fb_ = rf.MakeFrameBuffer();
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_R32F, EF_R16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto sm_rtv = rf.Make2DRtv(sm_tex_, 0, 1, 0);
@@ -727,7 +727,7 @@ namespace KlayGE
 
 		rsm_fb_ = rf.MakeFrameBuffer();
 
-		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt8 != EF_Unknown);
 		rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
@@ -1069,9 +1069,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt8 != EF_Unknown);
-		auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R16F, EF_R32F }, 1, 0);
+		auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 		BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, sample_quality, EAH_GPU_Read | EAH_GPU_Write);
@@ -1203,7 +1203,7 @@ namespace KlayGE
 
 		this->SetupViewportGI(index, false);
 
-		auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
+		auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_R32F, EF_R16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		if (tex_array_support_)
 		{
@@ -1226,7 +1226,7 @@ namespace KlayGE
 			}
 		}
 
-		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -1238,7 +1238,7 @@ namespace KlayGE
 		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.shadowing_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.shadowing_tex, 0, 1, 0));
 
-		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }, 1, 0);
+		fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.projective_shadowing_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.projective_shadowing_tex, 0, 1, 0));
@@ -1271,7 +1271,7 @@ namespace KlayGE
 		pvp.vdm_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.vdm_count_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(pvp.g_buffer_vdm_max_ds_dsvs[1]);
 
-		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -1347,7 +1347,7 @@ namespace KlayGE
 				pvp.temp_shading_tex_array = rf.MakeTexture2D(width, height, 1, sample_count, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 
-				auto const multi_sample_mask_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+				auto const multi_sample_mask_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_R8, EF_ABGR8, EF_ARGB8}), 1, 0);
 				pvp.multi_sample_mask_tex = rf.MakeTexture2D(width, height, 1, 1, multi_sample_mask_fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write);
 
@@ -1357,7 +1357,7 @@ namespace KlayGE
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color3, rf.Make2DRtv(pvp.multi_sample_mask_tex, 0, 1, 0));
 			}
 
-			auto const light_indices_fmt = caps.BestMatchUavFormat({ EF_R16UI, EF_R32UI });
+			auto const light_indices_fmt = caps.BestMatchUavFormat(MakeSpan({EF_R16UI, EF_R32UI}));
 			BOOST_ASSERT(light_indices_fmt != EF_Unknown);
 			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, num_depth_slices_, light_indices_fmt, 1, 0,
@@ -1368,7 +1368,7 @@ namespace KlayGE
 		}
 		else
 		{
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -1394,7 +1394,7 @@ namespace KlayGE
 			}
 		}
 
-		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R8, EF_R16F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+		fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_R8, EF_R16F, EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.small_ssvo_srv = rf.MakeTextureSrv(pvp.small_ssvo_tex);
@@ -1470,7 +1470,7 @@ namespace KlayGE
 				KFL_UNREACHABLE("Invalid detail mode");
 			}
 
-			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num));
+			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(MakeSpan(g_buffer_files, num));
 		}
 
 		return g_buffer_effects_[effect_index.index];

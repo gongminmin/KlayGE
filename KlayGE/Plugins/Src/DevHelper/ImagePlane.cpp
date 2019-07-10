@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -357,7 +358,7 @@ namespace KlayGE
 
 			uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height,
 				1, 1, 1, uncompressed_format, false);
-			uncompressed_tex_->CreateHWResource(uncompressed_init_data, nullptr);
+			uncompressed_tex_->CreateHWResource(MakeSpan<1>(uncompressed_init_data), nullptr);
 		}
 
 		if (metadata.ForceSRGB())
@@ -377,7 +378,7 @@ namespace KlayGE
 					init_data.row_pitch = ori_mapper.RowPitch();
 					init_data.slice_pitch = ori_mapper.SlicePitch();
 
-					srgb_uncompressed_tex->CreateHWResource(init_data, nullptr);
+					srgb_uncompressed_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 				}
 
 				uncompressed_tex_ = srgb_uncompressed_tex;
@@ -398,7 +399,7 @@ namespace KlayGE
 					init_data.row_pitch = ori_mapper.RowPitch();
 					init_data.slice_pitch = ori_mapper.SlicePitch();
 
-					srgb_compressed_tex->CreateHWResource(init_data, nullptr);
+					srgb_compressed_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 				}
 
 				compressed_tex_ = srgb_compressed_tex;
@@ -800,7 +801,7 @@ namespace KlayGE
 						init_data.row_pitch = row_pitch;
 						init_data.slice_pitch = (this_tex_region_height + block_height - 1) / block_height * row_pitch;
 
-						new_tex_regions[i]->CreateHWResource(init_data, nullptr);
+						new_tex_regions[i]->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 						uncompressed_tex_->CopyToSubTexture2D(*new_tex_regions[i], 0, 0, 0, 0, tex_width, this_tex_region_height,
 							0, 0, 0, i * tex_region_height, tex_width, this_tex_region_height);
@@ -820,7 +821,7 @@ namespace KlayGE
 			joiners[i]();
 		}
 
-		new_tex->CreateHWResource(init_data, nullptr);
+		new_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 		if (IsCompressedFormat(format))
 		{
@@ -861,7 +862,7 @@ namespace KlayGE
 				linear);
 		}
 
-		target.uncompressed_tex_->CreateHWResource(target_init_data, nullptr);
+		target.uncompressed_tex_->CreateHWResource(MakeSpan<1>(target_init_data), nullptr);
 
 		return target;
 	}

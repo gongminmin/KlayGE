@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -40,7 +41,8 @@
 namespace KlayGE
 {
 	DepthOfField::DepthOfField()
-		: PostProcess(L"DepthOfField", false, {}, {"color_tex", "depth_tex"}, {"output"}, RenderEffectPtr(), nullptr)
+		: PostProcess(L"DepthOfField", false, MakeSpan<std::string>(), MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			  MakeSpan<std::string>({"output"}), RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
@@ -124,7 +126,7 @@ namespace KlayGE
 			if (!spread_tex_ || spread_tex_->Width(0) != width || spread_tex_->Height(0) != height)
 			{
 				auto const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				auto const fmt = caps.BestMatchTextureRenderTargetFormat({EF_ABGR32F, EF_ABGR16F}, 1, 0);
+				auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR32F, EF_ABGR16F}), 1, 0);
 				BOOST_ASSERT(fmt != EF_Unknown);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -188,7 +190,9 @@ namespace KlayGE
 	}
 
 
-	BokehFilter::BokehFilter() : PostProcess(L"BokehFilter", false, {}, {"color_tex", "depth_tex"}, {"output"}, RenderEffectPtr(), nullptr)
+	BokehFilter::BokehFilter()
+		: PostProcess(L"BokehFilter", false, MakeSpan<std::string>(), MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			  MakeSpan<std::string>({"output"}), RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		gs_support_ = caps.gs_support;

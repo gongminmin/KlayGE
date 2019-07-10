@@ -560,7 +560,7 @@ namespace KlayGE
 
 	void D3D12Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim,
 			uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-			ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+			std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();

@@ -48,7 +48,7 @@ namespace KlayGE
 		return std::any();
 	}
 
-	std::any NullScriptModule::Call(std::string const & func_name, ArrayRef<std::any> args)
+	std::any NullScriptModule::Call(std::string const & func_name, std::span<std::any const> args)
 	{
 		KFL_UNUSED(func_name);
 		KFL_UNUSED(args);

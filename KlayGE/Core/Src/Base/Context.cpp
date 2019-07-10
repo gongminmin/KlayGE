@@ -20,7 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Log.hpp>
@@ -651,13 +651,13 @@ namespace KlayGE
 			}
 		}
 
-		ArrayRef<char const *> const available_rfs = available_rfs_array;
-		ArrayRef<char const *> const available_afs = available_afs_array;
-		ArrayRef<char const *> const available_adsfs = available_adsfs_array;
-		ArrayRef<char const *> const available_ifs = available_ifs_array;
-		ArrayRef<char const *> const available_sfs = available_sfs_array;
-		ArrayRef<char const *> const available_scfs = available_scfs_array;
-		ArrayRef<char const *> const available_sms = available_sms_array;
+		std::span<char const *> const available_rfs = available_rfs_array;
+		std::span<char const *> const available_afs = available_afs_array;
+		std::span<char const *> const available_adsfs = available_adsfs_array;
+		std::span<char const *> const available_ifs = available_ifs_array;
+		std::span<char const *> const available_sfs = available_sfs_array;
+		std::span<char const *> const available_scfs = available_scfs_array;
+		std::span<char const *> const available_sms = available_sms_array;
 
 		if (std::find(available_rfs.begin(), available_rfs.end(), rf_name) == available_rfs.end())
 		{

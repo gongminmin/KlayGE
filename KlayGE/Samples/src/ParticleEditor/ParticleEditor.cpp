@@ -334,19 +334,19 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	DepthStencilViewPtr ds_view;
 	if (depth_texture_support_)
 	{
-		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 
 		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -772,14 +772,14 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 			}
 		}
 
-		auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+		auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		ElementInitData init_data;
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
 		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1, fmt, 1, 0,
-			EAH_GPU_Read | EAH_Immutable, init_data);
+			EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	}
 	else
 	{
@@ -793,7 +793,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	auto const fmt = caps.BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 
 	uint32_t data;
@@ -801,7 +801,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }

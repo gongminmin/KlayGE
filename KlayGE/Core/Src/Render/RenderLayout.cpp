@@ -59,13 +59,13 @@ namespace KlayGE
 		return n;
 	}
 
-	void RenderLayout::BindVertexStream(GraphicsBufferPtr const & buffer, ArrayRef<VertexElement> vet,
+	void RenderLayout::BindVertexStream(GraphicsBufferPtr const & buffer, std::span<VertexElement const> vet,
 		stream_type type, uint32_t freq)
 	{
 		BOOST_ASSERT(buffer);
 
 		uint32_t size = 0;
-		for (size_t i = 0; i < vet.size(); ++ i)
+		for (int i = 0; i < vet.size(); ++ i)
 		{
 			size += vet[i].element_size();
 		}
@@ -74,7 +74,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < vertex_streams_.size(); ++ i)
 			{
-				if (MakeArrayRef(vertex_streams_[i].format) == vet)
+				if (MakeSpan(vertex_streams_[i].format) == vet)
 				{
 					vertex_streams_[i].stream = buffer;
 					vertex_streams_[i].vertex_size = size;
@@ -88,7 +88,7 @@ namespace KlayGE
 
 			StreamUnit vs;
 			vs.stream = buffer;
-			vs.format = vet.ToVector();
+			vs.format.assign(vet.begin(), vet.end());
 			vs.vertex_size = size;
 			vs.type = type;
 			vs.freq = freq;
@@ -97,7 +97,7 @@ namespace KlayGE
 		else
 		{
 			instance_stream_.stream = buffer;
-			instance_stream_.format = vet.ToVector();
+			instance_stream_.format.assign(vet.begin(), vet.end());
 			instance_stream_.vertex_size = size;
 			instance_stream_.type = type;
 			instance_stream_.freq = freq;

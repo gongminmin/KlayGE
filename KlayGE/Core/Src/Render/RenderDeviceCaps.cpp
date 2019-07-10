@@ -72,7 +72,7 @@ namespace KlayGE
 		return (iter != uav_formats_.end()) && (*iter == format);
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchVertexFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchVertexFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)
@@ -87,7 +87,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchTextureFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchTextureFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)
@@ -102,7 +102,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchRenderTargetFormat(ArrayRef<ElementFormat> formats,
+	ElementFormat RenderDeviceCaps::BestMatchRenderTargetFormat(std::span<ElementFormat const> formats,
 		uint32_t sample_count, uint32_t sample_quality) const
 	{
 		ElementFormat ret = EF_Unknown;
@@ -118,7 +118,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchTextureRenderTargetFormat(ArrayRef<ElementFormat> formats,
+	ElementFormat RenderDeviceCaps::BestMatchTextureRenderTargetFormat(std::span<ElementFormat const> formats,
 		uint32_t sample_count, uint32_t sample_quality) const
 	{
 		ElementFormat ret = EF_Unknown;
@@ -134,7 +134,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchUavFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchUavFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)

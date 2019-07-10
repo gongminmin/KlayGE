@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -183,10 +184,10 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 		static ElementFormat constexpr backup_fmts[] = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
-		ArrayRef<ElementFormat> fmt_options = backup_fmts;
+		std::span<ElementFormat const> fmt_options = backup_fmts;
 		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt_options = fmt_options.Slice(2);
+			fmt_options = fmt_options.subspan(2);
 		}
 		auto const fmt = caps.BestMatchTextureFormat(fmt_options);
 		BOOST_ASSERT(fmt != EF_Unknown);

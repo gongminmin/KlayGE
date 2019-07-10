@@ -112,7 +112,7 @@ namespace KlayGE
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (all_num_vertex_stream != 0)
 		{
-			d3d12_re.IASetVertexBuffers(0, MakeArrayRef(&vbvs_[0], all_num_vertex_stream));
+			d3d12_re.IASetVertexBuffers(0, MakeSpan(&vbvs_[0], all_num_vertex_stream));
 		}
 		if (this->UseIndices())
 		{

@@ -113,8 +113,8 @@ namespace KlayGE
 			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * 4 * sizeof(UIManager::VertexFormat)), TransientBuffer::BF_Vertex);
 			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * INDEX_PER_QUAD * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
-			rls_[0]->BindVertexStream(tb_vb_->GetBuffer(), { VertexElement(VEU_Position, 0, EF_BGR32F),
-				VertexElement(VEU_Diffuse, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 0, EF_GR32F) });
+			rls_[0]->BindVertexStream(tb_vb_->GetBuffer(), MakeSpan({VertexElement(VEU_Position, 0, EF_BGR32F),
+				VertexElement(VEU_Diffuse, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 0, EF_GR32F)}));
 			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 
 			effect_ = effect;

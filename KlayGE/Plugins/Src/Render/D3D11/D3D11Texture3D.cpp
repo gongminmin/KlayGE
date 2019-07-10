@@ -289,7 +289,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D11Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 
@@ -306,7 +306,7 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(init_data.size() == num_mip_maps_);
 			subres_data.resize(init_data.size());
-			for (size_t i = 0; i < init_data.size(); ++ i)
+			for (int i = 0; i < init_data.size(); ++ i)
 			{
 				subres_data[i].pSysMem = init_data[i].data;
 				subres_data[i].SysMemPitch = init_data[i].row_pitch;

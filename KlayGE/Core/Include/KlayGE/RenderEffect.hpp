@@ -55,6 +55,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -775,7 +776,7 @@ namespace KlayGE
 		friend class RenderEffectTemplate;
 
 	public:
-		void Open(ArrayRef<std::string> names);
+		void Open(std::span<std::string const> names);
 #if KLAYGE_IS_DEV_PLATFORM
 		void CompileShaders();
 #endif
@@ -859,7 +860,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectTemplate : boost::noncopyable
 	{
 	public:
-		void Open(ArrayRef<std::string> names, RenderEffect& effect);
+		void Open(std::span<std::string const> names, RenderEffect& effect);
 #if KLAYGE_IS_DEV_PLATFORM
 		void CompileShaders(RenderEffect& effect);
 #endif
@@ -1353,9 +1354,9 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_names);
-	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names);
+	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffects(std::span<std::string const> effect_names);
 	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name);
-	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names);
+	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffects(std::span<std::string const> effect_names);
 }
 
 #endif		// _RENDEREFFECT_HPP

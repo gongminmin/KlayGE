@@ -474,7 +474,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCube::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLTextureCube::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

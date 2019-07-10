@@ -296,10 +296,10 @@ namespace KlayGE
 			mono_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			ElementFormat const backup_fmts[] = { EF_B10G11R11F, settings.color_fmt, EF_ABGR8, EF_ARGB8 };
-			ArrayRef<ElementFormat> fmt_options = backup_fmts;
+			std::span<ElementFormat const> fmt_options = backup_fmts;
 			if (settings.display_output_method != DOM_sRGB)
 			{
-				fmt_options = fmt_options.Slice(1);
+				fmt_options = fmt_options.subspan(1);
 			}
 			auto fmt = caps.BestMatchTextureRenderTargetFormat(fmt_options, 1, 0);
 
@@ -314,7 +314,7 @@ namespace KlayGE
 			overlay_frame_buffer_ = rf.MakeFrameBuffer();
 			overlay_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -339,7 +339,7 @@ namespace KlayGE
 				resize_frame_buffer_ = rf.MakeFrameBuffer();
 				resize_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-				auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+				auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 				BOOST_ASSERT(fmt != EF_Unknown);
 
 				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
@@ -368,13 +368,13 @@ namespace KlayGE
 
 		if (smaa_edge_detection_pp_ || smaa_blending_weight_pp_)
 		{
-			auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+			auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_edges_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
 			smaa_edges_rtv_ = rf.Make2DRtv(smaa_edges_tex_, 0, 1, 0);
 
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_blend_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
@@ -396,7 +396,7 @@ namespace KlayGE
 			post_tone_mapping_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			auto const fmt = caps.BestMatchTextureRenderTargetFormat((settings.display_output_method == DOM_sRGB)
-				? MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }), 1, 0);
+				? MakeSpan({EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -413,8 +413,8 @@ namespace KlayGE
 			hdr_frame_buffer_ = rf.MakeFrameBuffer();
 			hdr_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-			auto const fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
-				: MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }), 1, 0);
+			auto const fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F})
+				: MakeSpan({EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 			hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
@@ -748,7 +748,7 @@ namespace KlayGE
 					}
 					else
 					{
-						fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+						fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 						BOOST_ASSERT(fmt != EF_Unknown);
 					}
 

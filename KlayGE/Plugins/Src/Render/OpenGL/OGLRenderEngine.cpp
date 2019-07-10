@@ -1759,7 +1759,7 @@ namespace KlayGE
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
 
 			std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
-			auto add_render_target_format = [&render_target_formats, &max_samples](ArrayRef<ElementFormat> fmts)
+			auto add_render_target_format = [&render_target_formats, &max_samples](std::span<ElementFormat const> fmts)
 			{
 				for (auto fmt : fmts)
 				{
@@ -1771,7 +1771,7 @@ namespace KlayGE
 			};
 
 			add_render_target_format(
-				{
+				MakeSpan({
 					EF_R8,
 					EF_GR8,
 					EF_ARGB8,
@@ -1811,7 +1811,7 @@ namespace KlayGE
 					EF_D32F,
 					EF_ARGB8_SRGB,
 					EF_ABGR8_SRGB
-				});
+				}));
 
 			caps_.AssignRenderTargetFormats(std::move(render_target_formats));
 		}

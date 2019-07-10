@@ -265,7 +265,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture1D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLESTexture1D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

@@ -91,7 +91,7 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, std::max(1U, g_buffer_rt0_tex_->NumMipMaps() - 1),
@@ -109,7 +109,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R32F, EF_R16F }), 1, 0);
+			caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R32F, EF_R16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0,
@@ -251,7 +251,7 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, g_buffer_rt0_tex_->NumMipMaps() - 2, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);

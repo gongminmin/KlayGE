@@ -35,9 +35,9 @@ namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess()
 		: PostProcess(L"SumLum", false,
-			{},
-			{ "src_tex" },
-			{ "out_tex" },
+			MakeSpan<std::string>(),
+			MakeSpan<std::string>({"src_tex"}),
+			MakeSpan<std::string>({"out_tex"}),
 			RenderEffectPtr(), nullptr)
 	{
 	}
@@ -116,9 +116,9 @@ namespace KlayGE
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
 			: PostProcess(L"AdaptedLum", false,
-					{},
-					{ "src_tex" },
-					{ "output" },
+					MakeSpan<std::string>(),
+					MakeSpan<std::string>({"src_tex"}),
+					MakeSpan<std::string>({"output"}),
 					RenderEffectPtr(), nullptr),
 				last_index_(false)
 	{
@@ -133,7 +133,7 @@ namespace KlayGE
 		ElementFormat fmt;
 		if (caps.pack_to_rgba_required)
 		{
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 		}
 		else
@@ -146,7 +146,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < 2; ++i)
 		{
-			adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, init_data);
+			adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(init_data));
 			adapted_rtvs_[i] = rf.Make2DRtv(adapted_textures_[i], 0, 1, 0);
 		}
 		this->OutputPin(0, adapted_rtvs_[last_index_]);
@@ -175,9 +175,9 @@ namespace KlayGE
 
 	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
 			: PostProcess(L"AdaptedLumCS", false,
-					{},
-					{ "src_tex" },
-					{ "out_tex" },
+					MakeSpan<std::string>(),
+					MakeSpan<std::string>({"src_tex"}),
+					MakeSpan<std::string>({"out_tex"}),
 					RenderEffectPtr(), nullptr)
 	{
 		auto effect = SyncLoadRenderEffect("SumLum.fxml");
@@ -228,7 +228,7 @@ namespace KlayGE
 		ElementFormat fmt;
 		if (caps.pack_to_rgba_required)
 		{
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 		}
 		else
@@ -309,8 +309,8 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(float);
 		init_data.slice_pitch = 0;
 		init_data.data = &init_lum;
-		TexturePtr adapted_lum_tex = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, init_data);
+		TexturePtr adapted_lum_tex =
+			rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, MakeSpan<1>(init_data));
 
 		sum_lums_1st_->InputPin(index, srv);
 		sum_lums_1st_->OutputPin(index, rf.Make2DUav(lum_tex, 0, 1, 0));
@@ -450,7 +450,7 @@ namespace KlayGE
 		pattern_real_tex_ = SyncLoadTexture("lens_effects_real.dds", EAH_GPU_Read | EAH_Immutable);
 		pattern_imag_tex_ = SyncLoadTexture("lens_effects_imag.dds", EAH_GPU_Read | EAH_Immutable);
 
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		auto resized_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		resized_srv_ = rf.MakeTextureSrv(resized_tex);
@@ -460,7 +460,7 @@ namespace KlayGE
 			resized_data.data = &zero_data[0];
 			resized_data.row_pitch = WIDTH * sizeof(uint8_t);
 			resized_data.slice_pitch = WIDTH * HEIGHT * sizeof(uint8_t);
-			auto empty_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, resized_data);
+			auto empty_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(resized_data));
 			empty_srv_ = rf.MakeTextureSrv(empty_tex);
 		}
 

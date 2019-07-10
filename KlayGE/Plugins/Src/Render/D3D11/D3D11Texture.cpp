@@ -647,7 +647,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = width * NumFormatBytes(format_);
 			init_data.slice_pitch = init_data.row_pitch;
-			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, 0, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
@@ -696,7 +696,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
@@ -757,7 +757,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, y_offset, z_offset, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(),
 				D3D11CalcSubresource(0, 0, 1),
@@ -807,7 +807,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face, num_mip_maps_),
 				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);

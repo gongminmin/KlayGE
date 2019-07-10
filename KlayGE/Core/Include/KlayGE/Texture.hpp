@@ -52,7 +52,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <atomic>
 #include <string>
@@ -219,7 +219,7 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) = 0;
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) = 0;
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) = 0;
+		virtual void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) = 0;
 		virtual void DeleteHWResource() = 0;
 		virtual bool HWResourceReady() const = 0;
 
@@ -318,7 +318,7 @@ namespace KlayGE
 		void Unmap3D(uint32_t array_index, uint32_t level) override;
 		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
-		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
+		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 		void DeleteHWResource() override;
 		bool HWResourceReady() const override;
 

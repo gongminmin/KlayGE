@@ -42,7 +42,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <cstring>
 #include <string>
@@ -154,7 +154,7 @@ namespace KlayGE
 				D3D_FEATURE_LEVEL_11_0
 			};
 
-			ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
+			std::span<D3D_FEATURE_LEVEL const> feature_levels;
 			{
 				static size_t constexpr feature_level_name_hashes[] =
 				{
@@ -183,10 +183,10 @@ namespace KlayGE
 					}
 				}
 
-				feature_levels = MakeArrayRef(all_feature_levels).Slice(feature_level_start_index);
+				feature_levels = MakeSpan(all_feature_levels).subspan(feature_level_start_index);
 			}
 
-			for (size_t i = 0; i < feature_levels.size(); ++ i)
+			for (int i = 0; i < feature_levels.size(); ++ i)
 			{
 				ID3D12Device* device = nullptr;
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter().get(),

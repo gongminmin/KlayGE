@@ -21,6 +21,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -256,7 +257,7 @@ namespace
 
 						if (ve.format == EF_A2BGR10)
 						{
-							ve.format = caps.BestMatchVertexFormat({ EF_ARGB8, EF_ABGR8 });
+							ve.format = caps.BestMatchVertexFormat(MakeSpan({EF_ARGB8, EF_ABGR8}));
 
 							if (ve.format == EF_ARGB8)
 							{
@@ -1991,7 +1992,7 @@ namespace KlayGE
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 
 		LZMACodec lzma;
-		len = lzma.Encode(ofs, MakeArrayRef(reinterpret_cast<uint8_t const *>(ss_str.c_str()), ss_str.size()));
+		len = lzma.Encode(ofs, MakeSpan(reinterpret_cast<uint8_t const *>(ss_str.c_str()), ss_str.size()));
 
 		ofs.seekp(p, std::ios_base::beg);
 		len = Native2LE(len);

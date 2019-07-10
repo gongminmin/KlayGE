@@ -184,7 +184,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 		{
 			std::string y_fmt;
 			std::string c_fmt;
-			if (caps.BestMatchTextureFormat({ EF_R16, EF_R16F }) == EF_R16)
+			if (caps.BestMatchTextureFormat(MakeSpan({EF_R16, EF_R16F})) == EF_R16)
 			{
 				y_fmt = "R16";
 			}
@@ -192,7 +192,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			{
 				y_fmt = "R16F";
 			}
-			if (caps.BestMatchTextureFormat({ EF_BC5, EF_BC3 }) == EF_BC5)
+			if (caps.BestMatchTextureFormat(MakeSpan({EF_BC5, EF_BC3})) == EF_BC5)
 			{
 				c_fmt = "BC5";
 			}

@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
 	init_data.row_pitch = width * num_channels;
 	init_data.slice_pitch = width * height * num_channels;
 	TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, format, true);
-	out_tex->CreateHWResource(init_data, nullptr);
+	out_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 	SaveTexture(out_tex, out_name);
 
 	Context::Destroy();

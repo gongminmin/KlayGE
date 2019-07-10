@@ -34,7 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
 #include <map>
@@ -144,13 +144,13 @@ namespace KlayGE
 		bool TextureRenderTargetFormatSupport(ElementFormat format, uint32_t sample_count, uint32_t sample_quality) const;
 		bool UavFormatSupport(ElementFormat format) const;
 
-		ElementFormat BestMatchVertexFormat(ArrayRef<ElementFormat> formats) const;
-		ElementFormat BestMatchTextureFormat(ArrayRef<ElementFormat> formats) const;
-		ElementFormat BestMatchRenderTargetFormat(ArrayRef<ElementFormat> formats,
+		ElementFormat BestMatchVertexFormat(std::span<ElementFormat const> formats) const;
+		ElementFormat BestMatchTextureFormat(std::span<ElementFormat const> formats) const;
+		ElementFormat BestMatchRenderTargetFormat(std::span<ElementFormat const> formats,
 			uint32_t sample_count, uint32_t sample_quality) const;
-		ElementFormat BestMatchTextureRenderTargetFormat(ArrayRef<ElementFormat> formats,
+		ElementFormat BestMatchTextureRenderTargetFormat(std::span<ElementFormat const> formats,
 			uint32_t sample_count, uint32_t sample_quality) const;
-		ElementFormat BestMatchUavFormat(ArrayRef<ElementFormat> formats) const;
+		ElementFormat BestMatchUavFormat(std::span<ElementFormat const> formats) const;
 
 		static constexpr uint32_t EncodeSampleCountQuality(uint32_t sample_count, uint32_t sample_quality) noexcept
 		{

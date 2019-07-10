@@ -665,11 +665,11 @@ void CausticsMapApp::InitBuffer()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	
-	auto const normal_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_A2BGR10, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const normal_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_A2BGR10, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(normal_fmt != EF_Unknown);
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 	DepthStencilViewPtr refract_obj_ds_dsv_f;
@@ -677,7 +677,7 @@ void CausticsMapApp::InitBuffer()
 	DepthStencilViewPtr background_ds_dsv;
 	if (depth_texture_support_)
 	{
-		auto const ds_fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+		auto const ds_fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 
 		refract_obj_ds_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -727,7 +727,7 @@ void CausticsMapApp::InitBuffer()
 	refract_obj_fb_b_->Attach(refract_obj_ds_dsv_b);
 
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }) : MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
+		caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F}) : MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	caustics_texture_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	caustics_srv_ = rf.MakeTextureSrv(caustics_texture_);
@@ -745,11 +745,11 @@ void CausticsMapApp::InitEnvCube()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	auto const ds_fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	auto const ds_fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 	auto depth_view = rf.Make2DDsv(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, ds_fmt, 1, 0);
 	env_cube_buffer_ = rf.MakeFrameBuffer();
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }) : MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
+		caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F}) : MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	auto env_tex = rf.MakeTexture2D(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	auto env_srv = rf.MakeTextureSrv(env_tex);
@@ -773,12 +773,12 @@ void CausticsMapApp::InitCubeSM()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	auto const ds_fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	auto const ds_fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 	BOOST_ASSERT(ds_fmt != EF_Unknown);
 	auto depth_view = rf.Make2DDsv(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	auto shadow_tex = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	auto shadow_srv = rf.MakeTextureSrv(shadow_tex);
@@ -853,11 +853,11 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_texture_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	scene_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_texture_, 0, 1, 0));
-	fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_fb_->Attach(rf.Make2DDsv(width, height, fmt, 1, 0));
 

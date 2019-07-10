@@ -270,7 +270,7 @@ namespace KlayGE
 			D3D_FEATURE_LEVEL_11_0
 		};
 
-		ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
+		std::span<D3D_FEATURE_LEVEL const> feature_levels;
 		{
 			uint32_t feature_level_start_index = 0;
 			if (dxgi_sub_ver_ < 4)
@@ -283,7 +283,7 @@ namespace KlayGE
 				}
 			}
 
-			feature_levels = MakeArrayRef(all_feature_levels).Slice(feature_level_start_index);
+			feature_levels = MakeSpan(all_feature_levels).subspan(feature_level_start_index);
 		}
 
 		ID3D11Device* d3d_device = nullptr;
@@ -369,10 +369,10 @@ namespace KlayGE
 		auto& re = rf.RenderEngineInstance();
 		auto const & caps = re.DeviceCaps();
 		static ElementFormat constexpr backup_fmts[] = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
-		ArrayRef<ElementFormat> fmt_options = backup_fmts;
+		std::span<ElementFormat const> fmt_options = backup_fmts;
 		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt_options = fmt_options.Slice(2);
+			fmt_options = fmt_options.subspan(2);
 		}
 		format_ = caps.BestMatchTextureFormat(fmt_options);
 		switch (format_)

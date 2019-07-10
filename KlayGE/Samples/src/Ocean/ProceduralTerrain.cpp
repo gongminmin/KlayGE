@@ -19,8 +19,8 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		auto const height_fmt = caps.BestMatchTextureRenderTargetFormat(caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 })
-			: MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		auto const height_fmt = caps.BestMatchTextureRenderTargetFormat(caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8})
+			: MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 		BOOST_ASSERT(height_fmt != EF_Unknown);
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -49,7 +49,7 @@ namespace KlayGE
 		gradient_map_cpu_tex_ = rf.MakeTexture2D(gradient_map_tex_->Width(0), gradient_map_tex_->Height(0),
 			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
-		auto const mask_fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const mask_fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(mask_fmt != EF_Unknown);
 		mask_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, mask_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);

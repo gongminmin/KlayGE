@@ -81,7 +81,7 @@ namespace KlayGE
 					barrier.Transition.Subresource = sub_res;
 					std::fill(curr_states_.begin(), curr_states_.end(), target_state);
 
-					re.AddResourceBarrier(cmd_list, barrier);
+					re.AddResourceBarrier(cmd_list, MakeSpan<1>(barrier));
 
 					state_changed = true;
 				}
@@ -98,7 +98,7 @@ namespace KlayGE
 						barrier.Transition.Subresource = i;
 						curr_states_[i] = target_state;
 
-						re.AddResourceBarrier(cmd_list, barrier);
+						re.AddResourceBarrier(cmd_list, MakeSpan<1>(barrier));
 
 						state_changed = true;
 					}
@@ -115,7 +115,7 @@ namespace KlayGE
 				barrier.Transition.Subresource = sub_res;
 				curr_states_[sub_res] = target_state;
 
-				re.AddResourceBarrier(cmd_list, barrier);
+				re.AddResourceBarrier(cmd_list, MakeSpan<1>(barrier));
 
 				state_changed = true;
 			}
@@ -126,7 +126,7 @@ namespace KlayGE
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 			barrier.UAV.pResource = d3d_resource_.get();
 
-			re.AddResourceBarrier(cmd_list, barrier);
+			re.AddResourceBarrier(cmd_list, MakeSpan<1>(barrier));
 		}
 	}
 

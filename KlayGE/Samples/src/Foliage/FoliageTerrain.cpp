@@ -59,13 +59,13 @@ namespace KlayGE
 				g_buffer_files[1] = "GBufferTwoSided.fxml";
 				++ num;
 			}
-			this->BindDeferredEffect(SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num)));
+			this->BindDeferredEffect(SyncLoadRenderEffects(MakeSpan(g_buffer_files, num)));
 		}
 
 		void InstanceBuffer(uint32_t lod, GraphicsBufferPtr const & vb)
 		{
 			rls_[lod]->BindVertexStream(vb,
-				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+				MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -120,7 +120,7 @@ namespace KlayGE
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rls_[0]->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+			rls_[0]->BindVertexStream(vb, MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -190,7 +190,7 @@ namespace KlayGE
 		foliage_dist_rl_->TopologyType(RenderLayout::TT_PointList);
 
 		auto const height_fmt = caps.BestMatchTextureRenderTargetFormat(
-			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+			caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 		BOOST_ASSERT(height_fmt != EF_Unknown);
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -219,7 +219,7 @@ namespace KlayGE
 		gradient_map_cpu_tex_ = rf.MakeTexture2D(gradient_map_tex_->Width(0), gradient_map_tex_->Height(0),
 			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
-		auto const mask_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const mask_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(mask_fmt != EF_Unknown);
 
 		mask_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, mask_fmt,
@@ -334,7 +334,7 @@ namespace KlayGE
 
 				plant_lod_instance_rls_[plant_type][lod] = rf.MakeRenderLayout();
 				plant_lod_instance_rls_[plant_type][lod]->BindVertexStream(plant_lod_instance_buffers_[plant_type][lod],
-					{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
+					MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}));
 
 				if (!use_draw_indirect_)
 				{
@@ -351,7 +351,7 @@ namespace KlayGE
 
 			plant_impostor_instance_rls_[plant_type] = rf.MakeRenderLayout();
 			plant_impostor_instance_rls_[plant_type]->BindVertexStream(plant_impostor_instance_buffers_[plant_type],
-				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
+				MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}));
 
 			if (!use_draw_indirect_)
 			{

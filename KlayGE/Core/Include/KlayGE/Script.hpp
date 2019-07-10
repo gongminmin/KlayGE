@@ -36,7 +36,7 @@
 #include <string>
 
 #include <KFL/CXX17/any.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 namespace KlayGE
 {
@@ -47,7 +47,7 @@ namespace KlayGE
 		virtual ~ScriptModule();
 
 		virtual std::any Value(std::string const & name) = 0;
-		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args) = 0;
+		virtual std::any Call(std::string const & func_name, std::span<std::any const> args) = 0;
 		virtual std::any RunString(std::string const & script) = 0;
 	};
 

@@ -213,17 +213,17 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	static ElementFormat constexpr backup_fmts[] = { EF_B10G11R11F, EF_ABGR8, EF_ARGB8 };
-	ArrayRef<ElementFormat> fmt_options = backup_fmts;
+	std::span<ElementFormat const> fmt_options = backup_fmts;
 	if (!caps.fp_color_support)
 	{
-		fmt_options = fmt_options.Slice(1);
+		fmt_options = fmt_options.subspan(1);
 	}
 	auto fmt = caps.BestMatchRenderTargetFormat(fmt_options, 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	auto scene_srv = rf.MakeTextureSrv(scene_tex_);
 
-	fmt = caps.BestMatchRenderTargetFormat({ EF_R16F, EF_R32F }, 1, 0);
+	fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 

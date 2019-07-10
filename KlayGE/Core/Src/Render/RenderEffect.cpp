@@ -77,7 +77,7 @@ namespace
 	uint32_t const KFX_VERSION = 0x0140;
 
 #if KLAYGE_IS_DEV_PLATFORM
-	ArrayRef<std::pair<char const *, size_t>> GetTypeDefines()
+	std::span<std::pair<char const *, size_t> const> GetTypeDefines()
 	{
 #define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
 		static std::pair<char const *, size_t> const types[] =
@@ -142,7 +142,7 @@ namespace
 #undef NAME_AND_HASH
 		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
 
-		return types;
+		return MakeSpan(types);
 	}
 
 	uint32_t TypeCodeFromName(std::string_view name)
@@ -2529,7 +2529,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit EffectLoadingDesc(ArrayRef<std::string> name)
+		explicit EffectLoadingDesc(std::span<std::string const> name)
 		{
 			effect_desc_.res_name = std::vector<std::string>(name.begin(), name.end());
 			effect_desc_.cloned = false;
@@ -2669,7 +2669,7 @@ namespace KlayGE
 #endif
 
 
-	void RenderEffect::Open(ArrayRef<std::string> names)
+	void RenderEffect::Open(std::span<std::string const> names)
 	{
 		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
 		effect_template_->Open(names, *this);
@@ -3252,13 +3252,13 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderEffectTemplate::Open(ArrayRef<std::string> names, RenderEffect& effect)
+	void RenderEffectTemplate::Open(std::span<std::string const> names, RenderEffect& effect)
 	{
-		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(names.back()));
+		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(*(names.end() - 1)));
 		std::filesystem::path last_fxml_directory = last_fxml_path.parent_path();
 
 		std::string connected_name;
-		for (size_t i = 0; i < names.size(); ++ i)
+		for (int i = 0; i < names.size(); ++ i)
 		{
 			connected_name += std::filesystem::path(names[i]).stem().string();
 			if (i != names.size() - 1)
@@ -3328,7 +3328,7 @@ namespace KlayGE
 				XMLNodePtr root = frag_docs[0]->Parse(main_source);
 				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
 
-				for (size_t i = 1; i < names.size(); ++ i)
+				for (int i = 1; i < names.size(); ++ i)
 				{
 					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
 					if (source)
@@ -6599,20 +6599,20 @@ namespace KlayGE
 
 	RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
-	RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	RenderEffectPtr SyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
-	RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	RenderEffectPtr ASyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
 		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}

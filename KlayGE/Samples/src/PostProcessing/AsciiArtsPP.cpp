@@ -102,7 +102,7 @@ namespace
 		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			ASCII_HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	}
 
 	class ascii_lums_builder
@@ -238,9 +238,9 @@ namespace
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
 	: PostProcess(L"AsciiArts", false,
-			{},
-			{ "src_tex" },
-			{ "output" },
+			MakeSpan<std::string>(),
+			MakeSpan<std::string>({"src_tex"}),
+			MakeSpan<std::string>({"output"}),
 			RenderEffectPtr(), nullptr)
 {
 	auto effect = SyncLoadRenderEffect("AsciiArtsPP.fxml");

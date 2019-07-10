@@ -395,8 +395,8 @@ namespace KlayGE
 					init_data.data = &sih;
 					init_data.row_pitch = sizeof(sih);
 					init_data.slice_pitch = init_data.row_pitch;
-					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
-						1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, init_data);
+					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt), 1, 1, 1, settings.color_fmt, 1,
+						0, EAH_GPU_Read, MakeSpan<1>(init_data));
 
 					sih_tex->CopyToSubTexture2D(*stereo_nv_3d_vision_tex_,
 						0, 0, 0, h, sih_tex->Width(0), 1,
@@ -1613,14 +1613,14 @@ namespace KlayGE
 	}
 
 	void D3D11RenderEngine::SetShaderResources(
-		ShaderStage stage, ArrayRef<std::tuple<void*, uint32_t, uint32_t>> srvsrcs, ArrayRef<ID3D11ShaderResourceView*> srvs)
+		ShaderStage stage, std::span<std::tuple<void*, uint32_t, uint32_t> const> srvsrcs, std::span<ID3D11ShaderResourceView* const> srvs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (MakeArrayRef(shader_srv_ptr_cache_[stage_index]) != srvs)
+		if (MakeSpan(shader_srv_ptr_cache_[stage_index]) != srvs)
 		{
 			size_t const old_size = shader_srv_ptr_cache_[stage_index].size();
-			shader_srv_ptr_cache_[stage_index] = srvs.ToVector();
-			if (old_size > srvs.size())
+			shader_srv_ptr_cache_[stage_index].assign(srvs.begin(), srvs.end());
+			if (old_size > static_cast<size_t>(srvs.size()))
 			{
 				shader_srv_ptr_cache_[stage_index].resize(old_size, nullptr);
 			}
@@ -1628,30 +1628,30 @@ namespace KlayGE
 			ShaderSetShaderResources[stage_index](d3d_imm_ctx_.get(), 0,
 				static_cast<UINT>(shader_srv_ptr_cache_[stage_index].size()), &shader_srv_ptr_cache_[stage_index][0]);
 
-			shader_srvsrc_cache_[stage_index] = srvsrcs.ToVector();
+			shader_srvsrc_cache_[stage_index].assign(srvsrcs.begin(), srvsrcs.end());
 			shader_srv_ptr_cache_[stage_index].resize(srvs.size());
 		}
 	}
 
-	void D3D11RenderEngine::SetSamplers(ShaderStage stage, ArrayRef<ID3D11SamplerState*> samplers)
+	void D3D11RenderEngine::SetSamplers(ShaderStage stage, std::span<ID3D11SamplerState* const> samplers)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (MakeArrayRef(shader_sampler_ptr_cache_[stage_index]) != samplers)
+		if (MakeSpan(shader_sampler_ptr_cache_[stage_index]) != samplers)
 		{
 			ShaderSetSamplers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
 
-			shader_sampler_ptr_cache_[stage_index] = samplers.ToVector();
+			shader_sampler_ptr_cache_[stage_index].assign(samplers.begin(), samplers.end());
 		}
 	}
 
-	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, ArrayRef<ID3D11Buffer*> cbs)
+	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, std::span<ID3D11Buffer* const> cbs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (MakeArrayRef(shader_cb_ptr_cache_[stage_index]) != cbs)
+		if (MakeSpan(shader_cb_ptr_cache_[stage_index]) != cbs)
 		{
 			ShaderSetConstantBuffers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
 
-			shader_cb_ptr_cache_[stage_index] = cbs.ToVector();
+			shader_cb_ptr_cache_[stage_index].assign(cbs.begin(), cbs.end());
 		}
 	}
 

@@ -96,9 +96,9 @@ namespace KlayGE
 			return gl_shader_;
 		}
 
-		virtual ArrayRef<std::string> GlslTfbVaryings() const
+		virtual std::span<std::string const> GlslTfbVaryings() const
 		{
-			return ArrayRef<std::string>();
+			return std::span<std::string const>();
 		}
 		virtual bool TfbSeparateAttribs() const
 		{
@@ -161,9 +161,9 @@ namespace KlayGE
 			return glsl_attrib_names_;
 		}
 
-		ArrayRef<std::string> GlslTfbVaryings() const override
+		std::span<std::string const> GlslTfbVaryings() const override
 		{
-			return glsl_tfb_varyings_;
+			return MakeSpan(glsl_tfb_varyings_);
 		}
 		bool TfbSeparateAttribs() const override
 		{
@@ -196,9 +196,9 @@ namespace KlayGE
 	public:
 		OGLGeometryShaderStageObject();
 
-		ArrayRef<std::string> GlslTfbVaryings() const override
+		std::span<std::string const> GlslTfbVaryings() const override
 		{
-			return glsl_tfb_varyings_;
+			return MakeSpan(glsl_tfb_varyings_);
 		}
 		bool TfbSeparateAttribs() const override
 		{
@@ -253,9 +253,9 @@ namespace KlayGE
 	public:
 		OGLDomainShaderStageObject();
 
-		ArrayRef<std::string> GlslTfbVaryings() const override
+		std::span<std::string const> GlslTfbVaryings() const override
 		{
-			return glsl_tfb_varyings_;
+			return MakeSpan(glsl_tfb_varyings_);
 		}
 		bool TfbSeparateAttribs() const override
 		{

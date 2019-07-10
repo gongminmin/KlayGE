@@ -40,9 +40,9 @@ namespace KlayGE
 {
 	SSVOPostProcess::SSVOPostProcess()
 			: PostProcess(L"SSVO", false,
-				{},
-				{ "g_buffer_rt0_tex", "depth_tex" },
-				{ "out_tex" },
+				MakeSpan<std::string>(),
+				MakeSpan<std::string>({"g_buffer_rt0_tex", "depth_tex"}),
+				MakeSpan<std::string>({"out_tex"}),
 				RenderEffectPtr(), nullptr)
 	{
 		auto effect = SyncLoadRenderEffect("SSVO.fxml");

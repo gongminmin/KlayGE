@@ -628,16 +628,16 @@ namespace KlayGE
 			{
 			case RenderMaterial::TS_Albedo:
 			case RenderMaterial::TS_Emissive:
-				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1 });
+				prefered_format_ = caps.BestMatchTextureFormat(MakeSpan({EF_BC7_SRGB, EF_BC1_SRGB, EF_ETC1}));
 				break;
 
 			case RenderMaterial::TS_MetalnessGlossiness:
 			case RenderMaterial::TS_Normal:
-				prefered_format_ = caps.BestMatchTextureFormat({EF_BC5, EF_BC3, EF_GR8});
+				prefered_format_ = caps.BestMatchTextureFormat(MakeSpan({EF_BC5, EF_BC3, EF_GR8}));
 				break;
 
 			case RenderMaterial::TS_Height:
-				prefered_format_ = caps.BestMatchTextureFormat({ EF_BC4, EF_BC1, EF_ETC1 });
+				prefered_format_ = caps.BestMatchTextureFormat(MakeSpan({EF_BC4, EF_BC1, EF_ETC1}));
 				break;
 
 			default:

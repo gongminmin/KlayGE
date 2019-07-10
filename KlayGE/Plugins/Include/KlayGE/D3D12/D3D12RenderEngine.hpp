@@ -126,8 +126,8 @@ namespace KlayGE
 		void SetComputeRootSignature(ID3D12RootSignature* root_signature);
 		void RSSetScissorRects(D3D12_RECT const & rect);
 		void IASetPrimitiveTopology(RenderLayout::topology_type primitive_topology);
-		void SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*> descriptor_heaps);
-		void IASetVertexBuffers(uint32_t start_slot, ArrayRef<D3D12_VERTEX_BUFFER_VIEW> views);
+		void SetDescriptorHeaps(std::span<ID3D12DescriptorHeap* const> descriptor_heaps);
+		void IASetVertexBuffers(uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views);
 		void IASetIndexBuffer(D3D12_INDEX_BUFFER_VIEW const & view);
 		
 		void ResetRenderStates();
@@ -189,7 +189,7 @@ namespace KlayGE
 
 		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
 
-		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, ArrayRef<D3D12_RESOURCE_BARRIER> barriers);
+		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers);
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
 
 	private:
