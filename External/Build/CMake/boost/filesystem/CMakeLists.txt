@@ -1,5 +1,9 @@
 SET(LIB_NAME filesystem)
 
+IF(KLAYGE_PLATFORM_ANDROID AND KLAYGE_COMPILER_CLANG)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unusable-partial-specialization")
+ENDIF()
+
 SET(SOURCE_FILES
 	${BOOST_PROJECT_DIR}/libs/filesystem/src/codecvt_error_category.cpp
 	${BOOST_PROJECT_DIR}/libs/filesystem/src/operations.cpp

@@ -38,7 +38,14 @@
 #include <string>
 #include <vector>
 
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
+#endif
 #include <boost/lockfree/spsc_queue.hpp>
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
