@@ -91,7 +91,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthOfField.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferFoliage+GBufferTwoSided.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
@@ -161,6 +160,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoggySkyBox.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoliageDistribution.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliage.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliage+GBufferTwoSided.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliageImpostor.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GrassGreenTexture0002.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Ground.dds
