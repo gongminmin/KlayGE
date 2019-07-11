@@ -3254,8 +3254,8 @@ namespace KlayGE
 
 	void RenderEffectTemplate::Open(ArrayRef<std::string> names, RenderEffect& effect)
 	{
-		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(names.back()));
-		std::filesystem::path last_fxml_directory = last_fxml_path.parent_path();
+		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(names[0]));
+		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
 		for (size_t i = 0; i < names.size(); ++ i)
@@ -3270,10 +3270,10 @@ namespace KlayGE
 		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
 		if (kfx_name.empty())
 		{
-			kfx_name = (last_fxml_directory / (connected_name + ".kfx")).string();
+			kfx_name = (first_fxml_directory / (connected_name + ".kfx")).string();
 		}
 
-		res_name_ = (last_fxml_directory / (connected_name + ".fxml")).string();
+		res_name_ = (first_fxml_directory / (connected_name + ".fxml")).string();
 		res_name_hash_ = HashRange(res_name_.begin(), res_name_.end());
 #if KLAYGE_IS_DEV_PLATFORM
 		for (auto const & name : names)

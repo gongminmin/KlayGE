@@ -157,10 +157,8 @@ int main(int argc, char* argv[])
 			boost::algorithm::split(frags, base_name, boost::is_any_of("+"));
 			for (auto const & frag : frags)
 			{
-				fxml_names.push_back(frag + ".fxml");
+				fxml_names.push_back(ResLoader::Instance().Locate(frag + ".fxml"));
 			}
-
-			fxml_names.back() = (fxml_directory / fxml_names.back()).string();
 		}
 		else
 		{
