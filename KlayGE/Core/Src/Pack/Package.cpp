@@ -44,7 +44,14 @@
 #include <string>
 
 #include <boost/assert.hpp>
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
+#endif
 #include <boost/algorithm/string/predicate.hpp>
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 
 #include <CPP/7zip/Archive/IArchive.h>
 
