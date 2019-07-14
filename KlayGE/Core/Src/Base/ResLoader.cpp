@@ -726,10 +726,12 @@ namespace KlayGE
 		auto res_path = this->Locate(name);
 		if (!res_path.empty())
 		{
+#if !defined(KLAYGE_PLATFORM_ANDROID)
 #if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 			timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
 			timestamp = std::filesystem::last_write_time(res_path);
+#endif
 #endif
 		}
 
