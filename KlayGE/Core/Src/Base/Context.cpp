@@ -286,7 +286,7 @@ namespace KlayGE
 		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_ANDROID)
 		static char const * available_rfs_array[] = { "OpenGLES" };
-		static char const * available_afs_array[] = { "NullAudio" /* "OpenAL" */ };
+		static char const * available_afs_array[] = { "OpenAL" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
 		static char const * available_sfs_array[] = { "NullShow" };

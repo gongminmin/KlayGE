@@ -60,6 +60,9 @@ class CfgBuildDefault:
 		# The path of LibOVR. Could fill in the path, or "auto".
 		self.libovr_path = "auto"
 
+		# The directory of prebuilt host binaries for cross-compiling.
+		self.host_bin_dir = ""
+
 def GenerateCfgBuildFromDefault():
 	print("Generating CfgBuild.py ...")
 	sys.stdout.flush()
@@ -84,12 +87,16 @@ def LogWarning(message):
 	sys.stdout.flush()
 
 class CompilerInfo:
-	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
+	def __init__(self, build_info, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
 		self.arch = arch
 		self.generator = gen_name
 		self.compiler_root = compiler_root
 		self.vcvarsall_path = vcvarsall_path
 		self.vcvarsall_options = vcvarsall_options
+
+		self.is_cross_compiling = build_info.is_cross_compiling
+		if build_info.host_arch != arch:
+			self.is_cross_compiling = True
 
 class BuildInfo:
 	@classmethod
@@ -240,9 +247,18 @@ class BuildInfo:
 
 		self.host_platform = host_platform
 		self.target_platform = target_platform
+		self.is_cross_compiling = host_platform != target_platform
 		self.shader_platform_name = shader_platform_name
 		self.prefer_static = prefer_static
 		self.is_clean = ("clean" == compiler)
+
+		self.host_arch = platform.machine()
+		if (self.host_arch == "AMD64") or (self.host_arch == "x86_64"):
+			self.host_arch = "x64"
+		elif (self.host_arch == "ARM64"):
+			self.host_arch = "arm64"
+		else:
+			LogError("Unknown host architecture %s.\n" % self.host_arch)
 
 		if self.host_platform == "win":
 			self.where_cmd = "where"
@@ -318,7 +334,7 @@ class BuildInfo:
 					project_type = "xcode"
 					compiler = "clang"
 				else:
-					LogError("Unsupported target platform.\n")
+					LogError("Unsupported target platform %s.\n" % target_platform)
 			else:
 				if cfg_build.project != "auto":
 					project_type = cfg_build.project
@@ -421,7 +437,7 @@ class BuildInfo:
 			archs = cfg_build.arch
 			if "" == archs:
 				archs = ("x64", )
-				
+
 		if "" == cfg:
 			cfg = cfg_build.config
 			if "" == cfg:
@@ -444,7 +460,7 @@ class BuildInfo:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
-				compilers.append(CompilerInfo(arch, "Visual Studio 16", compiler_root, vcvarsall_path, vcvarsall_options))
+				compilers.append(CompilerInfo(self, arch, "Visual Studio 16", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2017" == project_type:
 			self.vs_version = 15
 			if "vc141" == compiler:
@@ -457,7 +473,7 @@ class BuildInfo:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
-				compilers.append(CompilerInfo(arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
+				compilers.append(CompilerInfo(self, arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
 			if "vc140" == compiler:
@@ -467,7 +483,7 @@ class BuildInfo:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
-				compilers.append(CompilerInfo(arch, "Visual Studio 14", compiler_root, vcvarsall_path, vcvarsall_options))
+				compilers.append(CompilerInfo(self, arch, "Visual Studio 14", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
@@ -475,7 +491,7 @@ class BuildInfo:
 				gen_name = "Xcode"
 				multi_config = True
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root))
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 		elif ("make" == project_type) or ("ninja" == project_type):
@@ -490,38 +506,38 @@ class BuildInfo:
 				compiler_name = "clang"
 				compiler_version = self.RetrieveClangVersion()
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root))
 			elif "mingw" == compiler:
 				compiler_name = "mgw"
 				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root))
 			elif "gcc" == compiler:
 				compiler_name = "gcc"
 				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root))
 			elif "vc142" == compiler:
 				compiler_name = "vc"
 				compiler_version = 142
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			elif "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			elif "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
 				for arch in archs:
-					compilers.append(CompilerInfo(arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 		else:
 			compiler_name = ""
 			compiler_version = 0
-			LogError("Unsupported compiler.\n")
+			LogError("Unsupported project type %s.\n" % project_type)
 
 		if 0 == project_type.find("vs"):
 			self.proj_ext_name = "vcxproj"
@@ -531,10 +547,12 @@ class BuildInfo:
 		self.compiler_version = compiler_version
 		self.multi_config = multi_config
 		self.compilers = compilers
+		self.archs = archs
 		self.cfg = cfg
 
 		self.gles_include_dir = cfg_build.gles_include_dir
 		self.libovr_path = cfg_build.libovr_path
+		self.host_bin_dir = cfg_build.host_bin_dir
 
 		self.jobs = multiprocessing.cpu_count()
 
@@ -556,12 +574,15 @@ class BuildInfo:
 		batch_cmd.AddCommand('xcodebuild -quiet -target %s -jobs %d -configuration %s' % (target_name, self.jobs, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
 
-	def MakeAddBuildCommand(self, batch_cmd, make_name):
+	def MakeAddBuildCommand(self, batch_cmd, make_name, target):
+		make_options = "-j%d" % self.jobs
+		if target != "ALL_BUILD":
+			make_options += " %s" % target
 		if "win" == self.host_platform:
-			batch_cmd.AddCommand("@%s -j%d" % (make_name, self.jobs))
+			batch_cmd.AddCommand("@%s %s" % (make_name, make_options))
 			batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 		else:
-			batch_cmd.AddCommand("%s -j%d" % (make_name, self.jobs))
+			batch_cmd.AddCommand("%s %s" % (make_name, make_options))
 			batch_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
 
 	def FindGCC(self):
@@ -615,7 +636,7 @@ class BuildInfo:
 
 	def FindProgramFilesFolder(self):
 		env = os.environ
-		if "64bit" == platform.architecture()[0]:
+		if "AMD64" == platform.machine():
 			if "ProgramFiles(x86)" in env:
 				program_files_folder = env["ProgramFiles(x86)"]
 			else:
@@ -703,6 +724,8 @@ class BuildInfo:
 		print("\tGLES SDK include path: %s" % self.gles_include_dir)
 		if self.is_windows_desktop:
 			print("\tOculus LibOVR path: %s" % self.libovr_path)
+		if len(self.host_bin_dir) > 0:
+			print("\tHost binary dir: %s" % self.host_bin_dir)
 		
 		print("")
 		sys.stdout.flush()
@@ -742,7 +765,7 @@ class BatchCommand:
 		os.remove(batch_file)
 		return ret_code
 
-def BuildAProject(name, build_path, build_info, compiler_info, additional_options = ""):
+def BuildProjects(name, build_path, build_info, compiler_info, project_list, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
@@ -774,6 +797,9 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 			additional_options += " -DIOS_PLATFORM=SIMULATOR"
 		else:
 			LogError("Unsupported iOS architecture.\n")
+
+	if compiler_info.is_cross_compiling:
+		additional_options += " -DKLAYGE_HOST_BIN_DIR=\"%s\"" % build_info.host_bin_dir
 
 	if build_info.compiler_name == "vc":
 		if "x64" == compiler_info.arch:
@@ -838,10 +864,11 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 				build_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 				build_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			for config in build_info.cfg:
-				if 0 == build_info.project_type.find("vs"):
-					build_info.MSBuildAddBuildCommand(build_cmd, name, "ALL_BUILD", config, vc_arch)
-				elif "xcode" == build_info.project_type:
-					build_info.XCodeBuildAddBuildCommand(build_cmd, "ALL_BUILD", config)
+				for target in project_list:
+					if 0 == build_info.project_type.find("vs"):
+						build_info.MSBuildAddBuildCommand(build_cmd, name, target, config, vc_arch)
+					elif "xcode" == build_info.project_type:
+						build_info.XCodeBuildAddBuildCommand(build_cmd, target, config)
 			if build_cmd.Execute() != 0:
 				LogError("Build %s failed.\n" % name)
 
@@ -926,7 +953,8 @@ def BuildAProject(name, build_path, build_info, compiler_info, additional_option
 				if build_info.compiler_name == "vc":
 					build_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 					build_cmd.AddCommand('@CD /d "%s"' % build_dir)
-				build_info.MakeAddBuildCommand(build_cmd, make_name)
+				for target in project_list:
+					build_info.MakeAddBuildCommand(build_cmd, make_name, target)
 				if build_cmd.Execute() != 0:
 					LogError("Build %s failed.\n" % name)
 
@@ -944,11 +972,22 @@ if __name__ == "__main__":
 	if build_info.is_windows_desktop:
 		if build_info.libovr_path != "auto":
 			additional_options += " -DKLAYGE_LibOVR_PATH:STRING=\"%s\"" % build_info.libovr_path
+
 	for compiler_info in build_info.compilers:
-		BuildAProject("KlayGE", ".", build_info, compiler_info, additional_options)
+		if (not build_info.is_clean) and compiler_info.is_cross_compiling and (len(build_info.host_bin_dir) == 0):
+			host_compiler = build_info.compiler_name
+			if build_info.compiler_name == "vc":
+				host_compiler += str(build_info.compiler_version)
+			host_build_info = BuildInfo(build_info.project_type, host_compiler, build_info.archs, build_info.cfg, "auto")
+			BuildProjects("KlayGE", ".", host_build_info, host_build_info.compilers[0], ("External/openal-soft/openal-soft/native-tools", "KlayGE/Tools/FXMLJIT/FXMLJIT", "KlayGE/Tools/MeshConv/MeshConv", "KlayGE/Tools/ImageConv/ImageConv"), additional_options)
+			build_info.host_bin_dir = "%s/KlayGE/bin/%s_%s" % (os.path.abspath(os.curdir), host_build_info.host_platform, compiler_info.arch)
+			break
+
+	for compiler_info in build_info.compilers:
+		BuildProjects("KlayGE", ".", build_info, compiler_info, ("ALL_BUILD", ), additional_options)
 
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
-		clean_dir_list = [ "assimp", "cxxopts", "freetype", "googletest", "libogg", "nanosvg", "python-cmake-buildsystem", "rapidjson", "rapidxml" ]
+		clean_dir_list = [ "7z", "assimp", "cxxopts", "FreeImage", "freetype", "GSL", "googletest", "libogg", "libvorbis", "nanosvg", "openal-soft", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "UniversalDXSDK", "wpftoolkit", "zlib" ]
 		for dir in clean_dir_list:
 			dir_name = "External/" + dir
 			if os.path.isdir(dir_name):
