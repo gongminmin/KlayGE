@@ -43,18 +43,17 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
-#endif
-#include <Windows.ApplicationModel.h>
-#include <windows.storage.h>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#endif
+#include <winrt/Windows.ApplicationModel.Core.h>
+#include <winrt/Windows.Storage.h>
 
-#include <wrl/client.h>
-#include <wrl/wrappers/corewrappers.h>
+namespace uwp
+{
+	using winrt::hstring;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::ApplicationModel;
+	using namespace winrt::Windows::Storage;
+}
 
 #include <KFL/ErrorHandling.hpp>
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -111,45 +110,15 @@ namespace KlayGE
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
 		local_path_ = exe_path_ + "/";
 #else
-		using namespace ABI::Windows::Foundation;
-		using namespace ABI::Windows::ApplicationModel;
-		using namespace ABI::Windows::Storage;
-		using namespace Microsoft::WRL;
-		using namespace Microsoft::WRL::Wrappers;
+		auto package = uwp::Package::Current();
+		auto installed_loc_storage_item = package.InstalledLocation().as<uwp::IStorageItem>();
+		auto const installed_loc_folder_name = installed_loc_storage_item.Path();
+		Convert(exe_path_, installed_loc_folder_name);
 
-		ComPtr<IPackageStatics> package_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Package).Get(), &package_stat));
-
-		ComPtr<IPackage> package;
-		TIFHR(package_stat->get_Current(&package));
-
-		ComPtr<IStorageFolder> installed_loc;
-		TIFHR(package->get_InstalledLocation(&installed_loc));
-
-		ComPtr<IStorageItem> installed_loc_storage_item;
-		TIFHR(installed_loc.As(&installed_loc_storage_item));
-
-		HString installed_loc_folder_name;
-		TIFHR(installed_loc_storage_item->get_Path(installed_loc_folder_name.GetAddressOf()));
-
-		Convert(exe_path_, installed_loc_folder_name.GetRawBuffer(nullptr));
-
-		ComPtr<IApplicationDataStatics> app_data_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Storage_ApplicationData).Get(), &app_data_stat));
-
-		ComPtr<IApplicationData> app_data;
-		TIFHR(app_data_stat->get_Current(&app_data));
-
-		ComPtr<IStorageFolder> local_folder;
-		TIFHR(app_data->get_LocalFolder(&local_folder));
-
-		ComPtr<IStorageItem> local_folder_storage_item;
-		TIFHR(local_folder.As(&local_folder_storage_item));
-
-		HString local_folder_name;
-		TIFHR(local_folder_storage_item->get_Path(local_folder_name.GetAddressOf()));
-
-		Convert(local_path_, local_folder_name.GetRawBuffer(nullptr));
+		auto app_data = uwp::ApplicationData::Current();
+		auto local_folder_storage_item = app_data.LocalFolder().as<uwp::IStorageItem>();
+		auto const local_folder_name = local_folder_storage_item.Path();
+		Convert(local_path_, local_folder_name);
 		local_path_ += "\\";
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX

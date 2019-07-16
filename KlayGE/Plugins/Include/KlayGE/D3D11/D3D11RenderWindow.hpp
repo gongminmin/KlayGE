@@ -15,19 +15,21 @@
 
 #pragma once
 
-#include <KlayGE/Signal.hpp>
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
+#include <KlayGE/Signal.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable : 4471) // A forward declaration of an unscoped enumeration must have an underlying type
-#endif
-#include <windows.graphics.display.h>
-#include <windows.ui.core.h>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#endif
+#include <winrt/Windows.Graphics.Display.Core.h>
+#include <winrt/Windows.UI.Core.h>
+
+namespace uwp
+{
+	using winrt::get_abi;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::Graphics::Display;
+	using namespace winrt::Windows::UI::Core;
+}
 #endif
 
 class IAmdDxExtQuadBufferStereo;
@@ -90,7 +92,7 @@ namespace KlayGE
 		void OnSize(Window const& win, bool active);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
+		HRESULT OnStereoEnabledChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args);
 #endif
 
 	private:
@@ -103,8 +105,8 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hWnd_; // Win32 Window handle
 #else
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		EventRegistrationToken stereo_enabled_changed_token_;
+		uwp::CoreWindow wnd_{nullptr};
+		uwp::DisplayInformation::StereoEnabledChanged_revoker stereo_enabled_changed_token_;
 #endif
 		bool isFullScreen_;
 		uint32_t sync_interval_;

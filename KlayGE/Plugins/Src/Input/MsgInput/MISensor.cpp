@@ -730,128 +730,66 @@ namespace KlayGE
 
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 
-#include <wrl/client.h>
-#include <wrl/event.h>
-#include <wrl/wrappers/corewrappers.h>
-
-using namespace ABI::Windows::Foundation;
-using namespace ABI::Windows::Devices::Geolocation;
-using namespace ABI::Windows::Devices::Sensors;
-using namespace Microsoft::WRL;
-
 namespace KlayGE
 {
 	MsgInputSensor::MsgInputSensor()
 	{
-		using namespace Microsoft::WRL::Wrappers;
-
 		if (Context::Instance().Config().location_sensor)
 		{
-			ABI::Windows::Devices::Geolocation::IGeolocator* locator;
-			TIFHR(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_Devices_Geolocation_Geolocator).Get(),
-				&locator));
-			locator_ = MakeCOMPtr(locator);
-
-			auto callback = Callback<ITypedEventHandler<Geolocator*, PositionChangedEventArgs*>>(
-				[this](IGeolocator* sender, IPositionChangedEventArgs* e)
-				{
-					return this->OnPositionChanged(sender, e);
+			locator_ = uwp::Geolocator();
+			position_token_ = locator_.PositionChanged(
+				winrt::auto_revoke, [this](uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args) {
+					return this->OnPositionChanged(sender, args);
 				});
-			TIFHR(locator_->add_PositionChanged(callback.Get(), &position_token_));
 		}
 		{
-			ComPtr<IAccelerometerStatics> accelerometer_stat;
-			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Accelerometer).Get(),
-				&accelerometer_stat));
-
-			IAccelerometer* accelerometer;
-			TIFHR(accelerometer_stat->GetDefault(&accelerometer));
-			if (accelerometer)
+			accelerometer_ = uwp::Accelerometer::GetDefault();
+			if (accelerometer_)
 			{
-				accelerometer_ = MakeCOMPtr(accelerometer);
-
-				auto callback = Callback<ITypedEventHandler<Accelerometer*, AccelerometerReadingChangedEventArgs*>>(
-					[this](IAccelerometer* sender, IAccelerometerReadingChangedEventArgs* e)
-					{
-						return this->OnAccelerometeReadingChanged(sender, e);
+				accelerometer_reading_token_ = accelerometer_.ReadingChanged(
+					winrt::auto_revoke, [this](uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args) {
+						return this->OnAccelerometeReadingChanged(sender, args);
 					});
-				TIFHR(accelerometer_->add_ReadingChanged(callback.Get(), &accelerometer_reading_token_));
 			}
 		}
 		{
-			ComPtr<IGyrometerStatics> gyrometer_stat;
-			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Gyrometer).Get(),
-				&gyrometer_stat));
-
-			IGyrometer* gyrometer;
-			TIFHR(gyrometer_stat->GetDefault(&gyrometer));
-			if (gyrometer)
+			gyrometer_ = uwp::Gyrometer::GetDefault();
+			if (gyrometer_)
 			{
-				gyrometer_ = MakeCOMPtr(gyrometer);
-
-				auto callback = Callback<ITypedEventHandler<Gyrometer*, GyrometerReadingChangedEventArgs*>>(
-					[this](IGyrometer* sender, IGyrometerReadingChangedEventArgs* e)
-					{
-						return this->OnGyrometerReadingChanged(sender, e);
+				gyrometer_reading_token_ = gyrometer_.ReadingChanged(
+					winrt::auto_revoke, [this](uwp::Gyrometer const& sender, uwp::GyrometerReadingChangedEventArgs const& args) {
+						return this->OnGyrometerReadingChanged(sender, args);
 					});
-				TIFHR(gyrometer_->add_ReadingChanged(callback.Get(), &gyrometer_reading_token_));
 			}
 		}
 		{
-			ComPtr<IInclinometerStatics> inclinometer_stat;
-			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Inclinometer).Get(),
-				&inclinometer_stat));
-
-			IInclinometer* inclinometer;
-			TIFHR(inclinometer_stat->GetDefault(&inclinometer));
-			if (inclinometer)
+			inclinometer_ = uwp::Inclinometer::GetDefault();
+			if (inclinometer_)
 			{
-				inclinometer_ = MakeCOMPtr(inclinometer);
-
-				auto callback = Callback<ITypedEventHandler<Inclinometer*, InclinometerReadingChangedEventArgs*>>(
-					[this](IInclinometer* sender, IInclinometerReadingChangedEventArgs* e)
-					{
-						return this->OnInclinometerReadingChanged(sender, e);
+				inclinometer_reading_token_ = inclinometer_.ReadingChanged(
+					winrt::auto_revoke, [this](uwp::Inclinometer const& sender, uwp::InclinometerReadingChangedEventArgs const& args) {
+						return this->OnInclinometerReadingChanged(sender, args);
 					});
-				TIFHR(inclinometer_->add_ReadingChanged(callback.Get(), &inclinometer_reading_token_));
 			}
 		}
 		{
-			ComPtr<ICompassStatics> compass_stat;
-			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Compass).Get(),
-				&compass_stat));
-
-			ICompass* compass;
-			TIFHR(compass_stat->GetDefault(&compass));
-			if (compass)
+			compass_ = uwp::Compass::GetDefault();
+			if (compass_)
 			{
-				compass_ = MakeCOMPtr(compass);
-
-				auto callback = Callback<ITypedEventHandler<Compass*, CompassReadingChangedEventArgs*>>(
-					[this](ICompass* sender, ICompassReadingChangedEventArgs* e)
-					{
-						return this->OnCompassReadingChanged(sender, e);
+				compass_reading_token_ = compass_.ReadingChanged(
+					winrt::auto_revoke, [this](uwp::Compass const& sender, uwp::CompassReadingChangedEventArgs const& args) {
+						return this->OnCompassReadingChanged(sender, args);
 					});
-				TIFHR(compass_->add_ReadingChanged(callback.Get(), &compass_reading_token_));
 			}
 		}
 		{
-			ComPtr<IOrientationSensorStatics> orientation_stat;
-			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_OrientationSensor).Get(),
-				&orientation_stat));
-			
-			IOrientationSensor* orientation;
-			TIFHR(orientation_stat->GetDefault(&orientation));
-			if (orientation)
+			orientation_ = uwp::OrientationSensor::GetDefault();
+			if (orientation_)
 			{
-				orientation_ = MakeCOMPtr(orientation);
-
-				auto callback = Callback<ITypedEventHandler<OrientationSensor*, OrientationSensorReadingChangedEventArgs*>>(
-					[this](IOrientationSensor* sender, IOrientationSensorReadingChangedEventArgs* e)
-					{
-						return this->OnOrientationSensorReadingChanged(sender, e);
+				orientation_reading_token_ = orientation_.ReadingChanged(winrt::auto_revoke,
+					[this](uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args) {
+						return this->OnOrientationSensorReadingChanged(sender, args);
 					});
-				TIFHR(orientation_->add_ReadingChanged(callback.Get(), &orientation_reading_token_));
 			}
 		}
 	}
@@ -860,146 +798,113 @@ namespace KlayGE
 	{
 		if (Context::Instance().Config().location_sensor)
 		{
-			locator_->remove_PositionChanged(position_token_);
+			position_token_.revoke();
 		}
 		if (accelerometer_)
 		{
-			accelerometer_->remove_ReadingChanged(accelerometer_reading_token_);
+			accelerometer_reading_token_.revoke();
 		}
 		if (gyrometer_)
 		{
-			gyrometer_->remove_ReadingChanged(gyrometer_reading_token_);
+			gyrometer_reading_token_.revoke();
 		}
 		if (inclinometer_)
 		{
-			inclinometer_->remove_ReadingChanged(inclinometer_reading_token_);
+			inclinometer_reading_token_.revoke();
 		}
 		if (compass_)
 		{
-			compass_->remove_ReadingChanged(compass_reading_token_);
+			compass_reading_token_.revoke();
 		}
 		if (orientation_)
 		{
-			orientation_->remove_ReadingChanged(orientation_reading_token_);
+			orientation_reading_token_.revoke();
 		}
 	}
 
-	HRESULT MsgInputSensor::OnPositionChanged(IGeolocator* sender, IPositionChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnPositionChanged(uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IGeoposition> position;
-		TIFHR(e->get_Position(&position));
-		ComPtr<IGeocoordinate> coordinate;
-		TIFHR(position->get_Coordinate(&coordinate));
+		auto const position = args.Position();
+		auto const coordinate = position.Coordinate();
 		
-		double tmp;
-		IReference<double>* rtmp;
-
-		ComPtr<IGeocoordinateWithPoint> coordinate_with_point;
-		TIFHR(coordinate.As(&coordinate_with_point));
-		ComPtr<IGeopoint> point;
-		TIFHR(coordinate_with_point->get_Point(&point));
-		BasicGeoposition geo_position;
-		TIFHR(point->get_Position(&geo_position));
+		auto const coordinate_with_point = coordinate.as<uwp::IGeocoordinateWithPoint>();
+		auto const point = coordinate_with_point.Point();
+		auto const geo_position = point.Position();
 		latitude_ = static_cast<float>(geo_position.Latitude);
 		longitude_ = static_cast<float>(geo_position.Longitude);
 		altitude_ = static_cast<float>(geo_position.Altitude);
 
-		TIFHR(coordinate->get_Accuracy(&tmp));
-		location_error_radius_ = static_cast<float>(tmp);
+		location_error_radius_ = static_cast<float>(coordinate.Accuracy());
 
-		TIFHR(coordinate->get_AltitudeAccuracy(&rtmp));
+		auto rtmp = coordinate.AltitudeAccuracy();
 		if (rtmp)
 		{
-			TIFHR(rtmp->get_Value(&tmp));
-			location_altitude_error_ = static_cast<float>(tmp);
+			location_altitude_error_ = static_cast<float>(rtmp.Value());
 		}
 
-		rtmp = nullptr;
-		TIFHR(coordinate->get_Speed(&rtmp));
+		rtmp = coordinate.Speed();
 		if (rtmp)
 		{
-			TIFHR(rtmp->get_Value(&tmp));
-			speed_ = static_cast<float>(tmp);
+			speed_ = static_cast<float>(rtmp.Value());
 		}
 
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnAccelerometeReadingChanged(IAccelerometer* sender, IAccelerometerReadingChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnAccelerometeReadingChanged(
+		uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IAccelerometerReading> reading;
-		TIFHR(e->get_Reading(&reading));
+		auto const reading = args.Reading();
 
-		double tmp;
-
-		TIFHR(reading->get_AccelerationX(&tmp));
-		accel_.x() = static_cast<float>(tmp);
-
-		TIFHR(reading->get_AccelerationY(&tmp));
-		accel_.y() = static_cast<float>(tmp);
-
-		TIFHR(reading->get_AccelerationZ(&tmp));
-		accel_.z() = static_cast<float>(tmp);
+		accel_.x() = static_cast<float>(reading.AccelerationX());
+		accel_.y() = static_cast<float>(reading.AccelerationY());
+		accel_.z() = static_cast<float>(reading.AccelerationZ());
 
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnGyrometerReadingChanged(IGyrometer* sender, IGyrometerReadingChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnGyrometerReadingChanged(uwp::Gyrometer const& sender, uwp::GyrometerReadingChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IGyrometerReading> reading;
-		TIFHR(e->get_Reading(&reading));
+		auto const reading = args.Reading();
 
-		double tmp;
-
-		TIFHR(reading->get_AngularVelocityX(&tmp));
-		angular_velocity_.x() = static_cast<float>(tmp);
-
-		TIFHR(reading->get_AngularVelocityY(&tmp));
-		angular_velocity_.y() = static_cast<float>(tmp);
-
-		TIFHR(reading->get_AngularVelocityZ(&tmp));
-		angular_velocity_.z() = static_cast<float>(tmp);
+		angular_velocity_.x() = static_cast<float>(reading.AngularVelocityX());
+		angular_velocity_.y() = static_cast<float>(reading.AngularVelocityY());
+		angular_velocity_.z() = static_cast<float>(reading.AngularVelocityZ());
 
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnInclinometerReadingChanged(IInclinometer* sender, IInclinometerReadingChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnInclinometerReadingChanged(uwp::Inclinometer const& sender, uwp::InclinometerReadingChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IInclinometerReading> reading;
-		TIFHR(e->get_Reading(&reading));
+		auto const reading = args.Reading();
 
-		TIFHR(reading->get_PitchDegrees(&tilt_.x()));
-		TIFHR(reading->get_RollDegrees(&tilt_.y()));
-		TIFHR(reading->get_YawDegrees(&tilt_.z()));
+		tilt_.x() = reading.PitchDegrees();
+		tilt_.y() = reading.RollDegrees();
+		tilt_.z() = reading.YawDegrees();
 
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnCompassReadingChanged(ICompass* sender, ICompassReadingChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnCompassReadingChanged(uwp::Compass const& sender, uwp::CompassReadingChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<ICompassReading> reading;
-		TIFHR(e->get_Reading(&reading));
+		auto const reading = args.Reading();
 
-		double tmp;
+		magnetic_heading_north_ = static_cast<float>(reading.HeadingMagneticNorth());
 
-		TIFHR(reading->get_HeadingMagneticNorth(&tmp));
-		magnetic_heading_north_ = static_cast<float>(tmp);
-
-		ComPtr<ICompassReadingHeadingAccuracy> reading_with_accuracy;
-		if (SUCCEEDED(reading.As(&reading_with_accuracy)))
+		auto reading_with_accuracy = reading.as<uwp::ICompassReadingHeadingAccuracy>();
+		if (reading_with_accuracy)
 		{
-			ABI::Windows::Devices::Sensors::MagnetometerAccuracy accuracy;
-			TIFHR(reading_with_accuracy->get_HeadingAccuracy(&accuracy));
+			auto const accuracy = reading_with_accuracy.HeadingAccuracy();
 			magnetometer_accuracy_ = static_cast<int32_t>(accuracy);
 		}
 		else
@@ -1010,21 +915,18 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnOrientationSensorReadingChanged(IOrientationSensor* sender,
-		IOrientationSensorReadingChangedEventArgs* e)
+	HRESULT MsgInputSensor::OnOrientationSensorReadingChanged(
+		uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args)
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IOrientationSensorReading> reading;
-		TIFHR(e->get_Reading(&reading));
+		auto const reading = args.Reading();
 
-		ComPtr<ISensorQuaternion> quat;
-		TIFHR(reading->get_Quaternion(&quat));
-
-		TIFHR(quat->get_X(&orientation_quat_.x()));
-		TIFHR(quat->get_Y(&orientation_quat_.y()));
-		TIFHR(quat->get_Z(&orientation_quat_.z()));
-		TIFHR(quat->get_W(&orientation_quat_.w()));
+		auto const quat = reading.Quaternion();
+		orientation_quat_.x() = quat.X();
+		orientation_quat_.y() = quat.Y();
+		orientation_quat_.z() = quat.Z();
+		orientation_quat_.w() = quat.W();
 
 		return S_OK;
 	}

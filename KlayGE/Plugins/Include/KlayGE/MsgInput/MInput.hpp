@@ -215,15 +215,18 @@ typedef struct _HIDP_VALUE_CAPS
 #include <Sensors.h>
 #endif
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
-#endif
-#include <windows.devices.geolocation.h>
-#include <windows.devices.sensors.h>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#endif
+#include <windows.h>
+#include <winrt/Windows.Devices.Geolocation.h>
+#include <winrt/Windows.Devices.Sensors.h>
+
+namespace uwp
+{
+	using winrt::event_token;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::Devices::Geolocation;
+	using namespace winrt::Windows::Devices::Sensors;
+}
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/sensor.h>
 #endif
@@ -497,40 +500,35 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const override;
 
-		HRESULT OnPositionChanged(ABI::Windows::Devices::Geolocation::IGeolocator* sender,
-			ABI::Windows::Devices::Geolocation::IPositionChangedEventArgs* e);
-		HRESULT OnAccelerometeReadingChanged(ABI::Windows::Devices::Sensors::IAccelerometer* sender,
-			ABI::Windows::Devices::Sensors::IAccelerometerReadingChangedEventArgs* e);
-		HRESULT OnGyrometerReadingChanged(ABI::Windows::Devices::Sensors::IGyrometer* sender,
-			ABI::Windows::Devices::Sensors::IGyrometerReadingChangedEventArgs* e);
-		HRESULT OnInclinometerReadingChanged(ABI::Windows::Devices::Sensors::IInclinometer* sender,
-			ABI::Windows::Devices::Sensors::IInclinometerReadingChangedEventArgs* e);
-		HRESULT OnCompassReadingChanged(ABI::Windows::Devices::Sensors::ICompass* sender,
-			ABI::Windows::Devices::Sensors::ICompassReadingChangedEventArgs* e);
-		HRESULT OnOrientationSensorReadingChanged(ABI::Windows::Devices::Sensors::IOrientationSensor* sender,
-			ABI::Windows::Devices::Sensors::IOrientationSensorReadingChangedEventArgs* e);
+		HRESULT OnPositionChanged(uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args);
+		HRESULT OnAccelerometeReadingChanged(uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args);
+		HRESULT OnGyrometerReadingChanged(uwp::Gyrometer const& sender, uwp::GyrometerReadingChangedEventArgs const& args);
+		HRESULT OnInclinometerReadingChanged(uwp::Inclinometer const& sender, uwp::InclinometerReadingChangedEventArgs const& args);
+		HRESULT OnCompassReadingChanged(uwp::Compass const& sender, uwp::CompassReadingChangedEventArgs const& args);
+		HRESULT OnOrientationSensorReadingChanged(
+			uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args);
 
 	private:
 		virtual void UpdateInputs() override;
 
 	private:
-		std::shared_ptr<ABI::Windows::Devices::Geolocation::IGeolocator> locator_;
-		EventRegistrationToken position_token_;
+		uwp::Geolocator locator_{nullptr};
+		uwp::Geolocator::PositionChanged_revoker position_token_;
 
-		std::shared_ptr<ABI::Windows::Devices::Sensors::IAccelerometer> accelerometer_;
-		EventRegistrationToken accelerometer_reading_token_;
+		uwp::Accelerometer accelerometer_{nullptr};
+		uwp::Accelerometer::ReadingChanged_revoker accelerometer_reading_token_;
 
-		std::shared_ptr<ABI::Windows::Devices::Sensors::IGyrometer> gyrometer_;
-		EventRegistrationToken gyrometer_reading_token_;
+		uwp::Gyrometer gyrometer_{nullptr};
+		uwp::Gyrometer::ReadingChanged_revoker gyrometer_reading_token_;
 
-		std::shared_ptr<ABI::Windows::Devices::Sensors::IInclinometer> inclinometer_;
-		EventRegistrationToken inclinometer_reading_token_;
+		uwp::Inclinometer inclinometer_{nullptr};
+		uwp::Inclinometer::ReadingChanged_revoker inclinometer_reading_token_;
 
-		std::shared_ptr<ABI::Windows::Devices::Sensors::ICompass> compass_;
-		::EventRegistrationToken compass_reading_token_;
+		uwp::Compass compass_{nullptr};
+		uwp::Compass::ReadingChanged_revoker compass_reading_token_;
 
-		std::shared_ptr<ABI::Windows::Devices::Sensors::IOrientationSensor> orientation_;
-		EventRegistrationToken orientation_reading_token_;
+		uwp::OrientationSensor orientation_{nullptr};
+		uwp::OrientationSensor::ReadingChanged_revoker orientation_reading_token_;
 	};
 #elif defined KLAYGE_PLATFORM_ANDROID
 	class MsgInputSensor : public InputSensor

@@ -56,17 +56,6 @@
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 #include <KlayGE/D3D12/D3D12RenderWindow.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_STORE
-#include <wrl/client.h>
-#include <wrl/event.h>
-#include <wrl/wrappers/corewrappers.h>
-
-using namespace ABI::Windows::Foundation;
-using namespace ABI::Windows::Graphics::Display;
-using namespace Microsoft::WRL;
-using namespace Microsoft::WRL::Wrappers;
-#endif
-
 namespace KlayGE
 {
 	D3D12RenderWindow::D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings)
@@ -275,19 +264,11 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		d3d12_re.DXGIFactory4()->RegisterStereoStatusWindow(hWnd_, WM_SIZE, &stereo_cookie_);
 #else
-		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
-			&disp_info_stat));
-
-		auto callback = Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
-			[this](IDisplayInformation* sender, IInspectable* args)
-			{
+		auto disp_info = uwp::DisplayInformation::GetForCurrentView();
+		stereo_enabled_changed_token_ = disp_info.StereoEnabledChanged(
+			winrt::auto_revoke, [this](uwp::DisplayInformation const& sender, uwp::IInspectable const& args) {
 				return this->OnStereoEnabledChanged(sender, args);
 			});
-
-		ComPtr<IDisplayInformation> disp_info;
-		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
-		disp_info->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
 #endif
 
 		sc_desc1_.Width = this->Width();
@@ -546,8 +527,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
-		ABI::Windows::Foundation::Rect rc;
-		wnd_->get_Bounds(&rc);
+		auto const rc = wnd_.Bounds();
 		rect.left = static_cast<LONG>(rc.X * dpi_scale + 0.5f);
 		rect.right = static_cast<LONG>((rc.X + rc.Width) * dpi_scale + 0.5f);
 		rect.top = static_cast<LONG>(rc.Y * dpi_scale + 0.5f);
@@ -586,13 +566,7 @@ namespace KlayGE
 
 		d3d12_re.DXGIFactory4()->UnregisterStereoStatus(stereo_cookie_);
 #else
-		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
-			&disp_info_stat));
-
-		ComPtr<IDisplayInformation> disp_info;
-		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
-		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
+		stereo_enabled_changed_token_.revoke();
 
 		this->FullScreen(false);
 #endif
@@ -691,8 +665,8 @@ namespace KlayGE
 		d3d12_re.DXGIFactory4()->CreateSwapChainForHwnd(d3d_cmd_queue, hWnd_,
 			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
 #else
-		d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(d3d_cmd_queue,
-			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
+		d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(
+			d3d_cmd_queue, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, &sc);
 #endif
 
 		IDXGISwapChain3* sc3 = nullptr;
@@ -774,7 +748,7 @@ namespace KlayGE
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-	HRESULT D3D12RenderWindow::OnStereoEnabledChanged(IDisplayInformation* sender, IInspectable* args)
+	HRESULT D3D12RenderWindow::OnStereoEnabledChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args)
 	{
 		KFL_UNUSED(sender);
 		KFL_UNUSED(args);

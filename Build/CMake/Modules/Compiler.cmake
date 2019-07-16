@@ -11,6 +11,12 @@ IF(CMAKE_C_COMPILER_ID MATCHES MSVC)
 		SET(KLAYGE_COMPILER_VERSION "140")
 	ENDIF()
 
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		if(MSVC_VERSION LESS 1911)
+			message(FATAL_ERROR "You need VS2017 15.3+ to build UWP configurations.")
+		endif()
+	endif()
+
 	SET(CMAKE_CXX_FLAGS "/W4 /WX /EHsc /MP /bigobj /Zc:throwingNew /Zc:strictStrings /Zc:rvalueCast /Gw")
 	IF(MSVC_VERSION GREATER 1910)
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
