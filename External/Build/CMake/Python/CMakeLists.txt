@@ -6,8 +6,20 @@ SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/gongminmin/cpython.git" "1e77e85097cfc6ff5ac52aeb5f8afc63b384a599" "FixForKlayGE" "v${PY_VERSION}")
-UpdateExternalLib("python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "f6810df467b99a769696003097081462d4fb6ecd" "FixForKlayGE" "master")
+UpdateExternalLib("Python" "https://github.com/python/cpython.git" "9a3ffc0492d1310ead9ce8f5ee678c26b20a338d" "v${PY_VERSION}" "v${PY_VERSION}rc1")
+foreach(patch "0001-bpo-35758-Fix-building-on-ARM-MSVC-gh-11531" "0002-bpo-35890-Fix-some-API-calling-consistency-GH-11742"
+	"0003-bpo-28269-Replace-strcasecmp-with-system-function-_s" "0004-Fix-for-MinGW-and-UWP")
+	ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
+endforeach()
+
+UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "501869c2b124552dae669d5fd6b7e7101a7cc30c")
+foreach(patch "0001-Enable-ASM-langage-only-if-required" "0002-Fix-android-build-by-linking-against-libutil-only-if"
+	"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
+	"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Don-t-set_target_properties-on-an-extension-when-it-"
+	"0007-Make-building-python-executable-python-development-f" "0008-Fix-some-problems-with-Android-and-iOS"
+	"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7")
+	ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/python-cmake-buildsystemPatches/${patch}.patch")
+endforeach()
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})
 

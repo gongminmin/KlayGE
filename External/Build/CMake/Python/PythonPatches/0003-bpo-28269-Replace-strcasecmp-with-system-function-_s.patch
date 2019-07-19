@@ -1,0 +1,60 @@
+From 192fc23c856a213b44f1ae532f51d44cbd467709 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 13 Jul 2019 06:11:43 -0700
+Subject: [PATCH 3/4] bpo-28269: Replace strcasecmp with system function
+ _stricmp. (GH-13095)
+
+---
+ .../2019-05-05-05-23-34.bpo-28269.-MOHI7.rst  |  1 +
+ Python/dynload_win.c                          | 20 +------------------
+ 2 files changed, 2 insertions(+), 19 deletions(-)
+ create mode 100644 Misc/NEWS.d/next/Windows/2019-05-05-05-23-34.bpo-28269.-MOHI7.rst
+
+diff --git a/Misc/NEWS.d/next/Windows/2019-05-05-05-23-34.bpo-28269.-MOHI7.rst b/Misc/NEWS.d/next/Windows/2019-05-05-05-23-34.bpo-28269.-MOHI7.rst
+new file mode 100644
+index 0000000000..a531b98118
+--- /dev/null
++++ b/Misc/NEWS.d/next/Windows/2019-05-05-05-23-34.bpo-28269.-MOHI7.rst
+@@ -0,0 +1 @@
++Replace use of :c:func:`strcasecmp` for the system function :c:func:`_stricmp`. Patch by Minmin Gong.
+diff --git a/Python/dynload_win.c b/Python/dynload_win.c
+index 0fdf77f552..51bbc163fa 100644
+--- a/Python/dynload_win.c
++++ b/Python/dynload_win.c
+@@ -38,24 +38,6 @@ const char *_PyImport_DynLoadFiletab[] = {
+     NULL
+ };
+ 
+-/* Case insensitive string compare, to avoid any dependencies on particular
+-   C RTL implementations */
+-
+-static int strcasecmp (const char *string1, const char *string2)
+-{
+-    int first, second;
+-
+-    do {
+-        first  = tolower(*string1);
+-        second = tolower(*string2);
+-        string1++;
+-        string2++;
+-    } while (first && first == second);
+-
+-    return (first - second);
+-}
+-
+-
+ /* Function to return the name of the "python" DLL that the supplied module
+    directly imports.  Looks through the list of imported modules and
+    returns the first entry that starts with "python" (case sensitive) and
+@@ -293,7 +275,7 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
+             import_python = GetPythonImport(hDLL);
+ 
+             if (import_python &&
+-                strcasecmp(buffer,import_python)) {
++                _stricmp(buffer,import_python)) {
+                 PyErr_Format(PyExc_ImportError,
+                              "Module use of %.150s conflicts "
+                              "with this version of Python.",
+-- 
+2.17.1.windows.2
+

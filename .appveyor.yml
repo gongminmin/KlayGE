@@ -54,6 +54,8 @@ before_build:
   - git reset --hard
 
 build_script:
+  - git config --global user.email "dummy@example.com"
+  - git config --global user.name "Dummy Name"
   - python Build.py %PROJECT% %COMPILER% %PLATFORM% %CONFIGURATION%
 
 on_success:

@@ -1,0 +1,33 @@
+From 50e7dff3883d4cc52f7479c34c3d848e82e56bfe Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Fri, 22 Jan 2016 02:57:58 -0500
+Subject: [PATCH 04/10] Fix android build error specifying multiprocessing
+ extension requirements.
+
+This commit will fix the following build error:
+
+//----------------
+Building C object CMakeBuild/extensions/CMakeFiles/extension_multiprocessing.dir/data/data/com.termux/files/home/Python-2.7.10/Modules/_multiprocessing/semaphore.c.o
+/data/data/com.termux/files/home/Python-2.7.10/Modules/_multiprocessing/semaphore.c:15:5: error: unknown type name 'SEM_HANDLE'
+     SEM_HANDLE handle;
+     ^
+//----------------
+---
+ cmake/extensions/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index 11da3f4..4aec97d 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -213,6 +213,7 @@ if(UNIX)
+         )
+     endif()
+     add_python_extension(_multiprocessing
++        REQUIRES HAVE_SEM_OPEN "NOT POSIX_SEMAPHORES_NOT_ENABLED"
+         SOURCES _multiprocessing/multiprocessing.c
+                 ${_multiprocessing${PY_VERSION_MAJOR}_SOURCES}
+         REQUIRES WITH_THREAD
+-- 
+2.17.1.windows.2
+

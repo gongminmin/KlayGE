@@ -1,0 +1,1224 @@
+From 84f5863a5a0b19d7035d7b46506dc3efd62e7709 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 20 Jan 2019 20:21:33 -0800
+Subject: [PATCH 4/4] Fix for MinGW and UWP
+
+---
+ Modules/_io/winconsoleio.c |  13 +++
+ Modules/_randommodule.c    |   4 +
+ Modules/faulthandler.c     |   6 +-
+ Modules/posixmodule.c      | 201 ++++++++++++++++++++++++++++++++++---
+ PC/getpathp.c              |  20 ++++
+ PC/pyconfig.h              |  23 +++++
+ PC/winreg.c                |  85 ++++++++++++++++
+ Python/bootstrap_hash.c    |  12 +++
+ Python/dynload_win.c       |   8 ++
+ Python/fileutils.c         |  64 +++++++++++-
+ Python/pytime.c            |  15 +++
+ Python/sysmodule.c         |   2 +
+ 12 files changed, 435 insertions(+), 18 deletions(-)
+
+diff --git a/Modules/_io/winconsoleio.c b/Modules/_io/winconsoleio.c
+index c11c1e09f4..ffe75a06df 100644
+--- a/Modules/_io/winconsoleio.c
++++ b/Modules/_io/winconsoleio.c
+@@ -268,6 +268,9 @@ _io__WindowsConsoleIO___init___impl(winconsoleio *self, PyObject *nameobj,
+     int rwa = 0;
+     int fd = -1;
+     int fd_is_own = 0;
++#ifdef MS_WINDOWS_STORE
++    CREATEFILE2_EXTENDED_PARAMETERS param;
++#endif
+ 
+     assert(PyWindowsConsoleIO_Check(self));
+     if (self->handle >= 0) {
+@@ -368,11 +371,21 @@ _io__WindowsConsoleIO___init___impl(winconsoleio *self, PyObject *nameobj,
+            on the specific access. This is required for modern names
+            CONIN$ and CONOUT$, which allow reading/writing state as
+            well as reading/writing content. */
++#ifdef MS_WINDOWS_STORE
++        ZeroMemory(&param, sizeof(param));
++        param.dwSize = sizeof(param);
++        self->handle = CreateFile2(name, GENERIC_READ | GENERIC_WRITE,
++            FILE_SHARE_READ | FILE_SHARE_WRITE, OPEN_EXISTING, &param);
++        if (self->handle == INVALID_HANDLE_VALUE)
++            self->handle = CreateFile2(name, access,
++                FILE_SHARE_READ | FILE_SHARE_WRITE, OPEN_EXISTING, &param);
++#else
+         self->handle = CreateFileW(name, GENERIC_READ | GENERIC_WRITE,
+             FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+         if (self->handle == INVALID_HANDLE_VALUE)
+             self->handle = CreateFileW(name, access,
+                 FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
++#endif
+         Py_END_ALLOW_THREADS
+ 
+         if (self->handle == INVALID_HANDLE_VALUE) {
+diff --git a/Modules/_randommodule.c b/Modules/_randommodule.c
+index 51677f8b00..33bcb26125 100644
+--- a/Modules/_randommodule.c
++++ b/Modules/_randommodule.c
+@@ -71,6 +71,10 @@
+ #ifdef HAVE_PROCESS_H
+ #  include <process.h>          /* needed for getpid() */
+ #endif
++#ifdef MS_WINDOWS_STORE
++#  define WIN32_LEAN_AND_MEAN
++#  include <windows.h>          /* needed for getpid()/GetCurrentProcessId() */
++#endif
+ 
+ /* Period parameters -- These are all magic.  Don't change. */
+ #define N 624
+diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
+index cf24c9b2b9..c4a5d5940f 100644
+--- a/Modules/faulthandler.c
++++ b/Modules/faulthandler.c
+@@ -471,7 +471,7 @@ faulthandler_enable(void)
+         handler->enabled = 1;
+     }
+ 
+-#ifdef MS_WINDOWS
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     assert(fatal_error.exc_handler == NULL);
+     fatal_error.exc_handler = AddVectoredExceptionHandler(1, faulthandler_exc_handler);
+ #endif
+@@ -523,7 +523,7 @@ faulthandler_disable(void)
+             faulthandler_disable_fatal_handler(handler);
+         }
+     }
+-#ifdef MS_WINDOWS
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     if (fatal_error.exc_handler != NULL) {
+         RemoveVectoredExceptionHandler(fatal_error.exc_handler);
+         fatal_error.exc_handler = NULL;
+@@ -920,7 +920,7 @@ faulthandler_unregister_py(PyObject *self, PyObject *args)
+ static void
+ faulthandler_suppress_crash_report(void)
+ {
+-#ifdef MS_WINDOWS
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     UINT mode;
+ 
+     /* Configure Windows to not display the Windows Error Reporting dialog */
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 5403660ba4..dd21717609 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -143,7 +143,9 @@ corresponding Unix manual entries for more information on calls.");
+ #endif
+ 
+ #if defined(MS_WINDOWS)
++#if !defined(MS_WINDOWS_STORE)
+ #  define TERMSIZE_USE_CONIO
++#endif
+ #elif defined(HAVE_SYS_IOCTL_H)
+ #  include <sys/ioctl.h>
+ #  if defined(HAVE_TERMIOS_H)
+@@ -161,9 +163,11 @@ corresponding Unix manual entries for more information on calls.");
+ #define HAVE_SYSTEM     1
+ #include <process.h>
+ #else
+-#ifdef _MSC_VER         /* Microsoft compiler */
++#if defined(_MSC_VER) || defined(__MINGW32__)         /* Microsoft compiler or MinGW */
++#ifndef MS_WINDOWS_STORE
+ #define HAVE_GETPPID    1
+ #define HAVE_GETLOGIN   1
++#endif  /* ! MS_WINDOWS_STORE */
+ #define HAVE_SPAWNV     1
+ #define HAVE_EXECV      1
+ #define HAVE_WSPAWNV    1
+@@ -191,7 +195,7 @@ corresponding Unix manual entries for more information on calls.");
+ #define HAVE_SYSTEM     1
+ #define HAVE_WAIT       1
+ #define HAVE_TTYNAME    1
+-#endif  /* _MSC_VER */
++#endif  /* _MSC_VER || __MINGW32__ */
+ #endif  /* ! __WATCOMC__ || __QNX__ */
+ 
+ 
+@@ -201,7 +205,7 @@ module os
+ [clinic start generated code]*/
+ /*[clinic end generated code: output=da39a3ee5e6b4b0d input=94a0f0f978acae17]*/
+ 
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+ 
+ #if defined(__sgi)&&_COMPILER_VERSION>=700
+ /* declare ctermid_r if compiling with MIPSPro 7.x in ANSI C mode
+@@ -244,7 +248,7 @@ extern int lstat(const char *, struct stat *);
+ #endif /* HAVE_LSTAT */
+ #endif /* !HAVE_UNISTD_H */
+ 
+-#endif /* !_MSC_VER */
++#endif /* !_MSC_VER && !__MINGW32__ */
+ 
+ #ifdef HAVE_UTIME_H
+ #include <utime.h>
+@@ -289,7 +293,7 @@ extern int lstat(const char *, struct stat *);
+ #endif
+ #endif
+ 
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+ #ifdef HAVE_DIRECT_H
+ #include <direct.h>
+ #endif
+@@ -311,10 +315,12 @@ extern int lstat(const char *, struct stat *);
+ #include <shellapi.h>   /* for ShellExecute() */
+ #include <lmcons.h>     /* for UNLEN */
+ #ifdef SE_CREATE_SYMBOLIC_LINK_NAME /* Available starting with Vista */
++#ifndef MS_WINDOWS_STORE
+ #define HAVE_SYMLINK
+ static int win32_can_symlink = 0;
+ #endif
+-#endif /* _MSC_VER */
++#endif
++#endif /* _MSC_VER || __MINGW32__ */
+ 
+ #ifndef MAXPATHLEN
+ #if defined(PATH_MAX) && PATH_MAX > 1024
+@@ -481,9 +487,14 @@ PyOS_AfterFork(void)
+ #ifdef MS_WINDOWS
+ /* defined in fileutils.c */
+ PyAPI_FUNC(void) _Py_time_t_to_FILE_TIME(time_t, int, FILETIME *);
++#ifdef MS_WINDOWS_STORE
++PyAPI_FUNC(void) _Py_attribute_data_to_stat(FILE_BASIC_INFO *, FILE_STANDARD_INFO *,
++                                            int, struct _Py_stat_struct *);
++#else
+ PyAPI_FUNC(void) _Py_attribute_data_to_stat(BY_HANDLE_FILE_INFORMATION *,
+                                             ULONG, struct _Py_stat_struct *);
+ #endif
++#endif
+ 
+ #ifdef MS_WINDOWS
+ static int
+@@ -1553,6 +1564,50 @@ win32_wchdir(LPCWSTR path)
+ #define HAVE_STAT_NSEC 1
+ #define HAVE_STRUCT_STAT_ST_FILE_ATTRIBUTES 1
+ 
++#ifdef MS_WINDOWS_STORE
++static void
++find_data_to_file_info(WIN32_FIND_DATAW *pFileData,
++                       FILE_BASIC_INFO *fbi,
++                       FILE_STANDARD_INFO *fsi,
++                       ULONG *reparse_tag)
++{
++    memset(fbi, 0, sizeof(*fbi));
++    memcpy(&fbi->CreationTime, &pFileData->ftCreationTime, sizeof(pFileData->ftCreationTime));
++    memcpy(&fbi->LastAccessTime, &pFileData->ftLastAccessTime, sizeof(pFileData->ftLastAccessTime));
++    memcpy(&fbi->LastWriteTime, &pFileData->ftLastWriteTime, sizeof(pFileData->ftLastWriteTime));
++    memcpy(&fbi->ChangeTime, &pFileData->ftLastWriteTime, sizeof(pFileData->ftLastWriteTime));
++    fbi->FileAttributes = pFileData->dwFileAttributes;
++
++    memset(fsi, 0, sizeof(*fsi));
++    fsi->AllocationSize;
++    fsi->EndOfFile.LowPart = pFileData->nFileSizeLow;
++    fsi->EndOfFile.HighPart = pFileData->nFileSizeHigh;
++    fsi->NumberOfLinks = 1;
++    fsi->DeletePending = FALSE;
++    fsi->Directory = (pFileData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? TRUE : FALSE;
++
++    if (pFileData->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
++        *reparse_tag = pFileData->dwReserved0;
++    else
++        *reparse_tag = 0;
++}
++
++static BOOL
++attributes_from_dir(LPCWSTR pszFile,
++                    FILE_BASIC_INFO *fbi,
++                    FILE_STANDARD_INFO *fsi,
++                    ULONG *reparse_tag)
++{
++    HANDLE hFindFile;
++    WIN32_FIND_DATAW FileData;
++    hFindFile = FindFirstFileW(pszFile, &FileData);
++    if (hFindFile == INVALID_HANDLE_VALUE)
++        return FALSE;
++    FindClose(hFindFile);
++    find_data_to_file_info(&FileData, fbi, fsi, reparse_tag);
++    return TRUE;
++}
++#else
+ static void
+ find_data_to_file_info(WIN32_FIND_DATAW *pFileData,
+                        BY_HANDLE_FILE_INFORMATION *info,
+@@ -1584,6 +1639,7 @@ attributes_from_dir(LPCWSTR pszFile, BY_HANDLE_FILE_INFORMATION *info, ULONG *re
+     find_data_to_file_info(&FileData, info, reparse_tag);
+     return TRUE;
+ }
++#endif
+ 
+ static BOOL
+ get_target_path(HANDLE hdl, wchar_t **target_path)
+@@ -1627,13 +1683,40 @@ static int
+ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
+                  BOOL traverse)
+ {
++#ifdef MS_WINDOWS_STORE
++    CREATEFILE2_EXTENDED_PARAMETERS param;
++    HANDLE hFile;
++    FILE_BASIC_INFO fbi;
++    FILE_STANDARD_INFO fsi;
++#else
+     int code;
+     HANDLE hFile, hFile2;
+     BY_HANDLE_FILE_INFORMATION info;
++#endif
+     ULONG reparse_tag = 0;
+     wchar_t *target_path;
+     const wchar_t *dot;
+ 
++#ifdef MS_WINDOWS_STORE
++    traverse = FALSE;
++#endif
++
++#ifdef MS_WINDOWS_STORE
++    ZeroMemory(&param, sizeof(param));
++    param.dwSize = sizeof(param);
++    param.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
++    /* FILE_FLAG_BACKUP_SEMANTICS is required to open a directory */
++    /* FILE_FLAG_OPEN_REPARSE_POINT does not follow the symlink.
++        Because of this, calls like GetFinalPathNameByHandle will return
++        the symlink path again and not the actual final path. */
++    param.dwFileFlags = FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT;
++    hFile = CreateFile2(
++        path,
++        FILE_READ_ATTRIBUTES, /* desired access */
++        0, /* share mode */
++        OPEN_EXISTING,
++        &param);
++#else
+     hFile = CreateFileW(
+         path,
+         FILE_READ_ATTRIBUTES, /* desired access */
+@@ -1647,6 +1730,7 @@ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
+         FILE_ATTRIBUTE_NORMAL|FILE_FLAG_BACKUP_SEMANTICS|
+             FILE_FLAG_OPEN_REPARSE_POINT,
+         NULL);
++#endif
+ 
+     if (hFile == INVALID_HANDLE_VALUE) {
+         /* Either the target doesn't exist, or we don't have access to
+@@ -1656,6 +1740,9 @@ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
+         if (lastError != ERROR_ACCESS_DENIED &&
+             lastError != ERROR_SHARING_VIOLATION)
+             return -1;
++#ifdef MS_WINDOWS_STORE
++        return -1;
++#else
+         /* Could not get attributes on open file. Fall back to
+            reading the directory. */
+         if (!attributes_from_dir(path, &info, &reparse_tag))
+@@ -1668,7 +1755,20 @@ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
+                 return -1;
+             }
+         }
++#endif
+     } else {
++#ifdef MS_WINDOWS_STORE
++        if (!GetFileInformationByHandleEx(hFile, FileBasicInfo, &fbi, sizeof(fbi))) {
++            CloseHandle(hFile);
++            return -1;
++        }
++        if (!GetFileInformationByHandleEx(hFile, FileStandardInfo, &fsi, sizeof(fsi))) {
++            CloseHandle(hFile);
++            return -1;
++        }
++        if (fbi.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
++            return -1;
++#else
+         if (!GetFileInformationByHandle(hFile, &info)) {
+             CloseHandle(hFile);
+             return -1;
+@@ -1700,10 +1800,15 @@ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
+                 PyMem_RawFree(target_path);
+                 return code;
+             }
++#endif
+         } else
+             CloseHandle(hFile);
+     }
++#ifdef MS_WINDOWS_STORE
++    _Py_attribute_data_to_stat(&fbi, &fsi, reparse_tag, result);
++#else
+     _Py_attribute_data_to_stat(&info, reparse_tag, result);
++#endif
+ 
+     /* Set S_IEXEC if it is an .exe, .bat, ... */
+     dot = wcsrchr(path, '.');
+@@ -3355,7 +3460,7 @@ os_getcwdb_impl(PyObject *module)
+ }
+ 
+ 
+-#if ((!defined(HAVE_LINK)) && defined(MS_WINDOWS))
++#if ((!defined(HAVE_LINK)) && defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE))
+ #define HAVE_LINK 1
+ #endif
+ 
+@@ -3737,8 +3842,23 @@ os__getfinalpathname_impl(PyObject *module, path_t *path)
+     int buf_size = Py_ARRAY_LENGTH(buf);
+     int result_length;
+     PyObject *result;
++#ifdef MS_WINDOWS_STORE
++    CREATEFILE2_EXTENDED_PARAMETERS param;
++#endif
+ 
+     Py_BEGIN_ALLOW_THREADS
++#ifdef MS_WINDOWS_STORE
++    ZeroMemory(&param, sizeof(param));
++    param.dwSize = sizeof(param);
++    /* FILE_FLAG_BACKUP_SEMANTICS is required to open a directory */
++    param.dwFileFlags = FILE_FLAG_BACKUP_SEMANTICS;
++    hFile = CreateFile2(
++        path->wide,
++        0, /* desired access */
++        0, /* share mode */
++        OPEN_EXISTING,
++        &param);
++#else
+     hFile = CreateFileW(
+         path->wide,
+         0, /* desired access */
+@@ -3748,6 +3868,7 @@ os__getfinalpathname_impl(PyObject *module, path_t *path)
+         /* FILE_FLAG_BACKUP_SEMANTICS is required to open a directory */
+         FILE_FLAG_BACKUP_SEMANTICS,
+         NULL);
++#endif
+     Py_END_ALLOW_THREADS
+ 
+     if (hFile == INVALID_HANDLE_VALUE) {
+@@ -3837,6 +3958,9 @@ static PyObject *
+ os__getvolumepathname_impl(PyObject *module, path_t *path)
+ /*[clinic end generated code: output=804c63fd13a1330b input=722b40565fa21552]*/
+ {
++#ifdef MS_WINDOWS_STORE
++    return NULL;
++#else
+     PyObject *result;
+     wchar_t *mountpath=NULL;
+     size_t buflen;
+@@ -3870,6 +3994,7 @@ os__getvolumepathname_impl(PyObject *module, path_t *path)
+ exit:
+     PyMem_Free(mountpath);
+     return result;
++#endif
+ }
+ 
+ #endif /* MS_WINDOWS */
+@@ -4641,6 +4766,9 @@ os_utime_impl(PyObject *module, path_t *path, PyObject *times, PyObject *ns,
+ #ifdef MS_WINDOWS
+     HANDLE hFile;
+     FILETIME atime, mtime;
++#ifdef MS_WINDOWS_STORE
++    CREATEFILE2_EXTENDED_PARAMETERS param;
++#endif
+ #else
+     int result;
+ #endif
+@@ -4717,9 +4845,18 @@ os_utime_impl(PyObject *module, path_t *path, PyObject *times, PyObject *ns,
+ 
+ #ifdef MS_WINDOWS
+     Py_BEGIN_ALLOW_THREADS
++#ifdef MS_WINDOWS_STORE
++    ZeroMemory(&param, sizeof(param));
++    param.dwSize = sizeof(param);
++    param.dwFileFlags = FILE_FLAG_BACKUP_SEMANTICS;
++    hFile = CreateFile2(path->wide, FILE_WRITE_ATTRIBUTES, 0,
++                        OPEN_EXISTING,
++                        &param);
++#else
+     hFile = CreateFileW(path->wide, FILE_WRITE_ATTRIBUTES, 0,
+                         NULL, OPEN_EXISTING,
+                         FILE_FLAG_BACKUP_SEMANTICS, NULL);
++#endif
+     Py_END_ALLOW_THREADS
+     if (hFile == INVALID_HANDLE_VALUE) {
+         path_error(path);
+@@ -6520,9 +6657,9 @@ os_getuid_impl(PyObject *module)
+ #endif /* HAVE_GETUID */
+ 
+ 
+-#ifdef MS_WINDOWS
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+ #define HAVE_KILL
+-#endif /* MS_WINDOWS */
++#endif /* MS_WINDOWS && !MS_WINDOWS_STORE */
+ 
+ #ifdef HAVE_KILL
+ /*[clinic input]
+@@ -7173,7 +7310,7 @@ exit:
+ 
+ #endif /* HAVE_READLINK */
+ 
+-#if !defined(HAVE_READLINK) && defined(MS_WINDOWS)
++#if !defined(HAVE_READLINK) && defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+ 
+ static PyObject *
+ win_readlink(PyObject *self, PyObject *args, PyObject *kwargs)
+@@ -7246,7 +7383,7 @@ win_readlink(PyObject *self, PyObject *args, PyObject *kwargs)
+     return result;
+ }
+ 
+-#endif /* !defined(HAVE_READLINK) && defined(MS_WINDOWS) */
++#endif /* !defined(HAVE_READLINK) && defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE) */
+ 
+ 
+ 
+@@ -10736,6 +10873,13 @@ os_abort_impl(PyObject *module)
+ }
+ 
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_STORE
++static PyObject *
++os_startfile_impl(PyObject *module, path_t *filepath, Py_UNICODE *operation)
++{
++    Py_RETURN_NONE;
++}
++#else
+ /* Grab ShellExecute dynamically from shell32 */
+ static int has_ShellExecute = -1;
+ static HINSTANCE (CALLBACK *Py_ShellExecuteW)(HWND, LPCWSTR, LPCWSTR, LPCWSTR,
+@@ -10815,6 +10959,7 @@ os_startfile_impl(PyObject *module, path_t *filepath, Py_UNICODE *operation)
+     }
+     Py_RETURN_NONE;
+ }
++#endif /* MS_WINDOWS_STORE */
+ #endif /* MS_WINDOWS */
+ 
+ 
+@@ -11370,6 +11515,11 @@ os_cpu_count_impl(PyObject *module)
+ {
+     int ncpu = 0;
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_STORE
++    SYSTEM_INFO sysinfo;
++    GetNativeSystemInfo(&sysinfo);
++    ncpu = sysinfo.dwNumberOfProcessors;
++#else
+     /* Vista is supported and the GetMaximumProcessorCount API is Win7+
+        Need to fallback to Vista behavior if this call isn't present */
+     HINSTANCE hKernel32;
+@@ -11386,6 +11536,7 @@ os_cpu_count_impl(PyObject *module)
+         GetSystemInfo(&sysinfo);
+         ncpu = sysinfo.dwNumberOfProcessors;
+     }
++#endif
+ #elif defined(__hpux)
+     ncpu = mpctl(MPC_GETNUMSPUS, NULL, NULL);
+ #elif defined(HAVE_SYSCONF) && defined(_SC_NPROCESSORS_ONLN)
+@@ -11467,6 +11618,10 @@ static int
+ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
+ /*[clinic end generated code: output=36be5afca6ea84d8 input=cfe99f9c05c70ad1]*/
+ {
++#ifdef MS_WINDOWS_STORE
++    /* No subprocesses on UWP */
++    return 0;
++#else
+     DWORD flags;
+ 
+     if (!GetHandleInformation((HANDLE)handle, &flags)) {
+@@ -11475,6 +11630,7 @@ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
+     }
+ 
+     return flags & HANDLE_FLAG_INHERIT;
++#endif
+ }
+ 
+ 
+@@ -11492,12 +11648,17 @@ os_set_handle_inheritable_impl(PyObject *module, intptr_t handle,
+                                int inheritable)
+ /*[clinic end generated code: output=021d74fe6c96baa3 input=7a7641390d8364fc]*/
+ {
++#ifdef MS_WINDOWS_STORE
++    PyErr_SetString(PyExc_NotImplementedError, "No subprocesses on UWP");
++    return NULL;
++#else
+     DWORD flags = inheritable ? HANDLE_FLAG_INHERIT : 0;
+     if (!SetHandleInformation((HANDLE)handle, HANDLE_FLAG_INHERIT, flags)) {
+         PyErr_SetFromWindowsErr(0);
+         return NULL;
+     }
+     Py_RETURN_NONE;
++#endif
+ }
+ #endif /* MS_WINDOWS */
+ 
+@@ -11953,7 +12114,12 @@ static PyObject *
+ DirEntry_from_find_data(path_t *path, WIN32_FIND_DATAW *dataW)
+ {
+     DirEntry *entry;
++#ifdef MS_WINDOWS_STORE
++    FILE_BASIC_INFO fbi;
++    FILE_STANDARD_INFO fsi;
++#else
+     BY_HANDLE_FILE_INFORMATION file_info;
++#endif
+     ULONG reparse_tag;
+     wchar_t *joined_path;
+ 
+@@ -11989,8 +12155,13 @@ DirEntry_from_find_data(path_t *path, WIN32_FIND_DATAW *dataW)
+             goto error;
+     }
+ 
++#ifdef MS_WINDOWS_STORE
++    find_data_to_file_info(dataW, &fbi, &fsi, &reparse_tag);
++    _Py_attribute_data_to_stat(&fbi, &fsi, reparse_tag, &entry->win32_lstat);
++#else
+     find_data_to_file_info(dataW, &file_info, &reparse_tag);
+     _Py_attribute_data_to_stat(&file_info, reparse_tag, &entry->win32_lstat);
++#endif
+ 
+     return (PyObject *)entry;
+ 
+@@ -12636,11 +12807,11 @@ static PyMethodDef posix_methods[] = {
+                         METH_VARARGS | METH_KEYWORDS,
+                         readlink__doc__},
+ #endif /* HAVE_READLINK */
+-#if !defined(HAVE_READLINK) && defined(MS_WINDOWS)
++#if !defined(HAVE_READLINK) && defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     {"readlink",        (PyCFunction)win_readlink,
+                         METH_VARARGS | METH_KEYWORDS,
+                         readlink__doc__},
+-#endif /* !defined(HAVE_READLINK) && defined(MS_WINDOWS) */
++#endif /* !defined(HAVE_READLINK) && defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE) */
+     OS_RENAME_METHODDEF
+     OS_REPLACE_METHODDEF
+     OS_RMDIR_METHODDEF
+@@ -12687,7 +12858,7 @@ static PyMethodDef posix_methods[] = {
+     OS_KILL_METHODDEF
+     OS_KILLPG_METHODDEF
+     OS_PLOCK_METHODDEF
+-#ifdef MS_WINDOWS
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     OS_STARTFILE_METHODDEF
+ #endif
+     OS_SETUID_METHODDEF
+@@ -12767,11 +12938,13 @@ static PyMethodDef posix_methods[] = {
+     OS_FPATHCONF_METHODDEF
+     OS_PATHCONF_METHODDEF
+     OS_ABORT_METHODDEF
++#ifndef MS_WINDOWS_STORE
+     OS__GETFULLPATHNAME_METHODDEF
+     OS__ISDIR_METHODDEF
+     OS__GETDISKUSAGE_METHODDEF
+     OS__GETFINALPATHNAME_METHODDEF
+     OS__GETVOLUMEPATHNAME_METHODDEF
++#endif
+     OS_GETLOADAVG_METHODDEF
+     OS_URANDOM_METHODDEF
+     OS_SETRESUID_METHODDEF
+diff --git a/PC/getpathp.c b/PC/getpathp.c
+index 1b553d53af..3e7c475dda 100644
+--- a/PC/getpathp.c
++++ b/PC/getpathp.c
+@@ -235,15 +235,22 @@ ismodule(wchar_t *filename, int update_filename)
+    stuff as fits will be appended.
+ */
+ 
++#ifndef MS_WINDOWS_STORE
+ static int _PathCchCombineEx_Initialized = 0;
+ typedef HRESULT(__stdcall *PPathCchCombineEx) (PWSTR pszPathOut, size_t cchPathOut,
+                                                PCWSTR pszPathIn, PCWSTR pszMore,
+                                                unsigned long dwFlags);
+ static PPathCchCombineEx _PathCchCombineEx;
++#endif
+ 
+ static void
+ join(wchar_t *buffer, const wchar_t *stuff)
+ {
++#ifdef MS_WINDOWS_STORE
++    if (FAILED(PathCchCombineEx(buffer, MAXPATHLEN+1, buffer, stuff, 0))) {
++        Py_FatalError("buffer overflow in getpathp.c's join()");
++    }
++#else
+     if (_PathCchCombineEx_Initialized == 0) {
+         HMODULE pathapi = LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll");
+         if (pathapi) {
+@@ -264,12 +271,15 @@ join(wchar_t *buffer, const wchar_t *stuff)
+             Py_FatalError("buffer overflow in getpathp.c's join()");
+         }
+     }
++#endif
+ }
+ 
++#ifndef MS_WINDOWS_STORE
+ static int _PathCchCanonicalizeEx_Initialized = 0;
+ typedef HRESULT(__stdcall *PPathCchCanonicalizeEx) (PWSTR pszPathOut, size_t cchPathOut,
+     PCWSTR pszPathIn, unsigned long dwFlags);
+ static PPathCchCanonicalizeEx _PathCchCanonicalizeEx;
++#endif
+ 
+ static _PyInitError canonicalize(wchar_t *buffer, const wchar_t *path)
+ {
+@@ -277,6 +287,11 @@ static _PyInitError canonicalize(wchar_t *buffer, const wchar_t *path)
+         return _Py_INIT_NO_MEMORY();
+     }
+ 
++#ifdef MS_WINDOWS_STORE
++    if (FAILED(PathCchCanonicalizeEx(buffer, MAXPATHLEN + 1, path, 0))) {
++        Py_FatalError("buffer overflow in getpathp.c's canonicalize()");
++    }
++#else
+     if (_PathCchCanonicalizeEx_Initialized == 0) {
+         HMODULE pathapi = LoadLibraryW(L"api-ms-win-core-path-l1-1-0.dll");
+         if (pathapi) {
+@@ -298,6 +313,7 @@ static _PyInitError canonicalize(wchar_t *buffer, const wchar_t *path)
+             return _Py_INIT_ERR("buffer overflow in getpathp.c's canonicalize()");
+         }
+     }
++#endif
+     return _Py_INIT_OK();
+ }
+ 
+@@ -1045,6 +1061,9 @@ static HANDLE hPython3;
+ int
+ _Py_CheckPython3(void)
+ {
++#ifdef MS_WINDOWS_STORE
++    return 0;
++#else
+     wchar_t py3path[MAXPATHLEN+1];
+     wchar_t *s;
+     if (python3_checked) {
+@@ -1070,4 +1089,5 @@ _Py_CheckPython3(void)
+     wcscat(py3path, L"\\DLLs\\python3.dll");
+     hPython3 = LoadLibraryExW(py3path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+     return hPython3 != NULL;
++#endif
+ }
+diff --git a/PC/pyconfig.h b/PC/pyconfig.h
+index d2a3f5dd39..895db3ab89 100644
+--- a/PC/pyconfig.h
++++ b/PC/pyconfig.h
+@@ -14,6 +14,8 @@ the following #defines
+ MS_WIN64 - Code specific to the MS Win64 API
+ MS_WIN32 - Code specific to the MS Win32 (and Win64) API (obsolete, this covers all supported APIs)
+ MS_WINDOWS - Code specific to Windows, but all versions.
++MS_WINDOWS_DESKTOP - Code specific to the MS Windows desktop API
++MS_WINDOWS_STORE - Code specific to the MS Windows store (UWP) API
+ Py_ENABLE_SHARED - Code if the Python core is built as a DLL.
+ 
+ Also note that neither "_M_IX86" or "_MSC_VER" should be used for
+@@ -48,6 +50,21 @@ WIN32 is still required for the locale module.
+ #define _CRT_NONSTDC_NO_DEPRECATE 1
+ #endif
+ 
++#if (_WIN32_WINNT >= 0x0A00 /* _WIN32_WINNT_WIN10 */)
++#  include <winapifamily.h>
++#  if defined(WINAPI_FAMILY)
++#    if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
++#      define MS_WINDOWS_DESKTOP
++#    else
++#      define MS_WINDOWS_STORE
++#    endif
++#  else
++#    define MS_WINDOWS_DESKTOP
++#  endif
++#else
++#  define MS_WINDOWS_DESKTOP
++#endif
++
+ #define HAVE_IO_H
+ #define HAVE_SYS_UTIME_H
+ #define HAVE_TEMPNAM
+@@ -411,7 +428,9 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ 
+ /* Define if you don't have tm_zone but do have the external array
+    tzname.  */
++#ifndef MS_WINDOWS_STORE
+ #define HAVE_TZNAME
++#endif
+ 
+ /* Define to `int' if <sys/types.h> doesn't define.  */
+ /* #undef mode_t */
+@@ -506,6 +525,10 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ /* Define if you have getpid.  */
+ #define HAVE_GETPID
+ 
++#ifdef MS_WINDOWS_STORE
++#define getpid GetCurrentProcessId
++#endif
++
+ /* Define if you have gettimeofday.  */
+ /* #undef HAVE_GETTIMEOFDAY */
+ 
+diff --git a/PC/winreg.c b/PC/winreg.c
+index 6f3106644b..4e4bab318d 100644
+--- a/PC/winreg.c
++++ b/PC/winreg.c
+@@ -105,6 +105,84 @@ PyDoc_STRVAR(PyHKEY_doc,
+   The PyHKEY object definition
+ 
+ ************************************************************************/
++#ifdef MS_WINDOWS_STORE
++/* Windows Runtime: provide all functions as not-implemented.  */
++#define _not_implemented(fn) \
++    static PyObject* winreg_##fn(PyObject *self, PyObject *args) { \
++    PyErr_SetExcFromWindowsErr(PyExc_WindowsError, ERROR_ACCESS_DENIED); \
++    return NULL;  \
++    }
++_not_implemented(CloseKey)
++_not_implemented(ConnectRegistry)
++_not_implemented(CreateKey)
++_not_implemented(CreateKeyEx)
++_not_implemented(DeleteKey)
++_not_implemented(DeleteKeyEx)
++_not_implemented(DeleteValue)
++_not_implemented(DisableReflectionKey)
++_not_implemented(EnableReflectionKey)
++_not_implemented(EnumKey)
++_not_implemented(EnumValue)
++_not_implemented(ExpandEnvironmentStrings)
++_not_implemented(FlushKey)
++_not_implemented(LoadKey)
++_not_implemented(OpenKey)
++_not_implemented(OpenKeyEx)
++_not_implemented(QueryValue)
++_not_implemented(QueryValueEx)
++_not_implemented(QueryInfoKey)
++_not_implemented(QueryReflectionKey)
++_not_implemented(SaveKey)
++_not_implemented(SetValue)
++_not_implemented(SetValueEx)
++
++#define WINREG_CLOSEKEY_METHODDEF \
++    {"CloseKey", (PyCFunction)winreg_CloseKey, METH_O, NULL},
++#define WINREG_CONNECTREGISTRY_METHODDEF \
++    {"ConnectRegistry", (PyCFunction)winreg_ConnectRegistry, METH_VARARGS, NULL},
++#define WINREG_CREATEKEY_METHODDEF \
++    {"CreateKey", (PyCFunction)winreg_CreateKey, METH_VARARGS, NULL},
++#define WINREG_CREATEKEYEX_METHODDEF \
++    {"CreateKeyEx", (PyCFunction)winreg_CreateKeyEx, METH_VARARGS|METH_KEYWORDS, NULL},
++#define WINREG_DELETEKEY_METHODDEF \
++    {"DeleteKey", (PyCFunction)winreg_DeleteKey, METH_VARARGS, NULL},
++#define WINREG_DELETEKEYEX_METHODDEF \
++    {"DeleteKeyEx", (PyCFunction)winreg_DeleteKeyEx, METH_VARARGS|METH_KEYWORDS, NULL},
++#define WINREG_DELETEVALUE_METHODDEF \
++    {"DeleteValue", (PyCFunction)winreg_DeleteValue, METH_VARARGS, NULL},
++#define WINREG_DISABLEREFLECTIONKEY_METHODDEF \
++    {"DisableReflectionKey", (PyCFunction)winreg_DisableReflectionKey, METH_O, NULL},
++#define WINREG_ENABLEREFLECTIONKEY_METHODDEF \
++    {"EnableReflectionKey", (PyCFunction)winreg_EnableReflectionKey, METH_O, NULL},
++#define WINREG_ENUMKEY_METHODDEF \
++    {"EnumKey", (PyCFunction)winreg_EnumKey, METH_VARARGS, NULL},
++#define WINREG_ENUMVALUE_METHODDEF \
++    {"EnumValue", (PyCFunction)winreg_EnumValue, METH_VARARGS, NULL},
++#define WINREG_EXPANDENVIRONMENTSTRINGS_METHODDEF \
++    {"ExpandEnvironmentStrings", (PyCFunction)winreg_ExpandEnvironmentStrings, METH_O, NULL},
++#define WINREG_FLUSHKEY_METHODDEF \
++    {"FlushKey", (PyCFunction)winreg_FlushKey, METH_O, NULL},
++#define WINREG_LOADKEY_METHODDEF \
++    {"LoadKey", (PyCFunction)winreg_LoadKey, METH_VARARGS, NULL},
++#define WINREG_OPENKEY_METHODDEF \
++    {"OpenKey", (PyCFunction)winreg_OpenKey, METH_VARARGS|METH_KEYWORDS, NULL},
++#define WINREG_OPENKEYEX_METHODDEF \
++    {"OpenKeyEx", (PyCFunction)winreg_OpenKeyEx, METH_VARARGS|METH_KEYWORDS, NULL},
++#define WINREG_QUERYVALUE_METHODDEF \
++    {"QueryValue", (PyCFunction)winreg_QueryValue, METH_VARARGS, NULL},
++#define WINREG_QUERYVALUEEX_METHODDEF \
++    {"QueryValueEx", (PyCFunction)winreg_QueryValueEx, METH_VARARGS, NULL},
++#define WINREG_QUERYINFOKEY_METHODDEF \
++    {"QueryInfoKey", (PyCFunction)winreg_QueryInfoKey, METH_O, NULL},
++#define WINREG_QUERYREFLECTIONKEY_METHODDEF \
++    {"QueryReflectionKey", (PyCFunction)winreg_QueryReflectionKey, METH_O, NULL},
++#define WINREG_SAVEKEY_METHODDEF \
++    {"SaveKey", (PyCFunction)winreg_SaveKey, METH_VARARGS, NULL},
++#define WINREG_SETVALUE_METHODDEF \
++    {"SetValue", (PyCFunction)winreg_SetValue, METH_VARARGS, NULL},
++#define WINREG_SETVALUEEX_METHODDEF \
++    {"SetValueEx", (PyCFunction)winreg_SetValueEx, METH_VARARGS, NULL},
++#else
+ typedef struct {
+     PyObject_VAR_HEAD
+     HKEY hkey;
+@@ -1813,6 +1891,7 @@ winreg_QueryReflectionKey_impl(PyObject *module, HKEY key)
+                                                    "RegQueryReflectionKey");
+     return PyBool_FromLong(result);
+ }
++#endif
+ 
+ static struct PyMethodDef winreg_methods[] = {
+     WINREG_CLOSEKEY_METHODDEF
+@@ -1861,7 +1940,11 @@ inskey(PyObject * d, char * name, HKEY key)
+     Py_XDECREF(v);
+ }
+ 
++#ifdef MS_WINDOWS_STORE
++#define ADD_KEY(val) inskey(d, #val, INVALID_HANDLE_VALUE)
++#else
+ #define ADD_KEY(val) inskey(d, #val, val)
++#endif
+ 
+ 
+ static struct PyModuleDef winregmodule = {
+@@ -1883,6 +1966,7 @@ PyMODINIT_FUNC PyInit_winreg(void)
+     if (m == NULL)
+         return NULL;
+     d = PyModule_GetDict(m);
++#ifndef MS_WINDOWS_STORE
+     PyHKEY_Type.tp_doc = PyHKEY_doc;
+     if (PyType_Ready(&PyHKEY_Type) < 0)
+         return NULL;
+@@ -1891,6 +1975,7 @@ PyMODINIT_FUNC PyInit_winreg(void)
+                              (PyObject *)&PyHKEY_Type) != 0)
+         return NULL;
+     Py_INCREF(PyExc_OSError);
++#endif
+     if (PyDict_SetItemString(d, "error",
+                              PyExc_OSError) != 0)
+         return NULL;
+diff --git a/Python/bootstrap_hash.c b/Python/bootstrap_hash.c
+index e2afba2b2e..acd4cdab43 100644
+--- a/Python/bootstrap_hash.c
++++ b/Python/bootstrap_hash.c
+@@ -31,11 +31,14 @@ static int _Py_HashSecret_Initialized = 0;
+ #endif
+ 
+ #ifdef MS_WINDOWS
++#ifndef MS_WINDOWS_STORE
+ static HCRYPTPROV hCryptProv = 0;
++#endif
+ 
+ static int
+ win32_urandom_init(int raise)
+ {
++#ifndef MS_WINDOWS_STORE
+     /* Acquire context */
+     if (!CryptAcquireContext(&hCryptProv, NULL, NULL,
+                              PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+@@ -47,6 +50,7 @@ error:
+     if (raise) {
+         PyErr_SetFromWindowsErr(0);
+     }
++#endif
+     return -1;
+ }
+ 
+@@ -55,6 +59,9 @@ error:
+ static int
+ win32_urandom(unsigned char *buffer, Py_ssize_t size, int raise)
+ {
++#ifdef MS_WINDOWS_STORE
++    return -1;
++#else
+     Py_ssize_t chunk;
+ 
+     if (hCryptProv == 0)
+@@ -79,6 +86,7 @@ win32_urandom(unsigned char *buffer, Py_ssize_t size, int raise)
+         size -= chunk;
+     }
+     return 0;
++#endif
+ }
+ 
+ #else /* !MS_WINDOWS */
+@@ -608,10 +616,12 @@ _Py_HashRandomization_Init(const _PyCoreConfig *config)
+            _PyRandom_Init() must not block Python initialization: call
+            pyurandom() is non-blocking mode (blocking=0): see the PEP 524. */
+         res = pyurandom(secret, secret_size, 0, 0);
++#ifndef MS_WINDOWS_STORE
+         if (res < 0) {
+             return _Py_INIT_USER_ERR("failed to get random numbers "
+                                      "to initialize Python");
+         }
++#endif
+     }
+     return _Py_INIT_OK();
+ }
+@@ -621,10 +631,12 @@ void
+ _Py_HashRandomization_Fini(void)
+ {
+ #ifdef MS_WINDOWS
++#ifndef MS_WINDOWS_STORE
+     if (hCryptProv) {
+         CryptReleaseContext(hCryptProv, 0);
+         hCryptProv = 0;
+     }
++#endif
+ #else
+     dev_urandom_close();
+ #endif
+diff --git a/Python/dynload_win.c b/Python/dynload_win.c
+index 51bbc163fa..7892e19018 100644
+--- a/Python/dynload_win.c
++++ b/Python/dynload_win.c
+@@ -192,22 +192,30 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
+ #endif
+ 
+         /* Don't display a message box when Python can't load a DLL */
++#ifndef MS_WINDOWS_STORE
+         old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
++#endif
+ 
+ #if HAVE_SXS
+         cookie = _Py_ActivateActCtx();
+ #endif
++#ifdef MS_WINDOWS_STORE
++        hDLL = LoadPackagedLibrary(wpathname, 0);
++#else
+         /* We use LoadLibraryEx so Windows looks for dependent DLLs
+             in directory of pathname first. */
+         /* XXX This call doesn't exist in Windows CE */
+         hDLL = LoadLibraryExW(wpathname, NULL,
+                               LOAD_WITH_ALTERED_SEARCH_PATH);
++#endif
+ #if HAVE_SXS
+         _Py_DeactivateActCtx(cookie);
+ #endif
+ 
+         /* restore old error mode settings */
++#ifndef MS_WINDOWS_STORE
+         SetErrorMode(old_mode);
++#endif
+ 
+         if (hDLL==NULL){
+             PyObject *message;
+diff --git a/Python/fileutils.c b/Python/fileutils.c
+index 5e71d37526..758e2a1541 100644
+--- a/Python/fileutils.c
++++ b/Python/fileutils.c
+@@ -35,7 +35,7 @@ int _Py_open_cloexec_works = -1;
+ PyObject *
+ _Py_device_encoding(int fd)
+ {
+-#if defined(MS_WINDOWS)
++#if defined(MS_WINDOWS) && !defined(MS_WINDOWS_STORE)
+     UINT cp;
+ #endif
+     int valid;
+@@ -46,6 +46,9 @@ _Py_device_encoding(int fd)
+         Py_RETURN_NONE;
+ 
+ #if defined(MS_WINDOWS)
++#if defined(MS_WINDOWS_STORE)
++    return PyUnicode_FromString("UTF-8");
++#else
+     if (fd == 0)
+         cp = GetConsoleCP();
+     else if (fd == 1 || fd == 2)
+@@ -56,6 +59,7 @@ _Py_device_encoding(int fd)
+        has no console */
+     if (cp != 0)
+         return PyUnicode_FromFormat("cp%u", (unsigned int)cp);
++#endif
+ #elif defined(CODESET)
+     {
+         char *codeset = nl_langinfo(CODESET);
+@@ -772,6 +776,31 @@ attributes_to_mode(DWORD attr)
+     return m;
+ }
+ 
++#ifdef MS_WINDOWS_STORE
++void
++_Py_attribute_data_to_stat(FILE_BASIC_INFO *fbi, FILE_STANDARD_INFO *fsi,
++                           ULONG reparse_tag, struct _Py_stat_struct *result)
++{
++    memset(result, 0, sizeof(*result));
++    result->st_mode = attributes_to_mode(fbi->FileAttributes);
++    result->st_size = fsi->EndOfFile.QuadPart;
++    FILE_TIME_to_time_t_nsec(&fbi->CreationTime, &result->st_ctime, &result->st_ctime_nsec);
++    FILE_TIME_to_time_t_nsec(&fbi->LastWriteTime, &result->st_mtime, &result->st_mtime_nsec);
++    FILE_TIME_to_time_t_nsec(&fbi->LastAccessTime, &result->st_atime, &result->st_atime_nsec);
++    result->st_nlink = fsi->NumberOfLinks;
++    /* XXX
++    result->st_ino = (((uint64_t)info->nFileIndexHigh) << 32) + info->nFileIndexLow;
++    */
++    result->st_ino = -1;
++    if (reparse_tag == IO_REPARSE_TAG_SYMLINK) {
++        /* first clear the S_IFMT bits */
++        result->st_mode ^= (result->st_mode & S_IFMT);
++        /* now set the bits that make this a symlink */
++        result->st_mode |= S_IFLNK;
++    }
++    result->st_file_attributes = fbi->FileAttributes;
++}
++#else
+ void
+ _Py_attribute_data_to_stat(BY_HANDLE_FILE_INFORMATION *info, ULONG reparse_tag,
+                            struct _Py_stat_struct *result)
+@@ -795,6 +824,7 @@ _Py_attribute_data_to_stat(BY_HANDLE_FILE_INFORMATION *info, ULONG reparse_tag,
+     result->st_file_attributes = info->dwFileAttributes;
+ }
+ #endif
++#endif
+ 
+ /* Return information about a file.
+ 
+@@ -812,7 +842,12 @@ int
+ _Py_fstat_noraise(int fd, struct _Py_stat_struct *status)
+ {
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_STORE
++    FILE_BASIC_INFO fbi;
++    FILE_STANDARD_INFO fsi;
++#else
+     BY_HANDLE_FILE_INFORMATION info;
++#endif
+     HANDLE h;
+     int type;
+ 
+@@ -846,6 +881,18 @@ _Py_fstat_noraise(int fd, struct _Py_stat_struct *status)
+         return 0;
+     }
+ 
++#ifdef MS_WINDOWS_STORE
++    if (!GetFileInformationByHandleEx(h, FileBasicInfo, &fbi, sizeof(fbi))) {
++        return -1;
++    }
++
++    if (!GetFileInformationByHandleEx(h, FileStandardInfo, &fsi, sizeof(fsi))) {
++        return -1;
++    }
++
++    _Py_attribute_data_to_stat(&fbi, &fsi, 0, status);
++    status->st_ino = 0;
++#else
+     if (!GetFileInformationByHandle(h, &info)) {
+         /* The Win32 error is already set, but we also set errno for
+            callers who expect it */
+@@ -856,6 +903,8 @@ _Py_fstat_noraise(int fd, struct _Py_stat_struct *status)
+     _Py_attribute_data_to_stat(&info, 0, status);
+     /* specific to fstat() */
+     status->st_ino = (((uint64_t)info.nFileIndexHigh) << 32) + info.nFileIndexLow;
++#endif
++
+     return 0;
+ #else
+     return fstat(fd, status);
+@@ -948,6 +997,9 @@ static int
+ get_inheritable(int fd, int raise)
+ {
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_STORE
++    return 0;
++#else
+     HANDLE handle;
+     DWORD flags;
+ 
+@@ -967,6 +1019,7 @@ get_inheritable(int fd, int raise)
+     }
+ 
+     return (flags & HANDLE_FLAG_INHERIT);
++#endif
+ #else
+     int flags;
+ 
+@@ -995,8 +1048,10 @@ static int
+ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+ {
+ #ifdef MS_WINDOWS
++#ifndef MS_WINDOWS_STORE
+     HANDLE handle;
+     DWORD flags;
++#endif
+ #else
+ #if defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
+     static int ioctl_works = -1;
+@@ -1024,6 +1079,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+     }
+ 
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_STORE
++    if (!inheritable)
++        return 0;
++    PyErr_SetString(PyExc_NotImplementedError, "set_inheritable is not implemented on UWP");
++    return -1;
++#else
+     _Py_BEGIN_SUPPRESS_IPH
+     handle = (HANDLE)_get_osfhandle(fd);
+     _Py_END_SUPPRESS_IPH
+@@ -1043,6 +1104,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+         return -1;
+     }
+     return 0;
++#endif
+ 
+ #else
+ 
+diff --git a/Python/pytime.c b/Python/pytime.c
+index 0e94131741..87d727e84d 100644
+--- a/Python/pytime.c
++++ b/Python/pytime.c
+@@ -1,6 +1,9 @@
+ #include "Python.h"
+ #ifdef MS_WINDOWS
+ #include <windows.h>
++#ifdef MS_WINDOWS_STORE
++#  include <winsock2.h>         /* struct timeval */
++#endif
+ #endif
+ 
+ #if defined(__APPLE__)
+@@ -666,11 +669,16 @@ pygettimeofday(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
+        days). */
+     *tp = large.QuadPart * 100 - 11644473600000000000;
+     if (info) {
++#ifndef MS_WINDOWS_STORE
+         DWORD timeAdjustment, timeIncrement;
+         BOOL isTimeAdjustmentDisabled, ok;
++#endif
+ 
+         info->implementation = "GetSystemTimeAsFileTime()";
+         info->monotonic = 0;
++#ifdef MS_WINDOWS_STORE
++        info->resolution = -1;
++#else
+         ok = GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement,
+                                      &isTimeAdjustmentDisabled);
+         if (!ok) {
+@@ -678,6 +686,7 @@ pygettimeofday(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
+             return -1;
+         }
+         info->resolution = timeIncrement * 1e-7;
++#endif
+         info->adjustable = 1;
+     }
+ 
+@@ -785,10 +794,15 @@ pymonotonic(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
+     *tp = t * MS_TO_NS;
+ 
+     if (info) {
++#ifndef MS_WINDOWS_STORE
+         DWORD timeAdjustment, timeIncrement;
+         BOOL isTimeAdjustmentDisabled, ok;
++#endif
+         info->implementation = "GetTickCount64()";
+         info->monotonic = 1;
++#ifdef MS_WINDOWS_STORE
++        info->resolution = 1;
++#else
+         ok = GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement,
+                                      &isTimeAdjustmentDisabled);
+         if (!ok) {
+@@ -796,6 +810,7 @@ pymonotonic(_PyTime_t *tp, _Py_clock_info_t *info, int raise)
+             return -1;
+         }
+         info->resolution = timeIncrement * 1e-7;
++#endif
+         info->adjustable = 0;
+     }
+ 
+diff --git a/Python/sysmodule.c b/Python/sysmodule.c
+index b73d100811..be74674f10 100644
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -1094,6 +1094,7 @@ sys_getwindowsversion(PyObject *self)
+     realMinor = ver.dwMinorVersion;
+     realBuild = ver.dwBuildNumber;
+ 
++#ifndef MS_WINDOWS_STORE
+     // GetVersion will lie if we are running in a compatibility mode.
+     // We need to read the version info from a system file resource
+     // to accurately identify the OS version. If we fail for any reason,
+@@ -1113,6 +1114,7 @@ sys_getwindowsversion(PyObject *self)
+         }
+         PyMem_RawFree(verblock);
+     }
++#endif
+     PyStructSequence_SET_ITEM(version, pos++, Py_BuildValue("(kkk)",
+         realMajor,
+         realMinor,
+-- 
+2.17.1.windows.2
+

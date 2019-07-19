@@ -1,0 +1,88 @@
+From 206c679b996985df4b691569cc7b8f4053341b0b Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 2 Feb 2019 20:26:55 -0800
+Subject: [PATCH 2/4] bpo-35890 : Fix some API calling consistency (GH-11742)
+
+Unicode version of Windows APIs are used in places, but not for GetVersionEx in Python/sysmodule.c
+The wcstok_s is called on Windows in Modules/main.c and PC/launcher.c, but not in Python/pathconfig.c
+---
+ .../Windows/2019-02-02-22-12-23.bpo-35890.ccIjHH.rst |  1 +
+ Python/pathconfig.c                                  | 12 +++++++++---
+ Python/sysmodule.c                                   |  6 +++---
+ 3 files changed, 13 insertions(+), 6 deletions(-)
+ create mode 100644 Misc/NEWS.d/next/Windows/2019-02-02-22-12-23.bpo-35890.ccIjHH.rst
+
+diff --git a/Misc/NEWS.d/next/Windows/2019-02-02-22-12-23.bpo-35890.ccIjHH.rst b/Misc/NEWS.d/next/Windows/2019-02-02-22-12-23.bpo-35890.ccIjHH.rst
+new file mode 100644
+index 0000000000..6bf6084ecc
+--- /dev/null
++++ b/Misc/NEWS.d/next/Windows/2019-02-02-22-12-23.bpo-35890.ccIjHH.rst
+@@ -0,0 +1 @@
++Fix API calling consistency of GetVersionEx and wcstok.
+\ No newline at end of file
+diff --git a/Python/pathconfig.c b/Python/pathconfig.c
+index aacc5f5a5f..3417842ce4 100644
+--- a/Python/pathconfig.c
++++ b/Python/pathconfig.c
+@@ -388,6 +388,12 @@ _PyPathConfig_ComputeArgv0(int argc, wchar_t **argv)
+ }
+ 
+ 
++#ifdef MS_WINDOWS
++#define WCSTOK wcstok_s
++#else
++#define WCSTOK wcstok
++#endif
++
+ /* Search for a prefix value in an environment file (pyvenv.cfg).
+    If found, copy it into the provided buffer. */
+ int
+@@ -418,11 +424,11 @@ _Py_FindEnvConfigValue(FILE *env_file, const wchar_t *key,
+         wchar_t *tmpbuffer = _Py_DecodeUTF8_surrogateescape(buffer, n);
+         if (tmpbuffer) {
+             wchar_t * state;
+-            wchar_t * tok = wcstok(tmpbuffer, L" \t\r\n", &state);
++            wchar_t * tok = WCSTOK(tmpbuffer, L" \t\r\n", &state);
+             if ((tok != NULL) && !wcscmp(tok, key)) {
+-                tok = wcstok(NULL, L" \t", &state);
++                tok = WCSTOK(NULL, L" \t", &state);
+                 if ((tok != NULL) && !wcscmp(tok, L"=")) {
+-                    tok = wcstok(NULL, L"\r\n", &state);
++                    tok = WCSTOK(NULL, L"\r\n", &state);
+                     if (tok != NULL) {
+                         wcsncpy(value, tok, MAXPATHLEN);
+                         result = 1;
+diff --git a/Python/sysmodule.c b/Python/sysmodule.c
+index efe5b29ef3..b73d100811 100644
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -1065,7 +1065,7 @@ sys_getwindowsversion(PyObject *self)
+ {
+     PyObject *version;
+     int pos = 0;
+-    OSVERSIONINFOEX ver;
++    OSVERSIONINFOEXW ver;
+     DWORD realMajor, realMinor, realBuild;
+     HANDLE hKernel32;
+     wchar_t kernel32_path[MAX_PATH];
+@@ -1073,7 +1073,7 @@ sys_getwindowsversion(PyObject *self)
+     DWORD verblock_size;
+ 
+     ver.dwOSVersionInfoSize = sizeof(ver);
+-    if (!GetVersionEx((OSVERSIONINFO*) &ver))
++    if (!GetVersionExW((OSVERSIONINFOW*) &ver))
+         return PyErr_SetFromWindowsErr(0);
+ 
+     version = PyStructSequence_New(&WindowsVersionType);
+@@ -1084,7 +1084,7 @@ sys_getwindowsversion(PyObject *self)
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.dwMinorVersion));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.dwBuildNumber));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.dwPlatformId));
+-    PyStructSequence_SET_ITEM(version, pos++, PyUnicode_FromString(ver.szCSDVersion));
++    PyStructSequence_SET_ITEM(version, pos++, PyUnicode_FromWideChar(ver.szCSDVersion, -1));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.wServicePackMajor));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.wServicePackMinor));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.wSuiteMask));
+-- 
+2.17.1.windows.2
+
