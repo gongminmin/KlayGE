@@ -2,6 +2,11 @@ set(EXTERNAL_PROJECT_DIR "${KLAYGE_ROOT_DIR}/External")
 
 set(EXTERNAL_VS_FOLDER_PREFIX "External")
 
+find_program(git_executable NAMES git git.exe git.cmd)
+if(NOT git_executable)
+	message(FATAL_ERROR "Failed to find git.")
+endif()
+
 FUNCTION(DOWNLOAD_7Z)
 	IF(KLAYGE_HOST_PLATFORM_WINDOWS)
 		SET(SEVENZIP_EXE_FILE_ID "20fea1314dbed552d5fedee096e2050369172ee1")
@@ -60,13 +65,13 @@ function(CloneExternalLib name url branch shallow_exclude)
 	if(NOT ("x${shallow_exclude}" STREQUAL "x"))
 		set(shallow_exclude_param "--shallow-exclude=${shallow_exclude}")
 	endif()
-	execute_process(COMMAND "git" "clone" ${url} ${branch_param} ${branch_name_param} ${shallow_exclude_param} "${name}" "-n" WORKING_DIRECTORY "${external_folder}")
+	execute_process(COMMAND "${git_executable}" "clone" ${url} ${branch_param} ${branch_name_param} ${shallow_exclude_param} "${name}" "-n" WORKING_DIRECTORY "${external_folder}")
 endfunction()
 
 function(CheckoutExternalLib name rev)
 	set(external_lib_folder "${KLAYGE_ROOT_DIR}/External/${name}")
 
-	execute_process(COMMAND "git" "checkout" "-q" ${rev} WORKING_DIRECTORY ${external_lib_folder} RESULT_VARIABLE checkout_err)
+	execute_process(COMMAND "${git_executable}" "checkout" "-q" ${rev} WORKING_DIRECTORY ${external_lib_folder} RESULT_VARIABLE checkout_err)
 	set(${ARGV2} ${checkout_err} PARENT_SCOPE)
 endfunction()
 
@@ -78,8 +83,8 @@ function(UpdateExternalLib name url rev)
 		set(need_clone FALSE)
 
 		message(STATUS "Updating ${name} to revision ${rev}...")
-		execute_process(COMMAND "git" "fetch" "origin" WORKING_DIRECTORY ${external_lib_folder})
-		execute_process(COMMAND "git" "rev-parse" "HEAD" WORKING_DIRECTORY ${external_lib_folder} OUTPUT_VARIABLE head_rev)
+		execute_process(COMMAND "${git_executable}" "fetch" "origin" WORKING_DIRECTORY ${external_lib_folder})
+		execute_process(COMMAND "${git_executable}" "rev-parse" "HEAD" WORKING_DIRECTORY ${external_lib_folder} OUTPUT_VARIABLE head_rev)
 		string(STRIP ${head_rev} head_rev)
 		if (${head_rev} STREQUAL ${rev})
 			set(need_checkout FALSE)
