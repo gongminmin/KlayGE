@@ -772,7 +772,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if 0 == build_info.project_type.find("vs"):
 		toolset_name = "-T"
 		if not build_info.is_windows_store:
-			toolset_name = " v%s," % build_info.compiler_version
+			toolset_name += " v%s," % build_info.compiler_version
 		toolset_name += "host=x64"
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
