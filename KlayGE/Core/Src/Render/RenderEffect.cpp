@@ -62,11 +62,13 @@
 
 #include <fstream>
 #include <string>
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#include <charconv>
+#endif
 
 #include <boost/assert.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -5467,10 +5469,23 @@ namespace KlayGE
 		{
 			array_size_ = MakeSharedPtr<std::string>(as_str);
 
-			if (!boost::conversion::try_lexical_convert(as_str, as))
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+			char const* str = as_str.c_str();
+			std::from_chars_result result = std::from_chars(str, str + as_str.size(), as);
+			if (result.ec != std::errc())
 			{
 				as = 1;  // dummy array size
 			}
+#else
+			try
+			{
+				as = std::stoul(as_str);
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
+#endif
 		}
 		var_ = stream_in_var(res, type_, as);
 
@@ -5543,10 +5558,23 @@ namespace KlayGE
 		uint32_t as;
 		if (array_size_)
 		{
-			if (!boost::conversion::try_lexical_convert(*array_size_, as))
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+			char const* str = array_size_->c_str();
+			std::from_chars_result result = std::from_chars(str, str + array_size_->size(), as);
+			if (result.ec != std::errc())
 			{
 				as = 1;  // dummy array size
 			}
+#else
+			try
+			{
+				as = std::stoul(*array_size_);
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
+#endif
 		}
 		else
 		{

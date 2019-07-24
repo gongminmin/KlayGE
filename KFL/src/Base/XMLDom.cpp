@@ -33,14 +33,8 @@
 #include <KFL/ResIdentifier.hpp>
 
 #include <string>
-
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#include <charconv>
 #endif
 
 #include <rapidxml.hpp>
@@ -507,17 +501,65 @@ namespace KlayGE
 
 	bool XMLNode::TryConvert(int32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stol(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLNode::TryConvert(uint32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stoul(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLNode::TryConvert(float& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stof(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	int32_t XMLNode::ValueInt() const
@@ -591,32 +633,80 @@ namespace KlayGE
 
 	bool XMLAttribute::TryConvert(int32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stol(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLAttribute::TryConvert(uint32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stoul(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLAttribute::TryConvert(float& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stof(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	int32_t XMLAttribute::ValueInt() const
 	{
-		return std::stol(std::string(value_));
+		return std::stol(std::string(this->ValueString()));
 	}
 
 	uint32_t XMLAttribute::ValueUInt() const
 	{
-		return std::stoul(std::string(value_));
+		return std::stoul(std::string(this->ValueString()));
 	}
 
 	float XMLAttribute::ValueFloat() const
 	{
-		return std::stof(std::string(value_));
+		return std::stof(std::string(this->ValueString()));
 	}
 
 	std::string_view XMLAttribute::ValueString() const
