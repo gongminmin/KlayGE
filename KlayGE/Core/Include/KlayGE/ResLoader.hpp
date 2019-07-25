@@ -38,15 +38,6 @@
 #include <string>
 #include <vector>
 
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
-#endif
-#include <boost/lockfree/spsc_queue.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
-#endif
-
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
 
@@ -180,8 +171,11 @@ namespace KlayGE
 		std::mutex loading_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_;
-		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>,
-			boost::lockfree::capacity<1024>> loading_res_queue_;
+
+		bool non_empty_loading_res_queue_ = false;
+		std::condition_variable loading_res_queue_cv_;
+		std::mutex loading_res_queue_mutex_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
 
 		std::unique_ptr<joiner<void>> loading_thread_;
 		volatile bool quit_;

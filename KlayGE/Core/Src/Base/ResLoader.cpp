@@ -831,7 +831,12 @@ namespace KlayGE
 						std::lock_guard<std::mutex> lock(loading_mutex_);
 						loading_res_.emplace_back(res_desc, async_is_done);
 					}
-					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
+					{
+						std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
+						loading_res_queue_.emplace_back(res_desc, async_is_done);
+						non_empty_loading_res_queue_ = true;
+						loading_res_queue_cv_.notify_one();
+					}
 				}
 				else
 				{
@@ -974,8 +979,17 @@ namespace KlayGE
 	{
 		while (!quit_)
 		{
-			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>> res_pair;
-			while (loading_res_queue_.pop(res_pair))
+			std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_copy;
+
+			{
+				std::unique_lock<std::mutex> lock(loading_res_queue_mutex_);
+				loading_res_queue_cv_.wait(lock, [this] { return non_empty_loading_res_queue_; });
+
+				loading_res_queue_copy.swap(loading_res_queue_);
+				non_empty_loading_res_queue_ = false;
+			}
+
+			for (auto& res_pair : loading_res_queue_copy)
 			{
 				if (LS_Loading == *res_pair.second)
 				{
