@@ -208,6 +208,13 @@ namespace KlayGE
 	ResLoader::~ResLoader()
 	{
 		quit_ = true;
+
+		{
+			std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
+			non_empty_loading_res_queue_ = true;
+			loading_res_queue_cv_.notify_one();
+		}
+
 		(*loading_thread_)();
 	}
 
