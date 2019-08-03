@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Input.hpp>
@@ -23,6 +22,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/PostProcess.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"

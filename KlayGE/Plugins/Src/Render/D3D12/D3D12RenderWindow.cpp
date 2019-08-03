@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -45,6 +44,7 @@
 #include <KFL/CXX2a/span.hpp>
 
 #include <cstring>
+#include <iterator>
 #include <string>
 
 #include <boost/assert.hpp>

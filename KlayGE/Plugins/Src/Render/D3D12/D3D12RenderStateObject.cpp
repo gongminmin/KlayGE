@@ -29,7 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -39,6 +38,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KFL/Hash.hpp>
 
+#include <iterator>
 #include <limits>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>

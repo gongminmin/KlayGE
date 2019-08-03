@@ -10,7 +10,6 @@ SET(BASE_DETAIL_HEADER_FILES
 SET(BASE_CXX17_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/any.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/filesystem.hpp
-	${KFL_PROJECT_DIR}/include/KFL/CXX17/iterator.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/optional.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/string_view.hpp
 )

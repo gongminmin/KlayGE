@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
@@ -15,6 +14,8 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+
+#include <iterator>
 
 #include "Model.hpp"
 

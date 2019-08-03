@@ -29,7 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -41,6 +40,7 @@
 #include <KlayGE/RenderEffect.hpp>
 
 #include <cstring>
+#include <iterator>
 
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>

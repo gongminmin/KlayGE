@@ -29,10 +29,11 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
+
+#include <iterator>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 

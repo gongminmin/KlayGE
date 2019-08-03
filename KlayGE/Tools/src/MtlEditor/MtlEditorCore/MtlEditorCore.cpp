@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -22,8 +21,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
 
 #include "MtlEditorCore.hpp"
 

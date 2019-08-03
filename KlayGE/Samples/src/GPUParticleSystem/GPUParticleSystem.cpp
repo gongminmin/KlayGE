@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Math.hpp>
@@ -23,10 +22,11 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
 #include <random>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "GPUParticleSystem.hpp"

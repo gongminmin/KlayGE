@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -26,8 +25,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
-#include <sstream>
+#include <iterator>
 #include <random>
+#include <sstream>
 
 #include "SampleCommon.hpp"
 #include "MotionBlurDoF.hpp"

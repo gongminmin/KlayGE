@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -23,6 +22,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"

@@ -29,14 +29,14 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Color.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <vector>
 #include <cstring>
+#include <iterator>
+#include <vector>
 #include <boost/assert.hpp>
 
 #include <KlayGE/TexCompressionETC.hpp>

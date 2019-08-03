@@ -29,7 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -61,6 +60,7 @@
 #include <KlayGE/D3D12/D3D12Fence.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>

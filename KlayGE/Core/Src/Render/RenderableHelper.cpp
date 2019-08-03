@@ -26,7 +26,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
@@ -43,6 +42,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <cstring>
+#include <iterator>
 
 #include <KlayGE/RenderableHelper.hpp>
 

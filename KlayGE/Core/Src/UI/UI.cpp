@@ -14,7 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -39,6 +38,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <mutex>
 
 #include <KlayGE/UI.hpp>

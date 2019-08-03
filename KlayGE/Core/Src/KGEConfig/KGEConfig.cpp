@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
@@ -20,6 +19,7 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <commctrl.h>
+#include <iterator>
 #include <sstream>
 #include <string>
 

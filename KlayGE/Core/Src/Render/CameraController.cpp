@@ -24,7 +24,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
@@ -40,6 +39,7 @@
 #include <KFL/Hash.hpp>
 
 #include <istream>
+#include <iterator>
 #include <string>
 
 #include <KlayGE/CameraController.hpp>

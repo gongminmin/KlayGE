@@ -29,15 +29,14 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <algorithm>
-#include <iterator>
 #include <fstream>
+#include <iterator>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>

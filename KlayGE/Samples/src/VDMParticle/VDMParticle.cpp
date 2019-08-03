@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
@@ -27,8 +26,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "VDMParticle.hpp"

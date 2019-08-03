@@ -30,8 +30,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/CXX17/iterator.hpp>
 
+#include <iterator>
 #include <cstring>
 #include <boost/assert.hpp>
 

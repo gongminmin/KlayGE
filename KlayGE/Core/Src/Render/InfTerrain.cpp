@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -20,6 +19,8 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KFL/Half.hpp>
+
+#include <iterator>
 
 #include <KlayGE/InfTerrain.hpp>
 

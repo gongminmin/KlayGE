@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -45,6 +44,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 #include <boost/assert.hpp>
 

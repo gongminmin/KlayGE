@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -22,9 +21,10 @@
 #include <KlayGE/Audio.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Sound.hpp"

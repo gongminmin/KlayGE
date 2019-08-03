@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -24,6 +23,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <system_error>

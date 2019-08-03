@@ -45,7 +45,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -61,6 +60,7 @@
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
+#include <iterator>
 #include <string>
 #ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 #include <charconv>

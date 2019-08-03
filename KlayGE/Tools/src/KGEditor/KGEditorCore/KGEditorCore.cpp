@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
@@ -21,8 +20,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KFL/XMLDom.hpp>
 
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>

@@ -36,7 +36,7 @@
 #include <KFL/Config.hpp>
 
 #if defined(KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT)
-	#include <type_traits>
+	#include <bit>
 #else
 	namespace std
 	{

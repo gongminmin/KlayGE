@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -20,6 +19,7 @@
 
 #include <KlayGE/SSRPostProcess.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"

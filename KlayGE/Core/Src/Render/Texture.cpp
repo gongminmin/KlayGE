@@ -28,7 +28,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -45,6 +44,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <system_error>
 
 #include <KlayGE/Texture.hpp>

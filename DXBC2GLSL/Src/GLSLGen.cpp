@@ -38,8 +38,8 @@
 #include <DXBC2GLSL/GLSLGen.hpp>
 
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 
+#include <iterator>
 #include <string>
 #include <ostream>
 

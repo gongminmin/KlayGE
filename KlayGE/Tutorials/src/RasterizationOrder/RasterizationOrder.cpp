@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
@@ -22,8 +21,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "RasterizationOrder.hpp"

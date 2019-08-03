@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -9,6 +8,8 @@
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Imposter.hpp>
 #include <KlayGE/Mesh.hpp>
+
+#include <iterator>
 
 #include "FoliageTerrain.hpp"
 

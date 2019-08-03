@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -28,8 +27,9 @@
 
 //#define CALC_FITTING_TABLE
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 #ifdef CALC_FITTING_TABLE
 #include <iostream>
 #include <iomanip>
