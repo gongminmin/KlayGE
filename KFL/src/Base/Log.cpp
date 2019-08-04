@@ -90,7 +90,7 @@ namespace
 			: oss_(oss)
 		{
 		}
-		MultiOStreamsCallback(MultiOStreamsCallback&& rhs)
+		MultiOStreamsCallback(MultiOStreamsCallback&& rhs) noexcept
 			: oss_(std::move(rhs.oss_))
 		{
 		}
@@ -134,7 +134,7 @@ namespace
 		EmptyOStreamsCallback()
 		{
 		}
-		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs)
+		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs) noexcept
 		{
 			KFL_UNUSED(rhs);
 		}

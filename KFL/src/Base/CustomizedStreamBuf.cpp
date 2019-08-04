@@ -171,7 +171,7 @@ namespace KlayGE
 	{
 	}
 
-	VectorStreamCallback::VectorStreamCallback(VectorStreamCallback&& rhs)
+	VectorStreamCallback::VectorStreamCallback(VectorStreamCallback&& rhs) noexcept
 		: data_(rhs.data_)
 	{
 	}
@@ -189,7 +189,7 @@ namespace KlayGE
 	{
 	}
 
-	StringStreamCallback::StringStreamCallback(StringStreamCallback&& rhs)
+	StringStreamCallback::StringStreamCallback(StringStreamCallback&& rhs) noexcept
 		: data_(rhs.data_)
 	{
 	}

@@ -98,7 +98,7 @@ namespace KlayGE
 	{
 	public:
 		explicit VectorStreamCallback(std::vector<std::streambuf::char_type>& data);
-		VectorStreamCallback(VectorStreamCallback&& rhs);
+		VectorStreamCallback(VectorStreamCallback&& rhs) noexcept;
 
 		std::streambuf::int_type operator()(void const * buff, std::streamsize count);
 
@@ -119,7 +119,7 @@ namespace KlayGE
 	{
 	public:
 		explicit StringStreamCallback(std::basic_string<std::streambuf::char_type>& data);
-		StringStreamCallback(StringStreamCallback&& rhs);
+		StringStreamCallback(StringStreamCallback&& rhs) noexcept;
 
 		std::streambuf::int_type operator()(void const * buff, std::streamsize count);
 
