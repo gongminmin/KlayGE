@@ -165,7 +165,7 @@ namespace KlayGE
 				*glossiness_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
 					static_cast<float>(!!textures_[RenderMaterial::TS_Glossiness]));
 				*glossiness_tex_param_ = textures_[RenderMaterial::TS_Glossiness];
-				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+				*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_GenShadowMap:
