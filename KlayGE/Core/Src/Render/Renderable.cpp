@@ -173,7 +173,7 @@ namespace KlayGE
 				case PT_TransparencyBackGBufferMRT:
 				case PT_TransparencyFrontGBufferMRT:
 				case PT_GenReflectiveShadowMap:
-					*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+					*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 					break;
 
 				case PT_OpaqueSpecialShading:
