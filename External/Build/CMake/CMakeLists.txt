@@ -122,6 +122,8 @@ function(UpdateExternalLib name url rev)
 			CheckoutExternalLib(${name} ${rev})
 		endif()
 	endif()
+
+	set(${ARGV5} ${need_checkout} PARENT_SCOPE)
 endfunction()
 
 function(ApplyPatch name patch)
