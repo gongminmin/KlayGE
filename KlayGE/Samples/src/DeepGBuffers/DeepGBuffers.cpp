@@ -34,8 +34,7 @@ namespace
 	{
 	public:
 		explicit SwitchableMesh(std::wstring_view name)
-			: StaticMesh(name),
-				lighting_(true)
+			: StaticMesh(name)
 		{
 			gbuffers_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
 			no_lighting_gbuffers_effect_ = SyncLoadRenderEffect("DeepGBuffers.fxml");
@@ -92,8 +91,8 @@ namespace
 		}
 
 	private:
-		bool lighting_;
-		bool simple_forward_;
+		bool lighting_ = true;
+		bool simple_forward_ = false;
 
 		RenderEffectPtr gbuffers_effect_;
 		RenderEffectPtr no_lighting_gbuffers_effect_;
