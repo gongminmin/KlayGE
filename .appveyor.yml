@@ -7,7 +7,7 @@ platform:
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: vs2015
       COMPILER: vc140
       BUILD_DIR: vc140
