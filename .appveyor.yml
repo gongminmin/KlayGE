@@ -11,7 +11,7 @@ environment:
       PROJECT: vs2019
       COMPILER: vc142
       BUILD_DIR: vc142
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: vs2015
       COMPILER: vc140
       BUILD_DIR: vc140
