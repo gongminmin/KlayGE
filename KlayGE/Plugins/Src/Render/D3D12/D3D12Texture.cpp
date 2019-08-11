@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -663,11 +662,9 @@ namespace KlayGE
 			std::fill(curr_states_.begin(), curr_states_.end(), init_state);
 		}
 
-		ID3D12Resource* d3d_texture;
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&tex_desc, init_state, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
-			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture)));
-		d3d_resource_ = MakeCOMPtr(d3d_texture);
+			IID_ID3D12Resource, d3d_resource_.put_void()));
 
 		if (!init_data.empty())
 		{

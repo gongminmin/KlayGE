@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -68,9 +67,9 @@ namespace KlayGE
 			desc.Buffer.ElementOffset = first_elem;
 			desc.Buffer.ElementWidth = num_elems;
 
-			ID3D11ShaderResourceView* d3d_sr_view;
-			TIFHR(d3d_device_->CreateShaderResourceView(d3d_buffer_.get(), &desc, &d3d_sr_view));
-			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			TIFHR(d3d_device_->CreateShaderResourceView(d3d_buffer_.get(), &desc, d3d_sr_view.put()));
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
 		}
 	}
 
@@ -98,9 +97,9 @@ namespace KlayGE
 			desc.Buffer.ElementOffset = first_elem;
 			desc.Buffer.ElementWidth = num_elems;
 
-			ID3D11RenderTargetView* d3d_rt_view;
-			TIFHR(d3d_device_->CreateRenderTargetView(d3d_buffer_.get(), &desc, &d3d_rt_view));
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			TIFHR(d3d_device_->CreateRenderTargetView(d3d_buffer_.get(), &desc, d3d_rt_view.put()));
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -152,9 +151,9 @@ namespace KlayGE
 				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
 			}
 
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			TIFHR(d3d_device_->CreateUnorderedAccessView(d3d_buffer_.get(), &uav_desc, &d3d_ua_view));
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			TIFHR(d3d_device_->CreateUnorderedAccessView(d3d_buffer_.get(), &uav_desc, d3d_ua_view.put()));
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -250,9 +249,7 @@ namespace KlayGE
 		desc.ByteWidth = size_in_byte_;
 		desc.StructureByteStride = structure_byte_stride_;
 
-		ID3D11Buffer* d3d_buffer;
-		TIFHR(d3d_device_->CreateBuffer(&desc, p_subres, &d3d_buffer));
-		d3d_buffer_ = MakeCOMPtr(d3d_buffer);
+		TIFHR(d3d_device_->CreateBuffer(&desc, p_subres, d3d_buffer_.put()));
 	}
 
 	void D3D11GraphicsBuffer::DeleteHWResource()

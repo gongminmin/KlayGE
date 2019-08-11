@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>

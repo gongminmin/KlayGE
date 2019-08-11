@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -642,9 +641,8 @@ namespace KlayGE
 		cbv_srv_heap_desc.NumDescriptors = 1;
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeap* csu_heap;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
+		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
 
 		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
@@ -667,9 +665,8 @@ namespace KlayGE
 		cbv_srv_heap_desc.NumDescriptors = 1;
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeap* csu_heap;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
+		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
 
 		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 

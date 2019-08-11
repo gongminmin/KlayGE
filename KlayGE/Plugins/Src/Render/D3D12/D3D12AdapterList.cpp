@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 
 #include <vector>
 #include <system_error>
@@ -87,24 +86,22 @@ namespace KlayGE
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D12AdapterList::Enumerate(IDXGIFactory4Ptr const & gi_factory)
+	void D3D12AdapterList::Enumerate(IDXGIFactory4* gi_factory)
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
-		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
+		IDXGIAdapter1Ptr dxgi_adapter;
+		while (gi_factory->EnumAdapters1(adapter_no, dxgi_adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				ID3D12Device* device = nullptr;
-				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter, D3D_FEATURE_LEVEL_11_0,
-					IID_ID3D12Device, reinterpret_cast<void**>(&device))))
+				com_ptr<ID3D12Device> device;
+				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
+					IID_ID3D12Device, device.put_void())))
 				{
-					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get());
 					adapter->Enumerate();
 					adapters_.push_back(std::move(adapter));
-
-					device->Release();
 				}
 			}
 
@@ -118,24 +115,22 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12AdapterList::Enumerate(IDXGIFactory6Ptr const & gi_factory)
+	void D3D12AdapterList::Enumerate(IDXGIFactory6* gi_factory)
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
+		IDXGIAdapter1Ptr dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter))))
+			IID_IDXGIAdapter1, dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				ID3D12Device* device = nullptr;
-				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter, D3D_FEATURE_LEVEL_11_0,
-					IID_ID3D12Device, reinterpret_cast<void**>(&device))))
+				com_ptr<ID3D12Device> device;
+				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
+					IID_ID3D12Device, device.put_void())))
 				{
-					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get());
 					adapter->Enumerate();
 					adapters_.push_back(std::move(adapter));
-
-					device->Release();
 				}
 			}
 
@@ -144,10 +139,8 @@ namespace KlayGE
 
 		if (adapters_.empty())
 		{
-			IDXGIFactory4* gif4;
-			gi_factory->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gif4));
-			IDXGIFactory4Ptr gi_factory4 = MakeCOMPtr<IDXGIFactory4>(gif4);
-			this->Enumerate(gi_factory4);
+			auto gi_factory4 = com_ptr<IDXGIFactory6>(gi_factory).as<IDXGIFactory4>(IID_IDXGIFactory4);
+			this->Enumerate(gi_factory4.get());
 		}
 
 		if (adapters_.empty())

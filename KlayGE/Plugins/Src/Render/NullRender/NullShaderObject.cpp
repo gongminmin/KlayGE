@@ -35,6 +35,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -291,8 +292,8 @@ namespace KlayGE
 
 			if (!shader_code_.empty())
 			{
-				ID3D11ShaderReflection* reflection;
-				ShaderStageObject::ReflectDXBC(shader_code_, reinterpret_cast<void**>(&reflection));
+				com_ptr<ID3D11ShaderReflection> reflection;
+				ShaderStageObject::ReflectDXBC(shader_code_, reflection.put_void());
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -407,9 +408,7 @@ namespace KlayGE
 						}
 					}
 
-					this->StageSpecificReflection(reflection);
-
-					reflection->Release();
+					this->StageSpecificReflection(reflection.get());
 				}
 
 				shader_code_ =

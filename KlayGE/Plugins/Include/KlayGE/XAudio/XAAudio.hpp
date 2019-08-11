@@ -64,6 +64,7 @@
 #define XAUDIO2_DLL_W L"xaudio2_7.dll"
 #endif
 
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
@@ -198,7 +199,7 @@ namespace KlayGE
 		virtual void DoResume() override;
 
 	private:
-		std::shared_ptr<IXAudio2> xaudio_;
+		com_ptr<IXAudio2> xaudio_;
 		std::shared_ptr<IXAudio2MasteringVoice>	mastering_voice_;
 		uint32_t mastering_channels_;
 

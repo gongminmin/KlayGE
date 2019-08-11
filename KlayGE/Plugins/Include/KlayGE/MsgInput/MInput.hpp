@@ -232,6 +232,7 @@ namespace uwp
 #endif
 
 #include <KlayGE/Input.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/Timer.hpp>
 
 #include <array>
@@ -481,13 +482,13 @@ namespace KlayGE
 
 	private:
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
-		std::shared_ptr<ILocation> locator_;
-		std::shared_ptr<ILocationEvents> location_event_;
+		com_ptr<ILocation> locator_;
+		com_ptr<ILocationEvents> location_event_;
 #endif
-		std::shared_ptr<ISensorCollection> motion_sensor_collection_;
-		std::vector<std::shared_ptr<ISensorEvents>> motion_sensor_events_;
-		std::shared_ptr<ISensorCollection> orientation_sensor_collection_;
-		std::vector<std::shared_ptr<ISensorEvents>> orientation_sensor_events_;
+		com_ptr<ISensorCollection> motion_sensor_collection_;
+		std::vector<com_ptr<ISensorEvents>> motion_sensor_events_;
+		com_ptr<ISensorCollection> orientation_sensor_collection_;
+		std::vector<com_ptr<ISensorEvents>> orientation_sensor_events_;
 
 		bool destroyed_;
 	};

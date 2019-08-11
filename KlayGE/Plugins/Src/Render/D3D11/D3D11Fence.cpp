@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -57,14 +56,15 @@ namespace KlayGE
 		desc.Query = D3D11_QUERY_EVENT;
 		desc.MiscFlags = 0;
 
-		ID3D11Query* query;
-		d3d_device->CreateQuery(&desc, &query);
-		auto fence = MakeCOMPtr(query);
+		ID3D11QueryPtr query;
+		d3d_device->CreateQuery(&desc, query.put());
+
 		uint64_t const id = fence_val_;
-		fences_[id] = fence;
 		++ fence_val_;
 
-		d3d_imm_ctx->End(fence.get());
+		d3d_imm_ctx->End(query.get());
+
+		fences_[id] = std::move(query);
 
 		return id;
 	}
@@ -109,9 +109,7 @@ namespace KlayGE
 		auto* d3d_device = re.D3DDevice5();
 		BOOST_ASSERT(d3d_device != nullptr);
 
-		ID3D11Fence* fence;
-		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, reinterpret_cast<void**>(&fence));
-		fence_ = MakeCOMPtr(fence);
+		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, fence_.put_void());
 
 		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}

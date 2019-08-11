@@ -33,7 +33,6 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -430,8 +429,8 @@ namespace KlayGE
 
 			if (!shader_code_.empty())
 			{
-				ID3D11ShaderReflection* reflection;
-				ShaderStageObject::ReflectDXBC(shader_code_, reinterpret_cast<void**>(&reflection));
+				com_ptr<ID3D11ShaderReflection> reflection;
+				ShaderStageObject::ReflectDXBC(shader_code_, reflection.put_void());
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -546,9 +545,7 @@ namespace KlayGE
 						}
 					}
 
-					this->StageSpecificReflection(reflection);
-
-					reflection->Release();
+					this->StageSpecificReflection(reflection.get());
 				}
 
 				shader_code_ =
@@ -645,14 +642,14 @@ namespace KlayGE
 			rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
 		}
 
-		ID3D11GeometryShader* gs;
+		ID3D11GeometryShaderPtr gs;
 		if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob.data(), code_blob.size(), &d3d11_decl[0],
-				static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr, &gs)))
+				static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr, gs.put())))
 		{
 			is_validate_ = false;
 		}
 
-		return MakeCOMPtr(gs);
+		return gs;
 	}
 
 	std::string_view D3D11ShaderStageObject::GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const
@@ -693,15 +690,12 @@ namespace KlayGE
 		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 
-		ID3D11VertexShader* vs;
-		if (FAILED(d3d_device->CreateVertexShader(shader_code_.data(), shader_code_.size(), nullptr, &vs)))
+		if (FAILED(d3d_device->CreateVertexShader(shader_code_.data(), shader_code_.size(), nullptr, vertex_shader_.put())))
 		{
 			is_validate_ = false;
 		}
 		else
 		{
-			vertex_shader_ = MakeCOMPtr(vs);
-
 			RenderDeviceCaps const& caps = re.DeviceCaps();
 			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
 			if (!sd.so_decl.empty())
@@ -780,14 +774,9 @@ namespace KlayGE
 		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		ID3D11Device* d3d_device = re.D3DDevice();
 
-		ID3D11PixelShader* ps;
-		if (FAILED(d3d_device->CreatePixelShader(shader_code_.data(), shader_code_.size(), nullptr, &ps)))
+		if (FAILED(d3d_device->CreatePixelShader(shader_code_.data(), shader_code_.size(), nullptr, pixel_shader_.put())))
 		{
 			is_validate_ = false;
-		}
-		else
-		{
-			pixel_shader_ = MakeCOMPtr(ps);
 		}
 	}
 
@@ -816,14 +805,9 @@ namespace KlayGE
 				auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 				ID3D11Device* d3d_device = re.D3DDevice();
 
-				ID3D11GeometryShader* gs;
-				if (FAILED(d3d_device->CreateGeometryShader(shader_code_.data(), shader_code_.size(), nullptr, &gs)))
+				if (FAILED(d3d_device->CreateGeometryShader(shader_code_.data(), shader_code_.size(), nullptr, geometry_shader_.put())))
 				{
 					is_validate_ = false;
-				}
-				else
-				{
-					geometry_shader_ = MakeCOMPtr(gs);
 				}
 			}
 			else
@@ -862,14 +846,9 @@ namespace KlayGE
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
-			ID3D11ComputeShader* cs;
-			if (FAILED(d3d_device->CreateComputeShader(shader_code_.data(), shader_code_.size(), nullptr, &cs)))
+			if (FAILED(d3d_device->CreateComputeShader(shader_code_.data(), shader_code_.size(), nullptr, compute_shader_.put())))
 			{
 				is_validate_ = false;
-			}
-			else
-			{
-				compute_shader_ = MakeCOMPtr(cs);
 			}
 		}
 		else
@@ -934,14 +913,9 @@ namespace KlayGE
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
-			ID3D11HullShader* hs;
-			if (FAILED(d3d_device->CreateHullShader(shader_code_.data(), shader_code_.size(), nullptr, &hs)))
+			if (FAILED(d3d_device->CreateHullShader(shader_code_.data(), shader_code_.size(), nullptr, hull_shader_.put())))
 			{
 				is_validate_ = false;
-			}
-			else
-			{
-				hull_shader_ = MakeCOMPtr(hs);
 			}
 		}
 		else
@@ -973,15 +947,12 @@ namespace KlayGE
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 
-			ID3D11DomainShader* ds;
-			if (FAILED(d3d_device->CreateDomainShader(shader_code_.data(), shader_code_.size(), nullptr, &ds)))
+			if (FAILED(d3d_device->CreateDomainShader(shader_code_.data(), shader_code_.size(), nullptr, domain_shader_.put())))
 			{
 				is_validate_ = false;
 			}
 			else
 			{
-				domain_shader_ = MakeCOMPtr(ds);
-
 				ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
 				if (!sd.so_decl.empty())
 				{

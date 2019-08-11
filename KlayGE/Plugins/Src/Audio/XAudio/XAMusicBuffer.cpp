@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>

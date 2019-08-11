@@ -40,7 +40,7 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D12Adapter::D3D12Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter)
+	D3D12Adapter::D3D12Adapter(uint32_t adapter_no, IDXGIAdapter1* adapter)
 					: adapter_no_(adapter_no)
 	{
 		this->ResetAdapter(adapter);
@@ -83,8 +83,8 @@ namespace KlayGE
 		};
 
 		UINT i = 0;
-		IDXGIOutput* output = nullptr;
-		while (adapter_->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
+		com_ptr<IDXGIOutput> output;
+		while (adapter_->EnumOutputs(i, output.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (output != nullptr)
 			{
@@ -110,9 +110,6 @@ namespace KlayGE
 						}
 					}
 				}
-
-				output->Release();
-				output = nullptr;
 			}
 
 			++ i;
@@ -121,15 +118,13 @@ namespace KlayGE
 		std::sort(modes_.begin(), modes_.end());
 	}
 
-	void D3D12Adapter::ResetAdapter(IDXGIAdapter1Ptr const & ada)
+	void D3D12Adapter::ResetAdapter(IDXGIAdapter1* ada)
 	{
-		adapter_ = ada;
+		adapter_.reset(ada);
 		adapter_->GetDesc1(&adapter_desc_);
 		modes_.resize(0);
 
-		IDXGIAdapter3* adapter3;
-		adapter_->QueryInterface(IID_IDXGIAdapter3, reinterpret_cast<void**>(&adapter3));
-		if (adapter3 != nullptr)
+		if (auto adapter3 = adapter_.as<IDXGIAdapter3>(IID_IDXGIAdapter3))
 		{
 			DXGI_ADAPTER_DESC2 desc2;
 			adapter3->GetDesc2(&desc2);
@@ -143,7 +138,6 @@ namespace KlayGE
 			adapter_desc_.SharedSystemMemory = desc2.SharedSystemMemory;
 			adapter_desc_.AdapterLuid = desc2.AdapterLuid;
 			adapter_desc_.Flags = desc2.Flags;
-			adapter3->Release();
 		}
 	}
 }

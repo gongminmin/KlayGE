@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Fence.hpp>
@@ -64,10 +63,7 @@ namespace KlayGE
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_OCCLUSION;
 		desc.MiscFlags = 0;
-
-		ID3D11Query* query;
-		d3d_device->CreateQuery(&desc, &query);
-		query_ = MakeCOMPtr(query);
+		d3d_device->CreateQuery(&desc, query_.put());
 	}
 
 	void D3D11OcclusionQuery::Begin()
@@ -109,10 +105,7 @@ namespace KlayGE
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_OCCLUSION_PREDICATE;
 		desc.MiscFlags = 0;
-
-		ID3D11Predicate* predicate;
-		d3d_device->CreatePredicate(&desc, &predicate);
-		predicate_ = MakeCOMPtr(predicate);
+		d3d_device->CreatePredicate(&desc, predicate_.put());
 	}
 
 	void D3D11ConditionalRender::Begin()
@@ -170,22 +163,13 @@ namespace KlayGE
 		D3D11_QUERY_DESC disjoint_desc;
 		disjoint_desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
 		disjoint_desc.MiscFlags = 0;
-
-		ID3D11Query* disjoint_query;
-		d3d_device->CreateQuery(&disjoint_desc, &disjoint_query);
-		timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
+		d3d_device->CreateQuery(&disjoint_desc, timestamp_disjoint_query_.put());
 
 		D3D11_QUERY_DESC timestamp_desc;
 		timestamp_desc.Query = D3D11_QUERY_TIMESTAMP;
 		timestamp_desc.MiscFlags = 0;
-
-		ID3D11Query* start_query;
-		d3d_device->CreateQuery(&timestamp_desc, &start_query);
-		timestamp_start_query_ = MakeCOMPtr(start_query);
-
-		ID3D11Query* end_query;
-		d3d_device->CreateQuery(&timestamp_desc, &end_query);
-		timestamp_end_query_ = MakeCOMPtr(end_query);
+		d3d_device->CreateQuery(&timestamp_desc, timestamp_start_query_.put());
+		d3d_device->CreateQuery(&timestamp_desc, timestamp_end_query_.put());
 	}
 
 	void D3D11TimerQuery::Begin()
@@ -234,10 +218,7 @@ namespace KlayGE
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_SO_STATISTICS;
 		desc.MiscFlags = 0;
-
-		ID3D11Query* start_query;
-		d3d_device->CreateQuery(&desc, &start_query);
-		so_stat_query_ = MakeCOMPtr(start_query);
+		d3d_device->CreateQuery(&desc, so_stat_query_.put());
 	}
 
 	void D3D11SOStatisticsQuery::Begin()

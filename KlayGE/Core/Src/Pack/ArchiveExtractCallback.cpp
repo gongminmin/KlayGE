@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	ArchiveExtractCallback::ArchiveExtractCallback(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & out_file_stream)
+	ArchiveExtractCallback::ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream)
 		: password_is_defined_(!pw.empty()), out_file_stream_(out_file_stream)
 	{
 		Convert(password_, pw);

@@ -29,7 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/COMPtr.hpp>
 
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 

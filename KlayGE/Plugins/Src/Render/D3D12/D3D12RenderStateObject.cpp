@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -145,9 +144,9 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();
@@ -173,9 +172,9 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();

@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/RenderEngine.hpp>

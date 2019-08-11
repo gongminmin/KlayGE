@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 
@@ -174,10 +173,10 @@ namespace KlayGE
 			res_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		}
 
-		ID3D12Resource* buffer;
+		ID3D12ResourcePtr buffer;
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
-			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
-		return MakeCOMPtr(buffer);
+			IID_ID3D12Resource, buffer.put_void()));
+		return buffer;
 	}
 }

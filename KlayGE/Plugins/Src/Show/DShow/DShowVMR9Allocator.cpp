@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX2a/span.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
@@ -71,7 +70,7 @@ namespace KlayGE
 #endif
 		}
 
-		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
+		d3d_.reset(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
 
 		this->CreateDevice();
 	}
@@ -112,11 +111,9 @@ namespace KlayGE
 			vp_mode = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 		}
 
-		IDirect3DDevice9* d3d_device;
 		TIFHR(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
 			wnd_, vp_mode | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED,
-			&d3dpp_, &d3d_device));
-		d3d_device_ = MakeCOMPtr(d3d_device);
+			&d3dpp_, d3d_device_.put()));
 	}
 
 	void DShowVMR9Allocator::DeleteSurfaces()
@@ -193,10 +190,8 @@ namespace KlayGE
 		BOOST_ASSERT(fmt != EF_Unknown);
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
-		IDirect3DSurface9* surf;
 		TIFHR(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, nullptr));
-		cache_surf_ = MakeCOMPtr(surf);
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, cache_surf_.put(), nullptr));
 
 		return S_OK;
 	}
@@ -242,8 +237,7 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		vmr_surf_alloc_notify_ = MakeCOMPtr(lpIVMRSurfAllocNotify);
-		vmr_surf_alloc_notify_->AddRef();
+		vmr_surf_alloc_notify_.reset(lpIVMRSurfAllocNotify);
 
 		HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
 		TIFHR(vmr_surf_alloc_notify_->SetD3DDevice(d3d_device_.get(), hMonitor));

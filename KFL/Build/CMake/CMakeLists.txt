@@ -20,7 +20,7 @@ SET(BASE_CXX2a_HEADER_FILES
 SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/AlignedAllocator.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Architecture.hpp
-	${KFL_PROJECT_DIR}/include/KFL/COMPtr.hpp
+	${KFL_PROJECT_DIR}/include/KFL/com_ptr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Compiler.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp

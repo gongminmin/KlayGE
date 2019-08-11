@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -206,11 +205,10 @@ namespace KlayGE
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 			res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-			ID3D12Resource* buffer;
+			ID3D12ResourcePtr buffer_upload;
 			TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
-			ID3D12ResourcePtr buffer_upload = MakeCOMPtr(buffer);
+				IID_ID3D12Resource, buffer_upload.put_void()));
 
 			D3D12_RANGE read_range;
 			read_range.Begin = 0;

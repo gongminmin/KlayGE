@@ -19,7 +19,6 @@
 #include <KFL/Math.hpp>
 #include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -135,44 +134,22 @@ namespace KlayGE
 		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;
 #endif
 
-		IDXGIFactory1* gi_factory_1;
-		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory_1)));
-		gi_factory_1_ = MakeCOMPtr(gi_factory_1);
+		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, gi_factory_1_.put_void()));
 		dxgi_sub_ver_ = 1;
-
-		IDXGIFactory2* gi_factory_2;
-		gi_factory_1->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
-		if (gi_factory_2 != nullptr)
+		if (gi_factory_1_.try_as(IID_IDXGIFactory2, gi_factory_2_))
 		{
-			gi_factory_2_ = MakeCOMPtr(gi_factory_2);
 			dxgi_sub_ver_ = 2;
-
-			IDXGIFactory3* gi_factory_3;
-			gi_factory_1->QueryInterface(IID_IDXGIFactory3, reinterpret_cast<void**>(&gi_factory_3));
-			if (gi_factory_3 != nullptr)
+			if (gi_factory_1_.try_as(IID_IDXGIFactory3, gi_factory_3_))
 			{
-				gi_factory_3_ = MakeCOMPtr(gi_factory_3);
 				dxgi_sub_ver_ = 3;
-
-				IDXGIFactory4* gi_factory_4;
-				gi_factory_1->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory_4));
-				if (gi_factory_4 != nullptr)
+				if (gi_factory_1_.try_as(IID_IDXGIFactory4, gi_factory_4_))
 				{
-					gi_factory_4_ = MakeCOMPtr(gi_factory_4);
 					dxgi_sub_ver_ = 4;
-
-					IDXGIFactory5* gi_factory_5;
-					gi_factory_1->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory_5));
-					if (gi_factory_5 != nullptr)
+					if (gi_factory_1_.try_as(IID_IDXGIFactory5, gi_factory_5_))
 					{
-						gi_factory_5_ = MakeCOMPtr(gi_factory_5);
 						dxgi_sub_ver_ = 5;
-
-						IDXGIFactory6* gi_factory_6;
-						gi_factory_1->QueryInterface(IID_IDXGIFactory6, reinterpret_cast<void**>(&gi_factory_6));
-						if (gi_factory_6 != nullptr)
+						if (gi_factory_1_.try_as(IID_IDXGIFactory6, gi_factory_6_))
 						{
-							gi_factory_6_ = MakeCOMPtr(gi_factory_6);
 							dxgi_sub_ver_ = 6;
 						}
 					}
@@ -923,12 +900,9 @@ namespace KlayGE
 	{
 		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
-			IDXGIDevice3* dxgi_device = nullptr;
-			d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
-			if (dxgi_device != nullptr)
+			if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
 			{
 				dxgi_device->Trim();
-				dxgi_device->Release();
 			}
 		}
 	}
@@ -1269,90 +1243,27 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)
 	{
-		d3d_device_ = MakeCOMPtr(device);
-		d3d_imm_ctx_ = MakeCOMPtr(imm_ctx);
+		d3d_device_.reset(device);
+		d3d_imm_ctx_.reset(imm_ctx);
 		d3d_11_runtime_sub_ver_ = 0;
 
-		ID3D11Device1* d3d_device_1 = nullptr;
-		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1)
+		if (d3d_device_.try_as(IID_ID3D11Device1, d3d_device_1_) && d3d_imm_ctx_.try_as(IID_ID3D11DeviceContext1, d3d_imm_ctx_1_))
 		{
-			ID3D11DeviceContext1* d3d_imm_ctx_1 = nullptr;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
-			if (d3d_imm_ctx_1)
+			d3d_11_runtime_sub_ver_ = 1;
+			if (d3d_device_.try_as(IID_ID3D11Device2, d3d_device_2_) && d3d_imm_ctx_.try_as(IID_ID3D11DeviceContext2, d3d_imm_ctx_2_))
 			{
-				d3d_device_1_ = MakeCOMPtr(d3d_device_1);
-				d3d_imm_ctx_1_ = MakeCOMPtr(d3d_imm_ctx_1);
-				d3d_11_runtime_sub_ver_ = 1;
-
-				ID3D11Device2* d3d_device_2 = nullptr;
-				device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
-				if (d3d_device_2)
+				d3d_11_runtime_sub_ver_ = 2;
+				if (d3d_device_.try_as(IID_ID3D11Device3, d3d_device_3_) && d3d_imm_ctx_.try_as(IID_ID3D11DeviceContext3, d3d_imm_ctx_3_))
 				{
-					ID3D11DeviceContext2* d3d_imm_ctx_2 = nullptr;
-					imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
-					if (d3d_imm_ctx_2)
+					d3d_11_runtime_sub_ver_ = 3;
+					if (d3d_device_.try_as(IID_ID3D11Device4, d3d_device_4_))
 					{
-						d3d_device_2_ = MakeCOMPtr(d3d_device_2);
-						d3d_imm_ctx_2_ = MakeCOMPtr(d3d_imm_ctx_2);
-						d3d_11_runtime_sub_ver_ = 2;
-
-						ID3D11Device3* d3d_device_3 = nullptr;
-						device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
-						if (d3d_device_3)
-						{
-							ID3D11DeviceContext3* d3d_imm_ctx_3 = nullptr;
-							imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
-							if (d3d_imm_ctx_3)
-							{
-								d3d_device_3_ = MakeCOMPtr(d3d_device_3);
-								d3d_imm_ctx_3_ = MakeCOMPtr(d3d_imm_ctx_3);
-								d3d_11_runtime_sub_ver_ = 3;
-
-								ID3D11Device4* d3d_device_4 = nullptr;
-								device->QueryInterface(IID_ID3D11Device4, reinterpret_cast<void**>(&d3d_device_4));
-								if (d3d_device_4)
-								{
-									d3d_device_4_ = MakeCOMPtr(d3d_device_4);
-									d3d_11_runtime_sub_ver_ = 4;
-
-									ID3D11Device5* d3d_device_5 = nullptr;
-									device->QueryInterface(IID_ID3D11Device5, reinterpret_cast<void**>(&d3d_device_5));
-									if (d3d_device_5)
-									{
-										ID3D11DeviceContext4* d3d_imm_ctx_4 = nullptr;
-										imm_ctx->QueryInterface(IID_ID3D11DeviceContext4, reinterpret_cast<void**>(&d3d_imm_ctx_4));
-										if (d3d_imm_ctx_4)
-										{
-											d3d_device_5_ = MakeCOMPtr(d3d_device_5);
-											d3d_imm_ctx_4_ = MakeCOMPtr(d3d_imm_ctx_4);
-										}
-										else
-										{
-											d3d_device_5->Release();
-											d3d_device_5 = nullptr;
-										}
-									}
-								}
-							}
-							else
-							{
-								d3d_device_3->Release();
-								d3d_device_3 = nullptr;
-							}
-						}
-					}
-					else
-					{
-						d3d_device_2->Release();
-						d3d_device_2 = nullptr;
+						d3d_11_runtime_sub_ver_ = 4;
+						
+						d3d_device_.try_as(IID_ID3D11Device5, d3d_device_5_);
+						d3d_imm_ctx_.try_as(IID_ID3D11DeviceContext4, d3d_imm_ctx_4_);
 					}
 				}
-			}
-			else
-			{
-				d3d_device_1->Release();
-				d3d_device_1 = nullptr;
 			}
 		}
 	}

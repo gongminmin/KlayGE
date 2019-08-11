@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -314,8 +313,8 @@ namespace KlayGE
 			}
 		}
 
-		ID3D11Texture3D* d3d_tex;
-		TIFHR(d3d_device_->CreateTexture3D(&desc, subres_data.data(), &d3d_tex));
-		d3d_texture_ = MakeCOMPtr(d3d_tex);
+		ID3D11Texture3DPtr d3d_tex;
+		TIFHR(d3d_device_->CreateTexture3D(&desc, subres_data.data(), d3d_tex.put()));
+		d3d_tex.as(IID_ID3D11Resource, d3d_texture_);
 	}
 }

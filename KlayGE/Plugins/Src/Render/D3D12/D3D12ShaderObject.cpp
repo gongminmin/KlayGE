@@ -33,7 +33,6 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -435,8 +434,8 @@ namespace KlayGE
 
 			if (!shader_code_.empty())
 			{
-				ID3D12ShaderReflection* reflection;
-				ShaderStageObject::ReflectDXBC(shader_code_, reinterpret_cast<void**>(&reflection));
+				com_ptr<ID3D12ShaderReflection> reflection;
+				ShaderStageObject::ReflectDXBC(shader_code_, reflection.put_void());
 				if (reflection != nullptr)
 				{
 					D3D12_SHADER_DESC desc;
@@ -551,9 +550,7 @@ namespace KlayGE
 						}
 					}
 
-					this->StageSpecificReflection(reflection);
-
-					reflection->Release();
+					this->StageSpecificReflection(reflection.get());
 				}
 
 				shader_code_ =
@@ -1049,9 +1046,7 @@ namespace KlayGE
 			sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
 			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			sampler_heap_desc.NodeMask = 0;
-			ID3D12DescriptorHeap* s_heap;
-			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&s_heap)));
-			d3d_so_template_->sampler_heap_ = MakeCOMPtr(s_heap);
+			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_so_template_->sampler_heap_.put_void()));
 
 			UINT const sampler_desc_size = re.SamplerDescSize();
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_sampler_handle = d3d_so_template_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();

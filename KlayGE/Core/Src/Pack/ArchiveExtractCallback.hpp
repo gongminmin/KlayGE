@@ -39,6 +39,8 @@
 #include <CPP/7zip/Archive/IArchive.h>
 #include <CPP/7zip/IPassword.h>
 
+#include <KFL/com_ptr.hpp>
+
 namespace KlayGE
 {
 	class ArchiveExtractCallback : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
@@ -62,7 +64,7 @@ namespace KlayGE
 		STDMETHOD(CryptoGetTextPassword)(BSTR* password);
 
 	public:
-		ArchiveExtractCallback(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & out_file_stream);
+		ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream);
 		virtual ~ArchiveExtractCallback() = default;
 
 	private:
@@ -71,7 +73,7 @@ namespace KlayGE
 		bool password_is_defined_;
 		std::wstring password_;
 
-		std::shared_ptr<ISequentialOutStream> out_file_stream_;
+		com_ptr<ISequentialOutStream> out_file_stream_;
 	};
 }
 

@@ -14,7 +14,6 @@
 #include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -95,8 +94,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto& d3d11_re = checked_cast<D3D11RenderEngine&>(rf.RenderEngineInstance());
-		ID3D11Device* d3d_device = d3d11_re.D3DDevice();
-		ID3D11DeviceContext* d3d_imm_ctx = nullptr;
+		ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
+		ID3D11DeviceContextPtr d3d_imm_ctx;
 
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
@@ -191,8 +190,8 @@ namespace KlayGE
 
 			for (auto const & dev_type_beh : dev_type_behaviors)
 			{
-				d3d_device = nullptr;
-				d3d_imm_ctx = nullptr;
+				d3d_device.reset();
+				d3d_imm_ctx.reset();
 				IDXGIAdapter* dx_adapter = nullptr;
 				D3D_DRIVER_TYPE dev_type = dev_type_beh.first;
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
@@ -204,12 +203,12 @@ namespace KlayGE
 				HRESULT hr = E_FAIL;
 				for (auto const & flags : available_create_device_flags)
 				{
-					ID3D11Device* this_device = nullptr;
-					ID3D11DeviceContext* this_imm_ctx = nullptr;
+					ID3D11DevicePtr this_device;
+					ID3D11DeviceContextPtr this_imm_ctx;
 					D3D_FEATURE_LEVEL this_out_feature_level;
 					hr = d3d11_re.D3D11CreateDevice(dx_adapter, dev_type, nullptr, flags,
-						&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &this_device,
-						&this_out_feature_level, &this_imm_ctx);
+						&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, this_device.put(),
+						&this_out_feature_level, this_imm_ctx.put());
 					if (SUCCEEDED(hr))
 					{
 						d3d_device = this_device;
@@ -220,28 +219,23 @@ namespace KlayGE
 				}
 				if (SUCCEEDED(hr))
 				{
-					d3d11_re.D3DDevice(d3d_device, d3d_imm_ctx, out_feature_level);
+					d3d11_re.D3DDevice(d3d_device.get(), d3d_imm_ctx.get(), out_feature_level);
 
 					if (Context::Instance().AppInstance().OnConfirmDevice()())
 					{
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
-							IDXGIDevice1* dxgi_device = nullptr;
-							hr = d3d_device->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
-							if (SUCCEEDED(hr) && (dxgi_device != nullptr))
+							if (auto dxgi_device = d3d_device.try_as<IDXGIDevice1>(IID_IDXGIDevice1))
 							{
-								IDXGIAdapter* ada;
-								dxgi_device->GetAdapter(&ada);
-								IDXGIAdapter1* ada1;
-								ada->QueryInterface(IID_IDXGIAdapter1, reinterpret_cast<void**>(&ada1));
-								ada->Release();
-								adapter_->ResetAdapter(MakeCOMPtr(ada1));
+								com_ptr<IDXGIAdapter> ada;
+								dxgi_device->GetAdapter(ada.put());
+								adapter_->ResetAdapter(ada.as<IDXGIAdapter1>(IID_IDXGIAdapter1).get());
 								adapter_->Enumerate();
-							}
+
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-							dxgi_device->SetMaximumFrameLatency(1);
+								dxgi_device->SetMaximumFrameLatency(1);
 #endif
-							dxgi_device->Release();
+							}
 						}
 
 						description_ = adapter_->Description() + L" " + dev_type_beh.second.data() + L" FL ";
@@ -277,11 +271,8 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_device->Release();
-						d3d_device = nullptr;
-
-						d3d_imm_ctx->Release();
-						d3d_imm_ctx = nullptr;
+						d3d_device.reset();
+						d3d_imm_ctx.reset();
 					}
 				}
 			}
@@ -472,8 +463,8 @@ namespace KlayGE
 #endif
 					if (AmdDxExtCreate11 != nullptr)
 					{
-						IAmdDxExt* amd_dx_ext;
-						HRESULT hr = AmdDxExtCreate11(d3d_device, &amd_dx_ext);
+						com_ptr<IAmdDxExt> amd_dx_ext;
+						HRESULT hr = AmdDxExtCreate11(d3d_device.get(), amd_dx_ext.put());
 						if (SUCCEEDED(hr))
 						{
 							AmdDxExtVersion ext_version;
@@ -481,22 +472,20 @@ namespace KlayGE
 							if (SUCCEEDED(hr))
 							{
 								IAmdDxExtInterface* adti = amd_dx_ext->GetExtInterface(AmdDxExtQuadBufferStereoID);
-								IAmdDxExtQuadBufferStereo* stereo = static_cast<IAmdDxExtQuadBufferStereo*>(adti);
-								if (stereo != nullptr)
+								if (adti != nullptr)
 								{
-									stereo_amd_qb_ext_ = MakeCOMPtr(stereo);
+									stereo_amd_qb_ext_.reset(static_cast<IAmdDxExtQuadBufferStereo*>(adti), false);
 									stereo_amd_qb_ext_->EnableQuadBufferStereo(true);
 								}
 							}
 						}
-						amd_dx_ext->Release();
 					}
 				}
 			}
 		}
 #endif
 
-		this->CreateSwapChain(d3d_device, settings.display_output_method != DOM_sRGB);
+		this->CreateSwapChain(d3d_device.get(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -504,25 +493,18 @@ namespace KlayGE
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
 
+		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>(IID_ID3D10Multithread))
 		{
-			ID3D10Multithread* d3d_multithread;
-			if (SUCCEEDED(d3d_device->QueryInterface(IID_ID3D10Multithread, reinterpret_cast<void**>(&d3d_multithread))))
-			{
-				d3d_multithread->SetMultithreadProtected(true);
-				d3d_multithread->Release();
-			}
+			d3d_multithread->SetMultithreadProtected(true);
 		}
 
 		this->UpdateSurfacesPtrs();
 
 #ifdef KLAYGE_DEBUG
-		ID3D11InfoQueue* d3d_info_queue = nullptr;
-		if (SUCCEEDED(d3d_device->QueryInterface(IID_ID3D11InfoQueue, reinterpret_cast<void**>(&d3d_info_queue))))
+		if (auto d3d_info_queue = d3d_device.try_as<ID3D11InfoQueue>(IID_ID3D11InfoQueue))
 		{
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
-
-			d3d_info_queue->Release();
 		}
 #endif
 	}
@@ -842,9 +824,9 @@ namespace KlayGE
 			}
 		}
 
-		ID3D11Texture2D* back_buffer;
-		TIFHR(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
-		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(MakeCOMPtr(back_buffer));
+		ID3D11Texture2DPtr back_buffer;
+		TIFHR(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, back_buffer.put_void()));
+		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(back_buffer);
 
 		render_target_view_ = rf.Make2DRtv(back_buffer_, 0, 1, 0);
 
@@ -888,52 +870,35 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
-			IDXGISwapChain1* sc1 = nullptr;
 			d3d11_re.DXGIFactory2()->CreateSwapChainForHwnd(d3d_device, hWnd_,
-				&sc_desc1_, &sc_fs_desc_, nullptr, &sc1);
-			swap_chain_1_ = MakeCOMPtr(sc1);
-
-			IDXGISwapChain* sc;
-			swap_chain_1_->QueryInterface(IID_IDXGISwapChain, reinterpret_cast<void**>(&sc));
-			swap_chain_ = MakeCOMPtr(sc);
+				&sc_desc1_, &sc_fs_desc_, nullptr, swap_chain_1_.put());
+			swap_chain_1_.as(IID_IDXGISwapChain, swap_chain_);
 		}
 		else
 		{
-			IDXGISwapChain* sc = nullptr;
-			d3d11_re.DXGIFactory1()->CreateSwapChain(d3d_device, &sc_desc_, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
-
-			IDXGISwapChain1* sc1;
-			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain1, reinterpret_cast<void**>(&sc1))))
-			{
-				swap_chain_1_ = MakeCOMPtr(sc1);
-			}
+			d3d11_re.DXGIFactory1()->CreateSwapChain(d3d_device, &sc_desc_, swap_chain_.put());
+			swap_chain_.try_as(IID_IDXGISwapChain1, swap_chain_1_);
 		}
 #else
-		IDXGISwapChain1* sc1 = nullptr;
 		d3d11_re.DXGIFactory2()->CreateSwapChainForCoreWindow(
-			d3d_device, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, &sc1);
-		swap_chain_1_ = MakeCOMPtr(sc1);
+			d3d_device, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, swap_chain_1_.put());
 
-		IDXGISwapChain* sc;
-		swap_chain_1_->QueryInterface(IID_IDXGISwapChain, reinterpret_cast<void**>(&sc));
-		swap_chain_ = MakeCOMPtr(sc);
+		swap_chain_1_.as(IID_IDXGISwapChain, swap_chain_);
 #endif
 
 		if (dxgi_async_swap_chain_)
 		{
-			IDXGISwapChain3* sc3;
-			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3))))
+			IDXGISwapChain3Ptr sc3;
+			if (swap_chain_.try_as(IID_IDXGISwapChain3, sc3))
 			{
 				frame_latency_waitable_obj_ = MakeWin32UniqueHandle(sc3->GetFrameLatencyWaitableObject());
-				sc3->Release();
 			}
 		}
 
 		if (try_hdr_display)
 		{
-			IDXGISwapChain4* sc4;
-			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain4, reinterpret_cast<void**>(&sc4))))
+			IDXGISwapChain4Ptr sc4;
+			if (swap_chain_.try_as(IID_IDXGISwapChain4, sc4))
 			{
 				UINT color_space_support;
 				if (SUCCEEDED(sc4->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020, &color_space_support))
@@ -941,8 +906,6 @@ namespace KlayGE
 				{
 					sc4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
 				}
-
-				sc4->Release();
 			}
 		}
 	}

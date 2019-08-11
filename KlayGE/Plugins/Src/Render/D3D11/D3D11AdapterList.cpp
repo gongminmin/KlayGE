@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
+#include <KFL/com_ptr.hpp>
 
 #include <vector>
 #include <system_error>
@@ -73,12 +73,12 @@ namespace KlayGE
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
-		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
+		IDXGIAdapter1Ptr dxgi_adapter;
+		while (gi_factory->EnumAdapters1(adapter_no, dxgi_adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.get());
 				adapter->Enumerate();
 				adapters_.push_back(std::move(adapter));
 			}
@@ -96,13 +96,13 @@ namespace KlayGE
 	void D3D11AdapterList::Enumerate(IDXGIFactory6* gi_factory)
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
+		IDXGIAdapter1Ptr dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter))))
+			IID_IDXGIAdapter1, dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.get());
 				adapter->Enumerate();
 				adapters_.push_back(std::move(adapter));
 			}
@@ -112,9 +112,7 @@ namespace KlayGE
 
 		if (adapters_.empty())
 		{
-			IDXGIFactory1* gif1;
-			gi_factory->QueryInterface(IID_IDXGIFactory1, reinterpret_cast<void**>(&gif1));
-			IDXGIFactory1Ptr gi_factory1 = MakeCOMPtr<IDXGIFactory1>(gif1);
+			auto gi_factory1 = com_ptr<IDXGIFactory6>(gi_factory).as<IDXGIFactory1>(IID_IDXGIFactory1);
 			this->Enumerate(gi_factory1.get());
 		}
 

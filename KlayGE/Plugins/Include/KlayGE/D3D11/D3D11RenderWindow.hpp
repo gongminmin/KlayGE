@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <KFL/com_ptr.hpp>
 #include <KFL/SmartPtrHelper.hpp>
 
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
@@ -35,7 +36,7 @@ namespace uwp
 #endif
 
 class IAmdDxExtQuadBufferStereo;
-typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
+using IAmdDxExtQuadBufferStereoPtr = KlayGE::com_ptr<IAmdDxExtQuadBufferStereo>;
 
 namespace KlayGE
 {

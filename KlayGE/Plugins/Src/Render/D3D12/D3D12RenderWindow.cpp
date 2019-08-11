@@ -32,7 +32,6 @@
 #include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -122,13 +121,13 @@ namespace KlayGE
 		viewport_->Width(width_);
 		viewport_->Height(height_);
 
-		ID3D12Device* d3d_device = nullptr;
-		ID3D12CommandQueue* d3d_cmd_queue = nullptr;
+		com_ptr<ID3D12Device> d3d_device;
+		com_ptr<ID3D12CommandQueue> d3d_cmd_queue;
 
 		if (d3d12_re.D3DDevice())
 		{
-			d3d_device = d3d12_re.D3DDevice();
-			d3d_cmd_queue = d3d12_re.D3DRenderCmdQueue();
+			d3d_device.reset(d3d12_re.D3DDevice());
+			d3d_cmd_queue.reset(d3d12_re.D3DRenderCmdQueue());
 
 			main_wnd_ = false;
 		}
@@ -176,29 +175,23 @@ namespace KlayGE
 
 			for (int i = 0; i < feature_levels.size(); ++ i)
 			{
-				ID3D12Device* device = nullptr;
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter(),
-						feature_levels[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
+						feature_levels[i], IID_ID3D12Device, d3d_device.put_void())))
 				{
-					d3d_device = device;
-
 					D3D12_COMMAND_QUEUE_DESC queue_desc;
 					queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 					queue_desc.Priority = 0;
 					queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 					queue_desc.NodeMask = 0;
-
-					ID3D12CommandQueue* cmd_queue;
 					TIFHR(d3d_device->CreateCommandQueue(&queue_desc,
-						IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
-					d3d_cmd_queue = cmd_queue;
+						IID_ID3D12CommandQueue, d3d_cmd_queue.put_void()));
 
 					D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 					req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
 					req_feature_levels.pFeatureLevelsRequested = &feature_levels[0];
 					d3d_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &req_feature_levels, sizeof(req_feature_levels));
 
-					d3d12_re.D3DDevice(d3d_device, d3d_cmd_queue, req_feature_levels.MaxSupportedFeatureLevel);
+					d3d12_re.D3DDevice(d3d_device.get(), d3d_cmd_queue.get(), req_feature_levels.MaxSupportedFeatureLevel);
 
 					if (Context::Instance().AppInstance().OnConfirmDevice()())
 					{
@@ -235,11 +228,8 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_device->Release();
-						d3d_device = nullptr;
-
-						d3d_cmd_queue->Release();
-						d3d_cmd_queue = nullptr;
+						d3d_device.reset();
+						d3d_cmd_queue.reset();
 					}
 				}
 			}
@@ -313,7 +303,7 @@ namespace KlayGE
 		sc_fs_desc_.Windowed = !this->FullScreen();
 #endif
 
-		this->CreateSwapChain(d3d_cmd_queue, settings.display_output_method != DOM_sRGB);
+		this->CreateSwapChain(d3d_cmd_queue.get(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -326,8 +316,7 @@ namespace KlayGE
 		this->UpdateSurfacesPtrs();
 
 #ifdef KLAYGE_DEBUG
-		ID3D12InfoQueue* d3d_info_queue = nullptr;
-		if (SUCCEEDED(d3d_device->QueryInterface(IID_ID3D12InfoQueue, reinterpret_cast<void**>(&d3d_info_queue))))
+		if (auto d3d_info_queue = d3d_device.try_as<ID3D12InfoQueue>(IID_ID3D12InfoQueue))
 		{
 			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
@@ -342,8 +331,6 @@ namespace KlayGE
 			filter.DenyList.NumIDs = static_cast<UINT>(std::size(hide));
 			filter.DenyList.pIDList = hide;
 			d3d_info_queue->AddStorageFilterEntries(&filter);
-
-			d3d_info_queue->Release();
 		}
 #endif
 	}
@@ -616,10 +603,10 @@ namespace KlayGE
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
-			ID3D12Resource* bb12;
+			com_ptr<ID3D12Resource> bb12;
 			TIFHR(swap_chain_->GetBuffer(static_cast<UINT>(i),
-				IID_ID3D12Resource, reinterpret_cast<void**>(&bb12)));
-			render_targets_[i] = MakeSharedPtr<D3D12Texture2D>(MakeCOMPtr<ID3D12Resource>(bb12));
+				IID_ID3D12Resource, bb12.put_void()));
+			render_targets_[i] = MakeSharedPtr<D3D12Texture2D>(bb12);
 		}
 		
 		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
@@ -656,26 +643,23 @@ namespace KlayGE
 	{
 		auto const& d3d12_re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		IDXGISwapChain1* sc = nullptr;
+		com_ptr<IDXGISwapChain1> sc;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		d3d12_re.DXGIFactory4()->CreateSwapChainForHwnd(d3d_cmd_queue, hWnd_,
-			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
+			&sc_desc1_, &sc_fs_desc_, nullptr, sc.put());
 #else
 		d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(
-			d3d_cmd_queue, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, &sc);
+			d3d_cmd_queue, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, sc.put());
 #endif
 
-		IDXGISwapChain3* sc3 = nullptr;
-		sc->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3));
-		swap_chain_ = MakeCOMPtr(sc3);
-		sc->Release();
+		sc.as(IID_IDXGISwapChain3, swap_chain_);
 
 		frame_latency_waitable_obj_ = MakeWin32UniqueHandle(swap_chain_->GetFrameLatencyWaitableObject());
 
 		if (try_hdr_display)
 		{
-			IDXGISwapChain4* sc4;
-			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain4, reinterpret_cast<void**>(&sc4))))
+			IDXGISwapChain4Ptr sc4;
+			if (swap_chain_.try_as(IID_IDXGISwapChain4, sc4))
 			{
 				UINT color_space_support;
 				if (SUCCEEDED(sc4->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020, &color_space_support))
@@ -683,8 +667,6 @@ namespace KlayGE
 				{
 					sc4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
 				}
-
-				sc4->Release();
 			}
 		}
 	}

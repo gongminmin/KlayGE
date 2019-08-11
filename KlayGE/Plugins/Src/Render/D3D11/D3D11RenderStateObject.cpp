@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -62,15 +61,13 @@ namespace KlayGE
 			d3d_rs_desc1.AntialiasedLineEnable = d3d_rs_desc.AntialiasedLineEnable;
 			d3d_rs_desc1.ForcedSampleCount = 0;
 
-			ID3D11RasterizerState1* rasterizer_state;
-			TIFHR(d3d_device_1->CreateRasterizerState1(&d3d_rs_desc1, &rasterizer_state));
-			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
+			ID3D11RasterizerState1Ptr rasterizer_state;
+			TIFHR(d3d_device_1->CreateRasterizerState1(&d3d_rs_desc1, rasterizer_state.put()));
+			rasterizer_state.as(IID_ID3D11RasterizerState, rasterizer_state_);
 		}
 		else
 		{
-			ID3D11RasterizerState* rasterizer_state;
-			TIFHR(d3d_device->CreateRasterizerState(&d3d_rs_desc, &rasterizer_state));
-			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
+			TIFHR(d3d_device->CreateRasterizerState(&d3d_rs_desc, rasterizer_state_.put()));
 		}
 
 		D3D11_DEPTH_STENCIL_DESC d3d_dss_desc;
@@ -89,9 +86,7 @@ namespace KlayGE
 		d3d_dss_desc.BackFace.StencilPassOp = D3D11Mapping::Mapping(dss_desc.back_stencil_pass);
 		d3d_dss_desc.BackFace.StencilFunc = D3D11Mapping::Mapping(dss_desc.back_stencil_func);
 
-		ID3D11DepthStencilState* ds_state;
-		TIFHR(d3d_device->CreateDepthStencilState(&d3d_dss_desc, &ds_state));
-		depth_stencil_state_ = MakeCOMPtr(ds_state);
+		TIFHR(d3d_device->CreateDepthStencilState(&d3d_dss_desc, depth_stencil_state_.put()));
 
 		D3D11_BLEND_DESC d3d_bs_desc;
 		d3d_bs_desc.AlphaToCoverageEnable = bs_desc.alpha_to_coverage_enable;
@@ -134,15 +129,13 @@ namespace KlayGE
 				d3d_bs_desc1.RenderTarget[i].RenderTargetWriteMask = d3d_bs_desc.RenderTarget[i].RenderTargetWriteMask;
 			}
 
-			ID3D11BlendState1* blend_state;
-			TIFHR(d3d_device_1->CreateBlendState1(&d3d_bs_desc1, &blend_state));
-			blend_state_ = MakeCOMPtr(blend_state);
+			ID3D11BlendState1Ptr blend_state;
+			TIFHR(d3d_device_1->CreateBlendState1(&d3d_bs_desc1, blend_state.put()));
+			blend_state.as(IID_ID3D11BlendState, blend_state_);
 		}
 		else
 		{
-			ID3D11BlendState* blend_state;
-			TIFHR(d3d_device->CreateBlendState(&d3d_bs_desc, &blend_state));
-			blend_state_ = MakeCOMPtr(blend_state);
+			TIFHR(d3d_device->CreateBlendState(&d3d_bs_desc, blend_state_.put()));
 		}
 	}
 
@@ -176,8 +169,6 @@ namespace KlayGE
 		d3d_desc.MinLOD = desc.min_lod;
 		d3d_desc.MaxLOD = desc.max_lod;
 
-		ID3D11SamplerState* sampler_state;
-		TIFHR(d3d_device->CreateSamplerState(&d3d_desc, &sampler_state));
-		sampler_state_ = MakeCOMPtr(sampler_state);
+		TIFHR(d3d_device->CreateSamplerState(&d3d_desc, sampler_state_.put()));
 	}
 }

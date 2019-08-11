@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -46,9 +45,7 @@ namespace KlayGE
 		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
-		ID3D12Fence* fence;
-		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		fence_ = MakeCOMPtr(fence);
+		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, fence_.put_void()));
 
 		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}

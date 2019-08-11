@@ -27,13 +27,13 @@ namespace KlayGE
 	class D3D11Adapter
 	{
 	public:
-		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter);
+		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1* adapter);
 
 		void Enumerate();
 
 		// ·ÃÎÊÉè±¸ÃèÊö×Ö·û´®
 		std::wstring const Description() const;
-		void ResetAdapter(IDXGIAdapter1Ptr const & ada);
+		void ResetAdapter(IDXGIAdapter1* ada);
 
 		uint32_t AdapterNo() const
 		{

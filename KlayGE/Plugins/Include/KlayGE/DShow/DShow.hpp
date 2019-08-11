@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/Show.hpp>
 
 struct IGraphBuilder;
@@ -41,11 +42,11 @@ namespace KlayGE
 		ShowState State(long msTimeout = -1);
 
 	private:
-		std::shared_ptr<IGraphBuilder>		graph_;
-		std::shared_ptr<IBaseFilter>		filter_;
-		std::shared_ptr<IMediaControl>		media_control_;
-		std::shared_ptr<IMediaEvent>		media_event_;
-		std::shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
+		com_ptr<IGraphBuilder> graph_;
+		com_ptr<IBaseFilter> filter_;
+		com_ptr<IMediaControl> media_control_;
+		com_ptr<IMediaEvent> media_event_;
+		com_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
 
 	private:
 		void Init();

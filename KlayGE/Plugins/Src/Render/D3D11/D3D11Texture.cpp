@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -126,9 +125,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
-			ID3D11ShaderResourceView* d3d_sr_view;
-			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
-			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, d3d_sr_view.put());
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
 		}
 	}
 
@@ -154,9 +153,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -181,9 +180,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -207,9 +206,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, array_index, face, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -235,9 +234,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -262,9 +261,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -288,9 +287,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, array_index, face, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -314,9 +313,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -340,9 +339,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -366,9 +365,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 

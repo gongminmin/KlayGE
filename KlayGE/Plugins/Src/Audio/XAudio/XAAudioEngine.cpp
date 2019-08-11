@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -123,9 +122,7 @@ namespace KlayGE
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) && defined(KLAYGE_DEBUG)
 		flags |= XAUDIO2_DEBUG_ENGINE;
 #endif
-		IXAudio2* xaudio = nullptr;
-		TIFHR(DynamicXAudio2Create_(&xaudio, flags, Processor1));
-		xaudio_ = MakeCOMPtr(xaudio);
+		TIFHR(DynamicXAudio2Create_(xaudio_.put(), flags, Processor1));
 
 		IXAudio2MasteringVoice*	mastering_voice;
 		TIFHR(xaudio_->CreateMasteringVoice(&mastering_voice, XAUDIO2_DEFAULT_CHANNELS, XAUDIO2_DEFAULT_SAMPLERATE));
