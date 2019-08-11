@@ -69,7 +69,7 @@ namespace KlayGE
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11AdapterList::Enumerate(IDXGIFactory1Ptr const & gi_factory)
+	void D3D11AdapterList::Enumerate(IDXGIFactory1* gi_factory)
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
@@ -93,7 +93,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11AdapterList::Enumerate(IDXGIFactory6Ptr const & gi_factory)
+	void D3D11AdapterList::Enumerate(IDXGIFactory6* gi_factory)
 	{
 		UINT adapter_no = 0;
 		IDXGIAdapter1* dxgi_adapter = nullptr;
@@ -115,7 +115,7 @@ namespace KlayGE
 			IDXGIFactory1* gif1;
 			gi_factory->QueryInterface(IID_IDXGIFactory1, reinterpret_cast<void**>(&gif1));
 			IDXGIFactory1Ptr gi_factory1 = MakeCOMPtr<IDXGIFactory1>(gif1);
-			this->Enumerate(gi_factory1);
+			this->Enumerate(gi_factory1.get());
 		}
 
 		if (adapters_.empty())

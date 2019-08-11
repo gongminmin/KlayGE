@@ -58,9 +58,9 @@ namespace KlayGE
 			return adapter_no_;
 		}
 
-		IDXGIAdapter1Ptr const & DXGIAdapter() const
+		IDXGIAdapter1* DXGIAdapter() const
 		{
-			return adapter_;
+			return adapter_.get();
 		}
 
 		DXGI_FORMAT DesktopFormat() const

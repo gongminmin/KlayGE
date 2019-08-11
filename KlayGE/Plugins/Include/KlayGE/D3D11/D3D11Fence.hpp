@@ -36,6 +36,7 @@
 #include <map>
 #include <atomic>
 
+#include <KFL/SmartPtrHelper.hpp>
 #include <KlayGE/Fence.hpp>
 
 namespace KlayGE
@@ -58,7 +59,6 @@ namespace KlayGE
 	{
 	public:
 		D3D11_4Fence();
-		~D3D11_4Fence() override;
 
 		uint64_t Signal(FenceType ft) override;
 		void Wait(uint64_t id) override;
@@ -66,7 +66,7 @@ namespace KlayGE
 
 	private:
 		ID3D11FencePtr fence_;
-		HANDLE fence_event_;
+		Win32UniqueHandle fence_event_;
 		uint64_t last_completed_val_;
 		std::atomic<uint64_t> fence_val_;
 	};

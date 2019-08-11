@@ -1104,7 +1104,7 @@ namespace KlayGE
 
 	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect const & effect)
 	{
-		D3D11ShaderObjectPtr ret = MakeSharedPtr<D3D11ShaderObject>(so_template_);
+		auto ret = MakeSharedPtr<D3D11ShaderObject>(so_template_);
 
 		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;

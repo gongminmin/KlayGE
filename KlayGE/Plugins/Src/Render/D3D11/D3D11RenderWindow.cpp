@@ -43,8 +43,7 @@
 namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(D3D11Adapter* adapter, std::string const & name, RenderSettings const & settings)
-						: adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false), dxgi_async_swap_chain_(false),
-							frame_latency_waitable_obj_(0)
+						: adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false), dxgi_async_swap_chain_(false)
 	{
 		// Store info
 		name_				= name;
@@ -198,7 +197,7 @@ namespace KlayGE
 				D3D_DRIVER_TYPE dev_type = dev_type_beh.first;
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
 				{
-					dx_adapter = adapter_->DXGIAdapter().get();
+					dx_adapter = adapter_->DXGIAdapter();
 					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
 				}
 				D3D_FEATURE_LEVEL out_feature_level = D3D_FEATURE_LEVEL_11_0;
@@ -790,10 +789,7 @@ namespace KlayGE
 		this->FullScreen(false);
 #endif
 
-		if (frame_latency_waitable_obj_ != 0)
-		{
-			::CloseHandle(frame_latency_waitable_obj_);
-		}
+		frame_latency_waitable_obj_.reset();
 
 		render_target_view_right_eye_.reset();
 		depth_stencil_view_right_eye_.reset();
@@ -929,11 +925,7 @@ namespace KlayGE
 			IDXGISwapChain3* sc3;
 			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3))))
 			{
-				if (frame_latency_waitable_obj_ != 0)
-				{
-					::CloseHandle(frame_latency_waitable_obj_);
-				}
-				frame_latency_waitable_obj_ = sc3->GetFrameLatencyWaitableObject();
+				frame_latency_waitable_obj_ = MakeWin32UniqueHandle(sc3->GetFrameLatencyWaitableObject());
 				sc3->Release();
 			}
 		}
@@ -997,7 +989,7 @@ namespace KlayGE
 	{
 		if (swap_chain_ && dxgi_async_swap_chain_)
 		{
-			::WaitForSingleObjectEx(frame_latency_waitable_obj_, 1000, true);
+			::WaitForSingleObjectEx(frame_latency_waitable_obj_.get(), 1000, true);
 		}
 	}
 

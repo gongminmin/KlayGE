@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <KFL/SmartPtrHelper.hpp>
+
 #include <KlayGE/Signal.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
@@ -137,7 +139,7 @@ namespace KlayGE
 #endif
 		IDXGISwapChain3Ptr swap_chain_;
 		bool main_wnd_;
-		HANDLE frame_latency_waitable_obj_;
+		Win32UniqueHandle frame_latency_waitable_obj_;
 
 		std::array<TexturePtr, NUM_BACK_BUFFERS> render_targets_;
 		std::array<RenderTargetViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;

@@ -59,8 +59,7 @@
 namespace KlayGE
 {
 	D3D12RenderWindow::D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings)
-						: adapter_(adapter), dxgi_allow_tearing_(false),
-							frame_latency_waitable_obj_(0)
+						: adapter_(adapter), dxgi_allow_tearing_(false)
 	{
 		// Store info
 		name_				= name;
@@ -178,7 +177,7 @@ namespace KlayGE
 			for (int i = 0; i < feature_levels.size(); ++ i)
 			{
 				ID3D12Device* device = nullptr;
-				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter().get(),
+				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter(),
 						feature_levels[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
 				{
 					d3d_device = device;
@@ -571,10 +570,7 @@ namespace KlayGE
 		this->FullScreen(false);
 #endif
 
-		if (frame_latency_waitable_obj_ != 0)
-		{
-			::CloseHandle(frame_latency_waitable_obj_);
-		}
+		frame_latency_waitable_obj_.reset();
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
@@ -674,11 +670,7 @@ namespace KlayGE
 		swap_chain_ = MakeCOMPtr(sc3);
 		sc->Release();
 
-		if (frame_latency_waitable_obj_ != 0)
-		{
-			::CloseHandle(frame_latency_waitable_obj_);
-		}
-		frame_latency_waitable_obj_ = swap_chain_->GetFrameLatencyWaitableObject();
+		frame_latency_waitable_obj_ = MakeWin32UniqueHandle(swap_chain_->GetFrameLatencyWaitableObject());
 
 		if (try_hdr_display)
 		{
@@ -727,7 +719,7 @@ namespace KlayGE
 	{
 		if (swap_chain_)
 		{
-			::WaitForSingleObjectEx(frame_latency_waitable_obj_, 1000, true);
+			::WaitForSingleObjectEx(frame_latency_waitable_obj_.get(), 1000, true);
 		}
 	}
 

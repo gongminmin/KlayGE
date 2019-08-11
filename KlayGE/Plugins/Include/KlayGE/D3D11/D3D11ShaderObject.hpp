@@ -368,8 +368,6 @@ namespace KlayGE
 		std::vector<ID3D11UnorderedAccessView*> uavs_;
 		std::vector<uint32_t> uav_init_counts_;
 	};
-
-	typedef std::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
 }
 
 #endif			// KLAYGE_PLUGINS_D3D11_SHADER_OBJECT_HPP

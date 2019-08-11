@@ -21,8 +21,9 @@
 
 #pragma once
 
-#include <KFL/Vector.hpp>
 #include <KFL/Color.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/SmartPtrHelper.hpp>
 
 #include <vector>
 #include <map>
@@ -237,9 +238,9 @@ namespace KlayGE
 		FrameBufferPtr stereo_nv_3d_vision_fb_;
 		TexturePtr stereo_nv_3d_vision_tex_;
 
-		HANDLE device_lost_event_;
-		DWORD  device_lost_reg_cookie_;
-		PTP_WAIT thread_pool_wait_;
+		Win32UniqueHandle device_lost_event_;
+		DWORD device_lost_reg_cookie_;
+		Win32UniqueTpWait thread_pool_wait_;
 	};
 }
 

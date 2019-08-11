@@ -79,7 +79,7 @@ namespace
 
 	typedef KlayGE::uint32_t (WINAPI *CreateObjectFunc)(const GUID* clsID, const GUID* interfaceID, void** outObject);
 
-	HRESULT GetArchiveItemPath(std::shared_ptr<IInArchive> const & archive, uint32_t index, std::string& result)
+	HRESULT GetArchiveItemPath(IInArchive* archive, uint32_t index, std::string& result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -99,7 +99,7 @@ namespace
 		}
 	}
 
-	HRESULT IsArchiveItemFolder(std::shared_ptr<IInArchive> const & archive, uint32_t index, bool &result)
+	HRESULT IsArchiveItemFolder(IInArchive* archive, uint32_t index, bool &result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -217,11 +217,11 @@ namespace KlayGE
 		for (uint32_t i = 0; i < num_items_; ++ i)
 		{
 			bool is_folder = true;
-			TIFHR(IsArchiveItemFolder(archive_, i, is_folder));
+			TIFHR(IsArchiveItemFolder(archive_.get(), i, is_folder));
 			if (!is_folder)
 			{
 				std::string file_path;
-				TIFHR(GetArchiveItemPath(archive_, i, file_path));
+				TIFHR(GetArchiveItemPath(archive_.get(), i, file_path));
 				std::replace(file_path.begin(), file_path.end(), '\\', '/');
 				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
 					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))

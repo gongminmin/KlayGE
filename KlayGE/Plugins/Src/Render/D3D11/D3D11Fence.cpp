@@ -113,12 +113,7 @@ namespace KlayGE
 		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, reinterpret_cast<void**>(&fence));
 		fence_ = MakeCOMPtr(fence);
 
-		fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-	}
-
-	D3D11_4Fence::~D3D11_4Fence()
-	{
-		::CloseHandle(fence_event_);
+		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}
 
 	uint64_t D3D11_4Fence::Signal(FenceType ft)
@@ -140,8 +135,8 @@ namespace KlayGE
 	{
 		if (!this->Completed(id))
 		{
-			TIFHR(fence_->SetEventOnCompletion(id, fence_event_));
-			::WaitForSingleObjectEx(fence_event_, INFINITE, FALSE);
+			TIFHR(fence_->SetEventOnCompletion(id, fence_event_.get()));
+			::WaitForSingleObjectEx(fence_event_.get(), INFINITE, FALSE);
 		}
 	}
 

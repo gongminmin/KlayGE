@@ -17,6 +17,7 @@
 #include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -96,7 +97,7 @@ namespace KlayGE
 	D3D11RenderEngine::D3D11RenderEngine()
 		: num_so_buffs_(0),
 			dsv_ptr_cache_(nullptr),
-			device_lost_event_(nullptr), device_lost_reg_cookie_(0), thread_pool_wait_(nullptr)
+			device_lost_reg_cookie_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 6;
@@ -181,11 +182,11 @@ namespace KlayGE
 
 		if (gi_factory_6_)
 		{
-			adapterList_.Enumerate(gi_factory_6_);
+			adapterList_.Enumerate(gi_factory_6_.get());
 		}
 		else
 		{
-			adapterList_.Enumerate(gi_factory_1_);
+			adapterList_.Enumerate(gi_factory_1_.get());
 		}
 	}
 
@@ -426,14 +427,14 @@ namespace KlayGE
 
 		if (d3d_11_runtime_sub_ver_ >= 4)
 		{
-			device_lost_event_ = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
+			device_lost_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS));
 			if (device_lost_event_ != nullptr)
 			{
-				thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
+				thread_pool_wait_ = MakeWin32UniquTpWait(::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr));
 				if (thread_pool_wait_ != nullptr)
 				{
-					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, nullptr);
-					TIFHR(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+					::SetThreadpoolWait(thread_pool_wait_.get(), device_lost_event_.get(), nullptr);
+					TIFHR(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_.get(), &device_lost_reg_cookie_));
 				}
 			}
 		}
@@ -850,16 +851,8 @@ namespace KlayGE
 			d3d_device_4_->UnregisterDeviceRemoved(device_lost_reg_cookie_);
 			device_lost_reg_cookie_ = 0;
 		}
-		if (device_lost_event_ != nullptr)
-		{
-			::CloseHandle(device_lost_event_);
-			device_lost_event_ = nullptr;
-		}
-		if (thread_pool_wait_ != nullptr)
-		{
-			::CloseThreadpoolWait(thread_pool_wait_);
-			thread_pool_wait_ = nullptr;
-		}
+		device_lost_event_.reset();
+		thread_pool_wait_.reset();
 
 		adapterList_.Destroy();
 

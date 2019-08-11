@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <KFL/SmartPtrHelper.hpp>
+
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
 #include <KlayGE/Signal.hpp>
 
@@ -127,7 +129,7 @@ namespace KlayGE
 		IDXGISwapChainPtr swap_chain_;
 		IDXGISwapChain1Ptr swap_chain_1_;
 		bool main_wnd_;
-		HANDLE frame_latency_waitable_obj_;
+		Win32UniqueHandle frame_latency_waitable_obj_;
 
 		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
 		uint32_t stereo_amd_right_eye_height_;
