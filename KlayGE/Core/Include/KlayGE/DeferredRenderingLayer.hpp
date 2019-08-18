@@ -50,7 +50,7 @@
 namespace KlayGE
 {
 	enum VPAttribMask
-	{		
+	{
 		VPAM_Enabled = 1UL << 0,
 		VPAM_NoOpaque = 1UL << 1,
 		VPAM_NoTransparencyBack = 1UL << 2,
@@ -58,7 +58,12 @@ namespace KlayGE
 		VPAM_NoSimpleForward = 1UL << 4,
 		VPAM_NoGI = 1UL << 5,
 		VPAM_NoSSVO = 1UL << 6,
-		VPAM_NoDoF = 1UL << 7
+		VPAM_NoDoF = 1UL << 7,
+		VPAM_NoSSS = 1UL << 8,
+		VPAM_NoSSR = 1UL << 9,
+		VPAM_NoVDM = 1UL << 10,
+		VPAM_NoAtmospheric = 1UL << 11,
+		VPAM_NoTAA = 1UL << 12,
 	};
 
 	struct PerViewport
