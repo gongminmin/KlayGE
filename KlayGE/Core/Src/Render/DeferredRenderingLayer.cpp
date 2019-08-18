@@ -2939,59 +2939,74 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AddSSS(PerViewport const & pvp)
 	{
-		auto* sss_pp = sss_blur_pps_[pvp.sample_count != 1].get();
+		if (!(pvp.attrib & VPAM_NoSSS))
+		{
+			auto* sss_pp = sss_blur_pps_[pvp.sample_count != 1].get();
 
-		sss_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_fb->AttachedDsv());
-		sss_pp->InputPin(0, pvp.merged_shading_srvs[pvp.curr_merged_buffer_index]);
-		sss_pp->InputPin(1, pvp.g_buffer_depth_srv);
-		sss_pp->OutputPin(0, pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index]);
-		sss_pp->Apply();
+			sss_pp->OutputFrameBuffer()->Attach(pvp.g_buffer_fb->AttachedDsv());
+			sss_pp->InputPin(0, pvp.merged_shading_srvs[pvp.curr_merged_buffer_index]);
+			sss_pp->InputPin(1, pvp.g_buffer_depth_srv);
+			sss_pp->OutputPin(0, pvp.merged_shading_rtvs[pvp.curr_merged_buffer_index]);
+			sss_pp->Apply();
+		}
 	}
 
 	void DeferredRenderingLayer::AddSSR(PerViewport const & pvp)
 	{
-		auto* ssr_pp = ssr_pps_[pvp.sample_count != 1].get();
+		if (!(pvp.attrib & VPAM_NoSSR))
+		{
+			auto* ssr_pp = ssr_pps_[pvp.sample_count != 1].get();
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-		ssr_pp->InputPin(0, pvp.g_buffer_rt0_srv);
-		ssr_pp->InputPin(1, pvp.g_buffer_rt1_srv);
-		ssr_pp->InputPin(2, pvp.g_buffer_resolved_depth_srv);
-		ssr_pp->InputPin(3, pvp.merged_shading_resolved_srvs[!pvp.curr_merged_buffer_index]);
-		ssr_pp->InputPin(4, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
-		ssr_pp->Apply();
+			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
+			ssr_pp->InputPin(0, pvp.g_buffer_rt0_srv);
+			ssr_pp->InputPin(1, pvp.g_buffer_rt1_srv);
+			ssr_pp->InputPin(2, pvp.g_buffer_resolved_depth_srv);
+			ssr_pp->InputPin(3, pvp.merged_shading_resolved_srvs[!pvp.curr_merged_buffer_index]);
+			ssr_pp->InputPin(4, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
+			ssr_pp->Apply();
+		}
 	}
 
 	void DeferredRenderingLayer::AddVDM(PerViewport const & pvp)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (!(pvp.attrib & VPAM_NoVDM))
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-		vdm_composition_pp_->InputPin(0, pvp.vdm_color_srv);
-		vdm_composition_pp_->InputPin(1, pvp.vdm_transition_srv);
-		vdm_composition_pp_->InputPin(2, pvp.vdm_count_srv);
-		vdm_composition_pp_->InputPin(3, pvp.merged_depth_resolved_srvs[pvp.curr_merged_buffer_index]);
-		vdm_composition_pp_->Render();
+			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
+			vdm_composition_pp_->InputPin(0, pvp.vdm_color_srv);
+			vdm_composition_pp_->InputPin(1, pvp.vdm_transition_srv);
+			vdm_composition_pp_->InputPin(2, pvp.vdm_count_srv);
+			vdm_composition_pp_->InputPin(3, pvp.merged_depth_resolved_srvs[pvp.curr_merged_buffer_index]);
+			vdm_composition_pp_->Render();
+		}
 	}
 
 	void DeferredRenderingLayer::AddAtmospheric(PerViewport const & pvp)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (!(pvp.attrib & VPAM_NoAtmospheric))
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-		atmospheric_pp_->SetParam(0, pvp.inv_proj);
-		atmospheric_pp_->InputPin(0, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
-		atmospheric_pp_->Render();
+			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
+			atmospheric_pp_->SetParam(0, pvp.inv_proj);
+			atmospheric_pp_->InputPin(0, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
+			atmospheric_pp_->Render();
+		}
 	}
 
 	void DeferredRenderingLayer::AddTAA(PerViewport const & pvp)
 	{
-		App3DFramework& app = Context::Instance().AppInstance();
-		if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
+		if (!(pvp.attrib & VPAM_NoTAA))
 		{
-			taa_pp_->InputPin(0, pvp.merged_shading_resolved_srvs[!pvp.curr_merged_buffer_index]);
-			taa_pp_->Render();
+			App3DFramework& app = Context::Instance().AppInstance();
+			if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
+			{
+				taa_pp_->InputPin(0, pvp.merged_shading_resolved_srvs[!pvp.curr_merged_buffer_index]);
+				taa_pp_->Render();
+			}
 		}
 	}
 
