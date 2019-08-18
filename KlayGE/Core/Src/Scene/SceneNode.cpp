@@ -622,8 +622,8 @@ namespace KlayGE
 					if (child->pos_aabb_os_)
 					{
 						if ((child->pos_aabb_os_->Min().x() < child->pos_aabb_os_->Max().x())
-							&& (child->pos_aabb_os_->Min().y() < child->pos_aabb_os_->Max().y())
-							&& (child->pos_aabb_os_->Min().z() < child->pos_aabb_os_->Max().z()))
+							|| (child->pos_aabb_os_->Min().y() < child->pos_aabb_os_->Max().y())
+							|| (child->pos_aabb_os_->Min().z() < child->pos_aabb_os_->Max().z()))
 						{
 							*pos_aabb_os_ |= MathLib::transform_aabb(*child->pos_aabb_os_, child->TransformToParent());
 						}

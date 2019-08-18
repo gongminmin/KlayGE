@@ -137,11 +137,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		float sample_z;
 		if (front_side)
 		{
-			sample_z = front_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).x;
+			sample_z = front_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddy).x;
 		}
 		else
 		{
-			sample_z = back_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).x;
+			sample_z = back_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddy).x;
 		}
 
 		float4 ret;
