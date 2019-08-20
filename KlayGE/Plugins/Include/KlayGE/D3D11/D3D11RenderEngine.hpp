@@ -220,18 +220,6 @@ namespace KlayGE
 
 		char const* shader_profiles_[NumShaderStages];
 
-		enum StereoMethod
-		{
-			SM_None,
-			SM_DXGI,
-			SM_NV3DVision,
-			SM_AMDQuadBuffer
-		};
-
-		StereoMethod stereo_method_;
-		FrameBufferPtr stereo_nv_3d_vision_fb_;
-		TexturePtr stereo_nv_3d_vision_tex_;
-
 		Win32UniqueHandle device_lost_event_;
 		DWORD device_lost_reg_cookie_;
 		Win32UniqueTpWait thread_pool_wait_;

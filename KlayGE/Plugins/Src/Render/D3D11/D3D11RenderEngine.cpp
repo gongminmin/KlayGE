@@ -316,57 +316,6 @@ namespace KlayGE
 
 		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
-
-		if (STM_LCDShutter == settings.stereo_method)
-		{
-			stereo_method_ = SM_None;
-
-			if (gi_factory_2_->IsWindowedStereoEnabled())
-			{
-				stereo_method_ = SM_DXGI;
-			}
-
-			if (SM_None == stereo_method_)
-			{
-				if (win->Adapter().Description().find(L"NVIDIA", 0) != std::wstring::npos)
-				{
-					stereo_method_ = SM_NV3DVision;
-
-					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-					uint32_t const w = win->Width();
-					uint32_t const h = win->Height();
-					stereo_nv_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
-						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-
-					stereo_nv_3d_vision_fb_ = rf.MakeFrameBuffer();
-					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::Attachment::Color0,
-						rf.Make2DRtv(stereo_nv_3d_vision_tex_, 0, 1, 0));
-
-					NVSTEREOIMAGEHEADER sih;
-					sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
-					sih.dwBPP = NumFormatBits(settings.color_fmt);
-					sih.dwFlags = SIH_SWAP_EYES;
-					sih.dwWidth = w * 2; 
-					sih.dwHeight = h;
-
-					ElementInitData init_data;
-					init_data.data = &sih;
-					init_data.row_pitch = sizeof(sih);
-					init_data.slice_pitch = init_data.row_pitch;
-					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt), 1, 1, 1, settings.color_fmt, 1,
-						0, EAH_GPU_Read, MakeSpan<1>(init_data));
-
-					sih_tex->CopyToSubTexture2D(*stereo_nv_3d_vision_tex_,
-						0, 0, 0, h, sih_tex->Width(0), 1,
-						0, 0, 0, 0, sih_tex->Width(0), 1);
-				}
-				else if (win->Adapter().Description().find(L"AMD", 0) != std::wstring::npos)
-				{
-					stereo_method_ = SM_AMDQuadBuffer;
-				}
-			}
-		}
 	}
 
 	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
@@ -841,9 +790,6 @@ namespace KlayGE
 		rtv_ptr_cache_.clear();
 		dsv_ptr_cache_ = nullptr;
 
-		stereo_nv_3d_vision_fb_.reset();
-		stereo_nv_3d_vision_tex_.reset();
-
 		if (d3d_imm_ctx_1_)
 		{
 			d3d_imm_ctx_1_->ClearState();
@@ -1226,83 +1172,23 @@ namespace KlayGE
 		uint32_t const height = mono_tex_->Height(0);
 		auto& win = checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_);
 
-		switch (stereo_method_)
+		if (gi_factory_2_->IsWindowedStereoEnabled())
 		{
-		case SM_DXGI:
-			{
-				auto const& view = (0 == eye) ? *win.D3DBackBufferRtv() : *win.D3DBackBufferRightEyeRtv();
-				auto* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
-				this->OMSetRenderTargets(1, &rtv, nullptr);
+			auto const& view = (0 == eye) ? *win.D3DBackBufferRtv() : *win.D3DBackBufferRightEyeRtv();
+			auto* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
+			this->OMSetRenderTargets(1, &rtv, nullptr);
 
-				D3D11_VIEWPORT vp;
-				vp.TopLeftX = 0;
-				vp.TopLeftY = 0;
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
+			D3D11_VIEWPORT vp;
+			vp.TopLeftX = 0;
+			vp.TopLeftY = 0;
+			vp.Width = static_cast<float>(width);
+			vp.Height = static_cast<float>(height);
+			vp.MinDepth = 0;
+			vp.MaxDepth = 1;
 
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-			}
-			break;
-
-		case SM_NV3DVision:
-			{
-				this->BindFrameBuffer(stereo_nv_3d_vision_fb_);
-
-				D3D11_VIEWPORT vp;
-				vp.TopLeftY = 0;
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
-				vp.TopLeftX = (0 == eye) ? 0 : vp.Width;
-
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-		
-				if (0 == eye)
-				{
-					ID3D11Resource* back = checked_cast<D3D11Texture2D&>(*win.D3DBackBuffer()).D3DResource();
-					ID3D11Resource* stereo = checked_cast<D3D11Texture2D&>(*stereo_nv_3d_vision_tex_).D3DResource();
-
-					D3D11_BOX box;
-					box.left = 0;
-					box.right = width;
-					box.top = 0;
-					box.bottom = height;
-					box.front = 0;
-					box.back = 1;
-					d3d_imm_ctx_1_->CopySubresourceRegion(back, 0, 0, 0, 0, stereo, 0, &box);
-				}
-			}
-			break;
-
-		case SM_AMDQuadBuffer:
-			{
-				RenderTargetView const& view = *win.D3DBackBufferRtv();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
-				this->OMSetRenderTargets(1, &rtv, nullptr);
-
-				D3D11_VIEWPORT vp;
-				vp.TopLeftX = 0;
-				vp.TopLeftY = (0 == eye) ? 0 : static_cast<float>(win.StereoRightEyeHeight());
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
-
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-			}
-			break;
-
-		default:
-			break;
+			this->RSSetViewports(1, &vp);
+			stereoscopic_pp_->SetParam(3, eye);
+			stereoscopic_pp_->Render();
 		}
 	}
 

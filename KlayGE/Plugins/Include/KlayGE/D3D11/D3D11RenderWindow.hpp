@@ -82,10 +82,6 @@ namespace KlayGE
 		{
 			return render_target_view_right_eye_;
 		}
-		uint32_t StereoRightEyeHeight() const
-		{
-			return stereo_amd_right_eye_height_;
-		}
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
@@ -115,6 +111,7 @@ namespace KlayGE
 		uint32_t sync_interval_;
 
 		D3D11Adapter* adapter_;
+
 		bool dxgi_stereo_support_;
 		bool dxgi_allow_tearing_;
 		bool dxgi_async_swap_chain_;
@@ -127,9 +124,6 @@ namespace KlayGE
 		IDXGISwapChain1Ptr swap_chain_1_;
 		bool main_wnd_;
 		Win32UniqueHandle frame_latency_waitable_obj_;
-
-		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
-		uint32_t stereo_amd_right_eye_height_;
 
 		TexturePtr back_buffer_;
 		TexturePtr depth_stencil_;

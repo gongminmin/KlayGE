@@ -408,51 +408,6 @@ namespace KlayGE
 		}
 #endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		if ((STM_LCDShutter == settings.stereo_method) && !dxgi_stereo_support_)
-		{
-			if (adapter_->Description().find(L"AMD", 0) != std::wstring::npos)
-			{
-#ifdef KLAYGE_PLATFORM_WIN64
-				const TCHAR* ati_driver = TEXT("atidxx64.dll");
-#else
-				const TCHAR* ati_driver = TEXT("atidxx32.dll");
-#endif
-				HMODULE dll = ::GetModuleHandle(ati_driver);
-				if (dll != nullptr)
-				{
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-					PFNAmdDxExtCreate11 AmdDxExtCreate11 = reinterpret_cast<PFNAmdDxExtCreate11>(::GetProcAddress(dll, "AmdDxExtCreate11"));
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
-#pragma GCC diagnostic pop
-#endif
-					if (AmdDxExtCreate11 != nullptr)
-					{
-						com_ptr<IAmdDxExt> amd_dx_ext;
-						HRESULT hr = AmdDxExtCreate11(d3d_device.get(), amd_dx_ext.put());
-						if (SUCCEEDED(hr))
-						{
-							AmdDxExtVersion ext_version;
-							hr = amd_dx_ext->GetVersion(&ext_version);
-							if (SUCCEEDED(hr))
-							{
-								IAmdDxExtInterface* adti = amd_dx_ext->GetExtInterface(AmdDxExtQuadBufferStereoID);
-								if (adti != nullptr)
-								{
-									stereo_amd_qb_ext_.reset(static_cast<IAmdDxExtQuadBufferStereo*>(adti), false);
-									stereo_amd_qb_ext_->EnableQuadBufferStereo(true);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-#endif
-
 		this->CreateSwapChain(d3d_device.get(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_1_);
 
@@ -775,11 +730,6 @@ namespace KlayGE
 			{
 				depth_stencil_view_right_eye_ = rf.Make2DDsv(depth_stencil_, 1, 1, 0);
 			}
-		}
-
-		if (!!stereo_amd_qb_ext_)
-		{
-			stereo_amd_right_eye_height_ = stereo_amd_qb_ext_->GetLineOffset(swap_chain_1_.get());
 		}
 
 		this->Attach(Attachment::Color0, render_target_view_);
