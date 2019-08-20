@@ -626,7 +626,7 @@ namespace KlayGE
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-		auto d3d_device = d3d11_re.D3DDevice();
+		auto* d3d_device = d3d11_re.D3DDevice1();
 		auto const& caps = d3d11_re.DeviceCaps();
 
 		std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(so_decl.size());
@@ -688,7 +688,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice();
+		ID3D11Device1* d3d_device = re.D3DDevice1();
 
 		if (FAILED(d3d_device->CreateVertexShader(shader_code_.data(), shader_code_.size(), nullptr, vertex_shader_.put())))
 		{
@@ -772,7 +772,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice();
+		ID3D11Device1* d3d_device = re.D3DDevice1();
 
 		if (FAILED(d3d_device->CreatePixelShader(shader_code_.data(), shader_code_.size(), nullptr, pixel_shader_.put())))
 		{
@@ -803,7 +803,7 @@ namespace KlayGE
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-				ID3D11Device* d3d_device = re.D3DDevice();
+				ID3D11Device1* d3d_device = re.D3DDevice1();
 
 				if (FAILED(d3d_device->CreateGeometryShader(shader_code_.data(), shader_code_.size(), nullptr, geometry_shader_.put())))
 				{
@@ -844,7 +844,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice();
+			ID3D11Device1* d3d_device = re.D3DDevice1();
 
 			if (FAILED(d3d_device->CreateComputeShader(shader_code_.data(), shader_code_.size(), nullptr, compute_shader_.put())))
 			{
@@ -911,7 +911,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice();
+			ID3D11Device1* d3d_device = re.D3DDevice1();
 
 			if (FAILED(d3d_device->CreateHullShader(shader_code_.data(), shader_code_.size(), nullptr, hull_shader_.put())))
 			{
@@ -945,7 +945,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice();
+			ID3D11Device1* d3d_device = re.D3DDevice1();
 
 			if (FAILED(d3d_device->CreateDomainShader(shader_code_.data(), shader_code_.size(), nullptr, domain_shader_.put())))
 			{

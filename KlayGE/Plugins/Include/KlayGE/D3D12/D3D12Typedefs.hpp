@@ -46,7 +46,7 @@ namespace KlayGE
 	using IDXGIFactory4Ptr = com_ptr<IDXGIFactory4>;
 	using IDXGIFactory5Ptr = com_ptr<IDXGIFactory5>;
 	using IDXGIFactory6Ptr = com_ptr<IDXGIFactory6>;
-	using IDXGIAdapter1Ptr = com_ptr<IDXGIAdapter1>;
+	using IDXGIAdapter2Ptr = com_ptr<IDXGIAdapter2>;
 	using IDXGISwapChain3Ptr = com_ptr<IDXGISwapChain3>;
 	using IDXGISwapChain4Ptr = com_ptr<IDXGISwapChain4>;
 	using ID3D12DevicePtr = com_ptr<ID3D12Device>;

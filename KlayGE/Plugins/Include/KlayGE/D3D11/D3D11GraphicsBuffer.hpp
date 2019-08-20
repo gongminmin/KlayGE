@@ -56,8 +56,8 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		ID3D11BufferPtr d3d_buffer_;
 

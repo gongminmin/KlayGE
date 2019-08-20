@@ -140,8 +140,8 @@ namespace KlayGE
 			CubeFaces first_face, uint32_t num_faces, uint32_t level) const;
 
 	protected:
-		ID3D11Device*				d3d_device_;
-		ID3D11DeviceContext*		d3d_imm_ctx_;
+		ID3D11Device1*				d3d_device_;
+		ID3D11DeviceContext1*		d3d_imm_ctx_;
 
 		DXGI_FORMAT dxgi_fmt_;
 

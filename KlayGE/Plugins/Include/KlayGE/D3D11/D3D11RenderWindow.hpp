@@ -119,15 +119,11 @@ namespace KlayGE
 		bool dxgi_allow_tearing_;
 		bool dxgi_async_swap_chain_;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		DXGI_SWAP_CHAIN_DESC sc_desc_;
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
-#else
-		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #endif
-		IDXGISwapChainPtr swap_chain_;
 		IDXGISwapChain1Ptr swap_chain_1_;
 		bool main_wnd_;
 		Win32UniqueHandle frame_latency_waitable_obj_;

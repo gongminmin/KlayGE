@@ -29,7 +29,7 @@ namespace KlayGE
 
 		void Destroy();
 
-		void Enumerate(IDXGIFactory1* gi_factory);
+		void Enumerate(IDXGIFactory2* gi_factory);
 		void Enumerate(IDXGIFactory6* gi_factory);
 
 		size_t NumAdapter() const;

@@ -32,7 +32,6 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>

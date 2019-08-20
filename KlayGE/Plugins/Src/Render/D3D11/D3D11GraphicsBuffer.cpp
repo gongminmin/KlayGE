@@ -40,8 +40,8 @@ namespace KlayGE
 		}
 
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	ID3D11ShaderResourceViewPtr const & D3D11GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,

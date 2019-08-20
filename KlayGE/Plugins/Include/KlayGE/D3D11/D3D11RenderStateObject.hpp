@@ -28,7 +28,7 @@ namespace KlayGE
 
 		void Active();
 
-		ID3D11RasterizerState* D3DRasterizerState() const
+		ID3D11RasterizerState1* D3DRasterizerState() const
 		{
 			return rasterizer_state_.get();
 		}
@@ -38,15 +38,15 @@ namespace KlayGE
 			return depth_stencil_state_.get();
 		}
 
-		ID3D11BlendState* D3DBlendState() const
+		ID3D11BlendState1* D3DBlendState() const
 		{
 			return blend_state_.get();
 		}
 
 	private:
-		ID3D11RasterizerStatePtr rasterizer_state_;
+		ID3D11RasterizerState1Ptr rasterizer_state_;
 		ID3D11DepthStencilStatePtr depth_stencil_state_;
-		ID3D11BlendStatePtr blend_state_;
+		ID3D11BlendState1Ptr blend_state_;
 	};
 
 	class D3D11SamplerStateObject : public SamplerStateObject

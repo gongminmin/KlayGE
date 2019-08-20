@@ -27,20 +27,20 @@ namespace KlayGE
 	class D3D11Adapter
 	{
 	public:
-		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1* adapter);
+		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter2* adapter);
 
 		void Enumerate();
 
 		// 访问设备描述字符串
 		std::wstring const Description() const;
-		void ResetAdapter(IDXGIAdapter1* ada);
+		void ResetAdapter(IDXGIAdapter2* adapter);
 
 		uint32_t AdapterNo() const
 		{
 			return adapter_no_;
 		}
 
-		IDXGIAdapter1* DXGIAdapter() const
+		IDXGIAdapter2* DXGIAdapter() const
 		{
 			return adapter_.get();
 		}
@@ -58,8 +58,8 @@ namespace KlayGE
 		uint32_t			adapter_no_;
 
 		// 适配器信息
-		IDXGIAdapter1Ptr adapter_;
-		DXGI_ADAPTER_DESC1 adapter_desc_{};
+		IDXGIAdapter2Ptr adapter_;
+		DXGI_ADAPTER_DESC2 adapter_desc_{};
 
 		// 显示模式列表
 		std::vector<D3D11VideoMode> modes_;

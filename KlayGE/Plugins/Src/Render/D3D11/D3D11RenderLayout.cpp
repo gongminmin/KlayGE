@@ -93,7 +93,7 @@ namespace KlayGE
 
 			auto vs_code = shader.VsCode();
 			auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice();
+			ID3D11Device1* d3d_device = re.D3DDevice1();
 			ID3D11InputLayoutPtr new_layout;
 			TIFHR(d3d_device->CreateInputLayout(&vertex_elems_[0], static_cast<UINT>(vertex_elems_.size()),
 				vs_code.data(), vs_code.size(), new_layout.put()));

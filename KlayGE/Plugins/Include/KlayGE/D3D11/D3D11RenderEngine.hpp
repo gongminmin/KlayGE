@@ -55,7 +55,6 @@ namespace KlayGE
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		IDXGIFactory1* DXGIFactory1() const;
 		IDXGIFactory2* DXGIFactory2() const;
 		IDXGIFactory3* DXGIFactory3() const;
 		IDXGIFactory4* DXGIFactory4() const;
@@ -63,13 +62,11 @@ namespace KlayGE
 		IDXGIFactory6* DXGIFactory6() const;
 		uint8_t DXGISubVer() const;
 
-		ID3D11Device* D3DDevice() const;
 		ID3D11Device1* D3DDevice1() const;
 		ID3D11Device2* D3DDevice2() const;
 		ID3D11Device3* D3DDevice3() const;
 		ID3D11Device4* D3DDevice4() const;
 		ID3D11Device5* D3DDevice5() const;
-		ID3D11DeviceContext* D3DDeviceImmContext() const;
 		ID3D11DeviceContext1* D3DDeviceImmContext1() const;
 		ID3D11DeviceContext2* D3DDeviceImmContext2() const;
 		ID3D11DeviceContext3* D3DDeviceImmContext3() const;
@@ -78,7 +75,7 @@ namespace KlayGE
 
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
 
-		void D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level);
+		void D3DDevice(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
 		void ForceFlush();
 
@@ -96,9 +93,9 @@ namespace KlayGE
 			return shader_profiles_[static_cast<uint32_t>(stage)];
 		}
 
-		void RSSetState(ID3D11RasterizerState* ras);
+		void RSSetState(ID3D11RasterizerState1* ras);
 		void OMSetDepthStencilState(ID3D11DepthStencilState* ds, uint16_t stencil_ref);
-		void OMSetBlendState(ID3D11BlendState* bs, Color const & blend_factor, uint32_t sample_mask);
+		void OMSetBlendState(ID3D11BlendState1* bs, Color const & blend_factor, uint32_t sample_mask);
 		void VSSetShader(ID3D11VertexShader* shader);
 		void PSSetShader(ID3D11PixelShader* shader);
 		void GSSetShader(ID3D11GeometryShader* shader);
@@ -141,7 +138,7 @@ namespace KlayGE
 		virtual void DoResume() override;
 
 		void FillRenderDeviceCaps();
-		void DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx);
+		void DetectD3D11Runtime(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx);
 
 		virtual void StereoscopicForLCDShutter(int32_t eye) override;
 
@@ -165,21 +162,18 @@ namespace KlayGE
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
 
-		IDXGIFactory1Ptr gi_factory_1_;
 		IDXGIFactory2Ptr gi_factory_2_;
 		IDXGIFactory3Ptr gi_factory_3_;
 		IDXGIFactory4Ptr gi_factory_4_;
 		IDXGIFactory5Ptr gi_factory_5_;
 		IDXGIFactory6Ptr gi_factory_6_;
 		uint8_t dxgi_sub_ver_;
-		
-		ID3D11DevicePtr  d3d_device_;
+
 		ID3D11Device1Ptr d3d_device_1_;
 		ID3D11Device2Ptr d3d_device_2_;
 		ID3D11Device3Ptr d3d_device_3_;
 		ID3D11Device4Ptr d3d_device_4_;
 		ID3D11Device5Ptr d3d_device_5_;
-		ID3D11DeviceContextPtr  d3d_imm_ctx_;
 		ID3D11DeviceContext1Ptr d3d_imm_ctx_1_;
 		ID3D11DeviceContext2Ptr d3d_imm_ctx_2_;
 		ID3D11DeviceContext3Ptr d3d_imm_ctx_3_;
@@ -192,10 +186,10 @@ namespace KlayGE
 		// Enumerates itself
 		D3D11AdapterList adapterList_;
 
-		ID3D11RasterizerState* rasterizer_state_cache_;
+		ID3D11RasterizerState1* rasterizer_state_cache_;
 		ID3D11DepthStencilState* depth_stencil_state_cache_;
 		uint16_t stencil_ref_cache_;
-		ID3D11BlendState* blend_state_cache_;
+		ID3D11BlendState1* blend_state_cache_;
 		Color blend_factor_cache_;
 		uint32_t sample_mask_cache_;
 		ID3D11VertexShader* vertex_shader_cache_;

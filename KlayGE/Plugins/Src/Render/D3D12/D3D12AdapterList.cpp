@@ -90,7 +90,7 @@ namespace KlayGE
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter1Ptr dxgi_adapter;
+		com_ptr<IDXGIAdapter1> dxgi_adapter;
 		while (gi_factory->EnumAdapters1(adapter_no, dxgi_adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != nullptr)
@@ -99,7 +99,7 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
 					IID_ID3D12Device, device.put_void())))
 				{
-					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get());
+					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>(IID_IDXGIAdapter2).get());
 					adapter->Enumerate();
 					adapters_.push_back(std::move(adapter));
 				}
@@ -118,9 +118,9 @@ namespace KlayGE
 	void D3D12AdapterList::Enumerate(IDXGIFactory6* gi_factory)
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1Ptr dxgi_adapter;
+		IDXGIAdapter2Ptr dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter1, dxgi_adapter.release_and_put_void())))
+			IID_IDXGIAdapter2, dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{

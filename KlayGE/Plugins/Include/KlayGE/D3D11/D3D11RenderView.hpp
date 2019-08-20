@@ -35,8 +35,8 @@ namespace KlayGE
 		virtual ID3D11ShaderResourceView* RetrieveD3DShaderResourceView() const = 0;
 
 	protected:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		mutable ID3D11ShaderResourceViewPtr d3d_sr_view_;
 		void* sr_src_;
@@ -86,22 +86,14 @@ namespace KlayGE
 			return rt_num_subres_;
 		}
 
-	private:
-		void BindDiscardFunc();
-		void HWDiscard();
-		void FackDiscard();
-
 	protected:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
-		ID3D11DeviceContext1* d3d_imm_ctx_1_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		mutable ID3D11RenderTargetViewPtr d3d_rt_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
-
-		std::function<void()> discard_func_;
 	};
 
 	class D3D11Texture1D2DCubeRenderTargetView : public D3D11RenderTargetView
@@ -169,22 +161,14 @@ namespace KlayGE
 			return rt_num_subres_;
 		}
 
-	private:
-		void BindDiscardFunc();
-		void HWDiscard();
-		void FackDiscard();
-
 	protected:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
-		ID3D11DeviceContext1* d3d_imm_ctx_1_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		mutable ID3D11DepthStencilViewPtr d3d_ds_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
-
-		std::function<void()> discard_func_;
 	};
 	
 	class D3D11Texture1D2DCubeDepthStencilView : public D3D11DepthStencilView
@@ -245,22 +229,14 @@ namespace KlayGE
 			return ua_num_subres_;
 		}
 
-	private:
-		void BindDiscardFunc();
-		void HWDiscard();
-		void FackDiscard();
-
 	protected:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
-		ID3D11DeviceContext1* d3d_imm_ctx_1_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		mutable ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 		void* ua_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
-
-		std::function<void()> discard_func_;
 	};
 
 	class D3D11Texture1D2DCubeUnorderedAccessView : public D3D11UnorderedAccessView

@@ -33,26 +33,21 @@
 
 namespace KlayGE
 {
-	using IDXGIFactory1Ptr = com_ptr<IDXGIFactory1>;
 	using IDXGIFactory2Ptr = com_ptr<IDXGIFactory2>;
 	using IDXGIFactory3Ptr = com_ptr<IDXGIFactory3>;
 	using IDXGIFactory4Ptr = com_ptr<IDXGIFactory4>;
 	using IDXGIFactory5Ptr = com_ptr<IDXGIFactory5>;
 	using IDXGIFactory6Ptr = com_ptr<IDXGIFactory6>;
-	using IDXGIAdapter1Ptr = com_ptr<IDXGIAdapter1>;
 	using IDXGIAdapter2Ptr = com_ptr<IDXGIAdapter2>;
-	using IDXGISwapChainPtr = com_ptr<IDXGISwapChain>;
 	using IDXGISwapChain1Ptr = com_ptr<IDXGISwapChain1>;
 	using IDXGISwapChain2Ptr = com_ptr<IDXGISwapChain2>;
 	using IDXGISwapChain3Ptr = com_ptr<IDXGISwapChain3>;
 	using IDXGISwapChain4Ptr = com_ptr<IDXGISwapChain4>;
-	using ID3D11DevicePtr = com_ptr<ID3D11Device>;
 	using ID3D11Device1Ptr = com_ptr<ID3D11Device1>;
 	using ID3D11Device2Ptr = com_ptr<ID3D11Device2>;
 	using ID3D11Device3Ptr = com_ptr<ID3D11Device3>;
 	using ID3D11Device4Ptr = com_ptr<ID3D11Device4>;
 	using ID3D11Device5Ptr = com_ptr<ID3D11Device5>;
-	using ID3D11DeviceContextPtr = com_ptr<ID3D11DeviceContext>;
 	using ID3D11DeviceContext1Ptr = com_ptr<ID3D11DeviceContext1>;
 	using ID3D11DeviceContext2Ptr = com_ptr<ID3D11DeviceContext2>;
 	using ID3D11DeviceContext3Ptr = com_ptr<ID3D11DeviceContext3>;
@@ -76,10 +71,8 @@ namespace KlayGE
 	using ID3D11RenderTargetViewPtr = com_ptr<ID3D11RenderTargetView>;
 	using ID3D11DepthStencilViewPtr = com_ptr<ID3D11DepthStencilView>;
 	using ID3D11UnorderedAccessViewPtr = com_ptr<ID3D11UnorderedAccessView>;
-	using ID3D11RasterizerStatePtr = com_ptr<ID3D11RasterizerState>;
 	using ID3D11RasterizerState1Ptr = com_ptr<ID3D11RasterizerState1>;
 	using ID3D11DepthStencilStatePtr = com_ptr<ID3D11DepthStencilState>;
-	using ID3D11BlendStatePtr = com_ptr<ID3D11BlendState>;
 	using ID3D11BlendState1Ptr = com_ptr<ID3D11BlendState1>;
 	using ID3D11SamplerStatePtr = com_ptr<ID3D11SamplerState>;
 	using ID3D11ShaderResourceViewPtr = com_ptr<ID3D11ShaderResourceView>;
