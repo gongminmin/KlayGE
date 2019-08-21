@@ -151,12 +151,14 @@ namespace KlayGE
 
 	private:
 		typedef HRESULT(WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
+		typedef HRESULT(WINAPI *CreateDXGIFactory2Func)(UINT flags, REFIID riid, void** ppFactory);
 		typedef HRESULT(WINAPI *D3D11CreateDeviceFunc)(IDXGIAdapter* pAdapter,
 			D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 			D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
 			ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext);
 
 		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
+		CreateDXGIFactory2Func DynamicCreateDXGIFactory2_;
 		D3D11CreateDeviceFunc DynamicD3D11CreateDevice_;
 
 		HMODULE mod_dxgi_;

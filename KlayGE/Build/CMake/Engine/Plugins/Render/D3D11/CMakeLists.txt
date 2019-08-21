@@ -24,7 +24,6 @@ SET(D3D11_RE_SOURCE_FILES
 )
 
 SET(D3D11_RE_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/AMDQuadBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Adapter.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11AdapterList.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Fence.hpp
@@ -42,7 +41,6 @@ SET(D3D11_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Texture.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Typedefs.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11VideoMode.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/NV3DVision.hpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${D3D11_RE_SOURCE_FILES})

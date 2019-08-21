@@ -49,7 +49,6 @@
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include "NV3DVision.hpp"
 
 namespace
 {
@@ -121,6 +120,7 @@ namespace KlayGE
 		if (mod_dxgi_ != nullptr)
 		{
 			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
+			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
 		}
 		if (mod_d3d11_ != nullptr)
 		{
@@ -131,10 +131,35 @@ namespace KlayGE
 #endif
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
+		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
 		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;
 #endif
 
-		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, gi_factory_2_.put_void()));
+		if (DynamicCreateDXGIFactory2_)
+		{
+			UINT const dxgi_factory_flags = 0;
+			static UINT const available_dxgi_factory_flags[] =
+			{
+#ifdef KLAYGE_DEBUG
+				dxgi_factory_flags | DXGI_CREATE_FACTORY_DEBUG,
+#endif
+				dxgi_factory_flags
+			};
+
+			HRESULT hr = E_FAIL;
+			for (auto const& flags : available_dxgi_factory_flags)
+			{
+				hr = DynamicCreateDXGIFactory2_(flags, IID_IDXGIFactory2, gi_factory_2_.put_void());
+				if (SUCCEEDED(hr))
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, gi_factory_2_.put_void()));
+		}
 		dxgi_sub_ver_ = 2;
 		if (gi_factory_2_.try_as(IID_IDXGIFactory3, gi_factory_3_))
 		{
@@ -812,6 +837,7 @@ namespace KlayGE
 		gi_factory_6_.reset();
 
 		DynamicCreateDXGIFactory1_ = nullptr;
+		DynamicCreateDXGIFactory2_ = nullptr;
 		DynamicD3D11CreateDevice_ = nullptr;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP

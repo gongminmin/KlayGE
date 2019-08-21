@@ -37,8 +37,6 @@
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 
-#include "AMDQuadBuffer.hpp"
-
 namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(D3D11Adapter* adapter, std::string const & name, RenderSettings const & settings)
@@ -227,7 +225,7 @@ namespace KlayGE
 							{
 								com_ptr<IDXGIAdapter> ada;
 								dxgi_device->GetAdapter(ada.put());
-								adapter_->ResetAdapter(ada.as<IDXGIAdapter2>(IID_IDXGIAdapter1).get());
+								adapter_->ResetAdapter(ada.as<IDXGIAdapter2>(IID_IDXGIAdapter2).get());
 								adapter_->Enumerate();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
@@ -238,7 +236,7 @@ namespace KlayGE
 
 						description_ = adapter_->Description() + L" " + dev_type_beh.second.data() + L" FL ";
 						std::wstring_view fl_str;
-						switch (static_cast<uint32_t>(out_feature_level))
+						switch (out_feature_level)
 						{
 						case D3D_FEATURE_LEVEL_12_1:
 							fl_str = L"12.1";
@@ -359,14 +357,6 @@ namespace KlayGE
 				sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 			}
 		}
-		if (dxgi_allow_tearing_)
-		{
-			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-		}
-		if (dxgi_async_swap_chain_)
-		{
-			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-		}
 
 		sc_fs_desc_.RefreshRate.Numerator = 60;
 		sc_fs_desc_.RefreshRate.Denominator = 1;
@@ -380,6 +370,7 @@ namespace KlayGE
 				return this->OnStereoEnabledChanged(sender, args);
 			});
 
+		sc_desc1_.Scaling = DXGI_SCALING_NONE;
 		sc_desc1_.Flags = 0;
 		if (stereo)
 		{
@@ -394,7 +385,6 @@ namespace KlayGE
 		if (dxgi_allow_tearing_)
 		{
 			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
 		else
 		{
@@ -402,11 +392,16 @@ namespace KlayGE
 
 			sync_interval_ = std::max(1U, sync_interval_);
 		}
+#endif
+
+		if (dxgi_allow_tearing_)
+		{
+			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
 		if (dxgi_async_swap_chain_)
 		{
 			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 		}
-#endif
 
 		this->CreateSwapChain(d3d_device.get(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_1_);
