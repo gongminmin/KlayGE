@@ -51,7 +51,6 @@ public:
 	void SetUp() override
 	{
 		auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		stream_output_support_ = caps.stream_output_support;
 		draw_indirect_support_ = caps.draw_indirect_support;
 		uavs_at_every_stage_support_ = caps.uavs_at_every_stage_support;
 		gs_support_ = caps.gs_support;
@@ -59,11 +58,6 @@ public:
 
 	void TestCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
@@ -114,11 +108,6 @@ public:
 
 	void TestVertexIDToBuffer(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		uint32_t const num_vertices = 1024;
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
@@ -155,7 +144,7 @@ public:
 
 	void TestConditionalCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_ || !gs_support_)
+		if (!gs_support_)
 		{
 			return;
 		}
@@ -227,7 +216,7 @@ public:
 
 	void TestDrawIndirectCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_ || !gs_support_ || !draw_indirect_support_ || !uavs_at_every_stage_support_)
+		if (!gs_support_ || !draw_indirect_support_ || !uavs_at_every_stage_support_)
 		{
 			return;
 		}
@@ -328,11 +317,6 @@ public:
 
 	void TestMultipleBuffers(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
@@ -408,7 +392,6 @@ public:
 	}
 
 private:
-	bool stream_output_support_;
 	bool draw_indirect_support_;
 	bool uavs_at_every_stage_support_;
 	bool gs_support_;

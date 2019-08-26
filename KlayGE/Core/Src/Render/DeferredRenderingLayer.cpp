@@ -910,7 +910,6 @@ namespace KlayGE
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		if ((caps.max_simultaneous_rts < 2)
-			|| !caps.hw_instancing_support || !caps.instance_id_support
 			|| !caps.depth_texture_support
 			|| !caps.fp_color_support
 			|| caps.pack_to_rgba_required

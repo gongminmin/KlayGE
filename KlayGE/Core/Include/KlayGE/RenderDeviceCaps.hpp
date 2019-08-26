@@ -107,10 +107,6 @@ namespace KlayGE
 
 		bool is_tbdr : 1;
 
-		bool hw_instancing_support : 1;
-		bool instance_id_support : 1;
-		bool stream_output_support : 1;
-		bool alpha_to_coverage_support : 1;
 		bool primitive_restart_support : 1;
 		bool multithread_rendering_support : 1;
 		bool multithread_res_creating_support : 1;

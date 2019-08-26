@@ -1513,10 +1513,6 @@ namespace KlayGE
 
 		caps_.is_tbdr = false;
 
-		caps_.hw_instancing_support = true;
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;

@@ -807,7 +807,7 @@ void GPUParticleSystemApp::OnCreate()
 	}
 	else
 	{
-		use_so = caps.stream_output_support && caps.load_from_buffer_support;
+		use_so = caps.load_from_buffer_support;
 	}
 	use_mrt = caps.max_simultaneous_rts > 1;
 

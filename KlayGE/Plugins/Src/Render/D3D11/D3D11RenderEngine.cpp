@@ -910,19 +910,6 @@ namespace KlayGE
 			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
 			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
 		}
-		if (d3d_11_runtime_sub_ver_ >= 2)
-		{
-			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.hw_instancing_support = d3d11_feature.SimpleInstancingSupported ? true : false;
-		}
-		else
-		{
-			caps_.hw_instancing_support = true;
-		}
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		caps_.primitive_restart_support = true;
 		{
 			D3D11_FEATURE_DATA_THREADING mt_feature;
@@ -940,11 +927,7 @@ namespace KlayGE
 		caps_.independent_blend_support = true;
 		caps_.draw_indirect_support = true;
 		caps_.no_overwrite_support = true;
-		{
-			D3D11_FEATURE_DATA_D3D9_OPTIONS d3d11_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D9_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.full_npot_texture_support = d3d11_feature.FullNonPow2TextureSupport ? true : false;
-		}
+		caps_.full_npot_texture_support = true;
 		caps_.render_to_texture_array_support = true;
 		caps_.explicit_multi_sample_support = true;
 		caps_.load_from_buffer_support = true;

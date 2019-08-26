@@ -1459,10 +1459,6 @@ namespace KlayGE
 
 		caps_.is_tbdr = false;
 
-		caps_.hw_instancing_support = true;
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		if (!this->HackForAdreno())
 		{
 			caps_.primitive_restart_support = true;
