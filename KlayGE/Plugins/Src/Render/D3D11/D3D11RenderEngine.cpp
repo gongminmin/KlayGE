@@ -943,6 +943,12 @@ namespace KlayGE
 			caps_.rovs_support = false;
 		}
 		caps_.flexible_srvs_support = true;
+		{
+			D3D11_FEATURE_DATA_D3D11_OPTIONS3 d3d11_feature;
+			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &d3d11_feature, sizeof(d3d11_feature));
+			caps_.vp_rt_index_at_every_stage_support = d3d11_feature.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer ? true : false;
+		}
+
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

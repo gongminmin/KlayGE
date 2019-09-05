@@ -363,6 +363,34 @@ void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangl
 		</pass>
 	</technique>
 
+	<shader version="4">
+		<![CDATA[
+void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
+						float4 tangent_quat : TANGENT,
+						uint instance_id : SV_InstanceID,
+						out float oDist : TEXCOORD0,
+						out float4 oPos : SV_Position,
+						out uint oRtIndex : SV_RenderTargetArrayIndex)
+{
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	
+	oPos = mul(Position, mvps[instance_id]);
+
+	oDist = calc_dist(Position);
+	oRtIndex = instance_id;
+}
+		]]>
+	</shader>
+
+	<technique name="GenCubeOneInstanceVpRtShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenCubeOneInstanceVpRtShadowMapVS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+
 	<shader version="5">
 		<![CDATA[
 [maxvertexcount(3)]

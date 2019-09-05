@@ -1536,6 +1536,7 @@ namespace KlayGE
 		caps_.uavs_at_every_stage_support = false;	// TODO
 		caps_.rovs_support = false;	// TODO
 		caps_.flexible_srvs_support = false; // TODO
+		caps_.vp_rt_index_at_every_stage_support = false; // TODO
 
 		caps_.gs_support = true;
 

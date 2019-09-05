@@ -65,20 +65,26 @@ namespace
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			if ((SMT_CubeOne == sm_type_) || (SMT_CubeOneInstance == sm_type_) || (SMT_CubeOneInstanceGS == sm_type_))
+			switch (sm_type_)
 			{
-				for (int i = 0; i < 6; ++ i)
+			case SMT_CubeOne:
+			case SMT_CubeOneInstance:
+			case SMT_CubeOneInstanceGS:
+			case SMT_CubeOneInstanceVpRt:
+				for (int i = 0; i < 6; ++i)
 				{
 					light_views_[i] = light_src->SMCamera(i)->ViewMatrix();
 				}
-			}
-			else if (SMT_DP == sm_type_)
-			{
+				break;
+			
+			case SMT_DP:
 				light_views_[pass_index_] = light_src->SMCamera(4 + pass_index_)->ViewMatrix();
-			}
-			else
-			{
+				break;
+			
+			case SMT_Cube:
+			default:
 				light_views_[pass_index_] = app.ActiveCamera().ViewMatrix();
+				break;
 			}
 			light_proj_ = app.ActiveCamera().ProjMatrix();
 
@@ -215,11 +221,11 @@ namespace
 
 			if (gen_sm)
 			{
+				RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 				switch (sm_type_)
 				{
 				case SMT_DP:
 					{
-						RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 						if (TM_Hardware == caps.tess_method)
 						{
 							technique_ = effect_->TechniqueByName("GenDPShadowMapTessTech");
@@ -268,12 +274,23 @@ namespace
 					}
 					break;
 
-				default:
+				case SMT_CubeOneInstanceGS:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
 					smooth_mesh_ = false;
 					for (auto const & rl : rls_)
 					{
 						rl->NumInstances(1);
+					}
+					break;
+
+				case SMT_CubeOneInstanceVpRt:
+				default:
+					BOOST_ASSERT(caps.vp_rt_index_at_every_stage_support);
+					technique_ = effect_->TechniqueByName("GenCubeOneInstanceVpRtShadowMap");
+					smooth_mesh_ = false;
+					for (auto const& rl : rls_)
+					{
+						rl->NumInstances(6);
 					}
 					break;
 				}
@@ -486,6 +503,15 @@ void ShadowCubeMap::OnCreate()
 	id_sm_type_static_ = dialog_->IDFromName("SMStatic");
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
+
+	if (!caps.vp_rt_index_at_every_stage_support)
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(5);
+	}
+	if (caps.max_shader_model < ShaderModel(5, 0))
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(4);
+	}
 
 	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
