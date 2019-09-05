@@ -72,6 +72,10 @@ namespace
 					light_views_[i] = light_src->SMCamera(i)->ViewMatrix();
 				}
 			}
+			else if (SMT_DP == sm_type_)
+			{
+				light_views_[pass_index_] = light_src->SMCamera(4 + pass_index_)->ViewMatrix();
+			}
 			else
 			{
 				light_views_[pass_index_] = app.ActiveCamera().ViewMatrix();
@@ -400,12 +404,21 @@ void ShadowCubeMap::OnCreate()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	if (caps.render_to_texture_array_support)
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-		shadow_cube_one_buffer_->Viewport()->Camera()->OmniDirectionalMode(true);
-		shadow_cube_one_buffer_->Viewport()->Camera()->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+
+		auto const& camera = shadow_cube_one_buffer_->Viewport()->Camera();
+		camera->OmniDirectionalMode(true);
+		camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+
+		auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+		camera_node->AddComponent(camera);
+		root_node.AddChild(camera_node);
+
 		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));
 		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
 		shadow_cube_one_buffer_->Attach(rf.MakeCubeDsv(shadow_one_depth_tex, 0, 0));
@@ -417,13 +430,18 @@ void ShadowCubeMap::OnCreate()
 		shadow_dual_view_[i] = rf.Make2DRtv(shadow_dual_texs_[i], 0, 1, 0);
 
 		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_dual_buffers_[i]->Viewport()->Camera()->ProjParams(PI, 1, 0.1f, 500.0f);
+		
+		auto const& camera = shadow_dual_buffers_[i]->Viewport()->Camera();
+		camera->ProjParams(PI, 1, 0.1f, 500.0f);
+
+		auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+		camera_node->AddComponent(camera);
+		root_node.AddChild(camera_node);
+
 		shadow_dual_buffers_[i]->Attach(FrameBuffer::Attachment::Color0, shadow_dual_view_[i]);
 		shadow_dual_buffers_[i]->Attach(depth_view);
 	}
 	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read);
-
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
@@ -629,13 +647,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		case 0:
 		case 1:
 			{
-				float3 const pos = light_->Position();
-				float3 const lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
-
-				auto& camera = *shadow_dual_buffers_[pass]->Viewport()->Camera();
-				camera.LookAtDist(MathLib::length(lookat - pos));
-				camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
-
 				renderEngine.BindFrameBuffer(shadow_dual_buffers_[pass]);
 				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
@@ -731,13 +742,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 			case 0:
 				{
-					float3 const& pos = light_->Position();
-					float3 const lookat = pos + light_->Direction();
-
-					auto& camera = *shadow_cube_one_buffer_->Viewport()->Camera();
-					camera.LookAtDist(MathLib::length(lookat - pos));
-					camera.BoundSceneNode()->TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, lookat)));
-
 					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
 					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
