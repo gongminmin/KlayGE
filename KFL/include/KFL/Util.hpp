@@ -202,7 +202,7 @@ namespace KlayGE
 
 	uint32_t LastError();
 
-	std::string ReadShortString(ResIdentifierPtr const & res);
+	std::string ReadShortString(ResIdentifier& res);
 	void WriteShortString(std::ostream& os, std::string_view str);
 
 	template <typename T, typename... Args>

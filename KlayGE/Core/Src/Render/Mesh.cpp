@@ -1123,7 +1123,7 @@ namespace KlayGE
 			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 			mtls[mtl_index] = mtl;
 
-			mtl->Name(ReadShortString(decoded));
+			mtl->Name(ReadShortString(*decoded));
 
 			float4 albedo;
 			decoded->read(&albedo, sizeof(albedo));
@@ -1168,7 +1168,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 			{
-				mtl->TextureName(static_cast<RenderMaterial::TextureSlot>(i), ReadShortString(decoded));
+				mtl->TextureName(static_cast<RenderMaterial::TextureSlot>(i), ReadShortString(*decoded));
 			}
 			if (!mtl->TextureName(RenderMaterial::TS_Normal).empty())
 			{
@@ -1258,7 +1258,7 @@ namespace KlayGE
 		mesh_start_indices.clear();
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
-			mesh_names[mesh_index] = ReadShortString(decoded);
+			mesh_names[mesh_index] = ReadShortString(*decoded);
 
 			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
 			mtl_ids[mesh_index] = LE2Native(mtl_ids[mesh_index]);
@@ -1306,7 +1306,7 @@ namespace KlayGE
 		nodes.resize(num_nodes);
 		for (auto& node : nodes)
 		{
-			auto node_name = ReadShortString(decoded);
+			auto node_name = ReadShortString(*decoded);
 			std::wstring node_wname;
 			Convert(node_wname, node_name);
 
@@ -1352,7 +1352,7 @@ namespace KlayGE
 		{
 			Joint& joint = joints[joint_index];
 
-			joint.name = ReadShortString(decoded);
+			joint.name = ReadShortString(*decoded);
 			decoded->read(&joint.parent, sizeof(joint.parent));
 			joint.parent = LE2Native(joint.parent);
 
@@ -1487,7 +1487,7 @@ namespace KlayGE
 				for (uint32_t action_index = 0; action_index < num_actions; ++ action_index)
 				{
 					AnimationAction action;
-					action.name = ReadShortString(decoded);
+					action.name = ReadShortString(*decoded);
 					decoded->read(&action.start_frame, sizeof(action.start_frame));
 					action.start_frame = LE2Native(action.start_frame);
 					decoded->read(&action.end_frame, sizeof(action.end_frame));
