@@ -67,10 +67,10 @@ namespace KlayGE
 	public:
 		XMLDocument();
 
-		XMLNodePtr Parse(ResIdentifierPtr const & source);
+		XMLNodePtr Parse(ResIdentifier& source);
 		void Print(std::ostream& os);
 
-		XMLNodePtr CloneNode(XMLNodePtr const & node);
+		XMLNodePtr CloneNode(XMLNode const& node);
 
 		XMLNodePtr AllocNode(XMLNodeType type, std::string_view name);
 		XMLAttributePtr AllocAttribInt(std::string_view name, int32_t value);
@@ -126,13 +126,13 @@ namespace KlayGE
 		XMLNodePtr PrevSibling() const;
 		XMLNodePtr NextSibling() const;
 
-		void InsertNode(XMLNodePtr const & location, XMLNodePtr const & new_node);
-		void InsertAttrib(XMLAttributePtr const & location, XMLAttributePtr const & new_attr);
+		void InsertNode(XMLNode const& location, XMLNodePtr const & new_node);
+		void InsertAttrib(XMLAttribute const& location, XMLAttributePtr const & new_attr);
 		void AppendNode(XMLNodePtr const & new_node);
 		void AppendAttrib(XMLAttributePtr const & new_attr);
 
-		void RemoveNode(XMLNodePtr const & node);
-		void RemoveAttrib(XMLAttributePtr const & attr);
+		void RemoveNode(XMLNode const& node);
+		void RemoveAttrib(XMLAttribute const& attr);
 
 		bool TryConvert(int32_t& val) const;
 		bool TryConvert(uint32_t& val) const;

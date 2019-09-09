@@ -255,7 +255,6 @@ namespace KlayGE
 		};
 	};
 
-
 	class KLAYGE_CORE_API RenderEffectAnnotation : boost::noncopyable
 	{
 	public:
@@ -390,7 +389,7 @@ namespace KlayGE
 		friend class RenderEffectTemplate;
 
 	public:
-		void Open(std::span<std::string const> names);
+		void Load(std::span<std::string const> names);
 #if KLAYGE_IS_DEV_PLATFORM
 		void CompileShaders();
 #endif
@@ -474,7 +473,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectTemplate : boost::noncopyable
 	{
 	public:
-		void Open(std::span<std::string const> names, RenderEffect& effect);
+		void Load(std::span<std::string const> names, RenderEffect& effect);
 #if KLAYGE_IS_DEV_PLATFORM
 		void CompileShaders(RenderEffect& effect);
 #endif
@@ -551,8 +550,8 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 		void PreprocessIncludes(XMLDocument& doc, XMLNode& root, std::vector<std::unique_ptr<XMLDocument>>& include_docs);
 		void RecursiveIncludeNode(XMLNode const & root, std::vector<std::string>& include_names) const;
-		void InsertIncludeNodes(XMLDocument& target_doc, XMLNode& target_root,
-			XMLNodePtr const & target_place, XMLNode const & include_root) const;
+		void InsertIncludeNodes(
+			XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const;
 
 		XMLNodePtr ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNodePtr const & tech_node);
 		void ResolveOverrideTechs(XMLDocument& doc, XMLNode& root);
@@ -587,7 +586,7 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Open(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index);
+		void Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index);
 		void CompileShaders(RenderEffect& effect, uint32_t tech_index);
 #endif
 		void CreateHwShaders(RenderEffect& effect, uint32_t tech_index);
@@ -682,8 +681,8 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Open(RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
-		void Open(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
+		void Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
+		void Load(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
 		void CompileShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index);
 #endif
 		void CreateHwShaders(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index);

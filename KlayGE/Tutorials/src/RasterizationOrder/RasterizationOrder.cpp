@@ -221,7 +221,7 @@ void RasterizationOrderApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("RasterizationOrder.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("RasterizationOrder.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_color_map_ = dialog_params_->IDFromName("ColorMap");
 	id_capture_ = dialog_params_->IDFromName("Capture");

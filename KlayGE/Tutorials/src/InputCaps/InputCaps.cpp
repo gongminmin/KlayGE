@@ -275,7 +275,7 @@ void InputCaps::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("InputCaps.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("InputCaps.uiml"));
 }
 
 void InputCaps::OnResize(uint32_t width, uint32_t height)

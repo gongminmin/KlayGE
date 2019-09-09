@@ -247,7 +247,7 @@ DetailedSurfaceApp::DetailedSurfaceApp()
 void DetailedSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Open("DetailedSurface.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DetailedSurface.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);

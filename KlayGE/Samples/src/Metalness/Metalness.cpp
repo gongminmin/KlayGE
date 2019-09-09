@@ -191,7 +191,7 @@ void MetalnessApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Metalness.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Metalness.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Parameters");
 	id_single_object_ = dialog_->IDFromName("SingleObject");

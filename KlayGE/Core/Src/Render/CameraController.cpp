@@ -793,7 +793,7 @@ namespace KlayGE
 		camera_->DirtyTransforms();
 	}
 
-	CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res)
+	CameraPathControllerPtr LoadCameraPath(ResIdentifier& res)
 	{
 		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
 

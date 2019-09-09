@@ -3956,7 +3956,7 @@ namespace KlayGE
 
 		std::shared_ptr<void> CreateResource() override
 		{
-			effect_desc_.effect->Open(effect_desc_.res_name);
+			effect_desc_.effect->Load(effect_desc_.res_name);
 			return effect_desc_.effect;
 		}
 
@@ -4076,10 +4076,10 @@ namespace KlayGE
 #endif
 
 
-	void RenderEffect::Open(std::span<std::string const> names)
+	void RenderEffect::Load(std::span<std::string const> names)
 	{
 		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
-		effect_template_->Open(names, *this);
+		effect_template_->Load(names, *this);
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -4313,7 +4313,7 @@ namespace KlayGE
 			std::string const include_name = std::string(attr->ValueString());
 
 			include_docs.push_back(MakeUniquePtr<XMLDocument>());
-			XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
+			XMLNodePtr include_root = include_docs.back()->Parse(*ResLoader::Instance().Open(include_name));
 
 			std::vector<std::string> include_names;
 			this->RecursiveIncludeNode(*include_root, include_names);
@@ -4339,8 +4339,8 @@ namespace KlayGE
 					else
 					{
 						include_docs.push_back(MakeUniquePtr<XMLDocument>());
-						XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
-						this->InsertIncludeNodes(doc, root, node, *recursive_include_root);
+						XMLNodePtr recursive_include_root = include_docs.back()->Parse(*ResLoader::Instance().Open(*iter));
+						this->InsertIncludeNodes(doc, root, *node, *recursive_include_root);
 
 						whole_include_names.push_back(*iter);
 						++ iter;
@@ -4360,12 +4360,12 @@ namespace KlayGE
 
 			if (!found)
 			{
-				this->InsertIncludeNodes(doc, root, node, *include_root);
+				this->InsertIncludeNodes(doc, root, *node, *include_root);
 				whole_include_names.push_back(include_name);
 			}
 
 			XMLNodePtr node_next = node->NextSibling("include");
-			root.RemoveNode(node);
+			root.RemoveNode(*node);
 			node = node_next;
 		}
 	}
@@ -4380,7 +4380,7 @@ namespace KlayGE
 			std::string const include_name = std::string(attr->ValueString());
 
 			XMLDocument include_doc;
-			XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
+			XMLNodePtr include_root = include_doc.Parse(*ResLoader::Instance().Open(include_name));
 			this->RecursiveIncludeNode(*include_root, include_names);
 
 			bool found = false;
@@ -4400,14 +4400,14 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEffectTemplate::InsertIncludeNodes(XMLDocument& target_doc, XMLNode& target_root,
-		XMLNodePtr const & target_place, XMLNode const & include_root) const
+	void RenderEffectTemplate::InsertIncludeNodes(
+		XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const
 	{
 		for (XMLNodePtr child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 		{
 			if ((XNT_Element == child_node->Type()) && (child_node->Name() != "include"))
 			{
-				target_root.InsertNode(target_place, target_doc.CloneNode(child_node));
+				target_root.InsertNode(target_place, target_doc.CloneNode(*child_node));
 			}
 		}
 	}
@@ -4432,17 +4432,17 @@ namespace KlayGE
 			if (parent_tech_name == inherit_name)
 			{
 				auto parent_node = this->ResolveInheritTechNode(doc, root, node);
-				new_tech_node = doc.CloneNode(parent_node);
+				new_tech_node = doc.CloneNode(*parent_node);
 
 				for (auto tech_anno_node = tech_node->FirstNode("annotation"); tech_anno_node;
 					tech_anno_node = tech_anno_node->NextSibling("annotation"))
 				{
-					new_tech_node->AppendNode(doc.CloneNode(tech_anno_node));
+					new_tech_node->AppendNode(doc.CloneNode(*tech_anno_node));
 				}
 				for (auto tech_macro_node = tech_node->FirstNode("macro"); tech_macro_node;
 					tech_macro_node = tech_macro_node->NextSibling("macro"))
 				{
-					new_tech_node->AppendNode(doc.CloneNode(tech_macro_node));
+					new_tech_node->AppendNode(doc.CloneNode(*tech_macro_node));
 				}
 				for (auto pass_node = tech_node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"))
 				{
@@ -4459,17 +4459,17 @@ namespace KlayGE
 							for (auto pass_anno_node = pass_node->FirstNode("annotation"); pass_anno_node;
 								pass_anno_node = pass_anno_node->NextSibling("annotation"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_anno_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_anno_node));
 							}
 							for (auto pass_macro_node = pass_node->FirstNode("macro"); pass_macro_node;
 								pass_macro_node = pass_macro_node->NextSibling("macro"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_macro_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_macro_node));
 							}
 							for (auto pass_state_node = pass_node->FirstNode("state"); pass_state_node;
 								pass_state_node = pass_state_node->NextSibling("state"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_state_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_state_node));
 							}
 
 							found_pass = true;
@@ -4479,11 +4479,11 @@ namespace KlayGE
 
 					if (!found_pass)
 					{
-						new_tech_node->AppendNode(doc.CloneNode(pass_node));
+						new_tech_node->AppendNode(doc.CloneNode(*pass_node));
 					}
 				}
 
-				new_tech_node->RemoveAttrib(new_tech_node->Attrib("name"));
+				new_tech_node->RemoveAttrib(*new_tech_node->Attrib("name"));
 				new_tech_node->AppendAttrib(doc.AllocAttribString("name", tech_name));
 
 				break;
@@ -4513,17 +4513,17 @@ namespace KlayGE
 					auto name = overrided_node->Attrib("name")->ValueString();
 					if (override_tech_name == name)
 					{
-						auto new_node = doc.CloneNode(this->ResolveInheritTechNode(doc, root, node));
-						new_node->RemoveAttrib(new_node->Attrib("name"));
+						auto new_node = doc.CloneNode(*this->ResolveInheritTechNode(doc, root, node));
+						new_node->RemoveAttrib(*new_node->Attrib("name"));
 						new_node->AppendAttrib(doc.AllocAttribString("name", name));
 						auto attr = new_node->Attrib("override");
 						if (attr)
 						{
-							new_node->RemoveAttrib(attr);
+							new_node->RemoveAttrib(*attr);
 						}
 
-						root.InsertNode(overrided_node, new_node);
-						root.RemoveNode(overrided_node);
+						root.InsertNode(*overrided_node, new_node);
+						root.RemoveNode(*overrided_node);
 						overrided_node = new_node;
 
 						break;
@@ -4654,12 +4654,12 @@ namespace KlayGE
 		for (XMLNodePtr node = root.FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 		{
 			techniques_.push_back(MakeUniquePtr<RenderTechnique>());
-			techniques_.back()->Open(effect, node, index);
+			techniques_.back()->Load(effect, *node, index);
 		}
 	}
 #endif
 
-	void RenderEffectTemplate::Open(std::span<std::string const> names, RenderEffect& effect)
+	void RenderEffectTemplate::Load(std::span<std::string const> names, RenderEffect& effect)
 	{
 		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
 		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
@@ -4693,7 +4693,7 @@ namespace KlayGE
 				timestamp_ = std::max(timestamp_, source->Timestamp());
 
 				std::unique_ptr<XMLDocument> doc = MakeUniquePtr<XMLDocument>();
-				XMLNodePtr root = doc->Parse(source);
+				XMLNodePtr root = doc->Parse(*source);
 
 				std::vector<std::string> include_names;
 				this->RecursiveIncludeNode(*root, include_names);
@@ -4732,7 +4732,7 @@ namespace KlayGE
 			if (main_source)
 			{
 				frag_docs[0] = MakeUniquePtr<XMLDocument>();
-				XMLNodePtr root = frag_docs[0]->Parse(main_source);
+				XMLNodePtr root = frag_docs[0]->Parse(*main_source);
 				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
 
 				for (int i = 1; i < names.size(); ++ i)
@@ -4741,13 +4741,13 @@ namespace KlayGE
 					if (source)
 					{
 						frag_docs[i] = MakeUniquePtr<XMLDocument>();
-						XMLNodePtr frag_root = frag_docs[i]->Parse(source);
+						XMLNodePtr frag_root = frag_docs[i]->Parse(*source);
 
 						this->PreprocessIncludes(*frag_docs[i], *frag_root, include_docs);
 
 						for (auto frag_node = frag_root->FirstNode(); frag_node; frag_node = frag_node->NextSibling())
 						{
-							root->AppendNode(frag_docs[i]->CloneNode(frag_node));
+							root->AppendNode(frag_docs[i]->CloneNode(*frag_node));
 						}
 					}
 				}
@@ -4990,7 +4990,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
-			num_cbufs = Native2LE(num_cbufs);
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
 			{
@@ -5000,7 +4999,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_params = Native2LE(static_cast<uint16_t>(effect.params_.size()));
-			num_params = Native2LE(num_params);
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
 			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
 			{
@@ -5019,7 +5017,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(shader_frags_.size()));
-			num_shader_frags = Native2LE(num_shader_frags);
 			os.write(reinterpret_cast<char const *>(&num_shader_frags), sizeof(num_shader_frags));
 			for (uint32_t i = 0; i < shader_frags_.size(); ++ i)
 			{
@@ -5029,7 +5026,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(shader_descs_.size() - 1));
-			num_shader_descs = Native2LE(num_shader_descs);
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
 			for (uint32_t i = 1; i < shader_descs_.size(); ++i)
 			{
@@ -5037,11 +5033,9 @@ namespace KlayGE
 				WriteShortString(os, shader_descs_[i].func_name);
 
 				uint64_t tmp64 = Native2LE(shader_descs_[i].macros_hash);
-				tmp64 = Native2LE(tmp64);
 				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
 
 				uint32_t tmp32 = Native2LE(shader_descs_[i].tech_pass_type);
-				tmp32 = Native2LE(tmp32);
 				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
 				uint8_t len = static_cast<uint8_t>(shader_descs_[i].so_decl.size());
@@ -5057,7 +5051,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_techs = Native2LE(static_cast<uint16_t>(techniques_.size()));
-			num_techs = Native2LE(num_techs);
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
@@ -5483,13 +5476,13 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderTechnique::Open(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index)
+	void RenderTechnique::Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index)
 	{
-		name_ = std::string(node->Attrib("name")->ValueString());
+		name_ = std::string(node.Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		RenderTechnique* parent_tech = nullptr;
-		XMLAttributePtr inherit_attr = node->Attrib("inherit");
+		XMLAttributePtr inherit_attr = node.Attrib("inherit");
 		if (inherit_attr)
 		{
 			std::string_view const inherit = inherit_attr->ValueString();
@@ -5500,7 +5493,7 @@ namespace KlayGE
 		}
 
 		{
-			XMLNodePtr anno_node = node->FirstNode("annotation");
+			XMLNodePtr anno_node = node.FirstNode("annotation");
 			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -5523,7 +5516,7 @@ namespace KlayGE
 		}
 
 		{
-			XMLNodePtr macro_node = node->FirstNode("macro");
+			XMLNodePtr macro_node = node.FirstNode("macro");
 			if (macro_node)
 			{
 				macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
@@ -5557,7 +5550,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!node->FirstNode("pass") && parent_tech)
+		if (!node.FirstNode("pass") && parent_tech)
 		{
 			is_validate_ = parent_tech->is_validate_;
 			has_discard_ = parent_tech->has_discard_;
@@ -5578,7 +5571,7 @@ namespace KlayGE
 
 					auto inherit_pass = parent_tech->passes_[index].get();
 
-					pass->Open(effect, tech_index, index, inherit_pass);
+					pass->Load(effect, tech_index, index, inherit_pass);
 					is_validate_ &= pass->Validate();
 				}
 			}
@@ -5600,7 +5593,7 @@ namespace KlayGE
 			}
 		
 			uint32_t index = 0;
-			for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
+			for (XMLNodePtr pass_node = node.FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
 			{
 				RenderPassPtr pass = MakeSharedPtr<RenderPass>();
 				passes_.push_back(pass);
@@ -5611,7 +5604,7 @@ namespace KlayGE
 					inherit_pass = parent_tech->passes_[index].get();
 				}
 
-				pass->Open(effect, *pass_node, tech_index, index, inherit_pass);
+				pass->Load(effect, *pass_node, tech_index, index, inherit_pass);
 
 				is_validate_ &= pass->Validate();
 
@@ -5807,7 +5800,7 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderPass::Open(
+	void RenderPass::Load(
 		RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass)
 	{
 		name_ = std::string(node.Attrib("name")->ValueString());
@@ -6281,7 +6274,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderPass::Open(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
+	void RenderPass::Load(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
 		BOOST_ASSERT(inherit_pass);
 

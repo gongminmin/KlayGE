@@ -151,7 +151,7 @@ void VideoTextureApp::OnCreate()
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("VideoTexture.uiml"));
 }
 
 void VideoTextureApp::OnResize(uint32_t width, uint32_t height)

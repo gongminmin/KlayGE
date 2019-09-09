@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 		}
 
 		RenderEffect effect;
-		effect.Open(fxml_names);
+		effect.Load(fxml_names);
 		effect.CompileShaders();
 	}
 	if (!target_folder.empty())

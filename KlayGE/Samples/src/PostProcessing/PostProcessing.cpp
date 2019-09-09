@@ -153,7 +153,7 @@ void PostProcessingApp::OnCreate()
 	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
 	black_hole_ = SyncLoadPostProcess("BlackHole.ppml", "black_hole");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");

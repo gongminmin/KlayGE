@@ -860,7 +860,7 @@ void GPUParticleSystemApp::OnCreate()
 		checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 	}
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)

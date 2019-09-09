@@ -101,7 +101,7 @@ void PackJTML(std::string const & jtml_name)
 	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_path.string());
 
 	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(jtml);
+	XMLNodePtr root = doc.Parse(*jtml);
 
 	uint32_t n = root->AttribInt("num_tiles", 2048);
 	uint32_t num_tiles = 1;

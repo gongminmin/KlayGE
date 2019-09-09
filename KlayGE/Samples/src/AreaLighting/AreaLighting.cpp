@@ -197,7 +197,7 @@ void AreaLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("AreaLighting.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("AreaLighting.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_light_type_combo_ = dialog_->IDFromName("LightTypeCombo");

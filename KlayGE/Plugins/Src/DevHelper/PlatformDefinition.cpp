@@ -94,7 +94,7 @@ namespace KlayGE
 		ResIdentifierPtr plat = ResLoader::Instance().Open(name);
 
 		KlayGE::XMLDocument doc;
-		XMLNodePtr root = doc.Parse(plat);
+		XMLNodePtr root = doc.Parse(*plat);
 
 		platform = RetrieveAttrValue(root, "name", "");
 		major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));

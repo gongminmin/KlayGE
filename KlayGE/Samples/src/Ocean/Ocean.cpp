@@ -881,7 +881,7 @@ void OceanApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
 	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");

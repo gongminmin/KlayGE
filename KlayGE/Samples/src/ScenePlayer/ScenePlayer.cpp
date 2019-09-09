@@ -342,7 +342,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
 	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(ifs);
+	XMLNodePtr root = doc.Parse(*ifs);
 
 	{
 		XMLAttributePtr attr = root->Attrib("skybox");
@@ -764,7 +764,7 @@ void ScenePlayerApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("ScenePlayer.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ScenePlayer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");

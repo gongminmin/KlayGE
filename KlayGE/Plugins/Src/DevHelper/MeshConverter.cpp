@@ -2961,7 +2961,7 @@ namespace
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
 		KlayGE::XMLDocument doc;
-		XMLNodePtr root = doc.Parse(file);
+		XMLNodePtr root = doc.Parse(*file);
 
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 

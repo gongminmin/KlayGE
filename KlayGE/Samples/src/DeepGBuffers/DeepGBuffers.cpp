@@ -203,7 +203,7 @@ void DeepGBuffersApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DeepGBuffers.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DeepGBuffers.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 	id_receives_lighting_ = dialog_->IDFromName("Lighting");
 	id_transparency_static_ = dialog_->IDFromName("TransparencyStatic");

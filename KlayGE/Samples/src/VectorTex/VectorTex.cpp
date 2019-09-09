@@ -118,7 +118,7 @@ void VectorTexApp::OnCreate()
 
 	checked_cast<RenderTeapot&>(*model_->Mesh(0)).VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("VideoTexture.uiml"));
 }
 
 void VectorTexApp::OnResize(uint32_t width, uint32_t height)

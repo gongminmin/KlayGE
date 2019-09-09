@@ -169,7 +169,7 @@ void VDMParticleApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("VDMParticle.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("VDMParticle.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_particle_rendering_type_static_ = dialog_->IDFromName("ParticleRenderingTypeStatic");

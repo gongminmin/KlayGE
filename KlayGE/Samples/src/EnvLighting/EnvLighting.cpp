@@ -952,7 +952,7 @@ void EnvLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");

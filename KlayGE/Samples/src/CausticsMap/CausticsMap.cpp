@@ -798,7 +798,7 @@ void CausticsMapApp::InitCubeSM()
 void CausticsMapApp::InitUI()
 {
 	//UI Settings
-	UIManager::Instance().Load(ResLoader::Instance().Open("Caustics.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Caustics.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	int ui_id = 0;

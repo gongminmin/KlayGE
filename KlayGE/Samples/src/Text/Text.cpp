@@ -105,7 +105,7 @@ void TextApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Text.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)

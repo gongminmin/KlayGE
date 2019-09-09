@@ -190,7 +190,7 @@ namespace KlayGE
 		Signal::Connection connection_;
 	};
 
-	KLAYGE_CORE_API CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res);
+	KLAYGE_CORE_API CameraPathControllerPtr LoadCameraPath(ResIdentifier& res);
 	KLAYGE_CORE_API void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path);
 }
 

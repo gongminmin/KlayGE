@@ -266,7 +266,7 @@ void DeferredRenderingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");

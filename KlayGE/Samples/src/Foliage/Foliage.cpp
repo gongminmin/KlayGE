@@ -164,7 +164,7 @@ void FoliageApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Foliage.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Foliage.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");

@@ -94,7 +94,7 @@ void SoundApp::OnCreate()
 	ae.AddBuffer(2, af.MakeMusicBuffer(music_2_, 3));
 	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Sound.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Sound.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");

@@ -121,7 +121,7 @@ void Fractal::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Fractal.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)

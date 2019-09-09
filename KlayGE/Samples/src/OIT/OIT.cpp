@@ -513,7 +513,7 @@ void OITApp::OnCreate()
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("OIT.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("OIT.uiml"));
 	dialog_oit_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 

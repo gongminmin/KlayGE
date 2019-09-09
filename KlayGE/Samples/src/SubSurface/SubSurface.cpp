@@ -95,7 +95,7 @@ void SubSurfaceApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("SubSurface.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("SubSurface.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_sigma_static_ = dialog_params_->IDFromName("SigmaStatic");
 	id_sigma_slider_ = dialog_params_->IDFromName("SigmaSlider");

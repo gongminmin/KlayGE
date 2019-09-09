@@ -135,7 +135,7 @@ namespace
 			ResIdentifierPtr mtl_input = ResLoader::Instance().Open(mtl_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(mtl_input);
+			XMLNodePtr root = doc.Parse(*mtl_input);
 
 			{
 				XMLAttributePtr attr = root->Attrib("name");

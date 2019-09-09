@@ -333,7 +333,7 @@ void MotionBlurDoFApp::OnCreate()
 	motion_blur_ = MakeSharedPtr<MotionBlurPostProcess>();
 	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
 	mb_dialog_ = UIManager::Instance().GetDialogs()[1];
 	app_dialog_ = UIManager::Instance().GetDialogs()[2];

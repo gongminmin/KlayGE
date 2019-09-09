@@ -1783,7 +1783,7 @@ namespace KlayGE
 		if (file)
 		{
 			XMLDocument kges_doc;
-			XMLNodePtr kges_root = kges_doc.Parse(file);
+			XMLNodePtr kges_root = kges_doc.Parse(*file);
 			this->SceneName(std::string(kges_root->Attrib("name")->ValueString()));
 			{
 				XMLAttributePtr attr = kges_root->Attrib("skybox");

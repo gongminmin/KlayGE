@@ -169,7 +169,7 @@ void AtmosphericScatteringApp::OnCreate()
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("AtmosphericScattering.uiml"));
 	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");
 	id_atmosphere_top_ = dialog_param_->IDFromName("atmosphere_top");
 	id_density_ = dialog_param_->IDFromName("density");

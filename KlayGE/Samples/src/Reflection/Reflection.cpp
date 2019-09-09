@@ -228,7 +228,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
-	screen_camera_path_ = LoadCameraPath(ResLoader::Instance().Open("Reflection.cam_path"));
+	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
 	screen_camera_path_->AttachCamera(this->ActiveCamera());
 	auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	camera_node->AddComponent(this->ActiveCamera().shared_from_this());
@@ -275,7 +275,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Reflection.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Reflection.uiml"));
 	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");

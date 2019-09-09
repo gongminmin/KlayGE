@@ -128,7 +128,7 @@ void CascadedShadowMapApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("CascadedShadowMap.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");

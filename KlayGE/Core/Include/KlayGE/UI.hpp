@@ -377,7 +377,7 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		void Load(ResIdentifierPtr const & source);
+		void Load(ResIdentifier& source);
 
 		UIDialogPtr MakeDialog(TexturePtr const & control_tex = TexturePtr());
 

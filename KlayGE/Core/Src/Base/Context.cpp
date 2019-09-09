@@ -351,7 +351,7 @@ namespace KlayGE
 		if (file)
 		{
 			XMLDocument cfg_doc;
-			XMLNodePtr cfg_root = cfg_doc.Parse(file);
+			XMLNodePtr cfg_root = cfg_doc.Parse(*file);
 
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
 			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");

@@ -124,7 +124,7 @@ namespace
 			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(psmm_input);
+			XMLNodePtr root = doc.Parse(*psmm_input);
 
 			{
 				XMLNodePtr particle_node = root->FirstNode("particle");

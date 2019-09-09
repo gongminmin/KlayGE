@@ -197,7 +197,7 @@ void Refract::OnCreate()
 		backface_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Refract.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Refract.uiml"));
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)

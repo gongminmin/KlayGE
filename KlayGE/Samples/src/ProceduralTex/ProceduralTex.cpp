@@ -145,7 +145,7 @@ ProceduralTexApp::ProceduralTexApp()
 void ProceduralTexApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Open("ProceduralTex.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ProceduralTex.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);

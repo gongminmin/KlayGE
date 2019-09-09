@@ -146,7 +146,7 @@ void SSSSSApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("SSSSS.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("SSSSS.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_sss_ = dialog_params_->IDFromName("SSS");
 	id_sss_strength_static_ = dialog_params_->IDFromName("SSSStrengthStatic");

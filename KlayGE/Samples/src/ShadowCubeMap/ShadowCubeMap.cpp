@@ -495,7 +495,7 @@ void ShadowCubeMap::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubeMap.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ShadowCubeMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");
