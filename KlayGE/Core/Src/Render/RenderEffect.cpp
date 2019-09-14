@@ -5064,6 +5064,7 @@ namespace KlayGE
 			effect.shader_objs_.clear();
 
 			macros_.clear();
+			struct_types_.clear();
 			shader_frags_.clear();
 			hlsl_shader_.clear();
 			techniques_.clear();
@@ -5495,9 +5496,9 @@ namespace KlayGE
 		}
 		str += '\n';
 
-		for (uint32_t i = 0; i < effect.NumStructTypes(); ++i)
+		for (uint32_t i = 0; i < this->NumStructTypes(); ++i)
 		{
-			RenderEffectStructType const& struct_type = *effect.StructTypeByIndex(i);
+			RenderEffectStructType const& struct_type = *this->StructTypeByIndex(i);
 			str += "struct " + struct_type.Name() + "\n";
 			str += "{\n";
 			for (uint32_t j = 0; j < struct_type.NumMembers(); ++j)
