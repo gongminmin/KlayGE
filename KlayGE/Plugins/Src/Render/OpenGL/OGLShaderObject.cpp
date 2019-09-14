@@ -46,6 +46,7 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include <map>
 
 #include <boost/assert.hpp>
 
@@ -1470,6 +1471,7 @@ namespace KlayGE
 			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
 				GL_UNIFORM_OFFSET, &uniform_offsets[0]);
 
+			std::map<std::string, GLint> struct_offsets;
 			for (GLint j = 0; j < uniforms; ++ j)
 			{
 				std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
@@ -1484,24 +1486,50 @@ namespace KlayGE
 					*iter = '\0';
 				}
 
-				RenderEffectParameter* param = effect.ParameterByName(&uniform_name[0]);
-				GLint stride;
-				if (param->ArraySize())
+				iter = std::find(uniform_name.begin(), uniform_name.end(), '.');
+				if (iter != uniform_name.end())
 				{
-					stride = uniform_array_strides[j];
-				}
-				else
-				{
-					if (param->Type() != REDT_float4x4)
+					*iter = '\0';
+
+					std::string struct_name(uniform_name.data());
+					auto struct_iter = struct_offsets.find(struct_name);
+					if (struct_iter == struct_offsets.end())
 					{
-						stride = 4;
+						struct_offsets.insert(std::make_pair(struct_name, uniform_offsets[j]));
 					}
 					else
 					{
-						stride = uniform_matrix_strides[j];
+						struct_iter->second = std::min(struct_iter->second, uniform_offsets[j]);
 					}
 				}
-				param->BindToCBuffer(effect, cb_index, uniform_offsets[j], stride);
+				else
+				{
+					RenderEffectParameter* param = effect.ParameterByName(uniform_name.data());
+					GLint stride;
+					if (param->ArraySize())
+					{
+						stride = uniform_array_strides[j];
+					}
+					else
+					{
+						if (param->Type() != REDT_float4x4)
+						{
+							stride = 4;
+						}
+						else
+						{
+							stride = uniform_matrix_strides[j];
+						}
+					}
+					param->BindToCBuffer(effect, cb_index, uniform_offsets[j], stride);
+				}
+			}
+
+			for (auto const& item : struct_offsets)
+			{
+				RenderEffectParameter* param = effect.ParameterByName(item.first);
+				BOOST_ASSERT(param->Type() == REDT_struct);
+				param->BindToCBuffer(effect, cb_index, item.second, 1);
 			}
 		}
 	}

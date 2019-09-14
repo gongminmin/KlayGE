@@ -105,6 +105,7 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 	class RenderEffectParameter;
 	class RenderVariable;
+	class RenderEffectStructType;
 	class RenderEffectAnnotation;
 	typedef std::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 	struct RasterizerStateDesc;

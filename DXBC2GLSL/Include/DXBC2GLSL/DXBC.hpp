@@ -85,7 +85,9 @@ struct DXBCShaderVariableDesc
 	uint32_t sampler_size;
 };
 
-// Same layout with D3D11_SHADER_TYPE_DESC
+struct DXBCShaderMemberDesc;
+
+// Similar to D3D11_SHADER_TYPE_DESC, except member_desc
 struct DXBCShaderTypeDesc
 {
 	ShaderVariableClass var_class;
@@ -96,6 +98,15 @@ struct DXBCShaderTypeDesc
 	uint32_t members;
 	uint32_t offset;
 	char const * name;
+
+	std::vector<DXBCShaderMemberDesc> member_desc;
+};
+
+struct DXBCShaderMemberDesc
+{
+	char const* name;
+	uint32_t start_offset;
+	DXBCShaderTypeDesc type;
 };
 
 // Same layout with D3D11_SHADER_BUFFER_DESC

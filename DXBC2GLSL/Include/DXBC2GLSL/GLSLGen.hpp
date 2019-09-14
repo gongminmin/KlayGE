@@ -142,6 +142,8 @@ public:
 	void ToHSJoinPhases(std::ostream& out);
 
 private:
+	void ToStructs(std::ostream& out);
+	void ToType(std::ostream& out, DXBCShaderTypeDesc const& type_desc) const;
 	void ToDeclarations(std::ostream& out);
 	void ToDclInterShaderInputRecords(std::ostream& out);
 	void ToDclInterShaderOutputRecords(std::ostream& out);
@@ -151,8 +153,8 @@ private:
 	void ToDeclInterShaderOutputRegisters(std::ostream& out) const;
 	void ToCopyToInterShaderOutputRecords(std::ostream& out) const;
 	void ToDclInterShaderPatchConstantRegisters(std::ostream& out);
-	void ToCopyToInterShaderPatchConstantRecords(std::ostream& out)const;
-	void ToCopyToInterShaderPatchConstantRegisters(std::ostream& out)const;
+	void ToCopyToInterShaderPatchConstantRecords(std::ostream& out) const;
+	void ToCopyToInterShaderPatchConstantRegisters(std::ostream& out) const;
 	void ToDefaultHSControlPointPhase(std::ostream& out)const;
 	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
@@ -161,6 +163,9 @@ private:
 		ShaderInputType const & sit = SIT_UNDEFINED) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
+	void ToOperandName(std::ostream& out, ShaderOperand const& op, DXBCShaderTypeDesc const& type_desc, const char* var_name,
+		uint32_t var_start_offset, std::vector<DXBCShaderVariable> const& cb_vars, uint32_t offset, bool contain_multi_var,
+		bool dynamic_indexed, uint32_t register_index, uint32_t num_selectors, bool no_swizzle, bool& need_comps) const;
 	void ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
 		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false,
 		ShaderInputType const & sit = SIT_UNDEFINED) const;

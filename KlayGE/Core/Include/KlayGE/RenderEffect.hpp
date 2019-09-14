@@ -125,6 +125,7 @@ namespace KlayGE
 		REDT_rasterizer_ordered_texture2D,
 		REDT_rasterizer_ordered_texture2DArray,
 		REDT_rasterizer_ordered_texture3D,
+		REDT_struct,
 
 		REDT_count
 	};
@@ -135,6 +136,11 @@ namespace KlayGE
 	public:
 		RenderVariable();
 		virtual ~RenderVariable() = 0;
+
+		virtual RenderEffectStructType* StructType() const
+		{
+			return nullptr;
+		}
 
 		virtual std::unique_ptr<RenderVariable> Clone() = 0;
 
@@ -187,6 +193,10 @@ namespace KlayGE
 		virtual RenderVariable& operator=(std::span<float4 const> value);
 		virtual RenderVariable& operator=(std::span<float4x4 const> value);
 
+		// For struct
+		virtual RenderVariable& operator=(std::vector<uint8_t> const& value);
+		virtual RenderVariable& operator=(std::span<uint8_t const> value);
+
 		virtual void Value(bool& val) const;
 		virtual void Value(uint32_t& val) const;
 		virtual void Value(int32_t& val) const;
@@ -221,6 +231,9 @@ namespace KlayGE
 		virtual void Value(std::vector<float3>& val) const;
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
+
+		// For struct
+		virtual void Value(std::vector<uint8_t>& val) const;
 
 		virtual void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
 		virtual void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
@@ -259,10 +272,10 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node);
+		void Load(RenderEffect const& effect, XMLNode const& node);
 #endif
 
-		void StreamIn(ResIdentifier& res);
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res);
 #if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os) const;
 #endif
@@ -382,6 +395,40 @@ namespace KlayGE
 		std::string impl_;
 	};
 
+	class KLAYGE_CORE_API RenderEffectStructType final : boost::noncopyable
+	{
+	public:
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node);
+#endif
+
+		void StreamIn(ResIdentifier& res);
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const;
+#endif
+
+		std::string const& Name() const
+		{
+			return name_;
+		}
+		size_t NameHash() const
+		{
+			return name_hash_;
+		}
+
+		uint32_t NumMembers() const;
+		RenderEffectDataType MemberType(uint32_t index) const;
+		std::string const& MemberTypeName(uint32_t index) const;
+		std::string const& MemberName(uint32_t index) const;
+		std::shared_ptr<std::string> const& MemberArraySize(uint32_t index) const;
+
+	private:
+		std::string name_;
+		size_t name_hash_;
+
+		std::vector<std::tuple<RenderEffectDataType, std::string, std::string, std::shared_ptr<std::string>>> members_;
+	};
+
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API RenderEffect : boost::noncopyable
@@ -433,6 +480,10 @@ namespace KlayGE
 			BOOST_ASSERT(index < this->NumCBuffers());
 			cbuffers_[index] = cbuff;
 		}
+
+		uint32_t NumStructTypes() const;
+		RenderEffectStructType* StructTypeByName(std::string_view name) const;
+		RenderEffectStructType* StructTypeByIndex(uint32_t index) const;
 
 		uint32_t NumTechniques() const;
 		RenderTechnique* TechniqueByName(std::string_view name) const;
@@ -491,6 +542,17 @@ namespace KlayGE
 		size_t ResNameHash() const
 		{
 			return res_name_hash_;
+		}
+
+		uint32_t NumStructTypes() const
+		{
+			return static_cast<uint32_t>(struct_types_.size());
+		}
+		RenderEffectStructType* StructTypeByName(std::string_view name) const;
+		RenderEffectStructType* StructTypeByIndex(uint32_t index) const
+		{
+			BOOST_ASSERT(index < this->NumStructTypes());
+			return struct_types_[index].get();
 		}
 
 		uint32_t NumTechniques() const
@@ -568,6 +630,8 @@ namespace KlayGE
 		std::string kfx_name_;
 		bool need_compile_;
 #endif
+
+		std::vector<std::unique_ptr<RenderEffectStructType>> struct_types_;
 
 		std::vector<std::unique_ptr<RenderTechnique>> techniques_;
 
@@ -857,10 +921,10 @@ namespace KlayGE
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node);
+		void Load(RenderEffect const& effect, XMLNode const& node);
 #endif
 
-		void StreamIn(ResIdentifier& res);
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res);
 #if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os) const;
 #endif
@@ -870,6 +934,11 @@ namespace KlayGE
 		RenderEffectDataType Type() const
 		{
 			return type_;
+		}
+
+		RenderEffectStructType* StructType() const
+		{
+			return var_->StructType();
 		}
 
 		RenderVariable const & Var() const

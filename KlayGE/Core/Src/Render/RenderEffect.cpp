@@ -76,7 +76,17 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0140;
+	uint32_t const KFX_VERSION = 0x0150;
+
+#if KLAYGE_IS_DEV_PLATFORM
+	std::unique_ptr<RenderVariable> LoadVariable(
+		RenderEffect const& effect, XMLNode const& node, RenderEffectDataType type, uint32_t array_size);
+#endif
+	std::unique_ptr<RenderVariable> StreamInVariable(
+		RenderEffect const& effect, ResIdentifier& res, RenderEffectDataType type, uint32_t array_size);
+#if KLAYGE_IS_DEV_PLATFORM
+	void StreamOutVariable(std::ostream& os, RenderVariable const& var);
+#endif
 
 #if KLAYGE_IS_DEV_PLATFORM
 	std::span<std::pair<char const *, size_t> const> GetTypeDefines()
@@ -139,7 +149,8 @@ namespace
 			NAME_AND_HASH("rasterizer_ordered_texture1DArray"),
 			NAME_AND_HASH("rasterizer_ordered_texture2D"),
 			NAME_AND_HASH("rasterizer_ordered_texture2DArray"),
-			NAME_AND_HASH("rasterizer_ordered_texture3D")
+			NAME_AND_HASH("rasterizer_ordered_texture3D"),
+			NAME_AND_HASH("struct"),
 		};
 #undef NAME_AND_HASH
 		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
@@ -491,10 +502,10 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		virtual void Load(XMLNode const& node, uint32_t array_size) = 0;
+		virtual void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) = 0;
 #endif
 
-		virtual void StreamIn(ResIdentifier& res) = 0;
+		virtual void StreamIn(RenderEffect const& effect, ResIdentifier& res) = 0;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		virtual void StreamOut(std::ostream& os) const = 0;
@@ -669,8 +680,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			bool tmp = false;
@@ -682,8 +694,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			bool tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = tmp;
@@ -716,8 +730,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			uint32_t tmp = 0;
@@ -729,8 +744,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -764,8 +781,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			int32_t tmp = 0;
@@ -777,8 +795,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			int32_t tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -812,8 +832,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			float tmp = 0;
@@ -825,8 +846,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			float tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -860,8 +883,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			uint2 tmp(0, 0);
@@ -877,8 +901,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -919,8 +945,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			uint3 tmp(0, 0, 0);
@@ -940,8 +967,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -982,8 +1011,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			uint4 tmp(0, 0, 0, 0);
@@ -1007,8 +1037,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1049,8 +1081,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			int2 tmp(0, 0);
@@ -1066,8 +1099,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			int2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1108,8 +1143,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			int3 tmp(0, 0, 0);
@@ -1129,8 +1165,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			int3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1171,8 +1209,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			int4 tmp(0, 0, 0, 0);
@@ -1196,8 +1235,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			int4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1238,8 +1279,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			float2 tmp(0, 0);
@@ -1255,8 +1297,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			float2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1297,8 +1341,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			float3 tmp(0, 0, 0);
@@ -1318,8 +1363,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			float3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1360,8 +1407,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			float4 tmp(0, 0, 0, 0);
@@ -1385,8 +1433,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			float4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1445,8 +1495,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			float4x4 tmp(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1465,8 +1516,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			float4x4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1511,8 +1564,9 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			SamplerStateDesc desc;
@@ -1593,8 +1647,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			SamplerStateDesc desc;
 			res.read(&desc, sizeof(desc));
 			desc.border_clr[0] = LE2Native(desc.border_clr[0]);
@@ -1649,8 +1705,9 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			std::string tmp;
@@ -1662,8 +1719,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			*this = ReadShortString(res);
 		}
 
@@ -1690,8 +1749,9 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			ShaderDesc desc;
@@ -1701,8 +1761,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			ShaderDesc desc;
 			desc.profile = ReadShortString(res);
 			desc.func_name = ReadShortString(res);
@@ -1834,8 +1896,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -1859,8 +1923,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -1972,8 +2038,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -1997,8 +2065,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2052,8 +2122,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2077,8 +2149,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2132,8 +2206,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2157,8 +2233,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2212,8 +2290,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2241,8 +2321,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2304,8 +2386,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2333,8 +2417,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2396,8 +2482,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2425,8 +2513,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2488,8 +2578,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2517,8 +2609,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2580,8 +2674,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2609,8 +2705,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2672,8 +2770,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2701,8 +2801,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2764,8 +2866,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2793,8 +2897,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2856,8 +2962,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2885,8 +2993,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2948,8 +3058,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2977,8 +3089,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -3065,8 +3179,10 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
+
 			if (XMLNodePtr value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -3095,8 +3211,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -3220,8 +3338,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			*this = TexturePtr();
@@ -3249,8 +3368,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			*this = TexturePtr();
 			*this = ReadShortString(res);
 		}
@@ -3336,8 +3457,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			*this = UnorderedAccessViewPtr();
@@ -3353,8 +3475,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			*this = UnorderedAccessViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3440,8 +3564,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			*this = ShaderResourceViewPtr();
@@ -3457,8 +3582,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			*this = ShaderResourceViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3515,8 +3642,9 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(array_size);
 
 			*this = UnorderedAccessViewPtr();
@@ -3532,8 +3660,10 @@ namespace
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
+
 			*this = UnorderedAccessViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3587,16 +3717,18 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(node);
 			KFL_UNUSED(array_size);
 			*this = ShaderResourceViewPtr();
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(res);
 			*this = ShaderResourceViewPtr();
 		}
@@ -3636,16 +3768,18 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(node);
 			KFL_UNUSED(array_size);
 			*this = UnorderedAccessViewPtr();
 		}
 #endif
 
-		void StreamIn(ResIdentifier& res) override
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
 		{
+			KFL_UNUSED(effect);
 			KFL_UNUSED(res);
 			*this = UnorderedAccessViewPtr();
 		}
@@ -3670,6 +3804,65 @@ namespace
 
 	protected:
 		UnorderedAccessViewPtr val_;
+	};
+
+	class RenderVariableStruct final : public RenderVariableArray<uint8_t>
+	{
+	public:
+		explicit RenderVariableStruct(bool in_cbuff = false)
+			: RenderVariableArray<uint8_t>(in_cbuff)
+		{
+		}
+
+		RenderEffectStructType* StructType() const override
+		{
+			return struct_type_;
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = RenderVariableArray<uint8_t>::Clone();
+
+			auto* struct_var = checked_cast<RenderVariableStruct*>(ret.get());
+			struct_var->struct_type_ = struct_type_;
+
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(array_size);
+
+			struct_type_ = effect.StructTypeByName(node.Attrib("type")->ValueString());
+			BOOST_ASSERT(struct_type_);
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			struct_type_ = effect.StructTypeByName(ReadShortString(res));
+			BOOST_ASSERT(struct_type_);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			WriteShortString(os, struct_type_->Name());
+		}
+#endif
+
+		using RenderVariableArray<uint8_t>::operator=;
+		using RenderVariableArray<uint8_t>::Value;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableStruct>(in_cbuff);
+		}
+
+	private:
+		RenderEffectStructType* struct_type_ = nullptr;
 	};
 
 	std::unique_ptr<RenderVariableIOable> RenderVariableFactory(RenderEffectDataType type, bool is_array)
@@ -3892,6 +4085,10 @@ namespace
 			ret = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
 			break;
 
+		case REDT_struct:
+			ret = MakeUniquePtr<RenderVariableStruct>();
+			break;
+
 		default:
 			KFL_UNREACHABLE("Invalid type");
 		}
@@ -3900,18 +4097,20 @@ namespace
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
-	std::unique_ptr<RenderVariable> LoadVariable(XMLNode const & node, RenderEffectDataType type, uint32_t array_size)
+	std::unique_ptr<RenderVariable> LoadVariable(
+		RenderEffect const& effect, XMLNode const& node, RenderEffectDataType type, uint32_t array_size)
 	{
 		auto ret = RenderVariableFactory(type, array_size != 0);
-		ret->Load(node, array_size);
+		ret->Load(effect, node, array_size);
 		return ret;
 	}
 #endif
 
-	std::unique_ptr<RenderVariable> StreamInVariable(ResIdentifier& res, RenderEffectDataType type, uint32_t array_size)
+	std::unique_ptr<RenderVariable> StreamInVariable(
+		RenderEffect const& effect, ResIdentifier& res, RenderEffectDataType type, uint32_t array_size)
 	{
 		auto ret = RenderVariableFactory(type, array_size != 0);
-		ret->StreamIn(res);
+		ret->StreamIn(effect, res);
 		return ret;
 	}
 
@@ -4049,20 +4248,20 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectAnnotation::Load(XMLNode const& node)
+	void RenderEffectAnnotation::Load(RenderEffect const& effect, XMLNode const& node)
 	{
 		type_ = TypeFromName(node.Attrib("type")->ValueString());
 		name_ = std::string(node.Attrib("name")->ValueString());
-		var_ = LoadVariable(node, type_, 0);
+		var_ = LoadVariable(effect, node, type_, 0);
 	}
 #endif
 
-	void RenderEffectAnnotation::StreamIn(ResIdentifier& res)
+	void RenderEffectAnnotation::StreamIn(RenderEffect const& effect, ResIdentifier& res)
 	{
 		res.read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
 		name_ = ReadShortString(res);
-		var_ = StreamInVariable(res, type_, 0);
+		var_ = StreamInVariable(effect, res, type_, 0);
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -4074,6 +4273,119 @@ namespace KlayGE
 		StreamOutVariable(os, *var_);
 	}
 #endif
+
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectStructType::Load(RenderEffect const& effect, XMLNode const& node)
+	{
+		name_ = std::string(node.Attrib("name")->ValueString());
+		name_hash_ = HashRange(name_.begin(), name_.end());
+
+		for (XMLNodePtr member_node = node.FirstNode("member"); member_node; member_node = member_node->NextSibling("member"))
+		{
+			RenderEffectDataType member_type;
+			auto member_type_name = member_node->Attrib("type")->ValueString();
+			if (effect.StructTypeByName(member_type_name) != nullptr)
+			{
+				member_type = REDT_struct;
+			}
+			else
+			{
+				member_type = TypeFromName(member_type_name);
+				member_type_name = "";
+			}
+
+			auto member_name = member_node->Attrib("name")->ValueString();
+
+			std::string member_array_size;
+			if (auto attr = member_node->Attrib("array_size"))
+			{
+				member_array_size = std::string(attr->ValueString());
+			}
+			
+			members_.push_back(std::make_tuple(
+				member_type, std::string(member_type_name), std::string(member_name), MakeSharedPtr<std::string>(member_array_size)));
+		}
+	}
+#endif
+
+	void RenderEffectStructType::StreamIn(ResIdentifier& res)
+	{
+		name_ = ReadShortString(res);
+		name_hash_ = HashRange(name_.begin(), name_.end());
+
+		uint8_t len;
+		res.read(reinterpret_cast<char*>(&len), sizeof(len));
+
+		members_.resize(len);
+		for (uint32_t i = 0; i < len; ++i)
+		{
+			uint8_t type;
+			res.read(reinterpret_cast<char*>(&type), sizeof(type));
+			std::get<0>(members_[i]) = static_cast<RenderEffectDataType>(type);
+
+			if (type == REDT_struct)
+			{
+				std::get<1>(members_[i]) = ReadShortString(res);
+			}
+
+			std::get<2>(members_[i]) = ReadShortString(res);
+			std::get<3>(members_[i]) = MakeSharedPtr<std::string>(ReadShortString(res));
+		}
+	}
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectStructType::StreamOut(std::ostream& os) const
+	{
+		WriteShortString(os, name_);
+
+		uint8_t len = static_cast<uint8_t>(members_.size());
+		os.write(reinterpret_cast<char const*>(&len), sizeof(len));
+
+		for (uint32_t i = 0; i < len; ++i)
+		{
+			uint8_t const type = static_cast<uint8_t>(std::get<0>(members_[i]));
+			os.write(reinterpret_cast<char const*>(&type), sizeof(type));
+
+			if (type == REDT_struct)
+			{
+				WriteShortString(os, std::get<1>(members_[i]));
+			}
+
+			WriteShortString(os, std::get<2>(members_[i]));
+			WriteShortString(os, *std::get<3>(members_[i]));
+		}
+	}
+#endif
+
+	uint32_t RenderEffectStructType::NumMembers() const
+	{
+		return static_cast<uint8_t>(members_.size());
+	}
+
+	RenderEffectDataType RenderEffectStructType::MemberType(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<0>(members_[index]);
+	}
+
+	std::string const& RenderEffectStructType::MemberTypeName(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<1>(members_[index]);
+	}
+
+	std::string const& RenderEffectStructType::MemberName(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<2>(members_[index]);
+	}
+
+	std::shared_ptr<std::string> const& RenderEffectStructType::MemberArraySize(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<3>(members_[index]);
+	}
 
 
 	void RenderEffect::Load(std::span<std::string const> names)
@@ -4229,6 +4541,21 @@ namespace KlayGE
 				cbuffer = cbuff;
 			}
 		}
+	}
+
+	uint32_t RenderEffect::NumStructTypes() const
+	{
+		return effect_template_->NumStructTypes();
+	}
+
+	RenderEffectStructType* RenderEffect::StructTypeByName(std::string_view name) const
+	{
+		return effect_template_->StructTypeByName(name);
+	}
+
+	RenderEffectStructType* RenderEffect::StructTypeByIndex(uint32_t index) const
+	{
+		return effect_template_->StructTypeByIndex(index);
 	}
 
 	uint32_t RenderEffect::NumTechniques() const
@@ -4543,6 +4870,12 @@ namespace KlayGE
 			}
 		}
 
+		for (XMLNodePtr node = root.FirstNode("struct"); node; node = node->NextSibling("struct"))
+		{
+			struct_types_.push_back(MakeUniquePtr<RenderEffectStructType>());
+			struct_types_.back()->Load(effect, *node);
+		}
+
 		std::vector<XMLNodePtr> parameter_nodes;
 		for (XMLNodePtr node = root.FirstNode(); node; node = node->NextSibling())
 		{
@@ -4563,7 +4896,20 @@ namespace KlayGE
 		{
 			XMLNode const& node = *parameter_nodes[param_index];
 
-			RenderEffectDataType type = TypeFromName(node.Attrib("type")->ValueString());
+			RenderEffectDataType type = REDT_count;
+			auto type_name = node.Attrib("type")->ValueString();
+			for (auto const& struct_type : struct_types_)
+			{
+				if (type_name == struct_type->Name())
+				{
+					type = REDT_struct;
+					break;
+				}
+			}
+			if (type == REDT_count)
+			{
+				type = TypeFromName(type_name);
+			}
 			if ((type != REDT_sampler)
 				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture2DMS) && (type != REDT_texture3D)
 				&& (type != REDT_textureCUBE)
@@ -4609,7 +4955,7 @@ namespace KlayGE
 			}
 
 			effect.params_.push_back(MakeUniquePtr<RenderEffectParameter>());
-			effect.params_.back()->Load(node);
+			effect.params_.back()->Load(effect, node);
 		}
 
 		for (XMLNodePtr shader_graph_nodes_node = root.FirstNode("shader_graph_nodes"); shader_graph_nodes_node;
@@ -4847,6 +5193,19 @@ namespace KlayGE
 					}
 
 					{
+						uint16_t num_structs;
+						source.read(&num_structs, sizeof(num_structs));
+						num_structs = LE2Native(num_structs);
+
+						struct_types_.resize(num_structs);
+						for (uint32_t i = 0; i < num_structs; ++i)
+						{
+							struct_types_[i] = MakeUniquePtr<RenderEffectStructType>();
+							struct_types_[i]->StreamIn(source);
+						}
+					}
+
+					{
 						uint16_t num_cbufs;
 						source.read(&num_cbufs, sizeof(num_cbufs));
 						num_cbufs = LE2Native(num_cbufs);
@@ -4866,7 +5225,7 @@ namespace KlayGE
 						for (uint32_t i = 0; i < num_params; ++ i)
 						{
 							effect.params_[i] = MakeUniquePtr<RenderEffectParameter>();
-							effect.params_[i]->StreamIn(source);
+							effect.params_[i]->StreamIn(effect, source);
 						}
 					}
 
@@ -4989,6 +5348,15 @@ namespace KlayGE
 		}
 
 		{
+			uint16_t num_structs = Native2LE(static_cast<uint16_t>(struct_types_.size()));
+			os.write(reinterpret_cast<char const*>(&num_structs), sizeof(num_structs));
+			for (uint32_t i = 0; i < struct_types_.size(); ++i)
+			{
+				struct_types_[i]->StreamOut(os);
+			}
+		}
+
+		{
 			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
@@ -5060,6 +5428,19 @@ namespace KlayGE
 	}
 #endif
 
+	RenderEffectStructType* RenderEffectTemplate::StructTypeByName(std::string_view name) const
+	{
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (auto const& struct_type : struct_types_)
+		{
+			if (name_hash == struct_type->NameHash())
+			{
+				return struct_type.get();
+			}
+		}
+		return nullptr;
+	}
+
 	RenderTechnique* RenderEffectTemplate::TechniqueByName(std::string_view name) const
 	{
 		size_t const name_hash = HashRange(name.begin(), name.end());
@@ -5114,6 +5495,35 @@ namespace KlayGE
 		}
 		str += '\n';
 
+		for (uint32_t i = 0; i < effect.NumStructTypes(); ++i)
+		{
+			RenderEffectStructType const& struct_type = *effect.StructTypeByIndex(i);
+			str += "struct " + struct_type.Name() + "\n";
+			str += "{\n";
+			for (uint32_t j = 0; j < struct_type.NumMembers(); ++j)
+			{
+				RenderEffectDataType member_type = struct_type.MemberType(j);
+				if (member_type == REDT_struct)
+				{
+					str += struct_type.MemberTypeName(j);
+				}
+				else
+				{
+					str += std::string(TypeNameFromCode(member_type));
+				}
+
+				str += " " + struct_type.MemberName(j);
+
+				auto array_size_str = struct_type.MemberArraySize(j);
+				if (array_size_str && !array_size_str->empty())
+				{
+					str += "[" + *array_size_str + "]";
+				}
+				str += ";\n";
+			}
+			str += "};\n";
+		}
+
 		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
 			RenderEffectConstantBuffer const & cbuff = *effect.CBufferByIndex(i);
@@ -5160,10 +5570,21 @@ namespace KlayGE
 					break;
 
 				default:
-					str += std::string(TypeNameFromCode(param.Type())) + " " + param.Name();
-					if (param.ArraySize())
+					if (param.Type() == REDT_struct)
 					{
-						str += "[" + *param.ArraySize() + "]";
+						str += param.StructType()->Name();
+					}
+					else
+					{
+						str += std::string(TypeNameFromCode(param.Type()));
+					}
+
+					str += " " + param.Name();
+
+					auto array_size_str = param.ArraySize();
+					if (array_size_str && !array_size_str->empty())
+					{
+						str += "[" + *array_size_str + "]";
 					}
 					str += ";\n";
 					break;
@@ -5506,7 +5927,7 @@ namespace KlayGE
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
 
-					annotation->Load(*anno_node);
+					annotation->Load(effect, *anno_node);
 				}
 			}
 			else if (parent_tech)
@@ -5689,7 +6110,7 @@ namespace KlayGE
 				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 				(*annotations_)[i] = annotation;
 				
-				annotation->StreamIn(res);
+				annotation->StreamIn(effect, res);
 			}
 		}
 
@@ -5820,7 +6241,7 @@ namespace KlayGE
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
 
-					annotation->Load(*anno_node);
+					annotation->Load(effect, *anno_node);
 				}
 			}
 			else if (inherit_pass)
@@ -6401,8 +6822,7 @@ namespace KlayGE
 			{
 				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 				(*annotations_)[i] = annotation;
-				
-				annotation->StreamIn(res);
+				annotation->StreamIn(effect, res);
 			}
 		}
 
@@ -6765,9 +7185,19 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectParameter::Load(XMLNode const& node)
+	void RenderEffectParameter::Load(RenderEffect const& effect, XMLNode const& node)
 	{
-		type_ = TypeFromName(node.Attrib("type")->ValueString());
+		auto type_name = node.Attrib("type")->ValueString();
+		auto* struct_type = effect.StructTypeByName(type_name);
+		if (struct_type)
+		{
+			type_ = REDT_struct;
+		}
+		else
+		{
+			type_ = TypeFromName(type_name);
+		}
+
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = std::string(node.Attrib("name")->ValueString());
 		name_->second = HashRange(name_->first.begin(), name_->first.end());
@@ -6795,7 +7225,7 @@ namespace KlayGE
 		{
 			as = 0;
 		}
-		var_ = LoadVariable(node, type_, as);
+		var_ = LoadVariable(effect, node, type_, as);
 
 		{
 			XMLNodePtr anno_node = node.FirstNode("annotation");
@@ -6805,7 +7235,7 @@ namespace KlayGE
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					annotations_->push_back(MakeUniquePtr<RenderEffectAnnotation>());
-					annotations_->back()->Load(*anno_node);
+					annotations_->back()->Load(effect, *anno_node);
 				}
 			}
 		}
@@ -6839,7 +7269,7 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderEffectParameter::StreamIn(ResIdentifier& res)
+	void RenderEffectParameter::StreamIn(RenderEffect const& effect, ResIdentifier& res)
 	{
 		res.read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
@@ -6883,7 +7313,7 @@ namespace KlayGE
 			}
 #endif
 		}
-		var_ = StreamInVariable(res, type_, as);
+		var_ = StreamInVariable(effect, res, type_, as);
 
 		uint8_t num_anno;
 		res.read(&num_anno, sizeof(num_anno));
@@ -6893,8 +7323,8 @@ namespace KlayGE
 			annotations_->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{
-				(*annotations_)[i] = MakeUniquePtr<RenderEffectAnnotation>();				
-				(*annotations_)[i]->StreamIn(res);
+				(*annotations_)[i] = MakeUniquePtr<RenderEffectAnnotation>();
+				(*annotations_)[i]->StreamIn(effect, res);
 			}
 		}
 
@@ -7514,6 +7944,18 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
+	RenderVariable& RenderVariable::operator=(std::vector<uint8_t> const& value)
+	{
+		KFL_UNUSED(value);
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint8_t const> value)
+	{
+		KFL_UNUSED(value);
+		KFL_UNREACHABLE("Can't be called");
+	}
+
 	void RenderVariable::Value(bool& /*value*/) const
 	{
 		KFL_UNREACHABLE("Can't be called");
@@ -7681,6 +8123,12 @@ namespace KlayGE
 
 	void RenderVariable::Value(std::vector<float4x4>& /*value*/) const
 	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	void RenderVariable::Value(std::vector<uint8_t>& value) const
+	{
+		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 

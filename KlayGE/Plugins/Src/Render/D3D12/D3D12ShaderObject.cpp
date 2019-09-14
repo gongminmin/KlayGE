@@ -956,7 +956,11 @@ namespace KlayGE
 						{
 							RenderEffectParameter* param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
 							uint32_t stride;
-							if (shader_desc.cb_desc[i].var_desc[j].elements > 0)
+							if (param->Type() == REDT_struct)
+							{
+								stride = 1;
+							}
+							else if (shader_desc.cb_desc[i].var_desc[j].elements > 0)
 							{
 								if (param->Type() != REDT_float4x4)
 								{

@@ -50,7 +50,7 @@
 using namespace std;
 using namespace KlayGE;
 
-uint32_t const KFX_VERSION = 0x0140;
+uint32_t const KFX_VERSION = 0x0150;
 
 int main(int argc, char* argv[])
 {
