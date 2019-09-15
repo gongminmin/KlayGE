@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float4x4" name="mvp"/>
-	<parameter type="float4x4" name="model"/>
+	<include name="ModelCamera.fxml"/>
+
 	<parameter type="int3" name="hl_axis"/>
 
 	<shader>
