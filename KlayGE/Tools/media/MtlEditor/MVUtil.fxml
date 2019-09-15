@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float4x4" name="mvp"/>
+	<include name="ModelCamera.fxml"/>
 
 	<shader>
 		<![CDATA[
