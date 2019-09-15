@@ -2,8 +2,8 @@
 
 <effect>
 	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
-	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4" name="color"/>
 
 	<parameter type="float3" name="v0"/>
