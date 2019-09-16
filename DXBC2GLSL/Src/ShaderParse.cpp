@@ -740,7 +740,10 @@ struct ShaderParser
 			type_token += 2;
 			if (name_offset != 0)
 			{
-				ret.name = reinterpret_cast<char const*>(reinterpret_cast<char const*>(first_token) + name_offset);
+				if (ret.var_class == SVC_STRUCT)
+				{
+					ret.name = reinterpret_cast<char const*>(reinterpret_cast<char const*>(first_token) + name_offset);
+				}
 			}
 		}
 

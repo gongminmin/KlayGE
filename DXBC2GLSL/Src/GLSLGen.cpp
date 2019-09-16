@@ -6260,6 +6260,47 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 	}
 }
 
+ShaderImmType GLSLGen::OperandAsCBufferType(
+	uint32_t imm_as_type, uint32_t offset, uint32_t var_start_offset, DXBCShaderTypeDesc const& var_type_desc) const
+{
+	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
+	if (var_type_desc.var_class == SVC_STRUCT)
+	{
+		uint32_t const in_struct_offset = offset - var_start_offset;
+		for (int m = var_type_desc.members - 1; m >= 0; --m)
+		{
+			if (in_struct_offset >= var_type_desc.member_desc[m].start_offset)
+			{
+				as_type = this->OperandAsCBufferType(imm_as_type, in_struct_offset, 0, var_type_desc.member_desc[m].type);
+				break;
+			}
+		}
+	}
+	else
+	{
+		switch (var_type_desc.type)
+		{
+		case SVT_INT:
+			as_type = SIT_Int;
+			break;
+
+		case SVT_UINT:
+			as_type = SIT_UInt;
+			break;
+
+		case SVT_FLOAT:
+			as_type = SIT_Float;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+	}
+
+	return as_type;
+}
+
 ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
@@ -6382,24 +6423,8 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 							if ((offset >= var.var_desc.start_offset)
 								&& (var.var_desc.start_offset + var.var_desc.size > offset))
 							{
-								switch (var.type_desc.type)
-								{
-								case SVT_INT:
-									as_type = SIT_Int;
-									break;
-
-								case SVT_UINT:
-									as_type = SIT_UInt;
-									break;
-
-								case SVT_FLOAT:
-									as_type = SIT_Float;
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
+								as_type = this->OperandAsCBufferType(imm_as_type, offset, var.var_desc.start_offset, var.type_desc);
+								break;
 							}
 						}
 					}

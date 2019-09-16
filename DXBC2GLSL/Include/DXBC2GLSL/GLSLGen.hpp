@@ -161,6 +161,8 @@ private:
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
 		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false, bool no_cast = false,
 		ShaderInputType const & sit = SIT_UNDEFINED) const;
+	ShaderImmType OperandAsCBufferType(
+		uint32_t imm_as_type, uint32_t offset, uint32_t var_start_offset, DXBCShaderTypeDesc const& var_type_desc) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
 	void ToOperandName(std::ostream& out, ShaderOperand const& op, DXBCShaderTypeDesc const& type_desc, const char* var_name,
