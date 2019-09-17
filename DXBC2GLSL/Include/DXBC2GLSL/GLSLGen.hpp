@@ -87,7 +87,8 @@ enum GLSLRules : uint32_t
 	GSR_EXTFragDepth = 1UL << 22,
 	GSR_EXTTessellationShader = 1UL << 23,
 	GSR_PrecisionOnSampler = 1UL << 24,
-	GSR_ExplicitMultiSample = 1UL << 25
+	GSR_ExplicitMultiSample = 1UL << 25,
+	GSR_EXTVertexShaderLayer = 1UL << 26,
 };
 
 struct RegisterDesc

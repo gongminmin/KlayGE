@@ -534,6 +534,10 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
+						if (caps.vp_rt_index_at_every_stage_support)
+						{
+							rules |= GSR_EXTVertexShaderLayer;
+						}
 						dxbc2glsl.FeedDXBC(&code[0], has_gs, has_ps, static_cast<ShaderTessellatorPartitioning>(this->DsPartitioning()),
 							static_cast<ShaderTessellatorOutputPrimitive>(this->DsOutputPrimitive()), gsv, rules);
 						glsl_src_ = dxbc2glsl.GLSLString();

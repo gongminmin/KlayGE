@@ -1536,7 +1536,7 @@ namespace KlayGE
 		caps_.uavs_at_every_stage_support = false;	// TODO
 		caps_.rovs_support = false;	// TODO
 		caps_.flexible_srvs_support = false; // TODO
-		caps_.vp_rt_index_at_every_stage_support = false; // TODO
+		caps_.vp_rt_index_at_every_stage_support = glloader_GL_NV_viewport_array2() || glloader_GL_AMD_vertex_shader_layer();
 
 		caps_.gs_support = true;
 

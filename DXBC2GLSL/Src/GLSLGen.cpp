@@ -302,6 +302,11 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	{
 		out << "#extension GL_EXT_tessellation_shader : enable\n";
 	}
+	if ((ST_VS == shader_type_) && (glsl_rules_ & GSR_EXTVertexShaderLayer))
+	{
+		out << "#extension GL_NV_viewport_array2 : enable\n";
+		out << "#extension GL_AMD_vertex_shader_layer : enable\n";
+	}
 	out << "\n";
 
 	if (glsl_rules_ & GSR_Precision)
