@@ -252,7 +252,7 @@ namespace KlayGE
 			init_data[i].row_pitch = sizeof(uint32_t);
 			init_data[i].slice_pitch = init_data[i].row_pitch;
 		}
-		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan(init_data));
 
 		auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);

@@ -906,23 +906,43 @@ namespace KlayGE
 		}
 
 		{
-			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
-			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
+			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature))))
+			{
+				caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
+			}
+			else
+			{
+				caps_.is_tbdr = false;
+			}
 		}
 		caps_.primitive_restart_support = true;
 		{
-			D3D11_FEATURE_DATA_THREADING mt_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
-			caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
-			caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
-			caps_.arbitrary_multithread_rendering_support = caps_.multithread_rendering_support;
+			D3D11_FEATURE_DATA_THREADING mt_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature))))
+			{
+				caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
+				caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
+				caps_.arbitrary_multithread_rendering_support = caps_.multithread_rendering_support;
+			}
+			else
+			{
+				caps_.multithread_rendering_support = false;
+				caps_.multithread_res_creating_support = false;
+				caps_.arbitrary_multithread_rendering_support = false;
+			}
 		}
 		caps_.mrt_independent_bit_depths_support = true;
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
+			}
+			else
+			{
+				caps_.logic_op_support = false;
+			}
 		}
 		caps_.independent_blend_support = true;
 		caps_.draw_indirect_support = true;
@@ -934,19 +954,36 @@ namespace KlayGE
 		caps_.uavs_at_every_stage_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_1);
 		if (d3d_11_runtime_sub_ver_ >= 3)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS2 d3d11_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.rovs_support = d3d11_feature.ROVsSupported ? true : false;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.rovs_support = d3d11_feature.ROVsSupported ? true : false;
+			}
+			else
+			{
+				caps_.rovs_support = false;
+			}
 		}
 		else
 		{
 			caps_.rovs_support = false;
 		}
 		caps_.flexible_srvs_support = true;
+		if (d3d_11_runtime_sub_ver_ >= 4)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS3 d3d11_feature;
-			d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.vp_rt_index_at_every_stage_support = d3d11_feature.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer ? true : false;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS3 d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.vp_rt_index_at_every_stage_support = d3d11_feature.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer ? true : false;
+			}
+			else
+			{
+				caps_.vp_rt_index_at_every_stage_support = false;
+			}
+		}
+		else
+		{
+			caps_.vp_rt_index_at_every_stage_support = false;
 		}
 
 		caps_.gs_support = true;
@@ -961,7 +998,7 @@ namespace KlayGE
 		bool check_uav_fmts = false;
 		if (d3d_11_runtime_sub_ver_ >= 3)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS2 feature_data;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 feature_data{};
 			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &feature_data, sizeof(feature_data))))
 			{
 				check_uav_fmts = feature_data.TypedUAVLoadAdditionalFormats ? true : false;
@@ -1113,11 +1150,10 @@ namespace KlayGE
 					if (check_uav_fmts)
 					{
 						D3D11_FEATURE_DATA_FORMAT_SUPPORT2 format_support = { fmt.second , 0};
-						HRESULT hr = d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2,
-							&format_support, sizeof(format_support));
-						if (SUCCEEDED(hr)
-							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
-							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
+						if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(
+								D3D11_FEATURE_FORMAT_SUPPORT2, &format_support, sizeof(format_support))) &&
+							((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0) &&
+							((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
 						{
 							uav_formats.push_back(fmt.first);
 						}

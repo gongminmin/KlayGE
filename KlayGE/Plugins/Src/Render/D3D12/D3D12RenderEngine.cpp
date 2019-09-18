@@ -1159,10 +1159,15 @@ namespace KlayGE
 
 		caps_.max_shader_model = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
 		{
-			D3D12_FEATURE_DATA_ARCHITECTURE arch_feature;
-			arch_feature.NodeIndex = 0;
-			d3d_device_->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch_feature, sizeof(arch_feature));
-			caps_.is_tbdr = arch_feature.TileBasedRenderer ? true : false;
+			D3D12_FEATURE_DATA_ARCHITECTURE arch_feature{};
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch_feature, sizeof(arch_feature))))
+			{
+				caps_.is_tbdr = arch_feature.TileBasedRenderer ? true : false;
+			}
+			else
+			{
+				caps_.is_tbdr = false;
+			}
 		}
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = true;
@@ -1191,7 +1196,7 @@ namespace KlayGE
 
 		bool check_uav_fmts = false;
 		{
-			D3D12_FEATURE_DATA_D3D12_OPTIONS feature_data;
+			D3D12_FEATURE_DATA_D3D12_OPTIONS feature_data{};
 			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &feature_data, sizeof(feature_data))))
 			{
 				caps_.logic_op_support = feature_data.OutputMergerLogicOp ? true : false;
