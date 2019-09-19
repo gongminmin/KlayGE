@@ -365,6 +365,7 @@ void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangl
 
 	<shader version="4">
 		<![CDATA[
+#ifdef KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
 void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 						float4 tangent_quat : TANGENT,
 						uint instance_id : SV_InstanceID,
@@ -379,6 +380,7 @@ void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 	oDist = calc_dist(Position);
 	oRtIndex = instance_id;
 }
+#endif
 		]]>
 	</shader>
 
