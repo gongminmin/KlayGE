@@ -113,9 +113,9 @@ namespace KlayGE
 	{
 		HQTerrainRenderable::OnRenderBegin();
 
-		auto const& pmccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCameraCBufferInstance();
+		auto const& pccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedCameraCBufferInstance();
 
-		*mvp_wo_oblique_param_ = MathLib::transpose(pmccb.Mvp(*model_camera_cbuffer_));
+		*mvp_wo_oblique_param_ = MathLib::transpose(pccb.Camera(*camera_cbuffer_, 0).mvp);
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl && (drl->ActiveViewport() == 0))
@@ -137,8 +137,8 @@ namespace KlayGE
 				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
 
-			pmccb.Mvp(*model_camera_cbuffer_) = MathLib::transpose(mvp);
-			model_camera_cbuffer_->Dirty(true);
+			pccb.Camera(*camera_cbuffer_, 0).mvp = MathLib::transpose(mvp);
+			camera_cbuffer_->Dirty(true);
 		}
 	}
 }

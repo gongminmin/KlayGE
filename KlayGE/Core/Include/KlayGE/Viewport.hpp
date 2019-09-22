@@ -58,14 +58,12 @@ namespace KlayGE
 			return height_;
 		}
 
-		void Camera(CameraPtr const& camera)
-		{
-			camera_ = camera;
-		}
-		CameraPtr const& Camera() const
-		{
-			return camera_;
-		}
+		uint32_t NumCameras() const;
+		void NumCameras(uint32_t num);
+		void Camera(CameraPtr const& camera);
+		CameraPtr const& Camera() const;
+		void Camera(uint32_t index, CameraPtr const& camera);
+		CameraPtr const& Camera(uint32_t index) const;
 
 	private:
 		int left_;
@@ -73,7 +71,7 @@ namespace KlayGE
 		int width_;
 		int height_;
 
-		CameraPtr camera_;
+		std::vector<CameraPtr> cameras_;
 	};
 }
 

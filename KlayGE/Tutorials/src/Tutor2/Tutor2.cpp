@@ -47,8 +47,6 @@ public:
 	explicit RenderPolygon(std::wstring_view name);
 
 	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
-
-	void OnRenderBegin() override;
 };
 
 int SampleMain()
@@ -196,12 +194,4 @@ void RenderPolygon::DoBuildMeshInfo(KlayGE::RenderModel const & model)
 	KlayGE::AABBox const & pos_bb = this->PosBound();
 	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-}
-
-void RenderPolygon::OnRenderBegin()
-{
-	KlayGE::App3DFramework const & app = KlayGE::Context::Instance().AppInstance();
-
-	KlayGE::float4x4 view_proj = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-	*(effect_->ParameterByName("mvp")) = view_proj;
 }

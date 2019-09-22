@@ -10,7 +10,8 @@
 
 	<shader>
 		<![CDATA[
-void ImpostorGBufferVS(float2 pos2 : POSITION,
+void ImpostorGBufferVS(uint instance_id : SV_InstanceID,
+			float2 pos2 : POSITION,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -19,6 +20,10 @@ void ImpostorGBufferVS(float2 pos2 : POSITION,
 {
 	float4 pos = float4(pos2 * pos_extent.xy + pos_center.xy, 0, 1);
 	float2 texcoord = (float2(pos2.x, -pos2.y) + 1) * tc_extent + start_tc;
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 movdel_view = camera.model_view;
 
 	pos.xyz = mul(pos.xyz, (float3x3)billboard_mat);
 

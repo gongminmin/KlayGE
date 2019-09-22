@@ -9,7 +9,8 @@
 
 	<shader>
 		<![CDATA[
-void FoliageImpostorGBufferVS(float2 pos2 : POSITION,
+void FoliageImpostorGBufferVS(uint instance_id : SV_InstanceID,
+			float2 pos2 : POSITION,
 			float4 instance_pos_scale : TEXCOORD1,
 			float2 instance_rotation : TEXCOORD2,
 			out float4 oTexCoord_2xy : TEXCOORD0,
@@ -24,6 +25,10 @@ void FoliageImpostorGBufferVS(float2 pos2 : POSITION,
 	pos.xyz *= instance_pos_scale.w;
 	pos.xyz = mul(pos.xyz, (float3x3)billboard_mat);
 	pos.xyz += instance_pos_scale.xyz;
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;

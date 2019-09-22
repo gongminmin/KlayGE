@@ -45,11 +45,6 @@ namespace
 		{
 		}
 
-		float4x4 LightViewProj() const
-		{
-			return light_views_[pass_index_] * light_proj_;
-		}
-
 		virtual void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
 			gen_sm_pass_ = gen_sm;
@@ -71,22 +66,18 @@ namespace
 			case SMT_CubeOneInstance:
 			case SMT_CubeOneInstanceGS:
 			case SMT_CubeOneInstanceVpRt:
-				for (int i = 0; i < 6; ++i)
-				{
-					light_views_[i] = light_src->SMCamera(i)->ViewMatrix();
-				}
+				light_view_ = light_src->SMCamera(0)->ViewMatrix();
 				break;
 			
 			case SMT_DP:
-				light_views_[pass_index_] = light_src->SMCamera(4 + pass_index_)->ViewMatrix();
+				light_view_ = light_src->SMCamera(4)->ViewMatrix();
 				break;
 			
 			case SMT_Cube:
 			default:
-				light_views_[pass_index_] = app.ActiveCamera().ViewMatrix();
+				light_view_ = app.ActiveCamera().ViewMatrix();
 				break;
 			}
-			light_proj_ = app.ActiveCamera().ProjMatrix();
 
 			light_color_ = light_src->Color();
 			light_falloff_ = light_src->Falloff();
@@ -115,7 +106,6 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(effect->ParameterByName("model")) = model;
 			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
 			*(effect->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 			*(effect->ParameterByName("esm_scale_factor")) = esm_scale_factor_ * light_inv_range_;
@@ -125,37 +115,21 @@ namespace
 				switch (sm_type_)
 				{
 				case SMT_DP:
+					*(effect->ParameterByName("far")) = camera.FarPlane();
+
 					{
-						*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
-
-						float4x4 mv = model * light_views_[pass_index_];
-						*(effect->ParameterByName("mv")) = mv;
-						*(effect->ParameterByName("far")) = camera.FarPlane();
-
-						FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-						*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
+						FrameBufferPtr const& cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
+						*(effect->ParameterByName("tess_edge_length_scale")) =
+							float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
 					}
-					break;
-
-				case SMT_Cube:
-					*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
 					break;
 
 				default:
-					{
-						std::vector<float4x4> mvps(6);
-						for (int i = 0; i < 6; ++ i)
-						{
-							mvps[i] = model * light_views_[i] * light_proj_;
-						}
-						*(effect->ParameterByName("mvps")) = mvps;
-					}
 					break;
 				}
 			}
 			else
 			{
-				*(effect->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
 				*(effect->ParameterByName("light_projective_tex")) = lamp_tex_;
@@ -167,7 +141,7 @@ namespace
 
 				if (SMT_DP == sm_type_)
 				{
-					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
+					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_view_;
 				}
 			}
 		}
@@ -183,8 +157,7 @@ namespace
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
-		float4x4 light_views_[6];
-		float4x4 light_proj_;
+		float4x4 light_view_;
 		float3 light_color_;
 		float3 light_falloff_;
 
@@ -423,43 +396,6 @@ void ShadowCubeMap::OnCreate()
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
-	if (caps.render_to_texture_array_support)
-	{
-		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-
-		auto const& camera = shadow_cube_one_buffer_->Viewport()->Camera();
-		camera->OmniDirectionalMode(true);
-		camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
-
-		auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
-		camera_node->AddComponent(camera);
-		root_node.AddChild(camera_node);
-
-		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));
-		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
-		shadow_cube_one_buffer_->Attach(rf.MakeCubeDsv(shadow_one_depth_tex, 0, 0));
-	}
-
-	for (int i = 0; i < 2; ++ i)
-	{
-		shadow_dual_texs_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		shadow_dual_view_[i] = rf.Make2DRtv(shadow_dual_texs_[i], 0, 1, 0);
-
-		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
-		
-		auto const& camera = shadow_dual_buffers_[i]->Viewport()->Camera();
-		camera->ProjParams(PI, 1, 0.1f, 500.0f);
-
-		auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
-		camera_node->AddComponent(camera);
-		root_node.AddChild(camera_node);
-
-		shadow_dual_buffers_[i]->Attach(FrameBuffer::Attachment::Color0, shadow_dual_view_[i]);
-		shadow_dual_buffers_[i]->Attach(depth_view);
-	}
-	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read);
-
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(20, 20, 20));
@@ -473,6 +409,41 @@ void ShadowCubeMap::OnCreate()
 	light_node->AddChild(light_proxy->RootNode());
 	light_node->OnMainThreadUpdate().Connect(PointLightNodeUpdate());
 	root_node.AddChild(light_node);
+
+	if (caps.render_to_texture_array_support)
+	{
+		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
+
+		auto& viewport = *shadow_cube_one_buffer_->Viewport();
+
+		viewport.NumCameras(6);
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			viewport.Camera(i, light_->SMCamera(i));
+			light_->SMCamera(i)->OmniDirectionalMode(true);
+		}
+
+		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));
+		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
+		shadow_cube_one_buffer_->Attach(rf.MakeCubeDsv(shadow_one_depth_tex, 0, 0));
+	}
+
+	for (int i = 0; i < 2; ++ i)
+	{
+		shadow_dual_texs_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		shadow_dual_view_[i] = rf.Make2DRtv(shadow_dual_texs_[i], 0, 1, 0);
+
+		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
+
+		auto const& camera = shadow_dual_buffers_[i]->Viewport()->Camera();
+		camera->BindSceneNode(light_->SMCamera(4 + i)->BoundSceneNode());
+		camera->ProjParams(PI, 1, 0.1f, 500.0f);
+
+		shadow_dual_buffers_[i]->Attach(FrameBuffer::Attachment::Color0, shadow_dual_view_[i]);
+		shadow_dual_buffers_[i]->Attach(depth_view);
+	}
+	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read);
 
 	for (int i = 0; i < 6; ++ i)
 	{

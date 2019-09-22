@@ -311,7 +311,8 @@ namespace KlayGE
 		RenderEffectParameter* reflection_tex_param_;
 
 		RenderEffectConstantBufferPtr mesh_cbuffer_;
-		RenderEffectConstantBufferPtr model_camera_cbuffer_;
+		RenderEffectConstantBufferPtr model_cbuffer_;
+		RenderEffectConstantBufferPtr camera_cbuffer_;
 	};
 
 	// TODO: Consider merging this with Renderable

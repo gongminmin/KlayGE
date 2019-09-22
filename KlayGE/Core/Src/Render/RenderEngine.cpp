@@ -1387,7 +1387,8 @@ namespace KlayGE
 		default_material_.reset();
 		predefined_material_cb_.reset();
 		predefined_mesh_cb_.reset();
-		predefined_model_camera_cb_.reset();
+		predefined_model_cb_.reset();
+		predefined_camera_cb_.reset();
 
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
@@ -1486,13 +1487,22 @@ namespace KlayGE
 		return *predefined_mesh_cb_;
 	}
 
-	RenderEngine::PredefinedModelCameraCBuffer const& RenderEngine::PredefinedModelCameraCBufferInstance() const
+	RenderEngine::PredefinedModelCBuffer const& RenderEngine::PredefinedModelCBufferInstance() const
 	{
-		if (!predefined_model_camera_cb_)
+		if (!predefined_model_cb_)
 		{
-			predefined_model_camera_cb_ = MakeUniquePtr<PredefinedModelCameraCBuffer>();
+			predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
 		}
-		return *predefined_model_camera_cb_;
+		return *predefined_model_cb_;
+	}
+
+	RenderEngine::PredefinedCameraCBuffer const& RenderEngine::PredefinedCameraCBufferInstance() const
+	{
+		if (!predefined_camera_cb_)
+		{
+			predefined_camera_cb_ = MakeUniquePtr<PredefinedCameraCBuffer>();
+		}
+		return *predefined_camera_cb_;
 	}
 
 
@@ -1633,74 +1643,51 @@ namespace KlayGE
 	}
 
 
-	RenderEngine::PredefinedModelCameraCBuffer::PredefinedModelCameraCBuffer()
+	RenderEngine::PredefinedModelCBuffer::PredefinedModelCBuffer()
 	{
 		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
-		predefined_cbuffer_ = effect_->CBufferByName("klayge_model_camera");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_model");
 
 		model_offset_ = effect_->ParameterByName("model")->CBufferOffset();
-		model_view_offset_ = effect_->ParameterByName("model_view")->CBufferOffset();
-		mvp_offset_ = effect_->ParameterByName("mvp")->CBufferOffset();
 		inv_model_offset_ = effect_->ParameterByName("inv_model")->CBufferOffset();
-		inv_mv_offset_ = effect_->ParameterByName("inv_mv")->CBufferOffset();
-		inv_mvp_offset_ = effect_->ParameterByName("inv_mvp")->CBufferOffset();
-		eye_pos_offset_ = effect_->ParameterByName("eye_pos")->CBufferOffset();
-		forward_vec_offset_ = effect_->ParameterByName("forward_vec")->CBufferOffset();
-		up_vec_offset_ = effect_->ParameterByName("up_vec")->CBufferOffset();
 
 		this->Model(*predefined_cbuffer_) = float4x4::Identity();
-		this->ModelView(*predefined_cbuffer_) = float4x4::Identity();
-		this->Mvp(*predefined_cbuffer_) = float4x4::Identity();
 		this->InvModel(*predefined_cbuffer_) = float4x4::Identity();
-		this->InvMv(*predefined_cbuffer_) = float4x4::Identity();
-		this->InvMvp(*predefined_cbuffer_) = float4x4::Identity();
-		this->EyePos(*predefined_cbuffer_) = float3(0, 0, 0);
-		this->ForwardVec(*predefined_cbuffer_) = float3(0, 0, 1);
-		this->UpVec(*predefined_cbuffer_) = float3(0, 1, 0);
 	}
 
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::Model(RenderEffectConstantBuffer& cbuff) const
+	float4x4& RenderEngine::PredefinedModelCBuffer::Model(RenderEffectConstantBuffer& cbuff) const
 	{
 		return *cbuff.template VariableInBuff<float4x4>(model_offset_);
 	}
 
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::ModelView(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4x4>(model_view_offset_);
-	}
-
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::Mvp(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4x4>(mvp_offset_);
-	}
-
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::InvModel(RenderEffectConstantBuffer& cbuff) const
+	float4x4& RenderEngine::PredefinedModelCBuffer::InvModel(RenderEffectConstantBuffer& cbuff) const
 	{
 		return *cbuff.template VariableInBuff<float4x4>(inv_model_offset_);
 	}
 
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::InvMv(RenderEffectConstantBuffer& cbuff) const
+
+	RenderEngine::PredefinedCameraCBuffer::PredefinedCameraCBuffer()
 	{
-		return *cbuff.template VariableInBuff<float4x4>(inv_mv_offset_);
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_camera");
+
+		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
+		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
+
+		this->NumCameras(*predefined_cbuffer_) = 1;
+
+		CameraInfo empty = {};
+		this->Camera(*predefined_cbuffer_, 0) = empty;
 	}
 
-	float4x4& RenderEngine::PredefinedModelCameraCBuffer::InvMvp(RenderEffectConstantBuffer& cbuff) const
+	uint32_t& RenderEngine::PredefinedCameraCBuffer::NumCameras(RenderEffectConstantBuffer& cbuff) const
 	{
-		return *cbuff.template VariableInBuff<float4x4>(inv_mvp_offset_);
+		return *cbuff.template VariableInBuff<uint32_t>(num_cameras_offset_);
 	}
 
-	float3& RenderEngine::PredefinedModelCameraCBuffer::EyePos(RenderEffectConstantBuffer& cbuff) const
+	RenderEngine::PredefinedCameraCBuffer::CameraInfo& RenderEngine::PredefinedCameraCBuffer::Camera(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
 	{
-		return *cbuff.template VariableInBuff<float3>(eye_pos_offset_);
-	}
-
-	float3& RenderEngine::PredefinedModelCameraCBuffer::ForwardVec(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float3>(forward_vec_offset_);
-	}
-
-	float3& RenderEngine::PredefinedModelCameraCBuffer::UpVec(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float3>(up_vec_offset_);
+		return *(cbuff.template VariableInBuff<RenderEngine::PredefinedCameraCBuffer::CameraInfo>(cameras_offset_) + index);
 	}
 }

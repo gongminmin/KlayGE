@@ -49,11 +49,21 @@ namespace
 			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
 			technique_ = special_shading_tech_;
 
-			reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+			{
+				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
+				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
+			}
+			else
+			{
+				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingNoVpRtTech");
+			}
+
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
 			reflection_alpha_blend_front_tech_ = reflection_tech_;
 
-			special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
 			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
 			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
 

@@ -42,9 +42,19 @@ namespace
 			: InfTerrainRenderable(L"Ocean", 384)
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
-			gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
-			reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
-			special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+			{
+				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
+				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
+				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
+			}
+			else
+			{
+				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRTNoVpRt");
+				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFrontNoVpRt");
+				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFrontNoVpRt");
+			}
 			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
 
 			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");

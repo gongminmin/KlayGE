@@ -17,9 +17,13 @@
 
 	<shader>
 		<![CDATA[
-void PrimitiveVS(float p : POSITION,
+void PrimitiveVS(uint instance_id : SV_InstanceID,
+			float p : POSITION,
 			out float4 oPosition : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	float3 pos;
 	if (p < 0.5f)
 	{
@@ -56,10 +60,14 @@ void PrimitiveVS(float p : POSITION,
 	oPosition = mul(float4(pos, 1), mvp);
 }
 
-void HelperVS(float4 position : POSITION,
+void HelperVS(uint instance_id : SV_InstanceID,
+			float4 position : POSITION,
 			out float4 oPosition : SV_Position)
 {
 	position = float4(position.xyz * pos_extent + pos_center, 1);
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
 	oPosition = mul(position, mvp);
 }
 

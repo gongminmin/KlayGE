@@ -6,9 +6,8 @@
 	<include name="util.fxml"/>
 	<include name="Material.fxml"/>
 	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
-	<parameter type="float4x4" name="mvp"/>
-	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 	<parameter type="float2" name="far_plane"/>
 
@@ -33,7 +32,7 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
-	oPos = mul(Position, mvp);
+	oPos = mul(Position, cameras[0].mvp);
 	oDist = calc_dist(Position);
 }
 
@@ -53,7 +52,6 @@ float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<parameter type="float4x4" name="mv" />
 	<parameter type="float" name="far" />
 
 	<shader>
@@ -63,7 +61,7 @@ void CalcDPSM(float4 Position,
 			out float4 oPos)
 {
 	// transform vertex to DP-space
-	oPos = mul(Position, mv);
+	oPos = mul(Position, cameras[0].model_view);
 	oPos /= oPos.w;
 
 	// because the origin is at 0 the proj-vector
@@ -162,6 +160,7 @@ HS_CONSTANT_DATA_OUTPUT HWTessGenDPShadowMapConstantsHS(InputPatch<VS_CONTROL_PO
 {	
 	HS_CONSTANT_DATA_OUTPUT output;
 
+	float4x4 mvp = cameras[0].mvp;
 	if (adaptive_tess)
 	{
 		float4 p0 = mul(float4(ip[0].Pos, 1), mvp);
@@ -245,8 +244,6 @@ void HWTessGenDPShadowMapDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	</technique>
 
 
-	<parameter type="float4x4" name="mvps" array_size="6"/>
-
 	<shader version="4">
 		<![CDATA[
 bool frustum_culling(float4 pos0, float4 pos1, float4 pos2)
@@ -283,10 +280,11 @@ void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float 
 	for (int f = 0; f < 6; ++ f)
 	{
 		output.rt_index = f;
-		
+
+		float4x4 mvp = cameras[f].mvp;
 		float4 pos[3] =
 		{
-			mul(in_pos[0], mvps[f]), mul(in_pos[1], mvps[f]), mul(in_pos[2], mvps[f])
+			mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
 		};
 		
 		[branch]
@@ -326,7 +324,7 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
-	oPos = mul(Position, mvps[instance_id]);
+	oPos = mul(Position, cameras[instance_id].mvp);
 
 	oDist.x = calc_dist(Position);
 	oDist.y = asfloat(instance_id);
@@ -375,7 +373,7 @@ void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
-	oPos = mul(Position, mvps[instance_id]);
+	oPos = mul(Position, cameras[instance_id].mvp);
 
 	oDist = calc_dist(Position);
 	oRtIndex = instance_id;
@@ -403,10 +401,11 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 {
 	PS_IN output;
 	output.rt_index = instance_id;
-	
+
+	float4x4 mvp = cameras[instance_id].mvp;
 	float4 pos[3] =
 	{
-		mul(in_pos[0], mvps[instance_id]), mul(in_pos[1], mvps[instance_id]), mul(in_pos[2], mvps[instance_id])
+		mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
 	};
 
 	[branch]
@@ -470,7 +469,7 @@ void RenderSceneVS(float4 Position : POSITION,
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	oTexcoord = Texcoord;
-	oPos = mul(Position, mvp);
+	oPos = mul(Position, cameras[0].mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)obj_model_to_light_model);
 	oLightViewPos = mul(Position, obj_model_to_light_view).xyz;
@@ -535,8 +534,8 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float atten = AttenuationTerm(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
-	
-	float3 clr = albedo * 0.2f + emissive + shading * ori_color * atten;	
+
+	float3 clr = albedo * 0.2f + emissive + shading * ori_color * atten;
 	return float4(clr, 1.0f);
 }
 		]]>

@@ -7,7 +7,8 @@
 
 	<shader>
 		<![CDATA[
-void FoliageGBufferVS(float4 pos : POSITION,
+void FoliageGBufferVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 #if NUM_JOINTS > 0
@@ -51,6 +52,10 @@ void FoliageGBufferVS(float4 pos : POSITION,
 	float4 result_tangent_quat;
 	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
 	oTexCoord_2xy.xy = TexcoordNode(texcoord);
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	oPos = mul(float4(result_pos, 1), mvp);
 

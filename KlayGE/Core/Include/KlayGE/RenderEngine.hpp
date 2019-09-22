@@ -333,10 +333,10 @@ namespace KlayGE
 
 		PredefinedMeshCBuffer const& PredefinedMeshCBufferInstance() const;
 
-		class KLAYGE_CORE_API PredefinedModelCameraCBuffer
+		class KLAYGE_CORE_API PredefinedModelCBuffer
 		{
 		public:
-			PredefinedModelCameraCBuffer();
+			PredefinedModelCBuffer();
 
 			RenderEffectConstantBuffer* CBuffer() const
 			{
@@ -344,31 +344,56 @@ namespace KlayGE
 			}
 
 			float4x4& Model(RenderEffectConstantBuffer& cbuff) const;
-			float4x4& ModelView(RenderEffectConstantBuffer& cbuff) const;
-			float4x4& Mvp(RenderEffectConstantBuffer& cbuff) const;
 			float4x4& InvModel(RenderEffectConstantBuffer& cbuff) const;
-			float4x4& InvMv(RenderEffectConstantBuffer& cbuff) const;
-			float4x4& InvMvp(RenderEffectConstantBuffer& cbuff) const;
-			float3& EyePos(RenderEffectConstantBuffer& cbuff) const;
-			float3& ForwardVec(RenderEffectConstantBuffer& cbuff) const;
-			float3& UpVec(RenderEffectConstantBuffer& cbuff) const;
 
 		private:
 			RenderEffectPtr effect_;
 			RenderEffectConstantBuffer* predefined_cbuffer_;
 
 			uint32_t model_offset_;
-			uint32_t model_view_offset_;
-			uint32_t mvp_offset_;
 			uint32_t inv_model_offset_;
-			uint32_t inv_mv_offset_;
-			uint32_t inv_mvp_offset_;
-			uint32_t eye_pos_offset_;
-			uint32_t forward_vec_offset_;
-			uint32_t up_vec_offset_;
 		};
 
-		PredefinedModelCameraCBuffer const& PredefinedModelCameraCBufferInstance() const;
+		PredefinedModelCBuffer const& PredefinedModelCBufferInstance() const;
+
+		class KLAYGE_CORE_API PredefinedCameraCBuffer
+		{
+		public:
+			struct CameraInfo
+			{
+				alignas(16) float4x4 model_view;
+				alignas(16) float4x4 mvp;
+				alignas(16) float4x4 inv_mv;
+				alignas(16) float4x4 inv_mvp;
+				alignas(16) float3 eye_pos;
+				alignas(4) float padding0;
+				alignas(16) float3 forward_vec;
+				alignas(4) float padding1;
+				alignas(16) float3 up_vec;
+				alignas(4) float padding2;
+			};
+			KLAYGE_STATIC_ASSERT(sizeof(CameraInfo) == 304);
+
+		public:
+			PredefinedCameraCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			uint32_t& NumCameras(RenderEffectConstantBuffer& cbuff) const;
+			CameraInfo& Camera(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t num_cameras_offset_;
+			uint32_t cameras_offset_;
+		};
+
+		PredefinedCameraCBuffer const& PredefinedCameraCBufferInstance() const;
 
 	protected:
 		void Destroy();
@@ -494,7 +519,8 @@ namespace KlayGE
 		mutable RenderMaterialPtr default_material_;
 		mutable std::unique_ptr<PredefinedMaterialCBuffer> predefined_material_cb_;
 		mutable std::unique_ptr<PredefinedMeshCBuffer> predefined_mesh_cb_;
-		mutable std::unique_ptr<PredefinedModelCameraCBuffer> predefined_model_camera_cb_;
+		mutable std::unique_ptr<PredefinedModelCBuffer> predefined_model_cb_;
+		mutable std::unique_ptr<PredefinedCameraCBuffer> predefined_camera_cb_;
 	};
 }
 

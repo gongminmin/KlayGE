@@ -89,7 +89,8 @@
 
 	<shader>
 		<![CDATA[
-void GBufferVS(float4 pos : POSITION,
+void GBufferVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 #if NUM_JOINTS > 0
@@ -114,6 +115,10 @@ void GBufferVS(float4 pos : POSITION,
 	float4 blend_weights = 0;
 	int4 blend_indices = 0;
 #endif
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
@@ -259,7 +264,8 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 
 	<shader>
 		<![CDATA[
-void GenShadowMapVS(float4 pos : POSITION,
+void GenShadowMapVS(uint instance_id : SV_InstanceID,
+						float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float4 tangent_quat : TANGENT,
 #if NUM_JOINTS > 0
@@ -281,6 +287,10 @@ void GenShadowMapVS(float4 pos : POSITION,
 	float4 blend_weights = 0;
 	int4 blend_indices = 0;
 #endif
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;

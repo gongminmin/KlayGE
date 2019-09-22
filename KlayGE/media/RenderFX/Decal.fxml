@@ -10,7 +10,8 @@
 
 	<shader>
 		<![CDATA[
-void DecalGBufferVS(float4 pos : POSITION,
+void DecalGBufferVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -18,6 +19,10 @@ void DecalGBufferVS(float4 pos : POSITION,
 			out float3 oViewDir : TEXCOORD4,
 			out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = float2(pos.x * 0.5f + 0.5f, KLAYGE_FLIPPING * pos.y * 0.5f + 0.5f);
 

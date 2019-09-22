@@ -10,9 +10,12 @@ struct VS_CONTROL_POINT_OUTPUT
 	float3 Pos : POSITION;
 	float2 Texcoord : TEXCOORD0;
 	float4 TangentQuat : TEXCOORD1;
+
+	uint instance_id : TEXCOORD2;
 };
 
-VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
+VS_CONTROL_POINT_OUTPUT GBufferTessVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT
 #if NUM_JOINTS > 0
@@ -43,6 +46,8 @@ VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, output.Pos, output.TangentQuat);
 	output.Texcoord = TexcoordNode(texcoord);
 
+	output.instance_id = instance_id;
+
 	return output;
 }
 
@@ -53,7 +58,7 @@ struct HS_CONSTANT_DATA_OUTPUT
 	float inside	: SV_InsideTessFactor;
 };
 
-float2 ScreenCoord(float3 pos)
+float2 ScreenCoord(float3 pos, float4x4 mvp)
 {
 	float4 p = mul(float4(pos, 1), mvp);
 	p /= p.w;
@@ -61,7 +66,7 @@ float2 ScreenCoord(float3 pos)
 	return (p.xy * 0.5f + 0.5f) * frame_size;
 }
 
-float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws)
+float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws, float4x4 model_view)
 {
 	float np = distance(p0_ss, p1_ss);
 	float dist = length(mul(float4((p0_ws + p1_ws) / 2, 1), model_view).xyz);
@@ -71,6 +76,11 @@ float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws)
 HS_CONSTANT_DATA_OUTPUT GBufferTessConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
 {
 	HS_CONSTANT_DATA_OUTPUT output;
+
+	KlayGECameraInfo camera = CameraFromInstance(ip[0].instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+	float3 forward_vec = camera.forward_vec;
 
 	const float BACK_FACE_THRESHOLD = 0.4f;
 		
@@ -96,13 +106,13 @@ HS_CONSTANT_DATA_OUTPUT GBufferTessConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 	}
 	else
 	{
-		float2 p0 = ScreenCoord(ip[0].Pos);
-		float2 p1 = ScreenCoord(ip[1].Pos);
-		float2 p2 = ScreenCoord(ip[2].Pos);
+		float2 p0 = ScreenCoord(ip[0].Pos, mvp);
+		float2 p1 = ScreenCoord(ip[1].Pos, mvp);
+		float2 p2 = ScreenCoord(ip[2].Pos, mvp);
 
-		float3 edges_factors = float3(EdgeFactor(p2, p0, ip[2].Pos, ip[0].Pos),
-				EdgeFactor(p0, p1, ip[0].Pos, ip[1].Pos),
-				EdgeFactor(p1, p2, ip[1].Pos, ip[2].Pos))
+		float3 edges_factors = float3(EdgeFactor(p2, p0, ip[2].Pos, ip[0].Pos, model_view),
+				EdgeFactor(p0, p1, ip[0].Pos, ip[1].Pos, model_view),
+				EdgeFactor(p1, p2, ip[1].Pos, ip[2].Pos, model_view))
 			* tess_factors.x * 0.3f;
 
 		output.edges[0] = clamp(edges_factors.x, tess_factors.z, tess_factors.w);
@@ -126,13 +136,17 @@ VS_CONTROL_POINT_OUTPUT GBufferTessHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p,
 	return p[i];
 }
 
-void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_quat,
+void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_quat, uint instance_id,
 						out float4 oTexCoord_2xy,
 						out float4 oTsToView0_2z,
 						out float4 oTsToView1_Depth,
 						out SS_TEXCOORD_TYPE oScreenTc,
 						out float4 oPos)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
 	float3x3 obj_to_tangent;
 	obj_to_tangent[0] = transform_quat(float3(1, 0, 0), tangent_quat);
 	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
@@ -175,8 +189,8 @@ void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 				pos, texcoord,
 				tangent_quat);
-				
-	PostTessellation(bc_coords, pos, texcoord, tangent_quat,
+
+	PostTessellation(bc_coords, pos, texcoord, tangent_quat, patch[0].instance_id,
 				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
 }
 		]]>

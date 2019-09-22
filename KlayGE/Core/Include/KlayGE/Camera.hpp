@@ -85,7 +85,7 @@ namespace KlayGE
 		bool JitterMode() const;
 		void JitterMode(bool jitter);
 
-		void Active(RenderEffectConstantBuffer& model_camera_cbuffer_, float4x4 const& model_mat, float4x4 const& inv_model_mat,
+		void Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat, float4x4 const& inv_model_mat,
 			bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const;
 
 	private:

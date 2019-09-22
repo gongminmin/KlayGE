@@ -66,9 +66,9 @@ namespace
 		{
 			Renderable::OnRenderBegin();
 
-			auto const& pmccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedModelCameraCBufferInstance();
-			pmccb.Mvp(*model_camera_cbuffer_) = MathLib::transpose(model_mat_);
-			model_camera_cbuffer_->Dirty(true);
+			auto const& pccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedCameraCBufferInstance();
+			pccb.Camera(*camera_cbuffer_, 0).mvp = MathLib::transpose(model_mat_);
+			camera_cbuffer_->Dirty(true);
 		}
 
 		void Texture(TexturePtr const & tex)

@@ -2,8 +2,8 @@
 
 <effect>
 	<include name="util.fxml"/>
-	<include name="ModelCamera.fxml"/>
 
+	<parameter type="float4x4" name="inv_mvp"/>
 	<parameter type="float" name="depth_far"/>
 	<parameter type="int" name="skybox_compressed"/>
 	<parameter type="textureCUBE" name="skybox_tex"/>

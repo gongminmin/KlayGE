@@ -57,9 +57,13 @@ namespace KlayGE
 			auto* mesh_cbuff = mesh_cb.CBuffer();
 			mesh_cbuffer_ = mesh_cbuff->Clone(mesh_cbuff->OwnerEffect());
 
-			auto const& model_camera_cb = re.PredefinedModelCameraCBufferInstance();
-			auto* model_camera_cbuff = model_camera_cb.CBuffer();
-			model_camera_cbuffer_ = model_camera_cbuff->Clone(model_camera_cbuff->OwnerEffect());
+			auto const& model_cb = re.PredefinedModelCBufferInstance();
+			auto* model_cbuff = model_cb.CBuffer();
+			model_cbuffer_ = model_cbuff->Clone(model_cbuff->OwnerEffect());
+
+			auto const& camera_cb = re.PredefinedCameraCBufferInstance();
+			auto* camera_cbuff = camera_cb.CBuffer();
+			camera_cbuffer_ = camera_cbuff->Clone(camera_cbuff->OwnerEffect());
 		}
 	}
 
@@ -108,12 +112,11 @@ namespace KlayGE
 	void Renderable::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		{
 			uint32_t const mesh_cbuff_index = effect_->FindCBuffer("klayge_mesh");
-			if (mesh_cbuff_index != static_cast<uint32_t>(-1) && (effect_->CBufferByIndex(mesh_cbuff_index)->Size() > 0))
+			if ((mesh_cbuff_index != static_cast<uint32_t>(-1)) && (effect_->CBufferByIndex(mesh_cbuff_index)->Size() > 0))
 			{
 				if (&mesh_cbuffer_->OwnerEffect() != effect_.get())
 				{
@@ -125,31 +128,59 @@ namespace KlayGE
 		}
 
 		{
-			uint32_t const model_camera_cbuff_index = effect_->FindCBuffer("klayge_model_camera");
-			if (model_camera_cbuff_index != static_cast<uint32_t>(-1) && (effect_->CBufferByIndex(model_camera_cbuff_index)->Size() > 0))
+			uint32_t const camera_cbuff_index = effect_->FindCBuffer("klayge_camera");
+			if ((camera_cbuff_index != static_cast<uint32_t>(-1)) && (effect_->CBufferByIndex(camera_cbuff_index)->Size() > 0))
 			{
-				if (&model_camera_cbuffer_->OwnerEffect() != effect_.get())
+				if (&camera_cbuffer_->OwnerEffect() != effect_.get())
 				{
-					model_camera_cbuffer_ = model_camera_cbuffer_->Clone(*effect_);
+					camera_cbuffer_ = camera_cbuffer_->Clone(*effect_);
 				}
 
-				float4x4 cascade_crop_mat = float4x4::Identity();
-				bool need_cascade_crop_mat = false;
-				if (drl)
+				auto& viewport = *re.CurFrameBuffer()->Viewport();
+				for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
 				{
-					int32_t cas_index = drl->CurrCascadeIndex();
-					if (cas_index >= 0)
+					Camera const& camera = *viewport.Camera(i);
+
+					float4x4 cascade_crop_mat = float4x4::Identity();
+					bool need_cascade_crop_mat = false;
+					if (drl)
 					{
-						cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-						need_cascade_crop_mat = true;
+						int32_t const cas_index = drl->CurrCascadeIndex();
+						if (cas_index >= 0)
+						{
+							cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+							need_cascade_crop_mat = true;
+						}
 					}
+
+					camera.Active(
+						*camera_cbuffer_, i, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
 				}
 
-				camera.Active(
-					*model_camera_cbuffer_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
-				model_mat_dirty_ = false;
+				effect_->BindCBufferByIndex(camera_cbuff_index, camera_cbuffer_);
+			}
+		}
 
-				effect_->BindCBufferByIndex(model_camera_cbuff_index, model_camera_cbuffer_);
+		{
+			uint32_t const model_cbuff_index = effect_->FindCBuffer("klayge_model");
+			if ((model_cbuff_index != static_cast<uint32_t>(-1)) && (effect_->CBufferByIndex(model_cbuff_index)->Size() > 0))
+			{
+				if (&model_cbuffer_->OwnerEffect() != effect_.get())
+				{
+					model_cbuffer_ = model_cbuffer_->Clone(*effect_);
+				}
+
+				if (model_mat_dirty_)
+				{
+					auto const& pmcb = re.PredefinedModelCBufferInstance();
+
+					pmcb.Model(*model_cbuffer_) = MathLib::transpose(model_mat_);
+					pmcb.InvModel(*model_cbuffer_) = MathLib::transpose(inv_model_mat_);
+
+					model_mat_dirty_ = false;
+				}
+
+				effect_->BindCBufferByIndex(model_cbuff_index, model_cbuffer_);
 			}
 		}
 

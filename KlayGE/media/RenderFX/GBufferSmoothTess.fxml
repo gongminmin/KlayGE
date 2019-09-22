@@ -27,7 +27,7 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				pos, texcoord,
 				tangent_quat);
 
-	PostTessellation(bc_coords, pos, texcoord, tangent_quat,
+	PostTessellation(bc_coords, pos, texcoord, tangent_quat, patch[0].instance_id,
 				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
 }
 		]]>

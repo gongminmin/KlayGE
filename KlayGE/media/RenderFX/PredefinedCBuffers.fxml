@@ -7,8 +7,14 @@
 
 	<shader>
 		<![CDATA[
-void PredefinedCBuffersNoopVS(out float4 oPosition : SV_Position)
+// Just dummy shaders
+
+void PredefinedCBuffersNoopVS(out float4 oPositionOS : PositionOS, out float4 oPosition : SV_Position)
 {
+	oPositionOS = mul(float4(pos_center, 1), model);
+
+	KlayGECameraInfo camera = CameraFromInstance(0);
+	float4x4 mvp = camera.mvp;
 	oPosition = mul(float4(pos_center, 1), mvp);
 }
 

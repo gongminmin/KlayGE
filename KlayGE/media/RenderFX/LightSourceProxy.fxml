@@ -17,7 +17,8 @@
 
 	<shader>
 		<![CDATA[
-void LightSourceProxyVS(float4 pos : POSITION,
+void LightSourceProxyVS(uint instance_id : SV_InstanceID,
+						float4 pos : POSITION,
 						float4 tangent_quat : TANGENT,
 			out float3 oPosOS : TEXCOORD0,
 			out float3 oNormal : TEXCOORD1,
@@ -25,7 +26,10 @@ void LightSourceProxyVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model);

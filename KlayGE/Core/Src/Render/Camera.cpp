@@ -307,36 +307,32 @@ namespace KlayGE
 		}
 	}
 
-	void Camera::Active(RenderEffectConstantBuffer& model_camera_cbuffer, float4x4 const& model_mat, float4x4 const& inv_model_mat,
+	void Camera::Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat, float4x4 const& inv_model_mat,
 		bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const& pmccb = re.PredefinedModelCameraCBufferInstance();
-
-		if (model_mat_dirty)
-		{
-			pmccb.Model(model_camera_cbuffer) = MathLib::transpose(model_mat);
-			pmccb.InvModel(model_camera_cbuffer) = MathLib::transpose(inv_model_mat);
-
-			model_camera_cbuffer.Dirty(true);
-		}
 		if (model_mat_dirty || camera_dirty_)
 		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto const& pccb = re.PredefinedCameraCBufferInstance();
+
 			float4x4 mvp = model_mat * this->ViewProjMatrix();
 			if (need_cascade_crop_mat)
 			{
 				mvp *= cascade_crop_mat;
 			}
 
-			pmccb.ModelView(model_camera_cbuffer) = MathLib::transpose(model_mat * this->ViewMatrix());
-			pmccb.Mvp(model_camera_cbuffer) = MathLib::transpose(mvp);
-			pmccb.InvMv(model_camera_cbuffer) = MathLib::transpose(this->InverseViewMatrix() * inv_model_mat);
-			pmccb.InvMvp(model_camera_cbuffer) = MathLib::transpose(this->InverseViewProjMatrix() * inv_model_mat);
-			pmccb.EyePos(model_camera_cbuffer) = this->EyePos();
-			pmccb.ForwardVec(model_camera_cbuffer) = this->ForwardVec();
-			pmccb.UpVec(model_camera_cbuffer) = this->UpVec();
+			RenderEngine::PredefinedCameraCBuffer::CameraInfo camera_info;
+			camera_info.model_view = MathLib::transpose(model_mat * this->ViewMatrix());
+			camera_info.mvp = MathLib::transpose(mvp);
+			camera_info.inv_mv = MathLib::transpose(this->InverseViewMatrix() * inv_model_mat);
+			camera_info.inv_mvp = MathLib::transpose(this->InverseViewProjMatrix() * inv_model_mat);
+			camera_info.eye_pos = this->EyePos();
+			camera_info.forward_vec = this->ForwardVec();
+			camera_info.up_vec = this->UpVec();
 
-			model_camera_cbuffer.Dirty(true);
+			pccb.Camera(camera_cbuffer, index) = camera_info;
+
+			camera_cbuffer.Dirty(true);
 		}
 	}
 }

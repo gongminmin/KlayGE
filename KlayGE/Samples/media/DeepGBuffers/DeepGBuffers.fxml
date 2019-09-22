@@ -30,7 +30,8 @@
 
 	<shader>
 		<![CDATA[
-void NoLightingSimpleForwardVS(float4 pos : POSITION,
+void NoLightingSimpleForwardVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
@@ -39,6 +40,9 @@ void NoLightingSimpleForwardVS(float4 pos : POSITION,
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = normalize(tangent_quat * 2 - 1);
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
