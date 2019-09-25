@@ -9,7 +9,6 @@
 enum SM_TYPE
 {
 	SMT_Cube,
-	SMT_DP,
 	SMT_CubeOne,
 	SMT_CubeOneInstance,
 	SMT_CubeOneInstanceGS,
@@ -49,18 +48,13 @@ private:
 	KlayGE::FrameBufferPtr shadow_cube_one_buffer_;
 	KlayGE::TexturePtr shadow_cube_one_tex_;
 
-	KlayGE::FrameBufferPtr shadow_dual_buffers_[2];
-	KlayGE::TexturePtr shadow_dual_texs_[2];
-	KlayGE::RenderTargetViewPtr shadow_dual_view_[2];
-	KlayGE::TexturePtr shadow_dual_tex_;
-
 	KlayGE::TexturePtr lamp_tex_;
 
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::uint32_t loading_percentage_;
 
-	SM_TYPE sm_type_;
+	SM_TYPE sm_type_ = SMT_Cube;
 
 	float esm_scale_factor_;
 

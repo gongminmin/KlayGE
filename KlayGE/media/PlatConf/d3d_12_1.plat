@@ -17,6 +17,7 @@
 	<render_to_texture_array_support value="1"/>
 	<uavs_at_every_stage_support value="1"/>
 	<explicit_multi_sample_support value="1"/>
+	<vp_rt_index_at_every_stage_support value="1"/>
 
 	<gs_support value="1"/>
 	<cs_support value="1"/>
