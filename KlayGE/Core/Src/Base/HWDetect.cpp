@@ -151,7 +151,7 @@ namespace KlayGE
 			HRESULT hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 			if (FAILED(hr))
 			{
-				hr = ::CoInitialize(nullptr);
+				hr = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 			}
 
 			return SUCCEEDED(hr);

@@ -309,7 +309,7 @@ namespace KlayGE
 	MsgInputSensor::MsgInputSensor()
 		: destroyed_(false)
 	{
-		HRESULT hr = ::CoInitialize(0);
+		HRESULT hr = ::CoInitializeEx(0, COINIT_APARTMENTTHREADED);
 
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		if (Context::Instance().Config().location_sensor)
