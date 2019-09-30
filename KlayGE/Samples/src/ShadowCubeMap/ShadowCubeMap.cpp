@@ -152,10 +152,6 @@ namespace
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
-			for (auto const & rl : rls_)
-			{
-				rl->TopologyType(RenderLayout::TT_TriangleList);
-			}
 
 			if (gen_sm)
 			{
@@ -163,34 +159,18 @@ namespace
 				{
 				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
 					break;
 
 				case SMT_CubeOne:
 					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
 					break;
 
 				case SMT_CubeOneInstance:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(6);
-					}
 					break;
 
 				case SMT_CubeOneInstanceGS:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
 					break;
 
 				case SMT_CubeOneInstanceVpRt:
@@ -201,20 +181,12 @@ namespace
 						KFL_UNUSED(caps);
 					}
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceVpRtShadowMap");
-					for (auto const& rl : rls_)
-					{
-						rl->NumInstances(6);
-					}
 					break;
 				}
 			}
 			else
 			{
 				technique_ = effect_->TechniqueByName("RenderScene");
-				for (auto const & rl : rls_)
-				{
-					rl->NumInstances(1);
-				}
 			}
 		}
 
@@ -528,7 +500,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		}
 	}
 
-	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	re.ForceInstances(1);
 
 	switch (sm_type_)
 	{
@@ -549,8 +522,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		case 4:
 		case 5:
 			{
-				renderEngine.BindFrameBuffer(shadow_cube_buffer_);
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+				re.BindFrameBuffer(shadow_cube_buffer_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
 				shadow_cube_buffer_->Viewport()->Camera(light_->SMCamera(pass));
 
@@ -564,7 +537,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 		default:
 			{
-				renderEngine.BindFrameBuffer(FrameBufferPtr());
+				re.BindFrameBuffer(FrameBufferPtr());
 
 				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 				if (Context::Instance().Config().graphics_cfg.gamma)
@@ -573,7 +546,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					clear_clr.g() = 0.133f;
 					clear_clr.b() = 0.325f;
 				}
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 				for (auto const & mesh : scene_meshes_)
 				{
@@ -585,14 +558,19 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		break;
 
 	default:
-		if (renderEngine.DeviceCaps().render_to_texture_array_support)
+		if (re.DeviceCaps().render_to_texture_array_support)
 		{
 			switch (pass)
 			{
 			case 0:
 				{
-					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
-					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+					if ((sm_type_ == SMT_CubeOneInstance) || (sm_type_ == SMT_CubeOneInstanceVpRt))
+					{
+						re.ForceInstances(6);
+					}
+
+					re.BindFrameBuffer(shadow_cube_one_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
 					for (auto const & mesh : scene_meshes_)
 					{
@@ -613,7 +591,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						sm_filter_pps_[p]->Apply();
 					}
 
-					renderEngine.BindFrameBuffer(FrameBufferPtr());
+					re.BindFrameBuffer(FrameBufferPtr());
 
 					Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 					if (Context::Instance().Config().graphics_cfg.gamma)
@@ -622,7 +600,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						clear_clr.g() = 0.133f;
 						clear_clr.b() = 0.325f;
 					}
-					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 					for (auto const & mesh : scene_meshes_)
 					{
