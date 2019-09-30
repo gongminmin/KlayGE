@@ -385,7 +385,24 @@ namespace KlayGE
 		desc.Height = width_;
 		desc.MipLevels = num_mip_maps_;
 		desc.ArraySize = 6 * array_size_;
-		desc.Format = D3D11Mapping::MappingFormat(format_);
+		switch (format_)
+		{
+		case EF_D16:
+			desc.Format = DXGI_FORMAT_R16_TYPELESS;
+			break;
+
+		case EF_D24S8:
+			desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			break;
+
+		default:
+			desc.Format = dxgi_fmt_;
+			break;
+		}
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
 		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);

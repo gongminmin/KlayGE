@@ -285,8 +285,8 @@ namespace KlayGE
 		RenderTechnique* gbuffer_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_back_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_front_mrt_tech_;
-		RenderTechnique* gen_sm_tech_;
-		RenderTechnique* gen_cascaded_sm_tech_;
+		RenderTechnique* gen_shadow_map_tech_;
+		RenderTechnique* gen_csm_tech_;
 		RenderTechnique* gen_rsm_tech_;
 		RenderTechnique* reflection_tech_;
 		RenderTechnique* reflection_alpha_blend_back_tech_;

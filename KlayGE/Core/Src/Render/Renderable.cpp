@@ -444,16 +444,16 @@ namespace KlayGE
 		if (this->AlphaTest())
 		{
 			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			gen_cascaded_sm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 		}
 		else
 		{
 			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
+			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapTech");
+			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMapTech");
-			gen_cascaded_sm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapTech");
 		}
 		gbuffer_alpha_blend_back_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
 		gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
@@ -477,14 +477,14 @@ namespace KlayGE
 		case PT_TransparencyFrontGBufferMRT:
 			return gbuffer_alpha_blend_front_mrt_tech_;
 
-		case PT_GenReflectiveShadowMap:
-			return gen_rsm_tech_;
-
 		case PT_GenShadowMap:
-			return gen_sm_tech_;
+			return gen_shadow_map_tech_;
 
 		case PT_GenCascadedShadowMap:
-			return gen_cascaded_sm_tech_;
+			return gen_csm_tech_;
+
+		case PT_GenReflectiveShadowMap:
+			return gen_rsm_tech_;
 
 		case PT_OpaqueReflection:
 			return reflection_tech_;

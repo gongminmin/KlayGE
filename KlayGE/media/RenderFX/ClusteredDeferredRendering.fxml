@@ -819,7 +819,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	<parameter type="rw_texture2D" elem_type="unorm float4" name="shadowing_rw_tex"/>
 	<cbuffer name="light_batch3">
 		<parameter type="float4x4" name="lights_view_proj" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
-		<parameter type="int" name="filtered_sms_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
+		<parameter type="int" name="filtered_shadow_maps_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 		<parameter type="float" name="esms_scale_factor" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 	</cbuffer>
 
@@ -921,7 +921,7 @@ bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_inde
 					light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
 					float len = length(lights_pos_es[i].xyz - pos_es);
 					new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-						filtered_sms_2d_light_index[i], esms_scale_factor[i]);
+						filtered_shadow_maps_2d_light_index[i], esms_scale_factor[i]);
 				}
 				else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
 				{

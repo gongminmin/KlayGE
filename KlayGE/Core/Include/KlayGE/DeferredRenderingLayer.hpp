@@ -462,9 +462,9 @@ namespace KlayGE
 		void AccumulateToLightingTex(PerViewport const & pvp, PassTargetBuffer pass_tb);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type,
-			int32_t org_no, int32_t index_in_pass, bool is_profile) const;
+			int32_t light_index, int32_t index_in_pass, bool is_profile) const;
 		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
-			int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code) const;
+			int32_t& light_index, int32_t& index_in_pass, bool& is_profile, uint32_t code) const;
 
 		void BuildLightList();
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
@@ -482,7 +482,7 @@ namespace KlayGE
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
-		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
+		void PostGenerateShadowMap(PerViewport const & pvp, int32_t light_index, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateShadowingCS(PerViewport const & pvp);
@@ -498,12 +498,12 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
+		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t light_index);
 		void UpdateShading(PerViewport const & pvp, PassTargetBuffer pass_tb);
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, PassTargetBuffer pass_tb);
+			int32_t light_index, PassTargetBuffer pass_tb);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, PassTargetBuffer pass_tb,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
@@ -521,8 +521,8 @@ namespace KlayGE
 		uint32_t GBufferGenerationDRJob(PerViewport& pvp, PassType pass_type);
 		uint32_t GBufferProcessingDRJob(PerViewport const & pvp);
 		uint32_t OpaqueGBufferProcessingDRJob(PerViewport const & pvp);
-		uint32_t ShadowMapGenerationDRJob(PerViewport const & pvp, PassType pass_type, int32_t org_no, int32_t index_in_pass);
-		uint32_t IndirectLightingDRJob(PerViewport const & pvp, int32_t org_no);
+		uint32_t ShadowMapGenerationDRJob(PerViewport const & pvp, PassType pass_type, int32_t light_index, int32_t index_in_pass);
+		uint32_t IndirectLightingDRJob(PerViewport const & pvp, int32_t light_index);
 		uint32_t ShadowingDRJob(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		uint32_t ShadingDRJob(PerViewport const & pvp, PassType pass_type, int32_t index_in_pass);
 		uint32_t ReflectionDRJob(PerViewport const & pvp, PassType pass_type);
@@ -640,22 +640,23 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS = 1;
 
 		int32_t projective_light_index_;
-		std::vector<std::pair<int32_t, uint32_t>> sm_light_indices_;
-		FrameBufferPtr sm_fb_;
-		TexturePtr sm_tex_;
-		TexturePtr sm_depth_tex_;
+		std::vector<std::pair<int32_t, uint32_t>> shadow_map_light_indices_;
+		FrameBufferPtr shadow_map_fb_;
+		TexturePtr shadow_map_tex_;
+		TexturePtr shadow_map_depth_tex_;
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_texs_;
-		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_srvs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_texs_;
-		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_srvs_;
-		std::array<RenderTargetViewPtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_slice_rtvs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_texs_;
-		std::array<ShaderResourceViewPtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_srvs_;
-		std::array<RenderTargetViewPtr, (MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS) * 6> filtered_sm_cube_face_rtvs_;
+		TexturePtr unfiltered_shadow_map_2d_texs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		ShaderResourceViewPtr unfiltered_shadow_map_2d_srvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		TexturePtr filtered_shadow_map_2d_texs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		ShaderResourceViewPtr filtered_shadow_map_2d_srvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		RenderTargetViewPtr filtered_shadow_map_2d_slice_rtvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		TexturePtr filtered_shadow_map_cube_texs_[MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS];
+		ShaderResourceViewPtr filtered_shadow_map_cube_srvs_[MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS];
+		RenderTargetViewPtr
+			filtered_shadow_map_cube_face_rtvs_[(MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS) * 6];
 
-		PostProcessPtr sm_filter_pp_;
+		PostProcessPtr shadow_map_filter_pp_;
 		PostProcessPtr csm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
 		PostProcessPtr depth_to_linear_pps_[2];
@@ -679,10 +680,10 @@ namespace KlayGE
 		RenderEffectParameter* light_dir_es_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
-		RenderEffectParameter* filtered_sm_2d_tex_param_;
-		RenderEffectParameter* filtered_sm_2d_tex_array_param_;
-		RenderEffectParameter* filtered_sm_2d_light_index_param_;
-		RenderEffectParameter* filtered_sm_cube_tex_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_tex_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_tex_array_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_light_index_param_;
+		RenderEffectParameter* filtered_shadow_map_cube_tex_param_;
 		RenderEffectParameter* inv_width_height_param_;
 		RenderEffectParameter* shadowing_tex_param_;
 		RenderEffectParameter* projective_shadowing_tex_param_;
@@ -724,7 +725,7 @@ namespace KlayGE
 		RenderEffectParameter* projective_shadowing_rw_tex_param_;
 		RenderEffectParameter* shadowing_rw_tex_param_;
 		RenderEffectParameter* lights_view_proj_param_;
-		RenderEffectParameter* filtered_sms_2d_light_index_param_;
+		RenderEffectParameter* filtered_shadow_maps_2d_light_index_param_;
 		RenderEffectParameter* esms_scale_factor_param_;
 
 		RenderEffectParameter* near_q_far_param_;

@@ -297,7 +297,7 @@ namespace KlayGE
 		desc.Height = height_;
 		desc.Depth = depth_;
 		desc.MipLevels = num_mip_maps_;
-		desc.Format = D3D11Mapping::MappingFormat(format_);
+		desc.Format = dxgi_fmt_;
 		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
 
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data;
