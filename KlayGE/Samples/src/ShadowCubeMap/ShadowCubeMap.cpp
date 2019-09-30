@@ -271,7 +271,7 @@ void ShadowCubeMap::OnCreate()
 		fmt = EF_R16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	auto shadow_srv = rf.MakeTextureSrv(shadow_tex_);
+	shadow_srv_ = rf.MakeTextureSrv(shadow_tex_);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	shadow_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(shadow_tex_, 0, 1, 0));
 	shadow_cube_buffer_->Attach(depth_view);
@@ -298,6 +298,14 @@ void ShadowCubeMap::OnCreate()
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
+		if (caps.flexible_srvs_support)
+		{
+			flexible_srvs_support_ = true;
+			for (uint32_t i = 0; i < 6; ++i)
+			{
+				shadow_cube_one_srvs_[i] = rf.MakeTexture2DSrv(shadow_cube_one_tex_, 0, static_cast<Texture::CubeFaces>(i), 0, 1);
+			}
+		}
 
 		auto& viewport = *shadow_cube_one_buffer_->Viewport();
 
@@ -316,7 +324,6 @@ void ShadowCubeMap::OnCreate()
 	for (int i = 0; i < 6; ++ i)
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
-		sm_filter_pps_[i]->InputPin(0, shadow_srv);
 		sm_filter_pps_[i]->OutputPin(0, rf.Make2DRtv(shadow_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0));
 	}
 
@@ -508,6 +515,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case SMT_Cube:
 		if (pass > 0)
 		{
+			sm_filter_pps_[pass - 1]->InputPin(0, shadow_srv_);
 			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_,
 				*light_->SMCamera(pass - 1));
 			sm_filter_pps_[pass - 1]->Apply();
@@ -584,8 +592,16 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				{
 					for (int p = 0; p < 6; ++ p)
 					{
-						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
-							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+						if (flexible_srvs_support_)
+						{
+							sm_filter_pps_[p]->InputPin(0, shadow_cube_one_srvs_[p]);
+						}
+						else
+						{
+							shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0),
+								shadow_tex_->Height(0), p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+							sm_filter_pps_[p]->InputPin(0, shadow_srv_);
+						}
 						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_,
 							*light_->SMCamera(p));
 						sm_filter_pps_[p]->Apply();

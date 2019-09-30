@@ -42,11 +42,15 @@ private:
 
 	KlayGE::FrameBufferPtr shadow_cube_buffer_;
 	KlayGE::TexturePtr shadow_tex_;
+	KlayGE::ShaderResourceViewPtr shadow_srv_;
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
 	KlayGE::FrameBufferPtr shadow_cube_one_buffer_;
 	KlayGE::TexturePtr shadow_cube_one_tex_;
+	KlayGE::ShaderResourceViewPtr shadow_cube_one_srvs_[6];
+
+	bool flexible_srvs_support_ = false;
 
 	KlayGE::TexturePtr lamp_tex_;
 

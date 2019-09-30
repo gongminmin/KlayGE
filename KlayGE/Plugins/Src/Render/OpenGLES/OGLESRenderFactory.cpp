@@ -135,6 +135,17 @@ namespace KlayGE
 		return MakeSharedPtr<OGLESTextureShaderResourceView>(texture);
 	}
 
+	ShaderResourceViewPtr OGLESRenderFactory::MakeTexture2DSrv(
+		TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+		return MakeSharedPtr<OGLESTextureShaderResourceView>(texture);
+	}
+
 	ShaderResourceViewPtr OGLESRenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
 		uint32_t first_elem, uint32_t num_elems)
 	{

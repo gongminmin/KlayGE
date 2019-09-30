@@ -142,6 +142,12 @@ namespace KlayGE
 		return this->MakeTextureSrv(texture, texture->Format(), first_array_index, array_size, first_level, num_levels);
 	}
 
+	ShaderResourceViewPtr RenderFactory::MakeTexture2DSrv(
+		TexturePtr const& texture, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		return this->MakeTexture2DSrv(texture, texture->Format(), array_index, face, first_level, num_levels);
+	}
+
 	ShaderResourceViewPtr RenderFactory::MakeTextureSrv(TexturePtr const & texture)
 	{
 		return this->MakeTextureSrv(texture, texture->Format());

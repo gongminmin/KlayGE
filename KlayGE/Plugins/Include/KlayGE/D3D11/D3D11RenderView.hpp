@@ -51,6 +51,15 @@ namespace KlayGE
 		ID3D11ShaderResourceView* RetrieveD3DShaderResourceView() const override;
 	};
 
+	class D3D11CubeTextureFaceShaderResourceView : public D3D11ShaderResourceView
+	{
+	public:
+		D3D11CubeTextureFaceShaderResourceView(TexturePtr const& texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			uint32_t first_level, uint32_t num_levels);
+
+		ID3D11ShaderResourceView* RetrieveD3DShaderResourceView() const override;
+	};
+
 	class D3D11BufferShaderResourceView : public D3D11ShaderResourceView
 	{
 	public:

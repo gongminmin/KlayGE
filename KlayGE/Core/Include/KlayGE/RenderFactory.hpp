@@ -103,8 +103,12 @@ namespace KlayGE
 
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
+		ShaderResourceViewPtr MakeTexture2DSrv(
+			TexturePtr const& texture, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels);
 		virtual ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
 			uint32_t array_size, uint32_t first_level, uint32_t num_levels) = 0;
+		virtual ShaderResourceViewPtr MakeTexture2DSrv(TexturePtr const& texture, ElementFormat pf, int array_index,
+			Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels) = 0;
 		virtual ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) = 0;
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture);

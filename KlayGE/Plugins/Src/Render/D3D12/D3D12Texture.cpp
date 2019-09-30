@@ -139,6 +139,31 @@ namespace KlayGE
 		}
 	}
 
+	D3D12ShaderResourceViewSimulationPtr const& D3D12Texture::RetrieveD3DShaderResourceView(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, face);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
+
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillSRVDesc(pf, array_index, face, first_level, num_levels);
+			auto sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, desc);
+			return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
+		}
+	}
+
 	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index,
 		uint32_t array_size, uint32_t level)
 	{
@@ -903,6 +928,30 @@ namespace KlayGE
 		re.RecycleTempBuffer(d3d_texture_readback_buff_, false, static_cast<uint32_t>(required_size));
 		d3d_texture_upload_buff_.reset();
 		d3d_texture_readback_buff_.reset();
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,

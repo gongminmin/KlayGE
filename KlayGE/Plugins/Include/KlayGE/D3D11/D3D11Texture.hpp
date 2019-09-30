@@ -55,6 +55,8 @@ namespace KlayGE
 
 		ID3D11ShaderResourceViewPtr const & RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
+		ID3D11ShaderResourceViewPtr const& RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+			uint32_t first_level, uint32_t num_levels);
 
 		ID3D11RenderTargetViewPtr const & RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level);
@@ -118,7 +120,9 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t first_level, uint32_t num_levels) const = 0;
+			uint32_t first_level, uint32_t num_levels) const;
+		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(
+			ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const;
 
 		virtual D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const;
@@ -302,6 +306,8 @@ namespace KlayGE
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
+		D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(
+			ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t level) const override;
 		D3D11_RENDER_TARGET_VIEW_DESC FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const override;

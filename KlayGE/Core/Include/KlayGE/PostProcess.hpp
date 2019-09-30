@@ -424,12 +424,16 @@ namespace KlayGE
 
 			if (0 == index)
 			{
-				auto const* tex = srv->TextureResource().get();
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-						1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				pp_chain_[0]->OutputPin(0, rf.Make2DRtv(blur_x, 0, 1, 0));
-				pp_chain_[1]->InputPin(0, rf.MakeTextureSrv(blur_x));
+				auto const& tex = *srv->TextureResource();
+				if (!blur_x_tex_ || (blur_x_tex_->Width(0) != tex.Width(0)) || (blur_x_tex_->Height(0) != tex.Height(0)))
+				{
+					auto& rf = Context::Instance().RenderFactoryInstance();
+					blur_x_tex_ = rf.MakeTexture2D(tex.Width(0), tex.Height(0), 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+					blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+				}
+				pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+				pp_chain_[1]->InputPin(0, blur_x_srv_);
 			}
 			else
 			{
@@ -438,6 +442,11 @@ namespace KlayGE
 		}
 
 		using PostProcessChain::InputPin;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 
 
@@ -451,6 +460,11 @@ namespace KlayGE
 
 		void SetParam(uint32_t index, float2 const& value) override;
 		using PostProcess::SetParam;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 
 	class KLAYGE_CORE_API LogGaussianBlurPostProcess : public PostProcessChain
@@ -462,6 +476,11 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 }
 

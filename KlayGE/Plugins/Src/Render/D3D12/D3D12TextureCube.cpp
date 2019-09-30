@@ -220,6 +220,40 @@ namespace KlayGE
 		return desc;
 	}
 
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12TextureCube::FillSRVDesc(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+		switch (pf)
+		{
+		case EF_D16:
+			desc.Format = DXGI_FORMAT_R16_UNORM;
+			break;
+
+		case EF_D24S8:
+			desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			desc.Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+
+		default:
+			desc.Format = D3D12Mapping::MappingFormat(pf);
+			break;
+		}
+
+		desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		desc.Texture2DArray.MostDetailedMip = first_level;
+		desc.Texture2DArray.MipLevels = num_levels;
+		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
+		desc.Texture2DArray.ArraySize = 1;
+		desc.Texture2DArray.PlaneSlice = (desc.Format == DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
+		desc.Texture2DArray.ResourceMinLODClamp = 0;
+
+		return desc;
+	}
+
 	D3D12_RENDER_TARGET_VIEW_DESC D3D12TextureCube::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 		uint32_t level) const
 	{

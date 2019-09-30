@@ -144,6 +144,15 @@ namespace KlayGE
 		D3D12ShaderResourceViewSimulationPtr RetrieveD3DShaderResourceView() const override;
 	};
 
+	class D3D12CubeTextureFaceShaderResourceView : public D3D12ShaderResourceView
+	{
+	public:
+		D3D12CubeTextureFaceShaderResourceView(TexturePtr const& texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			uint32_t first_level, uint32_t num_levels);
+
+		D3D12ShaderResourceViewSimulationPtr RetrieveD3DShaderResourceView() const override;
+	};
+
 	class D3D12BufferShaderResourceView : public D3D12ShaderResourceView
 	{
 	public:

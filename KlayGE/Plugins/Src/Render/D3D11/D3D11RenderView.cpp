@@ -60,6 +60,41 @@ namespace KlayGE
 	}
 
 
+	D3D11CubeTextureFaceShaderResourceView::D3D11CubeTextureFaceShaderResourceView(TexturePtr const& texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(texture_cube->AccessHint() & EAH_GPU_Read);
+
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
+
+		tex_ = texture_cube;
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
+
+		first_array_index_ = array_index * 6 + face;
+		array_size_ = 1;
+		first_level_ = first_level;
+		num_levels_ = num_levels;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		sr_src_ = texture_cube.get();
+	}
+
+	ID3D11ShaderResourceView* D3D11CubeTextureFaceShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && tex_ && tex_->HWResourceReady())
+		{
+			uint32_t const array_index = first_array_index_ / 6;
+			Texture::CubeFaces const face = static_cast<Texture::CubeFaces>(first_array_index_ - array_index * 6);
+			d3d_sr_view_ = checked_cast<D3D11Texture&>(*tex_).RetrieveD3DShaderResourceView(pf_, array_index, face,
+				first_level_, num_levels_);
+		}
+		return d3d_sr_view_.get();
+	}
+
+
 	D3D11BufferShaderResourceView::D3D11BufferShaderResourceView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
 		uint32_t num_elems)
 	{

@@ -211,9 +211,41 @@ namespace KlayGE
 			break;
 		}
 
-		desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURECUBE;
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
 		desc.TextureCube.MostDetailedMip = first_level;
 		desc.TextureCube.MipLevels = num_levels;
+
+		return desc;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11TextureCube::FillSRVDesc(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		switch (pf)
+		{
+		case EF_D16:
+			desc.Format = DXGI_FORMAT_R16_UNORM;
+			break;
+
+		case EF_D24S8:
+			desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			desc.Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+
+		default:
+			desc.Format = D3D11Mapping::MappingFormat(pf);
+			break;
+		}
+
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+		desc.Texture2DArray.MostDetailedMip = first_level;
+		desc.Texture2DArray.MipLevels = num_levels;
+		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
+		desc.Texture2DArray.ArraySize = 1;
 
 		return desc;
 	}

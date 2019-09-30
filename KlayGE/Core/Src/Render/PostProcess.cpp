@@ -1687,9 +1687,9 @@ namespace KlayGE
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			FrameBufferPtr const & fb = re.CurFrameBuffer();
 
-			auto const* tex = srv->TextureResource().get();
-			uint32_t const tex_width = tex->Width(0);
-			uint32_t const tex_height = tex->Height(0);
+			auto const& tex = *srv->TextureResource();
+			uint32_t const tex_width = tex.Width(0);
+			uint32_t const tex_height = tex.Height(0);
 
 			float const scale_x = static_cast<float>(fb->Width()) / tex_width;
 			float const scale_y = static_cast<float>(fb->Height()) / tex_height;
@@ -1703,12 +1703,16 @@ namespace KlayGE
 			{
 				x_width = static_cast<uint32_t>(scale_y * tex_width + 0.5f);
 			}
-			uint32_t x_height = tex->Height(0);
+			uint32_t x_height = tex.Height(0);
 
-			TexturePtr blur_x = rf.MakeTexture2D(x_width, x_height, 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pp_chain_[0]->OutputPin(0, rf.Make2DRtv(blur_x, 0, 1, 0));
-			pp_chain_[1]->InputPin(0, rf.MakeTextureSrv(blur_x));
+			if (!blur_x_tex_ || (blur_x_tex_->Width(0) != x_width) || (blur_x_tex_->Height(0) != x_height))
+			{
+				blur_x_tex_ = rf.MakeTexture2D(x_width, x_height, 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+				blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+			}
+			pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+			pp_chain_[1]->InputPin(0, blur_x_srv_);
 		}
 		else
 		{
@@ -1752,12 +1756,16 @@ namespace KlayGE
 
 		if (0 == index)
 		{
-			auto const* tex = srv->TextureResource().get();
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pp_chain_[0]->OutputPin(0, rf.Make2DRtv(blur_x, 0, 1, 0));
-			pp_chain_[1]->InputPin(0, rf.MakeTextureSrv(blur_x));
+			auto const& tex = *srv->TextureResource();
+			if (!blur_x_tex_ || (blur_x_tex_->Width(0) != tex.Width(0)) || (blur_x_tex_->Height(0) != tex.Height(0)))
+			{
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				blur_x_tex_ = rf.MakeTexture2D(tex.Width(0), tex.Height(0), 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+				blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+			}
+			pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+			pp_chain_[1]->InputPin(0, blur_x_srv_);
 		}
 		else
 		{
