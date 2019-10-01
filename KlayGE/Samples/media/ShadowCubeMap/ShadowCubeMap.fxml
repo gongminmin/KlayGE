@@ -131,11 +131,12 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 						out float2 oDist : TEXCOORD0)
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
-	
-	oPos = mul(Position, cameras[instance_id].mvp);
+
+	uint camera_index = CameraIndex(instance_id);
+	oPos = mul(Position, cameras[camera_index].mvp);
 
 	oDist.x = CalcDist(Position);
-	oDist.y = asfloat(instance_id);
+	oDist.y = asfloat(camera_index);
 }
 
 [maxvertexcount(3)]
@@ -180,11 +181,12 @@ void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 						out uint oRtIndex : SV_RenderTargetArrayIndex)
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
-	
-	oPos = mul(Position, cameras[instance_id].mvp);
+
+	uint camera_index = CameraIndex(instance_id);
+	oPos = mul(Position, cameras[camera_index].mvp);
 
 	oDist = CalcDist(Position);
-	oRtIndex = instance_id;
+	oRtIndex = camera_index;
 }
 #endif
 		]]>

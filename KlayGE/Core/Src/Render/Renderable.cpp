@@ -157,6 +157,11 @@ namespace KlayGE
 						*camera_cbuffer_, i, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
 				}
 
+				{
+					auto const& pccb = re.PredefinedCameraCBufferInstance();
+					pccb.NumCameras(*camera_cbuffer_) = viewport.NumCameras();
+				}
+
 				effect_->BindCBufferByIndex(camera_cbuff_index, camera_cbuffer_);
 			}
 		}
