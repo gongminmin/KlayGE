@@ -149,15 +149,13 @@ namespace
 
 		void OnRenderBegin()
 		{
+			model_mat_ = MathLib::rotation_x(DEG90);
+
 			RenderablePlane::OnRenderBegin();
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & model = MathLib::rotation_x(DEG90);
-
-			*(effect_->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
-			*(effect_->ParameterByName("model")) = model;
 			*(effect_->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 
 			if (light_)
@@ -175,7 +173,7 @@ namespace
 				float4x4 light_model = light_->BoundSceneNode()->TransformToParent();
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
-				*(effect_->ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
+				*(effect_->ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
 			}
 			else
 			{
@@ -187,11 +185,12 @@ namespace
 				*(effect_->ParameterByName("light_color")) = float3(light_->Color());
 				*(effect_->ParameterByName("light_falloff")) = light_->Falloff();
 				*(effect_->ParameterByName("light_vp")) = caustics_light_->SMCamera(0)->ViewMatrix() * caustics_light_->SMCamera(0)->ProjMatrix();
-				*(effect_->ParameterByName("eye_pos")) = float3(MathLib::transform(app.ActiveCamera().EyePos(), MathLib::inverse(model)));
+				*(effect_->ParameterByName("eye_pos")) =
+					float3(MathLib::transform(app.ActiveCamera().EyePos(), MathLib::inverse(model_mat_)));
 				*(effect_->ParameterByName("shadow_cube_tex")) = sm_texture_;
 				*(effect_->ParameterByName("caustics_tex")) = caustics_map_;
-				*(effect_->ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
-				*(effect_->ParameterByName("obj_model_to_light_view")) = model * first_light_view;
+				*(effect_->ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
+				*(effect_->ParameterByName("obj_model_to_light_view")) = model_mat_ * first_light_view;
 			}
 		}
 
@@ -259,15 +258,10 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			CausticsMapApp& app = checked_cast<CausticsMapApp&>(Context::Instance().AppInstance());
 			Camera const & camera = app.ActiveCamera();
-
-			*(scene_effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
-			*(scene_effect_->ParameterByName("model")) = model_mat_;
-			
-			AABBox const & pos_bb = this->PosBound();
-			*(scene_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(scene_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			switch (pass_)
 			{

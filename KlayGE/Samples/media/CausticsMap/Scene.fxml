@@ -6,9 +6,8 @@
 	<include name="Lighting.fxml"/>
 	<include name="Material.fxml"/>
 	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
-	<parameter type="float4x4" name="model"/>
-	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float2" name="far_plane"/>
 
 	<shader>
@@ -19,7 +18,7 @@ void DepthTexWODTVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 
-	oPos = mul(pos, mvp);
+	oPos = mul(pos, cameras[0].mvp);
 	oDepth = oPos.w;
 }  
 
@@ -33,7 +32,7 @@ void PosTexVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 
-	oPos = mul(pos, mvp);
+	oPos = mul(pos, cameras[0].mvp);
 }
 
 float4 PosTexPS() : SV_Target
@@ -73,7 +72,7 @@ void PosNormTexVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 
-	oPos = mul(pos, mvp);
+	oPos = mul(pos, cameras[0].mvp);
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
 }
 
@@ -187,7 +186,7 @@ void DistanceMappingVS(float4 pos		: POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	
-	oPos = mul(pos, mvp);
+	oPos = mul(pos, cameras[0].mvp);
 
 	tangent_quat = tangent_quat * 2 - 1;
 
@@ -345,7 +344,7 @@ void RefractEffectVS(float4 position : POSITION, float4 tangent_quat : TANGENT,
 {
 	position = float4(position.xyz * pos_extent + pos_center, 1);
 	
-	hPos = mul(float4(position.xyz, 1), mvp);
+	hPos = mul(float4(position.xyz, 1), cameras[0].mvp);
 	wPosition = mul(float4(position.xyz, 1), model).xyz;
 	wNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
 	wViewVec = normalize(wPosition - eye_pos);
