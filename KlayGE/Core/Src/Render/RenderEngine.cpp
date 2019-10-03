@@ -1026,6 +1026,11 @@ namespace KlayGE
 		}
 	}
 
+	uint32_t RenderEngine::NumCameraInstances() const
+	{
+		return (num_camera_instances_ == 0) ? cur_frame_buffer_->Viewport()->NumCameras() : num_camera_instances_;
+	}
+
 	void RenderEngine::Refresh()
 	{
 		if (Context::Instance().AppInstance().MainWnd()->Active())

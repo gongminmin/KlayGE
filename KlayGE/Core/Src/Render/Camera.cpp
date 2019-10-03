@@ -321,7 +321,7 @@ namespace KlayGE
 				mvp *= cascade_crop_mat;
 			}
 
-			RenderEngine::PredefinedCameraCBuffer::CameraInfo camera_info;
+			auto& camera_info = pccb.Camera(camera_cbuffer, index);
 			camera_info.model_view = MathLib::transpose(model_mat * this->ViewMatrix());
 			camera_info.mvp = MathLib::transpose(mvp);
 			camera_info.inv_mv = MathLib::transpose(this->InverseViewMatrix() * inv_model_mat);
@@ -329,8 +329,6 @@ namespace KlayGE
 			camera_info.eye_pos = this->EyePos();
 			camera_info.forward_vec = this->ForwardVec();
 			camera_info.up_vec = this->UpVec();
-
-			pccb.Camera(camera_cbuffer, index) = camera_info;
 
 			camera_cbuffer.Dirty(true);
 		}

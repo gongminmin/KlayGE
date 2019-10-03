@@ -136,7 +136,7 @@ namespace KlayGE
 					camera_cbuffer_ = camera_cbuffer_->Clone(*effect_);
 				}
 
-				auto& viewport = *re.CurFrameBuffer()->Viewport();
+				auto const& viewport = *re.CurFrameBuffer()->Viewport();
 				for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
 				{
 					Camera const& camera = *viewport.Camera(i);

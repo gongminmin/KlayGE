@@ -508,7 +508,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	}
 
 	auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	re.ForceInstances(1);
+	re.NumCameraInstances(0);
 
 	switch (sm_type_)
 	{
@@ -572,9 +572,9 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 			case 0:
 				{
-					if ((sm_type_ == SMT_CubeOneInstance) || (sm_type_ == SMT_CubeOneInstanceVpRt))
+					if ((sm_type_ == SMT_CubeOne) || (sm_type_ == SMT_CubeOneInstanceGS))
 					{
-						re.ForceInstances(6);
+						re.NumCameraInstances(1);
 					}
 
 					re.BindFrameBuffer(shadow_cube_one_buffer_);

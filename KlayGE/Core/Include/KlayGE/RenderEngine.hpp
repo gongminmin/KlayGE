@@ -178,10 +178,11 @@ namespace KlayGE
 			default_render_height_scale_ = scale;
 		}
 
-		void ForceInstances(uint32_t num)
+		void NumCameraInstances(uint32_t num)
 		{
-			force_num_instances_ = num;
+			num_camera_instances_ = num;
 		}
+		uint32_t NumCameraInstances() const;
 
 		// Render a frame when no pending message
 		virtual void Refresh();
@@ -512,7 +513,7 @@ namespace KlayGE
 		uint32_t native_shader_version_;
 		std::string_view native_shader_platform_name_;
 
-		uint32_t force_num_instances_ = 1;
+		uint32_t num_camera_instances_ = 0;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;
