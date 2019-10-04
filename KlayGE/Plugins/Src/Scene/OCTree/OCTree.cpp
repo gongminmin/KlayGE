@@ -449,17 +449,10 @@ namespace KlayGE
 				visible = BO_Yes;
 			}
 		}
-		if (visible)
+		if (visible != BO_No)
 		{
-			if (frustum_)
-			{
-				// Frustum VS AABB
-				visible = frustum_->Intersect(aabb);
-			}
-			else
-			{
-				visible = BO_Yes;
-			}
+			// Frustum VS AABB
+			visible = SceneManager::AABBVisible(aabb);
 		}
 		return visible;
 	}
@@ -480,17 +473,10 @@ namespace KlayGE
 				visible = BO_Yes;
 			}
 		}
-		if (visible)
+		if (visible != BO_No)
 		{
-			if (frustum_)
-			{
-				// Frustum VS OBB
-				visible = frustum_->Intersect(obb);
-			}
-			else
-			{
-				visible = BO_Yes;
-			}
+			// Frustum VS OBB
+			visible = SceneManager::OBBVisible(obb);
 		}
 		return visible;
 	}
@@ -511,17 +497,34 @@ namespace KlayGE
 				visible = BO_Yes;
 			}
 		}
-		if (visible)
+		if (visible != BO_No)
 		{
-			if (frustum_)
+			// Frustum VS Sphere
+			visible = SceneManager::SphereVisible(sphere);
+		}
+		return visible;
+	}
+
+	BoundOverlap OCTree::FrustumVisible(Frustum const& frustum) const
+	{
+		// Frustum VS node
+		BoundOverlap visible = BO_Yes;
+		if (!octree_.empty())
+		{
+			if (MathLib::intersect_aabb_frustum(octree_[0].bb, frustum) != BO_No)
 			{
-				// Frustum VS OBB
-				visible = frustum_->Intersect(sphere);
+				visible = this->BoundVisible(0, frustum);
 			}
 			else
 			{
+				// Out of scene
 				visible = BO_Yes;
 			}
+		}
+		if (visible != BO_No)
+		{
+			// Frustum VS Frustum
+			visible = SceneManager::FrustumVisible(frustum);
 		}
 		return visible;
 	}
@@ -664,7 +667,7 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if ((node.visible != BO_No) && MathLib::intersect_aabb_frustum(node.bb, frustum))
+		if ((node.visible != BO_No) && (MathLib::intersect_aabb_frustum(node.bb, frustum) != BO_No))
 		{
 			if (BO_Yes == node.visible)
 			{
