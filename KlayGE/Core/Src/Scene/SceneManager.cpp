@@ -74,8 +74,8 @@ namespace KlayGE
 			num_draw_calls_(0), num_dispatch_calls_(0),
 			quit_(false), deferred_mode_(false)
 	{
-		scene_root_.VisibleMark(BO_Partial);
-		overlay_root_.VisibleMark(BO_Partial);
+		scene_root_.VisibleMark(BoundOverlap::Partial);
+		overlay_root_.VisibleMark(BoundOverlap::Partial);
 	}
 
 	// Îö¹¹º¯Êý
@@ -138,7 +138,7 @@ namespace KlayGE
 				uint32_t const attr = node.Attrib();
 
 				visible = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
-				if (BO_Partial == visible)
+				if (BoundOverlap::Partial == visible)
 				{
 					if (attr & SceneNode::SOA_Cullable)
 					{
@@ -146,20 +146,20 @@ namespace KlayGE
 						{
 							visible = ((MathLib::ortho_area(camera.ForwardVec(), node.PosBoundWS()) > small_obj_threshold_)
 								&& (MathLib::perspective_area(camera.EyePos(), view_proj, node.PosBoundWS()) > small_obj_threshold_))
-								? BO_Yes : BO_No;
+								? BoundOverlap::Yes : BoundOverlap::No;
 						}
 						else
 						{
-							visible = BO_Yes;
+							visible = BoundOverlap::Yes;
 						}
 					}
 					else
 					{
-						visible = BO_Yes;
+						visible = BoundOverlap::Yes;
 					}
 
 					if (!camera.OmniDirectionalMode() && (attr & SceneNode::SOA_Cullable)
-						&& (BO_Yes == visible))
+						&& (BoundOverlap::Yes == visible))
 					{
 						visible = this->AABBVisible(node.PosBoundWS());
 					}
@@ -167,7 +167,7 @@ namespace KlayGE
 			}
 			else
 			{
-				visible = BO_No;
+				visible = BoundOverlap::No;
 			}
 
 			node.VisibleMark(visible);
@@ -284,7 +284,7 @@ namespace KlayGE
 		}
 		else
 		{
-			return BO_Yes;
+			return BoundOverlap::Yes;
 		}
 	}
 
@@ -296,7 +296,7 @@ namespace KlayGE
 		}
 		else
 		{
-			return BO_Yes;
+			return BoundOverlap::Yes;
 		}
 	}
 
@@ -308,7 +308,7 @@ namespace KlayGE
 		}
 		else
 		{
-			return BO_Yes;
+			return BoundOverlap::Yes;
 		}
 	}
 
@@ -320,7 +320,7 @@ namespace KlayGE
 		}
 		else
 		{
-			return BO_Yes;
+			return BoundOverlap::Yes;
 		}
 	}
 
@@ -429,7 +429,7 @@ namespace KlayGE
 
 		for (auto* node : scene_nodes)
 		{
-			node->VisibleMark(BO_No);
+			node->VisibleMark(BoundOverlap::No);
 		}
 		if (!(urt & App3DFramework::URV_Overlay))
 		{
@@ -439,7 +439,7 @@ namespace KlayGE
 					if ((node.Parent() == nullptr)
 						|| (node.Visible() && (!(attr & SceneNode::SOA_Cullable) || (attr & SceneNode::SOA_Moveable))))
 					{
-						node.VisibleMark(BO_Partial);
+						node.VisibleMark(BoundOverlap::Partial);
 					}
 					return node.Visible();
 				});
@@ -487,13 +487,13 @@ namespace KlayGE
 			for (auto const & scene_node : scene_nodes)
 			{
 				scene_node->MainThreadUpdate(app_time, frame_time);
-				scene_node->VisibleMark(scene_node->Visible() ? BO_Yes : BO_No);
+				scene_node->VisibleMark(scene_node->Visible() ? BoundOverlap::Yes : BoundOverlap::No);
 			}
 		}
 
 		for (auto* node : scene_nodes)
 		{
-			if (node->VisibleMark() != BO_No)
+			if (node->VisibleMark() != BoundOverlap::No)
 			{
 				node->ForEachComponentOfType<RenderableComponent>(
 					[](RenderableComponent& renderable_comp) { renderable_comp.BoundRenderable().ClearInstances(); });
@@ -502,7 +502,7 @@ namespace KlayGE
 
 		for (auto* node : scene_nodes)
 		{
-			if (node->VisibleMark() != BO_No)
+			if (node->VisibleMark() != BoundOverlap::No)
 			{
 				node->ForEachComponentOfType<RenderableComponent>([node](RenderableComponent& renderable_comp) {
 					auto& renderable = renderable_comp.BoundRenderable();
@@ -705,9 +705,9 @@ namespace KlayGE
 		if (node.Parent())
 		{
 			BoundOverlap const parent_bo = node.Parent()->VisibleMark();
-			if (BO_No == parent_bo)
+			if (BoundOverlap::No == parent_bo)
 			{
-				visible = BO_No;
+				visible = BoundOverlap::No;
 			}
 			else
 			{
@@ -718,7 +718,7 @@ namespace KlayGE
 					{
 						visible = ((MathLib::ortho_area(view_dir, node.PosBoundWS()) > small_obj_threshold_)
 							&& (MathLib::perspective_area(eye_pos, view_proj, node.PosBoundWS()) > small_obj_threshold_))
-							? parent_bo : BO_No;
+							? parent_bo : BoundOverlap::No;
 					}
 					else
 					{
@@ -733,7 +733,7 @@ namespace KlayGE
 		}
 		else
 		{
-			visible = BO_Partial;
+			visible = BoundOverlap::Partial;
 		}
 
 		return visible;

@@ -1888,7 +1888,8 @@ namespace KlayGE
 				float const scale = light.CosOuterInner().w();
 				float4x4 mat = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 				float4x4 light_model = mat * light.BoundSceneNode()->TransformToWorld();
-				pvp.light_visibles[light_index] = (scene_mgr.AABBVisible(MathLib::transform_aabb(cone_aabb_, light_model)) != BO_No);
+				pvp.light_visibles[light_index] =
+					(scene_mgr.AABBVisible(MathLib::transform_aabb(cone_aabb_, light_model)) != BoundOverlap::No);
 			}
 			break;
 
@@ -1899,7 +1900,8 @@ namespace KlayGE
 				float3 const & p = light.Position();
 				float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 					* MathLib::translation(p);
-				pvp.light_visibles[light_index] = (scene_mgr.AABBVisible(MathLib::transform_aabb(box_aabb_, light_model)) != BO_No);
+				pvp.light_visibles[light_index] =
+					(scene_mgr.AABBVisible(MathLib::transform_aabb(box_aabb_, light_model)) != BoundOverlap::No);
 			}
 			break;
 

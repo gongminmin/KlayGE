@@ -71,11 +71,11 @@ namespace KlayGE
 	float const DEG2RAD	= 0.01745329f;			// 角度化弧度因数
 	float const RAD2DEG	= 57.29577f;			// 弧度化角度因数
 
-	enum BoundOverlap
+	enum class BoundOverlap : uint32_t
 	{
-		BO_Yes,
-		BO_No,
-		BO_Partial
+		No = 0,
+		Partial,
+		Yes,
 	};
 
 	namespace MathLib

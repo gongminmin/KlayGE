@@ -147,7 +147,7 @@ namespace KlayGE
 	template <typename T>
 	bool Sphere_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
-		return MathLib::intersect_sphere_frustum(*this, frustum) != BO_No;
+		return MathLib::intersect_sphere_frustum(*this, frustum) != BoundOverlap::No;
 	}
 
 	template <typename T>

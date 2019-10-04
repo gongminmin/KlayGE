@@ -215,7 +215,7 @@ namespace KlayGE
 		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
 		bool pos_aabb_dirty_ = true;
-		BoundOverlap visible_mark_ = BO_No;
+		BoundOverlap visible_mark_ = BoundOverlap::No;
 
 		UpdateEvent sub_thread_update_event_;
 		UpdateEvent main_thread_update_event_;

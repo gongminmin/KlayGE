@@ -2830,7 +2830,7 @@ namespace KlayGE
 
 				if (dot_coord(plane, v0) < 0)
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (dot_coord(plane, v1) < 0)
 				{
@@ -2838,7 +2838,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_obb_frustum(OBBox const & obb, Frustum const & frustum) noexcept;
@@ -2867,7 +2867,7 @@ namespace KlayGE
 
 				if (dot_coord(plane, v0) < 0)
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (dot_coord(plane, v1) < 0)
 				{
@@ -2875,7 +2875,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_sphere_frustum(Sphere const & sphere, Frustum const & frustum) noexcept;
@@ -2891,7 +2891,7 @@ namespace KlayGE
 				float const d = dot_coord(plane, sphere.Center());
 				if (d <= -sphere.Radius())
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (d > sphere.Radius())
 				{
@@ -2899,7 +2899,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & rhs) noexcept;
@@ -2927,11 +2927,11 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 			if (inside_all)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 
 			for (int i = 0; i < 6; ++ i)
@@ -2949,7 +2949,7 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 
 			Vector_T<T, 3> edge_axis_l[6];
@@ -2994,10 +2994,10 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 
-			return BO_Partial;
+			return BoundOverlap::Partial;
 		}
 
 
