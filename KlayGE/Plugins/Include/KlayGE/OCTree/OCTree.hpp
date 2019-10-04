@@ -46,6 +46,7 @@ namespace KlayGE
 		virtual BoundOverlap AABBVisible(AABBox const & aabb) const override;
 		virtual BoundOverlap OBBVisible(OBBox const & obb) const override;
 		virtual BoundOverlap SphereVisible(Sphere const & sphere) const override;
+		virtual BoundOverlap FrustumVisible(Frustum const& frustum) const override;
 
 		virtual void ClearObject() override;
 
