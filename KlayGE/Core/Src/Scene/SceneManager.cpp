@@ -64,8 +64,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
-		: frustum_(nullptr),
-			scene_root_(L"SceenRoot", SceneNode::SOA_Cullable),
+		: scene_root_(L"SceenRoot", SceneNode::SOA_Cullable),
 			overlay_root_(L"OverlayRoot", SceneNode::SOA_Cullable | SceneNode::SOA_Overlay),
 			small_obj_threshold_(0),
 			update_elapse_(1.0f / 60),
@@ -115,59 +114,57 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::ClipScene()
 	{
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
-		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
-		}
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
 		for (auto* sn : all_scene_nodes_)
 		{
 			auto& node = *sn;
-			BoundOverlap visible;
+			BoundOverlap visible = BoundOverlap::No;
 			if (node.Visible() && node.Updated())
 			{
 				uint32_t const attr = node.Attrib();
 
-				visible = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
-				if (BoundOverlap::Partial == visible)
+				for (uint32_t i = 0; i < num_cameras; ++i)
 				{
-					if (attr & SceneNode::SOA_Cullable)
+					auto const& camera = *viewport.Camera(i);
+					float4x4 const& view_proj = camera_view_projs_[i];
+
+					auto visible_in_camera = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
+					if (BoundOverlap::Partial == visible_in_camera)
 					{
-						if (small_obj_threshold_ > 0)
+						if (attr & SceneNode::SOA_Cullable)
 						{
-							visible = ((MathLib::ortho_area(camera.ForwardVec(), node.PosBoundWS()) > small_obj_threshold_)
-								&& (MathLib::perspective_area(camera.EyePos(), view_proj, node.PosBoundWS()) > small_obj_threshold_))
-								? BoundOverlap::Yes : BoundOverlap::No;
+							if (small_obj_threshold_ > 0)
+							{
+								visible_in_camera = ((MathLib::ortho_area(camera.ForwardVec(), node.PosBoundWS()) > small_obj_threshold_)
+									&& (MathLib::perspective_area(camera.EyePos(), view_proj, node.PosBoundWS()) > small_obj_threshold_))
+									? BoundOverlap::Yes : BoundOverlap::No;
+							}
+							else
+							{
+								visible_in_camera = BoundOverlap::Yes;
+							}
 						}
 						else
 						{
-							visible = BoundOverlap::Yes;
+							visible_in_camera = BoundOverlap::Yes;
+						}
+
+						if (!camera.OmniDirectionalMode() && (attr & SceneNode::SOA_Cullable) && (BoundOverlap::Yes == visible_in_camera))
+						{
+							visible_in_camera = camera_frustums_[i]->Intersect(node.PosBoundWS());
+						}
+
+						visible = std::max(visible, visible_in_camera);
+						if (visible == BoundOverlap::Yes)
+						{
+							break;
 						}
 					}
-					else
-					{
-						visible = BoundOverlap::Yes;
-					}
 
-					if (!camera.OmniDirectionalMode() && (attr & SceneNode::SOA_Cullable)
-						&& (BoundOverlap::Yes == visible))
-					{
-						visible = this->AABBVisible(node.PosBoundWS());
-					}
 				}
-			}
-			else
-			{
-				visible = BoundOverlap::No;
 			}
 
 			node.VisibleMark(visible);
@@ -278,50 +275,90 @@ namespace KlayGE
 
 	BoundOverlap SceneManager::AABBVisible(AABBox const & aabb) const
 	{
-		if (frustum_)
+		BoundOverlap ret;
+		if (camera_frustums_.empty())
 		{
-			return frustum_->Intersect(aabb);
+			ret = BoundOverlap::Yes;
 		}
 		else
 		{
-			return BoundOverlap::Yes;
+			ret = BoundOverlap::No;
+			for (auto const* camera_frustum : camera_frustums_)
+			{
+				ret = std::max(ret, camera_frustum->Intersect(aabb));
+				if (ret == BoundOverlap::Yes)
+				{
+					break;
+				}
+			}
 		}
+		return ret;
 	}
 
 	BoundOverlap SceneManager::OBBVisible(OBBox const & obb) const
 	{
-		if (frustum_)
+		BoundOverlap ret;
+		if (camera_frustums_.empty())
 		{
-			return frustum_->Intersect(obb);
+			ret = BoundOverlap::Yes;
 		}
 		else
 		{
-			return BoundOverlap::Yes;
+			ret = BoundOverlap::No;
+			for (auto const* camera_frustum : camera_frustums_)
+			{
+				ret = std::max(ret, camera_frustum->Intersect(obb));
+				if (ret == BoundOverlap::Yes)
+				{
+					break;
+				}
+			}
 		}
+		return ret;
 	}
 
 	BoundOverlap SceneManager::SphereVisible(Sphere const & sphere) const
 	{
-		if (frustum_)
+		BoundOverlap ret;
+		if (camera_frustums_.empty())
 		{
-			return frustum_->Intersect(sphere);
+			ret = BoundOverlap::Yes;
 		}
 		else
 		{
-			return BoundOverlap::Yes;
+			ret = BoundOverlap::No;
+			for (auto const* camera_frustum : camera_frustums_)
+			{
+				ret = std::max(ret, camera_frustum->Intersect(sphere));
+				if (ret == BoundOverlap::Yes)
+				{
+					break;
+				}
+			}
 		}
+		return ret;
 	}
 
 	BoundOverlap SceneManager::FrustumVisible(Frustum const & frustum) const
 	{
-		if (frustum_)
+		BoundOverlap ret;
+		if (camera_frustums_.empty())
 		{
-			return frustum_->Intersect(frustum);
+			ret = BoundOverlap::Yes;
 		}
 		else
 		{
-			return BoundOverlap::Yes;
+			ret = BoundOverlap::No;
+			for (auto const* camera_frustum : camera_frustums_)
+			{
+				ret = std::max(ret, camera_frustum->Intersect(frustum));
+				if (ret == BoundOverlap::Yes)
+				{
+					break;
+				}
+			}
 		}
+		return ret;
 	}
 
 	void SceneManager::ClearObject()
@@ -404,6 +441,8 @@ namespace KlayGE
 		urt_ = urt;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+
 		App3DFramework& app = Context::Instance().AppInstance();
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
@@ -424,7 +463,6 @@ namespace KlayGE
 				return true;
 			});
 
-		Camera& camera = app.ActiveCamera();
 		auto& scene_nodes = (urt & App3DFramework::URV_Overlay) ? all_overlay_nodes_ : all_scene_nodes_;
 
 		for (auto* node : scene_nodes)
@@ -446,7 +484,11 @@ namespace KlayGE
 		}
 		if (urt & App3DFramework::URV_NeedFlush)
 		{
-			frustum_ = &camera.ViewFrustum();
+			camera_frustums_.resize(viewport.NumCameras());
+			for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
+			{
+				camera_frustums_[i] = &viewport.Camera(i)->ViewFrustum();
+			}
 
 			std::vector<uint32_t> visible_list((scene_nodes.size() + 31) / 32, 0);
 			for (size_t i = 0; i < scene_nodes.size(); ++ i)
@@ -458,12 +500,35 @@ namespace KlayGE
 			}
 			size_t seed = 0;
 			HashRange(seed, visible_list.begin(), visible_list.end());
-			HashCombine(seed, camera.OmniDirectionalMode());
-			HashCombine(seed, &camera);
+			for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
+			{
+				auto const& camera = *viewport.Camera(i);
+				HashCombine(seed, camera.OmniDirectionalMode());
+				HashCombine(seed, &camera);
+			}
 
 			auto vmiter = visible_marks_map_.find(seed);
 			if (vmiter == visible_marks_map_.end())
 			{
+				camera_view_projs_.resize(viewport.NumCameras());
+				for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
+				{
+					camera_view_projs_[i] = viewport.Camera(i)->ViewProjMatrix();
+				}
+				auto drl = Context::Instance().DeferredRenderingLayerInstance();
+				if (drl)
+				{
+					int32_t cas_index = drl->CurrCascadeIndex();
+					if (cas_index >= 0)
+					{
+						float4x4 const& ccm = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+						for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
+						{
+							camera_view_projs_[i] *= ccm;
+						}
+					}
+				}
+
 				this->ClipScene();
 
 				auto visible_marks = MakeUniquePtr<BoundOverlap[]>(scene_nodes.size());
@@ -530,10 +595,14 @@ namespace KlayGE
 				return lhs.first->Weight() < rhs.first->Weight();
 			});
 
-		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
+		float4 view_mat_z;
+		if (viewport.NumCameras() == 1)
+		{
+			view_mat_z = viewport.Camera(0)->ViewMatrix().Col(2);
+		}
 		for (auto& items : render_queue_)
 		{
-			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
+			if ((viewport.NumCameras() == 1) && !items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
 				std::vector<std::pair<float, uint32_t>> min_depths(items.second.size());
 				for (size_t j = 0; j < min_depths.size(); ++ j)

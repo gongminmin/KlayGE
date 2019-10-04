@@ -313,7 +313,6 @@ void ShadowCubeMap::OnCreate()
 		for (uint32_t i = 0; i < 6; ++i)
 		{
 			viewport.Camera(i, light_->SMCamera(i));
-			light_->SMCamera(i)->OmniDirectionalMode(true);
 		}
 
 		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));

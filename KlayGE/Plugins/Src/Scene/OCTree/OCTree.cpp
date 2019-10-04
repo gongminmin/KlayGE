@@ -31,14 +31,16 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <algorithm>
 #include <boost/assert.hpp>
 
 #ifdef KLAYGE_DRAW_NODES
-#include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #endif
 
@@ -153,21 +155,17 @@ namespace KlayGE
 			this->NodeVisible(0);
 		}
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		bool omni_directional = false;
+		for (uint32_t i = 0; i < num_cameras; ++i)
 		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
+			omni_directional |= viewport.Camera(i)->OmniDirectionalMode();
 		}
 
-		if (camera.OmniDirectionalMode())
+		if (omni_directional)
 		{
 			for (auto* sn : all_scene_nodes_)
 			{
@@ -181,9 +179,19 @@ namespace KlayGE
 						if (small_obj_threshold_ > 0)
 						{
 							AABBox const & aabb_ws = node.PosBoundWS();
-							visible = ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_)
-								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
-								? BoundOverlap::Yes : BoundOverlap::No;
+							visible = BoundOverlap::No;
+							for (uint32_t i = 0; i < num_cameras; ++i)
+							{
+								auto const& camera = *viewport.Camera(i);
+								float4x4 const& view_proj = camera_view_projs_[i];
+
+								if ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_) &&
+									(MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+								{
+									visible = BoundOverlap::Yes;
+									break;
+								}
+							}
 						}
 						else
 						{
@@ -216,20 +224,33 @@ namespace KlayGE
 				BoundOverlap visible = node.VisibleMark();
 				if (node.Visible() && (visible != BoundOverlap::No))
 				{
-					visible = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
-					if (BoundOverlap::Partial == visible)
+					visible = BoundOverlap::No;
+					for (uint32_t i = 0; i < num_cameras; ++i)
 					{
-						uint32_t const attr = node.Attrib();
-						if (attr & SceneNode::SOA_Cullable)
+						auto const& camera = *viewport.Camera(i);
+						float4x4 const& view_proj = camera_view_projs_[i];
+
+						auto visible_in_camera = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
+						if (BoundOverlap::Partial == visible_in_camera)
 						{
-							if (attr & SceneNode::SOA_Moveable)
+							uint32_t const attr = node.Attrib();
+							if (attr & SceneNode::SOA_Cullable)
 							{
-								visible = this->AABBVisible(node.PosBoundWS());
+								if (attr & SceneNode::SOA_Moveable)
+								{
+									visible_in_camera = camera_frustums_[i]->Intersect(node.PosBoundWS());
+								}
 							}
-						}
-						else
-						{
-							visible = BoundOverlap::Yes;
+							else
+							{
+								visible_in_camera = BoundOverlap::Yes;
+							}
+
+							visible = std::max(visible, visible_in_camera);
+							if (visible == BoundOverlap::Yes)
+							{
+								break;
+							}
 						}
 					}
 
@@ -324,26 +345,35 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		auto& octree_node = octree_[index];
+		bool large_enough;
+		if (small_obj_threshold_ <= 0)
 		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
+			large_enough = true;
+		}
+		else
+		{
+			large_enough = false;
+			for (uint32_t i = 0; i < num_cameras; ++i)
 			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+				auto const& camera = *viewport.Camera(i);
+				float4x4 const& view_proj = camera_view_projs_[i];
+				if (((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
+					&& (MathLib::perspective_area(camera.EyePos(), view_proj, octree_node.bb) > small_obj_threshold_)))
+				{
+					large_enough = true;
+					break;
+				}
 			}
 		}
 
-		auto& octree_node = octree_[index];
-		if ((small_obj_threshold_ <= 0)
-			|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
-				&& (MathLib::perspective_area(camera.EyePos(), view_proj, octree_node.bb) > small_obj_threshold_)))
+		if (large_enough)
 		{
-			octree_node.visible = frustum_->Intersect(octree_node.bb);
+			octree_node.visible = SceneManager::AABBVisible(octree_node.bb);
 			if (BoundOverlap::Partial == octree_node.visible)
 			{
 				if (octree_node.first_child_index != -1)
@@ -373,19 +403,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
-		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
-		}
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
 		auto const & octree_node = octree_[index];
 		if ((octree_node.visible != BoundOverlap::No) || force)
@@ -394,21 +414,35 @@ namespace KlayGE
 			{
 				if ((BoundOverlap::No == node->VisibleMark()) && node->Visible())
 				{
-					auto visible = this->VisibleTestFromParent(*node, camera.ForwardVec(), camera.EyePos(), view_proj);
-					if (BoundOverlap::Partial == visible)
+					BoundOverlap visible = BoundOverlap::No;
+					for (uint32_t i = 0; i < num_cameras; ++i)
 					{
-						AABBox const & aabb_ws = node->PosBoundWS();
-						if (node->Parent() || (small_obj_threshold_ <= 0)
-							|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
-								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_)))
+						auto const& camera = *viewport.Camera(i);
+						float4x4 const& view_proj = camera_view_projs_[i];
+
+						auto visible_in_camera = this->VisibleTestFromParent(*node, camera.ForwardVec(), camera.EyePos(), view_proj);
+						if (BoundOverlap::Partial == visible_in_camera)
 						{
-							visible = frustum_->Intersect(aabb_ws);
+							AABBox const& aabb_ws = node->PosBoundWS();
+							if (node->Parent() || (small_obj_threshold_ <= 0)
+								|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
+									&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_)))
+							{
+								visible_in_camera = camera_frustums_[i]->Intersect(aabb_ws);
+							}
+							else
+							{
+								visible_in_camera = BoundOverlap::No;
+							}
 						}
-						else
+
+						visible = std::max(visible, visible_in_camera);
+						if (visible == BoundOverlap::Yes)
 						{
-							visible = BoundOverlap::No;
+							break;
 						}
 					}
+
 					node->VisibleMark(visible);
 
 					if (visible != BoundOverlap::No)

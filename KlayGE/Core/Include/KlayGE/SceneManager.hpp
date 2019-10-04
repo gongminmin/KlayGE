@@ -115,7 +115,8 @@ namespace KlayGE
 
 	protected:
 		std::vector<CameraPtr> frame_cameras_;
-		Frustum const * frustum_;
+		std::vector<Frustum const*> camera_frustums_;
+		std::vector<float4x4> camera_view_projs_;
 		std::vector<LightSourcePtr> frame_lights_;
 		SceneNode scene_root_;
 		SceneNode overlay_root_;
