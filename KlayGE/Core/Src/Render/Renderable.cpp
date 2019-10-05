@@ -205,9 +205,9 @@ namespace KlayGE
 
 				switch (type_)
 				{
-				case PT_OpaqueGBufferMRT:
-				case PT_TransparencyBackGBufferMRT:
-				case PT_TransparencyFrontGBufferMRT:
+				case PT_OpaqueGBuffer:
+				case PT_TransparencyBackGBuffer:
+				case PT_TransparencyFrontGBuffer:
 				case PT_GenReflectiveShadowMap:
 					*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 					break;
@@ -448,20 +448,20 @@ namespace KlayGE
 	{
 		if (this->AlphaTest())
 		{
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferAlphaTestTech");
 			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestTech");
 			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 		}
 		else
 		{
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferTech");
 			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapTech");
 			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapTech");
 		}
-		gbuffer_alpha_blend_back_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-		gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+		gbuffer_alpha_blend_back_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+		gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
 		special_shading_tech_ = effect_->TechniqueByName("SpecialShadingTech");
 		special_shading_alpha_blend_back_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
 		special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
@@ -473,14 +473,14 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_OpaqueGBufferMRT:
-			return gbuffer_mrt_tech_;
+		case PT_OpaqueGBuffer:
+			return gbuffer_tech_;
 
-		case PT_TransparencyBackGBufferMRT:
-			return gbuffer_alpha_blend_back_mrt_tech_;
+		case PT_TransparencyBackGBuffer:
+			return gbuffer_alpha_blend_back_tech_;
 
-		case PT_TransparencyFrontGBufferMRT:
-			return gbuffer_alpha_blend_front_mrt_tech_;
+		case PT_TransparencyFrontGBuffer:
+			return gbuffer_alpha_blend_front_tech_;
 
 		case PT_GenShadowMap:
 			return gen_shadow_map_tech_;

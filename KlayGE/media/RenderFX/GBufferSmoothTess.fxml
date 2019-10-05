@@ -33,7 +33,7 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="GBufferSmoothTessMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="GBufferSmoothTessTech" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>

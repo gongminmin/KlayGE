@@ -76,7 +76,7 @@ void FoliageGBufferVS(uint instance_id : SV_InstanceID,
 		]]>
 	</shader>
 
-	<technique name="FoliageGBufferMRT" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="FoliageGBuffer" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="FoliageGBufferVS()"/>
 		</pass>

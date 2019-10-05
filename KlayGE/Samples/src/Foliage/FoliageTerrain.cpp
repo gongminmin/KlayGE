@@ -98,8 +98,8 @@ namespace KlayGE
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("GBufferFoliageImpostor.fxml"));
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			technique_ = gbuffer_mrt_tech_;
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferAlphaTestTech");
+			technique_ = gbuffer_tech_;
 
 			pos_aabb_ = aabbox;
 

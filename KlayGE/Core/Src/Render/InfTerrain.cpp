@@ -446,20 +446,20 @@ namespace KlayGE
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
 		{
-			terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
-			terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
-			terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
-			terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
+			terrain_gbuffer_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillTech");
+			terrain_gbuffer_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineTech");
+			terrain_gbuffer_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillTech");
+			terrain_gbuffer_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineTech");
 			gen_shadow_map_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
 			gen_csm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
 			gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
 		}
 		else
 		{
-			terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTNoVpRtTech");
-			terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTNoVpRtTech");
-			terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTNoVpRtTech");
-			terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTNoVpRtTech");
+			terrain_gbuffer_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillNoVpRtTech");
+			terrain_gbuffer_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineNoVpRtTech");
+			terrain_gbuffer_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillNoVpRtTech");
+			terrain_gbuffer_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineNoVpRtTech");
 			gen_shadow_map_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapNoVpRtTech");
 			gen_csm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapNoVpRtTech");
 			gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapNoVpRtTech");
@@ -515,8 +515,8 @@ namespace KlayGE
 			tech_index += 1;
 		}
 
-		gbuffer_mrt_tech_ = terrain_gbuffer_mrt_techs_[tech_index];
-		technique_ = gbuffer_mrt_tech_;
+		gbuffer_tech_ = terrain_gbuffer_techs_[tech_index];
+		technique_ = gbuffer_tech_;
 	}
 
 	void HQTerrainRenderable::CreateNonTessIB()
@@ -672,7 +672,7 @@ namespace KlayGE
 		{
 			switch (type_)
 			{
-			case PT_OpaqueGBufferMRT:
+			case PT_OpaqueGBuffer:
 			case PT_OpaqueShading:
 			case PT_OpaqueSpecialShading:
 				need_tess = true;

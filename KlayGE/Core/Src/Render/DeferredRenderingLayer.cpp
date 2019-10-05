@@ -1923,7 +1923,7 @@ namespace KlayGE
 		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 			[this, vp_index, pass_tb]
 			{
-				return this->GBufferGenerationDRJob(viewports_[vp_index], ComposePassType(PRT_MRT, pass_tb, PC_GBuffer));
+				return this->GBufferGenerationDRJob(viewports_[vp_index], ComposePassType(PRT_GBuffer, pass_tb, PC_GBuffer));
 			}));
 		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->RenderingStatsDRJob(); }));
 		jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
@@ -4219,7 +4219,7 @@ namespace KlayGE
 
 		if (!decals_.empty())
 		{
-			this->RenderDecals(pvp, PT_OpaqueGBufferMRT);
+			this->RenderDecals(pvp, PT_OpaqueGBuffer);
 		}
 
 		return 0;

@@ -41,9 +41,9 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("FoggySkyBox.fxml");
 
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
+			gbuffer_tech_ = effect->TechniqueByName("GBufferSkyBoxTech");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
-			this->Technique(effect, gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_tech_);
 		}
 		
 		void FogColor(Color const & clr)

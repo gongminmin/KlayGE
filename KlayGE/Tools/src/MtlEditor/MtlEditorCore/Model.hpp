@@ -34,7 +34,7 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechnique* visualize_gbuffer_mrt_techs_[2];
+	KlayGE::RenderTechnique* visualize_gbuffer_techs_[2];
 
 	bool is_skinned_;
 };

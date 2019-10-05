@@ -89,7 +89,7 @@ namespace
 		{
 			switch (type)
 			{
-			case PT_OpaqueGBufferMRT:
+			case PT_OpaqueGBuffer:
 				technique_ = depth_tech_;
 				break;
 
@@ -952,7 +952,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
 				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
 
-				terrain_->Pass(PT_OpaqueGBufferMRT);
+				terrain_->Pass(PT_OpaqueGBuffer);
 				terrain_->Visible(true);
 				ps_->RootNode()->Visible(false);
 			}

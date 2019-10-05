@@ -45,17 +45,17 @@ namespace
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
 			{
-				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
+				gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFront");
 				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
 				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
 			}
 			else
 			{
-				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRTNoVpRt");
+				gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontNoVpRt");
 				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFrontNoVpRt");
 				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFrontNoVpRt");
 			}
-			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
+			technique_ = gbuffer_alpha_blend_front_tech_;
 
 			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");
 
@@ -142,9 +142,9 @@ namespace
 
 			switch (type_)
 			{
-			case PT_OpaqueGBufferMRT:
-			case PT_TransparencyBackGBufferMRT:
-			case PT_TransparencyFrontGBufferMRT:
+			case PT_OpaqueGBuffer:
+			case PT_TransparencyBackGBuffer:
+			case PT_TransparencyFrontGBuffer:
 				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 				break;
 
@@ -755,9 +755,9 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("Ocean.fxml");
 
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
+			gbuffer_tech_ = effect->TechniqueByName("GBufferSkyBoxTech");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
-			this->Technique(effect, gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_tech_);
 		}
 		
 		void FogColor(Color const & clr)

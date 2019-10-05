@@ -118,9 +118,9 @@ void DetailedSkinnedMesh::UpdateTechniques()
 
 	if (visualize_ >= 0)
 	{
-		gbuffer_mrt_tech_ = model_->visualize_gbuffer_mrt_techs_[visualize_];
-		gbuffer_alpha_blend_back_mrt_tech_ = gbuffer_mrt_tech_;
-		gbuffer_alpha_blend_front_mrt_tech_ = gbuffer_mrt_tech_;
+		gbuffer_tech_ = model_->visualize_gbuffer_techs_[visualize_];
+		gbuffer_alpha_blend_back_tech_ = gbuffer_tech_;
+		gbuffer_alpha_blend_front_tech_ = gbuffer_tech_;
 	}
 }
 
@@ -456,18 +456,18 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		effect_ = SyncLoadRenderEffect("MtlEditor.fxml");
 	}
 
-	std::string g_buffer_mrt_tech_str;
+	std::string g_buffer_tech_str;
 	for (int vis = 0; vis < 2; ++ vis)
 	{
 		if (0 == vis)
 		{
-			g_buffer_mrt_tech_str = "VisualizeVertexMRTTech";
+			g_buffer_tech_str = "VisualizeVertexTech";
 		}
 		else
 		{
-			g_buffer_mrt_tech_str = "VisualizeTextureMRTTech";
+			g_buffer_tech_str = "VisualizeTextureTech";
 		}
-		visualize_gbuffer_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_mrt_tech_str);
+		visualize_gbuffer_techs_[vis] = effect_->TechniqueByName(g_buffer_tech_str);
 	}
 
 	is_skinned_ = has_skinned;

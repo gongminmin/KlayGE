@@ -196,7 +196,7 @@ void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="GBufferFlatTessMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="GBufferFlatTessTech" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>

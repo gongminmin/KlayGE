@@ -159,7 +159,7 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 				auto mesh = scene_model->Mesh(i).get();
 
 				while (!mesh->AllHWResourceReady());
-				mesh->Pass(PT_OpaqueGBufferMRT);
+				mesh->Pass(PT_OpaqueGBuffer);
 				mesh->Render();
 			}
 		}

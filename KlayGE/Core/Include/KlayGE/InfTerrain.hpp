@@ -211,7 +211,7 @@ namespace KlayGE
 
 		float3 texture_world_offset_;
 
-		RenderTechnique* terrain_gbuffer_mrt_techs_[4];
+		RenderTechnique* terrain_gbuffer_techs_[4];
 		RenderEffectParameter* height_map_param_;
 		RenderEffectParameter* gradient_map_param_;
 		RenderEffectParameter* mask_map_param_;

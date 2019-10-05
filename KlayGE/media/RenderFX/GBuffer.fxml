@@ -167,7 +167,7 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	return normal;
 }
 
-void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
+void ConstructGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 					out float4 rt0, out float4 rt1)
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
@@ -176,29 +176,29 @@ void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_
 	float metalness = MetalnessNode(texcoord_2xy.xy);
 	float glossiness = GlossinessNode(texcoord_2xy.xy);
 
-	StoreGBufferMRT(normal, glossiness, albedo, metalness,
+	StoreGBuffer(normal, glossiness, albedo, metalness,
 		rt0, rt1);
 }
 
-void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					bool is_front_face : SV_IsFrontFace,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
+	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 
-void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+void GBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					bool is_front_face : SV_IsFrontFace,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	float opacity = OpacityNode(texcoord_2xy.xy);
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
+	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 
-void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+void GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
@@ -206,25 +206,25 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
-	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, rt0, rt1);
+	ConstructGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, rt0, rt1);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferMRTTech">
+	<technique name="GBufferTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaTestMRTTech" inherit="GBufferMRTTech">
+	<technique name="GBufferAlphaTestTech" inherit="GBufferTech">
 		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestMRTPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendBackMRTTech" inherit="GBufferMRTTech">
+	<technique name="GBufferAlphaBlendBackTech" inherit="GBufferTech">
 		<pass name="p0">
 			<state name="depth_func" value="greater"/>
 
@@ -239,10 +239,10 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="replace"/>
 
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaBlendPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
+	<technique name="GBufferAlphaBlendFrontTech" inherit="GBufferAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
 
@@ -250,13 +250,13 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 		</pass>
 	</technique>
 
-	<technique name="GenReflectiveShadowMapTech" inherit="GBufferMRTTech">
+	<technique name="GenReflectiveShadowMapTech" inherit="GBufferTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
 
-	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GBufferAlphaTestMRTTech">
+	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GBufferAlphaTestTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 		</pass>

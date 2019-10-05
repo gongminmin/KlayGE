@@ -145,14 +145,14 @@ void VisualizeVertexVS(uint instance_id : SV_InstanceID,
 	oClr = VisualizeVertex(result_pos, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2], blend_weights, blend_indices, oTex);
 }
 
-void VisualizeVertexMRTPS(float4 clr : COLOR,
+void VisualizeVertexPS(float4 clr : COLOR,
 				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = 0;
 	rt1 = clr;
 }
 
-void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
+void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = 0;
@@ -161,7 +161,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="VisualizeVertexMRTTech">
+	<technique name="VisualizeVertexTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
@@ -175,11 +175,11 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexMRTPS()"/>
+			<state name="pixel_shader" value="VisualizeVertexPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureMRTTech">
+	<technique name="VisualizeTextureTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
@@ -193,7 +193,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureMRTPS()"/>
+			<state name="pixel_shader" value="VisualizeTexturePS()"/>
 		</pass>
 	</technique>
 

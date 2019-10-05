@@ -476,8 +476,8 @@ namespace KlayGE
 	{
 		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
 
-		gbuffer_mrt_tech_ = effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
-		technique_ = gbuffer_mrt_tech_;
+		gbuffer_tech_ = effect_->TechniqueByName("DecalGBufferAlphaTestTech");
+		technique_ = gbuffer_tech_;
 
 		pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
@@ -533,9 +533,9 @@ namespace KlayGE
 
 		switch (type_)
 		{
-		case PT_OpaqueGBufferMRT:
-		case PT_TransparencyBackGBufferMRT:
-		case PT_TransparencyFrontGBufferMRT:
+		case PT_OpaqueGBuffer:
+		case PT_TransparencyBackGBuffer:
+		case PT_TransparencyFrontGBuffer:
 			*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
 			break;

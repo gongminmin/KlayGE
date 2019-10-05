@@ -52,7 +52,7 @@ namespace KlayGE
 
 	enum PassRT
 	{
-		PRT_MRT = 0,
+		PRT_GBuffer = 0,
 		PRT_ShadowMap,
 		PRT_CascadedShadowMap,
 		PRT_ReflectiveShadowMap,
@@ -70,9 +70,9 @@ namespace KlayGE
 
 	enum PassType
 	{
-		PT_OpaqueGBufferMRT = MakePassType<PRT_MRT, PTB_Opaque, PC_GBuffer>::value,
-		PT_TransparencyBackGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyBack, PC_GBuffer>::value,
-		PT_TransparencyFrontGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyFront, PC_GBuffer>::value,
+		PT_OpaqueGBuffer = MakePassType<PRT_GBuffer, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyFront, PC_GBuffer>::value,
 		
 		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
@@ -282,9 +282,9 @@ namespace KlayGE
 
 		// For deferred only
 
-		RenderTechnique* gbuffer_mrt_tech_;
-		RenderTechnique* gbuffer_alpha_blend_back_mrt_tech_;
-		RenderTechnique* gbuffer_alpha_blend_front_mrt_tech_;
+		RenderTechnique* gbuffer_tech_;
+		RenderTechnique* gbuffer_alpha_blend_back_tech_;
+		RenderTechnique* gbuffer_alpha_blend_front_tech_;
 		RenderTechnique* gen_shadow_map_tech_;
 		RenderTechnique* gen_csm_tech_;
 		RenderTechnique* gen_rsm_tech_;

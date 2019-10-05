@@ -124,8 +124,8 @@ namespace
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Imposter.fxml"));
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
-			technique_ = gbuffer_mrt_tech_;
+			gbuffer_tech_ = effect_->TechniqueByName("ImpostorGBufferAlphaTest");
+			technique_ = gbuffer_tech_;
 
 			pos_aabb_ = aabbox;
 

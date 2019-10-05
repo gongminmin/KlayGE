@@ -58,7 +58,7 @@ namespace
 				technique_ = back_face_depth_tech_;
 				break;
 
-			case PT_TransparencyBackGBufferMRT:
+			case PT_TransparencyBackGBuffer:
 				technique_ = back_face_tech_;
 				break;
 
@@ -284,7 +284,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_buffer_);
 			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
-			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBuffer);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -321,7 +321,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			// Pass 1: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
 
-			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBuffer);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}

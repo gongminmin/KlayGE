@@ -45,7 +45,7 @@ void ImpostorGBufferVS(uint instance_id : SV_InstanceID,
 	oScreenTc = EncodeSSTexcoord(oPos);
 }
 
-void ImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+void ImpostorGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = normal_tex.Sample(bilinear_sampler, texcoord_2xy.xy);
@@ -55,10 +55,10 @@ void ImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to
 		]]>
 	</shader>
 
-	<technique name="ImpostorGBufferAlphaTestMRT" inherit="GBufferAlphaTestMRTTech">
+	<technique name="ImpostorGBufferAlphaTest" inherit="GBufferAlphaTestTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="ImpostorGBufferVS()"/>
-			<state name="pixel_shader" value="ImpostorGBufferAlphaTestMRTPS()"/>
+			<state name="pixel_shader" value="ImpostorGBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
 </effect>
