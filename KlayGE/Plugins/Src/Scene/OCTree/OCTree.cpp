@@ -245,12 +245,12 @@ namespace KlayGE
 							{
 								visible_in_camera = BoundOverlap::Yes;
 							}
+						}
 
-							visible = std::max(visible, visible_in_camera);
-							if (visible == BoundOverlap::Yes)
-							{
-								break;
-							}
+						visible = std::max(visible, visible_in_camera);
+						if (visible == BoundOverlap::Yes)
+						{
+							break;
 						}
 					}
 

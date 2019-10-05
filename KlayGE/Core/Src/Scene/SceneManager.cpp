@@ -156,14 +156,13 @@ namespace KlayGE
 						{
 							visible_in_camera = camera_frustums_[i]->Intersect(node.PosBoundWS());
 						}
-
-						visible = std::max(visible, visible_in_camera);
-						if (visible == BoundOverlap::Yes)
-						{
-							break;
-						}
 					}
 
+					visible = std::max(visible, visible_in_camera);
+					if (visible == BoundOverlap::Yes)
+					{
+						break;
+					}
 				}
 			}
 
