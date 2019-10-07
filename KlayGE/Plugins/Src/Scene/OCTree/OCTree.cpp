@@ -171,26 +171,33 @@ namespace KlayGE
 			{
 				auto& node = *sn;
 				BoundOverlap visible;
-				if (node.Visible() && node.Updated())
+				if (node.Visible())
 				{
-					uint32_t const attr = node.Attrib();
-					if (attr & SceneNode::SOA_Cullable)
+					if (node.Updated())
 					{
-						if (small_obj_threshold_ > 0)
+						uint32_t const attr = node.Attrib();
+						if (attr & SceneNode::SOA_Cullable)
 						{
-							AABBox const & aabb_ws = node.PosBoundWS();
-							visible = BoundOverlap::No;
-							for (uint32_t i = 0; i < num_cameras; ++i)
+							if (small_obj_threshold_ > 0)
 							{
-								auto const& camera = *viewport.Camera(i);
-								float4x4 const& view_proj = camera_view_projs_[i];
-
-								if ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_) &&
-									(MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+								AABBox const& aabb_ws = node.PosBoundWS();
+								visible = BoundOverlap::No;
+								for (uint32_t i = 0; i < num_cameras; ++i)
 								{
-									visible = BoundOverlap::Yes;
-									break;
+									auto const& camera = *viewport.Camera(i);
+									float4x4 const& view_proj = camera_view_projs_[i];
+
+									if ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_) &&
+										(MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+									{
+										visible = BoundOverlap::Yes;
+										break;
+									}
 								}
+							}
+							else
+							{
+								visible = BoundOverlap::Yes;
 							}
 						}
 						else
@@ -222,31 +229,14 @@ namespace KlayGE
 			{
 				auto& node = *sn;
 				BoundOverlap visible = node.VisibleMark();
-				if (node.Visible() && (visible != BoundOverlap::No))
+				uint32_t const attr = node.Attrib();
+				if (node.Visible() && (visible == BoundOverlap::Partial) && (attr & SceneNode::SOA_Cullable) &&
+					(attr & SceneNode::SOA_Moveable))
 				{
 					visible = BoundOverlap::No;
 					for (uint32_t i = 0; i < num_cameras; ++i)
 					{
-						auto const& camera = *viewport.Camera(i);
-						float4x4 const& view_proj = camera_view_projs_[i];
-
-						auto visible_in_camera = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
-						if (BoundOverlap::Partial == visible_in_camera)
-						{
-							uint32_t const attr = node.Attrib();
-							if (attr & SceneNode::SOA_Cullable)
-							{
-								if (attr & SceneNode::SOA_Moveable)
-								{
-									visible_in_camera = camera_frustums_[i]->Intersect(node.PosBoundWS());
-								}
-							}
-							else
-							{
-								visible_in_camera = BoundOverlap::Yes;
-							}
-						}
-
+						BoundOverlap const visible_in_camera = camera_frustums_[i]->Intersect(node.PosBoundWS());
 						visible = std::max(visible, visible_in_camera);
 						if (visible == BoundOverlap::Yes)
 						{
@@ -414,33 +404,38 @@ namespace KlayGE
 			{
 				if ((BoundOverlap::No == node->VisibleMark()) && node->Visible())
 				{
-					BoundOverlap visible = BoundOverlap::No;
-					for (uint32_t i = 0; i < num_cameras; ++i)
+					BoundOverlap visible;
+					if (node->Updated())
 					{
-						auto const& camera = *viewport.Camera(i);
-						float4x4 const& view_proj = camera_view_projs_[i];
-
-						auto visible_in_camera = this->VisibleTestFromParent(*node, camera.ForwardVec(), camera.EyePos(), view_proj);
-						if (BoundOverlap::Partial == visible_in_camera)
+						visible = BoundOverlap::No;
+						for (uint32_t i = 0; i < num_cameras; ++i)
 						{
-							AABBox const& aabb_ws = node->PosBoundWS();
-							if (node->Parent() || (small_obj_threshold_ <= 0)
-								|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
-									&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_)))
+							auto const& camera = *viewport.Camera(i);
+							float4x4 const& view_proj = camera_view_projs_[i];
+
+							auto visible_in_camera = this->VisibleTestFromParent(*node, camera.ForwardVec(), camera.EyePos(), view_proj);
+							if (BoundOverlap::Partial == visible_in_camera)
 							{
-								visible_in_camera = camera_frustums_[i]->Intersect(aabb_ws);
+								if (node->Parent())
+								{
+									visible_in_camera = camera_frustums_[i]->Intersect(node->PosBoundWS());
+								}
+								else
+								{
+									visible_in_camera = BoundOverlap::No;
+								}
 							}
-							else
+
+							visible = std::max(visible, visible_in_camera);
+							if (visible == BoundOverlap::Yes)
 							{
-								visible_in_camera = BoundOverlap::No;
+								break;
 							}
 						}
-
-						visible = std::max(visible, visible_in_camera);
-						if (visible == BoundOverlap::Yes)
-						{
-							break;
-						}
+					}
+					else
+					{
+						visible = BoundOverlap::Yes;
 					}
 
 					node->VisibleMark(visible);
