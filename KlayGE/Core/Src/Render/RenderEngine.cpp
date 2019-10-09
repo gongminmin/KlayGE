@@ -1026,7 +1026,7 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t RenderEngine::NumCameraInstances() const
+	uint32_t RenderEngine::NumRealizedCameraInstances() const
 	{
 		return (num_camera_instances_ == 0) ? cur_frame_buffer_->Viewport()->NumCameras() : num_camera_instances_;
 	}
@@ -1677,9 +1677,12 @@ namespace KlayGE
 		predefined_cbuffer_ = effect_->CBufferByName("klayge_camera");
 
 		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
+		camera_indices_offset_ = effect_->ParameterByName("camera_indices")->CBufferOffset();
 		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
 
 		this->NumCameras(*predefined_cbuffer_) = 1;
+
+		this->CameraIndices(*predefined_cbuffer_, 0) = 0;
 
 		CameraInfo empty = {};
 		this->Camera(*predefined_cbuffer_, 0) = empty;
@@ -1690,9 +1693,14 @@ namespace KlayGE
 		return *cbuff.template VariableInBuff<uint32_t>(num_cameras_offset_);
 	}
 
+	uint32_t& RenderEngine::PredefinedCameraCBuffer::CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<uint32_t>(camera_indices_offset_) + index);
+	}
+
 	RenderEngine::PredefinedCameraCBuffer::CameraInfo& RenderEngine::PredefinedCameraCBuffer::Camera(
 		RenderEffectConstantBuffer& cbuff, uint32_t index) const
 	{
-		return *(cbuff.template VariableInBuff<RenderEngine::PredefinedCameraCBuffer::CameraInfo>(cameras_offset_) + index);
+		return *(cbuff.template VariableInBuff<CameraInfo>(cameras_offset_) + index);
 	}
 }

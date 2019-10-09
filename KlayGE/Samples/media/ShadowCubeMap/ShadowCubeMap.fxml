@@ -85,28 +85,36 @@ void GenCubeOneShadowMapVS(float4 Position : POSITION,
 void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
 	PS_IN output;
-	for (int f = 0; f < 6; ++ f)
+	for (uint f = 0; f < 6; ++f)
 	{
-		output.rt_index = f;
-
-		float4x4 mvp = cameras[f].mvp;
-		float4 pos[3] =
-		{
-			mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
-		};
-		
 		[branch]
-		if (FrustumCulling(pos[0], pos[1], pos[2]))
+		if (f < num_cameras)
 		{
-			[unroll]
-			for (int v = 0; v < 3; ++ v)
+			output.rt_index = RenderTargetIndex(f);
+
+			float4x4 mvp = cameras[f].mvp;
+			float4 pos[3] =
 			{
-				output.pos = pos[v];
-				output.dist = in_dist[v];
-				out_stream.Append(output);
+				mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
+			};
+		
+			[branch]
+			if (FrustumCulling(pos[0], pos[1], pos[2]))
+			{
+				[unroll]
+				for (int v = 0; v < 3; ++ v)
+				{
+					output.pos = pos[v];
+					output.dist = in_dist[v];
+					out_stream.Append(output);
+				}
 			}
+			out_stream.RestartStrip();
 		}
-		out_stream.RestartStrip();
+		else
+		{
+			break;
+		}
 	}
 }
 		]]>
@@ -136,7 +144,7 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 	oPos = mul(Position, cameras[camera_index].mvp);
 
 	oDist.x = CalcDist(Position);
-	oDist.y = asfloat(camera_index);
+	oDist.y = asfloat(RenderTargetIndex(camera_index));
 }
 
 [maxvertexcount(3)]
@@ -186,7 +194,7 @@ void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 	oPos = mul(Position, cameras[camera_index].mvp);
 
 	oDist = CalcDist(Position);
-	oRtIndex = camera_index;
+	oRtIndex = RenderTargetIndex(camera_index);
 }
 #endif
 		]]>
@@ -209,24 +217,28 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 						uint instance_id : SV_GSInstanceID,
 						inout TriangleStream<PS_IN> out_stream)
 {
-	PS_IN output;
-	output.rt_index = instance_id;
-
-	float4x4 mvp = cameras[instance_id].mvp;
-	float4 pos[3] =
-	{
-		mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
-	};
-
 	[branch]
-	if (FrustumCulling(pos[0], pos[1], pos[2]))
+	if (instance_id < num_cameras)
 	{
-		[unroll]
-		for (int v = 0; v < 3; ++ v)
+		PS_IN output;
+		output.rt_index = RenderTargetIndex(instance_id);
+
+		float4x4 mvp = cameras[instance_id].mvp;
+		float4 pos[3] =
 		{
-			output.pos = pos[v];
-			output.dist = in_dist[v];
-			out_stream.Append(output);
+			mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
+		};
+
+		[branch]
+		if (FrustumCulling(pos[0], pos[1], pos[2]))
+		{
+			[unroll]
+			for (int v = 0; v < 3; ++ v)
+			{
+				output.pos = pos[v];
+				output.dist = in_dist[v];
+				out_stream.Append(output);
+			}
 		}
 	}
 }

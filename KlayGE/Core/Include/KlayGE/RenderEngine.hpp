@@ -182,7 +182,10 @@ namespace KlayGE
 		{
 			num_camera_instances_ = num;
 		}
-		uint32_t NumCameraInstances() const;
+		uint32_t NumCameraInstances() const
+		{
+			return num_camera_instances_;
+		}
 
 		// Render a frame when no pending message
 		virtual void Refresh();
@@ -365,6 +368,8 @@ namespace KlayGE
 		class KLAYGE_CORE_API PredefinedCameraCBuffer
 		{
 		public:
+			static constexpr uint32_t max_num_cameras = 8;
+
 			struct CameraInfo
 			{
 				alignas(16) float4x4 model_view;
@@ -389,6 +394,7 @@ namespace KlayGE
 			}
 
 			uint32_t& NumCameras(RenderEffectConstantBuffer& cbuff) const;
+			uint32_t& CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
 			CameraInfo& Camera(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
 
 		private:
@@ -396,6 +402,7 @@ namespace KlayGE
 			RenderEffectConstantBuffer* predefined_cbuffer_;
 
 			uint32_t num_cameras_offset_;
+			uint32_t camera_indices_offset_;
 			uint32_t cameras_offset_;
 		};
 
@@ -403,6 +410,7 @@ namespace KlayGE
 
 	protected:
 		void Destroy();
+		uint32_t NumRealizedCameraInstances() const;
 
 	private:
 		virtual void CheckConfig(RenderSettings& settings);

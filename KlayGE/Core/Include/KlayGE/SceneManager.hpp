@@ -110,8 +110,7 @@ namespace KlayGE
 
 		void UpdateThreadFunc();
 
-		BoundOverlap VisibleTestFromParent(SceneNode const & node, float3 const & view_dir, float3 const & eye_pos,
-			float4x4 const & view_proj);
+		BoundOverlap VisibleTestFromParent(SceneNode const & node, uint32_t camera_index);
 
 	protected:
 		std::vector<CameraPtr> frame_cameras_;
@@ -121,7 +120,8 @@ namespace KlayGE
 		SceneNode scene_root_;
 		SceneNode overlay_root_;
 
-		std::unordered_map<size_t, std::unique_ptr<BoundOverlap[]>> visible_marks_map_;
+		std::unordered_map<size_t, std::unique_ptr<std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras>[]>>
+			visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;

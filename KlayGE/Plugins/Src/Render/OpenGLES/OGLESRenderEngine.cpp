@@ -1042,7 +1042,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instances = rl.NumInstances() * this->NumCameraInstances();
+		uint32_t const num_instances = rl.NumInstances() * this->NumRealizedCameraInstances();
 		BOOST_ASSERT(num_instances != 0);
 
 		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0).GetShaderObject(effect));

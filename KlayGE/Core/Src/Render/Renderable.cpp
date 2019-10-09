@@ -136,31 +136,38 @@ namespace KlayGE
 					camera_cbuffer_ = camera_cbuffer_->Clone(*effect_);
 				}
 
+				auto const& pccb = re.PredefinedCameraCBufferInstance();
+
 				auto const& viewport = *re.CurFrameBuffer()->Viewport();
-				for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
+				uint32_t const num_cameras = viewport.NumCameras();
+				visible_in_cameras_ = 0;
+				for (uint32_t i = 0; i < num_cameras; ++i)
 				{
-					Camera const& camera = *viewport.Camera(i);
-
-					float4x4 cascade_crop_mat = float4x4::Identity();
-					bool need_cascade_crop_mat = false;
-					if (drl)
+					if ((curr_node_ == nullptr) || (curr_node_->VisibleMark(i) != BoundOverlap::No))
 					{
-						int32_t const cas_index = drl->CurrCascadeIndex();
-						if (cas_index >= 0)
+						Camera const& camera = *viewport.Camera(i);
+
+						float4x4 cascade_crop_mat = float4x4::Identity();
+						bool need_cascade_crop_mat = false;
+						if (drl)
 						{
-							cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-							need_cascade_crop_mat = true;
+							int32_t const cas_index = drl->CurrCascadeIndex();
+							if (cas_index >= 0)
+							{
+								cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+								need_cascade_crop_mat = true;
+							}
 						}
+
+						camera.Active(*camera_cbuffer_, visible_in_cameras_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat,
+							need_cascade_crop_mat);
+						pccb.CameraIndices(*camera_cbuffer_, visible_in_cameras_) = i;
+
+						++visible_in_cameras_;
 					}
-
-					camera.Active(
-						*camera_cbuffer_, i, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat, need_cascade_crop_mat);
 				}
 
-				{
-					auto const& pccb = re.PredefinedCameraCBufferInstance();
-					pccb.NumCameras(*camera_cbuffer_) = viewport.NumCameras();
-				}
+				pccb.NumCameras(*camera_cbuffer_) = visible_in_cameras_;
 
 				effect_->BindCBufferByIndex(camera_cbuff_index, camera_cbuffer_);
 			}
@@ -292,7 +299,18 @@ namespace KlayGE
 					this->BindSceneNode(node);
 
 					this->OnRenderBegin();
+
+					bool const auto_set_camera_instances = (re.NumCameraInstances() == 0);
+					if (auto_set_camera_instances)
+					{
+						re.NumCameraInstances(visible_in_cameras_);
+					}
 					re.Render(effect, tech, layout);
+					if (auto_set_camera_instances)
+					{
+						re.NumCameraInstances(0);
+					}
+
 					this->OnRenderEnd();
 				}
 			}

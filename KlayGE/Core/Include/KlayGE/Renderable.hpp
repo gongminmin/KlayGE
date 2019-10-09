@@ -313,6 +313,7 @@ namespace KlayGE
 		RenderEffectConstantBufferPtr mesh_cbuffer_;
 		RenderEffectConstantBufferPtr model_cbuffer_;
 		RenderEffectConstantBufferPtr camera_cbuffer_;
+		uint32_t visible_in_cameras_ = 0;
 	};
 
 	// TODO: Consider merging this with Renderable

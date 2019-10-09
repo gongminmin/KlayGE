@@ -48,6 +48,8 @@ namespace KlayGE
 			pos_aabb_os_ = MakeUniquePtr<AABBox>();
 			pos_aabb_ws_ = MakeUniquePtr<AABBox>();
 		}
+
+		this->FillVisibleMark(BoundOverlap::No);
 	}
 
 	SceneNode::SceneNode(std::wstring_view name, uint32_t attrib)
@@ -396,14 +398,21 @@ namespace KlayGE
 		return updated_ && !pos_aabb_dirty_;
 	}
 
-	void SceneNode::VisibleMark(BoundOverlap vm)
+	void SceneNode::FillVisibleMark(BoundOverlap vm)
 	{
-		visible_mark_ = vm;
+		visible_marks_.fill(vm);
 	}
 
-	BoundOverlap SceneNode::VisibleMark() const
+	void SceneNode::VisibleMark(uint32_t camera_index, BoundOverlap vm)
 	{
-		return visible_mark_;
+		BOOST_ASSERT(camera_index < visible_marks_.size());
+		visible_marks_[camera_index] = vm;
+	}
+
+	BoundOverlap SceneNode::VisibleMark(uint32_t camera_index) const
+	{
+		BOOST_ASSERT(camera_index < visible_marks_.size());
+		return visible_marks_[camera_index];
 	}
 
 	void SceneNode::SubThreadUpdate(float app_time, float elapsed_time)

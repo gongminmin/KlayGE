@@ -18,7 +18,8 @@
 
 	<cbuffer name="klayge_camera">
 		<parameter type="uint" name="num_cameras"/>
-		<parameter type="KlayGECameraInfo" name="cameras" array_size="6"/>
+		<parameter type="uint4" name="camera_indices" array_size="2"/>
+		<parameter type="KlayGECameraInfo" name="cameras" array_size="8"/>
 	</cbuffer>
 
 	<shader>
@@ -36,6 +37,11 @@ uint CameraIndex(uint instance_id)
 KlayGECameraInfo CameraFromInstance(uint instance_id)
 {
 	return cameras[CameraIndex(instance_id)];
+}
+
+uint RenderTargetIndex(uint camera_id)
+{
+	return camera_indices[camera_id / 4][camera_id % 4];
 }
 		]]>
 	</shader>

@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/SceneComponent.hpp>
 #include <KlayGE/Signal.hpp>
@@ -150,8 +151,9 @@ namespace KlayGE
 		void UpdateTransforms();
 		void UpdatePosBoundSubtree();
 		bool Updated() const;
-		void VisibleMark(BoundOverlap vm);
-		BoundOverlap VisibleMark() const;
+		void FillVisibleMark(BoundOverlap vm);
+		void VisibleMark(uint32_t camera_index, BoundOverlap vm);
+		BoundOverlap VisibleMark(uint32_t camera_index) const;
 
 		using UpdateEvent = Signal::Signal<void(SceneNode&, float, float)>;
 		UpdateEvent& OnSubThreadUpdate()
@@ -215,7 +217,7 @@ namespace KlayGE
 		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
 		bool pos_aabb_dirty_ = true;
-		BoundOverlap visible_mark_ = BoundOverlap::No;
+		std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras> visible_marks_;
 
 		UpdateEvent sub_thread_update_event_;
 		UpdateEvent main_thread_update_event_;

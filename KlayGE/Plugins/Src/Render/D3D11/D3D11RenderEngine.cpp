@@ -617,7 +617,7 @@ namespace KlayGE
 			break;
 		}
 
-		uint32_t const num_instances = rl.NumInstances() * this->NumCameraInstances();
+		uint32_t const num_instances = rl.NumInstances() * this->NumRealizedCameraInstances();
 
 		num_primitives_just_rendered_ += num_instances * prim_count;
 		num_vertices_just_rendered_ += num_instances * vertex_count;
