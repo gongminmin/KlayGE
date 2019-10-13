@@ -464,6 +464,9 @@ namespace KlayGE
 			gen_csm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapNoVpRtTech");
 			gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapNoVpRtTech");
 		}
+		gen_shadow_map_multi_view_tech_ = gen_shadow_map_tech_;
+		gen_csm_multi_view_tech_ = gen_csm_tech_;
+		gen_rsm_multi_view_tech_ = gen_rsm_tech_;
 
 		*deferred_effect->ParameterByName("vertex_per_tile_edge") = static_cast<int32_t>(VERTEX_PER_TILE_EDGE);
 		*deferred_effect->ParameterByName("patches_per_tile_edge") = int2(PATCHES_PER_TILE_EDGE, PATCHES_PER_TILE_EDGE - 1);
@@ -516,6 +519,7 @@ namespace KlayGE
 		}
 
 		gbuffer_tech_ = terrain_gbuffer_techs_[tech_index];
+		gbuffer_multi_view_tech_ = gbuffer_tech_;
 		technique_ = gbuffer_tech_;
 	}
 

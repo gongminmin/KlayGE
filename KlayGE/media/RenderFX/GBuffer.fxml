@@ -89,7 +89,10 @@
 
 	<shader>
 		<![CDATA[
-void GBufferVS(uint instance_id : SV_InstanceID,
+void GBufferVS(
+#if MULTI_VIEW_MODE
+			uint instance_id : SV_InstanceID,
+#endif
 			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
@@ -105,7 +108,18 @@ void GBufferVS(uint instance_id : SV_InstanceID,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
-			out float4 oPos : SV_Position)
+#if MULTI_VIEW_MODE
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+			out uint oRtIndex : SV_RenderTargetArrayIndex,
+			out float4 oPos : SV_Position
+#else
+			out float oRtIndex : TEXCOORD4,
+			out float4 oPos : POSITION
+#endif
+#else
+			out float4 oPos : SV_Position
+#endif
+			)
 {
 #if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
@@ -116,7 +130,12 @@ void GBufferVS(uint instance_id : SV_InstanceID,
 	int4 blend_indices = 0;
 #endif
 
-	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
 	float4x4 mvp = camera.mvp;
 	float4x4 model_view = camera.model_view;
 
@@ -144,6 +163,15 @@ void GBufferVS(uint instance_id : SV_InstanceID,
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	uint rt_index = RenderTargetIndex(camera_index);
+#if MULTI_VIEW_MODE
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = rt_index;
+#else
+	oRtIndex = rt_index + 0.5f;
+#endif
+#endif
 }
 
 float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
@@ -211,6 +239,54 @@ void GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z 
 		]]>
 	</shader>
 
+	<shader version="4">
+		<![CDATA[
+bool FrustumCulling(float4 pos0, float4 pos1, float4 pos2)
+{
+	float4 t0 = saturate(pos0.xyxy * float4(-1, -1, 1, 1) - pos0.w);
+	float4 t1 = saturate(pos1.xyxy * float4(-1, -1, 1, 1) - pos1.w);
+	float4 t2 = saturate(pos2.xyxy * float4(-1, -1, 1, 1) - pos2.w);
+	float4 t = t0 * t1 * t2;
+	return !any(t);
+}
+
+struct GBufferPS_In
+{
+	float4 texcoord_2xy : TEXCOORD0;
+	float4 ts_to_view0_2z : TEXCOORD1;
+	float3 ts_to_view1 : TEXCOORD2;
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD3;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle float4 in_ts_to_view0_2z[3] : TEXCOORD1,
+	triangle float3 in_ts_to_view1[3] : TEXCOORD2, triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD3,
+	triangle float in_rt_index[3] : TEXCOORD4, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<GBufferPS_In> out_stream)
+{
+	GBufferPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[branch]
+	if (FrustumCulling(in_position[0], in_position[1], in_position[2]))
+	{
+		[unroll]
+		for (int v = 0; v < 3; ++ v)
+		{
+			output.texcoord_2xy = in_texcoord_2xy[v];
+			output.ts_to_view0_2z = in_ts_to_view0_2z[v];
+			output.ts_to_view1 = in_ts_to_view1[v];
+			output.ss_tc = in_ss_tc[v];
+			output.position = in_position[v];
+			out_stream.Append(output);
+		}
+	}
+}
+		]]>
+	</shader>
+
 	<technique name="GBufferTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -250,21 +326,77 @@ void GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z 
 		</pass>
 	</technique>
 
+	<technique name="GBufferMultiViewTech" inherit="GBufferTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GBufferAlphaTestMultiViewTech" inherit="GBufferAlphaTestTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GBufferAlphaBlendBackMultiViewTech" inherit="GBufferAlphaBlendBackTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontMultiViewTech" inherit="GBufferAlphaBlendFrontTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="GBufferMultiViewNoVpRtTech" inherit="GBufferMultiViewTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaTestMultiViewNoVpRtTech" inherit="GBufferAlphaTestMultiViewTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendBackMultiViewNoVpRtTech" inherit="GBufferAlphaBlendBackMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontMultiViewNoVpRtTech" inherit="GBufferAlphaBlendFrontMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GenReflectiveShadowMapTech" inherit="GBufferTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
-
 	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GBufferAlphaTestTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
 
+	<technique name="GenReflectiveShadowMapMultiViewTech" inherit="GenReflectiveShadowMapTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GenReflectiveShadowMapAlphaTestMultiViewTech" inherit="GenReflectiveShadowMapAlphaTestTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="GenReflectiveShadowMapMultiViewNoVpRtTech" inherit="GenReflectiveShadowMapMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GenReflectiveShadowMapAlphaTestMultiViewNoVpRtTech" inherit="GenReflectiveShadowMapAlphaTestMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+
 	<shader>
 		<![CDATA[
-void GenShadowMapVS(uint instance_id : SV_InstanceID,
+void GenShadowMapVS(
+#if MULTI_VIEW_MODE
+						uint instance_id : SV_InstanceID,
+#endif
 						float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float4 tangent_quat : TANGENT,
@@ -277,7 +409,18 @@ void GenShadowMapVS(uint instance_id : SV_InstanceID,
 #endif
 #endif
 						out float3 oTc : TEXCOORD0,
-						out float4 oPos : SV_Position)
+#if MULTI_VIEW_MODE
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+						out uint oRtIndex : SV_RenderTargetArrayIndex,
+						out float4 oPos : SV_Position
+#else
+						out float oRtIndex : TEXCOORD1,
+						out float4 oPos : POSITION
+#endif
+#else
+						out float4 oPos : SV_Position
+#endif
+						)
 {
 #if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
@@ -288,7 +431,12 @@ void GenShadowMapVS(uint instance_id : SV_InstanceID,
 	int4 blend_indices = 0;
 #endif
 
-	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
 	float4x4 mvp = camera.mvp;
 	float4x4 model_view = camera.model_view;
 
@@ -304,6 +452,15 @@ void GenShadowMapVS(uint instance_id : SV_InstanceID,
 
 	oPos = mul(float4(result_pos, 1), mvp);
 	oTc.z = mul(float4(result_pos, 1), model_view).z;
+
+	uint rt_index = RenderTargetIndex(camera_index);
+#if MULTI_VIEW_MODE
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = rt_index;
+#else
+	oRtIndex = rt_index + 0.5f;
+#endif
+#endif
 }
 
 float4 GenShadowMapPS(float3 tc : TEXCOORD0) : SV_Target
@@ -316,6 +473,37 @@ float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 	float opacity = OpacityNode(tc.xy);
 	clip(opacity - alpha_test_threshold);
 	return tc.z;
+}
+		]]>
+	</shader>
+
+	<shader version="4">
+		<![CDATA[
+struct GenShadowMapPS_In
+{
+	float3 tc : TEXCOORD0;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void GenShadowCubemapNoVpRtGS(triangle float3 in_tc[3] : TEXCOORD0, triangle float in_rt_index[3] : TEXCOORD1,
+	triangle float4 in_position[3] : POSITION, inout TriangleStream<GenShadowMapPS_In> out_stream)
+{
+	GenShadowMapPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[branch]
+	if (FrustumCulling(in_position[0], in_position[1], in_position[2]))
+	{
+		[unroll]
+		for (int v = 0; v < 3; ++ v)
+		{
+			output.tc = in_tc[v];
+			output.position = in_position[v];
+			out_stream.Append(output);
+		}
+	}
 }
 		]]>
 	</shader>
@@ -335,6 +523,24 @@ float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
+	<technique name="GenShadowMapMultiViewTech" inherit="GenShadowMapTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GenShadowMapAlphaTestMultiViewTech" inherit="GenShadowMapAlphaTestTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="GenShadowMapMultiViewNoVpRtTech" inherit="GenShadowMapMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GenShadowMapAlphaTestMultiViewNoVpRtTech" inherit="GenShadowMapMultiViewAlphaTestTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GenCascadedShadowMapTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -347,6 +553,24 @@ float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 	<technique name="GenCascadedShadowMapAlphaTestTech" inherit="GenCascadedShadowMapTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenCascadedShadowMapMultiViewTech" inherit="GenCascadedShadowMapTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="GenCascadedShadowMapAlphaTestMultiViewTech" inherit="GenCascadedShadowMapAlphaTestTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="GenCascadedShadowMapMultiViewNoVpRtTech" inherit="GenCascadedShadowMapMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GenCascadedShadowMapAlphaTestMultiViewNoVpRtTech" inherit="GenCascadedShadowMapAlphaTestMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
 		</pass>
 	</technique>
 
@@ -401,6 +625,32 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
+	<technique name="SpecialShadingMultiViewTech" inherit="SpecialShadingTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="SpecialShadingAlphaBlendBackMultiViewTech" inherit="SpecialShadingAlphaBlendBackTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+	<technique name="SpecialShadingAlphaBlendFrontMultiViewTech" inherit="SpecialShadingAlphaBlendFrontTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="SpecialShadingMultiViewNoVpRtTech" inherit="SpecialShadingMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="SpecialShadingAlphaBlendBackMultiViewNoVpRtTech" inherit="SpecialShadingAlphaBlendBackMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="SpecialShadingAlphaBlendFrontMultiViewNoVpRtTech" inherit="SpecialShadingAlphaBlendFrontMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
+		</pass>
+	</technique>
+
 	<shader>
 		<![CDATA[
 float4 SelectModePS() : SV_Target
@@ -416,6 +666,16 @@ float4 SelectModePS() : SV_Target
 
 			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="SelectModePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SelectModeMultiViewTech" inherit="SelectModeTech">
+		<macro name="MULTI_VIEW_MODE" value="1"/>
+	</technique>
+
+	<technique name="SelectModeMultiViewNoVpRtTech" inherit="SelectModeMultiViewTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferNoVpRtGS()"/>
 		</pass>
 	</technique>
 

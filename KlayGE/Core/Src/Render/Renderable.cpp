@@ -464,12 +464,29 @@ namespace KlayGE
 
 	void Renderable::UpdateTechniques()
 	{
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		bool const vp_rt_index_at_every_stage_support = re.DeviceCaps().vp_rt_index_at_every_stage_support;
+
 		if (this->AlphaTest())
 		{
 			gbuffer_tech_ = effect_->TechniqueByName("GBufferAlphaTestTech");
 			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestTech");
 			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+			if (vp_rt_index_at_every_stage_support)
+			{
+				gbuffer_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaTestMultiViewTech");
+				gen_shadow_map_multi_view_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestMultiViewTech");
+				gen_csm_multi_view_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestMultiViewTech");
+				gen_rsm_multi_view_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestMultiViewTech");
+			}
+			else
+			{
+				gbuffer_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaTestMultiViewNoVpRtTech");
+				gen_shadow_map_multi_view_tech_ = effect_->TechniqueByName("GenShadowMapAlphaTestMultiViewNoVpRtTech");
+				gen_csm_multi_view_tech_ = effect_->TechniqueByName("GenCascadedShadowMapAlphaTestMultiViewNoVpRtTech");
+				gen_rsm_multi_view_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestMultiViewNoVpRtTech");
+			}
 		}
 		else
 		{
@@ -477,12 +494,43 @@ namespace KlayGE
 			gen_shadow_map_tech_ = effect_->TechniqueByName("GenShadowMapTech");
 			gen_csm_tech_ = effect_->TechniqueByName("GenCascadedShadowMapTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapTech");
+			if (vp_rt_index_at_every_stage_support)
+			{
+				gbuffer_multi_view_tech_ = effect_->TechniqueByName("GBufferMultiViewTech");
+				gen_shadow_map_multi_view_tech_ = effect_->TechniqueByName("GenShadowMapMultiViewTech");
+				gen_csm_multi_view_tech_ = effect_->TechniqueByName("GenCascadedShadowMapMultiViewTech");
+				gen_rsm_multi_view_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapMultiViewTech");
+			}
+			else
+			{
+				gbuffer_multi_view_tech_ = effect_->TechniqueByName("GBufferMultiViewNoVpRtTech");
+				gen_shadow_map_multi_view_tech_ = effect_->TechniqueByName("GenShadowMapMultiViewNoVpRtTech");
+				gen_csm_multi_view_tech_ = effect_->TechniqueByName("GenCascadedShadowMapMultiViewNoVpRtTech");
+				gen_rsm_multi_view_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapMultiViewNoVpRtTech");
+			}
 		}
 		gbuffer_alpha_blend_back_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackTech");
 		gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
 		special_shading_tech_ = effect_->TechniqueByName("SpecialShadingTech");
 		special_shading_alpha_blend_back_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
 		special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
+		if (vp_rt_index_at_every_stage_support)
+		{
+			gbuffer_alpha_blend_back_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMultiViewTech");
+			gbuffer_alpha_blend_front_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMultiViewTech");
+			special_shading_multi_view_tech_ = effect_->TechniqueByName("SpecialShadingMultiViewTech");
+			special_shading_alpha_blend_back_multi_view_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendBackMultiViewTech");
+			special_shading_alpha_blend_front_multi_view_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontMultiViewTech");
+		}
+		else
+		{
+			gbuffer_alpha_blend_back_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMultiViewNoVpRtTech");
+			gbuffer_alpha_blend_front_multi_view_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMultiViewNoVpRtTech");
+			special_shading_multi_view_tech_ = effect_->TechniqueByName("SpecialShadingMultiViewNoVpRtTech");
+			special_shading_alpha_blend_back_multi_view_tech_ = effect_->TechniqueByName("SpecialShadingAlphaBlendBackMultiViewNoVpRtTech");
+			special_shading_alpha_blend_front_multi_view_tech_ =
+				effect_->TechniqueByName("SpecialShadingAlphaBlendFrontMultiViewNoVpRtTech");
+		}
 
 		select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 	}
@@ -500,6 +548,15 @@ namespace KlayGE
 		case PT_TransparencyFrontGBuffer:
 			return gbuffer_alpha_blend_front_tech_;
 
+		case PT_OpaqueGBufferMultiView:
+			return gbuffer_multi_view_tech_;
+
+		case PT_TransparencyBackGBufferMultiView:
+			return gbuffer_alpha_blend_back_multi_view_tech_;
+
+		case PT_TransparencyFrontGBufferMultiView:
+			return gbuffer_alpha_blend_front_multi_view_tech_;
+
 		case PT_GenShadowMap:
 			return gen_shadow_map_tech_;
 
@@ -508,6 +565,15 @@ namespace KlayGE
 
 		case PT_GenReflectiveShadowMap:
 			return gen_rsm_tech_;
+
+		case PT_GenShadowMapMultiView:
+			return gen_shadow_map_multi_view_tech_;
+
+		case PT_GenCascadedShadowMapMultiView:
+			return gen_csm_multi_view_tech_;
+
+		case PT_GenReflectiveShadowMapMultiView:
+			return gen_rsm_multi_view_tech_;
 
 		case PT_OpaqueReflection:
 			return reflection_tech_;
@@ -526,6 +592,15 @@ namespace KlayGE
 
 		case PT_TransparencyFrontSpecialShading:
 			return special_shading_alpha_blend_front_tech_;
+
+		case PT_OpaqueSpecialShadingMultiView:
+			return special_shading_multi_view_tech_;
+
+		case PT_TransparencyBackSpecialShadingMultiView:
+			return special_shading_alpha_blend_back_multi_view_tech_;
+
+		case PT_TransparencyFrontSpecialShadingMultiView:
+			return special_shading_alpha_blend_front_multi_view_tech_;
 
 		case PT_SimpleForward:
 			return simple_forward_tech_;

@@ -427,7 +427,8 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		tex_array_support_ = (caps.max_texture_array_length >= 4) && (caps.render_to_texture_array_support);
+		tex_array_support_ = (caps.max_texture_array_length >= 6) && caps.render_to_texture_array_support;
+		flexible_srvs_support_ = caps.flexible_srvs_support;
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		typed_uav_ = false;
@@ -654,11 +655,33 @@ namespace KlayGE
 
 		shadow_map_fb_ = rf.MakeFrameBuffer();
 		shadow_map_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, shadow_map_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		auto shadow_map_rtv = rf.Make2DRtv(shadow_map_tex_, 0, 1, 0);
-		shadow_map_fb_->Attach(FrameBuffer::Attachment::Color0, shadow_map_rtv);
+		shadow_map_rtv_ = rf.Make2DRtv(shadow_map_tex_, 0, 1, 0);
+		shadow_map_fb_->Attach(FrameBuffer::Attachment::Color0, shadow_map_rtv_);
 		shadow_map_depth_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		auto shadow_map_depth_view = rf.Make2DDsv(shadow_map_depth_tex_, 0, 1, 0);
-		shadow_map_fb_->Attach(shadow_map_depth_view);
+		auto shadow_map_depth_dsv = rf.Make2DDsv(shadow_map_depth_tex_, 0, 1, 0);
+		shadow_map_fb_->Attach(shadow_map_depth_dsv);
+		shadow_map_depth_srv_ = rf.MakeTextureSrv(shadow_map_depth_tex_);
+
+		if (tex_array_support_)
+		{
+			shadow_map_array_fb_ = rf.MakeFrameBuffer();
+			shadow_map_array_fb_->Viewport()->NumCameras(6);
+			shadow_map_array_tex_ =
+				rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 6, shadow_map_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			shadow_map_array_rtv_ = rf.Make2DRtv(shadow_map_array_tex_, 0, 6, 0);
+			shadow_map_array_fb_->Attach(FrameBuffer::Attachment::Color0, shadow_map_array_rtv_);
+			shadow_map_array_depth_tex_ =
+				rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 6, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			auto shadow_map_array_depth_dsv = rf.Make2DDsv(shadow_map_array_depth_tex_, 0, 6, 0);
+			shadow_map_array_fb_->Attach(shadow_map_array_depth_dsv);
+			if (flexible_srvs_support_)
+			{
+				for (uint32_t i = 0; i < 6; ++i)
+				{
+					shadow_map_array_depth_srvs_[i] = rf.MakeTextureSrv(shadow_map_array_depth_tex_, i, 1, 0, 1);
+				}
+			}
+		}
 
 		csm_fb_ = rf.MakeFrameBuffer();
 		csm_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2, SHADOW_MAP_SIZE * 2, 1, 1, shadow_map_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -741,7 +764,7 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		rsm_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(rsm_texs_[0], 0, 1, 0)); // normal (light space)
 		rsm_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(rsm_texs_[1], 0, 1, 0)); // albedo
-		rsm_fb_->Attach(shadow_map_depth_view);
+		rsm_fb_->Attach(shadow_map_depth_dsv);
 			
 		copy_to_light_buffer_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBuffer");
 		copy_to_light_buffer_i_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBufferI");
@@ -751,8 +774,7 @@ namespace KlayGE
 		csm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
 		csm_filter_pp_->InputPin(0, rf.MakeTextureSrv(csm_tex_));
 		depth_to_esm_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToESM");
-		depth_to_esm_pp_->InputPin(0, rf.MakeTextureSrv(shadow_map_depth_tex_));
-		depth_to_esm_pp_->OutputPin(0, shadow_map_rtv);
+		depth_to_esm_pp_->OutputPin(0, shadow_map_rtv_);
 		for (int i = 0; i < 2; ++ i)
 		{
 			depth_to_linear_pps_[i] = SyncLoadPostProcess("Depth.ppml", (i == 0) ? "DepthToLinear" : "DepthToLinearMS");
@@ -1995,7 +2017,15 @@ namespace KlayGE
 		case LightSource::LT_TubeArea:
 			if (0 == (attr & LightSource::LSA_NoShadow))
 			{
-				passes = 7;
+				if (tex_array_support_)
+				{
+					shadow_pt = PT_GenShadowMapMultiView;
+					passes = 2;
+				}
+				else
+				{
+					passes = 7;
+				}
 			}
 			break;
 
@@ -2339,69 +2369,105 @@ namespace KlayGE
 	void DeferredRenderingLayer::PostGenerateShadowMap(PerViewport const & pvp, int32_t light_index, int32_t index_in_pass)
 	{
 		LightSource::LightType const type = lights_[light_index]->Type();
-		auto const& shadow_map_camera = lights_[light_index]->SMCamera(
-			((type == LightSource::LT_Spot) || (type == LightSource::LT_Directional)) ? 0 : index_in_pass - 1);
 
-		PostProcessChainPtr pp_chain;
-		if (LightSource::LT_Directional == type)
+		if (tex_array_support_ &&
+			((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type) || (LightSource::LT_TubeArea == type)))
 		{
-			pp_chain = checked_pointer_cast<PostProcessChain>(csm_filter_pp_);
-			pp_chain->OutputPin(0, pvp.filtered_csm_slice_rtvs[index_in_pass - 1]);
-		}
-		else
-		{
+			auto const& shadow_map_camera = lights_[light_index]->SMCamera(0);
 			depth_to_esm_pp_->SetParam(0, shadow_map_camera->NearQFarParam());
 			depth_to_esm_pp_->SetParam(1, shadow_map_camera->InverseProjMatrix());
-			depth_to_esm_pp_->Apply();
 
-			pp_chain = checked_pointer_cast<PostProcessChain>(shadow_map_filter_pp_);
-			if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
-				|| (LightSource::LT_TubeArea == type))
+			PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(shadow_map_filter_pp_);
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(4);
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(4);
+			checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *shadow_map_camera);
+
+			for (uint32_t i = 0; i < 6; ++i)
 			{
-				pp_chain->OutputPin(
-					0, filtered_shadow_map_cube_face_rtvs_[shadow_map_light_indices_[light_index].first * 6 + index_in_pass - 1]);
-			}
-			else 
-			{
-				pp_chain->OutputPin(0, filtered_shadow_map_2d_slice_rtvs_[shadow_map_light_indices_[light_index].first]);
-				if (has_sss_objs_ && translucency_enabled_)
+				if (flexible_srvs_support_)
 				{
-					shadow_map_tex_->CopyToTexture(*unfiltered_shadow_map_2d_texs_[shadow_map_light_indices_[light_index].first]);
+					depth_to_esm_pp_->InputPin(0, shadow_map_array_depth_srvs_[i]);
 				}
-			}
-		}
+				else
+				{
+					shadow_map_array_depth_tex_->CopyToSubTexture2D(*shadow_map_depth_tex_, 0, 0, 0, 0, shadow_map_depth_tex_->Width(0),
+						shadow_map_depth_tex_->Height(0), i, 0, 0, 0, shadow_map_depth_tex_->Width(0), shadow_map_depth_tex_->Height(0));
+					depth_to_esm_pp_->InputPin(0, shadow_map_depth_srv_);
+				}
+				depth_to_esm_pp_->Apply();
 
-		int2 kernel_size;
-		if (LightSource::LT_Directional == type)
-		{
-			float3 const & scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
-			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(csm_tex_->Width(0));
-			kernel_size.x() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 4);
-			kernel_size.y() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 4);
+				pp_chain->OutputPin(
+					0, filtered_shadow_map_cube_face_rtvs_[shadow_map_light_indices_[light_index].first * 6 + i]);
+
+				pp_chain->Apply();
+			}
 		}
 		else
 		{
-			kernel_size.x() = 4;
-			kernel_size.y() = 4;
-		}
-		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
-		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
+			auto const& shadow_map_camera = lights_[light_index]->SMCamera(
+				((type == LightSource::LT_Spot) || (type == LightSource::LT_Directional)) ? 0 : index_in_pass - 1);
 
-		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *shadow_map_camera);
-		pp_chain->Apply();
-
-		if (LightSource::LT_Directional == type)
-		{
-			if (tex_array_support_)
+			PostProcessChainPtr pp_chain;
+			if (LightSource::LT_Directional == type)
 			{
-				if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
-				{
-					pvp.filtered_csm_texs[0]->BuildMipSubLevels();
-				}
+				pp_chain = checked_pointer_cast<PostProcessChain>(csm_filter_pp_);
+				pp_chain->OutputPin(0, pvp.filtered_csm_slice_rtvs[index_in_pass - 1]);
 			}
 			else
 			{
-				pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels();
+				depth_to_esm_pp_->InputPin(0, shadow_map_depth_srv_);
+				depth_to_esm_pp_->SetParam(0, shadow_map_camera->NearQFarParam());
+				depth_to_esm_pp_->SetParam(1, shadow_map_camera->InverseProjMatrix());
+				depth_to_esm_pp_->Apply();
+
+				pp_chain = checked_pointer_cast<PostProcessChain>(shadow_map_filter_pp_);
+				if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type) || (LightSource::LT_TubeArea == type))
+				{
+					pp_chain->OutputPin(
+						0, filtered_shadow_map_cube_face_rtvs_[shadow_map_light_indices_[light_index].first * 6 + index_in_pass - 1]);
+				}
+				else
+				{
+					pp_chain->OutputPin(0, filtered_shadow_map_2d_slice_rtvs_[shadow_map_light_indices_[light_index].first]);
+					if (has_sss_objs_ && translucency_enabled_)
+					{
+						shadow_map_tex_->CopyToTexture(*unfiltered_shadow_map_2d_texs_[shadow_map_light_indices_[light_index].first]);
+					}
+				}
+			}
+
+			int2 kernel_size;
+			if (LightSource::LT_Directional == type)
+			{
+				float3 const& scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
+				float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(csm_tex_->Width(0));
+				kernel_size.x() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 4);
+				kernel_size.y() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 4);
+			}
+			else
+			{
+				kernel_size.x() = 4;
+				kernel_size.y() = 4;
+			}
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
+
+			checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *shadow_map_camera);
+			pp_chain->Apply();
+
+			if (LightSource::LT_Directional == type)
+			{
+				if (tex_array_support_)
+				{
+					if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
+					{
+						pvp.filtered_csm_texs[0]->BuildMipSubLevels();
+					}
+				}
+				else
+				{
+					pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels();
+				}
 			}
 		}
 	}
@@ -4251,7 +4317,7 @@ namespace KlayGE
 		case LightSource::LT_Point:
 		case LightSource::LT_SphereArea:
 		case LightSource::LT_TubeArea:
-			last_pass_index = 6;
+			last_pass_index = tex_array_support_ ? 1 : 6;
 			break;
 
 		case LightSource::LT_Spot:
@@ -4297,6 +4363,16 @@ namespace KlayGE
 				shadow_map_fb_->AttachedDsv()->ClearDepth(1.0f);
 				break;
 
+			case PRT_ShadowMapMultiView:
+				for (uint32_t i = 0; i < 6; ++i)
+				{
+					shadow_map_array_fb_->Viewport()->Camera(i, light.SMCamera(i));
+				}
+				re.BindFrameBuffer(shadow_map_array_fb_);
+				shadow_map_array_fb_->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
+				shadow_map_array_fb_->AttachedDsv()->ClearDepth(1.0f);
+				break;
+
 			case PRT_CascadedShadowMap:
 				csm_fb_->Viewport()->Camera(shadow_map_camera);
 				re.BindFrameBuffer(csm_fb_);
@@ -4321,6 +4397,8 @@ namespace KlayGE
 
 	uint32_t DeferredRenderingLayer::IndirectLightingDRJob(PerViewport const & pvp, int32_t light_index)
 	{
+		depth_to_esm_pp_->InputPin(0, shadow_map_depth_srv_);
+
 		auto const& shadow_map_camera = rsm_fb_->Viewport()->Camera();
 		depth_to_esm_pp_->SetParam(0, shadow_map_camera->NearQFarParam());
 		depth_to_esm_pp_->SetParam(1, shadow_map_camera->InverseProjMatrix());

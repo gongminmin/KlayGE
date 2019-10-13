@@ -541,6 +541,7 @@ namespace KlayGE
 
 	private:
 		bool tex_array_support_;
+		bool flexible_srvs_support_;
 
 		// TODO: Remove the magic number
 		mutable RenderEffectPtr g_buffer_effects_[48];
@@ -643,7 +644,14 @@ namespace KlayGE
 		std::vector<std::pair<int32_t, uint32_t>> shadow_map_light_indices_;
 		FrameBufferPtr shadow_map_fb_;
 		TexturePtr shadow_map_tex_;
+		RenderTargetViewPtr shadow_map_rtv_;
 		TexturePtr shadow_map_depth_tex_;
+		ShaderResourceViewPtr shadow_map_depth_srv_;
+		FrameBufferPtr shadow_map_array_fb_;
+		TexturePtr shadow_map_array_tex_;
+		RenderTargetViewPtr shadow_map_array_rtv_;
+		TexturePtr shadow_map_array_depth_tex_;
+		ShaderResourceViewPtr shadow_map_array_depth_srvs_[6];
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
 		TexturePtr unfiltered_shadow_map_2d_texs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];

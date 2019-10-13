@@ -37,6 +37,7 @@ namespace KlayGE
 		PC_Shading,
 		PC_Reflection,
 		PC_SpecialShading,
+		PC_SpecialShadingMultiView,
 		PC_SimpleForward,
 		PC_VDM,
 		PC_None
@@ -53,9 +54,13 @@ namespace KlayGE
 	enum PassRT
 	{
 		PRT_GBuffer = 0,
+		PRT_GBufferMultiView,
 		PRT_ShadowMap,
+		PRT_ShadowMapMultiView,
 		PRT_CascadedShadowMap,
+		PRT_CascadedShadowMapMultiView,
 		PRT_ReflectiveShadowMap,
+		PRT_ReflectiveShadowMapMultiView,
 		PRT_None
 	};
 
@@ -73,10 +78,18 @@ namespace KlayGE
 		PT_OpaqueGBuffer = MakePassType<PRT_GBuffer, PTB_Opaque, PC_GBuffer>::value,
 		PT_TransparencyBackGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyBack, PC_GBuffer>::value,
 		PT_TransparencyFrontGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyFront, PC_GBuffer>::value,
+
+		PT_OpaqueGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_TransparencyFront, PC_GBuffer>::value,
 		
 		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
+
+		PT_GenShadowMapMultiView = MakePassType<PRT_ShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
+		PT_GenCascadedShadowMapMultiView = MakePassType<PRT_CascadedShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
+		PT_GenReflectiveShadowMapMultiView = MakePassType<PRT_ReflectiveShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
 		
 		PT_Shadowing = MakePassType<PRT_None, PTB_None, PC_Shadowing>::value,
 
@@ -93,7 +106,11 @@ namespace KlayGE
 		PT_OpaqueSpecialShading = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShading>::value,
 		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
 		PT_TransparencyFrontSpecialShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShading>::value,
-		
+
+		PT_OpaqueSpecialShadingMultiView = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShadingMultiView>::value,
+		PT_TransparencyBackSpecialShadingMultiView = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShadingMultiView>::value,
+		PT_TransparencyFrontSpecialShadingMultiView = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShadingMultiView>::value,
+
 		PT_SimpleForward = MakePassType<PRT_None, PTB_None, PC_SimpleForward>::value,
 
 		PT_VDM = MakePassType<PRT_None, PTB_None, PC_VDM>::value
@@ -283,17 +300,26 @@ namespace KlayGE
 		// For deferred only
 
 		RenderTechnique* gbuffer_tech_;
+		RenderTechnique* gbuffer_multi_view_tech_;
 		RenderTechnique* gbuffer_alpha_blend_back_tech_;
+		RenderTechnique* gbuffer_alpha_blend_back_multi_view_tech_;
 		RenderTechnique* gbuffer_alpha_blend_front_tech_;
+		RenderTechnique* gbuffer_alpha_blend_front_multi_view_tech_;
 		RenderTechnique* gen_shadow_map_tech_;
+		RenderTechnique* gen_shadow_map_multi_view_tech_;
 		RenderTechnique* gen_csm_tech_;
+		RenderTechnique* gen_csm_multi_view_tech_;
 		RenderTechnique* gen_rsm_tech_;
+		RenderTechnique* gen_rsm_multi_view_tech_;
 		RenderTechnique* reflection_tech_;
 		RenderTechnique* reflection_alpha_blend_back_tech_;
 		RenderTechnique* reflection_alpha_blend_front_tech_;
 		RenderTechnique* special_shading_tech_;
+		RenderTechnique* special_shading_multi_view_tech_;
 		RenderTechnique* special_shading_alpha_blend_back_tech_;
+		RenderTechnique* special_shading_alpha_blend_back_multi_view_tech_;
 		RenderTechnique* special_shading_alpha_blend_front_tech_;
+		RenderTechnique* special_shading_alpha_blend_front_multi_view_tech_;
 		RenderTechnique* simple_forward_tech_;
 		RenderTechnique* vdm_tech_;
 
