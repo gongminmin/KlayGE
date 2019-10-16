@@ -19,11 +19,11 @@ float4 StoreGBufferRT1(float3 albedo, float metalness)
 	return float4(albedo, metalness);
 }
 
-void StoreGBufferMRT(float3 normal, float glossiness, float3 albedo, float metalness,
+void StoreGBufferMRT(float3 normal, float3 albedo, float2 glossiness_metalness,
 			out float4 rt0, out float4 rt1)
 {
-	rt0 = StoreGBufferRT0(normal, glossiness);
-	rt1 = StoreGBufferRT1(albedo, metalness);
+	rt0 = StoreGBufferRT0(normal, glossiness_metalness.x);
+	rt1 = StoreGBufferRT1(albedo, glossiness_metalness.y);
 }
 
 float3 GetNormal(float4 rt0)

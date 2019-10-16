@@ -74,11 +74,11 @@ float4 VisualizeTexture(float2 tex0)
 	}
 	else if (TS_Metalness == texture_slot)
 	{
-		ret = float4(MetalnessNode(tex0).xxx, 0);
+		ret = float4(MetalnessGlossinessNode(tex0).xxx, 0);
 	}
 	else if (TS_Glossiness == texture_slot)
 	{
-		ret = float4(GlossinessNode(tex0).xxx, 0);
+		ret = float4(MetalnessGlossinessNode(tex0).yyy, 0);
 	}
 	else if (TS_Emissive == texture_slot)
 	{

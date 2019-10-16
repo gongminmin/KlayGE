@@ -128,7 +128,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
-	StoreGBufferMRT(normal, metalness_glossiness_factor.y, waterbody_color, 0,
+	StoreGBufferMRT(normal, waterbody_color, float2(0, metalness_glossiness_factor.y),
 		rt0, rt1);
 }
 
