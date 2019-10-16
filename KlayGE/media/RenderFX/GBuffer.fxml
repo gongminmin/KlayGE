@@ -535,7 +535,7 @@ void GenShadowCubemapNoVpRtGS(triangle float3 in_tc[3] : TEXCOORD0, triangle flo
 			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
 		</pass>
 	</technique>
-	<technique name="GenShadowMapAlphaTestMultiViewNoVpRtTech" inherit="GenShadowMapMultiViewAlphaTestTech">
+	<technique name="GenShadowMapAlphaTestMultiViewNoVpRtTech" inherit="GenShadowMapAlphaTestMultiViewTech">
 		<pass name="p0">
 			<state name="geometry_shader" value="GenShadowCubemapNoVpRtGS()"/>
 		</pass>
