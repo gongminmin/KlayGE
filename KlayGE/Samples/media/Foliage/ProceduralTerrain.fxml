@@ -155,7 +155,7 @@ void GBufferProceduralTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch 
 	float3 normal, color;
 	CalcProceduralTerrainNormalColor(world_pos, model_view, debug_patch, normal, color);
 
-	StoreGBuffer(normal, 0, color, 0,
+	StoreGBuffer(normal, color, 0,
 		rt0, rt1);
 }
 		]]>

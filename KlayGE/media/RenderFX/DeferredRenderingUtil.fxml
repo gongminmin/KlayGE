@@ -5,16 +5,16 @@
 
 	<shader>
 		<![CDATA[
-void StoreGBuffer(float3 normal, float glossiness, float3 albedo, float metalness,
+void StoreGBuffer(float3 normal, float3 albedo, float2 metalness_glossiness,
 			out float4 rt0, out float4 rt1)
 {
 	float p = sqrt(-normal.z * 8 + 8);
 	float2 enc = normal.xy / p + 0.5f;
 	float2 enc255 = enc * 255;
 	float2 residual = floor(frac(enc255) * 16);
-	rt0 = float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, glossiness);
+	rt0 = float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, metalness_glossiness.y);
 
-	rt1 = float4(albedo, metalness);
+	rt1 = float4(albedo, metalness_glossiness.x);
 }
 
 float3 GetNormal(float4 rt0)

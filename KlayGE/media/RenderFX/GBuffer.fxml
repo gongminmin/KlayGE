@@ -54,10 +54,7 @@
 		<node name="AlbedoNode" return="float3" impl="StaticAlbedoNode">
 			<param type="float2" name="texcoord"/>
 		</node>
-		<node name="MetalnessNode" return="float" impl="StaticMetalnessNode">
-			<param type="float2" name="texcoord"/>
-		</node>
-		<node name="GlossinessNode" return="float" impl="StaticGlossinessNode">
+		<node name="MetalnessGlossinessNode" return="float2" impl="StaticMetalnessGlossinessNode">
 			<param type="float2" name="texcoord"/>
 		</node>
 		<node name="EmissiveNode" return="float3" impl="StaticEmissiveNode">
@@ -201,10 +198,9 @@ void ConstructGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_vie
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
 
 	float3 albedo = AlbedoNode(texcoord_2xy.xy);
-	float metalness = MetalnessNode(texcoord_2xy.xy);
-	float glossiness = GlossinessNode(texcoord_2xy.xy);
+	float2 metalness_glossiness = MetalnessGlossinessNode(texcoord_2xy.xy);
 
-	StoreGBuffer(normal, glossiness, albedo, metalness,
+	StoreGBuffer(normal, albedo, metalness_glossiness,
 		rt0, rt1);
 }
 
@@ -704,24 +700,14 @@ float3 StaticAlbedoNode(float2 texcoord)
 	return albedo;
 }
 
-float StaticMetalnessNode(float2 texcoord)
+float2 StaticMetalnessGlossinessNode(float2 texcoord)
 {
-	float metalness = metalness_glossiness_factor.x;
+	float2 metalness_glossiness = metalness_glossiness_factor.xy;
 	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).x;
+		metalness_glossiness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord));
 	}
-	return metalness;
-}
-
-float StaticGlossinessNode(float2 texcoord)
-{
-	float glossiness = metalness_glossiness_factor.y;
-	if (metalness_glossiness_factor.z > 0.5f)
-	{
-		glossiness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).y;
-	}
-	return glossiness;
+	return metalness_glossiness;
 }
 
 float3 StaticEmissiveNode(float2 texcoord)
