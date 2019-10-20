@@ -83,6 +83,8 @@ namespace
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
+
+			this->AddsSubPath();
 		}
 
 		uint64_t Type() const override
@@ -156,8 +158,6 @@ namespace
 			auto rhs_model = std::static_pointer_cast<RenderModel>(resource);
 			auto model = model_desc_.CreateModelFactoryFunc(rhs_model->RootNode()->Name(), rhs_model->RootNode()->Attrib());
 			model->CloneDataFrom(*rhs_model, model_desc_.CreateMeshFactoryFunc);
-
-			this->AddsSubPath();
 
 			model->BuildModelInfo();
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
@@ -321,8 +321,6 @@ namespace
 					GraphicsBuffer::Mapper mapper(*sw_rl.GetIndexStream(), BA_Read_Only);
 					rl.GetIndexStream()->CreateHWResource(mapper.Pointer<void>());
 				}
-
-				this->AddsSubPath();
 
 				model->BuildModelInfo();
 				for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
@@ -565,22 +563,7 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo(RenderModel const & model)
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-
 		mtl_ = model.GetMaterial(this->MaterialID());
-
-		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
-		{
-			auto slot = static_cast<RenderMaterial::TextureSlot>(i);
-			if (!mtl_->TextureName(slot).empty())
-			{
-				if (!ResLoader::Instance().Locate(mtl_->TextureName(slot)).empty()
-					|| !ResLoader::Instance().Locate(mtl_->TextureName(slot) + ".dds").empty())
-				{
-					mtl_->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(mtl_->TextureName(slot), EAH_GPU_Read | EAH_Immutable)));
-				}
-			}
-		}
 
 		if (mtl_->Transparent())
 		{
@@ -1214,6 +1197,8 @@ namespace KlayGE
 				mtl->MinTessFactor(1);
 				mtl->MaxTessFactor(9);
 			}
+
+			mtl->LoadTextureSlots();
 		}
 
 		uint32_t num_merged_ves;

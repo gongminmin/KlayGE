@@ -151,6 +151,8 @@ namespace KlayGE
 
 		void Active(RenderEffect& effect);
 
+		void LoadTextureSlots();
+
 	private:
 		std::string name_;
 

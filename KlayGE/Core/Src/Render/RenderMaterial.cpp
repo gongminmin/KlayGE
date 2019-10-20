@@ -473,6 +473,8 @@ namespace
 				mtl->MinTessFactor(mtl_desc_.mtl_data->tess_factors.z());
 				mtl->MaxTessFactor(mtl_desc_.mtl_data->tess_factors.w());
 
+				mtl->LoadTextureSlots();
+
 				*mtl_desc_.mtl = mtl;
 			}
 		}
@@ -1021,6 +1023,24 @@ namespace KlayGE
 		if (occlusion_tex_param_)
 		{
 			*occlusion_tex_param_ = this->Texture(RenderMaterial::TS_Occlusion);
+		}
+	}
+
+	void RenderMaterial::LoadTextureSlots()
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++i)
+		{
+			auto slot = static_cast<RenderMaterial::TextureSlot>(i);
+			auto const& tex_name = textures_[slot].first;
+			if (!tex_name.empty())
+			{
+				if (!ResLoader::Instance().Locate(tex_name).empty()
+					|| !ResLoader::Instance().Locate(tex_name + ".dds").empty())
+				{
+					this->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable)));
+				}
+			}
 		}
 	}
 
