@@ -148,6 +148,8 @@ namespace
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
+		using StaticMesh::Material;
+
 		void Material(float4 const & diffuse, float4 const & specular, float glossiness)
 		{
 			*(effect_->ParameterByName("diffuse")) = float3(diffuse.x(), diffuse.y(), diffuse.z());

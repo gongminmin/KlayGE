@@ -241,7 +241,7 @@ namespace KlayGE
 			clear_clr.g() = 0.133f;
 			clear_clr.b() = 0.325f;
 		}
-		;
+
 		auto const fmt = re.DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 		BOOST_ASSERT(fmt != EF_Unknown);
 		uint32_t texel = ((fmt == EF_ABGR8) ? clear_clr.ABGR() : clear_clr.ARGB());

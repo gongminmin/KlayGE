@@ -56,6 +56,8 @@ namespace
 			}
 		}
 
+		using StaticMesh::Material;
+
 		void Material(float3 const & albedo, float metalness, float glossiness)
 		{
 			*(effect_->ParameterByName("albedo")) = albedo;

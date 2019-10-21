@@ -450,6 +450,38 @@ namespace KlayGE
 		technique_ = this->PassTech(type);
 	}
 
+	void Renderable::Material(RenderMaterialPtr const& mtl)
+	{
+		mtl_ = mtl;
+
+		if (mtl_->Transparent())
+		{
+			effect_attrs_ |= EA_TransparencyBack;
+			effect_attrs_ |= EA_TransparencyFront;
+		}
+		if (mtl_->AlphaTestThreshold() > 0)
+		{
+			effect_attrs_ |= EA_AlphaTest;
+		}
+		if (mtl_->Sss())
+		{
+			effect_attrs_ |= EA_SSS;
+		}
+
+		if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
+			mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
+			(effect_attrs_ & EA_Reflection))
+		{
+			effect_attrs_ |= EA_SpecialShading;
+		}
+
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, is_skinned_));
+		}
+	}
+
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
 	{
 		effect_ = deferred_effect;

@@ -230,6 +230,17 @@ namespace KlayGE
 
 		virtual void Pass(PassType type);
 
+		virtual void IsSkinned(bool is_skinned)
+		{
+			is_skinned_ = is_skinned;
+		}
+
+		virtual void Material(RenderMaterialPtr const& mtl);
+		virtual RenderMaterialPtr const& Material() const
+		{
+			return mtl_;
+		}
+
 		virtual bool SpecialShading() const
 		{
 			return effect_attrs_ & EA_SpecialShading ? true : false;
@@ -329,6 +340,7 @@ namespace KlayGE
 
 		PassType type_;
 		uint32_t effect_attrs_ = 0;
+		bool is_skinned_ = false;
 
 		RenderMaterialPtr mtl_;
 

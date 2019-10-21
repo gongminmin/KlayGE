@@ -563,34 +563,8 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo(RenderModel const & model)
 	{
-		mtl_ = model.GetMaterial(this->MaterialID());
-
-		if (mtl_->Transparent())
-		{
-			effect_attrs_ |= EA_TransparencyBack;
-			effect_attrs_ |= EA_TransparencyFront;
-		}
-		if (mtl_->AlphaTestThreshold() > 0)
-		{
-			effect_attrs_ |= EA_AlphaTest;
-		}
-		if (mtl_->Sss())
-		{
-			effect_attrs_ |= EA_SSS;
-		}
-
-		if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
-			mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
-			(effect_attrs_ & EA_Reflection))
-		{
-			effect_attrs_ |= EA_SpecialShading;
-		}
-
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
-		{
-			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model.IsSkinned()));
-		}
+		this->IsSkinned(model.IsSkinned());
+		this->Material(model.GetMaterial(this->MaterialID()));
 	}
 
 	void StaticMesh::PosBound(AABBox const & aabb)
