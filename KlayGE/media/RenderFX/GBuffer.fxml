@@ -70,6 +70,10 @@
 		<node name="HeightForParallaxNode" return="float" impl="StaticHeightForParallaxNode">
 			<param type="float2" name="texcoord"/>
 		</node>
+		<node name="HeightForParallaxOcclusionNode" return="float" impl="StaticHeightForParallaxOcclusionNode">
+			<param type="float2" name="texcoord"/>
+			<param type="int" name="level"/>
+		</node>
 		<node name="HeightForTessellationNode" return="float" impl="StaticHeightForTessellationNode">
 			<param type="float2" name="texcoord"/>
 		</node>
@@ -171,11 +175,79 @@ void GBufferVS(
 #endif
 }
 
-float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+float2 ParallaxMappingCorrection(float2 uv, float3 view)
 {
-	float2 uv = texcoord_2xy.xy;
-	float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
 	uv += view.xy * HeightForParallaxNode(uv);
+	return uv;
+}
+
+float2 ParallaxOcclusionMappingCorrection(float2 uv, float3 view)
+{
+	const int lod_threshold = 3;
+	const int min_samples = 8;
+	const int max_samples = 50;
+
+	float2 parallax_offset = normalize(view).xy * height_offset_scale.y;
+
+	uint width, height;
+	albedo_tex.GetDimensions(width, height);
+	float level = mipmap_level(uv, uint2(width, height));
+
+	float2 original_uv = uv;
+	[branch]
+	if (level <= lod_threshold)
+	{
+		int num_steps = (int)lerp(max_samples, min_samples, view.z);
+
+		float step_size = 1.0f / num_steps;
+		float prev_height = 1;
+		float next_height = 0;
+
+		int step_index = 0;
+
+		float2 tex_offset_per_step = step_size * parallax_offset;
+		float2 tex_curr_offset = uv;
+		float curr_bound = 1;
+
+		float2 pt1 = 0;
+		float2 pt2 = 0;
+
+		[loop]
+		while (step_index < num_steps)
+		{
+			tex_curr_offset -= tex_offset_per_step;
+			float curr_height = HeightForParallaxOcclusionNode(tex_curr_offset, level);
+			curr_bound -= step_size;
+
+			if (curr_height > curr_bound)
+			{
+				pt1 = float2(curr_bound, curr_height);
+				pt2 = float2(curr_bound + step_size, prev_height);
+				step_index = num_steps;
+			}
+			else
+			{
+				++step_index;
+			}
+			prev_height = curr_height;
+		}
+
+		float delta1 = pt1.x - pt1.y;
+		float delta2 = pt2.x - pt2.y;
+		float parallax_amount = (delta1 == delta2) ? 0 : (pt1.x * delta2 - pt2.x * delta1) / (delta2 - delta1);
+
+		float2 offset_uv = uv - parallax_offset * (1 - parallax_amount);
+		if (level > lod_threshold - 1)
+		{
+			// Lerp the texture coordinate from parallax occlusion mapped coordinate to bump mapping smoothly based on the current mip level
+			uv = lerp(offset_uv, original_uv, frac(level));
+		}
+		else
+		{
+			uv = offset_uv;
+		}
+	}
+
 	return uv;
 }
 
@@ -208,17 +280,15 @@ void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD
 					bool is_front_face : SV_IsFrontFace,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
-}
+	float3 view = -normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
+	texcoord_2xy.xy = parallax_occlusion_mapping_enabled ? ParallaxOcclusionMappingCorrection(texcoord_2xy.xy, view)
+		: ParallaxMappingCorrection(texcoord_2xy.xy, view);
 
-void GBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
-					bool is_front_face : SV_IsFrontFace,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
-{
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+#if ALPHA_TEST_MODE
 	float opacity = OpacityNode(texcoord_2xy.xy);
 	clip(opacity - alpha_test_threshold);
+#endif
+
 	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 
@@ -227,10 +297,10 @@ void GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z 
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
-
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
-	ConstructGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, rt0, rt1);
+
+	GBufferPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, true,
+		rt0, rt1);
 }
 		]]>
 	</shader>
@@ -292,8 +362,9 @@ void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle fl
 		</pass>
 	</technique>
 	<technique name="GBufferAlphaTestTech" inherit="GBufferTech">
+		<macro name="ALPHA_TEST_MODE" value="1"/>
 		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferAlphaBlendBackTech" inherit="GBufferTech">
@@ -746,6 +817,16 @@ float StaticHeightForParallaxNode(float2 texcoord)
 	if (height_map_parallax_enabled)
 	{
 		height = (height_tex.Sample(trilinear_sampler, texcoord).x + height_offset_scale.x) * height_offset_scale.y;
+	}
+	return height;
+}
+
+float StaticHeightForParallaxOcclusionNode(float2 texcoord, int level)
+{
+	float height = 0;
+	if (height_map_parallax_enabled)
+	{
+		height = height_tex.SampleLevel(trilinear_sampler, texcoord, level).x;
 	}
 	return height;
 }

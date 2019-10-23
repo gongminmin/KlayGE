@@ -162,7 +162,7 @@ namespace
 			mtl_desc_.mtl_data->normal_scale = 1;
 			mtl_desc_.mtl_data->occlusion_strength = 1;
 
-			mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_Parallax;
+			mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::ParallaxMapping;
 			mtl_desc_.mtl_data->height_offset_scale = float2(-0.5f, 0.06f);
 			mtl_desc_.mtl_data->tess_factors = float4(5, 5, 1, 9);
 
@@ -310,13 +310,17 @@ namespace
 				{
 					std::string_view const mode_str = attr->ValueString();
 					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
-					if (CT_HASH("Flat Tessellation") == mode_hash)
+					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
 					{
-						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_FlatTessellation;
+						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping;
+					}
+					else if (CT_HASH("Flat Tessellation") == mode_hash)
+					{
+						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::FlatTessellation;
 					}
 					else if (CT_HASH("Smooth Tessellation") == mode_hash)
 					{
-						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_SmoothTessellation;
+						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::SmoothTessellation;
 					}
 				}
 
@@ -498,7 +502,8 @@ namespace
 	uint32_t constexpr sw_normal_scale_offset_ = sw_alpha_test_threshold_offset_ + sizeof(uint32_t);
 	uint32_t constexpr sw_occlusion_strength_offset_ = sw_normal_scale_offset_ + sizeof(float);
 	uint32_t constexpr sw_height_offset_scale_offset_ = sw_occlusion_strength_offset_ + sizeof(float);
-	uint32_t constexpr sw_tess_factors_offset_ = sw_occlusion_strength_offset_ + sizeof(float4);
+	uint32_t constexpr sw_parallax_occlusion_mapping_enabled_offset_ = sw_height_offset_scale_offset_ + sizeof(float2);
+	uint32_t constexpr sw_tess_factors_offset_ = sw_parallax_occlusion_mapping_enabled_offset_ + sizeof(uint32_t);
 	uint32_t constexpr sw_pdmc_size = sw_tess_factors_offset_ + sizeof(float4);
 
 	RenderEngine::PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance()
@@ -778,17 +783,21 @@ namespace KlayGE
 			break;
 
 		case TS_Height:
-			if (detail_mode_ == RenderMaterial::SDM_Parallax)
+			if ((detail_mode_ == SurfaceDetailMode::ParallaxMapping) || (detail_mode_ == SurfaceDetailMode::ParallaxOcclusionMapping))
 			{
 				if (is_sw_mode_)
 				{
 					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_parallax_enabled_offset_]) = srv ? 1 : 0;
 					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_tess_enabled_offset_]) = 0;
+					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_parallax_occlusion_mapping_enabled_offset_]) =
+						(detail_mode_ == SurfaceDetailMode::ParallaxOcclusionMapping) ? 1 : 0;
 				}
 				else
 				{
 					pmcb.HeightMapParallaxEnabled(*cbuffer_) = srv ? 1 : 0;
 					pmcb.HeightMapTessEnabled(*cbuffer_) = 0;
+					pmcb.ParallaxOcclusionMappingEnabled(*cbuffer_) =
+						(detail_mode_ == SurfaceDetailMode::ParallaxOcclusionMapping) ? 1 : 0;
 				}
 			}
 			else
@@ -1153,18 +1162,22 @@ namespace KlayGE
 			root->AppendNode(occlusion_node);
 		}
 
-		if (mtl->DetailMode() != RenderMaterial::SDM_Parallax)
+		if (mtl->DetailMode() != RenderMaterial::SurfaceDetailMode::ParallaxMapping)
 		{
 			XMLNodePtr detail_node = doc.AllocNode(XNT_Element, "detail");
 
 			std::string detail_mode_str;
 			switch (mtl->DetailMode())
 			{
-			case RenderMaterial::SDM_FlatTessellation:
+			case RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping:
+				detail_mode_str = "Parallax Occlusion Mapping";
+				break;
+
+			case RenderMaterial::SurfaceDetailMode::FlatTessellation:
 				detail_mode_str = "Flat Tessellation";
 				break;
 
-			case RenderMaterial::SDM_SmoothTessellation:
+			case RenderMaterial::SurfaceDetailMode::SmoothTessellation:
 				detail_mode_str = "Smooth Tessellation";
 				break;
 
@@ -1173,6 +1186,8 @@ namespace KlayGE
 			}
 			detail_node->AppendAttrib(doc.AllocAttribString("mode", detail_mode_str));
 
+			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
 				XMLNodePtr tess_node = doc.AllocNode(XNT_Element, "tess");
 				tess_node->AppendAttrib(doc.AllocAttribFloat("edge_hint", mtl->EdgeTessHint()));

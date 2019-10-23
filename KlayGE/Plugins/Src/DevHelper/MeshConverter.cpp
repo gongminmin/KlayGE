@@ -522,7 +522,7 @@ namespace
 				render_mtl.OcclusionStrength(occlusion_strength);
 			}
 
-			render_mtl.DetailMode(RenderMaterial::SDM_Parallax);
+			render_mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxMapping);
 			if (render_mtl.TextureName(RenderMaterial::TS_Height).empty())
 			{
 				render_mtl.HeightOffset(0);
@@ -1684,7 +1684,7 @@ namespace
 			mtl.Sss(false);
 			mtl.TwoSided(false);
 
-			mtl.DetailMode(RenderMaterial::SDM_Parallax);
+			mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxMapping);
 			mtl.HeightOffset(-0.5f);
 			mtl.HeightScale(0.06f);
 			mtl.EdgeTessHint(5);
@@ -1906,13 +1906,17 @@ namespace
 				{
 					std::string_view const mode_str = attr->ValueString();
 					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
-					if (CT_HASH("Flat Tessellation") == mode_hash)
+					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
 					{
-						mtl.DetailMode(RenderMaterial::SDM_FlatTessellation);
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping);
+					}
+					else if (CT_HASH("Flat Tessellation") == mode_hash)
+					{
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::FlatTessellation);
 					}
 					else if (CT_HASH("Smooth Tessellation") == mode_hash)
 					{
-						mtl.DetailMode(RenderMaterial::SDM_SmoothTessellation);
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::SmoothTessellation);
 					}
 				}
 

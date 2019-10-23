@@ -230,7 +230,8 @@ namespace MtlEditor
 
 			DetailModeItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
 			DetailModeItemsSource.items.Clear();
-			DetailModeItemsSource.items.Add("Parallax");
+			DetailModeItemsSource.items.Add("Parallax Mapping");
+			DetailModeItemsSource.items.Add("Parallax Occlusion Mapping");
 			DetailModeItemsSource.items.Add("Flat Tessellation");
 			DetailModeItemsSource.items.Add("Smooth Tessellation");
 

@@ -1447,7 +1447,7 @@ namespace KlayGE
 		{
 			effect_index.flags.sss = material->Sss();
 			effect_index.flags.two_sided = material->TwoSided();
-			effect_index.flags.detail_mode = material->DetailMode();
+			effect_index.flags.detail_mode = static_cast<uint8_t>(material->DetailMode());
 		}
 		effect_index.flags.line = line;
 		effect_index.flags.skinning = skinning;
@@ -1478,23 +1478,21 @@ namespace KlayGE
 				g_buffer_files[num] = "GBufferSkinning.fxml";
 				++ num;
 			}
-			switch (effect_index.flags.detail_mode)
+			switch (static_cast<RenderMaterial::SurfaceDetailMode>(effect_index.flags.detail_mode))
 			{
-			case RenderMaterial::SDM_Parallax:
+			case RenderMaterial::SurfaceDetailMode::ParallaxMapping:
+			case RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping:
 				break;
 
-			case RenderMaterial::SDM_FlatTessellation:
+			case RenderMaterial::SurfaceDetailMode::FlatTessellation:
 				g_buffer_files[num] = "GBufferFlatTess.fxml";
 				++ num;
 				break;
 
-			case RenderMaterial::SDM_SmoothTessellation:
+			case RenderMaterial::SurfaceDetailMode::SmoothTessellation:
 				g_buffer_files[num] = "GBufferSmoothTess.fxml";
 				++ num;
 				break;
-
-			default:
-				KFL_UNREACHABLE("Invalid detail mode");
 			}
 
 			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(MakeSpan(g_buffer_files, num));

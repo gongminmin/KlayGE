@@ -1152,7 +1152,8 @@ namespace KlayGE
 			uint8_t detail_mode;
 			decoded->read(&detail_mode, sizeof(detail_mode));
 			mtl->DetailMode(static_cast<RenderMaterial::SurfaceDetailMode>(detail_mode));
-			if (mtl->DetailMode() != RenderMaterial::SDM_Parallax)
+			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
 				float tess_factor;
 				decoded->read(&tess_factor, sizeof(tess_factor));
@@ -1622,7 +1623,8 @@ namespace KlayGE
 
 			uint8_t detail_mode = static_cast<uint8_t>(mtl.DetailMode());
 			os.write(reinterpret_cast<char*>(&detail_mode), sizeof(detail_mode));
-			if (mtl.DetailMode() != RenderMaterial::SDM_Parallax)
+			if ((mtl.DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl.DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
 				float tess_factor = Native2LE(mtl.EdgeTessHint());
 				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));

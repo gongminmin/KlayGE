@@ -713,7 +713,7 @@ namespace KlayGE
 
 	uint32_t MtlEditorCore::DetailMode(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->DetailMode();
+		return static_cast<uint32_t>(model_->GetMaterial(mtl_id)->DetailMode());
 	}
 
 	float MtlEditorCore::HeightOffset(uint32_t mtl_id) const

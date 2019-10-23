@@ -96,7 +96,8 @@ public:
 				EXPECT_FLOAT_EQ(mtl->HeightOffset(), sanity_mtl->HeightOffset());
 				EXPECT_FLOAT_EQ(mtl->HeightScale(), sanity_mtl->HeightScale());
 			}
-			if (mtl->DetailMode() != RenderMaterial::SDM_Parallax)
+			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
 				EXPECT_FLOAT_EQ(mtl->EdgeTessHint(), sanity_mtl->EdgeTessHint());
 				EXPECT_FLOAT_EQ(mtl->InsideTessHint(), sanity_mtl->InsideTessHint());

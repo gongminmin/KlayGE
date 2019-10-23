@@ -54,11 +54,12 @@ namespace KlayGE
 			TS_NumTextureSlots
 		};
 
-		enum SurfaceDetailMode
+		enum class SurfaceDetailMode : uint32_t
 		{
-			SDM_Parallax = 0,
-			SDM_FlatTessellation,
-			SDM_SmoothTessellation
+			ParallaxMapping = 0,
+			ParallaxOcclusionMapping,
+			FlatTessellation,
+			SmoothTessellation
 		};
 
 	public:
@@ -169,7 +170,7 @@ namespace KlayGE
 		bool transparent_ = false;
 		bool sss_ = false;
 		bool two_sided_ = false;
-		SurfaceDetailMode detail_mode_ = SDM_Parallax;
+		SurfaceDetailMode detail_mode_ = SurfaceDetailMode::ParallaxMapping;
 		std::array<std::pair<std::string, ShaderResourceViewPtr>, TS_NumTextureSlots> textures_;
 	};
 

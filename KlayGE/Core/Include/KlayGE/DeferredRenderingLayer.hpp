@@ -544,7 +544,7 @@ namespace KlayGE
 		bool flexible_srvs_support_;
 
 		// TODO: Remove the magic number
-		mutable RenderEffectPtr g_buffer_effects_[48];
+		mutable RenderEffectPtr g_buffer_effects_[64];
 
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
