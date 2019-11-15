@@ -269,6 +269,7 @@ namespace KlayGE
 						fmt = EF_D16;
 					}
 					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					KLAYGE_TEXTURE_DEBUG_NAME(ds_tex_);
 					ds_srv_ = rf.MakeTextureSrv(ds_tex_);
 					ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 				}
@@ -304,6 +305,7 @@ namespace KlayGE
 			auto fmt = caps.BestMatchTextureRenderTargetFormat(fmt_options, 1, 0);
 
 			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(mono_tex_);
 			mono_srv_ = rf.MakeTextureSrv(mono_tex_);
 			mono_rtv_ = rf.Make2DRtv(mono_tex_, 0, 1, 0);
 			mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, mono_rtv_);
@@ -318,6 +320,7 @@ namespace KlayGE
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(overlay_tex_);
 			overlay_srv_ = rf.MakeTextureSrv(overlay_tex_);
 			overlay_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(overlay_tex_, 0, 1, 0));
 
@@ -344,6 +347,7 @@ namespace KlayGE
 
 				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
 					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(resize_tex_);
 				resize_srv_ = rf.MakeTextureSrv(resize_tex_);
 				resize_rtv_ = rf.Make2DRtv(resize_tex_, 0, 1, 0);
 				resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, resize_rtv_);
@@ -371,12 +375,14 @@ namespace KlayGE
 			auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_edges_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(smaa_edges_tex_);
 			smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
 			smaa_edges_rtv_ = rf.Make2DRtv(smaa_edges_tex_, 0, 1, 0);
 
 			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_blend_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(smaa_blend_tex_);
 			smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
 			smaa_blend_rtv_ = rf.Make2DRtv(smaa_blend_tex_, 0, 1, 0);
 
@@ -400,6 +406,7 @@ namespace KlayGE
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(post_tone_mapping_tex_);
 			post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
 			post_tone_mapping_rtv_ = rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0);
 			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, post_tone_mapping_rtv_);
@@ -417,6 +424,7 @@ namespace KlayGE
 				: MakeSpan({EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+			KLAYGE_TEXTURE_DEBUG_NAME(hdr_tex_);
 			hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 			hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(ds_dsv);
@@ -696,6 +704,7 @@ namespace KlayGE
 					if (caps.depth_texture_support)
 					{
 						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+						KLAYGE_TEXTURE_DEBUG_NAME(ds_tex_);
 						ds_srv_ = rf.MakeTextureSrv(ds_tex_);
 						ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 					}
@@ -724,6 +733,7 @@ namespace KlayGE
 			{
 				ElementFormat fmt = mono_tex_->Format();
 				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(mono_tex_);
 				mono_srv_ = rf.MakeTextureSrv(mono_tex_);
 				mono_rtv_ = rf.Make2DRtv(mono_tex_, 0, 1, 0);
 				mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, mono_rtv_);
@@ -753,6 +763,7 @@ namespace KlayGE
 					}
 
 					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					KLAYGE_TEXTURE_DEBUG_NAME(resize_tex_);
 					resize_srv_ = rf.MakeTextureSrv(resize_tex_);
 					resize_rtv_ = rf.Make2DRtv(resize_tex_, 0, 1, 0);
 					resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, resize_rtv_);
@@ -797,10 +808,12 @@ namespace KlayGE
 			{
 				smaa_edges_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_edges_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(smaa_edges_tex_);
 				smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
 				smaa_edges_rtv_ = rf.Make2DRtv(smaa_edges_tex_, 0, 1, 0);
 				smaa_blend_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_blend_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(smaa_blend_tex_);
 				smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
 				smaa_blend_rtv_ = rf.Make2DRtv(smaa_blend_tex_, 0, 1, 0);
 
@@ -818,6 +831,7 @@ namespace KlayGE
 				ElementFormat fmt = post_tone_mapping_tex_->Format();
 				post_tone_mapping_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(post_tone_mapping_tex_);
 				post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
 				post_tone_mapping_rtv_ = rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0);
 				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, post_tone_mapping_rtv_);
@@ -830,6 +844,7 @@ namespace KlayGE
 				ElementFormat fmt = hdr_tex_->Format();
 				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+				KLAYGE_TEXTURE_DEBUG_NAME(hdr_tex_);
 				hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 				hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
 				hdr_frame_buffer_->Attach(ds_dsv);

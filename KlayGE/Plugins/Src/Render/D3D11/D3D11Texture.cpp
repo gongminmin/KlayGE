@@ -54,6 +54,13 @@ namespace KlayGE
 		return name;
 	}
 
+#ifndef KLAYGE_SHIP
+	void D3D11Texture::DebugName(std::wstring_view name)
+	{
+		d3d_texture_->SetPrivateData(WKPDID_D3DDebugObjectNameW, static_cast<uint32_t>(name.size()), name.data());
+	}
+#endif
+
 	uint32_t D3D11Texture::Width(uint32_t level) const
 	{
 		KFL_UNUSED(level);

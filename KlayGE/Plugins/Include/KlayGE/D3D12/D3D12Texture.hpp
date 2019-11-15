@@ -48,6 +48,9 @@ namespace KlayGE
 		explicit D3D12Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		std::wstring const & Name() const;
+#ifndef KLAYGE_SHIP
+		void DebugName(std::wstring_view name) override;
+#endif
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

@@ -29,7 +29,10 @@ namespace KlayGE
 		D3D11Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~D3D11Texture();
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
+#ifndef KLAYGE_SHIP
+		void DebugName(std::wstring_view name) override;
+#endif
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

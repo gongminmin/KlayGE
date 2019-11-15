@@ -61,6 +61,12 @@
 
 namespace KlayGE
 {
+#ifdef KLAYGE_SHIP
+#define KLAYGE_TEXTURE_DEBUG_NAME(texture)
+#else
+#define KLAYGE_TEXTURE_DEBUG_NAME(texture) texture->DebugName(L#texture)
+#endif
+
 	enum TextureMapAccess
 	{
 		TMA_Read_Only,
@@ -157,8 +163,13 @@ namespace KlayGE
 		Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~Texture();
 
-		// Gets the name of texture
-		virtual std::wstring const & Name() const = 0;
+		virtual std::wstring const& Name() const = 0;
+#ifndef KLAYGE_SHIP
+		virtual void DebugName(std::wstring_view name)
+		{
+			KFL_UNUSED(name);
+		}
+#endif
 
 		// Gets the number of mipmaps to be used for this texture.
 		uint32_t NumMipMaps() const;
