@@ -12,6 +12,8 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4" name="object_id"/>
 		<parameter type="int2" name="frame_size"/>
+		<parameter type="float" name="half_exposure_x_framerate"/>
+		<parameter type="float" name="motion_blur_radius"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">
@@ -109,12 +111,14 @@ void GBufferVS(
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oCurrPosSS : TEXCOORD4,
+			out float4 oPrevPosSS : TEXCOORD5,
 #if MULTI_VIEW_MODE
 #if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
 			out uint oRtIndex : SV_RenderTargetArrayIndex,
 			out float4 oPos : SV_Position
 #else
-			out float oRtIndex : TEXCOORD4,
+			out float oRtIndex : TEXCOORD6,
 			out float4 oPos : POSITION
 #endif
 #else
@@ -164,6 +168,9 @@ void GBufferVS(
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(float4(result_pos, 1), prev_mvps[camera_index]);
 
 	uint rt_index = RenderTargetIndex(camera_index);
 #if MULTI_VIEW_MODE
@@ -264,23 +271,43 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	return normal;
 }
 
-void ConstructGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
-					out float4 rt0, out float4 rt1)
+void ConstructGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1, float2 motion_vec,
+					out float4 rt0, out float4 rt1, out float4 rt2)
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
 
 	float3 albedo = AlbedoNode(texcoord_2xy.xy);
 	float2 metalness_glossiness = MetalnessGlossinessNode(texcoord_2xy.xy);
 
-	StoreGBuffer(normal, albedo, metalness_glossiness,
-		rt0, rt1);
+	StoreGBuffer(normal, albedo, metalness_glossiness, motion_vec,
+		rt0, rt1, rt2);
 }
 
-void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
-					bool is_front_face : SV_IsFrontFace,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+float2 GenerateVelocity(float4 curr_pos_ss, float4 prev_pos_ss, float half_exposure_x_framerate)
 {
-	float3 view = -normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
+	const float EPSILON = 0.01f;
+
+	float2 velocity = (curr_pos_ss.xy / curr_pos_ss.w - prev_pos_ss.xy / prev_pos_ss.w) * half_exposure_x_framerate;
+	float len_velocity = length(velocity);
+
+	float weight = max(0.5f, min(len_velocity, motion_blur_radius));
+	weight /= max(len_velocity, EPSILON);
+	velocity *= weight;
+	velocity.y *= KLAYGE_FLIPPING;
+	return velocity;
+}
+
+void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
+					float4 curr_pos_ss : TEXCOORD4, float4 prev_pos_ss : TEXCOORD5,
+					bool is_front_face : SV_IsFrontFace,
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1
+#if !SKIP_MOTION_VEC
+					, out float4 rt2 : SV_Target2
+#endif
+	)
+{
+	float3 view = -normalize(float3(ts_to_view0_2z.z, ts_to_view1_depth.z, ts_to_view0_2z.w));
 	texcoord_2xy.xy = parallax_occlusion_mapping_enabled ? ParallaxOcclusionMappingCorrection(texcoord_2xy.xy, view)
 		: ParallaxMappingCorrection(texcoord_2xy.xy, view);
 
@@ -289,18 +316,34 @@ void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD
 	clip(opacity - alpha_test_threshold);
 #endif
 
-	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
+#if !SKIP_MOTION_VEC
+	float2 motion_vec = GenerateVelocity(curr_pos_ss, prev_pos_ss, half_exposure_x_framerate);
+#else
+	float2 motion_vec = 0;
+	float4 rt2;
+#endif
+
+	ConstructGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, motion_vec, rt0, rt1, rt2);
 }
 
 void GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+					float4 curr_pos_ss : TEXCOORD4, float4 prev_pos_ss : TEXCOORD5,
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1
+#if !SKIP_MOTION_VEC
+					, out float4 rt2 : SV_Target2
+#endif
+	)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
 
-	GBufferPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, true,
-		rt0, rt1);
+	GBufferPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth, ss_tc, curr_pos_ss, prev_pos_ss, true,
+		rt0, rt1
+#if !SKIP_MOTION_VEC
+		, rt2
+#endif
+		);
 }
 		]]>
 	</shader>
@@ -322,6 +365,8 @@ struct GBufferPS_In
 	float4 ts_to_view0_2z : TEXCOORD1;
 	float3 ts_to_view1 : TEXCOORD2;
 	SS_TEXCOORD_TYPE ss_tc : TEXCOORD3;
+	float4 curr_pos_ss : TEXCOORD4;
+	float4 prev_pos_ss : TEXCOORD5;
 	uint rt_index : SV_RenderTargetArrayIndex;
 	float4 position : SV_Position;
 };
@@ -329,7 +374,8 @@ struct GBufferPS_In
 [maxvertexcount(3)]
 void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle float4 in_ts_to_view0_2z[3] : TEXCOORD1,
 	triangle float3 in_ts_to_view1[3] : TEXCOORD2, triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD3,
-	triangle float in_rt_index[3] : TEXCOORD4, triangle float4 in_position[3] : POSITION,
+	triangle float4 in_curr_pos_ss[3] : TEXCOORD4, triangle float4 in_prev_pos_ss[3] : TEXCOORD5,
+	triangle float in_rt_index[3] : TEXCOORD6, triangle float4 in_position[3] : POSITION,
 	inout TriangleStream<GBufferPS_In> out_stream)
 {
 	GBufferPS_In output;
@@ -345,6 +391,8 @@ void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle fl
 			output.ts_to_view0_2z = in_ts_to_view0_2z[v];
 			output.ts_to_view1 = in_ts_to_view1[v];
 			output.ss_tc = in_ss_tc[v];
+			output.curr_pos_ss = in_curr_pos_ss[v];
+			output.prev_pos_ss = in_prev_pos_ss[v];
 			output.position = in_position[v];
 			out_stream.Append(output);
 		}
@@ -430,14 +478,16 @@ void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle fl
 	</technique>
 
 	<technique name="GenReflectiveShadowMapTech" inherit="GBufferTech">
+		<macro name="SKIP_MOTION_VEC" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
 		</pass>
 	</technique>
-	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GBufferAlphaTestTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-		</pass>
+	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GenReflectiveShadowMapTech">
+		<macro name="ALPHA_TEST_MODE" value="1"/>
 	</technique>
 
 	<technique name="GenReflectiveShadowMapMultiViewTech" inherit="GenReflectiveShadowMapTech">

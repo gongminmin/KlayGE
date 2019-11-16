@@ -146,6 +146,7 @@ namespace KlayGE
 		float4x4 const& InverseTransformToParent() const;
 		float4x4 const& TransformToWorld() const;
 		float4x4 const& InverseTransformToWorld() const;
+		float4x4 const& PrevTransformToWorld() const;
 		AABBox const& PosBoundOS() const;
 		AABBox const& PosBoundWS() const;
 		void UpdateTransforms();
@@ -212,6 +213,7 @@ namespace KlayGE
 
 		float4x4 xform_to_parent_  = float4x4::Identity();
 		mutable float4x4 xform_to_world_ = float4x4::Identity();
+		mutable float4x4 prev_xform_to_world_ = float4x4::Identity();
 		float4x4 inv_xform_to_parent_ = float4x4::Identity();
 		mutable float4x4 inv_xform_to_world_ = float4x4::Identity();
 		std::unique_ptr<AABBox> pos_aabb_os_;

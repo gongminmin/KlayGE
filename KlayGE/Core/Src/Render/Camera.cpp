@@ -307,8 +307,9 @@ namespace KlayGE
 		}
 	}
 
-	void Camera::Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat, float4x4 const& inv_model_mat,
-		bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const
+	void Camera::Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat,
+		float4x4 const& inv_model_mat, float4x4 const& prev_model_mat, bool model_mat_dirty, float4x4 const& cascade_crop_mat,
+		bool need_cascade_crop_mat) const
 	{
 		if (model_mat_dirty || camera_dirty_)
 		{
@@ -316,9 +317,11 @@ namespace KlayGE
 			auto const& pccb = re.PredefinedCameraCBufferInstance();
 
 			float4x4 mvp = model_mat * this->ViewProjMatrix();
+			float4x4 prev_mvp = prev_model_mat * prev_view_mat_ * prev_proj_mat_;
 			if (need_cascade_crop_mat)
 			{
 				mvp *= cascade_crop_mat;
+				prev_mvp *= cascade_crop_mat;
 			}
 
 			auto& camera_info = pccb.Camera(camera_cbuffer, index);
@@ -329,6 +332,8 @@ namespace KlayGE
 			camera_info.eye_pos = this->EyePos();
 			camera_info.forward_vec = this->ForwardVec();
 			camera_info.up_vec = this->UpVec();
+
+			pccb.PrevMvp(camera_cbuffer, index) = MathLib::transpose(prev_mvp);
 
 			camera_cbuffer.Dirty(true);
 		}

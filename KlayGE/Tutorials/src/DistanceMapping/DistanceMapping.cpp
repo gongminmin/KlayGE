@@ -142,12 +142,6 @@ namespace
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
-		void ModelMatrix(float4x4 const & mat)
-		{
-			Renderable::ModelMatrix(mat);
-			inv_model_mat_ = MathLib::inverse(model_mat_);
-		}
-
 		void LightPos(float3 const & light_pos)
 		{
 			*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_model_mat_);

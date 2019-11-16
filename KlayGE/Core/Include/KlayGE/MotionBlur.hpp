@@ -51,8 +51,20 @@ namespace KlayGE
 	public:
 		MotionBlurPostProcess();
 
+		void Exposure(float exposure);
+		float Exposure() const;
+
+		void BlurRadius(uint32_t blur_radius);
+		uint32_t BlurRadius() const;
+
+		void ReconstructionSamples(uint32_t reconstruction_samples);
+		uint32_t ReconstructionSamples() const;
+
 		using PostProcess::InputPin;
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
+
+		using PostProcess::OutputPin;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
 
 		using PostProcess::SetParam;
 		void SetParam(uint32_t index, uint32_t const & value) override;

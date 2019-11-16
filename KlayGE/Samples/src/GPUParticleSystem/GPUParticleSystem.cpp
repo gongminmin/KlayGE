@@ -537,10 +537,10 @@ namespace
 			*(effect_->ParameterByName("normal_map_tex")) = terrain_normal_map;
 		}
 
-		void ModelMatrix(float4x4 const & model)
+		void ModelMatrix(float4x4 const & model_mat) override
 		{
-			Renderable::ModelMatrix(model);
-			*(effect_->ParameterByName("ps_model_mat")) = model;
+			Renderable::ModelMatrix(model_mat);
+			*(effect_->ParameterByName("ps_model_mat")) = model_mat;
 		}
 
 		float4x4 const & ModelMatrix() const

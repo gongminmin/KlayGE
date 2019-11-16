@@ -398,6 +398,7 @@ namespace KlayGE
 			uint32_t& NumCameras(RenderEffectConstantBuffer& cbuff) const;
 			uint32_t& CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
 			CameraInfo& Camera(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+			float4x4& PrevMvp(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
 
 		private:
 			RenderEffectPtr effect_;
@@ -406,6 +407,7 @@ namespace KlayGE
 			uint32_t num_cameras_offset_;
 			uint32_t camera_indices_offset_;
 			uint32_t cameras_offset_;
+			uint32_t prev_mvps_offset_;
 		};
 
 		PredefinedCameraCBuffer const& PredefinedCameraCBufferInstance() const;

@@ -64,6 +64,7 @@ namespace KlayGE
 		VPAM_NoVDM = 1UL << 10,
 		VPAM_NoAtmospheric = 1UL << 11,
 		VPAM_NoTAA = 1UL << 12,
+		VPAM_NoMotionBlur = 1UL << 13,
 	};
 
 	struct PerViewport
@@ -87,6 +88,8 @@ namespace KlayGE
 		ShaderResourceViewPtr g_buffer_rt0_srv;
 		TexturePtr g_buffer_rt1_tex;
 		ShaderResourceViewPtr g_buffer_rt1_srv;
+		TexturePtr g_buffer_rt2_tex;
+		ShaderResourceViewPtr g_buffer_rt2_srv;
 		TexturePtr g_buffer_ds_tex;
 		ShaderResourceViewPtr g_buffer_ds_srv;
 		TexturePtr g_buffer_depth_tex;
@@ -96,6 +99,8 @@ namespace KlayGE
 		ShaderResourceViewPtr g_buffer_resolved_rt0_srv;
 		TexturePtr g_buffer_resolved_rt1_tex;
 		ShaderResourceViewPtr g_buffer_resolved_rt1_srv;
+		TexturePtr g_buffer_resolved_rt2_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt2_srv;
 		TexturePtr g_buffer_resolved_depth_tex;
 		ShaderResourceViewPtr g_buffer_resolved_depth_srv;
 		RenderTargetViewPtr g_buffer_resolved_depth_rtv;
@@ -158,6 +163,10 @@ namespace KlayGE
 		TexturePtr dof_tex;
 		ShaderResourceViewPtr dof_srv;
 		RenderTargetViewPtr dof_rtv;
+
+		TexturePtr motion_blur_tex;
+		ShaderResourceViewPtr motion_blur_srv;
+		RenderTargetViewPtr motion_blur_rtv;
 
 		TexturePtr small_ssvo_tex;
 		ShaderResourceViewPtr small_ssvo_srv;
@@ -223,6 +232,7 @@ namespace KlayGE
 			DT_Diffuse,
 			DT_Specular,
 			DT_Shininess,
+			DT_MotionVec,
 			DT_Edge,
 			DT_SSVO,
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -252,6 +262,12 @@ namespace KlayGE
 		void DepthOfFieldEnabled(bool dof, bool bokeh);
 		void DepthFocus(float plane, float range);
 		void BokehLuminanceThreshold(float lum_threshold);
+		void MotionBlurEnabled(bool mb);
+		void MotionBlurExposure(float exposure);
+		float MotionBlurExposure() const;
+		void MotionBlurRadius(uint32_t blur_radius);
+		uint32_t MotionBlurRadius() const;
+		void MotionBlurReconstructionSamples(uint32_t reconstruction_samples);
 
 		void AddDecal(RenderDecalPtr const & decal);
 
@@ -339,6 +355,10 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_rt1_tex;
 		}
+		TexturePtr const& GBufferRT2Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_rt2_tex;
+		}
 		TexturePtr const & DepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_depth_tex;
@@ -358,6 +378,14 @@ namespace KlayGE
 		ShaderResourceViewPtr const& GBufferResolvedRT1Srv(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_resolved_rt1_srv;
+		}
+		TexturePtr const& GBufferResolvedRT2Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt2_tex;
+		}
+		ShaderResourceViewPtr const& GBufferResolvedRT2Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt2_srv;
 		}
 		TexturePtr const & ResolvedDepthTex(uint32_t vp) const
 		{
@@ -581,6 +609,9 @@ namespace KlayGE
 
 		KlayGE::PostProcessPtr bokeh_filter_pp_;
 		bool bokeh_filter_enabled_ = false;
+
+		KlayGE::PostProcessPtr motion_blur_pp_;
+		bool motion_blur_enabled_ = false;
 
 		float light_scale_;
 		RenderLayoutPtr rl_cone_;

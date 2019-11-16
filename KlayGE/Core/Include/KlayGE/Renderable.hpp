@@ -205,6 +205,8 @@ namespace KlayGE
 		}
 
 		virtual void ModelMatrix(float4x4 const & mat);
+		virtual void InverseModelMatrix(float4x4 const& mat);
+		virtual void PrevModelMatrix(float4x4 const& mat);
 		virtual void BindSceneNode(SceneNode const * node);
 		SceneNode const * CurrSceneNode() const
 		{
@@ -336,6 +338,7 @@ namespace KlayGE
 
 		float4x4 model_mat_ = float4x4::Identity();
 		float4x4 inv_model_mat_ = float4x4::Identity();
+		float4x4 prev_model_mat_ = float4x4::Identity();
 		bool model_mat_dirty_ = true;
 
 		PassType type_;
@@ -347,6 +350,8 @@ namespace KlayGE
 		RenderEffectParameter* frame_size_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
+		RenderEffectParameter* half_exposure_x_framerate_param_;
+		RenderEffectParameter* motion_blur_radius_param_;
 
 		RenderEffectConstantBufferPtr mesh_cbuffer_;
 		RenderEffectConstantBufferPtr model_cbuffer_;

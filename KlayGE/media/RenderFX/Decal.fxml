@@ -46,7 +46,7 @@ void DecalGBufferVS(uint instance_id : SV_InstanceID,
 void DecalGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					float3 view_dir : TEXCOORD4,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1, out float4 rt1 : SV_Target2)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
@@ -71,7 +71,7 @@ void DecalGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0
 		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	ConstructGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
+	ConstructGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, 0, rt0, rt1, rt2);
 }
 		]]>
 	</shader>

@@ -22,6 +22,7 @@
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
 namespace KlayGE
@@ -86,7 +87,7 @@ namespace KlayGE
 		void JitterMode(bool jitter);
 
 		void Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat, float4x4 const& inv_model_mat,
-			bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const;
+			float4x4 const& prev_model_mat, bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const;
 
 	private:
 		float		look_at_dist_ = 1;

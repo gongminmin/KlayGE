@@ -216,17 +216,15 @@ namespace
 					KFL_UNUSED(node);
 					KFL_UNUSED(app_time);
 
-					last_xform_to_parent_ = node.TransformToParent();
-
-					float4x4 mat_t = MathLib::transpose(last_xform_to_parent_);
+					float4x4 mat_t = MathLib::transpose(node.PrevTransformToWorld());
 					inst_.last_mat[0] = mat_t.Row(0);
 					inst_.last_mat[1] = mat_t.Row(1);
 					inst_.last_mat[2] = mat_t.Row(2);
 
-					float e = elapsed_time * 0.3f * -node.TransformToParent()(3, 1);
-					node.TransformToParent(node.TransformToParent() * MathLib::rotation_y(e));
+					float e = elapsed_time * 0.3f * -node.TransformToWorld()(3, 1);
+					node.TransformToWorld(node.TransformToWorld() * MathLib::rotation_y(e));
 
-					mat_t = MathLib::transpose(node.TransformToParent());
+					mat_t = MathLib::transpose(node.TransformToWorld());
 					inst_.mat[0] = mat_t.Row(0);
 					inst_.mat[1] = mat_t.Row(1);
 					inst_.mat[2] = mat_t.Row(2);
@@ -247,7 +245,6 @@ namespace
 	private:
 		SceneNodePtr node_;
 		InstData inst_;
-		float4x4 last_xform_to_parent_;
 	};
 
 

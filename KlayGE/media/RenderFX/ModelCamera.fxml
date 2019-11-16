@@ -20,6 +20,7 @@
 		<parameter type="uint" name="num_cameras"/>
 		<parameter type="uint4" name="camera_indices" array_size="2"/>
 		<parameter type="KlayGECameraInfo" name="cameras" array_size="8"/>
+		<parameter type="float4x4" name="prev_mvps" array_size="8"/>
 	</cbuffer>
 
 	<shader>

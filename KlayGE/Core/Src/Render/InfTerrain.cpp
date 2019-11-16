@@ -634,9 +634,12 @@ namespace KlayGE
 		float const dz = eye.z() - snapped_z_;
 		snapped_x_ = eye.x() - 2 * dx;				// TODO: Figure out why the 2x works
 		snapped_z_ = eye.z() - 2 * dz;
-		float4x4 trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
-		float4x4 scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
-		Renderable::ModelMatrix(scale * trans);
+		float4x4 const trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
+		float4x4 const scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
+		float4x4 const model_mat = scale * trans;
+		float4x4 const prev_model_mat = model_mat_;
+		Renderable::ModelMatrix(model_mat);
+		Renderable::PrevModelMatrix(prev_model_mat);
 
 		*proj_mat_param_ = proj;
 

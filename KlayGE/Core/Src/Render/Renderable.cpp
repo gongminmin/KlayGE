@@ -19,6 +19,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/App3D.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -159,8 +160,8 @@ namespace KlayGE
 							}
 						}
 
-						camera.Active(*camera_cbuffer_, visible_in_cameras_, model_mat_, inv_model_mat_, model_mat_dirty_, cascade_crop_mat,
-							need_cascade_crop_mat);
+						camera.Active(*camera_cbuffer_, visible_in_cameras_, model_mat_, inv_model_mat_, prev_model_mat_, model_mat_dirty_,
+							cascade_crop_mat, need_cascade_crop_mat);
 						pccb.CameraIndices(*camera_cbuffer_, visible_in_cameras_) = i;
 
 						++visible_in_cameras_;
@@ -209,6 +210,9 @@ namespace KlayGE
 			{
 				FrameBufferPtr const & fb = re.CurFrameBuffer();
 				*frame_size_param_ = int2(fb->Width(), fb->Height());
+
+				*half_exposure_x_framerate_param_ = drl->MotionBlurExposure() / 2 / Context::Instance().AppInstance().FrameTime();
+				*motion_blur_radius_param_ = static_cast<float>(drl->MotionBlurRadius());
 
 				switch (type_)
 				{
@@ -378,8 +382,25 @@ namespace KlayGE
 	{
 		if (memcmp(&model_mat_, &mat, sizeof(mat)) != 0)
 		{
-			model_mat_ = mat;
-			inv_model_mat_ = MathLib::transpose(model_mat_);
+			model_mat_ = prev_model_mat_ = mat;
+			model_mat_dirty_ = true;
+		}
+	}
+
+	void Renderable::InverseModelMatrix(float4x4 const& mat)
+	{
+		if (memcmp(&inv_model_mat_, &mat, sizeof(mat)) != 0)
+		{
+			inv_model_mat_ = mat;
+			model_mat_dirty_ = true;
+		}
+	}
+
+	void Renderable::PrevModelMatrix(float4x4 const& mat)
+	{
+		if (memcmp(&prev_model_mat_, &mat, sizeof(mat)) != 0)
+		{
+			prev_model_mat_ = mat;
 			model_mat_dirty_ = true;
 		}
 	}
@@ -388,6 +409,8 @@ namespace KlayGE
 	{
 		curr_node_ = node;
 		this->ModelMatrix(node->TransformToWorld());
+		this->InverseModelMatrix(node->InverseTransformToWorld());
+		this->PrevModelMatrix(node->PrevTransformToWorld());
 	}
 
 	void Renderable::UpdateBoundBox()
@@ -492,6 +515,8 @@ namespace KlayGE
 		opaque_depth_tex_param_ = effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
 		select_mode_object_id_param_ = effect_->ParameterByName("object_id");
+		half_exposure_x_framerate_param_ = effect_->ParameterByName("half_exposure_x_framerate");
+		motion_blur_radius_param_ = effect_->ParameterByName("motion_blur_radius");
 	}
 
 	void Renderable::UpdateTechniques()

@@ -1701,6 +1701,7 @@ namespace KlayGE
 		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
 		camera_indices_offset_ = effect_->ParameterByName("camera_indices")->CBufferOffset();
 		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
+		prev_mvps_offset_ = effect_->ParameterByName("prev_mvps")->CBufferOffset();
 
 		this->NumCameras(*predefined_cbuffer_) = 1;
 
@@ -1708,6 +1709,8 @@ namespace KlayGE
 
 		CameraInfo empty = {};
 		this->Camera(*predefined_cbuffer_, 0) = empty;
+
+		this->PrevMvp(*predefined_cbuffer_, 0) = float4x4::Identity();
 	}
 
 	uint32_t& RenderEngine::PredefinedCameraCBuffer::NumCameras(RenderEffectConstantBuffer& cbuff) const
@@ -1724,5 +1727,11 @@ namespace KlayGE
 		RenderEffectConstantBuffer& cbuff, uint32_t index) const
 	{
 		return *(cbuff.template VariableInBuff<CameraInfo>(cameras_offset_) + index);
+	}
+
+	float4x4& RenderEngine::PredefinedCameraCBuffer::PrevMvp(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<float4x4>(prev_mvps_offset_) + index);
 	}
 }

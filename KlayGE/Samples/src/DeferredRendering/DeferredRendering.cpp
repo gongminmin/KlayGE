@@ -278,6 +278,7 @@ void DeferredRenderingApp::OnCreate()
 	id_aa_ = dialog_->IDFromName("AA");
 	id_dof_ = dialog_->IDFromName("DoF");
 	id_bokeh_ = dialog_->IDFromName("Bokeh");
+	id_motion_blur_ = dialog_->IDFromName("MotionBlur");
 	id_num_lights_static_ = dialog_->IDFromName("NumLightsStatic");
 	id_num_lights_slider_ = dialog_->IDFromName("NumLightsSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
@@ -332,6 +333,9 @@ void DeferredRenderingApp::OnCreate()
 	this->DepthOfFieldHandler(*dialog_->Control<UICheckBox>(id_dof_));
 	dialog_->Control<UICheckBox>(id_bokeh_)->OnChangedEvent().Connect([this](UICheckBox const& sender) { this->BokehHandler(sender); });
 	this->BokehHandler(*dialog_->Control<UICheckBox>(id_bokeh_));
+	dialog_->Control<UICheckBox>(id_motion_blur_)->OnChangedEvent().Connect(
+		[this](UICheckBox const& sender) { this->MotionBlurHandler(sender); });
+	this->MotionBlurHandler(*dialog_->Control<UICheckBox>(id_motion_blur_));
 	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
@@ -480,6 +484,15 @@ void DeferredRenderingApp::BokehHandler(UICheckBox const& sender)
 	}
 }
 
+void DeferredRenderingApp::MotionBlurHandler(UICheckBox const& sender)
+{
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
+	{
+		motion_blur_enabled_ = sender.GetChecked();
+		deferred_rendering_->MotionBlurEnabled(motion_blur_enabled_);
+	}
+}
+
 void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & sender)
 {
 	int const num_lights = sender.GetValue();
@@ -591,5 +604,12 @@ void DeferredRenderingApp::DoUpdateOverlay()
 
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 {
+	if (pass == 0)
+	{
+		// Workaround for MotionBlur
+		Camera& camera = this->ActiveCamera();
+		camera.MainThreadUpdate(this->AppTime(), this->FrameTime());
+	}
+
 	return deferred_rendering_->Update(pass);
 }

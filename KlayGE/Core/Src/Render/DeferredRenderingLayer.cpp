@@ -49,6 +49,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
+#include <KlayGE/MotionBlur.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
 #include <KlayGE/SSSBlur.hpp>
@@ -338,11 +339,10 @@ namespace
 	{
 	public:
 		DeferredRenderingDebugPostProcess()
-			: PostProcess(L"DeferredRenderingDebug", false,
-				MakeSpan<std::string>(),
-				MakeSpan<std::string>({"g_buffer_rt0_tex", "g_buffer_rt1_tex", "depth_tex", "lighting_tex", "ssvo_tex"}),
-				MakeSpan<std::string>({"out_tex"}),
-				RenderEffectPtr(), nullptr)
+			: PostProcess(L"DeferredRenderingDebug", false, MakeSpan<std::string>(),
+				  MakeSpan<std::string>(
+					  {"g_buffer_rt0_tex", "g_buffer_rt1_tex", "g_buffer_rt2_tex", "depth_tex", "lighting_tex", "ssvo_tex"}),
+				  MakeSpan<std::string>({"out_tex"}), RenderEffectPtr(), nullptr)
 		{
 			auto effect = ASyncLoadRenderEffect("DeferredRenderingDebug.fxml");
 			this->Technique(effect, effect->TechniqueByName("ShowPosition"));
@@ -377,6 +377,10 @@ namespace
 
 			case DeferredRenderingLayer::DT_Shininess:
 				technique_ = effect_->TechniqueByName("ShowShininess");
+				break;
+
+			case DeferredRenderingLayer::DT_MotionVec:
+				technique_ = effect_->TechniqueByName("ShowMotionVec");
 				break;
 
 			case DeferredRenderingLayer::DT_Edge:
@@ -763,6 +767,9 @@ namespace KlayGE
 			bokeh_filter_pp_ = MakeSharedPtr<BokehFilter>();
 		}
 
+		motion_blur_pp_ = MakeSharedPtr<MotionBlurPostProcess>();
+		motion_blur_pp_->SetParam(3, static_cast<uint32_t>(MotionBlurPostProcess::VT_Result));
+
 		rsm_fb_ = rf.MakeFrameBuffer();
 
 		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
@@ -1061,6 +1068,63 @@ namespace KlayGE
 		}
 	}
 
+	void DeferredRenderingLayer::MotionBlurEnabled(bool mb)
+	{
+		if (motion_blur_pp_)
+		{
+			motion_blur_enabled_ = mb;
+		}
+	}
+
+	void DeferredRenderingLayer::MotionBlurExposure(float exposure)
+	{
+		if (motion_blur_pp_)
+		{
+			auto& mb_pp = checked_cast<MotionBlurPostProcess&>(*motion_blur_pp_);
+			mb_pp.Exposure(exposure);
+		}
+	}
+
+	float DeferredRenderingLayer::MotionBlurExposure() const
+	{
+		float exposure = 0;
+		if (motion_blur_pp_)
+		{
+			auto& mb_pp = checked_cast<MotionBlurPostProcess&>(*motion_blur_pp_);
+			exposure = mb_pp.Exposure();
+		}
+		return exposure;
+	}
+
+	void DeferredRenderingLayer::MotionBlurRadius(uint32_t blur_radius)
+	{
+		if (motion_blur_pp_)
+		{
+			auto& mb_pp = checked_cast<MotionBlurPostProcess&>(*motion_blur_pp_);
+			mb_pp.BlurRadius(blur_radius);
+		}
+	}
+
+	uint32_t DeferredRenderingLayer::MotionBlurRadius() const
+	{
+		uint32_t blur_radius = 0;
+		if (motion_blur_pp_)
+		{
+			auto& mb_pp = checked_cast<MotionBlurPostProcess&>(*motion_blur_pp_);
+			blur_radius = mb_pp.BlurRadius();
+		}
+		return blur_radius;
+	}
+
+	void DeferredRenderingLayer::MotionBlurReconstructionSamples(uint32_t reconstruction_samples)
+	{
+		if (motion_blur_pp_)
+		{
+			auto& mb_pp = checked_cast<MotionBlurPostProcess&>(*motion_blur_pp_);
+			mb_pp.ReconstructionSamples(reconstruction_samples);
+		}
+	}
+
 	void DeferredRenderingLayer::AddDecal(RenderDecalPtr const & decal)
 	{
 		decals_.push_back(decal);
@@ -1090,7 +1154,6 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[index];
 		pvp.attrib = attrib;
 		pvp.frame_buffer = fb;
-		pvp.frame_buffer->Viewport()->Camera()->JitterMode(true);
 		pvp.sample_count = sample_count;
 		pvp.sample_quality = sample_quality;
 
@@ -1131,12 +1194,18 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write);
 		KLAYGE_TEXTURE_DEBUG_NAME(pvp.g_buffer_resolved_rt1_tex);
 		pvp.g_buffer_resolved_rt1_srv = rf.MakeTextureSrv(pvp.g_buffer_resolved_rt1_tex);
+		pvp.g_buffer_resolved_rt2_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write);
+		KLAYGE_TEXTURE_DEBUG_NAME(pvp.g_buffer_resolved_rt2_tex);
+		pvp.g_buffer_resolved_rt2_srv = rf.MakeTextureSrv(pvp.g_buffer_resolved_rt2_tex);
 		if (sample_count == 1)
 		{
 			pvp.g_buffer_rt0_tex = pvp.g_buffer_resolved_rt0_tex;
 			pvp.g_buffer_rt0_srv = pvp.g_buffer_resolved_rt0_srv;
 			pvp.g_buffer_rt1_tex = pvp.g_buffer_resolved_rt1_tex;
 			pvp.g_buffer_rt1_srv = pvp.g_buffer_resolved_rt1_srv;
+			pvp.g_buffer_rt2_tex = pvp.g_buffer_resolved_rt2_tex;
+			pvp.g_buffer_rt2_srv = pvp.g_buffer_resolved_rt2_srv;
 		}
 		else
 		{
@@ -1148,6 +1217,10 @@ namespace KlayGE
 				EAH_GPU_Read | EAH_GPU_Write);
 			KLAYGE_TEXTURE_DEBUG_NAME(pvp.g_buffer_rt1_tex);
 			pvp.g_buffer_rt1_srv = rf.MakeTextureSrv(pvp.g_buffer_rt1_tex);
+			pvp.g_buffer_rt2_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, sample_count, sample_quality,
+				EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(pvp.g_buffer_rt2_tex);
+			pvp.g_buffer_rt2_srv = rf.MakeTextureSrv(pvp.g_buffer_rt2_tex);
 		}
 
 		uint32_t hint = EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips;
@@ -1248,6 +1321,7 @@ namespace KlayGE
 
 		pvp.g_buffer_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.g_buffer_rt0_tex, 0, 1, 0));
 		pvp.g_buffer_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.g_buffer_rt1_tex, 0, 1, 0));
+		pvp.g_buffer_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.g_buffer_rt2_tex, 0, 1, 0));
 		pvp.g_buffer_fb->Attach(ds_view);
 
 		this->SetupViewportGI(index, false);
@@ -1391,6 +1465,14 @@ namespace KlayGE
 			pvp.dof_rtv = rf.Make2DRtv(pvp.dof_tex, 0, 1, 0);
 		}
 
+		if (!(attrib & VPAM_NoMotionBlur))
+		{
+			pvp.motion_blur_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(pvp.motion_blur_tex);
+			pvp.motion_blur_srv = rf.MakeTextureSrv(pvp.motion_blur_tex);
+			pvp.motion_blur_rtv = rf.Make2DRtv(pvp.motion_blur_tex, 0, 1, 0);
+		}
+
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
@@ -1475,11 +1557,12 @@ namespace KlayGE
 		{
 			dr_debug_pp_->InputPin(0, this->GBufferResolvedRT0Srv(index));
 			dr_debug_pp_->InputPin(1, this->GBufferResolvedRT1Srv(index));
-			dr_debug_pp_->InputPin(2, this->ResolvedDepthSrv(index));
+			dr_debug_pp_->InputPin(2, this->GBufferResolvedRT2Srv(index));
+			dr_debug_pp_->InputPin(3, this->ResolvedDepthSrv(index));
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-			dr_debug_pp_->InputPin(3,this->LightingSrv(index));
+			dr_debug_pp_->InputPin(4,this->LightingSrv(index));
 #endif
-			dr_debug_pp_->InputPin(4, this->SmallSSVOSrv(index));
+			dr_debug_pp_->InputPin(5, this->SmallSSVOSrv(index));
 		}
 	}
 
@@ -2007,7 +2090,8 @@ namespace KlayGE
 				|| (DeferredRenderingLayer::DT_Depth == display_type_)
 				|| (DeferredRenderingLayer::DT_Diffuse == display_type_)
 				|| (DeferredRenderingLayer::DT_Specular == display_type_)
-				|| (DeferredRenderingLayer::DT_Shininess == display_type_))
+				|| (DeferredRenderingLayer::DT_Shininess == display_type_)
+				|| (DeferredRenderingLayer::DT_MotionVec == display_type_))
 			{
 				jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->VisualizeGBufferDRJob(); }));
 			}
@@ -4742,6 +4826,17 @@ namespace KlayGE
 			}
 
 			color_srv = pvp.dof_srv;
+		}
+
+		if (!(pvp.attrib & VPAM_NoMotionBlur) && motion_blur_enabled_)
+		{
+			motion_blur_pp_->InputPin(0, color_srv);
+			motion_blur_pp_->InputPin(1, depth_srv);
+			motion_blur_pp_->InputPin(2, pvp.g_buffer_rt2_srv);
+			motion_blur_pp_->OutputPin(0, pvp.motion_blur_rtv);
+			motion_blur_pp_->Apply();
+
+			color_srv = pvp.motion_blur_srv;
 		}
 
 		re.BindFrameBuffer(pvp.frame_buffer);

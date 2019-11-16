@@ -147,7 +147,7 @@ void CalcProceduralTerrainNormalColor(float3 world_pos, float4x4 model_view, flo
 
 void GBufferProceduralTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1,
 				uint rt_index : SV_RenderTargetArrayIndex,
-				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1, out float4 rt2 : SV_Target2)
 {
 	KlayGECameraInfo camera = cameras[rt_index];
 	float4x4 model_view = camera.model_view;
@@ -155,8 +155,8 @@ void GBufferProceduralTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch 
 	float3 normal, color;
 	CalcProceduralTerrainNormalColor(world_pos, model_view, debug_patch, normal, color);
 
-	StoreGBuffer(normal, color, 0,
-		rt0, rt1);
+	StoreGBuffer(normal, color, 0, 0,
+		rt0, rt1, rt2);
 }
 		]]>
 	</shader>
