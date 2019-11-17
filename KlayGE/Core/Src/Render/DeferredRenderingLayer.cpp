@@ -383,6 +383,10 @@ namespace
 				technique_ = effect_->TechniqueByName("ShowMotionVec");
 				break;
 
+			case DeferredRenderingLayer::DT_Occlusion:
+				technique_ = effect_->TechniqueByName("ShowOcclusion");
+				break;
+
 			case DeferredRenderingLayer::DT_Edge:
 				break;
 
@@ -801,6 +805,7 @@ namespace KlayGE
 
 		g_buffer_rt0_tex_param_ = dr_effect->ParameterByName("g_buffer_rt0_tex");
 		g_buffer_rt1_tex_param_ = dr_effect->ParameterByName("g_buffer_rt1_tex");
+		g_buffer_rt2_tex_param_ = dr_effect->ParameterByName("g_buffer_rt2_tex");
 		depth_tex_param_ = dr_effect->ParameterByName("depth_tex");
 		depth_tex_ms_param_ = dr_effect->ParameterByName("depth_tex_ms");
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -866,6 +871,7 @@ namespace KlayGE
 		{
 			g_buffer_rt0_tex_ms_param_ = dr_effect->ParameterByName("g_buffer_rt0_tex_ms");
 			g_buffer_rt1_tex_ms_param_ = dr_effect->ParameterByName("g_buffer_rt1_tex_ms");
+			g_buffer_rt2_tex_ms_param_ = dr_effect->ParameterByName("g_buffer_rt2_tex_ms");
 			g_buffer_ds_tex_ms_param_ = dr_effect->ParameterByName("g_buffer_ds_tex_ms");
 			g_buffer_depth_tex_ms_param_ = dr_effect->ParameterByName("g_buffer_depth_tex_ms");
 			g_buffer_stencil_tex_param_ = (dr_effect_->ParameterByName("g_buffer_stencil_tex"));
@@ -1502,8 +1508,9 @@ namespace KlayGE
 
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(pvp.g_buffer_resolved_rt0_tex, 0, 1, 0));
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(pvp.g_buffer_resolved_rt1_tex, 0, 1, 0));
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color2, pvp.g_buffer_resolved_depth_rtv);
-				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color3, rf.Make2DRtv(pvp.multi_sample_mask_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color2, rf.Make2DRtv(pvp.g_buffer_resolved_rt2_tex, 0, 1, 0));
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color3, pvp.g_buffer_resolved_depth_rtv);
+				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::Attachment::Color4, rf.Make2DRtv(pvp.multi_sample_mask_tex, 0, 1, 0));
 			}
 
 			auto const light_indices_fmt = caps.BestMatchUavFormat(MakeSpan({EF_R16UI, EF_R32UI}));
@@ -2091,7 +2098,8 @@ namespace KlayGE
 				|| (DeferredRenderingLayer::DT_Diffuse == display_type_)
 				|| (DeferredRenderingLayer::DT_Specular == display_type_)
 				|| (DeferredRenderingLayer::DT_Shininess == display_type_)
-				|| (DeferredRenderingLayer::DT_MotionVec == display_type_))
+				|| (DeferredRenderingLayer::DT_MotionVec == display_type_)
+				|| (DeferredRenderingLayer::DT_Occlusion == display_type_))
 			{
 				jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>([this] { return this->VisualizeGBufferDRJob(); }));
 			}
@@ -2325,6 +2333,7 @@ namespace KlayGE
 		{
 			*g_buffer_rt0_tex_ms_param_ = pvp.g_buffer_rt0_tex;
 			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_tex;
+			*g_buffer_rt2_tex_ms_param_ = pvp.g_buffer_rt2_tex;
 			*g_buffer_ds_tex_ms_param_ = pvp.g_buffer_ds_srv;
 
 			*near_q_far_param_ = pvp.frame_buffer->Viewport()->Camera()->NearQFarParam();
@@ -2988,6 +2997,7 @@ namespace KlayGE
 
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
 		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*g_buffer_rt2_tex_param_ = pvp.g_buffer_rt2_srv;
 		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*lighting_tex_param_ = pvp.lighting_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
@@ -3333,6 +3343,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		*g_buffer_rt1_tex_param_ = pvp.g_buffer_resolved_rt1_tex;
+		*g_buffer_rt2_tex_param_ = pvp.g_buffer_resolved_rt2_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -3594,6 +3605,7 @@ namespace KlayGE
 
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
 		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*g_buffer_rt2_tex_param_ = pvp.g_buffer_rt2_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		if (PTB_Opaque == pass_tb)
@@ -3636,6 +3648,7 @@ namespace KlayGE
 
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
 		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*g_buffer_rt2_tex_param_ = pvp.g_buffer_rt2_srv;
 		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
@@ -3772,6 +3785,7 @@ namespace KlayGE
 		*light_index_tex_param_ = pvp.light_index_tex;
 		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
 		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+		*g_buffer_rt2_tex_param_ = pvp.g_buffer_rt2_srv;
 		*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
@@ -3848,6 +3862,7 @@ namespace KlayGE
 		{
 			*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_srv;
 			*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_srv;
+			*g_buffer_rt2_tex_param_ = pvp.g_buffer_rt2_srv;
 			*g_buffer_stencil_tex_param_ = pvp.g_buffer_stencil_srv;
 			*depth_tex_param_ = pvp.g_buffer_depth_srv;
 		}
@@ -3855,6 +3870,7 @@ namespace KlayGE
 		{
 			*g_buffer_rt0_tex_ms_param_ = pvp.g_buffer_rt0_srv;
 			*g_buffer_rt1_tex_ms_param_ = pvp.g_buffer_rt1_srv;
+			*g_buffer_rt2_tex_ms_param_ = pvp.g_buffer_rt2_srv;
 			*g_buffer_depth_tex_ms_param_ = pvp.g_buffer_depth_srv;
 			*g_buffer_stencil_tex_ms_param_ = pvp.g_buffer_stencil_srv;
 			*multi_sample_mask_tex_param_ = pvp.multi_sample_mask_tex;

@@ -12,6 +12,7 @@
 			<item name="Specular"/>
 			<item name="Shininess"/>
 			<item name="MotionVec"/>
+			<item name="Occlusion"/>
 			<item name="Edge"/>
 			<item name="SSVO"/>
 			<item name="Diffuse Lighting"/>

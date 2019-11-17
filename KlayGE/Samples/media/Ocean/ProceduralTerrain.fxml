@@ -203,7 +203,7 @@ void GBufferProceduralTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch 
 	float3 normal, color;
 	CalcProceduralTerrainNormalColor(world_pos, model_view, debug_patch, normal, color);
 
-	StoreGBuffer(normal, color, 0, 0,
+	StoreGBuffer(normal, color, 0, 0, 1,
 		rt0, rt1, rt2);
 
 #if !KLAYGE_OPENGLES

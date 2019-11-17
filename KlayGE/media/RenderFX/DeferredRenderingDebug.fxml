@@ -80,6 +80,13 @@ float4 ShowMotionVecPS(float2 tc0 : TEXCOORD0) : SV_Target
 	return float4(abs(motion_vec) * 30, 1, 1);
 }
 
+float4 ShowOcclusionPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc0);
+	float occlusion = GetOcclusion(rt2);
+	return float4(occlusion.xxx, 1);
+}
+
 float4 ShowSSVOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	return ssvo_tex.Sample(point_sampler, tc0).x;
@@ -180,6 +187,18 @@ float4 ShowSpecularLightingPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="ShowQuadVS()"/>
 			<state name="pixel_shader" value="ShowMotionVecPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowOcclusion">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowOcclusionPS()"/>
 		</pass>
 	</technique>
 

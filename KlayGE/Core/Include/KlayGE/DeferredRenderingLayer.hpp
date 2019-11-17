@@ -233,6 +233,7 @@ namespace KlayGE
 			DT_Specular,
 			DT_Shininess,
 			DT_MotionVec,
+			DT_Occlusion,
 			DT_Edge,
 			DT_SSVO,
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -703,6 +704,7 @@ namespace KlayGE
 
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
 		RenderEffectParameter* g_buffer_rt1_tex_param_;
+		RenderEffectParameter* g_buffer_rt2_tex_param_;
 		RenderEffectParameter* depth_tex_param_;
 		RenderEffectParameter* depth_tex_ms_param_;
 		RenderEffectParameter* shading_tex_param_;
@@ -740,6 +742,7 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderEffectParameter* g_buffer_rt0_tex_ms_param_;
 		RenderEffectParameter* g_buffer_rt1_tex_ms_param_;
+		RenderEffectParameter* g_buffer_rt2_tex_ms_param_;
 		RenderEffectParameter* g_buffer_ds_tex_ms_param_;
 		RenderEffectParameter* g_buffer_depth_tex_ms_param_;
 		RenderEffectParameter* g_buffer_stencil_tex_param_;

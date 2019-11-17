@@ -80,7 +80,7 @@
 			<param type="float2" name="texcoord"/>
 		</node>
 
-		<node name="OcclusionNode" return="float3" impl="StaticOcclusionNode">
+		<node name="OcclusionNode" return="float" impl="StaticOcclusionNode">
 			<param type="float2" name="texcoord"/>
 		</node>
 
@@ -279,7 +279,9 @@ void ConstructGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_vie
 	float3 albedo = AlbedoNode(texcoord_2xy.xy);
 	float2 metalness_glossiness = MetalnessGlossinessNode(texcoord_2xy.xy);
 
-	StoreGBuffer(normal, albedo, metalness_glossiness, motion_vec,
+	float occlusion = OcclusionNode(texcoord_2xy.xy);
+
+	StoreGBuffer(normal, albedo, metalness_glossiness, motion_vec, occlusion,
 		rt0, rt1, rt2);
 }
 
@@ -896,7 +898,7 @@ float StaticOcclusionNode(float2 texcoord)
 	float occlusion = 1;
 	if (occlusion_map_enabled)
 	{
-		occlusion = occlusion_tex.Sample(trilinear_sampler, texcoord).x;
+		occlusion = get_x_channel(occlusion_tex.Sample(trilinear_sampler, texcoord));
 	}
 	return occlusion;
 }

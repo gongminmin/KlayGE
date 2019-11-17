@@ -660,6 +660,7 @@ float4 DeferredShadowingDirectionalPS(
 
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt2_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
 	<parameter type="texture2DMS" name="shading_tex_ms"/>
 
@@ -732,7 +733,11 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 c_spec = GetSpecular(rt1);
 	float4 shading = float4(CalcShading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
 	shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
-	return shading;
+
+	float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
+	float occlusion = GetOcclusion(rt2);
+	
+	return shading * float4(occlusion.xxx, 1);
 }
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
