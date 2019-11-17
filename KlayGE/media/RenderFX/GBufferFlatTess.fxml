@@ -141,9 +141,12 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 						out float4 oTsToView0_2z,
 						out float4 oTsToView1_Depth,
 						out SS_TEXCOORD_TYPE oScreenTc,
+						out float4 oCurrPosSS,
+						out float4 oPrevPosSS,
 						out float4 oPos)
 {
-	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
 	float4x4 mvp = camera.mvp;
 	float4x4 model_view = camera.model_view;
 
@@ -166,6 +169,9 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(float4(pos, 1), prev_mvps[camera_index]);
 }
 
 [domain("tri")]
@@ -177,6 +183,8 @@ void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oTsToView0_2z : TEXCOORD1,
 							out float4 oTsToView1_Depth : TEXCOORD2,
 							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+							out float4 oCurrPosSS : TEXCOORD4,
+							out float4 oPrevPosSS : TEXCOORD5,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -191,7 +199,7 @@ void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				tangent_quat);
 
 	PostTessellation(bc_coords, pos, texcoord, tangent_quat, patch[0].instance_id,
-				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
+				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oCurrPosSS, oPrevPosSS, oPos);
 }
 		]]>
 	</shader>
