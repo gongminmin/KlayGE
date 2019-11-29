@@ -1543,7 +1543,6 @@ namespace KlayGE
 		normal_scale_offset_ = effect_->ParameterByName("normal_scale")->CBufferOffset();
 		occlusion_strength_offset_ = effect_->ParameterByName("occlusion_strength")->CBufferOffset();
 		height_offset_scale_offset_ = effect_->ParameterByName("height_offset_scale")->CBufferOffset();
-		parallax_occlusion_mapping_enabled_offset_ = effect_->ParameterByName("parallax_occlusion_mapping_enabled")->CBufferOffset();
 		tess_factors_offset_ = effect_->ParameterByName("tess_factors")->CBufferOffset();
 
 		this->AlbedoClr(*predefined_cbuffer_) = float4(0, 0, 0, 1);
@@ -1558,7 +1557,6 @@ namespace KlayGE
 		this->NormalScale(*predefined_cbuffer_) = 1;
 		this->OcclusionStrength(*predefined_cbuffer_) = 1;
 		this->HeightOffsetScale(*predefined_cbuffer_) = float2(-0.5f, 0.06f);
-		this->ParallaxOcclusionMappingEnabled(*predefined_cbuffer_) = 0;
 		this->TessFactors(*predefined_cbuffer_) = float4(5, 5, 1, 9);
 	}
 
@@ -1620,11 +1618,6 @@ namespace KlayGE
 	float2& RenderEngine::PredefinedMaterialCBuffer::HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const
 	{
 		return *cbuff.template VariableInBuff<float2>(height_offset_scale_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::ParallaxOcclusionMappingEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(parallax_occlusion_mapping_enabled_offset_);
 	}
 
 	float4& RenderEngine::PredefinedMaterialCBuffer::TessFactors(RenderEffectConstantBuffer& cbuff) const

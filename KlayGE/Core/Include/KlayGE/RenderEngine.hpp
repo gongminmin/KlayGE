@@ -292,7 +292,6 @@ namespace KlayGE
 			float& NormalScale(RenderEffectConstantBuffer& cbuff) const;
 			float& OcclusionStrength(RenderEffectConstantBuffer& cbuff) const;
 			float2& HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const;
-			int32_t& ParallaxOcclusionMappingEnabled(RenderEffectConstantBuffer& cbuff) const;
 			float4& TessFactors(RenderEffectConstantBuffer& cbuff) const;
 
 		private:
@@ -311,7 +310,6 @@ namespace KlayGE
 			uint32_t normal_scale_offset_;
 			uint32_t occlusion_strength_offset_;
 			uint32_t height_offset_scale_offset_;
-			uint32_t parallax_occlusion_mapping_enabled_offset_;
 			uint32_t tess_factors_offset_;
 		};
 

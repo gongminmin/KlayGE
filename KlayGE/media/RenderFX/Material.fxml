@@ -14,7 +14,6 @@
 		<parameter type="float" name="normal_scale"/>
 		<parameter type="float" name="occlusion_strength"/>
 		<parameter type="float2" name="height_offset_scale"/>
-		<parameter type="int" name="parallax_occlusion_mapping_enabled"/>
 		<parameter type="float4" name="tess_factors"/>
 	</cbuffer>
 

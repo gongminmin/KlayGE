@@ -502,8 +502,7 @@ namespace
 	uint32_t constexpr sw_normal_scale_offset_ = sw_alpha_test_threshold_offset_ + sizeof(uint32_t);
 	uint32_t constexpr sw_occlusion_strength_offset_ = sw_normal_scale_offset_ + sizeof(float);
 	uint32_t constexpr sw_height_offset_scale_offset_ = sw_occlusion_strength_offset_ + sizeof(float);
-	uint32_t constexpr sw_parallax_occlusion_mapping_enabled_offset_ = sw_height_offset_scale_offset_ + sizeof(float2);
-	uint32_t constexpr sw_tess_factors_offset_ = sw_parallax_occlusion_mapping_enabled_offset_ + sizeof(uint32_t);
+	uint32_t constexpr sw_tess_factors_offset_ = sw_height_offset_scale_offset_ + sizeof(uint32_t);
 	uint32_t constexpr sw_pdmc_size = sw_tess_factors_offset_ + sizeof(float4);
 
 	RenderEngine::PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance()
@@ -789,15 +788,11 @@ namespace KlayGE
 				{
 					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_parallax_enabled_offset_]) = srv ? 1 : 0;
 					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_height_map_tess_enabled_offset_]) = 0;
-					reinterpret_cast<uint32_t&>(sw_cbuffer_[sw_parallax_occlusion_mapping_enabled_offset_]) =
-						(detail_mode_ == SurfaceDetailMode::ParallaxOcclusionMapping) ? 1 : 0;
 				}
 				else
 				{
 					pmcb.HeightMapParallaxEnabled(*cbuffer_) = srv ? 1 : 0;
 					pmcb.HeightMapTessEnabled(*cbuffer_) = 0;
-					pmcb.ParallaxOcclusionMappingEnabled(*cbuffer_) =
-						(detail_mode_ == SurfaceDetailMode::ParallaxOcclusionMapping) ? 1 : 0;
 				}
 			}
 			else
