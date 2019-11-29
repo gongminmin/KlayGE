@@ -1615,7 +1615,11 @@ namespace KlayGE
 			switch (static_cast<RenderMaterial::SurfaceDetailMode>(effect_index.flags.detail_mode))
 			{
 			case RenderMaterial::SurfaceDetailMode::ParallaxMapping:
+				break;
+
 			case RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping:
+				g_buffer_files[num] = "GBufferParallaxOcclusionMapping.fxml";
+				++num;
 				break;
 
 			case RenderMaterial::SurfaceDetailMode::FlatTessellation:

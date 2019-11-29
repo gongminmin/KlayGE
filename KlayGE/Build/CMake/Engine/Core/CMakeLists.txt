@@ -208,6 +208,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferFlatTess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferLine.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferParallaxOcclusionMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSmoothTess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSSS.fxml

@@ -88,6 +88,11 @@
 			<param type="float3" name="pos"/>
 			<param type="float4" name="tangent_quat"/>
 		</node>
+
+		<node name="TexcoordAdjustmentNode" return="float2" impl="DefaultTexcoordAdjustmentNode">
+			<param type="float2" name="texcoord"/>
+			<param type="float3" name="view_ray"/>
+		</node>
 	</shader_graph_nodes>
 
 	<shader>
@@ -188,76 +193,6 @@ float2 ParallaxMappingCorrection(float2 uv, float3 view)
 	return uv;
 }
 
-float2 ParallaxOcclusionMappingCorrection(float2 uv, float3 view)
-{
-	const int lod_threshold = 3;
-	const int min_samples = 8;
-	const int max_samples = 50;
-
-	float2 parallax_offset = normalize(view).xy * height_offset_scale.y;
-
-	uint width, height;
-	albedo_tex.GetDimensions(width, height);
-	float level = mipmap_level(uv, uint2(width, height));
-
-	float2 original_uv = uv;
-	[branch]
-	if (level <= lod_threshold)
-	{
-		int num_steps = (int)lerp(max_samples, min_samples, view.z);
-
-		float step_size = 1.0f / num_steps;
-		float prev_height = 1;
-		float next_height = 0;
-
-		int step_index = 0;
-
-		float2 tex_offset_per_step = step_size * parallax_offset;
-		float2 tex_curr_offset = uv;
-		float curr_bound = 1;
-
-		float2 pt1 = 0;
-		float2 pt2 = 0;
-
-		[loop]
-		while (step_index < num_steps)
-		{
-			tex_curr_offset -= tex_offset_per_step;
-			float curr_height = HeightForParallaxOcclusionNode(tex_curr_offset, level);
-			curr_bound -= step_size;
-
-			if (curr_height > curr_bound)
-			{
-				pt1 = float2(curr_bound, curr_height);
-				pt2 = float2(curr_bound + step_size, prev_height);
-				step_index = num_steps;
-			}
-			else
-			{
-				++step_index;
-			}
-			prev_height = curr_height;
-		}
-
-		float delta1 = pt1.x - pt1.y;
-		float delta2 = pt2.x - pt2.y;
-		float parallax_amount = (delta1 == delta2) ? 0 : (pt1.x * delta2 - pt2.x * delta1) / (delta2 - delta1);
-
-		float2 offset_uv = uv - parallax_offset * (1 - parallax_amount);
-		if (level > lod_threshold - 1)
-		{
-			// Lerp the texture coordinate from parallax occlusion mapped coordinate to bump mapping smoothly based on the current mip level
-			uv = lerp(offset_uv, original_uv, frac(level));
-		}
-		else
-		{
-			uv = offset_uv;
-		}
-	}
-
-	return uv;
-}
-
 float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
@@ -310,8 +245,7 @@ void GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD
 	)
 {
 	float3 view = -normalize(float3(ts_to_view0_2z.z, ts_to_view1_depth.z, ts_to_view0_2z.w));
-	texcoord_2xy.xy = parallax_occlusion_mapping_enabled ? ParallaxOcclusionMappingCorrection(texcoord_2xy.xy, view)
-		: ParallaxMappingCorrection(texcoord_2xy.xy, view);
+	texcoord_2xy.xy = TexcoordAdjustmentNode(texcoord_2xy.xy, view);
 
 #if ALPHA_TEST_MODE
 	float opacity = OpacityNode(texcoord_2xy.xy);
@@ -481,12 +415,6 @@ void GBufferNoVpRtGS(triangle float4 in_texcoord_2xy[3] : TEXCOORD0, triangle fl
 
 	<technique name="GenReflectiveShadowMapTech" inherit="GBufferTech">
 		<macro name="SKIP_MOTION_VEC" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferPS()"/>
-		</pass>
 	</technique>
 	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GenReflectiveShadowMapTech">
 		<macro name="ALPHA_TEST_MODE" value="1"/>
@@ -906,6 +834,11 @@ float StaticOcclusionNode(float2 texcoord)
 float3 DefaultPositionAdjustmentNode(float3 position, float4 tangent_quat)
 {
 	return position;
+}
+
+float2 DefaultTexcoordAdjustmentNode(float2 texcoord, float3 view_ray)
+{
+	return ParallaxMappingCorrection(texcoord, view_ray);
 }
 		]]>
 	</shader>
