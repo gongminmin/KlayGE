@@ -118,7 +118,6 @@ matrix:
             - xquartz
           packages:
             - ninja
-            - wine
           update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
@@ -130,7 +129,6 @@ matrix:
             - xquartz
           packages:
             - ninja
-            - wine
           update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
@@ -140,6 +138,10 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       export WINEARCH=win32;
       winetricks;
+    fi
+  # macOS
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install https://raw.githubusercontent.com/sashkab/homebrew-core/b7f9fd6f8c198fe5eacb076aa2c6d41e2203597/Formula/wine.rb;
     fi
 
 script:
