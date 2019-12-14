@@ -110,8 +110,8 @@ float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool 
 		occlusion = get_x_channel(judatex2d_wrap(occlusion_tex_bb, uv));
 	}
 	
-	float3 shading = 0.1f * diffuse + shadow * atten * light_color * CalcBRDFShading(diffuse, 0.2f, shininess, light_vec, halfway, normal);
-	return float4(shading * occlusion, 1);
+	float3 shading = 0.1f * diffuse + atten * light_color * CalcBRDFShading(diffuse, 0.2f, shininess, light_vec, halfway, normal);
+	return float4(shading * occlusion * shadow, 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,
@@ -143,30 +143,12 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 		use_na_length, use_occlusion_map);
 }
 
-void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
-					float2 texcoord0	: TEXCOORD0,
-					float4 tangent_quat			: TANGENT,
-					out float4 oL			: TEXCOORD0,	// in tangent space
-					out float4 oH			: TEXCOORD1,	// in tangent space
-					out float3 oV			: TEXCOORD2,	// in tangent space
-					out float4 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
-					out float4 oPos			: SV_Position)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord0 = texcoord0 * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-
-	CalcTBN(pos, texcoord0, tangent_quat,
-		oL, oH, oV, oPos);
-
-	oParallaxOffsetTS = float4(normalize(oV).xy, normalize(oL.xyz).xy) * height_scale;
-}
-
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 					float4 H					: TEXCOORD1,
-					float3 V					: TEXCOORD2,
-					float4 vParallaxOffsetTS	: TEXCOORD3) : SV_Target
+					float3 V					: TEXCOORD2) : SV_Target
 {
+	float4 vParallaxOffsetTS = float4(normalize(V).xy, normalize(L.xyz).xy) * height_scale;
+
 	float3 view = normalize(V);
 	float2 texCoord = float2(L.w, H.w);
 
@@ -292,7 +274,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 
 	<technique name="ParallaxOcclusion">
 		<pass name="p0">
-			<state name="vertex_shader" value="ParallaxOcclusionMappingVS()"/>
+			<state name="vertex_shader" value="CalcTBNVS()"/>
 			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
 		</pass>
 	</technique>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<material>
+	<albedo color="0.4 0.4 0.4 1" texture="diffuse.dds"/>
+	<metalness_glossiness metalness="0.2" glossiness="0.4"/>
+</material>

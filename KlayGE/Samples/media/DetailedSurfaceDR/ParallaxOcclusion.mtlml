@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<material>
+	<detail mode="Parallax Occlusion Mapping"/>
+	<albedo color="0.4 0.4 0.4 1" texture="diffuse.dds"/>
+	<metalness_glossiness metalness="0.2" glossiness="0.4"/>
+	<normal texture="normal.dds"/>
+	<height texture="height.dds"/>
+	<occlusion texture="occlusion.dds"/>
+</material>
