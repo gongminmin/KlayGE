@@ -542,12 +542,12 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
-				cmd_list->ResolveSubresource(other.D3DResource().get(), i, d3d_resource_.get(), i, dxgi_fmt_);
+				cmd_list->ResolveSubresource(other.D3DResource(), i, d3d_resource_.get(), i, dxgi_fmt_);
 			}
 		}
 		else
 		{
-			cmd_list->CopyResource(other.D3DResource().get(), d3d_resource_.get());
+			cmd_list->CopyResource(other.D3DResource(), d3d_resource_.get());
 		}
 	}
 
@@ -571,7 +571,7 @@ namespace KlayGE
 		src.SubresourceIndex = src_subres;
 
 		D3D12_TEXTURE_COPY_LOCATION dst;
-		dst.pResource = other.D3DResource().get();
+		dst.pResource = other.D3DResource();
 		dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		dst.SubresourceIndex = dst_subres;
 

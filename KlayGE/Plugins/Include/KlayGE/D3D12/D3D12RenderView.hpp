@@ -128,7 +128,6 @@ namespace KlayGE
 
 	protected:
 		ID3D12Device* d3d_device_;
-		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
 		mutable D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		void* sr_src_;
@@ -190,7 +189,6 @@ namespace KlayGE
 
 	protected:
 		ID3D12Device* d3d_device_;
-		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
 		mutable D3D12RenderTargetViewSimulationPtr d3d_rt_view_;
 		D3D12ResourcePtr rt_src_;
@@ -266,7 +264,6 @@ namespace KlayGE
 
 	protected:
 		ID3D12Device* d3d_device_;
-		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
 		mutable D3D12DepthStencilViewSimulationPtr d3d_ds_view_;
 		D3D12ResourcePtr ds_src_;
@@ -339,7 +336,6 @@ namespace KlayGE
 
 	protected:
 		ID3D12Device* d3d_device_;
-		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
 		mutable D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		D3D12ResourcePtr ua_src_;

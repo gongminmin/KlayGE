@@ -270,7 +270,7 @@ TEST(BlitterTest, Blit2D)
 
 TEST(BlitterTest, Blit2DArray)
 {
-	TestBlitter2D( 5, 4, false);
+	TestBlitter2D(5, 4, false);
 }
 
 TEST(BlitterTest, Blit2DToBuff)

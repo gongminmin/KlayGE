@@ -906,7 +906,7 @@ namespace KlayGE
 		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
 		if (indirect_buff)
 		{
-			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const&>(*indirect_buff).D3DResource().get();
+			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const&>(*indirect_buff).D3DResource();
 
 			if (rl.UseIndices())
 			{
@@ -1005,7 +1005,7 @@ namespace KlayGE
 
 			pass.Bind(effect);
 			this->UpdateComputePSO(effect, pass);
-			d3d_render_cmd_list_->ExecuteIndirect(dispatch_indirect_signature_.get(), 1, arg_buff.D3DResource().get(), offset, nullptr, 0);
+			d3d_render_cmd_list_->ExecuteIndirect(dispatch_indirect_signature_.get(), 1, arg_buff.D3DResource(), offset, nullptr, 0);
 			pass.Unbind(effect);
 		}
 
@@ -1967,7 +1967,7 @@ namespace KlayGE
 			buffs.emplace_back(buff, size_in_byte);
 		}
 	}
-	
+
 	void D3D12RenderEngine::ReleaseAfterSync(ID3D12ResourcePtr const & buff)
 	{
 		if (buff)

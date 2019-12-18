@@ -80,6 +80,8 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
+		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
+
 	private:
 		uint32_t counter_offset_;
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;

@@ -43,15 +43,12 @@ namespace KlayGE
 		D3D12Resource();
 		virtual ~D3D12Resource();
 
-		ID3D12ResourcePtr const & D3DResource() const
+		ID3D12Resource* D3DResource() const
 		{
-			return d3d_resource_;
+			return d3d_resource_.get();
 		}
 
 		void UpdateResourceBarrier(ID3D12GraphicsCommandList* cmd_list, uint32_t sub_res, D3D12_RESOURCE_STATES target_state);
-
-	protected:
-		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
 
 	protected:
 		ID3D12ResourcePtr d3d_resource_;

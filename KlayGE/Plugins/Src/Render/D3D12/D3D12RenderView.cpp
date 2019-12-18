@@ -54,7 +54,7 @@ namespace KlayGE
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateShaderResourceView(res_->D3DResource().get(), &srv_desc, handle_);
+		device->CreateShaderResourceView(res_->D3DResource(), &srv_desc, handle_);
 	}
 
 	D3D12ShaderResourceViewSimulation::~D3D12ShaderResourceViewSimulation()
@@ -76,7 +76,7 @@ namespace KlayGE
 
 		handle_ = re.RTVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocRTV();
-		device->CreateRenderTargetView(res_->D3DResource().get(), &rtv_desc, handle_);
+		device->CreateRenderTargetView(res_->D3DResource(), &rtv_desc, handle_);
 	}
 
 	D3D12RenderTargetViewSimulation::~D3D12RenderTargetViewSimulation()
@@ -98,7 +98,7 @@ namespace KlayGE
 
 		handle_ = re.DSVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocDSV();
-		device->CreateDepthStencilView(res_->D3DResource().get(), &dsv_desc, handle_);
+		device->CreateDepthStencilView(res_->D3DResource(), &dsv_desc, handle_);
 	}
 
 	D3D12DepthStencilViewSimulation::~D3D12DepthStencilViewSimulation()
@@ -124,13 +124,13 @@ namespace KlayGE
 			counter_offset_ = static_cast<uint32_t>(uav_desc.Buffer.CounterOffsetInBytes);
 			if (counter_offset_ != 0)
 			{
-				counter = res_->D3DResource().get();
+				counter = res_->D3DResource();
 			}
 		}
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateUnorderedAccessView(res_->D3DResource().get(), counter, &uav_desc, handle_);
+		device->CreateUnorderedAccessView(res_->D3DResource(), counter, &uav_desc, handle_);
 	}
 
 	D3D12UnorderedAccessViewSimulation::~D3D12UnorderedAccessViewSimulation()
@@ -150,7 +150,6 @@ namespace KlayGE
 
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		tex_ = texture;
 		pf_ = pf == EF_Unknown ? texture->Format() : pf;
@@ -183,7 +182,6 @@ namespace KlayGE
 
 		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		tex_ = texture_cube;
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
@@ -218,7 +216,6 @@ namespace KlayGE
 
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		buff_ = gb;
 		pf_ = pf;
@@ -248,38 +245,41 @@ namespace KlayGE
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 	}
 
 	void D3D12RenderTargetView::ClearColor(Color const & clr)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
-			rt_src_->UpdateResourceBarrier(d3d_cmd_list_, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			rt_src_->UpdateResourceBarrier(d3d_cmd_list, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
-		d3d_cmd_list_->ClearRenderTargetView(d3d_rt_view_->Handle(), &clr.r(), 0, nullptr);
+		d3d_cmd_list->ClearRenderTargetView(d3d_rt_view_->Handle(), &clr.r(), 0, nullptr);
 	}
 
 	void D3D12RenderTargetView::Discard()
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
-			rt_src_->UpdateResourceBarrier(d3d_cmd_list_, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			rt_src_->UpdateResourceBarrier(d3d_cmd_list, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = rt_first_subres_;
 		region.NumSubresources = rt_num_subres_;
-		d3d_cmd_list_->DiscardResource(rt_src_->D3DResource().get(), &region);
+		d3d_cmd_list->DiscardResource(rt_src_->D3DResource(), &region);
 	}
 
 	void D3D12RenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
@@ -416,7 +416,6 @@ namespace KlayGE
 
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		buff_ = gb;
 		width_ = num_elems;
@@ -453,65 +452,72 @@ namespace KlayGE
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 	}
 
 	void D3D12DepthStencilView::ClearDepth(float depth)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
-		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
+		d3d_cmd_list->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 	}
 
 	void D3D12DepthStencilView::ClearStencil(int32_t stencil)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
-		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
+		d3d_cmd_list->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
 	void D3D12DepthStencilView::ClearDepthStencil(float depth, int32_t stencil)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
-		d3d_cmd_list_->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		d3d_cmd_list->ClearDepthStencilView(d3d_ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 			depth, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
 	void D3D12DepthStencilView::Discard()
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ds_first_subres_;
 		region.NumSubresources = ds_num_subres_;
-		d3d_cmd_list_->DiscardResource(ds_src_->D3DResource().get(), &region);
+		d3d_cmd_list->DiscardResource(ds_src_->D3DResource(), &region);
 	}
 
 	void D3D12DepthStencilView::OnAttached(FrameBuffer& fb)
@@ -557,7 +563,6 @@ namespace KlayGE
 
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		tex_ = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
@@ -666,11 +671,13 @@ namespace KlayGE
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		d3d_device_ = re.D3DDevice();
-		d3d_cmd_list_ = re.D3DRenderCmdList();
 	}
 
 	void D3D12UnorderedAccessView::Clear(float4 const & val)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
 		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbv_srv_heap_desc.NumDescriptors = 1;
@@ -679,22 +686,24 @@ namespace KlayGE
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
 
-		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		ua_src_->UpdateResourceBarrier(d3d_cmd_list, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_f4_val_ = val;
-		d3d_cmd_list_->ClearUnorderedAccessViewFloat(gpu_handle, d3d_ua_view_->Handle(),
-			ua_src_->D3DResource().get(), &clear_f4_val_.x(), 0, nullptr);
+		d3d_cmd_list->ClearUnorderedAccessViewFloat(gpu_handle, d3d_ua_view_->Handle(),
+			ua_src_->D3DResource(), &clear_f4_val_.x(), 0, nullptr);
 	}
 
 	void D3D12UnorderedAccessView::Clear(uint4 const & val)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
 		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbv_srv_heap_desc.NumDescriptors = 1;
@@ -703,36 +712,37 @@ namespace KlayGE
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
 
-		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		ua_src_->UpdateResourceBarrier(d3d_cmd_list, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_ui4_val_ = val;
-		d3d_cmd_list_->ClearUnorderedAccessViewUint(gpu_handle, d3d_ua_view_->Handle(),
-			ua_src_->D3DResource().get(), &clear_ui4_val_.x(), 0, nullptr);
+		d3d_cmd_list->ClearUnorderedAccessViewUint(gpu_handle, d3d_ua_view_->Handle(),
+			ua_src_->D3DResource(), &clear_ui4_val_.x(), 0, nullptr);
 	}
 
 	void D3D12UnorderedAccessView::Discard()
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* d3d_cmd_list = re.D3DRenderCmdList();
+
 		for (uint32_t i = 0; i < ua_num_subres_; ++ i)
 		{
-			ua_src_->UpdateResourceBarrier(d3d_cmd_list_, ua_first_subres_ + i, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			ua_src_->UpdateResourceBarrier(d3d_cmd_list, ua_first_subres_ + i, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.FlushResourceBarriers(d3d_cmd_list_);
+		re.FlushResourceBarriers(d3d_cmd_list);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ua_first_subres_;
 		region.NumSubresources = ua_num_subres_;
-		d3d_cmd_list_->DiscardResource(ua_src_->D3DResource().get(), &region);
+		d3d_cmd_list->DiscardResource(ua_src_->D3DResource(), &region);
 	}
 
 	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t index)
