@@ -102,15 +102,12 @@ namespace KlayGE
 
 		re.ForceFinish();
 
-		D3D12_RANGE range;
-		range.Begin = 0;
-
 		uint64_t* result;
-		range.End = sizeof(uint64_t);
-		query_result_->Map(0, &range, reinterpret_cast<void**>(&result));
+		D3D12_RANGE const read_range{0, sizeof(uint64_t)};
+		query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
 		uint64_t ret = *result;
-		range.End = 0;
-		query_result_->Unmap(0, &range);
+		D3D12_RANGE const write_range{0, 0};
+		query_result_->Unmap(0, &write_range);
 		return ret;
 	}
 
@@ -194,15 +191,12 @@ namespace KlayGE
 
 		re.ForceFinish();
 
-		D3D12_RANGE range;
-		range.Begin = 0;
-
 		uint64_t* result;
-		range.End = sizeof(uint64_t);
-		predicate_result_->Map(0, &range, reinterpret_cast<void**>(&result));
+		D3D12_RANGE const read_range{0, sizeof(uint64_t)};
+		predicate_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
 		bool ret = *result ? true : false;
-		range.End = 0;
-		predicate_result_->Unmap(0, &range);
+		D3D12_RANGE const write_range{0, 0};
+		predicate_result_->Unmap(0, &write_range);
 		return ret;
 	}
 
@@ -272,15 +266,12 @@ namespace KlayGE
 		UINT64 freq;
 		re.D3DRenderCmdQueue()->GetTimestampFrequency(&freq);
 
-		D3D12_RANGE range;
-		range.Begin = 0;
-
 		uint64_t* timestamp;
-		range.End = sizeof(uint64_t) * 2;
-		timestamp_result_->Map(0, &range, reinterpret_cast<void**>(&timestamp));
+		D3D12_RANGE const read_range{0, sizeof(uint64_t) * 2};
+		timestamp_result_->Map(0, &read_range, reinterpret_cast<void**>(&timestamp));
 		double ret = static_cast<double>(timestamp[1] - timestamp[0]) / freq;
-		range.End = 0;
-		timestamp_result_->Unmap(0, &range);
+		D3D12_RANGE const write_range{0, 0};
+		timestamp_result_->Unmap(0, &write_range);
 
 		return ret;
 	}
@@ -347,15 +338,12 @@ namespace KlayGE
 
 		re.ForceFinish();
 
-		D3D12_RANGE range;
-		range.Begin = 0;
-
 		D3D12_QUERY_DATA_SO_STATISTICS* result;
-		range.End = sizeof(D3D12_QUERY_DATA_SO_STATISTICS);
-		so_stat_query_result_->Map(0, &range, reinterpret_cast<void**>(&result));
+		D3D12_RANGE const read_range{0, sizeof(D3D12_QUERY_DATA_SO_STATISTICS)};
+		so_stat_query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
 		uint64_t ret = result->NumPrimitivesWritten;
-		range.End = 0;
-		so_stat_query_result_->Unmap(0, &range);
+		D3D12_RANGE const write_range{0, 0};
+		so_stat_query_result_->Unmap(0, &write_range);
 		return ret;
 	}
 
@@ -368,15 +356,12 @@ namespace KlayGE
 
 		re.ForceFinish();
 
-		D3D12_RANGE range;
-		range.Begin = 0;
-
 		D3D12_QUERY_DATA_SO_STATISTICS* result;
-		range.End = sizeof(D3D12_QUERY_DATA_SO_STATISTICS);
-		so_stat_query_result_->Map(0, &range, reinterpret_cast<void**>(&result));
+		D3D12_RANGE const read_range{0, sizeof(D3D12_QUERY_DATA_SO_STATISTICS)};
+		so_stat_query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
 		uint64_t ret = result->PrimitivesStorageNeeded;
-		range.End = 0;
-		so_stat_query_result_->Unmap(0, &range);
+		D3D12_RANGE const write_range{0, 0};
+		so_stat_query_result_->Unmap(0, &write_range);
 		return ret;
 	}
 }

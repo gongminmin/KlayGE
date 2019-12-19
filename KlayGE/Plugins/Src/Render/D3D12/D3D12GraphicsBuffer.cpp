@@ -222,7 +222,7 @@ namespace KlayGE
 
 		if (subres_init != nullptr)
 		{
-			if ((heap_prop.Type == D3D12_HEAP_TYPE_UPLOAD) || (heap_prop.Type == D3D12_HEAP_TYPE_READBACK))
+			if (heap_prop.Type == D3D12_HEAP_TYPE_UPLOAD)
 			{
 				void* p = nullptr;
 				D3D12_RANGE const read_range{0, 0};
@@ -238,14 +238,12 @@ namespace KlayGE
 				ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
 				std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
-				D3D12_RANGE read_range;
-				read_range.Begin = 0;
-				read_range.End = 0;
-
 				void* p;
+				D3D12_RANGE const read_range{0, 0};
 				upload_buff->Map(0, &read_range, &p);
 				memcpy(p, subres_init, size_in_byte_);
-				upload_buff->Unmap(0, nullptr);
+				D3D12_RANGE const write_range{0, size_in_byte_};
+				upload_buff->Unmap(0, &write_range);
 
 				this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 				re.FlushResourceBarriers(cmd_list);
@@ -327,11 +325,8 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
-		D3D12_RANGE read_range;
-		read_range.Begin = 0;
-		read_range.End = (ba == BA_Write_Only) ? 0 : size_in_byte_;
-
 		void* p;
+		D3D12_RANGE const read_range{0, (ba == BA_Write_Only) ? 0 : size_in_byte_};
 		TIFHR(d3d_resource_->Map(0, &read_range, &p));
 		return p;
 	}
@@ -340,10 +335,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_resource_);
 
-		D3D12_RANGE write_range;
-		write_range.Begin = 0;
-		write_range.End = (mapped_ba_ == BA_Read_Only) ? 0 : size_in_byte_;
-
+		D3D12_RANGE const write_range{0, (mapped_ba_ == BA_Read_Only) ? 0 : size_in_byte_};
 		d3d_resource_->Unmap(0, &write_range);
 	}
 
@@ -423,14 +415,12 @@ namespace KlayGE
 
 			auto upload_buff = re.AllocTempBuffer(true, size);
 
-			D3D12_RANGE read_range;
-			read_range.Begin = 0;
-			read_range.End = 0;
-
 			void* p;
+			D3D12_RANGE const read_range{0, 0};
 			TIFHR(upload_buff->Map(0, &read_range, &p));
 			memcpy(p, data, size);
-			upload_buff->Unmap(0, nullptr);
+			D3D12_RANGE const write_range{0, size};
+			upload_buff->Unmap(0, &write_range);
 
 			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);

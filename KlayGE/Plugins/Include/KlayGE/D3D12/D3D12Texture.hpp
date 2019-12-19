@@ -181,8 +181,7 @@ namespace KlayGE
 	protected:
 		DXGI_FORMAT dxgi_fmt_;
 
-		ID3D12ResourcePtr d3d_texture_upload_buff_;
-		ID3D12ResourcePtr d3d_texture_readback_buff_;
+		ID3D12ResourcePtr mapped_buff_;
 
 		TextureMapAccess mapped_tma_;
 		uint32_t mapped_x_offset_;
