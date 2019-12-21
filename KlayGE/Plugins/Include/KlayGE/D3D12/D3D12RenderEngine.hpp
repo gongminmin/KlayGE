@@ -80,6 +80,11 @@ namespace KlayGE
 		void BeginFrame() override;
 		void EndFrame() override;
 
+		uint32_t FrameIndex() const
+		{
+			return curr_frame_index_;
+		}
+
 		IDXGIFactory4* DXGIFactory4() const;
 		IDXGIFactory5* DXGIFactory5() const;
 		IDXGIFactory6* DXGIFactory6() const;
@@ -193,13 +198,15 @@ namespace KlayGE
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
 
 	private:
-		struct CmdAllocatorDependencies
+		struct CmdAllocatorContext
 		{
 			ID3D12CommandAllocatorPtr cmd_allocator;
 			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
 			std::vector<std::pair<ID3D12ResourcePtr, uint32_t>> recycle_after_sync_upload_buffs_;
 			std::vector<std::pair<ID3D12ResourcePtr, uint32_t>> recycle_after_sync_readback_buffs_;
 			std::vector<ID3D12ResourcePtr> release_after_sync_buffs_;
+
+			uint64_t fence_value = 0;
 		};
 
 	private:
@@ -230,8 +237,8 @@ namespace KlayGE
 		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
 		void UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so);
 
-		std::shared_ptr<CmdAllocatorDependencies> AllocCmdAllocator();
-		void RecycleCmdAllocator(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);
+		CmdAllocatorContext& CurrRenderCmdAllocator();
+		CmdAllocatorContext const& CurrRenderCmdAllocator() const;
 
 		std::vector<D3D12_RESOURCE_BARRIER>* FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation);
 
@@ -245,13 +252,13 @@ namespace KlayGE
 
 		ID3D12DevicePtr d3d_device_;
 		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
-		std::list<std::pair<std::shared_ptr<CmdAllocatorDependencies>, uint64_t>> d3d_render_cmd_allocators_;
-		std::shared_ptr<CmdAllocatorDependencies> curr_render_cmd_allocator_;
+		std::array<CmdAllocatorContext, NUM_BACK_BUFFERS> d3d_render_cmd_allocators_;
 		ID3D12GraphicsCommandListPtr d3d_render_cmd_list_;
 		ID3D12CommandAllocatorPtr d3d_res_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
 		std::mutex res_cmd_list_mutex_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
+		uint32_t curr_frame_index_ = 0;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -306,10 +313,10 @@ namespace KlayGE
 		StereoMethod stereo_method_;
 
 		FencePtr render_cmd_fence_;
-		uint64_t render_cmd_fence_val_;
+		uint64_t render_cmd_fence_val_ = 0;
 
 		FencePtr res_cmd_fence_;
-		uint64_t res_cmd_fence_val_;
+		uint64_t res_cmd_fence_val_ = 0;
 
 		RenderEffectPtr blit_effect_;
 		RenderTechnique* bilinear_blit_tech_;

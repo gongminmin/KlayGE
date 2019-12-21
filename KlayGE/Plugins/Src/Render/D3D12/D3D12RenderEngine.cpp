@@ -69,7 +69,6 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D12RenderEngine::D3D12RenderEngine()
-		: render_cmd_fence_val_(0), res_cmd_fence_val_(0)
 	{
 		UINT dxgi_factory_flags = 0;
 
@@ -139,8 +138,14 @@ namespace KlayGE
 		RenderEngine::EndFrame();
 
 		render_cmd_fence_val_ = checked_cast<D3D12Fence&>(*render_cmd_fence_).Signal(d3d_render_cmd_queue_.get());
-		this->RecycleCmdAllocator(curr_render_cmd_allocator_, render_cmd_fence_val_);
-		curr_render_cmd_allocator_ = this->AllocCmdAllocator();
+
+		this->CurrRenderCmdAllocator().fence_value = render_cmd_fence_val_;
+
+		curr_frame_index_ = (curr_frame_index_ + 1) % NUM_BACK_BUFFERS;
+
+		auto& next_cmd_allocator = this->CurrRenderCmdAllocator();
+		render_cmd_fence_->Wait(next_cmd_allocator.fence_value);
+		next_cmd_allocator.cmd_allocator->Reset();
 
 		this->ResetRenderCmd();
 		this->ClearTempObjs();
@@ -178,7 +183,7 @@ namespace KlayGE
 
 	ID3D12CommandAllocator* D3D12RenderEngine::D3DRenderCmdAllocator() const
 	{
-		return curr_render_cmd_allocator_->cmd_allocator.get();
+		return this->CurrRenderCmdAllocator().cmd_allocator.get();
 	}
 
 	ID3D12GraphicsCommandList* D3D12RenderEngine::D3DRenderCmdList() const
@@ -280,9 +285,13 @@ namespace KlayGE
 		Verify(!!d3d_render_cmd_queue_);
 		Verify(!!d3d_device_);
 
-		curr_render_cmd_allocator_ = this->AllocCmdAllocator();
+		for (auto& cmd_allocator : d3d_render_cmd_allocators_)
+		{
+			TIFHR(d3d_device_->CreateCommandAllocator(
+				D3D12_COMMAND_LIST_TYPE_DIRECT, IID_ID3D12CommandAllocator, cmd_allocator.cmd_allocator.release_and_put_void()));
+		}
 
-		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, curr_render_cmd_allocator_->cmd_allocator.get(), nullptr,
+		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, this->CurrRenderCmdAllocator().cmd_allocator.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, d3d_render_cmd_list_.release_and_put_void()));
 
 		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -395,19 +404,21 @@ namespace KlayGE
 
 	void D3D12RenderEngine::ClearTempObjs()
 	{
-		curr_render_cmd_allocator_->cbv_srv_uav_heap_cache_.clear();
-		curr_render_cmd_allocator_->release_after_sync_buffs_.clear();
+		auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
 
-		for (auto const & item : curr_render_cmd_allocator_->recycle_after_sync_upload_buffs_)
+		curr_render_cmd_allocator.cbv_srv_uav_heap_cache_.clear();
+		curr_render_cmd_allocator.release_after_sync_buffs_.clear();
+
+		for (auto const & item : curr_render_cmd_allocator.recycle_after_sync_upload_buffs_)
 		{
 			temp_upload_free_buffs_.emplace(item.second, item.first);
 		}
-		curr_render_cmd_allocator_->recycle_after_sync_upload_buffs_.clear();
-		for (auto const & item : curr_render_cmd_allocator_->recycle_after_sync_readback_buffs_)
+		curr_render_cmd_allocator.recycle_after_sync_upload_buffs_.clear();
+		for (auto const & item : curr_render_cmd_allocator.recycle_after_sync_readback_buffs_)
 		{
 			temp_readback_free_buffs_.emplace(item.second, item.first);
 		}
-		curr_render_cmd_allocator_->recycle_after_sync_readback_buffs_.clear();
+		curr_render_cmd_allocator.recycle_after_sync_readback_buffs_.clear();
 	}
 
 	void D3D12RenderEngine::CommitResCmd()
@@ -1056,9 +1067,9 @@ namespace KlayGE
 		if (render_cmd_fence_)
 		{
 			uint64_t max_fence_val = 0;
-			for (auto const& item : d3d_render_cmd_allocators_)
+			for (auto const& cmd_allocator : d3d_render_cmd_allocators_)
 			{
-				max_fence_val = std::max(max_fence_val, item.second);
+				max_fence_val = std::max(max_fence_val, cmd_allocator.fence_value);
 			}
 			render_cmd_fence_->Wait(max_fence_val);
 		}
@@ -1091,8 +1102,7 @@ namespace KlayGE
 		d3d_res_cmd_list_.reset();
 		d3d_res_cmd_allocator_.reset();
 		d3d_render_cmd_list_.reset();
-		curr_render_cmd_allocator_.reset();
-		d3d_render_cmd_allocators_.clear();
+		d3d_render_cmd_allocators_ = {};
 		d3d_render_cmd_queue_.reset();
 		d3d_device_.reset();
 
@@ -1901,7 +1911,7 @@ namespace KlayGE
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
-		curr_render_cmd_allocator_->cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
+		this->CurrRenderCmdAllocator().cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
 		return cbv_srv_uav_heap;
 	}
 
@@ -1962,8 +1972,9 @@ namespace KlayGE
 	{
 		if (buff)
 		{
-			auto& buffs = is_upload ? curr_render_cmd_allocator_->recycle_after_sync_upload_buffs_
-				: curr_render_cmd_allocator_->recycle_after_sync_readback_buffs_;
+			auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
+			auto& buffs = is_upload ? curr_render_cmd_allocator.recycle_after_sync_upload_buffs_
+				: curr_render_cmd_allocator.recycle_after_sync_readback_buffs_;
 			buffs.emplace_back(buff, size_in_byte);
 		}
 	}
@@ -1972,7 +1983,7 @@ namespace KlayGE
 	{
 		if (buff)
 		{
-			curr_render_cmd_allocator_->release_after_sync_buffs_.push_back(buff);
+			this->CurrRenderCmdAllocator().release_after_sync_buffs_.push_back(buff);
 		}
 	}
 
@@ -2025,36 +2036,13 @@ namespace KlayGE
 		}
 	}
 
-	std::shared_ptr<D3D12RenderEngine::CmdAllocatorDependencies> D3D12RenderEngine::AllocCmdAllocator()
+	D3D12RenderEngine::CmdAllocatorContext& D3D12RenderEngine::CurrRenderCmdAllocator()
 	{
-		std::shared_ptr<CmdAllocatorDependencies> ret;
-		for (auto iter = d3d_render_cmd_allocators_.begin(); iter != d3d_render_cmd_allocators_.end(); ++ iter)
-		{
-			if (render_cmd_fence_->Completed(iter->second))
-			{
-				ret = iter->first;
-				d3d_render_cmd_allocators_.erase(iter);
-				ret->cmd_allocator->Reset();
-				break;
-			}
-		}
-
-		if (!ret)
-		{
-			ret = MakeSharedPtr<CmdAllocatorDependencies>();
-
-			TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-				IID_ID3D12CommandAllocator, ret->cmd_allocator.put_void()));
-		}
-
-		return ret;
+		return d3d_render_cmd_allocators_[curr_frame_index_];
 	}
 
-	void D3D12RenderEngine::RecycleCmdAllocator(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val)
+	D3D12RenderEngine::CmdAllocatorContext const& D3D12RenderEngine::CurrRenderCmdAllocator() const
 	{
-		if (cmd_allocator)
-		{
-			d3d_render_cmd_allocators_.emplace_back(cmd_allocator, fence_val);
-		}
+		return d3d_render_cmd_allocators_[curr_frame_index_];
 	}
 }
