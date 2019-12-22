@@ -409,16 +409,8 @@ namespace KlayGE
 		curr_render_cmd_allocator.cbv_srv_uav_heap_cache_.clear();
 		curr_render_cmd_allocator.release_after_sync_buffs_.clear();
 
-		for (auto const & item : curr_render_cmd_allocator.recycle_after_sync_upload_buffs_)
-		{
-			temp_upload_free_buffs_.emplace(item.second, item.first);
-		}
-		curr_render_cmd_allocator.recycle_after_sync_upload_buffs_.clear();
-		for (auto const & item : curr_render_cmd_allocator.recycle_after_sync_readback_buffs_)
-		{
-			temp_readback_free_buffs_.emplace(item.second, item.first);
-		}
-		curr_render_cmd_allocator.recycle_after_sync_readback_buffs_.clear();
+		upload_memory_allocator_.ClearStallPages();
+		readback_memory_allocator_.ClearStallPages();
 	}
 
 	void D3D12RenderEngine::CommitResCmd()
@@ -1079,8 +1071,8 @@ namespace KlayGE
 
 		this->ClearTempObjs();
 
-		temp_upload_free_buffs_.clear();
-		temp_readback_free_buffs_.clear();
+		upload_memory_allocator_.Clear();
+		readback_memory_allocator_.Clear();
 
 		so_buffs_.clear();
 		root_signatures_.clear();
@@ -1915,67 +1907,17 @@ namespace KlayGE
 		return cbv_srv_uav_heap;
 	}
 
-	ID3D12ResourcePtr D3D12RenderEngine::AllocTempBuffer(bool is_upload, uint32_t size_in_byte)
+	ID3D12ResourcePtr D3D12RenderEngine::AllocTempBuffer(bool is_upload, uint32_t size_in_bytes)
 	{
-		ID3D12ResourcePtr ret;
-
-		auto& buffs = (is_upload) ? temp_upload_free_buffs_ : temp_readback_free_buffs_;
-
-		auto iter = buffs.lower_bound(size_in_byte);
-		if ((iter != buffs.end()) && (iter->first == size_in_byte))
-		{
-			ret = iter->second;
-
-			buffs.erase(iter);
-		}
-		else
-		{
-			D3D12_RESOURCE_STATES init_state;
-			D3D12_HEAP_PROPERTIES heap_prop;
-			if (is_upload)
-			{
-				init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
-				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-			}
-			else
-			{
-				init_state = D3D12_RESOURCE_STATE_COPY_DEST;
-				heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
-			}
-			heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-			heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-			heap_prop.CreationNodeMask = 0;
-			heap_prop.VisibleNodeMask = 0;
-
-			D3D12_RESOURCE_DESC res_desc;
-			res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			res_desc.Alignment = 0;
-			res_desc.Width = size_in_byte;
-			res_desc.Height = 1;
-			res_desc.DepthOrArraySize = 1;
-			res_desc.MipLevels = 1;
-			res_desc.Format = DXGI_FORMAT_UNKNOWN;
-			res_desc.SampleDesc.Count = 1;
-			res_desc.SampleDesc.Quality = 0;
-			res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-			TIFHR(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-				&res_desc, init_state, nullptr,
-				IID_ID3D12Resource, ret.put_void()));
-		}
-
-		return ret;
+		return (is_upload ? upload_memory_allocator_ : readback_memory_allocator_).Allocate(size_in_bytes)->Resource();
 	}
 
-	void D3D12RenderEngine::RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_byte)
+	void D3D12RenderEngine::RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_bytes)
 	{
 		if (buff)
 		{
-			auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
-			auto& buffs = is_upload ? curr_render_cmd_allocator.recycle_after_sync_upload_buffs_
-				: curr_render_cmd_allocator.recycle_after_sync_readback_buffs_;
-			buffs.emplace_back(buff, size_in_byte);
+			(is_upload ? upload_memory_allocator_ : readback_memory_allocator_)
+				.Deallocate(MakeSharedPtr<D3D12GpuMemoryPage>(is_upload, buff, size_in_bytes));
 		}
 	}
 

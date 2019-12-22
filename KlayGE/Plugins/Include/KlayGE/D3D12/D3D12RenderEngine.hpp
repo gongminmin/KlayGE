@@ -47,6 +47,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12AdapterList.hpp>
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 
 namespace KlayGE
@@ -189,8 +190,8 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
-		ID3D12ResourcePtr AllocTempBuffer(bool is_upload, uint32_t size_in_byte);
-		void RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_byte);
+		ID3D12ResourcePtr AllocTempBuffer(bool is_upload, uint32_t size_in_bytes);
+		void RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_bytes);
 
 		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
 
@@ -202,8 +203,6 @@ namespace KlayGE
 		{
 			ID3D12CommandAllocatorPtr cmd_allocator;
 			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
-			std::vector<std::pair<ID3D12ResourcePtr, uint32_t>> recycle_after_sync_upload_buffs_;
-			std::vector<std::pair<ID3D12ResourcePtr, uint32_t>> recycle_after_sync_readback_buffs_;
 			std::vector<ID3D12ResourcePtr> release_after_sync_buffs_;
 
 			uint64_t fence_value = 0;
@@ -285,8 +284,8 @@ namespace KlayGE
 		std::vector<D3D12_VERTEX_BUFFER_VIEW> curr_vbvs_;
 		D3D12_INDEX_BUFFER_VIEW curr_ibv_;
 
-		std::multimap<uint32_t, ID3D12ResourcePtr> temp_upload_free_buffs_;
-		std::multimap<uint32_t, ID3D12ResourcePtr> temp_readback_free_buffs_;
+		D3D12GpuMemoryAllocator upload_memory_allocator_{true};
+		D3D12GpuMemoryAllocator readback_memory_allocator_{false};
 
 		ID3D12DescriptorHeapPtr rtv_desc_heap_;
 		uint32_t rtv_desc_size_;
