@@ -66,7 +66,7 @@ namespace KlayGE
 #ifndef KLAYGE_SHIP
 	void D3D12Texture::DebugName(std::wstring_view name)
 	{
-		d3d_resource_->SetPrivateData(WKPDID_D3DDebugObjectNameW, static_cast<uint32_t>(name.size()), name.data());
+		d3d_resource_->SetPrivateData(WKPDID_D3DDebugObjectNameW, static_cast<uint32_t>(name.size() * sizeof(wchar_t)), name.data());
 	}
 #endif
 

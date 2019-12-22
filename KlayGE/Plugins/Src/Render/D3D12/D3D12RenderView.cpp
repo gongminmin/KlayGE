@@ -297,7 +297,7 @@ namespace KlayGE
 
 	D3D12Texture1D2DCubeRenderTargetView::D3D12Texture1D2DCubeRenderTargetView(TexturePtr const & texture, ElementFormat pf,
 		int first_array_index, int array_size, int level)
-		: D3D12RenderTargetView(checked_pointer_cast<D3D12Texture>(texture), first_array_index * texture->NumMipMaps() + level, 1)
+		: D3D12RenderTargetView(checked_pointer_cast<D3D12Texture>(texture), first_array_index * texture->NumMipMaps() + level, array_size)
 	{
 		BOOST_ASSERT(texture);
 
@@ -533,7 +533,7 @@ namespace KlayGE
 
 	D3D12Texture1D2DCubeDepthStencilView::D3D12Texture1D2DCubeDepthStencilView(TexturePtr const & texture, ElementFormat pf,
 		int first_array_index, int array_size, int level)
-		: D3D12DepthStencilView(checked_pointer_cast<D3D12Texture>(texture), first_array_index * texture->NumMipMaps() + level, 1)
+		: D3D12DepthStencilView(checked_pointer_cast<D3D12Texture>(texture), first_array_index * texture->NumMipMaps() + level, array_size)
 	{
 		BOOST_ASSERT(texture);
 
