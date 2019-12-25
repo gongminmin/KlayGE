@@ -83,7 +83,6 @@ namespace KlayGE
 		{
 			std::vector<D3D12GpuMemoryPagePtr> stall_pages;
 		};
-		static uint32_t const NUM_BACK_BUFFERS = 3;
 		std::array<FrameContext, NUM_BACK_BUFFERS> frame_contexts_;
 
 		std::multimap<uint32_t, D3D12GpuMemoryPagePtr> available_pages_;

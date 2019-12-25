@@ -136,7 +136,10 @@ namespace KlayGE
 
 	void D3D12GpuMemoryAllocator::Clear()
 	{
-		this->ClearStallPages();
+		for (auto& frame_context : frame_contexts_)
+		{
+			frame_context.stall_pages.clear();
+		}
 		available_pages_.clear();
 	}
 } // namespace KlayGE

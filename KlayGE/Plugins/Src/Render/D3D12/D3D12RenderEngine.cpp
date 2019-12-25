@@ -406,8 +406,12 @@ namespace KlayGE
 	{
 		auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
 
-		curr_render_cmd_allocator.cbv_srv_uav_heap_cache_.clear();
-		curr_render_cmd_allocator.release_after_sync_buffs_.clear();
+		{
+			std::lock_guard<std::mutex> lock(curr_render_cmd_allocator.mutex);
+
+			curr_render_cmd_allocator.cbv_srv_uav_heap_cache.clear();
+			curr_render_cmd_allocator.release_after_sync_buffs.clear();
+		}
 
 		upload_memory_allocator_.ClearStallPages();
 		readback_memory_allocator_.ClearStallPages();
@@ -1094,7 +1098,14 @@ namespace KlayGE
 		d3d_res_cmd_list_.reset();
 		d3d_res_cmd_allocator_.reset();
 		d3d_render_cmd_list_.reset();
-		d3d_render_cmd_allocators_ = {};
+		for (auto& cmd_allocator : d3d_render_cmd_allocators_)
+		{
+			std::lock_guard<std::mutex> lock(cmd_allocator.mutex);
+			cmd_allocator.cmd_allocator.reset();
+			cmd_allocator.cbv_srv_uav_heap_cache.clear();
+			cmd_allocator.release_after_sync_buffs.clear();
+			cmd_allocator.fence_value = 0;
+		}
 		d3d_render_cmd_queue_.reset();
 		d3d_device_.reset();
 
@@ -1903,7 +1914,11 @@ namespace KlayGE
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
-		this->CurrRenderCmdAllocator().cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
+		{
+			auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
+			std::lock_guard<std::mutex> lock(curr_render_cmd_allocator.mutex);
+			curr_render_cmd_allocator.cbv_srv_uav_heap_cache.push_back(cbv_srv_uav_heap);
+		}
 		return cbv_srv_uav_heap;
 	}
 
@@ -1925,7 +1940,9 @@ namespace KlayGE
 	{
 		if (buff)
 		{
-			this->CurrRenderCmdAllocator().release_after_sync_buffs_.push_back(buff);
+			auto& curr_render_cmd_allocator = this->CurrRenderCmdAllocator();
+			std::lock_guard<std::mutex> lock(curr_render_cmd_allocator.mutex);
+			curr_render_cmd_allocator.release_after_sync_buffs.push_back(buff);
 		}
 	}
 

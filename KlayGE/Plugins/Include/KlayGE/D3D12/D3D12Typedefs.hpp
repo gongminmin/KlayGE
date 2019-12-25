@@ -60,6 +60,8 @@ namespace KlayGE
 	using ID3D12FencePtr = com_ptr<ID3D12Fence>;
 	using ID3D12PipelineStatePtr = com_ptr<ID3D12PipelineState>;
 	using ID3D12RootSignaturePtr = com_ptr<ID3D12RootSignature>;
+
+	static uint32_t const NUM_BACK_BUFFERS = 3;
 } // namespace KlayGE
 
 #endif // _D3D12TYPEDEFS_HPP

@@ -55,7 +55,6 @@ namespace KlayGE
 	class D3D12AdapterList;
 	class D3D12Adapter;
 
-	static uint32_t const NUM_BACK_BUFFERS = 3;
 	static uint32_t const NUM_MAX_RENDER_TARGET_VIEWS = 8 * 1024;
 	static uint32_t const NUM_MAX_DEPTH_STENCIL_VIEWS = 4 * 1024;
 	static uint32_t const NUM_MAX_CBV_SRV_UAVS = 32 * 1024;
@@ -202,8 +201,9 @@ namespace KlayGE
 		struct CmdAllocatorContext
 		{
 			ID3D12CommandAllocatorPtr cmd_allocator;
-			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
-			std::vector<ID3D12ResourcePtr> release_after_sync_buffs_;
+			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache;
+			std::vector<ID3D12ResourcePtr> release_after_sync_buffs;
+			std::mutex mutex;
 
 			uint64_t fence_value = 0;
 		};
