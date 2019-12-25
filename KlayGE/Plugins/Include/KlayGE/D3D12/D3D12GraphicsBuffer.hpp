@@ -40,6 +40,7 @@
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12Resource.hpp>
+#include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 
 namespace KlayGE
 {
@@ -83,6 +84,7 @@ namespace KlayGE
 		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
 
 	private:
+		D3D12GpuMemoryBlockPtr gpu_mem_block_;
 		uint32_t counter_offset_;
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 

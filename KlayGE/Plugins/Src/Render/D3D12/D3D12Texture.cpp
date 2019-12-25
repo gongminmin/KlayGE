@@ -513,7 +513,7 @@ namespace KlayGE
 		d3d_ua_views_.clear();
 
 		d3d_resource_.reset();
-		mapped_buff_.reset();
+		mapped_mem_block_.reset();
 	}
 
 	bool D3D12Texture::HWResourceReady() const
@@ -713,11 +713,11 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, 0, num_subres, 0, &layouts[0], &num_rows[0], &row_sizes_in_bytes[0], &required_size);
 
-			auto upload_buff = re.AllocTempBuffer(true, static_cast<uint32_t>(required_size));
+			auto upload_mem_block = re.AllocMemBlock(true, static_cast<uint32_t>(required_size));
+			auto const& upload_buff = upload_mem_block->Resource();
+			uint32_t const upload_buff_offset = upload_mem_block->Offset();
 
-			uint8_t* p;
-			D3D12_RANGE const read_range{0, 0};
-			upload_buff->Map(0, &read_range, reinterpret_cast<void**>(&p));
+			uint8_t* p = reinterpret_cast<uint8_t*>(upload_mem_block->CpuAddress());
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
 				D3D12_SUBRESOURCE_DATA src_data;
@@ -743,12 +743,13 @@ namespace KlayGE
 					}
 				}
 			}
-			upload_buff->Unmap(0, nullptr);
 
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
+				layouts[i].Offset += upload_buff_offset;
+
 				D3D12_TEXTURE_COPY_LOCATION src;
-				src.pResource = upload_buff.get();
+				src.pResource = upload_buff;
 				src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 				src.PlacedFootprint = layouts[i];
 
@@ -762,8 +763,7 @@ namespace KlayGE
 
 			re.CommitResCmd();
 
-			re.RecycleTempBuffer(upload_buff, true, static_cast<uint32_t>(required_size));
-			upload_buff.reset();
+			re.DeallocMemBlock(true, std::move(upload_mem_block));
 		}
 	}
 
@@ -793,10 +793,10 @@ namespace KlayGE
 		uint32_t required_size = 0;
 		this->GetCopyableFootprints(width, height, depth, layout, num_row, row_size_in_bytes, required_size);
 
-		ID3D12ResourcePtr readback_buff;
+		D3D12GpuMemoryBlockPtr readback_mem_block;
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			readback_buff = re.AllocTempBuffer(false, static_cast<uint32_t>(required_size));
+			readback_mem_block = re.AllocMemBlock(false, static_cast<uint32_t>(required_size));
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -808,8 +808,9 @@ namespace KlayGE
 			src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 			src.SubresourceIndex = subres;
 
+			layout.Offset += readback_mem_block->Offset();
 			D3D12_TEXTURE_COPY_LOCATION dst;
-			dst.pResource = readback_buff.get();
+			dst.pResource = readback_mem_block->Resource();
 			dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			dst.PlacedFootprint = layout;
 
@@ -826,62 +827,54 @@ namespace KlayGE
 			re.ForceFinish();
 		}
 
+		void* p;
 		switch (tma)
 		{
 		case TMA_Read_Only:
-			mapped_buff_ = readback_buff;
+			mapped_mem_block_ = readback_mem_block;
+			p = readback_mem_block->CpuAddress();
 			break;
 
 		case TMA_Read_Write:
 		case TMA_Write_Only:
-			mapped_buff_ = re.AllocTempBuffer(true, static_cast<uint32_t>(required_size));
+			mapped_mem_block_ = re.AllocMemBlock(true, static_cast<uint32_t>(required_size));
+			p = mapped_mem_block_->CpuAddress();
+			if (TMA_Read_Write == tma)
+			{
+				memcpy(p, readback_mem_block->CpuAddress(), required_size);
+				re.DeallocMemBlock(false, std::move(readback_mem_block));
+			}
 			break;
 
 		default:
 			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
-		void* p;
-		D3D12_RANGE const read_range{0, (tma == TMA_Write_Only) ? 0 : required_size};
-		mapped_buff_->Map(0, &read_range, &p);
-
 		data = p;
 		row_pitch = layout.Footprint.RowPitch;
 		slice_pitch = layout.Footprint.RowPitch * layout.Footprint.Height;
-
-		if (TMA_Read_Write == tma)
-		{
-			readback_buff->Map(0, &read_range, &p);
-
-			memcpy(data, p, required_size);
-
-			D3D12_RANGE const write_range{0, 0};
-			readback_buff->Unmap(0, &write_range);
-		}
 	}
 
 	void D3D12Texture::DoUnmap(uint32_t subres)
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
-		uint32_t row_size_in_bytes = 0;
-		uint32_t num_row = 0;
-		uint32_t required_size = 0;
-		this->GetCopyableFootprints(mapped_width_, mapped_height_, mapped_depth_, layout, num_row, row_size_in_bytes, required_size);
-
-		D3D12_RANGE const write_range{0, (mapped_tma_ == TMA_Read_Only) ? 0 : required_size};
-		mapped_buff_->Unmap(0, &write_range);
-
 		if ((TMA_Write_Only == mapped_tma_) || (TMA_Read_Write == mapped_tma_))
 		{
+			D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+			uint32_t row_size_in_bytes = 0;
+			uint32_t num_row = 0;
+			uint32_t required_size = 0;
+			this->GetCopyableFootprints(mapped_width_, mapped_height_, mapped_depth_, layout, num_row, row_size_in_bytes, required_size);
+
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
+			layout.Offset += mapped_mem_block_->Offset();
 			D3D12_TEXTURE_COPY_LOCATION src;
-			src.pResource = mapped_buff_.get();
+			src.pResource = mapped_mem_block_->Resource();
 			src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			src.PlacedFootprint = layout;
 
@@ -901,8 +894,8 @@ namespace KlayGE
 			cmd_list->CopyTextureRegion(&dst, mapped_x_offset_, mapped_y_offset_, mapped_z_offset_, &src, &src_box);
 		}
 
-		re.RecycleTempBuffer(mapped_buff_, mapped_tma_ != TMA_Read_Only, static_cast<uint32_t>(required_size));
-		mapped_buff_.reset();
+		re.DeallocMemBlock(mapped_tma_ == TMA_Read_Only, std::move(mapped_mem_block_));
+		mapped_mem_block_.reset();
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(

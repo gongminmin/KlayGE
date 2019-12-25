@@ -181,8 +181,7 @@ namespace KlayGE
 	protected:
 		DXGI_FORMAT dxgi_fmt_;
 
-		ID3D12ResourcePtr mapped_buff_;
-
+		D3D12GpuMemoryBlockPtr mapped_mem_block_;
 		TextureMapAccess mapped_tma_;
 		uint32_t mapped_x_offset_;
 		uint32_t mapped_y_offset_;

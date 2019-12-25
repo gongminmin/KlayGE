@@ -913,7 +913,9 @@ namespace KlayGE
 		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
 		if (indirect_buff)
 		{
-			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const&>(*indirect_buff).D3DResource();
+			auto const& d3d12_indirect_buff = checked_cast<D3D12GraphicsBuffer const&>(*indirect_buff);
+			auto* arg_buff = d3d12_indirect_buff.D3DResource();
+			uint32_t const arg_buff_offset = d3d12_indirect_buff.D3DResourceOffset();
 
 			if (rl.UseIndices())
 			{
@@ -924,7 +926,7 @@ namespace KlayGE
 					pass.Bind(effect);
 					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
 					d3d_render_cmd_list_->ExecuteIndirect(draw_indexed_indirect_signature_.get(), 1,
-						arg_buff, rl.IndirectArgsOffset(), nullptr, 0);
+						arg_buff, arg_buff_offset + rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
 			}
@@ -937,7 +939,7 @@ namespace KlayGE
 					pass.Bind(effect);
 					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
 					d3d_render_cmd_list_->ExecuteIndirect(draw_indirect_signature_.get(), 1,
-						arg_buff, rl.IndirectArgsOffset(), nullptr, 0);
+						arg_buff, arg_buff_offset + rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
 			}
@@ -1005,6 +1007,8 @@ namespace KlayGE
 
 		this->FlushResourceBarriers(d3d_render_cmd_list_.get());
 
+		offset += arg_buff.D3DResourceOffset();
+
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
@@ -1012,7 +1016,8 @@ namespace KlayGE
 
 			pass.Bind(effect);
 			this->UpdateComputePSO(effect, pass);
-			d3d_render_cmd_list_->ExecuteIndirect(dispatch_indirect_signature_.get(), 1, arg_buff.D3DResource(), offset, nullptr, 0);
+			d3d_render_cmd_list_->ExecuteIndirect(
+				dispatch_indirect_signature_.get(), 1, arg_buff.D3DResource(), offset, nullptr, 0);
 			pass.Unbind(effect);
 		}
 
@@ -1922,17 +1927,16 @@ namespace KlayGE
 		return cbv_srv_uav_heap;
 	}
 
-	ID3D12ResourcePtr D3D12RenderEngine::AllocTempBuffer(bool is_upload, uint32_t size_in_bytes)
+	D3D12GpuMemoryBlockPtr D3D12RenderEngine::AllocMemBlock(bool is_upload, uint32_t size_in_bytes)
 	{
-		return (is_upload ? upload_memory_allocator_ : readback_memory_allocator_).Allocate(size_in_bytes)->Resource();
+		return (is_upload ? upload_memory_allocator_ : readback_memory_allocator_).Allocate(size_in_bytes);
 	}
 
-	void D3D12RenderEngine::RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_bytes)
+	void D3D12RenderEngine::DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block)
 	{
-		if (buff)
+		if (mem_block)
 		{
-			(is_upload ? upload_memory_allocator_ : readback_memory_allocator_)
-				.Deallocate(MakeSharedPtr<D3D12GpuMemoryPage>(is_upload, buff, size_in_bytes));
+			(is_upload ? upload_memory_allocator_ : readback_memory_allocator_).Deallocate(std::move(mem_block));
 		}
 	}
 

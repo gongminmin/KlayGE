@@ -48,10 +48,16 @@ namespace KlayGE
 			return d3d_resource_.get();
 		}
 
+		uint32_t D3DResourceOffset() const
+		{
+			return d3d_resource_offset_;
+		}
+
 		void UpdateResourceBarrier(ID3D12GraphicsCommandList* cmd_list, uint32_t sub_res, D3D12_RESOURCE_STATES target_state);
 
 	protected:
 		ID3D12ResourcePtr d3d_resource_;
+		uint32_t d3d_resource_offset_;
 
 		std::vector<D3D12_RESOURCE_STATES> curr_states_;
 	};

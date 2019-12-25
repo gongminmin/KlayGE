@@ -189,8 +189,8 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
-		ID3D12ResourcePtr AllocTempBuffer(bool is_upload, uint32_t size_in_bytes);
-		void RecycleTempBuffer(ID3D12ResourcePtr const & buff, bool is_upload, uint32_t size_in_bytes);
+		D3D12GpuMemoryBlockPtr AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
+		void DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block);
 
 		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
 
