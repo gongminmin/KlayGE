@@ -47,13 +47,13 @@ namespace KlayGE
 		: is_upload_(is_upload), resource_(std::move(resource)), gpu_addr_(resource_->GetGPUVirtualAddress())
 	{
 		D3D12_RANGE const read_range{0, 0};
-		resource_->Map(0, is_upload_ ? nullptr : &read_range, &cpu_addr_);
+		resource_->Map(0, is_upload_ ? &read_range : nullptr, &cpu_addr_);
 	}
 
 	D3D12GpuMemoryPage::~D3D12GpuMemoryPage()
 	{
 		D3D12_RANGE const write_range{0, 0};
-		resource_->Unmap(0, is_upload_ ? &write_range : nullptr);
+		resource_->Unmap(0, is_upload_ ? nullptr : &write_range);
 	}
 
 
@@ -168,9 +168,8 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12ResourcePtr resource;
-		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&res_desc, init_state, nullptr,
-			IID_ID3D12Resource, resource.put_void()));
+		TIFHR(device->CreateCommittedResource(
+			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, IID_ID3D12Resource, resource.put_void()));
 
 		return MakeSharedPtr<D3D12GpuMemoryPage>(is_upload_, std::move(resource));
 	}
