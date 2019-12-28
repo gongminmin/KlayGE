@@ -266,6 +266,14 @@ void DetailedSurfaceApp::DoUpdateOverlay()
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables " << sceneMgr.NumPrimitivesRendered() << " Primitives "
 		   << sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t DetailedSurfaceApp::DoUpdate(uint32_t pass)

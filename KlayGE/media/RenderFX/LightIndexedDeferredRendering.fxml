@@ -154,6 +154,7 @@ float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 {
 	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 normal = GetNormal(rt0);
 	float glossiness = GetGlossiness(rt0);
@@ -301,6 +302,7 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -340,6 +342,7 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -379,6 +382,7 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -419,6 +423,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);

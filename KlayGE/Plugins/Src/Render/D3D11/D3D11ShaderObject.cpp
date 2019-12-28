@@ -312,6 +312,11 @@ namespace KlayGE
 				this->StageSpecificStreamIn(res);
 			}
 		}
+		else
+		{
+			std::vector<char> native_shader_block(native_shader_block_len);
+			res.read(reinterpret_cast<char*>(native_shader_block.data()), native_shader_block_len);
+		}
 	}
 
 	void D3D11ShaderStageObject::StreamOut(std::ostream& os)
