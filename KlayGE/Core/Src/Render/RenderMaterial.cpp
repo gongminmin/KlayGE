@@ -1032,17 +1032,20 @@ namespace KlayGE
 
 	void RenderMaterial::LoadTextureSlots()
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++i)
+		if (Context::Instance().RenderFactoryValid())
 		{
-			auto slot = static_cast<RenderMaterial::TextureSlot>(i);
-			auto const& tex_name = textures_[slot].first;
-			if (!tex_name.empty())
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++i)
 			{
-				if (!ResLoader::Instance().Locate(tex_name).empty()
-					|| !ResLoader::Instance().Locate(tex_name + ".dds").empty())
+				auto slot = static_cast<RenderMaterial::TextureSlot>(i);
+				auto const& tex_name = textures_[slot].first;
+				if (!tex_name.empty())
 				{
-					this->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable)));
+					if (!ResLoader::Instance().Locate(tex_name).empty()
+						|| !ResLoader::Instance().Locate(tex_name + ".dds").empty())
+					{
+						this->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable)));
+					}
 				}
 			}
 		}
