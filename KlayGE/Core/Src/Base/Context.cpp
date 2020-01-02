@@ -44,8 +44,15 @@
 #include <sstream>
 #include <string>
 
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
+#endif
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
+	#pragma clang diagnostic pop
+#endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
