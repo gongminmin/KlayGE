@@ -64,7 +64,7 @@ namespace KlayGE
 #ifdef KLAYGE_SHIP
 #define KLAYGE_TEXTURE_DEBUG_NAME(texture)
 #else
-#define KLAYGE_TEXTURE_DEBUG_NAME(texture) texture->DebugName(L#texture)
+#define KLAYGE_TEXTURE_DEBUG_NAME(texture) texture->DebugName(L ## #texture)
 #endif
 
 	enum TextureMapAccess
