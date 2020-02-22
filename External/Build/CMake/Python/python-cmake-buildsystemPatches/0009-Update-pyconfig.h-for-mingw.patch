@@ -1,7 +1,7 @@
-From aa149266b5625c63eeef5d021d42d42c40bd08df Mon Sep 17 00:00:00 2001
+From b26b21ea5087fa64a518f7a8b593a7fb595d365c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 9 Jan 2019 23:00:01 -0800
-Subject: [PATCH 09/10] Update pyconfig.h for mingw
+Subject: [PATCH 09/11] Update pyconfig.h for mingw
 
 ---
  CMakeLists.txt                |  2 +-
@@ -9,10 +9,10 @@ Subject: [PATCH 09/10] Update pyconfig.h for mingw
  2 files changed, 32 insertions(+), 11 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 820fd1a..86a5dad 100644
+index 7179fbe..5549e7f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -387,7 +387,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
+@@ -388,7 +388,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
      "A colon (:) separated list of extra paths to add to the PYTHONPATH")
  
  # Configure 'pyconfig.h'

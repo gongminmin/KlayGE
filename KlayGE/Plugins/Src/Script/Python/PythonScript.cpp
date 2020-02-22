@@ -86,7 +86,11 @@ namespace KlayGE
 		{ "flush", StdoutFlush, METH_VARARGS, "sys.stdout.write" },
 		{ 0, 0, 0, 0 } // sentinel
 	};
-	
+
+#if defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" // tp_print is deprecated
+#endif
 	PyTypeObject stdout_type =
 	{
 		PyVarObject_HEAD_INIT(0, 0)
@@ -94,10 +98,10 @@ namespace KlayGE
 		sizeof(PyObject),     /* tp_basicsize */
 		0,                    /* tp_itemsize */
 		0,                    /* tp_dealloc */
-		0,                    /* tp_print */
+		0,                    /* tp_vectorcall_offset */
 		0,                    /* tp_getattr */
 		0,                    /* tp_setattr */
-		0,                    /* tp_reserved */
+		0,                    /* tp_as_async */
 		0,                    /* tp_repr */
 		0,                    /* tp_as_number */
 		0,                    /* tp_as_sequence */
@@ -137,6 +141,8 @@ namespace KlayGE
 		0,                    /* tp_del */
 		0,                    /* tp_version_tag */
 		0,                    /* tp_finalize */
+		0,                    /* tp_vectorcall */
+		0,                    /* tp_print */
 
 #ifdef COUNT_ALLOCS
 		0,                    /* tp_allocs */
@@ -146,7 +152,10 @@ namespace KlayGE
 		0                     /* tp_next */
 #endif
 	};
-	
+#if defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+
 	PyModuleDef emb_module =
 	{
 		PyModuleDef_HEAD_INIT,
@@ -456,6 +465,18 @@ namespace KlayGE
 	PythonEngine::PythonEngine()
 	{
 		Py_NoSiteFlag = 1;
+
+		PyPreConfig preconfig;
+		PyPreConfig_InitPythonConfig(&preconfig);
+
+		preconfig.utf8_mode = 1;
+
+		PyStatus status = Py_PreInitialize(&preconfig);
+		if (PyStatus_Exception(status))
+		{
+			Py_ExitStatusException(status);
+		}
+
 		std::wstring py_lib;
 		Convert(py_lib, ResLoader::Instance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
 		Py_SetPath(&py_lib[0]);

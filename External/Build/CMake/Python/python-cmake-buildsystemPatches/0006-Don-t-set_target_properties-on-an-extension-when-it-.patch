@@ -1,7 +1,7 @@
-From 63c09bf0e057af0c991e09ae37819dd61ca8632f Mon Sep 17 00:00:00 2001
+From 724d77bdc230305566d85f100dbc64989aea2acb Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 30 Dec 2017 12:41:39 -0800
-Subject: [PATCH 06/10] Don't set_target_properties on an extension when it's
+Subject: [PATCH 06/11] Don't set_target_properties on an extension when it's
  disabled.
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH 06/10] Don't set_target_properties on an extension when it's
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 0c5ab41..1baae12 100644
+index ad82e91..4dd369d 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
-@@ -477,7 +477,7 @@ add_python_extension(_decimal
+@@ -493,7 +493,7 @@ add_python_extension(_decimal
      ${_decimal_LIBRARIES}
      ${_decimal_INCLUDEDIRS}
  )
@@ -21,7 +21,7 @@ index 0c5ab41..1baae12 100644
      set_target_properties(extension_decimal PROPERTIES COMPILE_FLAGS ${_decimal_compile_flags})
  endif()
  
-@@ -719,7 +719,7 @@ else()
+@@ -735,7 +735,7 @@ else()
      )
  endif()
  

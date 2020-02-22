@@ -1,26 +1,25 @@
 SET(PY_VERSION_MAJOR 3)
-SET(PY_VERSION_MINOR 7)
-SET(PY_VERSION_PATCH 2)
+SET(PY_VERSION_MINOR 8)
+SET(PY_VERSION_PATCH 1)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/python/cpython.git" "9a3ffc0492d1310ead9ce8f5ee678c26b20a338d" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
+UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
 if(need_patch)
-	foreach(patch "0001-bpo-35758-Fix-building-on-ARM-MSVC-gh-11531" "0002-bpo-35890-Fix-some-API-calling-consistency-GH-11742"
-		"0003-bpo-28269-Replace-strcasecmp-with-system-function-_s" "0004-Fix-for-MinGW-and-UWP")
+	foreach(patch "0001-Fix-for-MinGW-and-UWP")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
 	endforeach()
 endif()
 
-UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "501869c2b124552dae669d5fd6b7e7101a7cc30c" "" "" need_patch)
+UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "a1ce7c2cf346ce62648d8c3e9e5cae7f655d4309" "" "" need_patch)
 if(need_patch)
 	foreach(patch "0001-Enable-ASM-langage-only-if-required" "0002-Fix-android-build-by-linking-against-libutil-only-if"
 		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
 		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Don-t-set_target_properties-on-an-extension-when-it-"
 		"0007-Make-building-python-executable-python-development-f" "0008-Fix-some-problems-with-Android-and-iOS"
-		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7")
+		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7" "0011-Adapt-to-python-3.8")
 		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/python-cmake-buildsystemPatches/${patch}.patch")
 	endforeach()
 endif()

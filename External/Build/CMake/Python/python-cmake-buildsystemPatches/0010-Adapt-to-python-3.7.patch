@@ -1,7 +1,7 @@
-From cfdc2c4ce962543727f114a682a7f1fbfce8d5fc Mon Sep 17 00:00:00 2001
+From d224642ff82ee7012098a2aad4ea783b8ec63b8c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 17 Jan 2019 23:55:48 -0800
-Subject: [PATCH 10/10] Adapt to python 3.7
+Subject: [PATCH 10/11] Adapt to python 3.7
 
 ---
  cmake/ConfigureChecks.cmake     |  4 ++++
@@ -13,17 +13,17 @@ Subject: [PATCH 10/10] Adapt to python 3.7
  6 files changed, 62 insertions(+), 1 deletion(-)
 
 diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
-index c684e39..64dc673 100644
+index 9c0034f..dab533b 100644
 --- a/cmake/ConfigureChecks.cmake
 +++ b/cmake/ConfigureChecks.cmake
-@@ -2496,3 +2496,7 @@ endif()
- if(CMAKE_SYSTEM MATCHES Windows)
+@@ -2500,3 +2500,7 @@ if(CMAKE_SYSTEM MATCHES Windows)
    set(PY_PLATFORM win32)
  endif()
-+
+ 
 +if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
 +  set(_PYTHONFRAMEWORK "")
 +endif()
++
 diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
 index 988c74c..137dc9d 100644
 --- a/cmake/config-mingw/pyconfig.h
@@ -95,7 +95,7 @@ index 7b2d3c7..ffe64c7 100644
      /* This lives in Python/Python-ast.c */
      {"_ast", PyInit__ast},
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 1baae12..c3452fb 100644
+index 4dd369d..8d54929 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
 @@ -144,6 +144,11 @@ if(PY_VERSION VERSION_EQUAL "3.6" OR PY_VERSION VERSION_GREATER "3.6")

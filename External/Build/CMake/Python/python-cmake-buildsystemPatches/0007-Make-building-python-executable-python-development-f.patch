@@ -1,7 +1,7 @@
-From faaea797481a18fea2bc78b20cd3085df40a0314 Mon Sep 17 00:00:00 2001
+From 83ab73e02bf5c2d4cdf7d189380532f7ae810ce8 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 23 Jan 2018 23:38:33 -0800
-Subject: [PATCH 07/10] Make building python executable, python development,
+Subject: [PATCH 07/11] Make building python executable, python development,
  freeze importlib and pgen optional.
 
 ---
@@ -10,7 +10,7 @@ Subject: [PATCH 07/10] Make building python executable, python development,
  2 files changed, 141 insertions(+), 120 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4e62c90..8bb6bc5 100644
+index fe969d2..ac9fb7c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,6 +23,11 @@ if(APPLE)
@@ -36,7 +36,7 @@ index 4e62c90..8bb6bc5 100644
  
  # Options
  option(DOWNLOAD_SOURCES "Automatically download the Python sources" ON)
-@@ -464,77 +471,87 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
+@@ -465,77 +472,87 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
  
  # Add the other subdirectories
  add_subdirectory(cmake/libpython CMakeBuild/libpython)

@@ -1,7 +1,7 @@
-From c45a706d73ddf58ea9d30d70a36b013543f9f161 Mon Sep 17 00:00:00 2001
+From 008a56a6cf8a8382fee4a368e088396bd889bd9a Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 10 Jan 2018 22:01:45 -0800
-Subject: [PATCH 08/10] Fix some problems with Android and iOS.
+Subject: [PATCH 08/11] Fix some problems with Android and iOS.
 
 ---
  CMakeLists.txt              | 2 +-
@@ -10,7 +10,7 @@ Subject: [PATCH 08/10] Fix some problems with Android and iOS.
  3 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8bb6bc5..820fd1a 100644
+index ac9fb7c..7179fbe 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -136,7 +136,7 @@ option(WITH_DOC_STRINGS "Enable if you want documentation strings in extension m
@@ -23,10 +23,10 @@ index 8bb6bc5..820fd1a 100644
      if(WITH_STATIC_DEPENDENCIES)
          if(NOT POLICY CMP0065)
 diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
-index 9a063ed..c684e39 100644
+index 7c2ad80..9c0034f 100644
 --- a/cmake/ConfigureChecks.cmake
 +++ b/cmake/ConfigureChecks.cmake
-@@ -156,7 +156,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
+@@ -159,7 +159,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
  
  set(_msg "Checking SOABI")
  try_run(PLATFORM_RUN PLATFORM_COMPILE
@@ -35,7 +35,7 @@ index 9a063ed..c684e39 100644
          RUN_OUTPUT_VARIABLE PLATFORM_TRIPLET)
  if(NOT PLATFORM_COMPILE)
    message(FATAL_ERROR "We could not determine the platform. Please clean the ${CMAKE_PROJECT_NAME} environment and try again...")
-@@ -356,7 +356,7 @@ find_library(HAVE_LIBTERMCAP termcap)
+@@ -359,7 +359,7 @@ find_library(HAVE_LIBTERMCAP termcap)
  set(LIBUTIL_LIBRARIES )
  set(LIBUTIL_EXPECTED 1)
  
