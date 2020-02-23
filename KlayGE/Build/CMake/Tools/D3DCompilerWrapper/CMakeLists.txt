@@ -4,10 +4,12 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 		${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py
 	)
 
-	SET(EXTRA_INCLUDE_DIRS ${EXTRA_INCLUDE_DIRS}
-		${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include)
-
 	SETUP_TOOL(D3DCompilerWrapper)
+
+	target_include_directories(D3DCompilerWrapper
+		PRIVATE
+			${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include
+	)
 ELSE()
 	FIND_PACKAGE(PythonInterp)
 

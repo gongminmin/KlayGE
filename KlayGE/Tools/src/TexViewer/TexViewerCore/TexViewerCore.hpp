@@ -8,15 +8,15 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Texture.hpp>
 
-#ifdef KLAYGE_MTL_EDITOR_CORE_SOURCE		// Build dll
-#define KLAYGE_MTL_EDITOR_CORE_API KLAYGE_SYMBOL_EXPORT
+#ifdef KLAYGE_TEX_VIEWER_CORE_SOURCE		// Build dll
+#define KLAYGE_TEX_VIEWER_CORE_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll
-#define KLAYGE_MTL_EDITOR_CORE_API KLAYGE_SYMBOL_IMPORT
+#define KLAYGE_TEX_VIEWER_CORE_API KLAYGE_SYMBOL_IMPORT
 #endif
 
 namespace KlayGE
 {
-	class KLAYGE_MTL_EDITOR_CORE_API TexViewerCore : public App3DFramework
+	class KLAYGE_TEX_VIEWER_CORE_API TexViewerCore : public App3DFramework
 	{
 	public:
 		explicit TexViewerCore(void* native_wnd);

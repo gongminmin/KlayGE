@@ -32,8 +32,6 @@ ENDFUNCTION()
 # Required variables:
 # - SOURCE_FILES/HEADER_FILES/RESOURCE_FILES
 # - EFFECT_FILES/POST_PROCESSORS/UI_FILES
-# - EXTRA_INCLUDE_DIRS: dependencies required besides KlayGE_Core and boost
-# - EXTRA_LINKED_LIBRARIES: dependencies required besides KlayGE_Core and boost
 #
 MACRO(SETUP_SAMPLE EXE_NAME)
 	IF(KLAYGE_PLATFORM_WINDOWS_STORE)
@@ -170,50 +168,16 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 	SOURCE_GROUP("Post Processors" FILES ${POST_PROCESSORS})
 	SOURCE_GROUP("UI Files" FILES ${UI_FILES})
 
-	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/GSL/include)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Samples/src/Common)
-	IF(KLAYGE_PLATFORM_ANDROID)
-		INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue)
-	ENDIF()
-	INCLUDE_DIRECTORIES(${EXTRA_INCLUDE_DIRS})
-	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/lib/${KLAYGE_PLATFORM_NAME})
-	IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
-		LINK_DIRECTORIES(${KLAYGE_BIN_DIR})
-	ELSE()
-		LINK_DIRECTORIES(${KLAYGE_OUTPUT_DIR})
-	ENDIF()
-	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Samples/lib/${KLAYGE_PLATFORM_NAME})
-	IF(KLAYGE_PLATFORM_ANDROID OR KLAYGE_PLATFORM_IOS)
-		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../glloader/lib/${KLAYGE_PLATFORM_NAME})
-		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
-		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/7z/${KLAYGE_PLATFORM_NAME})
-		if(KLAYGE_PLATFORM_ANDROID)
-			LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/android_native_app_glue/${KLAYGE_PLATFORM_NAME})
-			LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/openal-soft/${KLAYGE_PLATFORM_NAME})
-		endif()
-	ENDIF()
-	LINK_DIRECTORIES(${EXTRA_LINKED_DIRS})
-
 	IF(KLAYGE_PLATFORM_ANDROID)
 		ADD_LIBRARY(${EXE_NAME} SHARED ${SOURCE_FILES})
 	ELSE()
 		ADD_EXECUTABLE(${EXE_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${EFFECT_FILES} ${POST_PROCESSORS} ${UI_FILES})
 	ENDIF()
-	IF(KLAYGE_PLATFORM_DARWIN)
-		FIND_LIBRARY(APPKIT AppKit "/")
-		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES} ${APPKIT})
-	ELSEIF(KLAYGE_PLATFORM_IOS)
-		FIND_LIBRARY(FOUNDATION Foundation "/")
-		FIND_LIBRARY(QUARTZCORE QuartzCore "/")
-		FIND_LIBRARY(UIKIT UIKit "/")
-		FIND_LIBRARY(OPENGLES OpenGLES "/")
-		FIND_LIBRARY(COREFOUNDATION CoreFoundation "/")
-		FIND_LIBRARY(GLKIT GLKit "/")
-		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES} ${FOUNDATION} ${QUARTZCORE} ${UIKIT} ${OPENGLES} ${COREFOUNDATION} ${GLKIT})
-	ENDIF()
+
+	target_include_directories(${EXE_NAME}
+		PRIVATE
+			$<TARGET_PROPERTY:SampleCommon,INTERFACE_INCLUDE_DIRECTORIES>
+	)
 
 	SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 		PROJECT_LABEL ${EXE_NAME}
@@ -255,54 +219,48 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 	endif()
 
 	IF(KLAYGE_PLATFORM_ANDROID)
-		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-			-Wl,--whole-archive
-			debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_AudioEngine_OpenAL${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_OpenAL${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
-			debug android_native_app_glue${KLAYGE_OUTPUT_SUFFIX}_d optimized android_native_app_glue${KLAYGE_OUTPUT_SUFFIX}
-			-Wl,--no-whole-archive
-			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-			debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
-			debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-			${KLAYGE_FILESYSTEM_LIBRARY}
-			debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX}
-			debug OpenAL${KLAYGE_OUTPUT_SUFFIX}_d optimized OpenAL${KLAYGE_OUTPUT_SUFFIX}
-			log android atomic)
+		target_link_libraries(${EXE_NAME}
+			PRIVATE
+				-Wl,--whole-archive
+				KlayGE_RenderEngine_OpenGLES
+				KlayGE_Scene_OCTree
+				KlayGE_InputEngine_MsgInput
+				KlayGE_AudioEngine_OpenAL
+				KlayGE_ShowEngine_NullShow
+				KlayGE_ScriptEngine_NullScript
+				KlayGE_AudioDataSource_NullAudioDataSource
+				android_native_app_glue
+				-Wl,--no-whole-archive
+				SampleCommon
+				OpenAL
+		)
 	ELSEIF(KLAYGE_PLATFORM_IOS)
-		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-			debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
-			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-			debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
-			debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-			${KLAYGE_FILESYSTEM_LIBRARY}
-			debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX})
-	ELSE()
-		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX})
-		IF(KLAYGE_PLATFORM_LINUX)
-			SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES} dl pthread)
-		ENDIF()
-	ENDIF()
-	ADD_DEPENDENCIES(${EXE_NAME} AllInEngine SampleCommon)
+		FIND_LIBRARY(FOUNDATION Foundation "/")
+		FIND_LIBRARY(QUARTZCORE QuartzCore "/")
+		FIND_LIBRARY(UIKIT UIKit "/")
+		FIND_LIBRARY(OPENGLES OpenGLES "/")
+		FIND_LIBRARY(COREFOUNDATION CoreFoundation "/")
+		FIND_LIBRARY(GLKIT GLKit "/")
 
-	TARGET_LINK_LIBRARIES(${EXE_NAME} ${EXTRA_LINKED_LIBRARIES})
+		target_link_libraries(${EXE_NAME}
+			PRIVATE
+				${FOUNDATION} ${QUARTZCORE} ${UIKIT} ${OPENGLES} ${COREFOUNDATION} ${GLKIT}
+				KlayGE_RenderEngine_OpenGLES
+				KlayGE_Scene_OCTree
+				KlayGE_InputEngine_MsgInput
+				KlayGE_AudioEngine_NullAudio
+				KlayGE_ShowEngine_NullShow
+				KlayGE_ScriptEngine_NullScript
+				KlayGE_AudioDataSource_NullAudioDataSource
+				SampleCommon
+		)
+	ELSE()
+		target_link_libraries(${EXE_NAME}
+			PRIVATE
+				SampleCommon
+		)
+	ENDIF()
+	ADD_DEPENDENCIES(${EXE_NAME} SampleCommon)
 
 	IF(KLAYGE_PLATFORM_WINDOWS_STORE)
 		IF(KLAYGE_SHADER_PLATFORM_NAME MATCHES "auto")

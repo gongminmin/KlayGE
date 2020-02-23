@@ -20,12 +20,6 @@ FOREACH(flag_var
 	STRING(REPLACE "${NO_RTTI_FLAG}" "${RTTI_FLAG}" ${flag_var} "${${flag_var}}")
 ENDFOREACH()
 
-IF(KLAYGE_PLATFORM_WINDOWS)
-	ADD_DEFINITIONS(-DWIN32)
-ELSE()
-	ADD_DEFINITIONS(-D__ANSI__)
-ENDIF()
-
 ADD_SUBDIRECTORY(FreeImage)
 ADD_SUBDIRECTORY(LibJPEG)
 ADD_SUBDIRECTORY(LibJXR)
@@ -38,5 +32,17 @@ ADD_SUBDIRECTORY(OpenEXR)
 
 foreach(target
 	"FreeImage" "LibJPEG" "LibJXR" "LibOpenJPEG" "LibPNG" "LibRaw" "LibTIFF4" "LibWebP" "OpenEXR")
+	if(KLAYGE_PLATFORM_WINDOWS)
+		target_compile_definitions(${target}
+			PRIVATE
+				-DWIN32
+		)
+	else()
+		target_compile_definitions(${target}
+			PRIVATE
+				-D__ANSI__
+		)
+	endif()
+
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/FreeImage")
 endforeach()

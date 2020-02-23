@@ -2,27 +2,21 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/KFontGen/KFontGen.cpp
 )
 
-SET(EXTRA_INCLUDE_DIRS
-	${PROJECT_BINARY_DIR}/External/freetype/freetype/include
-	${KLAYGE_PROJECT_DIR}/../External/freetype/include
-	${KLAYGE_PROJECT_DIR}/../kfont/include
-)
-
-SET(EXTRA_LINKED_DIRS
-	${KLAYGE_PROJECT_DIR}/../External/lib/freetype/${KLAYGE_PLATFORM_NAME}
-)
-if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
-	set(EXTRA_LINKED_DIRS ${EXTRA_LINKED_DIRS}
-		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
-endif()
-
-SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-	debug kfont${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-	${KLAYGE_FILESYSTEM_LIBRARY}
-	debug freetype${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized freetype${KLAYGE_OUTPUT_SUFFIX}
-	${ZLIB_LIBRARIES}
-)
-
 SETUP_TOOL(KFontGen)
+
+target_include_directories(KFontGen
+	PRIVATE
+		${PROJECT_BINARY_DIR}/External/freetype/freetype/include
+		${KLAYGE_PROJECT_DIR}/../External/freetype/include
+		${KLAYGE_PROJECT_DIR}/../kfont/include
+)
+
+target_link_libraries(KFontGen
+	PRIVATE
+		kfont
+		${KLAYGE_FILESYSTEM_LIBRARY}
+		freetype
+		${ZLIB_LIBRARIES}
+)
 
 add_dependencies(KFontGen freetype)
