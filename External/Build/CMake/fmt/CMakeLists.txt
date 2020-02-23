@@ -1,0 +1,23 @@
+SET(fmt_project_dir "${EXTERNAL_PROJECT_DIR}/fmt")
+SET(fmt_output_dir "${EXTERNAL_PROJECT_DIR}/lib/fmt/${KLAYGE_PLATFORM_NAME}")
+
+UpdateExternalLib("fmt" "https://github.com/fmtlib/fmt.git" "2161a73f2bbd723700ca6cebe1ae49d41201a10e")
+
+set(CPACK_BINARY_NSIS OFF CACHE BOOL "" FORCE)
+set(FMT_DOC OFF CACHE BOOL "" FORCE)
+set(FMT_INSTALL OFF CACHE BOOL "" FORCE)
+set(FMT_TEST OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(${fmt_project_dir} "${CMAKE_CURRENT_BINARY_DIR}/fmt")
+
+set_target_properties(fmt PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY ${fmt_output_dir}
+	ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${fmt_output_dir}
+	ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${fmt_output_dir}
+	ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${fmt_output_dir}
+	ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${fmt_output_dir}
+	PROJECT_LABEL fmt
+	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+	OUTPUT_NAME fmt${KLAYGE_OUTPUT_SUFFIX}
+	FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/fmt"
+)

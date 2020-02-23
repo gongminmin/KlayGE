@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
@@ -1073,11 +1075,8 @@ namespace KlayGE
 			XMLNodePtr albedo_node = doc.AllocNode(XNT_Element, "albedo");
 
 			float4 const& albedo = mtl->Albedo();
-			std::string color_str = std::to_string(albedo.x())
-				+ ' ' + std::to_string(albedo.y())
-				+ ' ' + std::to_string(albedo.z())
-				+ ' ' + std::to_string(albedo.w());
-			albedo_node->AppendAttrib(doc.AllocAttribString("color", color_str));
+			albedo_node->AppendAttrib(
+				doc.AllocAttribString("color", std::format("{} {} {} {}", albedo.x(), albedo.y(), albedo.z(), albedo.w())));
 
 			if (!mtl->TextureName(RenderMaterial::TS_Albedo).empty())
 			{
@@ -1116,10 +1115,8 @@ namespace KlayGE
 
 			if ((emissive.x() > 0) || (emissive.y() > 0) || (emissive.z() > 0))
 			{
-				std::string color_str = std::to_string(emissive.x())
-					+ ' ' + std::to_string(emissive.y())
-					+ ' ' + std::to_string(emissive.z());
-				emissive_node->AppendAttrib(doc.AllocAttribString("color", color_str));
+				emissive_node->AppendAttrib(
+					doc.AllocAttribString("color", std::format("{} {} {}", emissive.x(), emissive.y(), emissive.z())));
 			}
 			if (!mtl->TextureName(RenderMaterial::TS_Emissive).empty())
 			{

@@ -83,6 +83,7 @@ External/boost
 External/cxxopts
 External/d3dcompiler
 External/Downloads
+External/fmt
 External/FreeImage
 External/freetype
 External/googletest

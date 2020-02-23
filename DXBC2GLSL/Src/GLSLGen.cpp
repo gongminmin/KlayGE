@@ -38,6 +38,7 @@
 #include <DXBC2GLSL/GLSLGen.hpp>
 
 #include <KFL/CXX17.hpp>
+#include <KFL/CXX2a/format.hpp>
 
 #include <iterator>
 #include <string>
@@ -6717,7 +6718,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const& op, DXBCShad
 			std::string struct_prefix = std::string(var_name);
 			if (element_count != 0)
 			{
-				struct_prefix += '[' + std::to_string(element_index) + ']';
+				struct_prefix += std::format("[{}]", element_index);
 			}
 			struct_prefix += '.';
 

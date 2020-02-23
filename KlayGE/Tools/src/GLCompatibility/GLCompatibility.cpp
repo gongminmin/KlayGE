@@ -1,4 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -53,7 +55,7 @@ namespace
 			for (int i = 0; i < num_exts; ++ i)
 			{
 				std::string name;
-				re.GetCustomAttrib("FEATURE_NAME_" + std::to_string(i), &name);
+				re.GetCustomAttrib(std::format("FEATURE_NAME_{}", i), &name);
 				std::string::size_type p = name.find("GL_VERSION_");
 				if (std::string::npos == p)
 				{

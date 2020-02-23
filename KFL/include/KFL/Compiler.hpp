@@ -46,6 +46,7 @@
 
 // Macros for C++2a library features:
 // KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+// KLAYGE_CXX2A_LIBRARY_FORMAT_SUPPORT
 // KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
 
 // Macros for TS library features:

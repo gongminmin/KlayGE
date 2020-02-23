@@ -37,6 +37,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -202,8 +204,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				post_tone_mapping_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml",
-					"PostToneMapping" + std::to_string(i));
+				post_tone_mapping_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml", std::format("PostToneMapping{}", i));
 			}
 
 			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];

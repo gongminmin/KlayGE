@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
@@ -982,19 +984,10 @@ namespace KlayGE
 				XMLNodePtr color_node = doc.AllocNode(XNT_Element, "color");
 				{
 					Color const & from = ps->ParticleColorFrom();
-					{
-						std::string from_str = std::to_string(from.r())
-							+ ' ' + std::to_string(from.g())
-							+ ' ' + std::to_string(from.b());
-						color_node->AppendAttrib(doc.AllocAttribString("from", from_str));
-					}
+					color_node->AppendAttrib(doc.AllocAttribString("from", std::format("{} {} {}", from.r(), from.g(), from.b())));
+
 					Color const & to = ps->ParticleColorTo();
-					{
-						std::string to_str = std::to_string(to.r())
-							+ ' ' + std::to_string(to.g())
-							+ ' ' + std::to_string(to.b());
-						color_node->AppendAttrib(doc.AllocAttribString("to", to_str));
-					}
+					color_node->AppendAttrib(doc.AllocAttribString("to", std::format("{} {} {}", to.r(), to.g(), to.b())));
 				}
 				particle_node->AppendNode(color_node);
 			}
@@ -1020,18 +1013,12 @@ namespace KlayGE
 			}
 			{
 				XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
-				{
-					std::string min_str = std::to_string(particle_emitter->MinPosition().x())
-						+ ' ' + std::to_string(particle_emitter->MinPosition().y())
-						+ ' ' + std::to_string(particle_emitter->MinPosition().z());
-					pos_node->AppendAttrib(doc.AllocAttribString("min", min_str));
-				}
-				{
-					std::string max_str = std::to_string(particle_emitter->MaxPosition().x())
-						+ ' ' + std::to_string(particle_emitter->MaxPosition().y())
-						+ ' ' + std::to_string(particle_emitter->MaxPosition().z());
-					pos_node->AppendAttrib(doc.AllocAttribString("max", max_str));
-				}
+				pos_node->AppendAttrib(
+					doc.AllocAttribString("min", std::format("{} {} {}", particle_emitter->MinPosition().x(),
+													 particle_emitter->MinPosition().y(), particle_emitter->MinPosition().z())));
+				pos_node->AppendAttrib(
+					doc.AllocAttribString("max", std::format("{} {} {}", particle_emitter->MaxPosition().x(),
+													 particle_emitter->MaxPosition().y(), particle_emitter->MaxPosition().z())));
 				emitter_node->AppendNode(pos_node);
 			}		
 			{

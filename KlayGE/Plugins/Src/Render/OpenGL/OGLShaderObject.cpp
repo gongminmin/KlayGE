@@ -29,7 +29,9 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/CXX17/string_view.hpp>
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -657,7 +659,7 @@ namespace KlayGE
 				break;
 
 			case VEU_TextureCoord:
-				glsl_param_name = "v_TEXCOORD" + std::to_string(static_cast<int>(decl.usage_index));
+				glsl_param_name = std::format("v_TEXCOORD{}", static_cast<int>(decl.usage_index));
 				break;
 
 			case VEU_Tangent:
@@ -857,7 +859,7 @@ namespace KlayGE
 					{
 						usage = VEU_TextureCoord;
 						usage_index = static_cast<uint8_t>(semantic_index);
-						glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
+						glsl_param_name = std::format("TEXCOORD{}", semantic_index);
 					}
 					else if (CT_HASH("TANGENT") == semantic_hash)
 					{

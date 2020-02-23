@@ -45,6 +45,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -5866,9 +5868,8 @@ namespace KlayGE
 			ShaderModel const & ver = effect_shader_frag.Version();
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 			{
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
-					+ std::to_string(static_cast<int>(ver.major_ver)) + ", "
-					+ std::to_string(static_cast<int>(ver.minor_ver)) + ")\n";
+				str += std::format(
+					"#if KLAYGE_SHADER_MODEL >= SHADER_MODEL({}, {})\n", static_cast<int>(ver.major_ver), static_cast<int>(ver.minor_ver));
 			}
 
 			str += effect_shader_frag.str() + "\n";

@@ -29,7 +29,9 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
@@ -1628,7 +1630,7 @@ namespace
 			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
 			if (scene_lods.size() > 1)
 			{
-				lod_output_name  += "_lod_" + std::to_string(lod);
+				lod_output_name  += std::format("_lod_{}", lod);
 			}
 			lod_output_name += output_ext.string();
 
@@ -1673,7 +1675,7 @@ namespace
 			render_model_->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>();
 			auto& mtl = *render_model_->GetMaterial(mtl_index);
 
-			mtl.Name("Material " + std::to_string(mtl_index));
+			mtl.Name(std::format("Material {}", mtl_index));
 
 			mtl.Albedo(float4(0, 0, 0, 1));
 			mtl.Metalness(0);

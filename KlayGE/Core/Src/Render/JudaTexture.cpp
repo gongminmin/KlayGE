@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -1234,7 +1236,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < tex_cache_array_.size(); ++ i)
 			{
-				*(effect.ParameterByName("juda_tex_cache_" + std::to_string(i))) = tex_cache_array_[i];
+				*(effect.ParameterByName(std::format("juda_tex_cache_{}", i))) = tex_cache_array_[i];
 			}
 			*(effect.ParameterByName("inv_juda_tex_cache_size")) = float2(1.0f / tex_cache_array_[0]->Width(0), 1.0f / tex_cache_array_[0]->Height(0));
 		}

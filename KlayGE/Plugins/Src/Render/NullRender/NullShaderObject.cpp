@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
@@ -1140,7 +1142,7 @@ namespace KlayGE
 					{
 						usage = VEU_TextureCoord;
 						usage_index = static_cast<uint8_t>(semantic_index);
-						glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
+						glsl_param_name = std::format("TEXCOORD{}", semantic_index);
 					}
 					else if (CT_HASH("TANGENT") == semantic_hash)
 					{
