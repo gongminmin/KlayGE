@@ -63,7 +63,7 @@ namespace KlayGE
 		virtual ~InStream() = default;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		ResIdentifierPtr is_;
 		uint64_t stream_size_ = 0;
@@ -87,7 +87,7 @@ namespace KlayGE
 		virtual ~OutStream() = default;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		std::shared_ptr<std::ostream> os_;
 	};

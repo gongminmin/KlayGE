@@ -1,8 +1,3 @@
-IF(KLAYGE_COMPILER_GCC)
-	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-ENDIF()
-
 SET(LIB_NAME KlayGE_AudioEngine_XAudio)
 
 SET(XAUDIO_AE_SOURCE_FILES
@@ -22,6 +17,21 @@ SOURCE_GROUP("Header Files" FILES ${XAUDIO_AE_HEADER_FILES})
 ADD_LIBRARY(${LIB_NAME} SHARED
 	${XAUDIO_AE_SOURCE_FILES} ${XAUDIO_AE_HEADER_FILES}
 )
+
+IF(KLAYGE_COMPILER_GCC)
+	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unknown-pragmas
+	)
+elseif(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-missing-braces
+			-Wno-delete-abstract-non-virtual-dtor
+			-Wno-delete-non-abstract-non-virtual-dtor
+	)
+endif()
 
 target_include_directories(${LIB_NAME}
 	PUBLIC

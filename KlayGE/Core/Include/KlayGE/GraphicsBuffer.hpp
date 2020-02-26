@@ -165,7 +165,7 @@ namespace KlayGE
 
 		uint8_t* subres_data_ = nullptr;
 		std::vector<uint8_t> data_block_;
-		std::atomic<bool> mapped_ = false;
+		std::atomic<bool> mapped_{false};
 	};
 }
 

@@ -8,7 +8,7 @@ SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME
 
 UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
 if(need_patch)
-	foreach(patch "0001-Fix-for-MinGW-and-UWP")
+	foreach(patch "0001-Fix-for-MinGW-and-UWP" "0002-Fix-for-clang-cl")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
 	endforeach()
 endif()
@@ -139,6 +139,15 @@ IF(ANDROID OR IOS)
 ENDIF()
 
 ADD_SUBDIRECTORY("${EXTERNAL_PROJECT_DIR}/python-cmake-buildsystem" "${CMAKE_CURRENT_BINARY_DIR}/python")
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(libpython-static
+		PRIVATE
+			-Wno-invalid-token-paste
+			-w
+			/Od # lld-link can't find __powidf2
+	)
+endif()
 
 target_compile_definitions(libpython-static
 	PRIVATE

@@ -138,7 +138,7 @@ namespace KlayGE
 
 		void DoReset() override;
 		void DoPlay(bool loop) override;
-		void DoStop();
+		void DoStop() override;
 
 		bool FillData(uint32_t size);
 

@@ -85,6 +85,11 @@ namespace KlayGE
 			return offset_;
 		}
 
+		uint32_t Size() const
+		{
+			return size_;
+		}
+
 		void* CpuAddress() const
 		{
 			return cpu_addr_;

@@ -22,7 +22,7 @@ class CfgBuildDefault:
 		self.project = "auto"
 
 		# Compiler name.
-		#   On Windows desktop, could be "vc142", "vc141", "vc140", "mingw", "auto".
+		#   On Windows desktop, could be "vc142", "vc141", "vc140", "mingw", "clangcl", "auto".
 		#   On Windows store, could be "vc142", "vc141", "vc140", "auto".
 		#   On Android, could be "clang", "auto".
 		#   On Linux, could be "gcc", "auto".
@@ -412,6 +412,17 @@ class BuildInfo:
 						else:
 							LogError("Could NOT find vc140 compiler.\n")
 					vcvarsall_options = ""
+			elif "clangcl" == compiler:
+				if project_type == "vs2019":
+					try_folder = self.FindVS2019Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = ""
+					else:
+						LogError("Could NOT find clang-cl compiler toolset for VS2019.\n")
+				else:
+					LogError("Could NOT find clang-cl compiler.\n")
 			elif "clang" == compiler:
 				clang_loc = self.FindClang()
 				compiler_root = clang_loc[0:clang_loc.rfind("\\clang++") + 1]
@@ -456,6 +467,9 @@ class BuildInfo:
 			elif "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
+			elif "clangcl" == compiler:
+				compiler_name = "clangcl"
+				compiler_version = self.RetrieveClangVersion(compiler_root + "../../Tools/Llvm/bin/")
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
@@ -771,9 +785,12 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	toolset_name = ""
 	if 0 == build_info.project_type.find("vs"):
 		toolset_name = "-T"
-		if not build_info.is_windows_store:
-			toolset_name += " v%s," % build_info.compiler_version
-		toolset_name += "host=x64"
+		if build_info.compiler_name == "clangcl":
+			toolset_name += " ClangCL"
+		else:
+			if not build_info.is_windows_store:
+				toolset_name += " v%s," % build_info.compiler_version
+			toolset_name += "host=x64"
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -801,7 +818,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if compiler_info.is_cross_compiling:
 		additional_options += " -DKLAYGE_HOST_BIN_DIR=\"%s\"" % build_info.host_bin_dir
 
-	if build_info.compiler_name == "vc":
+	if 0 == build_info.project_type.find("vs"):
 		if "x64" == compiler_info.arch:
 			vc_option = "amd64"
 			vc_arch = "x64"
@@ -819,6 +836,8 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if build_info.multi_config:
 		if 0 == build_info.project_type.find("vs"):
 			additional_options += " -A %s" % vc_arch
+			if build_info.compiler_name == "clangcl":
+				additional_options += " -DClangCL_Path=\"" + compiler_info.compiler_root + "../../Tools/Llvm/bin/\""
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level

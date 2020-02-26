@@ -42,7 +42,7 @@
 #endif
 #include <WbemIdl.h>
 
-#if defined(KLAYGE_COMPILER_MSVC)
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_CLANGCL)
 DEFINE_GUID(IID_IWbemLocator, 0xdc12a687, 0x737f, 0x11cf, 0x88, 0x4d, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
 #endif
 #if !defined(KLAYGE_COMPILER_GCC)

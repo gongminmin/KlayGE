@@ -43,6 +43,13 @@ SOURCE_GROUP("Resource Files\\PlatConf" FILES ${PLAT_CONF_FILES})
 ADD_LIBRARY(${LIB_NAME} SHARED
 	${SOURCE_FILES} ${HEADER_FILES} ${PLAT_CONF_FILES})
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-pragma-pack
+	)
+endif()
+
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DKLAYGE_PLUGIN_DEV_HELPER_SOURCE

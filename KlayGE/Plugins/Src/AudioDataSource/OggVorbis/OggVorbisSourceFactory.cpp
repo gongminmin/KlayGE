@@ -20,14 +20,14 @@ namespace KlayGE
 	class OggVorbisAudioDataSourceFactory : public AudioDataSourceFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"OggVorbis Audio Data Source Factory");
 			return name;
 		}
 
 	private:
-		AudioDataSourcePtr MakeAudioDataSource()
+		AudioDataSourcePtr MakeAudioDataSource() override
 		{
 			return MakeSharedPtr<OggVorbisSource>();
 		}

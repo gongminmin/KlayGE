@@ -39,7 +39,7 @@ namespace KlayGE
 	class NullInputFactory : public InputFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"Null Input Factory");
 			return name;

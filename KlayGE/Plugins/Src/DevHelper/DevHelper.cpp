@@ -99,7 +99,7 @@ namespace KlayGE
 		void GetImageInfo(std::string_view input_name, std::string_view metadata_name, RenderDeviceCaps const * caps,
 			Texture::TextureType& type,
 			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch) override
 		{
 			auto metadata = this->LoadTexMetadata(metadata_name, caps);
 

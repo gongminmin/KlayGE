@@ -87,7 +87,7 @@ namespace KlayGE
 		{ 0, 0, 0, 0 } // sentinel
 	};
 
-#if defined(KLAYGE_COMPILER_CLANG)
+#if defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" // tp_print is deprecated
 #endif

@@ -42,7 +42,7 @@ using namespace KlayGE;
 
 namespace
 {
-	class KLAYGE_DEV_HELPER_API TexLoader
+	class TexLoader
 	{
 	public:
 		TexturePtr Load(std::string_view input_name, TexMetadata const & metadata);

@@ -53,11 +53,16 @@
 #pragma warning(disable: 4244) // Conversion from doubel to int64
 #pragma warning(disable: 4456) // Declaration of 'name' hides previous local declaration
 #pragma warning(disable: 4702) // Unreachable code
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" // Ignore deprecated function calls
 #endif
 #define NANOSVG_IMPLEMENTATION
 #include <nanosvg.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
 #endif
 #define NANOSVGRAST_IMPLEMENTATION
 #include <nanosvgrast.h>

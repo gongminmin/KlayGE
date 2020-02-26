@@ -28,6 +28,25 @@ set(IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(assimp
+		PRIVATE
+			-Wno-pragma-pack
+			-Wno-unused-parameter
+			-Wno-sometimes-uninitialized
+			-Wno-invalid-offsetof
+			-Wno-sign-compare
+			-Wno-unknown-warning-option
+			-Wno-unused-variable
+			-Wno-unused-value
+			-Wno-unused-private-field
+	)
+	target_compile_options(IrrXML
+		PRIVATE
+			-Wno-pragma-pack
+	)
+endif()
+
 SET_TARGET_PROPERTIES(assimp PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${ASSIMP_OUTPUT_DIR}
 	ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${ASSIMP_OUTPUT_DIR}

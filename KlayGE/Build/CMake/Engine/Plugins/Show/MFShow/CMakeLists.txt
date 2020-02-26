@@ -17,6 +17,14 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${MFSHOW_SE_SOURCE_FILES} ${MFSHOW_SE_HEADER_FILES}
 )
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-sign-compare
+			-w
+	)
+endif()
+
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>

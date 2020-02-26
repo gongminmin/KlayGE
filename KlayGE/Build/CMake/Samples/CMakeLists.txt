@@ -174,6 +174,12 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 		ADD_EXECUTABLE(${EXE_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${EFFECT_FILES} ${POST_PROCESSORS} ${UI_FILES})
 	ENDIF()
 
+	if(KLAYGE_COMPILER_CLANGCL)
+		target_compile_options(${EXE_NAME}
+			PRIVATE
+				-Wno-inconsistent-missing-override)
+	endif()
+
 	target_include_directories(${EXE_NAME}
 		PRIVATE
 			$<TARGET_PROPERTY:SampleCommon,INTERFACE_INCLUDE_DIRECTORIES>

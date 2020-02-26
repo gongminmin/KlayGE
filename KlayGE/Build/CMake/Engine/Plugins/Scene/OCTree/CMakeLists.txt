@@ -16,6 +16,13 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${OCTREE_SM_SOURCE_FILES} ${OCTREE_SM_HEADER_FILES}
 )
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-inconsistent-missing-override
+	)
+endif()
+
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>

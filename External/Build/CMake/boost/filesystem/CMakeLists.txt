@@ -1,9 +1,5 @@
 SET(LIB_NAME filesystem)
 
-IF(KLAYGE_PLATFORM_ANDROID AND KLAYGE_COMPILER_CLANG)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unusable-partial-specialization")
-ENDIF()
-
 SET(SOURCE_FILES
 	${BOOST_PROJECT_DIR}/libs/filesystem/src/codecvt_error_category.cpp
 	${BOOST_PROJECT_DIR}/libs/filesystem/src/directory.cpp
@@ -24,6 +20,19 @@ IF(NOT MSVC)
 ENDIF()
 
 SETUP_BOOST_LIBRARY(${LIB_NAME})
+
+if(KLAYGE_PLATFORM_ANDROID AND KLAYGE_COMPILER_CLANG)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unusable-partial-specialization
+	)
+endif()
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unused-const-variable
+	)
+endif()
 
 target_compile_definitions(${LIB_NAME}
 	PRIVATE

@@ -1,7 +1,7 @@
 From e11cdf1c2f2e3b4d6fbaee0fe0f371120a4337cc Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 10 Sep 2018 21:23:12 -0700
-Subject: [PATCH 3/6] Fix some compiling problems on MinGW 7.x
+Subject: [PATCH 3/7] Fix some compiling problems on MinGW 7.x
 
 ---
  Source/LibJXR/common/include/guiddef.h        |  8 +++-

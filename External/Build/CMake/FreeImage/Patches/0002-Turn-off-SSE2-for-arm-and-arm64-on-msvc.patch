@@ -1,7 +1,7 @@
 From aae17a214dd7d358fbaa35b7c3158dfcbe080c8c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 10 Sep 2018 21:26:12 -0700
-Subject: [PATCH 2/6] Turn off SSE2 for arm and arm64 on msvc
+Subject: [PATCH 2/7] Turn off SSE2 for arm and arm64 on msvc
 
 ---
  Source/OpenEXR/IlmImf/ImfSimd.h | 2 +-

@@ -68,7 +68,7 @@ namespace KlayGE
 		virtual ~ArchiveExtractCallback() = default;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		bool password_is_defined_;
 		std::wstring password_;

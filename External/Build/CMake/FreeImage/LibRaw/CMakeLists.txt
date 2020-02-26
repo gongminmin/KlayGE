@@ -34,6 +34,13 @@ ADD_LIBRARY(${LIB_NAME} STATIC
 	${LIBRAW_INTERNAL_HEADER_FILES} ${LIBRAW_LIBRAW_HEADER_FILES}
 )
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			/Od # lld-link can't find __powidf2
+	)
+endif()
+
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DLIBRAW_NODLL

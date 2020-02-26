@@ -60,69 +60,88 @@
 		#error "-std=c++14 must be turned on."
 	#endif
 
-	#define KLAYGE_COMPILER_CLANG
-	#define KLAYGE_COMPILER_NAME clang
-
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#if __cplusplus > 201402L
-		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-	#endif
+	#if defined(_MSC_VER)
+		#define KLAYGE_COMPILER_CLANGCL
+		#define KLAYGE_COMPILER_NAME clangcl
 
-	#if defined(__APPLE__)
-		#if CLANG_VERSION >= 61
+		#if __cplusplus > 201402L
+			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#endif
+
+		#if CLANG_VERSION >= 90
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
+			#error "Unsupported compiler version. Please install clang-cl 9.0 or up."
 		#endif
 
-		#if CLANG_VERSION >= 80
+		#define KLAYGE_HAS_DECLSPEC
+		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
+	#else
+		#define KLAYGE_COMPILER_CLANG
+		#define KLAYGE_COMPILER_NAME clang
+
+		#if __cplusplus > 201402L
+			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#endif
+
+		#if defined(__APPLE__)
+			#if CLANG_VERSION >= 61
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
+			#endif
+
+			#if CLANG_VERSION >= 80
+				#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+			#endif
+			#if CLANG_VERSION >= 90
+				#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+			#endif
+			#if CLANG_VERSION >= 100
+				#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+				#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+			#endif
+		#elif defined(__ANDROID__)
+			#if CLANG_VERSION >= 50
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
+			#endif
+
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#endif
-		#if CLANG_VERSION >= 90
-			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-		#endif
-		#if CLANG_VERSION >= 100
 			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#endif
-	#elif defined(__ANDROID__)
-		#if CLANG_VERSION >= 50
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
-		#else
-			#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
-		#endif
+			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+		#elif defined(linux) || defined(__linux) || defined(__linux__)
+			#if CLANG_VERSION >= 50
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install clang++ 5.0 or up."
+			#endif
 
-		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-	#elif defined(linux) || defined(__linux) || defined(__linux__)
-		#if CLANG_VERSION >= 50
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
-		#else
-			#error "Unsupported compiler version. Please install clang++ 5.0 or up."
-		#endif
-
-		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-		#if CLANG_VERSION >= 70
-			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-			#if __cplusplus > 201703
-				#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-				#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+			#if CLANG_VERSION >= 70
+				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+				#if __cplusplus > 201703
+					#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+					#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+				#endif
+			#else
+				#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 			#endif
 		#else
-			#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
 		#endif
-	#else
-		#error "Clang++ on an unknown platform. Only Apple, Android, Linux, and Windows are supported."
-	#endif
 
-	#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-	#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
+	#endif
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()

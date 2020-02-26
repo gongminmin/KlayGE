@@ -1,7 +1,7 @@
 From b9d6b26ab7c50b3cfeb31a002051a820c8f663a0 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 7 Jul 2018 21:47:26 -0700
-Subject: [PATCH 2/2] Fix compiling problems for Android
+Subject: [PATCH 2/3] Fix compiling problems for Android
 
 ---
  C/CpuArch.c            |  2 +-

@@ -1,7 +1,3 @@
-IF(KLAYGE_COMPILER_GCC)
-	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-comment")
-ENDIF()
 IF(KLAYGE_COMPILER_MSVC)
 	SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO")
 ENDIF()
@@ -25,6 +21,21 @@ SOURCE_GROUP("Header Files" FILES ${DSHOW_SE_HEADER_FILES})
 ADD_LIBRARY(${LIB_NAME} SHARED
 	${DSHOW_SE_SOURCE_FILES} ${DSHOW_SE_HEADER_FILES}
 )
+
+if(KLAYGE_COMPILER_GCC)
+	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unknown-pragmas
+			-Wno-comment
+	)
+elseif(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-inconsistent-missing-override
+			-Wno-comment
+	)
+endif()
 
 target_include_directories(${LIB_NAME}
 	PUBLIC

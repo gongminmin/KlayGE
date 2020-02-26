@@ -231,6 +231,13 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${CRYPTO_FILES} ${SPEC_ICONS_FILES} ${SPEC_FILES} ${WINDOWS_FILES}
 )
 
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-w
+	)
+endif()
+
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DMY7Z_EXPORTS

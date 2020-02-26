@@ -1,7 +1,7 @@
 From 44a48402469b9440532cb688f73e8069ac84bf1f Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 11 May 2019 16:10:22 -0700
-Subject: [PATCH 5/6] Fix missing __mingw_uuidof_s problem on gcc 8.3
+Subject: [PATCH 5/7] Fix missing __mingw_uuidof_s problem on gcc 8.3
 
 ---
  Source/LibJXR/common/include/guiddef.h | 13 +++++++++----

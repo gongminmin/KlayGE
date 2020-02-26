@@ -1,7 +1,7 @@
 From 844fa1b2b9801daa7f4665ba9899f35caa21d5c3 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 14 Dec 2019 17:12:32 -0800
-Subject: [PATCH 6/6] Fix compiling problems on VS2019 Update 4
+Subject: [PATCH 6/7] Fix compiling problems on VS2019 Update 4
 
 ---
  Source/OpenEXR/Imath/ImathQuat.h | 1 +

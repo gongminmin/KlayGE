@@ -1,6 +1,8 @@
 FIND_PACKAGE(GLES)
 
-IF(KLAYGE_GLES_FOUND)
+IF(NOT KLAYGE_GLES_FOUND)
+	return()
+ENDIF()
 
 SET(LIB_NAME KlayGE_RenderEngine_OpenGLES)
 
@@ -46,6 +48,13 @@ SOURCE_GROUP("Header Files" FILES ${OPENGLES_RE_HEADER_FILES})
 ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${OPENGLES_RE_SOURCE_FILES} ${OPENGLES_RE_HEADER_FILES}
 )
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-inconsistent-missing-override
+	)
+endif()
 
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
@@ -113,5 +122,3 @@ target_link_libraries(${LIB_NAME}
 )
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
-
-ENDIF()
