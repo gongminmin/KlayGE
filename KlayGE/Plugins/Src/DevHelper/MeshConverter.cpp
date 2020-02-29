@@ -47,10 +47,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-copy" // Ignore comparison between int and uint
 #endif
-#include <assimp/cimport.h>
-#include <assimp/cexport.h>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/pbrmaterial.h>
 
@@ -207,7 +206,7 @@ namespace
 		// From assimp
 		void BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node);
 		void BuildMaterials(aiScene const * scene);
-		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods);
+		void BuildMeshData(std::vector<aiScene const*> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
 		void BuildActions(aiScene const * scene);
 		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
@@ -548,7 +547,7 @@ namespace
 		}
 	}
 
-	void MeshLoader::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods)
+	void MeshLoader::BuildMeshData(std::vector<aiScene const*> const & scene_lods)
 	{
 		for (size_t lod = 0; lod < scene_lods.size(); ++ lod)
 		{
@@ -991,18 +990,6 @@ namespace
 
 	void MeshLoader::LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata)
 	{
-		auto ai_property_store_deleter = [](aiPropertyStore* props)
-		{
-			aiReleasePropertyStore(props);
-		};
-
-		std::unique_ptr<aiPropertyStore, decltype(ai_property_store_deleter)> props(aiCreatePropertyStore(), ai_property_store_deleter);
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
-		aiSetImportPropertyFloat(props.get(), AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_PP_SBP_REMOVE, 0);
-
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_GLOB_MEASURE_TIME, 1);
-
 		unsigned int ppsteps = aiProcess_JoinIdenticalVertices // join identical vertices/ optimize indexing
 			| aiProcess_ValidateDataStructure // perform a full validation of the loader's output
 			| aiProcess_RemoveRedundantMaterials // remove redundant materials
@@ -1010,12 +997,8 @@ namespace
 
 		uint32_t const num_lods = static_cast<uint32_t>(metadata.NumLods());
 
-		auto ai_scene_deleter = [](aiScene const * scene)
-		{
-			aiReleaseImport(scene);
-		};
-
-		std::vector<std::shared_ptr<aiScene const>> scenes(num_lods);
+		std::vector<Assimp::Importer> importers(num_lods);
+		std::vector<aiScene const*> scenes(num_lods);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			std::string_view const lod_file_name = (lod == 0) ? input_name : metadata.LodFileName(lod);
@@ -1026,22 +1009,28 @@ namespace
 				return;
 			}
 
-			scenes[lod].reset(aiImportFileExWithProperties(file_name.c_str(),
+			auto& importer = importers[lod];
+
+			importer.SetPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
+			importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
+			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, 0);
+			importer.SetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME, 1);
+
+			scenes[lod] = importer.ReadFile(file_name.c_str(),
 				ppsteps // configurable pp steps
 				| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
 				| aiProcess_Triangulate // triangulate polygons with more than 3 edges
 				| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
-				/*| aiProcess_FixInfacingNormals*/, // find normals facing inwards and inverts them
-				nullptr, props.get()), ai_scene_deleter);
+				/*| aiProcess_FixInfacingNormals*/);
 
 			if (!scenes[lod])
 			{
-				LogError() << "Assimp: Import file " << lod_file_name << " error: " << aiGetErrorString() << std::endl;
+				LogError() << "Assimp: Import file " << lod_file_name << " error: " << importer.GetErrorString() << std::endl;
 				return;
 			}
 		}
 
-		this->BuildJoints(scenes[0].get());
+		this->BuildJoints(scenes[0]);
 
 		bool const skinned = !joints_.empty();
 
@@ -1066,11 +1055,11 @@ namespace
 			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
 		}
 
-		this->BuildMaterials(scenes[0].get());
+		this->BuildMaterials(scenes[0]);
 
 		if (skinned)
 		{
-			this->BuildActions(scenes[0].get());
+			this->BuildActions(scenes[0]);
 		}
 
 		for (auto& mesh : meshes_)
@@ -1653,7 +1642,8 @@ namespace
 				}
 			}
 
-			aiExportScene(&ai_scene, format_id.c_str(), lod_output_name.c_str(), aiProcess_ConvertToLeftHanded);
+			Assimp::Exporter exporter;
+			exporter.Export(&ai_scene, format_id.c_str(), lod_output_name.c_str(), aiProcess_ConvertToLeftHanded);
 		}
 	}
 
