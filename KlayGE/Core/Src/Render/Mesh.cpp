@@ -563,7 +563,21 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo(RenderModel const & model)
 	{
-		this->IsSkinned(model.IsSkinned());
+		bool is_skinned = false;
+		for (uint32_t i = 0; !is_skinned && (i < rls_[0]->NumVertexStreams()); ++i)
+		{
+			auto const& vertex_stream_fmt = rls_[0]->VertexStreamFormat(i);
+			for (auto const& vertex_elem : vertex_stream_fmt)
+			{
+				if ((vertex_elem.usage == VEU_BlendIndex) || (vertex_elem.usage == VEU_BlendWeight))
+				{
+					is_skinned = true;
+					break;
+				}
+			}
+		}
+
+		this->IsSkinned(is_skinned);
 		this->Material(model.GetMaterial(this->MaterialID()));
 	}
 
@@ -654,7 +668,7 @@ namespace KlayGE
 
 	SkinnedModel::SkinnedModel(SceneNodePtr const & root_node)
 		: RenderModel(root_node),
-			last_frame_(-1),
+			last_frame_(0),
 			num_frames_(0), frame_rate_(0)
 	{
 	}
@@ -737,9 +751,9 @@ namespace KlayGE
 	{
 		bind_reals_.resize(joints_.size());
 		bind_duals_.resize(joints_.size());
-		for (size_t i = 0; i < joints_.size(); ++ i)
+		for (size_t i = 0; i < joints_.size(); ++i)
 		{
-			Joint const & joint = joints_[i];
+			Joint const& joint = joints_[i];
 
 			Quaternion bind_real, bind_dual;
 			float bind_scale;
@@ -796,6 +810,8 @@ namespace KlayGE
 			bind_reals_[i] = float4(bind_real.x(), bind_real.y(), bind_real.z(), bind_real.w()) * bind_scale;
 			bind_duals_[i] = float4(bind_dual.x(), bind_dual.y(), bind_dual.z(), bind_dual.w());
 		}
+
+		this->SetToEffect();
 	}
 
 	float SkinnedModel::GetFrame() const
@@ -824,6 +840,25 @@ namespace KlayGE
 		{
 			bind_reals_[i] = float4(0, 0, 0, 1);
 			bind_duals_[i] = float4(0, 0, 0, 0);
+		}
+
+		this->SetToEffect();
+	}
+
+	void SkinnedModel::SetToEffect()
+	{
+		for (auto& renderable : meshes_)
+		{
+			auto& effect = renderable->GetRenderEffect();
+			if (effect)
+			{
+				auto* joint_reals_ep = effect->ParameterByName("joint_reals");
+				if (joint_reals_ep)
+				{
+					*joint_reals_ep = bind_reals_;
+					*(effect->ParameterByName("joint_duals")) = bind_duals_;
+				}
+			}
 		}
 	}
 

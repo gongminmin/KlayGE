@@ -35,17 +35,6 @@ void DetailedSkinnedMesh::DoBuildMeshInfo(RenderModel const & model)
 	this->BindDeferredEffect(model_->Effect());
 }
 
-void DetailedSkinnedMesh::OnRenderBegin()
-{
-	SkinnedMesh::OnRenderBegin();
-	
-	if (model_->IsSkinned())
-	{
-		*(effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-		*(effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
-	}
-}
-
 void DetailedSkinnedMesh::VisualizeLighting()
 {
 	visualize_ = -1;

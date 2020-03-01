@@ -44,8 +44,6 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	explicit DetailedSkinnedMesh(std::wstring_view name);
 
-	void OnRenderBegin();
-
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
 	void VisualizeTexture(int slot);

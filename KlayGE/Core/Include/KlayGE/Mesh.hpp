@@ -354,6 +354,7 @@ namespace KlayGE
 	protected:
 		void BuildBones(float frame);
 		void UpdateBinds();
+		void SetToEffect();
 
 	protected:
 		std::vector<Joint> joints_;
