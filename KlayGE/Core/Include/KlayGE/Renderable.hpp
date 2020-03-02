@@ -367,6 +367,8 @@ namespace KlayGE
 
 		explicit RenderableComponent(RenderablePtr const& renderable);
 
+		SceneComponentPtr Clone() const override;
+
 		Renderable& BoundRenderable() const;
 
 		template <typename T>

@@ -677,6 +677,11 @@ namespace KlayGE
 		BOOST_ASSERT(renderable);
 	}
 
+	SceneComponentPtr RenderableComponent::Clone() const
+	{
+		return MakeSharedPtr<RenderableComponent>(renderable_);
+	}
+
 	Renderable& RenderableComponent::BoundRenderable() const
 	{
 		return *renderable_;

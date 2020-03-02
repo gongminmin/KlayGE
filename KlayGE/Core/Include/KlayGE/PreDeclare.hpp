@@ -175,6 +175,8 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
 	typedef std::shared_ptr<StaticMesh> StaticMeshPtr;
+	class JointComponent;
+	typedef std::shared_ptr<JointComponent> JointComponentPtr;
 	class SkinnedModel;
 	typedef std::shared_ptr<SkinnedModel> SkinnedModelPtr;
 	class SkinnedMesh;

@@ -34,6 +34,8 @@ namespace KlayGE
 	public:
 		Camera();
 
+		SceneComponentPtr Clone() const override;
+
 		float3 const& EyePos() const;
 		float3 LookAt() const;
 		float3 const& RightVec() const;

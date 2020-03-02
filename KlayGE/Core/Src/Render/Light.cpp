@@ -226,6 +226,17 @@ namespace KlayGE
 		KFL_UNUSED(extend);
 	}
 
+	void LightSource::CloneTo(LightSource& light) const
+	{
+		light.type_ = type_;
+		light.attrib_ = attrib_;
+		light.color_ = color_;
+		light.falloff_ = falloff_;
+		light.range_ = range_;
+
+		light.update_func_ = update_func_;
+	}
+
 
 	AmbientLightSource::AmbientLightSource()
 		: LightSource(LT_Ambient)
@@ -236,6 +247,17 @@ namespace KlayGE
 
 	AmbientLightSource::~AmbientLightSource()
 	{
+	}
+
+	SceneComponentPtr AmbientLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<AmbientLightSource>();
+
+		this->CloneTo(*ret);
+		ret->sky_tex_y_ = sky_tex_y_;
+		ret->sky_tex_c_ = sky_tex_c_;
+
+		return ret;
 	}
 
 	void AmbientLightSource::Attrib(int32_t attrib)
@@ -293,6 +315,13 @@ namespace KlayGE
 	{
 	}
 
+	SceneComponentPtr PointLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<PointLightSource>();
+		this->CloneToPoint(*ret);
+		return ret;
+	}
+
 	void PointLightSource::BindSceneNode(SceneNode* node)
 	{
 		if (!(attrib_ & LSA_NoShadow))
@@ -344,6 +373,17 @@ namespace KlayGE
 		}
 	}
 
+	void PointLightSource::CloneToPoint(PointLightSource& point_light) const
+	{
+		this->CloneTo(point_light);
+		point_light.projective_tex_ = projective_tex_;
+		point_light.crs_ = crs_;
+		for (size_t i = 0; i < sm_cameras_.size(); ++i)
+		{
+			point_light.sm_cameras_[i] = checked_pointer_cast<Camera>(sm_cameras_[i]->Clone());
+		}
+	}
+
 	void PointLightSource::UpdateCameras()
 	{
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -388,6 +428,19 @@ namespace KlayGE
 
 	SpotLightSource::~SpotLightSource()
 	{
+	}
+
+	SceneComponentPtr SpotLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<SpotLightSource>();
+
+		this->CloneTo(*ret);
+		ret->cos_outer_inner_ = cos_outer_inner_;
+		ret->projective_tex_ = projective_tex_;
+		ret->cr_ = cr_;
+		ret->sm_camera_ = checked_pointer_cast<Camera>(sm_camera_->Clone());
+
+		return ret;
 	}
 
 	void SpotLightSource::BindSceneNode(SceneNode* node)
@@ -498,6 +551,16 @@ namespace KlayGE
 	{
 	}
 
+	SceneComponentPtr DirectionalLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<DirectionalLightSource>();
+
+		this->CloneTo(*ret);
+		ret->sm_camera_ = checked_pointer_cast<Camera>(sm_camera_->Clone());
+
+		return ret;
+	}
+
 	void DirectionalLightSource::BindSceneNode(SceneNode* node)
 	{
 		if (!(attrib_ & LSA_NoShadow))
@@ -592,6 +655,16 @@ namespace KlayGE
 	{
 	}
 
+	SceneComponentPtr SphereAreaLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<SphereAreaLightSource>();
+
+		this->CloneToPoint(*ret);
+		ret->radius_ = radius_;
+
+		return ret;
+	}
+
 	float SphereAreaLightSource::Radius() const
 	{
 		return radius_;
@@ -610,6 +683,16 @@ namespace KlayGE
 
 	TubeAreaLightSource::~TubeAreaLightSource()
 	{
+	}
+
+	SceneComponentPtr TubeAreaLightSource::Clone() const
+	{
+		auto ret = MakeSharedPtr<TubeAreaLightSource>();
+
+		this->CloneToPoint(*ret);
+		ret->extend_ = extend_;
+
+		return ret;
 	}
 
 	void TubeAreaLightSource::Falloff(float3 const & fall_off)

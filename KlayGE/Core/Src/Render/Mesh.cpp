@@ -51,7 +51,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 18;
+	uint32_t const MODEL_BIN_VERSION = 19;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -509,14 +509,22 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < node.NumComponents(); ++ i)
 				{
-					for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++ mesh_index)
+					auto& component = *node.ComponentByIndex(i);
+					if (component.IsOfType<RenderableComponent>())
 					{
-						if (&checked_cast<RenderableComponent&>(*node.ComponentByIndex(i)).BoundRenderable() ==
-							source.Mesh(mesh_index).get())
+						auto* renderable = &boost::typeindex::runtime_cast<RenderableComponent&>(component).BoundRenderable();
+						for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++mesh_index)
 						{
-							new_node->AddComponent(MakeSharedPtr<RenderableComponent>(this->Mesh(mesh_index)));
-							break;
+							if (renderable == source.Mesh(mesh_index).get())
+							{
+								new_node->AddComponent(MakeSharedPtr<RenderableComponent>(this->Mesh(mesh_index)));
+								break;
+							}
 						}
+					}
+					else
+					{
+						new_node->AddComponent(component.Clone());
 					}
 				}
 				new_node->TransformToParent(node.TransformToParent());
@@ -666,6 +674,42 @@ namespace KlayGE
 	}
 
 
+	SceneComponentPtr JointComponent::Clone() const
+	{
+		auto ret = MakeSharedPtr<JointComponent>();
+
+		ret->bind_real_ = bind_real_;
+		ret->bind_dual_ = bind_dual_;
+		ret->bind_scale_ = bind_scale_;
+
+		ret->inverse_origin_real_ = inverse_origin_real_;
+		ret->inverse_origin_dual_ = inverse_origin_dual_;
+		ret->inverse_origin_scale_ = inverse_origin_scale_;
+
+		return ret;
+	}
+
+	void JointComponent::BindParams(Quaternion const& real, Quaternion const& dual, float scale)
+	{
+		bind_real_ = real;
+		bind_dual_ = dual;
+		bind_scale_ = scale;
+	}
+
+	void JointComponent::InverseOriginParams(Quaternion const& real, Quaternion const& dual, float scale)
+	{
+		inverse_origin_real_ = real;
+		inverse_origin_dual_ = dual;
+		inverse_origin_scale_ = scale;
+	}
+
+	void JointComponent::InitInverseOriginParams()
+	{
+		std::tie(inverse_origin_real_, inverse_origin_dual_) = MathLib::inverse(bind_real_, bind_dual_);
+		inverse_origin_scale_ = 1 / bind_scale_;
+	}
+
+
 	SkinnedModel::SkinnedModel(SceneNodePtr const & root_node)
 		: RenderModel(root_node),
 			last_frame_(0),
@@ -682,27 +726,42 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
-			Joint& joint = joints_[i];
+			auto& joint = *joints_[i];
 			KeyFrameSet const & kf = (*key_frame_sets_)[i];
 
 			std::tuple<Quaternion, Quaternion, float> key_dq = kf.Frame(frame);
 
-			if (joint.parent != -1)
+			bool is_root = false;
+			auto* parent_node = joint.BoundSceneNode()->Parent();
+			if (parent_node)
 			{
-				Joint const & parent(joints_[joint.parent]);
+				auto* parent_joint = parent_node->FirstComponentOfType<JointComponent>();
+				if (parent_joint == nullptr)
+				{
+					is_root = true;
+				}
+			}
 
-				if (MathLib::dot(std::get<0>(key_dq), parent.bind_real) < 0)
+			if (is_root)
+			{
+				joint.BindParams(std::get<0>(key_dq), std::get<1>(key_dq), std::get<2>(key_dq));
+			}
+			else
+			{
+				auto const& parent = *parent_node->FirstComponentOfType<JointComponent>();
+
+				if (MathLib::dot(std::get<0>(key_dq), parent.BindReal()) < 0)
 				{
 					std::get<0>(key_dq) = -std::get<0>(key_dq);
 					std::get<1>(key_dq) = -std::get<1>(key_dq);
 				}
 
-				if ((MathLib::SignBit(std::get<2>(key_dq)) > 0) && (MathLib::SignBit(parent.bind_scale) > 0))
+				if ((MathLib::SignBit(std::get<2>(key_dq)) > 0) && (MathLib::SignBit(parent.BindScale()) > 0))
 				{
-					joint.bind_real = MathLib::mul_real(std::get<0>(key_dq), parent.bind_real);
-					joint.bind_dual = MathLib::mul_dual(std::get<0>(key_dq), std::get<1>(key_dq) * parent.bind_scale,
-						parent.bind_real, parent.bind_dual);
-					joint.bind_scale = std::get<2>(key_dq) * parent.bind_scale;
+					joint.BindParams(MathLib::mul_real(std::get<0>(key_dq), parent.BindReal()),
+						MathLib::mul_dual(
+							std::get<0>(key_dq), std::get<1>(key_dq) * parent.BindScale(), parent.BindReal(), parent.BindDual()),
+						std::get<2>(key_dq) * parent.BindScale());
 				}
 				else
 				{
@@ -710,9 +769,9 @@ namespace KlayGE
 					float4x4 tmp_mat = MathLib::scaling(MathLib::abs(key_scale), MathLib::abs(key_scale), key_scale)
 						* MathLib::to_matrix(std::get<0>(key_dq))
 						* MathLib::translation(MathLib::udq_to_trans(std::get<0>(key_dq), std::get<1>(key_dq)))
-						* MathLib::scaling(MathLib::abs(parent.bind_scale), MathLib::abs(parent.bind_scale), parent.bind_scale)
-						* MathLib::to_matrix(parent.bind_real)
-						* MathLib::translation(MathLib::udq_to_trans(parent.bind_real, parent.bind_dual));
+						* MathLib::scaling(MathLib::abs(parent.BindScale()), MathLib::abs(parent.BindScale()), parent.BindScale())
+						* MathLib::to_matrix(parent.BindReal())
+						* MathLib::translation(MathLib::udq_to_trans(parent.BindReal(), parent.BindDual()));
 
 					float flip = 1;
 					if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
@@ -731,16 +790,8 @@ namespace KlayGE
 					float3 trans;
 					MathLib::decompose(scale, rot, trans, tmp_mat);
 
-					joint.bind_real = rot;
-					joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
-					joint.bind_scale = flip * scale.x();
+					joint.BindParams(rot, MathLib::quat_trans_to_udq(rot, trans), flip * scale.x());
 				}
-			}
-			else
-			{
-				joint.bind_real = std::get<0>(key_dq);
-				joint.bind_dual = std::get<1>(key_dq);
-				joint.bind_scale = std::get<2>(key_dq);
 			}
 		}
 
@@ -753,16 +804,16 @@ namespace KlayGE
 		bind_duals_.resize(joints_.size());
 		for (size_t i = 0; i < joints_.size(); ++i)
 		{
-			Joint const& joint = joints_[i];
+			auto const& joint = *joints_[i];
 
 			Quaternion bind_real, bind_dual;
 			float bind_scale;
-			if ((MathLib::SignBit(joint.inverse_origin_scale) > 0) && (MathLib::SignBit(joint.bind_scale) > 0))
+			if ((MathLib::SignBit(joint.InverseOriginScale()) > 0) && (MathLib::SignBit(joint.BindScale()) > 0))
 			{
-				bind_real = MathLib::mul_real(joint.inverse_origin_real, joint.bind_real);
-				bind_dual = MathLib::mul_dual(joint.inverse_origin_real, joint.inverse_origin_dual,
-					joint.bind_real, joint.bind_dual);
-				bind_scale = joint.inverse_origin_scale * joint.bind_scale;
+				bind_real = MathLib::mul_real(joint.InverseOriginReal(), joint.BindReal());
+				bind_dual = MathLib::mul_dual(joint.InverseOriginReal(), joint.InverseOriginDual(),
+					joint.BindReal(), joint.BindDual());
+				bind_scale = joint.InverseOriginScale() * joint.BindScale();
 
 				if (MathLib::SignBit(bind_real.w()) < 0)
 				{
@@ -772,12 +823,12 @@ namespace KlayGE
 			}
 			else
 			{
-				float4x4 tmp_mat = MathLib::scaling(MathLib::abs(joint.inverse_origin_scale), MathLib::abs(joint.inverse_origin_scale), joint.inverse_origin_scale)
-					* MathLib::to_matrix(joint.inverse_origin_real)
-					* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual))
-					* MathLib::scaling(MathLib::abs(joint.bind_scale), MathLib::abs(joint.bind_scale), joint.bind_scale)
-					* MathLib::to_matrix(joint.bind_real)
-					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
+				float4x4 tmp_mat = MathLib::scaling(MathLib::abs(joint.InverseOriginScale()), MathLib::abs(joint.InverseOriginScale()), joint.InverseOriginScale())
+					* MathLib::to_matrix(joint.InverseOriginReal())
+					* MathLib::translation(MathLib::udq_to_trans(joint.InverseOriginReal(), joint.InverseOriginDual()))
+					* MathLib::scaling(MathLib::abs(joint.BindScale()), MathLib::abs(joint.BindScale()), joint.BindScale())
+					* MathLib::to_matrix(joint.BindReal())
+					* MathLib::translation(MathLib::udq_to_trans(joint.BindReal(), joint.BindDual()));
 
 				float flip = 1;
 				if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
@@ -913,13 +964,44 @@ namespace KlayGE
 			auto const& src_skinned_model = checked_cast<SkinnedModel const&>(source);
 			auto& skinned_model = checked_cast<SkinnedModel&>(*this);
 
-			std::vector<Joint> joints(src_skinned_model.NumJoints());
+			std::vector<JointComponentPtr> joints(src_skinned_model.NumJoints());
 			for (uint32_t i = 0; i < src_skinned_model.NumJoints(); ++ i)
 			{
-				joints[i] = src_skinned_model.GetJoint(i);
+				joints[i] = checked_pointer_cast<JointComponent>(src_skinned_model.GetJoint(i)->Clone());
 			}
 			skinned_model.AssignJoints(joints.begin(), joints.end());
 			skinned_model.AttachKeyFrameSets(src_skinned_model.GetKeyFrameSets());
+
+			auto& root_node = *skinned_model.RootNode();
+			for (uint32_t i = 0; i < root_node.NumComponents(); ++i)
+			{
+				auto& component = *root_node.ComponentByIndex(i);
+				if (component.IsOfType<JointComponent>())
+				{
+					root_node.ReplaceComponent(i, joints[0]);
+					break;
+				}
+			}
+			root_node.Traverse([&joints, &src_skinned_model](SceneNode& node)
+				{
+					for (uint32_t i = 0; i < node.NumComponents(); ++i)
+					{
+						auto& component = *node.ComponentByIndex(i);
+						if (component.IsOfType<JointComponent>())
+						{
+							for (uint32_t j = 0; j < src_skinned_model.NumJoints(); ++j)
+							{
+								if (src_skinned_model.GetJoint(j)->BoundSceneNode()->Name() == node.Name())
+								{
+									node.ReplaceComponent(i, joints[j]);
+									break;
+								}
+							}
+						}
+					}
+
+					return true;
+				});
 
 			skinned_model.NumFrames(src_skinned_model.NumFrames());
 			skinned_model.FrameRate(src_skinned_model.FrameRate());
@@ -1043,6 +1125,13 @@ namespace KlayGE
 			}
 		}
 
+		struct NodeInfo
+		{
+			SceneNodePtr node;
+			std::vector<uint16_t> mesh_indices;
+			int16_t joint_index;
+		};
+
 		std::vector<RenderMaterialPtr> mtls;
 		std::vector<VertexElement> merged_ves;
 		char all_is_index_16_bit;
@@ -1057,8 +1146,8 @@ namespace KlayGE
 		std::vector<uint32_t> mesh_base_vertices;
 		std::vector<uint32_t> mesh_num_indices;
 		std::vector<uint32_t> mesh_start_indices;
-		std::vector<std::pair<SceneNodePtr, std::vector<uint16_t>>> nodes;
-		std::vector<Joint> joints;
+		std::vector<NodeInfo> nodes;
+		std::vector<JointComponentPtr> joints;
 		std::shared_ptr<std::vector<AnimationAction>> actions;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
 		uint32_t num_frames = 0;
@@ -1308,7 +1397,7 @@ namespace KlayGE
 			uint32_t attrib;
 			decoded->read(&attrib, sizeof(attrib));
 
-			node.first = MakeSharedPtr<SceneNode>(node_wname, attrib);
+			node.node = MakeSharedPtr<SceneNode>(node_wname, attrib);
 
 			int16_t parent_index;
 			decoded->read(&parent_index, sizeof(parent_index));
@@ -1316,7 +1405,7 @@ namespace KlayGE
 
 			if (parent_index >= 0)
 			{
-				nodes[parent_index].first->AddChild(node.first);
+				nodes[parent_index].node->AddChild(node.node);
 			}
 
 			uint16_t num_mesh_indices;
@@ -1325,13 +1414,17 @@ namespace KlayGE
 
 			if (num_mesh_indices > 0)
 			{
-				node.second.resize(num_mesh_indices);
-				decoded->read(node.second.data(), node.second.size() * sizeof(node.second[0]));
-				for (auto& mesh_index : node.second)
+				node.mesh_indices.resize(num_mesh_indices);
+				decoded->read(node.mesh_indices.data(), node.mesh_indices.size() * sizeof(node.mesh_indices[0]));
+				for (auto& mesh_index : node.mesh_indices)
 				{
 					mesh_index = LE2Native(mesh_index);
 				}
 			}
+
+			int16_t joint_index;
+			decoded->read(&joint_index, sizeof(joint_index));
+			node.joint_index = LE2Native(joint_index);
 
 			float4x4 xform_to_parent;
 			decoded->read(&xform_to_parent, sizeof(xform_to_parent));
@@ -1339,46 +1432,45 @@ namespace KlayGE
 			{
 				item = LE2Native(item);
 			}
-			node.first->TransformToParent(xform_to_parent);
+			node.node->TransformToParent(xform_to_parent);
 		}
 
 		joints.resize(num_joints);
 		for (uint32_t joint_index = 0; joint_index < num_joints; ++ joint_index)
 		{
-			Joint& joint = joints[joint_index];
+			joints[joint_index] = MakeSharedPtr<JointComponent>();
+			JointComponent& joint = *joints[joint_index];
 
-			joint.name = ReadShortString(*decoded);
-			decoded->read(&joint.parent, sizeof(joint.parent));
-			joint.parent = LE2Native(joint.parent);
+			Quaternion bind_real;
+			decoded->read(&bind_real, sizeof(bind_real));
+			bind_real[0] = LE2Native(bind_real[0]);
+			bind_real[1] = LE2Native(bind_real[1]);
+			bind_real[2] = LE2Native(bind_real[2]);
+			bind_real[3] = LE2Native(bind_real[3]);
 
-			decoded->read(&joint.bind_real, sizeof(joint.bind_real));
-			joint.bind_real[0] = LE2Native(joint.bind_real[0]);
-			joint.bind_real[1] = LE2Native(joint.bind_real[1]);
-			joint.bind_real[2] = LE2Native(joint.bind_real[2]);
-			joint.bind_real[3] = LE2Native(joint.bind_real[3]);
-			decoded->read(&joint.bind_dual, sizeof(joint.bind_dual));
-			joint.bind_dual[0] = LE2Native(joint.bind_dual[0]);
-			joint.bind_dual[1] = LE2Native(joint.bind_dual[1]);
-			joint.bind_dual[2] = LE2Native(joint.bind_dual[2]);
-			joint.bind_dual[3] = LE2Native(joint.bind_dual[3]);
+			Quaternion bind_dual;
+			decoded->read(&bind_dual, sizeof(bind_dual));
+			bind_dual[0] = LE2Native(bind_dual[0]);
+			bind_dual[1] = LE2Native(bind_dual[1]);
+			bind_dual[2] = LE2Native(bind_dual[2]);
+			bind_dual[3] = LE2Native(bind_dual[3]);
 
-			float flip = MathLib::SignBit(joint.bind_real.w());
+			float flip = MathLib::SignBit(bind_real.w());
 
-			joint.bind_scale = MathLib::length(joint.bind_real);
-			joint.inverse_origin_scale = 1 / joint.bind_scale;
-			joint.bind_real *= joint.inverse_origin_scale;
+			float bind_scale = MathLib::length(bind_real);
+			float inverse_origin_scale = 1 / bind_scale;
+			bind_real *= inverse_origin_scale;
 
+			Quaternion inverse_origin_real, inverse_origin_dual;
 			if (flip > 0)
 			{
-				std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
-				joint.inverse_origin_real = inv.first;
-				joint.inverse_origin_dual = inv.second;
+				std::tie(inverse_origin_real, inverse_origin_dual) = MathLib::inverse(bind_real, bind_dual);
 			}
 			else
 			{
-				float4x4 tmp_mat = MathLib::scaling(joint.bind_scale, joint.bind_scale, flip * joint.bind_scale)
-					* MathLib::to_matrix(joint.bind_real)
-					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
+				float4x4 tmp_mat = MathLib::scaling(bind_scale, bind_scale, flip * bind_scale)
+					* MathLib::to_matrix(bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(bind_real, bind_dual));
 				tmp_mat = MathLib::inverse(tmp_mat);
 				tmp_mat(2, 0) = -tmp_mat(2, 0);
 				tmp_mat(2, 1) = -tmp_mat(2, 1);
@@ -1389,12 +1481,15 @@ namespace KlayGE
 				float3 trans;
 				MathLib::decompose(scale, rot, trans, tmp_mat);
 
-				joint.inverse_origin_real = rot;
-				joint.inverse_origin_dual = MathLib::quat_trans_to_udq(rot, trans);
-				joint.inverse_origin_scale = -scale.x();
+				inverse_origin_real = rot;
+				inverse_origin_dual = MathLib::quat_trans_to_udq(rot, trans);
+				inverse_origin_scale = -scale.x();
 			}
 
-			joint.bind_scale *= flip;
+			bind_scale *= flip;
+
+			joint.BindParams(bind_real, bind_dual, bind_scale);
+			joint.InverseOriginParams(inverse_origin_real, inverse_origin_dual, inverse_origin_scale);
 		}
 
 		if (num_kfs > 0)
@@ -1497,11 +1592,11 @@ namespace KlayGE
 		RenderModelPtr model;
 		if (skinned)
 		{
-			model = MakeSharedPtr<SkinnedModel>(nodes[0].first);
+			model = MakeSharedPtr<SkinnedModel>(nodes[0].node);
 		}
 		else
 		{
-			model = MakeSharedPtr<RenderModel>(nodes[0].first);
+			model = MakeSharedPtr<RenderModel>(nodes[0].node);
 		}
 
 		model->NumMaterials(mtls.size());
@@ -1583,11 +1678,16 @@ namespace KlayGE
 
 		model->AssignMeshes(meshes.begin(), meshes.end());
 
-		for (auto& node : nodes)
+		for (auto const& node : nodes)
 		{
-			for (auto mesh_index : node.second)
+			for (auto const mesh_index : node.mesh_indices)
 			{
-				node.first->AddComponent(MakeSharedPtr<RenderableComponent>(meshes[mesh_index]));
+				node.node->AddComponent(MakeSharedPtr<RenderableComponent>(meshes[mesh_index]));
+			}
+
+			if (node.joint_index >= 0)
+			{
+				node.node->AddComponent(joints[node.joint_index]);
 			}
 		}
 
@@ -1748,9 +1848,21 @@ namespace KlayGE
 		}
 	}
 
-	void WriteNodesChunk(std::vector<SceneNode const *> const & nodes, std::vector<Renderable const *> const & renderables,
-		std::ostream& os)
+	void WriteNodesChunk(std::vector<SceneNode const*> const& nodes, std::vector<Renderable const*> const& renderables,
+		std::vector<JointComponent const*> const& joints, std::ostream& os)
 	{
+		std::map<Renderable const*, uint16_t> renderable_indices;
+		for (size_t i = 0; i < renderables.size(); ++i)
+		{
+			renderable_indices.emplace(renderables[i], static_cast<uint16_t>(i));
+		}
+
+		std::map<JointComponent const*, int16_t> joint_indices;
+		for (size_t i = 0; i < joints.size(); ++i)
+		{
+			joint_indices.emplace(joints[i], static_cast<int16_t>(i));
+		}
+
 		for (size_t i = 0; i < nodes.size(); ++ i)
 		{
 			std::string name;
@@ -1776,25 +1888,35 @@ namespace KlayGE
 			node_parent = Native2LE(node_parent);
 			os.write(reinterpret_cast<char*>(&node_parent), sizeof(node_parent));
 
+			int16_t joint_index = -1;
 			std::vector<uint16_t> mesh_indices;
-			nodes[i]->ForEachComponentOfType<RenderableComponent>([&renderables, &mesh_indices](RenderableComponent& mesh_comp)
-				{
-					auto& mesh = mesh_comp.BoundRenderable();
-					for (size_t i = 0; i < renderables.size(); ++ i)
+			nodes[i]->ForEachComponent(
+				[&mesh_indices, &joint_index, &renderable_indices, &joint_indices](SceneComponent& component) {
+					if (component.IsOfType<RenderableComponent>())
 					{
-						if (renderables[i] == &mesh)
-						{
-							uint16_t index = static_cast<uint16_t>(i);
-							index = Native2LE(index);
-							mesh_indices.push_back(index);
-							break;
-						}
+						RenderableComponent const& renderable_comp = boost::typeindex::runtime_cast<RenderableComponent const&>(component);
+						Renderable const* renderable = &renderable_comp.BoundRenderable();
+						BOOST_ASSERT(renderable_indices.find(renderable) != renderable_indices.end());
+
+						uint16_t index = renderable_indices[renderable];
+						index = Native2LE(index);
+						mesh_indices.push_back(index);
+					}
+					else if (component.IsOfType<JointComponent>())
+					{
+						JointComponent const* joint_comp = boost::typeindex::runtime_cast<JointComponent const*>(&component);
+						BOOST_ASSERT(joint_indices.find(joint_comp) != joint_indices.end());
+
+						int16_t index = joint_indices[joint_comp];
+						joint_index = Native2LE(index);
 					}
 				});
 			uint16_t num_meshes = static_cast<uint16_t>(mesh_indices.size());
 			num_meshes = Native2LE(num_meshes);
 			os.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 			os.write(reinterpret_cast<char*>(mesh_indices.data()), mesh_indices.size() * sizeof(mesh_indices[0]));
+
+			os.write(reinterpret_cast<char*>(&joint_index), sizeof(joint_index));
 
 			float4x4 xform_to_parent = nodes[i]->TransformToParent();
 			for (auto& item : xform_to_parent)
@@ -1805,26 +1927,51 @@ namespace KlayGE
 		}
 	}
 
-	void WriteBonesChunk(std::vector<Joint> const & joints, std::ostream& os)
+	void WriteBonesChunk(std::vector<JointComponent const*> const& joints, std::ostream& os)
 	{
 		for (size_t i = 0; i < joints.size(); ++ i)
 		{
-			WriteShortString(os, joints[i].name);
+			auto const& joint = *joints[i];
 
-			int16_t joint_parent = Native2LE(joints[i].parent);
-			os.write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
+			Quaternion bind_real, bind_dual;
+			float bind_scale;
+			if (MathLib::SignBit(joint.InverseOriginScale()) > 0)
+			{
+				std::tie(bind_real, bind_dual) = MathLib::inverse(joint.InverseOriginReal(), joint.InverseOriginDual());
+				bind_scale = 1 / joint.InverseOriginScale();
+			}
+			else
+			{
+				float4x4 tmp_mat = MathLib::scaling(-joint.InverseOriginScale(), -joint.InverseOriginScale(), joint.InverseOriginScale())
+					* MathLib::to_matrix(joint.InverseOriginReal())
+					* MathLib::translation(MathLib::udq_to_trans(joint.InverseOriginReal(), joint.InverseOriginDual()));
+				tmp_mat = MathLib::inverse(tmp_mat);
+				tmp_mat(2, 0) = -tmp_mat(2, 0);
+				tmp_mat(2, 1) = -tmp_mat(2, 1);
+				tmp_mat(2, 2) = -tmp_mat(2, 2);
 
-			Quaternion bind_real;
-			bind_real.x() = Native2LE(joints[i].bind_real.x());
-			bind_real.y() = Native2LE(joints[i].bind_real.y());
-			bind_real.z() = Native2LE(joints[i].bind_real.z());
-			bind_real.w() = Native2LE(joints[i].bind_real.w());
+				float3 scale;
+				Quaternion rot;
+				float3 trans;
+				MathLib::decompose(scale, rot, trans, tmp_mat);
+
+				bind_real = rot;
+				bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+				bind_scale = -scale.x();
+			}
+
+			bind_real *= std::abs(bind_scale);
+
+			bind_real.x() = Native2LE(bind_real.x());
+			bind_real.y() = Native2LE(bind_real.y());
+			bind_real.z() = Native2LE(bind_real.z());
+			bind_real.w() = Native2LE(bind_real.w());
 			os.write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
-			Quaternion bind_dual;
-			bind_dual.x() = Native2LE(joints[i].bind_dual.x());
-			bind_dual.y() = Native2LE(joints[i].bind_dual.y());
-			bind_dual.z() = Native2LE(joints[i].bind_dual.z());
-			bind_dual.w() = Native2LE(joints[i].bind_dual.w());
+
+			bind_dual.x() = Native2LE(bind_dual.x());
+			bind_dual.y() = Native2LE(bind_dual.y());
+			bind_dual.z() = Native2LE(bind_dual.z());
+			bind_dual.w() = Native2LE(bind_dual.w());
 			os.write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 		}
 	}
@@ -1914,7 +2061,7 @@ namespace KlayGE
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<SceneNode const *> const & nodes, std::vector<Renderable const *> const & renderables,
-		std::vector<Joint> const & joints, std::shared_ptr<std::vector<AnimationAction>> const & actions,
+		std::vector<JointComponent const*> const & joints, std::shared_ptr<std::vector<AnimationAction>> const & actions,
 		std::shared_ptr<std::vector<KeyFrameSet>> const & kfs, uint32_t num_frames, uint32_t frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> const & frame_pos_bbs)
 	{
@@ -1954,7 +2101,7 @@ namespace KlayGE
 
 		if (!nodes.empty())
 		{
-			WriteNodesChunk(nodes, renderables, ss);
+			WriteNodesChunk(nodes, renderables, joints, ss);
 		}
 
 		if (!joints.empty())
@@ -2133,7 +2280,7 @@ namespace KlayGE
 			renderables.push_back(model.Mesh(mesh_index).get());
 		}
 
-		std::vector<Joint> joints;
+		std::vector<JointComponent const*> joints;
 		std::shared_ptr<std::vector<AnimationAction>> actions;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
 		uint32_t num_frame = 0;
@@ -2147,38 +2294,7 @@ namespace KlayGE
 			joints.resize(num_joints);
 			for (uint32_t i = 0; i < num_joints; ++ i)
 			{
-				Joint joint = skinned_model.GetJoint(i);
-
-				float flip = MathLib::SignBit(joint.inverse_origin_scale);
-
-				joint.bind_scale = 1 / joint.inverse_origin_scale;
-				if (flip > 0)
-				{
-					std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.inverse_origin_real, joint.inverse_origin_dual);
-					joint.bind_real = inv.first;
-					joint.bind_dual = inv.second;
-				}
-				else
-				{
-					float4x4 tmp_mat = MathLib::scaling(-joint.inverse_origin_scale, -joint.inverse_origin_scale, joint.inverse_origin_scale)
-						* MathLib::to_matrix(joint.inverse_origin_real)
-						* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual));
-					tmp_mat = MathLib::inverse(tmp_mat);
-					tmp_mat(2, 0) = -tmp_mat(2, 0);
-					tmp_mat(2, 1) = -tmp_mat(2, 1);
-					tmp_mat(2, 2) = -tmp_mat(2, 2);
-
-					float3 scale;
-					Quaternion rot;
-					float3 trans;
-					MathLib::decompose(scale, rot, trans, tmp_mat);
-
-					joint.bind_real = rot;
-					joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
-					joint.bind_scale = -scale.x();
-				}
-
-				joints[i] = joint;
+				joints[i] = skinned_model.GetJoint(i).get();
 			}
 
 			actions = skinned_model.GetActions();

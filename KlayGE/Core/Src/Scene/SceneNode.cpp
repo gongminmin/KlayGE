@@ -285,6 +285,26 @@ namespace KlayGE
 		pos_aabb_dirty_ = true;
 	}
 
+	void SceneNode::ReplaceComponent(uint32_t index, SceneComponentPtr const& component)
+	{
+		BOOST_ASSERT(component);
+
+		auto* curr_node = component->BoundSceneNode();
+		if (curr_node != nullptr)
+		{
+			curr_node->RemoveComponent(component);
+		}
+
+		if (components_[index] != nullptr)
+		{
+			components_[index]->BindSceneNode(nullptr);
+		}
+
+		component->BindSceneNode(this);
+		components_[index] = component;
+		pos_aabb_dirty_ = true;
+	}
+
 	void SceneNode::ForEachComponent(std::function<void(SceneComponent&)> const& callback) const
 	{
 		for (auto const& component : components_)

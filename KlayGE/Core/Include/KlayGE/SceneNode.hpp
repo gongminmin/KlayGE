@@ -126,6 +126,7 @@ namespace KlayGE
 		void RemoveComponent(SceneComponentPtr const& component);
 		void RemoveComponent(SceneComponent* component);
 		void ClearComponents();
+		void ReplaceComponent(uint32_t index, SceneComponentPtr const& component);
 
 		void ForEachComponent(std::function<void(SceneComponent&)> const & callback) const;
 		template <typename T>

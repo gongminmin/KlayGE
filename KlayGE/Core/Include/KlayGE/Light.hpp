@@ -95,6 +95,9 @@ namespace KlayGE
 		virtual void Extend(float3 const & extend);
 
 	protected:
+		void CloneTo(LightSource& light) const;
+
+	protected:
 		LightType type_;
 		int32_t attrib_ = 0;
 		float4 color_ = float4(0, 0, 0, 0);
@@ -111,6 +114,8 @@ namespace KlayGE
 
 		AmbientLightSource();
 		virtual ~AmbientLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) override;
@@ -134,6 +139,8 @@ namespace KlayGE
 		PointLightSource();
 		virtual ~PointLightSource();
 
+		SceneComponentPtr Clone() const override;
+
 		void BindSceneNode(SceneNode* node) override;
 
 		void MainThreadUpdate(float app_time, float elapsed_time) override;
@@ -145,6 +152,7 @@ namespace KlayGE
 		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
 	protected:
+		void CloneToPoint(PointLightSource& point_light) const;
 		void UpdateCameras();
 
 	protected:
@@ -161,6 +169,8 @@ namespace KlayGE
 
 		SpotLightSource();
 		virtual ~SpotLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		void BindSceneNode(SceneNode* node) override;
 
@@ -200,6 +210,8 @@ namespace KlayGE
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
 
+		SceneComponentPtr Clone() const override;
+
 		void BindSceneNode(SceneNode* node) override;
 
 		void MainThreadUpdate(float app_time, float elapsed_time) override;
@@ -224,6 +236,8 @@ namespace KlayGE
 		SphereAreaLightSource();
 		virtual ~SphereAreaLightSource();
 
+		SceneComponentPtr Clone() const override;
+
 		virtual float Radius() const override;
 		virtual void Radius(float radius) override;
 
@@ -238,6 +252,8 @@ namespace KlayGE
 
 		TubeAreaLightSource();
 		virtual ~TubeAreaLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		using LightSource::Falloff;
 		virtual void Falloff(float3 const & fall_off);

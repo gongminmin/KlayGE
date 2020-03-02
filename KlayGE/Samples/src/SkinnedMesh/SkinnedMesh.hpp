@@ -23,7 +23,7 @@ private:
 	void SkinningHandler(KlayGE::UICheckBox const& sender);
 	void PlayingHandler(KlayGE::UICheckBox const& sender);
 
-	KlayGE::DeferredRenderingLayer* deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_{};
 
 	KlayGE::SkinnedModelPtr skinned_model_;
 	bool playing_{false};
@@ -36,8 +36,8 @@ private:
 	KlayGE::CameraPtr scene_camera_;
 
 	KlayGE::UIDialogPtr dialog_params_;
-	int id_skinning_;
-	int id_playing_;
+	int id_skinning_{};
+	int id_playing_{};
 };
 
 #endif // KLAYGE_SAMPLE_SKINNED_MESH_HPP

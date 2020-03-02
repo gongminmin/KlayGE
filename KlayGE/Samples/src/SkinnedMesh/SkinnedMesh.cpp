@@ -59,7 +59,7 @@ SkinnedMeshApp::SkinnedMeshApp()
 
 void SkinnedMeshApp::OnCreate()
 {
-	skinned_model_ = checked_pointer_cast<SkinnedModel>(ASyncLoadModel("archer_attacking.meshml", EAH_GPU_Read | EAH_Immutable,
+	skinned_model_ = checked_pointer_cast<SkinnedModel>(SyncLoadModel("archer_attacking.meshml", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper, CreateModelFactory<SkinnedModel>, CreateMeshFactory<SkinnedMesh>));
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
@@ -137,7 +137,6 @@ void SkinnedMeshApp::InputHandler(InputEngine const& sender, InputAction const& 
 void SkinnedMeshApp::SkinningHandler(UICheckBox const& sender)
 {
 	skinning_ = sender.GetChecked();
-
 	if (skinning_)
 	{
 		skinned_model_->RebindJoints();
@@ -146,6 +145,7 @@ void SkinnedMeshApp::SkinningHandler(UICheckBox const& sender)
 	{
 		skinned_model_->UnbindJoints();
 	}
+	dialog_params_->Control<UICheckBox>(id_playing_)->SetEnabled(skinning_);
 }
 
 void SkinnedMeshApp::PlayingHandler(UICheckBox const& sender)
@@ -161,7 +161,7 @@ void SkinnedMeshApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Screen Space Sub Surface Scattering", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Skinned Mesh", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();

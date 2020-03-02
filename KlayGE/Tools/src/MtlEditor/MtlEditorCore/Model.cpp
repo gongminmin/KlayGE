@@ -491,19 +491,52 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 	std::vector<uint16_t> indices;
 
 	auto const& skinned_model = checked_cast<DetailedSkinnedModel const&>(model);
-	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++ i)
+
+	std::map<JointComponent const*, int16_t> joint_indices;
+	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++i)
 	{
-		auto& joint = skinned_model.GetJoint(i);
-		if (joint.parent > 0)
+		joint_indices.emplace(skinned_model.GetJoint(i).get(), static_cast<int16_t>(i));
+	}
+
+	struct JointInfo
+	{
+		JointComponent const* joint;
+		int16_t parent_id;
+	};
+
+	std::vector<JointInfo> joints(skinned_model.NumJoints());
+	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++i)
+	{
+		joints[i].joint = skinned_model.GetJoint(i).get();
+
+		auto const* parent_node = joints[i].joint->BoundSceneNode()->Parent();
+		if (parent_node != nullptr)
+		{
+			auto const* parent_joint = parent_node->FirstComponentOfType<JointComponent>();
+			BOOST_ASSERT(joint_indices.find(parent_joint) != joint_indices.end());
+			joints[i].parent_id = static_cast<int16_t>(joint_indices[parent_joint]);
+		}
+		else
+		{
+			joints[i].parent_id = static_cast<int16_t>(-1);
+		}
+	}
+
+	for (uint32_t i = 0; i < static_cast<uint32_t>(joints.size()); ++ i)
+	{
+		auto const& joint = *joints[i].joint;
+		int16_t const parent_id = joints[i].parent_id;
+		auto const* parent_node = joint.BoundSceneNode()->Parent();
+		if (parent_node && parent_node->FirstComponentOfType<JointComponent>())
 		{
 			uint16_t const num_vertices = static_cast<uint16_t>(positions.size());
 
 			float const color = i / (skinned_model.NumJoints() - 1.0f);
 
-			Quaternion bind_real = joint.inverse_origin_real;
-			Quaternion bind_dual = joint.inverse_origin_dual;
-			float bind_scale = joint.inverse_origin_scale;
-			if (MathLib::SignBit(joint.inverse_origin_scale) > 0)
+			Quaternion bind_real = joint.InverseOriginReal();
+			Quaternion bind_dual = joint.InverseOriginDual();
+			float bind_scale = joint.InverseOriginScale();
+			if (MathLib::SignBit(bind_scale) > 0)
 			{
 				bind_dual *= bind_scale;
 			}
@@ -517,12 +550,12 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 			positions.push_back(float4(joint_pos.x(), joint_pos.y(), joint_pos.z(), color));
 			bone_indices.push_back(i);
 
-			auto& parent_joint = skinned_model.GetJoint(joint.parent);
+			auto& parent_joint = *parent_node->FirstComponentOfType<JointComponent>();
 
-			bind_real = parent_joint.inverse_origin_real;
-			bind_dual = parent_joint.inverse_origin_dual;
-			bind_scale = parent_joint.inverse_origin_scale;
-			if (MathLib::SignBit(parent_joint.inverse_origin_scale) > 0)
+			bind_real = parent_joint.InverseOriginReal();
+			bind_dual = parent_joint.InverseOriginDual();
+			bind_scale = parent_joint.InverseOriginScale();
+			if (MathLib::SignBit(bind_scale) > 0)
 			{
 				bind_dual *= bind_scale;
 			}
@@ -544,16 +577,16 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 			float3 const ny_dir = parent_joint_pos - y_dir * len * 0.1f;
 
 			positions.push_back(float4(px_dir.x(), px_dir.y(), px_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(ny_dir.x(), ny_dir.y(), ny_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(nx_dir.x(), nx_dir.y(), nx_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(py_dir.x(), py_dir.y(), py_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			indices.push_back(num_vertices + 0);
 			indices.push_back(num_vertices + 1);
@@ -676,12 +709,4 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 	}
 
 	hw_res_ready_ = true;
-}
-
-void SkeletonMesh::OnRenderBegin()
-{
-	SkinnedMesh::OnRenderBegin();
-
-	*(effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-	*(effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 }

@@ -274,9 +274,16 @@ namespace
 			int16_t parent_id;
 		};
 
+		struct JointInfo
+		{
+			std::string name;
+			JointComponentPtr joint;
+			int16_t parent_id;
+		};
+
 		std::vector<Mesh> meshes_;
 		std::vector<NodeTransform> nodes_;
-		std::vector<Joint> joints_;
+		std::vector<JointInfo> joints_;
 		bool has_normal_;
 		bool has_tangent_quat_;
 		bool has_texcoord_;
@@ -296,15 +303,14 @@ namespace
 	void MeshLoader::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
-		std::wstring wname;
-		KlayGE::Convert(wname, node->mName.C_Str());
-		auto const ai_node_name = (parent_id == -1) ? L"Root" : wname;
+		std::wstring name;
+		KlayGE::Convert(name, node->mName.C_Str());
 
 		int16_t index = -1;
 		if (lod == 0)
 		{
 			NodeTransform node_transform;
-			node_transform.node = MakeSharedPtr<SceneNode>(ai_node_name, SceneNode::SOA_Cullable);
+			node_transform.node = MakeSharedPtr<SceneNode>(name, SceneNode::SOA_Cullable);
 			node_transform.node->TransformToParent(trans_mat);
 			if (node->mNumMeshes > 0)
 			{
@@ -324,7 +330,7 @@ namespace
 			bool found = false;
 			for (size_t i = 0; i < nodes_.size(); ++ i)
 			{
-				if (nodes_[i].node->Name() == ai_node_name)
+				if (((parent_id == -1) && (nodes_[i].parent_id == -1)) || (nodes_[i].node->Name() == name))
 				{
 					index = static_cast<int16_t>(i);
 					if (node->mNumMeshes > 0)
@@ -670,7 +676,9 @@ namespace
 						bool found = false;
 						for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
 						{
-							if (joints_[ji].name == bone->mName.C_Str())
+							std::string joint_name;
+							Convert(joint_name, joints_[ji].name);
+							if (joint_name == bone->mName.C_Str())
 							{
 								for (unsigned int wi = 0; wi < bone->mNumWeights; ++ wi)
 								{
@@ -719,7 +727,7 @@ namespace
 
 	void MeshLoader::BuildJoints(aiScene const * scene)
 	{
-		std::map<std::string, Joint> joint_nodes;
+		std::map<std::string, std::pair<JointComponentPtr, int16_t>> joint_nodes;
 
 		std::function<void(aiNode const *, float4x4 const &)> build_bind_matrix =
 			[&build_bind_matrix, &joint_nodes, scene](aiNode const * node, float4x4 const & parent_mat)
@@ -732,13 +740,16 @@ namespace
 				{
 					aiBone const * bone = mesh->mBones[ibone];
 
-					Joint joint;
-					joint.name = bone->mName.C_Str();
+					auto joint = MakeSharedPtr<JointComponent>();
 
 					auto const bone_to_mesh = MathLib::inverse(MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1))) * mesh_trans;					
-					MatrixToDQ(bone_to_mesh, joint.bind_real, joint.bind_dual, joint.bind_scale);
+					Quaternion bind_real, bind_dual;
+					float bind_scale;
+					MatrixToDQ(bone_to_mesh, bind_real, bind_dual, bind_scale);
 
-					joint_nodes[joint.name] = joint;
+					joint->BindParams(bind_real, bind_dual, bind_scale);
+
+					joint_nodes[bone->mName.C_Str()] = std::make_pair(std::move(joint), static_cast<int16_t>(-1));
 				}
 			}
 
@@ -766,12 +777,9 @@ namespace
 
 			if (child_has_bone && (iter == joint_nodes.end()))
 			{
-				Joint joint;
-				joint.name = name;
-				joint.bind_real = Quaternion::Identity();
-				joint.bind_dual = Quaternion(0, 0, 0, 0);
-				joint.bind_scale = 1;
-				joint_nodes[name] = joint;
+				auto joint = MakeSharedPtr<JointComponent>();
+				joint->BindParams(Quaternion::Identity(), Quaternion(0, 0, 0, 0), 1);
+				joint_nodes[name] = std::make_pair(std::move(joint), static_cast<int16_t>(-1));
 			}
 
 			return child_has_bone;
@@ -788,13 +796,20 @@ namespace
 				joint_id = static_cast<int>(joints_.size());
 
 				auto const local_matrix = MathLib::transpose(float4x4(&node->mTransformation.a1));
+				Quaternion bind_real, bind_dual;
+				float bind_scale;
+				MatrixToDQ(local_matrix, bind_real, bind_dual, bind_scale);
+
 				// Borrow those variables to store a local matrix
-				MatrixToDQ(local_matrix, iter->second.inverse_origin_real, iter->second.inverse_origin_dual,
-					iter->second.inverse_origin_scale);
+				iter->second.first->InverseOriginParams(bind_real, bind_dual, bind_scale);
 
-				iter->second.parent = static_cast<int16_t>(parent_id);
+				iter->second.second = static_cast<int16_t>(parent_id);
 
-				joints_.push_back(iter->second);
+				JointInfo joint_info;
+				joint_info.name = name;
+				joint_info.joint = iter->second.first;
+				joint_info.parent_id = iter->second.second;
+				joints_.push_back(std::move(joint_info));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
@@ -888,9 +903,9 @@ namespace
 					KeyFrameSet default_tf;
 					default_tf.frame_id.push_back(0);
 					// Borrow those variables to store a local matrix
-					default_tf.bind_real.push_back(joints_[ji].inverse_origin_real);
-					default_tf.bind_dual.push_back(joints_[ji].inverse_origin_dual);
-					default_tf.bind_scale.push_back(joints_[ji].inverse_origin_scale);
+					default_tf.bind_real.push_back(joints_[ji].joint->InverseOriginReal());
+					default_tf.bind_dual.push_back(joints_[ji].joint->InverseOriginDual());
+					default_tf.bind_scale.push_back(joints_[ji].joint->InverseOriginScale());
 					anim.resampled_frames.emplace(joint_id, default_tf);
 				}
 			}
@@ -1044,6 +1059,27 @@ namespace
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			this->BuildNodeData(num_lods, lod, -1, scenes[lod]->mRootNode);
+		}
+
+		for (auto& joint : joints_)
+		{
+			if (joint.parent_id == -1)
+			{
+				nodes_[0].node->AddComponent(joint.joint);
+			}
+			else
+			{
+				std::wstring joint_name;
+				Convert(joint_name, joint.name);
+				for (auto& node : nodes_)
+				{
+					if (node.node->Name() == joint_name)
+					{
+						node.node->AddComponent(joint.joint);
+						break;
+					}
+				}
+			}
 		}
 
 		if (skinned)
@@ -2644,10 +2680,13 @@ namespace
 	{
 		for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 		{
-			Joint joint;
+			auto joint = MakeSharedPtr<JointComponent>();
 
-			joint.name = std::string(bone_node->Attrib("name")->ValueString());
-			joint.parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+			std::string const joint_name = std::string(bone_node->Attrib("name")->ValueString());
+			int16_t const parent_id = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+
+			Quaternion joint_bind_real, joint_bind_dual;
+			float joint_bind_scale;
 
 			XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
 			if (bind_pos_node)
@@ -2662,9 +2701,9 @@ namespace
 				float scale = MathLib::length(bind_quat);
 				bind_quat /= scale;
 
-				joint.bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
-				joint.bind_real = bind_quat * scale;
-				joint.bind_scale = scale;
+				joint_bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+				joint_bind_real = bind_quat * scale;
+				joint_bind_scale = scale;
 			}
 			else
 			{
@@ -2676,14 +2715,14 @@ namespace
 				XMLAttributePtr attr = bind_real_node->Attrib("v");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &joint.bind_real[0]);
+					ExtractFVector<4>(attr->ValueString(), &joint_bind_real[0]);
 				}
 				else
 				{
-					joint.bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
-					joint.bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
-					joint.bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
-					joint.bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
+					joint_bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
+					joint_bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
+					joint_bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
+					joint_bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
 				}
 
 				XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
@@ -2694,29 +2733,33 @@ namespace
 				attr = bind_dual_node->Attrib("v");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &joint.bind_dual[0]);
+					ExtractFVector<4>(attr->ValueString(), &joint_bind_dual[0]);
 				}
 				else
 				{
-					joint.bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
-					joint.bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
-					joint.bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
-					joint.bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
+					joint_bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
+					joint_bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
+					joint_bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
+					joint_bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
 				}
 
-				joint.bind_scale = MathLib::length(joint.bind_real);
-				joint.bind_real /= joint.bind_scale;
-				if (MathLib::SignBit(joint.bind_real.w()) < 0)
+				joint_bind_scale = MathLib::length(joint_bind_real);
+				joint_bind_real /= joint_bind_scale;
+				if (MathLib::SignBit(joint_bind_real.w()) < 0)
 				{
-					joint.bind_real = -joint.bind_real;
-					joint.bind_scale = -joint.bind_scale;
+					joint_bind_real = -joint_bind_real;
+					joint_bind_scale = -joint_bind_scale;
 				}
 			}
 
-			std::tie(joint.inverse_origin_real, joint.inverse_origin_dual) = MathLib::inverse(joint.bind_real, joint.bind_dual);
-			joint.inverse_origin_scale = 1 / joint.bind_scale;
+			joint->BindParams(joint_bind_real, joint_bind_dual, joint_bind_scale);
+			joint->InitInverseOriginParams();
 
-			joints_.emplace_back(std::move(joint));
+			JointInfo joint_info;
+			joint_info.name = joint_name;
+			joint_info.joint = std::move(joint);
+			joint_info.parent_id = parent_id;
+			joints_.push_back(std::move(joint_info));
 		}
 	}
 
@@ -2975,6 +3018,44 @@ namespace
 			this->CompileMeshesChunk(meshes_chunk);
 		}
 
+		if (!joints_.empty())
+		{
+			std::vector<NodeTransform> merged_nodes(joints_.size());
+
+			for (size_t i = 0; i < joints_.size(); ++i)
+			{
+				std::wstring joint_name;
+				Convert(joint_name, joints_[i].name);
+				NodeTransform node_transform;
+				node_transform.node = MakeSharedPtr<SceneNode>(joint_name, SceneNode::SOA_Cullable);
+				if (joints_[i].parent_id >= 0)
+				{
+					merged_nodes[joints_[i].parent_id].node->AddChild(node_transform.node);
+				}
+				node_transform.node->TransformToParent(float4x4::Identity());
+				node_transform.node->AddComponent(joints_[i].joint);
+				node_transform.parent_id = joints_[i].parent_id;
+				merged_nodes[i] = std::move(node_transform);
+			}
+
+			int16_t start_node_index = static_cast<int16_t>(joints_.size());
+			for (size_t i = 0; i < nodes_.size(); ++i)
+			{
+				if (nodes_[i].parent_id >= 0)
+				{
+					nodes_[i].parent_id += start_node_index;
+				}
+				else
+				{
+					merged_nodes[0].node->AddChild(nodes_[i].node);
+					nodes_[i].parent_id = 0;
+				}
+				merged_nodes.push_back(nodes_[i]);
+			}
+
+			nodes_ = std::move(merged_nodes);
+		}
+
 		if (skinned)
 		{
 			render_model_ = MakeSharedPtr<SkinnedModel>(nodes_[0].node);
@@ -3003,10 +3084,12 @@ namespace
 				auto& kf = kfs[i];
 				if (kf.frame_id.empty())
 				{
+					auto const& joint = *joints_[i].joint;
+
 					Quaternion inv_parent_real;
 					Quaternion inv_parent_dual;
 					float inv_parent_scale;
-					if (joints_[i].parent < 0)
+					if (joints_[i].parent_id < 0)
 					{
 						inv_parent_real = Quaternion::Identity();
 						inv_parent_dual = Quaternion(0, 0, 0, 0);
@@ -3014,16 +3097,16 @@ namespace
 					}
 					else
 					{
-						std::tie(inv_parent_real, inv_parent_dual)
-							= MathLib::inverse(joints_[joints_[i].parent].bind_real, joints_[joints_[i].parent].bind_dual);
-						inv_parent_scale = 1 / joints_[joints_[i].parent].bind_scale;
+						auto const& parent_joint = *joints_[joints_[i].parent_id].joint;
+						std::tie(inv_parent_real, inv_parent_dual) = MathLib::inverse(parent_joint.BindReal(), parent_joint.BindDual());
+						inv_parent_scale = 1 / parent_joint.BindScale();
 					}
 
 					kf.frame_id.push_back(0);
-					kf.bind_real.push_back(MathLib::mul_real(joints_[i].bind_real, inv_parent_real));
-					kf.bind_dual.push_back(MathLib::mul_dual(joints_[i].bind_real, joints_[i].bind_dual * inv_parent_scale,
+					kf.bind_real.push_back(MathLib::mul_real(joint.BindReal(), inv_parent_real));
+					kf.bind_dual.push_back(MathLib::mul_dual(joint.BindReal(), joint.BindDual() * inv_parent_scale,
 						inv_parent_real, inv_parent_dual));
-					kf.bind_scale.push_back(joints_[i].bind_scale * inv_parent_scale);
+					kf.bind_scale.push_back(joint.BindScale() * inv_parent_scale);
 				}
 			}
 
@@ -3064,11 +3147,11 @@ namespace
 		{
 			if (joints_used[ji])
 			{
-				Joint const * j = &joints_[ji];
-				while ((j->parent != -1) && !joints_used[j->parent])
+				int16_t parent_id = joints_[ji].parent_id;
+				while ((parent_id != -1) && !joints_used[parent_id])
 				{
-					joints_used[j->parent] = true;
-					j = &joints_[j->parent];
+					joints_used[parent_id] = true;
+					parent_id = joints_[parent_id].parent_id;
 				}
 			}
 		}
@@ -3603,12 +3686,13 @@ namespace
 		{
 			auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
+			std::vector<JointComponentPtr> joints;
 			for (auto& joint : joints_)
 			{
-				std::tie(joint.inverse_origin_real, joint.inverse_origin_dual) = MathLib::inverse(joint.bind_real, joint.bind_dual);
-				joint.inverse_origin_scale = 1 / joint.bind_scale;
+				joint.joint->InitInverseOriginParams();
+				joints.push_back(joint.joint);
 			}
-			skinned_model.AssignJoints(joints_.begin(), joints_.end());
+			skinned_model.AssignJoints(joints.begin(), joints.end());
 
 			// TODO: Run skinning on CPU to get the bounding box
 			for (uint32_t mesh_index = 0; mesh_index < render_meshes.size(); ++ mesh_index)

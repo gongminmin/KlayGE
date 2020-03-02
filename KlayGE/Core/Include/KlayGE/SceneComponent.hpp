@@ -49,6 +49,14 @@ namespace KlayGE
 
 		virtual ~SceneComponent();
 
+		virtual SceneComponentPtr Clone() const = 0;
+
+		template <typename T>
+		bool IsOfType() const
+		{
+			return (boost::typeindex::runtime_cast<T const*>(this) != nullptr);
+		}
+
 		virtual void BindSceneNode(SceneNode* node);
 		SceneNode* BoundSceneNode() const;
 

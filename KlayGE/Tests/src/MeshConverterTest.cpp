@@ -640,23 +640,30 @@ public:
 			EXPECT_EQ(skinned_model.NumJoints(), sanity_skinned_model.NumJoints());
 			for (uint32_t i = 0; i < sanity_skinned_model.NumJoints(); ++ i)
 			{
-				auto& joint = skinned_model.GetJoint(i);
-				auto& sanity_joint = sanity_skinned_model.GetJoint(i);
+				auto& joint = *skinned_model.GetJoint(i);
+				auto& sanity_joint = *sanity_skinned_model.GetJoint(i);
 
-				EXPECT_EQ(joint.name, sanity_joint.name);
-				EXPECT_EQ(joint.parent, sanity_joint.parent);
+				EXPECT_EQ(joint.BoundSceneNode()->Name(), sanity_joint.BoundSceneNode()->Name());
+				if (joint.BoundSceneNode()->Parent())
+				{
+					EXPECT_EQ(joint.BoundSceneNode()->Parent()->Name(), sanity_joint.BoundSceneNode()->Parent()->Name());
+				}
+				else
+				{
+					EXPECT_EQ(sanity_joint.BoundSceneNode()->Parent(), nullptr);
+				}
 
-				EXPECT_LT(std::abs(joint.bind_real.x() - sanity_joint.bind_real.x()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.y() - sanity_joint.bind_real.y()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.z() - sanity_joint.bind_real.z()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.w() - sanity_joint.bind_real.w()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().x() - sanity_joint.BindReal().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().y() - sanity_joint.BindReal().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().z() - sanity_joint.BindReal().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().w() - sanity_joint.BindReal().w()), 1e-4f);
 
-				EXPECT_LT(std::abs(joint.bind_dual.x() - sanity_joint.bind_dual.x()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.y() - sanity_joint.bind_dual.y()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.z() - sanity_joint.bind_dual.z()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.w() - sanity_joint.bind_dual.w()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().x() - sanity_joint.BindDual().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().y() - sanity_joint.BindDual().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().z() - sanity_joint.BindDual().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().w() - sanity_joint.BindDual().w()), 1e-4f);
 
-				EXPECT_LT(std::abs(joint.bind_scale - sanity_joint.bind_scale), 1e-5f);
+				EXPECT_LT(std::abs(joint.BindScale() - sanity_joint.BindScale()), 1e-5f);
 			}
 
 			EXPECT_EQ(skinned_model.NumActions(), sanity_skinned_model.NumActions());

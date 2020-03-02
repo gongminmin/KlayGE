@@ -66,8 +66,6 @@ class SkeletonMesh : public KlayGE::SkinnedMesh
 public:
 	explicit SkeletonMesh(KlayGE::RenderModel const & model);
 
-	void OnRenderBegin() override;
-
 private:
 	DetailedSkinnedModel const * model_;
 };

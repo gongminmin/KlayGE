@@ -40,6 +40,41 @@ namespace KlayGE
 		this->ProjParams(PI / 4, 1, 1, 1000);
 	}
 
+	SceneComponentPtr Camera::Clone() const
+	{
+		auto ret = MakeSharedPtr<Camera>();
+
+		ret->look_at_dist_ = look_at_dist_;
+
+		ret->fov_ = fov_;
+		ret->aspect_ = aspect_;
+		ret->near_plane_ = near_plane_;
+		ret->far_plane_ = far_plane_;
+		ret->proj_mat_ = proj_mat_;
+		ret->inv_proj_mat_ = inv_proj_mat_;
+		ret->proj_mat_wo_adjust_ = proj_mat_wo_adjust_;
+		ret->inv_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_;
+
+		ret->prev_view_mat_ = prev_view_mat_;
+		ret->prev_proj_mat_ = prev_proj_mat_;
+
+		ret->view_proj_mat_ = view_proj_mat_;
+		ret->inv_view_proj_mat_ = inv_view_proj_mat_;
+		ret->view_proj_mat_dirty_ = view_proj_mat_dirty_;
+		ret->view_proj_mat_wo_adjust_ = view_proj_mat_wo_adjust_;
+		ret->inv_view_proj_mat_wo_adjust_ = inv_view_proj_mat_wo_adjust_;
+		ret->view_proj_mat_wo_adjust_dirty_ = view_proj_mat_wo_adjust_dirty_;
+		ret->camera_dirty_ = camera_dirty_;
+
+		ret->frustum_ = frustum_;
+		ret->frustum_dirty_ = frustum_dirty_;
+
+		ret->mode_ = mode_;
+		ret->cur_jitter_index_ = cur_jitter_index_;
+
+		return ret;
+	}
+
 	float3 const& Camera::EyePos() const
 	{
 		float4x4 const& inv_view_mat = this->InverseViewMatrix();
