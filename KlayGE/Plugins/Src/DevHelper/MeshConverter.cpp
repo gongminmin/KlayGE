@@ -742,7 +742,7 @@ namespace
 
 					auto joint = MakeSharedPtr<JointComponent>();
 
-					auto const bone_to_mesh = MathLib::inverse(MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1))) * mesh_trans;					
+					auto const bone_to_mesh = MathLib::inverse(MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1))) * mesh_trans;
 					Quaternion bind_real, bind_dual;
 					float bind_scale;
 					MatrixToDQ(bone_to_mesh, bind_real, bind_dual, bind_scale);
@@ -794,14 +794,6 @@ namespace
 			if (iter != joint_nodes.end())
 			{
 				joint_id = static_cast<int>(joints_.size());
-
-				auto const local_matrix = MathLib::transpose(float4x4(&node->mTransformation.a1));
-				Quaternion bind_real, bind_dual;
-				float bind_scale;
-				MatrixToDQ(local_matrix, bind_real, bind_dual, bind_scale);
-
-				// Borrow those variables to store a local matrix
-				iter->second.first->InverseOriginParams(bind_real, bind_dual, bind_scale);
 
 				iter->second.second = static_cast<int16_t>(parent_id);
 
@@ -902,10 +894,15 @@ namespace
 				{
 					KeyFrameSet default_tf;
 					default_tf.frame_id.push_back(0);
-					// Borrow those variables to store a local matrix
-					default_tf.bind_real.push_back(joints_[ji].joint->InverseOriginReal());
-					default_tf.bind_dual.push_back(joints_[ji].joint->InverseOriginDual());
-					default_tf.bind_scale.push_back(joints_[ji].joint->InverseOriginScale());
+
+					auto const& local_matrix = joints_[ji].joint->BoundSceneNode()->TransformToWorld();
+					Quaternion bind_real, bind_dual;
+					float bind_scale;
+					MatrixToDQ(local_matrix, bind_real, bind_dual, bind_scale);
+
+					default_tf.bind_real.push_back(bind_real);
+					default_tf.bind_dual.push_back(bind_dual);
+					default_tf.bind_scale.push_back(bind_scale);
 					anim.resampled_frames.emplace(joint_id, default_tf);
 				}
 			}
@@ -3176,6 +3173,10 @@ namespace
 				BOOST_ASSERT(joint_mapping[ji] <= ji);
 				joints_[joint_mapping[ji]] = joints_[ji];
 				kfs[joint_mapping[ji]] = kfs[ji];
+			}
+			else
+			{
+				joints_[ji].joint->BoundSceneNode()->RemoveComponent(joints_[ji].joint.get());
 			}
 		}
 		joints_.resize(new_joint_id);
