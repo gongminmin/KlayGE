@@ -25,7 +25,6 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS4Test.d
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS8Test.dds" "ab7ebba0eca47348e7daa0d1fac01b4ccd10d677")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureTest.dds" "1a0f45e5edf0c52932f7b47893d6a292e11346e2")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.7z" "f128c4a3861d69279b2b43c885bf107b2dd4aaf0")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.txt" "e4c991063598ea62ed6fa5f6164565ca6e2fccb9")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/TestPassword.7z" "3b300e251ec5181ba03b24e57e478cab9d347471")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/array.dds" "C66B407817D0A08FBBE604F8616A6BB6991F1E50")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/array_mip.dds" "4B9714B72BAF80356DB3F373D5E71BCAED63E911")
