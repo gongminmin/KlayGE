@@ -297,7 +297,7 @@ namespace KlayGE
 		AABBox Frame(float frame) const;
 	};
 
-	struct KLAYGE_CORE_API AnimationAction
+	struct KLAYGE_CORE_API Animation
 	{
 		std::string name;
 		uint32_t start_frame;
@@ -370,13 +370,13 @@ namespace KlayGE
 
 		AABBox FramePosBound(uint32_t frame) const;
 
-		void AttachActions(std::shared_ptr<std::vector<AnimationAction>> const & actions);
-		std::shared_ptr<std::vector<AnimationAction>> const & GetActions() const
+		void AttachAnimations(std::shared_ptr<std::vector<Animation>> const & animations);
+		std::shared_ptr<std::vector<Animation>> const & GetAnimations() const
 		{
-			return actions_;
+			return animations_;
 		}
-		uint32_t NumActions() const;
-		void GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
+		uint32_t NumAnimations() const;
+		void GetAnimation(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
 
 	protected:
 		void BuildBones(float frame);
@@ -394,7 +394,7 @@ namespace KlayGE
 		uint32_t num_frames_;
 		uint32_t frame_rate_;
 
-		std::shared_ptr<std::vector<AnimationAction>> actions_;
+		std::shared_ptr<std::vector<Animation>> animations_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh

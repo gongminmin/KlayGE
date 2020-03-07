@@ -924,25 +924,25 @@ namespace KlayGE
 		return pos_aabb;
 	}
 
-	void SkinnedModel::AttachActions(std::shared_ptr<std::vector<AnimationAction>> const & actions)
+	void SkinnedModel::AttachAnimations(std::shared_ptr<std::vector<Animation>> const & animations)
 	{
-		actions_ = actions;
+		animations_ = animations;
 	}
 	
-	uint32_t SkinnedModel::NumActions() const
+	uint32_t SkinnedModel::NumAnimations() const
 	{
-		return actions_ ? static_cast<uint32_t>(actions_->size()) : 1;
+		return animations_ ? static_cast<uint32_t>(animations_->size()) : 1;
 	}
 
-	void SkinnedModel::GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame)
+	void SkinnedModel::GetAnimation(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame)
 	{
-		if (actions_)
+		if (animations_)
 		{
-			BOOST_ASSERT(index < actions_->size());
+			BOOST_ASSERT(index < animations_->size());
 
-			name = (*actions_)[index].name;
-			start_frame = (*actions_)[index].start_frame;
-			end_frame = (*actions_)[index].end_frame;
+			name = (*animations_)[index].name;
+			start_frame = (*animations_)[index].start_frame;
+			end_frame = (*animations_)[index].end_frame;
 		}
 		else
 		{
@@ -1013,7 +1013,7 @@ namespace KlayGE
 				skinned_mesh.AttachFramePosBounds(src_skinned_mesh.GetFramePosBounds());
 			}
 
-			skinned_model.AttachActions(src_skinned_model.GetActions());
+			skinned_model.AttachAnimations(src_skinned_model.GetAnimations());
 		}
 	}
 
@@ -1148,7 +1148,7 @@ namespace KlayGE
 		std::vector<uint32_t> mesh_start_indices;
 		std::vector<NodeInfo> nodes;
 		std::vector<JointComponentPtr> joints;
-		std::shared_ptr<std::vector<AnimationAction>> actions;
+		std::shared_ptr<std::vector<Animation>> animations;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
 		uint32_t num_frames = 0;
 		uint32_t frame_rate = 0;
@@ -1194,9 +1194,9 @@ namespace KlayGE
 		uint32_t num_kfs;
 		decoded->read(&num_kfs, sizeof(num_kfs));
 		num_kfs = LE2Native(num_kfs);
-		uint32_t num_actions;
-		decoded->read(&num_actions, sizeof(num_actions));
-		num_actions = LE2Native(num_actions);
+		uint32_t num_animations;
+		decoded->read(&num_animations, sizeof(num_animations));
+		num_animations = LE2Native(num_animations);
 
 		mtls.resize(num_mtls);
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
@@ -1571,18 +1571,18 @@ namespace KlayGE
 				}
 			}
 
-			if (num_actions > 0)
+			if (num_animations > 0)
 			{
-				actions = MakeSharedPtr<std::vector<AnimationAction>>(num_actions);
-				for (uint32_t action_index = 0; action_index < num_actions; ++ action_index)
+				animations = MakeSharedPtr<std::vector<Animation>>(num_animations);
+				for (uint32_t animation_index = 0; animation_index < num_animations; ++animation_index)
 				{
-					AnimationAction action;
-					action.name = ReadShortString(*decoded);
-					decoded->read(&action.start_frame, sizeof(action.start_frame));
-					action.start_frame = LE2Native(action.start_frame);
-					decoded->read(&action.end_frame, sizeof(action.end_frame));
-					action.end_frame = LE2Native(action.end_frame);
-					(*actions)[action_index] = action;
+					Animation animation;
+					animation.name = ReadShortString(*decoded);
+					decoded->read(&animation.start_frame, sizeof(animation.start_frame));
+					animation.start_frame = LE2Native(animation.start_frame);
+					decoded->read(&animation.end_frame, sizeof(animation.end_frame));
+					animation.end_frame = LE2Native(animation.end_frame);
+					(*animations)[animation_index] = animation;
 				}
 			}
 		}
@@ -1672,7 +1672,7 @@ namespace KlayGE
 					skinned_mesh->AttachFramePosBounds(frame_pos_bbs[mesh_index]);
 				}
 
-				skinned_model->AttachActions(actions);
+				skinned_model->AttachAnimations(animations);
 			}
 		}
 
@@ -2039,16 +2039,16 @@ namespace KlayGE
 		}
 	}
 
-	void WriteActionsChunk(std::vector<AnimationAction> const & actions, std::ostream& os)
+	void WriteAnimationsChunk(std::vector<Animation> const & animations, std::ostream& os)
 	{
-		for (size_t i = 0; i < actions.size(); ++ i)
+		for (size_t i = 0; i < animations.size(); ++ i)
 		{
-			WriteShortString(os, actions[i].name);
+			WriteShortString(os, animations[i].name);
 
-			uint32_t sf = Native2LE(actions[i].start_frame);
+			uint32_t sf = Native2LE(animations[i].start_frame);
 			os.write(reinterpret_cast<char*>(&sf), sizeof(sf));
 
-			uint32_t ef = Native2LE(actions[i].end_frame);
+			uint32_t ef = Native2LE(animations[i].end_frame);
 			os.write(reinterpret_cast<char*>(&ef), sizeof(ef));
 		}
 	}
@@ -2061,7 +2061,7 @@ namespace KlayGE
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<SceneNode const *> const & nodes, std::vector<Renderable const *> const & renderables,
-		std::vector<JointComponent const*> const & joints, std::shared_ptr<std::vector<AnimationAction>> const & actions,
+		std::vector<JointComponent const*> const & joints, std::shared_ptr<std::vector<Animation>> const & animations,
 		std::shared_ptr<std::vector<KeyFrameSet>> const & kfs, uint32_t num_frames, uint32_t frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> const & frame_pos_bbs)
 	{
@@ -2083,8 +2083,8 @@ namespace KlayGE
 			uint32_t num_kfs = Native2LE(kfs ? static_cast<uint32_t>(kfs->size()) : 0);
 			ss.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 
-			uint32_t num_actions = Native2LE(actions ? std::max(static_cast<uint32_t>(actions->size()), 1U) : 0);
-			ss.write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+			uint32_t num_animations = Native2LE(animations ? std::max(static_cast<uint32_t>(animations->size()), 1U) : 0);
+			ss.write(reinterpret_cast<char*>(&num_animations), sizeof(num_animations));
 		}
 
 		if (!mtls.empty())
@@ -2115,7 +2115,7 @@ namespace KlayGE
 
 			WriteBBKeyFramesChunk(frame_pos_bbs, ss);
 
-			WriteActionsChunk(*actions, ss);
+			WriteAnimationsChunk(*animations, ss);
 		}
 
 		std::ofstream ofs(jit_name.c_str(), std::ios_base::binary);
@@ -2281,7 +2281,7 @@ namespace KlayGE
 		}
 
 		std::vector<JointComponent const*> joints;
-		std::shared_ptr<std::vector<AnimationAction>> actions;
+		std::shared_ptr<std::vector<Animation>> animations;
 		std::shared_ptr<std::vector<KeyFrameSet>> kfs;
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
@@ -2297,7 +2297,7 @@ namespace KlayGE
 				joints[i] = skinned_model.GetJoint(i).get();
 			}
 
-			actions = skinned_model.GetActions();
+			animations = skinned_model.GetAnimations();
 
 			num_frame = skinned_model.NumFrames();
 			frame_rate = skinned_model.FrameRate();
@@ -2316,7 +2316,7 @@ namespace KlayGE
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 			nodes, renderables,
-			joints, actions, kfs, num_frame, frame_rate, frame_pos_bbs);
+			joints, animations, kfs, num_frame, frame_rate, frame_pos_bbs);
 
 #if KLAYGE_IS_DEV_PLATFORM
 		if (need_conversion)

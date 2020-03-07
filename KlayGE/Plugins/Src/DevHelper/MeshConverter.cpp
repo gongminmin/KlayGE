@@ -223,7 +223,7 @@ namespace
 		void BuildMaterials(aiScene const * scene);
 		void BuildMeshData(std::vector<aiScene const*> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
-		void BuildActions(aiScene const * scene);
+		void BuildAnimations(aiScene const * scene);
 		void ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale);
@@ -242,7 +242,7 @@ namespace
 		void CompileBonesChunk(XMLNodePtr const & bones_chunk);
 		void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk);
 		void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index);
-		void CompileActionsChunk(XMLNodePtr const & actions_chunk);
+		void CompileActionsChunk(XMLNodePtr const & animations_chunk);
 		void LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
@@ -830,26 +830,26 @@ namespace
 		alloc_joints(scene->mRootNode, -1);
 	}
 
-	void MeshLoader::BuildActions(aiScene const * scene)
+	void MeshLoader::BuildAnimations(aiScene const * scene)
 	{
 		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
-		struct Animation
+		struct AssimpAnimation
 		{
 			std::string name;
 			int frame_num;
 			std::map<int/*joint_id*/, KeyFrameSet> resampled_frames;
 		};
 
-		std::vector<Animation> animations;
+		std::vector<AssimpAnimation> assimp_animations;
 
 		int const resample_fps = 25;
-		// for actions
+		// for animations
 		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ ianim)
 		{
 			aiAnimation const * cur_anim = scene->mAnimations[ianim];
 			float duration = static_cast<float>(cur_anim->mDuration / cur_anim->mTicksPerSecond);
-			Animation anim;
+			AssimpAnimation anim;
 			anim.name = cur_anim->mName.C_Str();
 			anim.frame_num = static_cast<int>(ceilf(duration * resample_fps));
 			if (anim.frame_num == 0)
@@ -932,26 +932,26 @@ namespace
 				}
 			}
 
-			animations.push_back(anim);
+			assimp_animations.push_back(anim);
 		}
 
 		auto kfs = MakeSharedPtr<std::vector<KeyFrameSet>>(joints_.size());
-		auto actions = MakeSharedPtr<std::vector<AnimationAction>>();
-		int action_frame_offset = 0;
-		for (auto const & anim : animations)
+		auto animations = MakeSharedPtr<std::vector<Animation>>();
+		int animation_frame_offset = 0;
+		for (auto const & anim : assimp_animations)
 		{
-			AnimationAction action;
-			action.name = anim.name;
-			action.start_frame = action_frame_offset;
-			action.end_frame = action_frame_offset + anim.frame_num;
-			actions->push_back(action);
+			Animation animation;
+			animation.name = anim.name;
+			animation.start_frame = animation_frame_offset;
+			animation.end_frame = animation_frame_offset + anim.frame_num;
+			animations->push_back(std::move(animation));
 
 			for (auto const & frame : anim.resampled_frames)
 			{
 				auto& kf = (*kfs)[frame.first];
 				for (size_t f = 0; f < frame.second.frame_id.size(); ++ f)
 				{
-					int const shifted_frame = frame.second.frame_id[f] + action_frame_offset;
+					int const shifted_frame = frame.second.frame_id[f] + animation_frame_offset;
 
 					kf.frame_id.push_back(shifted_frame);
 					kf.bind_real.push_back(frame.second.bind_real[f]);
@@ -962,14 +962,14 @@ namespace
 				this->CompressKeyFrameSet(kf);
 			}
 
-			action_frame_offset = action_frame_offset + anim.frame_num;
+			animation_frame_offset += anim.frame_num;
 		}
 
 		skinned_model.AttachKeyFrameSets(kfs);
-		skinned_model.AttachActions(actions);
+		skinned_model.AttachAnimations(animations);
 
 		skinned_model.FrameRate(resample_fps);
-		skinned_model.NumFrames(action_frame_offset);
+		skinned_model.NumFrames(animation_frame_offset);
 	}
 
 	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
@@ -1121,7 +1121,7 @@ namespace
 
 		if (skinned)
 		{
-			this->BuildActions(scenes[0]);
+			this->BuildAnimations(scenes[0]);
 		}
 
 		for (auto& mesh : meshes_)
@@ -1754,16 +1754,16 @@ namespace
 			{
 				SkinnedModel const& skinned_model = checked_cast<SkinnedModel const&>(model);
 
-				ai_scene.mNumAnimations = skinned_model.NumActions();
+				ai_scene.mNumAnimations = skinned_model.NumAnimations();
 				ai_scene.mAnimations = new aiAnimation*[ai_scene.mNumAnimations];
 
 				for (uint32_t ai = 0; ai < ai_scene.mNumAnimations; ++ai)
 				{
 					ai_scene.mAnimations[ai] = new aiAnimation;
 
-					auto& actions = *skinned_model.GetActions();
-					ai_scene.mAnimations[ai]->mName.Set(actions[ai].name);
-					ai_scene.mAnimations[ai]->mDuration = actions[ai].end_frame - actions[ai].start_frame;
+					auto& animations = *skinned_model.GetAnimations();
+					ai_scene.mAnimations[ai]->mName.Set(animations[ai].name);
+					ai_scene.mAnimations[ai]->mDuration = animations[ai].end_frame - animations[ai].start_frame;
 					ai_scene.mAnimations[ai]->mTicksPerSecond = skinned_model.FrameRate();
 
 					ai_scene.mAnimations[ai]->mNumChannels = 0;
@@ -1827,7 +1827,7 @@ namespace
 						for (uint32_t pi = 0; pi < node_anim.mNumPositionKeys; ++pi)
 						{
 							node_anim.mPositionKeys[pi].mTime = node_anim.mRotationKeys[pi].mTime = node_anim.mScalingKeys[pi].mTime =
-								static_cast<float>(key_frame_set.frame_id[pi] - actions[ai].start_frame) / skinned_model.FrameRate();
+								static_cast<float>(key_frame_set.frame_id[pi] - animations[ai].start_frame) / skinned_model.FrameRate();
 
 							float4x4 const key_frame_mat =
 								MathLib::scaling(key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi]) *
@@ -3207,31 +3207,31 @@ namespace
 			action_node = actions_chunk->FirstNode("action");
 		}
 
-		auto actions = MakeSharedPtr<std::vector<AnimationAction>>();
+		auto animations = MakeSharedPtr<std::vector<Animation>>();
 
-		AnimationAction action;
+		Animation animation;
 		if (action_node)
 		{
 			for (; action_node; action_node = action_node->NextSibling("action"))
 			{
-				action.name = std::string(action_node->Attrib("name")->ValueString());
+				animation.name = std::string(action_node->Attrib("name")->ValueString());
 
-				action.start_frame = action_node->Attrib("start")->ValueUInt();
-				action.end_frame = action_node->Attrib("end")->ValueUInt();
+				animation.start_frame = action_node->Attrib("start")->ValueUInt();
+				animation.end_frame = action_node->Attrib("end")->ValueUInt();
 
-				actions->push_back(action);
+				animations->push_back(animation);
 			}
 		}
 		else
 		{
-			action.name = "root";
-			action.start_frame = 0;
-			action.end_frame = skinned_model.NumFrames();
+			animation.name = "root";
+			animation.start_frame = 0;
+			animation.end_frame = skinned_model.NumFrames();
 
-			actions->push_back(action);
+			animations->push_back(animation);
 		}
 
-		skinned_model.AttachActions(actions);
+		skinned_model.AttachAnimations(animations);
 	}
 
 	void MeshLoader::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)

@@ -666,20 +666,20 @@ public:
 				EXPECT_LT(std::abs(joint.BindScale() - sanity_joint.BindScale()), 1e-5f);
 			}
 
-			EXPECT_EQ(skinned_model.NumActions(), sanity_skinned_model.NumActions());
-			for (uint32_t i = 0; i < sanity_skinned_model.NumActions(); ++ i)
+			EXPECT_EQ(skinned_model.NumAnimations(), sanity_skinned_model.NumAnimations());
+			for (uint32_t i = 0; i < sanity_skinned_model.NumAnimations(); ++ i)
 			{
-				std::string action_name;
+				std::string animation_name;
 				uint32_t start_frame;
 				uint32_t end_frame;
-				skinned_model.GetAction(i, action_name, start_frame, end_frame);
+				skinned_model.GetAnimation(i, animation_name, start_frame, end_frame);
 
-				std::string sanity_action_name;
+				std::string sanity_animation_name;
 				uint32_t sanity_start_frame;
 				uint32_t sanity_end_frame;
-				sanity_skinned_model.GetAction(i, sanity_action_name, sanity_start_frame, sanity_end_frame);
+				sanity_skinned_model.GetAnimation(i, sanity_animation_name, sanity_start_frame, sanity_end_frame);
 
-				EXPECT_EQ(action_name, sanity_action_name);
+				EXPECT_EQ(animation_name, sanity_animation_name);
 				EXPECT_EQ(start_frame, sanity_start_frame);
 				EXPECT_EQ(end_frame, sanity_end_frame);
 			}
