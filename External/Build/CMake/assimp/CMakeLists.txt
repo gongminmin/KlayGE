@@ -40,6 +40,7 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unused-variable
 			-Wno-unused-value
 			-Wno-unused-private-field
+			-Wno-unused-function
 	)
 	target_compile_options(IrrXML
 		PRIVATE
