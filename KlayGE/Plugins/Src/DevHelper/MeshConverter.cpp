@@ -77,9 +77,19 @@ namespace
 		return float3(v.x, v.y, v.z);
 	}
 
+	aiVector3D Float3ToAiVector(float3 const& v)
+	{
+		return aiVector3D(v.x(), v.y(), v.z());
+	}
+
 	Quaternion AiQuatToQuat(aiQuaternion const& v)
 	{
 		return Quaternion(v.x, v.y, v.z, v.w);
+	}
+
+	aiQuaternion QuatToAiQuat(Quaternion const& v)
+	{
+		return aiQuaternion(v.w(), v.x(), v.y(), v.z());
 	}
 
 	template <typename T>
@@ -155,6 +165,11 @@ namespace
 		bind_scale = scale.x();
 	}
 
+	float4x4 DQToMatrix(Quaternion const& bind_real, Quaternion const& bind_dual, float bind_scale)
+	{
+		return MathLib::scaling(bind_scale, bind_scale, bind_scale) * MathLib::udq_to_matrix(bind_real, bind_dual);
+	}
+
 	template <int N>
 	void ExtractFVector(std::string_view value_str, float* v)
 	{
@@ -209,7 +224,7 @@ namespace
 		void BuildMeshData(std::vector<aiScene const*> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
 		void BuildActions(aiScene const * scene);
-		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+		void ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale);
 		void LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata);
@@ -881,8 +896,18 @@ namespace
 						scales.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
 					}
 
+					float4x4 parent_mat;
+					if (auto* parent_node = joints_[joint_id].joint->BoundSceneNode()->Parent())
+					{
+						parent_mat = parent_node->TransformToWorld();
+					}
+					else
+					{
+						parent_mat = float4x4::Identity();
+					}
+
 					// resample
-					this->ResampleJointTransform(anim.resampled_frames[joint_id], 0, anim.frame_num,
+					this->ResampleJointTransform(anim.resampled_frames[joint_id], parent_mat, 0, anim.frame_num,
 						static_cast<float>(cur_anim->mTicksPerSecond / resample_fps), poss, quats, scales);
 				}
 			}
@@ -895,10 +920,10 @@ namespace
 					KeyFrameSet default_tf;
 					default_tf.frame_id.push_back(0);
 
-					auto const& local_matrix = joints_[ji].joint->BoundSceneNode()->TransformToWorld();
+					auto const& node_mat = joints_[ji].joint->BoundSceneNode()->TransformToWorld();
 					Quaternion bind_real, bind_dual;
 					float bind_scale;
-					MatrixToDQ(local_matrix, bind_real, bind_dual, bind_scale);
+					MatrixToDQ(node_mat, bind_real, bind_dual, bind_scale);
 
 					default_tf.bind_real.push_back(bind_real);
 					default_tf.bind_dual.push_back(bind_dual);
@@ -947,7 +972,7 @@ namespace
 		skinned_model.NumFrames(action_frame_offset);
 	}
 
-	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
 		std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 		std::vector<std::pair<float, float3>> const & scales)
 	{
@@ -986,6 +1011,10 @@ namespace
 
 				bind_dual_resampled = bind_dq_resampled.second;
 			}
+
+			float4x4 const node_mat =
+				MathLib::scaling(scale_resampled) * MathLib::udq_to_matrix(bind_real_resampled, bind_dual_resampled) * parent_mat;
+			MatrixToDQ(node_mat, bind_real_resampled, bind_dual_resampled, scale_resampled.x());
 
 			if (MathLib::SignBit(bind_real_resampled.w()) < 0)
 			{
@@ -1158,6 +1187,7 @@ namespace
 		for (uint32_t lod = 0; lod < model.NumLods(); ++ lod)
 		{
 			auto& ai_scene = scene_lods[lod];
+			bool skinned = false;
 
 			ai_scene.mNumMaterials = static_cast<uint32_t>(model.NumMaterials());
 			ai_scene.mMaterials = new aiMaterial*[ai_scene.mNumMaterials];
@@ -1557,8 +1587,124 @@ namespace
 						}
 						break;
 
+					case VEU_BlendWeight:
+						break;
+
+					case VEU_BlendIndex:
+						break;
+
 					default:
 						KFL_UNREACHABLE("Unsupported vertex format.");
+					}
+				}
+
+				{
+					std::vector<uint8_t> blend_indices_data;
+					std::vector<uint8_t> blend_weight_data;
+					for (uint32_t vi = 0; vi < rl.NumVertexStreams(); ++vi)
+					{
+						auto const& ve = rl.VertexStreamFormat(vi)[0];
+						if (ve.usage == VEU_BlendIndex)
+						{
+							GraphicsBuffer::Mapper mapper(*rl.GetVertexStream(vi), BA_Read_Only);
+							uint8_t const* bi = mapper.Pointer<uint8_t>() + start_vertex * 4;
+							blend_indices_data.insert(blend_indices_data.end(), bi, bi + ai_mesh.mNumVertices * 4);
+						}
+						else if (ve.usage == VEU_BlendWeight)
+						{
+							GraphicsBuffer::Mapper mapper(*rl.GetVertexStream(vi), BA_Read_Only);
+							uint8_t const* bw = mapper.Pointer<uint8_t>() + start_vertex * 4;
+							blend_weight_data.insert(blend_weight_data.end(), bw, bw + ai_mesh.mNumVertices * 4);
+						}
+					}
+
+					std::vector<std::vector<uint8_t>> blend_indices;
+					std::vector<std::vector<float>> blend_weight;
+					std::vector<uint8_t> joint_indices;
+					if (!blend_indices_data.empty() && !blend_weight_data.empty())
+					{
+						blend_indices.resize(ai_mesh.mNumVertices);
+						blend_weight.resize(ai_mesh.mNumVertices);
+
+						for (uint32_t vi = 0; vi < ai_mesh.mNumVertices; ++vi)
+						{
+							for (uint32_t wi = 0; wi < 4; ++wi)
+							{
+								uint8_t const joint_index = (blend_indices_data[vi * 4 + wi]);
+								float const weight = blend_weight_data[vi * 4 + wi];
+								if (weight > 0)
+								{
+									blend_indices[vi].push_back(joint_index);
+									joint_indices.push_back(joint_index);
+									blend_weight[vi].push_back(weight / 255.0f);
+								};
+							}
+						}
+					}
+
+					std::sort(joint_indices.begin(), joint_indices.end());
+					joint_indices.erase(std::unique(joint_indices.begin(), joint_indices.end()), joint_indices.end());
+
+					if (!joint_indices.empty())
+					{
+						skinned = true;
+						SkinnedModel const& skinned_model = checked_cast<SkinnedModel const&>(model);
+
+						ai_mesh.mNumBones = static_cast<uint32_t>(joint_indices.size());
+						ai_mesh.mBones = new aiBone*[ai_mesh.mNumBones];
+						
+						std::map<uint32_t, uint32_t> joint_mapping;
+						for (uint32_t bi = 0; bi < ai_mesh.mNumBones; ++bi)
+						{
+							joint_mapping.emplace(joint_indices[bi], bi);
+						}
+
+						std::vector<std::vector<aiVertexWeight>> vertex_weights(ai_mesh.mNumBones);
+						for (uint32_t vi = 0; vi < ai_mesh.mNumVertices; ++vi)
+						{
+							for (uint32_t wi = 0; wi < blend_indices[vi].size(); ++wi)
+							{
+								auto& vw = vertex_weights[joint_mapping[blend_indices[vi][wi]]];
+								vw.push_back(aiVertexWeight(vi, blend_weight[vi][wi]));
+							}
+						}
+
+						for (uint32_t bi = 0; bi < ai_mesh.mNumBones; ++bi)
+						{
+							ai_mesh.mBones[bi] = new aiBone;
+
+							auto const* joint = skinned_model.GetJoint(joint_indices[bi]).get();
+							auto const* joint_node = joint->BoundSceneNode();
+
+							SceneNode const* mesh_node = nullptr;
+							model.RootNode()->Traverse([&mesh, &mesh_node](SceneNode& node)
+								{
+									node.ForEachComponentOfType<RenderableComponent>([&mesh, &node, &mesh_node](RenderableComponent& comp)
+										{
+											if (&comp.BoundRenderable() == &mesh)
+											{
+												mesh_node = &node;
+											}
+										});
+									return true;
+								});
+							BOOST_ASSERT(mesh_node != nullptr);
+
+							std::string joint_name;
+							Convert(joint_name, joint_node->Name());
+							ai_mesh.mBones[bi]->mName.Set(joint_name);
+
+							ai_mesh.mBones[bi]->mNumWeights = static_cast<uint32_t>(vertex_weights[bi].size());
+							ai_mesh.mBones[bi]->mWeights = new aiVertexWeight[ai_mesh.mBones[bi]->mNumWeights];
+							memcpy(ai_mesh.mBones[bi]->mWeights, vertex_weights[bi].data(),
+								ai_mesh.mBones[bi]->mNumWeights * sizeof(aiVertexWeight));
+
+							float4x4 const joint_mat = DQToMatrix(joint->BindReal(), joint->BindDual(), joint->BindScale());
+							float4x4 const node_mat = mesh_node->TransformToWorld();
+
+							float4x4 const offset_mat = MathLib::transpose(MathLib::inverse(joint_mat * MathLib::inverse(node_mat)));
+							memcpy(&ai_mesh.mBones[bi]->mOffsetMatrix.a1, &offset_mat, sizeof(offset_mat));
+						}
 					}
 				}
 
@@ -1599,6 +1745,103 @@ namespace
 							ai_face.mIndices[0] = indices_32[j * 3 + 0];
 							ai_face.mIndices[1] = indices_32[j * 3 + 1];
 							ai_face.mIndices[2] = indices_32[j * 3 + 2];
+						}
+					}
+				}
+			}
+
+			if (skinned)
+			{
+				SkinnedModel const& skinned_model = checked_cast<SkinnedModel const&>(model);
+
+				ai_scene.mNumAnimations = skinned_model.NumActions();
+				ai_scene.mAnimations = new aiAnimation*[ai_scene.mNumAnimations];
+
+				for (uint32_t ai = 0; ai < ai_scene.mNumAnimations; ++ai)
+				{
+					ai_scene.mAnimations[ai] = new aiAnimation;
+
+					auto& actions = *skinned_model.GetActions();
+					ai_scene.mAnimations[ai]->mName.Set(actions[ai].name);
+					ai_scene.mAnimations[ai]->mDuration = actions[ai].end_frame - actions[ai].start_frame;
+					ai_scene.mAnimations[ai]->mTicksPerSecond = skinned_model.FrameRate();
+
+					ai_scene.mAnimations[ai]->mNumChannels = 0;
+					std::vector<uint32_t> non_trivial_joint_indices;
+					for (uint32_t ji = 0; ji < skinned_model.NumJoints(); ++ji)
+					{
+						auto& key_frame_set = (*skinned_model.GetKeyFrameSets())[ji];
+						if (key_frame_set.frame_id.size() > 1)
+						{
+							non_trivial_joint_indices.push_back(ji);
+						}
+						else if (key_frame_set.frame_id.size() == 1)
+						{
+							float4x4 const& node_mat = skinned_model.GetJoint(ji)->BoundSceneNode()->TransformToWorld();
+							float4x4 const joint_mat =
+								MathLib::scaling(key_frame_set.bind_scale[0], key_frame_set.bind_scale[0], key_frame_set.bind_scale[0]) *
+								MathLib::udq_to_matrix(key_frame_set.bind_real[0], key_frame_set.bind_dual[0]);
+
+							for (uint32_t item = 0; item < float4x4::size(); ++item)
+							{
+								if (std::abs(node_mat[item] - joint_mat[item]) > 1e-3f)
+								{
+									non_trivial_joint_indices.push_back(ji);
+									break;
+								}
+							}
+						}
+					}
+
+					ai_scene.mAnimations[ai]->mNumChannels = static_cast<uint32_t>(non_trivial_joint_indices.size());
+					ai_scene.mAnimations[ai]->mChannels = new aiNodeAnim*[ai_scene.mAnimations[ai]->mNumChannels];
+					for (size_t ci = 0; ci < non_trivial_joint_indices.size(); ++ci)
+					{
+						uint32_t const ji = non_trivial_joint_indices[ci];
+						auto& key_frame_set = (*skinned_model.GetKeyFrameSets())[ji];
+						ai_scene.mAnimations[ai]->mChannels[ci] = new aiNodeAnim;
+						auto& node_anim = *ai_scene.mAnimations[ai]->mChannels[ci];
+
+						auto& joint_node = *skinned_model.GetJoint(ji)->BoundSceneNode();
+
+						std::string joint_name;
+						Convert(joint_name, joint_node.Name());
+						node_anim.mNodeName.Set(joint_name);
+
+						float4x4 parent_mat;
+						if (auto* parent_node = joint_node.Parent())
+						{
+							parent_mat = parent_node->TransformToWorld();
+						}
+						else
+						{
+							parent_mat = float4x4::Identity();
+						}
+
+						node_anim.mNumPositionKeys = node_anim.mNumRotationKeys = node_anim.mNumScalingKeys =
+							static_cast<uint32_t>(key_frame_set.frame_id.size());
+
+						node_anim.mPositionKeys = new aiVectorKey[node_anim.mNumPositionKeys];
+						node_anim.mRotationKeys = new aiQuatKey[node_anim.mNumPositionKeys];
+						node_anim.mScalingKeys = new aiVectorKey[node_anim.mNumPositionKeys];
+						for (uint32_t pi = 0; pi < node_anim.mNumPositionKeys; ++pi)
+						{
+							node_anim.mPositionKeys[pi].mTime = node_anim.mRotationKeys[pi].mTime = node_anim.mScalingKeys[pi].mTime =
+								static_cast<float>(key_frame_set.frame_id[pi] - actions[ai].start_frame) / skinned_model.FrameRate();
+
+							float4x4 const key_frame_mat =
+								MathLib::scaling(key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi]) *
+								MathLib::udq_to_matrix(key_frame_set.bind_real[pi], key_frame_set.bind_dual[pi]) *
+								MathLib::inverse(parent_mat);
+
+							float3 scale;
+							Quaternion rot;
+							float3 trans;
+							MathLib::decompose(scale, rot, trans, key_frame_mat);
+
+							node_anim.mPositionKeys[pi].mValue = Float3ToAiVector(trans);
+							node_anim.mRotationKeys[pi].mValue = QuatToAiQuat(rot);
+							node_anim.mScalingKeys[pi].mValue = Float3ToAiVector(scale);
 						}
 					}
 				}
