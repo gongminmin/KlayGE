@@ -269,12 +269,12 @@ void GenfBmTexs()
 			r8_init_data[i].slice_pitch = r8_init_data[i].row_pitch * height;
 		}
 		fbm5_tex_tex->CreateHWResource(r8_init_data, nullptr);
-		fbm5_tex_tex->BuildMipSubLevels();
+		fbm5_tex_tex->BuildMipSubLevels(TextureFilter::Linear);
 
 		TexturePtr fbm5_tex_bc4_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
 			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC4, false);
 		fbm5_tex_bc4_tex->CreateHWResource({}, nullptr);
-		fbm5_tex_tex->CopyToTexture(*fbm5_tex_bc4_tex);
+		fbm5_tex_tex->CopyToTexture(*fbm5_tex_bc4_tex, TextureFilter::Point);
 		SaveTexture(fbm5_tex_bc4_tex, OUTPUT_PATH "fBm5_tex.dds");
 	}
 
@@ -312,12 +312,12 @@ void GenfBmTexs()
 			gr8_init_data[i].slice_pitch = gr8_init_data[i].row_pitch * height;
 		}
 		fbm5_grad_tex->CreateHWResource(gr8_init_data, nullptr);
-		fbm5_grad_tex->BuildMipSubLevels();
+		fbm5_grad_tex->BuildMipSubLevels(TextureFilter::Linear);
 
 		TexturePtr fbm5_grad_bc5_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
 			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC5, false);		
 		fbm5_grad_bc5_tex->CreateHWResource({}, nullptr);
-		fbm5_grad_tex->CopyToTexture(*fbm5_grad_bc5_tex);
+		fbm5_grad_tex->CopyToTexture(*fbm5_grad_bc5_tex, TextureFilter::Point);
 		SaveTexture(fbm5_grad_bc5_tex, OUTPUT_PATH "fBm5_grad_tex.dds");
 	}
 }

@@ -45,8 +45,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TEXTURE_HPP
-#define _TEXTURE_HPP
+#ifndef KLAYGE_CORE_TEXTURE_HPP
+#define KLAYGE_CORE_TEXTURE_HPP
 
 #pragma once
 
@@ -72,6 +72,12 @@ namespace KlayGE
 		TMA_Read_Only,
 		TMA_Write_Only,
 		TMA_Read_Write
+	};
+
+	enum class TextureFilter
+	{
+		Point,
+		Linear,
 	};
 
 	// Abstract class representing a Texture resource.
@@ -195,21 +201,23 @@ namespace KlayGE
 		uint32_t AccessHint() const;
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
-		virtual void CopyToTexture(Texture& target) = 0;
-		virtual void CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width) = 0;
-		virtual void CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height) = 0;
-		virtual void CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth) = 0;
-		virtual void CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height) = 0;
+		virtual void CopyToTexture(Texture& target, TextureFilter filter) = 0;
+		virtual void CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width,
+			TextureFilter filter) = 0;
+		virtual void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level,
+			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) = 0;
+		virtual void CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth, TextureFilter filter) = 0;
+		virtual void CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index,
+			CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+			TextureFilter filter) = 0;
 
-		virtual void BuildMipSubLevels() = 0;
+		virtual void BuildMipSubLevels(TextureFilter filter) = 0;
 
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
@@ -252,19 +260,19 @@ namespace KlayGE
 		void ResizeTexture1D(Texture& target,
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width,
-			bool linear);
+			TextureFilter filter);
 		void ResizeTexture2D(Texture& target,
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-			bool linear);
+			TextureFilter filter);
 		void ResizeTexture3D(Texture& target,
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			bool linear);
+			TextureFilter filter);
 		void ResizeTextureCube(Texture& target,
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-			bool linear);
+			TextureFilter filter);
 
 	protected:
 		uint32_t		num_mip_maps_;
@@ -288,27 +296,22 @@ namespace KlayGE
 		uint32_t Height(uint32_t level) const override;
 		uint32_t Depth(uint32_t level) const override;
 
-		void CopyToTexture(Texture& target) override;
-		void CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width) override;
-		void CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
-		void CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth) override;
-		void CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
+		void CopyToTexture(Texture& target, TextureFilter filter) override;
+		void CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter) override;
+		void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+			uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) override;
+		void CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width,
+			uint32_t src_height, uint32_t src_depth, TextureFilter filter) override;
+		void CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+			TextureFilter filter) override;
 
-		void BuildMipSubLevels() override;
+		void BuildMipSubLevels(TextureFilter filter) override;
 
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
@@ -382,7 +385,7 @@ namespace KlayGE
 		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, ElementFormat src_format,
 		uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-		bool linear);
+		TextureFilter filter);
 
 	// return the lookat and up vector in cubemap view
 	//////////////////////////////////////////////////////////////////////////////////
@@ -390,4 +393,4 @@ namespace KlayGE
 	std::pair<Vector_T<T, 3>, Vector_T<T, 3>> CubeMapViewVector(Texture::CubeFaces face);
 }
 
-#endif			// _TEXTURE_HPP
+#endif			// KLAYGE_CORE_TEXTURE_HPP

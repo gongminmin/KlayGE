@@ -100,7 +100,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	void OGLTexture1D::CopyToTexture(Texture& target)
+	void OGLTexture1D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -108,16 +108,14 @@ namespace KlayGE
 		{
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				this->CopyToSubTexture1D(target,
-					array_index, level, 0, target.Width(level),
-					array_index, level, 0, this->Width(level));
+				this->CopyToSubTexture1D(
+					target, array_index, level, 0, target.Width(level), array_index, level, 0, this->Width(level), filter);
 			}
 		}
 	}
 
-	void OGLTexture1D::CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	void OGLTexture1D::CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 		
@@ -212,7 +210,7 @@ namespace KlayGE
 				else
 				{
 					this->ResizeTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width,
-						src_array_index, src_level, src_x_offset, src_width, true);
+						src_array_index, src_level, src_x_offset, src_width, filter);
 				}
 			}
 		}

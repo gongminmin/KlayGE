@@ -51,8 +51,8 @@ namespace
 
 		for (int face = 0; face < 6; ++ face)
 		{
-			in_tex->CopyToSubTextureCube(*out_tex, 0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width,
-				0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width);
+			in_tex->CopyToSubTextureCube(*out_tex, 0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width, 0,
+				static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width, TextureFilter::Point);
 
 			for (uint32_t level = 1; level < out_num_mipmaps - 1; ++ level)
 			{

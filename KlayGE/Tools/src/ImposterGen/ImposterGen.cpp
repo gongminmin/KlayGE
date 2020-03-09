@@ -165,8 +165,8 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 		}
 	}
 
-	impostors_g_buffer_rt0->BuildMipSubLevels();
-	impostors_g_buffer_rt1->BuildMipSubLevels();
+	impostors_g_buffer_rt0->BuildMipSubLevels(TextureFilter::Linear);
+	impostors_g_buffer_rt1->BuildMipSubLevels(TextureFilter::Linear);
 
 	std::string rt0_name = output_name + ".imposter.rt0.dds";
 	std::string rt1_name = output_name + ".imposter.rt1.dds";

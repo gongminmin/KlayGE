@@ -753,7 +753,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read);
-		tex->CopyToTexture(*cpu_tex);
+		tex->CopyToTexture(*cpu_tex, TextureFilter::Point);
 
 		std::vector<uint8_t> data(tex->Width(0) * tex->Height(0) * 4);
 		{

@@ -68,7 +68,8 @@ namespace
 				}
 
 				ResizeTexture(&ret[ch][0], ASCII_WIDTH, ASCII_WIDTH * ASCII_HEIGHT, EF_R8, ASCII_WIDTH, ASCII_HEIGHT, 1,
-					&char_data[char_size / 6], char_size, char_size * char_size, EF_R8, char_size * 2 / 3, char_size, 1, true);
+					&char_data[char_size / 6], char_size, char_size * char_size, EF_R8, char_size * 2 / 3, char_size, 1,
+					TextureFilter::Linear);
 			}
 			else
 			{
@@ -278,7 +279,7 @@ ShaderResourceViewPtr const& AsciiArtsPostProcess::InputPin(uint32_t index) cons
 void AsciiArtsPostProcess::Apply()
 {
 	downsampler_->Apply();
-	downsample_tex_->BuildMipSubLevels();
+	downsample_tex_->BuildMipSubLevels(TextureFilter::Linear);
 
 	PostProcess::Apply();
 }

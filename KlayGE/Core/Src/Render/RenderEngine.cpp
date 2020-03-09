@@ -887,7 +887,7 @@ namespace KlayGE
 			}
 			else
 			{
-				hdr_tex_->BuildMipSubLevels();
+				hdr_tex_->BuildMipSubLevels(TextureFilter::Linear);
 				hdr_pp_->Apply();
 			}
 		}

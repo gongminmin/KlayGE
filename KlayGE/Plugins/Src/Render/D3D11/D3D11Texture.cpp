@@ -85,30 +85,33 @@ namespace KlayGE
 		return 1;
 	}
 
-	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
+	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/,
+		uint32_t /*src_width*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*src_array_index*/,
+		uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/,
+		TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
+	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*dst_depth*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/, uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/,
+		uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_width*/, uint32_t /*src_height*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -477,6 +480,7 @@ namespace KlayGE
 		misc_flags = 0;
 		if (access_hint_ & EAH_Generate_Mips)
 		{
+			bind_flags |= D3D11_BIND_SHADER_RESOURCE;
 			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		}
 	}

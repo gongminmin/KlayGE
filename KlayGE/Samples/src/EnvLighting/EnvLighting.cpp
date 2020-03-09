@@ -880,7 +880,7 @@ void EnvLightingApp::OnCreate()
 		auto integrated_brdf_sw_tex = LoadSoftwareTexture("IntegratedBRDF.dds");
 
 		integrated_brdf_tex_ = rf.MakeTexture2D(integrated_brdf_sw_tex->Width(0), integrated_brdf_sw_tex->Height(0), 1, 1, fmt, 1, 0, EAH_GPU_Read);
-		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_);
+		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_, TextureFilter::Point);
 	}
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();

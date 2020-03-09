@@ -421,7 +421,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 			black_hole_->SetParam(5, this->AppTime());
 		}
 
-		color_tex_->BuildMipSubLevels();
+		color_tex_->BuildMipSubLevels(TextureFilter::Linear);
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);

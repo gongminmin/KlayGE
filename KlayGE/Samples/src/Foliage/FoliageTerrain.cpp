@@ -460,7 +460,7 @@ namespace KlayGE
 			re.BindFrameBuffer(fb);
 		}
 
-		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
+		height_map_tex_->CopyToTexture(*height_map_cpu_tex_, TextureFilter::Point);
 
 		Camera const& camera = *fb->Viewport()->Camera();
 		

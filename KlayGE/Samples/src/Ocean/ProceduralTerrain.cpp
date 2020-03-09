@@ -97,7 +97,7 @@ namespace KlayGE
 
 		re.BindFrameBuffer(fb);
 
-		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
+		height_map_tex_->CopyToTexture(*height_map_cpu_tex_, TextureFilter::Point);
 
 		//SaveTexture(height_map_cpu_tex_, "height_map.dds");
 		//SaveTexture(gradient_map_tex_, "gradient_map.dds");

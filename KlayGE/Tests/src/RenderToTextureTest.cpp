@@ -180,7 +180,7 @@ private:
 
 		auto target_resolved = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(), 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
-		source->CopyToTexture(*target_resolved);
+		source->CopyToTexture(*target_resolved, TextureFilter::Point);
 
 		return target_resolved;
 	}

@@ -501,7 +501,7 @@ namespace KlayGE
 			uint32_t urv = deferred_rendering_->Update(deferred_pass);
 			if (urv & App3DFramework::URV_Finished)
 			{
-				selective_tex_->CopyToTexture(*selective_cpu_tex_);
+				selective_tex_->CopyToTexture(*selective_cpu_tex_, TextureFilter::Point);
 				update_selective_buffer_ = false;
 			}
 

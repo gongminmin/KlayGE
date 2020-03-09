@@ -827,8 +827,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = scene_mgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = scene_mgr.NumVerticesRendered();
 
-		color_tex_->BuildMipSubLevels();
-		depth_tex_->BuildMipSubLevels();
+		color_tex_->BuildMipSubLevels(TextureFilter::Linear);
+		depth_tex_->BuildMipSubLevels(TextureFilter::Linear);
 
 		if (dof_on_)
 		{

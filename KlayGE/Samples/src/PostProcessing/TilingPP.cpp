@@ -55,7 +55,7 @@ ShaderResourceViewPtr const& TilingPostProcess::InputPin(uint32_t index) const
 void TilingPostProcess::Apply()
 {
 	downsampler_->Apply();
-	downsample_tex_->BuildMipSubLevels();
+	downsample_tex_->BuildMipSubLevels(TextureFilter::Linear);
 
 	PostProcess::Apply();
 }

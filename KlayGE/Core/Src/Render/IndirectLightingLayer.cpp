@@ -164,8 +164,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		rsm_texs_[0]->BuildMipSubLevels();
-		rsm_texs_[1]->BuildMipSubLevels();
+		rsm_texs_[0]->BuildMipSubLevels(TextureFilter::Linear);
+		rsm_texs_[1]->BuildMipSubLevels(TextureFilter::Linear);
 		
 		rsm_to_depth_derivate_pp_->Apply();
 		

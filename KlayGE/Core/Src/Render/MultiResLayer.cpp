@@ -231,8 +231,8 @@ namespace KlayGE
 				depth_derivate_mipmap_pp_->OutputPin(0, depth_derivative_small_mip_rtvs_[i - 1]);
 				depth_derivate_mipmap_pp_->Apply();
 
-				depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0, lower_width, lower_height,
-					0, i - 1, 0, 0, lower_width, lower_height);
+				depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0, lower_width, lower_height, 0, i - 1, 0,
+					0, lower_width, lower_height, TextureFilter::Point);
 			}
 		}
 	}
@@ -278,8 +278,8 @@ namespace KlayGE
 				normal_cone_mipmap_pp_->OutputPin(0, normal_cone_small_mip_rtvs_[i - 1]);
 				normal_cone_mipmap_pp_->Apply();
 
-				normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, lower_width, lower_height,
-					0, i - 1, 0, 0, lower_width, lower_height);
+				normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, lower_width, lower_height, 0, i - 1, 0, 0,
+					lower_width, lower_height, TextureFilter::Point);
 			}
 		}
 	}
@@ -320,8 +320,8 @@ namespace KlayGE
 			upsampling_pp_->OutputPin(0, multi_res_pingpong_mip_rtvs_[i]);
 			upsampling_pp_->Apply();
 
-			multi_res_pingpong_tex_->CopyToSubTexture2D(*multi_res_tex_, 0, i, 0, 0, width, height,
-				0, i, 0, 0, width, height);
+			multi_res_pingpong_tex_->CopyToSubTexture2D(
+				*multi_res_tex_, 0, i, 0, 0, width, height, 0, i, 0, 0, width, height, TextureFilter::Point);
 		}
 	}
 }

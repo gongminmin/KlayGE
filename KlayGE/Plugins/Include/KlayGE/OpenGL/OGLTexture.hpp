@@ -42,26 +42,21 @@ namespace KlayGE
 		uint32_t Height(uint32_t level) const override;
 		uint32_t Depth(uint32_t level) const override;
 
-		void CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width) override;
-		void CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
-		void CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth) override;
-		void CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
+		void CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter) override;
+		void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+			uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) override;
+		void CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width,
+			uint32_t src_height, uint32_t src_depth, TextureFilter filter) override;
+		void CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+			TextureFilter filter) override;
 
-		void BuildMipSubLevels() override;
+		void BuildMipSubLevels(TextureFilter filter) override;
 
 		GLuint GLTexture() const
 		{
@@ -141,10 +136,9 @@ namespace KlayGE
 
 		uint32_t Width(uint32_t level) const override;
 
-		void CopyToTexture(Texture& target) override;
-		void CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width) override;
+		void CopyToTexture(Texture& target, TextureFilter filter) override;
+		void CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
@@ -170,17 +164,14 @@ namespace KlayGE
 		uint32_t Width(uint32_t level) const override;
 		uint32_t Height(uint32_t level) const override;
 
-		void CopyToTexture(Texture& target) override;
-		void CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
-		void CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
+		void CopyToTexture(Texture& target, TextureFilter filter) override;
+		void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+			uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) override;
+		void CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+			TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
@@ -209,12 +200,11 @@ namespace KlayGE
 		uint32_t Height(uint32_t level) const override;
 		uint32_t Depth(uint32_t level) const override;
 
-		void CopyToTexture(Texture& target) override;
-		void CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth) override;
+		void CopyToTexture(Texture& target, TextureFilter filter) override;
+		void CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width,
+			uint32_t src_height, uint32_t src_depth, TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
@@ -245,17 +235,14 @@ namespace KlayGE
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
 
-		void CopyToTexture(Texture& target);
-		void CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level,
-			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height) override;
-		void CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-			uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-			uint32_t src_width, uint32_t src_height) override;
+		void CopyToTexture(Texture& target, TextureFilter filter);
+		void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+			uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) override;
+		void CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+			TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 

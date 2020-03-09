@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 	if (pattern_raw->Format() != EF_ABGR8)
 	{
 		TexturePtr pattern_refmt = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read);
-		pattern_raw->CopyToSubTexture2D(*pattern_refmt, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height);
+		pattern_raw->CopyToSubTexture2D(*pattern_refmt, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height, TextureFilter::Point);
 		pattern_raw = pattern_refmt;
 	}
 

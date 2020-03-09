@@ -229,7 +229,8 @@ int main(int argc, char* argv[])
 
 		rgba.resize(ras_width * ras_height * num_channels);
 		ResizeTexture(&rgba[0], ras_width * num_channels, ras_width * ras_height * num_channels, format, ras_width, ras_height, 1,
-			init_data[0].data, init_data[0].row_pitch, init_data[0].slice_pitch, format, ras_width, ras_height, depth, true);
+			init_data[0].data, init_data[0].row_pitch, init_data[0].slice_pitch, format, ras_width, ras_height, depth,
+			TextureFilter::Linear);
 
 		width = std::max(ras_width / 4, 1U);
 		height = std::max(ras_height / 4, 1U);

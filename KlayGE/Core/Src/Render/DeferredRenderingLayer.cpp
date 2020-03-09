@@ -2348,7 +2348,7 @@ namespace KlayGE
 		}
 #endif
 
-		pvp.g_buffer_resolved_rt0_tex->BuildMipSubLevels();
+		pvp.g_buffer_resolved_rt0_tex->BuildMipSubLevels(TextureFilter::Linear);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
@@ -2371,7 +2371,7 @@ namespace KlayGE
 		depth_to_linear_pps_[0]->OutputPin(0, pvp.g_buffer_depth_rtv);
 		depth_to_linear_pps_[0]->Apply();
 
-		pvp.g_buffer_depth_tex->BuildMipSubLevels();
+		pvp.g_buffer_depth_tex->BuildMipSubLevels(TextureFilter::Linear);
 	}
 
 	void DeferredRenderingLayer::RenderDecals(PerViewport const & pvp, PassType pass_type)
@@ -2380,8 +2380,8 @@ namespace KlayGE
 
 		uint32_t const width = pvp.g_buffer_resolved_rt0_tex->Width(0);
 		uint32_t const height = pvp.g_buffer_resolved_rt0_tex->Height(0);
-		pvp.g_buffer_resolved_rt0_tex->CopyToSubTexture2D(*pvp.g_buffer_rt0_backup_tex, 0, 0,
-			0, 0, width, height, 0, 0, 0, 0, width, height);
+		pvp.g_buffer_resolved_rt0_tex->CopyToSubTexture2D(
+			*pvp.g_buffer_rt0_backup_tex, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height, TextureFilter::Point);
 
 		re.BindFrameBuffer(pvp.g_buffer_fb);
 		for (auto const & de : decals_)
@@ -2530,7 +2530,8 @@ namespace KlayGE
 				else
 				{
 					shadow_map_array_depth_tex_->CopyToSubTexture2D(*shadow_map_depth_tex_, 0, 0, 0, 0, shadow_map_depth_tex_->Width(0),
-						shadow_map_depth_tex_->Height(0), i, 0, 0, 0, shadow_map_depth_tex_->Width(0), shadow_map_depth_tex_->Height(0));
+						shadow_map_depth_tex_->Height(0), i, 0, 0, 0, shadow_map_depth_tex_->Width(0), shadow_map_depth_tex_->Height(0),
+						TextureFilter::Point);
 					depth_to_esm_pp_->InputPin(0, shadow_map_depth_srv_);
 				}
 				depth_to_esm_pp_->Apply();
@@ -2570,7 +2571,8 @@ namespace KlayGE
 					pp_chain->OutputPin(0, filtered_shadow_map_2d_slice_rtvs_[shadow_map_light_indices_[light_index].first]);
 					if (has_sss_objs_ && translucency_enabled_)
 					{
-						shadow_map_tex_->CopyToTexture(*unfiltered_shadow_map_2d_texs_[shadow_map_light_indices_[light_index].first]);
+						shadow_map_tex_->CopyToTexture(
+							*unfiltered_shadow_map_2d_texs_[shadow_map_light_indices_[light_index].first], TextureFilter::Point);
 					}
 				}
 			}
@@ -2600,12 +2602,12 @@ namespace KlayGE
 				{
 					if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
 					{
-						pvp.filtered_csm_texs[0]->BuildMipSubLevels();
+						pvp.filtered_csm_texs[0]->BuildMipSubLevels(TextureFilter::Linear);
 					}
 				}
 				else
 				{
-					pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels();
+					pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels(TextureFilter::Linear);
 				}
 			}
 		}
@@ -3194,8 +3196,8 @@ namespace KlayGE
 		{
 			uint32_t const w = pvp.g_buffer_depth_tex->Width(0);
 			uint32_t const h = pvp.g_buffer_depth_tex->Height(0);
-			pvp.g_buffer_depth_tex->CopyToSubTexture2D(*pvp.merged_depth_texs[pvp.curr_merged_buffer_index],
-				0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
+			pvp.g_buffer_depth_tex->CopyToSubTexture2D(
+				*pvp.merged_depth_texs[pvp.curr_merged_buffer_index], 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h, TextureFilter::Point);
 		}
 		else
 		{
@@ -4249,7 +4251,7 @@ namespace KlayGE
 
 		re.Dispatch(*dr_effect_, *technique_depth_to_tiled_min_max_[pvp.sample_count != 1], out_tex->Width(0), out_tex->Height(0), 1);
 
-		pvp.g_buffer_resolved_depth_tex->BuildMipSubLevels();
+		pvp.g_buffer_resolved_depth_tex->BuildMipSubLevels(TextureFilter::Point);
 	}
 #endif
 
@@ -4803,7 +4805,7 @@ namespace KlayGE
 		depth_to_linear_pps_[index]->OutputPin(0, pvp.merged_depth_rtvs[pvp.curr_merged_buffer_index]);
 		depth_to_linear_pps_[index]->Apply();
 
-		pvp.g_buffer_depth_tex->BuildMipSubLevels();
+		pvp.g_buffer_depth_tex->BuildMipSubLevels(TextureFilter::Point);
 
 		return 0;
 	}
@@ -4817,7 +4819,7 @@ namespace KlayGE
 		if (pvp.sample_count != 1)
 		{
 			pvp.merged_shading_texs[pvp.curr_merged_buffer_index]->CopyToTexture(
-				*pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index]);
+				*pvp.merged_shading_resolved_texs[pvp.curr_merged_buffer_index], TextureFilter::Point);
 
 			// Borrow g_buffer_ds_tex_ms_param_
 			*g_buffer_ds_tex_ms_param_ = pvp.merged_depth_srvs[pvp.curr_merged_buffer_index];

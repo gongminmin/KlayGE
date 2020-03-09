@@ -186,7 +186,7 @@ namespace KlayGE
 				uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, in_tex->Width(0), in_tex->Height(0),
 					in_tex->Depth(0), in_tex->NumMipMaps(), in_tex->ArraySize(), uncompressed_format, false);
 				uncompressed_tex_->CreateHWResource({}, nullptr);
-				compressed_tex_->CopyToTexture(*uncompressed_tex_);
+				compressed_tex_->CopyToTexture(*uncompressed_tex_, TextureFilter::Point);
 			}
 			else
 			{
@@ -804,7 +804,7 @@ namespace KlayGE
 						new_tex_regions[i]->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 						uncompressed_tex_->CopyToSubTexture2D(*new_tex_regions[i], 0, 0, 0, 0, tex_width, this_tex_region_height,
-							0, 0, 0, i * tex_region_height, tex_width, this_tex_region_height);
+							0, 0, 0, i * tex_region_height, tex_width, this_tex_region_height, TextureFilter::Point);
 					}
 				});
 		}
@@ -859,7 +859,7 @@ namespace KlayGE
 				format, width, height, 1,
 				mapper.Pointer<void>(), mapper.RowPitch(), mapper.SlicePitch(), format,
 				uncompressed_tex_->Width(0), uncompressed_tex_->Height(0), 1,
-				linear);
+				linear ? TextureFilter::Linear : TextureFilter::Point);
 		}
 
 		target.uncompressed_tex_->CreateHWResource(MakeSpan<1>(target_init_data), nullptr);

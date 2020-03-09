@@ -150,12 +150,12 @@ namespace KlayGE
 		ElementFormat const tex1_fmt = UncompressedFormat(tex1.Format());
 
 		TexturePtr tex0_cpu = rf.MakeTexture2D(width, height, 1, 1, tex0_fmt, 1, 0, EAH_CPU_Read);
-		tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height,
-			tex0_array_index, tex0_level, tex0_x_offset, tex0_y_offset, width, height);
+		tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height, tex0_array_index, tex0_level, tex0_x_offset, tex0_y_offset, width,
+			height, TextureFilter::Point);
 
 		TexturePtr tex1_cpu = rf.MakeTexture2D(width, height, 1, 1, tex1_fmt, 1, 0, EAH_CPU_Read);
-		tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height,
-			tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width, height);
+		tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height, tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width,
+			height, TextureFilter::Point);
 
 		TexturePtr diff_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 

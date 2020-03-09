@@ -405,8 +405,8 @@ namespace KlayGE
 					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_small_mip_rtvs_[i - 1]);
 					reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 
-					depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0,
-						lower_width, lower_height, 0, i - 1, 0, 0, lower_width, lower_height);
+					depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0, lower_width, lower_height, 0, i - 1,
+						0, 0, lower_width, lower_height, TextureFilter::Point);
 				}
 			}
 
@@ -414,8 +414,8 @@ namespace KlayGE
 			compute_log_cascades_from_z_bounds_pp_->SetParam(2, near_far);
 			compute_log_cascades_from_z_bounds_pp_->Apply();
 
-			interval_tex_->CopyToSubTexture2D(*interval_cpu_tex_, 0, 0, 0, 0, num_cascades, 1,
-				0, 0, 0, 0, num_cascades, 1);
+			interval_tex_->CopyToSubTexture2D(
+				*interval_cpu_tex_, 0, 0, 0, 0, num_cascades, 1, 0, 0, 0, 0, num_cascades, 1, TextureFilter::Point);
 
 			Texture::Mapper interval_mapper(*interval_cpu_tex_, 0, 0,
 				TMA_Read_Only, 0, 0, num_cascades, 1);

@@ -598,7 +598,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						else
 						{
 							shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0),
-								shadow_tex_->Height(0), p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+								shadow_tex_->Height(0), p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0),
+								TextureFilter::Point);
 							sm_filter_pps_[p]->InputPin(0, shadow_srv_);
 						}
 						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_,

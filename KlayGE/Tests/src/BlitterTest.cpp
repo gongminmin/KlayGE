@@ -14,7 +14,7 @@
 using namespace std;
 using namespace KlayGE;
 
-void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, bool linear)
+void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, TextureFilter filter)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -84,13 +84,13 @@ void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, bool linear)
 
 		blitter.Blit(dst, array_index, mip, dst_x_offset, dst_y_offset, dst_x_size, dst_y_size,
 			src, array_index, mip, src_x_offset, src_y_offset, src_x_size, src_y_size,
-			linear);
+			filter);
 
 		std::vector<uint32_t> sanity_data(dst_x_size * dst_y_size);
 		ResizeTexture(&sanity_data[0], dst_x_size * sizeof(uint32_t), dst_x_size * dst_y_size * sizeof(uint32_t),
 			EF_ABGR8, dst_x_size, dst_y_size, 1,
 			&data[mip][(array_index * h + src_y_offset) * w + src_x_offset], w * sizeof(uint32_t), w * h * sizeof(uint32_t),
-			EF_ABGR8, src_x_size, src_y_size, 1, linear);
+			EF_ABGR8, src_x_size, src_y_size, 1, filter);
 
 		ElementInitData sanity_init_data;
 		sanity_init_data.data = &sanity_data[0];
@@ -265,12 +265,12 @@ void TestBlitterBuffTo2D(uint32_t array_size, uint32_t mip_levels)
 
 TEST(BlitterTest, Blit2D)
 {
-	TestBlitter2D(1, 3, false);
+	TestBlitter2D(1, 3, TextureFilter::Point);
 }
 
 TEST(BlitterTest, Blit2DArray)
 {
-	TestBlitter2D(5, 4, false);
+	TestBlitter2D(5, 4, TextureFilter::Point);
 }
 
 TEST(BlitterTest, Blit2DToBuff)

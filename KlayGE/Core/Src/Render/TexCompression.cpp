@@ -371,7 +371,7 @@ namespace KlayGE
 		{
 			uncompressed_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
 				1, 1, decoded_fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
-			in_tex->CopyToTexture(*uncompressed_tex);
+			in_tex->CopyToTexture(*uncompressed_tex, TextureFilter::Point);
 		}
 		else
 		{
@@ -410,7 +410,7 @@ namespace KlayGE
 
 		if (out_tex->Format() != decoded_fmt)
 		{
-			decoded_tex->CopyToTexture(*out_tex);
+			decoded_tex->CopyToTexture(*out_tex, TextureFilter::Point);
 		}
 	}
 
