@@ -259,14 +259,9 @@ namespace
 					}
 				}
 
-				uint32_t w = width_;
-				uint32_t h = height_;
-				for (uint32_t m = 0; m < num_mipmaps_ - 1; ++ m)
+				for (uint32_t m = 1; m < num_mipmaps_; ++ m)
 				{
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
-
-					planes_[arr][m + 1] = MakeSharedPtr<ImagePlane>();
+					planes_[arr][m] = MakeSharedPtr<ImagePlane>();
 				}
 			}
 		}
@@ -282,10 +277,25 @@ namespace
 					{
 						std::string_view const plane_file_name = metadata_.PlaneFileName(arr, m);
 						planes_[arr][m] = MakeSharedPtr<ImagePlane>();
-						if (!planes_[arr][m]->Load(plane_file_name, metadata_))
+						if (plane_file_name.empty())
 						{
-							LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
-							return false;
+							if (m == 0)
+							{
+								*planes_[arr][m] = planes_[0][0]->ResizeTo(width_, height_, false);
+							}
+							else
+							{
+								*planes_[arr][m] = planes_[arr][0]->ResizeTo(
+									std::max(1U, width_ >> m), std::max(1U, height_ >> m), metadata_.LinearMipmap());
+							}
+						}
+						else
+						{
+							if (!planes_[arr][m]->Load(plane_file_name, metadata_))
+							{
+								LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
+								return false;
+							}
 						}
 					}
 				}

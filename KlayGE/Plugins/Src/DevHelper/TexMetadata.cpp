@@ -657,7 +657,14 @@ namespace KlayGE
 
 	std::string_view TexMetadata::PlaneFileName(uint32_t array_index, uint32_t mip) const
 	{
-		return plane_file_names_[array_index][mip];
+		if ((plane_file_names_.size() > array_index) && (plane_file_names_[array_index].size() > mip))
+		{
+			return plane_file_names_[array_index][mip];
+		}
+		else
+		{
+			return "";
+		}
 	}
 
 	void TexMetadata::PlaneFileName(uint32_t array_index, uint32_t mip, std::string_view name)
