@@ -82,9 +82,9 @@ void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, TextureFilter filte
 		uint32_t const dst_x_size = std::min(src_x_size, std::min(w - src_x_offset, w - dst_x_offset));
 		uint32_t const dst_y_size = std::min(src_y_size, std::min(h - src_y_offset, h - dst_y_offset));
 
-		blitter.Blit(dst, array_index, mip, dst_x_offset, dst_y_offset, dst_x_size, dst_y_size,
-			src, array_index, mip, src_x_offset, src_y_offset, src_x_size, src_y_size,
-			filter);
+		blitter.Blit(dst, array_index, mip, dst_x_offset, dst_y_offset, dst_x_size, dst_y_size, src, array_index, mip,
+			static_cast<float>(src_x_offset), static_cast<float>(src_y_offset), static_cast<float>(src_x_size),
+			static_cast<float>(src_y_size), filter);
 
 		std::vector<uint32_t> sanity_data(dst_x_size * dst_y_size);
 		ResizeTexture(&sanity_data[0], dst_x_size * sizeof(uint32_t), dst_x_size * dst_y_size * sizeof(uint32_t),
@@ -171,8 +171,8 @@ void TestBlitter2DToBuff(uint32_t array_size, uint32_t mip_levels)
 		//uint32_t const dst_buff_offset = dis_x(gen);
 		uint32_t const dst_buff_offset = 0;
 
-		blitter.Blit(dst, dst_buff_offset,
-			src, array_index, mip, src_x_offset, src_y_offset, src_x_size, src_y_size);
+		blitter.Blit(dst, dst_buff_offset, src, array_index, mip, static_cast<float>(src_x_offset), static_cast<float>(src_y_offset),
+			src_x_size, src_y_size);
 
 		GraphicsBufferPtr dst_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, dst->Size(), nullptr);
 		dst->CopyToBuffer(*dst_cpu);

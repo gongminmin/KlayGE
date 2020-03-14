@@ -74,8 +74,8 @@ namespace KlayGE
 	}
 
 	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
-		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
+		uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level, float src_x_offset,
+		float src_y_offset, float src_width, float src_height, TextureFilter filter)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -91,8 +91,8 @@ namespace KlayGE
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h, 0);
-		*src_scale_param_ = float3(static_cast<float>(src_width) / src_w, static_cast<float>(src_height) / src_h, 1);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, 0);
+		*src_scale_param_ = float3(src_width / src_w, src_height / src_h, 1);
 
 		auto srv = rf.MakeTextureSrv(src, src_array_index, 1, src_level, 1);
 		RenderTechnique* tech;
@@ -117,8 +117,8 @@ namespace KlayGE
 
 	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
 		uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, TexturePtr const& src, uint32_t src_array_index,
-		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
-		uint32_t src_depth, TextureFilter filter)
+		uint32_t src_level, float src_x_offset, float src_y_offset, float src_z_offset, float src_width, float src_height, float src_depth,
+		TextureFilter filter)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -134,10 +134,8 @@ namespace KlayGE
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h,
-			static_cast<float>(src_z_offset) / src_d);
-		*src_scale_param_ = float3(static_cast<float>(src_width) / src_w, static_cast<float>(src_height) / src_h,
-			static_cast<float>(src_depth) / src_d);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, src_z_offset / src_d);
+		*src_scale_param_ = float3(src_width / src_w, src_height / src_h, src_depth / src_d);
 
 		*src_3d_tex_param_ = rf.MakeTextureSrv(src, src_array_index, 1, src_level, 1);
 		RenderTechnique* tech = (filter == TextureFilter::Linear) ? blit_linear_3d_tech_ : blit_point_3d_tech_;
@@ -154,16 +152,15 @@ namespace KlayGE
 
 	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level,
 		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, TexturePtr const& src,
-		uint32_t src_array_index, Texture::CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height, TextureFilter filter)
+		uint32_t src_array_index, Texture::CubeFaces src_face, uint32_t src_level, float src_x_offset, float src_y_offset,
+		float src_width, float src_height, TextureFilter filter)
 	{
 		this->Blit(dst, dst_array_index * 6 + dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height, src,
 			src_array_index * 6 + src_face, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 	}
 
-	void Blitter::Blit(GraphicsBufferPtr const & dst, uint32_t dst_x_offset,
-		TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void Blitter::Blit(GraphicsBufferPtr const& dst, uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index,
+		uint32_t src_level, float src_x_offset, float src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
 		// TODO: Relax this limitation
 		BOOST_ASSERT(0 == dst_x_offset);
@@ -177,7 +174,7 @@ namespace KlayGE
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h, 0);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, 0);
 		*src_scale_param_ = float3(1.0f / src_w, 1.0f / src_h, 1);
 		*dst_width_height_param_ = float4(static_cast<float>(src_width), 0, 0, 0);
 

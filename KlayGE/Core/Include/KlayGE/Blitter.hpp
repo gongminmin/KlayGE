@@ -45,18 +45,18 @@ namespace KlayGE
 
 		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
 			uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter);
+			float src_x_offset, float src_y_offset, float src_width, float src_height, TextureFilter filter);
 		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
 			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, TexturePtr const& src,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth, TextureFilter filter);
+			uint32_t src_array_index, uint32_t src_level, float src_x_offset, float src_y_offset, float src_z_offset, float src_width,
+			float src_height, float src_depth, TextureFilter filter);
 		void Blit(TexturePtr const& dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
 			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index,
-			Texture::CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width,
-			uint32_t src_height, TextureFilter filter);
+			Texture::CubeFaces src_face, uint32_t src_level, float src_x_offset, float src_y_offset, float src_width, float src_height,
+			TextureFilter filter);
 
 		void Blit(GraphicsBufferPtr const& dst, uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
+			float src_x_offset, float src_y_offset, uint32_t src_width, uint32_t src_height);
 		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
 			uint32_t dst_width, uint32_t dst_height, GraphicsBufferPtr const& src, uint32_t src_x_offset, ElementFormat src_fmt);
 
