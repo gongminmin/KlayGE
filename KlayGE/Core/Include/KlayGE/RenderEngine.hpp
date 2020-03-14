@@ -77,6 +77,7 @@
 #include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Mipmapper.hpp>
 #include <KFL/Color.hpp>
 
 #include <vector>
@@ -410,6 +411,8 @@ namespace KlayGE
 
 		PredefinedCameraCBuffer const& PredefinedCameraCBufferInstance() const;
 
+		Mipmapper const& MipmapperInstance() const;
+
 	protected:
 		void Destroy();
 		uint32_t NumRealizedCameraInstances() const;
@@ -539,6 +542,8 @@ namespace KlayGE
 		mutable std::unique_ptr<PredefinedMeshCBuffer> predefined_mesh_cb_;
 		mutable std::unique_ptr<PredefinedModelCBuffer> predefined_model_cb_;
 		mutable std::unique_ptr<PredefinedCameraCBuffer> predefined_camera_cb_;
+
+		mutable std::unique_ptr<Mipmapper> mipmapper_;
 	};
 }
 

@@ -87,7 +87,7 @@ namespace KlayGE
 	// This class represents the commonalities, and is the one 'used'
 	// by programmers even though the real implementation could be
 	// different in reality.
-	class KLAYGE_CORE_API Texture : boost::noncopyable
+	class KLAYGE_CORE_API Texture : public std::enable_shared_from_this<Texture>, boost::noncopyable
 	{
 	public:
 		// Enum identifying the texture type
@@ -217,7 +217,7 @@ namespace KlayGE
 			CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) = 0;
 
-		virtual void BuildMipSubLevels(TextureFilter filter) = 0;
+		void BuildMipSubLevels(TextureFilter filter);
 
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
@@ -274,6 +274,12 @@ namespace KlayGE
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter);
 
+		virtual bool HwBuildMipSubLevels(TextureFilter filter)
+		{
+			KFL_UNUSED(filter);
+			return false;
+		}
+
 	protected:
 		uint32_t		num_mip_maps_;
 		uint32_t		array_size_;
@@ -310,8 +316,6 @@ namespace KlayGE
 			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) override;
-
-		void BuildMipSubLevels(TextureFilter filter) override;
 
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,

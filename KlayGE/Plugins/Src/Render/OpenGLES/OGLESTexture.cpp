@@ -302,13 +302,27 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::BuildMipSubLevels(TextureFilter filter)
+	bool OGLESTexture::HwBuildMipSubLevels(TextureFilter filter)
 	{
-		KFL_UNUSED(filter);
+		if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+		{
+			if (filter != TextureFilter::Point)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (filter != TextureFilter::Linear)
+			{
+				return false;
+			}
+		}
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmap(target_type_);
+		return true;
 	}
 
 	void OGLESTexture::TexParameteri(GLenum pname, GLint param)

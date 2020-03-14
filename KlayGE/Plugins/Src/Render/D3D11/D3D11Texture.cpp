@@ -484,6 +484,35 @@ namespace KlayGE
 			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		}
 	}
+	
+	bool D3D11Texture::HwBuildMipSubLevels(TextureFilter filter)
+	{
+		if (access_hint_ & EAH_Generate_Mips)
+		{
+			if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+			{
+				if (filter != TextureFilter::Point)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (filter != TextureFilter::Linear)
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
+		d3d_imm_ctx_->GenerateMips(srv.get());
+		return true;
+	}
 
 	void D3D11Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*width*/,

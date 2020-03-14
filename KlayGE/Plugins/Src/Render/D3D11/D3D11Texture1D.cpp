@@ -229,26 +229,6 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
-	void D3D11Texture1D::BuildMipSubLevels(TextureFilter filter)
-	{
-		if (access_hint_ & EAH_Generate_Mips)
-		{
-			auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
-			d3d_imm_ctx_->GenerateMips(srv.get());
-		}
-		else
-		{
-			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-			{
-				for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-				{
-					this->ResizeTexture1D(*this, index, level, 0, this->Width(level),
-						index, level - 1, 0, this->Width(level - 1), filter);
-				}
-			}
-		}
-	}
-
 	void D3D11Texture1D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);

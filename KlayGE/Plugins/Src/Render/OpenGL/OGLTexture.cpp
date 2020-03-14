@@ -363,13 +363,38 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLTexture::BuildMipSubLevels(TextureFilter filter)
+	bool OGLTexture::HwBuildMipSubLevels(TextureFilter filter)
 	{
-		KFL_UNUSED(filter);
+		if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+		{
+			if (filter != TextureFilter::Point)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (filter != TextureFilter::Linear)
+			{
+				return false;
+			}
+		}
 
-		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindTexture(0, target_type_, texture_);
-		glGenerateMipmap(target_type_);
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glGenerateTextureMipmap(texture_);
+		}
+		else if (glloader_GL_EXT_direct_state_access())
+		{
+			glGenerateTextureMipmapEXT(texture_, target_type_);
+		}
+		else
+		{
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, target_type_, texture_);
+			glGenerateMipmap(target_type_);
+		}
+		return true;
 	}
 
 	void OGLTexture::TexParameteri(GLenum pname, GLint param)

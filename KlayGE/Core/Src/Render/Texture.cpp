@@ -3133,7 +3133,7 @@ namespace KlayGE
 
 
 	Texture::Texture(Texture::TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-			: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
+		: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
 	{
 	}
 
@@ -3174,6 +3174,72 @@ namespace KlayGE
 	uint32_t Texture::AccessHint() const
 	{
 		return access_hint_;
+	}
+
+	void Texture::BuildMipSubLevels(TextureFilter filter)
+	{
+		if (!this->HwBuildMipSubLevels(filter))
+		{
+			if ((access_hint_ & EAH_GPU_Unordered) || ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write)))
+			{
+				auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				auto const& mipmapper = re.MipmapperInstance();
+				mipmapper.BuildSubLevels(this->shared_from_this(), filter);
+			}
+			else
+			{
+				switch (type_)
+				{
+				case TextureType::TT_1D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture1D(*this, index, level, 0, this->Width(level),
+								index, level - 1, 0, this->Width(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_2D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level), index, level - 1, 0,
+								0, this->Width(level - 1), this->Height(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_3D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), index,
+								level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_Cube:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (int f = 0; f < 6; ++f)
+						{
+							CubeFaces const face = static_cast<CubeFaces>(f);
+							for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+							{
+								this->ResizeTextureCube(*this, index, face, level, 0, 0, this->Width(level), this->Height(level),
+									index, face, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1), filter);
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	void Texture::ResizeTexture1D(Texture& target,
@@ -4036,42 +4102,6 @@ namespace KlayGE
 
 		target.UpdateSubresourceCube(dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
 			resized_ptr, resized_row_pitch);
-	}
-
-	void SoftwareTexture::BuildMipSubLevels(TextureFilter filter)
-	{
-		for (uint32_t index = 0; index < this->ArraySize(); ++index)
-		{
-			for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
-			{
-				switch (type_)
-				{
-				case TT_1D:
-					this->CopyToSubTexture1D(
-						*this, index, level, 0, this->Width(level), index, level - 1, 0, this->Width(level - 1), filter);
-					break;
-
-				case TT_2D:
-					this->CopyToSubTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level), index, level - 1, 0, 0,
-						this->Width(level - 1), this->Height(level - 1), filter);
-					break;
-
-				case TT_3D:
-					this->CopyToSubTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
-						index, level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), filter);
-					break;
-
-				case TT_Cube:
-					for (uint32_t face = 0; face < 6; ++face)
-					{
-						this->CopyToSubTextureCube(*this, index, static_cast<CubeFaces>(face), level, 0, 0, this->Width(level),
-							this->Height(level), index, static_cast<CubeFaces>(face), level - 1, 0, 0, this->Width(level - 1),
-							this->Height(level - 1), filter);
-					}
-					break;
-				}
-			}
-		}
 	}
 
 	void SoftwareTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,

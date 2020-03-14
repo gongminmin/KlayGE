@@ -59,9 +59,15 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
+#include <mutex>
 #include <string>
 
 #include <KlayGE/RenderEngine.hpp>
+
+namespace
+{
+	std::mutex instance_mutex;
+}
 
 namespace KlayGE
 {
@@ -1411,6 +1417,8 @@ namespace KlayGE
 		predefined_model_cb_.reset();
 		predefined_camera_cb_.reset();
 
+		mipmapper_.reset();
+
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		ds_tex_.reset();
@@ -1485,7 +1493,11 @@ namespace KlayGE
 	{
 		if (!default_material_)
 		{
-			default_material_ = MakeSharedPtr<RenderMaterial>();
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!default_material_)
+			{
+				default_material_ = MakeSharedPtr<RenderMaterial>();
+			}
 		}
 		return default_material_;
 	}
@@ -1494,7 +1506,11 @@ namespace KlayGE
 	{
 		if (!predefined_material_cb_)
 		{
-			predefined_material_cb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!predefined_material_cb_)
+			{
+				predefined_material_cb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
+			}
 		}
 		return *predefined_material_cb_;
 	}
@@ -1503,7 +1519,11 @@ namespace KlayGE
 	{
 		if (!predefined_mesh_cb_)
 		{
-			predefined_mesh_cb_ = MakeUniquePtr<PredefinedMeshCBuffer>();
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!predefined_mesh_cb_)
+			{
+				predefined_mesh_cb_ = MakeUniquePtr<PredefinedMeshCBuffer>();
+			}
 		}
 		return *predefined_mesh_cb_;
 	}
@@ -1512,7 +1532,11 @@ namespace KlayGE
 	{
 		if (!predefined_model_cb_)
 		{
-			predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!predefined_model_cb_)
+			{
+				predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
+			}
 		}
 		return *predefined_model_cb_;
 	}
@@ -1521,9 +1545,26 @@ namespace KlayGE
 	{
 		if (!predefined_camera_cb_)
 		{
-			predefined_camera_cb_ = MakeUniquePtr<PredefinedCameraCBuffer>();
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!predefined_camera_cb_)
+			{
+				predefined_camera_cb_ = MakeUniquePtr<PredefinedCameraCBuffer>();
+			}
 		}
 		return *predefined_camera_cb_;
+	}
+
+	Mipmapper const& RenderEngine::MipmapperInstance() const
+	{
+		if (!mipmapper_)
+		{
+			std::lock_guard<std::mutex> lock(instance_mutex);
+			if (!mipmapper_)
+			{
+				mipmapper_ = MakeUniquePtr<Mipmapper>();
+			}
+		}
+		return *mipmapper_;
 	}
 
 

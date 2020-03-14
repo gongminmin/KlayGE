@@ -64,8 +64,6 @@ namespace KlayGE
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) override;
 
-		void BuildMipSubLevels(TextureFilter filter) override;
-
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
 			void*& data) override;

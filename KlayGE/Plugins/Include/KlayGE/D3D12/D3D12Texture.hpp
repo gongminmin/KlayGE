@@ -210,8 +210,6 @@ namespace KlayGE
 		void CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter) override;
 
-		void BuildMipSubLevels(TextureFilter filter) override;
-
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
@@ -251,8 +249,6 @@ namespace KlayGE
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) override;
 
-		void BuildMipSubLevels(TextureFilter filter) override;
-
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
@@ -289,8 +285,6 @@ namespace KlayGE
 			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width,
 			uint32_t src_height, uint32_t src_depth, TextureFilter filter) override;
-
-		void BuildMipSubLevels(TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
@@ -335,8 +329,6 @@ namespace KlayGE
 			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) override;
-
-		void BuildMipSubLevels(TextureFilter filter) override;
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 

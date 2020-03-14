@@ -65,6 +65,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/MathTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/MeshConverterTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/MipmapperTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/RenderToTextureTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/ResLoaderTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp

@@ -155,11 +155,6 @@ namespace KlayGE
 		KFL_UNUSED(filter);
 	}
 
-	void NullTexture::BuildMipSubLevels(TextureFilter filter)
-	{
-		KFL_UNUSED(filter);
-	}
-
 	void NullTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 		uint32_t x_offset, uint32_t width,
 		void*& data)

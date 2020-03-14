@@ -271,20 +271,6 @@ namespace KlayGE
 		this->DoUnmap(subres);
 	}
 
-	void D3D12Texture3D::BuildMipSubLevels(TextureFilter filter)
-	{		
-		// TODO
-		// GPU mipmapper
-		for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-		{
-			for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-			{
-				this->ResizeTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), index,
-					level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), filter);
-			}
-		}
-	}
-
 	void D3D12Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE3D,

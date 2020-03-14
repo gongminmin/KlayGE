@@ -56,8 +56,6 @@ namespace KlayGE
 			uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter) override;
 
-		void BuildMipSubLevels(TextureFilter filter) override;
-
 		GLuint GLTexture() const
 		{
 			return texture_;
@@ -87,6 +85,9 @@ namespace KlayGE
 		void UpdateSubresourceCube(uint32_t array_index, CubeFaces face, uint32_t level,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void const * data, uint32_t row_pitch) override;
+
+	protected:
+		bool HwBuildMipSubLevels(TextureFilter filter) override;
 
 	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
