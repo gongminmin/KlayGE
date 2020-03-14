@@ -1272,14 +1272,6 @@ namespace KlayGE
 
 		if (this->Stage(ShaderStage::Compute) && !uavs_.empty())
 		{
-			for (uint32_t i = 0; i < uavs_.size(); ++ i)
-			{
-				if (uavsrcs_[i] != nullptr)
-				{
-					re.DetachSRV(uavsrcs_[i], 0, 1);
-				}
-			}
-
 			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_.size()), &uavs_[0], &uav_init_counts_[0]);
 		}
 	}
