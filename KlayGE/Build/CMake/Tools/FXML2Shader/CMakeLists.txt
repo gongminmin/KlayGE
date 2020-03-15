@@ -3,8 +3,3 @@ SET(SOURCE_FILES
 )
 
 SETUP_TOOL(FXML2Shader)
-
-target_link_libraries(FXML2Shader
-	PRIVATE
-		${KLAYGE_FILESYSTEM_LIBRARY}
-)

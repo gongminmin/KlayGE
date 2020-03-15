@@ -12,16 +12,6 @@ SET(PYTHON_SE_HEADER_FILES
 SOURCE_GROUP("Source Files" FILES ${PYTHON_SE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${PYTHON_SE_HEADER_FILES})
 
-if(KLAYGE_PLATFORM_WINDOWS)
-	if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
-		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/Python/PC)
-	else()
-		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/python-cmake-buildsystem/cmake/config-mingw)
-	endif()
-else()
-	set(PYCONFIG_BUILD_DIR ${PROJECT_BINARY_DIR}/External/Python/python/bin)
-endif()
-
 ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${PYTHON_SE_SOURCE_FILES} ${PYTHON_SE_HEADER_FILES}
 )
@@ -35,8 +25,7 @@ target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>
 	PRIVATE
-		${KLAYGE_PROJECT_DIR}/../External/Python/Include
-		${PYCONFIG_BUILD_DIR}
+		$<TARGET_PROPERTY:libpython-static,INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Plugins/Include
 )
 
@@ -66,19 +55,18 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
 
-set(libpython_target_libraries "")
-if(KLAYGE_PLATFORM_WINDOWS)
-	list(APPEND libpython_target_libraries ws2_32) # Required by signalmodule
-	list(APPEND libpython_target_libraries version) # Required by sysmodule
-	list(APPEND libpython_target_libraries shlwapi) # Required by PC/getpathp
-endif()
-
 target_link_libraries(${LIB_NAME}
 	PRIVATE
 		${KLAYGE_CORELIB_NAME}
 		libpython-static
-		${libpython_target_libraries}
-		${ZLIB_LIBRARIES}
 )
+if(KLAYGE_PLATFORM_WINDOWS)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			ws2_32 # Required by signalmodule
+			version # Required by sysmodule
+			shlwapi # Required by PC/getpathp
+	)
+endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

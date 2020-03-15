@@ -7,5 +7,4 @@ SETUP_TOOL(MeshConv)
 target_link_libraries(MeshConv
 	PRIVATE
 		ToolCommon
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )

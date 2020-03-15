@@ -11,8 +11,3 @@ SET(POST_PROCESSORS
 )
 
 SETUP_TOOL(PrefilterCube)
-
-target_link_libraries(PrefilterCube
-	PRIVATE
-		${KLAYGE_FILESYSTEM_LIBRARY}
-)

@@ -1,1 +1,8 @@
+set(CXXOPTS_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/cxxopts")
+
 UpdateExternalLib("cxxopts" "https://github.com/jarro2783/cxxopts.git" "3f2d70530219e09fe7e563f86126b0d3b228a60d")
+
+set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CXXOPTS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(${CXXOPTS_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/cxxopts" EXCLUDE_FROM_ALL)

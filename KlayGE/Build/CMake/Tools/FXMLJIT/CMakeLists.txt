@@ -12,5 +12,4 @@ target_include_directories(FXMLJIT
 target_link_libraries(FXMLJIT
 	PRIVATE
 		ToolCommon
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )

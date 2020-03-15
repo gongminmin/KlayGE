@@ -7,5 +7,4 @@ SETUP_TOOL(ImageConv)
 target_link_libraries(ImageConv
 	PRIVATE
 		ToolCommon
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )

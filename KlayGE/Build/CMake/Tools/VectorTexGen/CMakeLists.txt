@@ -6,5 +6,5 @@ SETUP_TOOL(VectorTexGen)
 
 target_include_directories(VectorTexGen
 	PRIVATE
-		${KLAYGE_PROJECT_DIR}/../External/nanosvg/src
+		$<TARGET_PROPERTY:nanosvg,INTERFACE_INCLUDE_DIRECTORIES>
 )

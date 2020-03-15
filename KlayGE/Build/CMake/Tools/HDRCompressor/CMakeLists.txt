@@ -3,8 +3,3 @@ SET(SOURCE_FILES
 )
 
 SETUP_TOOL(HDRCompressor)
-
-target_link_libraries(HDRCompressor
-	PRIVATE
-		${KLAYGE_FILESYSTEM_LIBRARY}
-)

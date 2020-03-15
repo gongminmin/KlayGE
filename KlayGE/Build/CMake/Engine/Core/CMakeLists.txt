@@ -500,8 +500,9 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 
 if(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(${LIB_NAME}
-		PRIVATE
+		PUBLIC
 			-Wno-inconsistent-missing-override
+		PRIVATE
 			-Wno-microsoft-exception-spec
 	)
 endif()
@@ -529,7 +530,7 @@ target_include_directories(${LIB_NAME}
 		$<TARGET_PROPERTY:KFL,INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Core/Include
 	PRIVATE
-		${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include
+		$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
 		$<TARGET_PROPERTY:7zxa,INTERFACE_INCLUDE_DIRECTORIES>
 		$<TARGET_PROPERTY:kfont,INTERFACE_INCLUDE_DIRECTORIES>
 )
@@ -541,7 +542,7 @@ if(KLAYGE_PLATFORM_LINUX)
 elseif(KLAYGE_PLATFORM_ANDROID)
 	target_include_directories(${LIB_NAME}
 		PUBLIC
-			${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue
+			$<TARGET_PROPERTY:android_native_app_glue,INTERFACE_INCLUDE_DIRECTORIES>
 	)
 endif()
 
@@ -575,7 +576,6 @@ target_link_libraries(${LIB_NAME}
 	PRIVATE
 		kfont
 		LZMA
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_link_libraries(${LIB_NAME}

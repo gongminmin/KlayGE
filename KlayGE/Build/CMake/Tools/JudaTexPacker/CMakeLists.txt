@@ -3,8 +3,3 @@ SET(SOURCE_FILES
 )
 
 SETUP_TOOL(JudaTexPacker)
-
-target_link_libraries(JudaTexPacker
-	PRIVATE
-		${KLAYGE_FILESYSTEM_LIBRARY}
-)

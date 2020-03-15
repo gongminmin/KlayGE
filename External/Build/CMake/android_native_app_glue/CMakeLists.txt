@@ -14,6 +14,11 @@ SET(ANAG_SOURCES
 
 ADD_LIBRARY(android_native_app_glue ${ANAG_SOURCES})
 
+target_include_directories(android_native_app_glue
+	PUBLIC
+		${ANAG_PROJECT_DIR}
+)
+
 SET_TARGET_PROPERTIES(android_native_app_glue PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${ANAG_OUTPUT_DIR}
 	ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${ANAG_OUTPUT_DIR}

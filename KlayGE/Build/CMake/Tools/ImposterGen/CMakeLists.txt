@@ -3,8 +3,3 @@ SET(SOURCE_FILES
 )
 
 SETUP_TOOL(ImposterGen)
-
-target_link_libraries(ImposterGen
-	PRIVATE
-		${KLAYGE_FILESYSTEM_LIBRARY}
-)

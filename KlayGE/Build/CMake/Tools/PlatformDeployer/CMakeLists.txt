@@ -7,5 +7,4 @@ SETUP_TOOL(PlatformDeployer)
 target_link_libraries(PlatformDeployer
 	PRIVATE
 		ToolCommon
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )

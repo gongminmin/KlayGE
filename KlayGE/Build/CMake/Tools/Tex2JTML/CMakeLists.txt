@@ -7,5 +7,4 @@ SETUP_TOOL(Tex2JTML)
 target_link_libraries(Tex2JTML
 	PRIVATE
 		ToolCommon
-		${KLAYGE_FILESYSTEM_LIBRARY}
 )

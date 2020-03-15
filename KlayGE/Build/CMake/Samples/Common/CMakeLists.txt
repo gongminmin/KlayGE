@@ -120,8 +120,9 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "KlayGE/Samples"
 )
 
-TARGET_LINK_LIBRARIES(${LIB_NAME}
+target_link_libraries(${LIB_NAME}
 	PUBLIC
-		${KLAYGE_CORELIB_NAME})
+		${KLAYGE_CORELIB_NAME}
+)
 
 add_dependencies(${LIB_NAME} AllInEngine)

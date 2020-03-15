@@ -53,8 +53,9 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "kfont"
 )
 
-TARGET_LINK_LIBRARIES(${LIB_NAME}
-	KFL
+target_link_libraries(${LIB_NAME}
+	PRIVATE
+		KFL
 )
 
 add_dependencies(${LIB_NAME} KFL)

@@ -116,9 +116,10 @@ target_compile_definitions(${LIB_NAME}
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${Boost_INCLUDE_DIR}
-		${KFL_PROJECT_DIR}/../External/rapidxml
-		${KFL_PROJECT_DIR}/../External/GSL/include
+		$<TARGET_PROPERTY:GSL,INTERFACE_INCLUDE_DIRECTORIES>
 		${KFL_PROJECT_DIR}/include
+	PRIVATE
+		$<TARGET_PROPERTY:rapidxml,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 add_dependencies(${LIB_NAME} fmt)
@@ -139,7 +140,40 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KFL_PROJECT_DIR}/include/KFL/KFL.hpp")
 
-TARGET_LINK_LIBRARIES(${LIB_NAME}
+target_link_libraries(${LIB_NAME}
 	PUBLIC
 		fmt
 )
+
+if(KLAYGE_COMPILER_MSVC)
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_link_libraries(${LIB_NAME}
+			PUBLIC
+				kernel32
+		)
+	endif()
+else()
+	if(KLAYGE_COMPILER_GCC AND (NOT KLAYGE_PLATFORM_WINDOWS OR NOT (KLAYGE_COMPILER_VERSION EQUAL 81)))
+		target_link_libraries(${LIB_NAME}
+			PUBLIC
+				stdc++fs
+		)
+	elseif(KLAYGE_COMPILER_CLANG AND KLAYGE_PLATFORM_LINUX)
+		if(KLAYGE_COMPILER_VERSION LESS 70)
+			target_link_libraries(${LIB_NAME}
+				PUBLIC
+					c++experimental
+			)
+		else()
+			target_link_libraries(${LIB_NAME}
+				PUBLIC
+					c++fs
+			)
+		endif()
+	else()
+		target_link_libraries(${LIB_NAME}
+			PUBLIC
+				filesystem
+		)
+	endif()
+endif()

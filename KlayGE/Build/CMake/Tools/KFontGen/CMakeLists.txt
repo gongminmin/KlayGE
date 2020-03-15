@@ -6,17 +6,14 @@ SETUP_TOOL(KFontGen)
 
 target_include_directories(KFontGen
 	PRIVATE
-		${PROJECT_BINARY_DIR}/External/freetype/freetype/include
-		${KLAYGE_PROJECT_DIR}/../External/freetype/include
-		${KLAYGE_PROJECT_DIR}/../kfont/include
+		$<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>
+		$<TARGET_PROPERTY:kfont,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(KFontGen
 	PRIVATE
-		kfont
-		${KLAYGE_FILESYSTEM_LIBRARY}
 		freetype
-		${ZLIB_LIBRARIES}
+		kfont
 )
 
 add_dependencies(KFontGen freetype)

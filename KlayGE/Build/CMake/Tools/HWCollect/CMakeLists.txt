@@ -7,6 +7,6 @@ SETUP_TOOL(HWCollect)
 IF(KLAYGE_PLATFORM_WINDOWS)
 	target_include_directories(HWCollect
 		PRIVATE
-			${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include
+			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
 	)
 endif()
