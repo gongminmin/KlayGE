@@ -36,6 +36,9 @@
 #include <KlayGE/Window.hpp>
 
 #include <system_error>
+#if defined(KLAYGE_PLATFORM_WINDOWS)
+#include <xinput.h>
+#endif
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -162,9 +165,9 @@ namespace KlayGE
 						::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, buf.get(), &size);
 
 						RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
-						if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage)
-							&& ((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage)
-								|| (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)))
+						if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage) &&
+							((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage) || (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)) &&
+							(info->hid.dwVendorId != 0x045E)) // 0x045E is Microsoft XInput controller
 						{
 							device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
 							rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
@@ -290,8 +293,19 @@ namespace KlayGE
 		devices_.push_back(MakeSharedPtr<MsgInputOVR>());
 #endif
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID)
+#if defined(KLAYGE_PLATFORM_WINDOWS) || defined(KLAYGE_PLATFORM_ANDROID)
 		devices_.push_back(MakeSharedPtr<MsgInputSensor>());
+#endif
+
+#if defined(KLAYGE_PLATFORM_WINDOWS)
+		for (uint32_t i = 0; i < XUSER_MAX_COUNT; ++i)
+		{
+			XINPUT_STATE state{};
+			if (XInputGetState(i, &state) == ERROR_SUCCESS)
+			{
+				devices_.push_back(MakeSharedPtr<MsgInputXInput>(i));
+			}
+		}
 #endif
 	}
 

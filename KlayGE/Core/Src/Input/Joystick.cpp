@@ -21,13 +21,8 @@
 
 namespace KlayGE
 {
-	InputJoystick::InputJoystick()
-		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), num_buttons_(0), index_(false),
-			action_param_(MakeSharedPtr<InputJoystickActionParam>())
+	InputJoystick::InputJoystick() : action_param_(MakeSharedPtr<InputJoystickActionParam>())
 	{
-		buttons_[0].fill(false);
-		buttons_[1].fill(false);
-
 		action_param_->type = InputEngine::IDT_Joystick;
 	}
 
@@ -37,92 +32,65 @@ namespace KlayGE
 	{
 	}
 
-	// X轴位置
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::XPos() const
+	float3 const& InputJoystick::LeftThumb() const
 	{
-		return pos_.x();
+		return thumbs_[0];
 	}
 
-	// Y轴位置
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::YPos() const
+	float3 const& InputJoystick::RightThumb() const
 	{
-		return pos_.y();
+		return thumbs_[1];
+	}
+
+	float InputJoystick::LeftTrigger() const
+	{
+		return triggers_[0];
 	}
 	
-	// Z轴位置
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::ZPos() const
+	float InputJoystick::RightTrigger() const
 	{
-		return pos_.z();
-	}
-
-	// X轴旋转
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::XRot() const
-	{
-		return rot_.x();
-	}
-
-	// Y轴旋转
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::YRot() const
-	{
-		return rot_.y();
-	}
-	
-	// Z轴旋转
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::ZRot() const
-	{
-		return rot_.z();
-	}
-
-	// 获取滑杆的数量
-	//////////////////////////////////////////////////////////////////////////////////
-	size_t InputJoystick::NumSliders() const
-	{
-		return slider_.size();
-	}
-	
-	// 获取滑杆的值
-	/////////////////////////////////////////////////////////////////////////////////
-	long InputJoystick::Slider(size_t index) const
-	{
-		BOOST_ASSERT(index < slider_.size());
-
-		return slider_[index];
+		return triggers_[1];
 	}
 
 	// 获取键的数量
 	//////////////////////////////////////////////////////////////////////////////////
-	size_t InputJoystick::NumButtons() const
+	uint32_t InputJoystick::NumButtons() const
 	{
 		return num_buttons_;
 	}
 	
 	// 获取指定键是否按下
 	/////////////////////////////////////////////////////////////////////////////////
-	bool InputJoystick::Button(size_t n) const
+	bool InputJoystick::Button(uint32_t n) const
 	{
 		BOOST_ASSERT(n < buttons_[index_].size());
 
 		return buttons_[index_][n];
 	}
 
-	bool InputJoystick::ButtonDown(size_t n) const
+	bool InputJoystick::ButtonDown(uint32_t n) const
 	{
 		BOOST_ASSERT(n < buttons_[index_].size());
 
 		return (buttons_[index_][n] && !buttons_[!index_][n]);
 	}
 
-	bool InputJoystick::ButtonUp(size_t n) const
+	bool InputJoystick::ButtonUp(uint32_t n) const
 	{
 		BOOST_ASSERT(n < buttons_[index_].size());
 
 		return (!buttons_[index_][n] && buttons_[!index_][n]);
+	}
+
+	uint32_t InputJoystick::NumVibrationMotors() const
+	{
+		return num_vibration_motors_;
+	}
+
+	void InputJoystick::VibrationMotorSpeed(uint32_t n, float motor_speed)
+	{
+		KFL_UNUSED(n);
+		KFL_UNUSED(motor_speed);
 	}
 
 	// 实现动作映射
@@ -131,7 +99,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = JS_XPos; i <= JS_AnyButton; ++ i)
+		for (uint16_t i = JS_LeftThumbX; i <= JS_AnyButton; ++i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -148,30 +116,29 @@ namespace KlayGE
 
 		InputActionMap& iam = actionMaps_[id];
 
-		action_param_->pos = pos_;
-		action_param_->rot = rot_;
-		action_param_->slider = slider_;
+		action_param_->thumbs[0] = thumbs_[0];
+		action_param_->thumbs[1] = thumbs_[1];
+		action_param_->triggers[0] = triggers_[0];
+		action_param_->triggers[1] = triggers_[1];
 		action_param_->buttons_state = 0;
 		action_param_->buttons_down = 0;
 		action_param_->buttons_up = 0;
-		for (size_t i = 0; i < this->NumButtons(); ++ i)
+		for (uint32_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			action_param_->buttons_state |= (this->Button(i)? (1UL << i) : 0);
 			action_param_->buttons_down |= (this->ButtonDown(i)? (1UL << i) : 0);
 			action_param_->buttons_up |= (this->ButtonUp(i)? (1UL << i) : 0);
 		}
 
-		actionMaps_[id].UpdateInputActions(ret, JS_XPos, action_param_);
-		actionMaps_[id].UpdateInputActions(ret, JS_YPos, action_param_);
-		actionMaps_[id].UpdateInputActions(ret, JS_ZPos, action_param_);
-		actionMaps_[id].UpdateInputActions(ret, JS_XRot, action_param_);
-		actionMaps_[id].UpdateInputActions(ret, JS_YRot, action_param_);
-		actionMaps_[id].UpdateInputActions(ret, JS_ZRot, action_param_);
+		iam.UpdateInputActions(ret, JS_LeftThumbX, action_param_);
+		iam.UpdateInputActions(ret, JS_LeftThumbY, action_param_);
+		iam.UpdateInputActions(ret, JS_LeftThumbZ, action_param_);
+		iam.UpdateInputActions(ret, JS_RightThumbX, action_param_);
+		iam.UpdateInputActions(ret, JS_RightThumbY, action_param_);
+		iam.UpdateInputActions(ret, JS_RightThumbZ, action_param_);
+		iam.UpdateInputActions(ret, JS_LeftTrigger, action_param_);
+		iam.UpdateInputActions(ret, JS_RightTrigger, action_param_);
 
-		for (uint16_t i = 0; i < slider_.size(); ++ i)
-		{
-			iam.UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), action_param_);
-		}
 		bool any_button = false;
 		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{

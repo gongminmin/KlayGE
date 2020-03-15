@@ -15,6 +15,7 @@ SET(MSGINPUT_IE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MInputFactory.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MISensor.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MITouch.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MIXInput.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MIOVR.cpp
 )
 
@@ -93,6 +94,12 @@ target_link_libraries(${LIB_NAME}
 	PRIVATE
 		${KLAYGE_CORELIB_NAME}
 )
+if(KLAYGE_PLATFORM_WINDOWS)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			xinput
+	)
+endif()
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE

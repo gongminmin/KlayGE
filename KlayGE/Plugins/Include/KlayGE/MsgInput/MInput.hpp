@@ -403,13 +403,31 @@ namespace KlayGE
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		uint32_t device_id_;
+		uint32_t device_id_{0xFFFFFFFF};
 #endif
-		int3 pos_state_;
-		int3 rot_state_;
-		int2 slider_state_;
-		std::array<bool, 32> buttons_state_;
+		std::array<float3, 2> thumbs_state_{float3(0, 0, 0), float3(0, 0, 0)};
+		std::array<float, 2> triggers_state_{};
+		std::array<bool, 32> buttons_state_{};
 	};
+
+#if defined(KLAYGE_PLATFORM_WINDOWS)
+	class MsgInputXInput : public InputJoystick
+	{
+	public:
+		explicit MsgInputXInput(uint32_t device_id);
+
+		std::wstring const& Name() const override;
+
+		void VibrationMotorSpeed(uint32_t n, float motor_speed) override;
+
+	private:
+		void UpdateInputs() override;
+
+	private:
+		uint32_t device_id_;
+		std::array<uint16_t, 2> motor_speeds_{};
+	};
+#endif
 
 #if defined KLAYGE_HAVE_LIBOVR
 	class MsgInputOVR : public InputSensor, public OVR::MessageHandler
