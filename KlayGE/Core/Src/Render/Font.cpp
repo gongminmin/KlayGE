@@ -677,6 +677,7 @@ namespace KlayGE
 			{
 			}
 		};
+		KLAYGE_STATIC_ASSERT(sizeof(FontVert) == 24);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif

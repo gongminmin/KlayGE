@@ -65,6 +65,7 @@ namespace KlayGE
 		int16_t base;
 		int16_t scale;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(kfont_header) == 28);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
@@ -82,6 +83,7 @@ namespace KlayGE
 			uint16_t width;
 			uint16_t height;
 		};
+		KLAYGE_STATIC_ASSERT(sizeof(font_info) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif

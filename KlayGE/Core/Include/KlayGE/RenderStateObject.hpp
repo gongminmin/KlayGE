@@ -230,6 +230,7 @@ namespace KlayGE
 
 		friend bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs);
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(RasterizerStateDesc) == 24);
 
 	struct KLAYGE_CORE_API DepthStencilStateDesc
 	{
@@ -259,6 +260,7 @@ namespace KlayGE
 
 		friend bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs);
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DepthStencilStateDesc) == 52);
 
 	struct KLAYGE_CORE_API BlendStateDesc
 	{
@@ -283,6 +285,7 @@ namespace KlayGE
 
 		friend bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs);
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BlendStateDesc) == 270);
 
 	struct KLAYGE_CORE_API SamplerStateDesc
 	{
@@ -305,6 +308,7 @@ namespace KlayGE
 
 		friend bool operator<(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs);
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(SamplerStateDesc) == 49);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

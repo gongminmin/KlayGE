@@ -47,6 +47,7 @@ namespace
 		uint8_t read_write_mask;
 		uint8_t padding[2];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D10) == 24);
 
 	struct DXBCSignatureParameterD3D11
 	{
@@ -60,6 +61,7 @@ namespace
 		uint8_t read_write_mask;
 		uint8_t padding[2];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D11) == 28);
 
 	struct DXBCSignatureParameterD3D11_1
 	{
@@ -74,6 +76,7 @@ namespace
 		uint8_t padding[2];
 		uint32_t min_precision;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D11_1) == 32);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

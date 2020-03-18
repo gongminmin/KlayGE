@@ -436,6 +436,7 @@ namespace
 		float life_factor;
 		float alpha;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ParticleInstance) == 32);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
