@@ -97,7 +97,14 @@ namespace KlayGE
 		struct SourceVoice
 		{
 			IXAudio2SourceVoicePtr voice;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
+#endif
 			std::unique_ptr<IXAudio2VoiceCallback> voice_call_back;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 			X3DAUDIO_DSP_SETTINGS dsp_settings;
 			std::vector<float> output_matrix;
 			bool is_playing;
