@@ -215,8 +215,8 @@ namespace KlayGE
 	public:
 		D3D11UnorderedAccessView(void* src, uint32_t first_subres, uint32_t num_subres);
 
-		void Clear(float4 const & val);
-		void Clear(uint4 const & val);
+		void Clear(float4 const & val) override;
+		void Clear(uint4 const & val) override;
 
 		void Discard() override;
 

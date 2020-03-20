@@ -151,7 +151,14 @@ namespace KlayGE
 
 	private:
 		IXAudio2SourceVoicePtr source_voice_;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
+#endif
 		std::unique_ptr<IXAudio2VoiceCallback> voice_call_back_;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		std::vector<uint8_t> audio_data_;
 		uint32_t buffer_size_;
 		uint32_t buffer_count_;

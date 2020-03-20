@@ -38,10 +38,10 @@ namespace KlayGE
 	public:
 		D3D11OcclusionQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		uint64_t SamplesPassed();
+		uint64_t SamplesPassed() override;
 
 	private:
 		ID3D11QueryPtr query_;
@@ -52,13 +52,13 @@ namespace KlayGE
 	public:
 		D3D11ConditionalRender();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		void BeginConditionalRender();
-		void EndConditionalRender();
+		void BeginConditionalRender() override;
+		void EndConditionalRender() override;
 
-		bool AnySamplesPassed();
+		bool AnySamplesPassed() override;
 
 	private:
 		ID3D11PredicatePtr predicate_;
@@ -69,8 +69,8 @@ namespace KlayGE
 	public:
 		D3D11TimerQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		double TimeElapsed() override;
 
@@ -85,8 +85,8 @@ namespace KlayGE
 	public:
 		D3D11SOStatisticsQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		uint64_t NumPrimitivesWritten() override;
 		uint64_t PrimitivesGenerated() override;

@@ -245,8 +245,8 @@ namespace KlayGE
 		MsgInputEngine();
 		~MsgInputEngine();
 
-		std::wstring const & Name() const;
-		void EnumDevices();
+		std::wstring const & Name() const override;
+		void EnumDevices() override;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		NTSTATUS HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const;

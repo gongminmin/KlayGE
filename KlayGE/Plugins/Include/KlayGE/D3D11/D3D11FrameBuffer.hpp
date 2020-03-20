@@ -30,12 +30,12 @@ namespace KlayGE
 		ID3D11DepthStencilView* D3DDSView() const;
 		ID3D11UnorderedAccessView* D3DUAView(uint32_t n) const;
 
-		virtual std::wstring const & Description() const;
+		std::wstring const & Description() const override;
 
-		virtual void OnBind();
-		virtual void OnUnbind();
+		void OnBind() override;
+		void OnUnbind() override;
 
-		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) override;
 		virtual void Discard(uint32_t flags) override;
 
 	private:

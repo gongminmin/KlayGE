@@ -29,13 +29,13 @@ namespace KlayGE
 		explicit OGLFrameBuffer(bool off_screen);
 		virtual ~OGLFrameBuffer();
 
-		virtual std::wstring const & Description() const;
+		std::wstring const & Description() const override;
 
 		void OnBind() override;
 		void OnUnbind() override;
 
-		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
-		virtual void Discard(uint32_t flags) override;
+		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) override;
+		void Discard(uint32_t flags) override;
 
 		GLuint OGLFbo() const
 		{

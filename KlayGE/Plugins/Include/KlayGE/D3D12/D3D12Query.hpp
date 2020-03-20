@@ -42,10 +42,10 @@ namespace KlayGE
 	public:
 		D3D12OcclusionQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		uint64_t SamplesPassed();
+		uint64_t SamplesPassed() override;
 
 	private:
 		ID3D12QueryHeapPtr query_heap_;
@@ -57,13 +57,13 @@ namespace KlayGE
 	public:
 		D3D12ConditionalRender();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		void BeginConditionalRender();
-		void EndConditionalRender();
+		void BeginConditionalRender() override;
+		void EndConditionalRender() override;
 
-		bool AnySamplesPassed();
+		bool AnySamplesPassed() override;
 
 	private:
 		ID3D12QueryHeapPtr predicate_heap_;
@@ -75,8 +75,8 @@ namespace KlayGE
 	public:
 		D3D12TimerQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		double TimeElapsed() override;
 
@@ -90,8 +90,8 @@ namespace KlayGE
 	public:
 		D3D12SOStatisticsQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		uint64_t NumPrimitivesWritten() override;
 		uint64_t PrimitivesGenerated() override;

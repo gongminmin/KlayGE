@@ -78,8 +78,8 @@ namespace KlayGE
 		void ResetInitCount(uint64_t count);
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
 

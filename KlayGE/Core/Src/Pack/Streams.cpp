@@ -49,13 +49,13 @@ namespace KlayGE
 		is_->seekg(0, std::ios_base::beg);
 	}
 
-	STDMETHODIMP_(ULONG) InStream::AddRef()
+	STDMETHODIMP_(ULONG) InStream::AddRef() noexcept
 	{
 		++ ref_count_;
 		return ref_count_;
 	}
 
-	STDMETHODIMP_(ULONG) InStream::Release()
+	STDMETHODIMP_(ULONG) InStream::Release() noexcept
 	{
 		-- ref_count_;
 		if (0 == ref_count_)
@@ -66,7 +66,7 @@ namespace KlayGE
 		return ref_count_;
 	}
 
-	STDMETHODIMP InStream::QueryInterface(REFGUID iid, void** out_object)
+	STDMETHODIMP InStream::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
 		if (IID_IInStream == iid)
 		{
@@ -86,7 +86,7 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP InStream::Read(void *data, UInt32 size, UInt32* processedSize)
+	STDMETHODIMP InStream::Read(void *data, UInt32 size, UInt32* processedSize) noexcept
 	{
 		is_->read(data, size);
 		if (processedSize)
@@ -97,7 +97,7 @@ namespace KlayGE
 		return *is_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP InStream::Seek(Int64 offset, uint32_t seekOrigin, UInt64* newPosition)
+	STDMETHODIMP InStream::Seek(Int64 offset, uint32_t seekOrigin, UInt64* newPosition) noexcept
 	{
 		std::ios_base::seekdir way;
 		switch (seekOrigin)
@@ -127,25 +127,25 @@ namespace KlayGE
 		return *is_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP InStream::GetSize(UInt64* size)
+	STDMETHODIMP InStream::GetSize(UInt64* size) noexcept
 	{
 		*size = stream_size_;
 		return S_OK;
 	}
 
 
-	OutStream::OutStream(std::shared_ptr<std::ostream> const & os)
+	OutStream::OutStream(std::shared_ptr<std::ostream> const & os) noexcept
 		: os_(os)
 	{
 	}
 
-	STDMETHODIMP_(ULONG) OutStream::AddRef()
+	STDMETHODIMP_(ULONG) OutStream::AddRef() noexcept
 	{
 		++ ref_count_;
 		return ref_count_;
 	}
 
-	STDMETHODIMP_(ULONG) OutStream::Release()
+	STDMETHODIMP_(ULONG) OutStream::Release() noexcept
 	{
 		-- ref_count_;
 		if (0 == ref_count_)
@@ -156,7 +156,7 @@ namespace KlayGE
 		return ref_count_;
 	}
 
-	STDMETHODIMP OutStream::QueryInterface(REFGUID iid, void** out_object)
+	STDMETHODIMP OutStream::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
 		if (IID_IOutStream == iid)
 		{
@@ -170,7 +170,7 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP OutStream::Write(void const * data, UInt32 size, UInt32* processed_size)
+	STDMETHODIMP OutStream::Write(void const * data, UInt32 size, UInt32* processed_size) noexcept
 	{
 		os_->write(static_cast<char const *>(data), size);
 		if (processed_size)
@@ -181,7 +181,7 @@ namespace KlayGE
 		return *os_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP OutStream::Seek(Int64 offset, UInt32 seek_origin, UInt64* new_position)
+	STDMETHODIMP OutStream::Seek(Int64 offset, UInt32 seek_origin, UInt64* new_position) noexcept
 	{
 		std::ios_base::seekdir way;
 		switch (seek_origin)
@@ -211,7 +211,7 @@ namespace KlayGE
 		return *os_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP OutStream::SetSize(UInt64 new_size)
+	STDMETHODIMP OutStream::SetSize(UInt64 new_size) noexcept
 	{
 		KFL_UNUSED(new_size);
 		return E_NOTIMPL;

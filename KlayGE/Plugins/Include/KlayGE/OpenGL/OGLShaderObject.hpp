@@ -124,7 +124,7 @@ namespace KlayGE
 		{
 			KFL_UNUSED(dxbc2glsl);
 		}
-		virtual void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
 		{
 			KFL_UNUSED(effect);
 			KFL_UNUSED(shader_desc_ids);
@@ -174,7 +174,7 @@ namespace KlayGE
 		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 		std::vector<VertexElementUsage> usages_;
@@ -209,7 +209,7 @@ namespace KlayGE
 		void StageSpecificStreamIn(ResIdentifier& res) override;
 		void StageSpecificStreamOut(std::ostream& os) override;
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 		GLint gs_input_type_ = 0;
@@ -274,7 +274,7 @@ namespace KlayGE
 		}
 
 	private:
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 		uint32_t ds_partitioning_ = 0;

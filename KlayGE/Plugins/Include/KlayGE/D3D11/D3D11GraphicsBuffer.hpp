@@ -52,8 +52,8 @@ namespace KlayGE
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
 		ID3D11Device1* d3d_device_;

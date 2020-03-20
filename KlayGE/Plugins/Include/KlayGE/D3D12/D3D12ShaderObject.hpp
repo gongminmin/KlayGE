@@ -271,8 +271,8 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind(RenderEffect const& effect);
-		void Unbind();
+		void Bind(RenderEffect const& effect) override;
+		void Unbind() override;
 
 		std::vector<D3D12_SAMPLER_DESC> const & Samplers(ShaderStage stage) const
 		{

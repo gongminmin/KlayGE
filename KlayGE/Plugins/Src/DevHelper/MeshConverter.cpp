@@ -50,7 +50,14 @@
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpragma-pack" // Ignore cross header #pragma pack
+#endif
 #include <assimp/scene.h>
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 #include <assimp/pbrmaterial.h>
 
 #include <boost/algorithm/string/split.hpp>

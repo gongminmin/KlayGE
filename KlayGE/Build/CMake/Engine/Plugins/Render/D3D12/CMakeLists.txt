@@ -56,13 +56,6 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${D3D12_RE_SOURCE_FILES} ${D3D12_RE_HEADER_FILES}
 )
 
-if(KLAYGE_COMPILER_CLANGCL)
-	target_compile_options(${LIB_NAME}
-		PRIVATE
-			-Wno-inconsistent-missing-override
-	)
-endif()
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>

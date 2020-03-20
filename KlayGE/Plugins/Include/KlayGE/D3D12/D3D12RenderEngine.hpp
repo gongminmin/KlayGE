@@ -70,9 +70,9 @@ namespace KlayGE
 		D3D12RenderEngine();
 		~D3D12RenderEngine();
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		bool RequiresFlipping() const
+		bool RequiresFlipping() const override
 		{
 			return true;
 		}
@@ -108,15 +108,15 @@ namespace KlayGE
 		void ResetRenderCmd();
 		void CommitResCmd();
 
-		void ForceFlush();
+		void ForceFlush() override;
 		void ForceFinish();
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
+		TexturePtr const & ScreenDepthStencilTexture() const override;
 
-		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
-		bool FullScreen() const;
-		void FullScreen(bool fs);
+		bool FullScreen() const override;
+		void FullScreen(bool fs) override;
 
 		char const * DefaultShaderProfile(ShaderStage stage) const
 		{

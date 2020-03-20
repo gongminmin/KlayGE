@@ -49,16 +49,10 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${OPENGLES_RE_SOURCE_FILES} ${OPENGLES_RE_HEADER_FILES}
 )
 
-if(KLAYGE_COMPILER_CLANGCL)
-	target_compile_options(${LIB_NAME}
-		PRIVATE
-			-Wno-inconsistent-missing-override
-	)
-endif()
-
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
-		-DGLLOADER_GLES_SUPPORT)
+		-DGLLOADER_GLES_SUPPORT
+)
 
 target_include_directories(${LIB_NAME}
 	PUBLIC

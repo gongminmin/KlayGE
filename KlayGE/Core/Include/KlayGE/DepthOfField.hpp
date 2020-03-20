@@ -56,7 +56,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr sat_pp_;
@@ -106,7 +106,7 @@ namespace KlayGE
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		bool gs_support_;

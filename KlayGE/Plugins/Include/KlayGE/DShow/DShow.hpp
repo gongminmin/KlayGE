@@ -32,14 +32,14 @@ namespace KlayGE
 	{
 	public:
 		DShowEngine();
-		~DShowEngine();
+		~DShowEngine() override;
 
-		bool IsComplete();
+		bool IsComplete() override;
 
-		void Load(std::string const & fileName);
-		TexturePtr PresentTexture();
+		void Load(std::string const & fileName) override;
+		TexturePtr PresentTexture() override;
 
-		ShowState State(long msTimeout = -1);
+		ShowState State(long msTimeout = -1) override;
 
 	private:
 		com_ptr<IGraphBuilder> graph_;
@@ -52,12 +52,12 @@ namespace KlayGE
 		void Init();
 		void Free();
 
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
-		void DoPlay();
-		void DoStop();
-		void DoPause();
+		void DoPlay() override;
+		void DoStop() override;
+		void DoPause() override;
 	};
 }
 

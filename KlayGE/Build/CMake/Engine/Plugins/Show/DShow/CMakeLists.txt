@@ -29,12 +29,6 @@ if(KLAYGE_COMPILER_GCC)
 			-Wno-unknown-pragmas
 			-Wno-comment
 	)
-elseif(KLAYGE_COMPILER_CLANGCL)
-	target_compile_options(${LIB_NAME}
-		PRIVATE
-			-Wno-inconsistent-missing-override
-			-Wno-comment
-	)
 endif()
 
 target_include_directories(${LIB_NAME}

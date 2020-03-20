@@ -47,25 +47,25 @@ namespace KlayGE
 	{
 	public:
 		// IUnknown
-		STDMETHOD_(ULONG, AddRef)();
-		STDMETHOD_(ULONG, Release)();
-		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object);
+		STDMETHOD_(ULONG, AddRef)() noexcept;
+		STDMETHOD_(ULONG, Release)() noexcept;
+		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object) noexcept;
 
 		// IProgress
-		STDMETHOD(SetTotal)(UInt64 size);
-		STDMETHOD(SetCompleted)(UInt64 const * complete_value);
+		STDMETHOD(SetTotal)(UInt64 size) noexcept;
+		STDMETHOD(SetCompleted)(UInt64 const * complete_value) noexcept;
 
 		// IExtractCallBack
-		STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode);
-		STDMETHOD(PrepareOperation)(Int32 ask_extract_mode);
-		STDMETHOD(SetOperationResult)(Int32 operation_result);
+		STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode) noexcept;
+		STDMETHOD(PrepareOperation)(Int32 ask_extract_mode) noexcept;
+		STDMETHOD(SetOperationResult)(Int32 operation_result) noexcept;
 
 		// ICryptoGetTextPassword
-		STDMETHOD(CryptoGetTextPassword)(BSTR* password);
+		STDMETHOD(CryptoGetTextPassword)(BSTR* password) noexcept;
 
 	public:
-		ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream);
-		virtual ~ArchiveExtractCallback() = default;
+		ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream) noexcept;
+		virtual ~ArchiveExtractCallback() noexcept = default;
 
 	private:
 		std::atomic<int32_t> ref_count_{1};

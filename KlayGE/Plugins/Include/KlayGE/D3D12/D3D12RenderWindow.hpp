@@ -69,7 +69,7 @@ namespace KlayGE
 		void SwapBuffers() override;
 		void WaitOnSwapBuffers() override;
 
-		std::wstring const& Description() const;
+		std::wstring const& Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);

@@ -133,7 +133,7 @@ namespace KlayGE
 			}
 		}
 
-		void OnRenderBegin()
+		void OnRenderBegin() override
 		{
 			if (!three_dim_)
 			{
@@ -152,7 +152,7 @@ namespace KlayGE
 			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 		}
 
-		void OnRenderEnd()
+		void OnRenderEnd() override
 		{
 			pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -163,7 +163,7 @@ namespace KlayGE
 			tb_ib_->OnPresent();
 		}
 
-		void Render()
+		void Render() override
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 

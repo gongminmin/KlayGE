@@ -160,7 +160,7 @@ namespace KlayGE
 		OGLTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t slice, int level);
 		~OGLTexture3DRenderTargetView();
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
 		void Discard() override;
 

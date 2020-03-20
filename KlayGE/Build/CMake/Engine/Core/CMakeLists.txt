@@ -498,15 +498,6 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${APP_SOURCE_FILES} ${APP_HEADER_FILES}
 )
 
-if(KLAYGE_COMPILER_CLANGCL)
-	target_compile_options(${LIB_NAME}
-		PUBLIC
-			-Wno-inconsistent-missing-override
-		PRIVATE
-			-Wno-microsoft-exception-spec
-	)
-endif()
-
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DKLAYGE_CORE_SOURCE

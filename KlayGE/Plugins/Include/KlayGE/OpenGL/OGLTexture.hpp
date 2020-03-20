@@ -233,10 +233,10 @@ namespace KlayGE
 		OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
-		uint32_t Width(uint32_t level) const;
-		uint32_t Height(uint32_t level) const;
+		uint32_t Width(uint32_t level) const override;
+		uint32_t Height(uint32_t level) const override;
 
-		void CopyToTexture(Texture& target, TextureFilter filter);
+		void CopyToTexture(Texture& target, TextureFilter filter) override;
 		void CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
 			uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
 			uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter) override;

@@ -45,9 +45,9 @@ namespace KlayGE
 		D3D11RenderEngine();
 		~D3D11RenderEngine();
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		bool RequiresFlipping() const
+		bool RequiresFlipping() const override
 		{
 			return true;
 		}
@@ -77,16 +77,16 @@ namespace KlayGE
 
 		void D3DDevice(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
-		void ForceFlush();
+		void ForceFlush() override;
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
+		TexturePtr const & ScreenDepthStencilTexture() const override;
 
-		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
 		void GetCustomAttrib(std::string_view name, void* value) const override;
 
-		bool FullScreen() const;
-		void FullScreen(bool fs);
+		bool FullScreen() const override;
+		void FullScreen(bool fs) override;
 
 		char const * DefaultShaderProfile(ShaderStage stage) const
 		{

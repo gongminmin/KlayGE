@@ -47,7 +47,7 @@ namespace KlayGE
 	public:
 		explicit D3D12Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 #ifndef KLAYGE_SHIP
 		void DebugName(std::wstring_view name) override;
 #endif
@@ -136,24 +136,18 @@ namespace KlayGE
 			uint32_t& total_bytes);
 
 	private:
-		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t width,
-			void*& data);
-		virtual void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
-		virtual void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-			uint32_t width, uint32_t height, uint32_t depth,
-			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		virtual void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
+		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data) override;
+		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t width,
+			uint32_t height, void*& data, uint32_t& row_pitch) override;
+		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) override;
+		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset,
+			uint32_t width, uint32_t height, void*& data, uint32_t& row_pitch) override;
 
-		virtual void Unmap1D(uint32_t array_index, uint32_t level);
-		virtual void Unmap2D(uint32_t array_index, uint32_t level);
-		virtual void Unmap3D(uint32_t array_index, uint32_t level);
-		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
+		void Unmap1D(uint32_t array_index, uint32_t level) override;
+		void Unmap2D(uint32_t array_index, uint32_t level) override;
+		void Unmap3D(uint32_t array_index, uint32_t level) override;
+		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
 		virtual D3D12_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const;
@@ -213,10 +207,8 @@ namespace KlayGE
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
-		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t width,
-			void*& data);
-		void Unmap1D(uint32_t array_index, uint32_t level);
+		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data) override;
+		void Unmap1D(uint32_t array_index, uint32_t level) override;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
@@ -252,10 +244,9 @@ namespace KlayGE
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
-		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
-		void Unmap2D(uint32_t array_index, uint32_t level);
+		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t width,
+			uint32_t height, void*& data, uint32_t& row_pitch) override;
+		void Unmap2D(uint32_t array_index, uint32_t level) override;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
@@ -289,11 +280,9 @@ namespace KlayGE
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
-		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-			uint32_t width, uint32_t height, uint32_t depth,
-			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		void Unmap3D(uint32_t array_index, uint32_t level);
+		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) override;
+		void Unmap3D(uint32_t array_index, uint32_t level) override;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;
@@ -333,10 +322,9 @@ namespace KlayGE
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
 	private:
-		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
-		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
+		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset,
+			uint32_t width, uint32_t height, void*& data, uint32_t& row_pitch) override;
+		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const override;

@@ -27,9 +27,7 @@ IF(KLAYGE_COMPILER_GCC)
 elseif(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(${LIB_NAME}
 		PRIVATE
-			-Wno-missing-braces
 			-Wno-delete-abstract-non-virtual-dtor
-			-Wno-delete-non-abstract-non-virtual-dtor
 	)
 endif()
 

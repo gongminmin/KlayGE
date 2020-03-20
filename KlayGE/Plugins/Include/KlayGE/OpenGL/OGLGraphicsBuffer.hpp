@@ -62,8 +62,8 @@ namespace KlayGE
 		}
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
 		GLuint vb_;

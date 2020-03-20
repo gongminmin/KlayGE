@@ -17,17 +17,13 @@
 
 #include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_6.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
-#if KLAYGE_COMPILER_VERSION >= 90
-#pragma GCC diagnostic ignored "-Wclass-conversion" // Ignore conversion from class to parent struct
+#ifndef D3D10_NO_HELPERS
+#define D3D10_NO_HELPERS
 #endif
+#ifndef D3D11_NO_HELPERS
+#define D3D11_NO_HELPERS
 #endif
 #include <d3d11_4.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
 
 #include <KFL/com_ptr.hpp>
 
@@ -76,6 +72,11 @@ namespace KlayGE
 	using ID3D11BlendState1Ptr = com_ptr<ID3D11BlendState1>;
 	using ID3D11SamplerStatePtr = com_ptr<ID3D11SamplerState>;
 	using ID3D11ShaderResourceViewPtr = com_ptr<ID3D11ShaderResourceView>;
+
+	constexpr uint32_t D3D11CalcSubresource(uint32_t mip_slice, uint32_t array_slice, uint32_t mip_levels)
+	{
+		return mip_slice + array_slice * mip_levels;
+	}
 } // namespace KlayGE
 
 #endif // _D3D11TYPEDEFS_HPP

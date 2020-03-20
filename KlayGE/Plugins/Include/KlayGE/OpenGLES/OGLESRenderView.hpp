@@ -137,12 +137,12 @@ namespace KlayGE
 	public:
 		OGLESTexture2DRenderTargetView(TexturePtr const & texture_2d, ElementFormat pf, int array_index, int array_size, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
 		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
-		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
 		int array_index_;
@@ -157,12 +157,12 @@ namespace KlayGE
 		OGLESTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t slice, int level);
 		~OGLESTexture3DRenderTargetView();
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
 		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
-		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 		void OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att);
 
@@ -184,12 +184,12 @@ namespace KlayGE
 			int level);
 		OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
 		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att);
-		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
 		Texture::CubeFaces face_;
@@ -208,8 +208,8 @@ namespace KlayGE
 
 		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb);
-		void OnDetached(FrameBuffer& fb);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
 	private:
 		GLenum target_type_;
@@ -231,8 +231,8 @@ namespace KlayGE
 
 		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb);
-		void OnDetached(FrameBuffer& fb);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
 	private:
 		Texture::CubeFaces face_;

@@ -119,10 +119,10 @@ namespace KlayGE
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch) override;
 
-		virtual void Unmap1D(uint32_t array_index, uint32_t level);
-		virtual void Unmap2D(uint32_t array_index, uint32_t level);
-		virtual void Unmap3D(uint32_t array_index, uint32_t level);
-		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
+		virtual void Unmap1D(uint32_t array_index, uint32_t level) override;
+		virtual void Unmap2D(uint32_t array_index, uint32_t level) override;
+		virtual void Unmap3D(uint32_t array_index, uint32_t level) override;
+		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
 		virtual D3D11_SHADER_RESOURCE_VIEW_DESC FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels) const;

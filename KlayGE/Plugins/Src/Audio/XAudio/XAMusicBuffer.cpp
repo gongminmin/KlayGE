@@ -52,6 +52,8 @@ namespace KlayGE
 		{
 		}
 
+		virtual ~MusicVoiceContext() = default;
+
 		HANDLE GetBufferEndEvent() const
 		{
 			return buffer_end_event_.get();

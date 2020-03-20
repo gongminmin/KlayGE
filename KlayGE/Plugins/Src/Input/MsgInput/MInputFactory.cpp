@@ -39,7 +39,7 @@ namespace KlayGE
 	class MInputFactory : public InputFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"MsgInput Input Factory");
 			return name;

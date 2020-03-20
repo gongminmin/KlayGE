@@ -85,7 +85,7 @@ namespace KlayGE
 	public:
 		PSSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_PSSM;
 		}
@@ -104,7 +104,7 @@ namespace KlayGE
 	public:
 		SDSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_SDSM;
 		}

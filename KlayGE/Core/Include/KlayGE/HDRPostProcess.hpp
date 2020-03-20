@@ -101,7 +101,7 @@ namespace KlayGE
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr sum_lums_1st_;
@@ -118,7 +118,7 @@ namespace KlayGE
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
 		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr sum_lums_1st_;
@@ -134,7 +134,7 @@ namespace KlayGE
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr bright_pass_downsampler_;
@@ -152,7 +152,7 @@ namespace KlayGE
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr bilinear_copy_pp_;
@@ -192,7 +192,7 @@ namespace KlayGE
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr image_stat_;

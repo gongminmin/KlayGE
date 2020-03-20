@@ -118,7 +118,7 @@ namespace KlayGE
 			KFL_UNUSED(dxbc2glsl);
 		}
 #endif
-		virtual void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
 		{
 			KFL_UNUSED(effect);
 			KFL_UNUSED(shader_desc_ids);
@@ -170,7 +170,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 #endif
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 		std::vector<VertexElementUsage> usages_;
@@ -263,7 +263,7 @@ namespace KlayGE
 #endif
 
 	private:
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 #if KLAYGE_IS_DEV_PLATFORM

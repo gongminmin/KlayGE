@@ -27,7 +27,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		std::vector<PostProcessPtr> radial_blur_pps_;

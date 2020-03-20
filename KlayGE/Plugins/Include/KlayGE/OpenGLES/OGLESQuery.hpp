@@ -23,15 +23,15 @@ namespace KlayGE
 	{
 	public:
 		OGLESConditionalRender();
-		~OGLESConditionalRender();
+		~OGLESConditionalRender() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		void BeginConditionalRender();
-		void EndConditionalRender();
+		void BeginConditionalRender() override;
+		void EndConditionalRender() override;
 
-		bool AnySamplesPassed();
+		bool AnySamplesPassed() override;
 
 	private:
 		GLuint query_;
@@ -41,12 +41,12 @@ namespace KlayGE
 	{
 	public:
 		OGLESTimerQuery();
-		~OGLESTimerQuery();
+		~OGLESTimerQuery() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		double TimeElapsed();
+		double TimeElapsed() override;
 
 	private:
 		GLuint query_;
@@ -56,10 +56,10 @@ namespace KlayGE
 	{
 	public:
 		OGLESSOStatisticsQuery();
-		~OGLESSOStatisticsQuery();
+		~OGLESSOStatisticsQuery() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		uint64_t NumPrimitivesWritten() override;
 		uint64_t PrimitivesGenerated() override;
