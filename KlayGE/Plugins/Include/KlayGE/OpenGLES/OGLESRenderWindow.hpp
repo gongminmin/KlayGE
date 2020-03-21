@@ -54,6 +54,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		HWND	hWnd_;
 #elif defined KLAYGE_PLATFORM_LINUX
+		::Display* x_display_;
 		::Window x_window_;
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;

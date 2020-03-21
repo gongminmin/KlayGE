@@ -504,7 +504,7 @@ target_compile_definitions(${LIB_NAME}
 )
 IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
 	FIND_PATH(WINE_PATH "winegcc" #searching for 'wine' may result in include path
-		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin)
+		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin /usr/lib/wine)
 
 	IF(NOT WINE_PATH)
 		MESSAGE(FATAL_ERROR "Cound NOT find wine")

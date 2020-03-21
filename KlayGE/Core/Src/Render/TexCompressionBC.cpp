@@ -2920,7 +2920,7 @@ namespace KlayGE
 			return true;
 		}
 
-		size_t const p = static_cast<size_t>(exp(0.1f * static_cast<int64_t>(old_err - new_err) / temp) * RAND_MAX);
+		size_t const p = static_cast<size_t>(exp(0.1f * static_cast<int64_t>(old_err - new_err) / temp) * static_cast<float>(RAND_MAX));
 		size_t const r = IntRand();
 
 		return r < p;

@@ -336,7 +336,6 @@ namespace KlayGE
 				}
 			}
 		}
-
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (isFullScreen_)
 		{

@@ -231,6 +231,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		wnd = hWnd_ = main_wnd->HWnd();
 #elif defined KLAYGE_PLATFORM_LINUX
+		x_display_ = main_wnd->XDisplay();
 		wnd = x_window_ = main_wnd->XWindow();
 #elif defined KLAYGE_PLATFORM_ANDROID
 		wnd = a_window_ = main_wnd->AWindow();

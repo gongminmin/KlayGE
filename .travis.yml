@@ -15,7 +15,7 @@ cache:
     - KlayGE/Tools/media
     - KlayGE/Tutorials/media
 
-matrix:
+jobs:
   include:
     - os: windows
       env: MATRIX_EVAL="CC=cl.exe && CXX=cl.exe" PROJECT="vs2017" COMPILER="vc141" BUILD_DIR="$COMPILER"
@@ -30,7 +30,6 @@ matrix:
 
     - os: linux
       dist: xenial
-      sudo: required
       addons:
         apt:
           sources:
@@ -44,13 +43,11 @@ matrix:
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
-      dist: xenial
-      sudo: required
+      dist: bionic
       addons:
         apt:
           sources:
@@ -58,39 +55,17 @@ matrix:
           packages:
             - g++-9
             - ninja-build
-            - wine
+            - wine32
             - wine-dev
             - winetricks
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=gcc-9 && CXX=g++-9" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-            - ninja-build
-            - wine
-            - wine-dev
-            - winetricks
-            - libx11-dev
-            - libgl1-mesa-dev
-            - libopenal-dev
-          update:
-            - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
-
-    - os: linux
       dist: xenial
-      sudo: required
       addons:
         apt:
           sources:
@@ -106,9 +81,29 @@ matrix:
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
+
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-10
+            - libc++-10-dev
+            - libc++abi-10-dev
+            - ninja-build
+            - wine32
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update: true
+      env: MATRIX_EVAL="CC=clang-10 && CXX=clang++-10" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode9.4

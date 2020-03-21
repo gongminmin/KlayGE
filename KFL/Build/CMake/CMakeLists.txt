@@ -170,7 +170,7 @@ else()
 				PUBLIC
 					c++experimental
 			)
-		else()
+		elseif(KLAYGE_COMPILER_VERSION LESS 90)
 			target_link_libraries(${LIB_NAME}
 				PUBLIC
 					c++fs
