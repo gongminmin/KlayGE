@@ -50,6 +50,14 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${D3D11_RE_SOURCE_FILES} ${D3D11_RE_HEADER_FILES}
 )
 
+if(KLAYGE_COMPILER_GCC)
+	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unknown-pragmas
+	)
+endif()
+
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>

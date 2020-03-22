@@ -5,6 +5,14 @@ SET(SOURCE_FILES
 SETUP_TOOL(HWCollect)
 
 IF(KLAYGE_PLATFORM_WINDOWS)
+	if(KLAYGE_COMPILER_GCC)
+		# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
+		target_compile_options(HWCollect
+			PRIVATE
+				-Wno-unknown-pragmas
+		)
+	endif()
+
 	target_include_directories(HWCollect
 		PRIVATE
 			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
