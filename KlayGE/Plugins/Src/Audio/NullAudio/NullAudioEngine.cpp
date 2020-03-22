@@ -41,10 +41,6 @@ namespace KlayGE
 		this->SetListenerOri(float3(0, 0, 1), float3(0, 1, 0));
 	}
 
-	NullAudioEngine::~NullAudioEngine()
-	{
-	}
-
 	void NullAudioEngine::DoSuspend()
 	{
 	}

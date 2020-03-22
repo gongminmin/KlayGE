@@ -569,6 +569,8 @@ namespace KlayGE
 	{
 	}
 
+	ParticleEmitter::~ParticleEmitter() noexcept = default;
+
 	uint32_t ParticleEmitter::Update(float elapsed_time)
 	{
 		return static_cast<uint32_t>(elapsed_time * emit_freq_ + 0.5f);
@@ -600,6 +602,8 @@ namespace KlayGE
 		: ps_(ps)
 	{
 	}
+
+	ParticleUpdater::~ParticleUpdater() noexcept = default;
 
 	void ParticleUpdater::DoClone(ParticleUpdaterPtr const & rhs)
 	{

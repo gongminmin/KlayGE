@@ -115,14 +115,14 @@ namespace KlayGE
 		d3d_texture_ = d3d_tex;
 	}
 
-	uint32_t D3D11Texture2D::Width(uint32_t level) const
+	uint32_t D3D11Texture2D::Width(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	uint32_t D3D11Texture2D::Height(uint32_t level) const
+	uint32_t D3D11Texture2D::Height(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 

@@ -42,7 +42,7 @@
 namespace KlayGE
 {
 #ifdef KLAYGE_PLATFORM_WINDOWS
-	class Win32HandleDeleter
+	class Win32HandleDeleter final
 	{
 	public:
 		void operator()(HANDLE handle)
@@ -66,7 +66,7 @@ namespace KlayGE
 	}
 
 
-	class Win32TpWaitDeleter
+	class Win32TpWaitDeleter final
 	{
 	public:
 		void operator()(PTP_WAIT pw)

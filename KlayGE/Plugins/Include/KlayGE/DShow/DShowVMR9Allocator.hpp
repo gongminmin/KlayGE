@@ -24,7 +24,7 @@
 
 namespace KlayGE
 {
-	class DShowVMR9Allocator : public IVMRSurfaceAllocator9, IVMRImagePresenter9
+	class DShowVMR9Allocator final : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:
 		static uint64_t constexpr USER_ID = 0xBAFEDCBA;

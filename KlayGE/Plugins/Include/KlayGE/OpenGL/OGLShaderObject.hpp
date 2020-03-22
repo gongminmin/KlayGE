@@ -143,7 +143,7 @@ namespace KlayGE
 		GLuint gl_shader_ = 0;
 	};
 
-	class OGLVertexShaderStageObject : public OGLShaderStageObject
+	class OGLVertexShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLVertexShaderStageObject();
@@ -185,13 +185,13 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 	};
 
-	class OGLPixelShaderStageObject : public OGLShaderStageObject
+	class OGLPixelShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLPixelShaderStageObject();
 	};
 
-	class OGLGeometryShaderStageObject : public OGLShaderStageObject
+	class OGLGeometryShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLGeometryShaderStageObject();
@@ -220,13 +220,13 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 	};
 
-	class OGLComputeShaderStageObject : public OGLShaderStageObject
+	class OGLComputeShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLComputeShaderStageObject();
 	};
 
-	class OGLHullShaderStageObject : public OGLShaderStageObject
+	class OGLHullShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLHullShaderStageObject();
@@ -248,7 +248,7 @@ namespace KlayGE
 		uint32_t ds_output_primitive_ = 0;
 	};
 
-	class OGLDomainShaderStageObject : public OGLShaderStageObject
+	class OGLDomainShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLDomainShaderStageObject();
@@ -284,11 +284,11 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 	};
 
-	class OGLShaderObject : public ShaderObject
+	class OGLShaderObject final : public ShaderObject
 	{
 	public:
 		OGLShaderObject();
-		~OGLShaderObject();
+		~OGLShaderObject() override;
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 

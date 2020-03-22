@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class OGLESConditionalRender : public ConditionalRender
+	class OGLESConditionalRender final : public ConditionalRender
 	{
 	public:
 		OGLESConditionalRender();
@@ -37,7 +37,7 @@ namespace KlayGE
 		GLuint query_;
 	};
 
-	class OGLESTimerQuery : public TimerQuery
+	class OGLESTimerQuery final : public TimerQuery
 	{
 	public:
 		OGLESTimerQuery();
@@ -52,7 +52,7 @@ namespace KlayGE
 		GLuint query_;
 	};
 
-	class OGLESSOStatisticsQuery : public SOStatisticsQuery
+	class OGLESSOStatisticsQuery final : public SOStatisticsQuery
 	{
 	public:
 		OGLESSOStatisticsQuery();

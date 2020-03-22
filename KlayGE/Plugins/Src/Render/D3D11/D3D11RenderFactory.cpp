@@ -30,9 +30,7 @@
 
 namespace KlayGE
 {
-	D3D11RenderFactory::D3D11RenderFactory()
-	{
-	}
+	D3D11RenderFactory::D3D11RenderFactory() = default;
 
 	std::wstring const & D3D11RenderFactory::Name() const
 	{

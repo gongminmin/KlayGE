@@ -84,9 +84,7 @@ namespace KlayGE
 
 	// Îö¹¹º¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::~RenderEngine()
-	{
-	}
+	RenderEngine::~RenderEngine() noexcept = default;
 
 	void RenderEngine::Suspend()
 	{

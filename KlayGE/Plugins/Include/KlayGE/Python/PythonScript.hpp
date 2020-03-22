@@ -87,7 +87,7 @@ namespace KlayGE
 
 	// Py Script module
 	/////////////////////////////////////////////////////////////////////////////////
-	class PythonScriptModule : public ScriptModule
+	class PythonScriptModule final : public ScriptModule
 	{
 	public:
 		explicit PythonScriptModule(std::string const & name);
@@ -102,7 +102,7 @@ namespace KlayGE
 		PyObjectPtr dict_;
 	};
 
-	class PythonEngine : public ScriptEngine
+	class PythonEngine final : public ScriptEngine
 	{
 	public:
 		PythonEngine();

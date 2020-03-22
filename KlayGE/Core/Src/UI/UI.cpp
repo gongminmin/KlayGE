@@ -299,15 +299,8 @@ namespace KlayGE
 	}
 
 
-	UIManager::UIManager()
-		: mouse_on_ui_(false),
-			inited_(false)
-	{
-	}
-
-	UIManager::~UIManager()
-	{
-	}
+	UIManager::UIManager() = default;
+	UIManager::~UIManager() noexcept = default;
 	
 	UIManager& UIManager::Instance()
 	{

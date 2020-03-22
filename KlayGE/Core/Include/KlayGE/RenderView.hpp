@@ -28,7 +28,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ShaderResourceView : boost::noncopyable
 	{
 	public:
-		virtual ~ShaderResourceView();
+		virtual ~ShaderResourceView() noexcept;
 
 		ElementFormat Format() const
 		{
@@ -88,7 +88,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderTargetView : boost::noncopyable
 	{
 	public:
-		virtual ~RenderTargetView();
+		virtual ~RenderTargetView() noexcept;
 
 		uint32_t Width() const
 		{
@@ -194,7 +194,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API DepthStencilView : boost::noncopyable
 	{
 	public:
-		virtual ~DepthStencilView();
+		virtual ~DepthStencilView() noexcept;
 
 		uint32_t Width() const
 		{
@@ -284,7 +284,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API UnorderedAccessView : boost::noncopyable
 	{
 	public:
-		virtual ~UnorderedAccessView();
+		virtual ~UnorderedAccessView() noexcept;
 
 		ElementFormat Format() const
 		{

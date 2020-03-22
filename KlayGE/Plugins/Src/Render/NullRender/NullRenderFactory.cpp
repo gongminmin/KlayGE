@@ -40,9 +40,7 @@
 
 namespace KlayGE
 {
-	NullRenderFactory::NullRenderFactory()
-	{
-	}
+	NullRenderFactory::NullRenderFactory() = default;
 
 	std::wstring const & NullRenderFactory::Name() const
 	{

@@ -46,7 +46,7 @@ namespace KlayGE
 	{
 	public:
 		explicit AudioBuffer(AudioDataSourcePtr const & data_source);
-		virtual ~AudioBuffer();
+		virtual ~AudioBuffer() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -73,14 +73,14 @@ namespace KlayGE
 		AudioFormat	format_;
 		uint32_t freq_;
 
-		bool resume_playing_;
+		bool resume_playing_{false};
 	};
 
 	class KLAYGE_CORE_API SoundBuffer : public AudioBuffer
 	{
 	public:
 		explicit SoundBuffer(AudioDataSourcePtr const & data_source);
-		~SoundBuffer() override;
+		~SoundBuffer() noexcept override;
 
 		void Reset() override;
 
@@ -94,7 +94,7 @@ namespace KlayGE
 	{
 	public:
 		explicit MusicBuffer(AudioDataSourcePtr const & data_source);
-		~MusicBuffer() override;
+		~MusicBuffer() noexcept override;
 
 		void Play(bool loop = false) override;
 		void Stop() override;
@@ -114,7 +114,7 @@ namespace KlayGE
 	{
 	public:
 		AudioEngine();
-		virtual ~AudioEngine();
+		virtual ~AudioEngine() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -150,8 +150,8 @@ namespace KlayGE
 	protected:
 		std::map<size_t, AudioBufferPtr> audio_buffs_;
 
-		float sound_vol_;
-		float music_vol_;
+		float sound_vol_{1};
+		float music_vol_{1};
 	};
 }
 

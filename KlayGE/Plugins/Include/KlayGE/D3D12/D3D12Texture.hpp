@@ -96,8 +96,8 @@ namespace KlayGE
 		D3D12UnorderedAccessViewSimulationPtr const & RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
 			uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level);
 
-		virtual void DeleteHWResource() override;
-		virtual bool HWResourceReady() const override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
 
 	protected:
 		void DoHWCopyToTexture(Texture& target);
@@ -193,7 +193,7 @@ namespace KlayGE
 	};
 
 
-	class D3D12Texture1D : public D3D12Texture
+	class D3D12Texture1D final : public D3D12Texture
 	{
 	public:
 		D3D12Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
@@ -223,7 +223,7 @@ namespace KlayGE
 		uint32_t width_;
 	};
 
-	class D3D12Texture2D : public D3D12Texture
+	class D3D12Texture2D final : public D3D12Texture
 	{
 	public:
 		D3D12Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
@@ -262,7 +262,7 @@ namespace KlayGE
 		uint32_t height_;
 	};
 
-	class D3D12Texture3D : public D3D12Texture
+	class D3D12Texture3D final : public D3D12Texture
 	{
 	public:
 		D3D12Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
@@ -301,7 +301,7 @@ namespace KlayGE
 		uint32_t depth_;
 	};
 
-	class D3D12TextureCube : public D3D12Texture
+	class D3D12TextureCube final : public D3D12Texture
 	{
 	public:
 		D3D12TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,

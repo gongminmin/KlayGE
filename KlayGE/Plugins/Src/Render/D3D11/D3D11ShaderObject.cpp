@@ -61,7 +61,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	class SetD3D11ShaderParameterTextureSRV
+	class SetD3D11ShaderParameterTextureSRV final
 	{
 	public:
 		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
@@ -101,7 +101,7 @@ namespace
 		RenderEffectParameter* param_;
 	};
 
-	class SetD3D11ShaderParameterGraphicsBufferSRV
+	class SetD3D11ShaderParameterGraphicsBufferSRV final
 	{
 	public:
 		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
@@ -139,7 +139,7 @@ namespace
 		RenderEffectParameter* param_;
 	};
 
-	class SetD3D11ShaderParameterTextureUAV
+	class SetD3D11ShaderParameterTextureUAV final
 	{
 	public:
 		SetD3D11ShaderParameterTextureUAV(
@@ -174,7 +174,7 @@ namespace
 		RenderEffectParameter* param_;
 	};
 
-	class SetD3D11ShaderParameterGraphicsBufferUAV
+	class SetD3D11ShaderParameterGraphicsBufferUAV final
 	{
 	public:
 		SetD3D11ShaderParameterGraphicsBufferUAV(

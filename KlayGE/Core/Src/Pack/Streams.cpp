@@ -49,6 +49,8 @@ namespace KlayGE
 		is_->seekg(0, std::ios_base::beg);
 	}
 
+	InStream::~InStream() noexcept = default;
+
 	STDMETHODIMP_(ULONG) InStream::AddRef() noexcept
 	{
 		++ ref_count_;
@@ -138,6 +140,8 @@ namespace KlayGE
 		: os_(os)
 	{
 	}
+
+	OutStream::~OutStream() noexcept = default;
 
 	STDMETHODIMP_(ULONG) OutStream::AddRef() noexcept
 	{

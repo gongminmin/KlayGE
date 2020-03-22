@@ -34,7 +34,7 @@
 
 namespace KlayGE
 {
-	RenderFactory::~RenderFactory()
+	RenderFactory::~RenderFactory() noexcept
 	{
 		for (auto& rs : rs_pool_)
 		{

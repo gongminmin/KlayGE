@@ -28,7 +28,7 @@ struct IVMRSurfaceAllocator9;
 
 namespace KlayGE
 {
-	class DShowEngine : public ShowEngine
+	class DShowEngine final : public ShowEngine
 	{
 	public:
 		DShowEngine();

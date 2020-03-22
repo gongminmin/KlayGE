@@ -46,9 +46,7 @@
 
 namespace KlayGE
 {
-	D3D12RenderLayout::D3D12RenderLayout()
-	{
-	}
+	D3D12RenderLayout::D3D12RenderLayout() = default;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> const & D3D12RenderLayout::InputElementDesc() const
 	{

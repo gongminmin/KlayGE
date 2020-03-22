@@ -135,7 +135,7 @@ namespace KlayGE
 		};
 
 		RenderLayout();
-		virtual ~RenderLayout();
+		virtual ~RenderLayout() noexcept;
 
 		void TopologyType(topology_type type)
 		{

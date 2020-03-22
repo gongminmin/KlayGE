@@ -45,7 +45,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderFactory : boost::noncopyable
 	{
 	public:
-		virtual ~RenderFactory();
+		virtual ~RenderFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 

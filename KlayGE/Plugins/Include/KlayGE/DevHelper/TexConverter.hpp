@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_DEV_HELPER_API TexConverter
+	class KLAYGE_DEV_HELPER_API TexConverter final
 	{
 	public:
 		TexturePtr Load(std::string_view input_name, TexMetadata const & metadata);

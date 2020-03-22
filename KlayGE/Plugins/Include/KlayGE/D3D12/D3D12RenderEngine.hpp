@@ -64,11 +64,11 @@ namespace KlayGE
 		return MipSlice + ArraySlice * MipLevels + PlaneSlice * MipLevels * ArraySize;
 	}
 
-	class D3D12RenderEngine : public RenderEngine
+	class D3D12RenderEngine final : public RenderEngine
 	{
 	public:
 		D3D12RenderEngine();
-		~D3D12RenderEngine();
+		~D3D12RenderEngine() override;
 
 		std::wstring const & Name() const override;
 

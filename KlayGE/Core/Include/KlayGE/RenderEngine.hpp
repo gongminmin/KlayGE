@@ -88,7 +88,7 @@ namespace KlayGE
 	{
 	public:
 		RenderEngine();
-		virtual ~RenderEngine();
+		virtual ~RenderEngine() noexcept;
 
 		void Suspend();
 		void Resume();

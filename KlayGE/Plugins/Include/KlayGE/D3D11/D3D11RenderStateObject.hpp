@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class D3D11RenderStateObject : public RenderStateObject
+	class D3D11RenderStateObject final : public RenderStateObject
 	{
 	public:
 		D3D11RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,

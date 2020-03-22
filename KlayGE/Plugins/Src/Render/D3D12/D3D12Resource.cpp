@@ -38,9 +38,7 @@
 
 namespace KlayGE
 {
-	D3D12Resource::D3D12Resource()
-	{
-	}
+	D3D12Resource::D3D12Resource() = default;
 
 	D3D12Resource::~D3D12Resource()
 	{

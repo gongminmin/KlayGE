@@ -34,9 +34,7 @@ namespace KlayGE
 		viewport_->Height(height_);
 	}
 
-	FrameBuffer::~FrameBuffer()
-	{
-	}
+	FrameBuffer::~FrameBuffer() noexcept = default;
 
 	FrameBuffer::Attachment FrameBuffer::CalcAttachment(uint32_t index)
 	{

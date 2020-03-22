@@ -38,12 +38,12 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SSGIPostProcess : public PostProcess
+	class KLAYGE_CORE_API SSGIPostProcess final : public PostProcess
 	{
 	public:
 		SSGIPostProcess();
 
-		void OnRenderBegin();
+		void OnRenderBegin() override;
 
 	private:
 		RenderEffectParameter* proj_param_;

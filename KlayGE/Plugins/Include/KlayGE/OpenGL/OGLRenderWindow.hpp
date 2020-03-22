@@ -26,17 +26,17 @@ namespace KlayGE
 {
 	struct RenderSettings;
 
-	class OGLRenderWindow : public OGLFrameBuffer
+	class OGLRenderWindow final : public OGLFrameBuffer
 	{
 	public:
 		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
-		~OGLRenderWindow();
+		~OGLRenderWindow() override;
 
 		void Destroy();
 
-		void SwapBuffers();
+		void SwapBuffers() override;
 
-		std::wstring const & Description() const;
+		std::wstring const & Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);

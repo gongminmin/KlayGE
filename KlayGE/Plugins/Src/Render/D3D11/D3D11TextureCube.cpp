@@ -54,14 +54,14 @@ namespace KlayGE
 		width_ = size;
 	}
 
-	uint32_t D3D11TextureCube::Width(uint32_t level) const
+	uint32_t D3D11TextureCube::Width(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	uint32_t D3D11TextureCube::Height(uint32_t level) const
+	uint32_t D3D11TextureCube::Height(uint32_t level) const noexcept
 	{
 		return this->Width(level);
 	}

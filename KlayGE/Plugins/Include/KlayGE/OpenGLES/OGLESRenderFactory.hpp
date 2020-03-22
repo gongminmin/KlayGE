@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class OGLESRenderFactory : public RenderFactory
+	class OGLESRenderFactory final : public RenderFactory
 	{
 	public:
 		OGLESRenderFactory();

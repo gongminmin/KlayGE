@@ -52,7 +52,7 @@ namespace KlayGE
 		width_ = width;
 	}
 
-	uint32_t D3D11Texture1D::Width(uint32_t level) const
+	uint32_t D3D11Texture1D::Width(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 

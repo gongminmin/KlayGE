@@ -38,9 +38,7 @@ namespace KlayGE
 	{
 	}
 
-	GraphicsBuffer::~GraphicsBuffer()
-	{
-	}
+	GraphicsBuffer::~GraphicsBuffer() noexcept = default;
 
 
 	SoftwareGraphicsBuffer::SoftwareGraphicsBuffer(uint32_t size_in_byte, bool ref_only)

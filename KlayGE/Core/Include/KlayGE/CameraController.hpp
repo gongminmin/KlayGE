@@ -36,7 +36,7 @@ namespace KlayGE
 	{
 	public:
 		CameraController();
-		virtual ~CameraController();
+		virtual ~CameraController() noexcept;
 
 		void Scalers(float rotationScaler, float moveScaler);
 
@@ -50,7 +50,7 @@ namespace KlayGE
 		Camera*		camera_;
 	};
 
-	class KLAYGE_CORE_API FirstPersonCameraController : public CameraController
+	class KLAYGE_CORE_API FirstPersonCameraController final : public CameraController
 	{
 	public:
 		explicit FirstPersonCameraController(bool use_input_engine = true);
@@ -89,7 +89,7 @@ namespace KlayGE
 		void InputHandler(InputEngine const & sender, InputAction const & action);
 	};
 
-	class KLAYGE_CORE_API TrackballCameraController : public CameraController
+	class KLAYGE_CORE_API TrackballCameraController final : public CameraController
 	{
 	public:
 		explicit TrackballCameraController(bool use_input_engine = true,
@@ -120,7 +120,7 @@ namespace KlayGE
 		void InputHandler(InputEngine const & sender, InputAction const & action);
 	};
 
-	class KLAYGE_CORE_API CameraPathController : public CameraController
+	class KLAYGE_CORE_API CameraPathController final : public CameraController
 	{
 	public:
 		enum InterpolateType

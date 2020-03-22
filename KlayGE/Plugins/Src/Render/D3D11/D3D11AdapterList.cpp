@@ -26,10 +26,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11AdapterList::D3D11AdapterList()
-						: current_adapter_(0)
-	{
-	}
+	D3D11AdapterList::D3D11AdapterList() noexcept = default;
 
 	void D3D11AdapterList::Destroy()
 	{
@@ -39,7 +36,7 @@ namespace KlayGE
 
 	// 获取系统显卡数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t D3D11AdapterList::NumAdapter() const
+	size_t D3D11AdapterList::NumAdapter() const noexcept
 	{
 		return adapters_.size();
 	}
@@ -55,14 +52,14 @@ namespace KlayGE
 
 	// 获取当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D11AdapterList::CurrentAdapterIndex() const
+	uint32_t D3D11AdapterList::CurrentAdapterIndex() const noexcept
 	{
 		return current_adapter_;
 	}
 
 	// 设置当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11AdapterList::CurrentAdapterIndex(uint32_t index)
+	void D3D11AdapterList::CurrentAdapterIndex(uint32_t index) noexcept
 	{
 		current_adapter_ = index;
 	}

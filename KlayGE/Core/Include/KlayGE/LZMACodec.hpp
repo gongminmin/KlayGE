@@ -38,11 +38,11 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LZMACodec : boost::noncopyable
+	class KLAYGE_CORE_API LZMACodec final : boost::noncopyable
 	{
 	public:
-		LZMACodec();
-		~LZMACodec();
+		LZMACodec() noexcept;
+		~LZMACodec() noexcept;
 
 		uint64_t Encode(std::ostream& os, ResIdentifierPtr const & res, uint64_t len);
 		uint64_t Encode(std::ostream& os, std::span<uint8_t const> input);

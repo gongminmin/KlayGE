@@ -34,9 +34,7 @@ namespace KlayGE
 		}
 	}
 
-	D3D11Query::~D3D11Query()
-	{
-	}
+	D3D11Query::~D3D11Query() noexcept = default;
 
 	void D3D11Query::SignalFence()
 	{

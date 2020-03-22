@@ -39,10 +39,7 @@
 
 namespace KlayGE
 {
-	D3D11Fence::D3D11Fence()
-		: fence_val_(0)
-	{
-	}
+	D3D11Fence::D3D11Fence() = default;
 
 	uint64_t D3D11Fence::Signal(FenceType ft)
 	{
@@ -103,7 +100,6 @@ namespace KlayGE
 
 
 	D3D11_4Fence::D3D11_4Fence()
-		: last_completed_val_(0), fence_val_(1)
 	{
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_device = re.D3DDevice5();

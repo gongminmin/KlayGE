@@ -35,15 +35,12 @@ namespace uwp
 }
 #endif
 
-class IAmdDxExtQuadBufferStereo;
-using IAmdDxExtQuadBufferStereoPtr = KlayGE::com_ptr<IAmdDxExtQuadBufferStereo>;
-
 namespace KlayGE
 {
 	struct RenderSettings;
 	class D3D11Adapter;
 
-	class D3D11RenderWindow : public D3D11FrameBuffer
+	class D3D11RenderWindow final : public D3D11FrameBuffer
 	{
 	public:
 		D3D11RenderWindow(D3D11Adapter* adapter, std::string const& name, RenderSettings const& settings);
@@ -112,9 +109,9 @@ namespace KlayGE
 
 		D3D11Adapter* adapter_;
 
-		bool dxgi_stereo_support_;
-		bool dxgi_allow_tearing_;
-		bool dxgi_async_swap_chain_;
+		bool dxgi_stereo_support_{false};
+		bool dxgi_allow_tearing_{false};
+		bool dxgi_async_swap_chain_{false};
 
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP

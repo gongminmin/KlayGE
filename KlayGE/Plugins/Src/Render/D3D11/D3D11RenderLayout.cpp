@@ -29,9 +29,7 @@
 
 namespace KlayGE
 {
-	D3D11RenderLayout::D3D11RenderLayout()
-	{
-	}
+	D3D11RenderLayout::D3D11RenderLayout() = default;
 
 	void D3D11RenderLayout::Active() const
 	{

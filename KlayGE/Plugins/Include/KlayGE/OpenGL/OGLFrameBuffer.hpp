@@ -27,7 +27,7 @@ namespace KlayGE
 	{
 	public:
 		explicit OGLFrameBuffer(bool off_screen);
-		virtual ~OGLFrameBuffer();
+		~OGLFrameBuffer() override;
 
 		std::wstring const & Description() const override;
 
@@ -37,7 +37,7 @@ namespace KlayGE
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) override;
 		void Discard(uint32_t flags) override;
 
-		GLuint OGLFbo() const
+		GLuint OGLFbo() const noexcept
 		{
 			return fbo_;
 		}

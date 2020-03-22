@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API MultiResLayer : boost::noncopyable
+	class KLAYGE_CORE_API MultiResLayer final : boost::noncopyable
 	{
 	public:
 		MultiResLayer();

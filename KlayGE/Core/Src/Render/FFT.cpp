@@ -27,6 +27,8 @@
 
 namespace KlayGE
 {
+	GpuFft::~GpuFft() noexcept = default;
+
 	GpuFftPS::GpuFftPS(uint32_t width, uint32_t height, bool forward)
 		: width_(width), height_(height), forward_(forward)
 	{

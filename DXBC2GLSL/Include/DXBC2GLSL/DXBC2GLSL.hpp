@@ -46,7 +46,7 @@
 
 namespace DXBC2GLSL
 {
-	class DXBC2GLSL
+	class DXBC2GLSL final
 	{
 	public:
 		static uint32_t DefaultRules(GLSLVersion version);

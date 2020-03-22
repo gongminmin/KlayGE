@@ -56,7 +56,7 @@ namespace KlayGE
 		std::list<std::vector<char>> msgs;
 	};
 
-	class KLAYGE_CORE_API Lobby : boost::noncopyable
+	class KLAYGE_CORE_API Lobby final : boost::noncopyable
 	{
 		typedef std::vector<std::pair<uint32_t, PlayerDes>>	PlayerAddrs;
 		typedef PlayerAddrs::iterator		PlayerAddrsIter;

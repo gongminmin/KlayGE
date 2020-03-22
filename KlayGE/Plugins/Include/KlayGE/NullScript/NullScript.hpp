@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	class NullScriptModule : public ScriptModule
+	class NullScriptModule final : public ScriptModule
 	{
 	public:
 		NullScriptModule();
@@ -51,7 +51,7 @@ namespace KlayGE
 		std::any RunString(std::string const & script) override;
 	};
 
-	class NullScriptEngine : public ScriptEngine
+	class NullScriptEngine final : public ScriptEngine
 	{
 	public:
 		NullScriptEngine();

@@ -140,7 +140,7 @@ namespace KlayGE
 		std::vector<uint8_t> cbuff_indices_;
 	};
 
-	class D3D12VertexShaderStageObject : public D3D12ShaderStageObject
+	class D3D12VertexShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12VertexShaderStageObject();
@@ -161,7 +161,7 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12PixelShaderStageObject : public D3D12ShaderStageObject
+	class D3D12PixelShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12PixelShaderStageObject();
@@ -177,7 +177,7 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class D3D12GeometryShaderStageObject : public D3D12ShaderStageObject
+	class D3D12GeometryShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12GeometryShaderStageObject();
@@ -198,7 +198,7 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12ComputeShaderStageObject : public D3D12ShaderStageObject
+	class D3D12ComputeShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12ComputeShaderStageObject();
@@ -231,7 +231,7 @@ namespace KlayGE
 		uint32_t block_size_x_, block_size_y_, block_size_z_;
 	};
 
-	class D3D12HullShaderStageObject : public D3D12ShaderStageObject
+	class D3D12HullShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12HullShaderStageObject();
@@ -243,7 +243,7 @@ namespace KlayGE
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 	};
 
-	class D3D12DomainShaderStageObject : public D3D12ShaderStageObject
+	class D3D12DomainShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12DomainShaderStageObject();
@@ -264,7 +264,7 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12ShaderObject : public ShaderObject
+	class D3D12ShaderObject final : public ShaderObject
 	{
 	public:
 		D3D12ShaderObject();

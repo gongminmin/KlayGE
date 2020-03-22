@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_DEV_HELPER_API TexMetadata
+	class KLAYGE_DEV_HELPER_API TexMetadata final
 	{
 	public:
 		TexMetadata();

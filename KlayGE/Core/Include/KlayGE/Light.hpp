@@ -58,7 +58,7 @@ namespace KlayGE
 
 	public:
 		explicit LightSource(LightType type);
-		virtual ~LightSource();
+		virtual ~LightSource() noexcept;
 
 		LightType Type() const;
 
@@ -114,7 +114,7 @@ namespace KlayGE
 		std::function<void(LightSource&, float, float)> update_func_;
 	};
 
-	class KLAYGE_CORE_API AmbientLightSource : public LightSource
+	class KLAYGE_CORE_API AmbientLightSource final : public LightSource
 	{
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL)
@@ -127,7 +127,6 @@ namespace KlayGE
 #endif
 
 		AmbientLightSource();
-		virtual ~AmbientLightSource();
 
 		SceneComponentPtr Clone() const override;
 
@@ -158,7 +157,6 @@ namespace KlayGE
 #endif
 
 		PointLightSource();
-		virtual ~PointLightSource();
 
 		SceneComponentPtr Clone() const override;
 
@@ -183,7 +181,7 @@ namespace KlayGE
 		std::array<CameraPtr, 6> sm_cameras_;
 	};
 
-	class KLAYGE_CORE_API SpotLightSource : public LightSource
+	class KLAYGE_CORE_API SpotLightSource final : public LightSource
 	{
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL)
@@ -196,7 +194,6 @@ namespace KlayGE
 #endif
 
 		SpotLightSource();
-		virtual ~SpotLightSource();
 
 		SceneComponentPtr Clone() const override;
 
@@ -230,7 +227,7 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
-	class KLAYGE_CORE_API DirectionalLightSource : public LightSource
+	class KLAYGE_CORE_API DirectionalLightSource final : public LightSource
 	{
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL)
@@ -243,7 +240,6 @@ namespace KlayGE
 #endif
 
 		DirectionalLightSource();
-		virtual ~DirectionalLightSource();
 
 		SceneComponentPtr Clone() const override;
 
@@ -263,7 +259,7 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
-	class KLAYGE_CORE_API SphereAreaLightSource : public PointLightSource
+	class KLAYGE_CORE_API SphereAreaLightSource final : public PointLightSource
 	{
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL)
@@ -276,7 +272,6 @@ namespace KlayGE
 #endif
 
 		SphereAreaLightSource();
-		virtual ~SphereAreaLightSource();
 
 		SceneComponentPtr Clone() const override;
 
@@ -287,7 +282,7 @@ namespace KlayGE
 		float radius_;
 	};
 
-	class KLAYGE_CORE_API TubeAreaLightSource : public PointLightSource
+	class KLAYGE_CORE_API TubeAreaLightSource final : public PointLightSource
 	{
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL)
@@ -300,7 +295,6 @@ namespace KlayGE
 #endif
 
 		TubeAreaLightSource();
-		virtual ~TubeAreaLightSource();
 
 		SceneComponentPtr Clone() const override;
 

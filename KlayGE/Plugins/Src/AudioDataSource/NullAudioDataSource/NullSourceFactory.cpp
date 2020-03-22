@@ -34,7 +34,7 @@
 
 namespace KlayGE
 {
-	class NullAudioDataSourceFactory : public AudioDataSourceFactory
+	class NullAudioDataSourceFactory final : public AudioDataSourceFactory
 	{
 	public:
 		std::wstring const & Name() const override

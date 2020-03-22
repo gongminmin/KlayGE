@@ -53,9 +53,7 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_CASCADES = 4UL;
 
 	public:
-		virtual ~CascadedShadowLayer()
-		{
-		}
+		virtual ~CascadedShadowLayer() noexcept;
 
 		virtual CascadedShadowLayerType Type() const = 0;
 
@@ -80,7 +78,7 @@ namespace KlayGE
 		std::vector<float4x4> crop_mats_;
 	};
 
-	class KLAYGE_CORE_API PSSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API PSSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		PSSMCascadedShadowLayer();
@@ -99,7 +97,7 @@ namespace KlayGE
 		float lambda_;
 	};
 
-	class KLAYGE_CORE_API SDSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API SDSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		SDSMCascadedShadowLayer();

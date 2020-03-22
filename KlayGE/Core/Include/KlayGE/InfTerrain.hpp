@@ -27,7 +27,6 @@ namespace KlayGE
 	{
 	public:
 		InfTerrainRenderable(std::wstring_view name, uint32_t num_grids = 256, float stride = 1, float increate_rate = 1.012f);
-		virtual ~InfTerrainRenderable();
 
 		float2 const & XDir() const
 		{
@@ -172,9 +171,6 @@ namespace KlayGE
 	public:
 		explicit HQTerrainRenderable(RenderEffectPtr const & effect,
 			float world_scale = 800, float vertical_scale = 2.5f, int world_uv_repeats = 8);
-		virtual ~HQTerrainRenderable()
-		{
-		}
 
 		virtual void Render() override;
 

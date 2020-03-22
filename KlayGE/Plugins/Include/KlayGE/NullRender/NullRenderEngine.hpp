@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class NullRenderEngine : public RenderEngine
+	class NullRenderEngine final : public RenderEngine
 	{
 	public:
 		NullRenderEngine();

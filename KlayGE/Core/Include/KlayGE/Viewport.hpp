@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Viewport : boost::noncopyable
+	class KLAYGE_CORE_API Viewport final : boost::noncopyable
 	{
 	public:
 		Viewport();

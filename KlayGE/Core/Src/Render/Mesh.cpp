@@ -368,9 +368,7 @@ namespace KlayGE
 	{
 	}
 
-	RenderModel::~RenderModel()
-	{
-	}
+	RenderModel::~RenderModel() noexcept = default;
 
 	void RenderModel::BuildModelInfo()
 	{

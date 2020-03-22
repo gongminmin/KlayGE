@@ -42,7 +42,7 @@ namespace KlayGE
 {
 	// 保存适配器的信息，包含该适配器支持的设备列表
 	/////////////////////////////////////////////////////////////////////////////////
-	class D3D12Adapter
+	class D3D12Adapter final
 	{
 	public:
 		D3D12Adapter(uint32_t adapter_no, IDXGIAdapter2* adapter);
@@ -53,22 +53,22 @@ namespace KlayGE
 		std::wstring const Description() const;
 		void ResetAdapter(IDXGIAdapter2* adapter);
 
-		uint32_t AdapterNo() const
+		uint32_t AdapterNo() const noexcept
 		{
 			return adapter_no_;
 		}
 
-		IDXGIAdapter2* DXGIAdapter() const
+		IDXGIAdapter2* DXGIAdapter() const noexcept
 		{
 			return adapter_.get();
 		}
 
-		DXGI_FORMAT DesktopFormat() const
+		DXGI_FORMAT DesktopFormat() const noexcept
 		{
 			return DXGI_FORMAT_R8G8B8A8_UNORM;
 		}
 
-		size_t NumVideoMode() const;
+		size_t NumVideoMode() const noexcept;
 		D3D12VideoMode const & VideoMode(size_t index) const;
 
 	private:

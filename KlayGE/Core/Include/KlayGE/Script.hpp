@@ -43,8 +43,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API ScriptModule : boost::noncopyable
 	{
 	public:
-		ScriptModule();
-		virtual ~ScriptModule();
+		ScriptModule() noexcept;
+		virtual ~ScriptModule() noexcept;
 
 		virtual std::any Value(std::string const & name) = 0;
 		virtual std::any Call(std::string const & func_name, std::span<std::any const> args) = 0;
@@ -57,8 +57,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API ScriptEngine : boost::noncopyable
 	{
 	public:
-		ScriptEngine();
-		virtual ~ScriptEngine();
+		ScriptEngine() noexcept;
+		virtual ~ScriptEngine() noexcept;
 
 		void Suspend();
 		void Resume();

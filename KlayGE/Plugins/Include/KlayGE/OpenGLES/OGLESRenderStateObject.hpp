@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class OGLESRenderStateObject : public RenderStateObject
+	class OGLESRenderStateObject final : public RenderStateObject
 	{
 	public:
 		OGLESRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
@@ -51,7 +51,7 @@ namespace KlayGE
 		GLenum ogl_dest_blend_alpha_;
 	};
 
-	class OGLESSamplerStateObject : public SamplerStateObject
+	class OGLESSamplerStateObject final : public SamplerStateObject
 	{
 	public:
 		explicit OGLESSamplerStateObject(SamplerStateDesc const & desc);
@@ -59,7 +59,7 @@ namespace KlayGE
 
 		void Active(TexturePtr const & texture);
 
-		GLuint GLSampler() const
+		GLuint GLSampler() const noexcept
 		{
 			return sampler_;
 		}

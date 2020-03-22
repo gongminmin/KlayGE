@@ -44,7 +44,7 @@
 
 namespace
 {
-	class SoundVoiceContext : public IXAudio2VoiceCallback
+	class SoundVoiceContext final : public IXAudio2VoiceCallback
 	{
 	public:
 		explicit SoundVoiceContext(bool* is_playing_holder)

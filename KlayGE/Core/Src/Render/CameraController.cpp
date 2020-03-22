@@ -54,9 +54,7 @@ namespace KlayGE
 	{
 	}
 
-	CameraController::~CameraController()
-	{
-	}
+	CameraController::~CameraController() noexcept = default;
 
 	void CameraController::Scalers(float rotationScaler, float moveScaler)
 	{

@@ -42,6 +42,8 @@ namespace KlayGE
 	{
 		Convert(password_, pw);
 	}
+	
+	ArchiveExtractCallback::~ArchiveExtractCallback() noexcept = default;
 
 	STDMETHODIMP_(ULONG) ArchiveExtractCallback::AddRef() noexcept
 	{

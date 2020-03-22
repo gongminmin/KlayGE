@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class NullRenderFactory : public RenderFactory
+	class NullRenderFactory final : public RenderFactory
 	{
 	public:
 		NullRenderFactory();

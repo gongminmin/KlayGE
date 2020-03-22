@@ -40,7 +40,7 @@ struct IInArchive;
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Package
+	class KLAYGE_CORE_API Package final
 	{
 	public:
 		explicit Package(ResIdentifierPtr const & archive_is);

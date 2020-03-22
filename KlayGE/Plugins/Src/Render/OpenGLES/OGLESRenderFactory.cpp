@@ -30,9 +30,7 @@
 
 namespace KlayGE
 {
-	OGLESRenderFactory::OGLESRenderFactory()
-	{
-	}
+	OGLESRenderFactory::OGLESRenderFactory() = default;
 
 	std::wstring const & OGLESRenderFactory::Name() const
 	{

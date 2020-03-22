@@ -337,7 +337,7 @@ namespace KlayGE
 
 	// 输入动作格式
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API InputActionMap
+	class KLAYGE_CORE_API InputActionMap final
 	{
 	public:
 		void AddAction(InputActionDefine const & action_define);
@@ -657,7 +657,7 @@ namespace KlayGE
 		InputEngine::InputDeviceType type;
 	};
 
-	struct KLAYGE_CORE_API InputKeyboardActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputKeyboardActionParam final : public InputActionParam
 	{
 		std::bitset<256> buttons_state;
 		std::bitset<256>  buttons_down;
@@ -681,7 +681,7 @@ namespace KlayGE
 		MB_Ctrl = 1UL << 9,
 		MB_Alt = 1UL << 10
 	};
-	struct KLAYGE_CORE_API InputMouseActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputMouseActionParam final : public InputActionParam
 	{
 		int2 move_vec;
 		int32_t wheel_delta;
@@ -691,7 +691,7 @@ namespace KlayGE
 		uint16_t buttons_up;
 	};
 
-	struct KLAYGE_CORE_API InputJoystickActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputJoystickActionParam final : public InputActionParam
 	{
 		float3 thumbs[2];
 		float triggers[2];
@@ -700,7 +700,7 @@ namespace KlayGE
 		uint32_t buttons_up;
 	};
 	
-	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputTouchActionParam final : public InputActionParam
 	{
 		TouchSemantic gesture;
 		int2 center;
@@ -714,7 +714,7 @@ namespace KlayGE
 		uint16_t touches_up;
 	};
 
-	struct KLAYGE_CORE_API InputSensorActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputSensorActionParam final : public InputActionParam
 	{
 		float latitude;
 		float longitude;

@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class OGLRenderStateObject : public RenderStateObject
+	class OGLRenderStateObject final : public RenderStateObject
 	{
 	public:
 		OGLRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
@@ -54,13 +54,13 @@ namespace KlayGE
 		GLenum ogl_logic_op_;
 	};
 
-	class OGLSamplerStateObject : public SamplerStateObject
+	class OGLSamplerStateObject final : public SamplerStateObject
 	{
 	public:
 		explicit OGLSamplerStateObject(SamplerStateDesc const & desc);
-		virtual ~OGLSamplerStateObject();
+		~OGLSamplerStateObject() override;
 
-		GLuint GLSampler() const
+		GLuint GLSampler() const noexcept
 		{
 			return sampler_;
 		}

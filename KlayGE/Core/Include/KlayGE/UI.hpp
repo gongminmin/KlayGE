@@ -74,7 +74,7 @@ namespace KlayGE
 		Color Current;
 	};
 
-	class KLAYGE_CORE_API UIElement
+	class KLAYGE_CORE_API UIElement final
 	{
 	public:
 		void SetTexture(uint32_t tex_index, IRect const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
@@ -350,7 +350,7 @@ namespace KlayGE
 		IRect bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class KLAYGE_CORE_API UIManager : boost::noncopyable, public std::enable_shared_from_this<UIManager>
+	class KLAYGE_CORE_API UIManager final : boost::noncopyable, public std::enable_shared_from_this<UIManager>
 	{
 	public:
 		struct VertexFormat
@@ -369,7 +369,7 @@ namespace KlayGE
 		};
 
 		UIManager();
-		~UIManager();
+		~UIManager() noexcept;
 
 		static UIManager& Instance();
 		static void Destroy();
@@ -455,11 +455,11 @@ namespace KlayGE
 		};
 		std::map<size_t, std::vector<string_cache>> strings_;
 
-		bool mouse_on_ui_;
-		bool inited_;
+		bool mouse_on_ui_{false};
+		bool inited_{false};
 	};
 
-	class KLAYGE_CORE_API UIDialog : boost::noncopyable
+	class KLAYGE_CORE_API UIDialog final : boost::noncopyable
 	{
 		friend class UIManager;
 
@@ -685,7 +685,7 @@ namespace KlayGE
 		std::map<int, ControlLocation> id_location_;
 	};
 
-	class KLAYGE_CORE_API UIStatic : public UIControl
+	class KLAYGE_CORE_API UIStatic final : public UIControl
 	{
 	public:
 		enum
@@ -697,9 +697,6 @@ namespace KlayGE
 		explicit UIStatic(UIDialogPtr const & dialog);
 		UIStatic(uint32_t type, UIDialogPtr const & dialog);
 		UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bIsDefault = false);
-		virtual ~UIStatic()
-		{
-		}
 
 		virtual void Render();
 		virtual bool ContainsPoint(int2 const & /*pt*/) const
@@ -717,7 +714,7 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
-	class KLAYGE_CORE_API UIButton : public UIControl
+	class KLAYGE_CORE_API UIButton final : public UIControl
 	{
 	public:
 		enum
@@ -729,9 +726,6 @@ namespace KlayGE
 		explicit UIButton(UIDialogPtr const & dialog);
 		UIButton(uint32_t type, UIDialogPtr const & dialog);
 		UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIButton()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -770,7 +764,7 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
-	class KLAYGE_CORE_API UITexButton : public UIControl
+	class KLAYGE_CORE_API UITexButton final : public UIControl
 	{
 	public:
 		enum
@@ -782,9 +776,6 @@ namespace KlayGE
 		explicit UITexButton(UIDialogPtr const & dialog);
 		UITexButton(uint32_t type, UIDialogPtr const & dialog);
 		UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int4 const & coord_size, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UITexButton()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -823,7 +814,7 @@ namespace KlayGE
 		size_t tex_index_;
 	};
 
-	class KLAYGE_CORE_API UICheckBox : public UIControl
+	class KLAYGE_CORE_API UICheckBox final : public UIControl
 	{
 	public:
 		enum
@@ -835,9 +826,6 @@ namespace KlayGE
 		explicit UICheckBox(UIDialogPtr const & dialog);
 		UICheckBox(uint32_t type, UIDialogPtr const & dialog);
 		UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UICheckBox()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -892,7 +880,7 @@ namespace KlayGE
 		std::wstring text_;      // Window text
 	};
 
-	class KLAYGE_CORE_API UIRadioButton : public UIControl
+	class KLAYGE_CORE_API UIRadioButton final : public UIControl
 	{
 	public:
 		enum
@@ -904,9 +892,6 @@ namespace KlayGE
 		explicit UIRadioButton(UIDialogPtr const & dialog);
 		UIRadioButton(uint32_t type, UIDialogPtr const & dialog);
 		UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int4 const & coord_size, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIRadioButton()
-		{
-		}
 
 		void SetChecked(bool bChecked, bool bClearGroup = true)
 		{
@@ -972,7 +957,7 @@ namespace KlayGE
 		std::wstring text_;      // Window text
 	};
 
-	class KLAYGE_CORE_API UISlider : public UIControl
+	class KLAYGE_CORE_API UISlider final : public UIControl
 	{
 	public:
 		enum
@@ -984,9 +969,6 @@ namespace KlayGE
 		explicit UISlider(UIDialogPtr const & dialog);
 		UISlider(uint32_t type, UIDialogPtr const & dialog);
 		UISlider(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
-		virtual ~UISlider()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -1053,7 +1035,7 @@ namespace KlayGE
 		IRect slider_rc_;
 	};
 
-	class KLAYGE_CORE_API UIScrollBar : public UIControl
+	class KLAYGE_CORE_API UIScrollBar final : public UIControl
 	{
 	public:
 		enum
@@ -1146,7 +1128,7 @@ namespace KlayGE
 		bool  bSelected;
 	};
 
-	class KLAYGE_CORE_API UIListBox : public UIControl
+	class KLAYGE_CORE_API UIListBox final : public UIControl
 	{
 	public:
 		enum
@@ -1267,7 +1249,7 @@ namespace KlayGE
 		bool  bVisible;
 	};
 
-	class KLAYGE_CORE_API UIComboBox : public UIControl
+	class KLAYGE_CORE_API UIComboBox final : public UIControl
 	{
 	public:
 		enum
@@ -1385,7 +1367,7 @@ namespace KlayGE
 	};
 
 	// UniBuffer class for the edit control
-	class KLAYGE_CORE_API UniBuffer : boost::noncopyable
+	class KLAYGE_CORE_API UniBuffer final : boost::noncopyable
 	{
 	public:
 		explicit UniBuffer(int nInitialSize = 1);
@@ -1442,7 +1424,7 @@ namespace KlayGE
 	};
 
 	// EditBox control
-	class KLAYGE_CORE_API UIEditBox : public UIControl
+	class KLAYGE_CORE_API UIEditBox final : public UIControl
 	{
 	public:
 		enum
@@ -1563,7 +1545,7 @@ namespace KlayGE
 		static Timer timer_;
 	};
 
-	class KLAYGE_CORE_API UIPolylineEditBox : public UIControl
+	class KLAYGE_CORE_API UIPolylineEditBox final : public UIControl
 	{
 	public:
 		enum
@@ -1575,9 +1557,6 @@ namespace KlayGE
 		explicit UIPolylineEditBox(UIDialogPtr const & dialog);
 		UIPolylineEditBox(uint32_t type, UIDialogPtr const & dialog);
 		UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIPolylineEditBox()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -1627,7 +1606,7 @@ namespace KlayGE
 		bool move_point_;
 	};
 
-	class KLAYGE_CORE_API UIProgressBar : public UIControl
+	class KLAYGE_CORE_API UIProgressBar final : public UIControl
 	{
 	public:
 		enum
@@ -1639,9 +1618,6 @@ namespace KlayGE
 		explicit UIProgressBar(UIDialogPtr const & dialog);
 		UIProgressBar(uint32_t type, UIDialogPtr const & dialog);
 		UIProgressBar(UIDialogPtr const & dialog, int ID, int progress, int4 const & coord_size, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIProgressBar()
-		{
-		}
 
 		virtual bool CanHaveFocus() const
 		{

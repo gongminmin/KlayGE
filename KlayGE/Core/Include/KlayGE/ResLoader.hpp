@@ -50,9 +50,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ResLoadingDesc : boost::noncopyable
 	{
 	public:
-		virtual ~ResLoadingDesc()
-		{
-		}
+		virtual ~ResLoadingDesc() noexcept;
 
 		virtual uint64_t Type() const = 0;
 
@@ -178,7 +176,7 @@ namespace KlayGE
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
 
 		std::unique_ptr<joiner<void>> loading_thread_;
-		volatile bool quit_;
+		volatile bool quit_{false};
 	};
 }
 

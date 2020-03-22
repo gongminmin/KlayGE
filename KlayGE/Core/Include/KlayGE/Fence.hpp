@@ -48,7 +48,7 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~Fence();
+		virtual ~Fence() noexcept;
 
 		virtual uint64_t Signal(FenceType ft) = 0;
 		virtual void Wait(uint64_t id) = 0;

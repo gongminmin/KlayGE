@@ -46,9 +46,7 @@ namespace KlayGE
 			std::span<std::string const> input_pin_names,
 			std::span<std::string const> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
-		virtual ~PostProcess()
-		{
-		}
+		virtual ~PostProcess() noexcept;
 
 		virtual PostProcessPtr Clone();
 
@@ -207,9 +205,6 @@ namespace KlayGE
 			std::span<std::string const> input_pin_names,
 			std::span<std::string const> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
-		virtual ~PostProcessChain()
-		{
-		}
 
 		void Append(PostProcessPtr const & pp);
 		uint32_t NumPostProcesses() const;
@@ -301,7 +296,6 @@ namespace KlayGE
 	public:
 		SeparableBoxFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableBoxFilterPostProcess();
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
@@ -327,7 +321,6 @@ namespace KlayGE
 	public:
 		SeparableGaussianFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableGaussianFilterPostProcess();
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
@@ -354,7 +347,6 @@ namespace KlayGE
 	public:
 		SeparableBilateralFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableBilateralFilterPostProcess();
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
@@ -381,7 +373,6 @@ namespace KlayGE
 	{
 	public:
 		SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir);
-		virtual ~SeparableLogGaussianFilterPostProcess();
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;

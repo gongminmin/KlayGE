@@ -33,5 +33,5 @@
 
 namespace KlayGE
 {
-	DevHelper::~DevHelper() = default;
+	DevHelper::~DevHelper() noexcept = default;
 }

@@ -42,9 +42,6 @@ namespace KlayGE
 	{
 	public:
 		RenderableSkyBox();
-		virtual ~RenderableSkyBox()
-		{
-		}
 
 		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech);
 		void CubeMap(TexturePtr const & cube);

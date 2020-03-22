@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class NullShowEngine : public ShowEngine
+	class NullShowEngine final : public ShowEngine
 	{
 	public:
 		NullShowEngine();

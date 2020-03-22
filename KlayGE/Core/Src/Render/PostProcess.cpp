@@ -282,6 +282,8 @@ namespace KlayGE
 		this->Technique(effect, tech);
 	}
 
+	PostProcess::~PostProcess() noexcept = default;
+
 	PostProcessPtr PostProcess::Clone()
 	{
 		RenderEffectPtr effect = effect_->Clone();
@@ -1326,10 +1328,6 @@ namespace KlayGE
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
 	}
 
-	SeparableBoxFilterPostProcess::~SeparableBoxFilterPostProcess()
-	{
-	}
-	
 	void SeparableBoxFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
 		PostProcess::InputPin(index, srv);
@@ -1412,10 +1410,6 @@ namespace KlayGE
 		src_tex_size_ep_ = effect_->ParameterByName("src_tex_size");
 		color_weight_ep_ = effect_->ParameterByName("color_weight");
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
-	}
-
-	SeparableGaussianFilterPostProcess::~SeparableGaussianFilterPostProcess()
-	{
 	}
 
 	void SeparableGaussianFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
@@ -1535,10 +1529,6 @@ namespace KlayGE
 		sharpness_factor_ep_ = effect_->ParameterByName("sharpness_factor");
 	}
 
-	SeparableBilateralFilterPostProcess::~SeparableBilateralFilterPostProcess()
-	{
-	}
-
 	void SeparableBilateralFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
 		PostProcess::InputPin(index, srv);
@@ -1599,10 +1589,6 @@ namespace KlayGE
 
 		color_weight_ep_ = effect_->ParameterByName("color_weight");
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
-	}
-
-	SeparableLogGaussianFilterPostProcess::~SeparableLogGaussianFilterPostProcess()
-	{
 	}
 
 	void SeparableLogGaussianFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)

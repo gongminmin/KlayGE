@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SATSeparableScanSweepPostProcess : public PostProcess
+	class KLAYGE_CORE_API SATSeparableScanSweepPostProcess final : public PostProcess
 	{
 	public:
 		SATSeparableScanSweepPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech);
@@ -40,7 +40,7 @@ namespace KlayGE
 		RenderEffectParameter* scale_ep_;
 	};
 
-	class KLAYGE_CORE_API SATPostProcess : public PostProcessChain
+	class KLAYGE_CORE_API SATPostProcess final : public PostProcessChain
 	{
 	public:
 		SATPostProcess();
@@ -50,7 +50,7 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API SATPostProcessCS : public PostProcessChain
+	class KLAYGE_CORE_API SATPostProcessCS final : public PostProcessChain
 	{
 	public:
 		SATPostProcessCS();

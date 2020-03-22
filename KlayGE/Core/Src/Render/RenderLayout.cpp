@@ -35,9 +35,7 @@ namespace KlayGE
 		vertex_streams_.reserve(4);
 	}
 
-	RenderLayout::~RenderLayout()
-	{
-	}
+	RenderLayout::~RenderLayout() noexcept = default;
 
 	void RenderLayout::NumVertices(uint32_t n)
 	{

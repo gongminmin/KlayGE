@@ -117,13 +117,8 @@ namespace
 
 namespace KlayGE
 {
-	LZMACodec::LZMACodec()
-	{
-	}
-
-	LZMACodec::~LZMACodec()
-	{
-	}
+	LZMACodec::LZMACodec() noexcept = default;
+	LZMACodec::~LZMACodec() noexcept = default;
 
 	uint64_t LZMACodec::Encode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len)
 	{

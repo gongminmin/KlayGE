@@ -30,9 +30,7 @@ namespace KlayGE
 	{
 	}
 
-	LightSource::~LightSource()
-	{
-	}
+	LightSource::~LightSource() noexcept = default;
 
 	LightSource::LightType LightSource::Type() const
 	{
@@ -245,10 +243,6 @@ namespace KlayGE
 		color_ = float4(0, 0, 0, 0);
 	}
 
-	AmbientLightSource::~AmbientLightSource()
-	{
-	}
-
 	SceneComponentPtr AmbientLightSource::Clone() const
 	{
 		auto ret = MakeSharedPtr<AmbientLightSource>();
@@ -309,10 +303,6 @@ namespace KlayGE
 		{
 			sm_cameras_[i] = MakeSharedPtr<Camera>();
 		}
-	}
-
-	PointLightSource::~PointLightSource()
-	{
 	}
 
 	SceneComponentPtr PointLightSource::Clone() const
@@ -424,10 +414,6 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cr_ = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
-	}
-
-	SpotLightSource::~SpotLightSource()
-	{
 	}
 
 	SceneComponentPtr SpotLightSource::Clone() const
@@ -547,10 +533,6 @@ namespace KlayGE
 		attrib_ = 0;
 	}
 
-	DirectionalLightSource::~DirectionalLightSource()
-	{
-	}
-
 	SceneComponentPtr DirectionalLightSource::Clone() const
 	{
 		auto ret = MakeSharedPtr<DirectionalLightSource>();
@@ -651,10 +633,6 @@ namespace KlayGE
 		type_ = LT_SphereArea;
 	}
 
-	SphereAreaLightSource::~SphereAreaLightSource()
-	{
-	}
-
 	SceneComponentPtr SphereAreaLightSource::Clone() const
 	{
 		auto ret = MakeSharedPtr<SphereAreaLightSource>();
@@ -679,10 +657,6 @@ namespace KlayGE
 	TubeAreaLightSource::TubeAreaLightSource()
 	{
 		type_ = LT_TubeArea;
-	}
-
-	TubeAreaLightSource::~TubeAreaLightSource()
-	{
 	}
 
 	SceneComponentPtr TubeAreaLightSource::Clone() const

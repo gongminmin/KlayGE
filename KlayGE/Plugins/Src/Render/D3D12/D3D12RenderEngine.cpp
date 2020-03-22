@@ -1849,7 +1849,7 @@ namespace KlayGE
 
 			D3D12_ROOT_SIGNATURE_DESC root_signature_desc;
 			root_signature_desc.NumParameters = static_cast<UINT>(root_params.size());
-			root_signature_desc.pParameters = root_params.empty() ? nullptr : &root_params[0];
+			root_signature_desc.pParameters = root_params.data();
 			root_signature_desc.NumStaticSamplers = 0;
 			root_signature_desc.pStaticSamplers = nullptr;
 			root_signature_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;

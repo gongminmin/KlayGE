@@ -137,7 +137,7 @@ namespace KlayGE
 		GLuint gl_shader_ = 0;
 	};
 
-	class OGLESVertexShaderStageObject : public OGLESShaderStageObject
+	class OGLESVertexShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESVertexShaderStageObject();
@@ -181,7 +181,7 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 	};
 
-	class OGLESPixelShaderStageObject : public OGLESShaderStageObject
+	class OGLESPixelShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESPixelShaderStageObject();
@@ -195,19 +195,19 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class OGLESGeometryShaderStageObject : public OGLESShaderStageObject
+	class OGLESGeometryShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESGeometryShaderStageObject();
 	};
 
-	class OGLESComputeShaderStageObject : public OGLESShaderStageObject
+	class OGLESComputeShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESComputeShaderStageObject();
 	};
 
-	class OGLESHullShaderStageObject : public OGLESShaderStageObject
+	class OGLESHullShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESHullShaderStageObject();
@@ -235,7 +235,7 @@ namespace KlayGE
 #endif
 	};
 
-	class OGLESDomainShaderStageObject : public OGLESShaderStageObject
+	class OGLESDomainShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESDomainShaderStageObject();
@@ -283,7 +283,7 @@ namespace KlayGE
 		SamplerStateObjectPtr sampler;
 	};
 
-	class OGLESShaderObject : public ShaderObject
+	class OGLESShaderObject final : public ShaderObject
 	{
 	public:
 		OGLESShaderObject();

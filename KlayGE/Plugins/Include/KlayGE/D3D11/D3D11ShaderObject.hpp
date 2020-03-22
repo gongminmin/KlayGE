@@ -164,7 +164,7 @@ namespace KlayGE
 		std::vector<uint8_t> cbuff_indices_;
 	};
 
-	class D3D11VertexShaderStageObject : public D3D11ShaderStageObject
+	class D3D11VertexShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11VertexShaderStageObject();
@@ -201,7 +201,7 @@ namespace KlayGE
 		uint32_t vs_signature_;
 	};
 
-	class D3D11PixelShaderStageObject : public D3D11ShaderStageObject
+	class D3D11PixelShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11PixelShaderStageObject();
@@ -226,7 +226,7 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class D3D11GeometryShaderStageObject : public D3D11ShaderStageObject
+	class D3D11GeometryShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11GeometryShaderStageObject();
@@ -245,7 +245,7 @@ namespace KlayGE
 		ID3D11GeometryShaderPtr geometry_shader_;
 	};
 
-	class D3D11ComputeShaderStageObject : public D3D11ShaderStageObject
+	class D3D11ComputeShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11ComputeShaderStageObject();
@@ -285,7 +285,7 @@ namespace KlayGE
 		uint32_t block_size_x_, block_size_y_, block_size_z_;
 	};
 
-	class D3D11HullShaderStageObject : public D3D11ShaderStageObject
+	class D3D11HullShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11HullShaderStageObject();
@@ -304,7 +304,7 @@ namespace KlayGE
 		ID3D11HullShaderPtr hull_shader_;
 	};
 
-	class D3D11DomainShaderStageObject : public D3D11ShaderStageObject
+	class D3D11DomainShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11DomainShaderStageObject();
@@ -328,7 +328,7 @@ namespace KlayGE
 		ID3D11GeometryShaderPtr geometry_shader_;
 	};
 
-	class D3D11ShaderObject : public ShaderObject
+	class D3D11ShaderObject final : public ShaderObject
 	{
 	public:
 		D3D11ShaderObject();

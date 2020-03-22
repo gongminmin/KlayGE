@@ -52,6 +52,8 @@ namespace KlayGE
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
 
+	IndirectLightingLayer::~IndirectLightingLayer() noexcept = default;
+
 	MultiResSILLayer::MultiResSILLayer()
 	{
 		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();

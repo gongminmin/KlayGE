@@ -202,9 +202,9 @@ namespace KlayGE
 #endif
 	};
 
-	class KLAYGE_CORE_API DeferredRenderingLayer : boost::noncopyable
+	class KLAYGE_CORE_API DeferredRenderingLayer final : boost::noncopyable
 	{
-		class DeferredRenderingJob : boost::noncopyable
+		class DeferredRenderingJob final : boost::noncopyable
 		{
 		public:
 			explicit DeferredRenderingJob(std::function<uint32_t()> job_func)

@@ -27,9 +27,7 @@
 
 namespace KlayGE
 {
-	OGLESRenderLayout::OGLESRenderLayout()
-	{
-	}
+	OGLESRenderLayout::OGLESRenderLayout() = default;
 
 	OGLESRenderLayout::~OGLESRenderLayout()
 	{

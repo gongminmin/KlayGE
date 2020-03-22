@@ -268,7 +268,7 @@ namespace KlayGE
 		};
 	};
 
-	class KLAYGE_CORE_API RenderEffectAnnotation : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectAnnotation final : boost::noncopyable
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -302,7 +302,7 @@ namespace KlayGE
 		std::unique_ptr<RenderVariable> var_;
 	};
 
-	class KLAYGE_CORE_API RenderShaderFragment
+	class KLAYGE_CORE_API RenderShaderFragment final
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -335,7 +335,7 @@ namespace KlayGE
 		std::string str_;
 	};
 
-	class KLAYGE_CORE_API RenderShaderGraphNode
+	class KLAYGE_CORE_API RenderShaderGraphNode final
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -431,7 +431,7 @@ namespace KlayGE
 
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API RenderEffect : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffect final : boost::noncopyable
 	{
 		friend class RenderEffectTemplate;
 
@@ -521,7 +521,7 @@ namespace KlayGE
 		mutable bool hw_res_ready_ = false;
 	};
 
-	class KLAYGE_CORE_API RenderEffectTemplate : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectTemplate final : boost::noncopyable
 	{
 	public:
 		void Load(std::span<std::string const> names, RenderEffect& effect);
@@ -646,7 +646,7 @@ namespace KlayGE
 		std::vector<RenderShaderGraphNode> shader_graph_nodes_;
 	};
 
-	class KLAYGE_CORE_API RenderTechnique : boost::noncopyable
+	class KLAYGE_CORE_API RenderTechnique final : boost::noncopyable
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -741,7 +741,7 @@ namespace KlayGE
 		bool has_tessellation_;
 	};
 
-	class KLAYGE_CORE_API RenderPass : boost::noncopyable
+	class KLAYGE_CORE_API RenderPass final : boost::noncopyable
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -815,7 +815,7 @@ namespace KlayGE
 		bool is_validate_;
 	};
 
-	class KLAYGE_CORE_API RenderEffectConstantBuffer : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectConstantBuffer final : boost::noncopyable
 	{
 	public:
 		explicit RenderEffectConstantBuffer(RenderEffect const& effect) : effect_(&effect), dirty_(true)
@@ -917,7 +917,7 @@ namespace KlayGE
 		bool dirty_;
 	};
 
-	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectParameter final : boost::noncopyable
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM

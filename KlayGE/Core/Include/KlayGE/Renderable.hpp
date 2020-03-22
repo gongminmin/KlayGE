@@ -116,19 +116,19 @@ namespace KlayGE
 		PT_VDM = MakePassType<PRT_None, PTB_None, PC_VDM>::value
 	};
 
-	inline PassRT GetPassRT(PassType pt)
+	constexpr PassRT GetPassRT(PassType pt)
 	{
 		return static_cast<PassRT>(pt & 0xF);
 	}
-	inline PassTargetBuffer GetPassTargetBuffer(PassType pt)
+	constexpr PassTargetBuffer GetPassTargetBuffer(PassType pt)
 	{
 		return static_cast<PassTargetBuffer>((pt >> 4) & 0x3);
 	}
-	inline PassCategory GetPassCategory(PassType pt)
+	constexpr PassCategory GetPassCategory(PassType pt)
 	{
 		return static_cast<PassCategory>((pt >> 6) & 0xF);
 	}
-	inline PassType ComposePassType(PassRT rt, PassTargetBuffer tb, PassCategory cat)
+	constexpr PassType ComposePassType(PassRT rt, PassTargetBuffer tb, PassCategory cat)
 	{
 		return static_cast<PassType>((rt << 0) | (tb << 4) | (cat << 6));
 	}

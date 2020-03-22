@@ -36,7 +36,7 @@
 
 namespace KlayGE
 {
-	class NullInputFactory : public InputFactory
+	class NullInputFactory final : public InputFactory
 	{
 	public:
 		std::wstring const & Name() const override
@@ -46,15 +46,15 @@ namespace KlayGE
 		}
 
 	private:
-		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() override
+		std::unique_ptr<InputEngine> DoMakeInputEngine() override
 		{
 			return MakeUniquePtr<NullInputEngine>();
 		}
 
-		virtual void DoSuspend() override
+		void DoSuspend() override
 		{
 		}
-		virtual void DoResume() override
+		void DoResume() override
 		{
 		}
 	};

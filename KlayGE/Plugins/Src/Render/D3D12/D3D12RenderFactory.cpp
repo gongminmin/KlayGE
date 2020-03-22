@@ -48,9 +48,7 @@
 
 namespace KlayGE
 {
-	D3D12RenderFactory::D3D12RenderFactory()
-	{
-	}
+	D3D12RenderFactory::D3D12RenderFactory() = default;
 
 	std::wstring const & D3D12RenderFactory::Name() const
 	{

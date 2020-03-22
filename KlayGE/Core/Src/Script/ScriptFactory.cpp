@@ -35,6 +35,8 @@
 
 namespace KlayGE
 {
+    ScriptFactory::~ScriptFactory() noexcept = default;
+
 	ScriptEngine& ScriptFactory::ScriptEngineInstance()
 	{
 		if (!se_)

@@ -99,8 +99,9 @@ namespace KlayGE
 {
 	std::unique_ptr<ResLoader> ResLoader::res_loader_instance_;
 
+	ResLoadingDesc::~ResLoadingDesc() noexcept = default;
+
 	ResLoader::ResLoader()
-		: quit_(false)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP

@@ -22,15 +22,13 @@ namespace KlayGE
 	class KLAYGE_CORE_API GpuFft : boost::noncopyable
 	{
 	public:
-		virtual ~GpuFft()
-		{
-		}
+		virtual ~GpuFft() noexcept;
 
 		virtual void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
 			ShaderResourceViewPtr const& in_imag) = 0;
 	};
 
-	class KLAYGE_CORE_API GpuFftPS : public GpuFft
+	class KLAYGE_CORE_API GpuFftPS final : public GpuFft
 	{
 	public:
 		GpuFftPS(uint32_t width, uint32_t height, bool forward);
@@ -65,7 +63,7 @@ namespace KlayGE
 		PostProcessPtr fft_y_pp_;
 	};
 
-	class KLAYGE_CORE_API GpuFftCS4 : public GpuFft
+	class KLAYGE_CORE_API GpuFftCS4 final : public GpuFft
 	{
 	public:
 		GpuFftCS4(uint32_t width, uint32_t height, bool forward);
@@ -103,7 +101,7 @@ namespace KlayGE
 		bool forward_;
 	};
 
-	class KLAYGE_CORE_API GpuFftCS5 : public GpuFft
+	class KLAYGE_CORE_API GpuFftCS5 final : public GpuFft
 	{
 	public:
 		GpuFftCS5(uint32_t width, uint32_t height, bool forward);

@@ -98,7 +98,7 @@ namespace KlayGE
 	#pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API TexCompressionETC1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC1 final : public TexCompression
 	{
 	public:
 		struct Params
@@ -206,7 +206,7 @@ namespace KlayGE
 		uint8_t temp_selectors_[8];
 	};
 
-	class KLAYGE_CORE_API TexCompressionETC2RGB8 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC2RGB8 final : public TexCompression
 	{
 	public:
 		TexCompressionETC2RGB8();
@@ -222,7 +222,7 @@ namespace KlayGE
 		TexCompressionETC1Ptr etc1_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 final : public TexCompression
 	{
 	public:
 		TexCompressionETC2RGB8A1();

@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class D3D12GpuMemoryPage : boost::noncopyable
+	class D3D12GpuMemoryPage final : boost::noncopyable
 	{
 	public:
 		D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource);
@@ -70,7 +70,7 @@ namespace KlayGE
 	};
 	using D3D12GpuMemoryPagePtr = std::shared_ptr<D3D12GpuMemoryPage>;
 
-	class D3D12GpuMemoryBlock : boost::noncopyable
+	class D3D12GpuMemoryBlock final : boost::noncopyable
 	{
 	public:
 		D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size);
@@ -109,7 +109,7 @@ namespace KlayGE
 	};
 	using D3D12GpuMemoryBlockPtr = std::shared_ptr<D3D12GpuMemoryBlock>;
 
-	class D3D12GpuMemoryAllocator : boost::noncopyable
+	class D3D12GpuMemoryAllocator final : boost::noncopyable
 	{
 	public:
 		static constexpr uint32_t DefaultAligment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;

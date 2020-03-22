@@ -50,10 +50,6 @@ namespace KlayGE
 		d3d_viewport_.MaxDepth = 1.0f;
 	}
 
-	D3D12FrameBuffer::~D3D12FrameBuffer()
-	{
-	}
-
 	std::wstring const & D3D12FrameBuffer::Description() const
 	{
 		static std::wstring const desc(L"Direct3D12 Framebuffer");
@@ -86,8 +82,7 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* cmd_list = re.D3DRenderCmdList();
 
-		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()),
-			d3d_rt_handles_.empty() ? nullptr : &d3d_rt_handles_[0], false, d3d_ds_handle_ptr_);
+		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()), d3d_rt_handles_.data(), false, d3d_ds_handle_ptr_);
 		re.RSSetViewports(1, &d3d_viewport_);
 	}
 

@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	class ArchiveExtractCallback : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
+	class ArchiveExtractCallback final : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
 	{
 	public:
 		// IUnknown
@@ -65,7 +65,7 @@ namespace KlayGE
 
 	public:
 		ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream) noexcept;
-		virtual ~ArchiveExtractCallback() noexcept = default;
+		virtual ~ArchiveExtractCallback() noexcept;
 
 	private:
 		std::atomic<int32_t> ref_count_{1};

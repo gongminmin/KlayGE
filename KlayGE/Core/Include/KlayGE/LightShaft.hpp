@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LightShaftPostProcess : public PostProcess
+	class KLAYGE_CORE_API LightShaftPostProcess final : public PostProcess
 	{
 	public:
 		LightShaftPostProcess();

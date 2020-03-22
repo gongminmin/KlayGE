@@ -54,7 +54,7 @@ namespace KlayGE
 #pragma clang diagnostic pop
 #endif
 
-		virtual ~SceneComponent();
+		virtual ~SceneComponent() noexcept;
 
 		virtual SceneComponentPtr Clone() const = 0;
 

@@ -109,7 +109,7 @@ namespace KlayGE
 	{
 	public:
 		explicit ShaderStageObject(ShaderStage stage);
-		virtual ~ShaderStageObject();
+		virtual ~ShaderStageObject() noexcept;
 
 		virtual void StreamIn(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) = 0;

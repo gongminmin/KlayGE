@@ -239,7 +239,7 @@ namespace uwp
 
 namespace KlayGE
 {
-	class MsgInputEngine : public InputEngine
+	class MsgInputEngine final : public InputEngine
 	{
 	public:
 		MsgInputEngine();
@@ -303,8 +303,8 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
@@ -326,12 +326,12 @@ namespace KlayGE
 		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 	};
 
-	class MsgInputKeyboard : public InputKeyboard
+	class MsgInputKeyboard final : public InputKeyboard
 	{
 	public:
 		MsgInputKeyboard();
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
@@ -340,13 +340,13 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 		std::array<bool, 256> keys_state_;
 	};
 
-	class MsgInputMouse : public InputMouse
+	class MsgInputMouse final : public InputMouse
 	{
 	public:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -355,7 +355,7 @@ namespace KlayGE
 		MsgInputMouse();
 #endif
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -366,7 +366,7 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -381,7 +381,7 @@ namespace KlayGE
 		std::array<bool, 8> buttons_state_;
 	};
 
-	class MsgInputJoystick : public InputJoystick
+	class MsgInputJoystick final : public InputJoystick
 	{
 	public:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -390,7 +390,7 @@ namespace KlayGE
 		MsgInputJoystick();
 #endif
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -399,7 +399,7 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -411,7 +411,7 @@ namespace KlayGE
 	};
 
 #if defined(KLAYGE_PLATFORM_WINDOWS)
-	class MsgInputXInput : public InputJoystick
+	class MsgInputXInput final : public InputJoystick
 	{
 	public:
 		explicit MsgInputXInput(uint32_t device_id);
@@ -430,18 +430,18 @@ namespace KlayGE
 #endif
 
 #if defined KLAYGE_HAVE_LIBOVR
-	class MsgInputOVR : public InputSensor, public OVR::MessageHandler
+	class MsgInputOVR final : public InputSensor, public OVR::MessageHandler
 	{
 	public:
 		MsgInputOVR();
-		virtual ~MsgInputOVR();
+		~MsgInputOVR() override;
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 
-		virtual void OnMessage(OVR::Message const & msg) override;
+		void OnMessage(OVR::Message const & msg) override;
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 		OVR::Ptr<OVR::DeviceManager> manager_;
@@ -454,19 +454,20 @@ namespace KlayGE
 	};
 #endif
 
-	class MsgInputTouch : public InputTouch
+	class MsgInputTouch final : public InputTouch
 	{
 	public:
 		MsgInputTouch();
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
+
 		void OnPointerDown(int2 const & pt, uint32_t id);
 		void OnPointerUp(int2 const & pt, uint32_t id);
 		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
 		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 		int2 AdjustPoint(int2 const & pt) const;
 
 		Timer timer_;
@@ -476,13 +477,13 @@ namespace KlayGE
 	};
 	
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
-	class MsgInputSensor : public InputSensor
+	class MsgInputSensor final : public InputSensor
 	{
 	public:
 		MsgInputSensor();
-		virtual ~MsgInputSensor();
+		~MsgInputSensor() override;
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		void OnLocationChanged(REFIID report_type, ILocationReport* location_report);
@@ -496,7 +497,7 @@ namespace KlayGE
 		}
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -511,13 +512,13 @@ namespace KlayGE
 		bool destroyed_;
 	};
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-	class MsgInputSensor : public InputSensor
+	class MsgInputSensor final : public InputSensor
 	{
 	public:
 		MsgInputSensor();
-		virtual ~MsgInputSensor();
+		~MsgInputSensor() override;
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 
 		HRESULT OnPositionChanged(uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args);
 		HRESULT OnAccelerometeReadingChanged(uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args);
@@ -528,7 +529,7 @@ namespace KlayGE
 			uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args);
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 	private:
 		uwp::Geolocator locator_{nullptr};
@@ -550,16 +551,16 @@ namespace KlayGE
 		uwp::OrientationSensor::ReadingChanged_revoker orientation_reading_token_;
 	};
 #elif defined KLAYGE_PLATFORM_ANDROID
-	class MsgInputSensor : public InputSensor
+	class MsgInputSensor final : public InputSensor
 	{
 	public:
 		MsgInputSensor();
-		virtual ~MsgInputSensor();
+		~MsgInputSensor() override;
 
-		virtual std::wstring const & Name() const override;
+		std::wstring const & Name() const override;
 
 	private:
-		virtual void UpdateInputs() override;
+		void UpdateInputs() override;
 
 		static int SensorCallback(int fd, int events, void* data);
 

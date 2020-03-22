@@ -38,10 +38,10 @@ namespace KlayGE
 	{
 		namespace Detail
 		{
-			SignalBase::~SignalBase() = default;
+			SignalBase::~SignalBase() noexcept = default;
 		}
 
-		Connection::Connection() = default;
+		Connection::Connection() noexcept = default;
 
 		Connection::Connection(Connection&& rhs) noexcept : signal_(std::move(rhs.signal_)), slot_(std::move(rhs.slot_))
 		{

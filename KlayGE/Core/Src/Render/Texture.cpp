@@ -3141,9 +3141,7 @@ namespace KlayGE
 	{
 	}
 
-	Texture::~Texture()
-	{
-	}
+	Texture::~Texture() noexcept = default;
 
 	uint32_t Texture::NumMipMaps() const
 	{

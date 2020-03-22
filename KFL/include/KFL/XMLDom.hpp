@@ -62,7 +62,7 @@ namespace KlayGE
 		XNT_PI
 	};
 
-	class XMLDocument : boost::noncopyable
+	class XMLDocument final : boost::noncopyable
 	{
 	public:
 		XMLDocument();
@@ -87,7 +87,7 @@ namespace KlayGE
 		XMLNodePtr root_;
 	};
 
-	class XMLNode : boost::noncopyable
+	class XMLNode final : boost::noncopyable
 	{
 		friend class XMLDocument;
 
@@ -151,7 +151,7 @@ namespace KlayGE
 		std::vector<XMLAttributePtr> attrs_;
 	};
 
-	class XMLAttribute : boost::noncopyable
+	class XMLAttribute final : boost::noncopyable
 	{
 		friend class XMLDocument;
 		friend class XMLNode;

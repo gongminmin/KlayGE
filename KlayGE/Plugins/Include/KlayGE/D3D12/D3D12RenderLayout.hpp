@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	class D3D12RenderLayout : public RenderLayout
+	class D3D12RenderLayout final : public RenderLayout
 	{
 	public:
 		D3D12RenderLayout();

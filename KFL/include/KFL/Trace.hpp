@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class Trace
+	class Trace final
 	{
 	public:
 		Trace(char const * func, int line = 0, char const * file = nullptr)

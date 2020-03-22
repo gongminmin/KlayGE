@@ -32,7 +32,6 @@ namespace KlayGE
 	{
 	public:
 		SumLumPostProcess();
-		virtual ~SumLumPostProcess();
 
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
@@ -44,13 +43,13 @@ namespace KlayGE
 		std::vector<float4> tex_coord_offset_;
 	};
 
-	class KLAYGE_CORE_API SumLumLogPostProcess : public SumLumPostProcess
+	class KLAYGE_CORE_API SumLumLogPostProcess final : public SumLumPostProcess
 	{
 	public:
 		SumLumLogPostProcess();
 	};
 
-	class KLAYGE_CORE_API SumLumLogPostProcessCS : public SumLumPostProcess
+	class KLAYGE_CORE_API SumLumLogPostProcessCS final : public SumLumPostProcess
 	{
 	public:
 		SumLumLogPostProcessCS();
@@ -63,7 +62,7 @@ namespace KlayGE
 		SumLumIterativePostProcess();
 	};
 
-	class KLAYGE_CORE_API AdaptedLumPostProcess : public PostProcess
+	class KLAYGE_CORE_API AdaptedLumPostProcess final : public PostProcess
 	{
 	public:
 		AdaptedLumPostProcess();
@@ -80,7 +79,7 @@ namespace KlayGE
 		RenderEffectParameter* frame_delta_ep_;
 	};
 
-	class KLAYGE_CORE_API AdaptedLumPostProcessCS : public PostProcess
+	class KLAYGE_CORE_API AdaptedLumPostProcessCS final : public PostProcess
 	{
 	public:
 		AdaptedLumPostProcessCS();
@@ -92,7 +91,7 @@ namespace KlayGE
 		RenderEffectParameter* frame_delta_ep_;
 	};
 
-	class KLAYGE_CORE_API ImageStatPostProcess : public PostProcess
+	class KLAYGE_CORE_API ImageStatPostProcess final : public PostProcess
 	{
 	public:
 		ImageStatPostProcess();
@@ -109,7 +108,7 @@ namespace KlayGE
 		PostProcessPtr adapted_lum_;
 	};
 
-	class KLAYGE_CORE_API ImageStatPostProcessCS : public PostProcess
+	class KLAYGE_CORE_API ImageStatPostProcessCS final : public PostProcess
 	{
 	public:
 		ImageStatPostProcessCS();
@@ -125,7 +124,7 @@ namespace KlayGE
 		PostProcessPtr adapted_lum_;
 	};
 
-	class KLAYGE_CORE_API LensEffectsPostProcess : public PostProcess
+	class KLAYGE_CORE_API LensEffectsPostProcess final : public PostProcess
 	{
 	public:
 		LensEffectsPostProcess();
@@ -143,7 +142,7 @@ namespace KlayGE
 		PostProcessPtr glow_merger_;
 	};
 
-	class KLAYGE_CORE_API FFTLensEffectsPostProcess : public PostProcess
+	class KLAYGE_CORE_API FFTLensEffectsPostProcess final : public PostProcess
 	{
 	public:
 		FFTLensEffectsPostProcess();
@@ -183,7 +182,7 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
+	class KLAYGE_CORE_API HDRPostProcess final : public PostProcess
 	{
 	public:
 		explicit HDRPostProcess(bool fft_lens_effects);

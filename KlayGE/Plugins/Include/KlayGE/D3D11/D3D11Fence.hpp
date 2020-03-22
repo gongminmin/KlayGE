@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class D3D11Fence : public Fence
+	class D3D11Fence final : public Fence
 	{
 	public:
 		D3D11Fence();
@@ -52,10 +52,10 @@ namespace KlayGE
 
 	private:
 		std::map<uint64_t, ID3D11QueryPtr> fences_;
-		std::atomic<uint64_t> fence_val_;
+		std::atomic<uint64_t> fence_val_{0};
 	};
 	
-	class D3D11_4Fence : public Fence
+	class D3D11_4Fence final : public Fence
 	{
 	public:
 		D3D11_4Fence();
@@ -67,8 +67,8 @@ namespace KlayGE
 	private:
 		ID3D11FencePtr fence_;
 		Win32UniqueHandle fence_event_;
-		uint64_t last_completed_val_;
-		std::atomic<uint64_t> fence_val_;
+		uint64_t last_completed_val_{0};
+		std::atomic<uint64_t> fence_val_{1};
 	};
 }
 

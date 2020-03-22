@@ -32,7 +32,7 @@ namespace KlayGE
 		mutable GLuint gl_tex_;
 	};
 
-	class OGLESTextureShaderResourceView : public OGLESShaderResourceView
+	class OGLESTextureShaderResourceView final : public OGLESShaderResourceView
 	{
 	public:
 		explicit OGLESTextureShaderResourceView(TexturePtr const & texture);
@@ -40,7 +40,7 @@ namespace KlayGE
 		void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const override;
 	};
 
-	class OGLESBufferShaderResourceView : public OGLESShaderResourceView
+	class OGLESBufferShaderResourceView final : public OGLESShaderResourceView
 	{
 	public:
 		OGLESBufferShaderResourceView(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
@@ -83,7 +83,7 @@ namespace KlayGE
 	};
 	typedef std::shared_ptr<OGLESDepthStencilView> OGLESDepthStencilViewPtr;
 
-	class OGLESScreenRenderTargetView : public OGLESRenderTargetView
+	class OGLESScreenRenderTargetView final : public OGLESRenderTargetView
 	{
 	public:
 		OGLESScreenRenderTargetView(uint32_t width, uint32_t height, ElementFormat pf);
@@ -99,7 +99,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESScreenDepthStencilView : public OGLESDepthStencilView
+	class OGLESScreenDepthStencilView final : public OGLESDepthStencilView
 	{
 	public:
 		OGLESScreenDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf);
@@ -113,7 +113,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTexture1DRenderTargetView : public OGLESRenderTargetView
+	class OGLESTexture1DRenderTargetView final : public OGLESRenderTargetView
 	{
 	public:
 		OGLESTexture1DRenderTargetView(TexturePtr const & texture_1d, ElementFormat pf, int array_index, int array_size, int level);
@@ -132,7 +132,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTexture2DRenderTargetView : public OGLESRenderTargetView
+	class OGLESTexture2DRenderTargetView final : public OGLESRenderTargetView
 	{
 	public:
 		OGLESTexture2DRenderTargetView(TexturePtr const & texture_2d, ElementFormat pf, int array_index, int array_size, int level);
@@ -151,7 +151,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTexture3DRenderTargetView : public OGLESRenderTargetView
+	class OGLESTexture3DRenderTargetView final : public OGLESRenderTargetView
 	{
 	public:
 		OGLESTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t slice, int level);
@@ -177,7 +177,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTextureCubeRenderTargetView : public OGLESRenderTargetView
+	class OGLESTextureCubeRenderTargetView final : public OGLESRenderTargetView
 	{
 	public:
 		OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
@@ -197,7 +197,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTextureDepthStencilView : public OGLESDepthStencilView
+	class OGLESTextureDepthStencilView final : public OGLESDepthStencilView
 	{
 	public:
 		OGLESTextureDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
@@ -221,7 +221,7 @@ namespace KlayGE
 	};
 
 
-	class OGLESTextureCubeFaceDepthStencilView : public OGLESDepthStencilView
+	class OGLESTextureCubeFaceDepthStencilView final : public OGLESDepthStencilView
 	{
 	public:
 		OGLESTextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
@@ -241,7 +241,7 @@ namespace KlayGE
 
 
 #if defined(KLAYGE_PLATFORM_IOS)
-	class OGLESEAGLRenderView : public OGLESRenderTargetView
+	class OGLESEAGLRenderView final : public OGLESRenderTargetView
 	{
 	public:
 		explicit OGLESEAGLRenderView(ElementFormat pf);

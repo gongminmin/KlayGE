@@ -319,7 +319,7 @@ namespace KlayGE
 	{
 	}
 
-	ShaderStageObject::~ShaderStageObject() = default;
+	ShaderStageObject::~ShaderStageObject() noexcept = default;
 
 #if KLAYGE_IS_DEV_PLATFORM
 	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const & effect,

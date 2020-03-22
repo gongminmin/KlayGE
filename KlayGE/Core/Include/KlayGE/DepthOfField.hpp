@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API DepthOfField : public PostProcess
+	class KLAYGE_CORE_API DepthOfField final : public PostProcess
 	{
 	public:
 		DepthOfField();
@@ -84,7 +84,7 @@ namespace KlayGE
 		RenderEffectParameter* src_tex_param_;
 	};
 
-	class KLAYGE_CORE_API BokehFilter : public PostProcess
+	class KLAYGE_CORE_API BokehFilter final : public PostProcess
 	{
 	public:
 		BokehFilter();

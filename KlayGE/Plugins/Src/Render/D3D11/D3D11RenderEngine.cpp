@@ -93,9 +93,6 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::D3D11RenderEngine()
-		: num_so_buffs_(0),
-			dsv_ptr_cache_(nullptr),
-			device_lost_reg_cookie_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 6;
@@ -213,94 +210,94 @@ namespace KlayGE
 		RenderEngine::EndFrame();
 	}
 
-	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const
+	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const noexcept
 	{
 		return gi_factory_2_.get();
 	}
 
-	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const
+	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const noexcept
 	{
 		return gi_factory_3_.get();
 	}
 
-	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const
+	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const noexcept
 	{
 		return gi_factory_4_.get();
 	}
 
-	IDXGIFactory5* D3D11RenderEngine::DXGIFactory5() const
+	IDXGIFactory5* D3D11RenderEngine::DXGIFactory5() const noexcept
 	{
 		return gi_factory_5_.get();
 	}
 
-	IDXGIFactory6* D3D11RenderEngine::DXGIFactory6() const
+	IDXGIFactory6* D3D11RenderEngine::DXGIFactory6() const noexcept
 	{
 		return gi_factory_6_.get();
 	}
 
-	uint8_t D3D11RenderEngine::DXGISubVer() const
+	uint8_t D3D11RenderEngine::DXGISubVer() const noexcept
 	{
 		return dxgi_sub_ver_;
 	}
 
-	ID3D11Device1* D3D11RenderEngine::D3DDevice1() const
+	ID3D11Device1* D3D11RenderEngine::D3DDevice1() const noexcept
 	{
 		return d3d_device_1_.get();
 	}
 
-	ID3D11Device2* D3D11RenderEngine::D3DDevice2() const
+	ID3D11Device2* D3D11RenderEngine::D3DDevice2() const noexcept
 	{
 		return d3d_device_2_.get();
 	}
 
-	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const
+	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const noexcept
 	{
 		return d3d_device_3_.get();
 	}
 
-	ID3D11Device4* D3D11RenderEngine::D3DDevice4() const
+	ID3D11Device4* D3D11RenderEngine::D3DDevice4() const noexcept
 	{
 		return d3d_device_4_.get();
 	}
 
-	ID3D11Device5* D3D11RenderEngine::D3DDevice5() const
+	ID3D11Device5* D3D11RenderEngine::D3DDevice5() const noexcept
 	{
 		return d3d_device_5_.get();
 	}
 
-	ID3D11DeviceContext1* D3D11RenderEngine::D3DDeviceImmContext1() const
+	ID3D11DeviceContext1* D3D11RenderEngine::D3DDeviceImmContext1() const noexcept
 	{
 		return d3d_imm_ctx_1_.get();
 	}
 
-	ID3D11DeviceContext2* D3D11RenderEngine::D3DDeviceImmContext2() const
+	ID3D11DeviceContext2* D3D11RenderEngine::D3DDeviceImmContext2() const noexcept
 	{
 		return d3d_imm_ctx_2_.get();
 	}
 
-	ID3D11DeviceContext3* D3D11RenderEngine::D3DDeviceImmContext3() const
+	ID3D11DeviceContext3* D3D11RenderEngine::D3DDeviceImmContext3() const noexcept
 	{
 		return d3d_imm_ctx_3_.get();
 	}
 
-	ID3D11DeviceContext4* D3D11RenderEngine::D3DDeviceImmContext4() const
+	ID3D11DeviceContext4* D3D11RenderEngine::D3DDeviceImmContext4() const noexcept
 	{
 		return d3d_imm_ctx_4_.get();
 	}
 
-	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const
+	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const noexcept
 	{
 		return d3d_11_runtime_sub_ver_;
 	}
 
-	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
+	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const noexcept
 	{
 		return d3d_feature_level_;
 	}
 
 	// 获取D3D适配器列表
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11AdapterList const & D3D11RenderEngine::D3DAdapters() const
+	D3D11AdapterList const& D3D11RenderEngine::D3DAdapters() const noexcept
 	{
 		return adapterList_;
 	}
@@ -374,10 +371,6 @@ namespace KlayGE
 
 	void D3D11RenderEngine::ResetRenderStates()
 	{
-		RasterizerStateDesc default_rs_desc;
-		DepthStencilStateDesc default_dss_desc;
-		BlendStateDesc default_bs_desc;
-
 		vertex_shader_cache_ = nullptr;
 		pixel_shader_cache_ = nullptr;
 		geometry_shader_cache_ = nullptr;
@@ -386,7 +379,7 @@ namespace KlayGE
 		domain_shader_cache_ = nullptr;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRenderStateObject(default_rs_desc, default_dss_desc, default_bs_desc);
+		cur_rs_obj_ = rf.MakeRenderStateObject(RasterizerStateDesc(), DepthStencilStateDesc(), BlendStateDesc());
 
 		auto& d3d_cur_rs_obj = checked_cast<D3D11RenderStateObject&>(*cur_rs_obj_);
 		rasterizer_state_cache_ = d3d_cur_rs_obj.D3DRasterizerState();
@@ -406,7 +399,7 @@ namespace KlayGE
 		input_layout_cache_ = nullptr;
 		d3d_imm_ctx_1_->IASetInputLayout(input_layout_cache_);
 
-		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
+		viewport_cache_ = {};
 
 		if (!vb_cache_.empty())
 		{
@@ -884,8 +877,7 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			caps_.max_shader_model
-				= (d3d_feature_level_ > D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
+			caps_.max_shader_model = ShaderModel(5, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D11_REQ_TEXTURECUBE_DIMENSION;

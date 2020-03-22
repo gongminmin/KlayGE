@@ -41,9 +41,6 @@ namespace KlayGE
 	public:
 		explicit RenderablePoint();
 		RenderablePoint(float3 const & v, Color const & clr);
-		virtual ~RenderablePoint()
-		{
-		}
 
 		void SetPoint(float3 const & v);
 		void SetColor(Color const & clr);
@@ -58,9 +55,6 @@ namespace KlayGE
 	public:
 		explicit RenderableLine();
 		RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
-		virtual ~RenderableLine()
-		{
-		}
 
 		void SetLine(float3 const & v0, float3 const & v1);
 		void SetColor(Color const & clr);
@@ -76,9 +70,6 @@ namespace KlayGE
 	public:
 		explicit RenderableTriangle();
 		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr);
-		virtual ~RenderableTriangle()
-		{
-		}
 
 		void SetTriangle(float3 const & v0, float3 const & v1, float3 const & v2);
 		void SetColor(Color const & clr);
@@ -95,9 +86,6 @@ namespace KlayGE
 	public:
 		explicit RenderableTriBox();
 		RenderableTriBox(OBBox const & obb, Color const & clr);
-		virtual ~RenderableTriBox()
-		{
-		}
 
 		void SetBox(OBBox const & obb);
 		void SetColor(Color const & clr);
@@ -119,9 +107,6 @@ namespace KlayGE
 	public:
 		explicit RenderableLineBox();
 		RenderableLineBox(OBBox const & obb, Color const & clr);
-		virtual ~RenderableLineBox()
-		{
-		}
 
 		void SetBox(OBBox const & obb);
 		void SetColor(Color const & clr);
@@ -143,9 +128,6 @@ namespace KlayGE
 	public:
 		RenderablePlane(float length, float width, int length_segs, int width_segs,
 			bool has_tex_coord, bool has_tangent);
-		virtual ~RenderablePlane()
-		{
-		}
 	};
 
 	class KLAYGE_CORE_API RenderDecal : public Renderable

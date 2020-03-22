@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	class D3D12Mapping
+	class D3D12Mapping final
 	{
 	public:
 		static uint32_t MappingColorMask(uint32_t mask);

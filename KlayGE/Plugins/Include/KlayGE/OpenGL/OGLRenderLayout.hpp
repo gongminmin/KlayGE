@@ -24,11 +24,11 @@
 
 namespace KlayGE
 {
-	class OGLRenderLayout : public RenderLayout
+	class OGLRenderLayout final : public RenderLayout
 	{
 	public:
 		OGLRenderLayout();
-		~OGLRenderLayout();
+		~OGLRenderLayout() override;
 
 		void Active(ShaderObjectPtr const & so) const;
 

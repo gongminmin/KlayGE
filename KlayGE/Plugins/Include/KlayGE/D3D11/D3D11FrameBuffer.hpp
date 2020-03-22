@@ -24,7 +24,6 @@ namespace KlayGE
 	{
 	public:
 		D3D11FrameBuffer();
-		virtual ~D3D11FrameBuffer();
 
 		ID3D11RenderTargetView* D3DRTView(uint32_t n) const;
 		ID3D11DepthStencilView* D3DDSView() const;

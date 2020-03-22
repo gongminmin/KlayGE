@@ -102,12 +102,12 @@ namespace
 	};
 
 	template <typename SrcType>
-	class SetOGLESShaderParameter
+	class SetOGLESShaderParameter final
 	{
 	};
 
 	template <>
-	class SetOGLESShaderParameter<GraphicsBufferPtr>
+	class SetOGLESShaderParameter<GraphicsBufferPtr> final
 	{
 	public:
 		SetOGLESShaderParameter(std::vector<TextureBind>& buffers,
@@ -153,7 +153,7 @@ namespace
 	};
 
 	template <>
-	class SetOGLESShaderParameter<TexturePtr>
+	class SetOGLESShaderParameter<TexturePtr> final
 	{
 	public:
 		SetOGLESShaderParameter(std::vector<TextureBind>& samplers,

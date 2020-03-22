@@ -30,10 +30,6 @@ namespace KlayGE
 		d3d_viewport_.MaxDepth = 1.0f;
 	}
 
-	D3D11FrameBuffer::~D3D11FrameBuffer()
-	{
-	}
-
 	ID3D11RenderTargetView* D3D11FrameBuffer::D3DRTView(uint32_t n) const
 	{
 		if (n < rt_views_.size())
@@ -149,13 +145,13 @@ namespace KlayGE
 
 		if (ua_views_.empty())
 		{
-			re.OMSetRenderTargets(static_cast<UINT>(d3d_rt_view_.size()), &d3d_rt_view_[0], d3d_ds_view_);
+			re.OMSetRenderTargets(static_cast<UINT>(d3d_rt_view_.size()), d3d_rt_view_.data(), d3d_ds_view_);
 		}
 		else
 		{
-			ID3D11RenderTargetView** rts = d3d_rt_view_.empty() ? nullptr : &d3d_rt_view_[0];
-			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(d3d_rt_view_.size()), rts, d3d_ds_view_,
-				static_cast<UINT>(d3d_rt_view_.size()), static_cast<UINT>(d3d_ua_view_.size()), &d3d_ua_view_[0], &d3d_ua_init_count_[0]);
+			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(d3d_rt_view_.size()), d3d_rt_view_.data(), d3d_ds_view_,
+				static_cast<UINT>(d3d_rt_view_.size()), static_cast<UINT>(d3d_ua_view_.size()), d3d_ua_view_.data(),
+				d3d_ua_init_count_.data());
 		}
 
 		re.RSSetViewports(1, &d3d_viewport_);

@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Blitter : boost::noncopyable
+	class KLAYGE_CORE_API Blitter final : boost::noncopyable
 	{
 	public:
 		Blitter();

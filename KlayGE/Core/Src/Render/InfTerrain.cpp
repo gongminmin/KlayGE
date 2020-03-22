@@ -103,10 +103,6 @@ namespace KlayGE
 		rls_[0]->BindIndexStream(ib, EF_R32UI);
 	}
 
-	InfTerrainRenderable::~InfTerrainRenderable()
-	{
-	}
-
 	void InfTerrainRenderable::SetStretch(float stretch)
 	{
 		*(effect_->ParameterByName("stretch")) = stretch;

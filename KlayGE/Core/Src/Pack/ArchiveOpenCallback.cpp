@@ -43,6 +43,8 @@ namespace KlayGE
 		Convert(password_, pw);
 	}
 
+	ArchiveOpenCallback::~ArchiveOpenCallback() noexcept = default;
+
 	STDMETHODIMP_(ULONG) ArchiveOpenCallback::AddRef() noexcept
 	{
 		++ ref_count_;

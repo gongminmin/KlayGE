@@ -50,7 +50,7 @@ namespace KlayGE
 
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Font : boost::noncopyable
+	class KLAYGE_CORE_API Font final : boost::noncopyable
 	{
 	public:
 		// 字体建立标志

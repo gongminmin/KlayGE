@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SSSBlurPP : public PostProcess
+	class KLAYGE_CORE_API SSSBlurPP final : public PostProcess
 	{
 	public:
 		explicit SSSBlurPP(bool multi_sample);
@@ -49,7 +49,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		virtual void Apply() override;
+		void Apply() override;
 
 	private:
 		FrameBufferPtr blur_x_fb_;

@@ -40,7 +40,7 @@
 namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(D3D11Adapter* adapter, std::string const & name, RenderSettings const & settings)
-						: adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false), dxgi_async_swap_chain_(false)
+						: adapter_(adapter)
 	{
 		// Store info
 		name_				= name;
@@ -131,8 +131,8 @@ namespace KlayGE
 
 			static std::pair<D3D_DRIVER_TYPE, std::wstring_view> const dev_type_behaviors[] =
 			{
-				std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"),
-				std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP")
+				{D3D_DRIVER_TYPE_HARDWARE, L"HW"},
+				{D3D_DRIVER_TYPE_WARP, L"WARP"},
 			};
 
 			static D3D_FEATURE_LEVEL constexpr all_feature_levels[] =

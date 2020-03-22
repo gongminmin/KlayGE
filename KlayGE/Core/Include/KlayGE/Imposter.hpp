@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Imposter : boost::noncopyable
+	class KLAYGE_CORE_API Imposter final : boost::noncopyable
 	{
 	public:
 		Imposter(uint32_t num_azimuth, uint32_t num_elevation, uint32_t size, TexturePtr const & rt0_tex, TexturePtr const & rt1_tex);

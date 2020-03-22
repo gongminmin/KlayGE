@@ -23,7 +23,7 @@ namespace KlayGE
 {
 	struct RenderSettings;
 
-	class OGLESRenderWindow : public OGLESFrameBuffer
+	class OGLESRenderWindow final : public OGLESFrameBuffer
 	{
 	public:
 		OGLESRenderWindow(std::string const & name, RenderSettings const & settings);

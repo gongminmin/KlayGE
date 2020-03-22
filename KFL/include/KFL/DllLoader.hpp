@@ -52,7 +52,7 @@
 
 namespace KlayGE
 {
-	class DllLoader
+	class DllLoader final
 	{
 	public:
 		DllLoader();

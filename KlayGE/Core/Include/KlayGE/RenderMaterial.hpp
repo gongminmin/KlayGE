@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderMaterial : boost::noncopyable
+	class KLAYGE_CORE_API RenderMaterial final : boost::noncopyable
 	{
 	public:
 		enum TextureSlot

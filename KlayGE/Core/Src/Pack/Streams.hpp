@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	class InStream : boost::noncopyable, public IInStream, public IStreamGetSize
+	class InStream final : boost::noncopyable, public IInStream, public IStreamGetSize
 	{
 	public:
 		// IUnknown
@@ -60,7 +60,7 @@ namespace KlayGE
 
 	public:
 		explicit InStream(ResIdentifierPtr const & is);
-		virtual ~InStream() noexcept = default;
+		virtual ~InStream() noexcept;
 
 	private:
 		std::atomic<int32_t> ref_count_{1};
@@ -69,7 +69,7 @@ namespace KlayGE
 		uint64_t stream_size_ = 0;
 	};
 
-	class OutStream : boost::noncopyable, public IOutStream
+	class OutStream final : boost::noncopyable, public IOutStream
 	{
 	public:
 		// IUnknown
@@ -84,7 +84,7 @@ namespace KlayGE
 
 	public:
 		explicit OutStream(std::shared_ptr<std::ostream> const & os) noexcept;
-		virtual ~OutStream() noexcept = default;
+		virtual ~OutStream() noexcept;
 
 	private:
 		std::atomic<int32_t> ref_count_{1};

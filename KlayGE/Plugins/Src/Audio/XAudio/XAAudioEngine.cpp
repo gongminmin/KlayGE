@@ -86,7 +86,6 @@ namespace KlayGE
 	}
 
 	XAAudioEngine::XAAudioEngine()
-		: listener_{}
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		mod_xaudio2_ = ::LoadLibraryEx(TEXT(XAUDIO2_DLL_A), nullptr, 0);

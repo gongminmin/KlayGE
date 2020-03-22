@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API MotionBlurPostProcess : public PostProcess
+	class KLAYGE_CORE_API MotionBlurPostProcess final : public PostProcess
 	{
 	public:
 		enum VisualizeType

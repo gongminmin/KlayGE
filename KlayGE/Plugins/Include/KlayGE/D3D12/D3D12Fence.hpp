@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class D3D12Fence : public Fence
+	class D3D12Fence final : public Fence
 	{
 	public:
 		D3D12Fence();
@@ -50,7 +50,7 @@ namespace KlayGE
 		virtual void Wait(uint64_t id) override;
 		virtual bool Completed(uint64_t id) override;
 
-		ID3D12Fence* D3DFence() const
+		ID3D12Fence* D3DFence() const noexcept
 		{
 			return fence_.get();
 		}
@@ -60,8 +60,8 @@ namespace KlayGE
 	private:
 		ID3D12FencePtr fence_;
 		Win32UniqueHandle fence_event_;
-		uint64_t last_completed_val_;
-		std::atomic<uint64_t> fence_val_;
+		uint64_t last_completed_val_{0};
+		std::atomic<uint64_t> fence_val_{1};
 	};
 }
 

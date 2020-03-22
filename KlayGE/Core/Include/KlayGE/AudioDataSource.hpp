@@ -50,6 +50,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API AudioDataSource : boost::noncopyable
 	{
 	public:
+		virtual ~AudioDataSource() noexcept;
+
 		virtual void Open(ResIdentifierPtr const & file) = 0;
 		virtual void Close() = 0;
 
@@ -61,8 +63,6 @@ namespace KlayGE
 		virtual size_t Read(void* data, size_t size) = 0;
 		virtual void Reset() = 0;
 
-		virtual ~AudioDataSource();
-
 	protected:
 		AudioFormat format_;
 		uint32_t freq_;
@@ -71,9 +71,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API AudioDataSourceFactory : boost::noncopyable
 	{
 	public:
-		virtual ~AudioDataSourceFactory()
-		{
-		}
+		virtual ~AudioDataSourceFactory() noexcept;
 
 		void Suspend();
 		void Resume();

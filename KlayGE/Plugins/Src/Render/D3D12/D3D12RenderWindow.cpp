@@ -58,7 +58,7 @@
 namespace KlayGE
 {
 	D3D12RenderWindow::D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings)
-						: adapter_(adapter), dxgi_allow_tearing_(false)
+						: adapter_(adapter)
 	{
 		// Store info
 		name_				= name;

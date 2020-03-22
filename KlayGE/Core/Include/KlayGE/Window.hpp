@@ -55,7 +55,7 @@ OBJC_CLASS(NSView);
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Window : boost::noncopyable
+	class KLAYGE_CORE_API Window final : boost::noncopyable
 	{
 	public:
 		enum WindowRotation

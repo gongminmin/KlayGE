@@ -55,7 +55,7 @@ namespace KlayGE
 
 	// 获取支持的显示模式数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t D3D12Adapter::NumVideoMode() const
+	size_t D3D12Adapter::NumVideoMode() const noexcept
 	{
 		return modes_.size();
 	}
@@ -105,7 +105,7 @@ namespace KlayGE
 							// 如果找到一个新模式, 加入模式列表
 							if (std::find(modes_.begin(), modes_.end(), video_mode) == modes_.end())
 							{
-								modes_.push_back(video_mode);
+								modes_.push_back(std::move(video_mode));
 							}
 						}
 					}
@@ -122,6 +122,6 @@ namespace KlayGE
 	{
 		adapter_.reset(adapter);
 		adapter_->GetDesc2(&adapter_desc_);
-		modes_.resize(0);
+		modes_.clear();
 	}
 }

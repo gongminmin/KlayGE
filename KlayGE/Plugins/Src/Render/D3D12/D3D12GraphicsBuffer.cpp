@@ -48,8 +48,7 @@ namespace KlayGE
 {
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 							uint32_t size_in_byte, uint32_t structure_byte_stride)
-						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
-							counter_offset_(0)
+						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride)
 	{
 		curr_states_.resize(1, D3D12_RESOURCE_STATE_COMMON);
 	}

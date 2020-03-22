@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	struct KLAYGE_DEV_HELPER_API PlatformDefinition
+	struct KLAYGE_DEV_HELPER_API PlatformDefinition final
 	{
 		PlatformDefinition();
 		explicit PlatformDefinition(std::string_view platform);

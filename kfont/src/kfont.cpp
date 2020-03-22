@@ -116,6 +116,8 @@ namespace KlayGE
 	};
 	std::shared_ptr<LZMALoader> LZMALoader::instance_;
 
+	KFont::KFont() = default;
+
 	bool KFont::Load(std::string const & file_name)
 	{
 		ResIdentifierPtr kfont_input = MakeSharedPtr<ResIdentifier>(file_name, 0,

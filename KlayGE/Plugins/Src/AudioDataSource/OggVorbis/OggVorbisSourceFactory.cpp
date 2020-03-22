@@ -17,7 +17,7 @@
 
 namespace KlayGE
 {
-	class OggVorbisAudioDataSourceFactory : public AudioDataSourceFactory
+	class OggVorbisAudioDataSourceFactory final : public AudioDataSourceFactory
 	{
 	public:
 		std::wstring const & Name() const override

@@ -114,7 +114,7 @@ namespace KlayGE
 		};
 
 	public:
-		class KLAYGE_CORE_API Mapper : boost::noncopyable
+		class KLAYGE_CORE_API Mapper final : boost::noncopyable
 		{
 			friend class Texture;
 
@@ -167,7 +167,7 @@ namespace KlayGE
 
 	public:
 		Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
-		virtual ~Texture();
+		virtual ~Texture() noexcept;
 
 		virtual std::wstring const& Name() const = 0;
 #ifndef KLAYGE_SHIP

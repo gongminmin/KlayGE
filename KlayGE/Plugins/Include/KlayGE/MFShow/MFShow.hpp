@@ -55,7 +55,7 @@ struct IMFMediaEngine;
 
 namespace KlayGE
 {
-	class MFShowEngine : public ShowEngine
+	class MFShowEngine final : public ShowEngine
 	{
 	public:
 		MFShowEngine();

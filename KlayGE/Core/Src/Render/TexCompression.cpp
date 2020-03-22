@@ -275,6 +275,9 @@ namespace KlayGE
 	}
 
 
+
+	TexCompression::~TexCompression() noexcept = default;
+
 	void TexCompression::EncodeMem(uint32_t width, uint32_t height,
 		void* output, uint32_t out_row_pitch, uint32_t out_slice_pitch,
 		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch,

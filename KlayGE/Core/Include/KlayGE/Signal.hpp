@@ -57,7 +57,7 @@ namespace KlayGE
 		class KLAYGE_CORE_API Connection final : boost::noncopyable
 		{
 		public:
-			Connection();
+			Connection() noexcept;
 			Connection(Connection&& rhs) noexcept;
 			Connection(Detail::SignalBase& signal, std::shared_ptr<void> const& slot);
 
@@ -88,7 +88,7 @@ namespace KlayGE
 				friend class KlayGE::Signal::Connection;
 
 			public:
-				virtual ~SignalBase();
+				virtual ~SignalBase() noexcept;
 
 			private:
 				virtual void Disconnect(void* slot) = 0;

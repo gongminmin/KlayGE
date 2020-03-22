@@ -80,7 +80,7 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API TexCompressionBC1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC1 final : public TexCompression
 	{
 	public:
 		TexCompressionBC1();
@@ -98,7 +98,7 @@ namespace KlayGE
 		bool RefineBlock(ARGBColor32 const * argb, ARGBColor32& min_clr, ARGBColor32& max_clr, uint32_t mask) const;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC2 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC2 final : public TexCompression
 	{
 	public:
 		TexCompressionBC2();
@@ -110,7 +110,7 @@ namespace KlayGE
 		TexCompressionBC1 bc1_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC4 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC4 final : public TexCompression
 	{
 	public:
 		TexCompressionBC4();
@@ -119,7 +119,7 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC3 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC3 final : public TexCompression
 	{
 	public:
 		TexCompressionBC3();
@@ -132,7 +132,7 @@ namespace KlayGE
 		TexCompressionBC4 bc4_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC5 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC5 final : public TexCompression
 	{
 	public:
 		TexCompressionBC5();
@@ -144,7 +144,7 @@ namespace KlayGE
 		TexCompressionBC4 bc4_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC6U : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC6U final : public TexCompression
 	{
 	public:
 		TexCompressionBC6U();
@@ -205,7 +205,7 @@ namespace KlayGE
 		static int const mode_to_info_[];
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC6S : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC6S final : public TexCompression
 	{
 	public:
 		TexCompressionBC6S();
@@ -217,7 +217,7 @@ namespace KlayGE
 		TexCompressionBC6U bc6u_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC7 final : public TexCompression
 	{
 		static uint32_t const BC7_MAX_REGIONS = 3;
 		static uint32_t const BC7_NUM_CHANNELS = 4;

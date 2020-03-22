@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource
+	class D3D12GraphicsBuffer final : public GraphicsBuffer, public D3D12Resource
 	{
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride);
@@ -85,7 +85,7 @@ namespace KlayGE
 
 	private:
 		D3D12GpuMemoryBlockPtr gpu_mem_block_;
-		uint32_t counter_offset_;
+		uint32_t counter_offset_{0};
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 
 		BufferAccess mapped_ba_;

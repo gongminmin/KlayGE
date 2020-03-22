@@ -42,9 +42,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API IndirectLightingLayer : boost::noncopyable
 	{
 	public:
-		virtual ~IndirectLightingLayer()
-		{
-		}
+		virtual ~IndirectLightingLayer() noexcept;
 
 		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
 		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
@@ -67,7 +65,7 @@ namespace KlayGE
 		ShaderResourceViewPtr indirect_lighting_srv_;
 	};
 
-	class KLAYGE_CORE_API MultiResSILLayer : public IndirectLightingLayer
+	class KLAYGE_CORE_API MultiResSILLayer final : public IndirectLightingLayer
 	{
 	public:
 		MultiResSILLayer();
@@ -115,7 +113,7 @@ namespace KlayGE
 		PostProcessPtr rsm_to_depth_derivate_pp_;
 	};
 
-	class KLAYGE_CORE_API SSGILayer : public IndirectLightingLayer
+	class KLAYGE_CORE_API SSGILayer final : public IndirectLightingLayer
 	{
 	public:
 		SSGILayer();

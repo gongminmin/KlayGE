@@ -119,7 +119,7 @@ namespace KlayGE
 	typedef std::shared_ptr<OGLESTexture> OGLES2TexturePtr;
 
 
-	class OGLESTexture1D : public OGLESTexture
+	class OGLESTexture1D final : public OGLESTexture
 	{
 	public:
 		OGLESTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -146,7 +146,7 @@ namespace KlayGE
 		uint32_t width_;
 	};
 
-	class OGLESTexture2D : public OGLESTexture
+	class OGLESTexture2D final : public OGLESTexture
 	{
 	public:
 		OGLESTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -181,7 +181,7 @@ namespace KlayGE
 		uint32_t height_;
 	};
 
-	class OGLESTexture3D : public OGLESTexture
+	class OGLESTexture3D final : public OGLESTexture
 	{
 	public:
 		OGLESTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -217,7 +217,7 @@ namespace KlayGE
 		uint32_t depth_;
 	};
 
-	class OGLESTextureCube : public OGLESTexture
+	class OGLESTextureCube final : public OGLESTexture
 	{
 	public:
 		OGLESTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,

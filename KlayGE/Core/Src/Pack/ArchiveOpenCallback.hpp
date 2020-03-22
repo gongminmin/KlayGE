@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class ArchiveOpenCallback : boost::noncopyable, public IArchiveOpenCallback, public ICryptoGetTextPassword
+	class ArchiveOpenCallback final : boost::noncopyable, public IArchiveOpenCallback, public ICryptoGetTextPassword
 	{
 	public:
 		// IUnknown
@@ -58,7 +58,7 @@ namespace KlayGE
 
 	public:
 		explicit ArchiveOpenCallback(std::string_view pw) noexcept;
-		virtual ~ArchiveOpenCallback() noexcept = default;
+		virtual ~ArchiveOpenCallback() noexcept;
 
 	private:
 		std::atomic<int32_t> ref_count_{1};

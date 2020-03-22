@@ -62,21 +62,21 @@ namespace KlayGE
 		depth_ = depth;
 	}
 
-	uint32_t D3D11Texture3D::Width(uint32_t level) const
+	uint32_t D3D11Texture3D::Width(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	uint32_t D3D11Texture3D::Height(uint32_t level) const
+	uint32_t D3D11Texture3D::Height(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
-	uint32_t D3D11Texture3D::Depth(uint32_t level) const
+	uint32_t D3D11Texture3D::Depth(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 

@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	class MemInputStreamBuf : public std::streambuf, boost::noncopyable
+	class MemInputStreamBuf final : public std::streambuf, boost::noncopyable
 	{
 	public:
 		MemInputStreamBuf(void const * p, std::streamsize num_bytes);
@@ -94,7 +94,7 @@ namespace KlayGE
 	};
 
 
-	class VectorStreamCallback : boost::noncopyable
+	class VectorStreamCallback final : boost::noncopyable
 	{
 	public:
 		explicit VectorStreamCallback(std::vector<std::streambuf::char_type>& data);
@@ -106,16 +106,13 @@ namespace KlayGE
 		std::vector<std::streambuf::char_type>& data_;
 	};
 
-	class VectorOutputStreamBuf : public CallbackOutputStreamBuf<VectorStreamCallback>
+	class VectorOutputStreamBuf final : public CallbackOutputStreamBuf<VectorStreamCallback>
 	{
 	public:
-		explicit VectorOutputStreamBuf(std::vector<char_type>& data)
-			: CallbackOutputStreamBuf<VectorStreamCallback>(VectorStreamCallback(data))
-		{
-		}
+		explicit VectorOutputStreamBuf(std::vector<char_type>& data);
 	};
 
-	class StringStreamCallback : boost::noncopyable
+	class StringStreamCallback final : boost::noncopyable
 	{
 	public:
 		explicit StringStreamCallback(std::basic_string<std::streambuf::char_type>& data);
@@ -127,13 +124,10 @@ namespace KlayGE
 		std::basic_string<std::streambuf::char_type>& data_;
 	};
 
-	class StringOutputStreamBuf : public CallbackOutputStreamBuf<StringStreamCallback>
+	class StringOutputStreamBuf final : public CallbackOutputStreamBuf<StringStreamCallback>
 	{
 	public:
-		explicit StringOutputStreamBuf(std::basic_string<char_type>& data)
-			: CallbackOutputStreamBuf<StringStreamCallback>(StringStreamCallback(data))
-		{
-		}
+		explicit StringOutputStreamBuf(std::basic_string<char_type>& data);
 	};
 }
 

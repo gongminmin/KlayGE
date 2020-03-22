@@ -269,7 +269,6 @@ namespace
 namespace KlayGE
 {
 	CPUInfo::CPUInfo()
-		: feature_mask_(0)
 	{
 		num_hw_threads_ = 1;
 		num_cores_ = 1;

@@ -48,11 +48,11 @@
 
 namespace KlayGE
 {
-	class OGLRenderEngine : public RenderEngine
+	class OGLRenderEngine final : public RenderEngine
 	{
 	public:
 		OGLRenderEngine();
-		~OGLRenderEngine();
+		~OGLRenderEngine() override;
 
 		std::wstring const & Name() const override;
 

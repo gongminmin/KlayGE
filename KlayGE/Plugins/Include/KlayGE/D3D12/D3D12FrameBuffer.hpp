@@ -44,7 +44,6 @@ namespace KlayGE
 	{
 	public:
 		D3D12FrameBuffer();
-		virtual ~D3D12FrameBuffer();
 
 		std::wstring const & Description() const override;
 

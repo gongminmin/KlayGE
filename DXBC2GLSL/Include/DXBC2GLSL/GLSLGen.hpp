@@ -129,7 +129,7 @@ struct HSControlPointPhase
 	std::vector<std::shared_ptr<ShaderInstruction>> insns;//instructions
 };
 
-class GLSLGen
+class GLSLGen final
 {
 public:
 	static uint32_t DefaultRules(GLSLVersion version);

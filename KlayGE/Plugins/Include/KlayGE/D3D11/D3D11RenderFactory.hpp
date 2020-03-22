@@ -20,31 +20,31 @@
 
 namespace KlayGE
 {
-	class D3D11RenderFactory : public RenderFactory
+	class D3D11RenderFactory final : public RenderFactory
 	{
 	public:
 		D3D11RenderFactory();
 
 		std::wstring const & Name() const override;
 
-		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 
 		FrameBufferPtr MakeFrameBuffer() override;
 
 		RenderLayoutPtr MakeRenderLayout() override;
 
-		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
-		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
-		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 
 		QueryPtr MakeOcclusionQuery() override;
@@ -108,14 +108,14 @@ namespace KlayGE
 		ShaderStageObjectPtr MakeShaderStageObject(ShaderStage stage) override;
 
 	private:
-		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
+		std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
 
 		RenderStateObjectPtr DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 			BlendStateDesc const & bs_desc) override;
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) override;
 
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
 	private:
 		D3D11RenderFactory(D3D11RenderFactory const & rhs);

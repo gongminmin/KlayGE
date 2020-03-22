@@ -46,15 +46,15 @@ namespace KlayGE
 		}
 
 	private:
-		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() override
+		std::unique_ptr<InputEngine> DoMakeInputEngine() override
 		{
 			return MakeUniquePtr<MsgInputEngine>();
 		}
 
-		virtual void DoSuspend() override
+		void DoSuspend() override
 		{
 		}
-		virtual void DoResume() override
+		void DoResume() override
 		{
 		}
 	};

@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class MusicVoiceContext : public IXAudio2VoiceCallback
+	class MusicVoiceContext final : public IXAudio2VoiceCallback
 	{
 	public:
 		MusicVoiceContext()
@@ -52,7 +52,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual ~MusicVoiceContext() = default;
+		virtual ~MusicVoiceContext() noexcept = default;
 
 		HANDLE GetBufferEndEvent() const
 		{

@@ -129,7 +129,7 @@ namespace KlayGE
 	typedef std::shared_ptr<OGLTexture> OGLTexturePtr;
 
 
-	class OGLTexture1D : public OGLTexture
+	class OGLTexture1D final : public OGLTexture
 	{
 	public:
 		OGLTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -156,7 +156,7 @@ namespace KlayGE
 		uint32_t width_;
 	};
 
-	class OGLTexture2D : public OGLTexture
+	class OGLTexture2D final : public OGLTexture
 	{
 	public:
 		OGLTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -191,7 +191,7 @@ namespace KlayGE
 		uint32_t height_;
 	};
 
-	class OGLTexture3D : public OGLTexture
+	class OGLTexture3D final : public OGLTexture
 	{
 	public:
 		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
@@ -227,7 +227,7 @@ namespace KlayGE
 		uint32_t depth_;
 	};
 
-	class OGLTextureCube : public OGLTexture
+	class OGLTextureCube final : public OGLTexture
 	{
 	public:
 		OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,

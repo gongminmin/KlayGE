@@ -34,22 +34,12 @@
 
 namespace KlayGE
 {
-	ScriptModule::ScriptModule()
-	{
-	}
-
-	ScriptModule::~ScriptModule()
-	{
-	}
+	ScriptModule::ScriptModule() noexcept = default;
+	ScriptModule::~ScriptModule() noexcept = default;
 
 
-	ScriptEngine::ScriptEngine()
-	{
-	}
-
-	ScriptEngine::~ScriptEngine()
-	{
-	}
+	ScriptEngine::ScriptEngine() noexcept = default;
+	ScriptEngine::~ScriptEngine() noexcept = default;
 
 	void ScriptEngine::Suspend()
 	{

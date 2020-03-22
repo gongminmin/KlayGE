@@ -316,27 +316,21 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderStateObject : boost::noncopyable
 	{
 	public:
-		explicit RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
-				BlendStateDesc const & bs_desc)
-			: rs_desc_(rs_desc), dss_desc_(dss_desc), bs_desc_(bs_desc)
-		{
-		}
+		explicit RenderStateObject(
+			RasterizerStateDesc const& rs_desc, DepthStencilStateDesc const& dss_desc, BlendStateDesc const& bs_desc);
+		virtual ~RenderStateObject() noexcept;
 
-		virtual ~RenderStateObject()
-		{
-		}
-
-		RasterizerStateDesc const & GetRasterizerStateDesc() const
+		RasterizerStateDesc const & GetRasterizerStateDesc() const noexcept
 		{
 			return rs_desc_;
 		}
 
-		DepthStencilStateDesc const & GetDepthStencilStateDesc() const
+		DepthStencilStateDesc const & GetDepthStencilStateDesc() const noexcept
 		{
 			return dss_desc_;
 		}
 
-		BlendStateDesc const & GetBlendStateDesc() const
+		BlendStateDesc const & GetBlendStateDesc() const noexcept
 		{
 			return bs_desc_;
 		}

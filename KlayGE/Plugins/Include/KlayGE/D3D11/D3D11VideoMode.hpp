@@ -21,16 +21,15 @@ namespace KlayGE
 {
 	// 保存显示模式信息
 	/////////////////////////////////////////////////////////////////////////////////
-	class D3D11VideoMode
+	class D3D11VideoMode final
 	{
 	public:
 		D3D11VideoMode();
 		D3D11VideoMode(uint32_t width, uint32_t height, DXGI_FORMAT format);
 
-		uint32_t Width() const;
-		uint32_t Height() const;
-		DXGI_FORMAT Format() const;
-		uint32_t ColorDepth() const;
+		uint32_t Width() const noexcept;
+		uint32_t Height() const noexcept;
+		DXGI_FORMAT Format() const noexcept;
 
 	private:
 		uint32_t		width_;
@@ -38,8 +37,8 @@ namespace KlayGE
 		DXGI_FORMAT		format_;
 	};
 
-	bool operator<(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs);
-	bool operator==(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs);
+	bool operator<(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs) noexcept;
+	bool operator==(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs) noexcept;
 }
 
 #endif			// _D3D11VIDEOMODE_HPP

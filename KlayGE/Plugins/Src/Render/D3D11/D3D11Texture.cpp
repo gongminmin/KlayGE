@@ -44,10 +44,6 @@ namespace KlayGE
 		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
-	D3D11Texture::~D3D11Texture()
-	{
-	}
-
 	std::wstring const & D3D11Texture::Name() const
 	{
 		static const std::wstring name(L"Direct3D11 Texture");
@@ -61,7 +57,7 @@ namespace KlayGE
 	}
 #endif
 
-	uint32_t D3D11Texture::Width(uint32_t level) const
+	uint32_t D3D11Texture::Width(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -69,7 +65,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Height(uint32_t level) const
+	uint32_t D3D11Texture::Height(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -77,7 +73,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Depth(uint32_t level) const
+	uint32_t D3D11Texture::Depth(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);

@@ -75,6 +75,8 @@ namespace KlayGE
 	}
 
 
+	CascadedShadowLayer::~CascadedShadowLayer() noexcept = default;
+
 	uint32_t CascadedShadowLayer::NumCascades() const
 	{
 		return static_cast<uint32_t>(intervals_.size());

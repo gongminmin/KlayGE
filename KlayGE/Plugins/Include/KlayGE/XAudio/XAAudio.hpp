@@ -73,7 +73,7 @@ namespace KlayGE
 
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & data_source);
 
-	class XASoundBuffer : public SoundBuffer
+	class XASoundBuffer final : public SoundBuffer
 	{
 	public:
 		XASoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
@@ -123,7 +123,7 @@ namespace KlayGE
 		float3 dir_;
 	};
 
-	class XAMusicBuffer : public MusicBuffer
+	class XAMusicBuffer final : public MusicBuffer
 	{
 	public:
 		XAMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
@@ -177,7 +177,7 @@ namespace KlayGE
 		std::vector<float> output_matrix_;
 	};
 
-	class XAAudioEngine : public AudioEngine
+	class XAAudioEngine final : public AudioEngine
 	{
 	public:
 		XAAudioEngine();
@@ -209,8 +209,8 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up) override;
 
 	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
 	private:
 		com_ptr<IXAudio2> xaudio_;
@@ -218,7 +218,7 @@ namespace KlayGE
 		uint32_t mastering_channels_;
 
 		X3DAUDIO_HANDLE x3d_instance_;
-		X3DAUDIO_LISTENER listener_;
+		X3DAUDIO_LISTENER listener_{};
 
 		HMODULE mod_xaudio2_;
 		typedef HRESULT (WINAPI *XAudio2CreateFunc)(IXAudio2** ppXAudio2, UINT32 flags, XAUDIO2_PROCESSOR XAudio2Processor);

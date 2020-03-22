@@ -40,7 +40,6 @@
 namespace KlayGE
 {
 	D3D12Fence::D3D12Fence()
-			: last_completed_val_(0), fence_val_(1)
 	{
 		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();

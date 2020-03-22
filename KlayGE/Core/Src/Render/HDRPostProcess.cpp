@@ -42,10 +42,6 @@ namespace KlayGE
 	{
 	}
 
-	SumLumPostProcess::~SumLumPostProcess()
-	{
-	}
-
 	void SumLumPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
 		PostProcess::InputPin(index, srv);

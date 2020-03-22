@@ -41,14 +41,14 @@ namespace KlayGE
 	{
 	public:
 		D3D12Resource();
-		virtual ~D3D12Resource();
+		~D3D12Resource();
 
-		ID3D12Resource* D3DResource() const
+		ID3D12Resource* D3DResource() const noexcept
 		{
 			return d3d_resource_.get();
 		}
 
-		uint32_t D3DResourceOffset() const
+		uint32_t D3DResourceOffset() const noexcept
 		{
 			return d3d_resource_offset_;
 		}

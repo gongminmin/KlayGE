@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class NullRenderStateObject : public RenderStateObject
+	class NullRenderStateObject final : public RenderStateObject
 	{
 	public:
 		NullRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
@@ -47,7 +47,7 @@ namespace KlayGE
 		void Active();
 	};
 
-	class NullSamplerStateObject : public SamplerStateObject
+	class NullSamplerStateObject final : public SamplerStateObject
 	{
 	public:
 		explicit NullSamplerStateObject(SamplerStateDesc const & desc);

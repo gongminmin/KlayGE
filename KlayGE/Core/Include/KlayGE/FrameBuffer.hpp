@@ -59,7 +59,7 @@ namespace KlayGE
 
 	public:
 		FrameBuffer();
-		virtual ~FrameBuffer();
+		virtual ~FrameBuffer() noexcept;
 
 		static Attachment CalcAttachment(uint32_t index);
 
