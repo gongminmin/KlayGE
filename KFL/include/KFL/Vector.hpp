@@ -315,7 +315,7 @@ namespace KlayGE
 		}
 
 	private:
-		DetailType vec_;
+		DetailType vec_{};
 	};
 
 	template <typename T, int N>
