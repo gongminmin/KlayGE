@@ -53,6 +53,13 @@ MACRO(SETUP_GLLOADER LIB_NAME)
 			-DGLLOADER_SOURCE
 	)
 
+	if(KLAYGE_COMPILER_CLANGCL)
+		target_compile_options(${LIB_NAME}
+			PRIVATE
+				-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
+		)
+	endif()
+
 	target_include_directories(${LIB_NAME}
 		PUBLIC
 			${GLLOADER_PROJECT_DIR}/include

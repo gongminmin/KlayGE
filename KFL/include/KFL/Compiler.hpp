@@ -76,6 +76,13 @@
 			#error "Unsupported compiler version. Please install clang-cl 9.0 or up."
 		#endif
 
+		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+
 		#define KLAYGE_HAS_DECLSPEC
 		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
 		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)

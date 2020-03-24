@@ -147,6 +147,11 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-w
 			/Od # lld-link can't find __powidf2
 	)
+
+	target_compile_definitions(libpython-static
+		PRIVATE
+			-D_CRT_SECURE_NO_WARNINGS
+	)
 endif()
 
 target_compile_definitions(libpython-static

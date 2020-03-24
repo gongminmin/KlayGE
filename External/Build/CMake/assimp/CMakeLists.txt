@@ -29,6 +29,11 @@ set(IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
 
 if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_definitions(assimp
+		PRIVATE
+			-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
+	)
+
 	target_compile_options(assimp
 		PRIVATE
 			-Wno-pragma-pack
@@ -41,6 +46,7 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unused-value
 			-Wno-unused-private-field
 			-Wno-unused-function
+			-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
 	)
 	target_compile_options(IrrXML
 		PRIVATE

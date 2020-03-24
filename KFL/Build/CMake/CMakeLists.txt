@@ -151,7 +151,7 @@ target_link_libraries(${LIB_NAME}
 		fmt
 )
 
-if(KLAYGE_COMPILER_MSVC)
+if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
 	if(KLAYGE_PLATFORM_WINDOWS_STORE)
 		target_link_libraries(${LIB_NAME}
 			PUBLIC

@@ -41,7 +41,7 @@ SET_TARGET_PROPERTIES(vorbisfile PROPERTIES
 
 foreach(target
 	"vorbis" "vorbisfile" "vorbisenc")
-	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+	if(KLAYGE_COMPILER_CLANGCL OR KLAYGE_PLATFORM_WINDOWS_STORE)
 		target_compile_definitions(${target}
 			PRIVATE
 				-D_CRT_SECURE_NO_WARNINGS
