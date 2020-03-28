@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	class MemInputStreamBuf final : public std::streambuf, boost::noncopyable
+	class MemInputStreamBuf : public std::streambuf, boost::noncopyable
 	{
 	public:
 		MemInputStreamBuf(void const * p, std::streamsize num_bytes);
