@@ -375,7 +375,7 @@ namespace KlayGE
 		float tile_width = 0.125f;
 		for (uint32_t i = 0; i < rings; ++ i)
 		{
-			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
+			tile_rings_[i] = MakeUniquePtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
 				tile_non_tess_ib_, tile_non_tess_vid_vb_, tile_tess_ib_);
 			tile_width *= 2.0f;
 		}
@@ -688,18 +688,18 @@ namespace KlayGE
 
 		for (size_t i = 0; i < tile_rings_.size(); ++ i)
 		{
-			std::shared_ptr<TileRing> const & ring = tile_rings_[i];
+			TileRing const& ring = *tile_rings_[i];
 
 			if (need_tess)
 			{
-				rls_[0] = ring->GetTessRL();
+				rls_[0] = ring.GetTessRL();
 			}
 			else
 			{
-				rls_[0] = ring->GetNonTessRL();
+				rls_[0] = ring.GetNonTessRL();
 			}
 
-			*tile_size_param_ = ring->TileSize();
+			*tile_size_param_ = ring.TileSize();
 			re.Render(*effect_, *technique_, *rls_[0]);
 		}
 	}

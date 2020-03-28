@@ -1819,7 +1819,7 @@ namespace KlayGE
 	{
 		compression_format_ = EF_ETC2_BGR8;
 
-		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
+		etc1_codec_ = MakeUniquePtr<TexCompressionETC1>();
 	}
 
 	void TexCompressionETC2RGB8::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2039,8 +2039,8 @@ namespace KlayGE
 	{
 		compression_format_ = EF_ETC2_A1BGR8;
 
-		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
-		etc2_rgb8_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();
+		etc1_codec_ = MakeUniquePtr<TexCompressionETC1>();
+		etc2_rgb8_codec_ = MakeUniquePtr<TexCompressionETC2RGB8>();
 	}
 
 	void TexCompressionETC2RGB8A1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)

@@ -64,10 +64,10 @@ namespace
 
 		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
 		{
-			std::vector<char> tmp(count + 1);
-			std::memcpy(tmp.data(), buff, count);
-			tmp.back() = 0;
-			__android_log_write(prio_, "KlayGE", tmp.data());
+			auto tmp = MakeUniquePtr<char[]>(count + 1);
+			std::memcpy(tmp.get(), buff, count);
+			tmp[count] = 0;
+			__android_log_write(prio_, "KlayGE", tmp.get());
 			return static_cast<std::streambuf::int_type>(count);
 		}
 

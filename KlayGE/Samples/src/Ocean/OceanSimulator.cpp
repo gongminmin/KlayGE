@@ -5,7 +5,6 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/FFT.hpp>
 
 #include "OceanSimulator.hpp"
 
@@ -209,6 +208,6 @@ namespace KlayGE
 		*(effect_->ParameterByName("displacement_tex")) = displacement_tex_;
 		*(effect_->ParameterByName("dxyz_tex")) = out_real_tex_;
 
-		fft_ = MakeSharedPtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
+		fft_ = MakeUniquePtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
 	}
 }

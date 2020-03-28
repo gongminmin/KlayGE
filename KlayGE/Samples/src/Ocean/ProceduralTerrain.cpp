@@ -134,7 +134,7 @@ namespace KlayGE
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
-				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+				mvp *= drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 			}
 
 			pccb.Camera(*camera_cbuffer_, 0).mvp = MathLib::transpose(mvp);

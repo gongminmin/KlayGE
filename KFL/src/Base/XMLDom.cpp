@@ -71,10 +71,11 @@ namespace KlayGE
 		source.seekg(0, std::ios_base::end);
 		int len = static_cast<int>(source.tellg());
 		source.seekg(0, std::ios_base::beg);
-		xml_src_.resize(len + 1, 0);
+		xml_src_ = MakeUniquePtr<char[]>(len + 1);
 		source.read(&xml_src_[0], len);
+		xml_src_[len] = 0;
 
-		doc_->parse<0>(&xml_src_[0]);
+		doc_->parse<0>(xml_src_.get());
 		root_ = MakeSharedPtr<XMLNode>(doc_->first_node());
 
 		return root_;

@@ -524,7 +524,7 @@ namespace KlayGE
 					int32_t cas_index = drl->CurrCascadeIndex();
 					if (cas_index >= 0)
 					{
-						float4x4 const& ccm = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+						float4x4 const& ccm = drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 						for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
 						{
 							camera_view_projs_[i] *= ccm;

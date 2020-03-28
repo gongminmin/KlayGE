@@ -123,7 +123,7 @@ namespace KlayGE
 		alGetSourcei(source_, AL_BUFFERS_QUEUED, &queued_);
 		if (queued_ > 0)
 		{
-			std::vector<ALuint> cur_queue(queued_);
+			auto cur_queue = MakeUniquePtr<ALuint[]>(queued_);
 			alSourceUnqueueBuffers(source_, queued_, &cur_queue[0]);
 		}
 

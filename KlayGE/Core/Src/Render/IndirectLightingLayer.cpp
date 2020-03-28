@@ -56,7 +56,7 @@ namespace KlayGE
 
 	MultiResSILLayer::MultiResSILLayer()
 	{
-		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
+		multi_res_layer_ = MakeUniquePtr<MultiResLayer>();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -224,7 +224,7 @@ namespace KlayGE
 
 	SSGILayer::SSGILayer()
 	{
-		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
+		multi_res_layer_ = MakeUniquePtr<MultiResLayer>();
 
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
 

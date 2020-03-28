@@ -155,7 +155,7 @@ namespace KlayGE
 							int32_t const cas_index = drl->CurrCascadeIndex();
 							if (cas_index >= 0)
 							{
-								cascade_crop_mat = drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+								cascade_crop_mat = drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 								need_cascade_crop_mat = true;
 							}
 						}

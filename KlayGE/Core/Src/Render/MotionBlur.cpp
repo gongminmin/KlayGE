@@ -214,7 +214,7 @@ namespace KlayGE
 
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> random_dis(0, 255);
-		std::vector<uint8_t> rand_data(tile_width * tile_height);
+		auto rand_data = MakeUniquePtr<uint8_t[]>(tile_width * tile_height);
 		for (uint32_t j = 0; j < tile_height; ++j)
 		{
 			for (uint32_t i = 0; i < tile_width; ++i)
@@ -223,7 +223,7 @@ namespace KlayGE
 			}
 		}
 		ElementInitData init_data;
-		init_data.data = &rand_data[0];
+		init_data.data = rand_data.get();
 		init_data.row_pitch = tile_width;
 		init_data.slice_pitch = tile_width * tile_height;
 		auto random_srv = rf.MakeTextureSrv(

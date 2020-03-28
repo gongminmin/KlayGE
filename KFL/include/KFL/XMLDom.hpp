@@ -82,7 +82,7 @@ namespace KlayGE
 
 	private:
 		std::shared_ptr<rapidxml::xml_document<char>> doc_;
-		std::vector<char> xml_src_;
+		std::unique_ptr<char[]> xml_src_;
 
 		XMLNodePtr root_;
 	};

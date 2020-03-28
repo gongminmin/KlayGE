@@ -177,7 +177,7 @@ namespace KlayGE
 		float4x4 inv_view, inv_proj;
 		float4x4 proj_to_prev;
 
-		IndirectLightingLayerPtr il_layer;
+		std::unique_ptr<IndirectLightingLayer> il_layer;
 
 		std::vector<char> light_visibles;
 
@@ -429,9 +429,9 @@ namespace KlayGE
 		}
 
 		void SetCascadedShadowType(CascadedShadowLayerType type);
-		CascadedShadowLayerPtr const & GetCascadedShadowLayer() const
+		CascadedShadowLayer& GetCascadedShadowLayer() const
 		{
-			return cascaded_shadow_layer_;
+			return *cascaded_shadow_layer_;
 		}
 		int32_t CurrCascadeIndex() const
 		{
@@ -818,7 +818,7 @@ namespace KlayGE
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
 
-		CascadedShadowLayerPtr cascaded_shadow_layer_;
+		std::unique_ptr<CascadedShadowLayer> cascaded_shadow_layer_;
 		float2 blur_size_light_space_;
 		int32_t curr_cascade_index_;
 

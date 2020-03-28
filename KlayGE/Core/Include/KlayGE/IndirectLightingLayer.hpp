@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/MultiResLayer.hpp>
 
 #include <array>
 
@@ -82,7 +83,7 @@ namespace KlayGE
 		void VPLsLighting(LightSource const & light);
 
 	private:
-		MultiResLayerPtr multi_res_layer_;
+		std::unique_ptr<MultiResLayer> multi_res_layer_;
 
 		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
@@ -126,7 +127,7 @@ namespace KlayGE
 		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) override;
 
 	private:
-		MultiResLayerPtr multi_res_layer_;
+		std::unique_ptr<MultiResLayer> multi_res_layer_;
 
 		TexturePtr g_buffer_rt0_tex_;
 		ShaderResourceViewPtr g_buffer_rt0_srv_;

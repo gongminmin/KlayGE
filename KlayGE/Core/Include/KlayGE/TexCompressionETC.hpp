@@ -219,7 +219,7 @@ namespace KlayGE
 		void DecodeETCPlanarModeInternal(ARGBColor32* argb, ETC2PlanarModeBlock const & etc2);
 
 	private:
-		TexCompressionETC1Ptr etc1_codec_;
+		std::unique_ptr<TexCompressionETC1> etc1_codec_;
 	};
 
 	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 final : public TexCompression
@@ -231,8 +231,8 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		TexCompressionETC1Ptr etc1_codec_;
-		TexCompressionETC2RGB8Ptr etc2_rgb8_codec_;
+		std::unique_ptr<TexCompressionETC1> etc1_codec_;
+		std::unique_ptr<TexCompressionETC2RGB8> etc2_rgb8_codec_;
 	};
 }
 

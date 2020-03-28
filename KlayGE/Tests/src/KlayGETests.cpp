@@ -43,7 +43,7 @@ namespace KlayGE
 			context_cfg.graphics_cfg.gamma = false;
 			Context::Instance().Config(context_cfg);
 
-			app_ = MakeSharedPtr<KlayGETestsApp>();
+			app_ = MakeUniquePtr<KlayGETestsApp>();
 			app_->Create();
 		}
 
@@ -55,7 +55,7 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<App3DFramework> app_;
+		std::unique_ptr<App3DFramework> app_;
 	};
 
 	bool CompareBuffer(GraphicsBuffer& buff0, uint32_t buff0_offset,

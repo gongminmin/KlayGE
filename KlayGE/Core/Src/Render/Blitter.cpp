@@ -193,7 +193,8 @@ namespace KlayGE
 			tech = blit_2d_to_buff_tech_;
 		}
 
-		std::vector<float> pos_data(src_width * src_height);
+		size_t const pos_size = src_width * src_height;
+		auto pos_data = MakeUniquePtr<float[]>(pos_size);
 		for (uint32_t y = 0; y < src_height; ++ y)
 		{
 			for (uint32_t x = 0; x < src_width; ++ x)
@@ -202,8 +203,8 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(
+			BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(pos_size * sizeof(pos_data[0])), pos_data.get());
 		tex_to_buff_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tex_to_buff_so_rl_->BindVertexStream(dst, VertexElement(VEU_Diffuse, 0, EF_ABGR32F));
@@ -233,7 +234,8 @@ namespace KlayGE
 		*dst_width_height_param_ = float4(static_cast<float>(dst_width), static_cast<float>(dst_height),
 			1.0f / dst_width, 1.0f / dst_height);
 
-		std::vector<float> pos_data(dst_width * dst_height);
+		size_t const pos_size = dst_width * dst_height;
+		auto pos_data = MakeUniquePtr<float[]>(pos_size);
 		for (uint32_t y = 0; y < dst_height; ++ y)
 		{
 			for (uint32_t x = 0; x < dst_width; ++ x)
@@ -242,8 +244,8 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(
+			BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(pos_size * sizeof(pos_data[0])), pos_data.get());
 		buff_to_tex_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
 		buff_to_tex_rl_->BindVertexStream(src, VertexElement(VEU_Diffuse, 0, src_fmt));
 

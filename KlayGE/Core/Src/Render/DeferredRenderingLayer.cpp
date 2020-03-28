@@ -3220,13 +3220,13 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[vp];
 		if (ssgi_enable)
 		{
-			pvp.il_layer = MakeSharedPtr<SSGILayer>();
+			pvp.il_layer = MakeUniquePtr<SSGILayer>();
 		}
 		else
 		{
 			if (rsm_fb_)
 			{
-				pvp.il_layer = MakeSharedPtr<MultiResSILLayer>();
+				pvp.il_layer = MakeUniquePtr<MultiResSILLayer>();
 			}
 			else
 			{
@@ -3252,22 +3252,22 @@ namespace KlayGE
 				RenderDeviceCaps const & caps = re.DeviceCaps();
 				if (caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0)))
 				{
-					cascaded_shadow_layer_ = MakeSharedPtr<SDSMCascadedShadowLayer>();
+					cascaded_shadow_layer_ = MakeUniquePtr<SDSMCascadedShadowLayer>();
 				}
 				else
 				{
-					cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
+					cascaded_shadow_layer_ = MakeUniquePtr<PSSMCascadedShadowLayer>();
 				}
 			}
 			break;
 
 		case CSLT_PSSM:
-			cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
+			cascaded_shadow_layer_ = MakeUniquePtr<PSSMCascadedShadowLayer>();
 			break;
 
 		case CSLT_SDSM:
 		default:
-			cascaded_shadow_layer_ = MakeSharedPtr<SDSMCascadedShadowLayer>();
+			cascaded_shadow_layer_ = MakeUniquePtr<SDSMCascadedShadowLayer>();
 			break;
 		}
 	}
@@ -3278,7 +3278,7 @@ namespace KlayGE
 		pvp.num_cascades = num_cascades;
 		if (CSLT_PSSM == cascaded_shadow_layer_->Type())
 		{
-			checked_pointer_cast<PSSMCascadedShadowLayer>(cascaded_shadow_layer_)->Lambda(pssm_lambda);
+			checked_cast<PSSMCascadedShadowLayer&>(*cascaded_shadow_layer_).Lambda(pssm_lambda);
 		}
 	}
 
@@ -4428,7 +4428,7 @@ namespace KlayGE
 			cascaded_shadow_layer_->NumCascades(pvp.num_cascades);
 			if (CSLT_SDSM == cascaded_shadow_layer_->Type())
 			{
-				checked_pointer_cast<SDSMCascadedShadowLayer>(cascaded_shadow_layer_)->DepthTexture(pvp.g_buffer_resolved_depth_tex);
+				checked_cast<SDSMCascadedShadowLayer&>(*cascaded_shadow_layer_).DepthTexture(pvp.g_buffer_resolved_depth_tex);
 			}
 			cascaded_shadow_layer_->UpdateCascades(scene_camera, light_camera.ViewProjMatrix(), cascade_border);
 		}

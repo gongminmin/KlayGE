@@ -163,9 +163,10 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_DARWIN
 		uint32_t size = 0;
 		_NSGetExecutablePath(nullptr, &size);
-		std::vector<char> buffer(size + 1, '\0');
-		_NSGetExecutablePath(buffer.data(), &size);
-		exe_path_ = buffer.data();
+		auto buffer = MakeUniquePtr<char[]>(size + 1);
+		_NSGetExecutablePath(buffer.get(), &size);
+		buffer[size] = '\0';
+		exe_path_ = buffer.get();
 		exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/") + 1);
 		local_path_ = exe_path_;
 #endif

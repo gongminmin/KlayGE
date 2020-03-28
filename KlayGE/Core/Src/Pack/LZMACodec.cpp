@@ -185,10 +185,10 @@ namespace KlayGE
 
 	void LZMACodec::Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
 	{
-		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		is->read(&in_data[0], static_cast<size_t>(len));
+		auto in_data = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
+		is->read(in_data.get(), static_cast<size_t>(len));
 
-		this->Decode(output, MakeSpan(in_data.data(), static_cast<size_t>(len)), original_len);
+		this->Decode(output, MakeSpan(in_data.get(), static_cast<size_t>(len)), original_len);
 	}
 
 	void LZMACodec::Decode(std::vector<uint8_t>& output, std::span<uint8_t const> input, uint64_t original_len)
@@ -201,8 +201,8 @@ namespace KlayGE
 	{
 		uint8_t const * p = static_cast<uint8_t const *>(input.data());
 
-		std::vector<uint8_t> in_data(static_cast<size_t>(input.size()));
-		std::memcpy(&in_data[0], p, static_cast<std::streamsize>(in_data.size()));
+		auto in_data = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(input.size()));
+		std::memcpy(in_data.get(), p, static_cast<std::streamsize>(input.size()));
 
 		SizeT s_out_len = static_cast<SizeT>(original_len);
 

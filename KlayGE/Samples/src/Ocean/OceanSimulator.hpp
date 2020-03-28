@@ -3,6 +3,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/FFT.hpp>
 
 namespace KlayGE
 {
@@ -74,7 +75,7 @@ namespace KlayGE
 
 		RenderLayoutPtr quad_layout_;
 
-		GpuFftPtr fft_;
+		std::unique_ptr<GpuFft> fft_;
 	};
 }
 
