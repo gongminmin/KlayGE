@@ -36,6 +36,7 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
 	${KFL_PROJECT_DIR}/include/KFL/SmartPtrHelper.hpp
+	${KFL_PROJECT_DIR}/include/KFL/StringUtil.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Thread.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Timer.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Trace.hpp

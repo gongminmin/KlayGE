@@ -33,16 +33,13 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
 #include <iostream>
-
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
 #include <KlayGE/DevHelper/PlatformDefinition.hpp>
@@ -62,7 +59,7 @@ int main(int argc, char* argv[])
 
 	std::string platform = argv[1];
 
-	boost::algorithm::to_lower(platform);
+	StringUtil::ToLower(platform);
 
 	filesystem::path target_folder;
 	if (argc >= 4)
@@ -153,11 +150,10 @@ int main(int argc, char* argv[])
 		std::vector<string> fxml_names;
 		if (ResLoader::Instance().Locate(fxml_name).empty())
 		{
-			std::vector<std::string> frags;
-			boost::algorithm::split(frags, base_name, boost::is_any_of("+"));
+			std::vector<std::string_view> frags = StringUtil::Split(base_name, StringUtil::EqualTo('+'));
 			for (auto const & frag : frags)
 			{
-				fxml_names.push_back(ResLoader::Instance().Locate(frag + ".fxml"));
+				fxml_names.push_back(ResLoader::Instance().Locate(std::string(frag) + ".fxml"));
 			}
 		}
 		else

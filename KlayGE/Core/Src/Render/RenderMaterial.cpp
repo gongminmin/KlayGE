@@ -32,6 +32,7 @@
 
 #include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -43,9 +44,6 @@
 #include <fstream>
 #include <string>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include <KlayGE/RenderMaterial.hpp>
 
 namespace
@@ -55,14 +53,13 @@ namespace
 	template <int N>
 	void ExtractFVector(std::string_view value_str, float* v)
 	{
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{
-				boost::algorithm::trim(strs[i]);
-				v[i] = static_cast<float>(atof(strs[i].c_str()));
+				strs[i] = StringUtil::Trim(strs[i]);
+				v[i] = stof(std::string(strs[i]));
 			}
 			else
 			{

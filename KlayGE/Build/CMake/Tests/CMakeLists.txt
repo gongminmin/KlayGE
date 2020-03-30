@@ -70,6 +70,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/ResLoaderTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/StreamOutputTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/StringUtilTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/TexConverterTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/TextureTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/UavOutputTest.cpp

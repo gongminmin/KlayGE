@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Hash.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
@@ -42,15 +43,10 @@
 #include <vector>
 #include <regex>
 
-#include <boost/algorithm/string/case_conv.hpp>
-
 #ifndef KLAYGE_DEBUG
 #define CXXOPTS_NO_RTTI
 #endif
 #include <cxxopts.hpp>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
 #include <KlayGE/DevHelper/PlatformDefinition.hpp>
@@ -276,18 +272,17 @@ int main(int argc, char* argv[])
 	{
 		std::string input_name_str = vm["input-name"].as<std::string>();
 
-		std::vector<std::string> tokens;
-		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
+		std::vector<std::string_view> tokens = StringUtil::Split(input_name_str, StringUtil::IsAnyOf(",;"));
 		for (auto& arg : tokens)
 		{
-			boost::algorithm::trim(arg);
+			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				res_names.push_back(arg);
+				res_names.push_back(std::string(arg));
 			}
 			else
 			{
-				filesystem::path arg_path(arg);
+				filesystem::path arg_path(arg.begin(), arg.end());
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 
@@ -347,8 +342,8 @@ int main(int argc, char* argv[])
 		platform = "d3d_11_0";
 	}
 
-	boost::algorithm::to_lower(res_type);
-	boost::algorithm::to_lower(platform);
+	StringUtil::ToLower(res_type);
+	StringUtil::ToLower(platform);
 
 	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform)
 		|| ("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform)

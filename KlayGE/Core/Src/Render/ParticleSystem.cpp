@@ -32,6 +32,7 @@
 
 #include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -47,16 +48,6 @@
 
 #include <fstream>
 #include <string>
-
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
-#endif
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-	#pragma clang diagnostic pop
-#endif
 
 #include <KlayGE/ParticleSystem.hpp>
 
@@ -150,14 +141,13 @@ namespace
 						if (attr)
 						{
 							std::string_view const value_str = attr->ValueString();
-							std::vector<std::string> strs;
-							boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+							std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 							for (size_t i = 0; i < 3; ++ i)
 							{
 								if (i < strs.size())
 								{
-									boost::algorithm::trim(strs[i]);
-									from[i] = static_cast<float>(atof(strs[i].c_str()));
+									strs[i] = StringUtil::Trim(strs[i]);
+									from[i] = stof(std::string(strs[i]));
 								}
 								else
 								{
@@ -173,14 +163,13 @@ namespace
 						if (attr)
 						{
 							std::string_view const value_str = attr->ValueString();
-							std::vector<std::string> strs;
-							boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+							std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 							for (size_t i = 0; i < 3; ++ i)
 							{
 								if (i < strs.size())
 								{
-									boost::algorithm::trim(strs[i]);
-									to[i] = static_cast<float>(atof(strs[i].c_str()));
+									strs[i] = StringUtil::Trim(strs[i]);
+									to[i] = stof(std::string(strs[i]));
 								}
 								else
 								{
@@ -229,14 +218,13 @@ namespace
 					if (attr)
 					{
 						std::string_view const value_str = attr->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+						std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 						for (size_t i = 0; i < 3; ++ i)
 						{
 							if (i < strs.size())
 							{
-								boost::algorithm::trim(strs[i]);
-								min_pos[i] = static_cast<float>(atof(strs[i].c_str()));
+								strs[i] = StringUtil::Trim(strs[i]);
+								min_pos[i] = stof(std::string(strs[i]));
 							}
 							else
 							{
@@ -251,14 +239,13 @@ namespace
 					if (attr)
 					{
 						std::string_view const value_str = attr->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+						std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 						for (size_t i = 0; i < 3; ++ i)
 						{
 							if (i < strs.size())
 							{
-								boost::algorithm::trim(strs[i]);
-								max_pos[i] = static_cast<float>(atof(strs[i].c_str()));
+								strs[i] = StringUtil::Trim(strs[i]);
+								max_pos[i] = stof(std::string(strs[i]));
 							}
 							else
 							{

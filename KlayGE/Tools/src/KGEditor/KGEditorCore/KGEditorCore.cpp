@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -23,9 +24,6 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include "KGEditorCore.hpp"
 
@@ -1839,11 +1837,10 @@ namespace KlayGE
 					if (attr_node)
 					{
 						std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
-						std::vector<std::string> tokens;
-						boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
+						std::vector<std::string_view> tokens = StringUtil::Split(attr_str, StringUtil::IsAnyOf(" \t|"));
 						for (auto& token : tokens)
 						{
-							boost::algorithm::trim(token);
+							token = StringUtil::Trim(token);
 
 							if ("no_shadow" == token)
 							{

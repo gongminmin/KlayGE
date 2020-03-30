@@ -48,6 +48,7 @@
 
 #include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
@@ -69,8 +70,6 @@
 #endif
 
 #include <boost/assert.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -1908,14 +1907,13 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<bool> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					for (size_t index = 0; index < init_val.size(); ++index)
 					{
 						if (index < strs.size())
 						{
-							boost::algorithm::trim(strs[index]);
+							strs[index] = StringUtil::Trim(strs[index]);
 							init_val[index] = BoolFromStr(strs[index]);
 						}
 					}
@@ -2050,15 +2048,14 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					for (size_t index = 0; index < init_val.size(); ++index)
 					{
 						if (index < strs.size())
 						{
-							boost::algorithm::trim(strs[index]);
-							init_val[index] = std::stoul(strs[index]);
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stoul(std::string(strs[index]));
 						}
 					}
 					*this = init_val;
@@ -2134,15 +2131,14 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					for (size_t index = 0; index < init_val.size(); ++index)
 					{
 						if (index < strs.size())
 						{
-							boost::algorithm::trim(strs[index]);
-							init_val[index] = std::stol(strs[index]);
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stol(std::string(strs[index]));
 						}
 					}
 					*this = init_val;
@@ -2218,15 +2214,14 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					for (size_t index = 0; index < init_val.size(); ++index)
 					{
 						if (index < strs.size())
 						{
-							boost::algorithm::trim(strs[index]);
-							init_val[index] = std::stof(strs[index]);
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stof(std::string(strs[index]));
 						}
 					}
 					*this = init_val;
@@ -2302,8 +2297,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2312,8 +2306,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stoul(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2398,8 +2392,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2408,8 +2401,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stoul(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2494,8 +2487,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<uint4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2504,8 +2496,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stoul(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2590,8 +2582,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2600,8 +2591,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stol(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2686,8 +2677,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2696,8 +2686,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stol(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2782,8 +2772,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2792,8 +2781,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stol(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2878,8 +2867,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2888,8 +2876,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stof(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -2974,8 +2962,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -2984,8 +2971,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stof(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -3070,8 +3057,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 					size_t const dim = init_val[0].size();
 					for (size_t index = 0; index < init_val.size(); ++index)
@@ -3080,8 +3066,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stof(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
 							}
 						}
 					}
@@ -3191,8 +3177,7 @@ namespace
 				if (value_node && (XNT_CData == value_node->Type()))
 				{
 					std::string_view const value_str = value_node->ValueString();
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, value_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
 					std::vector<float4x4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 15) / 16)),
 						float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 					size_t const dim = init_val[0].size();
@@ -3202,8 +3187,8 @@ namespace
 						{
 							if (index * dim + j < strs.size())
 							{
-								boost::algorithm::trim(strs[index * dim + j]);
-								init_val[index][j] = std::stof(strs[index * dim + j]);
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
 							}
 						}
 					}

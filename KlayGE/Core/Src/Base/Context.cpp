@@ -21,6 +21,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX2a/span.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Log.hpp>
@@ -43,16 +44,6 @@
 #include <mutex>
 #include <sstream>
 #include <string>
-
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
-#endif
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-	#pragma clang diagnostic pop
-#endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
@@ -650,16 +641,14 @@ namespace KlayGE
 				{
 					std::string_view const options_str = attr->ValueString();
 
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, options_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(options_str, StringUtil::EqualTo(','));
 					for (size_t index = 0; index < strs.size(); ++ index)
 					{
-						std::string& opt = strs[index];
-						boost::algorithm::trim(opt);
+						std::string_view opt = StringUtil::Trim(strs[index]);
 						std::string::size_type const loc = opt.find(':');
-						std::string opt_name = opt.substr(0, loc);
-						std::string opt_val = opt.substr(loc + 1);
-						graphics_options.emplace_back(opt_name, opt_val);
+						std::string_view opt_name = opt.substr(0, loc);
+						std::string_view opt_val = opt.substr(loc + 1);
+						graphics_options.emplace_back(std::string(opt_name), std::string(opt_val));
 					}
 				}
 			}

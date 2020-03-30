@@ -35,6 +35,7 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderMaterial.hpp>
@@ -59,9 +60,6 @@
 #pragma clang diagnostic pop
 #endif
 #include <assimp/pbrmaterial.h>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/DevHelper/MeshConverter.hpp>
 
@@ -180,14 +178,13 @@ namespace
 	template <int N>
 	void ExtractFVector(std::string_view value_str, float* v)
 	{
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{
-				boost::algorithm::trim(strs[i]);
-				v[i] = static_cast<float>(atof(strs[i].c_str()));
+				strs[i] = StringUtil::Trim(strs[i]);
+				v[i] = std::stof(std::string(strs[i]));
 			}
 			else
 			{
@@ -199,14 +196,13 @@ namespace
 	template <int N>
 	void ExtractUIVector(std::string_view value_str, uint32_t* v)
 	{
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{
-				boost::algorithm::trim(strs[i]);
-				v[i] = static_cast<uint32_t>(atoi(strs[i].c_str()));
+				strs[i] = StringUtil::Trim(strs[i]);
+				v[i] = std::stoul(std::string(strs[i]));
 			}
 			else
 			{
@@ -2662,15 +2658,13 @@ namespace
 
 					std::string_view const index_str = attr->ValueString();
 					std::string_view const weight_str = weight_attr->ValueString();
-					std::vector<std::string> index_strs;
-					std::vector<std::string> weight_strs;
-					boost::algorithm::split(index_strs, index_str, boost::is_any_of(" "));
-					boost::algorithm::split(weight_strs, weight_str, boost::is_any_of(" "));
+					std::vector<std::string_view> index_strs = StringUtil::Split(index_str, StringUtil::EqualTo(' '));
+					std::vector<std::string_view> weight_strs = StringUtil::Split(weight_str, StringUtil::EqualTo(' '));
 					
 					for (size_t num_blend = 0; num_blend < index_strs.size(); ++ num_blend)
 					{
-						binding.push_back({ static_cast<uint32_t>(atoi(index_strs[num_blend].c_str())),
-							static_cast<float>(atof(weight_strs[num_blend].c_str())) });
+						binding.push_back(
+							{std::stoul(std::string(index_strs[num_blend])), std::stof(std::string(weight_strs[num_blend]))});
 					}
 				}
 				else

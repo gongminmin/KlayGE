@@ -2,6 +2,7 @@
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -30,9 +31,6 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include "SampleCommon.hpp"
 #include "ScenePlayer.hpp"
 
@@ -51,7 +49,7 @@ namespace
 			module_->RunString("from ScenePlayer import *");
 
 			script_ = MakeSharedPtr<std::string>();
-			*script_ = boost::algorithm::trim_copy(script);
+			*script_ = std::string(StringUtil::Trim(script));
 		}
 
 		virtual ~PyScriptUpdate()
@@ -426,11 +424,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		if (attr_node)
 		{
 			std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
-			std::vector<std::string> tokens;
-			boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
+			std::vector<std::string_view> tokens = StringUtil::Split(attr_str, StringUtil::IsAnyOf(" \t|"));
 			for (auto& token : tokens)
 			{
-				boost::algorithm::trim(token);
+				token = StringUtil::Trim(token);
 
 				if ("no_shadow" == token)
 				{
@@ -605,11 +602,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					obj_attr = SceneNode::SOA_Cullable;
 
 					std::string_view const attr_str = attr->ValueString();
-					std::vector<std::string> tokens;
-					boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
+					std::vector<std::string_view> tokens = StringUtil::Split(attr_str, StringUtil::IsAnyOf(" \t|"));
 					for (auto& token : tokens)
 					{
-						boost::algorithm::trim(token);
+						token = StringUtil::Trim(token);
 						if ("cullable" == token)
 						{
 							obj_attr |= SceneNode::SOA_Cullable;

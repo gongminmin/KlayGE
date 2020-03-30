@@ -33,6 +33,7 @@
 #include <KFL/com_ptr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 
 #include <CPP/Common/MyWindows.h>
@@ -44,14 +45,6 @@
 #include <string>
 
 #include <boost/assert.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunusable-partial-specialization" // Ignore unused class template partial specialization
-#endif
-#include <boost/algorithm/string/predicate.hpp>
-#if defined(KLAYGE_PLATFORM_ANDROID) && defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
-#endif
 
 #include <CPP/7zip/Archive/IArchive.h>
 
@@ -222,8 +215,8 @@ namespace KlayGE
 				std::string file_path;
 				TIFHR(GetArchiveItemPath(archive_.get(), i, file_path));
 				std::replace(file_path.begin(), file_path.end(), '\\', '/');
-				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
-					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))
+				if (!StringUtil::CaseInsensitiveLexicographicalCompare(extract_file_path, file_path) &&
+					!StringUtil::CaseInsensitiveLexicographicalCompare(file_path, extract_file_path))
 				{
 					real_index = i;
 					break;
