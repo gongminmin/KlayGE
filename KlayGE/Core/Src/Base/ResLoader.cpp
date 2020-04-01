@@ -255,12 +255,8 @@ namespace KlayGE
 		if (!new_path.is_absolute())
 		{
 			std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 			std::error_code ec;
 			if (!std::filesystem::exists(full_path, ec))
-#else
-			if (!std::filesystem::exists(full_path))
-#endif
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
 				try
@@ -271,11 +267,7 @@ namespace KlayGE
 				{
 					full_path = new_path;
 				}
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 				if (!std::filesystem::exists(full_path, ec))
-#else
-				if (!std::filesystem::exists(full_path))
-#endif
 				{
 					return "";
 				}
@@ -361,12 +353,8 @@ namespace KlayGE
 			{
 				package_path = std::string(path.substr(0, pkt_offset + 3));
 				std::filesystem::path pkt_path(package_path);
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 				std::error_code ec;
 				if (std::filesystem::exists(pkt_path, ec)
-#else
-				if (std::filesystem::exists(pkt_path)
-#endif
 					&& (std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
 				{
 					auto const next_slash_offset = path.find('/', pkt_offset + 3);
@@ -488,15 +476,9 @@ namespace KlayGE
 					}
 					if (!package)
 					{
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
-						uint64_t timestamp = std::filesystem::last_write_time(package_path).time_since_epoch().count();
-#else
-						uint64_t timestamp = std::filesystem::last_write_time(package_path);
-#endif
-						// The static_cast is a workaround for a bug in clang/c2
-						auto package_res = MakeSharedPtr<ResIdentifier>(package_path, timestamp,
-							MakeSharedPtr<std::ifstream>(package_path.c_str(),
-								static_cast<std::ios_base::openmode>(std::ios_base::binary)));
+						uint64_t const timestamp = std::filesystem::last_write_time(package_path).time_since_epoch().count();
+						auto package_res = MakeSharedPtr<ResIdentifier>(
+							package_path, timestamp, MakeSharedPtr<std::ifstream>(package_path.c_str(), std::ios_base::binary));
 
 						package = MakeSharedPtr<Package>(package_res, password);
 					}
@@ -560,12 +542,8 @@ namespace KlayGE
 					std::replace(res_name.begin(), res_name.end(), '\\', '/');
 #endif
 
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 					std::error_code ec;
 					if (std::filesystem::exists(std::filesystem::path(res_name), ec))
-#else
-					if (std::filesystem::exists(std::filesystem::path(res_name)))
-#endif
 					{
 						return res_name;
 					}
@@ -624,12 +602,7 @@ namespace KlayGE
 		if (!res_name.empty())
 		{
 			std::filesystem::path res_path(res_name);
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
-			uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
-#else
-			uint64_t timestamp = std::filesystem::last_write_time(res_path);
-#endif
-
+			uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
 			return MakeSharedPtr<ResIdentifier>(name, timestamp,
 				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 		}
@@ -646,21 +619,12 @@ namespace KlayGE
 #endif
 
 					std::filesystem::path res_path(res_name);
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 					std::error_code ec;
 					if (std::filesystem::exists(res_path, ec))
-#else
-					if (std::filesystem::exists(res_path))
-#endif
 					{
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
-						uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
-#else
-						uint64_t timestamp = std::filesystem::last_write_time(res_path);
-#endif
-						// The static_cast is a workaround for a bug in clang/c2
-						return MakeSharedPtr<ResIdentifier>(name, timestamp,
-							MakeSharedPtr<std::ifstream>(res_name.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::binary)));
+						uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+						return MakeSharedPtr<ResIdentifier>(
+							name, timestamp, MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 					}
 					else
 					{
@@ -705,11 +669,7 @@ namespace KlayGE
 		if (!res_path.empty())
 		{
 #if !defined(KLAYGE_PLATFORM_ANDROID)
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 			timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
-#else
-			timestamp = std::filesystem::last_write_time(res_path);
-#endif
 #endif
 		}
 

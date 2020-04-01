@@ -131,6 +131,15 @@ target_include_directories(${LIB_NAME}
 
 add_dependencies(${LIB_NAME} fmt)
 
+if(KLAYGE_WITH_GHC_FILESYSTEM)
+	target_include_directories(${LIB_NAME}
+		PUBLIC
+			$<TARGET_PROPERTY:ghc_filesystem,INTERFACE_INCLUDE_DIRECTORIES>
+	)
+
+	add_dependencies(${LIB_NAME} ghc_filesystem)
+endif()
+
 SET(LIB_OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX})
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
@@ -177,10 +186,5 @@ else()
 					c++fs
 			)
 		endif()
-	else()
-		target_link_libraries(${LIB_NAME}
-			PUBLIC
-				filesystem
-		)
 	endif()
 endif()
