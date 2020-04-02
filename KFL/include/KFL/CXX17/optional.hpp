@@ -1,5 +1,5 @@
 /**
- * @file optional.cpp
+ * @file optional.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_CXX17_OPTIONAL_HPP
-#define _KFL_CXX17_OPTIONAL_HPP
+#ifndef KFL_CXX17_OPTIONAL_HPP
+#define KFL_CXX17_OPTIONAL_HPP
 
 #pragma once
 
@@ -44,11 +44,11 @@
 		using experimental::optional;
 	}
 #else
-	#include <boost/optional.hpp>
+	#include <nonstd/optional.hpp>
 	namespace std
 	{
-		using boost::optional;
+		using nonstd::optional;
 	}
 #endif
 
-#endif		// _KFL_CXX17_OPTIONAL_HPP
+#endif		// KFL_CXX17_OPTIONAL_HPP

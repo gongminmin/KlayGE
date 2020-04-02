@@ -93,6 +93,7 @@ External/libogg
 External/libvorbis
 External/nanosvg
 External/openal-soft
+External/optional-lite
 External/Python
 External/python-cmake-buildsystem
 External/rapidjson
