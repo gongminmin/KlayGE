@@ -98,6 +98,7 @@ External/Python
 External/python-cmake-buildsystem
 External/rapidjson
 External/rapidxml
+External/string-view-lite
 External/UniversalDXSDK
 External/wpftoolkit
 External/zlib

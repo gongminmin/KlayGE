@@ -38,13 +38,13 @@
 #if defined(KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT)
 	#include <string_view>
 #else
-	#include <boost/utility/string_view.hpp>
+	#include <nonstd/string_view.hpp>
 
 	namespace std
 	{
-		using boost::basic_string_view;
-		using boost::string_view;
-		using boost::wstring_view;
+		using nonstd::basic_string_view;
+		using nonstd::string_view;
+		using nonstd::wstring_view;
 	}
 #endif
 

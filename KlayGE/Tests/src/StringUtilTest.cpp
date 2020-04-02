@@ -43,17 +43,17 @@ using namespace KlayGE;
 TEST(StringUtilTest, NarrowSplit)
 {
     std::vector<std::string_view> narrow_result = StringUtil::Split("split Test", StringUtil::EqualTo(' '));
-    EXPECT_EQ(narrow_result.size(), 2);
+    EXPECT_EQ(narrow_result.size(), 2U);
     EXPECT_EQ(narrow_result[0], "split");
     EXPECT_EQ(narrow_result[1], "Test");
 
     narrow_result = StringUtil::Split(" split Test ", StringUtil::EqualTo(' '));
-    EXPECT_EQ(narrow_result.size(), 2);
+    EXPECT_EQ(narrow_result.size(), 2U);
     EXPECT_EQ(narrow_result[0], "split");
     EXPECT_EQ(narrow_result[1], "Test");
 
     narrow_result = StringUtil::Split(" split\tTest ", StringUtil::IsAnyOf(" \t"));
-    EXPECT_EQ(narrow_result.size(), 2);
+    EXPECT_EQ(narrow_result.size(), 2U);
     EXPECT_EQ(narrow_result[0], "split");
     EXPECT_EQ(narrow_result[1], "Test");
 }
@@ -61,17 +61,17 @@ TEST(StringUtilTest, NarrowSplit)
 TEST(StringUtilTest, WideSplit)
 {
     std::vector<std::wstring_view> result = StringUtil::Split(L"split Test", StringUtil::EqualTo(L' '));
-    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result.size(), 2U);
     EXPECT_EQ(result[0], L"split");
     EXPECT_EQ(result[1], L"Test");
 
     result = StringUtil::Split(L" split Test ", StringUtil::EqualTo(L' '));
-    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result.size(), 2U);
     EXPECT_EQ(result[0], L"split");
     EXPECT_EQ(result[1], L"Test");
 
     result = StringUtil::Split(L" split\tTest ", StringUtil::IsAnyOf(L" \t"));
-    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result.size(), 2U);
     EXPECT_EQ(result[0], L"split");
     EXPECT_EQ(result[1], L"Test");
 }
