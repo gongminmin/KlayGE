@@ -569,40 +569,6 @@ namespace KlayGE
 
 		return ret;
 	}
-	
-	void UIComboBox::SetItemData(int nIndex, std::any const & data)
-	{
-		items_[nIndex]->data = data;
-	}
-
-	int UIComboBox::AddItem(std::wstring const & strText, std::any const & data)
-	{
-		BOOST_ASSERT(!strText.empty());
-
-		// Create a new item and set the data
-		std::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
-		pItem->strText = strText;
-		pItem->data = data;
-		pItem->rcActive = IRect(0, 0, 0, 0);
-		pItem->bVisible = false;
-
-		int ret = static_cast<int>(items_.size());
-
-		items_.push_back(pItem);
-
-		// Update the scroll bar with new range
-		scroll_bar_.SetTrackRange(0, items_.size());
-
-		// If this is the only item in the list, it's selected
-		if (1 == this->GetNumItems())
-		{
-			selected_ = 0;
-			focused_ = 0;
-			this->OnSelectionChangedEvent()(*this);
-		}
-
-		return ret;
-	}
 
 	void UIComboBox::RemoveItem(uint32_t index)
 	{
@@ -644,16 +610,6 @@ namespace KlayGE
 		return -1;
 	}
 
-	std::any const UIComboBox::GetSelectedData() const
-	{
-		if (selected_ < 0)
-		{
-			return std::any();
-		}
-
-		return items_[selected_]->data;
-	}
-
 	std::shared_ptr<UIComboBoxItem> UIComboBox::GetSelectedItem() const
 	{
 		if (selected_ < 0)
@@ -667,30 +623,6 @@ namespace KlayGE
 	int UIComboBox::GetSelectedIndex() const
 	{
 		return selected_;
-	}
-
-	std::any const UIComboBox::GetItemData(std::wstring const & strText) const
-	{
-		int index = this->FindItem(strText);
-		if (index == -1)
-		{
-			return std::any();
-		}
-
-		std::shared_ptr<UIComboBoxItem> const & pItem = items_[index];
-		if (!pItem)
-		{
-			return std::any();
-		}
-
-		return pItem->data;
-	}
-
-	std::any const UIComboBox::GetItemData(int nIndex) const
-	{
-		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
-
-		return items_[nIndex]->data;
 	}
 
 	void UIComboBox::SetSelectedByIndex(uint32_t index)

@@ -28,8 +28,6 @@
 #include <array>
 #include <map>
 
-#include <KFL/CXX17/any.hpp>
-
 namespace KlayGE
 {
 	enum UI_Control_State
@@ -1122,7 +1120,6 @@ namespace KlayGE
 	struct KLAYGE_CORE_API UIListBoxItem
 	{
 		std::wstring strText;
-		std::any data;
 
 		IRect  rcActive;
 		bool  bSelected;
@@ -1188,9 +1185,7 @@ namespace KlayGE
 			margin_ = margin;
 		}
 		int AddItem(std::wstring const & strText);
-		void SetItemData(int nIndex, std::any const & data);
-		int AddItem(std::wstring const & strText, std::any const & data);
-		void InsertItem(int nIndex, std::wstring const & strText, std::any const & data);
+		void InsertItem(int nIndex, std::wstring const & strText);
 		void RemoveItem(int nIndex);
 		void RemoveAllItems();
 
@@ -1243,7 +1238,6 @@ namespace KlayGE
 	struct UIComboBoxItem
 	{
 		std::wstring strText;
-		std::any data;
 
 		IRect  rcActive;
 		bool  bVisible;
@@ -1276,14 +1270,10 @@ namespace KlayGE
 		virtual void UpdateRects();
 
 		int AddItem(std::wstring const & strText);
-		void SetItemData(int nIndex, std::any const & data);
-		int AddItem(std::wstring const & strText, std::any const & data);
 		void RemoveAllItems();
 		void RemoveItem(uint32_t index);
 		bool ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		int FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
-		std::any const GetItemData(std::wstring const & strText) const;
-		std::any const GetItemData(int nIndex) const;
 		void SetDropHeight(uint32_t nHeight)
 		{
 			drop_height_ = nHeight;
@@ -1299,7 +1289,6 @@ namespace KlayGE
 			this->UpdateRects();
 		}
 
-		std::any const GetSelectedData() const;
 		std::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
 		int GetSelectedIndex() const;
 
@@ -1314,20 +1303,6 @@ namespace KlayGE
 
 		void SetSelectedByIndex(uint32_t index);
 		void SetSelectedByText(std::wstring const & strText);
-
-		template <typename T>
-		void SetSelectedByData(T const & data)
-		{
-			for (uint32_t i = 0; i < items_.size(); ++ i)
-			{
-				std::shared_ptr<UIComboBoxItem> pItem = items_[i];
-
-				if (std::any_cast<T>(pItem->data) == data)
-				{
-					this->SetSelectedByIndex(static_cast<uint32_t>(i));
-				}
-			}
-		}
 
 	public:
 		typedef Signal::Signal<void(UIComboBox const& sender)> SelectionChangedEvent;
