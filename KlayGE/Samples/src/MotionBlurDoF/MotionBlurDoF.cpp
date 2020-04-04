@@ -725,20 +725,26 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					Color clr(0, 0, 0, 1);
 					try
 					{
-						std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-							MakeSpan<std::any>({i, j, NUM_INSTANCE, NUM_LINE})));
+						std::vector<ScriptVariablePtr> scr_pos;
+						script_module_
+							->Call("get_pos", MakeSpan<ScriptVariablePtr>({script_module_->MakeVariable(i), script_module_->MakeVariable(j),
+												  script_module_->MakeVariable(NUM_INSTANCE), script_module_->MakeVariable(NUM_LINE)}))
+							->Value(scr_pos);
 
-						pos.x() = std::any_cast<float>(scr_pos[0]);
-						pos.y() = std::any_cast<float>(scr_pos[1]);
-						pos.z() = std::any_cast<float>(scr_pos[2]);
+						scr_pos[0]->Value(pos.x());
+						scr_pos[1]->Value(pos.y());
+						scr_pos[2]->Value(pos.z());
 
-						std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-							MakeSpan<std::any>({i, j, NUM_INSTANCE, NUM_LINE})));
+						std::vector<ScriptVariablePtr> scr_clr;
+						script_module_
+							->Call("get_clr", MakeSpan<ScriptVariablePtr>({script_module_->MakeVariable(i), script_module_->MakeVariable(j),
+												  script_module_->MakeVariable(NUM_INSTANCE), script_module_->MakeVariable(NUM_LINE)}))
+							->Value(scr_clr);
 
-						clr.r() = std::any_cast<float>(scr_clr[0]);
-						clr.g() = std::any_cast<float>(scr_clr[1]);
-						clr.b() = std::any_cast<float>(scr_clr[2]);
-						clr.a() = std::any_cast<float>(scr_clr[3]);
+						scr_clr[0]->Value(clr.r());
+						scr_clr[1]->Value(clr.g());
+						scr_clr[2]->Value(clr.b());
+						scr_clr[3]->Value(clr.a());
 					}
 					catch (...)
 					{

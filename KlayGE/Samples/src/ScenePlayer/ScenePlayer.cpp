@@ -56,11 +56,11 @@ namespace
 		{
 		}
 
-		std::any Run(float app_time, float elapsed_time)
+		ScriptVariablePtr Run(float app_time, float elapsed_time)
 		{
 			module_->RunString(*script_);
-
-			return module_->Call("update", MakeSpan<std::any>({app_time, elapsed_time}));
+			return module_->Call(
+				"update", MakeSpan<ScriptVariablePtr>({module_->MakeVariable(app_time), module_->MakeVariable(elapsed_time)}));
 		}
 
 	private:
@@ -80,24 +80,24 @@ namespace
 		{
 			LightSource& light = checked_cast<LightSource&>(component);
 
-			std::any py_ret = this->Run(app_time, elapsed_time);
-			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
+			ScriptVariablePtr py_ret = this->Run(app_time, elapsed_time);
+			std::vector<ScriptVariablePtr> ret;
+			if (py_ret->TryValue(ret))
 			{
-				std::vector<std::any> ret = std::any_cast<std::vector<std::any>>(py_ret);
 				size_t s = ret.size();
 
 				if (s > 0)
 				{
-					std::any py_mat = ret[0];
-					if (std::any_cast<std::vector<std::any>>(&py_mat) != nullptr)
+					ScriptVariablePtr const& py_mat = ret[0];
+					std::vector<ScriptVariablePtr> mat;
+					if (py_mat->TryValue(mat))
 					{
-						std::vector<std::any> mat = std::any_cast<std::vector<std::any>>(py_mat);
 						if (!mat.empty())
 						{
 							float4x4 light_mat;
 							for (int i = 0; i < 16; ++ i)
 							{
-								light_mat[i] = std::any_cast<float>(mat[i]);
+								mat[i]->Value(light_mat[i]);
 							}
 							light.BoundSceneNode()->TransformToParent(light_mat);
 						}
@@ -105,16 +105,16 @@ namespace
 				}
 				if (s > 1)
 				{
-					std::any py_clr = ret[1];
-					if (std::any_cast<std::vector<std::any>>(&py_clr) != nullptr)
+					ScriptVariablePtr const& py_clr = ret[1];
+					std::vector<ScriptVariablePtr> clr;
+					if (py_clr->TryValue(clr))
 					{
-						std::vector<std::any> clr = std::any_cast<std::vector<std::any>>(py_clr);
 						if (!clr.empty())
 						{
 							float3 light_clr;
 							for (int i = 0; i < 3; ++ i)
 							{
-								light_clr[i] = std::any_cast<float>(clr[i]);
+								clr[i]->Value(light_clr[i]);
 							}
 							light.Color(light_clr);
 						}
@@ -122,16 +122,16 @@ namespace
 				}				
 				if (s > 2)
 				{
-					std::any py_fo = ret[2];
-					if (std::any_cast<std::vector<std::any>>(&py_fo) != nullptr)
+					ScriptVariablePtr const& py_fo = ret[2];
+					std::vector<ScriptVariablePtr> fo;
+					if (py_fo->TryValue(fo))
 					{
-						std::vector<std::any> fo = std::any_cast<std::vector<std::any>>(py_fo);
 						if (!fo.empty())
 						{
 							float3 light_fall_off;
 							for (int i = 0; i < 3; ++ i)
 							{
-								light_fall_off[i] = std::any_cast<float>(fo[i]);
+								fo[i]->Value(light_fall_off[i]);
 							}
 							light.Falloff(light_fall_off);
 						}
@@ -139,16 +139,16 @@ namespace
 				}
 				if (s > 3)
 				{
-					std::any py_oi = ret[3];
-					if (std::any_cast<std::vector<std::any>>(&py_oi) != nullptr)
+					ScriptVariablePtr const& py_oi = ret[3];
+					std::vector<ScriptVariablePtr> oi;
+					if (py_oi->TryValue(oi))
 					{
-						std::vector<std::any> oi = std::any_cast<std::vector<std::any>>(py_oi);
 						if (!oi.empty())
 						{
 							float2 light_outer_inner;
 							for (int i = 0; i < 2; ++ i)
 							{
-								light_outer_inner[i] = std::any_cast<float>(oi[i]);
+								oi[i]->Value(light_outer_inner[i]);
 							}
 							light.OuterAngle(light_outer_inner.x());
 							light.InnerAngle(light_outer_inner.y());
@@ -169,24 +169,24 @@ namespace
 
 		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			std::any py_ret = this->Run(app_time, elapsed_time);
-			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
+			ScriptVariablePtr py_ret = this->Run(app_time, elapsed_time);
+			std::vector<ScriptVariablePtr> ret;
+			if (py_ret->TryValue(ret))
 			{
-				std::vector<std::any> ret = std::any_cast<std::vector<std::any>>(py_ret);
 				size_t s = ret.size();
 
 				if (s > 0)
 				{
-					std::any py_mat = ret[0];
-					if (std::any_cast<std::vector<std::any>>(&py_mat) != nullptr)
+					ScriptVariablePtr const& py_mat = ret[0];
+					std::vector<ScriptVariablePtr> mat;
+					if (py_mat->TryValue(mat))
 					{
-						std::vector<std::any> mat = std::any_cast<std::vector<std::any>>(py_mat);
 						if (!mat.empty())
 						{
 							float4x4 obj_mat;
 							for (int i = 0; i < 16; ++ i)
 							{
-								obj_mat[i] = std::any_cast<float>(mat[i]);
+								mat[i]->Value(obj_mat[i]);
 							}
 							node.TransformToParent(obj_mat);
 						}
@@ -208,10 +208,10 @@ namespace
 		{
 			Camera& camera = checked_cast<Camera&>(component);
 
-			std::any py_ret = this->Run(app_time, elapsed_time);
-			if (std::any_cast<std::vector<std::any>>(&py_ret) != nullptr)
+			ScriptVariablePtr py_ret = this->Run(app_time, elapsed_time);
+			std::vector<ScriptVariablePtr> ret;
+			if (py_ret->TryValue(ret))
 			{
-				std::vector<std::any> ret = std::any_cast<std::vector<std::any>>(py_ret);
 				size_t s = ret.size();
 
 				float3 cam_eye = camera.EyePos();
@@ -224,63 +224,65 @@ namespace
 				
 				if (s > 0)
 				{
-					std::any py_eye = ret[0];
-					if (std::any_cast<std::vector<std::any>>(&py_eye) != nullptr)
+					ScriptVariablePtr const& py_eye = ret[0];
+					std::vector<ScriptVariablePtr> eye;
+					if (py_eye->TryValue(eye))
 					{
-						std::vector<std::any> eye = std::any_cast<std::vector<std::any>>(py_eye);
 						if (!eye.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
 							{
-								cam_eye[i] = std::any_cast<float>(eye[i]);
+								eye[i]->Value(cam_eye[i]);
 							}
 						}
 					}
 				}
 				if (s > 1)
 				{
-					std::any py_lookat = ret[1];
-					if (std::any_cast<std::vector<std::any>>(&py_lookat) != nullptr)
+					ScriptVariablePtr const& py_lookat = ret[1];
+					std::vector<ScriptVariablePtr> lookat;
+					if (py_lookat->TryValue(lookat))
 					{
-						std::vector<std::any> lookat = std::any_cast<std::vector<std::any>>(py_lookat);
 						if (!lookat.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
 							{
-								cam_lookat[i] = std::any_cast<float>(lookat[i]);
+								lookat[i]->Value(cam_lookat[i]);
 							}
 						}
 					}
 				}
 				if (s > 2)
 				{
-					std::any py_up = ret[2];
-					if (std::any_cast<std::vector<std::any>>(&py_up) != nullptr)
+					ScriptVariablePtr const& py_up = ret[2];
+					std::vector<ScriptVariablePtr> up;
+					if (py_up->TryValue(up))
 					{
-						std::vector<std::any> up = std::any_cast<std::vector<std::any>>(py_up);
 						if (!up.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
 							{
-								cam_up[i] = std::any_cast<float>(up[i]);
+								up[i]->Value(cam_up[i]);
 							}
 						}
 					}
 				}
 				if (s > 3)
 				{
-					std::any py_np = ret[3];
-					if (std::any_cast<float>(&py_np) != nullptr)
+					ScriptVariablePtr const& py_np = ret[3];
+					float np;
+					if (py_np->TryValue(np))
 					{
-						cam_np = std::any_cast<float>(py_np);
+						cam_np = np;
 					}
 				}
 				if (s > 4)
 				{
-					std::any py_fp = ret[3];
-					if (std::any_cast<float>(&py_fp) != nullptr)
+					ScriptVariablePtr const& py_fp = ret[4];
+					float fp;
+					if (py_fp->TryValue(fp))
 					{
-						cam_fp = std::any_cast<float>(py_fp);
+						cam_fp = fp;
 					}
 				}
 

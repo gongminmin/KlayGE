@@ -62,23 +62,23 @@ namespace
 			}
 		}
 
-		std::vector<std::any> store_to_py()
+		std::vector<ScriptVariablePtr> StoreToPy(ScriptModule const& module)
 		{
-			std::vector<std::any> ret;
+			std::vector<ScriptVariablePtr> ret;
 
-			ret.push_back(vendor_);
-			ret.push_back(renderer_);
-			ret.push_back(major_ver_);
-			ret.push_back(minor_ver_);
-			ret.push_back(glsl_major_ver_);
-			ret.push_back(glsl_minor_ver_);
+			ret.push_back(module.MakeVariable(vendor_));
+			ret.push_back(module.MakeVariable(renderer_));
+			ret.push_back(module.MakeVariable(major_ver_));
+			ret.push_back(module.MakeVariable(minor_ver_));
+			ret.push_back(module.MakeVariable(glsl_major_ver_));
+			ret.push_back(module.MakeVariable(glsl_minor_ver_));
 
 			std::string ext_str;
 			for (auto const & ext : extensions_)
 			{
 				ext_str += ext + ' ';
 			}
-			ret.push_back(ext_str);
+			ret.push_back(module.MakeVariable(ext_str));
 
 			return ret;
 		}
@@ -133,11 +133,11 @@ int main()
 	GLESCompatibilityApp app;
 	app.Create();
 
-	information info;
-	std::vector<std::any> for_py = info.store_to_py();
-
 	ScriptEngine& scriptEng = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
 	ScriptModulePtr module = scriptEng.CreateModule("GLESCompatibility");
+
+	information info;
+	std::vector<ScriptVariablePtr> for_py = info.StoreToPy(*module);
 
 	module->Call("gles_compatibility", for_py);
 

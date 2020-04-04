@@ -386,6 +386,9 @@ namespace KlayGE
 	class ShowEngine;
 	class ShowFactory;
 
+	class ScriptVariable;
+	using ScriptVariablePtr = std::shared_ptr<ScriptVariable>;
+	class ScriptModule;
 	class ScriptEngine;
 	class ScriptFactory;
 
