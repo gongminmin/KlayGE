@@ -31,7 +31,6 @@ target_compile_definitions(${LIB_NAME}
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		${Boost_INCLUDE_DIR}
 		$<TARGET_PROPERTY:KFL,INTERFACE_INCLUDE_DIRECTORIES>
 		${DXBC2GLSL_PROJECT_DIR}/Include
 )
