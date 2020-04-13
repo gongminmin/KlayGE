@@ -75,6 +75,11 @@ namespace KlayGE
 		{
 			return state_;
 		}
+
+		void AppState(android_app* state)
+		{
+			state_ = state;
+		}
 #endif
 
 		void LoadCfg(std::string const & cfg_file);

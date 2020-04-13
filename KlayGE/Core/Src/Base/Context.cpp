@@ -119,10 +119,6 @@ namespace KlayGE
 	Context::Context()
 		: app_(nullptr)
 	{
-#ifdef KLAYGE_PLATFORM_ANDROID
-		state_ = get_app();
-#endif
-
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
