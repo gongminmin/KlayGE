@@ -442,7 +442,9 @@ namespace KlayGE
 		this->NumMaterials(source.NumMaterials());
 		for (uint32_t mtl_index = 0; mtl_index < source.NumMaterials(); ++ mtl_index)
 		{
-			this->GetMaterial(mtl_index) = source.GetMaterial(mtl_index)->Clone();
+			auto& mtl = this->GetMaterial(mtl_index);
+			mtl = source.GetMaterial(mtl_index)->Clone();
+			mtl->LoadTextureSlots();
 		}
 
 		if (source.NumMeshes() > 0)
