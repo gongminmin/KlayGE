@@ -66,7 +66,12 @@
 
 namespace
 {
-	std::mutex instance_mutex;
+	std::mutex default_mtl_instance_mutex;
+	std::mutex mtl_cb_instance_mutex;
+	std::mutex mesh_cb_instance_mutex;
+	std::mutex model_cb_instance_mutex;
+	std::mutex camera_cb_instance_mutex;
+	std::mutex mipmapper_instance_mutex;
 }
 
 namespace KlayGE
@@ -1491,7 +1496,7 @@ namespace KlayGE
 	{
 		if (!default_material_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(default_mtl_instance_mutex);
 			if (!default_material_)
 			{
 				default_material_ = MakeSharedPtr<RenderMaterial>();
@@ -1504,7 +1509,7 @@ namespace KlayGE
 	{
 		if (!predefined_material_cb_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(mtl_cb_instance_mutex);
 			if (!predefined_material_cb_)
 			{
 				predefined_material_cb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
@@ -1517,7 +1522,7 @@ namespace KlayGE
 	{
 		if (!predefined_mesh_cb_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(mesh_cb_instance_mutex);
 			if (!predefined_mesh_cb_)
 			{
 				predefined_mesh_cb_ = MakeUniquePtr<PredefinedMeshCBuffer>();
@@ -1530,7 +1535,7 @@ namespace KlayGE
 	{
 		if (!predefined_model_cb_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(model_cb_instance_mutex);
 			if (!predefined_model_cb_)
 			{
 				predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
@@ -1543,7 +1548,7 @@ namespace KlayGE
 	{
 		if (!predefined_camera_cb_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(camera_cb_instance_mutex);
 			if (!predefined_camera_cb_)
 			{
 				predefined_camera_cb_ = MakeUniquePtr<PredefinedCameraCBuffer>();
@@ -1556,7 +1561,7 @@ namespace KlayGE
 	{
 		if (!mipmapper_)
 		{
-			std::lock_guard<std::mutex> lock(instance_mutex);
+			std::lock_guard<std::mutex> lock(mipmapper_instance_mutex);
 			if (!mipmapper_)
 			{
 				mipmapper_ = MakeUniquePtr<Mipmapper>();
