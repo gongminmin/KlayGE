@@ -17,6 +17,8 @@ void FoliageImpostorGBufferVS(uint instance_id : SV_InstanceID,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oCurrPosSS : TEXCOORD4,
+			out float4 oPrevPosSS : TEXCOORD5,
 			out float4 oPos : SV_Position)
 {
 	float4 pos = float4(pos2 * pos_extent.xy + pos_center.xy, 0, 1);
@@ -26,7 +28,12 @@ void FoliageImpostorGBufferVS(uint instance_id : SV_InstanceID,
 	pos.xyz = mul(pos.xyz, (float3x3)billboard_mat);
 	pos.xyz += instance_pos_scale.xyz;
 
-	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
 	float4x4 mvp = camera.mvp;
 	float4x4 model_view = camera.model_view;
 
@@ -46,6 +53,9 @@ void FoliageImpostorGBufferVS(uint instance_id : SV_InstanceID,
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(pos, prev_mvps[camera_index]);
 }
 
 void FoliageImpostorGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,

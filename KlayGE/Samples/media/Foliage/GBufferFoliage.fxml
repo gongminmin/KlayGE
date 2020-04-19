@@ -25,6 +25,8 @@ void FoliageGBufferVS(uint instance_id : SV_InstanceID,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oCurrPosSS : TEXCOORD4,
+			out float4 oPrevPosSS : TEXCOORD5,
 			out float4 oPos : SV_Position)
 {
 #if NUM_JOINTS > 0
@@ -53,7 +55,12 @@ void FoliageGBufferVS(uint instance_id : SV_InstanceID,
 	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
 	oTexCoord_2xy.xy = TexcoordNode(texcoord);
 
-	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
 	float4x4 mvp = camera.mvp;
 	float4x4 model_view = camera.model_view;
 
@@ -72,6 +79,9 @@ void FoliageGBufferVS(uint instance_id : SV_InstanceID,
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(float4(result_pos, 1), prev_mvps[camera_index]);
 }
 		]]>
 	</shader>
