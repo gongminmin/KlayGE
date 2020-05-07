@@ -23,7 +23,14 @@
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <winrt/Windows.Graphics.Display.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
+#endif
 #include <winrt/Windows.UI.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace uwp
 {

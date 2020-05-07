@@ -36,11 +36,12 @@
 #include <KlayGE/Window.hpp>
 
 #include <system_error>
+
+#include <KlayGE/MsgInput/MInput.hpp>
+
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <xinput.h>
 #endif
-
-#include <KlayGE/MsgInput/MInput.hpp>
 
 namespace KlayGE
 {

@@ -216,7 +216,14 @@ typedef struct _HIDP_VALUE_CAPS
 #endif
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <windows.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
+#endif
 #include <winrt/Windows.Devices.Geolocation.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <winrt/Windows.Devices.Sensors.h>
 
 namespace uwp
