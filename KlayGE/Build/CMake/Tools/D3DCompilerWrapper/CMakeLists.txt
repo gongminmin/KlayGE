@@ -6,9 +6,9 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 
 	SETUP_TOOL(D3DCompilerWrapper)
 
-	target_include_directories(D3DCompilerWrapper
+	target_link_libraries(D3DCompilerWrapper
 		PRIVATE
-			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
+			UniversalDXSDK
 	)
 ELSE()
 	FIND_PACKAGE(PythonInterp)

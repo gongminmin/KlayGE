@@ -43,17 +43,9 @@ if(KLAYGE_PLATFORM_WINDOWS AND KLAYGE_COMPILER_GCC)
 endif()
 
 target_include_directories(${LIB_NAME}
-	PUBLIC
-		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>
 	PRIVATE
 		${KLAYGE_PROJECT_DIR}/Plugins/Include
 )
-if(KLAYGE_PLATFORM_WINDOWS)
-	target_include_directories(${LIB_NAME}
-		PRIVATE
-			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-endif()
 
 IF(KLAYGE_LIBOVR_FOUND)
 	target_compile_definitions(${LIB_NAME}
@@ -103,6 +95,7 @@ target_link_libraries(${LIB_NAME}
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE
+			UniversalDXSDK
 			xinput
 	)
 endif()

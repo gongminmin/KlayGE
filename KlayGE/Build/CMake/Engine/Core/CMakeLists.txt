@@ -526,29 +526,8 @@ endif()
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		$<TARGET_PROPERTY:Boost::type_index,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:KFL,INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Core/Include
-	PRIVATE
-		$<TARGET_PROPERTY:7zxa,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:kfont,INTERFACE_INCLUDE_DIRECTORIES>
 )
-if(KLAYGE_PLATFORM_WINDOWS)
-	target_include_directories(${LIB_NAME}
-		PRIVATE
-			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-endif()
-if(KLAYGE_PLATFORM_LINUX)
-	target_include_directories(${LIB_NAME}
-		PRIVATE
-			$<TARGET_PROPERTY:glloader,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-elseif(KLAYGE_PLATFORM_ANDROID)
-	target_include_directories(${LIB_NAME}
-		PUBLIC
-			$<TARGET_PROPERTY:android_native_app_glue,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-endif()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${KLAYGE_OUTPUT_DIR}
@@ -579,11 +558,13 @@ target_link_libraries(${LIB_NAME}
 		KFL
 	PRIVATE
 		kfont
+		7zxa
 		LZMA
 )
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE
+			UniversalDXSDK
 			ws2_32
 	)
 elseif(KLAYGE_PLATFORM_DARWIN)
@@ -604,6 +585,9 @@ elseif(KLAYGE_PLATFORM_LINUX)
 	)
 elseif(KLAYGE_PLATFORM_ANDROID)
 	target_link_libraries(${LIB_NAME}
+		PUBLIC
+			android_native_app_glue
+
 		PRIVATE
 			glloader_es
 			log android atomic

@@ -121,11 +121,6 @@ ENDIF()
 
 SETUP_SAMPLE(PostProcessing)
 
-target_include_directories(PostProcessing
-	PRIVATE		
-		$<TARGET_PROPERTY:kfont,INTERFACE_INCLUDE_DIRECTORIES>
-)
-
 target_link_libraries(PostProcessing
 	PRIVATE
 		kfont

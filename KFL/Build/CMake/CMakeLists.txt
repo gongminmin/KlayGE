@@ -126,25 +126,11 @@ target_include_directories(${LIB_NAME}
 		$<TARGET_PROPERTY:Boost::container,INTERFACE_INCLUDE_DIRECTORIES>
 		$<TARGET_PROPERTY:Boost::core,INTERFACE_INCLUDE_DIRECTORIES>
 		$<TARGET_PROPERTY:Boost::utility,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:optional-lite,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:string-view-lite,INTERFACE_INCLUDE_DIRECTORIES>
 		$<TARGET_PROPERTY:GSL,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:fmt,INTERFACE_INCLUDE_DIRECTORIES>
 		${KFL_PROJECT_DIR}/include
-	PRIVATE
-		$<TARGET_PROPERTY:rapidxml,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 add_dependencies(${LIB_NAME} fmt)
-
-if(KLAYGE_WITH_GHC_FILESYSTEM)
-	target_include_directories(${LIB_NAME}
-		PUBLIC
-			$<TARGET_PROPERTY:ghc_filesystem,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-
-	add_dependencies(${LIB_NAME} ghc_filesystem)
-endif()
 
 SET(LIB_OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX})
 
@@ -167,7 +153,19 @@ target_link_libraries(${LIB_NAME}
 		fmt
 		optional-lite
 		string-view-lite
+
+	PRIVATE
+		rapidxml
 )
+
+if(KLAYGE_WITH_GHC_FILESYSTEM)
+	target_link_libraries(${LIB_NAME}
+		PUBLIC
+			ghc_filesystem
+	)
+
+	add_dependencies(${LIB_NAME} ghc_filesystem)
+endif()
 
 if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
 	if(KLAYGE_PLATFORM_WINDOWS_STORE)

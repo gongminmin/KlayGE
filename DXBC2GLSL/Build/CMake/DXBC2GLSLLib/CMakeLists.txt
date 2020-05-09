@@ -31,7 +31,6 @@ target_compile_definitions(${LIB_NAME}
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		$<TARGET_PROPERTY:KFL,INTERFACE_INCLUDE_DIRECTORIES>
 		${DXBC2GLSL_PROJECT_DIR}/Include
 )
 
@@ -49,6 +48,9 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "DXBC2GLSL"
 )
 
-TARGET_LINK_LIBRARIES(${LIB_NAME})
+target_link_libraries(${LIB_NAME}
+	PUBLIC
+		KFL
+)
 
 add_dependencies(${LIB_NAME} KFL)

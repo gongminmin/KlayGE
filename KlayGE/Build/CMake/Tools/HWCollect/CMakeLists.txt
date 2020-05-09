@@ -13,8 +13,8 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 		)
 	endif()
 
-	target_include_directories(HWCollect
+	target_link_libraries(HWCollect
 		PRIVATE
-			$<TARGET_PROPERTY:UniversalDXSDK,INTERFACE_INCLUDE_DIRECTORIES>
+			UniversalDXSDK
 	)
 endif()

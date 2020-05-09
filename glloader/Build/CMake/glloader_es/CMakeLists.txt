@@ -11,12 +11,12 @@ target_compile_definitions(glloader_es
 )
 
 target_include_directories(glloader_es
-	PRIVATE
+	PUBLIC
 		${KLAYGE_GLES_INCLUDE_DIR}
 )
 if(APPLE AND NOT IOS)
 	target_include_directories(glloader_es
-		PRIVATE
+		PUBLIC
 			/opt/X11/include
 	)
 endif()

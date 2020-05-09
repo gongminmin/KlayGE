@@ -21,7 +21,6 @@ target_compile_definitions(${LIB_NAME}
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Tools/Include
 )
 

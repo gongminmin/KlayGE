@@ -4,7 +4,7 @@ SET(SOURCE_FILES
 
 SETUP_TOOL(VectorTexGen)
 
-target_include_directories(VectorTexGen
+target_link_libraries(VectorTexGen
 	PRIVATE
-		$<TARGET_PROPERTY:nanosvg,INTERFACE_INCLUDE_DIRECTORIES>
+		nanosvg
 )

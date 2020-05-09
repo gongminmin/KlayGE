@@ -55,25 +55,9 @@ target_compile_definitions(${LIB_NAME}
 )
 
 target_include_directories(${LIB_NAME}
-	PUBLIC
-		$<TARGET_PROPERTY:${KLAYGE_CORELIB_NAME},INTERFACE_INCLUDE_DIRECTORIES>
 	PRIVATE
-		${KLAYGE_GLES_INCLUDE_DIR}
-		$<TARGET_PROPERTY:glloader_es,INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Plugins/Include
 )
-if(KLAYGE_IS_DEV_PLATFORM)
-	target_include_directories(${LIB_NAME}
-		PRIVATE
-			$<TARGET_PROPERTY:DXBC2GLSLLib,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-endif()
-if(APPLE AND NOT IOS)
-	target_include_directories(${LIB_NAME}
-		PRIVATE
-			/opt/X11/include
-	)
-endif()
 
 ADD_DEPENDENCIES(${LIB_NAME} ${KLAYGE_CORELIB_NAME} glloader_es)
 if(KLAYGE_IS_DEV_PLATFORM)
@@ -104,15 +88,16 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
 
+target_link_libraries(${LIB_NAME}
+	PRIVATE
+		${KLAYGE_CORELIB_NAME}
+		glloader_es
+)
 if(KLAYGE_IS_DEV_PLATFORM)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE
 			DXBC2GLSLLib
 	)
 endif()
-target_link_libraries(${LIB_NAME}
-	PRIVATE
-		glloader_es ${KLAYGE_CORELIB_NAME}
-)
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
