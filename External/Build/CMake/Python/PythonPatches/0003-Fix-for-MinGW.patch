@@ -1,0 +1,86 @@
+From 793fb962db1b88aced076e4b1c394849745f641a Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 20 Jan 2019 20:21:33 -0800
+Subject: [PATCH 3/4] Fix for MinGW
+
+---
+ Modules/_stat.c       |  4 ++++
+ Modules/posixmodule.c | 12 ++++++------
+ 2 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/Modules/_stat.c b/Modules/_stat.c
+index 6a3020a00d..db6182dc8e 100644
+--- a/Modules/_stat.c
++++ b/Modules/_stat.c
+@@ -244,6 +244,10 @@ typedef unsigned short mode_t;
+ #  define SF_SNAPSHOT 0x00200000
+ #endif
+ 
++#ifndef IO_REPARSE_TAG_APPEXECLINK
++#  define IO_REPARSE_TAG_APPEXECLINK 0x8000001BL
++#endif
++
+ static mode_t
+ _PyLong_AsMode_t(PyObject *op)
+ {
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 850769fd95..d6424cd815 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -181,7 +181,7 @@ corresponding Unix manual entries for more information on calls.");
+ #define HAVE_SYSTEM     1
+ #include <process.h>
+ #else
+-#ifdef _MSC_VER         /* Microsoft compiler */
++#if defined(_MSC_VER) || defined(__MINGW32__)         /* Microsoft compiler or MinGW */
+ #define HAVE_GETPPID    1
+ #define HAVE_GETLOGIN   1
+ #define HAVE_SPAWNV     1
+@@ -213,7 +213,7 @@ corresponding Unix manual entries for more information on calls.");
+ #define HAVE_SYSTEM     1
+ #define HAVE_WAIT       1
+ #define HAVE_TTYNAME    1
+-#endif  /* _MSC_VER */
++#endif  /* _MSC_VER || __MINGW32__ */
+ #endif  /* ! __WATCOMC__ || __QNX__ */
+ 
+ 
+@@ -223,7 +223,7 @@ module os
+ [clinic start generated code]*/
+ /*[clinic end generated code: output=da39a3ee5e6b4b0d input=94a0f0f978acae17]*/
+ 
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+ 
+ #if defined(__sgi)&&_COMPILER_VERSION>=700
+ /* declare ctermid_r if compiling with MIPSPro 7.x in ANSI C mode
+@@ -231,7 +231,7 @@ module os
+ extern char        *ctermid_r(char *);
+ #endif
+ 
+-#endif /* !_MSC_VER */
++#endif /* !_MSC_VER && !__MINGW32__ */
+ 
+ #if defined(__VXWORKS__)
+ #include <vxCpuLib.h>
+@@ -292,7 +292,7 @@ extern char        *ctermid_r(char *);
+ #endif
+ #endif
+ 
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+ #ifdef HAVE_DIRECT_H
+ #include <direct.h>
+ #endif
+@@ -314,7 +314,7 @@ extern char        *ctermid_r(char *);
+ #include <shellapi.h>   /* for ShellExecute() */
+ #include <lmcons.h>     /* for UNLEN */
+ #define HAVE_SYMLINK
+-#endif /* _MSC_VER */
++#endif /* _MSC_VER || __MINGW32__ */
+ 
+ #ifndef MAXPATHLEN
+ #if defined(PATH_MAX) && PATH_MAX > 1024
+-- 
+2.17.1.windows.2
+

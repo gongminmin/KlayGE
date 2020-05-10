@@ -64,6 +64,13 @@ if(KLAYGE_PLATFORM_WINDOWS)
 			version # Required by sysmodule
 			shlwapi # Required by PC/getpathp
 	)
+
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_link_libraries(${LIB_NAME}
+			PRIVATE
+				advapi32 # Required by RegKey*
+		)
+	endif()
 endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

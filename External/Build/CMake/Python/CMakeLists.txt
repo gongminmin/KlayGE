@@ -8,7 +8,7 @@ SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME
 
 UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
 if(need_patch)
-	foreach(patch "0001-Fix-for-MinGW-and-UWP" "0002-Fix-for-clang-cl")
+	foreach(patch "0001-Fix-for-clang-cl" "0002-Use-RegQueryInfoKeyW-and-CryptAcquireContextW-for-co" "0003-Fix-for-MinGW" "0004-Fix-for-UWP")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
 	endforeach()
 endif()

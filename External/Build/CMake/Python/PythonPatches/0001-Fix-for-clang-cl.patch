@@ -1,7 +1,7 @@
-From de4823d360f011e958cf56da8166e86813069215 Mon Sep 17 00:00:00 2001
+From df7720bccf67ac8e3aa7bf9326247dc5a9bbbec6 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 21:57:22 -0800
-Subject: [PATCH 2/2] Fix for clang-cl
+Subject: [PATCH 1/4] Fix for clang-cl
 
 ---
  Include/pytime.h       | 4 ++++
@@ -9,14 +9,14 @@ Subject: [PATCH 2/2] Fix for clang-cl
  2 files changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/Include/pytime.h b/Include/pytime.h
-index bdda1da2e6..e725bc5c9c 100644
+index bdda1da2e6..fa6f54d080 100644
 --- a/Include/pytime.h
 +++ b/Include/pytime.h
 @@ -5,6 +5,10 @@
  #include "pyconfig.h" /* include for defines */
  #include "object.h"
  
-+#if defined(_MSC_VER) && defined(__clang__)
++#if defined(_MSC_VER)
 +struct timeval;
 +#endif
 +
