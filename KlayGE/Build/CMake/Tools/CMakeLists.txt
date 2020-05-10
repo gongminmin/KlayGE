@@ -22,8 +22,6 @@ MACRO(SETUP_TOOL EXE_NAME)
 
 	target_include_directories(${EXE_NAME}
 		PRIVATE
-			$<TARGET_PROPERTY:ToolCommon,INTERFACE_INCLUDE_DIRECTORIES>
-			$<TARGET_PROPERTY:cxxopts,INTERFACE_INCLUDE_DIRECTORIES>
 			${KLAYGE_PROJECT_DIR}/Plugins/Include
 			${KLAYGE_PROJECT_DIR}/Tools/Include
 	)
@@ -54,8 +52,10 @@ MACRO(SETUP_TOOL EXE_NAME)
 
 	target_link_libraries(${EXE_NAME}
 		PRIVATE
+			ToolCommon
 			KlayGE_DevHelper
 			${KLAYGE_CORELIB_NAME}
+			cxxopts
 	)
 
 	CREATE_PROJECT_USERFILE(KlayGE ${EXE_NAME})

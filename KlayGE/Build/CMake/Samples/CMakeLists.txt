@@ -180,11 +180,6 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 				-Wno-inconsistent-missing-override)
 	endif()
 
-	target_include_directories(${EXE_NAME}
-		PRIVATE
-			$<TARGET_PROPERTY:SampleCommon,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-
 	set(archive_output_dir ${KLAYGE_OUTPUT_DIR})
 	if(KLAYGE_PLATFORM_ANDROID)
 		set(library_output_dir ${CMAKE_CURRENT_BINARY_DIR}/libs/${KLAYGE_ARCH_NAME})

@@ -4,11 +4,6 @@ SET(SOURCE_FILES
 
 SETUP_TOOL(FXMLJIT)
 
-target_include_directories(FXMLJIT
-	PRIVATE
-		${KLAYGE_PROJECT_DIR}/Plugins/Include
-)
-
 target_link_libraries(FXMLJIT
 	PRIVATE
 		ToolCommon

@@ -122,11 +122,10 @@ endif()
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		$<TARGET_PROPERTY:Boost::assert,INTERFACE_INCLUDE_DIRECTORIES>
+		# Not using target_link_libraries to prevent adding boost_container project
 		$<TARGET_PROPERTY:Boost::container,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:Boost::core,INTERFACE_INCLUDE_DIRECTORIES>
+		# Not using target_link_libraries to prevent depending on Boost::io
 		$<TARGET_PROPERTY:Boost::utility,INTERFACE_INCLUDE_DIRECTORIES>
-		$<TARGET_PROPERTY:GSL,INTERFACE_INCLUDE_DIRECTORIES>
 		${KFL_PROJECT_DIR}/include
 )
 
@@ -150,9 +149,12 @@ KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KFL_PROJECT_DIR}/include/KFL/KFL.hp
 
 target_link_libraries(${LIB_NAME}
 	PUBLIC
+		Boost::assert
+		Boost::core
 		fmt
 		optional-lite
 		string-view-lite
+		GSL
 
 	PRIVATE
 		rapidxml

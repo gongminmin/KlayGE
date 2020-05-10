@@ -525,6 +525,7 @@ endif()
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
+		# Not using target_link_libraries to prevent depending on Boost::smart_ptr
 		$<TARGET_PROPERTY:Boost::type_index,INTERFACE_INCLUDE_DIRECTORIES>
 		${KLAYGE_PROJECT_DIR}/Core/Include
 )
