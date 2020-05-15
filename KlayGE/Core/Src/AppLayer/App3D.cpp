@@ -48,15 +48,18 @@
 #if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 #include <future>
 #include <windows.h>
+#include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.Graphics.Display.Core.h>
 
 namespace uwp
 {
 	using winrt::auto_revoke;
+	using winrt::com_ptr;
 	using winrt::event_token;
 	using winrt::hstring;
 	using winrt::implements;
+	using winrt::make;
 
 	using namespace winrt::Windows::Foundation;
 	using namespace winrt::Windows::ApplicationModel;
@@ -139,7 +142,7 @@ namespace KlayGE
 
 	private:
 		App3DFramework* app_;
-		MetroFramework view_;
+		uwp::IFrameworkView view_;
 	};
 
 	MetroFramework::MetroFramework(App3DFramework* app) : app_(app)
@@ -392,7 +395,7 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	MetroFrameworkSource::MetroFrameworkSource(App3DFramework* app) : view_(app)
+	MetroFrameworkSource::MetroFrameworkSource(App3DFramework* app) : view_(uwp::make<MetroFramework>(app))
 	{
 		app_ = app;
 	}
@@ -507,7 +510,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 	void App3DFramework::Run()
 	{
-		uwp::CoreApplication::Run(MetroFrameworkSource(this));
+		uwp::CoreApplication::Run(uwp::make<MetroFrameworkSource>(this));
 	}
 
 	void App3DFramework::MetroRun()
