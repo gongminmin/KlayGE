@@ -380,7 +380,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		{
 			SYSTEM_INFO si;
-			::GetNativeSystemInfo(&si);
+			::GetSystemInfo(&si);
 			num_hw_threads_ = si.dwNumberOfProcessors;
 		}
 #elif defined KLAYGE_PLATFORM_LINUX

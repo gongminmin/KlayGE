@@ -1,4 +1,4 @@
-From 5fc535a745573a76f91830f5e79d263a9c0f6858 Mon Sep 17 00:00:00 2001
+From a3940b167b64abcf3b95cd49cc9e8162702b4422 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 21:59:46 -0800
 Subject: [PATCH 3/3] Fix for clang-cl
