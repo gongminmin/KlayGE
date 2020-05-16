@@ -997,16 +997,16 @@ if __name__ == "__main__":
 			host_compiler = build_info.compiler_name
 			if build_info.compiler_name == "vc":
 				host_compiler += str(build_info.compiler_version)
-			host_build_info = BuildInfo(build_info.project_type, host_compiler, build_info.archs, build_info.cfg, "auto")
+			host_build_info = BuildInfo(build_info.project_type, host_compiler, (build_info.host_arch, ), build_info.cfg, "auto")
 			BuildProjects("KlayGE", ".", host_build_info, host_build_info.compilers[0], ("External/openal-soft/openal-soft/native-tools", "KlayGE/Tools/FXMLJIT/FXMLJIT", "KlayGE/Tools/MeshConv/MeshConv", "KlayGE/Tools/ImageConv/ImageConv"), additional_options)
-			build_info.host_bin_dir = "%s/KlayGE/bin/%s_%s" % (os.path.abspath(os.curdir), host_build_info.host_platform, compiler_info.arch)
+			build_info.host_bin_dir = "%s/KlayGE/bin/%s_%s" % (os.path.abspath(os.curdir), host_build_info.host_platform, build_info.host_arch)
 			break
 
 	for compiler_info in build_info.compilers:
 		BuildProjects("KlayGE", ".", build_info, compiler_info, ("ALL_BUILD", ), additional_options)
 
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
-		clean_dir_list = [ "7z", "assimp", "cxxopts", "FreeImage", "freetype", "GSL", "googletest", "libogg", "libvorbis", "nanosvg", "openal-soft", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "UniversalDXSDK", "wpftoolkit", "zlib" ]
+		clean_dir_list = [ "7z", "android_native_app_glue", "assimp", "cxxopts", "d3dcompiler", "filesystem", "fmt", "FreeImage", "freetype", "googletest", "GSL", "libogg", "libvorbis", "nanosvg", "openal-soft", "optional-lite", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "string-view-lite", "UniversalDXSDK", "wpftoolkit", "zlib" ]
 		for dir in clean_dir_list:
 			dir_name = "External/" + dir
 			if os.path.isdir(dir_name):
