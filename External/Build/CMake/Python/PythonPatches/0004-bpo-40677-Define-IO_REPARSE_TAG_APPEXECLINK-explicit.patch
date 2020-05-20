@@ -1,0 +1,39 @@
+From e654ff30eb343b650f31c93ee9eb8ae276d06721 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 19 May 2020 05:22:16 -0700
+Subject: [PATCH 4/7] bpo-40677: Define IO_REPARSE_TAG_APPEXECLINK explicitly
+ (GH-20206)
+
+This allows building with older versions of the Windows SDK where the value is not defined.
+---
+ .../next/Windows/2020-05-19-04-11-12.bpo-40677.qQbLW8.rst     | 1 +
+ Modules/_stat.c                                               | 4 ++++
+ 2 files changed, 5 insertions(+)
+ create mode 100644 Misc/NEWS.d/next/Windows/2020-05-19-04-11-12.bpo-40677.qQbLW8.rst
+
+diff --git a/Misc/NEWS.d/next/Windows/2020-05-19-04-11-12.bpo-40677.qQbLW8.rst b/Misc/NEWS.d/next/Windows/2020-05-19-04-11-12.bpo-40677.qQbLW8.rst
+new file mode 100644
+index 0000000000..a09cb243ab
+--- /dev/null
++++ b/Misc/NEWS.d/next/Windows/2020-05-19-04-11-12.bpo-40677.qQbLW8.rst
+@@ -0,0 +1 @@
++Manually define IO_REPARSE_TAG_APPEXECLINK in case some old Windows SDK doesn't have it.
+\ No newline at end of file
+diff --git a/Modules/_stat.c b/Modules/_stat.c
+index 6a3020a00d..7a799af0ca 100644
+--- a/Modules/_stat.c
++++ b/Modules/_stat.c
+@@ -40,6 +40,10 @@ typedef unsigned short mode_t;
+ #  define FILE_ATTRIBUTE_NO_SCRUB_DATA 0x20000
+ #endif
+ 
++#ifndef IO_REPARSE_TAG_APPEXECLINK
++#  define IO_REPARSE_TAG_APPEXECLINK 0x8000001BL
++#endif
++
+ #endif /* MS_WINDOWS */
+ 
+ /* From Python's stat.py */
+-- 
+2.17.1.windows.2
+

@@ -1,7 +1,7 @@
 From 587379b6425f4d530aed30d4b6d980134c022051 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 18 May 2020 09:50:03 -0700
-Subject: [PATCH 3/6] bpo-35890: Use RegQueryInfoKeyW and CryptAcquireContextW
+Subject: [PATCH 3/7] bpo-35890: Use RegQueryInfoKeyW and CryptAcquireContextW
  explicitly (GH-19974)
 
 ---

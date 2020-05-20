@@ -1,7 +1,7 @@
 From 2dba1568a511bcf86c10afe8a7d14f94a01589a5 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 18 May 2020 09:22:53 -0700
-Subject: [PATCH 2/6] bpo-40650: Include winsock2.h in pytime.c, instead of a
+Subject: [PATCH 2/7] bpo-40650: Include winsock2.h in pytime.c, instead of a
  full windows.h (GH-20137)
 
 ---

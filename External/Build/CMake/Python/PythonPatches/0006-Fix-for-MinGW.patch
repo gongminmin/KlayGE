@@ -1,28 +1,12 @@
-From 538f6bc965cf888ccecad0b19b1c43cf4786eafd Mon Sep 17 00:00:00 2001
+From 54618b66e44f0d82f8d3796e76ca8d8eb4419ee4 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
-Subject: [PATCH 5/6] Fix for MinGW
+Subject: [PATCH 6/7] Fix for MinGW
 
 ---
- Modules/_stat.c       | 4 ++++
  Modules/posixmodule.c | 8 ++++----
- 2 files changed, 8 insertions(+), 4 deletions(-)
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/Modules/_stat.c b/Modules/_stat.c
-index 6a3020a00d..7a799af0ca 100644
---- a/Modules/_stat.c
-+++ b/Modules/_stat.c
-@@ -40,6 +40,10 @@ typedef unsigned short mode_t;
- #  define FILE_ATTRIBUTE_NO_SCRUB_DATA 0x20000
- #endif
- 
-+#ifndef IO_REPARSE_TAG_APPEXECLINK
-+#  define IO_REPARSE_TAG_APPEXECLINK 0x8000001BL
-+#endif
-+
- #endif /* MS_WINDOWS */
- 
- /* From Python's stat.py */
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
 index 616b601385..51796835cf 100644
 --- a/Modules/posixmodule.c

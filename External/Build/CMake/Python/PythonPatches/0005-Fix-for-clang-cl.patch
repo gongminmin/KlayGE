@@ -1,7 +1,7 @@
-From 8c2dd4f51a422240d3c1bce58d988b80b592ef8d Mon Sep 17 00:00:00 2001
+From 0f0fd334507361cc94faefe7d2cf06723bae3b2c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 21:57:22 -0800
-Subject: [PATCH 4/6] Fix for clang-cl
+Subject: [PATCH 5/7] Fix for clang-cl
 
 ---
  Include/pytime.h       | 4 ++++

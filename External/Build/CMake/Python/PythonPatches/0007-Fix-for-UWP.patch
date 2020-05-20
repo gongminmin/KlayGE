@@ -1,7 +1,7 @@
-From c59ba617adbe397dd48bdf081e5803a11f0c07f7 Mon Sep 17 00:00:00 2001
+From eb626e004766b841fead2550e82d72dec0e50ce5 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
-Subject: [PATCH 6/6] Fix for UWP
+Subject: [PATCH 7/7] Fix for UWP
 
 ---
  Modules/faulthandler.c |  2 +-

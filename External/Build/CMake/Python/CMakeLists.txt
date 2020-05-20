@@ -9,7 +9,7 @@ SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME
 UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
 if(need_patch)
 	foreach(patch "0001-bpo-40653-Move-_dirnameW-out-of-ifdef-HAVE_SYMLINK-e" "0002-bpo-40650-Include-winsock2.h-in-pytime.c-instead-of-" "0003-bpo-35890-Use-RegQueryInfoKeyW-and-CryptAcquireConte"
-		"0004-Fix-for-clang-cl" "0005-Fix-for-MinGW" "0006-Fix-for-UWP")
+		"0004-bpo-40677-Define-IO_REPARSE_TAG_APPEXECLINK-explicit" "0005-Fix-for-clang-cl" "0006-Fix-for-MinGW" "0007-Fix-for-UWP")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
 	endforeach()
 endif()
