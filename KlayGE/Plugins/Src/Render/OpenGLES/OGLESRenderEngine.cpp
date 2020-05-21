@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <ostream>
 #include <string>
 
 #include <boost/assert.hpp>
