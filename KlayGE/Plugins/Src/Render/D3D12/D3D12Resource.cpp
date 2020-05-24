@@ -45,7 +45,7 @@ namespace KlayGE
 		if (Context::Instance().RenderFactoryValid())
 		{
 			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.ReleaseAfterSync(d3d_resource_);
+			re.AddStallResource(d3d_resource_);
 		}
 	}
 

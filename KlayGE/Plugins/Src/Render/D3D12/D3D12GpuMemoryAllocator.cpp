@@ -86,8 +86,7 @@ namespace KlayGE
 
 		if (curr_offset_ + aligned_size > page_size_)
 		{
-			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			frame_contexts_[d3d12_re.FrameIndex()].stall_pages.push_back(curr_page_);
+			stall_pages_.push_back(curr_page_);
 			curr_page_.reset();
 		}
 
@@ -109,27 +108,18 @@ namespace KlayGE
 
 	void D3D12GpuMemoryAllocator::ClearStallPages()
 	{
-		if (Context::Instance().RenderFactoryValid())
-		{
-			std::lock_guard<std::mutex> lock(allocation_mutex_);
+		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto& frame_context = frame_contexts_[d3d12_re.FrameIndex()];
-
-			frame_context.stall_pages.clear();
-			frame_context.large_pages.clear();
-		}
+		stall_pages_.clear();
+		large_pages_.clear();
 	}
 
 	void D3D12GpuMemoryAllocator::Clear()
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		for (auto& frame_context : frame_contexts_)
-		{
-			frame_context.stall_pages.clear();
-			frame_context.large_pages.clear();
-		}
+		stall_pages_.clear();
+		large_pages_.clear();
 
 		curr_page_.reset();
 	}
@@ -178,11 +168,8 @@ namespace KlayGE
 
 	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreateLargePage(uint32_t size_in_bytes)
 	{
-		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto& frame_context = frame_contexts_[d3d12_re.FrameIndex()];
-
 		auto large_page = this->CreatePage(size_in_bytes);
-		frame_context.large_pages.push_back(large_page);
+		large_pages_.push_back(large_page);
 		return large_page;
 	}
 } // namespace KlayGE

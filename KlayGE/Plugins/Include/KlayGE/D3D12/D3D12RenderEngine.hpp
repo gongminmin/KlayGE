@@ -80,7 +80,7 @@ namespace KlayGE
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		uint32_t FrameIndex() const
+		uint32_t FrameIndex() const noexcept
 		{
 			return curr_frame_index_;
 		}
@@ -192,18 +192,21 @@ namespace KlayGE
 		D3D12GpuMemoryBlockPtr AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
 		void DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block);
 
-		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
+		void AddStallResource(ID3D12ResourcePtr const& buff);
 
 		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers);
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
 
 	private:
-		struct CmdAllocatorContext
+		struct CmdContext
 		{
 			ID3D12CommandAllocatorPtr cmd_allocator;
 			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache;
-			std::vector<ID3D12ResourcePtr> release_after_sync_buffs;
+			std::vector<ID3D12ResourcePtr> stall_resources;
 			std::mutex mutex;
+
+			D3D12GpuMemoryAllocator upload_mem_allocator{true};
+			D3D12GpuMemoryAllocator readback_mem_allocator{false};
 
 			uint64_t fence_value = 0;
 		};
@@ -236,8 +239,8 @@ namespace KlayGE
 		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
 		void UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so);
 
-		CmdAllocatorContext& CurrRenderCmdAllocator();
-		CmdAllocatorContext const& CurrRenderCmdAllocator() const;
+		CmdContext& CurrRenderCmdContext() noexcept;
+		CmdContext const& CurrRenderCmdContext() const noexcept;
 
 		std::vector<D3D12_RESOURCE_BARRIER>* FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation);
 
@@ -251,7 +254,7 @@ namespace KlayGE
 
 		ID3D12DevicePtr d3d_device_;
 		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
-		std::array<CmdAllocatorContext, NUM_BACK_BUFFERS> d3d_render_cmd_allocators_;
+		std::array<CmdContext, NUM_BACK_BUFFERS> d3d_render_cmd_contexts_;
 		ID3D12GraphicsCommandListPtr d3d_render_cmd_list_;
 		ID3D12CommandAllocatorPtr d3d_res_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
@@ -283,9 +286,6 @@ namespace KlayGE
 		uint32_t curr_num_desc_heaps_;
 		std::vector<D3D12_VERTEX_BUFFER_VIEW> curr_vbvs_;
 		D3D12_INDEX_BUFFER_VIEW curr_ibv_;
-
-		D3D12GpuMemoryAllocator upload_memory_allocator_{true};
-		D3D12GpuMemoryAllocator readback_memory_allocator_{false};
 
 		ID3D12DescriptorHeapPtr rtv_desc_heap_;
 		uint32_t rtv_desc_size_;

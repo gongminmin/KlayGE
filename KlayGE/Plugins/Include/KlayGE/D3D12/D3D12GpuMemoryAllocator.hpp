@@ -138,12 +138,8 @@ namespace KlayGE
 		D3D12GpuMemoryPagePtr curr_page_;
 		uint32_t curr_offset_ = ~0U;
 
-		struct FrameContext
-		{
-			std::vector<D3D12GpuMemoryPagePtr> stall_pages;
-			std::vector<D3D12GpuMemoryPagePtr> large_pages;
-		};
-		std::array<FrameContext, NUM_BACK_BUFFERS> frame_contexts_;
+		std::vector<D3D12GpuMemoryPagePtr> stall_pages_;
+		std::vector<D3D12GpuMemoryPagePtr> large_pages_;
 	};
 } // namespace KlayGE
 
