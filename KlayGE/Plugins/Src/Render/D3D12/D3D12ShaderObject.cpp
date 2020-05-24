@@ -158,8 +158,7 @@ namespace
 				if (uav->TextureResource())
 				{
 					auto* tex = checked_cast<D3D12Texture*>(uav->TextureResource().get());
-					*uavsrc_ = std::make_tuple(
-						tex, uav->FirstArrayIndex() * uav->TextureResource()->NumMipMaps(), uav->ArraySize() * tex->NumMipMaps());
+					*uavsrc_ = std::make_tuple(tex, uav->FirstArrayIndex() * uav->TextureResource()->NumMipMaps() + uav->Level(), 1);
 				}
 				else
 				{
