@@ -130,6 +130,8 @@ namespace KlayGE
 			frame_context.stall_pages.clear();
 			frame_context.large_pages.clear();
 		}
+
+		curr_page_.reset();
 	}
 
 	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreatePage(uint32_t size_in_bytes)

@@ -351,7 +351,7 @@ namespace KlayGE
 		std::array<std::vector<D3D12_SAMPLER_DESC>, NumShaderStages> samplers_;
 		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
 		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, NumShaderStages> srvs_;
-		std::array<std::vector<D3D12Resource*>, NumShaderStages> uavsrcs_;
+		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> uavsrcs_;
 		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, NumShaderStages> uavs_;
 
 		uint32_t num_handles_;

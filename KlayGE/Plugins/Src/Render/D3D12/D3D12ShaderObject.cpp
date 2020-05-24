@@ -143,8 +143,8 @@ namespace
 	class SetD3D12ShaderParameterTextureUAV final
 	{
 	public:
-		SetD3D12ShaderParameterTextureUAV(D3D12Resource*& uavsrc,
-				D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* param)
+		SetD3D12ShaderParameterTextureUAV(
+			std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc, D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -155,18 +155,27 @@ namespace
 			param_->Value(uav);
 			if (uav)
 			{
-				*uavsrc_ = checked_cast<D3D12Texture*>(uav->TextureResource().get());
+				if (uav->TextureResource())
+				{
+					auto* tex = checked_cast<D3D12Texture*>(uav->TextureResource().get());
+					*uavsrc_ = std::make_tuple(
+						tex, uav->FirstArrayIndex() * uav->TextureResource()->NumMipMaps(), uav->ArraySize() * tex->NumMipMaps());
+				}
+				else
+				{
+					std::get<0>(*uavsrc_) = nullptr;
+				}
 				*uav_ = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
-				*uavsrc_ = nullptr;
+				std::get<0>(*uavsrc_) = nullptr;
 				*uav_ = nullptr;
 			}
 		}
 
 	private:
-		D3D12Resource** uavsrc_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>* uavsrc_;
 		D3D12UnorderedAccessViewSimulation** uav_;
 		RenderEffectParameter* param_;
 	};
@@ -174,8 +183,8 @@ namespace
 	class SetD3D12ShaderParameterGraphicsBufferUAV final
 	{
 	public:
-		SetD3D12ShaderParameterGraphicsBufferUAV(D3D12Resource*& uavsrc,
-				D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* const & param)
+		SetD3D12ShaderParameterGraphicsBufferUAV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc,
+			D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* const& param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -186,18 +195,25 @@ namespace
 			param_->Value(uav);
 			if (uav)
 			{
-				*uavsrc_ = checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get());
+				if (uav->BufferResource())
+				{
+					*uavsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get()), 0, 1);
+				}
+				else
+				{
+					std::get<0>(*uavsrc_) = nullptr;
+				}
 				*uav_ = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
-				*uavsrc_ = nullptr;
+				std::get<0>(*uavsrc_) = nullptr;
 				*uav_ = nullptr;
 			}
 		}
 
 	private:
-		D3D12Resource** uavsrc_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>* uavsrc_;
 		D3D12UnorderedAccessViewSimulation** uav_;
 		RenderEffectParameter* param_;
 	};
@@ -907,7 +923,7 @@ namespace KlayGE
 			samplers_[stage_idnex].resize(shader_desc.num_samplers);
 			srvsrcs_[stage_idnex].resize(shader_desc.num_srvs, std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			srvs_[stage_idnex].resize(shader_desc.num_srvs);
-			uavsrcs_[stage_idnex].resize(shader_desc.num_uavs, nullptr);
+			uavsrcs_[stage_idnex].resize(shader_desc.num_uavs, std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			uavs_[stage_idnex].resize(shader_desc.num_uavs);
 
 			for (size_t i = 0; i < shader_desc.res_desc.size(); ++i)
@@ -1082,7 +1098,7 @@ namespace KlayGE
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(),
 				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
-			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
+			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
@@ -1191,10 +1207,10 @@ namespace KlayGE
 				= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 			for (auto const & srvsrc : srvsrcs_[stage])
 			{
-				for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++ subres)
+				auto res = std::get<0>(srvsrc);
+				if (res != nullptr)
 				{
-					auto res = std::get<0>(srvsrc);
-					if (res != nullptr)
+					for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++subres)
 					{
 						res->UpdateResourceBarrier(cmd_list, std::get<1>(srvsrc) + subres, state_after);
 					}
@@ -1204,16 +1220,13 @@ namespace KlayGE
 			state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 			for (auto const & uavsrc : uavsrcs_[stage])
 			{
-				if (uavsrc != nullptr)
+				auto res = std::get<0>(uavsrc);
+				if (res != nullptr)
 				{
-#ifdef KLAYGE_DEBUG
-					for (auto const & srvsrc : srvsrcs_[stage])
+					for (uint32_t subres = 0; subres < std::get<2>(uavsrc); ++subres)
 					{
-						BOOST_ASSERT(std::get<0>(srvsrc) != uavsrc);
+						res->UpdateResourceBarrier(cmd_list, std::get<1>(uavsrc) + subres, state_after);
 					}
-#endif
-
-					uavsrc->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, state_after);
 				}
 			}
 		}
