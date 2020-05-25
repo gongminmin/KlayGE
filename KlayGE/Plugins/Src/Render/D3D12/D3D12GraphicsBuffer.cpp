@@ -241,21 +241,23 @@ namespace KlayGE
 
 			if (subres_init != nullptr)
 			{
-				ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
-				std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
-
 				auto upload_mem_block = re.AllocMemBlock(true, size_in_byte_);
 				memcpy(upload_mem_block->CpuAddress(), subres_init, size_in_byte_);
 
-				this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
-				re.FlushResourceBarriers(cmd_list);
+				{
+					re.ResetLoadCmd();
+					ID3D12GraphicsCommandList* cmd_list = re.D3DLoadCmdList();
 
-				cmd_list->CopyBufferRegion(
-					d3d_resource_.get(), d3d_resource_offset_, upload_mem_block->Resource(), upload_mem_block->Offset(), size_in_byte_);
+					this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+					re.FlushResourceBarriers(cmd_list);
 
-				curr_states_[0] = init_state;
+					cmd_list->CopyBufferRegion(
+						d3d_resource_.get(), d3d_resource_offset_, upload_mem_block->Resource(), upload_mem_block->Offset(), size_in_byte_);
 
-				re.CommitResCmd();
+					curr_states_[0] = init_state;
+
+					re.CommitLoadCmd();
+				}
 
 				re.DeallocMemBlock(true, std::move(upload_mem_block));
 			}

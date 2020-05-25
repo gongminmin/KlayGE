@@ -50,6 +50,9 @@
 #include <KlayGE/SALWrapper.hpp>
 #include <d3dcompiler.h>
 #endif
+#if defined(KLAYGE_COMPILER_GCC)
+#undef __out
+#endif
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>

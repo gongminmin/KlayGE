@@ -264,7 +264,7 @@ namespace KlayGE
 		re.ForceFinish();
 
 		UINT64 freq;
-		re.D3DRenderCmdQueue()->GetTimestampFrequency(&freq);
+		re.D3DCmdQueue()->GetTimestampFrequency(&freq);
 
 		uint64_t* timestamp;
 		D3D12_RANGE const read_range{0, sizeof(uint64_t) * 2};

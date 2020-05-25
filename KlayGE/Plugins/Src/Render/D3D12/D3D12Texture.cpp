@@ -702,12 +702,6 @@ namespace KlayGE
 
 		if (!init_data.empty())
 		{
-			ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
-			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
-
-			this->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_COPY_DEST);
-			re.FlushResourceBarriers(cmd_list);
-
 			uint32_t const num_subres = array_size * num_mip_maps_;
 			std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> layouts(num_subres);
 			std::vector<uint64_t> row_sizes_in_bytes(num_subres);
@@ -747,24 +741,32 @@ namespace KlayGE
 				}
 			}
 
-			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
-				layouts[i].Offset += upload_buff_offset;
+				re.ResetLoadCmd();
+				ID3D12GraphicsCommandList* cmd_list = re.D3DLoadCmdList();
 
-				D3D12_TEXTURE_COPY_LOCATION src;
-				src.pResource = upload_buff;
-				src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-				src.PlacedFootprint = layouts[i];
+				this->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_COPY_DEST);
+				re.FlushResourceBarriers(cmd_list);
 
-				D3D12_TEXTURE_COPY_LOCATION dst;
-				dst.pResource = d3d_resource_.get();
-				dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-				dst.SubresourceIndex = i;
+				for (uint32_t i = 0; i < num_subres; ++i)
+				{
+					layouts[i].Offset += upload_buff_offset;
 
-				cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+					D3D12_TEXTURE_COPY_LOCATION src;
+					src.pResource = upload_buff;
+					src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+					src.PlacedFootprint = layouts[i];
+
+					D3D12_TEXTURE_COPY_LOCATION dst;
+					dst.pResource = d3d_resource_.get();
+					dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+					dst.SubresourceIndex = i;
+
+					cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+				}
+
+				re.CommitLoadCmd();
 			}
-
-			re.CommitResCmd();
 
 			re.DeallocMemBlock(true, std::move(upload_mem_block));
 		}

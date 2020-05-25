@@ -122,13 +122,9 @@ namespace KlayGE
 		viewport_->Height(height_);
 
 		com_ptr<ID3D12Device> d3d_device;
-		com_ptr<ID3D12CommandQueue> d3d_cmd_queue;
-
 		if (d3d12_re.D3DDevice())
 		{
 			d3d_device.reset(d3d12_re.D3DDevice());
-			d3d_cmd_queue.reset(d3d12_re.D3DRenderCmdQueue());
-
 			main_wnd_ = false;
 		}
 		else
@@ -178,20 +174,12 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter(),
 						feature_levels[i], IID_ID3D12Device, d3d_device.put_void())))
 				{
-					D3D12_COMMAND_QUEUE_DESC queue_desc;
-					queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-					queue_desc.Priority = 0;
-					queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-					queue_desc.NodeMask = 0;
-					TIFHR(d3d_device->CreateCommandQueue(&queue_desc,
-						IID_ID3D12CommandQueue, d3d_cmd_queue.put_void()));
-
 					D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 					req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
 					req_feature_levels.pFeatureLevelsRequested = &feature_levels[0];
 					d3d_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &req_feature_levels, sizeof(req_feature_levels));
 
-					d3d12_re.D3DDevice(d3d_device.get(), d3d_cmd_queue.get(), req_feature_levels.MaxSupportedFeatureLevel);
+					d3d12_re.D3DDevice(d3d_device.get(), req_feature_levels.MaxSupportedFeatureLevel);
 
 					if (Context::Instance().AppInstance().OnConfirmDevice()())
 					{
@@ -229,7 +217,6 @@ namespace KlayGE
 					else
 					{
 						d3d_device.reset();
-						d3d_cmd_queue.reset();
 					}
 				}
 			}
@@ -238,7 +225,6 @@ namespace KlayGE
 		}
 
 		Verify(!!d3d_device);
-		Verify(!!d3d_cmd_queue);
 
 		depth_stencil_fmt_ = settings.depth_stencil_fmt;
 
@@ -303,7 +289,7 @@ namespace KlayGE
 		sc_fs_desc_.Windowed = !this->FullScreen();
 #endif
 
-		this->CreateSwapChain(d3d_cmd_queue.get(), settings.display_output_method != DOM_sRGB);
+		this->CreateSwapChain(d3d12_re.D3DCmdQueue(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -411,9 +397,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D12CommandQueue* cmd_queue = d3d12_re.D3DRenderCmdQueue();
-
-			this->CreateSwapChain(cmd_queue, Context::Instance().Config().graphics_cfg.display_output_method != DOM_sRGB);
+			this->CreateSwapChain(d3d12_re.D3DCmdQueue(), Context::Instance().Config().graphics_cfg.display_output_method != DOM_sRGB);
 			Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP

@@ -40,6 +40,7 @@
 #include <list>
 #include <map>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -55,6 +56,7 @@ namespace KlayGE
 	class D3D12AdapterList;
 	class D3D12Adapter;
 
+	static uint32_t const NUM_BACK_BUFFERS = 3;
 	static uint32_t const NUM_MAX_RENDER_TARGET_VIEWS = 8 * 1024;
 	static uint32_t const NUM_MAX_DEPTH_STENCIL_VIEWS = 4 * 1024;
 	static uint32_t const NUM_MAX_CBV_SRV_UAVS = 32 * 1024;
@@ -85,28 +87,27 @@ namespace KlayGE
 			return curr_frame_index_;
 		}
 
-		IDXGIFactory4* DXGIFactory4() const;
-		IDXGIFactory5* DXGIFactory5() const;
-		IDXGIFactory6* DXGIFactory6() const;
-		uint8_t DXGISubVer() const;
+		IDXGIFactory4* DXGIFactory4() const noexcept;
+		IDXGIFactory5* DXGIFactory5() const noexcept;
+		IDXGIFactory6* DXGIFactory6() const noexcept;
+		uint8_t DXGISubVer() const noexcept;
 
-		ID3D12Device* D3DDevice() const;
-		ID3D12CommandQueue* D3DRenderCmdQueue() const;
+		ID3D12Device* D3DDevice() const noexcept;
+		ID3D12CommandQueue* D3DCmdQueue() const noexcept;
+		D3D_FEATURE_LEVEL DeviceFeatureLevel() const noexcept;
+		void D3DDevice(ID3D12Device* device, D3D_FEATURE_LEVEL feature_level);
+
 		ID3D12CommandAllocator* D3DRenderCmdAllocator() const;
 		ID3D12GraphicsCommandList* D3DRenderCmdList() const;
-		ID3D12CommandAllocator* D3DResCmdAllocator() const;
-		ID3D12GraphicsCommandList* D3DResCmdList() const;
-		std::mutex& D3DResCmdListMutex()
-		{
-			return res_cmd_list_mutex_;
-		}
-		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
-		void D3DDevice(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
-		void ClearTempObjs();
 		void CommitRenderCmd();
 		void SyncRenderCmd();
 		void ResetRenderCmd();
-		void CommitResCmd();
+
+		ID3D12CommandAllocator* D3DLoadCmdAllocator() const;
+		ID3D12GraphicsCommandList* D3DLoadCmdList() const;
+		void CommitLoadCmd();
+		void SyncLoadCmd();
+		void ResetLoadCmd();
 
 		void ForceFlush() override;
 		void ForceFinish();
@@ -118,7 +119,7 @@ namespace KlayGE
 		bool FullScreen() const override;
 		void FullScreen(bool fs) override;
 
-		char const * DefaultShaderProfile(ShaderStage stage) const
+		char const* DefaultShaderProfile(ShaderStage stage) const noexcept
 		{
 			return shader_profiles_[static_cast<uint32_t>(stage)];
 		}
@@ -137,31 +138,31 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		ID3D12DescriptorHeap* RTVDescHeap() const
+		ID3D12DescriptorHeap* RTVDescHeap() const noexcept
 		{
 			return rtv_desc_heap_.get();
 		}
-		ID3D12DescriptorHeap* DSVDescHeap() const
+		ID3D12DescriptorHeap* DSVDescHeap() const noexcept
 		{
 			return dsv_desc_heap_.get();
 		}
-		ID3D12DescriptorHeap* CBVSRVUAVDescHeap() const
+		ID3D12DescriptorHeap* CBVSRVUAVDescHeap() const noexcept
 		{
 			return cbv_srv_uav_desc_heap_.get();
 		}
-		uint32_t RTVDescSize() const
+		uint32_t RTVDescSize() const noexcept
 		{
 			return rtv_desc_size_;
 		}
-		uint32_t DSVDescSize() const
+		uint32_t DSVDescSize() const noexcept
 		{
 			return dsv_desc_size_;
 		}
-		uint32_t CBVSRVUAVDescSize() const
+		uint32_t CBVSRVUAVDescSize() const noexcept
 		{
 			return cbv_srv_uav_desc_size_;
 		}
-		uint32_t SamplerDescSize() const
+		uint32_t SamplerDescSize() const noexcept
 		{
 			return sampler_desc_size_;
 		}
@@ -173,43 +174,19 @@ namespace KlayGE
 		void DeallocDSV(uint32_t offset);
 		void DeallocCBVSRVUAV(uint32_t offset);
 
-		RenderEffectPtr const & BlitEffect() const
-		{
-			return blit_effect_;
-		}
-		RenderTechnique* BilinearBlitTech() const
-		{
-			return bilinear_blit_tech_;
-		}
-
 		ID3D12RootSignaturePtr const & CreateRootSignature(
 			std::array<uint32_t, NumShaderStages * 4> const & num,
 			bool has_vs, bool has_stream_output);
 		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
-		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
 		D3D12GpuMemoryBlockPtr AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
 		void DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block);
 
-		void AddStallResource(ID3D12ResourcePtr const& buff);
+		void AddStallResource(ID3D12ResourcePtr const& resource);
 
 		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers);
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
-
-	private:
-		struct CmdContext
-		{
-			ID3D12CommandAllocatorPtr cmd_allocator;
-			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache;
-			std::vector<ID3D12ResourcePtr> stall_resources;
-			std::mutex mutex;
-
-			D3D12GpuMemoryAllocator upload_mem_allocator{true};
-			D3D12GpuMemoryAllocator readback_mem_allocator{false};
-
-			uint64_t fence_value = 0;
-		};
 
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
@@ -239,10 +216,12 @@ namespace KlayGE
 		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
 		void UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so);
 
-		CmdContext& CurrRenderCmdContext() noexcept;
-		CmdContext const& CurrRenderCmdContext() const noexcept;
-
 		std::vector<D3D12_RESOURCE_BARRIER>* FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation);
+
+		void RestoreRenderCmdStates();
+
+		class PerThreadContext;
+		PerThreadContext& CurrThreadContext(bool is_render_context) const;
 
 	private:
 		// Direct3D rendering device
@@ -253,14 +232,66 @@ namespace KlayGE
 		uint8_t dxgi_sub_ver_;
 
 		ID3D12DevicePtr d3d_device_;
-		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
-		std::array<CmdContext, NUM_BACK_BUFFERS> d3d_render_cmd_contexts_;
-		ID3D12GraphicsCommandListPtr d3d_render_cmd_list_;
-		ID3D12CommandAllocatorPtr d3d_res_cmd_allocator_;
-		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
-		std::mutex res_cmd_list_mutex_;
+		ID3D12CommandQueuePtr d3d_cmd_queue_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
+
+		class PerThreadContext : boost::noncopyable
+		{
+		public:
+			PerThreadContext(ID3D12Device* d3d_device, FencePtr const& frame_fence);
+			~PerThreadContext();
+
+			void CommitCmd(ID3D12CommandQueue* d3d_cmd_queue, uint32_t frame_index);
+			void SyncCmd(uint32_t frame_index);
+			void ResetCmd(uint32_t frame_index);
+
+			void Reset(uint32_t frame_index);
+
+			std::thread::id ThreadID() const noexcept;
+			ID3D12CommandAllocator* D3DCmdAllocator(uint32_t frame_index) const noexcept;
+			ID3D12GraphicsCommandList* D3DCmdList() const noexcept;
+
+		private:
+			struct PerThreadPerFrameContext : boost::noncopyable
+			{
+				ID3D12CommandAllocatorPtr d3d_cmd_allocator;
+				uint64_t fence_value = 0;
+			};
+
+		private:
+			std::thread::id thread_id_;
+			std::array<PerThreadPerFrameContext, NUM_BACK_BUFFERS> per_frame_contexts_;
+			ID3D12GraphicsCommandListPtr d3d_cmd_list_;
+			std::weak_ptr<Fence> frame_fence_;
+		};
+		mutable std::vector<std::unique_ptr<PerThreadContext>> render_thread_cmd_contexts_;
+		mutable std::vector<std::unique_ptr<PerThreadContext>> load_thread_cmd_contexts_;
+
+		struct PerFrameContext : boost::noncopyable
+		{
+		public:
+			~PerFrameContext();
+
+			void Destroy();
+
+			ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num);
+
+			void AddStallResource(ID3D12ResourcePtr const& resource);
+			void ClearStallResources();
+
+			D3D12GpuMemoryAllocator& GpuMemAllocator(bool is_upload) noexcept;
+
+		private:
+			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
+			std::vector<ID3D12ResourcePtr> stall_resources_;
+			D3D12GpuMemoryAllocator upload_mem_allocator_{true};
+			D3D12GpuMemoryAllocator readback_mem_allocator_{false};
+			std::mutex mutex_;
+		};
+		std::array<PerFrameContext, NUM_BACK_BUFFERS> per_frame_contexts_;
 		uint32_t curr_frame_index_ = 0;
+
+		FencePtr frame_fence_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -310,15 +341,6 @@ namespace KlayGE
 		};
 
 		StereoMethod stereo_method_;
-
-		FencePtr render_cmd_fence_;
-		uint64_t render_cmd_fence_val_ = 0;
-
-		FencePtr res_cmd_fence_;
-		uint64_t res_cmd_fence_val_ = 0;
-
-		RenderEffectPtr blit_effect_;
-		RenderTechnique* bilinear_blit_tech_;
 
 		ID3D12CommandSignaturePtr draw_indirect_signature_;
 		ID3D12CommandSignaturePtr draw_indexed_indirect_signature_;

@@ -56,7 +56,7 @@ namespace KlayGE
 		switch (ft)
 		{
 		case FT_Render:
-			cmd_queue = re.D3DRenderCmdQueue();
+			cmd_queue = re.D3DCmdQueue();
 			break;
 
 		default:

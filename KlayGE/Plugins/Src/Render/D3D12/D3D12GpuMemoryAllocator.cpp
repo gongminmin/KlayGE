@@ -47,7 +47,7 @@ namespace KlayGE
 		: is_upload_(is_upload), resource_(std::move(resource)), gpu_addr_(resource_->GetGPUVirtualAddress())
 	{
 		D3D12_RANGE const read_range{0, 0};
-		resource_->Map(0, is_upload_ ? &read_range : nullptr, &cpu_addr_);
+		resource_->Map(0, &read_range, &cpu_addr_);
 	}
 
 	D3D12GpuMemoryPage::~D3D12GpuMemoryPage()
