@@ -47,17 +47,17 @@ namespace KlayGE
 		D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource);
 		~D3D12GpuMemoryPage();
 
-		ID3D12Resource* Resource() const
+		ID3D12Resource* Resource() const noexcept
 		{
 			return resource_.get();
 		}
 
-		void* CpuAddress() const
+		void* CpuAddress() const noexcept
 		{
 			return cpu_addr_;
 		}
 
-		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const
+		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const noexcept
 		{
 			return gpu_addr_;
 		}
@@ -73,29 +73,29 @@ namespace KlayGE
 	class D3D12GpuMemoryBlock final : boost::noncopyable
 	{
 	public:
-		D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size);
+		D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept;
 
-		ID3D12Resource* Resource() const
+		ID3D12Resource* Resource() const noexcept
 		{
 			return resource_;
 		}
 
-		uint32_t Offset() const
+		uint32_t Offset() const noexcept
 		{
 			return offset_;
 		}
 
-		uint32_t Size() const
+		uint32_t Size() const noexcept
 		{
 			return size_;
 		}
 
-		void* CpuAddress() const
+		void* CpuAddress() const noexcept
 		{
 			return cpu_addr_;
 		}
 
-		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const
+		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const noexcept
 		{
 			return gpu_addr_;
 		}
@@ -115,7 +115,7 @@ namespace KlayGE
 		static constexpr uint32_t DefaultAligment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
 
 	public:
-		explicit D3D12GpuMemoryAllocator(bool is_upload);
+		explicit D3D12GpuMemoryAllocator(bool is_upload) noexcept;
 
 		D3D12GpuMemoryBlockPtr Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
 		void Deallocate(D3D12GpuMemoryBlockPtr mem_block);

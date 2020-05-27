@@ -598,46 +598,15 @@ namespace KlayGE
 
 		std::array<ID3D12DescriptorHeap*, 2> heaps;
 		uint32_t num_heaps = 0;
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
-		auto sampler_heap = d3d12_so.SamplerHeap();
+
+		ID3D12DescriptorHeap* cbv_srv_uav_heap = nullptr;
 		if (num_handles > 0)
 		{
-			size_t hash_val = 0;
-			for (uint32_t i = 0; i < NumShaderStages; ++i)
-			{
-				ShaderStage const stage = static_cast<ShaderStage>(i);
-				HashCombine(hash_val, stage);
-				HashCombine(hash_val, d3d12_so.SRVs(stage).size());
-				if (!d3d12_so.SRVs(stage).empty())
-				{
-					HashRange(hash_val, d3d12_so.SRVs(stage).begin(), d3d12_so.SRVs(stage).end());
-				}
-			}
-			for (uint32_t i = 0; i < NumShaderStages; ++i)
-			{
-				ShaderStage const stage = static_cast<ShaderStage>(i);
-				HashCombine(hash_val, stage);
-				HashCombine(hash_val, d3d12_so.UAVs(stage).size());
-				if (!d3d12_so.UAVs(stage).empty())
-				{
-					HashRange(hash_val, d3d12_so.UAVs(stage).begin(), d3d12_so.UAVs(stage).end());
-				}
-			}
-
-			auto iter = cbv_srv_uav_heaps_.find(hash_val);
-			if (iter == cbv_srv_uav_heaps_.end())
-			{
-				cbv_srv_uav_heap =
-					per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num_handles);
-				cbv_srv_uav_heaps_.emplace(hash_val, cbv_srv_uav_heap);
-			}
-			else
-			{
-				cbv_srv_uav_heap = iter->second;
-			}
-			heaps[num_heaps] = cbv_srv_uav_heap.get();
+			cbv_srv_uav_heap = per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num_handles);
+			heaps[num_heaps] = cbv_srv_uav_heap;
 			++ num_heaps;
 		}
+		auto* sampler_heap = d3d12_so.SamplerHeap();
 		if (sampler_heap)
 		{
 			heaps[num_heaps] = sampler_heap;
@@ -680,7 +649,7 @@ namespace KlayGE
 		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, HANDLES_PER_COPY> dst_handles;
 		std::array<uint32_t, HANDLES_PER_COPY> handle_sizes;
 		handle_sizes.fill(1);
-		if (cbv_srv_uav_heap)
+		if (cbv_srv_uav_heap != nullptr)
 		{
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -1092,7 +1061,6 @@ namespace KlayGE
 		root_signatures_.clear();
 		graphics_psos_.clear();
 		compute_psos_.clear();
-		cbv_srv_uav_heaps_.clear();
 
 		draw_indirect_signature_.reset();
 		draw_indexed_indirect_signature_.reset();
@@ -1972,6 +1940,11 @@ namespace KlayGE
 		}
 	}
 
+	ID3D12DescriptorHeap* D3D12RenderEngine::CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num)
+	{
+		return per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num);
+	}
+
 
 	D3D12RenderEngine::PerThreadContext::PerThreadContext(ID3D12Device* d3d_device, FencePtr const& frame_fence)
 	{
@@ -2061,24 +2034,44 @@ namespace KlayGE
 		upload_mem_allocator_.Clear();
 		readback_mem_allocator_.Clear();
 
-		cbv_srv_uav_heap_cache_.clear();
+		active_cbv_srv_uav_heap_cache_.clear();
+		stall_cbv_srv_uav_heap_cache_.clear();
 		stall_resources_.clear();
 	}
 
-	ID3D12DescriptorHeapPtr D3D12RenderEngine::PerFrameContext::CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num)
+	ID3D12DescriptorHeap* D3D12RenderEngine::PerFrameContext::CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num)
 	{
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbv_srv_heap_desc.NumDescriptors = num;
-		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
-		TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
+		ID3D12DescriptorHeap* ret;
+		auto iter = stall_cbv_srv_uav_heap_cache_.find(num);
+		if (iter != stall_cbv_srv_uav_heap_cache_.end())
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
-			cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
+
+			auto heap = std::move(iter->second.back());
+			ret = heap.get();
+			active_cbv_srv_uav_heap_cache_[num].emplace_back(std::move(heap));
+			iter->second.pop_back();
+
+			if (iter->second.empty())
+			{
+				stall_cbv_srv_uav_heap_cache_.erase(iter);
+			}
 		}
-		return cbv_srv_uav_heap;
+		else
+		{
+			D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
+			cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			cbv_srv_heap_desc.NumDescriptors = num;
+			cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			cbv_srv_heap_desc.NodeMask = 0;
+			ID3D12DescriptorHeapPtr heap;
+			TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, heap.put_void()));
+			ret = heap.get();
+			
+			std::lock_guard<std::mutex> lock(mutex_);
+			active_cbv_srv_uav_heap_cache_[num].emplace_back(std::move(heap));
+		}
+		return ret;
 	}
 
 	void D3D12RenderEngine::PerFrameContext::AddStallResource(ID3D12ResourcePtr const& resource)
@@ -2097,7 +2090,13 @@ namespace KlayGE
 		upload_mem_allocator_.ClearStallPages();
 		readback_mem_allocator_.ClearStallPages();
 
-		cbv_srv_uav_heap_cache_.clear();
+		for (auto& item : active_cbv_srv_uav_heap_cache_)
+		{
+			auto& heaps = stall_cbv_srv_uav_heap_cache_[item.first];
+			heaps.insert(heaps.end(), item.second.begin(), item.second.end());
+		}
+		active_cbv_srv_uav_heap_cache_.clear();
+
 		stall_resources_.clear();
 	}
 

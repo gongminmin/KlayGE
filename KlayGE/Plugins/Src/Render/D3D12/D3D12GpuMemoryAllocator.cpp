@@ -31,14 +31,11 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Fence.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 
 namespace KlayGE
@@ -57,23 +54,23 @@ namespace KlayGE
 	}
 
 
-	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size)
+	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept
 		: resource_(page.Resource()), offset_(offset), size_(size), cpu_addr_(reinterpret_cast<uint8_t*>(page.CpuAddress()) + offset),
 		  gpu_addr_(page.GpuAddress() + offset)
 	{
 	}
 
 
-	D3D12GpuMemoryAllocator::D3D12GpuMemoryAllocator(bool is_upload) : is_upload_(is_upload)
+	D3D12GpuMemoryAllocator::D3D12GpuMemoryAllocator(bool is_upload) noexcept : is_upload_(is_upload)
 	{
 	}
 
 	D3D12GpuMemoryBlockPtr D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
 	{
-		const uint32_t alignment_mask = alignment - 1;
+		uint32_t const alignment_mask = alignment - 1;
 		BOOST_ASSERT((alignment & alignment_mask) == 0);
 
-		const uint32_t aligned_size = (size_in_bytes + alignment_mask) & ~alignment_mask;
+		uint32_t const aligned_size = (size_in_bytes + alignment_mask) & ~alignment_mask;
 
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 

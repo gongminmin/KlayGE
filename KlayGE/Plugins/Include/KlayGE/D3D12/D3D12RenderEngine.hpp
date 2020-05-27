@@ -82,11 +82,6 @@ namespace KlayGE
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		uint32_t FrameIndex() const noexcept
-		{
-			return curr_frame_index_;
-		}
-
 		IDXGIFactory4* DXGIFactory4() const noexcept;
 		IDXGIFactory5* DXGIFactory5() const noexcept;
 		IDXGIFactory6* DXGIFactory6() const noexcept;
@@ -188,6 +183,8 @@ namespace KlayGE
 		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers);
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
 
+		ID3D12DescriptorHeap* CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
+
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
 		D3D12Adapter& ActiveAdapter() const;
@@ -274,7 +271,7 @@ namespace KlayGE
 
 			void Destroy();
 
-			ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num);
+			ID3D12DescriptorHeap* CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num);
 
 			void AddStallResource(ID3D12ResourcePtr const& resource);
 			void ClearStallResources();
@@ -282,7 +279,8 @@ namespace KlayGE
 			D3D12GpuMemoryAllocator& GpuMemAllocator(bool is_upload) noexcept;
 
 		private:
-			std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
+			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> active_cbv_srv_uav_heap_cache_;
+			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> stall_cbv_srv_uav_heap_cache_;
 			std::vector<ID3D12ResourcePtr> stall_resources_;
 			D3D12GpuMemoryAllocator upload_mem_allocator_{true};
 			D3D12GpuMemoryAllocator readback_mem_allocator_{false};
@@ -303,7 +301,6 @@ namespace KlayGE
 		std::unordered_map<size_t, ID3D12RootSignaturePtr> root_signatures_;
 		std::unordered_map<size_t, ID3D12PipelineStatePtr> graphics_psos_;
 		std::unordered_map<size_t, ID3D12PipelineStatePtr> compute_psos_;
-		std::unordered_map<size_t, ID3D12DescriptorHeapPtr> cbv_srv_uav_heaps_;
 
 		uint16_t curr_stencil_ref_;
 		Color curr_blend_factor_;

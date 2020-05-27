@@ -678,18 +678,10 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_cmd_list = re.D3DRenderCmdList();
 
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbv_srv_heap_desc.NumDescriptors = 1;
-		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
-
 		ua_src_->UpdateResourceBarrier(d3d_cmd_list, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
 		re.FlushResourceBarriers(d3d_cmd_list);
 
+		ID3D12DescriptorHeap* cbv_srv_uav_heap = re.CreateDynamicCBVSRVUAVDescriptorHeap(1);
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -704,18 +696,10 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_cmd_list = re.D3DRenderCmdList();
 
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbv_srv_heap_desc.NumDescriptors = 1;
-		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeapPtr cbv_srv_uav_heap;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, cbv_srv_uav_heap.put_void()));
-
 		ua_src_->UpdateResourceBarrier(d3d_cmd_list, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
 		re.FlushResourceBarriers(d3d_cmd_list);
 
+		ID3D12DescriptorHeap* cbv_srv_uav_heap = re.CreateDynamicCBVSRVUAVDescriptorHeap(1);
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
