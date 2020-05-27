@@ -408,7 +408,10 @@ namespace KlayGE
 	{
 		auto* cmd_list = this->CurrThreadContext(true).D3DCmdList();
 
-		cmd_list->SetPipelineState(curr_pso_);
+		if (curr_pso_ != nullptr)
+		{
+			cmd_list->SetPipelineState(curr_pso_);
+		}
 		cmd_list->OMSetStencilRef(curr_stencil_ref_);
 		cmd_list->OMSetBlendFactor(&curr_blend_factor_.r());
 		cmd_list->RSSetViewports(1, &curr_viewport_);
@@ -494,8 +497,6 @@ namespace KlayGE
 		curr_ibv_ = { 0, 0, DXGI_FORMAT_UNKNOWN };
 
 		this->D3DRenderCmdList()->IASetPrimitiveTopology(curr_topology_);
-
-		per_frame_contexts_[curr_frame_index_].ClearStallResources();
 	}
 
 	// 设置当前渲染目标
