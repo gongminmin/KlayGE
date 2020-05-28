@@ -899,7 +899,7 @@ namespace KlayGE
 			cmd_list->CopyTextureRegion(&dst, mapped_x_offset_, mapped_y_offset_, mapped_z_offset_, &src, &src_box);
 		}
 
-		re.DeallocMemBlock(mapped_tma_ == TMA_Read_Only, std::move(mapped_mem_block_));
+		re.DeallocMemBlock(mapped_tma_ != TMA_Read_Only, std::move(mapped_mem_block_));
 		mapped_mem_block_.reset();
 	}
 
