@@ -139,15 +139,20 @@ namespace KlayGE
 
 		curr_frame_index_ = (curr_frame_index_ + 1) % NUM_BACK_BUFFERS;
 
+		uint64_t max_fence_value = 0;
 		for (auto const& context : render_thread_cmd_contexts_)
 		{
 			context->Reset(curr_frame_index_);
+			max_fence_value = std::max(max_fence_value, context->FrameFenceValue(curr_frame_index_));
 		}
 		for (auto const& context : load_thread_cmd_contexts_)
 		{
 			context->Reset(curr_frame_index_);
+			max_fence_value = std::max(max_fence_value, context->FrameFenceValue(curr_frame_index_));
 		}
 
+		upload_mem_allocator_.ClearStallPages(max_fence_value);
+		readback_mem_allocator_.ClearStallPages(max_fence_value);
 		per_frame_contexts_[curr_frame_index_].ClearStallResources();
 
 		this->ResetRenderCmd();
@@ -391,7 +396,9 @@ namespace KlayGE
 
 	void D3D12RenderEngine::CommitRenderCmd()
 	{
-		this->CurrThreadContext(true).CommitCmd(d3d_cmd_queue_.get(), curr_frame_index_);
+		auto& context = this->CurrThreadContext(true);
+		context.CommitCmd(d3d_cmd_queue_.get(), curr_frame_index_);
+		frame_fence_value_ = context.FrameFenceValue(curr_frame_index_);
 	}
 
 	void D3D12RenderEngine::SyncRenderCmd()
@@ -1015,6 +1022,8 @@ namespace KlayGE
 		this->SyncRenderCmd();
 		this->SyncLoadCmd();
 
+		upload_mem_allocator_.ClearStallPages(frame_fence_value_);
+		readback_mem_allocator_.ClearStallPages(frame_fence_value_);
 		per_frame_contexts_[curr_frame_index_].ClearStallResources();
 	}
 
@@ -1069,6 +1078,9 @@ namespace KlayGE
 		cbv_srv_uav_desc_heap_.reset();
 		dsv_desc_heap_.reset();
 		rtv_desc_heap_.reset();
+
+		upload_mem_allocator_.Clear();
+		readback_mem_allocator_.Clear();
 
 		d3d_cmd_queue_.reset();
 		d3d_device_.reset();
@@ -1905,16 +1917,14 @@ namespace KlayGE
 
 	D3D12GpuMemoryBlockPtr D3D12RenderEngine::AllocMemBlock(bool is_upload, uint32_t size_in_bytes)
 	{
-		auto& allocator = per_frame_contexts_[curr_frame_index_].GpuMemAllocator(is_upload);
-		return allocator.Allocate(size_in_bytes);
+		return (is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Allocate(size_in_bytes);
 	}
 
 	void D3D12RenderEngine::DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block)
 	{
 		if (mem_block)
 		{
-			auto& allocator = per_frame_contexts_[curr_frame_index_].GpuMemAllocator(is_upload);
-			allocator.Deallocate(std::move(mem_block));
+			(is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Deallocate(std::move(mem_block), frame_fence_value_);
 		}
 	}
 
@@ -2023,6 +2033,11 @@ namespace KlayGE
 		return d3d_cmd_list_.get();
 	}
 
+	uint64_t D3D12RenderEngine::PerThreadContext::FrameFenceValue(uint32_t frame_index) const noexcept
+	{
+		return per_frame_contexts_[frame_index].fence_value;
+	}
+
 
 	D3D12RenderEngine::PerFrameContext::~PerFrameContext()
 	{
@@ -2031,9 +2046,6 @@ namespace KlayGE
 
 	void D3D12RenderEngine::PerFrameContext::Destroy()
 	{
-		upload_mem_allocator_.Clear();
-		readback_mem_allocator_.Clear();
-
 		active_cbv_srv_uav_heap_cache_.clear();
 		stall_cbv_srv_uav_heap_cache_.clear();
 		stall_resources_.clear();
@@ -2087,9 +2099,6 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		upload_mem_allocator_.ClearStallPages();
-		readback_mem_allocator_.ClearStallPages();
-
 		for (auto& item : active_cbv_srv_uav_heap_cache_)
 		{
 			auto& heaps = stall_cbv_srv_uav_heap_cache_[item.first];
@@ -2098,10 +2107,5 @@ namespace KlayGE
 		active_cbv_srv_uav_heap_cache_.clear();
 
 		stall_resources_.clear();
-	}
-
-	D3D12GpuMemoryAllocator& D3D12RenderEngine::PerFrameContext::GpuMemAllocator(bool is_upload) noexcept
-	{
-		return is_upload ? upload_mem_allocator_ : readback_mem_allocator_;
 	}
 }

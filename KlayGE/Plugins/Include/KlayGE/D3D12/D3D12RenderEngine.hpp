@@ -248,6 +248,8 @@ namespace KlayGE
 			ID3D12CommandAllocator* D3DCmdAllocator(uint32_t frame_index) const noexcept;
 			ID3D12GraphicsCommandList* D3DCmdList() const noexcept;
 
+			uint64_t FrameFenceValue(uint32_t frame_index) const noexcept;
+
 		private:
 			struct PerThreadPerFrameContext : boost::noncopyable
 			{
@@ -276,20 +278,17 @@ namespace KlayGE
 			void AddStallResource(ID3D12ResourcePtr const& resource);
 			void ClearStallResources();
 
-			D3D12GpuMemoryAllocator& GpuMemAllocator(bool is_upload) noexcept;
-
 		private:
 			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> active_cbv_srv_uav_heap_cache_;
 			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> stall_cbv_srv_uav_heap_cache_;
 			std::vector<ID3D12ResourcePtr> stall_resources_;
-			D3D12GpuMemoryAllocator upload_mem_allocator_{true};
-			D3D12GpuMemoryAllocator readback_mem_allocator_{false};
 			std::mutex mutex_;
 		};
 		std::array<PerFrameContext, NUM_BACK_BUFFERS> per_frame_contexts_;
 		uint32_t curr_frame_index_ = 0;
 
 		FencePtr frame_fence_;
+		uint64_t frame_fence_value_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -330,6 +329,9 @@ namespace KlayGE
 		D3D12_CPU_DESCRIPTOR_HANDLE null_uav_handle_;
 
 		char const* shader_profiles_[NumShaderStages];
+
+		D3D12GpuMemoryAllocator upload_mem_allocator_{true};
+		D3D12GpuMemoryAllocator readback_mem_allocator_{false};
 
 		enum StereoMethod
 		{

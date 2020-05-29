@@ -118,9 +118,9 @@ namespace KlayGE
 		explicit D3D12GpuMemoryAllocator(bool is_upload) noexcept;
 
 		D3D12GpuMemoryBlockPtr Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
-		void Deallocate(D3D12GpuMemoryBlockPtr mem_block);
+		void Deallocate(D3D12GpuMemoryBlockPtr mem_block, uint64_t fence_value);
 
-		void ClearStallPages();
+		void ClearStallPages(uint64_t fence_value);
 
 		void Clear();
 
@@ -132,13 +132,29 @@ namespace KlayGE
 		static constexpr uint32_t DefaultPageSize = 2 * 1024 * 1024;
 
 		bool const is_upload_;
-		uint32_t page_size_ = DefaultPageSize;
 
 		std::mutex allocation_mutex_;
-		D3D12GpuMemoryPagePtr curr_page_;
-		uint32_t curr_offset_ = ~0U;
 
-		std::vector<D3D12GpuMemoryPagePtr> stall_pages_;
+		struct PageInfo
+		{
+			D3D12GpuMemoryPagePtr page;
+
+			struct FreeRange
+			{
+				uint32_t first_offset;
+				uint32_t last_offset;
+			};
+			std::vector<FreeRange> free_list;
+
+			struct StallRange
+			{
+				FreeRange free_range;
+				uint64_t fence_value;
+			};
+			std::vector<StallRange> stall_list;
+		};
+		std::vector<PageInfo> pages_;
+
 		std::vector<D3D12GpuMemoryPagePtr> large_pages_;
 	};
 } // namespace KlayGE
