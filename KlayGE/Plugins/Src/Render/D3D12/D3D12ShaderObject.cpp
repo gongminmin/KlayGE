@@ -1254,20 +1254,24 @@ namespace KlayGE
 	{
 	}
 
-	std::vector<GraphicsBuffer*> D3D12ShaderObject::CBuffers(RenderEffect const& effect, ShaderStage stage) const
+	uint32_t D3D12ShaderObject::NumCBuffers(ShaderStage stage) const
 	{
-		std::vector<GraphicsBuffer*> ret;
 		auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 		if (shader_stage)
 		{
-			auto const& cb_indices = shader_stage->CBufferIndices();
-			ret.reserve(cb_indices.size());
-			for (auto cb_index : cb_indices)
-			{
-				ret.push_back(effect.CBufferByIndex(cb_index)->HWBuff().get());
-			}
+			return static_cast<uint32_t>(shader_stage->CBufferIndices().size());
 		}
-		return ret;
+		return 0;
+	}
+
+	GraphicsBuffer* D3D12ShaderObject::CBuffer(RenderEffect const& effect, ShaderStage stage, uint32_t index) const
+	{
+		auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
+		if (shader_stage)
+		{
+			return effect.CBufferByIndex(shader_stage->CBufferIndices()[index])->HWBuff().get();
+		}
+		return nullptr;
 	}
 
 	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc)

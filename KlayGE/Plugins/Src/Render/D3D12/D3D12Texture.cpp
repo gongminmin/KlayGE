@@ -798,7 +798,7 @@ namespace KlayGE
 		uint32_t required_size = 0;
 		this->GetCopyableFootprints(width, height, depth, layout, num_row, row_size_in_bytes, required_size);
 
-		D3D12GpuMemoryBlockPtr readback_mem_block;
+		std::unique_ptr<D3D12GpuMemoryBlock> readback_mem_block;
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
 			readback_mem_block = re.AllocMemBlock(false, static_cast<uint32_t>(required_size));
@@ -836,8 +836,8 @@ namespace KlayGE
 		switch (tma)
 		{
 		case TMA_Read_Only:
-			mapped_mem_block_ = readback_mem_block;
 			p = readback_mem_block->CpuAddress();
+			mapped_mem_block_ = std::move(readback_mem_block);
 			break;
 
 		case TMA_Read_Write:

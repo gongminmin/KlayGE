@@ -459,7 +459,7 @@ namespace KlayGE
 		else
 		{
 			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto cmd_list = re.D3DRenderCmdList();
+			auto* cmd_list = re.D3DRenderCmdList();
 
 			auto upload_mem_block = re.AllocMemBlock(true, size);
 			auto* const upload_buff = upload_mem_block->Resource();

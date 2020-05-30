@@ -83,7 +83,7 @@ namespace KlayGE
 		auto* cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()), d3d_rt_handles_.data(), false, d3d_ds_handle_ptr_);
-		re.RSSetViewports(1, &d3d_viewport_);
+		re.RSSetViewports(cmd_list, 1, &d3d_viewport_);
 	}
 
 	void D3D12FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)

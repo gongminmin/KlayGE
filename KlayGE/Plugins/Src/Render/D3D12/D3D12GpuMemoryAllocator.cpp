@@ -65,7 +65,7 @@ namespace KlayGE
 	{
 	}
 
-	D3D12GpuMemoryBlockPtr D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
+	std::unique_ptr<D3D12GpuMemoryBlock> D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
 	{
 		uint32_t const alignment_mask = alignment - 1;
 		BOOST_ASSERT((alignment & alignment_mask) == 0);
@@ -76,7 +76,9 @@ namespace KlayGE
 
 		if (aligned_size > DefaultPageSize)
 		{
-			return MakeSharedPtr<D3D12GpuMemoryBlock>(*this->CreateLargePage(aligned_size), 0, size_in_bytes);
+			auto large_page = this->CreatePage(aligned_size);
+			large_pages_.push_back(large_page);
+			return MakeUniquePtr<D3D12GpuMemoryBlock>(*large_page, 0, size_in_bytes);		
 		}
 
 		for (auto& page_info : pages_)
@@ -85,7 +87,7 @@ namespace KlayGE
 			{
 				if (iter->first_offset + aligned_size <= iter->last_offset)
 				{
-					auto ret = MakeSharedPtr<D3D12GpuMemoryBlock>(*page_info.page, iter->first_offset, aligned_size);
+					auto ret = MakeUniquePtr<D3D12GpuMemoryBlock>(*page_info.page, iter->first_offset, aligned_size);
 					iter->first_offset += aligned_size;
 					if (iter->first_offset == iter->last_offset)
 					{
@@ -100,12 +102,12 @@ namespace KlayGE
 		PageInfo new_page_info;
 		new_page_info.page = this->CreatePage(DefaultPageSize);
 		new_page_info.free_list.push_back({aligned_size, DefaultPageSize});
-		auto ret = MakeSharedPtr<D3D12GpuMemoryBlock>(*new_page_info.page, 0, aligned_size);
+		auto ret = MakeUniquePtr<D3D12GpuMemoryBlock>(*new_page_info.page, 0, aligned_size);
 		pages_.push_back(std::move(new_page_info));
 		return ret;
 	}
 
-	void D3D12GpuMemoryAllocator::Deallocate(D3D12GpuMemoryBlockPtr mem_block, uint64_t fence_value)
+	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
@@ -134,7 +136,7 @@ namespace KlayGE
 			{
 				if (stall_iter->fence_value <= fence_value)
 				{
-					auto free_iter = std::lower_bound(page.free_list.begin(), page.free_list.end(), stall_iter->free_range.first_offset,
+					auto const free_iter = std::lower_bound(page.free_list.begin(), page.free_list.end(), stall_iter->free_range.first_offset,
 						[](PageInfo::FreeRange& free_range, uint32_t first_offset) { return free_range.first_offset < first_offset; });
 					if ((free_iter == page.free_list.end()) || (free_iter->first_offset != stall_iter->free_range.last_offset))
 					{
@@ -145,7 +147,7 @@ namespace KlayGE
 						free_iter->first_offset = stall_iter->free_range.first_offset;
 						if (free_iter != page.free_list.begin())
 						{
-							auto prev_free_iter = free_iter - 1;
+							auto const prev_free_iter = free_iter - 1;
 							if (prev_free_iter->last_offset == free_iter->first_offset)
 							{
 								prev_free_iter->last_offset = free_iter->last_offset;
@@ -174,7 +176,7 @@ namespace KlayGE
 		large_pages_.clear();
 	}
 
-	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreatePage(uint32_t size_in_bytes)
+	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreatePage(uint32_t size_in_bytes) const
 	{
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* device = d3d12_re.D3DDevice();
@@ -214,12 +216,5 @@ namespace KlayGE
 			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, IID_ID3D12Resource, resource.put_void()));
 
 		return MakeSharedPtr<D3D12GpuMemoryPage>(is_upload_, std::move(resource));
-	}
-
-	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreateLargePage(uint32_t size_in_bytes)
-	{
-		auto large_page = this->CreatePage(size_in_bytes);
-		large_pages_.push_back(large_page);
-		return large_page;
 	}
 } // namespace KlayGE

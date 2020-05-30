@@ -119,17 +119,17 @@ namespace KlayGE
 			return shader_profiles_[static_cast<uint32_t>(stage)];
 		}
 
-		void OMSetStencilRef(uint16_t stencil_ref);
-		void OMSetBlendFactor(Color const & blend_factor);
-		void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports);
-		void SetPipelineState(ID3D12PipelineState* pso);
-		void SetGraphicsRootSignature(ID3D12RootSignature* root_signature);
-		void SetComputeRootSignature(ID3D12RootSignature* root_signature);
-		void RSSetScissorRects(D3D12_RECT const & rect);
-		void IASetPrimitiveTopology(RenderLayout::topology_type primitive_topology);
-		void SetDescriptorHeaps(std::span<ID3D12DescriptorHeap* const> descriptor_heaps);
-		void IASetVertexBuffers(uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views);
-		void IASetIndexBuffer(D3D12_INDEX_BUFFER_VIEW const & view);
+		void OMSetStencilRef(ID3D12GraphicsCommandList* cmd_list, uint16_t stencil_ref);
+		void OMSetBlendFactor(ID3D12GraphicsCommandList* cmd_list, Color const& blend_factor);
+		void RSSetViewports(ID3D12GraphicsCommandList* cmd_list, uint32_t num_viewports, D3D12_VIEWPORT const* viewports);
+		void SetPipelineState(ID3D12GraphicsCommandList* cmd_list, ID3D12PipelineState* pso);
+		void SetGraphicsRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature);
+		void SetComputeRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature);
+		void RSSetScissorRects(ID3D12GraphicsCommandList* cmd_list, D3D12_RECT const& rect);
+		void IASetPrimitiveTopology(ID3D12GraphicsCommandList* cmd_list, RenderLayout::topology_type primitive_topology);
+		void SetDescriptorHeaps(ID3D12GraphicsCommandList* cmd_list, std::span<ID3D12DescriptorHeap* const> descriptor_heaps);
+		void IASetVertexBuffers(ID3D12GraphicsCommandList* cmd_list, uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views);
+		void IASetIndexBuffer(ID3D12GraphicsCommandList* cmd_list, D3D12_INDEX_BUFFER_VIEW const& view);
 		
 		void ResetRenderStates();
 
@@ -175,8 +175,8 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 
-		D3D12GpuMemoryBlockPtr AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
-		void DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block);
+		std::unique_ptr<D3D12GpuMemoryBlock> AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
+		void DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block);
 
 		void AddStallResource(ID3D12ResourcePtr const& resource);
 

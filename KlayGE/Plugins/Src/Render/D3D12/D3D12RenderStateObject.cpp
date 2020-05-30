@@ -115,8 +115,9 @@ namespace KlayGE
 	void D3D12RenderStateObject::Active()
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.OMSetStencilRef(dss_desc_.front_stencil_ref);
-		re.OMSetBlendFactor(bs_desc_.blend_factor);
+		auto* cmd_list = re.D3DRenderCmdList();
+		re.OMSetStencilRef(cmd_list, dss_desc_.front_stencil_ref);
+		re.OMSetBlendFactor(cmd_list, bs_desc_.blend_factor);
 	}
 
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObject const & so,

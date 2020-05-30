@@ -555,12 +555,13 @@ namespace KlayGE
 	{
 		auto const& so = checked_cast<D3D12ShaderObject const&>(*pass.GetShaderObject(effect));
 		auto const& rso = checked_cast<D3D12RenderStateObject const&>(*pass.GetRenderStateObject());
+		auto* cmd_list = this->D3DRenderCmdList();
 
 		auto pso = rso.RetrieveGraphicsPSO(rl, so, *this->CurFrameBuffer(), has_tessellation);
-		this->SetPipelineState(pso);
+		this->SetPipelineState(cmd_list, pso);
 
 		auto root_signature = so.RootSignature();
-		this->SetGraphicsRootSignature(root_signature);
+		this->SetGraphicsRootSignature(cmd_list, root_signature);
 
 		D3D12_RECT scissor_rc;
 		if (pass.GetRenderStateObject()->GetRasterizerStateDesc().scissor_enable)
@@ -577,7 +578,7 @@ namespace KlayGE
 				static_cast<LONG>(curr_viewport_.TopLeftY + curr_viewport_.Height)
 			};
 		}
-		this->RSSetScissorRects(scissor_rc);
+		this->RSSetScissorRects(cmd_list, scissor_rc);
 
 		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
 	}
@@ -586,12 +587,13 @@ namespace KlayGE
 	{
 		auto const& so = checked_cast<D3D12ShaderObject const&>(*pass.GetShaderObject(effect));
 		auto const& rso = checked_cast<D3D12RenderStateObject const&>(*pass.GetRenderStateObject());
+		auto* cmd_list = this->D3DRenderCmdList();
 
 		auto pso = rso.RetrieveComputePSO(so);
-		this->SetPipelineState(pso);
+		this->SetPipelineState(cmd_list, pso);
 
 		auto root_signature = so.RootSignature();
-		this->SetComputeRootSignature(root_signature);
+		this->SetComputeRootSignature(cmd_list, root_signature);
 
 		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
 	}
@@ -620,15 +622,16 @@ namespace KlayGE
 			++ num_heaps;
 		}
 
-		this->SetDescriptorHeaps(MakeSpan(heaps.data(), num_heaps));
+		this->SetDescriptorHeaps(cmd_list, MakeSpan(heaps.data(), num_heaps));
 
 		uint32_t root_param_index = 0;
 		for (uint32_t i = 0; i < NumShaderStages; ++i)
 		{
 			ShaderStage const stage = static_cast<ShaderStage>(i);
-			auto const cbuffers = d3d12_so.CBuffers(effect, stage);
-			for (auto cbuffer : cbuffers)
+			uint32_t const num_cbuffers = d3d12_so.NumCBuffers(stage);
+			for (uint32_t cb_index = 0; cb_index < num_cbuffers; ++cb_index)
 			{
+				auto* cbuffer = d3d12_so.CBuffer(effect, stage, cb_index);
 				D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr;
 				if (cbuffer != nullptr)
 				{
@@ -816,7 +819,7 @@ namespace KlayGE
 
 		this->FlushResourceBarriers(cmd_list);
 
-		checked_cast<D3D12RenderLayout const&>(rl).Active();
+		checked_cast<D3D12RenderLayout const&>(rl).Active(cmd_list);
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
@@ -841,7 +844,7 @@ namespace KlayGE
 				break;
 			}
 		}
-		this->IASetPrimitiveTopology(tt);
+		this->IASetPrimitiveTopology(cmd_list, tt);
 
 		uint32_t prim_count;
 		switch (tt)
@@ -1437,89 +1440,88 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::OMSetStencilRef(uint16_t stencil_ref)
+	void D3D12RenderEngine::OMSetStencilRef(ID3D12GraphicsCommandList* cmd_list, uint16_t stencil_ref)
 	{
 		if (curr_stencil_ref_ != stencil_ref)
 		{
-			this->D3DRenderCmdList()->OMSetStencilRef(stencil_ref);
+			cmd_list->OMSetStencilRef(stencil_ref);
 			curr_stencil_ref_ = stencil_ref;
 		}
 	}
 
-	void D3D12RenderEngine::OMSetBlendFactor(Color const & blend_factor)
+	void D3D12RenderEngine::OMSetBlendFactor(ID3D12GraphicsCommandList* cmd_list, Color const& blend_factor)
 	{
 		if (curr_blend_factor_ != blend_factor)
 		{
-			this->D3DRenderCmdList()->OMSetBlendFactor(&blend_factor.r());
+			cmd_list->OMSetBlendFactor(&blend_factor.r());
 			curr_blend_factor_ = blend_factor;
 		}
 	}
 
-	void D3D12RenderEngine::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)
+	void D3D12RenderEngine::RSSetViewports(ID3D12GraphicsCommandList* cmd_list, uint32_t num_viewports, D3D12_VIEWPORT const* viewports)
 	{
-		auto* cmd_list = this->D3DRenderCmdList();
-		if (NumViewports == 1)
+		if (num_viewports == 1)
 		{
-			if (memcmp(&curr_viewport_, pViewports, sizeof(pViewports[0])) != 0)
+			if (memcmp(&curr_viewport_, viewports, sizeof(viewports[0])) != 0)
 			{
-				cmd_list->RSSetViewports(NumViewports, pViewports);
-				curr_viewport_ = pViewports[0];
+				cmd_list->RSSetViewports(num_viewports, viewports);
+				curr_viewport_ = viewports[0];
 			}
 		}
 		else
 		{
-			cmd_list->RSSetViewports(NumViewports, pViewports);
-			curr_viewport_ = pViewports[0];
+			cmd_list->RSSetViewports(num_viewports, viewports);
+			curr_viewport_ = viewports[0];
 		}
 	}
 
-	void D3D12RenderEngine::SetPipelineState(ID3D12PipelineState* pso)
+	void D3D12RenderEngine::SetPipelineState(ID3D12GraphicsCommandList* cmd_list, ID3D12PipelineState* pso)
 	{
 		if (pso != curr_pso_)
 		{
-			this->D3DRenderCmdList()->SetPipelineState(pso);
+			cmd_list->SetPipelineState(pso);
 			curr_pso_ = pso;
 		}
 	}
 
-	void D3D12RenderEngine::SetGraphicsRootSignature(ID3D12RootSignature* root_signature)
+	void D3D12RenderEngine::SetGraphicsRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature)
 	{
 		if (root_signature != curr_graphics_root_signature_)
 		{
-			this->D3DRenderCmdList()->SetGraphicsRootSignature(root_signature);
+			cmd_list->SetGraphicsRootSignature(root_signature);
 			curr_graphics_root_signature_ = root_signature;
 		}
 	}
 
-	void D3D12RenderEngine::SetComputeRootSignature(ID3D12RootSignature* root_signature)
+	void D3D12RenderEngine::SetComputeRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature)
 	{
 		if (root_signature != curr_compute_root_signature_)
 		{
-			this->D3DRenderCmdList()->SetComputeRootSignature(root_signature);
+			cmd_list->SetComputeRootSignature(root_signature);
 			curr_compute_root_signature_ = root_signature;
 		}
 	}
 
-	void D3D12RenderEngine::RSSetScissorRects(D3D12_RECT const & rect)
+	void D3D12RenderEngine::RSSetScissorRects(ID3D12GraphicsCommandList* cmd_list, D3D12_RECT const& rect)
 	{
 		if (memcmp(&rect, &curr_scissor_rc_, sizeof(rect)) != 0)
 		{
-			this->D3DRenderCmdList()->RSSetScissorRects(1, &rect);
+			cmd_list->RSSetScissorRects(1, &rect);
 			curr_scissor_rc_ = rect;
 		}
 	}
 
-	void D3D12RenderEngine::IASetPrimitiveTopology(RenderLayout::topology_type primitive_topology)
+	void D3D12RenderEngine::IASetPrimitiveTopology(ID3D12GraphicsCommandList* cmd_list, RenderLayout::topology_type primitive_topology)
 	{
 		if (topology_type_cache_ != primitive_topology)
 		{
 			topology_type_cache_ = primitive_topology;
 			curr_topology_ = D3D12Mapping::Mapping(primitive_topology);
-			this->D3DRenderCmdList()->IASetPrimitiveTopology(curr_topology_);
+			cmd_list->IASetPrimitiveTopology(curr_topology_);
 		}
 	}
 
-	void D3D12RenderEngine::SetDescriptorHeaps(std::span<ID3D12DescriptorHeap* const> descriptor_heaps)
+	void D3D12RenderEngine::SetDescriptorHeaps(ID3D12GraphicsCommandList* cmd_list, std::span<ID3D12DescriptorHeap* const> descriptor_heaps)
 	{
 		if ((descriptor_heaps.size() != curr_num_desc_heaps_)
 			|| (descriptor_heaps != MakeSpan(curr_desc_heaps_.data(), curr_num_desc_heaps_)))
@@ -1531,28 +1533,29 @@ namespace KlayGE
 				curr_desc_heaps_[i] = descriptor_heaps[i];
 			}
 
-			this->D3DRenderCmdList()->SetDescriptorHeaps(curr_num_desc_heaps_, curr_desc_heaps_.data());
+			cmd_list->SetDescriptorHeaps(curr_num_desc_heaps_, curr_desc_heaps_.data());
 		}
 	}
 
-	void D3D12RenderEngine::IASetVertexBuffers(uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views)
+	void D3D12RenderEngine::IASetVertexBuffers(
+		ID3D12GraphicsCommandList* cmd_list, uint32_t start_slot, std::span<D3D12_VERTEX_BUFFER_VIEW const> views)
 	{
 		if ((start_slot + static_cast<size_t>(views.size()) > curr_vbvs_.size())
 			|| (memcmp(&curr_vbvs_[start_slot], views.data(), views.size() * sizeof(views[0])) != 0))
 		{
 			curr_vbvs_.resize(std::max(curr_vbvs_.size(), static_cast<size_t>(start_slot + views.size())));
 			memcpy(&curr_vbvs_[start_slot], views.data(), views.size() * sizeof(views[0]));
-			this->D3DRenderCmdList()->IASetVertexBuffers(start_slot, static_cast<uint32_t>(views.size()), views.data());
+			cmd_list->IASetVertexBuffers(start_slot, static_cast<uint32_t>(views.size()), views.data());
 		}
 	}
 
-	void D3D12RenderEngine::IASetIndexBuffer(D3D12_INDEX_BUFFER_VIEW const & view)
+	void D3D12RenderEngine::IASetIndexBuffer(ID3D12GraphicsCommandList* cmd_list, D3D12_INDEX_BUFFER_VIEW const& view)
 	{
 		if ((curr_ibv_.BufferLocation != view.BufferLocation)
 			|| (curr_ibv_.SizeInBytes != view.SizeInBytes)
 			|| (curr_ibv_.Format != view.Format))
 		{
-			this->D3DRenderCmdList()->IASetIndexBuffer(&view);
+			cmd_list->IASetIndexBuffer(&view);
 			curr_ibv_ = view;
 		}
 	}
@@ -1915,12 +1918,12 @@ namespace KlayGE
 		return ret;
 	}
 
-	D3D12GpuMemoryBlockPtr D3D12RenderEngine::AllocMemBlock(bool is_upload, uint32_t size_in_bytes)
+	std::unique_ptr<D3D12GpuMemoryBlock> D3D12RenderEngine::AllocMemBlock(bool is_upload, uint32_t size_in_bytes)
 	{
 		return (is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Allocate(size_in_bytes);
 	}
 
-	void D3D12RenderEngine::DeallocMemBlock(bool is_upload, D3D12GpuMemoryBlockPtr mem_block)
+	void D3D12RenderEngine::DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block)
 	{
 		if (mem_block)
 		{

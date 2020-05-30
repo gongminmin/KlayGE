@@ -289,7 +289,8 @@ namespace KlayGE
 			return uavs_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<GraphicsBuffer*> CBuffers(RenderEffect const& effect, ShaderStage stage) const;
+		uint32_t NumCBuffers(ShaderStage stage) const;
+		GraphicsBuffer* CBuffer(RenderEffect const& effect, ShaderStage stage, uint32_t index) const;
 
 		ID3D12RootSignature* RootSignature() const
 		{

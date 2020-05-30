@@ -107,7 +107,6 @@ namespace KlayGE
 		void* const cpu_addr_;
 		D3D12_GPU_VIRTUAL_ADDRESS const gpu_addr_;
 	};
-	using D3D12GpuMemoryBlockPtr = std::shared_ptr<D3D12GpuMemoryBlock>;
 
 	class D3D12GpuMemoryAllocator final : boost::noncopyable
 	{
@@ -117,16 +116,14 @@ namespace KlayGE
 	public:
 		explicit D3D12GpuMemoryAllocator(bool is_upload) noexcept;
 
-		D3D12GpuMemoryBlockPtr Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
-		void Deallocate(D3D12GpuMemoryBlockPtr mem_block, uint64_t fence_value);
+		std::unique_ptr<D3D12GpuMemoryBlock> Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
+		void Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value);
 
 		void ClearStallPages(uint64_t fence_value);
-
 		void Clear();
 
 	private:
-		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes);
-		D3D12GpuMemoryPagePtr CreateLargePage(uint32_t size_in_bytes);
+		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes) const;
 
 	private:
 		static constexpr uint32_t DefaultPageSize = 2 * 1024 * 1024;
