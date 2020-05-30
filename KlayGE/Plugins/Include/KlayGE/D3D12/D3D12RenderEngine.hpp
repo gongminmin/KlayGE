@@ -162,6 +162,15 @@ namespace KlayGE
 			return sampler_desc_size_;
 		}
 
+		D3D12_CPU_DESCRIPTOR_HANDLE NullSrvHandle() const noexcept
+		{
+			return null_srv_handle_;
+		}
+		D3D12_CPU_DESCRIPTOR_HANDLE NullUavHandle() const noexcept
+		{
+			return null_uav_handle_;
+		}
+
 		uint32_t AllocRTV();
 		uint32_t AllocDSV();
 		uint32_t AllocCBVSRVUAV();

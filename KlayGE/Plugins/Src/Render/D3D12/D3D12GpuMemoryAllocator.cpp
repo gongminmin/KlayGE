@@ -147,7 +147,7 @@ namespace KlayGE
 						free_iter->first_offset = stall_iter->free_range.first_offset;
 						if (free_iter != page.free_list.begin())
 						{
-							auto const prev_free_iter = free_iter - 1;
+							auto const prev_free_iter = std::prev(free_iter);
 							if (prev_free_iter->last_offset == free_iter->first_offset)
 							{
 								prev_free_iter->last_offset = free_iter->last_offset;
