@@ -320,8 +320,7 @@ namespace KlayGE
 		case BA_Write_Only:
 			if (gpu_mem_block_)
 			{
-				re.DeallocMemBlock(true, std::move(gpu_mem_block_));
-				gpu_mem_block_ = re.AllocMemBlock(true, size_in_byte_);
+				re.RenewMemBlock(true, gpu_mem_block_, size_in_byte_);
 				d3d_resource_ = gpu_mem_block_->Resource();
 				d3d_resource_offset_ = gpu_mem_block_->Offset();
 				gpu_vaddr_ = gpu_mem_block_->GpuAddress();

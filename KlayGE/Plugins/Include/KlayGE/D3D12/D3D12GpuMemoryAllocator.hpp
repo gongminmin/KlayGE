@@ -73,7 +73,9 @@ namespace KlayGE
 	class D3D12GpuMemoryBlock final : boost::noncopyable
 	{
 	public:
-		D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept;
+		D3D12GpuMemoryBlock() noexcept;
+
+		void Reset(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept;
 
 		ID3D12Resource* Resource() const noexcept
 		{
@@ -101,11 +103,11 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12Resource* const resource_;
-		uint32_t const offset_;
-		uint32_t const size_;
-		void* const cpu_addr_;
-		D3D12_GPU_VIRTUAL_ADDRESS const gpu_addr_;
+		ID3D12Resource* resource_ = nullptr;
+		uint32_t offset_ = 0;
+		uint32_t size_ = 0;
+		void* cpu_addr_ = nullptr;
+		D3D12_GPU_VIRTUAL_ADDRESS gpu_addr_ = 0;
 	};
 
 	class D3D12GpuMemoryAllocator final : boost::noncopyable
@@ -118,11 +120,16 @@ namespace KlayGE
 
 		std::unique_ptr<D3D12GpuMemoryBlock> Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
 		void Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value);
+		void Renew(std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value, uint32_t size_in_bytes,
+			uint32_t alignment = DefaultAligment);
 
 		void ClearStallPages(uint64_t fence_value);
 		void Clear();
 
 	private:
+		void Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes,
+			uint32_t alignment);
+		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value);
 		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes) const;
 
 	private:

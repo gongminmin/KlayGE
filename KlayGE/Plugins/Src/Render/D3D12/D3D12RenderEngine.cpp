@@ -155,8 +155,9 @@ namespace KlayGE
 		readback_mem_allocator_.ClearStallPages(max_fence_value);
 		per_frame_contexts_[curr_frame_index_].ClearStallResources();
 
-		this->ResetRenderCmd();
-		this->RestoreRenderCmdStates();
+		auto& context = this->CurrThreadContext(true);
+		this->ResetRenderCmd(context);
+		this->RestoreRenderCmdStates(context.D3DCmdList());
 	}
 
 	IDXGIFactory4* D3D12RenderEngine::DXGIFactory4() const noexcept
@@ -396,25 +397,37 @@ namespace KlayGE
 
 	void D3D12RenderEngine::CommitRenderCmd()
 	{
-		auto& context = this->CurrThreadContext(true);
+		this->CommitRenderCmd(this->CurrThreadContext(true));
+	}
+
+	void D3D12RenderEngine::CommitRenderCmd(PerThreadContext& context)
+	{
 		context.CommitCmd(d3d_cmd_queue_.get(), curr_frame_index_);
 		frame_fence_value_ = context.FrameFenceValue(curr_frame_index_);
 	}
 
 	void D3D12RenderEngine::SyncRenderCmd()
 	{
-		this->CurrThreadContext(true).SyncCmd(curr_frame_index_);
+		this->SyncRenderCmd(this->CurrThreadContext(true));
+	}
+
+	void D3D12RenderEngine::SyncRenderCmd(PerThreadContext& context)
+	{
+		context.SyncCmd(curr_frame_index_);
 	}
 
 	void D3D12RenderEngine::ResetRenderCmd()
 	{
-		this->CurrThreadContext(true).ResetCmd(curr_frame_index_);
+		this->ResetRenderCmd(this->CurrThreadContext(true));
 	}
 
-	void D3D12RenderEngine::RestoreRenderCmdStates()
+	void D3D12RenderEngine::ResetRenderCmd(PerThreadContext& context)
 	{
-		auto* cmd_list = this->CurrThreadContext(true).D3DCmdList();
+		context.ResetCmd(curr_frame_index_);
+	}
 
+	void D3D12RenderEngine::RestoreRenderCmdStates(ID3D12GraphicsCommandList* cmd_list)
+	{
 		if (curr_pso_ != nullptr)
 		{
 			cmd_list->SetPipelineState(curr_pso_);
@@ -439,7 +452,7 @@ namespace KlayGE
 		auto fb = checked_cast<D3D12FrameBuffer*>(this->CurFrameBuffer().get());
 		if (fb)
 		{
-			fb->SetRenderTargets();
+			fb->SetRenderTargets(cmd_list);
 		}
 	}
 
@@ -550,12 +563,11 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::UpdateRenderPSO(RenderEffect const & effect, RenderPass const & pass, RenderLayout const & rl,
-		bool has_tessellation)
+	void D3D12RenderEngine::UpdateRenderPSO(ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, RenderPass const& pass,
+		RenderLayout const& rl, bool has_tessellation)
 	{
 		auto const& so = checked_cast<D3D12ShaderObject const&>(*pass.GetShaderObject(effect));
 		auto const& rso = checked_cast<D3D12RenderStateObject const&>(*pass.GetRenderStateObject());
-		auto* cmd_list = this->D3DRenderCmdList();
 
 		auto pso = rso.RetrieveGraphicsPSO(rl, so, *this->CurFrameBuffer(), has_tessellation);
 		this->SetPipelineState(cmd_list, pso);
@@ -580,14 +592,13 @@ namespace KlayGE
 		}
 		this->RSSetScissorRects(cmd_list, scissor_rc);
 
-		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
+		this->UpdateCbvSrvUavSamplerHeaps(cmd_list, effect, so);
 	}
 
-	void D3D12RenderEngine::UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass)
+	void D3D12RenderEngine::UpdateComputePSO(ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, RenderPass const& pass)
 	{
 		auto const& so = checked_cast<D3D12ShaderObject const&>(*pass.GetShaderObject(effect));
 		auto const& rso = checked_cast<D3D12RenderStateObject const&>(*pass.GetRenderStateObject());
-		auto* cmd_list = this->D3DRenderCmdList();
 
 		auto pso = rso.RetrieveComputePSO(so);
 		this->SetPipelineState(cmd_list, pso);
@@ -595,13 +606,13 @@ namespace KlayGE
 		auto root_signature = so.RootSignature();
 		this->SetComputeRootSignature(cmd_list, root_signature);
 
-		this->UpdateCbvSrvUavSamplerHeaps(effect, so);
+		this->UpdateCbvSrvUavSamplerHeaps(cmd_list, effect, so);
 	}
 
-	void D3D12RenderEngine::UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so)
+	void D3D12RenderEngine::UpdateCbvSrvUavSamplerHeaps(
+		ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, ShaderObject const& so)
 	{
 		auto const& d3d12_so = checked_cast<D3D12ShaderObject const&>(so);
-		auto* cmd_list = this->D3DRenderCmdList();
 
 		uint32_t const num_handles = d3d12_so.NumHandles();
 
@@ -735,7 +746,7 @@ namespace KlayGE
 		auto* cmd_list = this->D3DRenderCmdList();
 
 		auto& fb = checked_cast<D3D12FrameBuffer&>(*this->CurFrameBuffer());
-		fb.BindBarrier();
+		fb.BindBarrier(cmd_list);
 
 		for (uint32_t i = 0; i < so_buffs_.size(); ++ i)
 		{
@@ -870,7 +881,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
+					this->UpdateRenderPSO(cmd_list, effect, pass, rl, has_tessellation);
 					cmd_list->ExecuteIndirect(
 						draw_indexed_indirect_signature_.get(), 1, arg_buff, arg_buff_offset + rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
@@ -883,7 +894,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
+					this->UpdateRenderPSO(cmd_list, effect, pass, rl, has_tessellation);
 					cmd_list->ExecuteIndirect(
 						draw_indirect_signature_.get(), 1, arg_buff, arg_buff_offset + rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
@@ -900,7 +911,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
+					this->UpdateRenderPSO(cmd_list, effect, pass, rl, has_tessellation);
 					cmd_list->DrawIndexedInstanced(
 						num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass.Unbind(effect);
@@ -914,7 +925,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
+					this->UpdateRenderPSO(cmd_list, effect, pass, rl, has_tessellation);
 					cmd_list->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass.Unbind(effect);
 				}
@@ -935,7 +946,7 @@ namespace KlayGE
 			auto& pass = tech.Pass(i);
 
 			pass.Bind(effect);
-			this->UpdateComputePSO(effect, pass);
+			this->UpdateComputePSO(cmd_list, effect, pass);
 			cmd_list->Dispatch(tgx, tgy, tgz);
 			pass.Unbind(effect);
 		}
@@ -964,7 +975,7 @@ namespace KlayGE
 			auto& pass = tech.Pass(i);
 
 			pass.Bind(effect);
-			this->UpdateComputePSO(effect, pass);
+			this->UpdateComputePSO(cmd_list, effect, pass);
 			cmd_list->ExecuteIndirect(dispatch_indirect_signature_.get(), 1, arg_buff.D3DResource(), offset, nullptr, 0);
 			pass.Unbind(effect);
 		}
@@ -974,9 +985,10 @@ namespace KlayGE
 
 	void D3D12RenderEngine::ForceFlush()
 	{
-		this->CommitRenderCmd();
-		this->ResetRenderCmd();
-		this->RestoreRenderCmdStates();
+		auto& context = this->CurrThreadContext(true);
+		this->CommitRenderCmd(context);
+		this->ResetRenderCmd(context);
+		this->RestoreRenderCmdStates(context.D3DCmdList());
 	}
 
 	void D3D12RenderEngine::ForceFinish()
@@ -1888,10 +1900,12 @@ namespace KlayGE
 
 	void D3D12RenderEngine::DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block)
 	{
-		if (mem_block)
-		{
-			(is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Deallocate(std::move(mem_block), frame_fence_value_);
-		}
+		(is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Deallocate(std::move(mem_block), frame_fence_value_);
+	}
+
+	void D3D12RenderEngine::RenewMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes)
+	{
+		(is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Renew(mem_block, frame_fence_value_, size_in_bytes);
 	}
 
 	void D3D12RenderEngine::AddStallResource(ID3D12ResourcePtr const& resource)
@@ -2019,12 +2033,12 @@ namespace KlayGE
 
 	ID3D12DescriptorHeap* D3D12RenderEngine::PerFrameContext::CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num)
 	{
+		std::lock_guard<std::mutex> lock(mutex_);
+
 		ID3D12DescriptorHeap* ret;
 		auto iter = stall_cbv_srv_uav_heap_cache_.find(num);
 		if (iter != stall_cbv_srv_uav_heap_cache_.end())
 		{
-			std::lock_guard<std::mutex> lock(mutex_);
-
 			auto heap = std::move(iter->second.back());
 			ret = heap.get();
 			active_cbv_srv_uav_heap_cache_[num].emplace_back(std::move(heap));
@@ -2046,7 +2060,6 @@ namespace KlayGE
 			TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, heap.put_void()));
 			ret = heap.get();
 			
-			std::lock_guard<std::mutex> lock(mutex_);
 			active_cbv_srv_uav_heap_cache_[num].emplace_back(std::move(heap));
 		}
 		return ret;

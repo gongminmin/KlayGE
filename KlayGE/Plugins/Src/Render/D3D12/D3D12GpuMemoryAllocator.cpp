@@ -54,10 +54,15 @@ namespace KlayGE
 	}
 
 
-	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept
-		: resource_(page.Resource()), offset_(offset), size_(size), cpu_addr_(reinterpret_cast<uint8_t*>(page.CpuAddress()) + offset),
-		  gpu_addr_(page.GpuAddress() + offset)
+	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock() noexcept = default;
+
+	void D3D12GpuMemoryBlock::Reset(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept
 	{
+		resource_ = page.Resource();
+		offset_ = offset;
+		size_ = size;
+		cpu_addr_ = reinterpret_cast<uint8_t*>(page.CpuAddress()) + offset;
+		gpu_addr_ = page.GpuAddress() + offset;
 	}
 
 
@@ -67,18 +72,34 @@ namespace KlayGE
 
 	std::unique_ptr<D3D12GpuMemoryBlock> D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
 	{
+		std::lock_guard<std::mutex> lock(allocation_mutex_);
+
+		std::unique_ptr<D3D12GpuMemoryBlock> mem_block;
+		this->Allocate(lock, mem_block, size_in_bytes, alignment);
+		return mem_block;
+	}
+
+	void D3D12GpuMemoryAllocator::Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block,
+		uint32_t size_in_bytes, uint32_t alignment)
+	{
+		KFL_UNUSED(proof_of_lock);
+
 		uint32_t const alignment_mask = alignment - 1;
 		BOOST_ASSERT((alignment & alignment_mask) == 0);
 
 		uint32_t const aligned_size = (size_in_bytes + alignment_mask) & ~alignment_mask;
 
-		std::lock_guard<std::mutex> lock(allocation_mutex_);
+		if (!mem_block)
+		{
+			mem_block = MakeUniquePtr<D3D12GpuMemoryBlock>();
+		}
 
 		if (aligned_size > DefaultPageSize)
 		{
 			auto large_page = this->CreatePage(aligned_size);
 			large_pages_.push_back(large_page);
-			return MakeUniquePtr<D3D12GpuMemoryBlock>(*large_page, 0, size_in_bytes);		
+			mem_block->Reset(*large_page, 0, size_in_bytes);
+			return;
 		}
 
 		for (auto& page_info : pages_)
@@ -87,14 +108,14 @@ namespace KlayGE
 			{
 				if (iter->first_offset + aligned_size <= iter->last_offset)
 				{
-					auto ret = MakeUniquePtr<D3D12GpuMemoryBlock>(*page_info.page, iter->first_offset, aligned_size);
+					mem_block->Reset(*page_info.page, iter->first_offset, aligned_size);
 					iter->first_offset += aligned_size;
 					if (iter->first_offset == iter->last_offset)
 					{
 						page_info.free_list.erase(iter);
 					}
 
-					return ret;
+					return;
 				}
 			}
 		}
@@ -102,14 +123,25 @@ namespace KlayGE
 		PageInfo new_page_info;
 		new_page_info.page = this->CreatePage(DefaultPageSize);
 		new_page_info.free_list.push_back({aligned_size, DefaultPageSize});
-		auto ret = MakeUniquePtr<D3D12GpuMemoryBlock>(*new_page_info.page, 0, aligned_size);
+		mem_block->Reset(*new_page_info.page, 0, aligned_size);
 		pages_.push_back(std::move(new_page_info));
-		return ret;
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
+		this->Deallocate(lock, mem_block, fence_value);
+	}
+
+	void D3D12GpuMemoryAllocator::Deallocate(
+		std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value)
+	{
+		KFL_UNUSED(proof_of_lock);
+
+		if (!mem_block)
+		{
+			return;
+		}		
 
 		if (mem_block->Size() <= DefaultPageSize)
 		{
@@ -124,6 +156,15 @@ namespace KlayGE
 
 			KFL_UNREACHABLE("This memory block is not allocated by this allocator");
 		}
+	}
+
+	void D3D12GpuMemoryAllocator::Renew(
+		std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment)
+	{
+		std::lock_guard<std::mutex> lock(allocation_mutex_);
+
+		this->Deallocate(lock, mem_block, fence_value);
+		this->Allocate(lock, mem_block, size_in_bytes, alignment);
 	}
 
 	void D3D12GpuMemoryAllocator::ClearStallPages(uint64_t fence_value)

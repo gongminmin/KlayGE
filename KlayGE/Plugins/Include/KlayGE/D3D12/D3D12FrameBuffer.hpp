@@ -53,9 +53,8 @@ namespace KlayGE
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) override;
 		void Discard(uint32_t flags) override;
 
-		virtual void BindBarrier();
-
-		virtual void SetRenderTargets();
+		void BindBarrier(ID3D12GraphicsCommandList* cmd_list);
+		void SetRenderTargets(ID3D12GraphicsCommandList* cmd_list);
 
 		size_t PsoHashValue();
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc);

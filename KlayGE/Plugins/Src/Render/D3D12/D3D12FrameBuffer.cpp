@@ -58,7 +58,8 @@ namespace KlayGE
 
 	void D3D12FrameBuffer::OnBind()
 	{
-		this->SetRenderTargets();
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		this->SetRenderTargets(d3d12_re.D3DRenderCmdList());
 
 		for (size_t i = 0; i < ua_views_.size(); ++ i)
 		{
@@ -70,7 +71,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D12FrameBuffer::SetRenderTargets()
+	void D3D12FrameBuffer::SetRenderTargets(ID3D12GraphicsCommandList* cmd_list)
 	{
 		if (views_dirty_)
 		{
@@ -79,11 +80,10 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto* cmd_list = re.D3DRenderCmdList();
-
 		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()), d3d_rt_handles_.data(), false, d3d_ds_handle_ptr_);
-		re.RSSetViewports(cmd_list, 1, &d3d_viewport_);
+
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d12_re.RSSetViewports(cmd_list, 1, &d3d_viewport_);
 	}
 
 	void D3D12FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
@@ -146,7 +146,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12FrameBuffer::BindBarrier()
+	void D3D12FrameBuffer::BindBarrier(ID3D12GraphicsCommandList* cmd_list)
 	{
 		if (views_dirty_)
 		{
@@ -154,9 +154,6 @@ namespace KlayGE
 
 			views_dirty_ = false;
 		}
-
-		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{

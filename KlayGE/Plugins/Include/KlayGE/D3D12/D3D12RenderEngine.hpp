@@ -186,6 +186,7 @@ namespace KlayGE
 
 		std::unique_ptr<D3D12GpuMemoryBlock> AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
 		void DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block);
+		void RenewMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes);
 
 		void AddStallResource(ID3D12ResourcePtr const& resource);
 
@@ -217,17 +218,20 @@ namespace KlayGE
 
 		virtual void CheckConfig(RenderSettings& settings) override;
 
-		void UpdateRenderPSO(RenderEffect const & effect, RenderPass const & pass, RenderLayout const & rl,
-			bool has_tessellation);
-		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
-		void UpdateCbvSrvUavSamplerHeaps(RenderEffect const& effect, ShaderObject const& so);
+		void UpdateRenderPSO(ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, RenderPass const& pass,
+			RenderLayout const& rl, bool has_tessellation);
+		void UpdateComputePSO(ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, RenderPass const& pass);
+		void UpdateCbvSrvUavSamplerHeaps(ID3D12GraphicsCommandList* cmd_list, RenderEffect const& effect, ShaderObject const& so);
 
 		std::vector<D3D12_RESOURCE_BARRIER>* FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation);
 
-		void RestoreRenderCmdStates();
+		void RestoreRenderCmdStates(ID3D12GraphicsCommandList* cmd_list);
 
 		class PerThreadContext;
 		PerThreadContext& CurrThreadContext(bool is_render_context) const;
+		void CommitRenderCmd(PerThreadContext& context);
+		void SyncRenderCmd(PerThreadContext& context);
+		void ResetRenderCmd(PerThreadContext& context);
 
 	private:
 		// Direct3D rendering device
