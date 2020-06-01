@@ -121,7 +121,9 @@ namespace KlayGE
 
 		void OMSetStencilRef(ID3D12GraphicsCommandList* cmd_list, uint16_t stencil_ref);
 		void OMSetBlendFactor(ID3D12GraphicsCommandList* cmd_list, Color const& blend_factor);
-		void RSSetViewports(ID3D12GraphicsCommandList* cmd_list, uint32_t num_viewports, D3D12_VIEWPORT const* viewports);
+		void OMSetRenderTargets(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_CPU_DESCRIPTOR_HANDLE const> render_target_descriptors,
+			bool rts_single_handle_to_descriptor_range, D3D12_CPU_DESCRIPTOR_HANDLE const* depth_stencil_descriptor);
+		void RSSetViewports(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_VIEWPORT const> viewports);
 		void SetPipelineState(ID3D12GraphicsCommandList* cmd_list, ID3D12PipelineState* pso);
 		void SetGraphicsRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature);
 		void SetComputeRootSignature(ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* root_signature);
@@ -292,8 +294,12 @@ namespace KlayGE
 			void ClearStallResources();
 
 		private:
-			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> active_cbv_srv_uav_heap_cache_;
-			std::map<uint32_t, std::vector<ID3D12DescriptorHeapPtr>> stall_cbv_srv_uav_heap_cache_;
+			struct CbvSrcUavHeaps
+			{
+				std::vector<ID3D12DescriptorHeapPtr> actives;
+				std::vector<ID3D12DescriptorHeapPtr> stalls;
+			};
+			std::map<uint32_t, CbvSrcUavHeaps> cbv_srv_uav_heap_cache_;
 			std::vector<ID3D12ResourcePtr> stall_resources_;
 			std::mutex mutex_;
 		};
@@ -326,6 +332,9 @@ namespace KlayGE
 		uint32_t curr_num_desc_heaps_;
 		std::vector<D3D12_VERTEX_BUFFER_VIEW> curr_vbvs_;
 		D3D12_INDEX_BUFFER_VIEW curr_ibv_;
+		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT> curr_render_targets_;
+		uint32_t curr_num_render_targets_ = 0;
+		D3D12_CPU_DESCRIPTOR_HANDLE const* curr_depth_stencil_ = nullptr;
 
 		ID3D12DescriptorHeapPtr rtv_desc_heap_;
 		uint32_t rtv_desc_size_;

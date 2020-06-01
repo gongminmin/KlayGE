@@ -80,10 +80,9 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()), d3d_rt_handles_.data(), false, d3d_ds_handle_ptr_);
-
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d12_re.RSSetViewports(cmd_list, 1, &d3d_viewport_);
+		d3d12_re.OMSetRenderTargets(cmd_list, d3d_rt_handles_, false, d3d_ds_handle_ptr_);
+		d3d12_re.RSSetViewports(cmd_list, MakeSpan<1>(d3d_viewport_));
 	}
 
 	void D3D12FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
