@@ -35,8 +35,6 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
 
-	#define KLAYGE_HAS_DECLSPEC
-
 	#if defined(_WIN64)
 		#define KLAYGE_PLATFORM_WIN64
 	#else

@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.0+, g++ 7.1+, clang 3.6+, with C++14 or C++17 option on.
+// KlayGE requires vc 14.0+, g++ 7.1+, clang 5.0+, with C++14 or C++17 option on.
 
 // Macros for C++17 core features:
 // KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
@@ -56,15 +56,15 @@
 #if defined(__clang__)
 	// Clang++
 
-	#if __cplusplus < 201402L
-		#error "-std=c++14 must be turned on."
-	#endif
-
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
 	#if defined(_MSC_VER)
 		#define KLAYGE_COMPILER_CLANGCL
 		#define KLAYGE_COMPILER_NAME clangcl
+
+		#if __cplusplus < 201402L
+			#error "-std=c++14 must be turned on."
+		#endif
 
 		#if __cplusplus > 201402L
 			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
@@ -90,9 +90,11 @@
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang
 
-		#if __cplusplus > 201402L
-			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#if __cplusplus < 201703L
+			#error "-std=c++1z must be turned on."
 		#endif
+
+		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 
 		#if defined(__APPLE__)
 			#if CLANG_VERSION >= 61
@@ -135,7 +137,7 @@
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 			#if CLANG_VERSION >= 70
 				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-				#if __cplusplus > 201703
+				#if __cplusplus > 201703L
 					#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
 					#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
 				#endif
@@ -195,7 +197,7 @@
 			// MinGW-w64 8.1 can't use built-in filesystem due to a bug: https://sourceforge.net/p/mingw-w64/bugs/737/
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 		#endif
-		#if __cplusplus > 201703
+		#if __cplusplus > 201703L
 			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
 		#endif
 	#else
@@ -232,7 +234,7 @@
 		#error "Unsupported compiler version. Please install vc14 or up."
 	#endif
 
-	#if _MSVC_LANG > 201402
+	#if _MSVC_LANG > 201402L
 		#if _MSC_VER >= 1911
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#endif
@@ -242,17 +244,20 @@
 		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 		#if _MSC_VER >= 1914
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-			#if _MSC_VER >= 1915
-				#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-				#if _MSC_VER >= 1922
-					#if _MSVC_LANG > 201703
-						#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-					#endif
-				#endif
-			#endif
+		#endif
+		#if _MSC_VER >= 1915
+			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 		#endif
 		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+	#endif
+	#if _MSVC_LANG > 201703L
+		#if _MSC_VER >= 1922
+			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+		#endif
+		#if _MSC_VER >= 1926
+			#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+		#endif
 	#endif
 
 	#if !defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
