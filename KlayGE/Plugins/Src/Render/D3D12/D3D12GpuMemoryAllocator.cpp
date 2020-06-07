@@ -149,7 +149,7 @@ namespace KlayGE
 			{
 				if (page.page->Resource() == mem_block->Resource())
 				{
-					page.stall_list.push_back({mem_block->Offset(), mem_block->Offset() + mem_block->Size(), fence_value});
+					page.stall_list.push_back({{mem_block->Offset(), mem_block->Offset() + mem_block->Size()}, fence_value});
 					return;
 				}
 			}

@@ -71,7 +71,7 @@ namespace
 		*pebx = id[1];
 		*pecx = id[2];
 		*pedx = id[3];
-#elif (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG))
+#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 	#ifdef KLAYGE_CPU_X64
 		__asm__
 		(

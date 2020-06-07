@@ -47,6 +47,7 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unused-private-field
 			-Wno-unused-function
 			-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
+			-Wno-tautological-bitwise-compare
 	)
 	target_compile_options(IrrXML
 		PRIVATE

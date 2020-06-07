@@ -45,7 +45,7 @@
 	#else
 		#error "Unknown CPU type. In msvc, x64, arm, and arm64 are supported."
 	#endif
-#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 	#if defined(__x86_64__)
 		#define KLAYGE_CPU_X64
 		#define KLAYGE_COMPILER_TARGET x64
