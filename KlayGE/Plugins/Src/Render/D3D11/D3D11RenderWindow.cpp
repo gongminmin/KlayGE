@@ -121,13 +121,21 @@ namespace KlayGE
 		else
 		{
 			UINT const create_device_flags = 0;
-			static UINT const available_create_device_flags[] =
+			static UINT const all_create_device_flags[] =
 			{
-#ifdef KLAYGE_DEBUG
 				create_device_flags | D3D11_CREATE_DEVICE_DEBUG,
-#endif
 				create_device_flags
 			};
+
+			std::span<UINT const> available_create_device_flags = MakeSpan(all_create_device_flags);
+#ifdef KLAYGE_DEBUG
+			available_create_device_flags = MakeSpan(all_create_device_flags);
+#else
+			if (!settings.debug_context)
+			{
+				available_create_device_flags = available_create_device_flags.subspan(1);
+			}
+#endif
 
 			static std::pair<D3D_DRIVER_TYPE, std::wstring_view> const dev_type_behaviors[] =
 			{

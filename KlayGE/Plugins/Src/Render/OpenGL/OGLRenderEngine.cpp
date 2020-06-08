@@ -74,7 +74,6 @@
 
 namespace
 {
-#ifndef KLAYGE_SHIP
 	char const * DebugSourceString(GLenum value)
 	{
 		char const * ret;
@@ -184,7 +183,6 @@ namespace
 			<< "severity: " << DebugSeverityString(severity) << "; "
 			<< "message: " << message << std::endl;
 	}
-#endif
 }
 
 namespace KlayGE
@@ -269,26 +267,32 @@ namespace KlayGE
 		Context::Instance().AppInstance().MainWnd()->BindListeners();
 #endif
 
-#ifndef KLAYGE_SHIP
-		if (glloader_GL_VERSION_4_3() || glloader_GL_KHR_debug())
-		{
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(&DebugOutputProc, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-		}
-		else if (glloader_GL_ARB_debug_output())
-		{
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-			glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_ARB, 0, nullptr, GL_TRUE);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_ARB, 0, nullptr, GL_TRUE);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_ARB, 0, nullptr, GL_FALSE);
-		}
+#ifdef KLAYGE_DEBUG
+		bool const debug_context = true;
+#else
+		bool const debug_context = settings.debug_context;
 #endif
+		if (debug_context)
+		{
+			if (glloader_GL_VERSION_4_3() || glloader_GL_KHR_debug())
+			{
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback(&DebugOutputProc, nullptr);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+			}
+			else if (glloader_GL_ARB_debug_output())
+			{
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+				glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_ARB, 0, nullptr, GL_TRUE);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_ARB, 0, nullptr, GL_TRUE);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_ARB, 0, nullptr, GL_FALSE);
+			}
+		}
 
 		win->Attach(FrameBuffer::Attachment::Color0,
 			MakeSharedPtr<OGLScreenRenderTargetView>(win->Width(), win->Height(), settings.color_fmt));

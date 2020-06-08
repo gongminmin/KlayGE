@@ -73,6 +73,11 @@ namespace KlayGE
 		UINT dxgi_factory_flags = 0;
 
 #ifdef KLAYGE_DEBUG
+		bool const debug_context = true;
+#else
+		bool const debug_context = Context::Instance().Config().graphics_cfg.debug_context;
+#endif
+		if (debug_context)
 		{
 			com_ptr<ID3D12Debug> debug_ctrl;
 			if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12GetDebugInterface(IID_ID3D12Debug, debug_ctrl.put_void())))
@@ -83,7 +88,6 @@ namespace KlayGE
 				dxgi_factory_flags |= DXGI_CREATE_FACTORY_DEBUG;
 			}
 		}
-#endif
 
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 6;

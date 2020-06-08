@@ -330,6 +330,7 @@ namespace KlayGE
 		uint32_t paper_white = 100;
 		uint32_t display_max_luminance = 100;
 		std::vector<std::pair<std::string, std::string>> graphics_options;
+		bool debug_context = false;
 		bool perf_profiler = false;
 		bool location_sensor = false;
 
@@ -648,6 +649,13 @@ namespace KlayGE
 					}
 				}
 			}
+
+			XMLNodePtr debug_context_node = graphics_node->FirstNode("debug_context");
+			attr = debug_context_node->Attrib("value");
+			if (attr)
+			{
+				debug_context = BoolFromStr(attr->ValueString());
+			}
 		}
 
 		std::span<char const *> const available_rfs = available_rfs_array;
@@ -717,6 +725,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.paper_white = paper_white;
 		cfg_.graphics_cfg.display_max_luminance = display_max_luminance;
 		cfg_.graphics_cfg.options = std::move(graphics_options);
+		cfg_.graphics_cfg.debug_context = debug_context;
 
 		cfg_.deferred_rendering = false;
 		cfg_.perf_profiler = perf_profiler;
@@ -929,6 +938,10 @@ namespace KlayGE
 			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
 
 			graphics_node->AppendNode(output_node);
+
+			XMLNodePtr debug_context_node = cfg_doc.AllocNode(XNT_Element, "debug_context");
+			debug_context_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.debug_context));
+			graphics_node->AppendNode(debug_context_node);
 		}
 		root->AppendNode(graphics_node);
 

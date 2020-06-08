@@ -49,7 +49,6 @@
 
 namespace
 {
-#ifndef KLAYGE_SHIP
 	char const * DebugSourceString(GLenum value)
 	{
 		char const * ret;
@@ -159,7 +158,6 @@ namespace
 			<< "severity: " << DebugSeverityString(severity) << "; "
 			<< "message: " << message << std::endl;
 	}
-#endif
 }
 
 namespace KlayGE
@@ -220,28 +218,34 @@ namespace KlayGE
 		Context::Instance().AppInstance().MainWnd()->BindListeners();
 #endif
 
-#ifndef KLAYGE_SHIP
-		if (glloader_GLES_VERSION_3_2())
-		{
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(&DebugOutputProc, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-		}
-		else if (glloader_GLES_KHR_debug())
-		{
-			glEnable(GL_DEBUG_OUTPUT_KHR);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
-			glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
-		}
+#ifdef KLAYGE_DEBUG
+		bool const debug_context = true;
+#else
+		bool const debug_context = settings.debug_context;
 #endif
+		if (debug_context)
+		{
+			if (glloader_GLES_VERSION_3_2())
+			{
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback(&DebugOutputProc, nullptr);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+			}
+			else if (glloader_GLES_KHR_debug())
+			{
+				glEnable(GL_DEBUG_OUTPUT_KHR);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+				glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
+			}
+		}
 
 #if defined(KLAYGE_PLATFORM_IOS)
 		win->Attach(FrameBuffer::ATT_Color0,

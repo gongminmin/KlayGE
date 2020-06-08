@@ -304,9 +304,15 @@ namespace KlayGE
 		if (glloader_WGL_ARB_create_context())
 		{
 			int flags = 0;
-#ifndef KLAYGE_SHIP
-			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+#ifdef KLAYGE_DEBUG
+			bool const debug_context = true;
+#else
+			bool const debug_context = settings.debug_context;
 #endif
+			if (debug_context)
+			{
+				flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+			}
 
 			int attribs[] =
 			{
