@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Window.hpp>
@@ -24,9 +23,10 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "ParticleEditor.hpp"
@@ -89,7 +89,7 @@ namespace
 		{
 			switch (type)
 			{
-			case PT_OpaqueGBufferMRT:
+			case PT_OpaqueGBuffer:
 				technique_ = depth_tech_;
 				break;
 
@@ -162,7 +162,7 @@ void ParticleEditorApp::OnCreate()
 
 	scene_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	scene_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
@@ -170,12 +170,12 @@ void ParticleEditorApp::OnCreate()
 	else
 	{
 		scene_depth_buffer_ = rf.MakeFrameBuffer();
-		scene_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+		scene_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("ParticleEditor.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
@@ -334,26 +334,26 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	DepthStencilViewPtr ds_view;
 	if (depth_texture_support_)
 	{
-		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 
 		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		ds_view = rf.Make2DDsv(scene_ds_tex_, 0, 1, 0);
 
-		depth_to_linear_pp_->InputPin(0, scene_ds_tex_);
-		depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
+		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(scene_ds_tex_));
+		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(scene_depth_tex_, 0, 1, 0));
 	}
 	else
 	{
@@ -366,7 +366,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(ds_view);
 
-	copy_pp_->InputPin(0, scene_tex_);
+	copy_pp_->InputPin(0, rf.MakeTextureSrv(scene_tex_));
 
 	if (ps_)
 	{
@@ -753,7 +753,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read);
-		tex->CopyToTexture(*cpu_tex);
+		tex->CopyToTexture(*cpu_tex, TextureFilter::Point);
 
 		std::vector<uint8_t> data(tex->Width(0) * tex->Height(0) * 4);
 		{
@@ -772,14 +772,14 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 			}
 		}
 
-		auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+		auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		ElementInitData init_data;
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
 		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1, fmt, 1, 0,
-			EAH_GPU_Read | EAH_Immutable, init_data);
+			EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	}
 	else
 	{
@@ -793,7 +793,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	auto const fmt = caps.BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 
 	uint32_t data;
@@ -801,7 +801,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }
@@ -952,7 +952,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
 				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
 
-				terrain_->Pass(PT_OpaqueGBufferMRT);
+				terrain_->Pass(PT_OpaqueGBuffer);
 				terrain_->Visible(true);
 				ps_->RootNode()->Visible(false);
 			}

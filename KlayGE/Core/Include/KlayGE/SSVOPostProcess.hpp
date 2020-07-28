@@ -38,12 +38,12 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SSVOPostProcess : public PostProcess
+	class KLAYGE_CORE_API SSVOPostProcess final : public PostProcess
 	{
 	public:
 		SSVOPostProcess();
 
-		void OnRenderBegin();
+		void OnRenderBegin() override;
 
 	private:
 		RenderEffectParameter* proj_param_;

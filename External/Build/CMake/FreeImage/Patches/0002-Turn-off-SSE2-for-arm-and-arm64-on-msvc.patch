@@ -1,0 +1,25 @@
+From aae17a214dd7d358fbaa35b7c3158dfcbe080c8c Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 10 Sep 2018 21:26:12 -0700
+Subject: [PATCH 2/7] Turn off SSE2 for arm and arm64 on msvc
+
+---
+ Source/OpenEXR/IlmImf/ImfSimd.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/OpenEXR/IlmImf/ImfSimd.h b/Source/OpenEXR/IlmImf/ImfSimd.h
+index 09b1042c..827ad5d3 100644
+--- a/Source/OpenEXR/IlmImf/ImfSimd.h
++++ b/Source/OpenEXR/IlmImf/ImfSimd.h
+@@ -44,7 +44,7 @@
+ 
+ 
+ // GCC and Visual Studio SSE2 compiler flags
+-#if defined __SSE2__ || (_MSC_VER >= 1300 && !_M_CEE_PURE)
++#if defined __SSE2__ || (_MSC_VER >= 1300 && !_M_CEE_PURE && !_M_ARM && !_M_ARM64)
+     #define IMF_HAVE_SSE2 1
+ #endif
+ 
+-- 
+2.17.1.windows.2
+

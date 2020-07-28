@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Show.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
@@ -22,8 +21,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "VectorTex.hpp"
@@ -43,21 +43,10 @@ namespace
 			technique_ = effect_->TechniqueByName("Object");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
-
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -129,7 +118,7 @@ void VectorTexApp::OnCreate()
 
 	checked_cast<RenderTeapot&>(*model_->Mesh(0)).VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("VectorTex.uiml"));
 }
 
 void VectorTexApp::OnResize(uint32_t width, uint32_t height)

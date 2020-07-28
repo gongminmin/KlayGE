@@ -29,13 +29,13 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable : 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
 #endif
-#include <windows.system.display.h>
-#include <windows.ui.core.h>
-#if defined(KLAYGE_COMPILER_MSVC)
+#include <winrt/Windows.System.Display.h>
+#include <winrt/Windows.UI.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -62,7 +62,7 @@ OBJC_CLASS(NSView);
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Window : boost::noncopyable
+	class KLAYGE_CORE_API Window final : boost::noncopyable
 	{
 	public:
 		enum WindowRotation
@@ -84,23 +84,23 @@ namespace KlayGE
 			return wnd_;
 		}
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-		void SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const& window);
+		void SetWindow(winrt::Windows::UI::Core::CoreWindow const& window);
 
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> GetWindow() const
+		winrt::Windows::UI::Core::CoreWindow GetWindow() const
 		{
 			return wnd_;
 		}
 
 		void OnActivated();
-		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
-		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
+		void OnSizeChanged(winrt::Windows::UI::Core::WindowSizeChangedEventArgs const& args);
+		void OnVisibilityChanged(winrt::Windows::UI::Core::VisibilityChangedEventArgs const& args);
 		void OnClosed();
-		void OnKeyDown(ABI::Windows::UI::Core::IKeyEventArgs* args);
-		void OnKeyUp(ABI::Windows::UI::Core::IKeyEventArgs* args);
-		void OnPointerPressed(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerReleased(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerMoved(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerWheelChanged(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnKeyDown(winrt::Windows::UI::Core::KeyEventArgs const& args);
+		void OnKeyUp(winrt::Windows::UI::Core::KeyEventArgs const& args);
+		void OnPointerPressed(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerReleased(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerMoved(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerWheelChanged(winrt::Windows::UI::Core::PointerEventArgs const& args);
 		void OnDpiChanged();
 		void OnOrientationChanged();
 		void OnDisplayContentsInvalidated();
@@ -132,7 +132,7 @@ namespace KlayGE
 		void CreateGLESView();
 		static void PumpEvents();
 		void FlushBuffer();
-		uint2 GetNSViewSize();
+		uint2 GetNSViewSize() const;
 		void* NSView()
 		{
 			return ns_view_;
@@ -141,7 +141,7 @@ namespace KlayGE
 		static void PumpEvents();
 		void CreateColorRenderBuffer(ElementFormat pf);
 		void FlushBuffer();
-		uint2 GetGLKViewSize();
+		uint2 GetGLKViewSize() const;
 #endif
 
 		int32_t Left() const
@@ -403,8 +403,8 @@ namespace KlayGE
 		HWND wnd_;
 		WNDPROC default_wnd_proc_;
 #else
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		std::shared_ptr<ABI::Windows::System::Display::IDisplayRequest> disp_request_;
+		winrt::Windows::UI::Core::CoreWindow wnd_{nullptr};
+		winrt::Windows::System::Display::DisplayRequest disp_request_{ nullptr };
 		std::array<uint32_t, 16> pointer_id_map_;
 		bool full_screen_;
 #endif

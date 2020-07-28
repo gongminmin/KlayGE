@@ -5,7 +5,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/InfTerrain.hpp>
 
 #include <vector>

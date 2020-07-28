@@ -1,0 +1,554 @@
+From e11cdf1c2f2e3b4d6fbaee0fe0f371120a4337cc Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 10 Sep 2018 21:23:12 -0700
+Subject: [PATCH 3/7] Fix some compiling problems on MinGW 7.x
+
+---
+ Source/LibJXR/common/include/guiddef.h        |  8 +++-
+ Source/LibJXR/image/sys/strcodec.c            |  2 +-
+ Source/LibRawLite/internal/dcraw_common.cpp   |  2 +-
+ Source/LibTIFF4/tif_config.h                  |  2 +-
+ .../OpenEXR/IlmImf/ImfOptimizedPixelReading.h |  2 +-
+ Source/OpenEXR/IlmImf/ImfSystemSpecific.h     |  4 ++
+ Source/OpenEXR/Imath/ImathMatrix.h            | 40 +++++++---------
+ Source/OpenEXR/Imath/ImathVec.cpp             | 24 +++++-----
+ Source/OpenEXR/Imath/ImathVec.h               | 48 +++++++++----------
+ 9 files changed, 67 insertions(+), 65 deletions(-)
+
+diff --git a/Source/LibJXR/common/include/guiddef.h b/Source/LibJXR/common/include/guiddef.h
+index 81ef9bae..d769c5cc 100644
+--- a/Source/LibJXR/common/include/guiddef.h
++++ b/Source/LibJXR/common/include/guiddef.h
+@@ -53,6 +53,12 @@ typedef struct _GUID {
+ #endif
+ #endif
+ 
++#if defined(__MINGW32__) && defined(__cplusplus) && (USE___UUIDOF == 0)
++extern "C++" {
++__extension__ template<typename T> const GUID &__mingw_uuidof();
++}
++#endif
++
+ #ifndef FAR
+ #if defined(_WIN32) || defined(__ANSI__)
+ #define FAR
+@@ -62,7 +68,7 @@ typedef struct _GUID {
+ #endif
+ 
+ #ifndef DECLSPEC_SELECTANY
+-#if (_MSC_VER >= 1100)
++#if (_MSC_VER >= 1100) || defined(__MINGW32__)
+ #define DECLSPEC_SELECTANY  __declspec(selectany)
+ #else
+ #define DECLSPEC_SELECTANY
+diff --git a/Source/LibJXR/image/sys/strcodec.c b/Source/LibJXR/image/sys/strcodec.c
+index 972f2d5e..66dcc15d 100644
+--- a/Source/LibJXR/image/sys/strcodec.c
++++ b/Source/LibJXR/image/sys/strcodec.c
+@@ -664,7 +664,7 @@ ERR detach_SB(SimpleBitIO* pSB)
+ //================================================================
+ // Memory access functions
+ //================================================================
+-#if (defined(WIN32) && !defined(UNDER_CE) && (!defined(__MINGW32__) || defined(__MINGW64_TOOLCHAIN__))) || (defined(UNDER_CE) && defined(_ARM_))
++#if (defined(WIN32) && !defined(UNDER_CE)) || (defined(UNDER_CE) && defined(_ARM_))
+ // WinCE ARM and Desktop x86
+ #else
+ // other platform
+diff --git a/Source/LibRawLite/internal/dcraw_common.cpp b/Source/LibRawLite/internal/dcraw_common.cpp
+index 29cc72fa..8222bcdd 100644
+--- a/Source/LibRawLite/internal/dcraw_common.cpp
++++ b/Source/LibRawLite/internal/dcraw_common.cpp
+@@ -5573,7 +5573,7 @@ void CLASS lin_interpolate()
+  */
+ void CLASS vng_interpolate()
+ {
+-  static const signed char *cp,
++  static const int *cp,
+       terms[] = {-2, -2, +0, -1, 0, 0x01, -2, -2, +0, +0, 1, 0x01, -2, -1, -1, +0, 0, 0x01, -2, -1, +0, -1, 0, 0x02,
+                  -2, -1, +0, +0, 0, 0x03, -2, -1, +0, +1, 1, 0x01, -2, +0, +0, -1, 0, 0x06, -2, +0, +0, +0, 1, 0x02,
+                  -2, +0, +0, +1, 0, 0x03, -2, +1, -1, +0, 0, 0x04, -2, +1, +0, -1, 1, 0x04, -2, +1, +0, +0, 0, 0x06,
+diff --git a/Source/LibTIFF4/tif_config.h b/Source/LibTIFF4/tif_config.h
+index 8969f093..6d5c0458 100644
+--- a/Source/LibTIFF4/tif_config.h
++++ b/Source/LibTIFF4/tif_config.h
+@@ -85,7 +85,7 @@ If your big endian system isn't being detected, add an OS specific check
+ 
+ #ifdef _WIN32
+ /* Visual Studio 2015 / VC 14 / MSVC 19.00 finally has snprintf() */
+-#if defined(_MSC_VER) && (_MSC_VER < 1900)
++#if defined(_MSC_VER) && (_MSC_VER < 1900) && !defined(__MINGW32__)
+ #define snprintf _snprintf
+ #endif // _MSC_VER
+ #define lfind _lfind
+diff --git a/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h b/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
+index 1c83497a..b291fd7f 100644
+--- a/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
++++ b/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
+@@ -70,7 +70,7 @@ EXR_FORCEINLINE
+ bool
+ isPointerSSEAligned (const void* EXR_RESTRICT pPointer)
+ {
+-    unsigned long trailingBits = ((unsigned long)pPointer) & 15;
++    unsigned long trailingBits = ((unsigned long long)pPointer) & 15;
+     return trailingBits == 0;
+ }
+ 
+diff --git a/Source/OpenEXR/IlmImf/ImfSystemSpecific.h b/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
+index c0261a7c..0c8f6753 100644
+--- a/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
++++ b/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
+@@ -63,7 +63,11 @@ static bool GLOBAL_SYSTEM_LITTLE_ENDIAN =
+ static void* EXRAllocAligned(size_t size, size_t alignment)
+ {
+     void* ptr = 0;
++#ifdef _WIN32
++    ptr = _mm_malloc(size, alignment);
++#else
+     posix_memalign(&ptr, alignment, size);
++#endif
+     return ptr;
+ }
+ 
+diff --git a/Source/OpenEXR/Imath/ImathMatrix.h b/Source/OpenEXR/Imath/ImathMatrix.h
+index 3e96c2fd..00fbfbb6 100644
+--- a/Source/OpenEXR/Imath/ImathMatrix.h
++++ b/Source/OpenEXR/Imath/ImathMatrix.h
+@@ -262,17 +262,13 @@ template <class T> class Matrix33
+     // 
+     //------------------------------------------------------------
+ 
+-    const Matrix33 &    invert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++    const Matrix33 &    invert (bool singExc = false);
+ 
+-    Matrix33<T>         inverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++    Matrix33<T>         inverse (bool singExc = false) const;
+ 
+-    const Matrix33 &    gjInvert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++    const Matrix33 &    gjInvert (bool singExc = false);
+ 
+-    Matrix33<T>         gjInverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++    Matrix33<T>         gjInverse (bool singExc = false) const;
+ 
+ 
+     //------------------------------------------------
+@@ -636,17 +632,13 @@ template <class T> class Matrix44
+     // 
+     //------------------------------------------------------------
+ 
+-    const Matrix44 &    invert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++    const Matrix44 &    invert (bool singExc = false);
+ 
+-    Matrix44<T>         inverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++    Matrix44<T>         inverse (bool singExc = false) const;
+ 
+-    const Matrix44 &    gjInvert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++    const Matrix44 &    gjInvert (bool singExc = false);
+ 
+-    Matrix44<T>         gjInverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++    Matrix44<T>         gjInverse (bool singExc = false) const;
+ 
+ 
+     //------------------------------------------------
+@@ -1430,7 +1422,7 @@ Matrix33<T>::transposed () const
+ 
+ template <class T>
+ const Matrix33<T> &
+-Matrix33<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::gjInvert (bool singExc)
+ {
+     *this = gjInverse (singExc);
+     return *this;
+@@ -1438,7 +1430,7 @@ Matrix33<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix33<T>
+-Matrix33<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::gjInverse (bool singExc) const
+ {
+     int i, j, k;
+     Matrix33 s;
+@@ -1542,7 +1534,7 @@ Matrix33<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ const Matrix33<T> &
+-Matrix33<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::invert (bool singExc)
+ {
+     *this = inverse (singExc);
+     return *this;
+@@ -1550,7 +1542,7 @@ Matrix33<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix33<T>
+-Matrix33<T>::inverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::inverse (bool singExc) const
+ {
+     if (x[0][2] != 0 || x[1][2] != 0 || x[2][2] != 1)
+     {
+@@ -2699,7 +2691,7 @@ Matrix44<T>::transposed () const
+ 
+ template <class T>
+ const Matrix44<T> &
+-Matrix44<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::gjInvert (bool singExc)
+ {
+     *this = gjInverse (singExc);
+     return *this;
+@@ -2707,7 +2699,7 @@ Matrix44<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix44<T>
+-Matrix44<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::gjInverse (bool singExc) const
+ {
+     int i, j, k;
+     Matrix44 s;
+@@ -2811,7 +2803,7 @@ Matrix44<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ const Matrix44<T> &
+-Matrix44<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::invert (bool singExc)
+ {
+     *this = inverse (singExc);
+     return *this;
+@@ -2819,7 +2811,7 @@ Matrix44<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix44<T>
+-Matrix44<T>::inverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::inverse (bool singExc) const
+ {
+     if (x[0][3] != 0 || x[1][3] != 0 || x[2][3] != 0 || x[3][3] != 1)
+         return gjInverse(singExc);
+diff --git a/Source/OpenEXR/Imath/ImathVec.cpp b/Source/OpenEXR/Imath/ImathVec.cpp
+index 5e5b2107..37edc970 100644
+--- a/Source/OpenEXR/Imath/ImathVec.cpp
++++ b/Source/OpenEXR/Imath/ImathVec.cpp
+@@ -149,7 +149,7 @@ Vec2<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec2<short> &
+-Vec2<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -180,7 +180,7 @@ Vec2<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec2<short>
+-Vec2<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -225,7 +225,7 @@ Vec2<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec2<int> &
+-Vec2<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -256,7 +256,7 @@ Vec2<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec2<int>
+-Vec2<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -301,7 +301,7 @@ Vec3<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec3<short> &
+-Vec3<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -332,7 +332,7 @@ Vec3<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec3<short>
+-Vec3<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -377,7 +377,7 @@ Vec3<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec3<int> &
+-Vec3<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -408,7 +408,7 @@ Vec3<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec3<int>
+-Vec3<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -453,7 +453,7 @@ Vec4<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec4<short> &
+-Vec4<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -484,7 +484,7 @@ Vec4<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec4<short>
+-Vec4<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -529,7 +529,7 @@ Vec4<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec4<int> &
+-Vec4<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -560,7 +560,7 @@ Vec4<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec4<int>
+-Vec4<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+diff --git a/Source/OpenEXR/Imath/ImathVec.h b/Source/OpenEXR/Imath/ImathVec.h
+index fb859ebd..6f4e82a3 100644
+--- a/Source/OpenEXR/Imath/ImathVec.h
++++ b/Source/OpenEXR/Imath/ImathVec.h
+@@ -225,11 +225,11 @@ template <class T> class Vec2
+     T			length2 () const;
+ 
+     const Vec2 &	normalize ();           // modifies *this
+-    const Vec2 &	normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec2 &	normalizeExc ();
+     const Vec2 &	normalizeNonNull ();
+ 
+     Vec2<T>		normalized () const;	// does not modify *this
+-    Vec2<T>		normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec2<T>		normalizedExc () const;
+     Vec2<T>		normalizedNonNull () const;
+ 
+ 
+@@ -437,11 +437,11 @@ template <class T> class Vec3
+     T			length2 () const;
+ 
+     const Vec3 &	normalize ();           // modifies *this
+-    const Vec3 &	normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec3 &	normalizeExc ();
+     const Vec3 &	normalizeNonNull ();
+ 
+     Vec3<T>		normalized () const;	// does not modify *this
+-    Vec3<T>		normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec3<T>		normalizedExc () const;
+     Vec3<T>		normalizedNonNull () const;
+ 
+ 
+@@ -619,11 +619,11 @@ template <class T> class Vec4
+     T               length2 () const;
+ 
+     const Vec4 &    normalize ();           // modifies *this
+-    const Vec4 &    normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec4 &    normalizeExc ();
+     const Vec4 &    normalizeNonNull ();
+ 
+     Vec4<T>         normalized () const;	// does not modify *this
+-    Vec4<T>         normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec4<T>         normalizedExc () const;
+     Vec4<T>         normalizedNonNull () const;
+ 
+ 
+@@ -711,7 +711,7 @@ template <> const Vec2<short> &
+ Vec2<short>::normalize ();
+ 
+ template <> const Vec2<short> &
+-Vec2<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec2<short>::normalizeExc ();
+ 
+ template <> const Vec2<short> &
+ Vec2<short>::normalizeNonNull ();
+@@ -720,7 +720,7 @@ template <> Vec2<short>
+ Vec2<short>::normalized () const;
+ 
+ template <> Vec2<short>
+-Vec2<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec2<short>::normalizedExc () const;
+ 
+ template <> Vec2<short>
+ Vec2<short>::normalizedNonNull () const;
+@@ -735,7 +735,7 @@ template <> const Vec2<int> &
+ Vec2<int>::normalize ();
+ 
+ template <> const Vec2<int> &
+-Vec2<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec2<int>::normalizeExc ();
+ 
+ template <> const Vec2<int> &
+ Vec2<int>::normalizeNonNull ();
+@@ -744,7 +744,7 @@ template <> Vec2<int>
+ Vec2<int>::normalized () const;
+ 
+ template <> Vec2<int>
+-Vec2<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec2<int>::normalizedExc () const;
+ 
+ template <> Vec2<int>
+ Vec2<int>::normalizedNonNull () const;
+@@ -759,7 +759,7 @@ template <> const Vec3<short> &
+ Vec3<short>::normalize ();
+ 
+ template <> const Vec3<short> &
+-Vec3<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec3<short>::normalizeExc ();
+ 
+ template <> const Vec3<short> &
+ Vec3<short>::normalizeNonNull ();
+@@ -768,7 +768,7 @@ template <> Vec3<short>
+ Vec3<short>::normalized () const;
+ 
+ template <> Vec3<short>
+-Vec3<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec3<short>::normalizedExc () const;
+ 
+ template <> Vec3<short>
+ Vec3<short>::normalizedNonNull () const;
+@@ -783,7 +783,7 @@ template <> const Vec3<int> &
+ Vec3<int>::normalize ();
+ 
+ template <> const Vec3<int> &
+-Vec3<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec3<int>::normalizeExc ();
+ 
+ template <> const Vec3<int> &
+ Vec3<int>::normalizeNonNull ();
+@@ -792,7 +792,7 @@ template <> Vec3<int>
+ Vec3<int>::normalized () const;
+ 
+ template <> Vec3<int>
+-Vec3<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec3<int>::normalizedExc () const;
+ 
+ template <> Vec3<int>
+ Vec3<int>::normalizedNonNull () const;
+@@ -806,7 +806,7 @@ template <> const Vec4<short> &
+ Vec4<short>::normalize ();
+ 
+ template <> const Vec4<short> &
+-Vec4<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec4<short>::normalizeExc ();
+ 
+ template <> const Vec4<short> &
+ Vec4<short>::normalizeNonNull ();
+@@ -815,7 +815,7 @@ template <> Vec4<short>
+ Vec4<short>::normalized () const;
+ 
+ template <> Vec4<short>
+-Vec4<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec4<short>::normalizedExc () const;
+ 
+ template <> Vec4<short>
+ Vec4<short>::normalizedNonNull () const;
+@@ -830,7 +830,7 @@ template <> const Vec4<int> &
+ Vec4<int>::normalize ();
+ 
+ template <> const Vec4<int> &
+-Vec4<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec4<int>::normalizeExc ();
+ 
+ template <> const Vec4<int> &
+ Vec4<int>::normalizeNonNull ();
+@@ -839,7 +839,7 @@ template <> Vec4<int>
+ Vec4<int>::normalized () const;
+ 
+ template <> Vec4<int>
+-Vec4<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec4<int>::normalizedExc () const;
+ 
+ template <> Vec4<int>
+ Vec4<int>::normalizedNonNull () const;
+@@ -1209,7 +1209,7 @@ Vec2<T>::normalize ()
+ 
+ template <class T>
+ const Vec2<T> &
+-Vec2<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -1246,7 +1246,7 @@ Vec2<T>::normalized () const
+ 
+ template <class T>
+ Vec2<T>
+-Vec2<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+@@ -1701,7 +1701,7 @@ Vec3<T>::normalize ()
+ 
+ template <class T>
+ const Vec3<T> &
+-Vec3<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -1740,7 +1740,7 @@ Vec3<T>::normalized () const
+ 
+ template <class T>
+ Vec3<T>
+-Vec3<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+@@ -2106,7 +2106,7 @@ Vec4<T>::normalize ()
+ 
+ template <class T>
+ const Vec4<T> &
+-Vec4<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -2147,7 +2147,7 @@ Vec4<T>::normalized () const
+ 
+ template <class T>
+ Vec4<T>
+-Vec4<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+-- 
+2.17.1.windows.2
+

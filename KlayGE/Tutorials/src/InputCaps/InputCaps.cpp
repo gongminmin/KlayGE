@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -19,8 +18,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "InputCaps.hpp"
@@ -211,14 +211,14 @@ namespace
 		InputActionDefine(MouseMsg, MS_Z),
 		InputActionDefine(MouseMsg, MS_AnyButton),
 
-		InputActionDefine(JoystickMsg, JS_XPos),
-		InputActionDefine(JoystickMsg, JS_YPos),
-		InputActionDefine(JoystickMsg, JS_ZPos),
-		InputActionDefine(JoystickMsg, JS_XRot),
-		InputActionDefine(JoystickMsg, JS_YRot),
-		InputActionDefine(JoystickMsg, JS_ZRot),
-		InputActionDefine(JoystickMsg, JS_Slider0),
-		InputActionDefine(JoystickMsg, JS_Slider1),
+		InputActionDefine(JoystickMsg, JS_LeftThumbX),
+		InputActionDefine(JoystickMsg, JS_LeftThumbY),
+		InputActionDefine(JoystickMsg, JS_LeftThumbZ),
+		InputActionDefine(JoystickMsg, JS_RightThumbX),
+		InputActionDefine(JoystickMsg, JS_RightThumbY),
+		InputActionDefine(JoystickMsg, JS_RightThumbZ),
+		InputActionDefine(JoystickMsg, JS_LeftTrigger),
+		InputActionDefine(JoystickMsg, JS_RightTrigger),
 		InputActionDefine(JoystickMsg, JS_AnyButton),
 
 		InputActionDefine(TouchMsg, TS_Pan),
@@ -275,7 +275,16 @@ void InputCaps::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("InputCaps.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("InputCaps.uiml"));
+
+	for (size_t i = 0; i < inputEngine.NumDevices(); ++i)
+	{
+		auto const& device = inputEngine.Device(i);
+		if (device->Type() == InputEngine::IDT_Joystick)
+		{
+			joystick_ = checked_pointer_cast<InputJoystick>(device);
+		}
+	}
 }
 
 void InputCaps::OnResize(uint32_t width, uint32_t height)
@@ -324,9 +333,9 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 		{
 			InputJoystickActionParamPtr param = checked_pointer_cast<InputJoystickActionParam>(action.second);
 			std::wostringstream stream;
-			stream << param->pos.x() << ' ' << param->pos.y() << ' ' << param->pos.z() << ' ';
-			stream << param->rot.x() << ' ' << param->rot.y() << ' ' << param->rot.z() << ' ';
-			stream << param->slider.x() << ' ' << param->slider.y() << ' ';
+			stream << param->thumbs[0].x() << ' ' << param->thumbs[0].y() << ' ' << param->thumbs[0].z() << ' ';
+			stream << param->thumbs[1].x() << ' ' << param->thumbs[1].y() << ' ' << param->thumbs[1].z() << ' ';
+			stream << param->triggers[0] << ' ' << param->triggers[1] << ' ';
 			for (uint32_t i = 0; i < 16; ++ i)
 			{
 				if (param->buttons_state & (1UL << i))
@@ -335,6 +344,14 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 				}
 			}
 			joystick_str_ = stream.str();
+
+			if (joystick_)
+			{
+				for (uint32_t i = 0; (i < joystick_->NumVibrationMotors()) && (i < 2); ++i)
+				{
+					joystick_->VibrationMotorSpeed(i, param->triggers[i]);
+				}
+			}
 		}
 		break;
 

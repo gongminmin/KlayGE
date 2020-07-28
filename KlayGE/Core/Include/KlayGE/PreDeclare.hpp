@@ -72,7 +72,7 @@ namespace KlayGE
 	typedef std::shared_ptr<Font> FontPtr;
 	class RenderEngine;
 	struct RenderSettings;
-	struct RenderMaterial;
+	class RenderMaterial;
 	typedef std::shared_ptr<RenderMaterial> RenderMaterialPtr;
 	class Renderable;
 	typedef std::shared_ptr<Renderable> RenderablePtr;
@@ -102,8 +102,10 @@ namespace KlayGE
 	class RenderPass;
 	typedef std::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectConstantBuffer;
+	typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 	class RenderEffectParameter;
 	class RenderVariable;
+	class RenderEffectStructType;
 	class RenderEffectAnnotation;
 	typedef std::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 	struct RasterizerStateDesc;
@@ -166,13 +168,15 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderLayout> RenderLayoutPtr;
 	class RenderGraphicsBuffer;
 	typedef std::shared_ptr<RenderGraphicsBuffer> RenderGraphicsBufferPtr;
-	struct Viewport;
+	class Viewport;
 	typedef std::shared_ptr<Viewport> ViewportPtr;
 	class RenderFactory;
 	class RenderModel;
 	typedef std::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
 	typedef std::shared_ptr<StaticMesh> StaticMeshPtr;
+	class JointComponent;
+	typedef std::shared_ptr<JointComponent> JointComponentPtr;
 	class SkinnedModel;
 	typedef std::shared_ptr<SkinnedModel> SkinnedModelPtr;
 	class SkinnedMesh;
@@ -382,6 +386,9 @@ namespace KlayGE
 	class ShowEngine;
 	class ShowFactory;
 
+	class ScriptVariable;
+	using ScriptVariablePtr = std::shared_ptr<ScriptVariable>;
+	class ScriptModule;
 	class ScriptEngine;
 	class ScriptFactory;
 

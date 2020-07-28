@@ -24,7 +24,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
@@ -40,6 +41,7 @@
 #include <KFL/Hash.hpp>
 
 #include <istream>
+#include <iterator>
 #include <string>
 
 #include <KlayGE/CameraController.hpp>
@@ -52,9 +54,7 @@ namespace KlayGE
 	{
 	}
 
-	CameraController::~CameraController()
-	{
-	}
+	CameraController::~CameraController() noexcept = default;
 
 	void CameraController::Scalers(float rotationScaler, float moveScaler)
 	{
@@ -793,7 +793,7 @@ namespace KlayGE
 		camera_->DirtyTransforms();
 	}
 
-	CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res)
+	CameraPathControllerPtr LoadCameraPath(ResIdentifier& res)
 	{
 		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
 
@@ -919,23 +919,17 @@ namespace KlayGE
 
 				{
 					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string eye_str = std::to_string(eye_ctrl_pt.x())
-						+ ' ' + std::to_string(eye_ctrl_pt.y())
-						+ ' ' + std::to_string(eye_ctrl_pt.z());
+					std::string const eye_str = std::format("{} {} {}", eye_ctrl_pt.x(), eye_ctrl_pt.y(), eye_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("eye", eye_str));
 				}
 				{
 					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
-					std::string target_str = std::to_string(target_ctrl_pt.x())
-						+ ' ' + std::to_string(target_ctrl_pt.y())
-						+ ' ' + std::to_string(target_ctrl_pt.z());
+					std::string const target_str = std::format("{} {} {}", target_ctrl_pt.x(), target_ctrl_pt.y(), target_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("target", target_str));
 				}
 				{
 					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string up_str = std::to_string(up_ctrl_pt.x())
-						+ ' ' + std::to_string(up_ctrl_pt.y())
-						+ ' ' + std::to_string(up_ctrl_pt.z());
+					std::string const up_str = std::format("{} {} {}", up_ctrl_pt.x(), up_ctrl_pt.y(), up_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("up", up_str));
 				}
 

@@ -12,38 +12,20 @@ SET(PYTHON_SE_HEADER_FILES
 SOURCE_GROUP("Source Files" FILES ${PYTHON_SE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${PYTHON_SE_HEADER_FILES})
 
-ADD_DEFINITIONS(-DPy_NO_ENABLE_SHARED)
-
-if(KLAYGE_PLATFORM_WINDOWS)
-	if(KLAYGE_COMPILER_MSVC)
-		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/Python/PC)
-	else()
-		set(PYCONFIG_BUILD_DIR ${KLAYGE_PROJECT_DIR}/../External/python-cmake-buildsystem/cmake/config-mingw)
-	endif()
-else()
-	set(PYCONFIG_BUILD_DIR ${PROJECT_BINARY_DIR}/External/Python/python/bin)
-endif()
-
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/Include)
-INCLUDE_DIRECTORIES(${PYCONFIG_BUILD_DIR})
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Plugins/Include)
-IF(KLAYGE_PLATFORM_ANDROID)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue)
-ENDIF()
-LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/lib/Python/${KLAYGE_PLATFORM_NAME})
-LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/lib/${KLAYGE_PLATFORM_NAME})
-IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
-	LINK_DIRECTORIES(${KLAYGE_BIN_DIR})
-ELSE()
-	LINK_DIRECTORIES(${KLAYGE_OUTPUT_DIR})
-ENDIF()
-
 ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${PYTHON_SE_SOURCE_FILES} ${PYTHON_SE_HEADER_FILES}
 )
+
+target_compile_definitions(${LIB_NAME}
+	PRIVATE
+		-DPy_NO_ENABLE_SHARED
+)
+
+target_include_directories(${LIB_NAME}
+	PRIVATE
+		${KLAYGE_PROJECT_DIR}/Plugins/Include
+)
+
 ADD_DEPENDENCIES(${LIB_NAME} ${KLAYGE_CORELIB_NAME} libpython-static)
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
@@ -70,19 +52,25 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
 
-set(libpython_target_libraries "")
-if(KLAYGE_PLATFORM_WINDOWS)
-	list(APPEND libpython_target_libraries ws2_32) # Required by signalmodule
-	list(APPEND libpython_target_libraries version) # Required by sysmodule
-	list(APPEND libpython_target_libraries shlwapi) # Required by PC/getpathp
-endif()
-
-TARGET_LINK_LIBRARIES(${LIB_NAME}
-	debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-	debug KFL${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-	debug python${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized python${KLAYGE_OUTPUT_SUFFIX}
-	${libpython_target_libraries}
-	${ZLIB_LIBRARIES}
+target_link_libraries(${LIB_NAME}
+	PRIVATE
+		${KLAYGE_CORELIB_NAME}
+		libpython-static
 )
+if(KLAYGE_PLATFORM_WINDOWS)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			ws2_32 # Required by signalmodule
+			version # Required by sysmodule
+			shlwapi # Required by PC/getpathp
+	)
+
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_link_libraries(${LIB_NAME}
+			PRIVATE
+				advapi32 # Required by RegKey*
+		)
+	endif()
+endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

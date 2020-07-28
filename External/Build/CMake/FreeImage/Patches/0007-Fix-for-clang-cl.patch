@@ -1,0 +1,25 @@
+From 31e157369ec75ab89e4d2b58e43e82a728447a0e Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 25 Feb 2020 22:01:29 -0800
+Subject: [PATCH 7/7] Fix for clang-cl
+
+---
+ Source/LibWebP/src/dsp/dsp.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/LibWebP/src/dsp/dsp.h b/Source/LibWebP/src/dsp/dsp.h
+index adf75554..6491950f 100644
+--- a/Source/LibWebP/src/dsp/dsp.h
++++ b/Source/LibWebP/src/dsp/dsp.h
+@@ -60,7 +60,7 @@ extern "C" {
+ #endif
+ 
+ #if defined(_MSC_VER) && _MSC_VER >= 1500 && \
+-    (defined(_M_X64) || defined(_M_IX86))
++    (defined(_M_X64) || defined(_M_IX86)) && !defined(__clang__)
+ #define WEBP_MSC_SSE41  // Visual C++ SSE4.1 targets
+ #endif
+ 
+-- 
+2.17.1.windows.2
+

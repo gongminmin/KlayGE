@@ -101,7 +101,7 @@ namespace KlayGE
 		} while(result == kCFRunLoopRunHandledSource);
 	}
 
-	uint2 Window::GetGLKViewSize()
+	uint2 Window::GetGLKViewSize() const
 	{
 		CGRect rect = eagl_view_.frame;
 		return KlayGE::uint2(rect.size.width, rect.size.height);

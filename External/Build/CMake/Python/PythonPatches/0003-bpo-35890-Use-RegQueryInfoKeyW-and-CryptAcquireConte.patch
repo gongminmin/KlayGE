@@ -1,0 +1,60 @@
+From 587379b6425f4d530aed30d4b6d980134c022051 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 18 May 2020 09:50:03 -0700
+Subject: [PATCH 3/7] bpo-35890: Use RegQueryInfoKeyW and CryptAcquireContextW
+ explicitly (GH-19974)
+
+---
+ PC/getpathp.c           | 2 +-
+ PC/winreg.c             | 6 +++---
+ Python/bootstrap_hash.c | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/PC/getpathp.c b/PC/getpathp.c
+index 04f24d986f..8f9056db99 100644
+--- a/PC/getpathp.c
++++ b/PC/getpathp.c
+@@ -403,7 +403,7 @@ getpythonregpath(HKEY keyBase, int skipcore)
+         goto done;
+     }
+     /* Find out how big our core buffer is, and how many subkeys we have */
+-    rc = RegQueryInfoKey(newKey, NULL, NULL, NULL, &numKeys, NULL, NULL,
++    rc = RegQueryInfoKeyW(newKey, NULL, NULL, NULL, &numKeys, NULL, NULL,
+                     NULL, NULL, &dataSize, NULL, NULL);
+     if (rc!=ERROR_SUCCESS) {
+         goto done;
+diff --git a/PC/winreg.c b/PC/winreg.c
+index 5dff7deadf..caad18e045 100644
+--- a/PC/winreg.c
++++ b/PC/winreg.c
+@@ -1451,9 +1451,9 @@ winreg_QueryInfoKey_impl(PyObject *module, HKEY key)
+     if (PySys_Audit("winreg.QueryInfoKey", "n", (Py_ssize_t)key) < 0) {
+         return NULL;
+     }
+-    if ((rc = RegQueryInfoKey(key, NULL, NULL, 0, &nSubKeys, NULL, NULL,
+-                              &nValues,  NULL,  NULL, NULL, &ft))
+-                              != ERROR_SUCCESS) {
++    if ((rc = RegQueryInfoKeyW(key, NULL, NULL, 0, &nSubKeys, NULL, NULL,
++                               &nValues,  NULL,  NULL, NULL, &ft))
++                               != ERROR_SUCCESS) {
+         return PyErr_SetFromWindowsErrWithFunction(rc, "RegQueryInfoKey");
+     }
+     li.LowPart = ft.dwLowDateTime;
+diff --git a/Python/bootstrap_hash.c b/Python/bootstrap_hash.c
+index 43f5264d86..eb2b6d08d8 100644
+--- a/Python/bootstrap_hash.c
++++ b/Python/bootstrap_hash.c
+@@ -38,8 +38,8 @@ static int
+ win32_urandom_init(int raise)
+ {
+     /* Acquire context */
+-    if (!CryptAcquireContext(&hCryptProv, NULL, NULL,
+-                             PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
++    if (!CryptAcquireContextW(&hCryptProv, NULL, NULL,
++                              PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+         goto error;
+ 
+     return 0;
+-- 
+2.17.1.windows.2
+

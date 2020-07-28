@@ -1,11 +1,11 @@
 /**
- * @file iterator.hpp
+ * @file format.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
  *
- * This source file is part of Dilithium
- * For the latest info, see https://github.com/gongminmin/Dilithium
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
  *
@@ -28,30 +28,50 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_CXX17_ITERATOR_HPP
-#define _KFL_CXX17_ITERATOR_HPP
+#ifndef KFL_CXX2A_FORMAT_HPP
+#define KFL_CXX2A_FORMAT_HPP
 
 #pragma once
 
 #include <KFL/Config.hpp>
 
-#if defined(KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT)
-	#include <iterator>
+#if defined(KLAYGE_CXX2A_LIBRARY_FORMAT_SUPPORT)
+	#include <format>
 #else
+	#include <fmt/format.h>
 	namespace std
 	{
-		template <typename T>
-		inline constexpr size_t size(T const & t)
-		{
-			return t.size();
-		}
+		using fmt::format;
+		using fmt::format_to;
+		using fmt::format_to_n;
+		using fmt::formatted_size;
 
-		template <typename T, size_t N>
-		inline constexpr size_t size(T const (&)[N]) noexcept
-		{
-			return N;
-		}
+		using fmt::vformat;
+		using fmt::vformat_to;
+
+		using fmt::basic_format_arg;
+
+		using fmt::formatter;
+
+		using fmt::basic_format_parse_context;
+		using fmt::format_parse_context;
+		using fmt::wformat_parse_context;
+
+		using fmt::basic_format_context;
+		using fmt::format_context;
+		using fmt::wformat_context;
+
+		using fmt::visit_format_arg;
+
+		using fmt::make_format_args;
+
+		using fmt::basic_format_args;
+		using fmt::format_args;
+		using fmt::wformat_args;
+		using fmt::format_args_t;
+
+		using fmt::format_error;
 	}
 #endif
 
-#endif		// _KFL_CXX17_ITERATOR_HPP
+#endif		// KFL_CXX2A_FORMAT_HPP

@@ -126,7 +126,7 @@ float4 MaskPS(float2 texcoord : TEXCOORD0) : SV_Target
 
 	<shader>
 		<![CDATA[
-void CalcProceduralTerrainNormalColor(float3 world_pos, float debug_patch,
+void CalcProceduralTerrainNormalColor(float3 world_pos, float4x4 model_view, float debug_patch,
 		out float3 normal, out float3 color)
 {
 	normal = CalcTerrainNormal(world_pos);
@@ -145,50 +145,79 @@ void CalcProceduralTerrainNormalColor(float3 world_pos, float debug_patch,
 	normal = normalize(mul(normal, (float3x3)model_view));
 }
 
-void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1,
-				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+void GBufferProceduralTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1,
+				uint rt_index : SV_RenderTargetArrayIndex,
+				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1, out float4 rt2 : SV_Target2)
 {
-	float3 normal, color;
-	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
+	KlayGECameraInfo camera = cameras[rt_index];
+	float4x4 model_view = camera.model_view;
 
-	StoreGBufferMRT(normal, 0, color, 0,
-		rt0, rt1);
+	float3 normal, color;
+	CalcProceduralTerrainNormalColor(world_pos, model_view, debug_patch, normal, color);
+
+	StoreGBuffer(normal, color, 0, 0, 1,
+		rt0, rt1, rt2);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferTessTerrainFillMRTTech">
+	<technique name="GBufferTessTerrainFillTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="GBufferTessTerrainVS()"/>
 			<state name="hull_shader" value="GBufferTessTerrainHS()"/>
 			<state name="domain_shader" value="GBufferTessTerrainDS()"/>
-			<state name="pixel_shader" value="GBufferProceduralTerrainMRTPS()"/>
+			<state name="pixel_shader" value="GBufferProceduralTerrainPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferTessTerrainLineMRTTech" inherit="GBufferTessTerrainFillMRTTech">
+	<technique name="GBufferTessTerrainFillNoVpRtTech" inherit="GBufferTessTerrainFillTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferTerrainNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainLineTech" inherit="GBufferTessTerrainFillTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
-	<technique name="GBufferNoTessTerrainFillMRTTech">
+	<technique name="GBufferTessTerrainLineNoVpRtTech" inherit="GBufferTessTerrainLineTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferTerrainNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainFillTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
-			<state name="pixel_shader" value="GBufferProceduralTerrainMRTPS()"/>
+			<state name="pixel_shader" value="GBufferProceduralTerrainPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferNoTessTerrainLineMRTTech" inherit="GBufferNoTessTerrainFillMRTTech">
+	<technique name="GBufferNoTessTerrainFillNoVpRtTech" inherit="GBufferNoTessTerrainFillTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferTerrainNoVpRtGS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainLineTech" inherit="GBufferNoTessTerrainFillTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
+	<technique name="GBufferNoTessTerrainLineNoVpRtTech" inherit="GBufferNoTessTerrainLineTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferTerrainNoVpRtGS()"/>
+		</pass>
+	</technique>
 
-	<technique name="GenNoTessTerrainReflectiveShadowMapTech" inherit="GBufferNoTessTerrainFillMRTTech">
+	<technique name="GenNoTessTerrainReflectiveShadowMapTech" inherit="GBufferNoTessTerrainFillTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+	<technique name="GenNoTessTerrainReflectiveShadowMapNoVpRtTech" inherit="GenNoTessTerrainReflectiveShadowMapTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="GBufferTerrainNoVpRtGS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -48,31 +48,31 @@
 
 namespace KlayGE
 {
-	class OGLRenderEngine : public RenderEngine
+	class OGLRenderEngine final : public RenderEngine
 	{
 	public:
 		OGLRenderEngine();
-		~OGLRenderEngine();
+		~OGLRenderEngine() override;
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		bool RequiresFlipping() const
+		bool RequiresFlipping() const override
 		{
 			return false;
 		}
 
-		void ForceFlush();
+		void ForceFlush() override;
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
+		TexturePtr const & ScreenDepthStencilTexture() const override;
 
-		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
 		void GetCustomAttrib(std::string_view name, void* value) const override;
 
-		bool FullScreen() const;
-		void FullScreen(bool fs);
+		bool FullScreen() const override;
+		void FullScreen(bool fs) override;
 
-		void AdjustProjectionMatrix(float4x4& proj_mat);
+		void AdjustProjectionMatrix(float4x4& proj_mat) override;
 
 		void ActiveTexture(GLenum tex_unit);
 		void BindTexture(GLuint index, GLuint target, GLuint texture, bool force = false);

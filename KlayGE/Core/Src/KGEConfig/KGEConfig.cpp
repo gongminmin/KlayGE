@@ -11,7 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
@@ -20,6 +21,7 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <commctrl.h>
+#include <iterator>
 #include <sstream>
 #include <string>
 
@@ -175,8 +177,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			{
 				SendMessage(hResCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(buf));
 
-				std::string const res = std::to_string(cfg.graphics_cfg.width) + 'x'
-					+ std::to_string(cfg.graphics_cfg.height) + ' ';
+				std::string const res = std::format("{}x{} ", cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 
 				std::string str;
 				Convert(str, buf);

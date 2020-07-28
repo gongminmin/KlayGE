@@ -38,41 +38,43 @@
 
 namespace KlayGE
 {
-	class D3D12RenderFactory : public RenderFactory
+	class D3D12RenderFactory final : public RenderFactory
 	{
 	public:
 		D3D12RenderFactory();
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+		TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 
-		FrameBufferPtr MakeFrameBuffer();
+		FrameBufferPtr MakeFrameBuffer() override;
 
-		RenderLayoutPtr MakeRenderLayout();
+		RenderLayoutPtr MakeRenderLayout() override;
 
-		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
-		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
-		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
+		GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 
-		QueryPtr MakeOcclusionQuery();
-		QueryPtr MakeConditionalRender();
-		QueryPtr MakeTimerQuery();
+		QueryPtr MakeOcclusionQuery() override;
+		QueryPtr MakeConditionalRender() override;
+		QueryPtr MakeTimerQuery() override;
 		QueryPtr MakeSOStatisticsQuery() override;
 
-		virtual FencePtr MakeFence() override;
+		FencePtr MakeFence() override;
 
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t first_level, uint32_t num_levels) override;
+		ShaderResourceViewPtr MakeTexture2DSrv(TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face,
 			uint32_t first_level, uint32_t num_levels) override;
 		ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) override;
@@ -116,18 +118,18 @@ namespace KlayGE
 		UnorderedAccessViewPtr MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) override;
 
-		ShaderObjectPtr MakeShaderObject();
+		ShaderObjectPtr MakeShaderObject() override;
 		ShaderStageObjectPtr MakeShaderStageObject(ShaderStage stage) override;
 
 	private:
-		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
+		std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
 
 		RenderStateObjectPtr DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 			BlendStateDesc const & bs_desc) override;
-		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
+		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) override;
 
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
 	private:
 		D3D12RenderFactory(D3D12RenderFactory const & rhs);

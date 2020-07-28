@@ -27,7 +27,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/XMLDom.hpp>
@@ -100,7 +99,7 @@ namespace
 			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(ppmm_input);
+			XMLNodePtr root = doc.Parse(*ppmm_input);
 
 			pp_desc_.pp_data->cs_data_per_thread_x = 1;
 			pp_desc_.pp_data->cs_data_per_thread_y = 1;
@@ -258,30 +257,32 @@ namespace KlayGE
 	}
 
 	PostProcess::PostProcess(std::wstring_view name, bool volumetric,
-		ArrayRef<std::string> param_names,
-		ArrayRef<std::string> input_pin_names,
-		ArrayRef<std::string> output_pin_names,
+		std::span<std::string const> param_names,
+		std::span<std::string const> input_pin_names,
+		std::span<std::string const> output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
 			: PostProcess(name, volumetric)
 	{
 		input_pins_.resize(input_pin_names.size());
-		for (size_t i = 0; i < input_pin_names.size(); ++ i)
+		for (int i = 0; i < input_pin_names.size(); ++ i)
 		{
 			input_pins_[i].first = input_pin_names[i];
 		}
 		output_pins_.resize(output_pin_names.size());
-		for (size_t i = 0; i < output_pin_names.size(); ++ i)
+		for (int i = 0; i < output_pin_names.size(); ++ i)
 		{
-			output_pins_[i].first = output_pin_names[i];
+			std::get<0>(output_pins_[i]) = output_pin_names[i];
 		}
 		params_.resize(param_names.size());
-		for (size_t i = 0; i < param_names.size(); ++ i)
+		for (int i = 0; i < param_names.size(); ++ i)
 		{
 			params_[i].first = param_names[i];
 		}
 		input_pins_ep_.resize(input_pin_names.size());
 		this->Technique(effect, tech);
 	}
+
+	PostProcess::~PostProcess() noexcept = default;
 
 	PostProcessPtr PostProcess::Clone()
 	{
@@ -303,7 +304,7 @@ namespace KlayGE
 		std::vector<std::string> output_pin_names(output_pins_.size());
 		for (size_t i = 0; i < output_pin_names.size(); ++ i)
 		{
-			output_pin_names[i] = output_pins_[i].first;
+			output_pin_names[i] = std::get<0>(output_pins_[i]);
 		}
 
 		PostProcessPtr pp = MakeSharedPtr<PostProcess>(this->Name(), volumetric_,
@@ -364,7 +365,7 @@ namespace KlayGE
 			output_pins_ep_.resize(output_pins_.size());
 			for (size_t i = 0; i < output_pins_.size(); ++ i)
 			{
-				output_pins_ep_[i] = effect_->ParameterByName(output_pins_[i].first);
+				output_pins_ep_[i] = effect_->ParameterByName(std::get<0>(output_pins_[i]));
 			}
 
 			for (size_t i = 0; i < params_.size(); ++ i)
@@ -701,19 +702,6 @@ namespace KlayGE
 		return input_pins_[index].first;
 	}
 
-	void PostProcess::InputPin(uint32_t index, TexturePtr const & tex)
-	{
-		if (tex)
-		{
-			auto& rf = Context::Instance().RenderFactoryInstance();
-			this->InputPin(index, rf.MakeTextureSrv(tex));
-		}
-		else
-		{
-			this->InputPin(index, ShaderResourceViewPtr());
-		}
-	}
-
 	void PostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const & srv)
 	{
 		input_pins_[index].second = srv;
@@ -735,18 +723,10 @@ namespace KlayGE
 		}
 	}
 
-	TexturePtr const & PostProcess::InputPin(uint32_t index) const
+	ShaderResourceViewPtr const & PostProcess::InputPin(uint32_t index) const
 	{
 		BOOST_ASSERT(index < input_pins_.size());
-		if (input_pins_[index].second)
-		{
-			return input_pins_[index].second->TextureResource();
-		}
-		else
-		{
-			static TexturePtr null_tex;
-			return null_tex;
-		}
+		return input_pins_[index].second;
 	}
 
 	uint32_t PostProcess::NumOutputPins() const
@@ -758,7 +738,7 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < output_pins_.size(); ++ i)
 		{
-			if (output_pins_[i].first == name)
+			if (std::get<0>(output_pins_[i]) == name)
 			{
 				return static_cast<uint32_t>(i);
 			}
@@ -768,50 +748,59 @@ namespace KlayGE
 
 	std::string const & PostProcess::OutputPinName(uint32_t index) const
 	{
-		return output_pins_[index].first;
+		return std::get<0>(output_pins_[index]);
 	}
 
-	void PostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void PostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		if (!output_pins_[index].second && tex)
+		if ((!std::get<1>(output_pins_[index]) && !std::get<2>(output_pins_[index])) && rtv)
 		{
-			++ num_bind_output_;
+			++num_bind_output_;
 		}
-		if (output_pins_[index].second && !tex)
+		if ((std::get<1>(output_pins_[index]) || std::get<2>(output_pins_[index])) && !rtv)
 		{
-			-- num_bind_output_;
+			--num_bind_output_;
 		}
 
-		output_pins_[index].second = tex;
-		if (tex)
+		if (rtv)
 		{
-			if (!cs_based_)
-			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				RenderTargetViewPtr rtv;
-				if (Texture::TT_2D == tex->Type())
-				{
-					rtv = rf.Make2DRtv(tex, array_index, 1, level);
-				}
-				else
-				{
-					BOOST_ASSERT(Texture::TT_Cube == tex->Type());
-					rtv = rf.Make2DRtv(tex, array_index, static_cast<Texture::CubeFaces>(face), level);
-				}
-				frame_buffer_->Attach(FrameBuffer::CalcAttachment(index), rtv);
-			}
-
-			if (output_pins_ep_[index])
-			{
-				*(output_pins_ep_[index]) = tex;
-			}
+			frame_buffer_->Attach(FrameBuffer::CalcAttachment(index), rtv);
 		}
+		
+		std::get<1>(output_pins_[index]) = rtv;
+		std::get<2>(output_pins_[index]) = UnorderedAccessViewPtr();
 	}
 
-	TexturePtr const & PostProcess::OutputPin(uint32_t index) const
+	void PostProcess::OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav)
+	{
+		if ((!std::get<1>(output_pins_[index]) && !std::get<2>(output_pins_[index])) && uav)
+		{
+			++num_bind_output_;
+		}
+		if ((std::get<1>(output_pins_[index]) || std::get<2>(output_pins_[index])) && !uav)
+		{
+			--num_bind_output_;
+		}
+
+		if (output_pins_ep_[index])
+		{
+			*(output_pins_ep_[index]) = uav;
+		}
+
+		std::get<1>(output_pins_[index]) = RenderTargetViewPtr();
+		std::get<2>(output_pins_[index]) = uav;
+	}
+
+	RenderTargetViewPtr const & PostProcess::RtvOutputPin(uint32_t index) const
 	{
 		BOOST_ASSERT(index < output_pins_.size());
-		return output_pins_[index].second;
+		return std::get<1>(output_pins_[index]);
+	}
+
+	UnorderedAccessViewPtr const & PostProcess::UavOutputPin(uint32_t index) const
+	{
+		BOOST_ASSERT(index < output_pins_.size());
+		return std::get<2>(output_pins_[index]);
 	}
 
 	void PostProcess::Apply()
@@ -831,7 +820,7 @@ namespace KlayGE
 			BOOST_ASSERT(by > 0);
 			BOOST_ASSERT(bz > 0);
 
-			TexturePtr const & tex = this->OutputPin(0);
+			auto const* tex = this->UavOutputPin(0)->TextureResource().get();
 			uint32_t tgx = (tex->Width(0) + bx - 1) / bx;
 			uint32_t tgy = (tex->Height(0) + by - 1) / by;
 			uint32_t tgz = (tex->Depth(0) + bz - 1) / bz;
@@ -848,14 +837,14 @@ namespace KlayGE
 			{
 				BOOST_ASSERT(pp_mvp_param_);
 
-				*pp_mvp_param_ = model_mat_ * frame_buffer_->GetViewport()->camera->ViewProjMatrix();
+				*pp_mvp_param_ = model_mat_ * frame_buffer_->Viewport()->Camera()->ViewProjMatrix();
 			}
 			else
 			{
-				ViewportPtr const & vp = fb->GetViewport();
-				if ((!technique_->Transparent()) && (0 == vp->left) && (0 == vp->top)
-					&& (fb->Width() == static_cast<uint32_t>(vp->width))
-					&& (fb->Height() == static_cast<uint32_t>(vp->height)))
+				ViewportPtr const& vp = fb->Viewport();
+				if ((!technique_->Transparent()) && (0 == vp->Left()) && (0 == vp->Top())
+					&& (fb->Width() == static_cast<uint32_t>(vp->Width()))
+					&& (fb->Height() == static_cast<uint32_t>(vp->Height())))
 				{
 					fb->Discard(FrameBuffer::CBM_Color);
 				}
@@ -895,7 +884,7 @@ namespace KlayGE
 				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 
 				frame_buffer_ = rf.MakeFrameBuffer();
-				frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;
+				frame_buffer_->Viewport()->Camera(rf.RenderEngineInstance().CurFrameBuffer()->Viewport()->Camera());
 			}
 		}
 	}
@@ -919,9 +908,9 @@ namespace KlayGE
 	}
 
 	PostProcessChain::PostProcessChain(std::wstring const & name,
-		ArrayRef<std::string> param_names,
-		ArrayRef<std::string> input_pin_names,
-		ArrayRef<std::string> output_pin_names,
+		std::span<std::string const> param_names,
+		std::span<std::string const> input_pin_names,
+		std::span<std::string const> output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
 			: PostProcess(name, false, param_names, input_pin_names, output_pin_names, effect, tech)
 	{
@@ -1253,12 +1242,12 @@ namespace KlayGE
 		return pp_chain_.front()->InputPinName(index);
 	}
 
-	void PostProcessChain::InputPin(uint32_t index, TexturePtr const & tex)
+	void PostProcessChain::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		pp_chain_.front()->InputPin(index, tex);
+		pp_chain_.front()->InputPin(index, srv);
 	}
 
-	TexturePtr const & PostProcessChain::InputPin(uint32_t index) const
+	ShaderResourceViewPtr const& PostProcessChain::InputPin(uint32_t index) const
 	{
 		return pp_chain_.front()->InputPin(index);
 	}
@@ -1278,14 +1267,24 @@ namespace KlayGE
 		return pp_chain_.back()->OutputPinName(index);
 	}
 
-	void PostProcessChain::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	void PostProcessChain::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		pp_chain_.back()->OutputPin(index, tex, level, array_index, face);
+		pp_chain_.back()->OutputPin(index, rtv);
 	}
 
-	TexturePtr const & PostProcessChain::OutputPin(uint32_t index) const
+	void PostProcessChain::OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav)
 	{
-		return pp_chain_.back()->OutputPin(index);
+		pp_chain_.back()->OutputPin(index, uav);
+	}
+
+	RenderTargetViewPtr const& PostProcessChain::RtvOutputPin(uint32_t index) const
+	{
+		return pp_chain_.back()->RtvOutputPin(index);
+	}
+
+	UnorderedAccessViewPtr const& PostProcessChain::UavOutputPin(uint32_t index) const
+	{
+		return pp_chain_.back()->UavOutputPin(index);
 	}
 
 	void PostProcessChain::Apply()
@@ -1300,9 +1299,9 @@ namespace KlayGE
 	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
 		: PostProcess(L"SeparableBoxFilter", false,
-				{},
-				{ "src_tex" },
-				{ "output" },
+				MakeSpan<std::string>(),
+				MakeSpan<std::string>({"src_tex"}),
+				MakeSpan<std::string>({"output"}),
 				effect, tech),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
@@ -1329,15 +1328,12 @@ namespace KlayGE
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
 	}
 
-	SeparableBoxFilterPostProcess::~SeparableBoxFilterPostProcess()
+	void SeparableBoxFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-	}
-	
-	void SeparableBoxFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
-	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1345,9 +1341,10 @@ namespace KlayGE
 	void SeparableBoxFilterPostProcess::KernelRadius(int radius)
 	{
 		kernel_radius_ = radius;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const* srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1355,9 +1352,10 @@ namespace KlayGE
 	void SeparableBoxFilterPostProcess::Multiplier(float multiplier)
 	{
 		multiplier_ = multiplier;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const* srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1385,9 +1383,9 @@ namespace KlayGE
 	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
 			: PostProcess(L"SeparableGaussian", false,
-					{},
-					{ "src_tex" },
-					{ "output" },
+					MakeSpan<std::string>(),
+					MakeSpan<std::string>({"src_tex"}),
+					MakeSpan<std::string>({"output"}),
 					effect, tech),
 				kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
@@ -1414,15 +1412,12 @@ namespace KlayGE
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
 	}
 
-	SeparableGaussianFilterPostProcess::~SeparableGaussianFilterPostProcess()
+	void SeparableGaussianFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-	}
-
-	void SeparableGaussianFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
-	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
@@ -1430,9 +1425,10 @@ namespace KlayGE
 	void SeparableGaussianFilterPostProcess::KernelRadius(int radius)
 	{
 		kernel_radius_ = radius;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const* srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
@@ -1440,9 +1436,10 @@ namespace KlayGE
 	void SeparableGaussianFilterPostProcess::Multiplier(float multiplier)
 	{
 		multiplier_ = multiplier;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const* srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
@@ -1503,9 +1500,9 @@ namespace KlayGE
 	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(RenderEffectPtr const & effect,
 			RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
 		: PostProcess(L"SeparableBilateral", false,
-			{},
-			{ "src1_tex", "src2_tex" },
-			{ "out_tex" },
+			MakeSpan<std::string>(),
+			MakeSpan<std::string>({"src1_tex", "src2_tex"}),
+			MakeSpan<std::string>({"out_tex"}),
 			RenderEffectPtr(), nullptr),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
@@ -1532,15 +1529,12 @@ namespace KlayGE
 		sharpness_factor_ep_ = effect_->ParameterByName("sharpness_factor");
 	}
 
-	SeparableBilateralFilterPostProcess::~SeparableBilateralFilterPostProcess()
+	void SeparableBilateralFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-	}
-
-	void SeparableBilateralFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
-	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1548,9 +1542,10 @@ namespace KlayGE
 	void SeparableBilateralFilterPostProcess::KernelRadius(int radius)
 	{
 		kernel_radius_ = radius;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const& srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1558,9 +1553,10 @@ namespace KlayGE
 	void SeparableBilateralFilterPostProcess::Multiplier(float multiplier)
 	{
 		multiplier_ = multiplier;
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const& srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
@@ -1580,9 +1576,9 @@ namespace KlayGE
 	
 	SeparableLogGaussianFilterPostProcess::SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir)
 			: PostProcess(L"SeparableLogGaussian", false,
-				{ "esm_scale_factor", "near_q_far"},
-				{ "src_tex" },
-				{ "output" },
+				MakeSpan<std::string>({"esm_scale_factor", "near_q_far"}),
+				MakeSpan<std::string>({"src_tex"}),
+				MakeSpan<std::string>({"output"}),
 				RenderEffectPtr(), nullptr),
 				kernel_radius_(kernel_radius), x_dir_(x_dir)
 	{
@@ -1595,15 +1591,12 @@ namespace KlayGE
 		tex_coord_offset_ep_ = effect_->ParameterByName("tex_coord_offset");
 	}
 
-	SeparableLogGaussianFilterPostProcess::~SeparableLogGaussianFilterPostProcess()
+	void SeparableLogGaussianFilterPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-	}
-
-	void SeparableLogGaussianFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
-	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
@@ -1614,9 +1607,10 @@ namespace KlayGE
 
 		kernel_radius_ = radius;
 
-		TexturePtr const & tex = this->InputPin(0);
-		if (!!tex)
+		auto const* srv = this->InputPin(0).get();
+		if (srv)
 		{
+			auto const* tex = srv->TextureResource().get();
 			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
@@ -1669,9 +1663,9 @@ namespace KlayGE
 		this->Append(SyncLoadPostProcess("Resizer.ppml", "bicubic_y"));
 	}
 
-	void BicubicFilteringPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void BicubicFilteringPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		pp_chain_[0]->InputPin(index, tex);
+		pp_chain_[0]->InputPin(index, srv);
 
 		if (0 == index)
 		{
@@ -1679,8 +1673,9 @@ namespace KlayGE
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			FrameBufferPtr const & fb = re.CurFrameBuffer();
 
-			uint32_t const tex_width = tex->Width(0);
-			uint32_t const tex_height = tex->Height(0);
+			auto const& tex = *srv->TextureResource();
+			uint32_t const tex_width = tex.Width(0);
+			uint32_t const tex_height = tex.Height(0);
 
 			float const scale_x = static_cast<float>(fb->Width()) / tex_width;
 			float const scale_y = static_cast<float>(fb->Height()) / tex_height;
@@ -1694,16 +1689,20 @@ namespace KlayGE
 			{
 				x_width = static_cast<uint32_t>(scale_y * tex_width + 0.5f);
 			}
-			uint32_t x_height = tex->Height(0);
+			uint32_t x_height = tex.Height(0);
 
-			TexturePtr blur_x = rf.MakeTexture2D(x_width, x_height, 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pp_chain_[0]->OutputPin(0, blur_x);
-			pp_chain_[1]->InputPin(0, blur_x);
+			if (!blur_x_tex_ || (blur_x_tex_->Width(0) != x_width) || (blur_x_tex_->Height(0) != x_height))
+			{
+				blur_x_tex_ = rf.MakeTexture2D(x_width, x_height, 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+				blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+			}
+			pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+			pp_chain_[1]->InputPin(0, blur_x_srv_);
 		}
 		else
 		{
-			pp_chain_[1]->InputPin(index, tex);
+			pp_chain_[1]->InputPin(index, srv);
 		}
 	}
 
@@ -1737,21 +1736,26 @@ namespace KlayGE
 		pp_chain_[1]->SetParam(1, near_q_far);
 	}
 
-	void LogGaussianBlurPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void LogGaussianBlurPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		pp_chain_[0]->InputPin(index, tex);
+		pp_chain_[0]->InputPin(index, srv);
 
 		if (0 == index)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pp_chain_[0]->OutputPin(0, blur_x);
-			pp_chain_[1]->InputPin(0, blur_x);
+			auto const& tex = *srv->TextureResource();
+			if (!blur_x_tex_ || (blur_x_tex_->Width(0) != tex.Width(0)) || (blur_x_tex_->Height(0) != tex.Height(0)))
+			{
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				blur_x_tex_ = rf.MakeTexture2D(tex.Width(0), tex.Height(0), 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+				blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+			}
+			pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+			pp_chain_[1]->InputPin(0, blur_x_srv_);
 		}
 		else
 		{
-			pp_chain_[1]->InputPin(index, tex);
+			pp_chain_[1]->InputPin(index, srv);
 		}
 	}
 }

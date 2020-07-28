@@ -35,7 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
@@ -140,7 +140,7 @@ namespace KlayGE
 
 	protected:
 		ID3D11GeometryShaderPtr CreateGeometryShaderWithStreamOutput(RenderEffect const& effect,
-			std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ArrayRef<uint8_t> code_blob,
+			std::array<uint32_t, NumShaderStages> const& shader_desc_ids, std::span<uint8_t const> code_blob,
 			std::vector<ShaderDesc::StreamOutputDecl> const& so_decl);
 
 	private:
@@ -164,7 +164,7 @@ namespace KlayGE
 		std::vector<uint8_t> cbuff_indices_;
 	};
 
-	class D3D11VertexShaderStageObject : public D3D11ShaderStageObject
+	class D3D11VertexShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11VertexShaderStageObject();
@@ -201,7 +201,7 @@ namespace KlayGE
 		uint32_t vs_signature_;
 	};
 
-	class D3D11PixelShaderStageObject : public D3D11ShaderStageObject
+	class D3D11PixelShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11PixelShaderStageObject();
@@ -226,7 +226,7 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class D3D11GeometryShaderStageObject : public D3D11ShaderStageObject
+	class D3D11GeometryShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11GeometryShaderStageObject();
@@ -245,7 +245,7 @@ namespace KlayGE
 		ID3D11GeometryShaderPtr geometry_shader_;
 	};
 
-	class D3D11ComputeShaderStageObject : public D3D11ShaderStageObject
+	class D3D11ComputeShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11ComputeShaderStageObject();
@@ -285,7 +285,7 @@ namespace KlayGE
 		uint32_t block_size_x_, block_size_y_, block_size_z_;
 	};
 
-	class D3D11HullShaderStageObject : public D3D11ShaderStageObject
+	class D3D11HullShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11HullShaderStageObject();
@@ -304,7 +304,7 @@ namespace KlayGE
 		ID3D11HullShaderPtr hull_shader_;
 	};
 
-	class D3D11DomainShaderStageObject : public D3D11ShaderStageObject
+	class D3D11DomainShaderStageObject final : public D3D11ShaderStageObject
 	{
 	public:
 		D3D11DomainShaderStageObject();
@@ -328,17 +328,17 @@ namespace KlayGE
 		ID3D11GeometryShaderPtr geometry_shader_;
 	};
 
-	class D3D11ShaderObject : public ShaderObject
+	class D3D11ShaderObject final : public ShaderObject
 	{
 	public:
 		D3D11ShaderObject();
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind() override;
+		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
-		ArrayRef<uint8_t> VsCode() const;
+		std::span<uint8_t const> VsCode() const;
 		uint32_t VsSignature() const;
 
 	private:
@@ -364,14 +364,10 @@ namespace KlayGE
 		std::array<std::vector<ID3D11SamplerState*>, NumShaderStages> samplers_;
 		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
 		std::array<std::vector<ID3D11ShaderResourceView*>, NumShaderStages> srvs_;
-		std::array<std::vector<ID3D11Buffer*>, NumShaderStages> d3d11_cbuffs_;
 		std::vector<void*> uavsrcs_;
 		std::vector<ID3D11UnorderedAccessView*> uavs_;
-
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
+		std::vector<uint32_t> uav_init_counts_;
 	};
-
-	typedef std::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
 }
 
 #endif			// KLAYGE_PLUGINS_D3D11_SHADER_OBJECT_HPP

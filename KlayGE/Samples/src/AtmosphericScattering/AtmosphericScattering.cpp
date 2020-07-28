@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -8,7 +7,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneNode.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -21,6 +19,7 @@
 
 #include <KlayGE/SSRPostProcess.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -43,14 +42,6 @@ namespace
 		void DoBuildMeshInfo(RenderModel const & model) override
 		{
 			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void LightDir(float3 const & dir)
@@ -72,18 +63,6 @@ namespace
 		{
 			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
-		
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
-		}
 	};
 
 	class AtmosphereMesh : public StaticMesh
@@ -102,14 +81,6 @@ namespace
 
 			pos_aabb_.Min() *= 1.2f;
 			pos_aabb_.Max() *= 1.2f;
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void AtmosphereTop(float top)
@@ -135,18 +106,6 @@ namespace
 		void Absorb(Color const & clr)
 		{
 			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
-		}
-		
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}
 	};
 
@@ -210,7 +169,7 @@ void AtmosphericScatteringApp::OnCreate()
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("AtmosphericScattering.uiml"));
 	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");
 	id_atmosphere_top_ = dialog_param_->IDFromName("atmosphere_top");
 	id_density_ = dialog_param_->IDFromName("density");
@@ -296,14 +255,14 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 
 	Color f4_clr = clr / 250.0f;
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? f4_clr.ABGR() : f4_clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	dialog_param_->Control<UITexButton>(id_beta_button_)->SetTexture(tex_for_button);
 }
 
@@ -320,14 +279,14 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 			checked_cast<AtmosphereMesh&>(renderable).Absorb(clr);
 		});
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? clr.ABGR() : clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	dialog_param_->Control<UITexButton>(id_absorb_button_)->SetTexture(tex_for_button);
 }
 

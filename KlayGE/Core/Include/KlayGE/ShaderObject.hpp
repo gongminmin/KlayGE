@@ -75,6 +75,7 @@ namespace KlayGE
 				return !(lhs == rhs);
 			}
 		};
+		KLAYGE_STATIC_ASSERT(sizeof(StreamOutputDecl) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(pop)
 #endif
@@ -108,7 +109,7 @@ namespace KlayGE
 	{
 	public:
 		explicit ShaderStageObject(ShaderStage stage);
-		virtual ~ShaderStageObject();
+		virtual ~ShaderStageObject() noexcept;
 
 		virtual void StreamIn(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) = 0;
@@ -192,7 +193,7 @@ namespace KlayGE
 		void LinkShaders(RenderEffect const & effect);
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
-		virtual void Bind() = 0;
+		virtual void Bind(RenderEffect const& effect) = 0;
 		virtual void Unbind() = 0;
 
 		bool Validate() const

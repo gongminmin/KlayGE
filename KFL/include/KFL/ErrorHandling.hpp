@@ -37,11 +37,6 @@
 #include <string>
 #include <stdexcept>
 
-#ifndef _HRESULT_DEFINED
-#define _HRESULT_DEFINED
-typedef long HRESULT;
-#endif
-
 namespace KlayGE
 {
 	std::string CombineFileLine(std::string_view file, int line);
@@ -68,7 +63,7 @@ namespace KlayGE
 #define TIFERRC(x)		TIFEC(std::make_error_code(x))
 
 // Throw if failed (HRESULT)
-#define TIFHR(x)		{ if (static_cast<HRESULT>(x) < 0) { TMSG(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
+#define TIFHR(x)		{ if ((x) < 0) { TMSG(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
 
 #ifdef KLAYGE_DEBUG
 	#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal(msg, __FILE__, __LINE__)

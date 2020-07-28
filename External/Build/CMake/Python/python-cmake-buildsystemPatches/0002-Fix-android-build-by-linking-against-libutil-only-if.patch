@@ -1,0 +1,37 @@
+From 3f77cd11b4ec20785b5e3105e094b731560aa8b6 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Fri, 22 Jan 2016 00:20:12 -0500
+Subject: [PATCH 02/11] Fix android build by linking against libutil only if
+ found
+
+This commit fixes the following configure error:
+
+//----------------
+CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
+Please set them or make sure they are set and tested correctly in the CMake files:
+HAVE_LIBUTIL
+    linked by target "libpython-static" in directory /data/data/com.termux/files/home/python-cmake-buildsystem/cmake/libpython
+//----------------
+---
+ cmake/libpython/CMakeLists.txt | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
+index 6b183b2..56970b1 100644
+--- a/cmake/libpython/CMakeLists.txt
++++ b/cmake/libpython/CMakeLists.txt
+@@ -379,7 +379,10 @@ if(WITH_THREAD)
+     list(APPEND LIBPYTHON_TARGET_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+ endif()
+ if(UNIX)
+-    list(APPEND LIBPYTHON_TARGET_LIBRARIES ${LIBUTIL_LIBRARIES} ${M_LIBRARIES})
++    if(HAVE_LIBUTIL)
++        list(APPEND LIBPYTHON_TARGET_LIBRARIES ${LIBUTIL_LIBRARIES})
++    endif()
++    list(APPEND LIBPYTHON_TARGET_LIBRARIES ${M_LIBRARIES})
+ endif()
+ if(WIN32 AND IS_PY3)
+     list(APPEND LIBPYTHON_TARGET_LIBRARIES ws2_32) # Required by signalmodule
+-- 
+2.17.1.windows.2
+

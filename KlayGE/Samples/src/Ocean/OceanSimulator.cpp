@@ -5,7 +5,6 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/FFT.hpp>
 
 #include "OceanSimulator.hpp"
 
@@ -128,7 +127,7 @@ namespace KlayGE
 		re.BindFrameBuffer(tex_fb_);
 		re.Render(*effect_, *update_spectrum_tech_, *quad_layout_);
 
-		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_tex_, out_imag_tex_);
+		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_srv_, out_imag_srv_);
 
 		re.BindFrameBuffer(displacement_fb_);
 		re.Render(*effect_, *update_displacement_tech_, *quad_layout_);
@@ -170,12 +169,14 @@ namespace KlayGE
 		init_data.data = &h0_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float2);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		h0_tex_ = rf.MakeTexture2D(
+			params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 		init_data.data = &omega_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		omega_tex_ = rf.MakeTexture2D(
+			params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -186,7 +187,9 @@ namespace KlayGE
 		gradient_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(gradient_tex_, 0, 1, 0));
 
 		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_real_srv_ = rf.MakeTextureSrv(out_real_tex_);
 		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_imag_srv_ = rf.MakeTextureSrv(out_imag_tex_);
 		tex_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(out_real_tex_, 0, 1, 0));
 		tex_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(out_imag_tex_, 0, 1, 0));
 
@@ -205,6 +208,6 @@ namespace KlayGE
 		*(effect_->ParameterByName("displacement_tex")) = displacement_tex_;
 		*(effect_->ParameterByName("dxyz_tex")) = out_real_tex_;
 
-		fft_ = MakeSharedPtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
+		fft_ = MakeUniquePtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
 	}
 }

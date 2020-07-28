@@ -31,14 +31,16 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <algorithm>
 #include <boost/assert.hpp>
 
 #ifdef KLAYGE_DRAW_NODES
-#include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #endif
 
@@ -118,7 +120,7 @@ namespace KlayGE
 			octree_.resize(1);
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
-			octree_[0].visible = BO_No;
+			octree_[0].visible = BoundOverlap::No;
 			for (auto* sn : all_scene_nodes_)
 			{
 				auto const & node = *sn;
@@ -153,54 +155,74 @@ namespace KlayGE
 			this->NodeVisible(0);
 		}
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		bool omni_directional = false;
+		for (uint32_t i = 0; i < num_cameras; ++i)
 		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
+			omni_directional |= viewport.Camera(i)->OmniDirectionalMode();
 		}
 
-		if (camera.OmniDirectionalMode())
+		if (omni_directional)
 		{
 			for (auto* sn : all_scene_nodes_)
 			{
 				auto& node = *sn;
-				BoundOverlap visible;
-				if (node.Visible() && node.Updated())
+				if (node.Visible())
 				{
-					uint32_t const attr = node.Attrib();
-					if (attr & SceneNode::SOA_Cullable)
+					if (node.Updated())
 					{
-						if (small_obj_threshold_ > 0)
+						uint32_t const attr = node.Attrib();
+						if (attr & SceneNode::SOA_Cullable)
 						{
-							AABBox const & aabb_ws = node.PosBoundWS();
-							visible = ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_)
-								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
-								? BO_Yes : BO_No;
+							if (small_obj_threshold_ > 0)
+							{
+								AABBox const& aabb_ws = node.PosBoundWS();
+								for (uint32_t i = 0; i < num_cameras; ++i)
+								{
+									auto const& camera = *viewport.Camera(i);
+									float4x4 const& view_proj = camera_view_projs_[i];
+
+									node.VisibleMark(
+										i, ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_) &&
+											   (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+											   ? BoundOverlap::Yes
+											   : BoundOverlap::No);
+								}
+							}
+							else
+							{
+								for (uint32_t i = 0; i < num_cameras; ++i)
+								{
+									node.VisibleMark(i, BoundOverlap::Yes);
+								}
+							}
 						}
 						else
 						{
-							visible = BO_Yes;
+							for (uint32_t i = 0; i < num_cameras; ++i)
+							{
+								node.VisibleMark(i, BoundOverlap::Yes);
+							}
 						}
 					}
 					else
 					{
-						visible = BO_Yes;
+						for (uint32_t i = 0; i < num_cameras; ++i)
+						{
+							node.VisibleMark(i, BoundOverlap::Yes);
+						}
 					}
 				}
 				else
 				{
-					visible = BO_No;
+					for (uint32_t i = 0; i < num_cameras; ++i)
+					{
+						node.VisibleMark(i, BoundOverlap::No);
+					}
 				}
-
-				node.VisibleMark(visible);
 			}
 		}
 		else
@@ -213,27 +235,16 @@ namespace KlayGE
 			for (auto* sn : all_scene_nodes_)
 			{
 				auto& node = *sn;
-				BoundOverlap visible = node.VisibleMark();
-				if (node.Visible() && (visible != BO_No))
+				uint32_t const attr = node.Attrib();
+				if (node.Visible() && (attr & SceneNode::SOA_Cullable) && (attr & SceneNode::SOA_Moveable))
 				{
-					visible = this->VisibleTestFromParent(node, camera.ForwardVec(), camera.EyePos(), view_proj);
-					if (BO_Partial == visible)
+					for (uint32_t i = 0; i < num_cameras; ++i)
 					{
-						uint32_t const attr = node.Attrib();
-						if (attr & SceneNode::SOA_Cullable)
+						if (node.VisibleMark(i) == BoundOverlap::Partial)
 						{
-							if (attr & SceneNode::SOA_Moveable)
-							{
-								visible = this->AABBVisible(node.PosBoundWS());
-							}
-						}
-						else
-						{
-							visible = BO_Yes;
+							node.VisibleMark(i, camera_frustums_[i]->Intersect(node.PosBoundWS()));
 						}
 					}
-
-					node.VisibleMark(visible);
 				}
 			}
 		}
@@ -274,7 +285,7 @@ namespace KlayGE
 			AABBox const parent_bb = octree_[index].bb;
 			float3 const parent_center = parent_bb.Center();
 			octree_[index].first_child_index = static_cast<int>(this_size);
-			octree_[index].visible = BO_No;
+			octree_[index].visible = BoundOverlap::No;
 
 			octree_.resize(this_size + 8);
 			for (auto* node : octree_[index].node_ptrs)
@@ -324,28 +335,36 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		auto& octree_node = octree_[index];
+		bool large_enough;
+		if (small_obj_threshold_ <= 0)
 		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
+			large_enough = true;
+		}
+		else
+		{
+			large_enough = false;
+			for (uint32_t i = 0; i < num_cameras; ++i)
 			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+				auto const& camera = *viewport.Camera(i);
+				float4x4 const& view_proj = camera_view_projs_[i];
+				if (((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
+					&& (MathLib::perspective_area(camera.EyePos(), view_proj, octree_node.bb) > small_obj_threshold_)))
+				{
+					large_enough = true;
+					break;
+				}
 			}
 		}
 
-		auto& octree_node = octree_[index];
-		if ((small_obj_threshold_ <= 0)
-			|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
-				&& (MathLib::perspective_area(camera.EyePos(), view_proj, octree_node.bb) > small_obj_threshold_)))
+		if (large_enough)
 		{
-			BoundOverlap const vis = frustum_->Intersect(octree_node.bb);
-			octree_node.visible = vis;
-			if (BO_Partial == vis)
+			octree_node.visible = SceneManager::AABBVisible(octree_node.bb);
+			if (BoundOverlap::Partial == octree_node.visible)
 			{
 				if (octree_node.first_child_index != -1)
 				{
@@ -358,13 +377,14 @@ namespace KlayGE
 		}
 		else
 		{
-			octree_node.visible = BO_No;
+			octree_node.visible = BoundOverlap::No;
 		}
 
 #ifdef KLAYGE_DRAW_NODES
-		if ((vis != BO_No) && (-1 == node.first_child_index))
+		if ((vis != BoundOverlap::No) && (-1 == node.first_child_index))
 		{
-			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));
+			checked_pointer_cast<NodeRenderable>(node_renderable_)
+				->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));
 		}
 #endif
 	}
@@ -373,52 +393,66 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		Camera& camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewProjMatrix();
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
-		{
-			int32_t cas_index = drl->CurrCascadeIndex();
-			if (cas_index >= 0)
-			{
-				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-			}
-		}
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto const& viewport = *re.CurFrameBuffer()->Viewport();
+		uint32_t const num_cameras = viewport.NumCameras();
 
 		auto const & octree_node = octree_[index];
-		if ((octree_node.visible != BO_No) || force)
+		if ((octree_node.visible != BoundOverlap::No) || force)
 		{
 			for (auto* node : octree_node.node_ptrs)
 			{
-				if ((BO_No == node->VisibleMark()) && node->Visible())
+				if (node->Visible())
 				{
-					auto visible = this->VisibleTestFromParent(*node, camera.ForwardVec(), camera.EyePos(), view_proj);
-					if (BO_Partial == visible)
+					if (node->Updated())
 					{
-						AABBox const & aabb_ws = node->PosBoundWS();
-						if (node->Parent() || (small_obj_threshold_ <= 0)
-							|| ((MathLib::ortho_area(camera.ForwardVec(), octree_node.bb) > small_obj_threshold_)
-								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_)))
+						for (uint32_t i = 0; i < num_cameras; ++i)
 						{
-							visible = frustum_->Intersect(aabb_ws);
-						}
-						else
-						{
-							visible = BO_No;
+							if (node->VisibleMark(i) == BoundOverlap::No)
+							{
+								auto visible = this->VisibleTestFromParent(*node, i);
+								if (BoundOverlap::Partial == visible)
+								{
+									if (node->Parent())
+									{
+										visible = camera_frustums_[i]->Intersect(node->PosBoundWS());
+									}
+									else
+									{
+										visible = BoundOverlap::No;
+									}
+								}
+
+								node->VisibleMark(i, visible);
+							}
 						}
 					}
-					node->VisibleMark(visible);
-
-					if (visible != BO_No)
+					else
 					{
-						auto* override_node = node->Parent();
-						while ((override_node != nullptr) && (override_node->VisibleMark() == BO_No))
+						for (uint32_t i = 0; i < num_cameras; ++i)
 						{
-							override_node->VisibleMark(BO_Partial);
-							override_node = override_node->Parent();
+							node->VisibleMark(i, BoundOverlap::Yes);
 						}
+					}
+
+					for (uint32_t i = 0; i < num_cameras; ++i)
+					{
+						if (node->VisibleMark(i) != BoundOverlap::No)
+						{
+							auto* override_node = node->Parent();
+							while ((override_node != nullptr) && (override_node->VisibleMark(i) == BoundOverlap::No))
+							{
+								override_node->VisibleMark(i, BoundOverlap::Partial);
+								override_node = override_node->Parent();
+							}
+						}
+					}
+				}
+				else
+				{
+					for (uint32_t i = 0; i < num_cameras; ++i)
+					{
+						node->VisibleMark(i, BoundOverlap::No);
 					}
 				}
 			}
@@ -427,7 +461,7 @@ namespace KlayGE
 			{
 				for (int i = 0; i < 8; ++ i)
 				{
-					this->MarkNodeObjs(octree_node.first_child_index + i, (BO_Yes == octree_node.visible) || force);
+					this->MarkNodeObjs(octree_node.first_child_index + i, (BoundOverlap::Yes == octree_node.visible) || force);
 				}
 			}
 		}
@@ -436,7 +470,7 @@ namespace KlayGE
 	BoundOverlap OCTree::AABBVisible(AABBox const & aabb) const
 	{
 		// Frustum VS node
-		BoundOverlap visible = BO_Yes;
+		BoundOverlap visible = BoundOverlap::Yes;
 		if (!octree_.empty())
 		{
 			if (MathLib::intersect_aabb_aabb(octree_[0].bb, aabb))
@@ -446,20 +480,13 @@ namespace KlayGE
 			else
 			{
 				// Out of scene
-				visible = BO_Yes;
+				visible = BoundOverlap::Yes;
 			}
 		}
-		if (visible)
+		if (visible != BoundOverlap::No)
 		{
-			if (frustum_)
-			{
-				// Frustum VS AABB
-				visible = frustum_->Intersect(aabb);
-			}
-			else
-			{
-				visible = BO_Yes;
-			}
+			// Frustum VS AABB
+			visible = SceneManager::AABBVisible(aabb);
 		}
 		return visible;
 	}
@@ -467,7 +494,7 @@ namespace KlayGE
 	BoundOverlap OCTree::OBBVisible(OBBox const & obb) const
 	{
 		// Frustum VS node
-		BoundOverlap visible = BO_Yes;
+		BoundOverlap visible = BoundOverlap::Yes;
 		if (!octree_.empty())
 		{
 			if (MathLib::intersect_aabb_obb(octree_[0].bb, obb))
@@ -477,20 +504,13 @@ namespace KlayGE
 			else
 			{
 				// Out of scene
-				visible = BO_Yes;
+				visible = BoundOverlap::Yes;
 			}
 		}
-		if (visible)
+		if (visible != BoundOverlap::No)
 		{
-			if (frustum_)
-			{
-				// Frustum VS OBB
-				visible = frustum_->Intersect(obb);
-			}
-			else
-			{
-				visible = BO_Yes;
-			}
+			// Frustum VS OBB
+			visible = SceneManager::OBBVisible(obb);
 		}
 		return visible;
 	}
@@ -498,7 +518,7 @@ namespace KlayGE
 	BoundOverlap OCTree::SphereVisible(Sphere const & sphere) const
 	{
 		// Frustum VS node
-		BoundOverlap visible = BO_Yes;
+		BoundOverlap visible = BoundOverlap::Yes;
 		if (!octree_.empty())
 		{
 			if (MathLib::intersect_aabb_sphere(octree_[0].bb, sphere))
@@ -508,20 +528,37 @@ namespace KlayGE
 			else
 			{
 				// Out of scene
-				visible = BO_Yes;
+				visible = BoundOverlap::Yes;
 			}
 		}
-		if (visible)
+		if (visible != BoundOverlap::No)
 		{
-			if (frustum_)
+			// Frustum VS Sphere
+			visible = SceneManager::SphereVisible(sphere);
+		}
+		return visible;
+	}
+
+	BoundOverlap OCTree::FrustumVisible(Frustum const& frustum) const
+	{
+		// Frustum VS node
+		BoundOverlap visible = BoundOverlap::Yes;
+		if (!octree_.empty())
+		{
+			if (MathLib::intersect_aabb_frustum(octree_[0].bb, frustum) != BoundOverlap::No)
 			{
-				// Frustum VS OBB
-				visible = frustum_->Intersect(sphere);
+				visible = this->BoundVisible(0, frustum);
 			}
 			else
 			{
-				visible = BO_Yes;
+				// Out of scene
+				visible = BoundOverlap::Yes;
 			}
+		}
+		if (visible != BoundOverlap::No)
+		{
+			// Frustum VS Frustum
+			visible = SceneManager::FrustumVisible(frustum);
 		}
 		return visible;
 	}
@@ -531,15 +568,15 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if ((node.visible != BO_No) && MathLib::intersect_aabb_aabb(node.bb, aabb))
+		if ((node.visible != BoundOverlap::No) && MathLib::intersect_aabb_aabb(node.bb, aabb))
 		{
-			if (BO_Yes == node.visible)
+			if (BoundOverlap::Yes == node.visible)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 			else
 			{
-				BOOST_ASSERT(BO_Partial == node.visible);
+				BOOST_ASSERT(BoundOverlap::Partial == node.visible);
 
 				if (node.first_child_index != -1)
 				{
@@ -558,24 +595,24 @@ namespace KlayGE
 							+ ((j & 4) ? mark[5] : mark[2]))
 						{
 							BoundOverlap const bo = this->BoundVisible(node.first_child_index + j, aabb);
-							if (bo != BO_No)
+							if (bo != BoundOverlap::No)
 							{
 								return bo;
 							}
 						}
 					}
 
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				else
 				{
-					return BO_Partial;
+					return BoundOverlap::Partial;
 				}
 			}
 		}
 		else
 		{
-			return BO_No;
+			return BoundOverlap::No;
 		}
 	}
 
@@ -584,38 +621,38 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if ((node.visible != BO_No) && MathLib::intersect_aabb_obb(node.bb, obb))
+		if ((node.visible != BoundOverlap::No) && MathLib::intersect_aabb_obb(node.bb, obb))
 		{
-			if (BO_Yes == node.visible)
+			if (BoundOverlap::Yes == node.visible)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 			else
 			{
-				BOOST_ASSERT(BO_Partial == node.visible);
+				BOOST_ASSERT(BoundOverlap::Partial == node.visible);
 
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
 					{
 						BoundOverlap const bo = this->BoundVisible(node.first_child_index + i, obb);
-						if (bo != BO_No)
+						if (bo != BoundOverlap::No)
 						{
 							return bo;
 						}
 					}
 
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				else
 				{
-					return BO_Partial;
+					return BoundOverlap::Partial;
 				}
 			}
 		}
 		else
 		{
-			return BO_No;
+			return BoundOverlap::No;
 		}
 	}
 
@@ -624,38 +661,38 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if ((node.visible != BO_No) && MathLib::intersect_aabb_sphere(node.bb, sphere))
+		if ((node.visible != BoundOverlap::No) && MathLib::intersect_aabb_sphere(node.bb, sphere))
 		{
-			if (BO_Yes == node.visible)
+			if (BoundOverlap::Yes == node.visible)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 			else
 			{
-				BOOST_ASSERT(BO_Partial == node.visible);
+				BOOST_ASSERT(BoundOverlap::Partial == node.visible);
 
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
 					{
 						BoundOverlap const bo = this->BoundVisible(node.first_child_index + i, sphere);
-						if (bo != BO_No)
+						if (bo != BoundOverlap::No)
 						{
 							return bo;
 						}
 					}
 
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				else
 				{
-					return BO_Partial;
+					return BoundOverlap::Partial;
 				}
 			}
 		}
 		else
 		{
-			return BO_No;
+			return BoundOverlap::No;
 		}
 	}
 
@@ -664,38 +701,38 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if ((node.visible != BO_No) && MathLib::intersect_aabb_frustum(node.bb, frustum))
+		if ((node.visible != BoundOverlap::No) && (MathLib::intersect_aabb_frustum(node.bb, frustum) != BoundOverlap::No))
 		{
-			if (BO_Yes == node.visible)
+			if (BoundOverlap::Yes == node.visible)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 			else
 			{
-				BOOST_ASSERT(BO_Partial == node.visible);
+				BOOST_ASSERT(BoundOverlap::Partial == node.visible);
 
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
 					{
 						BoundOverlap const bo = this->BoundVisible(node.first_child_index + i, frustum);
-						if (bo != BO_No)
+						if (bo != BoundOverlap::No)
 						{
 							return bo;
 						}
 					}
 
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				else
 				{
-					return BO_Partial;
+					return BoundOverlap::Partial;
 				}
 			}
 		}
 		else
 		{
-			return BO_No;
+			return BoundOverlap::No;
 		}
 	}
 }

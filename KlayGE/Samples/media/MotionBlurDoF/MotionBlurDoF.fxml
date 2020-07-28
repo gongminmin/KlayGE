@@ -5,14 +5,13 @@
 	<include name="Quaternion.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="MotionBlur.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
 		<parameter type="float3" name="eye_in_world"/>
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
 	</cbuffer>
 
 	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>

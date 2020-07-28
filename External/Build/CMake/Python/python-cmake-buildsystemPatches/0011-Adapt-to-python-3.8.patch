@@ -1,0 +1,154 @@
+From b91fd31ea4a798639afdb9002496bbd5c7479ddd Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 18 Feb 2020 22:48:24 -0800
+Subject: [PATCH 11/11] Adapt to python 3.8
+
+---
+ CMakeLists.txt                  |  3 +++
+ cmake/config_3.c.in             |  4 ++++
+ cmake/extensions/CMakeLists.txt |  8 ++++---
+ cmake/libpython/CMakeLists.txt  | 39 ++++++++++++++++++++++++++++-----
+ 4 files changed, 45 insertions(+), 9 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5549e7f..c787c87 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -411,6 +411,9 @@ endif()
+ 
+ # Set include directories
+ include_directories(${INCLUDE_BUILD_DIR})
++if(PY_VERSION VERSION_EQUAL "3.8" OR PY_VERSION VERSION_GREATER "3.8")
++    include_directories(${INCLUDE_BUILD_DIR}/internal)
++endif()
+ include_directories(${PYCONFIG_BUILD_DIR})
+ include_directories(${SRC_DIR}/Python)
+ 
+diff --git a/cmake/config_3.c.in b/cmake/config_3.c.in
+index ffe64c7..f714b9e 100644
+--- a/cmake/config_3.c.in
++++ b/cmake/config_3.c.in
+@@ -27,7 +27,9 @@ extern PyObject* PyInit__sre(void);
+ extern PyObject* PyInit__symtable(void);
+ extern PyObject* PyInit__weakref(void);
+ extern PyObject* PyInit_xxsubtype(void);
++#if PY_VERSION_HEX < 0x03080000
+ extern PyObject* PyInit_zipimport(void);
++#endif
+ 
+ struct _inittab _PyImport_Inittab[] = {
+ 
+@@ -68,7 +70,9 @@ struct _inittab _PyImport_Inittab[] = {
+     {"_symtable", PyInit__symtable},
+     {"_weakref", PyInit__weakref},
+     {"xxsubtype", PyInit_xxsubtype},
++#if PY_VERSION_HEX < 0x03080000
+     {"zipimport", PyInit_zipimport},
++#endif
+ 
+     /* Sentinel */
+     {0, 0}
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index 8d54929..15126cc 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -129,9 +129,11 @@ add_python_extension(xxlimited REQUIRES IS_PY3 BUILD_TESTING
+     NO_INSTALL
+ )
+ add_python_extension(xxsubtype BUILTIN REQUIRES IS_PY3 SOURCES xxsubtype.c)
+-# The zipimport module is always imported at startup. Having it as a
+-# builtin module avoids some bootstrapping problems and reduces overhead.
+-add_python_extension(zipimport ALWAYS_BUILTIN REQUIRES IS_PY3 SOURCES zipimport.c)
++if(PY_VERSION VERSION_LESS "3.8")
++    # The zipimport module is always imported at startup. Having it as a
++    # builtin module avoids some bootstrapping problems and reduces overhead.
++    add_python_extension(zipimport ALWAYS_BUILTIN REQUIRES IS_PY3 SOURCES zipimport.c)
++endif()
+ 
+ # Python 3.6
+ if(PY_VERSION VERSION_EQUAL "3.6" OR PY_VERSION VERSION_GREATER "3.6")
+diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
+index 6742227..1b63381 100644
+--- a/cmake/libpython/CMakeLists.txt
++++ b/cmake/libpython/CMakeLists.txt
+@@ -1,4 +1,7 @@
+ add_definitions(-DPy_BUILD_CORE)
++if(PY_VERSION VERSION_EQUAL "3.8" OR PY_VERSION VERSION_GREATER "3.8")
++    add_definitions(-DPy_BUILD_CORE_BUILTIN)
++endif()
+ add_definitions(-DNDEBUG)
+ 
+ set(MODULE_SOURCES # Equivalent to MODULE_OBJS in Makefile.pre
+@@ -67,16 +70,24 @@ endif()
+ 
+ set(PARSER_COMMON_SOURCES # Equivalent to POBJS in Makefile.pre
+     ${SRC_DIR}/Parser/acceler.c
+-    ${SRC_DIR}/Parser/bitset.c
+-    ${SRC_DIR}/Parser/firstsets.c
+     ${SRC_DIR}/Parser/grammar1.c
+-    ${SRC_DIR}/Parser/grammar.c
+     ${SRC_DIR}/Parser/listnode.c
+-    ${SRC_DIR}/Parser/metagrammar.c
+     ${SRC_DIR}/Parser/node.c
+     ${SRC_DIR}/Parser/parser.c
+-    ${SRC_DIR}/Parser/pgen.c
+ )
++if(PY_VERSION VERSION_LESS "3.8")
++    list(APPEND PARSER_COMMON_SOURCES
++        ${SRC_DIR}/Parser/bitset.c
++        ${SRC_DIR}/Parser/firstsets.c
++        ${SRC_DIR}/Parser/grammar.c
++        ${SRC_DIR}/Parser/metagrammar.c
++        ${SRC_DIR}/Parser/pgen.c
++    )
++else()
++    list(APPEND PARSER_COMMON_SOURCES
++        ${SRC_DIR}/Parser/token.c
++    )
++endif()
+ 
+ set(OBJECT2_SOURCES
+     ${SRC_DIR}/Objects/bufferobject.c
+@@ -108,6 +119,12 @@ if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
+         ${SRC_DIR}/Objects/call.c
+     )
+ endif()
++if(PY_VERSION VERSION_EQUAL "3.8" OR PY_VERSION VERSION_GREATER "3.8")
++    list(APPEND OBJECT3_SOURCES
++        ${SRC_DIR}/Objects/interpreteridobject.c
++        ${SRC_DIR}/Objects/picklebufobject.c
++    )
++endif()
+ 
+ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
+     ${OBJECT${PY_VERSION_MAJOR}_SOURCES}
+@@ -220,6 +237,12 @@ if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
+         ${SRC_DIR}/Python/pathconfig.c
+     )
+ endif()
++if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
++    list(APPEND PYTHON3_COMMON_SOURCES
++        ${SRC_DIR}/Python/initconfig.c
++        ${SRC_DIR}/Python/preconfig.c
++    )
++endif()
+ 
+ set(PYTHON_COMMON_SOURCES
+     ${DYNLOAD_SOURCES}
+@@ -305,8 +328,12 @@ list(APPEND MODULE_SOURCES
+     ${SRC_DIR}/Modules/symtablemodule.c
+     ${SRC_DIR}/Modules/_weakref.c
+     ${SRC_DIR}/Modules/xxsubtype.c
+-    ${SRC_DIR}/Modules/zipimport.c
+ )
++if(PY_VERSION VERSION_LESS "3.8")
++    list(APPEND MODULE_SOURCES
++        ${SRC_DIR}/Modules/zipimport.c
++    )
++endif()
+ 
+ set(LIBPYTHON_OMIT_FROZEN_SOURCES
+     ${SRC_DIR}/Modules/getbuildinfo.c
+-- 
+2.17.1.windows.2
+

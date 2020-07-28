@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class CPUInfo
+	class CPUInfo final
 	{
 	public:
 		enum CPUFeature
@@ -93,7 +93,7 @@ namespace KlayGE
 	private:
 		std::string cpu_string_;
 		std::string cpu_brand_string_;
-		uint64_t feature_mask_;
+		uint64_t feature_mask_{0};
 
 		int num_hw_threads_;
 		int num_cores_;

@@ -1,6 +1,6 @@
 # KlayGE
 
-[![GitHub release](https://img.shields.io/badge/release-v4.14.0-blue.svg)](https://github.com/gongminmin/KlayGE/releases/latest)
+[![GitHub release](https://img.shields.io/badge/release-v4.17.0-blue.svg)](https://github.com/gongminmin/KlayGE/releases/latest)
 [![Build status](https://ci.appveyor.com/api/projects/status/uddr0wulxuferji4/branch/develop?svg=true)](https://ci.appveyor.com/project/gongminmin/KlayGE/branch/develop)
 [![Build Status](https://travis-ci.org/gongminmin/KlayGE.svg?branch=develop)](https://travis-ci.org/gongminmin/KlayGE)
 

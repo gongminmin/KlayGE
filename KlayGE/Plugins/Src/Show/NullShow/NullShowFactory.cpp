@@ -39,7 +39,7 @@ namespace KlayGE
 	class NullShowFactory : public ShowFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"Null Show Factory");
 			return name;

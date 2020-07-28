@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -40,31 +39,29 @@
 
 namespace KlayGE
 {
-	D3D11Fence::D3D11Fence()
-		: fence_val_(0)
-	{
-	}
+	D3D11Fence::D3D11Fence() = default;
 
 	uint64_t D3D11Fence::Signal(FenceType ft)
 	{
 		KFL_UNUSED(ft);
 
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice();
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+		ID3D11Device1* d3d_device = re.D3DDevice1();
+		ID3D11DeviceContext1* d3d_imm_ctx = re.D3DDeviceImmContext1();
 
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_EVENT;
 		desc.MiscFlags = 0;
 
-		ID3D11Query* query;
-		d3d_device->CreateQuery(&desc, &query);
-		auto fence = MakeCOMPtr(query);
+		ID3D11QueryPtr query;
+		d3d_device->CreateQuery(&desc, query.put());
+
 		uint64_t const id = fence_val_;
-		fences_[id] = fence;
 		++ fence_val_;
 
-		d3d_imm_ctx->End(fence.get());
+		d3d_imm_ctx->End(query.get());
+
+		fences_[id] = std::move(query);
 
 		return id;
 	}
@@ -75,7 +72,7 @@ namespace KlayGE
 		if (iter != fences_.end())
 		{
 			auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+			ID3D11DeviceContext1* d3d_imm_ctx = re.D3DDeviceImmContext1();
 
 			uint32_t ret;
 			while (S_OK != d3d_imm_ctx->GetData(iter->second.get(), &ret, sizeof(ret), 0));
@@ -93,7 +90,7 @@ namespace KlayGE
 		else
 		{
 			auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+			ID3D11DeviceContext1* d3d_imm_ctx = re.D3DDeviceImmContext1();
 
 			uint32_t ret;
 			HRESULT hr = d3d_imm_ctx->GetData(iter->second.get(), &ret, sizeof(ret), 0);
@@ -103,22 +100,14 @@ namespace KlayGE
 
 
 	D3D11_4Fence::D3D11_4Fence()
-		: last_completed_val_(0), fence_val_(1)
 	{
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_device = re.D3DDevice5();
 		BOOST_ASSERT(d3d_device != nullptr);
 
-		ID3D11Fence* fence;
-		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, reinterpret_cast<void**>(&fence));
-		fence_ = MakeCOMPtr(fence);
+		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, fence_.put_void());
 
-		fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-	}
-
-	D3D11_4Fence::~D3D11_4Fence()
-	{
-		::CloseHandle(fence_event_);
+		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}
 
 	uint64_t D3D11_4Fence::Signal(FenceType ft)
@@ -140,8 +129,8 @@ namespace KlayGE
 	{
 		if (!this->Completed(id))
 		{
-			TIFHR(fence_->SetEventOnCompletion(id, fence_event_));
-			::WaitForSingleObjectEx(fence_event_, INFINITE, FALSE);
+			TIFHR(fence_->SetEventOnCompletion(id, fence_event_.get()));
+			::WaitForSingleObjectEx(fence_event_.get(), INFINITE, FALSE);
 		}
 	}
 

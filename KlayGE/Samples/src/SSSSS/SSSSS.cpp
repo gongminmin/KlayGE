@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
@@ -14,7 +13,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
@@ -25,8 +24,9 @@
 #include <KlayGE/SSSBlur.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "SSSSS.hpp"
@@ -129,7 +129,7 @@ void SSSSSApp::OnCreate()
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-	scene_camera_ = re.DefaultFrameBuffer()->GetViewport()->camera;
+	scene_camera_ = re.DefaultFrameBuffer()->Viewport()->Camera();
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);
@@ -146,7 +146,7 @@ void SSSSSApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("SSSSS.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("SSSSS.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_sss_ = dialog_params_->IDFromName("SSS");
 	id_sss_strength_static_ = dialog_params_->IDFromName("SSSStrengthStatic");
@@ -263,6 +263,14 @@ void SSSSSApp::DoUpdateOverlay()
  
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Screen Space Sub Surface Scattering", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t SSSSSApp::DoUpdate(uint32_t pass)

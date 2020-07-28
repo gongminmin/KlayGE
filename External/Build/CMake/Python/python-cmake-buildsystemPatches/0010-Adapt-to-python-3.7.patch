@@ -1,0 +1,170 @@
+From d224642ff82ee7012098a2aad4ea783b8ec63b8c Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Thu, 17 Jan 2019 23:55:48 -0800
+Subject: [PATCH 10/11] Adapt to python 3.7
+
+---
+ cmake/ConfigureChecks.cmake     |  4 ++++
+ cmake/config-mingw/pyconfig.h   | 17 +++++++++++++++++
+ cmake/config-unix/pyconfig.h.in |  5 +++++
+ cmake/config_3.c.in             |  8 ++++++++
+ cmake/extensions/CMakeLists.txt |  5 +++++
+ cmake/libpython/CMakeLists.txt  | 24 +++++++++++++++++++++++-
+ 6 files changed, 62 insertions(+), 1 deletion(-)
+
+diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
+index 9c0034f..dab533b 100644
+--- a/cmake/ConfigureChecks.cmake
++++ b/cmake/ConfigureChecks.cmake
+@@ -2500,3 +2500,7 @@ if(CMAKE_SYSTEM MATCHES Windows)
+   set(PY_PLATFORM win32)
+ endif()
+ 
++if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
++  set(_PYTHONFRAMEWORK "")
++endif()
++
+diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
+index 988c74c..137dc9d 100644
+--- a/cmake/config-mingw/pyconfig.h
++++ b/cmake/config-mingw/pyconfig.h
+@@ -584,4 +584,21 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+    least significant byte first */
+ #define DOUBLE_IS_LITTLE_ENDIAN_IEEE754 1
+ 
++#if PY_VERSION_HEX >= 0x03070000
++/* Define to 1 if you have the `erf' function. */
++#define HAVE_ERF 1
++
++/* Define to 1 if you have the `erfc' function. */
++#define HAVE_ERFC 1
++
++/* Define if you have the 'inet_pton' function. */
++#define HAVE_INET_PTON 1
++
++/* framework name */
++#define _PYTHONFRAMEWORK ""
++
++/* Define if libssl has X509_VERIFY_PARAM_set1_host and related function */
++#define HAVE_X509_VERIFY_PARAM_SET1_HOST 1
++#endif
++
+ #endif /* !Py_CONFIG_H */
+diff --git a/cmake/config-unix/pyconfig.h.in b/cmake/config-unix/pyconfig.h.in
+index e08d3f8..fc6bc78 100644
+--- a/cmake/config-unix/pyconfig.h.in
++++ b/cmake/config-unix/pyconfig.h.in
+@@ -1501,6 +1501,11 @@
+ /* Define if you have POSIX threads, and your system does not define that. */
+ #cmakedefine _POSIX_THREADS
+ 
++#if PY_VERSION_HEX >= 0x03070000
++/* framework name */
++#define _PYTHONFRAMEWORK "@_PYTHONFRAMEWORK@"
++#endif
++
+ /* Define to force use of thread-safe errno, h_errno, and other functions */
+ #cmakedefine _REENTRANT 1
+ 
+diff --git a/cmake/config_3.c.in b/cmake/config_3.c.in
+index 7b2d3c7..ffe64c7 100644
+--- a/cmake/config_3.c.in
++++ b/cmake/config_3.c.in
+@@ -10,7 +10,11 @@ extern "C" {
+ /* -- ADDMODULE MARKER 1 -- */
+ 
+ extern PyObject* PyMarshal_Init(void);
++#if PY_VERSION_HEX >= 0x03070000
++extern PyObject* PyInit__imp(void);
++#else
+ extern PyObject* PyInit_imp(void);
++#endif
+ extern PyObject* PyInit_gc(void);
+ extern PyObject* PyInit__ast(void);
+ extern PyObject* _PyWarnings_Init(void);
+@@ -35,7 +39,11 @@ struct _inittab _PyImport_Inittab[] = {
+     {"marshal", PyMarshal_Init},
+ 
+     /* This lives in import.c */
++#if PY_VERSION_HEX >= 0x03070000
++    {"_imp", PyInit__imp},
++#else
+     {"_imp", PyInit_imp},
++#endif
+ 
+     /* This lives in Python/Python-ast.c */
+     {"_ast", PyInit__ast},
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index 4dd369d..8d54929 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -144,6 +144,11 @@ if(PY_VERSION VERSION_EQUAL "3.6" OR PY_VERSION VERSION_GREATER "3.6")
+     add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES _sha3/sha3module.c)
+ endif()
+ 
++# Python 3.7
++if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
++    add_python_extension(_abc BUILTIN REQUIRES IS_PY3 SOURCES _abc.c)
++endif()
++
+ # UNIX-only extensions
+ add_python_extension(fcntl REQUIRES UNIX SOURCES fcntlmodule.c)
+ add_python_extension(grp REQUIRES UNIX SOURCES grpmodule.c)
+diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
+index e1ee1b5..6742227 100644
+--- a/cmake/libpython/CMakeLists.txt
++++ b/cmake/libpython/CMakeLists.txt
+@@ -103,6 +103,11 @@ if(MSVC)
+         ${SRC_DIR}/PC/invalid_parameter_handler.c
+     )
+ endif()
++if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
++    list(APPEND OBJECT3_SOURCES
++        ${SRC_DIR}/Objects/call.c
++    )
++endif()
+ 
+ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
+     ${OBJECT${PY_VERSION_MAJOR}_SOURCES}
+@@ -206,6 +211,15 @@ set(PYTHON3_COMMON_SOURCES
+     ${SRC_DIR}/Python/pystrtod.c
+     ${SRC_DIR}/Python/pytime.c
+ )
++if(PY_VERSION VERSION_EQUAL "3.7" OR PY_VERSION VERSION_GREATER "3.7")
++    list(APPEND PYTHON3_COMMON_SOURCES
++        ${SRC_DIR}/Python/ast_opt.c
++        ${SRC_DIR}/Python/ast_unparse.c
++        ${SRC_DIR}/Python/context.c
++        ${SRC_DIR}/Python/hamt.c
++        ${SRC_DIR}/Python/pathconfig.c
++    )
++endif()
+ 
+ set(PYTHON_COMMON_SOURCES
+     ${DYNLOAD_SOURCES}
+@@ -243,13 +257,21 @@ set(PYTHON_COMMON_SOURCES
+     ${SRC_DIR}/Python/pystrcmp.c
+     ${SRC_DIR}/Python/Python-ast.c
+     ${SRC_DIR}/Python/pythonrun.c
+-    ${SRC_DIR}/Python/random.c
+     ${SRC_DIR}/Python/structmember.c
+     ${SRC_DIR}/Python/symtable.c
+     ${SRC_DIR}/Python/sysmodule.c
+     ${SRC_DIR}/Python/traceback.c
+     ${SRC_DIR}/Python/_warnings.c
+ )
++if(PY_VERSION VERSION_LESS "3.7")
++    list(APPEND PYTHON_COMMON_SOURCES
++        ${SRC_DIR}/Python/random.c
++    )
++else()
++    list(APPEND PYTHON_COMMON_SOURCES
++        ${SRC_DIR}/Python/bootstrap_hash.c
++    )
++endif()
+ if(UNIX)
+     list(APPEND PYTHON_COMMON_SOURCES
+         ${SRC_DIR}/Python/frozenmain.c
+-- 
+2.17.1.windows.2
+

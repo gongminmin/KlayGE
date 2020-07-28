@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Math.hpp>
@@ -15,7 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
@@ -23,10 +22,11 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
 #include <random>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "GPUParticleSystem.hpp"
@@ -110,7 +110,7 @@ namespace
 		TexturePtr ret;
 		if (caps.max_texture_depth >= vol_size)
 		{
-			auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+			auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			if (fmt == EF_ARGB8)
@@ -121,7 +121,7 @@ namespace
 				}
 			}
 
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 		}
 
 		return ret;
@@ -422,7 +422,7 @@ namespace
 
 				{
 					RenderDeviceCaps const & caps = re.DeviceCaps();
-					auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
+					auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR32F, EF_ABGR16F}), 1, 0);
 					BOOST_ASSERT(fmt != EF_Unknown);
 
 					std::vector<uint8_t> pos;
@@ -459,8 +459,10 @@ namespace
 						pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
 						pos_init.slice_pitch = 0;
 					}
-					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
-					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_pos_texture_[0] =
+						rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(pos_init));
+					particle_pos_texture_[1] =
+						rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(pos_init));
 					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				}
@@ -476,8 +478,9 @@ namespace
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_pos_texture_[1], 0, 1, 0));
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
-					pos_vel_rt_buffer_[0]->GetViewport()->camera = pos_vel_rt_buffer_[1]->GetViewport()->camera
-						= screen_buffer->GetViewport()->camera;
+					auto const& camera = screen_buffer->Viewport()->Camera();
+					pos_vel_rt_buffer_[0]->Viewport()->Camera(camera);
+					pos_vel_rt_buffer_[1]->Viewport()->Camera(camera);
 				}
 				else
 				{
@@ -493,9 +496,11 @@ namespace
 					vel_rt_buffer_[1] = rf.MakeFrameBuffer();
 					vel_rt_buffer_[1]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(particle_vel_texture_[1], 0, 1, 0));
 
-					pos_rt_buffer_[0]->GetViewport()->camera = pos_rt_buffer_[1]->GetViewport()->camera
-						= vel_rt_buffer_[0]->GetViewport()->camera = vel_rt_buffer_[1]->GetViewport()->camera
-						= screen_buffer->GetViewport()->camera;
+					auto const& camera = screen_buffer->Viewport()->Camera();
+					pos_rt_buffer_[0]->Viewport()->Camera(camera);
+					pos_rt_buffer_[1]->Viewport()->Camera(camera);
+					vel_rt_buffer_[0]->Viewport()->Camera(camera);
+					vel_rt_buffer_[1]->Viewport()->Camera(camera);
 				}
 
 				{
@@ -515,7 +520,8 @@ namespace
 					vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 					vel_init.slice_pitch = 0;
 
-					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, vel_init);
+					TexturePtr particle_init_vel = rf.MakeTexture2D(
+						tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(vel_init));
 					*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 				}
 
@@ -531,10 +537,10 @@ namespace
 			*(effect_->ParameterByName("normal_map_tex")) = terrain_normal_map;
 		}
 
-		void ModelMatrix(float4x4 const & model)
+		void ModelMatrix(float4x4 const & model_mat) override
 		{
-			model_mat_ = model;
-			*(effect_->ParameterByName("ps_model_mat")) = model;
+			Renderable::ModelMatrix(model_mat);
+			*(effect_->ParameterByName("ps_model_mat")) = model_mat;
 		}
 
 		float4x4 const & ModelMatrix() const
@@ -569,7 +575,8 @@ namespace
 				init_data.row_pitch = tex_width_ * sizeof(half);
 				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				TexturePtr particle_birth_time_tex =
+					rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 				*(effect_->ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -739,14 +746,13 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderablePlane::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
 			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
 			*(effect_->ParameterByName("inv_far")) = 1 / camera.FarPlane();
-
-			*(effect_->ParameterByName("pos_center")) = pos_aabb_.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 		}
 	};
 
@@ -801,7 +807,7 @@ void GPUParticleSystemApp::OnCreate()
 	}
 	else
 	{
-		use_so = caps.stream_output_support && caps.load_from_buffer_support;
+		use_so = caps.load_from_buffer_support;
 	}
 	use_mrt = caps.max_simultaneous_rts > 1;
 
@@ -843,9 +849,9 @@ void GPUParticleSystemApp::OnCreate()
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 	
 	scene_buffer_ = rf.MakeFrameBuffer();
-	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	scene_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	fog_buffer_ = rf.MakeFrameBuffer();
-	fog_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	fog_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
@@ -854,7 +860,7 @@ void GPUParticleSystemApp::OnCreate()
 		checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 	}
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
@@ -870,12 +876,13 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(ds_view);
 
 	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	fog_srv_ = rf.MakeTextureSrv(fog_tex_);
 	fog_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_renderable_)->SceneTexture(scene_tex_);
 
-	blend_pp_->InputPin(0, scene_tex_);
+	blend_pp_->InputPin(0, rf.MakeTextureSrv(scene_tex_));
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -960,7 +967,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(false);
 			particles_->Visible(false);
 
-			blend_pp_->InputPin(1, fog_tex_);
+			blend_pp_->InputPin(1, fog_srv_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);

@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,14 +13,15 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "ProceduralTex.hpp"
@@ -31,6 +31,14 @@ using namespace KlayGE;
 
 namespace
 {
+	enum class ProceduralType
+	{
+		Wood = 0,
+		Marble,
+		Cloud,
+		Electro,
+	};
+
 	class RenderPolygon : public StaticMesh
 	{
 	public:
@@ -41,15 +49,6 @@ namespace
 			technique_ = effect_->TechniqueByName("ProceduralMarbleTex");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-		}
-
 		void AppTime(float app_time)
 		{
 			*(effect_->ParameterByName("t")) = app_time / 2.0f;
@@ -57,6 +56,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -81,9 +82,28 @@ namespace
 			*(effect_->ParameterByName("light_falloff")) = light_falloff;
 		}
 
-		void ProceduralType(int type)
+		void ProceduralType(ProceduralType type)
 		{
-			technique_ = effect_->TechniqueByIndex(type);
+			std::string_view name;
+			switch (type)
+			{
+			case ProceduralType::Wood:
+				name = "ProceduralWoodTex";
+				break;
+
+			case ProceduralType::Marble:
+				name = "ProceduralMarbleTex";
+				break;
+
+			case ProceduralType::Cloud:
+				name = "ProceduralCloudTex";
+				break;
+
+			case ProceduralType::Electro:
+				name = "ProceduralElectroTex";
+				break;
+			}
+			technique_ = effect_->TechniqueByName(name);
 		}
 
 		void ProceduralFreq(float freq)
@@ -125,7 +145,7 @@ ProceduralTexApp::ProceduralTexApp()
 void ProceduralTexApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Open("ProceduralTex.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ProceduralTex.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
@@ -153,7 +173,7 @@ void ProceduralTexApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 	procedural_type_ = sender.GetSelectedIndex();
 	polygon_model_->ForEachMesh([this](Renderable& mesh)
 		{
-			checked_cast<RenderPolygon&>(mesh).ProceduralType(procedural_type_);
+			checked_cast<RenderPolygon&>(mesh).ProceduralType(static_cast<ProceduralType>(procedural_type_));
 		});
 }
 

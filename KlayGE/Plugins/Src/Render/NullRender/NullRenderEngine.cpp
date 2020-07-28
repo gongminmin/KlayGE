@@ -36,9 +36,7 @@
 
 namespace KlayGE
 {
-	NullRenderEngine::NullRenderEngine()
-	{
-	}
+	NullRenderEngine::NullRenderEngine() = default;
 
 	NullRenderEngine::~NullRenderEngine()
 	{

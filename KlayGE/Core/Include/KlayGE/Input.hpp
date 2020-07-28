@@ -227,14 +227,14 @@ namespace KlayGE
 	// 游戏杆动作
 	enum JoystickSemantic
 	{
-		JS_XPos				= 0x200,
-		JS_YPos				= 0x201,
-		JS_ZPos				= 0x202,
-		JS_XRot				= 0x203,
-		JS_YRot				= 0x204,
-		JS_ZRot				= 0x205,
-		JS_Slider0			= 0x206,
-		JS_Slider1			= 0x207,
+		JS_LeftThumbX		= 0x200,
+		JS_LeftThumbY		= 0x201,
+		JS_LeftThumbZ		= 0x202,
+		JS_RightThumbX		= 0x203,
+		JS_RightThumbY		= 0x204,
+		JS_RightThumbZ		= 0x205,
+		JS_LeftTrigger		= 0x206,
+		JS_RightTrigger		= 0x207,
 		JS_Button0			= 0x208,
 		JS_Button1			= 0x209,
 		JS_Button2			= 0x20A,
@@ -337,7 +337,7 @@ namespace KlayGE
 
 	// 输入动作格式
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API InputActionMap
+	class KLAYGE_CORE_API InputActionMap final
 	{
 	public:
 		void AddAction(InputActionDefine const & action_define);
@@ -508,34 +508,33 @@ namespace KlayGE
 			return InputEngine::IDT_Joystick;
 		}
 
-		long XPos() const;
-		long YPos() const;
-		long ZPos() const;
-		long XRot() const;
-		long YRot() const;
-		long ZRot() const;
+		float3 const& LeftThumb() const;
+		float3 const& RightThumb() const;
 
-		size_t NumSliders() const;
-		long Slider(size_t index) const;
+		float LeftTrigger() const;
+		float RightTrigger() const;
 
-		size_t NumButtons() const;
-		bool Button(size_t n) const;
+		uint32_t NumButtons() const;
+		bool Button(uint32_t n) const;
 
-		bool ButtonDown(size_t n) const;
-		bool ButtonUp(size_t n) const;
+		bool ButtonDown(uint32_t n) const;
+		bool ButtonUp(uint32_t n) const;
 
-		virtual InputActionsType UpdateActionMap(uint32_t id) override;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
+		uint32_t NumVibrationMotors() const;
+		virtual void VibrationMotorSpeed(uint32_t n, float speed);
+
+		InputActionsType UpdateActionMap(uint32_t id) override;
+		void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
-		int3 pos_;		// x, y, z axis position
-		int3 rot_;		// x, y, z axis rotation
+		std::array<float3, 2> thumbs_{float3(0, 0, 0), float3(0, 0, 0)};		// x, y, z axis
+		std::array<float, 2> triggers_{};
 
-		int2 slider_;		// extra axes positions
+		uint32_t num_buttons_{0};
+		std::array<std::array<bool, 32>, 2> buttons_{};	// 32 buttons
+		bool index_{false};
 
-		uint32_t num_buttons_;
-		std::array<std::array<bool, 32>, 2> buttons_;	// 32 buttons
-		bool index_;
+		uint32_t num_vibration_motors_{0};
 
 		InputJoystickActionParamPtr action_param_;
 	};
@@ -658,7 +657,7 @@ namespace KlayGE
 		InputEngine::InputDeviceType type;
 	};
 
-	struct KLAYGE_CORE_API InputKeyboardActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputKeyboardActionParam final : public InputActionParam
 	{
 		std::bitset<256> buttons_state;
 		std::bitset<256>  buttons_down;
@@ -682,7 +681,7 @@ namespace KlayGE
 		MB_Ctrl = 1UL << 9,
 		MB_Alt = 1UL << 10
 	};
-	struct KLAYGE_CORE_API InputMouseActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputMouseActionParam final : public InputActionParam
 	{
 		int2 move_vec;
 		int32_t wheel_delta;
@@ -692,17 +691,16 @@ namespace KlayGE
 		uint16_t buttons_up;
 	};
 
-	struct KLAYGE_CORE_API InputJoystickActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputJoystickActionParam final : public InputActionParam
 	{
-		int3 pos;
-		int3 rot;
-		int2 slider;
+		float3 thumbs[2];
+		float triggers[2];
 		uint32_t buttons_state;
 		uint32_t buttons_down;
 		uint32_t buttons_up;
 	};
 	
-	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputTouchActionParam final : public InputActionParam
 	{
 		TouchSemantic gesture;
 		int2 center;
@@ -716,7 +714,7 @@ namespace KlayGE
 		uint16_t touches_up;
 	};
 
-	struct KLAYGE_CORE_API InputSensorActionParam : public InputActionParam
+	struct KLAYGE_CORE_API InputSensorActionParam final : public InputActionParam
 	{
 		float latitude;
 		float longitude;

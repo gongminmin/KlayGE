@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
@@ -23,6 +22,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -153,7 +153,7 @@ void PostProcessingApp::OnCreate()
 	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
 	black_hole_ = SyncLoadPostProcess("BlackHole.ppml", "black_hole");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
@@ -230,7 +230,7 @@ void PostProcessingApp::OnCreate()
 	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	color_fb_ = rf.MakeFrameBuffer();
-	color_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	color_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 }
 
 void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
@@ -239,35 +239,36 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-	auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
 	color_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto color_srv = rf.MakeTextureSrv(color_tex_);
 	color_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
 	color_fb_->Attach(rf.Make2DDsv(width, height, EF_D16, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, color_fb_, 0);
 
-	copy_->InputPin(0, color_tex_);
+	copy_->InputPin(0, color_srv);
 
-	ascii_arts_->InputPin(0, color_tex_);
+	ascii_arts_->InputPin(0, color_srv);
 
-	cartoon_->InputPin(0, deferred_rendering_->GBufferResolvedRT0Tex(0));
-	cartoon_->InputPin(1, deferred_rendering_->ResolvedDepthTex(0));
-	cartoon_->InputPin(2, color_tex_);
+	cartoon_->InputPin(0, deferred_rendering_->GBufferResolvedRT0Srv(0));
+	cartoon_->InputPin(1, deferred_rendering_->ResolvedDepthSrv(0));
+	cartoon_->InputPin(2, color_srv);
 
-	tiling_->InputPin(0, color_tex_);
+	tiling_->InputPin(0, color_srv);
 
-	hdr_->InputPin(0, color_tex_);
+	hdr_->InputPin(0, color_srv);
 
-	night_vision_->InputPin(0, color_tex_);
+	night_vision_->InputPin(0, color_srv);
 
-	sepia_->InputPin(0, color_tex_);
+	sepia_->InputPin(0, color_srv);
 
-	cross_stitching_->InputPin(0, color_tex_);
+	cross_stitching_->InputPin(0, color_srv);
 
-	frosted_glass_->InputPin(0, color_tex_);
+	frosted_glass_->InputPin(0, color_srv);
 
-	black_hole_->InputPin(0, color_tex_);
+	black_hole_->InputPin(0, color_srv);
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -387,6 +388,14 @@ void PostProcessingApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
@@ -398,7 +407,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	{
 		if (active_pp_ == black_hole_)
 		{
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), camera.InverseViewProjMatrix());
 			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), camera.InverseViewProjMatrix());
@@ -412,7 +421,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 			black_hole_->SetParam(5, this->AppTime());
 		}
 
-		color_tex_->BuildMipSubLevels();
+		color_tex_->BuildMipSubLevels(TextureFilter::Linear);
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->AttachedRtv(FrameBuffer::Attachment::Color0)->Discard();
 		re.CurFrameBuffer()->AttachedDsv()->ClearDepth(1.0f);

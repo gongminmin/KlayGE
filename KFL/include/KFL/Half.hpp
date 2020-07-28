@@ -85,8 +85,11 @@ namespace KlayGE
 			: value_()
 		{
 		}
-
 		explicit half(float f) noexcept;
+		half(half const& rhs) noexcept
+			: value_(rhs.value_)
+		{
+		}
 
 		operator float() const noexcept;
 
@@ -130,28 +133,28 @@ namespace std
 	class numeric_limits<KlayGE::half>
 	{
 	public:
-		static bool const is_specialized = true;
-		static int const digits = HALF_MANT_DIG;
-		static int const digits10 = HALF_DIG;
-		static bool const is_signed = true;
-		static bool const is_integer = false;
-		static bool const is_exact = false;
-		static int const radix = HALF_RADIX;
-		static int const min_exponent = HALF_MIN_EXP;
-		static int const min_exponent10 = HALF_MIN_10_EXP;
-		static int const max_exponent = HALF_MAX_EXP;
-		static int const max_exponent10 = HALF_MAX_10_EXP;
-		static bool const has_infinity = true;
-		static bool const has_quiet_NaN = true;
-		static bool const has_signaling_NaN = true;
-		static float_denorm_style const has_denorm = denorm_present;
-		static bool const has_denorm_loss = false;
-		static bool const is_iec559 = false;
-		static bool const is_bounded = false;
-		static bool const is_modulo = false;
-		static bool const traps = true;
-		static bool const tinyness_before = false;
-		static float_round_style const round_style = round_to_nearest;
+		static bool constexpr is_specialized = true;
+		static int constexpr digits = HALF_MANT_DIG;
+		static int constexpr digits10 = HALF_DIG;
+		static bool constexpr is_signed = true;
+		static bool constexpr is_integer = false;
+		static bool constexpr is_exact = false;
+		static int constexpr radix = HALF_RADIX;
+		static int constexpr min_exponent = HALF_MIN_EXP;
+		static int constexpr min_exponent10 = HALF_MIN_10_EXP;
+		static int constexpr max_exponent = HALF_MAX_EXP;
+		static int constexpr max_exponent10 = HALF_MAX_10_EXP;
+		static bool constexpr has_infinity = true;
+		static bool constexpr has_quiet_NaN = true;
+		static bool constexpr has_signaling_NaN = true;
+		static float_denorm_style constexpr has_denorm = denorm_present;
+		static bool constexpr has_denorm_loss = false;
+		static bool constexpr is_iec559 = false;
+		static bool constexpr is_bounded = false;
+		static bool constexpr is_modulo = false;
+		static bool constexpr traps = true;
+		static bool constexpr tinyness_before = false;
+		static float_round_style constexpr round_style = round_to_nearest;
 
 		static KlayGE::half min() noexcept
 		{

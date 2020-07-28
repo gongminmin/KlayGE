@@ -66,7 +66,7 @@ namespace KlayGE
 	}
 
 	// Exception thrown when a joiner tries to join with its own thread or the joiner has no thread.
-	class bad_join : public std::exception
+	class bad_join final : public std::exception
 	{
 	public:
 		const char* what() const noexcept
@@ -169,7 +169,7 @@ namespace KlayGE
 
 	// Joiner class, an object that represent a launched thread the thread can be joined from different threads using this object
 	template <typename ResultType>
-	class joiner
+	class joiner final
 	{
 		typedef joiner_impl_base<ResultType> joiner_base_t;
 
@@ -256,7 +256,7 @@ namespace KlayGE
 		// This is the function executed by the underlying thread system that calls the user supplied Threadable object
 		//  and takes care of exception handling
 		template <typename Threadable, typename JoinerImpl>
-		class threaded
+		class threaded final
 		{
 			typedef threaded<Threadable, JoinerImpl>				threaded_t;
 			typedef typename std::result_of<Threadable()>::type		result_t;
@@ -309,7 +309,7 @@ namespace KlayGE
 	}
 
 	// A threader class that whose operator() launches a threadable	object in a new thread
-	class threader
+	class threader final
 	{
 		// This is the implementation of joiner functions created by "create_thread" and "class threader" threaders.
 		template <typename result_type>
@@ -371,7 +371,7 @@ namespace KlayGE
 	// This Threader class creates a pool of threads that can be reused for several Threadable object executions.
 	//  If the thread pool runs out of threads it creates more. The user can specify the minimum and maximum
 	//  number of pooled threads.
-	class thread_pool
+	class thread_pool final
 	{
 		class thread_pool_common_data_t;
 
@@ -447,7 +447,7 @@ namespace KlayGE
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class thread_pool_common_data_t : public std::enable_shared_from_this<thread_pool_common_data_t>
+		class thread_pool_common_data_t final : public std::enable_shared_from_this<thread_pool_common_data_t>
 		{
 			// This functor is the functor that implements thread pooling logic. Waits until someone fills
 			//  the func_ and thpool_join_info_ using the wake_up(...) function of the pooled thread's info.
@@ -517,7 +517,7 @@ namespace KlayGE
 
 		// This is the implementation of joiner functions created by "create_thread" and "class threader" threaders.
 		template <typename result_type>
-		class joiner_thread_pool_impl : public joiner_impl_base<result_type>
+		class joiner_thread_pool_impl final : public joiner_impl_base<result_type>
 		{
 			friend class thread_pool;
 

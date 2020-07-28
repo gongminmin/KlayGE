@@ -50,14 +50,14 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
-		if (deferred_effect_)
+		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
 			effect_attrs_ |= EA_SpecialShading;
 
 			this->BindDeferredEffect(effect);
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
+			gbuffer_tech_ = effect->TechniqueByName("GBufferSkyBoxTech");
 			special_shading_tech_ = effect->TechniqueByName("SkyBoxTech");
-			this->Technique(effect, gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_tech_);
 		}
 		else
 		{
@@ -111,8 +111,8 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_OpaqueGBufferMRT:
-			technique_ = gbuffer_mrt_tech_;
+		case PT_OpaqueGBuffer:
+			technique_ = gbuffer_tech_;
 			break;
 
 		case PT_OpaqueSpecialShading:

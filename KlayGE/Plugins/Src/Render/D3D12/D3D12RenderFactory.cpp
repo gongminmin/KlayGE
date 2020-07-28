@@ -48,9 +48,7 @@
 
 namespace KlayGE
 {
-	D3D12RenderFactory::D3D12RenderFactory()
-	{
-	}
+	D3D12RenderFactory::D3D12RenderFactory() = default;
 
 	std::wstring const & D3D12RenderFactory::Name() const
 	{
@@ -136,6 +134,12 @@ namespace KlayGE
 		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
 	{
 		return MakeSharedPtr<D3D12TextureShaderResourceView>(texture, pf, first_array_index, array_size, first_level, num_levels);
+	}
+
+	ShaderResourceViewPtr D3D12RenderFactory::MakeTexture2DSrv(
+		TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		return MakeSharedPtr<D3D12TextureShaderResourceView>(texture, pf, array_index, face, first_level, num_levels);
 	}
 
 	ShaderResourceViewPtr D3D12RenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,

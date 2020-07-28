@@ -166,7 +166,7 @@ namespace KlayGE
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		void* p;
-		if (!(re.HackForIntel()) && (ba == BA_Write_Only) && (BU_Dynamic == usage_))
+		if ((ba == BA_Write_Only) && (BU_Dynamic == usage_))
 		{
 			GLuint access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())

@@ -4,8 +4,6 @@
 	<include name="Lighting.fxml"/>
 	<include name="GBuffer.fxml"/>
 
-	<parameter type="float4x4" name="model"/>
-	<parameter type="float4" name="light_color"/>
 	<parameter type="int2" name="light_is_projective"/>
 
 	<parameter type="texture2D" name="projective_map_2d_tex"/>
@@ -19,7 +17,8 @@
 
 	<shader>
 		<![CDATA[
-void LightSourceProxyVS(float4 pos : POSITION,
+void LightSourceProxyVS(uint instance_id : SV_InstanceID,
+						float4 pos : POSITION,
 						float4 tangent_quat : TANGENT,
 			out float3 oPosOS : TEXCOORD0,
 			out float3 oNormal : TEXCOORD1,
@@ -27,7 +26,10 @@ void LightSourceProxyVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model);
@@ -35,7 +37,7 @@ void LightSourceProxyVS(float4 pos : POSITION,
 
 float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 {
-	float4 clr = light_color;
+	float4 clr = albedo_clr;
 	if (light_is_projective.x)
 	{
 		float4 proj_clr;

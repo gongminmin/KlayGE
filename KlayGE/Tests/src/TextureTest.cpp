@@ -59,7 +59,7 @@ public:
 		auto target_scaled = rf.MakeTexture2D(
 			static_cast<uint32_t>(target->Width(0) * scale), static_cast<uint32_t>(target->Height(0) * scale),
 			1, 1, target->Format(), 1, 0, EAH_CPU_Read);
-		target->CopyToTexture(*target_scaled);
+		target->CopyToTexture(*target_scaled, TextureFilter::Linear);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
 
@@ -76,9 +76,8 @@ public:
 
 		auto target = SyncLoadTexture(input_name, gpu_tex ? EAH_GPU_Read : EAH_CPU_Read);
 		auto target_scaled = rf.MakeTexture2D(target->Width(0) / 4, target->Height(0) / 4, 1, 1, target->Format(), 1, 0, EAH_CPU_Read);
-		target->CopyToTexture(*target_scaled);
-		target_scaled->CopyToSubTexture2D(*target, 0, 0, 24, 48, 20, 32,
-			0, 0, 4, 8, 24, 20);
+		target->CopyToTexture(*target_scaled, TextureFilter::Linear);
+		target_scaled->CopyToSubTexture2D(*target, 0, 0, 24, 48, 20, 32, 0, 0, 4, 8, 24, 20, TextureFilter::Linear);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
 
@@ -95,11 +94,11 @@ public:
 
 		auto target = SyncLoadTexture(input_name, gpu_tex ? EAH_GPU_Read : EAH_CPU_Read);
 		auto target_scaled = rf.MakeTexture2D(target->Width(0) / 4, target->Height(0) / 4, 1, 1, target->Format(), 1, 0, EAH_CPU_Read);
-		target->CopyToTexture(*target_scaled);
+		target->CopyToTexture(*target_scaled, TextureFilter::Linear);
 
 		auto target_cropped = rf.MakeTexture2D(20, 32, 1, 1, target->Format(), 1, 0, EAH_CPU_Read);
-		target_scaled->CopyToSubTexture2D(*target_cropped, 0, 0, 0, 0, target_cropped->Width(0), target_cropped->Height(0),
-			0, 0, 4, 8, 24, 20);
+		target_scaled->CopyToSubTexture2D(
+			*target_cropped, 0, 0, 0, 0, target_cropped->Width(0), target_cropped->Height(0), 0, 0, 4, 8, 24, 20, TextureFilter::Linear);
 
 		{
 			Texture::Mapper mapper(*target_cropped, 0, 0, TMA_Read_Only, 0, 0, target_cropped->Width(0), target_cropped->Height(0));

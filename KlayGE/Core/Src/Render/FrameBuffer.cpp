@@ -26,17 +26,15 @@ namespace KlayGE
 {
 	FrameBuffer::FrameBuffer()
 					: left_(0), top_(0), width_(0), height_(0),
-						viewport_(MakeSharedPtr<Viewport>())
+						viewport_(MakeSharedPtr<KlayGE::Viewport>())
 	{
-		viewport_->left = left_;
-		viewport_->top = top_;
-		viewport_->width = width_;
-		viewport_->height = height_;
+		viewport_->Left(left_);
+		viewport_->Top(top_);
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 	}
 
-	FrameBuffer::~FrameBuffer()
-	{
-	}
+	FrameBuffer::~FrameBuffer() noexcept = default;
 
 	FrameBuffer::Attachment FrameBuffer::CalcAttachment(uint32_t index)
 	{
@@ -73,19 +71,19 @@ namespace KlayGE
 
 	// 获取视口
 	/////////////////////////////////////////////////////////////////////////////////
-	ViewportPtr const & FrameBuffer::GetViewport() const
+	ViewportPtr const & FrameBuffer::Viewport() const
 	{
 		return viewport_;
 	}
 
-	ViewportPtr& FrameBuffer::GetViewport()
+	ViewportPtr& FrameBuffer::Viewport()
 	{
 		return viewport_;
 	}
 
 	// 设置视口
 	/////////////////////////////////////////////////////////////////////////////////
-	void FrameBuffer::SetViewport(ViewportPtr const & viewport)
+	void FrameBuffer::Viewport(ViewportPtr const & viewport)
 	{
 		viewport_ = viewport;
 	}
@@ -123,10 +121,10 @@ namespace KlayGE
 			width_ = view->Width();
 			height_ = view->Height();
 
-			viewport_->left		= 0;
-			viewport_->top		= 0;
-			viewport_->width	= width_;
-			viewport_->height	= height_;
+			viewport_->Left(0);
+			viewport_->Top(0);
+			viewport_->Width(width_);
+			viewport_->Height(height_);
 		}
 
 		if (view)

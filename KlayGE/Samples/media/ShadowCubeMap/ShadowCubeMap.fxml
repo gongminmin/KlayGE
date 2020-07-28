@@ -4,16 +4,12 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
-	<parameter type="float4x4" name="mvp"/>
-	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 	<parameter type="float2" name="far_plane"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
@@ -22,7 +18,7 @@
 
 	<shader>
 		<![CDATA[
-float calc_dist(float4 position)
+float CalcDist(float4 position)
 {
 	float4 LightWorldPos = mul(position, obj_model_to_light_model);
 	LightWorldPos /= LightWorldPos.w;
@@ -36,8 +32,8 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
-	oPos = mul(Position, mvp);
-	oDist = calc_dist(Position);
+	oPos = mul(Position, cameras[0].mvp);
+	oDist = CalcDist(Position);
 }
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
@@ -56,204 +52,9 @@ float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<parameter type="float4x4" name="mv" />
-	<parameter type="float" name="far" />
-
-	<shader>
-		<![CDATA[
-void CalcDPSM(float4 Position,
-			out float2 oDist,
-			out float4 oPos)
-{
-	// transform vertex to DP-space
-	oPos = mul(Position, mv);
-	oPos /= oPos.w;
-
-	// because the origin is at 0 the proj-vector
-	// matches the vertex-position
-	float fLength = length(oPos.xyz);
-	// normalize
-	oPos /= fLength;
-	// save for clipping
-	oDist.y = oPos.z;
-	// calc "normal" on intersection, by adding the 
-	// reflection-vector(0,0,1) and divide through 
-	// his z to get the texture coords
-	oPos.xy /= oPos.z + 1;
-	
-	// set z for z-buffering and neutralize w
-	oPos.z = fLength / far;
-	oPos.w = 1.0f;
-
-	// DP-depth
-	oDist.x = fLength;
-}
-
-void GenDPShadowMapVS(float4 Position : POSITION,
-						float4 tangent_quat : TANGENT,
-					out float2 oDist  : TEXCOORD0,
-					out float4 oPos   : SV_Position)
-{
-	Position = float4(Position.xyz * pos_extent + pos_center, 1);
-	
-	CalcDPSM(Position, oDist, oPos);
-}
-
-float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
-{
-	clip(dist.y);
-	return WriteAFloat(dist.x, far_plane.y);
-}
-		]]>
-	</shader>
-
-	<technique name="GenDPShadowMap">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="GenDPShadowMapVS()"/>
-			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
-		</pass>
-	</technique>
-
-
-	<parameter type="bool" name="adaptive_tess"/>
-	<parameter type="float4" name="tess_factors"/>
-	<parameter type="float2" name="tess_edge_length_scale"/>
-
-	<shader>
-		<![CDATA[
-void InterpolateFlatAttrs(float3 bc_coords,
-				float3 pos0, float3 pos1, float3 pos2,
-				out float3 oPos)
-{
-	float u = bc_coords.x;
-	float v = bc_coords.y;
-	float w = bc_coords.z;
-
-	oPos = pos0 * w + pos1 * u + pos2 * v;
-}
-		]]>
-	</shader>
-
-	<shader version="5">
-		<![CDATA[
-struct VS_CONTROL_POINT_OUTPUT
-{
-	float3 Pos : POSITION;
-};
-
-VS_CONTROL_POINT_OUTPUT HWTessGenDPShadowMapVS(float4 pos : POSITION)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	
-	VS_CONTROL_POINT_OUTPUT output;
-	output.Pos = pos.xyz;
-	return output;
-}
-		
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	// Tess factor for the FF HW block
-	float edges[3]	: SV_TessFactor;
-	float inside	: SV_InsideTessFactor;
-};
-
-//--------------------------------------------------------------------------------------
-// Constant data function for the HWTessGenDPShadowMapHS.  This is executed once per patch.
-//--------------------------------------------------------------------------------------
-HS_CONSTANT_DATA_OUTPUT HWTessGenDPShadowMapConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
-{	
-	HS_CONSTANT_DATA_OUTPUT output;
-
-	if (adaptive_tess)
-	{
-		float4 p0 = mul(float4(ip[0].Pos, 1), mvp);
-		float4 p1 = mul(float4(ip[1].Pos, 1), mvp);
-		float4 p2 = mul(float4(ip[2].Pos, 1), mvp);
-		p0.xy /= p0.w;
-		p1.xy /= p1.w;
-		p2.xy /= p2.w;
-		
-		float3 factor;
-		factor.x = length((p1.xy - p0.xy) * tess_edge_length_scale);
-		factor.y = length((p2.xy - p1.xy) * tess_edge_length_scale);
-		factor.z = length((p0.xy - p2.xy) * tess_edge_length_scale);
-		factor = clamp(factor, tess_factors.z, tess_factors.w);
-		
-		// Edge 0
-		output.edges[0] = factor.x;
-		// Edge 1
-		output.edges[1] = factor.y;
-		// Edge 2
-		output.edges[2] = factor.z;
-		// Inside
-		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
-	}
-	else
-	{
-		// Simply output the tessellation factors from constant space 
-		// for use by the FF tessellation unit
-		output.edges[0] = output.edges[1] = output.edges[2] = tess_factors.x;
-		output.inside = tess_factors.y;
-	}
-
-	return output;
-}
-
-struct HS_CONTROL_POINT
-{
-	float3 Pos : POSITION;
-};
-
-[domain("tri")]
-[partitioning("fractional_odd")]
-[outputtopology("triangle_cw")]
-[outputcontrolpoints(3)]
-[patchconstantfunc("HWTessGenDPShadowMapConstantsHS")]
-HS_CONTROL_POINT HWTessGenDPShadowMapHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
-										uint i : SV_OutputControlPointID)
-{
-	HS_CONTROL_POINT output;
-	output.Pos = p[i].Pos;
-	return output;
-}
-
-[domain("tri")]
-void HWTessGenDPShadowMapDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
-							float3 bc_coords : SV_DomainLocation,
-							const OutputPatch<HS_CONTROL_POINT, 3> patch,
-
-							out float2 oDist : TEXCOORD0,
-							out float4 oPos : SV_Position)
-{
-	float4 Position = float4(0, 0, 0, 1);
-	InterpolateFlatAttrs(bc_coords,
-				patch[0].Pos, patch[1].Pos, patch[2].Pos,
-				Position.xyz);
-
-	CalcDPSM(Position, oDist, oPos);
-}
-		]]>
-	</shader>
-
-	<technique name="GenDPShadowMapTessTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="HWTessGenDPShadowMapVS()"/>
-			<state name="hull_shader" value="HWTessGenDPShadowMapHS()"/>
-			<state name="domain_shader" value="HWTessGenDPShadowMapDS()"/>
-			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
-		</pass>
-	</technique>
-
-
-	<parameter type="float4x4" name="mvps" array_size="6"/>
-
 	<shader version="4">
 		<![CDATA[
-bool frustum_culling(float4 pos0, float4 pos1, float4 pos2)
+bool FrustumCulling(float4 pos0, float4 pos1, float4 pos2)
 {
 	float4 t0 = saturate(pos0.xyxy * float4(-1, -1, 1, 1) - pos0.w);
 	float4 t1 = saturate(pos1.xyxy * float4(-1, -1, 1, 1) - pos1.w);
@@ -277,34 +78,43 @@ void GenCubeOneShadowMapVS(float4 Position : POSITION,
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
 	oPos = Position;
-	oDist = calc_dist(Position);
+	oDist = CalcDist(Position);
 }
 
 [maxvertexcount(18)]
 void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
 	PS_IN output;
-	for (int f = 0; f < 6; ++ f)
+	for (uint f = 0; f < 6; ++f)
 	{
-		output.rt_index = f;
-		
-		float4 pos[3] =
-		{
-			mul(in_pos[0], mvps[f]), mul(in_pos[1], mvps[f]), mul(in_pos[2], mvps[f])
-		};
-		
 		[branch]
-		if (frustum_culling(pos[0], pos[1], pos[2]))
+		if (f < num_cameras)
 		{
-			[unroll]
-			for (int v = 0; v < 3; ++ v)
+			output.rt_index = RenderTargetIndex(f);
+
+			float4x4 mvp = cameras[f].mvp;
+			float4 pos[3] =
 			{
-				output.pos = pos[v];
-				output.dist = in_dist[v];
-				out_stream.Append(output);
+				mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
+			};
+		
+			[branch]
+			if (FrustumCulling(pos[0], pos[1], pos[2]))
+			{
+				[unroll]
+				for (int v = 0; v < 3; ++ v)
+				{
+					output.pos = pos[v];
+					output.dist = in_dist[v];
+					out_stream.Append(output);
+				}
 			}
+			out_stream.RestartStrip();
 		}
-		out_stream.RestartStrip();
+		else
+		{
+			break;
+		}
 	}
 }
 		]]>
@@ -329,11 +139,12 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 						out float2 oDist : TEXCOORD0)
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
-	
-	oPos = mul(Position, mvps[instance_id]);
 
-	oDist.x = calc_dist(Position);
-	oDist.y = asfloat(instance_id);
+	uint camera_index = CameraIndex(instance_id);
+	oPos = mul(Position, cameras[camera_index].mvp);
+
+	oDist.x = CalcDist(Position);
+	oDist.y = asfloat(RenderTargetIndex(camera_index));
 }
 
 [maxvertexcount(3)]
@@ -343,7 +154,7 @@ void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangl
 	output.rt_index = asuint(in_dist[0].y);
 
 	[branch]
-	if (frustum_culling(in_pos[0], in_pos[1], in_pos[2]))
+	if (FrustumCulling(in_pos[0], in_pos[1], in_pos[2]))
 	{
 		[unroll]
 		for (int v = 0; v < 3; ++ v)
@@ -367,6 +178,37 @@ void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangl
 		</pass>
 	</technique>
 
+	<shader version="4">
+		<![CDATA[
+#ifdef KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
+						float4 tangent_quat : TANGENT,
+						uint instance_id : SV_InstanceID,
+						out float oDist : TEXCOORD0,
+						out float4 oPos : SV_Position,
+						out uint oRtIndex : SV_RenderTargetArrayIndex)
+{
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+
+	uint camera_index = CameraIndex(instance_id);
+	oPos = mul(Position, cameras[camera_index].mvp);
+
+	oDist = CalcDist(Position);
+	oRtIndex = RenderTargetIndex(camera_index);
+}
+#endif
+		]]>
+	</shader>
+
+	<technique name="GenCubeOneInstanceVpRtShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenCubeOneInstanceVpRtShadowMapVS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+
 	<shader version="5">
 		<![CDATA[
 [maxvertexcount(3)]
@@ -375,23 +217,28 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 						uint instance_id : SV_GSInstanceID,
 						inout TriangleStream<PS_IN> out_stream)
 {
-	PS_IN output;
-	output.rt_index = instance_id;
-	
-	float4 pos[3] =
-	{
-		mul(in_pos[0], mvps[instance_id]), mul(in_pos[1], mvps[instance_id]), mul(in_pos[2], mvps[instance_id])
-	};
-
 	[branch]
-	if (frustum_culling(pos[0], pos[1], pos[2]))
+	if (instance_id < num_cameras)
 	{
-		[unroll]
-		for (int v = 0; v < 3; ++ v)
+		PS_IN output;
+		output.rt_index = RenderTargetIndex(instance_id);
+
+		float4x4 mvp = cameras[instance_id].mvp;
+		float4 pos[3] =
 		{
-			output.pos = pos[v];
-			output.dist = in_dist[v];
-			out_stream.Append(output);
+			mul(in_pos[0], mvp), mul(in_pos[1], mvp), mul(in_pos[2], mvp)
+		};
+
+		[branch]
+		if (FrustumCulling(pos[0], pos[1], pos[2]))
+		{
+			[unroll]
+			for (int v = 0; v < 3; ++ v)
+			{
+				output.pos = pos[v];
+				output.dist = in_dist[v];
+				out_stream.Append(output);
+			}
 		}
 	}
 }
@@ -411,20 +258,8 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	
 	<parameter type="float3" name="light_pos"/>
 
-	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float2" name="metalness_clr"/>
-	<parameter type="float2" name="glossiness_clr"/>
-	<parameter type="float4" name="emissive_clr"/>
-	<parameter type="int" name="albedo_map_enabled"/>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
-
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
-	<parameter type="texture2D" name="shadow_dual_tex"/>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -437,8 +272,6 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="float4x4" name="obj_model_to_light_view" />
-
 	<shader>
 		<![CDATA[
 void RenderSceneVS(float4 Position : POSITION,
@@ -447,7 +280,6 @@ void RenderSceneVS(float4 Position : POSITION,
 					out float2 oTexcoord : TEXCOORD0,
 					out float3 oLightWorldPos : TEXCOORD1,
 					out float3 oLightWorldNormal : TEXCOORD2,
-					out float3 oLightViewPos : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
@@ -455,14 +287,12 @@ void RenderSceneVS(float4 Position : POSITION,
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	oTexcoord = Texcoord;
-	oPos = mul(Position, mvp);
+	oPos = mul(Position, cameras[0].mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)obj_model_to_light_model);
-	oLightViewPos = mul(Position, obj_model_to_light_view).xyz;
 }
 
-float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,
-					float3 LightWorldNormal : TEXCOORD2, float3 LightViewPos : TEXCOORD3) : SV_Target 
+float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1, float3 LightWorldNormal : TEXCOORD2) : SV_Target 
 {
 	float3 albedo = albedo_clr.rgb;
 	if (albedo_map_enabled)
@@ -470,20 +300,17 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		albedo *= albedo_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(linear_wrap_sampler, Texcoord).r;
+		float2 mg_tex = get_xy_channel(metalness_glossiness_tex.Sample(linear_wrap_sampler, Texcoord));
+		metalness *= mg_tex.x;
+		glossiness *= mg_tex.y;
 	}
 	
 	float3 c_diff = DiffuseColor(albedo, metalness);
 	float3 c_spec = SpecularColor(albedo, metalness);
-	
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(linear_wrap_sampler, Texcoord).r;
-	}
 	float shininess = Glossiness2Shininess(glossiness);
 	
 	float3 emissive = emissive_clr.rgb;
@@ -498,33 +325,16 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 shading = CalcBRDFShading(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
 	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb * light_color;
-	float occluder;
-	float dist;
-#if USE_DPSM
-	dist = length(LightViewPos);
-
-	float2 tex = float2(LightViewPos.x * sign(LightViewPos.z), LightViewPos.y) / (dist + abs(LightViewPos.z));
-	tex.y *= KLAYGE_FLIPPING;
-	tex = (tex + 1) / 2;
-	tex.x *= 0.5f;
-	if (LightViewPos.z < 0.0f)
-	{
-		tex.x += 0.5f;
-	}
-
-	occluder = ReadAFloat(shadow_dual_tex.Sample(linear_clamp_sampler, tex), far_plane.x) * esm_scale_factor;
-#else
-	dist = length(LightWorldPos);
+	float dist = length(LightWorldPos);
 
 	float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
-	occluder = ReadAFloat(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir), far_plane.x * esm_scale_factor);
-#endif
+	float occluder = ReadAFloat(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir), far_plane.x * esm_scale_factor);
 	
 	float atten = AttenuationTerm(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
-	
-	float3 clr = albedo * 0.2f + emissive + shading * ori_color * atten;	
+
+	float3 clr = albedo * 0.2f + emissive + shading * ori_color * atten;
 	return float4(clr, 1.0f);
 }
 		]]>
@@ -537,8 +347,5 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 			<state name="vertex_shader" value="RenderSceneVS()"/>
 			<state name="pixel_shader" value="RenderScenePS()"/>
 		</pass>
-	</technique>
-	<technique name="RenderSceneDPSM" inherit="RenderScene">
-		<macro name="USE_DPSM" value="1"/>
 	</technique>
 </effect>

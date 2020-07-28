@@ -26,9 +26,9 @@ namespace KlayGE
 
 	LightShaftPostProcess::LightShaftPostProcess()
 		: PostProcess(L"LightShaft", false,
-			{ "light_pos", "light_shaft_clr", "light_intensity", "shadow_intensity", "depth_clip", "cutoff_decay_weight" },
-			{ "color_tex", "depth_tex" },
-			{},
+			MakeSpan<std::string>({"light_pos", "light_shaft_clr", "light_intensity", "shadow_intensity", "depth_clip", "cutoff_decay_weight"}),
+			MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			MakeSpan<std::string>(),
 			RenderEffectPtr(), nullptr)
 	{
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
@@ -44,35 +44,40 @@ namespace KlayGE
 		apply_pp_ = SyncLoadPostProcess("LightShaft.ppml", "ApplyLightShaftEffect");
 	}
 
-	void LightShaftPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void LightShaftPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
 		if (index < 2)
 		{
-			radial_blur_pps_[0]->InputPin(index, tex);
+			radial_blur_pps_[0]->InputPin(index, srv);
 
 			if (0 == index)
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+				auto const* tex = srv->TextureResource().get();
 				uint32_t const tex_width = tex->Width(0) / 4;
 				uint32_t const tex_height = tex->Height(0) / 4;
 
 				if (!blur_tex_[0] || (blur_tex_[0]->Width(0) != tex_width) || (blur_tex_[0]->Height(0) != tex_height))
 				{
-					blur_tex_[0] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-					blur_tex_[1] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					for (size_t i = 0; i < 2; ++i)
+					{
+						blur_tex_[i] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+						blur_srv_[i] = rf.MakeTextureSrv(blur_tex_[i]);
+						blur_rtv_[i] = rf.Make2DRtv(blur_tex_[i], 0, 1, 0);
+					}
 				}
 
 				bool active_idx = false;
-				radial_blur_pps_[0]->OutputPin(0, blur_tex_[active_idx]);
+				radial_blur_pps_[0]->OutputPin(0, blur_rtv_[active_idx]);
 				for (uint32_t i = 1; i < BLUR_ITERATE_NUM; ++ i)
 				{
-					radial_blur_pps_[i]->InputPin(0, blur_tex_[active_idx]);
-					radial_blur_pps_[i]->OutputPin(0, blur_tex_[!active_idx]);
+					radial_blur_pps_[i]->InputPin(0, blur_srv_[active_idx]);
+					radial_blur_pps_[i]->OutputPin(0, blur_rtv_[!active_idx]);
 					active_idx = !active_idx;
 				}
 
-				apply_pp_->InputPin(0, blur_tex_[active_idx]);
+				apply_pp_->InputPin(0, blur_srv_[active_idx]);
 				apply_pp_->SetParam(5, static_cast<float>(tex_width) / tex_height);
 			}
 		}

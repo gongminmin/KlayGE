@@ -1,0 +1,123 @@
+From b26b21ea5087fa64a518f7a8b593a7fb595d365c Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Wed, 9 Jan 2019 23:00:01 -0800
+Subject: [PATCH 09/11] Update pyconfig.h for mingw
+
+---
+ CMakeLists.txt                |  2 +-
+ cmake/config-mingw/pyconfig.h | 41 ++++++++++++++++++++++++++---------
+ 2 files changed, 32 insertions(+), 11 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7179fbe..5549e7f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -388,7 +388,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
+     "A colon (:) separated list of extra paths to add to the PYTHONPATH")
+ 
+ # Configure 'pyconfig.h'
+-if(UNIX)
++if(UNIX OR ANDROID OR IOS)
+     set(PYCONFIG_BUILD_DIR ${BIN_BUILD_DIR})
+     configure_file(cmake/config-unix/pyconfig.h.in
+                    ${PYCONFIG_BUILD_DIR}/pyconfig.h)
+diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
+index 5af0378..988c74c 100644
+--- a/cmake/config-mingw/pyconfig.h
++++ b/cmake/config-mingw/pyconfig.h
+@@ -84,18 +84,24 @@ WIN32 is still required for the locale module.
+ #endif
+ 
+ /* set the version macros for the windows headers */
+-#ifdef MS_WINX64
+-/* 64 bit only runs on XP or greater */
+-#  define Py_WINVER _WIN32_WINNT_WINXP
+-#  define Py_NTDDI NTDDI_WINXP
++#if PY_VERSION_HEX >= 0x03050000
++/* Python 3.5+ requires Windows Vista or greater */
++#  define Py_WINVER 0x0600 /* _WIN32_WINNT_VISTA */
++#  define Py_NTDDI NTDDI_VISTA
+ #else
+-/* Python 2.6+ requires Windows 2000 or greater */
+-#  ifdef _WIN32_WINNT_WIN2K
+-#    define Py_WINVER _WIN32_WINNT_WIN2K
++#  ifdef MS_WINX64
++/* 64 bit only runs on XP or greater */
++#    define Py_WINVER _WIN32_WINNT_WINXP
++#    define Py_NTDDI NTDDI_WINXP
+ #  else
+-#    define Py_WINVER 0x0500
++/* Python 2.6+ requires Windows 2000 or greater */
++#    ifdef _WIN32_WINNT_WIN2K
++#      define Py_WINVER _WIN32_WINNT_WIN2K
++#    else
++#      define Py_WINVER 0x0500
++#    endif
++#    define Py_NTDDI NTDDI_WIN2KSP4
+ #  endif
+-#  define Py_NTDDI NTDDI_WIN2KSP4
+ #endif
+ 
+ /* We only set these values when building Python - we don't want to force
+@@ -124,7 +130,9 @@ WIN32 is still required for the locale module.
+ #define Py_IS_NAN _isnan
+ #define Py_IS_INFINITY(X) (!_finite(X) && !_isnan(X))
+ #define Py_IS_FINITE(X) _finite(X)
+-#define copysign _copysign
++#if PY_VERSION_HEX < 0x03060000
++#  define copysign _copysign
++#endif
+ 
+ #include <basetsd.h>
+ 
+@@ -222,6 +230,8 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ 
+ #endif /* MS_WIN32 */
+ 
++#if PY_VERSION_HEX < 0x03060000
++
+ /* define signed and unsigned exact-width 32-bit and 64-bit types, used in the
+    implementation of Python long integers. */
+ #ifndef PY_UINT32_T
+@@ -258,6 +268,8 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ #endif
+ #endif
+ 
++#endif
++
+ /* Fairly standard from here! */
+ 
+ /* Define to 1 if you have the `copysign' function. */
+@@ -377,6 +389,8 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ /* Define if you want to use the GNU readline library */
+ /* #define WITH_READLINE 1 */
+ 
++#if PY_VERSION_HEX < 0x03060000
++
+ /* Define if you want to have a Unicode type. */
+ #define Py_USING_UNICODE
+ 
+@@ -384,6 +398,8 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ /* This is enough for unicodeobject.h to do the "right thing" on Windows. */
+ #define Py_UNICODE_SIZE 2
+ 
++#endif
++
+ /* Use Python's own small-block memory-allocator. */
+ #define WITH_PYMALLOC 1
+ 
+@@ -528,6 +544,11 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ /* Define if the compiler provides a wchar.h header file. */
+ #define HAVE_WCHAR_H 1
+ 
++#if PY_VERSION_HEX >= 0x03060000
++/* The size of `wchar_t', as computed by sizeof. */
++#define SIZEOF_WCHAR_T 2
++#endif
++
+ /* Define if you have the dl library (-ldl).  */
+ /* #undef HAVE_LIBDL */
+ 
+-- 
+2.17.1.windows.2
+

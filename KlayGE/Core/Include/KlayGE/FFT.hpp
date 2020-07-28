@@ -22,21 +22,19 @@ namespace KlayGE
 	class KLAYGE_CORE_API GpuFft : boost::noncopyable
 	{
 	public:
-		virtual ~GpuFft()
-		{
-		}
+		virtual ~GpuFft() noexcept;
 
-		virtual void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag) = 0;
+		virtual void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
+			ShaderResourceViewPtr const& in_imag) = 0;
 	};
 
-	class KLAYGE_CORE_API GpuFftPS : public GpuFft
+	class KLAYGE_CORE_API GpuFftPS final : public GpuFft
 	{
 	public:
 		GpuFftPS(uint32_t width, uint32_t height, bool forward);
 
-		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag);
+		void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
+			ShaderResourceViewPtr const& in_imag) override;
 
 	private:
 		int BitReverse(int i, int n);
@@ -50,22 +48,28 @@ namespace KlayGE
 		uint32_t log_x_, log_y_;
 
 		std::vector<TexturePtr> lookup_i_wr_wi_x_tex_;
+		std::vector<ShaderResourceViewPtr> lookup_i_wr_wi_x_srv_;
 		std::vector<TexturePtr> lookup_i_wr_wi_y_tex_;
+		std::vector<ShaderResourceViewPtr> lookup_i_wr_wi_y_srv_;
 
 		TexturePtr tmp_real_tex_[2];
+		ShaderResourceViewPtr tmp_real_srv_[2];
+		RenderTargetViewPtr tmp_real_rtv_[2];
 		TexturePtr tmp_imag_tex_[2];
+		ShaderResourceViewPtr tmp_imag_srv_[2];
+		RenderTargetViewPtr tmp_imag_rtv_[2];
 
 		PostProcessPtr fft_x_pp_;
 		PostProcessPtr fft_y_pp_;
 	};
 
-	class KLAYGE_CORE_API GpuFftCS4 : public GpuFft
+	class KLAYGE_CORE_API GpuFftCS4 final : public GpuFft
 	{
 	public:
 		GpuFftCS4(uint32_t width, uint32_t height, bool forward);
 
-		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag);
+		void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
+			ShaderResourceViewPtr const& in_imag) override;
 
 	private:
 		void Radix008A(UnorderedAccessViewPtr const & dst,
@@ -97,22 +101,23 @@ namespace KlayGE
 		bool forward_;
 	};
 
-	class KLAYGE_CORE_API GpuFftCS5 : public GpuFft
+	class KLAYGE_CORE_API GpuFftCS5 final : public GpuFft
 	{
 	public:
 		GpuFftCS5(uint32_t width, uint32_t height, bool forward);
 
-		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
-			TexturePtr const & in_real, TexturePtr const & in_imag);
+		void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
+			ShaderResourceViewPtr const& in_imag) override;
 
 	private:
-		void Radix008A(TexturePtr const & dst_real_tex, TexturePtr const & dst_imag_tex,
-					TexturePtr const & src_real_tex, TexturePtr const & src_imag_tex,
-					uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y);
+		void Radix008A(TexturePtr const& dst_real_tex, TexturePtr const& dst_imag_tex, ShaderResourceViewPtr const& src_real_srv,
+			ShaderResourceViewPtr const& src_imag_srv, uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y);
 
 	private:
 		TexturePtr tmp_real_tex_[2];
+		ShaderResourceViewPtr tmp_real_srv_[2];
 		TexturePtr tmp_imag_tex_[2];
+		ShaderResourceViewPtr tmp_imag_srv_[2];
 		
 		RenderEffectPtr effect_;
 		RenderTechnique* radix008a_tech_;

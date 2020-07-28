@@ -72,7 +72,7 @@ namespace KlayGE
 		return (iter != uav_formats_.end()) && (*iter == format);
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchVertexFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchVertexFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)
@@ -87,7 +87,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchTextureFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchTextureFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)
@@ -102,7 +102,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchRenderTargetFormat(ArrayRef<ElementFormat> formats,
+	ElementFormat RenderDeviceCaps::BestMatchRenderTargetFormat(std::span<ElementFormat const> formats,
 		uint32_t sample_count, uint32_t sample_quality) const
 	{
 		ElementFormat ret = EF_Unknown;
@@ -112,13 +112,13 @@ namespace KlayGE
 			{
 				ret = fmt;
 				break;
-			}			
+			}
 		}
 
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchTextureRenderTargetFormat(ArrayRef<ElementFormat> formats,
+	ElementFormat RenderDeviceCaps::BestMatchTextureRenderTargetFormat(std::span<ElementFormat const> formats,
 		uint32_t sample_count, uint32_t sample_quality) const
 	{
 		ElementFormat ret = EF_Unknown;
@@ -134,7 +134,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ElementFormat RenderDeviceCaps::BestMatchUavFormat(ArrayRef<ElementFormat> formats) const
+	ElementFormat RenderDeviceCaps::BestMatchUavFormat(std::span<ElementFormat const> formats) const
 	{
 		ElementFormat ret = EF_Unknown;
 		for (auto fmt : formats)
@@ -149,7 +149,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderDeviceCaps::AssignVertexFormats(std::vector<ElementFormat>&& vertex_formats)
+	void RenderDeviceCaps::AssignVertexFormats(std::vector<ElementFormat> vertex_formats)
 	{
 		std::sort(vertex_formats.begin(), vertex_formats.end());
 		vertex_formats.erase(std::unique(vertex_formats.begin(), vertex_formats.end()), vertex_formats.end());
@@ -157,7 +157,7 @@ namespace KlayGE
 		vertex_formats_ = std::move(vertex_formats);
 	}
 
-	void RenderDeviceCaps::AssignTextureFormats(std::vector<ElementFormat>&& texture_formats)
+	void RenderDeviceCaps::AssignTextureFormats(std::vector<ElementFormat> texture_formats)
 	{
 		std::sort(texture_formats.begin(), texture_formats.end());
 		texture_formats.erase(std::unique(texture_formats.begin(), texture_formats.end()), texture_formats.end());
@@ -167,7 +167,7 @@ namespace KlayGE
 		this->UpdateSupportBits();
 	}
 
-	void RenderDeviceCaps::AssignRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>>&& render_target_formats)
+	void RenderDeviceCaps::AssignRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>> render_target_formats)
 	{
 		render_target_formats_.clear();
 		for (auto const & item : render_target_formats)
@@ -178,7 +178,7 @@ namespace KlayGE
 		this->UpdateSupportBits();
 	}
 
-	void RenderDeviceCaps::AssignUavFormats(std::vector<ElementFormat>&& uav_formats)
+	void RenderDeviceCaps::AssignUavFormats(std::vector<ElementFormat> uav_formats)
 	{
 		std::sort(uav_formats.begin(), uav_formats.end());
 		uav_formats.erase(std::unique(uav_formats.begin(), uav_formats.end()), uav_formats.end());

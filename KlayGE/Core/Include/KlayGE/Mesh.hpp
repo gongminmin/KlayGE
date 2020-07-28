@@ -33,6 +33,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SceneComponent.hpp>
 
 #include <string>
 #include <tuple>
@@ -155,7 +156,7 @@ namespace KlayGE
 	public:
 		explicit RenderModel(SceneNodePtr const & root_node);
 		RenderModel(std::wstring_view name, uint32_t node_attrib);
-		virtual ~RenderModel();
+		virtual ~RenderModel() noexcept;
 
 		SceneNodePtr const & RootNode() const
 		{
@@ -229,19 +230,60 @@ namespace KlayGE
 	};
 
 
-	struct KLAYGE_CORE_API Joint
+	class KLAYGE_CORE_API JointComponent : public SceneComponent
 	{
-		std::string name;
+	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
+		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
-		Quaternion bind_real;
-		Quaternion bind_dual;
-		float bind_scale;
+		SceneComponentPtr Clone() const override;
 
-		Quaternion inverse_origin_real;
-		Quaternion inverse_origin_dual;
-		float inverse_origin_scale;
+		void BindParams(Quaternion const& real, Quaternion const& dual, float scale);
 
-		int16_t parent;
+		Quaternion const& BindReal() const
+		{
+			return bind_real_;
+		}
+		Quaternion const& BindDual() const
+		{
+			return bind_dual_;
+		}
+		float BindScale() const
+		{
+			return bind_scale_;
+		}
+
+		void InverseOriginParams(Quaternion const& real, Quaternion const& dual, float scale);
+
+		Quaternion const& InverseOriginReal() const
+		{
+			return inverse_origin_real_;
+		}
+		Quaternion const& InverseOriginDual() const
+		{
+			return inverse_origin_dual_;
+		}
+		float InverseOriginScale() const
+		{
+			return inverse_origin_scale_;
+		}
+
+		void InitInverseOriginParams();
+
+	private:
+		Quaternion bind_real_;
+		Quaternion bind_dual_;
+		float bind_scale_;
+
+		Quaternion inverse_origin_real_;
+		Quaternion inverse_origin_dual_;
+		float inverse_origin_scale_;
 	};
 
 	struct KLAYGE_CORE_API KeyFrameSet
@@ -262,7 +304,7 @@ namespace KlayGE
 		AABBox Frame(float frame) const;
 	};
 
-	struct KLAYGE_CORE_API AnimationAction
+	struct KLAYGE_CORE_API Animation
 	{
 		std::string name;
 		uint32_t start_frame;
@@ -283,11 +325,11 @@ namespace KlayGE
 		void CloneDataFrom(RenderModel const & source,
 			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>) override;
 
-		Joint& GetJoint(uint32_t index)
+		JointComponentPtr& GetJoint(uint32_t index)
 		{
 			return joints_[index];
 		}
-		Joint const & GetJoint(uint32_t index) const
+		JointComponentPtr const& GetJoint(uint32_t index) const
 		{
 			return joints_[index];
 		}
@@ -301,14 +343,6 @@ namespace KlayGE
 		{
 			joints_.assign(first, last);
 			this->UpdateBinds();
-		}
-		std::vector<float4> const & GetBindRealParts() const
-		{
-			return bind_reals_;
-		}
-		std::vector<float4> const & GetBindDualParts() const
-		{
-			return bind_duals_;
 		}
 		void AttachKeyFrameSets(std::shared_ptr<std::vector<KeyFrameSet>> const & kf)
 		{
@@ -343,20 +377,21 @@ namespace KlayGE
 
 		AABBox FramePosBound(uint32_t frame) const;
 
-		void AttachActions(std::shared_ptr<std::vector<AnimationAction>> const & actions);
-		std::shared_ptr<std::vector<AnimationAction>> const & GetActions() const
+		void AttachAnimations(std::shared_ptr<std::vector<Animation>> const & animations);
+		std::shared_ptr<std::vector<Animation>> const & GetAnimations() const
 		{
-			return actions_;
+			return animations_;
 		}
-		uint32_t NumActions() const;
-		void GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
+		uint32_t NumAnimations() const;
+		void GetAnimation(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
 
 	protected:
 		void BuildBones(float frame);
 		void UpdateBinds();
+		void SetToEffect();
 
 	protected:
-		std::vector<Joint> joints_;
+		std::vector<JointComponentPtr> joints_;
 		std::vector<float4> bind_reals_;
 		std::vector<float4> bind_duals_;
 
@@ -366,7 +401,7 @@ namespace KlayGE
 		uint32_t num_frames_;
 		uint32_t frame_rate_;
 
-		std::shared_ptr<std::vector<AnimationAction>> actions_;
+		std::shared_ptr<std::vector<Animation>> animations_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
@@ -408,11 +443,9 @@ namespace KlayGE
 
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
-		virtual void Update();
+		void AttachLightSrc(LightSourcePtr const & light);
 
 		void OnRenderBegin() override;
-
-		void AttachLightSrc(LightSourcePtr const & light);
 
 	protected:
 		void DoBuildMeshInfo(RenderModel const & model) override
@@ -423,8 +456,6 @@ namespace KlayGE
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameter* model_param_;
-		RenderEffectParameter* light_color_param_;
 		RenderEffectParameter* light_is_projective_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
@@ -448,6 +479,9 @@ namespace KlayGE
 	private:
 		CameraPtr camera_;
 	};
+
+	KLAYGE_CORE_API RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light);
+	KLAYGE_CORE_API RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera);
 }
 
 #endif			// _MESH_HPP

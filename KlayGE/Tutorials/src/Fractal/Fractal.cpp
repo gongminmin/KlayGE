@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
@@ -20,8 +19,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Fractal.hpp"
@@ -121,7 +121,7 @@ void Fractal::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Fractal.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)

@@ -23,21 +23,7 @@ set(ZLIB_INCLUDE_DIR
 	CACHE INTERNAL "" FORCE
 )
 set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} CACHE INTERNAL "" FORCE)
-if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
-	set(zlib_lib_dir ${ZLIB_OUTPUT_DIR})
-else()
-	set(zlib_lib_dir ${KLAYGE_BIN_DIR})
-endif()
-set(is_static_lib FALSE)
-if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC")
-	set(is_static_lib TRUE)
-endif()
-GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}" ${is_static_lib} debug_lib_name)
-GenerateLibFileName("${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}" ${is_static_lib} optimized_lib_name)
-set(ZLIB_LIBRARY
-	debug ${zlib_lib_dir}/${debug_lib_name} optimized ${zlib_lib_dir}/${optimized_lib_name}
-	CACHE INTERNAL "" FORCE
-)
+set(ZLIB_LIBRARY zlib CACHE INTERNAL "" FORCE)
 set(ZLIB_LIBRARIES ${ZLIB_LIBRARY} CACHE INTERNAL "" FORCE)
 set(ZLIB_FOUND TRUE CACHE INTERNAL "" FORCE)
 

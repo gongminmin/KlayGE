@@ -68,7 +68,8 @@ namespace
 				}
 
 				ResizeTexture(&ret[ch][0], ASCII_WIDTH, ASCII_WIDTH * ASCII_HEIGHT, EF_R8, ASCII_WIDTH, ASCII_HEIGHT, 1,
-					&char_data[char_size / 6], char_size, char_size * char_size, EF_R8, char_size * 2 / 3, char_size, 1, true);
+					&char_data[char_size / 6], char_size, char_size * char_size, EF_R8, char_size * 2 / 3, char_size, 1,
+					TextureFilter::Linear);
 			}
 			else
 			{
@@ -102,7 +103,7 @@ namespace
 		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			ASCII_HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 	}
 
 	class ascii_lums_builder
@@ -238,9 +239,9 @@ namespace
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
 	: PostProcess(L"AsciiArts", false,
-			{},
-			{ "src_tex" },
-			{ "output" },
+			MakeSpan<std::string>(),
+			MakeSpan<std::string>({"src_tex"}),
+			MakeSpan<std::string>({"output"}),
 			RenderEffectPtr(), nullptr)
 {
 	auto effect = SyncLoadRenderEffect("AsciiArtsPP.fxml");
@@ -254,22 +255,23 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 	*(effect->ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromKFont("gkai00mp.kfont")));
 }
 
-void AsciiArtsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+void AsciiArtsPostProcess::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	auto const* tex = srv->TextureResource().get();
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
 		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
-	downsampler_->InputPin(index, tex);
-	downsampler_->OutputPin(index, downsample_tex_);
+	downsampler_->InputPin(index, srv);
+	downsampler_->OutputPin(index, rf.Make2DRtv(downsample_tex_, 0, 1, 0));
 
-	PostProcess::InputPin(index, downsample_tex_);
+	PostProcess::InputPin(index, rf.MakeTextureSrv(downsample_tex_));
 
 	*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / tex->Width(0), static_cast<float>(CELL_HEIGHT) / tex->Height(0));
 }
 
-TexturePtr const & AsciiArtsPostProcess::InputPin(uint32_t index) const
+ShaderResourceViewPtr const& AsciiArtsPostProcess::InputPin(uint32_t index) const
 {
 	return downsampler_->InputPin(index);
 }
@@ -277,7 +279,7 @@ TexturePtr const & AsciiArtsPostProcess::InputPin(uint32_t index) const
 void AsciiArtsPostProcess::Apply()
 {
 	downsampler_->Apply();
-	downsample_tex_->BuildMipSubLevels();
+	downsample_tex_->BuildMipSubLevels(TextureFilter::Linear);
 
 	PostProcess::Apply();
 }

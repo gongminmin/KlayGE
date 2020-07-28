@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -22,9 +21,10 @@
 #include <KlayGE/Audio.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Sound.hpp"
@@ -94,7 +94,7 @@ void SoundApp::OnCreate()
 	ae.AddBuffer(2, af.MakeMusicBuffer(music_2_, 3));
 	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Sound.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Sound.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");

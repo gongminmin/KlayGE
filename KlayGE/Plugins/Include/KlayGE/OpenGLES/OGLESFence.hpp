@@ -40,19 +40,19 @@
 
 namespace KlayGE
 {
-	class OGLESFence : public Fence
+	class OGLESFence final : public Fence
 	{
 	public:
 		OGLESFence();
-		virtual ~OGLESFence();
+		~OGLESFence() override;
 
-		virtual uint64_t Signal(FenceType ft) override;
-		virtual void Wait(uint64_t id) override;
-		virtual bool Completed(uint64_t id) override;
+		uint64_t Signal(FenceType ft) override;
+		void Wait(uint64_t id) override;
+		bool Completed(uint64_t id) override;
 
 	private:
 		std::map<uint64_t, GLsync> fences_;
-		std::atomic<uint64_t> fence_val_;
+		std::atomic<uint64_t> fence_val_{0};
 	};
 }
 

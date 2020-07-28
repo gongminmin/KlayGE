@@ -70,7 +70,7 @@ namespace KlayGE
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<LZMALoader>();
+					instance_ = MakeUniquePtr<LZMALoader>();
 				}
 			}
 			return *instance_;
@@ -112,9 +112,11 @@ namespace KlayGE
 		LzmaCompressFunc lzma_compress_func_;
 		LzmaUncompressFunc lzma_uncompress_func_;
 
-		static std::shared_ptr<LZMALoader> instance_;
+		static std::unique_ptr<LZMALoader> instance_;
 	};
-	std::shared_ptr<LZMALoader> LZMALoader::instance_;
+	std::unique_ptr<LZMALoader> LZMALoader::instance_;
+
+	KFont::KFont() = default;
 
 	bool KFont::Load(std::string const & file_name)
 	{
@@ -341,17 +343,18 @@ namespace KlayGE
 
 	void KFont::GetDistanceData(uint8_t* p, uint32_t pitch, int32_t index) const
 	{
-		std::vector<uint8_t> decoded(char_size_ * char_size_);
+		size_t const decoded_size = char_size_ * char_size_;
+		auto decoded = MakeUniquePtr<uint8_t[]>(decoded_size);
 
 		uint32_t size;
 		this->GetLZMADistanceData(nullptr, size, index);
 
-		std::vector<uint8_t> in_data(size);
+		auto in_data = MakeUniquePtr<uint8_t[]>(size);
 		this->GetLZMADistanceData(&in_data[0], size, index);
 
-		SizeT s_out_len = static_cast<SizeT>(decoded.size());
+		SizeT s_out_len = decoded_size;
 
-		SizeT s_src_len = static_cast<SizeT>(in_data.size() - LZMA_PROPS_SIZE);
+		SizeT s_src_len = static_cast<SizeT>(size - LZMA_PROPS_SIZE);
 		LZMALoader::Instance().LzmaUncompress(static_cast<Byte*>(&decoded[0]), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
 			&in_data[0], LZMA_PROPS_SIZE);
 

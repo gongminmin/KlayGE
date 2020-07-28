@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -40,7 +41,8 @@
 namespace KlayGE
 {
 	DepthOfField::DepthOfField()
-		: PostProcess(L"DepthOfField", false, {}, {"color_tex", "depth_tex"}, {"output"}, RenderEffectPtr(), nullptr)
+		: PostProcess(L"DepthOfField", false, MakeSpan<std::string>(), MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			  MakeSpan<std::string>({"output"}), RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
@@ -112,27 +114,28 @@ namespace KlayGE
 		return show_blur_factor_;
 	}
 
-	void DepthOfField::InputPin(uint32_t index, TexturePtr const& tex)
+	void DepthOfField::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 			if (!spread_tex_ || spread_tex_->Width(0) != width || spread_tex_->Height(0) != height)
 			{
 				auto const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				auto const fmt = caps.BestMatchTextureRenderTargetFormat({EF_ABGR32F, EF_ABGR16F}, 1, 0);
+				auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR32F, EF_ABGR16F}), 1, 0);
 				BOOST_ASSERT(fmt != EF_Unknown);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ =
 					rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
-				spread_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(spread_tex_, 0, 1, 0));
+				auto spread_rtv = rf.Make2DRtv(spread_tex_, 0, 1, 0);
+				spread_fb_->Attach(FrameBuffer::Attachment::Color0, spread_rtv);
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width), static_cast<float>(height), 1.0f / width, 1.0f / height));
-				spreading_pp_->OutputPin(0, spread_tex_);
 
 				{
 					float4 const pos[] = {float4(-1, +1, 0 + (max_radius_ * 2 + 0.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
@@ -144,8 +147,19 @@ namespace KlayGE
 					normalization_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 				}
 
-				sat_pp_->InputPin(0, spread_tex_);
-				sat_pp_->OutputPin(0, spread_tex_);
+				sat_pp_->InputPin(0, rf.MakeTextureSrv(spread_tex_));
+
+				if (cs_support_)
+				{
+					auto spread_uav = rf.Make2DUav(spread_tex_, 0, 1, 0);
+					spreading_pp_->OutputPin(0, spread_uav);
+					sat_pp_->OutputPin(0, spread_uav);
+				}
+				else
+				{
+					spreading_pp_->OutputPin(0, spread_rtv);
+					sat_pp_->OutputPin(0, spread_rtv);
+				}
 			}
 		}
 	}
@@ -176,7 +190,9 @@ namespace KlayGE
 	}
 
 
-	BokehFilter::BokehFilter() : PostProcess(L"BokehFilter", false, {}, {"color_tex", "depth_tex"}, {"output"}, RenderEffectPtr(), nullptr)
+	BokehFilter::BokehFilter()
+		: PostProcess(L"BokehFilter", false, MakeSpan<std::string>(), MakeSpan<std::string>({"color_tex", "depth_tex"}),
+			  MakeSpan<std::string>({"output"}), RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		gs_support_ = caps.gs_support;
@@ -237,12 +253,13 @@ namespace KlayGE
 		return lum_threshold_;
 	}
 
-	void BokehFilter::InputPin(uint32_t index, TexturePtr const& tex)
+	void BokehFilter::InputPin(uint32_t index, ShaderResourceViewPtr const& srv)
 	{
-		PostProcess::InputPin(index, tex);
+		PostProcess::InputPin(index, srv);
 
 		if (0 == index)
 		{
+			auto const* tex = srv->TextureResource().get();
 			uint32_t const in_width = tex->Width(0) / 2;
 			uint32_t const in_height = tex->Height(0) / 2;
 			uint32_t const out_width = in_width * 2 + max_radius_ * 4;
@@ -349,18 +366,33 @@ namespace KlayGE
 				merge_bokeh_pp_->SetParam(
 					1, float4(static_cast<float>(out_width), static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height));
 				merge_bokeh_pp_->SetParam(4, static_cast<float>(in_width + max_radius_ * 4));
-				merge_bokeh_pp_->InputPin(0, bokeh_tex_);
+				merge_bokeh_pp_->InputPin(0, rf.MakeTextureSrv(bokeh_tex_));
 			}
 		}
 		else
 		{
-			merge_bokeh_pp_->InputPin(index, tex);
+			merge_bokeh_pp_->InputPin(index, srv);
 		}
 	}
 
-	void BokehFilter::OutputPin(uint32_t index, TexturePtr const& tex, int level, int array_index, int face)
+	void BokehFilter::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
 	{
-		merge_bokeh_pp_->OutputPin(index, tex, level, array_index, face);
+		merge_bokeh_pp_->OutputPin(index, rtv);
+	}
+
+	void BokehFilter::OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav)
+	{
+		merge_bokeh_pp_->OutputPin(index, uav);
+	}
+
+	RenderTargetViewPtr const& BokehFilter::RtvOutputPin(uint32_t index) const
+	{
+		return merge_bokeh_pp_->RtvOutputPin(index);
+	}
+
+	UnorderedAccessViewPtr const& BokehFilter::UavOutputPin(uint32_t index) const
+	{
+		return merge_bokeh_pp_->UavOutputPin(index);
 	}
 
 	void BokehFilter::Apply()

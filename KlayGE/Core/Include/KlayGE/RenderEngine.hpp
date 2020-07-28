@@ -77,6 +77,7 @@
 #include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Mipmapper.hpp>
 #include <KFL/Color.hpp>
 
 #include <vector>
@@ -87,7 +88,7 @@ namespace KlayGE
 	{
 	public:
 		RenderEngine();
-		virtual ~RenderEngine();
+		virtual ~RenderEngine() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -178,6 +179,15 @@ namespace KlayGE
 			default_render_height_scale_ = scale;
 		}
 
+		void NumCameraInstances(uint32_t num)
+		{
+			num_camera_instances_ = num;
+		}
+		uint32_t NumCameraInstances() const
+		{
+			return num_camera_instances_;
+		}
+
 		// Render a frame when no pending message
 		virtual void Refresh();
 
@@ -259,8 +269,153 @@ namespace KlayGE
 			return force_line_mode_;
 		}
 
+		RenderMaterialPtr const& DefaultMaterial() const;
+
+		class KLAYGE_CORE_API PredefinedMaterialCBuffer
+		{
+		public:
+			PredefinedMaterialCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			float4& AlbedoClr(RenderEffectConstantBuffer& cbuff) const;
+			float3& MetalnessGlossinessFactor(RenderEffectConstantBuffer& cbuff) const;
+			float4& EmissiveClr(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& AlbedoMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& NormalMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& HeightMapParallaxEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& HeightMapTessEnabled(RenderEffectConstantBuffer& cbuff) const;
+			int32_t& OcclusionMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+			float& AlphaTestThreshold(RenderEffectConstantBuffer& cbuff) const;
+			float& NormalScale(RenderEffectConstantBuffer& cbuff) const;
+			float& OcclusionStrength(RenderEffectConstantBuffer& cbuff) const;
+			float2& HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const;
+			float4& TessFactors(RenderEffectConstantBuffer& cbuff) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t albedo_clr_offset_;
+			uint32_t metalness_glossiness_factor_offset_;
+			uint32_t emissive_clr_offset_;
+			uint32_t albedo_map_enabled_offset_;
+			uint32_t normal_map_enabled_offset_;
+			uint32_t height_map_parallax_enabled_offset_;
+			uint32_t height_map_tess_enabled_offset_;
+			uint32_t occlusion_map_enabled_offset_;
+			uint32_t alpha_test_threshold_offset_;
+			uint32_t normal_scale_offset_;
+			uint32_t occlusion_strength_offset_;
+			uint32_t height_offset_scale_offset_;
+			uint32_t tess_factors_offset_;
+		};
+
+		PredefinedMaterialCBuffer const& PredefinedMaterialCBufferInstance() const;
+
+		class KLAYGE_CORE_API PredefinedMeshCBuffer
+		{
+		public:
+			PredefinedMeshCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			float3& PosCenter(RenderEffectConstantBuffer& cbuff) const;
+			float3& PosExtent(RenderEffectConstantBuffer& cbuff) const;
+			float2& TcCenter(RenderEffectConstantBuffer& cbuff) const;
+			float2& TcExtent(RenderEffectConstantBuffer& cbuff) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t pos_center_offset_;
+			uint32_t pos_extent_offset_;
+			uint32_t tc_center_offset_;
+			uint32_t tc_extent_offset_;
+		};
+
+		PredefinedMeshCBuffer const& PredefinedMeshCBufferInstance() const;
+
+		class KLAYGE_CORE_API PredefinedModelCBuffer
+		{
+		public:
+			PredefinedModelCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			float4x4& Model(RenderEffectConstantBuffer& cbuff) const;
+			float4x4& InvModel(RenderEffectConstantBuffer& cbuff) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t model_offset_;
+			uint32_t inv_model_offset_;
+		};
+
+		PredefinedModelCBuffer const& PredefinedModelCBufferInstance() const;
+
+		class KLAYGE_CORE_API PredefinedCameraCBuffer
+		{
+		public:
+			static constexpr uint32_t max_num_cameras = 8;
+
+			struct CameraInfo
+			{
+				alignas(16) float4x4 model_view;
+				alignas(16) float4x4 mvp;
+				alignas(16) float4x4 inv_mv;
+				alignas(16) float4x4 inv_mvp;
+				alignas(16) float3 eye_pos;
+				alignas(4) float padding0;
+				alignas(16) float3 forward_vec;
+				alignas(4) float padding1;
+				alignas(16) float3 up_vec;
+				alignas(4) float padding2;
+			};
+			KLAYGE_STATIC_ASSERT(sizeof(CameraInfo) == 304);
+
+		public:
+			PredefinedCameraCBuffer();
+
+			RenderEffectConstantBuffer* CBuffer() const
+			{
+				return predefined_cbuffer_;
+			}
+
+			uint32_t& NumCameras(RenderEffectConstantBuffer& cbuff) const;
+			uint32_t& CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+			CameraInfo& Camera(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+			float4x4& PrevMvp(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+
+		private:
+			RenderEffectPtr effect_;
+			RenderEffectConstantBuffer* predefined_cbuffer_;
+
+			uint32_t num_cameras_offset_;
+			uint32_t camera_indices_offset_;
+			uint32_t cameras_offset_;
+			uint32_t prev_mvps_offset_;
+		};
+
+		PredefinedCameraCBuffer const& PredefinedCameraCBufferInstance() const;
+
+		Mipmapper const& MipmapperInstance() const;
+
 	protected:
 		void Destroy();
+		uint32_t NumRealizedCameraInstances() const;
 
 	private:
 		virtual void CheckConfig(RenderSettings& settings);
@@ -287,21 +442,34 @@ namespace KlayGE
 		FrameBufferPtr screen_frame_buffer_;
 		SceneNodePtr screen_frame_buffer_camera_node_;
 		TexturePtr ds_tex_;
+		ShaderResourceViewPtr ds_srv_;
 		FrameBufferPtr hdr_frame_buffer_;
 		TexturePtr hdr_tex_;
+		ShaderResourceViewPtr hdr_srv_;
 		FrameBufferPtr post_tone_mapping_frame_buffer_;
 		TexturePtr post_tone_mapping_tex_;
+		ShaderResourceViewPtr post_tone_mapping_srv_;
+		RenderTargetViewPtr post_tone_mapping_rtv_;
 		FrameBufferPtr resize_frame_buffer_;
 		TexturePtr resize_tex_;
+		ShaderResourceViewPtr resize_srv_;
+		RenderTargetViewPtr resize_rtv_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
+		ShaderResourceViewPtr mono_srv_;
+		RenderTargetViewPtr mono_rtv_;
 		FrameBufferPtr default_frame_buffers_[4];
 
 		FrameBufferPtr overlay_frame_buffer_;
 		TexturePtr overlay_tex_;
+		ShaderResourceViewPtr overlay_srv_;
 
 		TexturePtr smaa_edges_tex_;
+		ShaderResourceViewPtr smaa_edges_srv_;
+		RenderTargetViewPtr smaa_edges_rtv_;
 		TexturePtr smaa_blend_tex_;
+		ShaderResourceViewPtr smaa_blend_srv_;
+		RenderTargetViewPtr smaa_blend_rtv_;
 
 		RenderLayoutPtr so_buffers_;
 
@@ -358,6 +526,8 @@ namespace KlayGE
 		uint32_t native_shader_version_;
 		std::string_view native_shader_platform_name_;
 
+		uint32_t num_camera_instances_ = 0;
+
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;
 		PerfRangePtr smaa_pp_perf_;
@@ -366,6 +536,14 @@ namespace KlayGE
 		PerfRangePtr hdr_display_pp_perf_;
 		PerfRangePtr stereoscopic_pp_perf_;
 #endif
+
+		mutable RenderMaterialPtr default_material_;
+		mutable std::unique_ptr<PredefinedMaterialCBuffer> predefined_material_cb_;
+		mutable std::unique_ptr<PredefinedMeshCBuffer> predefined_mesh_cb_;
+		mutable std::unique_ptr<PredefinedModelCBuffer> predefined_model_cb_;
+		mutable std::unique_ptr<PredefinedCameraCBuffer> predefined_camera_cb_;
+
+		mutable std::unique_ptr<Mipmapper> mipmapper_;
 	};
 }
 

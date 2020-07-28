@@ -34,15 +34,6 @@ void DetailedMesh::DoBuildMeshInfo(RenderModel const & model)
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	depth_texture_support_ = caps.depth_texture_support;
 
-	*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-	*(effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-	*(effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-	*(effect_->ParameterByName("normal_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Normal]);
-
-	*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-	*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
-	*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!textures_[RenderMaterial::TS_Glossiness]);
-
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
@@ -51,18 +42,12 @@ void DetailedMesh::DoBuildMeshInfo(RenderModel const & model)
 		extinction_coefficient.z() = MathLib::srgb_to_linear(extinction_coefficient.z());
 	}
 	*(effect_->ParameterByName("extinction_coefficient")) = extinction_coefficient;
-
-	AABBox const & pos_bb = this->PosBound();
-	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-	AABBox const & tc_bb = this->TexcoordBound();
-	*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-	*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 }
 
 void DetailedMesh::OnRenderBegin()
 {
+	StaticMesh::OnRenderBegin();
+
 	App3DFramework& app = Context::Instance().AppInstance();
 	*(effect_->ParameterByName("worldviewproj")) = app.ActiveCamera().ViewProjMatrix();
 }

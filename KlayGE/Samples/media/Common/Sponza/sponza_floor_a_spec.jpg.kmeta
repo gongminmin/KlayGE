@@ -3,7 +3,8 @@
 
 	"type": "2D",
 
-	"slot": "glossiness",
+	"slot": "metalness_glossiness",
 
-	"prefered_format": "BC4"
+	"prefered_format": "BC5",
+	"channel_mapping": [ -1, 0, -1, -1 ]
 }

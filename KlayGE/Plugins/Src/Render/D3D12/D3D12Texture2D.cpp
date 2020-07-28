@@ -29,10 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -42,6 +40,7 @@
 #include <KlayGE/RenderEffect.hpp>
 
 #include <cstring>
+#include <iterator>
 
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
@@ -157,7 +156,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
-	void D3D12Texture2D::CopyToTexture(Texture& target)
+	void D3D12Texture2D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -174,16 +173,16 @@ namespace KlayGE
 			{
 				for (uint32_t level = 0; level < num_mips; ++ level)
 				{
-					this->ResizeTexture2D(target, index, level, 0, 0, target.Width(level), target.Height(level),
-						index, level, 0, 0, this->Width(level), this->Height(level), true);
+					this->ResizeTexture2D(target, index, level, 0, 0, target.Width(level), target.Height(level), index, level, 0, 0,
+						this->Width(level), this->Height(level), filter);
 				}
 			}
 		}
 	}
 
-	void D3D12Texture2D::CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void D3D12Texture2D::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -201,13 +200,13 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 
-	void D3D12Texture2D::CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void D3D12Texture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
@@ -226,7 +225,7 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index * 6 + dst_face - CF_Positive_X, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 
@@ -377,166 +376,7 @@ namespace KlayGE
 		this->DoUnmap(subres);
 	}
 
-	void D3D12Texture2D::BuildMipSubLevels()
-	{
-		// TODO
-		// Depth stencil formats
-		// Compression formats
-		if (IsDepthFormat(format_) || IsCompressedFormat(format_))
-		{
-			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-			{
-				for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-				{
-					this->ResizeTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level),
-						index, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1), true);
-				}
-			}
-		}
-		else
-		{
-			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D12Device* device = re.D3DDevice();
-			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
-
-			auto const & effect = *re.BlitEffect();
-			auto const & tech = *re.BilinearBlitTech();
-			auto& pass = tech.Pass(0);
-			pass.Bind(effect);
-			auto& d3d12_so = checked_cast<D3D12ShaderObject&>(*pass.GetShaderObject(effect));
-
-			auto& d3d12_rl = checked_cast<D3D12RenderLayout&>(*re.PostProcessRenderLayout());
-
-			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
-			d3d12_so.UpdatePsoDesc(pso_desc);
-
-			pso_desc.StreamOutput.pSODeclaration = nullptr;
-			pso_desc.StreamOutput.NumEntries = 0;
-			pso_desc.StreamOutput.pBufferStrides = nullptr;
-			pso_desc.StreamOutput.NumStrides = 0;
-			pso_desc.StreamOutput.RasterizedStream = 0;
-
-			pso_desc.BlendState = checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject())->D3DBlendDesc();
-			pso_desc.SampleMask = 0xFFFFFFFF;
-			pso_desc.RasterizerState = checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject())->D3DRasterizerDesc();
-			pso_desc.DepthStencilState = checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject())->D3DDepthStencilDesc();
-			pso_desc.InputLayout.pInputElementDescs = &d3d12_rl.InputElementDesc()[0];
-			pso_desc.InputLayout.NumElements = static_cast<UINT>(d3d12_rl.InputElementDesc().size());
-			pso_desc.IBStripCutValue = (EF_R16UI == d3d12_rl.IndexStreamFormat())
-				? D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
-
-			RenderLayout::topology_type tt = d3d12_rl.TopologyType();
-			pso_desc.PrimitiveTopologyType = D3D12Mapping::MappingPriTopoType(tt);
-
-			pso_desc.NumRenderTargets = 1;
-			pso_desc.RTVFormats[0] = dxgi_fmt_;
-			for (uint32_t i = pso_desc.NumRenderTargets; i < std::size(pso_desc.RTVFormats); ++ i)
-			{
-				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
-			}
-			pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
-			pso_desc.SampleDesc.Count = 1;
-			pso_desc.SampleDesc.Quality = 0;
-			pso_desc.NodeMask = 0;
-			pso_desc.CachedPSO.pCachedBlob = nullptr;
-			pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
-			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-
-			ID3D12PipelineStatePtr const & pso = re.CreateRenderPSO(pso_desc);
-
-			re.SetPipelineState(pso.get());
-			re.SetGraphicsRootSignature(d3d12_so.RootSignature());
-
-			ID3D12DescriptorHeapPtr cbv_srv_uav_heap = re.CreateDynamicCBVSRVUAVDescriptorHeap(array_size_ * (num_mip_maps_ - 1));
-			auto sampler_heap = d3d12_so.SamplerHeap();
-
-			std::array<ID3D12DescriptorHeap*, 2> heaps;
-			uint32_t num_heaps = 0;
-			{
-				heaps[num_heaps] = cbv_srv_uav_heap.get();
-				++ num_heaps;
-			}
-			if (sampler_heap)
-			{
-				heaps[num_heaps] = sampler_heap;
-				++ num_heaps;
-			}
-			re.SetDescriptorHeaps(MakeArrayRef(heaps.data(), num_heaps));
-
-			if (sampler_heap)
-			{
-				D3D12_GPU_DESCRIPTOR_HANDLE gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
-				cmd_list->SetGraphicsRootDescriptorTable(1, gpu_sampler_handle);
-			}
-
-			auto& vb = checked_cast<D3D12GraphicsBuffer&>(*d3d12_rl.GetVertexStream(0));
-
-			D3D12_VERTEX_BUFFER_VIEW vbv;
-			vbv.BufferLocation = vb.GPUVirtualAddress();
-			vbv.SizeInBytes = vb.Size();
-			vbv.StrideInBytes = d3d12_rl.VertexSize(0);
-
-			re.IASetVertexBuffers(0, vbv);
-
-			re.IASetPrimitiveTopology(tt);
-
-			D3D12_VIEWPORT vp;
-			vp.TopLeftX = 0;
-			vp.TopLeftY = 0;
-			vp.MinDepth = 0;
-			vp.MaxDepth = 1;
-
-			D3D12_RECT scissor_rc;
-			scissor_rc.left = 0;
-			scissor_rc.top = 0;
-
-			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
-			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
-			uint32_t const srv_desc_size = re.CBVSRVUAVDescSize();
-			for (uint32_t index = 0; index < array_size_; ++ index)
-			{
-				for (uint32_t level = 1; level < num_mip_maps_; ++ level)
-				{
-					cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
-
-					this->UpdateResourceBarrier(cmd_list, CalcSubresource(level - 1, index, 0, num_mip_maps_, array_size_),
-						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-					this->UpdateResourceBarrier(cmd_list, CalcSubresource(level, index, 0, num_mip_maps_, array_size_),
-						D3D12_RESOURCE_STATE_RENDER_TARGET);
-					re.FlushResourceBarriers(cmd_list);
-
-					D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle
-						= this->RetrieveD3DRenderTargetView(format_, index, 1, level)->Handle();
-
-					D3D12_CPU_DESCRIPTOR_HANDLE const & sr_handle
-						= this->RetrieveD3DShaderResourceView(format_, index, 1, level - 1, 1)->Handle();
-					device->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, sr_handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-					cmd_list->OMSetRenderTargets(1, &rt_handle, false, nullptr);
-
-					vp.Width = static_cast<float>(this->Width(level));
-					vp.Height = static_cast<float>(this->Height(level));
-					re.RSSetViewports(1, &vp);
-
-					scissor_rc.right = this->Width(level);
-					scissor_rc.bottom = this->Height(level);
-					re.RSSetScissorRects(scissor_rc);
-
-					cmd_list->DrawInstanced(4, 1, 0, 0);
-
-					cpu_cbv_srv_uav_handle.ptr += srv_desc_size;
-					gpu_cbv_srv_uav_handle.ptr += srv_desc_size;
-				}
-			}
-
-			pass.Unbind(effect);
-
-			auto& fb = checked_cast<D3D12FrameBuffer&>(*re.CurFrameBuffer());
-			fb.SetRenderTargets();
-		}
-	}
-
-	void D3D12Texture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D12Texture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 			width_, height_, 1, array_size_, init_data, clear_value_hint);

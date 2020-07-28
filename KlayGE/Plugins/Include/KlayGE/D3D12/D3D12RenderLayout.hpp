@@ -40,14 +40,14 @@
 
 namespace KlayGE
 {
-	class D3D12RenderLayout : public RenderLayout
+	class D3D12RenderLayout final : public RenderLayout
 	{
 	public:
 		D3D12RenderLayout();
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> const & InputElementDesc() const;
 
-		void Active() const;
+		void Active(ID3D12GraphicsCommandList* cmd_list) const;
 
 		size_t PsoHashValue();
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc, bool has_tessellation);

@@ -64,7 +64,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API GraphicsBuffer : boost::noncopyable
 	{
 	public:
-		class Mapper : boost::noncopyable
+		class Mapper final : boost::noncopyable
 		{
 			friend class GraphicsBuffer;
 
@@ -97,24 +97,24 @@ namespace KlayGE
 
 	public:
 		GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride);
-		virtual ~GraphicsBuffer();
+		virtual ~GraphicsBuffer() noexcept;
 
-		uint32_t Size() const
+		uint32_t Size() const noexcept
 		{
 			return size_in_byte_;
 		}
 
-		BufferUsage Usage() const
+		BufferUsage Usage() const noexcept
 		{
 			return usage_;
 		}
 
-		uint32_t AccessHint() const
+		uint32_t AccessHint() const noexcept
 		{
 			return access_hint_;
 		}
 
-		uint32_t StructureByteStride() const
+		uint32_t StructureByteStride() const noexcept
 		{
 			return structure_byte_stride_;
 		}
@@ -165,7 +165,7 @@ namespace KlayGE
 
 		uint8_t* subres_data_ = nullptr;
 		std::vector<uint8_t> data_block_;
-		std::atomic<bool> mapped_ = false;
+		std::atomic<bool> mapped_{false};
 	};
 }
 

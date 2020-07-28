@@ -37,19 +37,21 @@
 
 namespace KlayGE
 {
-	ArchiveOpenCallback::ArchiveOpenCallback(std::string_view pw)
+	ArchiveOpenCallback::ArchiveOpenCallback(std::string_view pw) noexcept
 		: password_is_defined_(!pw.empty())
 	{
 		Convert(password_, pw);
 	}
 
-	STDMETHODIMP_(ULONG) ArchiveOpenCallback::AddRef()
+	ArchiveOpenCallback::~ArchiveOpenCallback() noexcept = default;
+
+	STDMETHODIMP_(ULONG) ArchiveOpenCallback::AddRef() noexcept
 	{
 		++ ref_count_;
 		return ref_count_;
 	}
 
-	STDMETHODIMP_(ULONG) ArchiveOpenCallback::Release()
+	STDMETHODIMP_(ULONG) ArchiveOpenCallback::Release() noexcept
 	{
 		-- ref_count_;
 		if (0 == ref_count_)
@@ -60,7 +62,7 @@ namespace KlayGE
 		return ref_count_;
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::QueryInterface(REFGUID iid, void** out_object)
+	STDMETHODIMP ArchiveOpenCallback::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
 		if (IID_ICryptoGetTextPassword == iid)
 		{
@@ -80,21 +82,21 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::SetTotal(UInt64 const * files, UInt64 const * bytes)
+	STDMETHODIMP ArchiveOpenCallback::SetTotal(UInt64 const * files, UInt64 const * bytes) noexcept
 	{
 		KFL_UNUSED(files);
 		KFL_UNUSED(bytes);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::SetCompleted(UInt64 const * files, UInt64 const * bytes)
+	STDMETHODIMP ArchiveOpenCallback::SetCompleted(UInt64 const * files, UInt64 const * bytes) noexcept
 	{
 		KFL_UNUSED(files);
 		KFL_UNUSED(bytes);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::CryptoGetTextPassword(BSTR* password)
+	STDMETHODIMP ArchiveOpenCallback::CryptoGetTextPassword(BSTR* password) noexcept
 	{
 		if (password_is_defined_)
 		{

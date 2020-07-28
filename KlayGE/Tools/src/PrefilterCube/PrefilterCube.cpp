@@ -40,30 +40,32 @@ namespace
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		auto in_srv = rf.MakeTextureSrv(in_tex);
+
 		PostProcessPtr diff_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeDiffuse");
 		PostProcessPtr spec_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeSpecular");
-		diff_pp->InputPin(0, in_tex);
-		spec_pp->InputPin(0, in_tex);
+		diff_pp->InputPin(0, in_srv);
+		spec_pp->InputPin(0, in_srv);
 
 		TexturePtr out_tex = rf.MakeTextureCube(in_width, out_num_mipmaps, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write);
 
 		for (int face = 0; face < 6; ++ face)
 		{
-			in_tex->CopyToSubTextureCube(*out_tex, 0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width,
-				0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width);
+			in_tex->CopyToSubTextureCube(*out_tex, 0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width, 0,
+				static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width, TextureFilter::Point);
 
 			for (uint32_t level = 1; level < out_num_mipmaps - 1; ++ level)
 			{
 				float shininess = Glossiness2Shininess(static_cast<float>(out_num_mipmaps - 2 - level) / (out_num_mipmaps - 2));
 
-				spec_pp->OutputPin(0, out_tex, level, 0, face);
+				spec_pp->OutputPin(0, rf.Make2DRtv(out_tex, 0, static_cast<Texture::CubeFaces>(face), level));
 				spec_pp->SetParam(0, face);
 				spec_pp->SetParam(1, shininess);
 				spec_pp->Apply();
 			}
 
 			{
-				diff_pp->OutputPin(0, out_tex, out_num_mipmaps - 1, 0, face);
+				diff_pp->OutputPin(0, rf.Make2DRtv(out_tex, 0, static_cast<Texture::CubeFaces>(face), out_num_mipmaps - 1));
 				diff_pp->SetParam(0, face);
 				diff_pp->Apply();
 			}

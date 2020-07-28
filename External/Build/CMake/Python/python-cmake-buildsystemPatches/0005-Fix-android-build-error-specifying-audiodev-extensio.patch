@@ -1,0 +1,49 @@
+From 508fdece4cb7552a06e09888f3a9e0608fe8f1a0 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Fri, 22 Jan 2016 02:59:34 -0500
+Subject: [PATCH 05/11] Fix android build error specifying audiodev extensions
+ requirements.
+
+This commit introduce the variable HAVE_SYS_SOUNDCARD_H and fix the
+following build error:
+
+//-------------
+Building C object CMakeBuild/extensions/CMakeFiles/extension_ossaudiodev.dir/data/data/com.termux/files/home/Python-2.7.10/Modules/ossaudiodev.c.o
+/data/data/com.termux/files/home/Python-2.7.10/Modules/ossaudiodev.c:33:27: fatal error: sys/soundcard.h: No such file or directory
+ #include <sys/soundcard.h>
+//-------------
+---
+ cmake/ConfigureChecks.cmake     | 1 +
+ cmake/extensions/CMakeLists.txt | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
+index f8ec82c..7c2ad80 100644
+--- a/cmake/ConfigureChecks.cmake
++++ b/cmake/ConfigureChecks.cmake
+@@ -275,6 +275,7 @@ check_include_files(sys/poll.h HAVE_SYS_POLL_H)
+ check_include_files(sys/random.h HAVE_SYS_RANDOM_H)
+ check_include_files(sys/resource.h HAVE_SYS_RESOURCE_H)
+ check_include_files(sys/select.h HAVE_SYS_SELECT_H)
++check_include_files(sys/soundcard.h HAVE_SYS_SOUNDCARD_H)
+ check_include_files(sys/statvfs.h HAVE_SYS_STATVFS_H)
+ check_include_files(sys/stat.h HAVE_SYS_STAT_H) # libffi and cpython
+ check_include_files(sys/timeb.h HAVE_SYS_TIMEB_H)
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index fae9ef3..ad82e91 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -185,8 +185,8 @@ add_python_extension(_scproxy
+ )
+ 
+ # Linux-only extensions
+-add_python_extension(linuxaudiodev REQUIRES LINUX IS_PY2 SOURCES linuxaudiodev.c)
+-add_python_extension(ossaudiodev REQUIRES LINUX SOURCES ossaudiodev.c)
++add_python_extension(linuxaudiodev REQUIRES LINUX IS_PY2 HAVE_SYS_SOUNDCARD_H SOURCES linuxaudiodev.c)
++add_python_extension(ossaudiodev REQUIRES LINUX HAVE_SYS_SOUNDCARD_H SOURCES ossaudiodev.c)
+ 
+ # Windows-only extensions
+ add_python_extension(_msi
+-- 
+2.17.1.windows.2
+

@@ -29,7 +29,9 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/CXX17/string_view.hpp>
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -46,6 +48,7 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include <map>
 
 #include <boost/assert.hpp>
 
@@ -533,6 +536,10 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
+						if (caps.vp_rt_index_at_every_stage_support)
+						{
+							rules |= GSR_EXTVertexShaderLayer;
+						}
 						dxbc2glsl.FeedDXBC(&code[0], has_gs, has_ps, static_cast<ShaderTessellatorPartitioning>(this->DsPartitioning()),
 							static_cast<ShaderTessellatorOutputPrimitive>(this->DsOutputPrimitive()), gsv, rules);
 						glsl_src_ = dxbc2glsl.GLSLString();
@@ -652,7 +659,7 @@ namespace KlayGE
 				break;
 
 			case VEU_TextureCoord:
-				glsl_param_name = "v_TEXCOORD" + std::to_string(static_cast<int>(decl.usage_index));
+				glsl_param_name = std::format("v_TEXCOORD{}", static_cast<int>(decl.usage_index));
 				break;
 
 			case VEU_Tangent:
@@ -852,7 +859,7 @@ namespace KlayGE
 					{
 						usage = VEU_TextureCoord;
 						usage_index = static_cast<uint8_t>(semantic_index);
-						glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
+						glsl_param_name = std::format("TEXCOORD{}", semantic_index);
 					}
 					else if (CT_HASH("TANGENT") == semantic_hash)
 					{
@@ -1318,7 +1325,7 @@ namespace KlayGE
 			bool const tfb_separate_attribs = tfb_stage->TfbSeparateAttribs();
 
 			std::vector<GLchar const*> names(glsl_tfb_varyings.size());
-			for (size_t i = 0; i < glsl_tfb_varyings.size(); ++i)
+			for (int i = 0; i < glsl_tfb_varyings.size(); ++i)
 			{
 				names[i] = glsl_tfb_varyings[i].c_str();
 			}
@@ -1419,8 +1426,7 @@ namespace KlayGE
 	{
 		GLint active_ubos = 0;
 		glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
-		all_cbuffs_.resize(active_ubos);
-		gl_bind_cbuffs_.resize(active_ubos);
+		all_cbuff_indices_.resize(active_ubos);
 		for (int i = 0; i < active_ubos; ++ i)
 		{
 			GLint length = 0;
@@ -1429,16 +1435,24 @@ namespace KlayGE
 			std::vector<GLchar> ubo_name(length, '\0');
 			glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
 
-			auto cbuff = effect.CBufferByName(&ubo_name[0]);
+			auto* cbuff = effect.CBufferByName(&ubo_name[0]);
 			BOOST_ASSERT(cbuff);
-			all_cbuffs_[i] = cbuff;
+			uint32_t cb_index = 0;
+			for (uint32_t j = 0; j < effect.NumCBuffers(); ++j)
+			{
+				if (effect.CBufferByIndex(j) == cbuff)
+				{
+					cb_index = j;
+					break;
+				}
+			}
+			all_cbuff_indices_[i] = cb_index;
 
 			glUniformBlockBinding(glsl_program_, glGetUniformBlockIndex(glsl_program_, &ubo_name[0]), i);
 
 			GLint ubo_size = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
 			cbuff->Resize(ubo_size);
-			gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer&>(*cbuff->HWBuff()).GLvbo();
 
 			GLint uniforms = 0;
 			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
@@ -1463,6 +1477,7 @@ namespace KlayGE
 			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
 				GL_UNIFORM_OFFSET, &uniform_offsets[0]);
 
+			std::map<std::string, GLint> struct_offsets;
 			for (GLint j = 0; j < uniforms; ++ j)
 			{
 				std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
@@ -1477,29 +1492,55 @@ namespace KlayGE
 					*iter = '\0';
 				}
 
-				RenderEffectParameter* param = effect.ParameterByName(&uniform_name[0]);
-				GLint stride;
-				if (param->ArraySize())
+				iter = std::find(uniform_name.begin(), uniform_name.end(), '.');
+				if (iter != uniform_name.end())
 				{
-					stride = uniform_array_strides[j];
-				}
-				else
-				{
-					if (param->Type() != REDT_float4x4)
+					*iter = '\0';
+
+					std::string struct_name(uniform_name.data());
+					auto struct_iter = struct_offsets.find(struct_name);
+					if (struct_iter == struct_offsets.end())
 					{
-						stride = 4;
+						struct_offsets.insert(std::make_pair(struct_name, uniform_offsets[j]));
 					}
 					else
 					{
-						stride = uniform_matrix_strides[j];
+						struct_iter->second = std::min(struct_iter->second, uniform_offsets[j]);
 					}
 				}
-				param->BindToCBuffer(*cbuff, uniform_offsets[j], stride);
+				else
+				{
+					RenderEffectParameter* param = effect.ParameterByName(uniform_name.data());
+					GLint stride;
+					if (param->ArraySize())
+					{
+						stride = uniform_array_strides[j];
+					}
+					else
+					{
+						if (param->Type() != REDT_float4x4)
+						{
+							stride = 4;
+						}
+						else
+						{
+							stride = uniform_matrix_strides[j];
+						}
+					}
+					param->BindToCBuffer(effect, cb_index, uniform_offsets[j], stride);
+				}
+			}
+
+			for (auto const& item : struct_offsets)
+			{
+				RenderEffectParameter* param = effect.ParameterByName(item.first);
+				BOOST_ASSERT(param->Type() == REDT_struct);
+				param->BindToCBuffer(effect, cb_index, item.second, 1);
 			}
 		}
 	}
 
-	void OGLShaderObject::Bind()
+	void OGLShaderObject::Bind(RenderEffect const& effect)
 	{
 		if (!this->Stage(ShaderStage::Pixel) ||
 			checked_cast<OGLShaderStageObject&>(*this->Stage(ShaderStage::Pixel)).GlslSource().empty())
@@ -1515,14 +1556,18 @@ namespace KlayGE
 			pb.func();
 		}
 
-		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
+		if (!all_cbuff_indices_.empty())
 		{
-			all_cbuffs_[i]->Update();
-		}
+			std::vector<GLuint> gl_bind_cbuffs;
+			gl_bind_cbuffs.reserve(all_cbuff_indices_.size());
+			for (auto cb_index : all_cbuff_indices_)
+			{
+				auto* cbuff = effect.CBufferByIndex(cb_index);
+				cbuff->Update();
+				gl_bind_cbuffs.push_back(checked_cast<OGLGraphicsBuffer&>(*cbuff->HWBuff()).GLvbo());	
+			}
 
-		if (!gl_bind_cbuffs_.empty())
-		{
-			re.BindBuffersBase(GL_UNIFORM_BUFFER, 0, static_cast<GLsizei>(all_cbuffs_.size()), &gl_bind_cbuffs_[0]);
+			re.BindBuffersBase(GL_UNIFORM_BUFFER, 0, static_cast<GLsizei>(gl_bind_cbuffs.size()), gl_bind_cbuffs.data());
 		}
 
 		if (!gl_bind_textures_.empty())

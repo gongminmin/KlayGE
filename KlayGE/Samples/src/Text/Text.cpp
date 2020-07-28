@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -20,9 +19,10 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Text.hpp"
@@ -105,7 +105,7 @@ void TextApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Text.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)

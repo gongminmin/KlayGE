@@ -15,30 +15,40 @@
 
 #pragma once
 
-#include <KlayGE/Signal.hpp>
+#include <KFL/com_ptr.hpp>
+#include <KFL/SmartPtrHelper.hpp>
+
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
+#include <KlayGE/Signal.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
+#include <winrt/Windows.Graphics.Display.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable : 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
 #endif
-#include <windows.graphics.display.h>
-#include <windows.ui.core.h>
-#if defined(KLAYGE_COMPILER_MSVC)
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#endif
 
-class IAmdDxExtQuadBufferStereo;
-typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
+namespace uwp
+{
+	using winrt::get_abi;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::Graphics::Display;
+	using namespace winrt::Windows::UI::Core;
+}
+#endif
 
 namespace KlayGE
 {
 	struct RenderSettings;
 	class D3D11Adapter;
 
-	class D3D11RenderWindow : public D3D11FrameBuffer
+	class D3D11RenderWindow final : public D3D11FrameBuffer
 	{
 	public:
 		D3D11RenderWindow(D3D11Adapter* adapter, std::string const& name, RenderSettings const& settings);
@@ -49,7 +59,7 @@ namespace KlayGE
 		void SwapBuffers() override;
 		void WaitOnSwapBuffers() override;
 
-		std::wstring const& Description() const;
+		std::wstring const& Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);
@@ -77,10 +87,6 @@ namespace KlayGE
 		{
 			return render_target_view_right_eye_;
 		}
-		uint32_t StereoRightEyeHeight() const
-		{
-			return stereo_amd_right_eye_height_;
-		}
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
@@ -90,7 +96,7 @@ namespace KlayGE
 		void OnSize(Window const& win, bool active);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
+		HRESULT OnStereoEnabledChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args);
 #endif
 
 	private:
@@ -103,32 +109,26 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hWnd_; // Win32 Window handle
 #else
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		EventRegistrationToken stereo_enabled_changed_token_;
+		uwp::CoreWindow wnd_{nullptr};
+		uwp::DisplayInformation::StereoEnabledChanged_revoker stereo_enabled_changed_token_;
 #endif
 		bool isFullScreen_;
 		uint32_t sync_interval_;
 
 		D3D11Adapter* adapter_;
-		bool dxgi_stereo_support_;
-		bool dxgi_allow_tearing_;
-		bool dxgi_async_swap_chain_;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		DXGI_SWAP_CHAIN_DESC sc_desc_;
+		bool dxgi_stereo_support_{false};
+		bool dxgi_allow_tearing_{false};
+		bool dxgi_async_swap_chain_{false};
+
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
-#else
-		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #endif
-		IDXGISwapChainPtr swap_chain_;
 		IDXGISwapChain1Ptr swap_chain_1_;
 		bool main_wnd_;
-		HANDLE frame_latency_waitable_obj_;
-
-		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
-		uint32_t stereo_amd_right_eye_height_;
+		Win32UniqueHandle frame_latency_waitable_obj_;
 
 		TexturePtr back_buffer_;
 		TexturePtr depth_stencil_;

@@ -15,11 +15,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -45,46 +44,46 @@
 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include "NV3DVision.hpp"
 
 namespace
 {
 	using namespace KlayGE;
 
-	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> const ShaderSetShaderResources[] =
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11ShaderResourceView * const *)> const ShaderSetShaderResources[] =
 	{
-		std::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
-		std::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
-		std::mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
-		std::mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
-		std::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
-		std::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
+		std::mem_fn(&ID3D11DeviceContext1::VSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext1::PSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext1::GSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext1::CSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext1::HSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext1::DSSetShaderResources)
 	};
 	KLAYGE_STATIC_ASSERT(std::size(ShaderSetShaderResources) == NumShaderStages);
 
-	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> const ShaderSetSamplers[] =
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11SamplerState * const *)> const ShaderSetSamplers[] =
 	{
-		std::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
-		std::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
-		std::mem_fn(&ID3D11DeviceContext::GSSetSamplers),
-		std::mem_fn(&ID3D11DeviceContext::CSSetSamplers),
-		std::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
-		std::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
+		std::mem_fn(&ID3D11DeviceContext1::VSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext1::PSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext1::GSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext1::CSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext1::HSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext1::DSSetSamplers)
 	};
 	KLAYGE_STATIC_ASSERT(std::size(ShaderSetSamplers) == NumShaderStages);
 
-	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> const ShaderSetConstantBuffers[] =
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11Buffer * const *)> const ShaderSetConstantBuffers[] =
 	{
-		std::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
-		std::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
-		std::mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
-		std::mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
-		std::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
-		std::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
+		std::mem_fn(&ID3D11DeviceContext1::VSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext1::PSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext1::GSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext1::CSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext1::HSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext1::DSSetConstantBuffers)
 	};
 	KLAYGE_STATIC_ASSERT(std::size(ShaderSetConstantBuffers) == NumShaderStages);
 }
@@ -94,9 +93,6 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::D3D11RenderEngine()
-		: num_so_buffs_(0),
-			dsv_ptr_cache_(nullptr),
-			device_lost_event_(nullptr), device_lost_reg_cookie_(0), thread_pool_wait_(nullptr)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 6;
@@ -121,6 +117,7 @@ namespace KlayGE
 		if (mod_dxgi_ != nullptr)
 		{
 			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
+			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
 		}
 		if (mod_d3d11_ != nullptr)
 		{
@@ -131,49 +128,48 @@ namespace KlayGE
 #endif
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
+		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
 		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;
 #endif
 
-		IDXGIFactory1* gi_factory_1;
-		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory_1)));
-		gi_factory_1_ = MakeCOMPtr(gi_factory_1);
-		dxgi_sub_ver_ = 1;
-
-		IDXGIFactory2* gi_factory_2;
-		gi_factory_1->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
-		if (gi_factory_2 != nullptr)
+		if (DynamicCreateDXGIFactory2_)
 		{
-			gi_factory_2_ = MakeCOMPtr(gi_factory_2);
-			dxgi_sub_ver_ = 2;
-
-			IDXGIFactory3* gi_factory_3;
-			gi_factory_1->QueryInterface(IID_IDXGIFactory3, reinterpret_cast<void**>(&gi_factory_3));
-			if (gi_factory_3 != nullptr)
+			UINT const dxgi_factory_flags = 0;
+			static UINT const available_dxgi_factory_flags[] =
 			{
-				gi_factory_3_ = MakeCOMPtr(gi_factory_3);
-				dxgi_sub_ver_ = 3;
+#ifdef KLAYGE_DEBUG
+				dxgi_factory_flags | DXGI_CREATE_FACTORY_DEBUG,
+#endif
+				dxgi_factory_flags
+			};
 
-				IDXGIFactory4* gi_factory_4;
-				gi_factory_1->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory_4));
-				if (gi_factory_4 != nullptr)
+			HRESULT hr = E_FAIL;
+			for (auto const& flags : available_dxgi_factory_flags)
+			{
+				hr = DynamicCreateDXGIFactory2_(flags, IID_IDXGIFactory2, gi_factory_2_.put_void());
+				if (SUCCEEDED(hr))
 				{
-					gi_factory_4_ = MakeCOMPtr(gi_factory_4);
-					dxgi_sub_ver_ = 4;
-
-					IDXGIFactory5* gi_factory_5;
-					gi_factory_1->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory_5));
-					if (gi_factory_5 != nullptr)
+					break;
+				}
+			}
+		}
+		else
+		{
+			TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, gi_factory_2_.put_void()));
+		}
+		dxgi_sub_ver_ = 2;
+		if (gi_factory_2_.try_as(IID_IDXGIFactory3, gi_factory_3_))
+		{
+			dxgi_sub_ver_ = 3;
+			if (gi_factory_2_.try_as(IID_IDXGIFactory4, gi_factory_4_))
+			{
+				dxgi_sub_ver_ = 4;
+				if (gi_factory_2_.try_as(IID_IDXGIFactory5, gi_factory_5_))
+				{
+					dxgi_sub_ver_ = 5;
+					if (gi_factory_2_.try_as(IID_IDXGIFactory6, gi_factory_6_))
 					{
-						gi_factory_5_ = MakeCOMPtr(gi_factory_5);
-						dxgi_sub_ver_ = 5;
-
-						IDXGIFactory6* gi_factory_6;
-						gi_factory_1->QueryInterface(IID_IDXGIFactory6, reinterpret_cast<void**>(&gi_factory_6));
-						if (gi_factory_6 != nullptr)
-						{
-							gi_factory_6_ = MakeCOMPtr(gi_factory_6);
-							dxgi_sub_ver_ = 6;
-						}
+						dxgi_sub_ver_ = 6;
 					}
 				}
 			}
@@ -181,11 +177,11 @@ namespace KlayGE
 
 		if (gi_factory_6_)
 		{
-			adapterList_.Enumerate(gi_factory_6_);
+			adapterList_.Enumerate(gi_factory_6_.get());
 		}
 		else
 		{
-			adapterList_.Enumerate(gi_factory_1_);
+			adapterList_.Enumerate(gi_factory_2_.get());
 		}
 	}
 
@@ -214,109 +210,94 @@ namespace KlayGE
 		RenderEngine::EndFrame();
 	}
 
-	IDXGIFactory1* D3D11RenderEngine::DXGIFactory1() const
-	{
-		return gi_factory_1_.get();
-	}
-
-	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const
+	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const noexcept
 	{
 		return gi_factory_2_.get();
 	}
 
-	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const
+	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const noexcept
 	{
 		return gi_factory_3_.get();
 	}
 
-	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const
+	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const noexcept
 	{
 		return gi_factory_4_.get();
 	}
 
-	IDXGIFactory5* D3D11RenderEngine::DXGIFactory5() const
+	IDXGIFactory5* D3D11RenderEngine::DXGIFactory5() const noexcept
 	{
 		return gi_factory_5_.get();
 	}
 
-	IDXGIFactory6* D3D11RenderEngine::DXGIFactory6() const
+	IDXGIFactory6* D3D11RenderEngine::DXGIFactory6() const noexcept
 	{
 		return gi_factory_6_.get();
 	}
 
-	uint8_t D3D11RenderEngine::DXGISubVer() const
+	uint8_t D3D11RenderEngine::DXGISubVer() const noexcept
 	{
 		return dxgi_sub_ver_;
 	}
 
-	ID3D11Device* D3D11RenderEngine::D3DDevice() const
-	{
-		return d3d_device_.get();
-	}
-
-	ID3D11Device1* D3D11RenderEngine::D3DDevice1() const
+	ID3D11Device1* D3D11RenderEngine::D3DDevice1() const noexcept
 	{
 		return d3d_device_1_.get();
 	}
 
-	ID3D11Device2* D3D11RenderEngine::D3DDevice2() const
+	ID3D11Device2* D3D11RenderEngine::D3DDevice2() const noexcept
 	{
 		return d3d_device_2_.get();
 	}
 
-	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const
+	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const noexcept
 	{
 		return d3d_device_3_.get();
 	}
 
-	ID3D11Device4* D3D11RenderEngine::D3DDevice4() const
+	ID3D11Device4* D3D11RenderEngine::D3DDevice4() const noexcept
 	{
 		return d3d_device_4_.get();
 	}
 
-	ID3D11Device5* D3D11RenderEngine::D3DDevice5() const
+	ID3D11Device5* D3D11RenderEngine::D3DDevice5() const noexcept
 	{
 		return d3d_device_5_.get();
 	}
 
-	ID3D11DeviceContext* D3D11RenderEngine::D3DDeviceImmContext() const
-	{
-		return d3d_imm_ctx_.get();
-	}
-
-	ID3D11DeviceContext1* D3D11RenderEngine::D3DDeviceImmContext1() const
+	ID3D11DeviceContext1* D3D11RenderEngine::D3DDeviceImmContext1() const noexcept
 	{
 		return d3d_imm_ctx_1_.get();
 	}
 
-	ID3D11DeviceContext2* D3D11RenderEngine::D3DDeviceImmContext2() const
+	ID3D11DeviceContext2* D3D11RenderEngine::D3DDeviceImmContext2() const noexcept
 	{
 		return d3d_imm_ctx_2_.get();
 	}
 
-	ID3D11DeviceContext3* D3D11RenderEngine::D3DDeviceImmContext3() const
+	ID3D11DeviceContext3* D3D11RenderEngine::D3DDeviceImmContext3() const noexcept
 	{
 		return d3d_imm_ctx_3_.get();
 	}
 
-	ID3D11DeviceContext4* D3D11RenderEngine::D3DDeviceImmContext4() const
+	ID3D11DeviceContext4* D3D11RenderEngine::D3DDeviceImmContext4() const noexcept
 	{
 		return d3d_imm_ctx_4_.get();
 	}
 
-	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const
+	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const noexcept
 	{
 		return d3d_11_runtime_sub_ver_;
 	}
 
-	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
+	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const noexcept
 	{
 		return d3d_feature_level_;
 	}
 
 	// 获取D3D适配器列表
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11AdapterList const & D3D11RenderEngine::D3DAdapters() const
+	D3D11AdapterList const& D3D11RenderEngine::D3DAdapters() const noexcept
 	{
 		return adapterList_;
 	}
@@ -357,57 +338,6 @@ namespace KlayGE
 
 		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
-
-		if (STM_LCDShutter == settings.stereo_method)
-		{
-			stereo_method_ = SM_None;
-
-			if ((dxgi_sub_ver_ >= 2) && gi_factory_2_->IsWindowedStereoEnabled())
-			{
-				stereo_method_ = SM_DXGI;
-			}
-
-			if (SM_None == stereo_method_)
-			{
-				if (win->Adapter().Description().find(L"NVIDIA", 0) != std::wstring::npos)
-				{
-					stereo_method_ = SM_NV3DVision;
-
-					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-					uint32_t const w = win->Width();
-					uint32_t const h = win->Height();
-					stereo_nv_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
-						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-
-					stereo_nv_3d_vision_fb_ = rf.MakeFrameBuffer();
-					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::Attachment::Color0,
-						rf.Make2DRtv(stereo_nv_3d_vision_tex_, 0, 1, 0));
-
-					NVSTEREOIMAGEHEADER sih;
-					sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
-					sih.dwBPP = NumFormatBits(settings.color_fmt);
-					sih.dwFlags = SIH_SWAP_EYES;
-					sih.dwWidth = w * 2; 
-					sih.dwHeight = h;
-
-					ElementInitData init_data;
-					init_data.data = &sih;
-					init_data.row_pitch = sizeof(sih);
-					init_data.slice_pitch = init_data.row_pitch;
-					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
-						1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, init_data);
-
-					sih_tex->CopyToSubTexture2D(*stereo_nv_3d_vision_tex_,
-						0, 0, 0, h, sih_tex->Width(0), 1,
-						0, 0, 0, 0, sih_tex->Width(0), 1);
-				}
-				else if (win->Adapter().Description().find(L"AMD", 0) != std::wstring::npos)
-				{
-					stereo_method_ = SM_AMDQuadBuffer;
-				}
-			}
-		}
 	}
 
 	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
@@ -415,7 +345,7 @@ namespace KlayGE
 		KFL_UNUSED(settings);
 	}
 
-	void D3D11RenderEngine::D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level)
+	void D3D11RenderEngine::D3DDevice(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
 		this->DetectD3D11Runtime(device, imm_ctx);
 
@@ -426,14 +356,14 @@ namespace KlayGE
 
 		if (d3d_11_runtime_sub_ver_ >= 4)
 		{
-			device_lost_event_ = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
+			device_lost_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS));
 			if (device_lost_event_ != nullptr)
 			{
-				thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
+				thread_pool_wait_ = MakeWin32UniquTpWait(::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr));
 				if (thread_pool_wait_ != nullptr)
 				{
-					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, nullptr);
-					TIFHR(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+					::SetThreadpoolWait(thread_pool_wait_.get(), device_lost_event_.get(), nullptr);
+					TIFHR(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_.get(), &device_lost_reg_cookie_));
 				}
 			}
 		}
@@ -441,10 +371,6 @@ namespace KlayGE
 
 	void D3D11RenderEngine::ResetRenderStates()
 	{
-		RasterizerStateDesc default_rs_desc;
-		DepthStencilStateDesc default_dss_desc;
-		BlendStateDesc default_bs_desc;
-
 		vertex_shader_cache_ = nullptr;
 		pixel_shader_cache_ = nullptr;
 		geometry_shader_cache_ = nullptr;
@@ -453,7 +379,7 @@ namespace KlayGE
 		domain_shader_cache_ = nullptr;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRenderStateObject(default_rs_desc, default_dss_desc, default_bs_desc);
+		cur_rs_obj_ = rf.MakeRenderStateObject(RasterizerStateDesc(), DepthStencilStateDesc(), BlendStateDesc());
 
 		auto& d3d_cur_rs_obj = checked_cast<D3D11RenderStateObject&>(*cur_rs_obj_);
 		rasterizer_state_cache_ = d3d_cur_rs_obj.D3DRasterizerState();
@@ -463,24 +389,24 @@ namespace KlayGE
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
-		d3d_imm_ctx_->RSSetState(rasterizer_state_cache_);
-		d3d_imm_ctx_->OMSetDepthStencilState(depth_stencil_state_cache_, stencil_ref_cache_);
-		d3d_imm_ctx_->OMSetBlendState(blend_state_cache_, &blend_factor_cache_.r(), sample_mask_cache_);
+		d3d_imm_ctx_1_->RSSetState(rasterizer_state_cache_);
+		d3d_imm_ctx_1_->OMSetDepthStencilState(depth_stencil_state_cache_, stencil_ref_cache_);
+		d3d_imm_ctx_1_->OMSetBlendState(blend_state_cache_, &blend_factor_cache_.r(), sample_mask_cache_);
 
 		topology_type_cache_ = RenderLayout::TT_PointList;
-		d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(topology_type_cache_));
+		d3d_imm_ctx_1_->IASetPrimitiveTopology(D3D11Mapping::Mapping(topology_type_cache_));
 
 		input_layout_cache_ = nullptr;
-		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_);
+		d3d_imm_ctx_1_->IASetInputLayout(input_layout_cache_);
 
-		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
+		viewport_cache_ = {};
 
 		if (!vb_cache_.empty())
 		{
 			vb_cache_.assign(vb_cache_.size(), nullptr);
 			vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
 			vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
-			d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
+			d3d_imm_ctx_1_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
 				&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
 			vb_cache_.clear();
 			vb_stride_cache_.clear();
@@ -488,14 +414,14 @@ namespace KlayGE
 		}
 
 		ib_cache_ = nullptr;
-		d3d_imm_ctx_->IASetIndexBuffer(ib_cache_, DXGI_FORMAT_R16_UINT, 0);
+		d3d_imm_ctx_1_->IASetIndexBuffer(ib_cache_, DXGI_FORMAT_R16_UINT, 0);
 
 		for (uint32_t i = 0; i < NumShaderStages; ++i)
 		{
 			if (!shader_srv_ptr_cache_[i].empty())
 			{
 				std::fill(shader_srv_ptr_cache_[i].begin(), shader_srv_ptr_cache_[i].end(), static_cast<ID3D11ShaderResourceView*>(nullptr));
-				ShaderSetShaderResources[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[i].size()), &shader_srv_ptr_cache_[i][0]);
+				ShaderSetShaderResources[i](d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[i].size()), &shader_srv_ptr_cache_[i][0]);
 				shader_srvsrc_cache_[i].clear();
 				shader_srv_ptr_cache_[i].clear();
 			}
@@ -503,14 +429,14 @@ namespace KlayGE
 			if (!shader_sampler_ptr_cache_[i].empty())
 			{
 				std::fill(shader_sampler_ptr_cache_[i].begin(), shader_sampler_ptr_cache_[i].end(), static_cast<ID3D11SamplerState*>(nullptr));
-				ShaderSetSamplers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_ptr_cache_[i].size()), &shader_sampler_ptr_cache_[i][0]);
+				ShaderSetSamplers[i](d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(shader_sampler_ptr_cache_[i].size()), &shader_sampler_ptr_cache_[i][0]);
 				shader_sampler_ptr_cache_[i].clear();
 			}
 
 			if (!shader_cb_ptr_cache_[i].empty())
 			{
 				std::fill(shader_cb_ptr_cache_[i].begin(), shader_cb_ptr_cache_[i].end(), static_cast<ID3D11Buffer*>(nullptr));
-				ShaderSetConstantBuffers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_ptr_cache_[i].size()), &shader_cb_ptr_cache_[i][0]);
+				ShaderSetConstantBuffers[i](d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(shader_cb_ptr_cache_[i].size()), &shader_cb_ptr_cache_[i][0]);
 				shader_cb_ptr_cache_[i].clear();
 			}
 		}
@@ -522,7 +448,7 @@ namespace KlayGE
 	{
 		KFL_UNUSED(fb);
 
-		BOOST_ASSERT(d3d_device_);
+		BOOST_ASSERT(d3d_device_1_);
 		BOOST_ASSERT(fb);
 	}
 
@@ -552,7 +478,7 @@ namespace KlayGE
 				}
 			}
 
-			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+			d3d_imm_ctx_1_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
 
 			num_so_buffs_ = num_buffs;
 		}
@@ -560,7 +486,7 @@ namespace KlayGE
 		{
 			std::vector<ID3D11Buffer*> d3d11_buffs(num_so_buffs_, nullptr);
 			std::vector<UINT> d3d11_buff_offsets(num_so_buffs_, 0);
-			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_so_buffs_), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+			d3d_imm_ctx_1_->SOSetTargets(static_cast<UINT>(num_so_buffs_), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
 
 			num_so_buffs_ = num_buffs;
 		}
@@ -584,7 +510,7 @@ namespace KlayGE
 			if ((vb_cache_.size() != all_num_vertex_stream) || (vb_cache_ != vbs)
 				|| (vb_stride_cache_ != strides) || (vb_offset_cache_ != offsets))
 			{
-				d3d_imm_ctx_->IASetVertexBuffers(0, all_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+				d3d_imm_ctx_1_->IASetVertexBuffers(0, all_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 				vb_cache_ = vbs;
 				vb_stride_cache_ = strides;
 				vb_offset_cache_ = offsets;
@@ -593,7 +519,7 @@ namespace KlayGE
 			auto layout = d3d_rl.InputLayout(tech.Pass(0).GetShaderObject(effect).get());
 			if (layout != input_layout_cache_)
 			{
-				d3d_imm_ctx_->IASetInputLayout(layout);
+				d3d_imm_ctx_1_->IASetInputLayout(layout);
 				input_layout_cache_ = layout;
 			}
 		}
@@ -604,7 +530,7 @@ namespace KlayGE
 				vb_cache_.assign(vb_cache_.size(), nullptr);
 				vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
 				vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
-				d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
+				d3d_imm_ctx_1_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
 					&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
 				vb_cache_.clear();
 				vb_stride_cache_.clear();
@@ -612,7 +538,7 @@ namespace KlayGE
 			}
 
 			input_layout_cache_ = nullptr;
-			d3d_imm_ctx_->IASetInputLayout(input_layout_cache_);
+			d3d_imm_ctx_1_->IASetInputLayout(input_layout_cache_);
 		}
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
@@ -640,7 +566,7 @@ namespace KlayGE
 		}
 		if (topology_type_cache_ != tt)
 		{
-			d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(tt));
+			d3d_imm_ctx_1_->IASetPrimitiveTopology(D3D11Mapping::Mapping(tt));
 			topology_type_cache_ = tt;
 		}
 
@@ -684,7 +610,7 @@ namespace KlayGE
 			break;
 		}
 
-		uint32_t const num_instances = rl.NumInstances();
+		uint32_t const num_instances = rl.NumInstances() * this->NumRealizedCameraInstances();
 
 		num_primitives_just_rendered_ += num_instances * prim_count;
 		num_vertices_just_rendered_ += num_instances * vertex_count;
@@ -694,7 +620,7 @@ namespace KlayGE
 			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer&>(*rl.GetIndexStream()).D3DBuffer();
 			if (ib_cache_ != d3dib)
 			{
-				d3d_imm_ctx_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+				d3d_imm_ctx_1_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 				ib_cache_ = d3dib;
 			}
 		}
@@ -702,7 +628,7 @@ namespace KlayGE
 		{
 			if (ib_cache_)
 			{
-				d3d_imm_ctx_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
+				d3d_imm_ctx_1_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
 				ib_cache_ = nullptr;
 			}
 		}
@@ -718,7 +644,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
+					d3d_imm_ctx_1_->DrawIndexedInstancedIndirect(
 						checked_cast<D3D11GraphicsBuffer const&>(*indirect_buff).D3DBuffer(), rl.IndirectArgsOffset());
 					pass.Unbind(effect);
 				}
@@ -730,7 +656,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					d3d_imm_ctx_->DrawInstancedIndirect(
+					d3d_imm_ctx_1_->DrawInstancedIndirect(
 						checked_cast<D3D11GraphicsBuffer const&>(*indirect_buff).D3DBuffer(), rl.IndirectArgsOffset());
 					pass.Unbind(effect);
 				}
@@ -746,7 +672,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
+					d3d_imm_ctx_1_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass.Unbind(effect);
 				}
 			}
@@ -758,7 +684,7 @@ namespace KlayGE
 					auto& pass = tech.Pass(i);
 
 					pass.Bind(effect);
-					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
+					d3d_imm_ctx_1_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass.Unbind(effect);
 				}
 			}
@@ -775,7 +701,7 @@ namespace KlayGE
 			auto& pass = tech.Pass(i);
 
 			pass.Bind(effect);
-			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
+			d3d_imm_ctx_1_->Dispatch(tgx, tgy, tgz);
 			pass.Unbind(effect);
 		}
 
@@ -791,7 +717,7 @@ namespace KlayGE
 			auto& pass = tech.Pass(i);
 
 			pass.Bind(effect);
-			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer&>(*buff_args).D3DBuffer(), offset);
+			d3d_imm_ctx_1_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer&>(*buff_args).D3DBuffer(), offset);
 			pass.Unbind(effect);
 		}
 
@@ -800,7 +726,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::ForceFlush()
 	{
-		d3d_imm_ctx_->Flush();
+		d3d_imm_ctx_1_->Flush();
 	}
 
 	TexturePtr const & D3D11RenderEngine::ScreenDepthStencilTexture() const
@@ -814,7 +740,7 @@ namespace KlayGE
 	{
 		D3D11_RECT rc = { static_cast<LONG>(x), static_cast<LONG>(y),
 			static_cast<LONG>(width), static_cast<LONG>(height) };
-		d3d_imm_ctx_->RSSetScissorRects(1, &rc);
+		d3d_imm_ctx_1_->RSSetScissorRects(1, &rc);
 	}
 
 	void D3D11RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
@@ -822,11 +748,11 @@ namespace KlayGE
 		size_t const name_hash = HashRange(name.begin(), name.end());
 		if (CT_HASH("D3D_DEVICE") == name_hash)
 		{
-			*static_cast<ID3D11Device**>(value) = d3d_device_.get();
+			*static_cast<ID3D11Device1**>(value) = d3d_device_1_.get();
 		}
 		else if (CT_HASH("D3D_IMM_CONTEXT") == name_hash)
 		{
-			*static_cast<ID3D11DeviceContext**>(value) = d3d_imm_ctx_.get();
+			*static_cast<ID3D11DeviceContext1**>(value) = d3d_imm_ctx_1_.get();
 		}
 		else if (CT_HASH("FEATURE_LEVEL") == name_hash)
 		{
@@ -834,7 +760,7 @@ namespace KlayGE
 		}
 		else if (CT_HASH("DXGI_FACTORY") == name_hash)
 		{
-			*static_cast<IDXGIFactory1**>(value) = gi_factory_1_.get();
+			*static_cast<IDXGIFactory2**>(value) = gi_factory_2_.get();
 		}
 	}
 
@@ -850,16 +776,8 @@ namespace KlayGE
 			d3d_device_4_->UnregisterDeviceRemoved(device_lost_reg_cookie_);
 			device_lost_reg_cookie_ = 0;
 		}
-		if (device_lost_event_ != nullptr)
-		{
-			::CloseHandle(device_lost_event_);
-			device_lost_event_ = nullptr;
-		}
-		if (thread_pool_wait_ != nullptr)
-		{
-			::CloseThreadpoolWait(thread_pool_wait_);
-			thread_pool_wait_ = nullptr;
-		}
+		device_lost_event_.reset();
+		thread_pool_wait_.reset();
 
 		adapterList_.Destroy();
 
@@ -890,33 +808,29 @@ namespace KlayGE
 		rtv_ptr_cache_.clear();
 		dsv_ptr_cache_ = nullptr;
 
-		stereo_nv_3d_vision_fb_.reset();
-		stereo_nv_3d_vision_tex_.reset();
-
-		if (d3d_imm_ctx_)
+		if (d3d_imm_ctx_1_)
 		{
-			d3d_imm_ctx_->ClearState();
-			d3d_imm_ctx_->Flush();
+			d3d_imm_ctx_1_->ClearState();
+			d3d_imm_ctx_1_->Flush();
 		}
 
-		d3d_imm_ctx_.reset();
 		d3d_imm_ctx_1_.reset();
 		d3d_imm_ctx_2_.reset();
 		d3d_imm_ctx_3_.reset();
 		d3d_imm_ctx_4_.reset();
-		d3d_device_.reset();
 		d3d_device_1_.reset();
 		d3d_device_2_.reset();
 		d3d_device_3_.reset();
 		d3d_device_4_.reset();
 		d3d_device_5_.reset();
-		gi_factory_1_.reset();
 		gi_factory_2_.reset();
 		gi_factory_3_.reset();
 		gi_factory_4_.reset();
 		gi_factory_5_.reset();
+		gi_factory_6_.reset();
 
 		DynamicCreateDXGIFactory1_ = nullptr;
+		DynamicCreateDXGIFactory2_ = nullptr;
 		DynamicD3D11CreateDevice_ = nullptr;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -929,12 +843,9 @@ namespace KlayGE
 	{
 		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
-			IDXGIDevice3* dxgi_device = nullptr;
-			d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
-			if (dxgi_device != nullptr)
+			if (auto dxgi_device = d3d_device_1_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
 			{
 				dxgi_device->Trim();
-				dxgi_device->Release();
 			}
 		}
 	}
@@ -958,7 +869,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::FillRenderDeviceCaps()
 	{
-		BOOST_ASSERT(d3d_device_);
+		BOOST_ASSERT(d3d_device_1_);
 
 		switch (d3d_feature_level_)
 		{
@@ -966,6 +877,7 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
+			// D3D11 feature level 12.1+ supports objects in shader model 5.1, although it doesn't support shader model 5.1 bytecode
 			caps_.max_shader_model
 				= (d3d_feature_level_ > D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
@@ -987,76 +899,87 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid feature level");
 		}
 
-		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
-			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
-			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
+			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature))))
+			{
+				caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
+			}
+			else
+			{
+				caps_.is_tbdr = false;
+			}
 		}
-		else
-		{
-			caps_.is_tbdr = false;
-		}
-		if (d3d_11_runtime_sub_ver_ >= 2)
-		{
-			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.hw_instancing_support = d3d11_feature.SimpleInstancingSupported ? true : false;
-		}
-		else
-		{
-			caps_.hw_instancing_support = true;
-		}
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		caps_.primitive_restart_support = true;
 		{
-			D3D11_FEATURE_DATA_THREADING mt_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
-			caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
-			caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
-			caps_.arbitrary_multithread_rendering_support = caps_.multithread_rendering_support;
+			D3D11_FEATURE_DATA_THREADING mt_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature))))
+			{
+				caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
+				caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
+				caps_.arbitrary_multithread_rendering_support = caps_.multithread_rendering_support;
+			}
+			else
+			{
+				caps_.multithread_rendering_support = false;
+				caps_.multithread_res_creating_support = false;
+				caps_.arbitrary_multithread_rendering_support = false;
+			}
 		}
 		caps_.mrt_independent_bit_depths_support = true;
-		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
-		}
-		else
-		{
-			caps_.logic_op_support = false;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
+			}
+			else
+			{
+				caps_.logic_op_support = false;
+			}
 		}
 		caps_.independent_blend_support = true;
 		caps_.draw_indirect_support = true;
 		caps_.no_overwrite_support = true;
-		if (d3d_11_runtime_sub_ver_ >= 1)
-		{
-			D3D11_FEATURE_DATA_D3D9_OPTIONS d3d11_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D9_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.full_npot_texture_support = d3d11_feature.FullNonPow2TextureSupport ? true : false;
-		}
-		else
-		{
-			caps_.full_npot_texture_support = false;
-		}
+		caps_.full_npot_texture_support = true;
 		caps_.render_to_texture_array_support = true;
 		caps_.explicit_multi_sample_support = true;
 		caps_.load_from_buffer_support = true;
 		caps_.uavs_at_every_stage_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_1);
 		if (d3d_11_runtime_sub_ver_ >= 3)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS2 d3d11_feature;
-			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &d3d11_feature, sizeof(d3d11_feature));
-			caps_.rovs_support = d3d11_feature.ROVsSupported ? true : false;
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.rovs_support = d3d11_feature.ROVsSupported ? true : false;
+			}
+			else
+			{
+				caps_.rovs_support = false;
+			}
 		}
 		else
 		{
 			caps_.rovs_support = false;
 		}
 		caps_.flexible_srvs_support = true;
+		if (d3d_11_runtime_sub_ver_ >= 4)
+		{
+			D3D11_FEATURE_DATA_D3D11_OPTIONS3 d3d11_feature{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &d3d11_feature, sizeof(d3d11_feature))))
+			{
+				caps_.vp_rt_index_at_every_stage_support = d3d11_feature.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer ? true : false;
+			}
+			else
+			{
+				caps_.vp_rt_index_at_every_stage_support = false;
+			}
+		}
+		else
+		{
+			caps_.vp_rt_index_at_every_stage_support = false;
+		}
+
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;
@@ -1066,12 +989,11 @@ namespace KlayGE
 		std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
 		std::vector<ElementFormat> uav_formats;
 
-		bool check_16bpp_fmts = (dxgi_sub_ver_ >= 2);
 		bool check_uav_fmts = false;
 		if (d3d_11_runtime_sub_ver_ >= 3)
 		{
-			D3D11_FEATURE_DATA_D3D11_OPTIONS2 feature_data;
-			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &feature_data, sizeof(feature_data))))
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 feature_data{};
+			if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &feature_data, sizeof(feature_data))))
 			{
 				check_uav_fmts = feature_data.TypedUAVLoadAdditionalFormats ? true : false;
 			}
@@ -1168,13 +1090,7 @@ namespace KlayGE
 				continue;
 			}
 
-			if (!check_16bpp_fmts
-				&& ((EF_R5G6B5 == fmt.first) || (EF_A1RGB5 == fmt.first) || (EF_ARGB4 == fmt.first)))
-			{
-				continue;
-			}
-
-			d3d_device_->CheckFormatSupport(fmt.second, &s);
+			d3d_device_1_->CheckFormatSupport(fmt.second, &s);
 			if (s != 0)
 			{
 				if (IsDepthFormat(fmt.first))
@@ -1197,7 +1113,7 @@ namespace KlayGE
 					}
 
 					UINT s1;
-					d3d_device_->CheckFormatSupport(depth_fmt, &s1);
+					d3d_device_1_->CheckFormatSupport(depth_fmt, &s1);
 					if (s1 != 0)
 					{
 						if (s1 & D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
@@ -1228,11 +1144,10 @@ namespace KlayGE
 					if (check_uav_fmts)
 					{
 						D3D11_FEATURE_DATA_FORMAT_SUPPORT2 format_support = { fmt.second , 0};
-						HRESULT hr = d3d_device_->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2,
-							&format_support, sizeof(format_support));
-						if (SUCCEEDED(hr)
-							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
-							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
+						if (SUCCEEDED(d3d_device_1_->CheckFeatureSupport(
+								D3D11_FEATURE_FORMAT_SUPPORT2, &format_support, sizeof(format_support))) &&
+							((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0) &&
+							((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
 						{
 							uav_formats.push_back(fmt.first);
 						}
@@ -1246,7 +1161,7 @@ namespace KlayGE
 					UINT quality;
 					while (count <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT)
 					{
-						if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmt.second, count, &quality)))
+						if (SUCCEEDED(d3d_device_1_->CheckMultisampleQualityLevels(fmt.second, count, &quality)))
 						{
 							if (quality > 0)
 							{
@@ -1273,92 +1188,25 @@ namespace KlayGE
 		caps_.AssignUavFormats(std::move(uav_formats));
 	}
 
-	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)
+	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx)
 	{
-		d3d_device_ = MakeCOMPtr(device);
-		d3d_imm_ctx_ = MakeCOMPtr(imm_ctx);
-		d3d_11_runtime_sub_ver_ = 0;
+		d3d_device_1_.reset(device);
+		d3d_imm_ctx_1_.reset(imm_ctx);
+		d3d_11_runtime_sub_ver_ = 1;
 
-		ID3D11Device1* d3d_device_1 = nullptr;
-		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1)
+		if (d3d_device_1_.try_as(IID_ID3D11Device2, d3d_device_2_) && d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext2, d3d_imm_ctx_2_))
 		{
-			ID3D11DeviceContext1* d3d_imm_ctx_1 = nullptr;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
-			if (d3d_imm_ctx_1)
+			d3d_11_runtime_sub_ver_ = 2;
+			if (d3d_device_1_.try_as(IID_ID3D11Device3, d3d_device_3_) && d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext3, d3d_imm_ctx_3_))
 			{
-				d3d_device_1_ = MakeCOMPtr(d3d_device_1);
-				d3d_imm_ctx_1_ = MakeCOMPtr(d3d_imm_ctx_1);
-				d3d_11_runtime_sub_ver_ = 1;
-
-				ID3D11Device2* d3d_device_2 = nullptr;
-				device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
-				if (d3d_device_2)
+				d3d_11_runtime_sub_ver_ = 3;
+				if (d3d_device_1_.try_as(IID_ID3D11Device4, d3d_device_4_))
 				{
-					ID3D11DeviceContext2* d3d_imm_ctx_2 = nullptr;
-					imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
-					if (d3d_imm_ctx_2)
-					{
-						d3d_device_2_ = MakeCOMPtr(d3d_device_2);
-						d3d_imm_ctx_2_ = MakeCOMPtr(d3d_imm_ctx_2);
-						d3d_11_runtime_sub_ver_ = 2;
-
-						ID3D11Device3* d3d_device_3 = nullptr;
-						device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
-						if (d3d_device_3)
-						{
-							ID3D11DeviceContext3* d3d_imm_ctx_3 = nullptr;
-							imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
-							if (d3d_imm_ctx_3)
-							{
-								d3d_device_3_ = MakeCOMPtr(d3d_device_3);
-								d3d_imm_ctx_3_ = MakeCOMPtr(d3d_imm_ctx_3);
-								d3d_11_runtime_sub_ver_ = 3;
-
-								ID3D11Device4* d3d_device_4 = nullptr;
-								device->QueryInterface(IID_ID3D11Device4, reinterpret_cast<void**>(&d3d_device_4));
-								if (d3d_device_4)
-								{
-									d3d_device_4_ = MakeCOMPtr(d3d_device_4);
-									d3d_11_runtime_sub_ver_ = 4;
-
-									ID3D11Device5* d3d_device_5 = nullptr;
-									device->QueryInterface(IID_ID3D11Device5, reinterpret_cast<void**>(&d3d_device_5));
-									if (d3d_device_5)
-									{
-										ID3D11DeviceContext4* d3d_imm_ctx_4 = nullptr;
-										imm_ctx->QueryInterface(IID_ID3D11DeviceContext4, reinterpret_cast<void**>(&d3d_imm_ctx_4));
-										if (d3d_imm_ctx_4)
-										{
-											d3d_device_5_ = MakeCOMPtr(d3d_device_5);
-											d3d_imm_ctx_4_ = MakeCOMPtr(d3d_imm_ctx_4);
-										}
-										else
-										{
-											d3d_device_5->Release();
-											d3d_device_5 = nullptr;
-										}
-									}
-								}
-							}
-							else
-							{
-								d3d_device_3->Release();
-								d3d_device_3 = nullptr;
-							}
-						}
-					}
-					else
-					{
-						d3d_device_2->Release();
-						d3d_device_2 = nullptr;
-					}
+					d3d_11_runtime_sub_ver_ = 4;
+						
+					d3d_device_1_.try_as(IID_ID3D11Device5, d3d_device_5_);
+					d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext4, d3d_imm_ctx_4_);
 				}
-			}
-			else
-			{
-				d3d_device_1->Release();
-				d3d_device_1 = nullptr;
 			}
 		}
 	}
@@ -1369,91 +1217,31 @@ namespace KlayGE
 		uint32_t const height = mono_tex_->Height(0);
 		auto& win = checked_cast<D3D11RenderWindow&>(*screen_frame_buffer_);
 
-		switch (stereo_method_)
+		if (gi_factory_2_->IsWindowedStereoEnabled())
 		{
-		case SM_DXGI:
-			{
-				auto const& view = (0 == eye) ? *win.D3DBackBufferRtv() : *win.D3DBackBufferRightEyeRtv();
-				auto* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
-				this->OMSetRenderTargets(1, &rtv, nullptr);
+			auto const& view = (0 == eye) ? *win.D3DBackBufferRtv() : *win.D3DBackBufferRightEyeRtv();
+			auto* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
+			this->OMSetRenderTargets(1, &rtv, nullptr);
 
-				D3D11_VIEWPORT vp;
-				vp.TopLeftX = 0;
-				vp.TopLeftY = 0;
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
+			D3D11_VIEWPORT vp;
+			vp.TopLeftX = 0;
+			vp.TopLeftY = 0;
+			vp.Width = static_cast<float>(width);
+			vp.Height = static_cast<float>(height);
+			vp.MinDepth = 0;
+			vp.MaxDepth = 1;
 
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-			}
-			break;
-
-		case SM_NV3DVision:
-			{
-				this->BindFrameBuffer(stereo_nv_3d_vision_fb_);
-
-				D3D11_VIEWPORT vp;
-				vp.TopLeftY = 0;
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
-				vp.TopLeftX = (0 == eye) ? 0 : vp.Width;
-
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-		
-				if (0 == eye)
-				{
-					ID3D11Resource* back = checked_cast<D3D11Texture2D&>(*win.D3DBackBuffer()).D3DResource();
-					ID3D11Resource* stereo = checked_cast<D3D11Texture2D&>(*stereo_nv_3d_vision_tex_).D3DResource();
-
-					D3D11_BOX box;
-					box.left = 0;
-					box.right = width;
-					box.top = 0;
-					box.bottom = height;
-					box.front = 0;
-					box.back = 1;
-					d3d_imm_ctx_->CopySubresourceRegion(back, 0, 0, 0, 0, stereo, 0, &box);
-				}
-			}
-			break;
-
-		case SM_AMDQuadBuffer:
-			{
-				RenderTargetView const& view = *win.D3DBackBufferRtv();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetView const&>(view).RetrieveD3DRenderTargetView();
-				this->OMSetRenderTargets(1, &rtv, nullptr);
-
-				D3D11_VIEWPORT vp;
-				vp.TopLeftX = 0;
-				vp.TopLeftY = (0 == eye) ? 0 : static_cast<float>(win.StereoRightEyeHeight());
-				vp.Width = static_cast<float>(width);
-				vp.Height = static_cast<float>(height);
-				vp.MinDepth = 0;
-				vp.MaxDepth = 1;
-
-				this->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(3, eye);
-				stereoscopic_pp_->Render();
-			}
-			break;
-
-		default:
-			break;
+			this->RSSetViewports(1, &vp);
+			stereoscopic_pp_->SetParam(3, eye);
+			stereoscopic_pp_->Render();
 		}
 	}
 
-	void D3D11RenderEngine::RSSetState(ID3D11RasterizerState* ras)
+	void D3D11RenderEngine::RSSetState(ID3D11RasterizerState1* ras)
 	{
 		if (rasterizer_state_cache_ != ras)
 		{
-			d3d_imm_ctx_->RSSetState(ras);
+			d3d_imm_ctx_1_->RSSetState(ras);
 			rasterizer_state_cache_ = ras;
 		}
 	}
@@ -1462,17 +1250,17 @@ namespace KlayGE
 	{
 		if ((depth_stencil_state_cache_ != ds) || (stencil_ref_cache_ != stencil_ref))
 		{
-			d3d_imm_ctx_->OMSetDepthStencilState(ds, stencil_ref);
+			d3d_imm_ctx_1_->OMSetDepthStencilState(ds, stencil_ref);
 			depth_stencil_state_cache_ = ds;
 			stencil_ref_cache_ = stencil_ref;
 		}
 	}
 
-	void D3D11RenderEngine::OMSetBlendState(ID3D11BlendState* bs, Color const & blend_factor, uint32_t sample_mask)
+	void D3D11RenderEngine::OMSetBlendState(ID3D11BlendState1* bs, Color const & blend_factor, uint32_t sample_mask)
 	{
 		if ((blend_state_cache_ != bs) || (blend_factor_cache_ != blend_factor) || (sample_mask_cache_ != sample_mask))
 		{
-			d3d_imm_ctx_->OMSetBlendState(bs, &blend_factor.r(), sample_mask);
+			d3d_imm_ctx_1_->OMSetBlendState(bs, &blend_factor.r(), sample_mask);
 			blend_state_cache_ = bs;
 			blend_factor_cache_ = blend_factor;
 			sample_mask_cache_ = sample_mask;
@@ -1483,7 +1271,7 @@ namespace KlayGE
 	{
 		if (vertex_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->VSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->VSSetShader(shader, nullptr, 0);
 			vertex_shader_cache_ = shader;
 		}
 	}
@@ -1492,7 +1280,7 @@ namespace KlayGE
 	{
 		if (pixel_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->PSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->PSSetShader(shader, nullptr, 0);
 			pixel_shader_cache_ = shader;
 		}
 	}
@@ -1501,7 +1289,7 @@ namespace KlayGE
 	{
 		if (geometry_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->GSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->GSSetShader(shader, nullptr, 0);
 			geometry_shader_cache_ = shader;
 		}
 	}
@@ -1510,7 +1298,7 @@ namespace KlayGE
 	{
 		if (compute_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->CSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->CSSetShader(shader, nullptr, 0);
 			compute_shader_cache_ = shader;
 		}
 	}
@@ -1519,7 +1307,7 @@ namespace KlayGE
 	{
 		if (hull_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->HSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->HSSetShader(shader, nullptr, 0);
 			hull_shader_cache_ = shader;
 		}
 	}
@@ -1528,7 +1316,7 @@ namespace KlayGE
 	{
 		if (domain_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->DSSetShader(shader, nullptr, 0);
+			d3d_imm_ctx_1_->DSSetShader(shader, nullptr, 0);
 			domain_shader_cache_ = shader;
 		}
 	}
@@ -1537,7 +1325,7 @@ namespace KlayGE
 	{
 		if (NumViewports > 1)
 		{
-			d3d_imm_ctx_->RSSetViewports(NumViewports, pViewports);
+			d3d_imm_ctx_1_->RSSetViewports(NumViewports, pViewports);
 		}
 		else
 		{
@@ -1549,7 +1337,7 @@ namespace KlayGE
 				&& MathLib::equal(pViewports->MaxDepth, viewport_cache_.MaxDepth)))
 			{
 				viewport_cache_ = *pViewports;
-				d3d_imm_ctx_->RSSetViewports(NumViewports, pViewports);
+				d3d_imm_ctx_1_->RSSetViewports(NumViewports, pViewports);
 			}
 		}
 	}
@@ -1559,7 +1347,7 @@ namespace KlayGE
 		if ((rtv_ptr_cache_.size() != num_rtvs) || (dsv_ptr_cache_ != dsv)
 			|| (memcmp(&rtv_ptr_cache_[0], rtvs, num_rtvs * sizeof(rtvs[0])) != 0))
 		{
-			d3d_imm_ctx_->OMSetRenderTargets(num_rtvs, rtvs, dsv);
+			d3d_imm_ctx_1_->OMSetRenderTargets(num_rtvs, rtvs, dsv);
 
 			rtv_ptr_cache_.assign(rtvs, rtvs + num_rtvs);
 			dsv_ptr_cache_ = dsv;
@@ -1576,7 +1364,7 @@ namespace KlayGE
 			|| (memcmp(&render_uav_ptr_cache_[uav_start_slot], uavs, num_uavs * sizeof(uavs[0])) != 0)
 			|| (memcmp(&render_uav_init_count_cache_[uav_start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0])) != 0))
 		{
-			d3d_imm_ctx_->OMSetRenderTargetsAndUnorderedAccessViews(num_rtvs, rtvs, dsv,
+			d3d_imm_ctx_1_->OMSetRenderTargetsAndUnorderedAccessViews(num_rtvs, rtvs, dsv,
 				uav_start_slot, num_uavs, uavs, uav_init_counts);
 
 			rtv_ptr_cache_.assign(rtvs, rtvs + num_rtvs);
@@ -1599,7 +1387,7 @@ namespace KlayGE
 			|| (memcmp(&compute_uav_ptr_cache_[start_slot], uavs, num_uavs * sizeof(uavs[0])) != 0)
 			|| (memcmp(&compute_uav_init_count_cache_[start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0])) != 0))
 		{
-			d3d_imm_ctx_->CSSetUnorderedAccessViews(start_slot, num_uavs, uavs, uav_init_counts);
+			d3d_imm_ctx_1_->CSSetUnorderedAccessViews(start_slot, num_uavs, uavs, uav_init_counts);
 
 			if (compute_uav_ptr_cache_.size() < start_slot + num_uavs)
 			{
@@ -1611,47 +1399,46 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderStage stage,
-			std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs,
-			std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(
+		ShaderStage stage, std::span<std::tuple<void*, uint32_t, uint32_t> const> srvsrcs, std::span<ID3D11ShaderResourceView* const> srvs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_srv_ptr_cache_[stage_index] != srvs)
+		if (MakeSpan(shader_srv_ptr_cache_[stage_index]) != srvs)
 		{
 			size_t const old_size = shader_srv_ptr_cache_[stage_index].size();
-			shader_srv_ptr_cache_[stage_index] = srvs;
-			if (old_size > srvs.size())
+			shader_srv_ptr_cache_[stage_index].assign(srvs.begin(), srvs.end());
+			if (old_size > static_cast<size_t>(srvs.size()))
 			{
 				shader_srv_ptr_cache_[stage_index].resize(old_size, nullptr);
 			}
 
-			ShaderSetShaderResources[stage_index](d3d_imm_ctx_.get(), 0,
+			ShaderSetShaderResources[stage_index](d3d_imm_ctx_1_.get(), 0,
 				static_cast<UINT>(shader_srv_ptr_cache_[stage_index].size()), &shader_srv_ptr_cache_[stage_index][0]);
 
-			shader_srvsrc_cache_[stage_index] = srvsrcs;
+			shader_srvsrc_cache_[stage_index].assign(srvsrcs.begin(), srvsrcs.end());
 			shader_srv_ptr_cache_[stage_index].resize(srvs.size());
 		}
 	}
 
-	void D3D11RenderEngine::SetSamplers(ShaderStage stage, std::vector<ID3D11SamplerState*> const & samplers)
+	void D3D11RenderEngine::SetSamplers(ShaderStage stage, std::span<ID3D11SamplerState* const> samplers)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_sampler_ptr_cache_[stage_index] != samplers)
+		if (MakeSpan(shader_sampler_ptr_cache_[stage_index]) != samplers)
 		{
-			ShaderSetSamplers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
+			ShaderSetSamplers[stage_index](d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
 
-			shader_sampler_ptr_cache_[stage_index] = samplers;
+			shader_sampler_ptr_cache_[stage_index].assign(samplers.begin(), samplers.end());
 		}
 	}
 
-	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, std::vector<ID3D11Buffer*> const & cbs)
+	void D3D11RenderEngine::SetConstantBuffers(ShaderStage stage, std::span<ID3D11Buffer* const> cbs)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
-		if (shader_cb_ptr_cache_[stage_index] != cbs)
+		if (MakeSpan(shader_cb_ptr_cache_[stage_index]) != cbs)
 		{
-			ShaderSetConstantBuffers[stage_index](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
+			ShaderSetConstantBuffers[stage_index](d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
 
-			shader_cb_ptr_cache_[stage_index] = cbs;
+			shader_cb_ptr_cache_[stage_index].assign(cbs.begin(), cbs.end());
 		}
 	}
 
@@ -1685,7 +1472,7 @@ namespace KlayGE
 			if (cleared)
 			{
 				ShaderSetShaderResources[stage](
-					d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[stage].size()), &shader_srv_ptr_cache_[stage][0]);
+					d3d_imm_ctx_1_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[stage].size()), &shader_srv_ptr_cache_[stage][0]);
 			}
 		}
 	}

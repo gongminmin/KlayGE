@@ -130,8 +130,8 @@ namespace
 		if (restored_format != EF_ARGB8)
 		{
 			std::vector<uint8_t> argb8_normals(width * height * 4);
-			ResizeTexture(&argb8_normals[0], width * 4, width * height * 4, EF_ARGB8, width, height, 1,
-				&normals[0], width * 4, width * height * 4, restored_format, width, height, 1, false);
+			ResizeTexture(&argb8_normals[0], width * 4, width * height * 4, EF_ARGB8, width, height, 1, &normals[0], width * 4,
+				width * height * 4, restored_format, width, height, 1, TextureFilter::Point);
 			normals.swap(argb8_normals);
 		}
 
@@ -172,10 +172,9 @@ namespace
 			}
 
 			std::vector<float3> the_normals(in_width * in_height);
-			ResizeTexture(&the_normals[0], in_width * sizeof(float3), in_width * in_height * sizeof(float3),
-				EF_BGR32F, in_width, in_height, 1,
-				restored_data.data, restored_data.row_pitch,
-				restored_data.slice_pitch, EF_ARGB8, in_width, in_height, 1, false);
+			ResizeTexture(&the_normals[0], in_width * sizeof(float3), in_width * in_height * sizeof(float3), EF_BGR32F, in_width, in_height,
+				1, restored_data.data, restored_data.row_pitch, restored_data.slice_pitch, EF_ARGB8, in_width, in_height, 1,
+				TextureFilter::Point);
 
 			{
 				if (IsCompressedFormat(new_format))

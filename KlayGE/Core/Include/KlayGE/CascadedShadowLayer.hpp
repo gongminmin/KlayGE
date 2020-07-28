@@ -53,9 +53,7 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_CASCADES = 4UL;
 
 	public:
-		virtual ~CascadedShadowLayer()
-		{
-		}
+		virtual ~CascadedShadowLayer() noexcept;
 
 		virtual CascadedShadowLayerType Type() const = 0;
 
@@ -80,12 +78,12 @@ namespace KlayGE
 		std::vector<float4x4> crop_mats_;
 	};
 
-	class KLAYGE_CORE_API PSSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API PSSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		PSSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_PSSM;
 		}
@@ -99,12 +97,12 @@ namespace KlayGE
 		float lambda_;
 	};
 
-	class KLAYGE_CORE_API SDSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API SDSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		SDSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_SDSM;
 		}
@@ -116,7 +114,7 @@ namespace KlayGE
 
 	private:
 		TexturePtr depth_tex_;
-		ShaderResourceViewPtr depth_tex_srv_;
+		ShaderResourceViewPtr depth_srv_;
 		bool cs_support_;
 
 		// For CS implement
@@ -166,14 +164,17 @@ namespace KlayGE
 		GraphicsBufferPtr bias_cpu_buff_;
 
 		// For PS implement
-		TexturePtr depth_deriative_tex_;
-		std::vector<ShaderResourceViewPtr> depth_deriative_srvs_;
-		TexturePtr depth_deriative_small_tex_;
+		TexturePtr depth_derivative_tex_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
+		std::vector<RenderTargetViewPtr> depth_derivative_mip_rtvs_;
+		TexturePtr depth_derivative_small_tex_;
+		std::vector<RenderTargetViewPtr> depth_derivative_small_mip_rtvs_;
 		PostProcessPtr reduce_z_bounds_from_depth_pp_;
 		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;
 		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;
 
 		TexturePtr interval_tex_;
+		RenderTargetViewPtr interval_rtv_;
 		TexturePtr interval_cpu_tex_;
 	};
 }

@@ -64,15 +64,18 @@ public:
 		EXPECT_EQ(target->ArraySize(), target_sanity->ArraySize());
 		EXPECT_EQ(target->Type(), target_sanity->Type());
 		EXPECT_EQ(target->Format(), target_sanity->Format());
-		for (uint32_t m = 0; m < target->NumMipMaps(); ++ m)
+		for (uint32_t i = 0; i < target->ArraySize(); ++i)
 		{
-			EXPECT_EQ(target->Width(m), target_sanity->Width(m));
-			EXPECT_EQ(target->Height(m), target_sanity->Height(m));
-			EXPECT_EQ(target->Depth(m), target_sanity->Depth(m));
+			for (uint32_t m = 0; m < target->NumMipMaps(); ++m)
+			{
+				EXPECT_EQ(target->Width(m), target_sanity->Width(m));
+				EXPECT_EQ(target->Height(m), target_sanity->Height(m));
+				EXPECT_EQ(target->Depth(m), target_sanity->Depth(m));
 
-			EXPECT_TRUE(Compare2D(*target_sanity, 0, m, 0, 0,
-				*target, 0, m, 0, 0,
-				target->Width(m), target->Height(m), tolerance));
+				EXPECT_TRUE(Compare2D(*target_sanity, i, m, 0, 0,
+					*target, i, m, 0, 0,
+					target->Width(m), target->Height(m), tolerance));
+			}
 		}
 	}
 };

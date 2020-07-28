@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -14,7 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
 #include <KlayGE/Script.hpp>
@@ -26,8 +25,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
-#include <sstream>
+#include <iterator>
 #include <random>
+#include <sstream>
 
 #include "SampleCommon.hpp"
 #include "MotionBlurDoF.hpp"
@@ -75,17 +75,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthInstanced");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
-		}
-
 		void OnRenderBegin()
 		{
+			MotionBlurRenderMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -134,17 +127,10 @@ namespace
 			technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
-		}
-
 		void OnRenderBegin()
 		{
+			MotionBlurRenderMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -230,17 +216,15 @@ namespace
 					KFL_UNUSED(node);
 					KFL_UNUSED(app_time);
 
-					last_xform_to_parent_ = node.TransformToParent();
-
-					float4x4 mat_t = MathLib::transpose(last_xform_to_parent_);
+					float4x4 mat_t = MathLib::transpose(node.PrevTransformToWorld());
 					inst_.last_mat[0] = mat_t.Row(0);
 					inst_.last_mat[1] = mat_t.Row(1);
 					inst_.last_mat[2] = mat_t.Row(2);
 
-					float e = elapsed_time * 0.3f * -node.TransformToParent()(3, 1);
-					node.TransformToParent(node.TransformToParent() * MathLib::rotation_y(e));
+					float e = elapsed_time * 0.3f * -node.TransformToWorld()(3, 1);
+					node.TransformToWorld(node.TransformToWorld() * MathLib::rotation_y(e));
 
-					mat_t = MathLib::transpose(node.TransformToParent());
+					mat_t = MathLib::transpose(node.TransformToWorld());
 					inst_.mat[0] = mat_t.Row(0);
 					inst_.mat[1] = mat_t.Row(1);
 					inst_.mat[2] = mat_t.Row(2);
@@ -261,7 +245,6 @@ namespace
 	private:
 		SceneNodePtr node_;
 		InstData inst_;
-		float4x4 last_xform_to_parent_;
 	};
 
 
@@ -320,8 +303,8 @@ void MotionBlurDoFApp::OnCreate()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
 	velocity_fb_ = rf.MakeFrameBuffer();
-	clr_depth_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
-	velocity_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	clr_depth_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
+	velocity_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -347,7 +330,7 @@ void MotionBlurDoFApp::OnCreate()
 	motion_blur_ = MakeSharedPtr<MotionBlurPostProcess>();
 	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
 	mb_dialog_ = UIManager::Instance().GetDialogs()[1];
 	app_dialog_ = UIManager::Instance().GetDialogs()[2];
@@ -477,53 +460,58 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto depth_srv = rf.MakeTextureSrv(depth_tex_);
 
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-		depth_to_linear_pp_->InputPin(0, ds_tex_);
-		depth_to_linear_pp_->OutputPin(0, depth_tex_);
+		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(ds_tex_));
+		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(depth_tex_, 0, 1, 0));
 	}
 
-	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
-		: MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
+	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F})
+		: MakeSpan({ EF_ABGR8, EF_ARGB8 }), 1, 0);
 	BOOST_ASSERT(color_fmt != EF_Unknown);
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+	auto color_srv = rf.MakeTextureSrv(color_tex_);
 	clr_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(ds_view);
 
-	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(motion_fmt != EF_Unknown);
 	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto velocity_srv = rf.MakeTextureSrv(velocity_tex_);
 	velocity_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(velocity_tex_, 0, 1, 0));
 	velocity_fb_->Attach(ds_view);
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	auto dof_srv = rf.MakeTextureSrv(dof_tex_);
+	auto dof_rtv = rf.Make2DRtv(dof_tex_, 0, 1, 0);
 
 	if (depth_of_field_)
 	{
-		depth_of_field_->InputPin(0, color_tex_);
-		depth_of_field_->InputPin(1, depth_tex_);
-		depth_of_field_->OutputPin(0, dof_tex_);
+		depth_of_field_->InputPin(0, color_srv);
+		depth_of_field_->InputPin(1, depth_srv);
+		depth_of_field_->OutputPin(0, dof_rtv);
 	}
-	depth_of_field_copy_pp_->InputPin(0, color_tex_);
-	depth_of_field_copy_pp_->OutputPin(0, dof_tex_);
+	depth_of_field_copy_pp_->InputPin(0, color_srv);
+	depth_of_field_copy_pp_->OutputPin(0, dof_rtv);
 
 	if (bokeh_filter_)
 	{
-		bokeh_filter_->InputPin(0, color_tex_);
-		bokeh_filter_->InputPin(1, depth_tex_);
-		bokeh_filter_->OutputPin(0, dof_tex_);
+		bokeh_filter_->InputPin(0, color_srv);
+		bokeh_filter_->InputPin(1, depth_srv);
+		bokeh_filter_->OutputPin(0, dof_rtv);
 	}
 
-	motion_blur_->InputPin(0, dof_tex_);
-	motion_blur_->InputPin(1, depth_tex_);
-	motion_blur_->InputPin(2, velocity_tex_);
-	motion_blur_copy_pp_->InputPin(0, dof_tex_);
+	motion_blur_->InputPin(0, dof_srv);
+	motion_blur_->InputPin(1, depth_srv);
+	motion_blur_->InputPin(2, velocity_srv);
+	motion_blur_copy_pp_->InputPin(0, dof_srv);
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -737,20 +725,26 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					Color clr(0, 0, 0, 1);
 					try
 					{
-						std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-							{ i, j, NUM_INSTANCE, NUM_LINE }));
+						std::vector<ScriptVariablePtr> scr_pos;
+						script_module_
+							->Call("get_pos", MakeSpan<ScriptVariablePtr>({script_module_->MakeVariable(i), script_module_->MakeVariable(j),
+												  script_module_->MakeVariable(NUM_INSTANCE), script_module_->MakeVariable(NUM_LINE)}))
+							->Value(scr_pos);
 
-						pos.x() = std::any_cast<float>(scr_pos[0]);
-						pos.y() = std::any_cast<float>(scr_pos[1]);
-						pos.z() = std::any_cast<float>(scr_pos[2]);
+						scr_pos[0]->Value(pos.x());
+						scr_pos[1]->Value(pos.y());
+						scr_pos[2]->Value(pos.z());
 
-						std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-							{i, j, NUM_INSTANCE, NUM_LINE }));
+						std::vector<ScriptVariablePtr> scr_clr;
+						script_module_
+							->Call("get_clr", MakeSpan<ScriptVariablePtr>({script_module_->MakeVariable(i), script_module_->MakeVariable(j),
+												  script_module_->MakeVariable(NUM_INSTANCE), script_module_->MakeVariable(NUM_LINE)}))
+							->Value(scr_clr);
 
-						clr.r() = std::any_cast<float>(scr_clr[0]);
-						clr.g() = std::any_cast<float>(scr_clr[1]);
-						clr.b() = std::any_cast<float>(scr_clr[2]);
-						clr.a() = std::any_cast<float>(scr_clr[3]);
+						scr_clr[0]->Value(clr.r());
+						scr_clr[1]->Value(clr.g());
+						scr_clr[2]->Value(clr.b());
+						scr_clr[3]->Value(clr.a());
 					}
 					catch (...)
 					{
@@ -839,8 +833,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = scene_mgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = scene_mgr.NumVerticesRendered();
 
-		color_tex_->BuildMipSubLevels();
-		depth_tex_->BuildMipSubLevels();
+		color_tex_->BuildMipSubLevels(TextureFilter::Linear);
+		depth_tex_->BuildMipSubLevels(TextureFilter::Linear);
 
 		if (dof_on_)
 		{

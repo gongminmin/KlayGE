@@ -46,7 +46,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API DevHelper : boost::noncopyable
 	{
 	public:
-		virtual ~DevHelper();
+		virtual ~DevHelper() noexcept;
 
 		virtual RenderModelPtr ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) = 0;

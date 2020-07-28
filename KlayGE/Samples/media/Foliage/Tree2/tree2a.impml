@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<imposter>
+	<azimuth value="8"/>
+	<elevation value="1"/>
+	<size value="256"/>
+	<rt0 name="tree2a.imposter.rt0.dds"/>
+	<rt1 name="tree2a.imposter.rt1.dds"/>
+</imposter>

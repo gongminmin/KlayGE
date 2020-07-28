@@ -28,6 +28,7 @@ private:
 	void AntiAliasHandler(KlayGE::UICheckBox const& sender);
 	void DepthOfFieldHandler(KlayGE::UICheckBox const& sender);
 	void BokehHandler(KlayGE::UICheckBox const& sender);
+	void MotionBlurHandler(KlayGE::UICheckBox const& sender);
 	void NumLightsChangedHandler(KlayGE::UISlider const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
@@ -44,6 +45,7 @@ private:
 	int anti_alias_enabled_;
 	bool dof_enabled_ = false;
 	bool bokeh_enabled_ = false;
+	bool motion_blur_enabled_ = false;
 
 	float il_scale_;
 
@@ -56,6 +58,7 @@ private:
 	int id_aa_;
 	int id_dof_;
 	int id_bokeh_;
+	int id_motion_blur_;
 	int id_num_lights_static_;
 	int id_num_lights_slider_;
 	int id_ctrl_camera_;

@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -47,9 +46,7 @@
 
 namespace KlayGE
 {
-	D3D12RenderLayout::D3D12RenderLayout()
-	{
-	}
+	D3D12RenderLayout::D3D12RenderLayout() = default;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> const & D3D12RenderLayout::InputElementDesc() const
 	{
@@ -77,7 +74,7 @@ namespace KlayGE
 		return vertex_elems_;
 	}
 
-	void D3D12RenderLayout::Active() const
+	void D3D12RenderLayout::Active(ID3D12GraphicsCommandList* cmd_list) const
 	{
 		if (streams_dirty_)
 		{
@@ -112,11 +109,11 @@ namespace KlayGE
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (all_num_vertex_stream != 0)
 		{
-			d3d12_re.IASetVertexBuffers(0, MakeArrayRef(&vbvs_[0], all_num_vertex_stream));
+			d3d12_re.IASetVertexBuffers(cmd_list, 0, MakeSpan(&vbvs_[0], all_num_vertex_stream));
 		}
 		if (this->UseIndices())
 		{
-			d3d12_re.IASetIndexBuffer(ibv_);
+			d3d12_re.IASetIndexBuffer(cmd_list, ibv_);
 		}
 	}
 

@@ -1,0 +1,15 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "occlusion",
+
+	"prefered_format": "BC4",
+
+	"bump":
+	{
+		"to_occlusion": true,
+		"occlusion_amplitude": 50.0
+	}
+}

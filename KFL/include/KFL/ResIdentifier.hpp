@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class ResIdentifier
+	class ResIdentifier final
 	{
 	public:
 		ResIdentifier(std::string_view name, uint64_t timestamp,

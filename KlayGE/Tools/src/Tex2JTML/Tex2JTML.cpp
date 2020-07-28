@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
@@ -49,9 +50,6 @@
 #define CXXOPTS_NO_RTTI
 #endif
 #include <cxxopts.hpp>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/ToolCommon.hpp>
@@ -338,18 +336,17 @@ int main(int argc, char* argv[])
 	{
 		std::string input_name_str = vm["input-name"].as<std::string>();
 
-		std::vector<std::string> tokens;
-		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
+		std::vector<std::string_view> tokens = StringUtil::Split(input_name_str, StringUtil::IsAnyOf(",;"));
 		for (auto& arg : tokens)
 		{
-			boost::algorithm::trim(arg);
+			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				tex_names.push_back(arg);
+				tex_names.push_back(std::string(arg));
 			}
 			else
 			{
-				filesystem::path arg_path(arg);
+				filesystem::path arg_path(arg.begin(), arg.end());
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 

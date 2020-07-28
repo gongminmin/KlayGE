@@ -1,0 +1,71 @@
+From 008a56a6cf8a8382fee4a368e088396bd889bd9a Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Wed, 10 Jan 2018 22:01:45 -0800
+Subject: [PATCH 08/11] Fix some problems with Android and iOS.
+
+---
+ CMakeLists.txt              | 2 +-
+ cmake/ConfigureChecks.cmake | 4 ++--
+ cmake/PlatformTest.cmake    | 4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ac9fb7c..7179fbe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -136,7 +136,7 @@ option(WITH_DOC_STRINGS "Enable if you want documentation strings in extension m
+ set(Py_DEBUG OFF) # TODO - Build debugging interpreter
+ option(WITH_PYMALLOC "Define if you want to compile in Python-specific mallocs" ON)
+ option(WITH_THREAD "Compile in rudimentary thread support" ON)
+-if(UNIX)
++if(UNIX OR ANDROID OR IOS)
+     option(WITH_STATIC_DEPENDENCIES "Restrict extensions and external dependencies to static libraries" OFF)
+     if(WITH_STATIC_DEPENDENCIES)
+         if(NOT POLICY CMP0065)
+diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
+index 7c2ad80..9c0034f 100644
+--- a/cmake/ConfigureChecks.cmake
++++ b/cmake/ConfigureChecks.cmake
+@@ -159,7 +159,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
+ 
+ set(_msg "Checking SOABI")
+ try_run(PLATFORM_RUN PLATFORM_COMPILE
+-        ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/cmake/platform.c
++        ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/cmake/platform.c
+         RUN_OUTPUT_VARIABLE PLATFORM_TRIPLET)
+ if(NOT PLATFORM_COMPILE)
+   message(FATAL_ERROR "We could not determine the platform. Please clean the ${CMAKE_PROJECT_NAME} environment and try again...")
+@@ -359,7 +359,7 @@ find_library(HAVE_LIBTERMCAP termcap)
+ set(LIBUTIL_LIBRARIES )
+ set(LIBUTIL_EXPECTED 1)
+ 
+-if(CMAKE_SYSTEM MATCHES "VxWorks\\-7$")
++if((CMAKE_SYSTEM MATCHES "VxWorks\\-7$") OR (CMAKE_SYSTEM MATCHES "Android"))
+   set(LIBUTIL_EXPECTED 0)
+   set(HAVE_LIBUTIL 0)
+ endif()
+diff --git a/cmake/PlatformTest.cmake b/cmake/PlatformTest.cmake
+index 9dbc361..84623b9 100644
+--- a/cmake/PlatformTest.cmake
++++ b/cmake/PlatformTest.cmake
+@@ -28,7 +28,7 @@ macro(python_platform_test var description srcfile invert)
+     endif()
+ 
+     try_compile(${var}_COMPILED
+-      ${CMAKE_CURRENT_BINARY_DIR}
++      ${CMAKE_BINARY_DIR}
+       ${srcfile}
+       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+@@ -87,7 +87,7 @@ macro(python_platform_test_run var description srcfile invert)
+     endif()
+ 
+     try_run(${var} ${var}_COMPILED
+-      ${CMAKE_CURRENT_BINARY_DIR}
++      ${CMAKE_BINARY_DIR}
+       ${srcfile}
+       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+-- 
+2.17.1.windows.2
+

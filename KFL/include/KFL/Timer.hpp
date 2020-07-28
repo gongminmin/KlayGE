@@ -35,7 +35,7 @@
 
 namespace KlayGE
 {
-	class Timer
+	class Timer final
 	{
 	public:
 		Timer(); // postcondition: elapsed()==0

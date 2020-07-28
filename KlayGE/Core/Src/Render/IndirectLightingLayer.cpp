@@ -52,13 +52,16 @@ namespace KlayGE
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
 
+	IndirectLightingLayer::~IndirectLightingLayer() noexcept = default;
+
 	MultiResSILLayer::MultiResSILLayer()
 	{
-		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
+		multi_res_layer_ = MakeUniquePtr<MultiResLayer>();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		vpl_rtv_ = rf.Make2DRtv(vpl_tex_, 0, 1, 0);
 
 		vpls_lighting_effect_ = SyncLoadRenderEffect("VPLsLighting.fxml");
 		vpls_lighting_instance_id_tech_ = vpls_lighting_effect_->TechniqueByName("VPLsLightingInstanceID");
@@ -71,7 +74,7 @@ namespace KlayGE
 		vpl_x_coord_param_ = vpls_lighting_effect_->ParameterByName("x_coord");
 		vpl_gbuffer_tex_param_ = vpls_lighting_effect_->ParameterByName("gbuffer_tex");
 		vpl_depth_tex_param_ = vpls_lighting_effect_->ParameterByName("depth_tex");
-		*(vpls_lighting_effect_->ParameterByName("vpls_tex")) = vpl_tex_;
+		*(vpls_lighting_effect_->ParameterByName("vpls_tex")) = rf.MakeTextureSrv(vpl_tex_);
 		*(vpls_lighting_effect_->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
 		vpl_renderable_ = SyncLoadModel("IndirectLightProxy.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable)->Mesh(0);
@@ -90,11 +93,12 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, std::max(1U, g_buffer_rt0_tex_->NumMipMaps() - 1),
 			1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write);
+		indirect_lighting_srv_ = rf.MakeTextureSrv(indirect_lighting_tex_);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, indirect_lighting_tex_);
 	}
@@ -103,30 +107,31 @@ namespace KlayGE
 	{
 		std::string RSM2VPLsSpotName = "RSM2VPLsSpot";
 
-		rsm_texs_[0] = rt0_tex;
-		rsm_texs_[1] = rt1_tex;
-		rsm_depth_tex_ = depth_tex;
-
-		rsm_to_vpls_pps_[LightSource::LT_Spot] = SyncLoadPostProcess("RSM2VPLs.ppml", RSM2VPLsSpotName);
-		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(0, rsm_texs_[0]);
-		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(1, rsm_texs_[1]);
-		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(2, rsm_depth_tex_);
-		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(3, rsm_depth_derivative_tex_);
-		rsm_to_vpls_pps_[LightSource::LT_Spot]->OutputPin(0, vpl_tex_);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		auto const fmt = caps.BestMatchTextureRenderTargetFormat(
-			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R32F, EF_R16F }), 1, 0);
+			caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R32F, EF_R16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
 
+		rsm_texs_[0] = rt0_tex;
+		rsm_texs_[1] = rt1_tex;
+		rsm_depth_tex_ = depth_tex;
+		auto rsm_depth_srv = rf.MakeTextureSrv(depth_tex);
+
+		rsm_to_vpls_pps_[LightSource::LT_Spot] = SyncLoadPostProcess("RSM2VPLs.ppml", RSM2VPLsSpotName);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(0, rf.MakeTextureSrv(rsm_texs_[0]));
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(1, rf.MakeTextureSrv(rsm_texs_[1]));
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(2, rsm_depth_srv);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(3, rf.MakeTextureSrv(rsm_depth_derivative_tex_));
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->OutputPin(0, vpl_rtv_);
+
 		rsm_to_depth_derivate_pp_ = SyncLoadPostProcess("MultiRes.ppml", "GBuffer2DepthDerivate");
-		rsm_to_depth_derivate_pp_->InputPin(1, rsm_depth_tex_);
-		rsm_to_depth_derivate_pp_->OutputPin(0, rsm_depth_derivative_tex_);
+		rsm_to_depth_derivate_pp_->InputPin(1, rsm_depth_srv);
+		rsm_to_depth_derivate_pp_->OutputPin(0, rf.Make2DRtv(rsm_depth_derivative_tex_, 0, 1, 0));
 		float delta_x = 1.0f / rsm_depth_derivative_tex_->Width(0);
 		float delta_y = 1.0f / rsm_depth_derivative_tex_->Height(0);
 		float4 rsm_delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
@@ -161,8 +166,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		rsm_texs_[0]->BuildMipSubLevels();
-		rsm_texs_[1]->BuildMipSubLevels();
+		rsm_texs_[0]->BuildMipSubLevels(TextureFilter::Linear);
+		rsm_texs_[1]->BuildMipSubLevels(TextureFilter::Linear);
 		
 		rsm_to_depth_derivate_pp_->Apply();
 		
@@ -219,7 +224,7 @@ namespace KlayGE
 
 	SSGILayer::SSGILayer()
 	{
-		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
+		multi_res_layer_ = MakeUniquePtr<MultiResLayer>();
 
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
 
@@ -241,16 +246,21 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		g_buffer_rt0_tex_ = rt0_tex;
+		g_buffer_rt0_srv_ = rf.MakeTextureSrv(rt0_tex);
 		g_buffer_depth_tex_ = depth_tex;
+		g_buffer_depth_srv_ = rf.MakeTextureSrv(depth_tex);
 
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, g_buffer_rt0_tex_->NumMipMaps() - 2, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
+		small_ssgi_srv_ = rf.MakeTextureSrv(small_ssgi_tex_);
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write);
+		indirect_lighting_srv_ = rf.MakeTextureSrv(indirect_lighting_tex_);
+		indirect_lighting_rtv_ = rf.Make2DRtv(indirect_lighting_tex_, 0, 1, 0);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, small_ssgi_tex_);
 	}
@@ -277,12 +287,13 @@ namespace KlayGE
 	{
 		KFL_UNUSED(proj_to_prev);
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
 
-		ssgi_pp_->InputPin(0, g_buffer_rt0_tex_);
-		ssgi_pp_->InputPin(1, g_buffer_depth_tex_);
-		ssgi_pp_->InputPin(2, prev_shading_tex);
-		ssgi_pp_->OutputPin(0, TexturePtr());
+		ssgi_pp_->InputPin(0, g_buffer_rt0_srv_);
+		ssgi_pp_->InputPin(1, g_buffer_depth_srv_);
+		ssgi_pp_->InputPin(2, rf.MakeTextureSrv(prev_shading_tex));
+		ssgi_pp_->OutputPin(0, RenderTargetViewPtr());
 		for (uint32_t i = 0; i < small_ssgi_tex_->NumMipMaps(); ++ i)
 		{
 			re.BindFrameBuffer(multi_res_layer_->MultiResFB(i));
@@ -291,9 +302,9 @@ namespace KlayGE
 
 		multi_res_layer_->UpsampleMultiRes();
 
-		ssgi_blur_pp_->InputPin(0, small_ssgi_tex_);
-		ssgi_blur_pp_->InputPin(1, g_buffer_depth_tex_);
-		ssgi_blur_pp_->OutputPin(0, indirect_lighting_tex_);
+		ssgi_blur_pp_->InputPin(0, small_ssgi_srv_);
+		ssgi_blur_pp_->InputPin(1, g_buffer_depth_srv_);
+		ssgi_blur_pp_->OutputPin(0, indirect_lighting_rtv_);
 		ssgi_blur_pp_->Apply();
 	}
 }

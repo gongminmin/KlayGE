@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,7 +13,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
@@ -28,8 +27,9 @@
 
 //#define CALC_FITTING_TABLE
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 #ifdef CALC_FITTING_TABLE
 #include <iostream>
 #include <iomanip>
@@ -144,22 +144,11 @@ namespace
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			auto& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
+		using StaticMesh::Material;
 
 		void Material(float4 const & diffuse, float4 const & specular, float glossiness)
 		{
@@ -180,6 +169,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -619,14 +610,14 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 		return ret;
 	}
 
 #ifdef CALC_FITTING_TABLE
 	void GenFittedBRDF(uint32_t width, uint32_t height, std::vector<float2>& fitted_brdf_f32,
-		ArrayRef<float4> r_factors, ArrayRef<float4> g_factors)
+		std::span<float4 const> r_factors, std::span<float4 const> g_factors)
 	{
 		fitted_brdf_f32.resize(width * height);
 		for (uint32_t y = 0; y < height; ++ y)
@@ -665,8 +656,8 @@ namespace
 		};
 
 		GenFittedBRDF(width, height, fitted_brdf_f32,
-			ArrayRef<float4>(r_min_factors_base.data(), r_min_factors_base.size()),
-			ArrayRef<float4>(g_min_factors_base.data(), g_min_factors_base.size()));
+			MakeSpan(r_min_factors_base.data(), r_min_factors_base.size()),
+			MakeSpan(g_min_factors_base.data(), g_min_factors_base.size()));
 	}
 
 	TexturePtr GenFittedBRDF(uint32_t width, uint32_t height)
@@ -694,7 +685,7 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan(init_data), nullptr);
 
 		return ret;
 	}
@@ -879,7 +870,7 @@ void EnvLightingApp::OnCreate()
 
 	auto& rf = Context::Instance().RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-	ElementFormat const fmt = caps.BestMatchTextureFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 });
+	ElementFormat const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}));
 	if (fmt == EF_GR8)
 	{
 		integrated_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
@@ -889,7 +880,7 @@ void EnvLightingApp::OnCreate()
 		auto integrated_brdf_sw_tex = LoadSoftwareTexture("IntegratedBRDF.dds");
 
 		integrated_brdf_tex_ = rf.MakeTexture2D(integrated_brdf_sw_tex->Width(0), integrated_brdf_sw_tex->Height(0), 1, 1, fmt, 1, 0, EAH_GPU_Read);
-		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_);
+		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_, TextureFilter::Point);
 	}
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
@@ -907,7 +898,7 @@ void EnvLightingApp::OnCreate()
 			KFL_UNUSED(elapsed_time);
 
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
 		});
@@ -963,7 +954,7 @@ void EnvLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");

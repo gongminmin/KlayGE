@@ -32,6 +32,7 @@
 #define INITGUID
 #include <KFL/Util.hpp>
 #include <KFL/CpuInfo.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/HWDetect.hpp>
 
 #include <KlayGE/SALWrapper.hpp>
@@ -296,17 +297,15 @@ void DetectGpuInfo(std::ostream& os)
 	if (SUCCEEDED((*DynamicCreateDXGIFactory1)(IID_IDXGIFactory1, reinterpret_cast<void**>(&factory))))
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1* adapter = nullptr;
-		while (factory->EnumAdapters1(adapter_no, &adapter) != DXGI_ERROR_NOT_FOUND)
+		com_ptr<IDXGIAdapter1> adapter;
+		while (factory->EnumAdapters1(adapter_no, adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (adapter != nullptr)
 			{
 				DXGI_ADAPTER_DESC1 adapter_desc;
 				adapter->GetDesc1(&adapter_desc);
 
-				IDXGIAdapter2* adapter2;
-				adapter->QueryInterface(IID_IDXGIAdapter2, reinterpret_cast<void**>(&adapter2));
-				if (adapter2 != nullptr)
+				if (auto adapter2 = adapter.try_as<IDXGIAdapter2>(IID_IDXGIAdapter2))
 				{
 					DXGI_ADAPTER_DESC2 desc2;
 					adapter2->GetDesc2(&desc2);
@@ -320,10 +319,7 @@ void DetectGpuInfo(std::ostream& os)
 					adapter_desc.SharedSystemMemory = desc2.SharedSystemMemory;
 					adapter_desc.AdapterLuid = desc2.AdapterLuid;
 					adapter_desc.Flags = desc2.Flags;
-					adapter2->Release();
 				}
-
-				adapter->Release();
 
 				if (adapter_desc.Flags != DXGI_ADAPTER_FLAG_SOFTWARE)
 				{

@@ -24,33 +24,33 @@ namespace KlayGE
 {
 	// 保存适配器的信息，包含该适配器支持的设备列表
 	/////////////////////////////////////////////////////////////////////////////////
-	class D3D11Adapter
+	class D3D11Adapter final
 	{
 	public:
-		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter);
+		D3D11Adapter(uint32_t adapter_no, IDXGIAdapter2* adapter);
 
 		void Enumerate();
 
 		// 访问设备描述字符串
 		std::wstring const Description() const;
-		void ResetAdapter(IDXGIAdapter1Ptr const & ada);
+		void ResetAdapter(IDXGIAdapter2* adapter);
 
-		uint32_t AdapterNo() const
+		uint32_t AdapterNo() const noexcept
 		{
 			return adapter_no_;
 		}
 
-		IDXGIAdapter1Ptr const & DXGIAdapter() const
+		IDXGIAdapter2* DXGIAdapter() const noexcept
 		{
-			return adapter_;
+			return adapter_.get();
 		}
 
-		DXGI_FORMAT DesktopFormat() const
+		DXGI_FORMAT DesktopFormat() const noexcept
 		{
 			return DXGI_FORMAT_R8G8B8A8_UNORM;
 		}
 
-		size_t NumVideoMode() const;
+		size_t NumVideoMode() const noexcept;
 		D3D11VideoMode const & VideoMode(size_t index) const;
 
 	private:
@@ -58,8 +58,8 @@ namespace KlayGE
 		uint32_t			adapter_no_;
 
 		// 适配器信息
-		IDXGIAdapter1Ptr adapter_;
-		DXGI_ADAPTER_DESC1 adapter_desc_{};
+		IDXGIAdapter2Ptr adapter_;
+		DXGI_ADAPTER_DESC2 adapter_desc_{};
 
 		// 显示模式列表
 		std::vector<D3D11VideoMode> modes_;

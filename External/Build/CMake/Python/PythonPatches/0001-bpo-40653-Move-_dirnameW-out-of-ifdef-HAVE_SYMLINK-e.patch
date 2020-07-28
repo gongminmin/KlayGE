@@ -1,0 +1,49 @@
+From 74167388ed68352bf21bae3d2a33fba6b5c750c6 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 18 May 2020 09:17:19 -0700
+Subject: [PATCH 1/7] bpo-40653: Move _dirnameW out of #ifdef
+ HAVE_SYMLINK/#endif (GH-20144)
+
+---
+ .../next/Build/2020-05-17-03-33-00.bpo-40653.WI8UGn.rst   | 1 +
+ Modules/posixmodule.c                                     | 8 ++++++--
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+ create mode 100644 Misc/NEWS.d/next/Build/2020-05-17-03-33-00.bpo-40653.WI8UGn.rst
+
+diff --git a/Misc/NEWS.d/next/Build/2020-05-17-03-33-00.bpo-40653.WI8UGn.rst b/Misc/NEWS.d/next/Build/2020-05-17-03-33-00.bpo-40653.WI8UGn.rst
+new file mode 100644
+index 0000000000..1e6c5cb32b
+--- /dev/null
++++ b/Misc/NEWS.d/next/Build/2020-05-17-03-33-00.bpo-40653.WI8UGn.rst
+@@ -0,0 +1 @@
++Move _dirnameW out of HAVE_SYMLINK to fix a potential compiling issue.
+\ No newline at end of file
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 850769fd95..616b601385 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -7891,8 +7891,6 @@ os_readlink_impl(PyObject *module, path_t *path, int dir_fd)
+ }
+ #endif /* defined(HAVE_READLINK) || defined(MS_WINDOWS) */
+ 
+-#ifdef HAVE_SYMLINK
+-
+ #if defined(MS_WINDOWS)
+ 
+ /* Remove the last portion of the path - return 0 on success */
+@@ -7915,6 +7913,12 @@ _dirnameW(WCHAR *path)
+     return 0;
+ }
+ 
++#endif
++
++#ifdef HAVE_SYMLINK
++
++#if defined(MS_WINDOWS)
++
+ /* Is this path absolute? */
+ static int
+ _is_absW(const WCHAR *path)
+-- 
+2.17.1.windows.2
+

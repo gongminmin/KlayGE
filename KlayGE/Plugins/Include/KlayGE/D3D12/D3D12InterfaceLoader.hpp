@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class D3D12InterfaceLoader
+	class D3D12InterfaceLoader final
 	{
 	public:
 		static D3D12InterfaceLoader& Instance();

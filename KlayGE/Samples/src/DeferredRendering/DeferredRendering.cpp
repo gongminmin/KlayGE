@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -21,6 +20,7 @@
 #include <KlayGE/ParticleSystem.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -266,7 +266,7 @@ void DeferredRenderingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
@@ -278,6 +278,7 @@ void DeferredRenderingApp::OnCreate()
 	id_aa_ = dialog_->IDFromName("AA");
 	id_dof_ = dialog_->IDFromName("DoF");
 	id_bokeh_ = dialog_->IDFromName("Bokeh");
+	id_motion_blur_ = dialog_->IDFromName("MotionBlur");
 	id_num_lights_static_ = dialog_->IDFromName("NumLightsStatic");
 	id_num_lights_slider_ = dialog_->IDFromName("NumLightsSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
@@ -332,6 +333,9 @@ void DeferredRenderingApp::OnCreate()
 	this->DepthOfFieldHandler(*dialog_->Control<UICheckBox>(id_dof_));
 	dialog_->Control<UICheckBox>(id_bokeh_)->OnChangedEvent().Connect([this](UICheckBox const& sender) { this->BokehHandler(sender); });
 	this->BokehHandler(*dialog_->Control<UICheckBox>(id_bokeh_));
+	dialog_->Control<UICheckBox>(id_motion_blur_)->OnChangedEvent().Connect(
+		[this](UICheckBox const& sender) { this->MotionBlurHandler(sender); });
+	this->MotionBlurHandler(*dialog_->Control<UICheckBox>(id_motion_blur_));
 	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
@@ -480,6 +484,15 @@ void DeferredRenderingApp::BokehHandler(UICheckBox const& sender)
 	}
 }
 
+void DeferredRenderingApp::MotionBlurHandler(UICheckBox const& sender)
+{
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
+	{
+		motion_blur_enabled_ = sender.GetChecked();
+		deferred_rendering_->MotionBlurEnabled(motion_blur_enabled_);
+	}
+}
+
 void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & sender)
 {
 	int const num_lights = sender.GetValue();
@@ -579,9 +592,24 @@ void DeferredRenderingApp::DoUpdateOverlay()
 	stream << scene_mgr.NumDrawCalls() << " Draws/frame "
 		<< scene_mgr.NumDispatchCalls() << " Dispatches/frame";
 	font_->RenderText(0, 90, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 {
+	if (pass == 0)
+	{
+		// Workaround for MotionBlur
+		Camera& camera = this->ActiveCamera();
+		camera.MainThreadUpdate(this->AppTime(), this->FrameTime());
+	}
+
 	return deferred_rendering_->Update(pass);
 }

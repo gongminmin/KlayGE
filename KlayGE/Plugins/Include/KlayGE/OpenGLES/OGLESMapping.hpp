@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class OGLESMapping
+	class OGLESMapping final
 	{
 	public:
 		static void Mapping(GLfloat* clr4, Color const & clr);

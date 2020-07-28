@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
+#include <KFL/com_ptr.hpp>
 
 #include <vector>
 #include <system_error>
@@ -26,10 +26,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11AdapterList::D3D11AdapterList()
-						: current_adapter_(0)
-	{
-	}
+	D3D11AdapterList::D3D11AdapterList() noexcept = default;
 
 	void D3D11AdapterList::Destroy()
 	{
@@ -39,7 +36,7 @@ namespace KlayGE
 
 	// 获取系统显卡数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t D3D11AdapterList::NumAdapter() const
+	size_t D3D11AdapterList::NumAdapter() const noexcept
 	{
 		return adapters_.size();
 	}
@@ -55,30 +52,30 @@ namespace KlayGE
 
 	// 获取当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D11AdapterList::CurrentAdapterIndex() const
+	uint32_t D3D11AdapterList::CurrentAdapterIndex() const noexcept
 	{
 		return current_adapter_;
 	}
 
 	// 设置当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11AdapterList::CurrentAdapterIndex(uint32_t index)
+	void D3D11AdapterList::CurrentAdapterIndex(uint32_t index) noexcept
 	{
 		current_adapter_ = index;
 	}
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11AdapterList::Enumerate(IDXGIFactory1Ptr const & gi_factory)
+	void D3D11AdapterList::Enumerate(IDXGIFactory2* gi_factory)
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
-		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
+		com_ptr<IDXGIAdapter1> dxgi_adapter;
+		while (gi_factory->EnumAdapters1(adapter_no, dxgi_adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>(IID_IDXGIAdapter2).get());
 				adapter->Enumerate();
 				adapters_.push_back(std::move(adapter));
 			}
@@ -93,16 +90,16 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11AdapterList::Enumerate(IDXGIFactory6Ptr const & gi_factory)
+	void D3D11AdapterList::Enumerate(IDXGIFactory6* gi_factory)
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = nullptr;
+		com_ptr<IDXGIAdapter2> dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter))))
+			IID_IDXGIAdapter2, dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.get());
 				adapter->Enumerate();
 				adapters_.push_back(std::move(adapter));
 			}
@@ -112,10 +109,8 @@ namespace KlayGE
 
 		if (adapters_.empty())
 		{
-			IDXGIFactory1* gif1;
-			gi_factory->QueryInterface(IID_IDXGIFactory1, reinterpret_cast<void**>(&gif1));
-			IDXGIFactory1Ptr gi_factory1 = MakeCOMPtr<IDXGIFactory1>(gif1);
-			this->Enumerate(gi_factory1);
+			auto gi_factory2 = com_ptr<IDXGIFactory6>(gi_factory).as<IDXGIFactory2>(IID_IDXGIFactory2);
+			this->Enumerate(gi_factory2.get());
 		}
 
 		if (adapters_.empty())

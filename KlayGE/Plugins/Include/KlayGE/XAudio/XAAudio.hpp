@@ -64,6 +64,7 @@
 #define XAUDIO2_DLL_W L"xaudio2_7.dll"
 #endif
 
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
@@ -72,7 +73,7 @@ namespace KlayGE
 
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & data_source);
 
-	class XASoundBuffer : public SoundBuffer
+	class XASoundBuffer final : public SoundBuffer
 	{
 	public:
 		XASoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
@@ -96,7 +97,14 @@ namespace KlayGE
 		struct SourceVoice
 		{
 			IXAudio2SourceVoicePtr voice;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
+#endif
 			std::unique_ptr<IXAudio2VoiceCallback> voice_call_back;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 			X3DAUDIO_DSP_SETTINGS dsp_settings;
 			std::vector<float> output_matrix;
 			bool is_playing;
@@ -115,7 +123,7 @@ namespace KlayGE
 		float3 dir_;
 	};
 
-	class XAMusicBuffer : public MusicBuffer
+	class XAMusicBuffer final : public MusicBuffer
 	{
 	public:
 		XAMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
@@ -137,13 +145,20 @@ namespace KlayGE
 
 		void DoReset() override;
 		void DoPlay(bool loop) override;
-		void DoStop();
+		void DoStop() override;
 
 		bool FillData(uint32_t size);
 
 	private:
 		IXAudio2SourceVoicePtr source_voice_;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
+#endif
 		std::unique_ptr<IXAudio2VoiceCallback> voice_call_back_;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		std::vector<uint8_t> audio_data_;
 		uint32_t buffer_size_;
 		uint32_t buffer_count_;
@@ -162,7 +177,7 @@ namespace KlayGE
 		std::vector<float> output_matrix_;
 	};
 
-	class XAAudioEngine : public AudioEngine
+	class XAAudioEngine final : public AudioEngine
 	{
 	public:
 		XAAudioEngine();
@@ -194,16 +209,16 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up) override;
 
 	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
 	private:
-		std::shared_ptr<IXAudio2> xaudio_;
+		com_ptr<IXAudio2> xaudio_;
 		std::shared_ptr<IXAudio2MasteringVoice>	mastering_voice_;
 		uint32_t mastering_channels_;
 
 		X3DAUDIO_HANDLE x3d_instance_;
-		X3DAUDIO_LISTENER listener_;
+		X3DAUDIO_LISTENER listener_{};
 
 		HMODULE mod_xaudio2_;
 		typedef HRESULT (WINAPI *XAudio2CreateFunc)(IXAudio2** ppXAudio2, UINT32 flags, XAUDIO2_PROCESSOR XAudio2Processor);

@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API MultiResLayer : boost::noncopyable
+	class KLAYGE_CORE_API MultiResLayer final : boost::noncopyable
 	{
 	public:
 		MultiResLayer();
@@ -62,17 +62,26 @@ namespace KlayGE
 		RenderLayoutPtr rl_quad_;
 
 		TexturePtr g_buffer_rt0_tex_;
-		TexturePtr g_buffer_depth_tex_;
+		ShaderResourceViewPtr g_buffer_rt0_srv_;
+		ShaderResourceViewPtr g_buffer_depth_srv_;
 
-		TexturePtr depth_deriative_tex_;
-		std::vector<ShaderResourceViewPtr> depth_deriative_srvs_;
-		TexturePtr depth_deriative_small_tex_;
+		TexturePtr depth_derivative_tex_;
+		ShaderResourceViewPtr depth_derivative_srv_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
+		std::vector<RenderTargetViewPtr> depth_derivative_mip_rtvs_;
+		TexturePtr depth_derivative_small_tex_;
+		std::vector<RenderTargetViewPtr> depth_derivative_small_mip_rtvs_;
 		TexturePtr normal_cone_tex_;
-		std::vector<ShaderResourceViewPtr> normal_cone_srvs_;
+		ShaderResourceViewPtr normal_cone_srv_;
+		std::vector<ShaderResourceViewPtr> normal_cone_mip_srvs_;
+		std::vector<RenderTargetViewPtr> normal_cone_mip_rtvs_;
 		TexturePtr normal_cone_small_tex_;
+		std::vector<RenderTargetViewPtr> normal_cone_small_mip_rtvs_;
 
 		TexturePtr multi_res_tex_;
+		ShaderResourceViewPtr multi_res_srv_;
 		TexturePtr multi_res_pingpong_tex_;
+		std::vector<RenderTargetViewPtr> multi_res_pingpong_mip_rtvs_;
 		std::vector<FrameBufferPtr> multi_res_fbs_;
 
 		RenderEffectPtr subsplat_stencil_effect_;

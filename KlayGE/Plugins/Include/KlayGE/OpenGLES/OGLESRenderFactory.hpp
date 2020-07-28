@@ -20,12 +20,12 @@
 
 namespace KlayGE
 {
-	class OGLESRenderFactory : public RenderFactory
+	class OGLESRenderFactory final : public RenderFactory
 	{
 	public:
 		OGLESRenderFactory();
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
 		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
@@ -36,9 +36,9 @@ namespace KlayGE
 		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 
-		FrameBufferPtr MakeFrameBuffer();
+		FrameBufferPtr MakeFrameBuffer() override;
 
-		RenderLayoutPtr MakeRenderLayout();
+		RenderLayoutPtr MakeRenderLayout() override;
 		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
@@ -46,14 +46,16 @@ namespace KlayGE
 		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, uint32_t structure_byte_stride = 0) override;
 
-		QueryPtr MakeOcclusionQuery();
-		QueryPtr MakeConditionalRender();
-		QueryPtr MakeTimerQuery();
+		QueryPtr MakeOcclusionQuery() override;
+		QueryPtr MakeConditionalRender() override;
+		QueryPtr MakeTimerQuery() override;
 		QueryPtr MakeSOStatisticsQuery() override;
 
 		virtual FencePtr MakeFence() override;
 
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+			uint32_t first_level, uint32_t num_levels) override;
+		ShaderResourceViewPtr MakeTexture2DSrv(TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face,
 			uint32_t first_level, uint32_t num_levels) override;
 		ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) override;
@@ -98,7 +100,7 @@ namespace KlayGE
 		UnorderedAccessViewPtr MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
 			uint32_t first_elem, uint32_t num_elems) override;
 
-		ShaderObjectPtr MakeShaderObject();
+		ShaderObjectPtr MakeShaderObject() override;
 		ShaderStageObjectPtr MakeShaderStageObject(ShaderStage stage) override;
 
 	private:
@@ -106,7 +108,7 @@ namespace KlayGE
 
 		RenderStateObjectPtr DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
 			BlendStateDesc const & bs_desc) override;
-		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
+		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) override;
 
 		virtual void DoSuspend() override;
 		virtual void DoResume() override;

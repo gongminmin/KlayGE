@@ -82,7 +82,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
-	void OGLESTexture2D::CopyToTexture(Texture& target)
+	void OGLESTexture2D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -90,16 +90,15 @@ namespace KlayGE
 		{
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				this->CopyToSubTexture2D(target,
-					array_index, level, 0, 0, target.Width(level), target.Height(level),
-					array_index, level, 0, 0, this->Width(level), this->Height(level));
+				this->CopyToSubTexture2D(target, array_index, level, 0, 0, target.Width(level), target.Height(level), array_index, level, 0,
+					0, this->Width(level), this->Height(level), filter);
 			}
 		}
 	}
 
-	void OGLESTexture2D::CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void OGLESTexture2D::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -192,13 +191,13 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 	
-	void OGLESTexture2D::CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void OGLESTexture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
@@ -294,7 +293,7 @@ namespace KlayGE
 			else
 			{
 				this->ResizeTextureCube(target, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-							src_array_index, CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+							src_array_index, CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 			}
 		}
 	}
@@ -380,7 +379,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLESTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

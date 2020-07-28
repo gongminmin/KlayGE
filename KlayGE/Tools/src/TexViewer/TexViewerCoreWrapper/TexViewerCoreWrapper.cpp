@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <iterator>
 
 #include "../TexViewerCore/TexViewerCore.hpp"
 

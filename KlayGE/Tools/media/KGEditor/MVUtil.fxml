@@ -1,16 +1,20 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float4x4" name="mvp"/>
-	<parameter type="float4x4" name="model"/>
+	<include name="ModelCamera.fxml"/>
+
 	<parameter type="int3" name="hl_axis"/>
 
 	<shader>
 		<![CDATA[
-void SimpleAxisVS(float4 pos : POSITION,
+void SimpleAxisVS(uint instance_id : SV_InstanceID,
+				float4 pos : POSITION,
 				out float4 oClr	: COLOR0,
 				out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(float4(pos.xyz, 1), mvp);
 	if (pos.w < 0.5f)
 	{
@@ -42,12 +46,16 @@ float4 SimpleAxisPS(float4 clr : COLOR0) : SV_Target
 
 	<shader>
 		<![CDATA[
-void AxisVS(float4 pos : POSITION,
+void AxisVS(uint instance_id : SV_InstanceID,
+				float4 pos : POSITION,
 				float axis : TEXCOORD0,
 				float3 normal : NORMAL,
 				out float4 oClr	: COLOR0,
 				out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(pos, mvp);
 	if (axis < 0.5f)
 	{
@@ -103,10 +111,14 @@ float4 AxisPS(float4 clr : COLOR0) : SV_Target
 
 	<shader>
 		<![CDATA[
-void GridVS(float4 pos : POSITION,
+void GridVS(uint instance_id : SV_InstanceID,
+				float4 pos : POSITION,
 				out float2 oMark : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(pos, mvp);
 
 	if (abs(pos.x) < 1e-6f)

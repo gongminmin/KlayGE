@@ -33,6 +33,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -40,17 +41,13 @@
 
 #include <iostream>
 
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
 #include <KlayGE/ToolCommon.hpp>
 #include <KlayGE/DevHelper/PlatformDefinition.hpp>
 
 using namespace std;
 using namespace KlayGE;
 
-uint32_t const KFX_VERSION = 0x0140;
+uint32_t const KFX_VERSION = 0x0150;
 
 int main(int argc, char* argv[])
 {
@@ -62,7 +59,7 @@ int main(int argc, char* argv[])
 
 	std::string platform = argv[1];
 
-	boost::algorithm::to_lower(platform);
+	StringUtil::ToLower(platform);
 
 	filesystem::path target_folder;
 	if (argc >= 4)
@@ -153,14 +150,11 @@ int main(int argc, char* argv[])
 		std::vector<string> fxml_names;
 		if (ResLoader::Instance().Locate(fxml_name).empty())
 		{
-			std::vector<std::string> frags;
-			boost::algorithm::split(frags, base_name, boost::is_any_of("+"));
+			std::vector<std::string_view> frags = StringUtil::Split(base_name, StringUtil::EqualTo('+'));
 			for (auto const & frag : frags)
 			{
-				fxml_names.push_back(frag + ".fxml");
+				fxml_names.push_back(ResLoader::Instance().Locate(std::string(frag) + ".fxml"));
 			}
-
-			fxml_names.back() = (fxml_directory / fxml_names.back()).string();
 		}
 		else
 		{
@@ -168,17 +162,12 @@ int main(int argc, char* argv[])
 		}
 
 		RenderEffect effect;
-		effect.Open(fxml_names);
+		effect.Load(fxml_names);
 		effect.CompileShaders();
 	}
 	if (!target_folder.empty())
 	{
-		filesystem::copy_file(kfx_path, target_folder / kfx_name,
-#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
-			filesystem::copy_options::overwrite_existing);
-#else
-			filesystem::copy_option::overwrite_if_exists);
-#endif
+		filesystem::copy_file(kfx_path, target_folder / kfx_name, filesystem::copy_options::overwrite_existing);
 		kfx_path = target_folder / kfx_name;
 	}
 

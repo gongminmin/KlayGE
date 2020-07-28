@@ -33,8 +33,9 @@
 #include <KFL/ResIdentifier.hpp>
 
 #include <string>
-
-#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#include <charconv>
+#endif
 
 #include <rapidxml.hpp>
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -65,15 +66,16 @@ namespace KlayGE
 	{
 	}
 
-	XMLNodePtr XMLDocument::Parse(ResIdentifierPtr const & source)
+	XMLNodePtr XMLDocument::Parse(ResIdentifier& source)
 	{
-		source->seekg(0, std::ios_base::end);
-		int len = static_cast<int>(source->tellg());
-		source->seekg(0, std::ios_base::beg);
-		xml_src_.resize(len + 1, 0);
-		source->read(&xml_src_[0], len);
+		source.seekg(0, std::ios_base::end);
+		int len = static_cast<int>(source.tellg());
+		source.seekg(0, std::ios_base::beg);
+		xml_src_ = MakeUniquePtr<char[]>(len + 1);
+		source.read(&xml_src_[0], len);
+		xml_src_[len] = 0;
 
-		doc_->parse<0>(&xml_src_[0]);
+		doc_->parse<0>(xml_src_.get());
 		root_ = MakeSharedPtr<XMLNode>(doc_->first_node());
 
 		return root_;
@@ -85,9 +87,9 @@ namespace KlayGE
 		os << *doc_;
 	}
 
-	XMLNodePtr XMLDocument::CloneNode(XMLNodePtr const & node)
+	XMLNodePtr XMLDocument::CloneNode(XMLNode const& node)
 	{
-		return MakeSharedPtr<XMLNode>(doc_->clone_node(node->node_));
+		return MakeSharedPtr<XMLNode>(doc_->clone_node(node.node_));
 	}
 
 	XMLNodePtr XMLDocument::AllocNode(XMLNodeType type, std::string_view name)
@@ -434,12 +436,12 @@ namespace KlayGE
 		}
 	}
 
-	void XMLNode::InsertNode(XMLNodePtr const & location, XMLNodePtr const & new_node)
+	void XMLNode::InsertNode(XMLNode const& location, XMLNodePtr const & new_node)
 	{
-		node_->insert_node(location->node_, new_node->node_);
+		node_->insert_node(location.node_, new_node->node_);
 		for (size_t i = 0; i < children_.size(); ++ i)
 		{
-			if (children_[i]->node_ == location->node_)
+			if (children_[i]->node_ == location.node_)
 			{
 				children_.insert(children_.begin() + i, new_node);
 				break;
@@ -447,12 +449,12 @@ namespace KlayGE
 		}
 	}
 
-	void XMLNode::InsertAttrib(XMLAttributePtr const & location, XMLAttributePtr const & new_attr)
+	void XMLNode::InsertAttrib(XMLAttribute const &location, XMLAttributePtr const & new_attr)
 	{
-		node_->insert_attribute(location->attr_, new_attr->attr_);
+		node_->insert_attribute(location.attr_, new_attr->attr_);
 		for (size_t i = 0; i < attrs_.size(); ++ i)
 		{
-			if (attrs_[i]->attr_ == location->attr_)
+			if (attrs_[i]->attr_ == location.attr_)
 			{
 				attrs_.insert(attrs_.begin() + i, new_attr);
 				break;
@@ -472,12 +474,12 @@ namespace KlayGE
 		attrs_.push_back(new_attr);
 	}
 
-	void XMLNode::RemoveNode(XMLNodePtr const & node)
+	void XMLNode::RemoveNode(XMLNode const& node)
 	{
-		node_->remove_node(node->node_);
+		node_->remove_node(node.node_);
 		for (size_t i = 0; i < children_.size(); ++ i)
 		{
-			if (children_[i]->node_ == node->node_)
+			if (children_[i]->node_ == node.node_)
 			{
 				children_.erase(children_.begin() + i);
 				break;
@@ -485,12 +487,12 @@ namespace KlayGE
 		}
 	}
 
-	void XMLNode::RemoveAttrib(XMLAttributePtr const & attr)
+	void XMLNode::RemoveAttrib(XMLAttribute const& attr)
 	{
-		node_->remove_attribute(attr->attr_);
+		node_->remove_attribute(attr.attr_);
 		for (size_t i = 0; i < attrs_.size(); ++ i)
 		{
-			if (attrs_[i]->attr_ == attr->attr_)
+			if (attrs_[i]->attr_ == attr.attr_)
 			{
 				attrs_.erase(attrs_.begin() + i);
 				break;
@@ -500,17 +502,65 @@ namespace KlayGE
 
 	bool XMLNode::TryConvert(int32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stol(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLNode::TryConvert(uint32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stoul(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLNode::TryConvert(float& val) const
 	{
-		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stof(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	int32_t XMLNode::ValueInt() const
@@ -584,32 +634,80 @@ namespace KlayGE
 
 	bool XMLAttribute::TryConvert(int32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stol(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLAttribute::TryConvert(uint32_t& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stoul(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	bool XMLAttribute::TryConvert(float& val) const
 	{
-		return boost::conversion::try_lexical_convert(value_, val);
+		std::string_view const value_str = this->ValueString();
+
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stof(std::string(value_str));
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
 	}
 
 	int32_t XMLAttribute::ValueInt() const
 	{
-		return std::stol(std::string(value_));
+		return std::stol(std::string(this->ValueString()));
 	}
 
 	uint32_t XMLAttribute::ValueUInt() const
 	{
-		return std::stoul(std::string(value_));
+		return std::stoul(std::string(this->ValueString()));
 	}
 
 	float XMLAttribute::ValueFloat() const
 	{
-		return std::stof(std::string(value_));
+		return std::stof(std::string(this->ValueString()));
 	}
 
 	std::string_view XMLAttribute::ValueString() const

@@ -56,6 +56,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <ostream>
 #include <string>
 
 #include <boost/assert.hpp>
@@ -73,7 +74,6 @@
 
 namespace
 {
-#ifndef KLAYGE_SHIP
 	char const * DebugSourceString(GLenum value)
 	{
 		char const * ret;
@@ -183,7 +183,6 @@ namespace
 			<< "severity: " << DebugSeverityString(severity) << "; "
 			<< "message: " << message << std::endl;
 	}
-#endif
 }
 
 namespace KlayGE
@@ -268,26 +267,32 @@ namespace KlayGE
 		Context::Instance().AppInstance().MainWnd()->BindListeners();
 #endif
 
-#ifndef KLAYGE_SHIP
-		if (glloader_GL_VERSION_4_3() || glloader_GL_KHR_debug())
-		{
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(&DebugOutputProc, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-		}
-		else if (glloader_GL_ARB_debug_output())
-		{
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-			glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_ARB, 0, nullptr, GL_TRUE);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_ARB, 0, nullptr, GL_TRUE);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_ARB, 0, nullptr, GL_FALSE);
-		}
+#ifdef KLAYGE_DEBUG
+		bool const debug_context = true;
+#else
+		bool const debug_context = settings.debug_context;
 #endif
+		if (debug_context)
+		{
+			if (glloader_GL_VERSION_4_3() || glloader_GL_KHR_debug())
+			{
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback(&DebugOutputProc, nullptr);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+			}
+			else if (glloader_GL_ARB_debug_output())
+			{
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+				glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_ARB, 0, nullptr, GL_TRUE);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_ARB, 0, nullptr, GL_TRUE);
+				glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_ARB, 0, nullptr, GL_FALSE);
+			}
+		}
 
 		win->Attach(FrameBuffer::Attachment::Color0,
 			MakeSharedPtr<OGLScreenRenderTargetView>(win->Width(), win->Height(), settings.color_fmt));
@@ -1081,15 +1086,15 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(fb);
 
-		Viewport const & vp = *fb->GetViewport();
-		if ((vp_x_ != vp.left) || (vp_y_ != vp.top) || (vp_width_ != vp.width) || (vp_height_ != vp.height))
+		Viewport const & vp = *fb->Viewport();
+		if ((vp_x_ != vp.Left()) || (vp_y_ != vp.Top()) || (vp_width_ != vp.Width()) || (vp_height_ != vp.Height()))
 		{
-			glViewport(vp.left, vp.top, vp.width, vp.height);
+			glViewport(vp.Left(), vp.Top(), vp.Width(), vp.Height());
 
-			vp_x_ = vp.left;
-			vp_y_ = vp.top;
-			vp_width_ = vp.width;
-			vp_height_ = vp.height;
+			vp_x_ = vp.Left();
+			vp_y_ = vp.Top();
+			vp_width_ = vp.Width();
+			vp_height_ = vp.Height();
 		}
 	}
 
@@ -1135,7 +1140,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instances = rl.NumInstances();
+		uint32_t const num_instances = rl.NumInstances() * this->NumRealizedCameraInstances();
 		BOOST_ASSERT(num_instances != 0);
 
 		OGLShaderObjectPtr cur_shader = checked_pointer_cast<OGLShaderObject>(tech.Pass(0).GetShaderObject(effect));
@@ -1513,10 +1518,6 @@ namespace KlayGE
 
 		caps_.is_tbdr = false;
 
-		caps_.hw_instancing_support = true;
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
@@ -1540,6 +1541,7 @@ namespace KlayGE
 		caps_.uavs_at_every_stage_support = false;	// TODO
 		caps_.rovs_support = false;	// TODO
 		caps_.flexible_srvs_support = false; // TODO
+		caps_.vp_rt_index_at_every_stage_support = glloader_GL_NV_viewport_array2() || glloader_GL_AMD_vertex_shader_layer();
 
 		caps_.gs_support = true;
 
@@ -1759,7 +1761,7 @@ namespace KlayGE
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
 
 			std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
-			auto add_render_target_format = [&render_target_formats, &max_samples](ArrayRef<ElementFormat> fmts)
+			auto add_render_target_format = [&render_target_formats, &max_samples](std::span<ElementFormat const> fmts)
 			{
 				for (auto fmt : fmts)
 				{
@@ -1771,7 +1773,7 @@ namespace KlayGE
 			};
 
 			add_render_target_format(
-				{
+				MakeSpan({
 					EF_R8,
 					EF_GR8,
 					EF_ARGB8,
@@ -1811,7 +1813,7 @@ namespace KlayGE
 					EF_D32F,
 					EF_ARGB8_SRGB,
 					EF_ABGR8_SRGB
-				});
+				}));
 
 			caps_.AssignRenderTargetFormats(std::move(render_target_formats));
 		}

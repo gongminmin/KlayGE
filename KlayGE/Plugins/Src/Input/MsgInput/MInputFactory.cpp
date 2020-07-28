@@ -39,22 +39,22 @@ namespace KlayGE
 	class MInputFactory : public InputFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"MsgInput Input Factory");
 			return name;
 		}
 
 	private:
-		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() override
+		std::unique_ptr<InputEngine> DoMakeInputEngine() override
 		{
 			return MakeUniquePtr<MsgInputEngine>();
 		}
 
-		virtual void DoSuspend() override
+		void DoSuspend() override
 		{
 		}
-		virtual void DoResume() override
+		void DoResume() override
 		{
 		}
 	};

@@ -40,9 +40,7 @@ namespace KlayGE
 	{
 	}
 
-	MusicBuffer::~MusicBuffer()
-	{
-	}
+	MusicBuffer::~MusicBuffer() noexcept = default;
 
 	bool MusicBuffer::IsSound() const
 	{

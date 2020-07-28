@@ -101,7 +101,7 @@ void PackJTML(std::string const & jtml_name)
 	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_path.string());
 
 	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(jtml);
+	XMLNodePtr root = doc.Parse(*jtml);
 
 	uint32_t n = root->AttribInt("num_tiles", 2048);
 	uint32_t num_tiles = 1;
@@ -216,7 +216,7 @@ void PackJTML(std::string const & jtml_name)
 		uint32_t in_height = src_texture->Height(0);
 
 		TexturePtr texture = rf.MakeTexture2D(in_width, in_height, 1, 1, format, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
-		src_texture->CopyToTexture(*texture);
+		src_texture->CopyToTexture(*texture, TextureFilter::Point);
 
 		Texture::Mapper mapper(*texture, 0, 0, TMA_Read_Only, 0, 0, in_width, in_height);
 		uint8_t const * in_data_p = mapper.Pointer<uint8_t>();

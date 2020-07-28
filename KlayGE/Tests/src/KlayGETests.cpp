@@ -43,7 +43,7 @@ namespace KlayGE
 			context_cfg.graphics_cfg.gamma = false;
 			Context::Instance().Config(context_cfg);
 
-			app_ = MakeSharedPtr<KlayGETestsApp>();
+			app_ = MakeUniquePtr<KlayGETestsApp>();
 			app_->Create();
 		}
 
@@ -55,7 +55,7 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<App3DFramework> app_;
+		std::unique_ptr<App3DFramework> app_;
 	};
 
 	bool CompareBuffer(GraphicsBuffer& buff0, uint32_t buff0_offset,
@@ -150,14 +150,14 @@ namespace KlayGE
 		ElementFormat const tex1_fmt = UncompressedFormat(tex1.Format());
 
 		TexturePtr tex0_cpu = rf.MakeTexture2D(width, height, 1, 1, tex0_fmt, 1, 0, EAH_CPU_Read);
-		tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height,
-			tex0_array_index, tex0_level, tex0_x_offset, tex0_y_offset, width, height);
+		tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height, tex0_array_index, tex0_level, tex0_x_offset, tex0_y_offset, width,
+			height, TextureFilter::Point);
 
 		TexturePtr tex1_cpu = rf.MakeTexture2D(width, height, 1, 1, tex1_fmt, 1, 0, EAH_CPU_Read);
-		tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height,
-			tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width, height);
+		tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height, tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width,
+			height, TextureFilter::Point);
 
-		TexturePtr diff_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read);
+		TexturePtr diff_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 
 		bool match = true;
 		{
@@ -173,7 +173,7 @@ namespace KlayGE
 			uint8_t const * tex1_p = tex1_mapper.Pointer<uint8_t>();
 			uint32_t const tex1_row_pitch = tex1_mapper.RowPitch();
 
-			Texture::Mapper diff_mapper(*diff_cpu, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper diff_mapper(*diff_cpu, 0, 0, TMA_Write_Only, 0, 0, width, height);
 			uint8_t* diff_p = diff_mapper.Pointer<uint8_t>();
 			uint32_t const diff_row_pitch = diff_mapper.RowPitch();
 

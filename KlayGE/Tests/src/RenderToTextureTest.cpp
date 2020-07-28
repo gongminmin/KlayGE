@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -71,7 +73,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -94,7 +96,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -125,7 +127,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -178,7 +180,7 @@ private:
 
 		auto target_resolved = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(), 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
-		source->CopyToTexture(*target_resolved);
+		source->CopyToTexture(*target_resolved, TextureFilter::Point);
 
 		return target_resolved;
 	}

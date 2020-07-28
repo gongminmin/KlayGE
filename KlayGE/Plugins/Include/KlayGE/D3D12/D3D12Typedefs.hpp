@@ -33,31 +33,33 @@
 
 #pragma once
 
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/SALWrapper.hpp>
-#include <dxgi1_6.h>
 #include <d3d12.h>
+#include <dxgi1_6.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #undef __out
 #endif
 
 namespace KlayGE
 {
-	typedef std::shared_ptr<IDXGIFactory4>				IDXGIFactory4Ptr;
-	typedef std::shared_ptr<IDXGIFactory5>				IDXGIFactory5Ptr;
-	typedef std::shared_ptr<IDXGIFactory6>				IDXGIFactory6Ptr;
-	typedef std::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
-	typedef std::shared_ptr<IDXGISwapChain3>			IDXGISwapChain3Ptr;
-	typedef std::shared_ptr<IDXGISwapChain4>			IDXGISwapChain4Ptr;
-	typedef std::shared_ptr<ID3D12Device>				ID3D12DevicePtr;
-	typedef std::shared_ptr<ID3D12CommandQueue>			ID3D12CommandQueuePtr;
-	typedef std::shared_ptr<ID3D12CommandAllocator>		ID3D12CommandAllocatorPtr;
-	typedef std::shared_ptr<ID3D12GraphicsCommandList>	ID3D12GraphicsCommandListPtr;
-	typedef std::shared_ptr<ID3D12DescriptorHeap>		ID3D12DescriptorHeapPtr;
-	typedef std::shared_ptr<ID3D12QueryHeap>			ID3D12QueryHeapPtr;
-	typedef std::shared_ptr<ID3D12Resource>				ID3D12ResourcePtr;
-	typedef std::shared_ptr<ID3D12Fence>				ID3D12FencePtr;
-	typedef std::shared_ptr<ID3D12PipelineState>		ID3D12PipelineStatePtr;
-	typedef std::shared_ptr<ID3D12RootSignature>		ID3D12RootSignaturePtr;
-}
+	using IDXGIFactory4Ptr = com_ptr<IDXGIFactory4>;
+	using IDXGIFactory5Ptr = com_ptr<IDXGIFactory5>;
+	using IDXGIFactory6Ptr = com_ptr<IDXGIFactory6>;
+	using IDXGIAdapter2Ptr = com_ptr<IDXGIAdapter2>;
+	using IDXGISwapChain3Ptr = com_ptr<IDXGISwapChain3>;
+	using IDXGISwapChain4Ptr = com_ptr<IDXGISwapChain4>;
+	using ID3D12DevicePtr = com_ptr<ID3D12Device>;
+	using ID3D12CommandAllocatorPtr = com_ptr<ID3D12CommandAllocator>;
+	using ID3D12CommandQueuePtr = com_ptr<ID3D12CommandQueue>;
+	using ID3D12CommandSignaturePtr = com_ptr<ID3D12CommandSignature>;
+	using ID3D12GraphicsCommandListPtr = com_ptr<ID3D12GraphicsCommandList>;
+	using ID3D12DescriptorHeapPtr = com_ptr<ID3D12DescriptorHeap>;
+	using ID3D12QueryHeapPtr = com_ptr<ID3D12QueryHeap>;
+	using ID3D12ResourcePtr = com_ptr<ID3D12Resource>;
+	using ID3D12FencePtr = com_ptr<ID3D12Fence>;
+	using ID3D12PipelineStatePtr = com_ptr<ID3D12PipelineState>;
+	using ID3D12RootSignaturePtr = com_ptr<ID3D12RootSignature>;
+} // namespace KlayGE
 
-#endif		// _D3D12TYPEDEFS_HPP
+#endif // _D3D12TYPEDEFS_HPP

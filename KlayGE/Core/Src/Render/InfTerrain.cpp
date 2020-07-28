@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -20,6 +19,8 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KFL/Half.hpp>
+
+#include <iterator>
 
 #include <KlayGE/InfTerrain.hpp>
 
@@ -34,7 +35,7 @@ namespace KlayGE
 		rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 		float far_plane = camera.FarPlane();
 
@@ -102,10 +103,6 @@ namespace KlayGE
 		rls_[0]->BindIndexStream(ib, EF_R32UI);
 	}
 
-	InfTerrainRenderable::~InfTerrainRenderable()
-	{
-	}
-
 	void InfTerrainRenderable::SetStretch(float stretch)
 	{
 		*(effect_->ParameterByName("stretch")) = stretch;
@@ -124,9 +121,9 @@ namespace KlayGE
 	void InfTerrainRenderable::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
-		if (deferred_effect_)
+		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
 			Renderable::OnRenderBegin();
 		}
@@ -144,7 +141,7 @@ namespace KlayGE
 		float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
 
 		*(effect_->ParameterByName("inv_virtual_view")) = inv_virtual_view;
-		*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
+		*(effect_->ParameterByName("culling_eye_pos")) = camera.EyePos();
 	}
 
 
@@ -159,7 +156,7 @@ namespace KlayGE
 				auto& inf_terrain_renderable = inf_terrain.BoundRenderableOfType<InfTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+				Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 				float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
 				if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
@@ -337,7 +334,7 @@ namespace KlayGE
 		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R16UI);
 		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
 		tile_non_tess_rl_->BindVertexStream(vb_,
-			{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
+			MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F)}),
 			RenderLayout::ST_Instance);
 		tile_non_tess_rl_->BindVertexStream(tile_non_tess_vid_vb_, VertexElement(VEU_TextureCoord, 2, EF_R32F));
 		tile_non_tess_rl_->NumInstances(num_tiles_);
@@ -347,7 +344,7 @@ namespace KlayGE
 		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R16UI);
 		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
 		tile_tess_rl_->BindVertexStream(vb_,
-			{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
+			MakeSpan({VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F)}),
 			RenderLayout::ST_Instance);
 		tile_tess_rl_->NumInstances(num_tiles_);
 	}
@@ -378,7 +375,7 @@ namespace KlayGE
 		float tile_width = 0.125f;
 		for (uint32_t i = 0; i < rings; ++ i)
 		{
-			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
+			tile_rings_[i] = MakeUniquePtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
 				tile_non_tess_ib_, tile_non_tess_vid_vb_, tile_tess_ib_);
 			tile_width *= 2.0f;
 		}
@@ -440,15 +437,32 @@ namespace KlayGE
 	{
 		Renderable::UpdateTechniques();
 
-		auto deferred_effect = deferred_effect_.get();
+		auto* deferred_effect = effect_.get();
 
-		terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
-		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
-		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
-		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
-		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
-		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
-		gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+		{
+			terrain_gbuffer_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillTech");
+			terrain_gbuffer_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineTech");
+			terrain_gbuffer_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillTech");
+			terrain_gbuffer_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineTech");
+			gen_shadow_map_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
+			gen_csm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
+			gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
+		}
+		else
+		{
+			terrain_gbuffer_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillNoVpRtTech");
+			terrain_gbuffer_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineNoVpRtTech");
+			terrain_gbuffer_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillNoVpRtTech");
+			terrain_gbuffer_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineNoVpRtTech");
+			gen_shadow_map_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapNoVpRtTech");
+			gen_csm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapNoVpRtTech");
+			gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapNoVpRtTech");
+		}
+		gen_shadow_map_multi_view_tech_ = gen_shadow_map_tech_;
+		gen_csm_multi_view_tech_ = gen_csm_tech_;
+		gen_rsm_multi_view_tech_ = gen_rsm_tech_;
 
 		*deferred_effect->ParameterByName("vertex_per_tile_edge") = static_cast<int32_t>(VERTEX_PER_TILE_EDGE);
 		*deferred_effect->ParameterByName("patches_per_tile_edge") = int2(PATCHES_PER_TILE_EDGE, PATCHES_PER_TILE_EDGE - 1);
@@ -462,7 +476,7 @@ namespace KlayGE
 		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
 		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
 
-		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
+		culling_eye_pos_param_ = deferred_effect->ParameterByName("culling_eye_pos");
 		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
 		proj_mat_param_ = deferred_effect->ParameterByName("proj_mat");
 		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
@@ -500,8 +514,9 @@ namespace KlayGE
 			tech_index += 1;
 		}
 
-		gbuffer_mrt_tech_ = terrain_gbuffer_mrt_techs_[tech_index];
-		technique_ = gbuffer_mrt_tech_;
+		gbuffer_tech_ = terrain_gbuffer_techs_[tech_index];
+		gbuffer_multi_view_tech_ = gbuffer_tech_;
+		technique_ = gbuffer_tech_;
 	}
 
 	void HQTerrainRenderable::CreateNonTessIB()
@@ -615,9 +630,12 @@ namespace KlayGE
 		float const dz = eye.z() - snapped_z_;
 		snapped_x_ = eye.x() - 2 * dx;				// TODO: Figure out why the 2x works
 		snapped_z_ = eye.z() - 2 * dz;
-		float4x4 trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
-		float4x4 scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
-		model_mat_ = scale * trans;
+		float4x4 const trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
+		float4x4 const scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
+		float4x4 const model_mat = scale * trans;
+		float4x4 const prev_model_mat = model_mat_;
+		Renderable::ModelMatrix(model_mat);
+		Renderable::PrevModelMatrix(prev_model_mat);
 
 		*proj_mat_param_ = proj;
 
@@ -637,7 +655,7 @@ namespace KlayGE
 		float3 culling_eye = camera.EyePos();
 		culling_eye.x() -= snapped_x_;
 		culling_eye.z() -= snapped_z_;
-		*eye_pos_param_ = culling_eye;
+		*culling_eye_pos_param_ = culling_eye;
 		*view_dir_param_ = camera.ForwardVec();
 	}
 
@@ -646,9 +664,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		*height_map_param_ = height_map_tex_;
-		*gradient_map_param_ = gradient_map_tex_;
-		*mask_map_param_ = mask_map_tex_;
+		*height_map_param_ = height_map_srv_;
+		*gradient_map_param_ = gradient_map_srv_;
+		*mask_map_param_ = mask_map_srv_;
 		*frame_size_param_ = int2(static_cast<int>(re.CurFrameBuffer()->Width()),
 			static_cast<int>(re.CurFrameBuffer()->Height()));
 
@@ -657,7 +675,7 @@ namespace KlayGE
 		{
 			switch (type_)
 			{
-			case PT_OpaqueGBufferMRT:
+			case PT_OpaqueGBuffer:
 			case PT_OpaqueShading:
 			case PT_OpaqueSpecialShading:
 				need_tess = true;
@@ -670,18 +688,18 @@ namespace KlayGE
 
 		for (size_t i = 0; i < tile_rings_.size(); ++ i)
 		{
-			std::shared_ptr<TileRing> const & ring = tile_rings_[i];
+			TileRing const& ring = *tile_rings_[i];
 
 			if (need_tess)
 			{
-				rls_[0] = ring->GetTessRL();
+				rls_[0] = ring.GetTessRL();
 			}
 			else
 			{
-				rls_[0] = ring->GetNonTessRL();
+				rls_[0] = ring.GetNonTessRL();
 			}
 
-			*tile_size_param_ = ring->TileSize();
+			*tile_size_param_ = ring.TileSize();
 			re.Render(*effect_, *technique_, *rls_[0]);
 		}
 	}
@@ -719,7 +737,7 @@ namespace KlayGE
 			reset_terrain_(true)
 	{
 		last_eye_pos_ =
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera->EyePos();
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DefaultFrameBuffer()->Viewport()->Camera()->EyePos();
 
 		BOOST_ASSERT(dynamic_cast<HQTerrainRenderable*>(renderable.get()) != nullptr);
 
@@ -732,7 +750,7 @@ namespace KlayGE
 				auto& hq_inf_terrain_renderable = hq_inf_terrain.BoundRenderableOfType<HQTerrainRenderable>();
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+				Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
 				hq_inf_terrain_renderable.SetMatrices(camera);
 

@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.0+, g++ 7.1+, clang 3.6+, with C++14 or C++17 option on.
+// KlayGE requires vc 14.0+, g++ 7.1+, clang 5.0+, with C++14 or C++17 option on.
 
 // Macros for C++17 core features:
 // KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
@@ -39,13 +39,15 @@
 
 // Macros for C++17 library features:
 // KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+// KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 // KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 // KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-// KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 // KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 
 // Macros for C++2a library features:
 // KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+// KLAYGE_CXX2A_LIBRARY_FORMAT_SUPPORT
+// KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
 
 // Macros for TS library features:
 // KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
@@ -54,70 +56,101 @@
 #if defined(__clang__)
 	// Clang++
 
-	#if __cplusplus < 201402L
-		#error "-std=c++14 must be turned on."
-	#endif
-
-	#define KLAYGE_COMPILER_CLANG
-	#define KLAYGE_COMPILER_NAME clang
-
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#if __cplusplus > 201402L
-		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-	#endif
-	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+	#if defined(_MSC_VER)
+		#define KLAYGE_COMPILER_CLANGCL
+		#define KLAYGE_COMPILER_NAME clangcl
 
-	#if defined(__APPLE__)
-		#if CLANG_VERSION >= 61
+		#if __cplusplus < 201402L
+			#error "-std=c++14 must be turned on."
+		#endif
+
+		#if __cplusplus > 201402L
+			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#endif
+
+		#if CLANG_VERSION >= 90
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
+			#error "Unsupported compiler version. Please install clang-cl 9.0 or up."
 		#endif
 
-		#if CLANG_VERSION >= 80
+		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+
+		#define KLAYGE_HAS_DECLSPEC
+		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
+	#else
+		#define KLAYGE_COMPILER_CLANG
+		#define KLAYGE_COMPILER_NAME clang
+
+		#if __cplusplus < 201703L
+			#error "-std=c++1z must be turned on."
+		#endif
+
+		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+
+		#if defined(__APPLE__)
+			#if CLANG_VERSION >= 61
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
+			#endif
+
+			#if CLANG_VERSION >= 80
+				#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+			#endif
+			#if CLANG_VERSION >= 90
+				#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+			#endif
+			#if CLANG_VERSION >= 100
+				#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+				#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+			#endif
+		#elif defined(__ANDROID__)
+			#if CLANG_VERSION >= 50
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
+			#endif
+
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#endif
-		#if CLANG_VERSION >= 90
-			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-		#endif
-		#if CLANG_VERSION >= 100
 			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#endif
-	#elif defined(__ANDROID__)
-		#if CLANG_VERSION >= 50
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+		#elif defined(linux) || defined(__linux) || defined(__linux__)
+			#if CLANG_VERSION >= 50
+				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+			#else
+				#error "Unsupported compiler version. Please install clang++ 5.0 or up."
+			#endif
+
+			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+			#if CLANG_VERSION >= 70
+				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+				#if __cplusplus > 201703L
+					#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+					#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+				#endif
+			#else
+				#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+			#endif
 		#else
-			#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
+			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
 		#endif
 
-		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-	#elif defined(linux) || defined(__linux) || defined(__linux__)
-		#if CLANG_VERSION >= 50
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
-		#else
-			#error "Unsupported compiler version. Please install clang++ 5.0 or up."
-		#endif
-
-		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-		#if CLANG_VERSION >= 70
-			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-		#else
-			#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
-		#endif
-	#else
-		#error "Clang++ on an unknown platform. Only Apple, Android, Linux, and Windows are supported."
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
-
-	#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-	#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
@@ -158,12 +191,14 @@
 	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#if GCC_VERSION >= 80
 		#if !defined(__MINGW32__) || (GCC_VERSION != 81)
 			// MinGW-w64 8.1 can't use built-in filesystem due to a bug: https://sourceforge.net/p/mingw-w64/bugs/737/
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+		#endif
+		#if __cplusplus > 201703L
+			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
 		#endif
 	#else
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
@@ -199,7 +234,7 @@
 		#error "Unsupported compiler version. Please install vc14 or up."
 	#endif
 
-	#if _MSVC_LANG > 201402
+	#if _MSVC_LANG > 201402L
 		#if _MSC_VER >= 1911
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#endif
@@ -210,11 +245,21 @@
 		#if _MSC_VER >= 1914
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 		#endif
+		#if _MSC_VER >= 1915
+			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		#endif
 		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#endif
+	#if _MSVC_LANG > 201703L
+		#if _MSC_VER >= 1922
+			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+		#endif
+		#if _MSC_VER >= 1926
+			#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+		#endif
+	#endif
 
-	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 	#if !defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif

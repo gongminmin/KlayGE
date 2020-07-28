@@ -1,0 +1,36 @@
+From 626f0f41a88a09a8a4196fdf6c9513b58b479b8d Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Fri, 22 Jan 2016 00:21:34 -0500
+Subject: [PATCH 03/11] Fix build error when curses is enabled but curses
+ header are not installer.
+
+This commit fixes the following build error:
+
+//--------------
+Building C object CMakeBuild/extensions/CMakeFiles/extension_curses.dir/data/data/com.termux/files/home/Python-2.7.10/Modules/_cursesmodule.c.o
+In file included from /data/data/com.termux/files/home/Python-2.7.10/Modules/_cursesmodule.c:114:0:
+/data/data/com.termux/files/home/Python-2.7.10/Include/py_curses.h:50:20: fatal error: curses.h: No such file or directory
+#include <curses.h>
+                    ^
+compilation terminated.
+//--------------
+---
+ cmake/extensions/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index 9d20afb..ed61086 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -617,7 +617,7 @@ add_python_extension(_curses_panel
+     LIBRARIES ${curses_common_LIBRARIES} ${PANEL_LIBRARIES}
+ )
+ add_python_extension(_curses
+-    REQUIRES ${curses_common_REQUIRES}
++    REQUIRES ${curses_common_REQUIRES} HAVE_CURSES_H
+     SOURCES _cursesmodule.c
+     LIBRARIES ${curses_common_LIBRARIES}
+ )
+-- 
+2.17.1.windows.2
+

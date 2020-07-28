@@ -1,0 +1,47 @@
+From 0f0fd334507361cc94faefe7d2cf06723bae3b2c Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 25 Feb 2020 21:57:22 -0800
+Subject: [PATCH 5/7] Fix for clang-cl
+
+---
+ Include/pytime.h       | 4 ++++
+ Modules/_tracemalloc.c | 5 +++--
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/Include/pytime.h b/Include/pytime.h
+index bdda1da2e6..fa6f54d080 100644
+--- a/Include/pytime.h
++++ b/Include/pytime.h
+@@ -5,6 +5,10 @@
+ #include "pyconfig.h" /* include for defines */
+ #include "object.h"
+ 
++#if defined(_MSC_VER)
++struct timeval;
++#endif
++
+ /**************************************************************************
+ Symbols and macros to supply platform-independent interfaces to time related
+ functions and constants
+diff --git a/Modules/_tracemalloc.c b/Modules/_tracemalloc.c
+index cbcf55f817..403e970589 100644
+--- a/Modules/_tracemalloc.c
++++ b/Modules/_tracemalloc.c
+@@ -59,11 +59,12 @@ __attribute__((packed))
+ 
+ /* Pack the frame_t structure to reduce the memory footprint on 64-bit
+    architectures: 12 bytes instead of 16. */
++#if defined(_MSC_VER)
++#pragma pack(push, 4)
++#endif
+ typedef struct
+ #ifdef __GNUC__
+ __attribute__((packed))
+-#elif defined(_MSC_VER)
+-#pragma pack(push, 4)
+ #endif
+ {
+     /* filename cannot be NULL: "<unknown>" is used if the Python frame
+-- 
+2.17.1.windows.2
+

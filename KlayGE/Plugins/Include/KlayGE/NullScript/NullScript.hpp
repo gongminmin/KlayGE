@@ -40,18 +40,38 @@
 
 namespace KlayGE
 {
-	class NullScriptModule : public ScriptModule
+	class NullScriptModule final : public ScriptModule
 	{
 	public:
 		NullScriptModule();
 		~NullScriptModule() override;
 
-		std::any Value(std::string const & name) override;
-		std::any Call(std::string const & func_name, ArrayRef<std::any> args) override;
-		std::any RunString(std::string const & script) override;
+		ScriptVariablePtr Value(std::string const & name) override;
+		ScriptVariablePtr Call(std::string const & func_name, std::span<ScriptVariablePtr const> args) override;
+		ScriptVariablePtr RunString(std::string const & script) override;
+
+		ScriptVariablePtr MakeVariable(std::string const& value) const override;
+		ScriptVariablePtr MakeVariable(std::string_view value) const override;
+		ScriptVariablePtr MakeVariable(char const* value) const override;
+		ScriptVariablePtr MakeVariable(char* value) const override;
+		ScriptVariablePtr MakeVariable(std::wstring const& value) const override;
+		ScriptVariablePtr MakeVariable(std::wstring_view value) const override;
+		ScriptVariablePtr MakeVariable(wchar_t const* value) const override;
+		ScriptVariablePtr MakeVariable(wchar_t* value) const override;
+		ScriptVariablePtr MakeVariable(int8_t value) const override;
+		ScriptVariablePtr MakeVariable(int16_t value) const override;
+		ScriptVariablePtr MakeVariable(int32_t value) const override;
+		ScriptVariablePtr MakeVariable(int64_t value) const override;
+		ScriptVariablePtr MakeVariable(uint8_t value) const override;
+		ScriptVariablePtr MakeVariable(uint16_t value) const override;
+		ScriptVariablePtr MakeVariable(uint32_t value) const override;
+		ScriptVariablePtr MakeVariable(uint64_t value) const override;
+		ScriptVariablePtr MakeVariable(float value) const override;
+		ScriptVariablePtr MakeVariable(double value) const override;
+		ScriptVariablePtr MakeVariable(std::span<ScriptVariablePtr const> value) const override;
 	};
 
-	class NullScriptEngine : public ScriptEngine
+	class NullScriptEngine final : public ScriptEngine
 	{
 	public:
 		NullScriptEngine();

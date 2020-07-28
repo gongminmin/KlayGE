@@ -20,7 +20,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Log.hpp>
@@ -44,14 +45,18 @@
 #include <sstream>
 #include <string>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION <= 140)
+#pragma warning(push)
+#pragma warning(disable: 4800) // BOOL to bool
+#endif
 #include <VersionHelpers.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION <= 140)
+#pragma warning(pop)
+#endif
 #endif
 #endif
 #elif defined(KLAYGE_PLATFORM_ANDROID)
@@ -114,10 +119,6 @@ namespace KlayGE
 	Context::Context()
 		: app_(nullptr)
 	{
-#ifdef KLAYGE_PLATFORM_ANDROID
-		state_ = get_app();
-#endif
-
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -329,6 +330,7 @@ namespace KlayGE
 		uint32_t paper_white = 100;
 		uint32_t display_max_luminance = 100;
 		std::vector<std::pair<std::string, std::string>> graphics_options;
+		bool debug_context = false;
 		bool perf_profiler = false;
 		bool location_sensor = false;
 
@@ -344,7 +346,7 @@ namespace KlayGE
 		if (file)
 		{
 			XMLDocument cfg_doc;
-			XMLNodePtr cfg_root = cfg_doc.Parse(file);
+			XMLNodePtr cfg_root = cfg_doc.Parse(*file);
 
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
 			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");
@@ -636,28 +638,33 @@ namespace KlayGE
 				{
 					std::string_view const options_str = attr->ValueString();
 
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, options_str, boost::is_any_of(","));
+					std::vector<std::string_view> strs = StringUtil::Split(options_str, StringUtil::EqualTo(','));
 					for (size_t index = 0; index < strs.size(); ++ index)
 					{
-						std::string& opt = strs[index];
-						boost::algorithm::trim(opt);
+						std::string_view opt = StringUtil::Trim(strs[index]);
 						std::string::size_type const loc = opt.find(':');
-						std::string opt_name = opt.substr(0, loc);
-						std::string opt_val = opt.substr(loc + 1);
-						graphics_options.emplace_back(opt_name, opt_val);
+						std::string_view opt_name = opt.substr(0, loc);
+						std::string_view opt_val = opt.substr(loc + 1);
+						graphics_options.emplace_back(std::string(opt_name), std::string(opt_val));
 					}
 				}
 			}
+
+			XMLNodePtr debug_context_node = graphics_node->FirstNode("debug_context");
+			attr = debug_context_node->Attrib("value");
+			if (attr)
+			{
+				debug_context = BoolFromStr(attr->ValueString());
+			}
 		}
 
-		ArrayRef<char const *> const available_rfs = available_rfs_array;
-		ArrayRef<char const *> const available_afs = available_afs_array;
-		ArrayRef<char const *> const available_adsfs = available_adsfs_array;
-		ArrayRef<char const *> const available_ifs = available_ifs_array;
-		ArrayRef<char const *> const available_sfs = available_sfs_array;
-		ArrayRef<char const *> const available_scfs = available_scfs_array;
-		ArrayRef<char const *> const available_sms = available_sms_array;
+		std::span<char const *> const available_rfs = available_rfs_array;
+		std::span<char const *> const available_afs = available_afs_array;
+		std::span<char const *> const available_adsfs = available_adsfs_array;
+		std::span<char const *> const available_ifs = available_ifs_array;
+		std::span<char const *> const available_sfs = available_sfs_array;
+		std::span<char const *> const available_scfs = available_scfs_array;
+		std::span<char const *> const available_sms = available_sms_array;
 
 		if (std::find(available_rfs.begin(), available_rfs.end(), rf_name) == available_rfs.end())
 		{
@@ -718,6 +725,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.paper_white = paper_white;
 		cfg_.graphics_cfg.display_max_luminance = display_max_luminance;
 		cfg_.graphics_cfg.options = std::move(graphics_options);
+		cfg_.graphics_cfg.debug_context = debug_context;
 
 		cfg_.deferred_rendering = false;
 		cfg_.perf_profiler = perf_profiler;
@@ -930,6 +938,10 @@ namespace KlayGE
 			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
 
 			graphics_node->AppendNode(output_node);
+
+			XMLNodePtr debug_context_node = cfg_doc.AllocNode(XNT_Element, "debug_context");
+			debug_context_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.debug_context));
+			graphics_node->AppendNode(debug_context_node);
 		}
 		root->AppendNode(graphics_node);
 

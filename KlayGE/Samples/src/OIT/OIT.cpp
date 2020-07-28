@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -15,7 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -24,8 +23,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "OIT.hpp"
@@ -97,137 +97,6 @@ namespace
 			effect_attrs_ = EA_TransparencyFront;
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			StaticMesh::DoBuildMeshInfo(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(no_oit_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(no_oit_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			*(dp_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(dp_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			*(wb_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(wb_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			if (gen_ppll_tech_)
-			{
-				*(gen_ppll_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-				*(gen_ppll_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			}
-			if (gen_rov_ppa_tech_)
-			{
-				*(gen_rov_ppa_effect_->ParameterByName("pos_center")) = pos_bb.Center();
-				*(gen_rov_ppa_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			}
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(no_oit_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(no_oit_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			*(dp_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(dp_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			*(wb_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(wb_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			if (gen_ppll_tech_)
-			{
-				*(gen_ppll_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-				*(gen_ppll_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			}
-			if (gen_rov_ppa_tech_)
-			{
-				*(gen_rov_ppa_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-				*(gen_rov_ppa_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			}
-
-			*(no_oit_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-			*(no_oit_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
-				textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
-			*(no_oit_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
-				textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
-			*(no_oit_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
-			*(no_oit_effect_->ParameterByName("albedo_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
-			*(no_oit_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(no_oit_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(no_oit_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-			*(no_oit_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-			*(no_oit_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(no_oit_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-
-			*(dp_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-			*(dp_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
-				textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
-			*(dp_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
-				textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
-			*(dp_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
-			*(dp_effect_->ParameterByName("albedo_map_enabled")) 
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
-			*(dp_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(dp_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(dp_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-			*(dp_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-			*(dp_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(dp_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-
-			*(wb_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-			*(wb_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
-				textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
-			*(wb_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
-				textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
-			*(wb_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
-			*(wb_effect_->ParameterByName("albedo_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
-			*(wb_effect_->ParameterByName("normal_map_enabled"))
-				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-			*(wb_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(wb_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-			*(wb_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-			*(wb_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-			*(wb_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-
-			if (gen_ppll_tech_)
-			{
-				*(gen_ppll_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-				*(gen_ppll_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
-					textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
-				*(gen_ppll_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
-					textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
-				*(gen_ppll_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-					textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
-				*(gen_ppll_effect_->ParameterByName("albedo_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
-				*(gen_ppll_effect_->ParameterByName("normal_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-				*(gen_ppll_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-				*(gen_ppll_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-				*(gen_ppll_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-				*(gen_ppll_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-				*(gen_ppll_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-			}
-			if (gen_rov_ppa_tech_)
-			{
-				*(gen_rov_ppa_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-				*(gen_rov_ppa_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
-					textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
-				*(gen_rov_ppa_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
-					textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
-				*(gen_rov_ppa_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-					textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
-				*(gen_rov_ppa_effect_->ParameterByName("albedo_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
-				*(gen_rov_ppa_effect_->ParameterByName("normal_map_enabled"))
-					= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
-				*(gen_rov_ppa_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-				*(gen_rov_ppa_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-				*(gen_rov_ppa_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-				*(gen_rov_ppa_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-				*(gen_rov_ppa_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
-			}
-		}
-
 		void SetOITMode(OITMode mode)
 		{
 			mode_ = mode;
@@ -235,17 +104,9 @@ namespace
 
 		void SetAlpha(float alpha)
 		{
-			*(no_oit_effect_->ParameterByName("alpha")) = alpha;
-			*(dp_effect_->ParameterByName("alpha")) = alpha;
-			*(wb_effect_->ParameterByName("alpha")) = alpha;
-			if (gen_ppll_tech_)
-			{
-				*(gen_ppll_effect_->ParameterByName("alpha")) = alpha;
-			}
-			if (gen_rov_ppa_tech_)
-			{
-				*(gen_rov_ppa_effect_->ParameterByName("alpha")) = alpha;
-			}
+			float4 albedo = mtl_->Albedo();
+			albedo.w() = alpha;
+			mtl_->Albedo(albedo);
 		}
 
 		void FirstPass(bool fp)
@@ -444,7 +305,7 @@ namespace
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			if ((OM_PerPixelLinkedLists == mode_) || (OM_AdaptiveTransparency == mode_) || (OM_RovAdaptiveTransparency == mode_))
 			{
-				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Viewport()->Width());
 			}
 
 			re.Render(*effect, *tech, *rl);
@@ -452,6 +313,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -484,7 +347,7 @@ namespace
 			case OM_RovAdaptiveTransparency:
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					*(effect_->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+					*(effect_->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Viewport()->Width());
 					break;
 				}
 
@@ -603,16 +466,17 @@ void OITApp::OnCreate()
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeling_fbs_[i] = rf.MakeFrameBuffer();
-		peeling_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		peeling_fbs_[i]->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
+	peeled_srvs_.resize(peeling_fbs_.size());
 
 	if (!depth_texture_support_)
 	{
 		for (size_t i = 0; i < depth_fbs_.size(); ++ i)
 		{
 			depth_fbs_[i] = rf.MakeFrameBuffer();
-			depth_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+			depth_fbs_[i]->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 		}
 	}
 
@@ -622,14 +486,14 @@ void OITApp::OnCreate()
 	}
 
 	weighted_fb_ = rf.MakeFrameBuffer();
-	weighted_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	weighted_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 
 	if (caps.max_simultaneous_uavs > 0)
 	{
 		opaque_bg_fb_ = rf.MakeFrameBuffer();
-		opaque_bg_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		opaque_bg_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 		linked_list_fb_ = rf.MakeFrameBuffer();
-		linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		linked_list_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 
 	tb_controller_.AttachCamera(this->ActiveCamera());
@@ -649,7 +513,7 @@ void OITApp::OnCreate()
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("OIT.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("OIT.uiml"));
 	dialog_oit_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
@@ -704,7 +568,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	auto const ds_format = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	auto const ds_format = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 	BOOST_ASSERT(ds_format != EF_Unknown);
 
 	if (depth_texture_support_)
@@ -717,7 +581,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	}
 	else
 	{
-		auto const depth_format = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const depth_format = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(depth_format != EF_Unknown);
 
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
@@ -727,11 +591,12 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	auto const peel_format = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR16F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const peel_format = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR16F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(peel_format != EF_Unknown);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		peeled_srvs_[i] = rf.MakeTextureSrv(peeled_texs_[i]);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(peeled_texs_[i], 0, 1, 0));
 		peeling_fbs_[i]->Attach(depth_views_[i % 2]);
@@ -755,7 +620,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 
 	if (caps.max_simultaneous_uavs > 0)
 	{
-		auto const opaque_bg_format = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, peel_format }, 1, 0);
+		auto const opaque_bg_format = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, peel_format}), 1, 0);
 		BOOST_ASSERT(opaque_bg_format != EF_Unknown);
 		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		opaque_bg_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(opaque_bg_tex_, 0, 1, 0));
@@ -772,8 +637,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		start_offset_srv_ = rf.MakeBufferSrv(start_offset_buf_, EF_R32UI);
 		linked_list_fb_->Attach(0, frag_link_uav_);
 		linked_list_fb_->Attach(1, start_offset_uav_);
-		linked_list_fb_->GetViewport()->width = width;
-		linked_list_fb_->GetViewport()->height = height;
+		linked_list_fb_->Viewport()->Width(width);
+		linked_list_fb_->Viewport()->Height(height);
 
 		polygon_model_->ForEachMesh([this](Renderable& mesh)
 			{
@@ -1042,7 +907,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						re.BindFrameBuffer(FrameBufferPtr());
 						for (size_t i = 0; i < num_layers_; ++ i)
 						{
-							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->InputPin(0, peeled_srvs_[num_layers_ - 1 - i]);
 							blend_pp_->Apply();
 						}
 
@@ -1166,7 +1031,7 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 						re.BindFrameBuffer(FrameBufferPtr());
 						for (size_t i = 0; i < num_layers_; ++ i)
 						{
-							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->InputPin(0, peeled_srvs_[num_layers_ - 1 - i]);
 							blend_pp_->Apply();
 						}
 

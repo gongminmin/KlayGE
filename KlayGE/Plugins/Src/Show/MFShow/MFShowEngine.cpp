@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -48,14 +47,13 @@
 #endif
 #include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_6.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
+#ifndef D3D10_NO_HELPERS
+#define D3D10_NO_HELPERS
+#endif
+#ifndef D3D11_NO_HELPERS
+#define D3D11_NO_HELPERS
 #endif
 #include <d3d11_4.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
 #if defined(KLAYGE_COMPILER_GCC)
 #undef __out
 #endif
@@ -222,26 +220,15 @@ namespace KlayGE
 
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		IDXGIFactory1* dxgi_factory;
-		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&dxgi_factory)));
-		dxgi_factory_ = MakeCOMPtr(dxgi_factory);
+		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, dxgi_factory_.put_void()));
 		dxgi_sub_ver_ = 1;
-
-		IDXGIFactory2* gi_factory2;
-		dxgi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory2));
-		if (gi_factory2 != nullptr)
+		if (dxgi_factory_.try_as<IDXGIFactory2>(IID_IDXGIFactory2))
 		{
 			dxgi_sub_ver_ = 2;
-
-			IDXGIFactory4* gi_factory4;
-			dxgi_factory->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory4));
-			if (gi_factory4 != nullptr)
+			if (dxgi_factory_.try_as<IDXGIFactory4>(IID_IDXGIFactory4))
 			{
 				dxgi_sub_ver_ = 4;
-				gi_factory4->Release();
 			}
-
-			gi_factory2->Release();
 		}
 
 		UINT constexpr create_device_flags = 0;
@@ -267,7 +254,7 @@ namespace KlayGE
 			D3D_FEATURE_LEVEL_11_0
 		};
 
-		ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
+		std::span<D3D_FEATURE_LEVEL const> feature_levels;
 		{
 			uint32_t feature_level_start_index = 0;
 			if (dxgi_sub_ver_ < 4)
@@ -280,26 +267,26 @@ namespace KlayGE
 				}
 			}
 
-			feature_levels = MakeArrayRef(all_feature_levels).Slice(feature_level_start_index);
+			feature_levels = MakeSpan(all_feature_levels).subspan(feature_level_start_index);
 		}
 
-		ID3D11Device* d3d_device = nullptr;
-		ID3D11DeviceContext* d3d_imm_ctx = nullptr;
+		com_ptr<ID3D11Device> d3d_device;
+		com_ptr<ID3D11DeviceContext> d3d_imm_ctx;
 		for (auto dev_type : dev_types)
 		{
-			d3d_device = nullptr;
-			d3d_imm_ctx = nullptr;
+			d3d_device.reset();
+			d3d_imm_ctx.reset();
 
 			HRESULT hr = E_FAIL;
 			for (auto const & flags : available_create_device_flags)
 			{
-				ID3D11Device* this_device = nullptr;
-				ID3D11DeviceContext* this_imm_ctx = nullptr;
+				com_ptr<ID3D11Device> this_device;
+				com_ptr<ID3D11DeviceContext> this_imm_ctx;
 				D3D_FEATURE_LEVEL this_out_feature_level;
 				hr = DynamicD3D11CreateDevice_(nullptr, dev_type, nullptr,
 					flags | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
 					&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION,
-					&this_device, &this_out_feature_level, &this_imm_ctx);
+					this_device.put(), &this_out_feature_level, this_imm_ctx.put());
 				if (SUCCEEDED(hr))
 				{
 					d3d_device = this_device;
@@ -316,60 +303,48 @@ namespace KlayGE
 		Verify(d3d_device != nullptr);
 		Verify(d3d_imm_ctx != nullptr);
 
-		d3d_device_ = MakeCOMPtr(d3d_device);
-		d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx);
+		d3d_device_ = d3d_device;
+		d3d_imm_ctx_ = d3d_imm_ctx;
 
-		ID3D10Multithread* d3d10_multithread;
-		TIFHR(d3d_device_->QueryInterface(IID_ID3D10Multithread, reinterpret_cast<void**>(&d3d10_multithread)));
-		if (d3d10_multithread != nullptr)
+		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>(IID_ID3D10Multithread))
 		{
-			d3d10_multithread->SetMultithreadProtected(true);
-			d3d10_multithread->Release();
+			d3d_multithread->SetMultithreadProtected(true);
 		}
 
-		IDXGIDevice2* dxgi_device;
-		TIFHR(d3d_device_->QueryInterface(IID_IDXGIDevice2, reinterpret_cast<void**>(&dxgi_device)));
-		if (dxgi_device != nullptr)
+		if (auto dxgi_device = d3d_device.try_as<IDXGIDevice2>(IID_IDXGIDevice2))
 		{
-			TIFHR(dxgi_device->SetMaximumFrameLatency(1));
-			dxgi_device->Release();
+			dxgi_device->SetMaximumFrameLatency(1);
 		}
 
 		UINT reset_token;
-		IMFDXGIDeviceManager* dxgi_dev_manager;
-		TIFHR(DynamicMFCreateDXGIDeviceManager_(&reset_token, &dxgi_dev_manager));
-		dxgi_dev_manager_ = MakeCOMPtr(dxgi_dev_manager);
+		TIFHR(DynamicMFCreateDXGIDeviceManager_(&reset_token, dxgi_dev_manager_.put()));
 
 		TIFHR(dxgi_dev_manager_->ResetDevice(d3d_device_.get(), reset_token));
 
-		auto me_notify = MakeCOMPtr(new MediaEngineNotify());
+		com_ptr<MediaEngineNotify> me_notify(new MediaEngineNotify(), false);
 		me_notify->MediaEngineNotifyCallback(this);
 
-		IMFMediaEngineClassFactory* me_factory;
+		com_ptr<IMFMediaEngineClassFactory> me_factory;
 		TIFHR(::CoCreateInstance(CLSID_MFMediaEngineClassFactory, nullptr, CLSCTX_INPROC_SERVER,
-			IID_IMFMediaEngineClassFactory, reinterpret_cast<void**>(&me_factory)));
-		auto factory = MakeCOMPtr(me_factory);
+			IID_IMFMediaEngineClassFactory, me_factory.put_void()));
 
-		IMFAttributes* mf_attributes;
-		TIFHR(DynamicMFCreateAttributes_(&mf_attributes, 1));
-		auto attributes = MakeCOMPtr(mf_attributes);
+		com_ptr<IMFAttributes> mf_attributes;
+		TIFHR(DynamicMFCreateAttributes_(mf_attributes.put(), 1));
 
-		TIFHR(attributes->SetUnknown(MF_MEDIA_ENGINE_DXGI_MANAGER, dxgi_dev_manager_.get()));
-		TIFHR(attributes->SetUnknown(MF_MEDIA_ENGINE_CALLBACK, me_notify.get()));
-		TIFHR(attributes->SetUINT32(MF_MEDIA_ENGINE_VIDEO_OUTPUT_FORMAT, d3d_format_));
+		TIFHR(mf_attributes->SetUnknown(MF_MEDIA_ENGINE_DXGI_MANAGER, dxgi_dev_manager_.get()));
+		TIFHR(mf_attributes->SetUnknown(MF_MEDIA_ENGINE_CALLBACK, me_notify.get()));
+		TIFHR(mf_attributes->SetUINT32(MF_MEDIA_ENGINE_VIDEO_OUTPUT_FORMAT, d3d_format_));
 
-		IMFMediaEngine* media_engine;
-		TIFHR(factory->CreateInstance(MF_MEDIA_ENGINE_WAITFORSTABLE_STATE, attributes.get(), &media_engine));
-		media_engine_ = MakeCOMPtr(media_engine);
+		TIFHR(me_factory->CreateInstance(MF_MEDIA_ENGINE_WAITFORSTABLE_STATE, mf_attributes.get(), media_engine_.put()));
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto& re = rf.RenderEngineInstance();
 		auto const & caps = re.DeviceCaps();
 		static ElementFormat constexpr backup_fmts[] = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
-		ArrayRef<ElementFormat> fmt_options = backup_fmts;
+		std::span<ElementFormat const> fmt_options = backup_fmts;
 		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt_options = fmt_options.Slice(2);
+			fmt_options = fmt_options.subspan(2);
 		}
 		format_ = caps.BestMatchTextureFormat(fmt_options);
 		switch (format_)
@@ -419,14 +394,9 @@ namespace KlayGE
 
 	void MFShowEngine::StartTimer()
 	{
-		IDXGIAdapter* dxgi_adapter;
-		TIFHR(dxgi_factory_->EnumAdapters(0, &dxgi_adapter));
-
-		IDXGIOutput* dxgi_output;
-		TIFHR(dxgi_adapter->EnumOutputs(0, &dxgi_output));
-		dxgi_output_ = MakeCOMPtr(dxgi_output);
-
-		dxgi_adapter->Release();
+		com_ptr<IDXGIAdapter> dxgi_adapter;
+		TIFHR(dxgi_factory_->EnumAdapters(0, dxgi_adapter.put()));
+		TIFHR(dxgi_adapter->EnumOutputs(0, dxgi_output_.put()));
 
 		stop_timer_ = false;
 
@@ -470,16 +440,13 @@ namespace KlayGE
 				tex_desc.CPUAccessFlags = 0;
 				tex_desc.MiscFlags = 0;
 
-				ID3D11Texture2D* d3d_tex;
-				TIFHR(d3d_device_->CreateTexture2D(&tex_desc, nullptr, &d3d_tex));
-				d3d_present_tex_ = MakeCOMPtr(d3d_tex);
+				TIFHR(d3d_device_->CreateTexture2D(&tex_desc, nullptr, d3d_present_tex_.release_and_put()));
 
 				tex_desc.Usage = D3D11_USAGE_STAGING;
 				tex_desc.BindFlags = 0;
 				tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
-				TIFHR(d3d_device_->CreateTexture2D(&tex_desc, nullptr, &d3d_tex));
-				d3d_present_cpu_tex_ = MakeCOMPtr(d3d_tex);
+				TIFHR(d3d_device_->CreateTexture2D(&tex_desc, nullptr, d3d_present_cpu_tex_.release_and_put()));
 
 				auto& rf = Context::Instance().RenderFactoryInstance();
 				present_tex_ = rf.MakeTexture2D(cx, cy, 1, 1, format_, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
@@ -547,12 +514,9 @@ namespace KlayGE
 
 	void MFShowEngine::DoSuspend()
 	{
-		IDXGIDevice3* dxgi_device = nullptr;
-		d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
-		if (dxgi_device != nullptr)
+		if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
 		{
 			dxgi_device->Trim();
-			dxgi_device->Release();
 		}
 	}
 

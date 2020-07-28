@@ -88,7 +88,7 @@ namespace KlayGE
 			ResIdentifierPtr impml_input = ResLoader::Instance().Open(imposter_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(impml_input);
+			XMLNodePtr root = doc.Parse(*impml_input);
 
 			XMLNodePtr azimuth_node = root->FirstNode("azimuth");
 			imposter_desc_.imposter_data->num_azimuth = azimuth_node->Attrib("value")->ValueUInt();

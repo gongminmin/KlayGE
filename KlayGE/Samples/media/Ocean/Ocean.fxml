@@ -51,11 +51,19 @@
 
 	<shader>
 		<![CDATA[
-void OceanGBufferVS(float2 pos : POSITION,
+void OceanGBufferVS(uint instance_id : SV_InstanceID,
+			float2 pos : POSITION,
 			out float3 oTexCoordDepth : TEXCOORD0,
 			out float2 noise_grad : TEXCOORD1,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD2,
-			out float4 oPos : SV_Position)
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+			out uint oRtIndex : SV_RenderTargetArrayIndex,
+			out float4 oPos : SV_Position
+#else
+			out float oRtIndex : TEXCOORD3,
+			out float4 oPos : POSITION
+#endif
+			)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
@@ -72,6 +80,11 @@ void OceanGBufferVS(float2 pos : POSITION,
 
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float3 eye_pos = camera.eye_pos;
 
 	float3 eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
@@ -101,11 +114,17 @@ void OceanGBufferVS(float2 pos : POSITION,
 	oTexCoordDepth.z = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
 }
 
-void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
-					SS_TEXCOORD_TYPE ss_tc : TEXCOORD2,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+void OceanGBufferAlphaBlendPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
+					SS_TEXCOORD_TYPE ss_tc : TEXCOORD2, uint rt_index : SV_RenderTargetArrayIndex,
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1, out float4 rt2 : SV_Target2)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
@@ -126,19 +145,36 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
 	gradient = lerp(noise_grad, gradient, BLEND_FACTOR);
 
+	KlayGECameraInfo camera = cameras[rt_index];
+	float4x4 model_view = camera.model_view;
+
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
-	StoreGBufferMRT(normal, glossiness_clr.x, waterbody_color, 0,
-		rt0, rt1);
+	StoreGBuffer(normal, waterbody_color, float2(0, metalness_glossiness_factor.y), 0, 1,
+		rt0, rt1, rt2);
 }
 
-void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
+void OceanReflectionAlphaBlendVS(uint instance_id : SV_InstanceID,
+					float2 pos : POSITION,
 					out float3 eye_dir : TEXCOORD0,
 					out SS_TEXCOORD_TYPE oTc : TEXCOORD1,
-					out float4 oPos : SV_Position)
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+					out uint oRtIndex : SV_RenderTargetArrayIndex,
+					out float4 oPos : SV_Position
+#else
+					out float oRtIndex : TEXCOORD2,
+					out float4 oPos : POSITION
+#endif
+					)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+	float3 eye_pos = camera.eye_pos;
 
 	eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
@@ -151,6 +187,12 @@ void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
 	oPos = mul(pos_os, mvp);
 
 	oTc = EncodeSSTexcoord(oPos);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
 }
 
 float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0, SS_TEXCOORD_TYPE ss_tc : TEXCOORD1) : SV_Target
@@ -174,12 +216,20 @@ float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0, SS_TEXCOORD_TYPE 
 	return float4(reflection, 1);
 }
 
-void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
+void OceanSpecialShadingAlphaBlendVS(uint instance_id : SV_InstanceID,
+					float2 pos : POSITION,
 					out float3 eye_dir : TEXCOORD0,
 					out float4 tex_coord_noise_grad : TEXCOORD1,
 					out float4 pos_ss : TEXCOORD2,
 					out SS_TEXCOORD_TYPE oTc : TEXCOORD3,
-					out float4 oPos : SV_Position)
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+					out uint oRtIndex : SV_RenderTargetArrayIndex,
+					out float4 oPos : SV_Position
+#else
+					out float oRtIndex : TEXCOORD4,
+					out float4 oPos : POSITION
+#endif
+					)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
@@ -196,6 +246,12 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+	float3 eye_pos = camera.eye_pos;
 
 	eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
@@ -220,6 +276,12 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 	pos_ss = oPos;
 
 	oTc = EncodeSSTexcoord(oPos);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
 }
 
 float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2,
@@ -263,10 +325,104 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 		]]>
 	</shader>
 
-	<technique name="OceanGBufferAlphaBlendFrontMRT" inherit="GBufferAlphaBlendFrontMRTTech">
+	<shader version="4">
+		<![CDATA[
+struct OceanGBufferPS_In
+{
+	float3 texcoord_depth : TEXCOORD0;
+	float2 noise_grad : TEXCOORD1;
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD2;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void OceanGBufferNoVpRtGS(triangle float3 in_texcoord_depth[3] : TEXCOORD0, triangle float2 in_noise_grad[3] : TEXCOORD1,
+	triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD2, triangle float in_rt_index[3] : TEXCOORD3, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<OceanGBufferPS_In> out_stream)
+{
+	OceanGBufferPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.texcoord_depth = in_texcoord_depth[v];
+		output.noise_grad = in_noise_grad[v];
+		output.ss_tc = in_ss_tc[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+
+struct OceanReflectionAlphaBlendPS_In
+{
+	float3 eye_dir : TEXCOORD0;
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD1;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void OceanReflectionAlphaBlendNoVpRtGS(triangle float3 in_eye_dir[3] : TEXCOORD0, triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD2,
+	triangle float in_rt_index[3] : TEXCOORD3, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<OceanReflectionAlphaBlendPS_In> out_stream)
+{
+	OceanReflectionAlphaBlendPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.eye_dir = in_eye_dir[v];
+		output.ss_tc = in_ss_tc[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+
+struct OceanSpecialShadingAlphaBlendPS_In
+{
+	float3 eye_dir : TEXCOORD0;
+	float4 tex_coord_noise_grad : TEXCOORD1;
+	float4 pos_ss : TEXCOORD2;
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD3;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void OceanSpecialShadingAlphaBlendNoVpRtGS(triangle float3 in_eye_dir[3] : TEXCOORD0,
+	triangle float4 in_tex_coord_noise_grad[3] : TEXCOORD1, triangle float4 in_pos_ss[3] : TEXCOORD2,
+	triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD3, triangle float in_rt_index[3] : TEXCOORD4, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<OceanSpecialShadingAlphaBlendPS_In> out_stream)
+{
+	OceanSpecialShadingAlphaBlendPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.eye_dir = in_eye_dir[v];
+		output.tex_coord_noise_grad = in_tex_coord_noise_grad[v];
+		output.pos_ss = in_pos_ss[v];
+		output.ss_tc = in_ss_tc[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="OceanGBufferAlphaBlendFront" inherit="GBufferAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="OceanGBufferVS()"/>
-			<state name="pixel_shader" value="OceanGBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="OceanGBufferAlphaBlendPS()"/>
+		</pass>
+	</technique>
+	<technique name="OceanGBufferAlphaBlendFrontNoVpRt" inherit="OceanGBufferAlphaBlendFront">
+		<pass name="p0">
+			<state name="geometry_shader" value="OceanGBufferNoVpRtGS()"/>
 		</pass>
 	</technique>
 
@@ -276,11 +432,21 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 			<state name="pixel_shader" value="OceanReflectionAlphaBlendPS()"/>
 		</pass>
 	</technique>
+	<technique name="OceanReflectionAlphaBlendFrontNoVpRt" inherit="OceanReflectionAlphaBlendFront">
+		<pass name="p0">
+			<state name="geometry_shader" value="OceanReflectionAlphaBlendNoVpRtGS()"/>
+		</pass>
+	</technique>
 
 	<technique name="OceanSpecialShadingAlphaBlendFront" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="OceanSpecialShadingAlphaBlendVS()"/>
 			<state name="pixel_shader" value="OceanSpecialShadingAlphaBlendPS()"/>
+		</pass>
+	</technique>
+	<technique name="OceanSpecialShadingAlphaBlendFrontNoVpRt" inherit="OceanSpecialShadingAlphaBlendFront">
+		<pass name="p0">
+			<state name="geometry_shader" value="OceanSpecialShadingAlphaBlendNoVpRtGS()"/>
 		</pass>
 	</technique>
 

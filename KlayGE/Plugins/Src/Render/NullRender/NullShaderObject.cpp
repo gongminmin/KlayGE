@@ -29,12 +29,15 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -291,8 +294,8 @@ namespace KlayGE
 
 			if (!shader_code_.empty())
 			{
-				ID3D11ShaderReflection* reflection;
-				ShaderStageObject::ReflectDXBC(shader_code_, reinterpret_cast<void**>(&reflection));
+				com_ptr<ID3D11ShaderReflection> reflection;
+				ShaderStageObject::ReflectDXBC(shader_code_, reflection.put_void());
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -407,9 +410,7 @@ namespace KlayGE
 						}
 					}
 
-					this->StageSpecificReflection(reflection);
-
-					reflection->Release();
+					this->StageSpecificReflection(reflection.get());
 				}
 
 				shader_code_ =
@@ -1141,7 +1142,7 @@ namespace KlayGE
 					{
 						usage = VEU_TextureCoord;
 						usage_index = static_cast<uint8_t>(semantic_index);
-						glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
+						glsl_param_name = std::format("TEXCOORD{}", semantic_index);
 					}
 					else if (CT_HASH("TANGENT") == semantic_hash)
 					{
@@ -1339,8 +1340,9 @@ namespace KlayGE
 		return MakeSharedPtr<NullShaderObject>();
 	}
 
-	void NullShaderObject::Bind()
+	void NullShaderObject::Bind(RenderEffect const& effect)
 	{
+		KFL_UNUSED(effect);
 	}
 
 	void NullShaderObject::Unbind()

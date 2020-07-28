@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -12,15 +11,16 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "VertexDisplacement.hpp"
@@ -46,10 +46,6 @@ namespace
 			*(effect_->ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(effect_->ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(effect_->ParameterByName("lightDir")) = float3(1, 0, -1);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void SetAngle(float angle)
@@ -59,6 +55,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderablePlane::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -127,7 +125,7 @@ void VertexDisplacement::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("VertexDisplacement.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("VertexDisplacement.uiml"));
 }
 
 void VertexDisplacement::OnResize(uint32_t width, uint32_t height)

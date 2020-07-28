@@ -30,19 +30,19 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/CXX17/iterator.hpp>
 
+#include <iterator>
 #include <cstring>
 #include <boost/assert.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#include <KFL/COMPtr.hpp>
+#include <KFL/com_ptr.hpp>
 #ifndef __wbemdisp_h__
 #define __wbemdisp_h__	// Force not to include wbemdisp.h
 #endif
 #include <WbemIdl.h>
 
-#if defined(KLAYGE_COMPILER_MSVC)
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_CLANGCL)
 DEFINE_GUID(IID_IWbemLocator, 0xdc12a687, 0x737f, 0x11cf, 0x88, 0x4d, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
 #endif
 #if !defined(KLAYGE_COMPILER_GCC)
@@ -90,13 +90,10 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(wbem_locator_);
 
-			IWbemServices* wbem_services = nullptr;
 			HRESULT hr = wbem_locator_->ConnectServer(network_resource, username, password, nullptr,
-				0, nullptr, nullptr, &wbem_services);
-			wbem_services_ = MakeCOMPtr(wbem_services);
+				0, nullptr, nullptr, wbem_services_.release_and_put());
 			if (FAILED(hr) || !this->SetProxyBlanket())
 			{
-				wbem_services_.reset();
 				return false;
 			}
 
@@ -107,15 +104,13 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(wbem_services_);
 
-			IEnumWbemClassObject* wbem_enum_result = nullptr;
 			wchar_t query_lang[] = L"WQL";
 			HRESULT hr = wbem_services_->ExecQuery(query_lang, wql,
-				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &wbem_enum_result);
+				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, wbem_enum_result_.release_and_put());
 			if (FAILED(hr))
 			{
 				return false;
 			}
-			wbem_enum_result_ = MakeCOMPtr(wbem_enum_result);
 
 			return true;
 		}
@@ -126,13 +121,11 @@ namespace KlayGE
 			ULONG result = 0;
 			if (wbem_enum_result_)
 			{
-				IWbemClassObject* wbem_object = nullptr;
-				hr = wbem_enum_result_->Next(WBEM_INFINITE, 1, &wbem_object, &result);
-				if (FAILED(hr) || (0 == result) || !wbem_object)
+				hr = wbem_enum_result_->Next(WBEM_INFINITE, 1, wbem_object_.release_and_put(), &result);
+				if (FAILED(hr) || (0 == result) || !wbem_object_)
 				{
 					return false;
 				}
-				wbem_object_ = MakeCOMPtr(wbem_object);
 			}
 
 			return true;
@@ -158,7 +151,7 @@ namespace KlayGE
 			HRESULT hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 			if (FAILED(hr))
 			{
-				hr = ::CoInitialize(nullptr);
+				hr = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 			}
 
 			return SUCCEEDED(hr);
@@ -173,13 +166,10 @@ namespace KlayGE
 
 		bool CreateInstance()
 		{
-			IWbemLocator* locator;
 			HRESULT hr = ::CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator,
-				reinterpret_cast<void**>(&locator));
-			wbem_locator_ = MakeCOMPtr(locator);
+				wbem_locator_.release_and_put_void());
 			if (FAILED(hr))
 			{
-				wbem_locator_.reset();
 				return false;
 			}
 
@@ -196,10 +186,10 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<IWbemClassObject> wbem_object_;
-		std::shared_ptr<IEnumWbemClassObject> wbem_enum_result_;
-		std::shared_ptr<IWbemLocator> wbem_locator_;
-		std::shared_ptr<IWbemServices> wbem_services_;
+		com_ptr<IWbemClassObject> wbem_object_;
+		com_ptr<IEnumWbemClassObject> wbem_enum_result_;
+		com_ptr<IWbemLocator> wbem_locator_;
+		com_ptr<IWbemServices> wbem_services_;
 	};
 #endif
 

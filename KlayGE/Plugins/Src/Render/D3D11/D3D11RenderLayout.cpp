@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -30,9 +29,7 @@
 
 namespace KlayGE
 {
-	D3D11RenderLayout::D3D11RenderLayout()
-	{
-	}
+	D3D11RenderLayout::D3D11RenderLayout() = default;
 
 	void D3D11RenderLayout::Active() const
 	{
@@ -94,13 +91,13 @@ namespace KlayGE
 
 			auto vs_code = shader.VsCode();
 			auto& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice();
-			ID3D11InputLayout* ia;
+			ID3D11Device1* d3d_device = re.D3DDevice1();
+			ID3D11InputLayoutPtr new_layout;
 			TIFHR(d3d_device->CreateInputLayout(&vertex_elems_[0], static_cast<UINT>(vertex_elems_.size()),
-				vs_code.data(), vs_code.size(), &ia));
-			ID3D11InputLayoutPtr new_layout = MakeCOMPtr(ia);
-			input_layouts_.emplace_back(signature, new_layout);
-			return new_layout.get();
+				vs_code.data(), vs_code.size(), new_layout.put()));
+			auto* new_layout_raw = new_layout.get();
+			input_layouts_.emplace_back(signature, std::move(new_layout)); // The emplace_back in VS2015 doesn't have a return value
+			return new_layout_raw;
 		}
 		else
 		{

@@ -14,7 +14,7 @@
 using namespace std;
 using namespace KlayGE;
 
-void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, bool linear)
+void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, TextureFilter filter)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -82,21 +82,21 @@ void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, bool linear)
 		uint32_t const dst_x_size = std::min(src_x_size, std::min(w - src_x_offset, w - dst_x_offset));
 		uint32_t const dst_y_size = std::min(src_y_size, std::min(h - src_y_offset, h - dst_y_offset));
 
-		blitter.Blit(dst, array_index, mip, dst_x_offset, dst_y_offset, dst_x_size, dst_y_size,
-			src, array_index, mip, src_x_offset, src_y_offset, src_x_size, src_y_size,
-			linear);
+		blitter.Blit(dst, array_index, mip, dst_x_offset, dst_y_offset, dst_x_size, dst_y_size, src, array_index, mip,
+			static_cast<float>(src_x_offset), static_cast<float>(src_y_offset), static_cast<float>(src_x_size),
+			static_cast<float>(src_y_size), filter);
 
 		std::vector<uint32_t> sanity_data(dst_x_size * dst_y_size);
 		ResizeTexture(&sanity_data[0], dst_x_size * sizeof(uint32_t), dst_x_size * dst_y_size * sizeof(uint32_t),
 			EF_ABGR8, dst_x_size, dst_y_size, 1,
 			&data[mip][(array_index * h + src_y_offset) * w + src_x_offset], w * sizeof(uint32_t), w * h * sizeof(uint32_t),
-			EF_ABGR8, src_x_size, src_y_size, 1, linear);
+			EF_ABGR8, src_x_size, src_y_size, 1, filter);
 
 		ElementInitData sanity_init_data;
 		sanity_init_data.data = &sanity_data[0];
 		sanity_init_data.row_pitch = dst_x_size * sizeof(uint32_t);
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
-		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
+		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, MakeSpan<1>(sanity_init_data));
 
 		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
@@ -171,8 +171,8 @@ void TestBlitter2DToBuff(uint32_t array_size, uint32_t mip_levels)
 		//uint32_t const dst_buff_offset = dis_x(gen);
 		uint32_t const dst_buff_offset = 0;
 
-		blitter.Blit(dst, dst_buff_offset,
-			src, array_index, mip, src_x_offset, src_y_offset, src_x_size, src_y_size);
+		blitter.Blit(dst, dst_buff_offset, src, array_index, mip, static_cast<float>(src_x_offset), static_cast<float>(src_y_offset),
+			src_x_size, src_y_size);
 
 		GraphicsBufferPtr dst_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, dst->Size(), nullptr);
 		dst->CopyToBuffer(*dst_cpu);
@@ -183,7 +183,8 @@ void TestBlitter2DToBuff(uint32_t array_size, uint32_t mip_levels)
 		sanity_init_data.data = mapper.Pointer<float4>();
 		sanity_init_data.row_pitch = src_x_size * sizeof(float4);
 		sanity_init_data.slice_pitch = src_x_size * src_y_size * sizeof(float4);
-		TexturePtr dst_sanity = rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, sanity_init_data);
+		TexturePtr dst_sanity =
+			rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, MakeSpan<1>(sanity_init_data));
 
 		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*src, array_index, mip, src_x_offset, src_y_offset,
@@ -254,7 +255,7 @@ void TestBlitterBuffTo2D(uint32_t array_size, uint32_t mip_levels)
 		sanity_init_data.data = &sanity_data[0];
 		sanity_init_data.row_pitch = dst_x_size * sizeof(uint32_t);
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
-		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
+		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, MakeSpan<1>(sanity_init_data));
 
 		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
@@ -264,12 +265,12 @@ void TestBlitterBuffTo2D(uint32_t array_size, uint32_t mip_levels)
 
 TEST(BlitterTest, Blit2D)
 {
-	TestBlitter2D(1, 3, false);
+	TestBlitter2D(1, 3, TextureFilter::Point);
 }
 
 TEST(BlitterTest, Blit2DArray)
 {
-	TestBlitter2D( 5, 4, false);
+	TestBlitter2D(5, 4, TextureFilter::Point);
 }
 
 TEST(BlitterTest, Blit2DToBuff)

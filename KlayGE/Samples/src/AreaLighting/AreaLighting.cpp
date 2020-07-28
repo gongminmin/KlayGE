@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -22,6 +21,7 @@
 #include <KlayGE/PerfProfiler.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -174,9 +174,9 @@ void AreaLightingApp::OnCreate()
 		for (int j = -5; j < 5; ++ j)
 		{
 			auto sphere_mesh = sphere_model_unique->Clone();
-			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
-			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
-			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
+			sphere_mesh->GetMaterial(0)->Albedo(float4(0.799102738f, 0.496932995f, 0.048171824f, 1));
+			sphere_mesh->GetMaterial(0)->Metalness((4 - i) / 9.0f);
+			sphere_mesh->GetMaterial(0)->Glossiness((4 - j) / 9.0f);
 			sphere_mesh->RootNode()->TransformToParent(MathLib::scaling(10.0f, 10.0f, 10.0f)
 				* MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
 			root_node.AddChild(sphere_mesh->RootNode());
@@ -197,7 +197,7 @@ void AreaLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("AreaLighting.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("AreaLighting.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_light_type_combo_ = dialog_->IDFromName("LightTypeCombo");
@@ -366,6 +366,14 @@ void AreaLightingApp::DoUpdateOverlay()
 	stream << scene_mgr.NumDrawCalls() << " Draws/frame "
 		<< scene_mgr.NumDispatchCalls() << " Dispatches/frame";
 	font_->RenderText(0, 72, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t AreaLightingApp::DoUpdate(uint32_t pass)

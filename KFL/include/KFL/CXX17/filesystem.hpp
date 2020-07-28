@@ -1,5 +1,5 @@
 /**
- * @file filesystem.cpp
+ * @file filesystem.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_CXX17_FILESYSTEM_HPP
-#define _KFL_CXX17_FILESYSTEM_HPP
+#ifndef KFL_CXX17_FILESYSTEM_HPP
+#define KFL_CXX17_FILESYSTEM_HPP
 
 #pragma once
 
@@ -44,11 +44,11 @@
 		namespace filesystem = experimental::filesystem;
 	}
 #else
-	#include <boost/filesystem.hpp>
+	#include <ghc/filesystem.hpp>
 	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace filesystem = ghc::filesystem;
 	}
 #endif
 
-#endif		// _KFL_CXX17_FILESYSTEM_HPP
+#endif		// KFL_CXX17_FILESYSTEM_HPP

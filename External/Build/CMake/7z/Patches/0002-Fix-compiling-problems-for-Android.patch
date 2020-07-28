@@ -1,0 +1,59 @@
+From bb4d3bddb142856551daa49de1a7dcc640f0e9d9 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 7 Jul 2018 21:47:26 -0700
+Subject: [PATCH 2/3] Fix compiling problems for Android
+
+---
+ C/CpuArch.c            |  2 +-
+ CPP/Common/MyWindows.h | 10 ++++++++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/C/CpuArch.c b/C/CpuArch.c
+index 02e482e..acf86fb 100644
+--- a/C/CpuArch.c
++++ b/C/CpuArch.c
+@@ -7,7 +7,7 @@
+ 
+ #ifdef MY_CPU_X86_OR_AMD64
+ 
+-#if (defined(_MSC_VER) && !defined(MY_CPU_AMD64)) || defined(__GNUC__)
++#if ((defined(_MSC_VER) && defined(MY_CPU_X86)) || defined(__GNUC__)) && !defined(__ANDROID__)
+ #define USE_ASM
+ #endif
+ 
+diff --git a/CPP/Common/MyWindows.h b/CPP/Common/MyWindows.h
+index e7696fb..627540e 100644
+--- a/CPP/Common/MyWindows.h
++++ b/CPP/Common/MyWindows.h
+@@ -116,12 +116,18 @@ typedef LONG SCODE;
+ #define E_OUTOFMEMORY ((HRESULT)0x8007000EL)
+ #define E_INVALIDARG ((HRESULT)0x80070057L)
+ 
++#define HRESULT_FROM_WIN32(e) ((HRESULT)(e))
++
+ #ifdef _MSC_VER
+ #define STDMETHODCALLTYPE __stdcall
++#define STDAPICALLTYPE __stdcall
+ #else
+ #define STDMETHODCALLTYPE
++#define STDAPICALLTYPE
+ #endif
+ 
++#define STDAPI MY_EXTERN_C HRESULT STDAPICALLTYPE
++
+ #define STDMETHOD_(t, f) virtual t STDMETHODCALLTYPE f
+ #define STDMETHOD(f) STDMETHOD_(HRESULT, f)
+ #define STDMETHODIMP_(type) type STDMETHODCALLTYPE
+@@ -247,5 +253,9 @@ typedef enum tagSTREAM_SEEK
+   STREAM_SEEK_END = 2
+ } STREAM_SEEK;
+ 
++#define CLASS_E_CLASSNOTAVAILABLE ((HRESULT)0x80040111L)
++
++typedef void *HINSTANCE;
++
+ #endif
+ #endif
+-- 
+2.17.1.windows.2
+

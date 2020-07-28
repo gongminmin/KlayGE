@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -11,7 +10,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/InfTerrain.hpp>
 #include <KlayGE/LensFlare.hpp>
@@ -23,6 +22,7 @@
 #include <KlayGE/SkyBox.hpp>
 #include <KFL/Half.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -42,17 +42,33 @@ namespace
 			: InfTerrainRenderable(L"Ocean", 384)
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
-			reflection_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
-			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
-			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+			{
+				gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFront");
+				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
+				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
+			}
+			else
+			{
+				gbuffer_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanGBufferAlphaBlendFrontNoVpRt");
+				reflection_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanReflectionAlphaBlendFrontNoVpRt");
+				special_shading_alpha_blend_front_tech_ = effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFrontNoVpRt");
+			}
+			technique_ = gbuffer_alpha_blend_front_tech_;
 
 			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
 
-			model_mat_ = float4x4::Identity();
+			this->ModelMatrix(float4x4::Identity());
+
+			mtl_ = MakeSharedPtr<RenderMaterial>();
+			mtl_->Albedo(float4(0.07f, 0.15f, 0.2f, 1));
+			mtl_->Metalness(1);
+			mtl_->Glossiness(0.5f);
+
 			effect_attrs_ |= EA_TransparencyFront;
 			effect_attrs_ |= EA_SpecialShading;
 		}
@@ -126,26 +142,15 @@ namespace
 
 			switch (type_)
 			{
-			case PT_OpaqueGBufferMRT:
-			case PT_TransparencyBackGBufferMRT:
-			case PT_TransparencyFrontGBufferMRT:
-				*albedo_clr_param_ = float4(0.07f, 0.15f, 0.2f, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*normal_map_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_parallax_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
-				*metalness_clr_param_ = float2(1, 0);
-				*glossiness_clr_param_ = float2(0.5f, 0);
+			case PT_OpaqueGBuffer:
+			case PT_TransparencyBackGBuffer:
+			case PT_TransparencyFrontGBuffer:
 				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*albedo_tex_param_ = TexturePtr();
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*emissive_tex_param_ = TexturePtr();
-				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
@@ -167,10 +172,6 @@ namespace
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*albedo_tex_param_ = TexturePtr();
-				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
-				*emissive_tex_param_ = TexturePtr();
-				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
 				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{
@@ -273,8 +274,8 @@ namespace
 
 			if (use_tex_array_)
 			{
-				ArrayRef<ElementInitData> did;
-				ArrayRef<ElementInitData> gid;
+				std::span<ElementInitData const> did;
+				std::span<ElementInitData const> gid;
 				if (use_load_tex)
 				{
 					did = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
@@ -290,11 +291,10 @@ namespace
 					0, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					gta->CopyToSubTexture2D(*gradient_tex_array_,
-						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+					gta->CopyToSubTexture2D(*gradient_tex_array_, i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, i, 0, 0, 0,
+						ocean_param_.dmap_dim, ocean_param_.dmap_dim, TextureFilter::Point);
 				}
-				gradient_tex_array_->BuildMipSubLevels();
+				gradient_tex_array_->BuildMipSubLevels(TextureFilter::Linear);
 
 				ocean_renderable.DisplacementMapArray(displacement_tex_array_);
 				ocean_renderable.GradientMapArray(gradient_tex_array_);
@@ -305,14 +305,14 @@ namespace
 				gradient_tex_.resize(ocean_param_.num_frames);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8 }, 1, 0);
+					auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8}), 1, 0);
 					BOOST_ASSERT(fmt != EF_Unknown);
 
-					ArrayRef<ElementInitData> did;
+					std::span<ElementInitData const> did;
 					if (use_load_tex)
 					{
 						auto const& disp_init_data = checked_cast<SoftwareTexture&>(*disp_tex).SubresourceData();
-						did = disp_init_data[i * disp_tex->NumMipMaps()];
+						did = MakeSpan<1>(disp_init_data[i * disp_tex->NumMipMaps()]);
 					}
 
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -328,7 +328,7 @@ namespace
 						if (EF_GR8 == fmt)
 						{
 							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, grad_init_data[i * grad_tex->NumMipMaps()]);
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, MakeSpan<1>(grad_init_data[i * grad_tex->NumMipMaps()]));
 						}
 						else
 						{
@@ -353,12 +353,11 @@ namespace
 							}
 						}
 						
-						gta->CopyToSubTexture2D(*gradient_tex_[i],
-							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+						gta->CopyToSubTexture2D(*gradient_tex_[i], 0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, 0, 0,
+							ocean_param_.dmap_dim, ocean_param_.dmap_dim, TextureFilter::Point);
 					}
 
-					gradient_tex_[i]->BuildMipSubLevels();
+					gradient_tex_[i]->BuildMipSubLevels(TextureFilter::Linear);
 				}
 			}
 
@@ -543,9 +542,8 @@ namespace
 				TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
 				TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
 
-				sim_disp_tex->CopyToSubTexture2D(*disp_cpu_tex,
-					0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
-					0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
+				sim_disp_tex->CopyToSubTexture2D(*disp_cpu_tex, 0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0, 0, 0,
+					sim_disp_tex->Width(0), sim_disp_tex->Height(0), TextureFilter::Point);
 
 				{
 					float4 max_disp = float4(-1e10f, -1e10f, -1e10f, -1e10f);
@@ -585,31 +583,28 @@ namespace
 				init_data.row_pitch = ocean_param_.dmap_dim * sizeof(uint32_t);
 				init_data.slice_pitch = init_data.row_pitch * ocean_param_.dmap_dim;
 				TexturePtr disp_8 = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, init_data);
+					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, MakeSpan<1>(init_data));
 
 				if (use_tex_array_)
 				{
-					disp_8->CopyToSubTexture2D(*displacement_tex_array_,
-						i, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
-						0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
-							
-					sim_grad_tex->CopyToSubTexture2D(*gradient_tex_array_,
-						i, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
-						0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
+					disp_8->CopyToSubTexture2D(*displacement_tex_array_, i, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0,
+						0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0), TextureFilter::Point);
+
+					sim_grad_tex->CopyToSubTexture2D(*gradient_tex_array_, i, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0,
+						0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0), TextureFilter::Point);
 				}
 				else
 				{
-					disp_8->CopyToTexture(*displacement_tex_[i]);
-					sim_grad_tex->CopyToSubTexture2D(*gradient_tex_[i],
-						0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
-						0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
-					gradient_tex_[i]->BuildMipSubLevels();
+					disp_8->CopyToTexture(*displacement_tex_[i], TextureFilter::Point);
+					sim_grad_tex->CopyToSubTexture2D(*gradient_tex_[i], 0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0, 0,
+						0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0), TextureFilter::Point);
+					gradient_tex_[i]->BuildMipSubLevels(TextureFilter::Linear);
 				}
 			}
 
 			if (use_tex_array_)
 			{
-				gradient_tex_array_->BuildMipSubLevels();
+				gradient_tex_array_->BuildMipSubLevels(TextureFilter::Linear);
 			}
 
 			displacement_params_.resize(ocean_param_.num_frames * 2);
@@ -643,7 +638,7 @@ namespace
 			param_init_data.slice_pitch = param_init_data.row_pitch * 2;
 			TexturePtr ocean_displacement_param_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, ocean_param_.num_frames, 2, 1,
 				1, 1, EF_ABGR32F, true);
-			ocean_displacement_param_tex->CreateHWResource(param_init_data, nullptr);
+			ocean_displacement_param_tex->CreateHWResource(MakeSpan<1>(param_init_data), nullptr);
 			SaveTexture(ocean_displacement_param_tex, PREFIX + "OceanDisplacementParam.dds");
 
 			if (use_tex_array_)
@@ -654,9 +649,8 @@ namespace
 					1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					gradient_tex_array_->CopyToSubTexture2D(*gta,
-						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+					gradient_tex_array_->CopyToSubTexture2D(*gta, i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, i, 0, 0, 0,
+						ocean_param_.dmap_dim, ocean_param_.dmap_dim, TextureFilter::Point);
 				}
 				SaveTexture(gta, PREFIX + "OceanGradient.dds");
 			}
@@ -670,7 +664,7 @@ namespace
 						1, 1, displacement_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
-						displacement_tex_[i]->CopyToTexture(*disp_slice);
+						displacement_tex_[i]->CopyToTexture(*disp_slice, TextureFilter::Point);
 
 						disp_init_data[i].row_pitch = ocean_param_.dmap_dim * disp_pixel_size;
 						disp_init_data[i].slice_pitch = disp_init_data[i].row_pitch * ocean_param_.dmap_dim;
@@ -702,9 +696,8 @@ namespace
 						1, 1, gradient_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
-						gradient_tex_[i]->CopyToSubTexture2D(*grad_slice,
-							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+						gradient_tex_[i]->CopyToSubTexture2D(*grad_slice, 0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, 0,
+							0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, TextureFilter::Point);
 
 						grad_init_data[i].row_pitch = ocean_param_.dmap_dim * grad_pixel_size;
 						grad_init_data[i].slice_pitch = grad_init_data[i].row_pitch * ocean_param_.dmap_dim;
@@ -754,9 +747,9 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("Ocean.fxml");
 
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
+			gbuffer_tech_ = effect->TechniqueByName("GBufferSkyBoxTech");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
-			this->Technique(effect, gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_tech_);
 		}
 		
 		void FogColor(Color const & clr)
@@ -868,12 +861,12 @@ void OceanApp::OnCreate()
 
 	Camera& scene_camera = this->ActiveCamera();
 	reflection_fb_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
+	reflection_fb_->Viewport()->Camera()->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 		scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	auto reflection_camera_node =
 		MakeSharedPtr<SceneNode>(L"ReflectionCameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-	reflection_camera_node->AddComponent(reflection_fb_->GetViewport()->camera);
+	reflection_camera_node->AddComponent(reflection_fb_->Viewport()->Camera());
 	root_node.AddChild(reflection_camera_node);
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -890,7 +883,7 @@ void OceanApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
 	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");
@@ -1001,7 +994,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	deferred_rendering_->SetupViewport(0, reflection_fb_,
 		VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
 
-	screen_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
 
 void OceanApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -1136,6 +1129,14 @@ void OceanApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
@@ -1147,8 +1148,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		float3 reflect_eye, reflect_at, reflect_up;
 		checked_pointer_cast<OceanRenderableComponent>(ocean_)->ReflectViewParams(
 			reflect_eye, reflect_at, reflect_up, screen_camera_->EyePos(), screen_camera_->LookAt(), screen_camera_->UpVec());
-		reflection_fb_->GetViewport()->camera->LookAtDist(MathLib::length(reflect_at - reflect_eye));
-		reflection_fb_->GetViewport()->camera->BoundSceneNode()->TransformToWorld(
+		reflection_fb_->Viewport()->Camera()->LookAtDist(MathLib::length(reflect_at - reflect_eye));
+		reflection_fb_->Viewport()->Camera()->BoundSceneNode()->TransformToWorld(
 			MathLib::inverse(MathLib::look_at_lh(reflect_eye, reflect_at, reflect_up)));
 	}
 	else
@@ -1164,8 +1165,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		if (light_shaft_on_)
 		{
 			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
-			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingTex(deferred_rendering_->ActiveViewport()));
-			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthTex(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingSrv(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthSrv(deferred_rendering_->ActiveViewport()));
 			light_shaft_pp_->Apply();
 		}
 	}

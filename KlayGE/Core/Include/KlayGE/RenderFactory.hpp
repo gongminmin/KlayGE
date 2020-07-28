@@ -35,7 +35,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -45,7 +45,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderFactory : boost::noncopyable
 	{
 	public:
-		virtual ~RenderFactory();
+		virtual ~RenderFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 
@@ -65,16 +65,16 @@ namespace KlayGE
 
 		TexturePtr MakeTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-			ArrayRef<ElementInitData> init_data = {}, float4 const * clear_value_hint = nullptr);
+			std::span<ElementInitData const> init_data = {}, float4 const * clear_value_hint = nullptr);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-			ArrayRef<ElementInitData> init_data = {}, float4 const * clear_value_hint = nullptr);
+			std::span<ElementInitData const> init_data = {}, float4 const * clear_value_hint = nullptr);
 		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-			ArrayRef<ElementInitData> init_data = {}, float4 const * clear_value_hint = nullptr);
+			std::span<ElementInitData const> init_data = {}, float4 const * clear_value_hint = nullptr);
 		TexturePtr MakeTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint,
-			ArrayRef<ElementInitData> init_data = {}, float4 const * clear_value_hint = nullptr);
+			std::span<ElementInitData const> init_data = {}, float4 const * clear_value_hint = nullptr);
 
 		virtual FrameBufferPtr MakeFrameBuffer() = 0;
 
@@ -103,8 +103,12 @@ namespace KlayGE
 
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, uint32_t first_array_index, uint32_t array_size,
 			uint32_t first_level, uint32_t num_levels);
+		ShaderResourceViewPtr MakeTexture2DSrv(
+			TexturePtr const& texture, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels);
 		virtual ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
 			uint32_t array_size, uint32_t first_level, uint32_t num_levels) = 0;
+		virtual ShaderResourceViewPtr MakeTexture2DSrv(TexturePtr const& texture, ElementFormat pf, int array_index,
+			Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels) = 0;
 		virtual ShaderResourceViewPtr MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
 			uint32_t num_elems) = 0;
 		ShaderResourceViewPtr MakeTextureSrv(TexturePtr const & texture);

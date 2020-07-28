@@ -32,12 +32,12 @@
 
 namespace KlayGE
 {
-	class OGLGraphicsBuffer : public GraphicsBuffer
+	class OGLGraphicsBuffer final : public GraphicsBuffer
 	{
 	public:
 		explicit OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
 			uint32_t size_in_byte, uint32_t structure_byte_stride);
-		~OGLGraphicsBuffer();
+		~OGLGraphicsBuffer() override;
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
@@ -51,23 +51,23 @@ namespace KlayGE
 
 		void Active(bool force);
 
-		GLuint GLvbo() const
+		GLuint GLvbo() const noexcept
 		{
 			return vb_;
 		}
 		GLuint RetrieveGLTexture(ElementFormat fmt);
-		GLenum GLType() const
+		GLenum GLType() const noexcept
 		{
 			return target_;
 		}
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
 		GLuint vb_;
-		GLuint tex_ = 0;
+		GLuint tex_{0};
 		GLenum target_;
 	};
 }

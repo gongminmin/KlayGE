@@ -27,10 +27,10 @@
 		<parameter type="int" name="num_cascades"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="filtered_sm_2d_tex"/>
-	<parameter type="texture2DArray" name="filtered_sm_2d_tex_array"/>
-	<parameter type="int" name="filtered_sm_2d_light_index"/>
-	<parameter type="textureCUBE" name="filtered_sm_cube_tex"/>
+	<parameter type="texture2D" name="filtered_shadow_map_2d_tex"/>
+	<parameter type="texture2DArray" name="filtered_shadow_map_2d_tex_array"/>
+	<parameter type="int" name="filtered_shadow_map_2d_light_index"/>
+	<parameter type="textureCUBE" name="filtered_shadow_map_cube_tex"/>
 	<parameter type="texture2DArray" name="filtered_csm_tex_array"/>
 	<parameter type="texture2D" name="filtered_csm_0_tex"/>
 	<parameter type="texture2D" name="filtered_csm_1_tex"/>
@@ -96,7 +96,7 @@ float4 ESMOmnidirectional(float3 dir_ls, float len, bool has_shadow, bool has_pr
 	float shadow = 1;
 	if (has_shadow)
 	{
-		float occluder = filtered_sm_cube_tex.SampleLevel(linear_sampler, dir_ls, 0).x;
+		float occluder = filtered_shadow_map_cube_tex.SampleLevel(linear_sampler, dir_ls, 0).x;
 		shadow = CalcESM(occluder, len, esm_scale_factor);
 	}
 
@@ -116,9 +116,9 @@ float4 ESMDirectional(float3 pos_es, float2 light_proj_pos, float len, bool has_
 	if (has_shadow)
 	{
 #if (KLAYGE_MAX_TEX_ARRAY_LEN >= 4) && (1 == KLAYGE_RENDER_TO_TEX_ARRAY)
-		float occluder = filtered_sm_2d_tex_array.SampleLevel(linear_sampler, float3(light_proj_pos, sm_index), 0).x;
+		float occluder = filtered_shadow_map_2d_tex_array.SampleLevel(linear_sampler, float3(light_proj_pos, sm_index), 0).x;
 #else
-		float occluder = filtered_sm_2d_tex.SampleLevel(linear_sampler, light_proj_pos, 0).x;
+		float occluder = filtered_shadow_map_2d_tex.SampleLevel(linear_sampler, light_proj_pos, 0).x;
 #endif
 		shadow = CalcESM(occluder, len, esm_scale_factor);
 	}
@@ -433,7 +433,7 @@ float4 DeferredShadowingSpotPS(
 	light_proj_pos.y *= KLAYGE_FLIPPING;
 	light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
 	float len = length(light_pos_es.xyz - pos_es);	
-	return ESMDirectional(pos_es, light_proj_pos.xy, len, light_attrib.z > 0, light_attrib.w > 0, filtered_sm_2d_light_index,
+	return ESMDirectional(pos_es, light_proj_pos.xy, len, light_attrib.z > 0, light_attrib.w > 0, filtered_shadow_map_2d_light_index,
 		esm_scale_factor);
 }
 
@@ -660,6 +660,7 @@ float4 DeferredShadowingDirectionalPS(
 
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt2_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
 	<parameter type="texture2DMS" name="shading_tex_ms"/>
 
@@ -732,7 +733,11 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 c_spec = GetSpecular(rt1);
 	float4 shading = float4(CalcShading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
 	shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
-	return shading;
+
+	float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
+	float occlusion = GetOcclusion(rt2);
+	
+	return shading * float4(occlusion.xxx, 1);
 }
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target

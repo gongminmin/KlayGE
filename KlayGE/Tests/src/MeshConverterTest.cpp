@@ -67,38 +67,42 @@ public:
 			auto mtl = target->GetMaterial(i);
 			auto sanity_mtl = sanity_model->GetMaterial(i);
 
-			EXPECT_EQ(mtl->name, sanity_mtl->name);
-			EXPECT_FLOAT_EQ(mtl->albedo.x(), sanity_mtl->albedo.x());
-			EXPECT_FLOAT_EQ(mtl->albedo.y(), sanity_mtl->albedo.y());
-			EXPECT_FLOAT_EQ(mtl->albedo.z(), sanity_mtl->albedo.z());
-			EXPECT_FLOAT_EQ(mtl->albedo.w(), sanity_mtl->albedo.w());
-			EXPECT_FLOAT_EQ(mtl->metalness, sanity_mtl->metalness);
-			EXPECT_FLOAT_EQ(mtl->glossiness, sanity_mtl->glossiness);
-			EXPECT_FLOAT_EQ(mtl->emissive.x(), sanity_mtl->emissive.x());
-			EXPECT_FLOAT_EQ(mtl->emissive.y(), sanity_mtl->emissive.y());
-			EXPECT_FLOAT_EQ(mtl->emissive.z(), sanity_mtl->emissive.z());
-			EXPECT_EQ(mtl->transparent, sanity_mtl->transparent);
-			EXPECT_FLOAT_EQ(mtl->alpha_test, sanity_mtl->alpha_test);
-			EXPECT_EQ(mtl->sss, sanity_mtl->sss);
-			EXPECT_EQ(mtl->two_sided, sanity_mtl->two_sided);
+			EXPECT_EQ(mtl->Name(), sanity_mtl->Name());
+			EXPECT_FLOAT_EQ(mtl->Albedo().x(), sanity_mtl->Albedo().x());
+			EXPECT_FLOAT_EQ(mtl->Albedo().y(), sanity_mtl->Albedo().y());
+			EXPECT_FLOAT_EQ(mtl->Albedo().z(), sanity_mtl->Albedo().z());
+			EXPECT_FLOAT_EQ(mtl->Albedo().w(), sanity_mtl->Albedo().w());
+			EXPECT_FLOAT_EQ(mtl->Metalness(), sanity_mtl->Metalness());
+			EXPECT_FLOAT_EQ(mtl->Glossiness(), sanity_mtl->Glossiness());
+			EXPECT_FLOAT_EQ(mtl->Emissive().x(), sanity_mtl->Emissive().x());
+			EXPECT_FLOAT_EQ(mtl->Emissive().y(), sanity_mtl->Emissive().y());
+			EXPECT_FLOAT_EQ(mtl->Emissive().z(), sanity_mtl->Emissive().z());
+			EXPECT_EQ(mtl->Transparent(), sanity_mtl->Transparent());
+			EXPECT_FLOAT_EQ(mtl->AlphaTestThreshold(), sanity_mtl->AlphaTestThreshold());
+			EXPECT_EQ(mtl->Sss(), sanity_mtl->Sss());
+			EXPECT_EQ(mtl->TwoSided(), sanity_mtl->TwoSided());
+			EXPECT_EQ(mtl->NormalScale(), sanity_mtl->NormalScale());
+			EXPECT_EQ(mtl->OcclusionStrength(), sanity_mtl->OcclusionStrength());
 
-			for (uint32_t slot = RenderMaterial::TS_Albedo; slot != RenderMaterial::TS_Height; ++ slot)
+			for (uint32_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++j)
 			{
-				EXPECT_EQ(mtl->tex_names[slot], sanity_mtl->tex_names[slot]);
+				auto slot = static_cast<RenderMaterial::TextureSlot>(j);
+				EXPECT_EQ(mtl->TextureName(slot), sanity_mtl->TextureName(slot));
 			}
 
-			EXPECT_EQ(mtl->detail_mode, sanity_mtl->detail_mode);
-			if (!mtl->tex_names[RenderMaterial::TS_Height].empty())
+			EXPECT_EQ(mtl->DetailMode(), sanity_mtl->DetailMode());
+			if (!mtl->TextureName(RenderMaterial::TS_Height).empty())
 			{
-				EXPECT_FLOAT_EQ(mtl->height_offset_scale.x(), sanity_mtl->height_offset_scale.x());
-				EXPECT_FLOAT_EQ(mtl->height_offset_scale.y(), sanity_mtl->height_offset_scale.y());
+				EXPECT_FLOAT_EQ(mtl->HeightOffset(), sanity_mtl->HeightOffset());
+				EXPECT_FLOAT_EQ(mtl->HeightScale(), sanity_mtl->HeightScale());
 			}
-			if (mtl->detail_mode != RenderMaterial::SDM_Parallax)
+			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
-				EXPECT_FLOAT_EQ(mtl->tess_factors.x(), sanity_mtl->tess_factors.x());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.y(), sanity_mtl->tess_factors.y());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.z(), sanity_mtl->tess_factors.z());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.w(), sanity_mtl->tess_factors.w());
+				EXPECT_FLOAT_EQ(mtl->EdgeTessHint(), sanity_mtl->EdgeTessHint());
+				EXPECT_FLOAT_EQ(mtl->InsideTessHint(), sanity_mtl->InsideTessHint());
+				EXPECT_FLOAT_EQ(mtl->MinTessFactor(), sanity_mtl->MinTessFactor());
+				EXPECT_FLOAT_EQ(mtl->MaxTessFactor(), sanity_mtl->MaxTessFactor());
 			}
 		}
 
@@ -636,39 +640,46 @@ public:
 			EXPECT_EQ(skinned_model.NumJoints(), sanity_skinned_model.NumJoints());
 			for (uint32_t i = 0; i < sanity_skinned_model.NumJoints(); ++ i)
 			{
-				auto& joint = skinned_model.GetJoint(i);
-				auto& sanity_joint = sanity_skinned_model.GetJoint(i);
+				auto& joint = *skinned_model.GetJoint(i);
+				auto& sanity_joint = *sanity_skinned_model.GetJoint(i);
 
-				EXPECT_EQ(joint.name, sanity_joint.name);
-				EXPECT_EQ(joint.parent, sanity_joint.parent);
+				EXPECT_EQ(joint.BoundSceneNode()->Name(), sanity_joint.BoundSceneNode()->Name());
+				if (joint.BoundSceneNode()->Parent())
+				{
+					EXPECT_EQ(joint.BoundSceneNode()->Parent()->Name(), sanity_joint.BoundSceneNode()->Parent()->Name());
+				}
+				else
+				{
+					EXPECT_EQ(sanity_joint.BoundSceneNode()->Parent(), nullptr);
+				}
 
-				EXPECT_LT(std::abs(joint.bind_real.x() - sanity_joint.bind_real.x()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.y() - sanity_joint.bind_real.y()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.z() - sanity_joint.bind_real.z()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_real.w() - sanity_joint.bind_real.w()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().x() - sanity_joint.BindReal().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().y() - sanity_joint.BindReal().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().z() - sanity_joint.BindReal().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().w() - sanity_joint.BindReal().w()), 1e-4f);
 
-				EXPECT_LT(std::abs(joint.bind_dual.x() - sanity_joint.bind_dual.x()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.y() - sanity_joint.bind_dual.y()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.z() - sanity_joint.bind_dual.z()), 1e-4f);
-				EXPECT_LT(std::abs(joint.bind_dual.w() - sanity_joint.bind_dual.w()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().x() - sanity_joint.BindDual().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().y() - sanity_joint.BindDual().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().z() - sanity_joint.BindDual().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().w() - sanity_joint.BindDual().w()), 1e-4f);
 
-				EXPECT_LT(std::abs(joint.bind_scale - sanity_joint.bind_scale), 1e-5f);
+				EXPECT_LT(std::abs(joint.BindScale() - sanity_joint.BindScale()), 1e-5f);
 			}
 
-			EXPECT_EQ(skinned_model.NumActions(), sanity_skinned_model.NumActions());
-			for (uint32_t i = 0; i < sanity_skinned_model.NumActions(); ++ i)
+			EXPECT_EQ(skinned_model.NumAnimations(), sanity_skinned_model.NumAnimations());
+			for (uint32_t i = 0; i < sanity_skinned_model.NumAnimations(); ++ i)
 			{
-				std::string action_name;
+				std::string animation_name;
 				uint32_t start_frame;
 				uint32_t end_frame;
-				skinned_model.GetAction(i, action_name, start_frame, end_frame);
+				skinned_model.GetAnimation(i, animation_name, start_frame, end_frame);
 
-				std::string sanity_action_name;
+				std::string sanity_animation_name;
 				uint32_t sanity_start_frame;
 				uint32_t sanity_end_frame;
-				sanity_skinned_model.GetAction(i, sanity_action_name, sanity_start_frame, sanity_end_frame);
+				sanity_skinned_model.GetAnimation(i, sanity_animation_name, sanity_start_frame, sanity_end_frame);
 
-				EXPECT_EQ(action_name, sanity_action_name);
+				EXPECT_EQ(animation_name, sanity_animation_name);
 				EXPECT_EQ(start_frame, sanity_start_frame);
 				EXPECT_EQ(end_frame, sanity_end_frame);
 			}

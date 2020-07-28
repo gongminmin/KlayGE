@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -9,7 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/SceneNode.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -21,6 +20,7 @@
 
 #include <KlayGE/SSRPostProcess.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -49,11 +49,21 @@ namespace
 			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
 			technique_ = special_shading_tech_;
 
-			reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+			{
+				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
+				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
+			}
+			else
+			{
+				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingNoVpRtTech");
+			}
+
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
 			reflection_alpha_blend_front_tech_ = reflection_tech_;
 
-			special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
 			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
 			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
 
@@ -228,7 +238,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
-	screen_camera_path_ = LoadCameraPath(ResLoader::Instance().Open("Reflection.cam_path"));
+	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
 	screen_camera_path_->AttachCamera(this->ActiveCamera());
 	auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	camera_node->AddComponent(this->ActiveCamera().shared_from_this());
@@ -260,7 +270,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	auto back_refl_camera_node = MakeSharedPtr<SceneNode>(
 		L"BackReflectionCameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-	back_refl_camera_node->AddComponent(back_refl_fb_->GetViewport()->camera);
+	back_refl_camera_node->AddComponent(back_refl_fb_->Viewport()->Camera());
 	root_node.AddChild(back_refl_camera_node);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -275,7 +285,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Reflection.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Reflection.uiml"));
 	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
@@ -325,7 +335,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 
 	deferred_rendering_->SetupViewport(0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
 
-	screen_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
 
 void ScreenSpaceReflectionApp::InputHandler(KlayGE::InputEngine const & /*sender*/, KlayGE::InputAction const & action)
@@ -383,6 +393,14 @@ void ScreenSpaceReflectionApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
@@ -425,7 +443,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 		}
 		else
 		{
-			CameraPtr const & back_camera = back_refl_fb_->GetViewport()->camera;
+			CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
 
 			float3 eye = screen_camera_->EyePos();
 			float3 at = screen_camera_->LookAt();

@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -41,12 +40,8 @@ namespace KlayGE
 		}
 
 		auto const& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
-	}
-
-	D3D11Texture::~D3D11Texture()
-	{
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	std::wstring const & D3D11Texture::Name() const
@@ -55,7 +50,14 @@ namespace KlayGE
 		return name;
 	}
 
-	uint32_t D3D11Texture::Width(uint32_t level) const
+#ifndef KLAYGE_SHIP
+	void D3D11Texture::DebugName(std::wstring_view name)
+	{
+		d3d_texture_->SetPrivateData(WKPDID_D3DDebugObjectNameW, static_cast<uint32_t>(name.size() * sizeof(wchar_t)), name.data());
+	}
+#endif
+
+	uint32_t D3D11Texture::Width(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -63,7 +65,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Height(uint32_t level) const
+	uint32_t D3D11Texture::Height(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -71,7 +73,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Depth(uint32_t level) const
+	uint32_t D3D11Texture::Depth(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -79,30 +81,33 @@ namespace KlayGE
 		return 1;
 	}
 
-	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
+	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/,
+		uint32_t /*src_width*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*src_array_index*/,
+		uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/,
+		TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
+	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*dst_depth*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/, uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/,
+		uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_width*/, uint32_t /*src_height*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -126,9 +131,35 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
-			ID3D11ShaderResourceView* d3d_sr_view;
-			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
-			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, d3d_sr_view.put());
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
+		}
+	}
+
+	ID3D11ShaderResourceViewPtr const& D3D11Texture::RetrieveD3DShaderResourceView(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, face);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
+
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillSRVDesc(pf, array_index, face, first_level, num_levels);
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, d3d_sr_view.put());
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
 		}
 	}
 
@@ -154,9 +185,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -181,9 +212,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -207,9 +238,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillRTVDesc(pf, array_index, face, level);
-			ID3D11RenderTargetView* d3d_rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &d3d_rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(d3d_rt_view)).first->second;
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
@@ -235,9 +266,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -262,9 +293,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -288,9 +319,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillDSVDesc(pf, array_index, face, level);
-			ID3D11DepthStencilView* d3d_ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &d3d_ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(d3d_ds_view)).first->second;
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
@@ -314,9 +345,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -340,9 +371,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -366,9 +397,9 @@ namespace KlayGE
 		else
 		{
 			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -445,8 +476,38 @@ namespace KlayGE
 		misc_flags = 0;
 		if (access_hint_ & EAH_Generate_Mips)
 		{
+			bind_flags |= D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		}
+	}
+	
+	bool D3D11Texture::HwBuildMipSubLevels(TextureFilter filter)
+	{
+		if (access_hint_ & EAH_Generate_Mips)
+		{
+			if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+			{
+				if (filter != TextureFilter::Point)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (filter != TextureFilter::Linear)
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
+		d3d_imm_ctx_->GenerateMips(srv.get());
+		return true;
 	}
 
 	void D3D11Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
@@ -495,6 +556,30 @@ namespace KlayGE
 
 	void D3D11Texture::UnmapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/)
 	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
@@ -647,7 +732,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = width * NumFormatBytes(format_);
 			init_data.slice_pitch = init_data.row_pitch;
-			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, 0, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
@@ -696,7 +781,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
@@ -757,7 +842,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
 				x_offset, y_offset, z_offset, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(),
 				D3D11CalcSubresource(0, 0, 1),
@@ -807,7 +892,7 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face, num_mip_maps_),
 				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);

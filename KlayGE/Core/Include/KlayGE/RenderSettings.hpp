@@ -77,6 +77,8 @@ namespace KlayGE
 		float max_dpi_scale;
 
 		std::vector<std::pair<std::string, std::string>> options;
+
+		bool debug_context = false;
 	};
 }
 

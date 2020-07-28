@@ -1,0 +1,91 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="int" name="frame_width"/>
+		<parameter type="int" name="num_vertices"/>
+	</cbuffer>
+
+	<parameter type="rw_structured_buffer" elem_type="float4" name="rw_output_buffer"/>
+
+	<shader version="5">
+		<![CDATA[
+void RasterizeToUavPS(float2 tex : TEXCOORD0, float4 pos : SV_Position)
+{
+	uint index = (uint)pos.y * frame_width + (uint)pos.x;
+	rw_output_buffer[index] = float4(tex, tex);
+}
+		]]>
+	</shader>
+
+	<technique name="RasterizeToUav">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="RasterizeToUavPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="structured_buffer" elem_type="float4" name="input_buffer"/>
+
+	<shader version="5">
+		<![CDATA[
+void RasterizeToCounterUavPS(float2 tex : TEXCOORD0, float4 pos : SV_Position)
+{
+	uint index = rw_output_buffer.IncrementCounter();
+	rw_output_buffer[index] = float4(tex, tex);
+}
+		]]>
+	</shader>
+
+	<technique name="RasterizeToCounterUav">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="RasterizeToCounterUavPS()"/>
+		</pass>
+	</technique>
+
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(32, 32, 1)]
+void UavToCsCS(uint3 dtid : SV_DispatchThreadID)
+{
+	uint index = dtid.y * frame_width + dtid.x;
+	rw_output_buffer[index] = input_buffer[index] * float4(1, 2, 3, 4);
+}
+		]]>
+	</shader>
+
+	<technique name="UavToCs">
+		<pass name="p0">
+			<state name="compute_shader" value="UavToCsCS()"/>
+		</pass>
+	</technique>
+
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(32, 32, 1)]
+void CounterUavToCsCS(uint3 dtid : SV_DispatchThreadID)
+{
+	uint index = rw_output_buffer.IncrementCounter();
+	rw_output_buffer[index] = rw_output_buffer[index - num_vertices] * float4(1, 2, 3, 4);
+}
+		]]>
+	</shader>
+
+	<technique name="CounterUavToCs">
+		<pass name="p0">
+			<state name="compute_shader" value="CounterUavToCsCS()"/>
+		</pass>
+	</technique>
+</effect>

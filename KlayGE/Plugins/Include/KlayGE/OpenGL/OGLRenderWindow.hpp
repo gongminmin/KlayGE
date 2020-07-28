@@ -26,17 +26,17 @@ namespace KlayGE
 {
 	struct RenderSettings;
 
-	class OGLRenderWindow : public OGLFrameBuffer
+	class OGLRenderWindow final : public OGLFrameBuffer
 	{
 	public:
 		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
-		~OGLRenderWindow();
+		~OGLRenderWindow() override;
 
 		void Destroy();
 
-		void SwapBuffers();
+		void SwapBuffers() override;
 
-		std::wstring const & Description() const;
+		std::wstring const & Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);
@@ -45,11 +45,11 @@ namespace KlayGE
 		void FullScreen(bool fs);
 
 		// Method for dealing with resize / move & 3d library
-		void WindowMovedOrResized();
+		void WindowMovedOrResized(Window const& win);
 
 	private:
-		void OnExitSizeMove(Window const & win);
-		void OnSize(Window const & win, bool active);
+		void OnExitSizeMove(Window const& win);
+		void OnSize(Window const& win, bool active);
 
 	private:
 		std::string	name_;

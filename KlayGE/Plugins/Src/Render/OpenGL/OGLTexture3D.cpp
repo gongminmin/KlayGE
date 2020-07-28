@@ -124,21 +124,21 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, depth_ >> level);
 	}
 
-	void OGLTexture3D::CopyToTexture(Texture& target)
+	void OGLTexture3D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
-			this->CopyToSubTexture3D(target,
-				0, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level),
-				0, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level));
+			this->CopyToSubTexture3D(target, 0, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level), 0, level, 0,
+				0, 0, this->Width(level), this->Height(level), this->Depth(level), filter);
 		}
 	}
 
-	void OGLTexture3D::CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void OGLTexture3D::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
+		uint32_t src_depth, TextureFilter filter)
 	{
 		KFL_UNUSED(dst_depth);
 
@@ -237,8 +237,9 @@ namespace KlayGE
 				}
 				else
 				{
-					this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
-						src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
+					this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width,
+						dst_height, dst_depth, src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height,
+						src_depth, filter);
 				}
 			}
 		}
@@ -359,7 +360,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLTexture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

@@ -29,16 +29,15 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KFL/Hash.hpp>
 
+#include <iterator>
 #include <limits>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
@@ -116,8 +115,9 @@ namespace KlayGE
 	void D3D12RenderStateObject::Active()
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.OMSetStencilRef(dss_desc_.front_stencil_ref);
-		re.OMSetBlendFactor(bs_desc_.blend_factor);
+		auto* cmd_list = re.D3DRenderCmdList();
+		re.OMSetStencilRef(cmd_list, dss_desc_.front_stencil_ref);
+		re.OMSetBlendFactor(cmd_list, bs_desc_.blend_factor);
 	}
 
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObject const & so,
@@ -145,9 +145,9 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();
@@ -173,9 +173,9 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();

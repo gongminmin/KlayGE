@@ -18,6 +18,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderEffect.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -37,6 +38,41 @@ namespace KlayGE
 	Camera::Camera()
 	{
 		this->ProjParams(PI / 4, 1, 1, 1000);
+	}
+
+	SceneComponentPtr Camera::Clone() const
+	{
+		auto ret = MakeSharedPtr<Camera>();
+
+		ret->look_at_dist_ = look_at_dist_;
+
+		ret->fov_ = fov_;
+		ret->aspect_ = aspect_;
+		ret->near_plane_ = near_plane_;
+		ret->far_plane_ = far_plane_;
+		ret->proj_mat_ = proj_mat_;
+		ret->inv_proj_mat_ = inv_proj_mat_;
+		ret->proj_mat_wo_adjust_ = proj_mat_wo_adjust_;
+		ret->inv_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_;
+
+		ret->prev_view_mat_ = prev_view_mat_;
+		ret->prev_proj_mat_ = prev_proj_mat_;
+
+		ret->view_proj_mat_ = view_proj_mat_;
+		ret->inv_view_proj_mat_ = inv_view_proj_mat_;
+		ret->view_proj_mat_dirty_ = view_proj_mat_dirty_;
+		ret->view_proj_mat_wo_adjust_ = view_proj_mat_wo_adjust_;
+		ret->inv_view_proj_mat_wo_adjust_ = inv_view_proj_mat_wo_adjust_;
+		ret->view_proj_mat_wo_adjust_dirty_ = view_proj_mat_wo_adjust_dirty_;
+		ret->camera_dirty_ = camera_dirty_;
+
+		ret->frustum_ = frustum_;
+		ret->frustum_dirty_ = frustum_dirty_;
+
+		ret->mode_ = mode_;
+		ret->cur_jitter_index_ = cur_jitter_index_;
+
+		return ret;
 	}
 
 	float3 const& Camera::EyePos() const
@@ -85,6 +121,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -103,6 +140,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -121,6 +159,7 @@ namespace KlayGE
 		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -165,6 +204,7 @@ namespace KlayGE
 	{
 		view_proj_mat_dirty_ = true;
 		view_proj_mat_wo_adjust_dirty_ = true;
+		camera_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -299,6 +339,38 @@ namespace KlayGE
 		else
 		{
 			mode_ &= ~CM_Jitter;
+		}
+	}
+
+	void Camera::Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat,
+		float4x4 const& inv_model_mat, float4x4 const& prev_model_mat, bool model_mat_dirty, float4x4 const& cascade_crop_mat,
+		bool need_cascade_crop_mat) const
+	{
+		if (model_mat_dirty || camera_dirty_)
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto const& pccb = re.PredefinedCameraCBufferInstance();
+
+			float4x4 mvp = model_mat * this->ViewProjMatrix();
+			float4x4 prev_mvp = prev_model_mat * prev_view_mat_ * prev_proj_mat_;
+			if (need_cascade_crop_mat)
+			{
+				mvp *= cascade_crop_mat;
+				prev_mvp *= cascade_crop_mat;
+			}
+
+			auto& camera_info = pccb.Camera(camera_cbuffer, index);
+			camera_info.model_view = MathLib::transpose(model_mat * this->ViewMatrix());
+			camera_info.mvp = MathLib::transpose(mvp);
+			camera_info.inv_mv = MathLib::transpose(this->InverseViewMatrix() * inv_model_mat);
+			camera_info.inv_mvp = MathLib::transpose(this->InverseViewProjMatrix() * inv_model_mat);
+			camera_info.eye_pos = this->EyePos();
+			camera_info.forward_vec = this->ForwardVec();
+			camera_info.up_vec = this->UpVec();
+
+			pccb.PrevMvp(camera_cbuffer, index) = MathLib::transpose(prev_mvp);
+
+			camera_cbuffer.Dirty(true);
 		}
 	}
 }

@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -15,7 +14,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
@@ -24,8 +23,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Refract.hpp"
@@ -50,19 +50,6 @@ namespace
 			*(effect_->ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.11f, 1 / 1.12f);
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
-
 		virtual void Pass(PassType pass)
 		{
 			switch (pass)
@@ -71,7 +58,7 @@ namespace
 				technique_ = back_face_depth_tech_;
 				break;
 
-			case PT_TransparencyBackGBufferMRT:
+			case PT_TransparencyBackGBuffer:
 				technique_ = back_face_tech_;
 				break;
 
@@ -101,6 +88,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -201,14 +190,14 @@ void Refract::OnCreate()
 
 	backface_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
-	backface_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	backface_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	if (!depth_texture_support_)
 	{
 		backface_depth_buffer_ = rf.MakeFrameBuffer();
-		backface_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+		backface_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Refract.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Refract.uiml"));
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)
@@ -222,7 +211,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	DepthStencilViewPtr backface_ds_view;
 	if (depth_texture_support_)
 	{
-		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ cfg.graphics_cfg.depth_stencil_fmt, EF_D16 }, 1, 0);
+		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({cfg.graphics_cfg.depth_stencil_fmt, EF_D16}), 1, 0);
 		BOOST_ASSERT(ds_fmt != EF_Unknown);
 		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		backface_ds_view = rf.Make2DDsv(backface_ds_tex_, 0, 1, 0);
@@ -233,11 +222,11 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	}
 
 	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
-		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+		caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	auto const normal_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	auto const normal_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(normal_fmt != EF_Unknown);
 	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
@@ -247,8 +236,8 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-		depth_to_linear_pp_->InputPin(0, backface_ds_tex_);
-		depth_to_linear_pp_->OutputPin(0, backface_depth_tex_);
+		depth_to_linear_pp_->InputPin(0, rf.MakeTextureSrv(backface_ds_tex_));
+		depth_to_linear_pp_->OutputPin(0, rf.Make2DRtv(backface_depth_tex_, 0, 1, 0));
 	}
 	else
 	{
@@ -295,7 +284,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_buffer_);
 			re.CurFrameBuffer()->AttachedDsv()->ClearDepth(0.0f);
 
-			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBuffer);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -332,7 +321,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			// Pass 1: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
 
-			refractor_renderable.Pass(PT_TransparencyBackGBufferMRT);
+			refractor_renderable.Pass(PT_TransparencyBackGBuffer);
 			skybox_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}

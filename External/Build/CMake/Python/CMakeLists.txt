@@ -1,13 +1,29 @@
 SET(PY_VERSION_MAJOR 3)
-SET(PY_VERSION_MINOR 7)
-SET(PY_VERSION_PATCH 2)
+SET(PY_VERSION_MINOR 8)
+SET(PY_VERSION_PATCH 1)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/gongminmin/cpython.git" "1e77e85097cfc6ff5ac52aeb5f8afc63b384a599" "FixForKlayGE" "v${PY_VERSION}")
-UpdateExternalLib("python-cmake-buildsystem" "https://github.com/gongminmin/python-cmake-buildsystem.git" "f6810df467b99a769696003097081462d4fb6ecd" "FixForKlayGE" "master")
+UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
+if(need_patch)
+	foreach(patch "0001-bpo-40653-Move-_dirnameW-out-of-ifdef-HAVE_SYMLINK-e" "0002-bpo-40650-Include-winsock2.h-in-pytime.c-instead-of-" "0003-bpo-35890-Use-RegQueryInfoKeyW-and-CryptAcquireConte"
+		"0004-bpo-40677-Define-IO_REPARSE_TAG_APPEXECLINK-explicit" "0005-Fix-for-clang-cl" "0006-Fix-for-MinGW" "0007-Fix-for-UWP")
+		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
+	endforeach()
+endif()
+
+UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "a1ce7c2cf346ce62648d8c3e9e5cae7f655d4309" "" "" need_patch)
+if(need_patch)
+	foreach(patch "0001-Enable-ASM-langage-only-if-required" "0002-Fix-android-build-by-linking-against-libutil-only-if"
+		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
+		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Don-t-set_target_properties-on-an-extension-when-it-"
+		"0007-Make-building-python-executable-python-development-f" "0008-Fix-some-problems-with-Android-and-iOS"
+		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7" "0011-Adapt-to-python-3.8")
+		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/python-cmake-buildsystemPatches/${patch}.patch")
+	endforeach()
+endif()
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})
 
@@ -18,9 +34,6 @@ FOREACH(flag_var
 	ENDIF()
 ENDFOREACH()
 IF(KLAYGE_COMPILER_MSVC)
-	IF(MSVC_VERSION GREATER 1800)
-		ADD_DEFINITIONS(-D_CRT_NON_CONFORMING_WCSTOK)
-	ENDIF()
 	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
 ENDIF()
 
@@ -72,6 +85,9 @@ set(ENABLE_SQLITE3 OFF CACHE BOOL "" FORCE)
 set(ENABLE_SUBPROCESS OFF CACHE BOOL "" FORCE)
 set(ENABLE_TESTCAPI OFF CACHE BOOL "" FORCE)
 set(ENABLE_WINAPI OFF CACHE BOOL "" FORCE)
+if(KLAYGE_PLATFORM_WINDOWS)
+	set(ENABLE_WINREG ON CACHE BOOL "" FORCE)
+endif()
 set(INSTALL_DEVELOPMENT OFF CACHE BOOL "" FORCE)
 set(INSTALL_MANUAL OFF CACHE BOOL "" FORCE)
 set(INSTALL_TEST OFF CACHE BOOL "" FORCE)
@@ -90,12 +106,6 @@ set(WITH_COMPUTED_GOTOS OFF CACHE BOOL "" FORCE)
 set(WITH_DOC_STRINGS OFF CACHE BOOL "" FORCE)
 set(WITH_TSC OFF CACHE BOOL "" FORCE)
 set(USE_BUILTIN_ZLIB OFF CACHE BOOL "" FORCE)
-
-IF(KLAYGE_PLATFORM_WINDOWS_STORE)
-	ADD_DEFINITIONS(-D_WIN32_WINNT=0x0A00)
-	ADD_DEFINITIONS(-DWINVER=0x0A00)
-	ADD_DEFINITIONS(-DNTDDI_VERSION=0x0A000000)
-ENDIF()
 
 IF(CMAKE_CROSSCOMPILING)
 	STRING(TOLOWER ${CMAKE_SYSTEM_NAME} lc_system_name)
@@ -129,9 +139,55 @@ IF(ANDROID OR IOS)
 	set(WITH_STATIC_DEPENDENCIES ON)
 ENDIF()
 
-ADD_DEFINITIONS(-DPy_BUILD_CORE)
-
 ADD_SUBDIRECTORY("${EXTERNAL_PROJECT_DIR}/python-cmake-buildsystem" "${CMAKE_CURRENT_BINARY_DIR}/python")
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(libpython-static
+		PRIVATE
+			-Wno-invalid-token-paste
+			-w
+			/Od # lld-link can't find __powidf2
+	)
+
+	target_compile_definitions(libpython-static
+		PRIVATE
+			-D_CRT_SECURE_NO_WARNINGS
+	)
+endif()
+
+target_compile_definitions(libpython-static
+	PRIVATE
+		-DPy_BUILD_CORE
+)
+if(KLAYGE_COMPILER_MSVC AND (MSVC_VERSION GREATER 1800))
+	target_compile_definitions(libpython-static
+		PRIVATE
+			-D_CRT_NON_CONFORMING_WCSTOK
+	)
+endif()
+if(KLAYGE_PLATFORM_WINDOWS_STORE)
+	target_compile_definitions(libpython-static
+		PRIVATE
+			-D_WIN32_WINNT=0x0A00
+			-DWINVER=0x0A00
+			-DNTDDI_VERSION=0x0A000000
+	)
+endif()
+
+if(KLAYGE_PLATFORM_WINDOWS)
+	if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
+		set(PYCONFIG_BUILD_DIR ${PYTHON_PROJECT_DIR}/PC)
+	else()
+		set(PYCONFIG_BUILD_DIR ${EXTERNAL_PROJECT_DIR}/python-cmake-buildsystem/cmake/config-mingw)
+	endif()
+else()
+	set(PYCONFIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/python/bin)
+endif()
+target_include_directories(libpython-static
+	PUBLIC
+		${PYTHON_PROJECT_DIR}/Include
+		${PYCONFIG_BUILD_DIR}
+)
 
 SET_TARGET_PROPERTIES(libpython-static PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIR}

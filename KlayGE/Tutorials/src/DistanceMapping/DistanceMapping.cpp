@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -21,8 +20,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "DistanceMapping.hpp"
@@ -142,12 +142,6 @@ namespace
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
-		void ModelMatrix(float4x4 const & mat)
-		{
-			Renderable::ModelMatrix(mat);
-			inv_model_mat_ = MathLib::inverse(model_mat_);
-		}
-
 		void LightPos(float3 const & light_pos)
 		{
 			*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_model_mat_);
@@ -170,9 +164,6 @@ namespace
 			*(effect_->ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
 			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
-
-	private:
-		float4x4 inv_model_mat_;
 	};
 
 
@@ -264,7 +255,7 @@ void DistanceMapping::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DistanceMapping.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DistanceMapping.uiml"));
 }
 
 void DistanceMapping::OnResize(uint32_t width, uint32_t height)

@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Controls.Ribbon;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.ComponentModel;
-using System.Windows.Controls.Ribbon;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
-using System.Windows.Forms;
 
 namespace MtlEditor
 {
@@ -46,11 +38,11 @@ namespace MtlEditor
 			MP_EmissiveMultiplier,
 			MP_Opacity,
 			MP_AlbedoTex,
-			MP_MetalnessTex,
-			MP_GlossinessTex,
+			MP_MetalnessGlossinessTex,
 			MP_EmissiveTex,
 			MP_NormalTex,
 			MP_HeightTex,
+			MP_OcclusionTex,
 			MP_DetailMode,
 			MP_HeightOffset,
 			MP_HeightScale,
@@ -142,15 +134,10 @@ namespace MtlEditor
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string albedo_tex { get; set; }
 			[Category("Textures")]
-			[DisplayName("Metalness")]
-			[PropertyOrder((int)MaterialProperties.MP_MetalnessTex)]
+			[DisplayName("MetalnessGlossiness")]
+			[PropertyOrder((int)MaterialProperties.MP_MetalnessGlossinessTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
-			public string metalness_tex { get; set; }
-			[Category("Textures")]
-			[DisplayName("Glossiness")]
-			[PropertyOrder((int)MaterialProperties.MP_GlossinessTex)]
-			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
-			public string glossiness_tex { get; set; }
+			public string metalness_glossiness_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emissive")]
 			[PropertyOrder((int)MaterialProperties.MP_EmissiveTex)]
@@ -166,6 +153,11 @@ namespace MtlEditor
 			[PropertyOrder((int)MaterialProperties.MP_HeightTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string height_tex { get; set; }
+			[Category("Textures")]
+			[DisplayName("Occlusion")]
+			[PropertyOrder((int)MaterialProperties.MP_OcclusionTex)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
+			public string occlusion_tex { get; set; }
 
 			[Category("Detail")]
 			[DisplayName("Mode")]
@@ -238,7 +230,8 @@ namespace MtlEditor
 
 			DetailModeItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
 			DetailModeItemsSource.items.Clear();
-			DetailModeItemsSource.items.Add("Parallax");
+			DetailModeItemsSource.items.Add("Parallax Mapping");
+			DetailModeItemsSource.items.Add("Parallax Occlusion Mapping");
 			DetailModeItemsSource.items.Add("Flat Tessellation");
 			DetailModeItemsSource.items.Add("Smooth Tessellation");
 
@@ -822,11 +815,11 @@ namespace MtlEditor
 				mtl_properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
 				mtl_properties_obj_.albedo_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo);
-				mtl_properties_obj_.metalness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness);
-				mtl_properties_obj_.glossiness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness);
+				mtl_properties_obj_.metalness_glossiness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_MetalnessGlossiness);
 				mtl_properties_obj_.emissive_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive);
 				mtl_properties_obj_.normal_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal);
 				mtl_properties_obj_.height_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height);
+				mtl_properties_obj_.occlusion_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Occlusion);
 
 				mtl_properties_obj_.detail_mode = DetailModeItemsSource.items[(int)core_.DetailMode(mtl_id)].DisplayName;
 				mtl_properties_obj_.height_offset = core_.HeightOffset(mtl_id);
@@ -988,28 +981,15 @@ namespace MtlEditor
 						}
 						break;
 
-					case MaterialProperties.MP_MetalnessTex:
+					case MaterialProperties.MP_MetalnessGlossinessTex:
 						if (selected_mtl_id_ > 0)
 						{
 							uint mtl_id = selected_mtl_id_ - 1;
-							string metalness_tex = RelativePath(mtl_properties_obj_.metalness_tex);
-							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness) != metalness_tex)
+							string metalness_glossiness_tex = RelativePath(mtl_properties_obj_.metalness_glossiness_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_MetalnessGlossiness) != metalness_glossiness_tex)
 							{
 								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness, metalness_tex));
-							}
-						}
-						break;
-
-					case MaterialProperties.MP_GlossinessTex:
-						if (selected_mtl_id_ > 0)
-						{
-							uint mtl_id = selected_mtl_id_ - 1;
-							string glossiness_tex = RelativePath(mtl_properties_obj_.glossiness_tex);
-							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness) != glossiness_tex)
-							{
-								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness, glossiness_tex));
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_MetalnessGlossiness, metalness_glossiness_tex));
 							}
 						}
 						break;
@@ -1049,6 +1029,19 @@ namespace MtlEditor
 							{
 								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
 									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height, height_tex));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_OcclusionTex:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							string occlusion_tex = RelativePath(mtl_properties_obj_.occlusion_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Occlusion) != occlusion_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Occlusion, occlusion_tex));
 							}
 						}
 						break;

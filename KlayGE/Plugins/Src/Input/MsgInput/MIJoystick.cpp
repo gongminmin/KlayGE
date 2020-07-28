@@ -39,15 +39,10 @@ namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputJoystick::MsgInputJoystick(HANDLE device)
-		: device_id_(0xFFFFFFFF),
 #elif defined KLAYGE_PLATFORM_ANDROID
 	MsgInputJoystick::MsgInputJoystick()
-		:
 #endif
-			pos_state_(0, 0, 0), rot_state_(0, 0, 0), slider_state_(0, 0)
 	{
-		buttons_state_.fill(false);
-
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		auto const& mie = checked_cast<MsgInputEngine const&>(Context::Instance().InputFactoryInstance().InputEngineInstance());
 
@@ -147,23 +142,23 @@ namespace KlayGE
 
 							for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++ i)
 							{
-								long center;
-								long shift;
+								float offset;
+								float scale;
 								switch (value_caps[i].BitField)
 								{
 								case 1:
-									center = 0x80;
-									shift = 0;
+									offset = 128;
+									scale = 128;
 									break;
 
 								case 2:
-									center = 0x8000;
-									shift = 8;
+									offset = 32768;
+									scale = 32768;
 									break;
 
 								default:
-									center = 0;
-									shift = 0;
+									offset = 0;
+									scale = 1;
 									break;
 								}
 
@@ -175,35 +170,35 @@ namespace KlayGE
 									switch (value_caps[i].Range.UsageMin)
 									{
 									case HID_USAGE_GENERIC_X:
-										pos_state_.x() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[0].x() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_Y:
-										pos_state_.y() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[0].y() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_Z:
-										pos_state_.z() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[0].z() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_RX:
-										rot_state_.x() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[1].x() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_RY:
-										rot_state_.y() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[1].y() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_RZ:
-										rot_state_.z() = (static_cast<long>(value) - center) >> shift;
+										thumbs_state_[1].z() = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_SLIDER:
-										slider_state_.x() = (static_cast<long>(value) - center) >> shift;
+										triggers_state_[0] = (value - offset) / scale;
 										break;
 
 									case HID_USAGE_GENERIC_DIAL:
-										slider_state_.y() = (static_cast<long>(value) - center) >> shift;
+										triggers_state_[1] = (value - offset) / scale;
 										break;
 
 									default:
@@ -224,35 +219,35 @@ namespace KlayGE
 		switch (axis)
 		{
 		case 0:
-			pos_state_.x() = value;
+			thumbs_state_[0].x() = value;
 			break;
 
 		case 1:
-			pos_state_.y() = value;
+			thumbs_state_[0].y() = value;
 			break;
 
 		case 2:
-			pos_state_.z() = value;
+			thumbs_state_[0].z() = value;
 			break;
 
 		case 3:
-			rot_state_.x() = value;
+			thumbs_state_[1].x() = value;
 			break;
 
 		case 4:
-			rot_state_.y() = value;
+			thumbs_state_[1].y() = value;
 			break;
 
 		case 5:
-			rot_state_.z() = value;
+			thumbs_state_[1].z() = value;
 			break;
 
 		case 6:
-			slider_state_.x() = value;
+			triggers_state_[0] = value;
 			break;
 
 		case 7:
-			slider_state_.y() = value;
+			triggers_state_[1] = value;
 			break;
 
 		default:
@@ -271,9 +266,8 @@ namespace KlayGE
 
 	void MsgInputJoystick::UpdateInputs()
 	{
-		pos_ = pos_state_;
-		rot_ = rot_state_;
-		slider_ = slider_state_;
+		thumbs_ = thumbs_state_;
+		triggers_ = triggers_state_;
 
 		index_ = !index_;
 		buttons_[index_] = buttons_state_;

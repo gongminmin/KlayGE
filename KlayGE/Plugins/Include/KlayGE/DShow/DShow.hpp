@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/Show.hpp>
 
 struct IGraphBuilder;
@@ -27,36 +28,36 @@ struct IVMRSurfaceAllocator9;
 
 namespace KlayGE
 {
-	class DShowEngine : public ShowEngine
+	class DShowEngine final : public ShowEngine
 	{
 	public:
 		DShowEngine();
-		~DShowEngine();
+		~DShowEngine() override;
 
-		bool IsComplete();
+		bool IsComplete() override;
 
-		void Load(std::string const & fileName);
-		TexturePtr PresentTexture();
+		void Load(std::string const & fileName) override;
+		TexturePtr PresentTexture() override;
 
-		ShowState State(long msTimeout = -1);
+		ShowState State(long msTimeout = -1) override;
 
 	private:
-		std::shared_ptr<IGraphBuilder>		graph_;
-		std::shared_ptr<IBaseFilter>		filter_;
-		std::shared_ptr<IMediaControl>		media_control_;
-		std::shared_ptr<IMediaEvent>		media_event_;
-		std::shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
+		com_ptr<IGraphBuilder> graph_;
+		com_ptr<IBaseFilter> filter_;
+		com_ptr<IMediaControl> media_control_;
+		com_ptr<IMediaEvent> media_event_;
+		com_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
 
 	private:
 		void Init();
 		void Free();
 
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 
-		void DoPlay();
-		void DoStop();
-		void DoPause();
+		void DoPlay() override;
+		void DoStop() override;
+		void DoPause() override;
 	};
 }
 

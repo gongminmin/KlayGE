@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 		resized_data.data = &zero_data[0];
 		resized_data.row_pitch = WIDTH * sizeof(uint8_t);
 		resized_data.slice_pitch = WIDTH * HEIGHT * sizeof(uint8_t);
-		empty_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, resized_data);
+		empty_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(resized_data));
 	}
 
 	TexturePtr pattern_raw = SyncLoadTexture(src_name, EAH_CPU_Read);
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 	if (pattern_raw->Format() != EF_ABGR8)
 	{
 		TexturePtr pattern_refmt = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read);
-		pattern_raw->CopyToSubTexture2D(*pattern_refmt, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height);
+		pattern_raw->CopyToSubTexture2D(*pattern_refmt, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height, TextureFilter::Point);
 		pattern_raw = pattern_refmt;
 	}
 
@@ -141,13 +141,14 @@ int main(int argc, char* argv[])
 	pattern_real_data.data = &pattern_real[0];
 	pattern_real_data.row_pitch = WIDTH * sizeof(float4);
 	pattern_real_data.slice_pitch = WIDTH * HEIGHT * sizeof(float4);
-	TexturePtr real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pattern_real_data);
+	TexturePtr real_tex =
+		rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, MakeSpan<1>(pattern_real_data));
 
 	TexturePtr pattern_real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	TexturePtr pattern_imag_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	GpuFftPS fft(WIDTH, HEIGHT, true);
-	fft.Execute(pattern_real_tex, pattern_imag_tex, real_tex, empty_tex);
+	fft.Execute(pattern_real_tex, pattern_imag_tex, rf.MakeTextureSrv(real_tex), rf.MakeTextureSrv(empty_tex));
 
 	SaveTexture(pattern_real_tex, "lens_effects_real.dds");
 	SaveTexture(pattern_imag_tex, "lens_effects_imag.dds");

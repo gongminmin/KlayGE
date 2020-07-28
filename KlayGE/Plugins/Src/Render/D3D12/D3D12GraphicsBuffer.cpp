@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -49,8 +48,7 @@ namespace KlayGE
 {
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 							uint32_t size_in_byte, uint32_t structure_byte_stride)
-						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
-							counter_offset_(0)
+						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride)
 	{
 		curr_states_.resize(1, D3D12_RESOURCE_STATE_COMMON);
 	}
@@ -73,7 +71,8 @@ namespace KlayGE
 			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D12Mapping::MappingFormat(pf);
 			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			desc.Buffer.FirstElement = first_elem;
+			desc.Buffer.FirstElement =
+				((access_hint_ & EAH_GPU_Structured) ? d3d_resource_offset_ / structure_byte_stride_ : 0) + first_elem;
 			desc.Buffer.NumElements = num_elems;
 			desc.Buffer.StructureByteStride = (access_hint_ & EAH_GPU_Structured) ? structure_byte_stride_ : 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
@@ -100,7 +99,8 @@ namespace KlayGE
 			D3D12_RENDER_TARGET_VIEW_DESC desc;
 			desc.Format = D3D12Mapping::MappingFormat(pf);
 			desc.ViewDimension = D3D12_RTV_DIMENSION_BUFFER;
-			desc.Buffer.FirstElement = first_elem;
+			desc.Buffer.FirstElement =
+				((access_hint_ & EAH_GPU_Structured) ? d3d_resource_offset_ / structure_byte_stride_ : 0) + first_elem;
 			desc.Buffer.NumElements = num_elems;
 
 			auto rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
@@ -139,7 +139,8 @@ namespace KlayGE
 				d3d_ua_view.Buffer.StructureByteStride = 0;
 			}
 			d3d_ua_view.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-			d3d_ua_view.Buffer.FirstElement = first_elem;
+			d3d_ua_view.Buffer.FirstElement =
+				((access_hint_ & EAH_GPU_Structured) ? d3d_resource_offset_ / structure_byte_stride_ : 0) + first_elem;
 			d3d_ua_view.Buffer.NumElements = num_elems;
 			d3d_ua_view.Buffer.CounterOffsetInBytes = counter_offset_;
 			if (access_hint_ & EAH_Raw)
@@ -159,7 +160,6 @@ namespace KlayGE
 	void D3D12GraphicsBuffer::CreateHWResource(void const * subres_init)
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12Device* device = re.D3DDevice();
 
 		uint32_t total_size = size_in_byte_;
 		if ((access_hint_ & EAH_GPU_Write)
@@ -174,61 +174,93 @@ namespace KlayGE
 				+ sizeof(uint64_t);
 		}
 
-		d3d_resource_ = this->CreateBuffer(access_hint_, total_size);
-		gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();
-
-		D3D12_RESOURCE_DESC res_desc = d3d_resource_->GetDesc();
-		D3D12_HEAP_PROPERTIES heap_prop;
-		D3D12_HEAP_FLAGS heap_flags;
-		d3d_resource_->GetHeapProperties(&heap_prop, &heap_flags);
-
-		D3D12_RESOURCE_STATES init_state;
-		if (EAH_CPU_Read == access_hint_)
+		if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
-			init_state = D3D12_RESOURCE_STATE_COPY_DEST;
-		}
-		else if ((0 == access_hint_) || (access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
-		{
-			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+			gpu_mem_block_ = re.AllocMemBlock(true, size_in_byte_);
+			d3d_resource_ = gpu_mem_block_->Resource();
+			d3d_resource_offset_ = gpu_mem_block_->Offset();
+			gpu_vaddr_ = gpu_mem_block_->GpuAddress();
+
+			if (subres_init != nullptr)
+			{
+				memcpy(gpu_mem_block_->CpuAddress(), subres_init, size_in_byte_);
+			}
+
+			curr_states_[0] = D3D12_RESOURCE_STATE_GENERIC_READ;
 		}
 		else
 		{
-			init_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-		}
+			gpu_mem_block_.reset();
 
-		curr_states_[0] = init_state;
+			D3D12_RESOURCE_STATES init_state;
+			D3D12_HEAP_PROPERTIES heap_prop;
+			if (EAH_CPU_Read == access_hint_)
+			{
+				init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+				heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
+			}
+			else if ((0 == access_hint_) || (access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
+			{
+				init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+			}
+			else
+			{
+				init_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+				heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+			}
+			heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+			heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			heap_prop.CreationNodeMask = 0;
+			heap_prop.VisibleNodeMask = 0;
 
-		if (subres_init != nullptr)
-		{
-			ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
-			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
+			D3D12_RESOURCE_DESC res_desc;
+			res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			res_desc.Alignment = 0;
+			res_desc.Width = total_size;
+			res_desc.Height = 1;
+			res_desc.DepthOrArraySize = 1;
+			res_desc.MipLevels = 1;
+			res_desc.Format = DXGI_FORMAT_UNKNOWN;
+			res_desc.SampleDesc.Count = 1;
+			res_desc.SampleDesc.Quality = 0;
+			res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			if (access_hint_ & EAH_GPU_Unordered)
+			{
+				res_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			}
 
-			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-			res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			TIFHR(re.D3DDevice()->CreateCommittedResource(
+				&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, IID_ID3D12Resource, d3d_resource_.put_void()));
 
-			ID3D12Resource* buffer;
-			TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
-			ID3D12ResourcePtr buffer_upload = MakeCOMPtr(buffer);
-
-			D3D12_RANGE read_range;
-			read_range.Begin = 0;
-			read_range.End = 0;
-
-			void* p;
-			buffer_upload->Map(0, &read_range, &p);
-			memcpy(p, subres_init, size_in_byte_);
-			buffer_upload->Unmap(0, nullptr);
-
-			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
-			re.FlushResourceBarriers(cmd_list);
-
-			cmd_list->CopyResource(d3d_resource_.get(), buffer_upload.get());
+			d3d_resource_offset_ = 0;
+			gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();
 
 			curr_states_[0] = init_state;
 
-			re.CommitResCmd();
+			if (subres_init != nullptr)
+			{
+				auto upload_mem_block = re.AllocMemBlock(true, size_in_byte_);
+				memcpy(upload_mem_block->CpuAddress(), subres_init, size_in_byte_);
+
+				{
+					re.ResetLoadCmd();
+					ID3D12GraphicsCommandList* cmd_list = re.D3DLoadCmdList();
+
+					this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+					re.FlushResourceBarriers(cmd_list);
+
+					cmd_list->CopyBufferRegion(
+						d3d_resource_.get(), d3d_resource_offset_, upload_mem_block->Resource(), upload_mem_block->Offset(), size_in_byte_);
+
+					curr_states_[0] = init_state;
+
+					re.CommitLoadCmd();
+				}
+
+				re.DeallocMemBlock(true, std::move(upload_mem_block));
+			}
 		}
 
 		if ((access_hint_ & EAH_GPU_Write)
@@ -256,7 +288,14 @@ namespace KlayGE
 		d3d_rt_views_.clear();
 		d3d_ua_views_.clear();
 		counter_offset_ = 0;
+		if (gpu_mem_block_)
+		{
+			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeallocMemBlock(true, std::move(gpu_mem_block_));
+			gpu_mem_block_.reset();
+		}
 		d3d_resource_.reset();
+		d3d_resource_offset_ = 0;
 	}
 
 	bool D3D12GraphicsBuffer::HWResourceReady() const
@@ -279,11 +318,12 @@ namespace KlayGE
 			break;
 
 		case BA_Write_Only:
-			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
+			if (gpu_mem_block_)
 			{
-				re.RecycleTempBuffer(d3d_resource_, true, size_in_byte_);
-				d3d_resource_ = re.AllocTempBuffer(true, size_in_byte_);
-				gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();
+				re.RenewMemBlock(true, gpu_mem_block_, size_in_byte_);
+				d3d_resource_ = gpu_mem_block_->Resource();
+				d3d_resource_offset_ = gpu_mem_block_->Offset();
+				gpu_vaddr_ = gpu_mem_block_->GpuAddress();
 			}
 			else
 			{
@@ -298,12 +338,28 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
-		D3D12_RANGE read_range;
-		read_range.Begin = 0;
-		read_range.End = (ba == BA_Write_Only) ? 0 : size_in_byte_;
-
 		void* p;
-		TIFHR(d3d_resource_->Map(0, &read_range, &p));
+		if (gpu_mem_block_)
+		{
+			p = gpu_mem_block_->CpuAddress();
+		}
+		else
+		{
+			D3D12_RANGE read_range;
+			if ((ba == BA_Write_Only) || (ba == BA_Write_No_Overwrite))
+			{
+				read_range.Begin = 0;
+				read_range.End = 0;
+			}
+			else
+			{
+				read_range.Begin = d3d_resource_offset_;
+				read_range.End = d3d_resource_offset_ + size_in_byte_;
+			}
+
+			TIFHR(d3d_resource_->Map(0, &read_range, &p));
+			p = reinterpret_cast<uint8_t*>(p) + d3d_resource_offset_;
+		}
 		return p;
 	}
 
@@ -311,11 +367,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_resource_);
 
-		D3D12_RANGE write_range;
-		write_range.Begin = 0;
-		write_range.End = (mapped_ba_ == BA_Read_Only) ? 0 : size_in_byte_;
+		if (!gpu_mem_block_)
+		{
+			D3D12_RANGE write_range;
+			if (mapped_ba_ == BA_Read_Only)
+			{
+				write_range.Begin = 0;
+				write_range.End = 0;
+			}
+			else
+			{
+				write_range.Begin = d3d_resource_offset_;
+				write_range.End = d3d_resource_offset_ + size_in_byte_;
+			}
 
-		d3d_resource_->Unmap(0, &write_range);
+			d3d_resource_->Unmap(0, &write_range);
+		}
 	}
 
 	void D3D12GraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
@@ -363,7 +430,7 @@ namespace KlayGE
 		if ((src_heap_type == dst_heap_type) && (src_heap_type != D3D12_HEAP_TYPE_DEFAULT))
 		{
 			uint8_t const * src = static_cast<uint8_t const *>(this->Map(BA_Read_Only));
-			uint8_t* dst = static_cast<uint8_t*>(d3d_gb.Map(BA_Read_Write));
+			uint8_t* dst = static_cast<uint8_t*>(d3d_gb.Map(BA_Write_Only));
 			memcpy(dst + dst_offset, src + src_offset, size);
 			d3d_gb.Unmap();
 			this->Unmap();
@@ -375,7 +442,8 @@ namespace KlayGE
 			d3d_gb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
-			cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), dst_offset, d3d_resource_.get(), src_offset, size);
+			cmd_list->CopyBufferRegion(d3d_gb.D3DResource(), d3d_gb.D3DResourceOffset() + dst_offset, d3d_resource_.get(),
+				d3d_resource_offset_ + src_offset, size);
 		}
 	}
 
@@ -390,25 +458,20 @@ namespace KlayGE
 		else
 		{
 			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto cmd_list = re.D3DRenderCmdList();
+			auto* cmd_list = re.D3DRenderCmdList();
 
-			auto upload_buff = re.AllocTempBuffer(true, size);
+			auto upload_mem_block = re.AllocMemBlock(true, size);
+			auto* const upload_buff = upload_mem_block->Resource();
+			uint32_t const upload_buff_offset = upload_mem_block->Offset();
 
-			D3D12_RANGE read_range;
-			read_range.Begin = 0;
-			read_range.End = 0;
-
-			void* p;
-			TIFHR(upload_buff->Map(0, &read_range, &p));
-			memcpy(p, data, size);
-			upload_buff->Unmap(0, nullptr);
+			memcpy(upload_mem_block->CpuAddress(), data, size);
 
 			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
-			cmd_list->CopyBufferRegion(d3d_resource_.get(), offset, upload_buff.get(), 0, size);
+			cmd_list->CopyBufferRegion(d3d_resource_.get(), d3d_resource_offset_ + offset, upload_buff, upload_buff_offset, size);
 
-			re.RecycleTempBuffer(upload_buff, true, size);
+			re.DeallocMemBlock(true, std::move(upload_mem_block));
 		}
 	}
 

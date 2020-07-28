@@ -25,7 +25,14 @@ namespace KlayGE
 	class KLAYGE_CORE_API LightSource : public SceneComponent, public std::enable_shared_from_this<LightSource>
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		enum LightType
 		{
@@ -51,7 +58,7 @@ namespace KlayGE
 
 	public:
 		explicit LightSource(LightType type);
-		virtual ~LightSource();
+		virtual ~LightSource() noexcept;
 
 		LightType Type() const;
 
@@ -95,6 +102,9 @@ namespace KlayGE
 		virtual void Extend(float3 const & extend);
 
 	protected:
+		void CloneTo(LightSource& light) const;
+
+	protected:
 		LightType type_;
 		int32_t attrib_ = 0;
 		float4 color_ = float4(0, 0, 0, 0);
@@ -104,13 +114,21 @@ namespace KlayGE
 		std::function<void(LightSource&, float, float)> update_func_;
 	};
 
-	class KLAYGE_CORE_API AmbientLightSource : public LightSource
+	class KLAYGE_CORE_API AmbientLightSource final : public LightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		AmbientLightSource();
-		virtual ~AmbientLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) override;
@@ -129,10 +147,18 @@ namespace KlayGE
 	class KLAYGE_CORE_API PointLightSource : public LightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		PointLightSource();
-		virtual ~PointLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		void BindSceneNode(SceneNode* node) override;
 
@@ -145,6 +171,7 @@ namespace KlayGE
 		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
 	protected:
+		void CloneToPoint(PointLightSource& point_light) const;
 		void UpdateCameras();
 
 	protected:
@@ -154,13 +181,21 @@ namespace KlayGE
 		std::array<CameraPtr, 6> sm_cameras_;
 	};
 
-	class KLAYGE_CORE_API SpotLightSource : public LightSource
+	class KLAYGE_CORE_API SpotLightSource final : public LightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		SpotLightSource();
-		virtual ~SpotLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		void BindSceneNode(SceneNode* node) override;
 
@@ -192,13 +227,21 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
-	class KLAYGE_CORE_API DirectionalLightSource : public LightSource
+	class KLAYGE_CORE_API DirectionalLightSource final : public LightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		DirectionalLightSource();
-		virtual ~DirectionalLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		void BindSceneNode(SceneNode* node) override;
 
@@ -216,13 +259,21 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
-	class KLAYGE_CORE_API SphereAreaLightSource : public PointLightSource
+	class KLAYGE_CORE_API SphereAreaLightSource final : public PointLightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		SphereAreaLightSource();
-		virtual ~SphereAreaLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		virtual float Radius() const override;
 		virtual void Radius(float radius) override;
@@ -231,18 +282,26 @@ namespace KlayGE
 		float radius_;
 	};
 
-	class KLAYGE_CORE_API TubeAreaLightSource : public PointLightSource
+	class KLAYGE_CORE_API TubeAreaLightSource final : public PointLightSource
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		TubeAreaLightSource();
-		virtual ~TubeAreaLightSource();
+
+		SceneComponentPtr Clone() const override;
 
 		using LightSource::Falloff;
-		virtual void Falloff(float3 const & fall_off);
-		virtual float3 const & Extend() const override;
-		virtual void Extend(float3 const & extend) override;
+		void Falloff(float3 const & fall_off) override;
+		float3 const & Extend() const override;
+		void Extend(float3 const & extend) override;
 
 	protected:
 		float3 extend_;

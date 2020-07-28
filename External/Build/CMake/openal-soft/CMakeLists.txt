@@ -1,7 +1,7 @@
 set(OPENALSOFT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/openal-soft")
 set(OPENALSOFT_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/openal-soft/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "05cdc2cb3002e0c9a20764a1e4e6a0e4de5e809e")
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "cee8100f1917ce21052b9cf255eeefdc839ae550")
 
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	set(ALSOFT_BACKEND_DSOUND ON CACHE BOOL "" FORCE)
@@ -21,6 +21,9 @@ set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
 set(ALSOFT_CONFIG OFF CACHE BOOL "" FORCE)
 set(ALSOFT_HRTF_DEFS OFF CACHE BOOL "" FORCE)
 set(ALSOFT_AMBDEC_PRESETS OFF CACHE BOOL "" FORCE)
+if(CMAKE_CROSSCOMPILING)
+	set(ALSOFT_NATIVE_TOOLS_PATH "${KLAYGE_HOST_BIN_DIR}" CACHE STRING "" FORCE)
+endif()
 
 if(KLAYGE_COMPILER_MSVC)
 	set(HAVE___RESTRICT FALSE)
@@ -60,7 +63,24 @@ set_target_properties(OpenAL PROPERTIES
 	OUTPUT_NAME OpenAL${KLAYGE_OUTPUT_SUFFIX}
 )
 
+if(NOT CMAKE_CROSSCOMPILING)
+	set(EXE_SUFFIX "")
+	if(KLAYGE_PLATFORM_WINDOWS)
+		set(EXE_SUFFIX ".exe")
+	endif()
+	SET(NATIVE_BIN_DIR  "${OpenAL_BINARY_DIR}/native-tools")
+	SET(BIN2H_COMMAND  "${NATIVE_BIN_DIR}/bin2h")
+	SET(BSINCGEN_COMMAND  "${NATIVE_BIN_DIR}/bsincgen")
+	add_custom_target(copy-native-tools
+		COMMAND ${CMAKE_COMMAND} -E copy "${BIN2H_COMMAND}${EXE_SUFFIX}" "${KLAYGE_BIN_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E copy "${BSINCGEN_COMMAND}${EXE_SUFFIX}" "${KLAYGE_BIN_DIR}"
+		DEPENDS "native-tools"
+	)
+	set_target_properties(copy-native-tools PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/openal-soft")
+	add_dependencies(OpenAL copy-native-tools)
+endif()
+
 foreach(target
-	"build_version" "common" "native-tools" "OpenAL")
+	"build_version" "native-tools" "OpenAL")
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/openal-soft")
 endforeach()

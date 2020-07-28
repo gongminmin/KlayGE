@@ -140,7 +140,7 @@ namespace KlayGE
 		std::vector<uint8_t> cbuff_indices_;
 	};
 
-	class D3D12VertexShaderStageObject : public D3D12ShaderStageObject
+	class D3D12VertexShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12VertexShaderStageObject();
@@ -161,7 +161,7 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12PixelShaderStageObject : public D3D12ShaderStageObject
+	class D3D12PixelShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12PixelShaderStageObject();
@@ -177,7 +177,7 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class D3D12GeometryShaderStageObject : public D3D12ShaderStageObject
+	class D3D12GeometryShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12GeometryShaderStageObject();
@@ -198,7 +198,7 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12ComputeShaderStageObject : public D3D12ShaderStageObject
+	class D3D12ComputeShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12ComputeShaderStageObject();
@@ -231,7 +231,7 @@ namespace KlayGE
 		uint32_t block_size_x_, block_size_y_, block_size_z_;
 	};
 
-	class D3D12HullShaderStageObject : public D3D12ShaderStageObject
+	class D3D12HullShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12HullShaderStageObject();
@@ -243,7 +243,7 @@ namespace KlayGE
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 	};
 
-	class D3D12DomainShaderStageObject : public D3D12ShaderStageObject
+	class D3D12DomainShaderStageObject final : public D3D12ShaderStageObject
 	{
 	public:
 		D3D12DomainShaderStageObject();
@@ -264,35 +264,33 @@ namespace KlayGE
 		uint32_t rasterized_stream_ = 0;
 	};
 
-	class D3D12ShaderObject : public ShaderObject
+	class D3D12ShaderObject final : public ShaderObject
 	{
 	public:
 		D3D12ShaderObject();
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind();
-		void Unbind();
+		void Bind(RenderEffect const& effect) override;
+		void Unbind() override;
 
-		std::vector<D3D12_SAMPLER_DESC> const & Samplers(ShaderStage stage) const
+		uint32_t NumSamplers(ShaderStage stage) const
 		{
-			return samplers_[static_cast<uint32_t>(stage)];
+			return static_cast<uint32_t>(samplers_[static_cast<uint32_t>(stage)].size());
 		}
 
-		std::vector<D3D12ShaderResourceViewSimulation*> const & SRVs(ShaderStage stage) const
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& SrvHandles(ShaderStage stage) const
 		{
-			return srvs_[static_cast<uint32_t>(stage)];
+			return srv_handles_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<D3D12UnorderedAccessViewSimulation*> const & UAVs(ShaderStage stage) const
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& UavHandles(ShaderStage stage) const
 		{
-			return uavs_[static_cast<uint32_t>(stage)];
+			return uav_handles_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<GraphicsBuffer*> const & CBuffers(ShaderStage stage) const
-		{
-			return d3d_cbuffs_[static_cast<uint32_t>(stage)];
-		}
+		uint32_t NumCBuffers(ShaderStage stage) const;
+		D3D12_GPU_VIRTUAL_ADDRESS CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const;
 
 		ID3D12RootSignature* RootSignature() const
 		{
@@ -353,12 +351,9 @@ namespace KlayGE
 
 		std::array<std::vector<D3D12_SAMPLER_DESC>, NumShaderStages> samplers_;
 		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
-		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, NumShaderStages> srvs_;
-		std::array<std::vector<D3D12Resource*>, NumShaderStages> uavsrcs_;
-		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, NumShaderStages> uavs_;
-		std::array<std::vector<GraphicsBuffer*>, NumShaderStages> d3d_cbuffs_;
-
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
+		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, NumShaderStages> srv_handles_;
+		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> uavsrcs_;
+		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, NumShaderStages> uav_handles_;
 
 		uint32_t num_handles_;
 	};

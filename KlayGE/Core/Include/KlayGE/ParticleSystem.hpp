@@ -35,7 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 
 #include <mutex>
 #include <random>
@@ -59,9 +59,7 @@ namespace KlayGE
 	{
 	public:
 		explicit ParticleEmitter(ParticleSystemPtr const& ps);
-		virtual ~ParticleEmitter()
-		{
-		}
+		virtual ~ParticleEmitter() noexcept;
 
 		virtual std::string const & Type() const = 0;
 		virtual ParticleEmitterPtr Clone() = 0;
@@ -208,9 +206,7 @@ namespace KlayGE
 	{
 	public:
 		explicit ParticleUpdater(ParticleSystemPtr const& ps);
-		virtual ~ParticleUpdater()
-		{
-		}
+		virtual ~ParticleUpdater() noexcept;
 
 		virtual std::string const & Type() const = 0;
 		virtual ParticleUpdaterPtr Clone() = 0;
@@ -225,7 +221,7 @@ namespace KlayGE
 		std::weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem : public std::enable_shared_from_this<ParticleSystem>
+	class KLAYGE_CORE_API ParticleSystem final : public std::enable_shared_from_this<ParticleSystem>
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles, bool sort_particles = false);
@@ -367,7 +363,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name);
 
 
-	class KLAYGE_CORE_API PointParticleEmitter : public ParticleEmitter
+	class KLAYGE_CORE_API PointParticleEmitter final : public ParticleEmitter
 	{
 	public:
 		explicit PointParticleEmitter(ParticleSystemPtr const& ps);
@@ -385,7 +381,7 @@ namespace KlayGE
 		std::uniform_int_distribution<> random_dis_;
 	};
 
-	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
+	class KLAYGE_CORE_API PolylineParticleUpdater final : public ParticleUpdater
 	{
 	public:
 		explicit PolylineParticleUpdater(ParticleSystemPtr const& ps);

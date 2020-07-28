@@ -34,7 +34,7 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechnique* visualize_gbuffer_mrt_techs_[2];
+	KlayGE::RenderTechnique* visualize_gbuffer_techs_[2];
 
 	bool is_skinned_;
 };
@@ -43,8 +43,6 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
 	explicit DetailedSkinnedMesh(std::wstring_view name);
-
-	void OnRenderBegin();
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -67,8 +65,6 @@ class SkeletonMesh : public KlayGE::SkinnedMesh
 {
 public:
 	explicit SkeletonMesh(KlayGE::RenderModel const & model);
-
-	void OnRenderBegin() override;
 
 private:
 	DetailedSkinnedModel const * model_;

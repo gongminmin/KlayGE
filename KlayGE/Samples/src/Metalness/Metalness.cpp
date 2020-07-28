@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,7 +13,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
@@ -25,8 +24,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Metalness.hpp"
@@ -56,18 +56,7 @@ namespace
 			}
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
+		using StaticMesh::Material;
 
 		void Material(float3 const & albedo, float metalness, float glossiness)
 		{
@@ -78,6 +67,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -142,7 +133,7 @@ void MetalnessApp::OnCreate()
 			KFL_UNUSED(elapsed_time);
 
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			node.TransformToParent(camera.InverseViewMatrix());
 		});
@@ -202,7 +193,7 @@ void MetalnessApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Metalness.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Metalness.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Parameters");
 	id_single_object_ = dialog_->IDFromName("SingleObject");

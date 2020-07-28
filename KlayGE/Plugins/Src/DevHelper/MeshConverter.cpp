@@ -29,10 +29,13 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
 #include <KFL/CXX17/filesystem.hpp>
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderMaterial.hpp>
@@ -41,15 +44,22 @@
 #include <cstring>
 #include <iostream>
 
-#include <assimp/cimport.h>
-#include <assimp/cexport.h>
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 90)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy" // Ignore comparison between int and uint
+#endif
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpragma-pack" // Ignore cross header #pragma pack
+#endif
 #include <assimp/scene.h>
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 #include <assimp/pbrmaterial.h>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/DevHelper/MeshConverter.hpp>
 
@@ -72,9 +82,19 @@ namespace
 		return float3(v.x, v.y, v.z);
 	}
 
+	aiVector3D Float3ToAiVector(float3 const& v)
+	{
+		return aiVector3D(v.x(), v.y(), v.z());
+	}
+
 	Quaternion AiQuatToQuat(aiQuaternion const& v)
 	{
 		return Quaternion(v.x, v.y, v.z, v.w);
+	}
+
+	aiQuaternion QuatToAiQuat(Quaternion const& v)
+	{
+		return aiQuaternion(v.w(), v.x(), v.y(), v.z());
 	}
 
 	template <typename T>
@@ -150,17 +170,21 @@ namespace
 		bind_scale = scale.x();
 	}
 
+	float4x4 DQToMatrix(Quaternion const& bind_real, Quaternion const& bind_dual, float bind_scale)
+	{
+		return MathLib::scaling(bind_scale, bind_scale, bind_scale) * MathLib::udq_to_matrix(bind_real, bind_dual);
+	}
+
 	template <int N>
 	void ExtractFVector(std::string_view value_str, float* v)
 	{
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{
-				boost::algorithm::trim(strs[i]);
-				v[i] = static_cast<float>(atof(strs[i].c_str()));
+				strs[i] = StringUtil::Trim(strs[i]);
+				v[i] = std::stof(std::string(strs[i]));
 			}
 			else
 			{
@@ -172,14 +196,13 @@ namespace
 	template <int N>
 	void ExtractUIVector(std::string_view value_str, uint32_t* v)
 	{
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
 		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{
-				boost::algorithm::trim(strs[i]);
-				v[i] = static_cast<uint32_t>(atoi(strs[i].c_str()));
+				strs[i] = StringUtil::Trim(strs[i]);
+				v[i] = std::stoul(std::string(strs[i]));
 			}
 			else
 			{
@@ -201,10 +224,10 @@ namespace
 		// From assimp
 		void BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node);
 		void BuildMaterials(aiScene const * scene);
-		void BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods);
+		void BuildMeshData(std::vector<aiScene const*> const & scene_lods);
 		void BuildJoints(aiScene const * scene);
-		void BuildActions(aiScene const * scene);
-		void ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+		void BuildAnimations(aiScene const * scene);
+		void ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
 			std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 			std::vector<std::pair<float, float3>> const & scale);
 		void LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata);
@@ -222,7 +245,7 @@ namespace
 		void CompileBonesChunk(XMLNodePtr const & bones_chunk);
 		void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk);
 		void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index);
-		void CompileActionsChunk(XMLNodePtr const & actions_chunk);
+		void CompileActionsChunk(XMLNodePtr const & animations_chunk);
 		void LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
@@ -269,9 +292,16 @@ namespace
 			int16_t parent_id;
 		};
 
+		struct JointInfo
+		{
+			std::string name;
+			JointComponentPtr joint;
+			int16_t parent_id;
+		};
+
 		std::vector<Mesh> meshes_;
 		std::vector<NodeTransform> nodes_;
-		std::vector<Joint> joints_;
+		std::vector<JointInfo> joints_;
 		bool has_normal_;
 		bool has_tangent_quat_;
 		bool has_texcoord_;
@@ -291,15 +321,14 @@ namespace
 	void MeshLoader::BuildNodeData(uint32_t num_lods, uint32_t lod, int16_t parent_id, aiNode const * node)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
-		std::wstring wname;
-		KlayGE::Convert(wname, node->mName.C_Str());
-		auto const ai_node_name = (parent_id == -1) ? L"Root" : wname;
+		std::wstring name;
+		KlayGE::Convert(name, node->mName.C_Str());
 
 		int16_t index = -1;
 		if (lod == 0)
 		{
 			NodeTransform node_transform;
-			node_transform.node = MakeSharedPtr<SceneNode>(ai_node_name, SceneNode::SOA_Cullable);
+			node_transform.node = MakeSharedPtr<SceneNode>(name, SceneNode::SOA_Cullable);
 			node_transform.node->TransformToParent(trans_mat);
 			if (node->mNumMeshes > 0)
 			{
@@ -319,7 +348,7 @@ namespace
 			bool found = false;
 			for (size_t i = 0; i < nodes_.size(); ++ i)
 			{
-				if (nodes_[i].node->Name() == ai_node_name)
+				if (((parent_id == -1) && (nodes_[i].parent_id == -1)) || (nodes_[i].node->Name() == name))
 				{
 					index = static_cast<int16_t>(i);
 					if (node->mNumMeshes > 0)
@@ -442,23 +471,22 @@ namespace
 
 			render_model_->GetMaterial(mi) = MakeSharedPtr<RenderMaterial>();
 			auto& render_mtl = *render_model_->GetMaterial(mi);
-			render_mtl.name = name;
-			render_mtl.albedo = float4(albedo.x(), albedo.y(), albedo.z(), opacity);
-			render_mtl.metalness = metalness;
-			render_mtl.glossiness = Shininess2Glossiness(shininess);
-			render_mtl.emissive = emissive;
-			render_mtl.transparent = transparent;
-			render_mtl.alpha_test = alpha_test;
-			render_mtl.sss = false;
-			render_mtl.two_sided = two_sided;
+			render_mtl.Name(name);
+			render_mtl.Albedo(float4(albedo.x(), albedo.y(), albedo.z(), opacity));
+			render_mtl.Metalness(metalness);
+			render_mtl.Glossiness(Shininess2Glossiness(shininess));
+			render_mtl.Emissive(emissive);
+			render_mtl.Transparent(transparent);
+			render_mtl.AlphaTestThreshold(alpha_test);
+			render_mtl.Sss(false);
+			render_mtl.TwoSided(two_sided);
 
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				render_mtl.tex_names[RenderMaterial::TS_Albedo] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Albedo, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_UNKNOWN);
@@ -466,8 +494,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, 0, 0, 0, 0, 0, 0);
-
-				render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 			}
 			else
 			{
@@ -476,8 +503,7 @@ namespace
 				{
 					aiString str;
 					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
-
-					render_mtl.tex_names[RenderMaterial::TS_Glossiness] = str.C_Str();
+					render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 				}
 			}
 
@@ -486,8 +512,7 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				render_mtl.tex_names[RenderMaterial::TS_Emissive] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Emissive, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
@@ -495,8 +520,11 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
+				render_mtl.TextureName(RenderMaterial::TS_Normal, str.C_Str());
 
-				render_mtl.tex_names[RenderMaterial::TS_Normal] = str.C_Str();
+				float normal_scale;
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_SCALE(aiTextureType_NORMALS, 0), &normal_scale);
+				render_mtl.NormalScale(normal_scale);
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
@@ -504,30 +532,46 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				render_mtl.tex_names[RenderMaterial::TS_Height] = str.C_Str();
+				render_mtl.TextureName(RenderMaterial::TS_Height, str.C_Str());
 			}
 
-			render_mtl.detail_mode = RenderMaterial::SDM_Parallax;
-			if (render_mtl.tex_names[RenderMaterial::TS_Height].empty())
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_LIGHTMAP);
+			if (count > 0)
 			{
-				render_mtl.height_offset_scale = float2(0, 0);
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_LIGHTMAP, 0, &str, 0, 0, 0, 0, 0, 0);
+				render_mtl.TextureName(RenderMaterial::TS_Occlusion, str.C_Str());
+
+				float occlusion_strength;
+				aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_TEXTURE_STRENGTH(aiTextureType_LIGHTMAP, 0), &occlusion_strength);
+				render_mtl.OcclusionStrength(occlusion_strength);
+			}
+
+			render_mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxMapping);
+			if (render_mtl.TextureName(RenderMaterial::TS_Height).empty())
+			{
+				render_mtl.HeightOffset(0);
+				render_mtl.HeightScale(0);
 			}
 			else
 			{
-				render_mtl.height_offset_scale = float2(-0.5f, 0.06f);
+				render_mtl.HeightOffset(-0.5f);
+				render_mtl.HeightScale(0.06f);
 
-				float ai_bumpscaling = 0;
+				float ai_bumpscaling;
 				if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_BUMPSCALING, &ai_bumpscaling))
 				{
-					render_mtl.height_offset_scale.y() = ai_bumpscaling;
+					render_mtl.HeightScale(ai_bumpscaling);
 				}
 			}
-			render_mtl.tess_factors = float4(5, 5, 1, 9);
+			render_mtl.EdgeTessHint(5);
+			render_mtl.InsideTessHint(5);
+			render_mtl.MinTessFactor(1);
+			render_mtl.MaxTessFactor(9);
 		}
 	}
 
-	void MeshLoader::BuildMeshData(std::vector<std::shared_ptr<aiScene const>> const & scene_lods)
+	void MeshLoader::BuildMeshData(std::vector<aiScene const*> const & scene_lods)
 	{
 		for (size_t lod = 0; lod < scene_lods.size(); ++ lod)
 		{
@@ -650,7 +694,9 @@ namespace
 						bool found = false;
 						for (uint32_t ji = 0; ji < joints_.size(); ++ ji)
 						{
-							if (joints_[ji].name == bone->mName.C_Str())
+							std::string joint_name;
+							Convert(joint_name, joints_[ji].name);
+							if (joint_name == bone->mName.C_Str())
 							{
 								for (unsigned int wi = 0; wi < bone->mNumWeights; ++ wi)
 								{
@@ -699,7 +745,7 @@ namespace
 
 	void MeshLoader::BuildJoints(aiScene const * scene)
 	{
-		std::map<std::string, Joint> joint_nodes;
+		std::map<std::string, std::pair<JointComponentPtr, int16_t>> joint_nodes;
 
 		std::function<void(aiNode const *, float4x4 const &)> build_bind_matrix =
 			[&build_bind_matrix, &joint_nodes, scene](aiNode const * node, float4x4 const & parent_mat)
@@ -712,13 +758,16 @@ namespace
 				{
 					aiBone const * bone = mesh->mBones[ibone];
 
-					Joint joint;
-					joint.name = bone->mName.C_Str();
+					auto joint = MakeSharedPtr<JointComponent>();
 
-					auto const bone_to_mesh = MathLib::inverse(MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1))) * mesh_trans;					
-					MatrixToDQ(bone_to_mesh, joint.bind_real, joint.bind_dual, joint.bind_scale);
+					auto const bone_to_mesh = MathLib::inverse(MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1))) * mesh_trans;
+					Quaternion bind_real, bind_dual;
+					float bind_scale;
+					MatrixToDQ(bone_to_mesh, bind_real, bind_dual, bind_scale);
 
-					joint_nodes[joint.name] = joint;
+					joint->BindParams(bind_real, bind_dual, bind_scale);
+
+					joint_nodes[bone->mName.C_Str()] = std::make_pair(std::move(joint), static_cast<int16_t>(-1));
 				}
 			}
 
@@ -746,12 +795,9 @@ namespace
 
 			if (child_has_bone && (iter == joint_nodes.end()))
 			{
-				Joint joint;
-				joint.name = name;
-				joint.bind_real = Quaternion::Identity();
-				joint.bind_dual = Quaternion(0, 0, 0, 0);
-				joint.bind_scale = 1;
-				joint_nodes[name] = joint;
+				auto joint = MakeSharedPtr<JointComponent>();
+				joint->BindParams(Quaternion::Identity(), Quaternion(0, 0, 0, 0), 1);
+				joint_nodes[name] = std::make_pair(std::move(joint), static_cast<int16_t>(-1));
 			}
 
 			return child_has_bone;
@@ -767,14 +813,13 @@ namespace
 			{
 				joint_id = static_cast<int>(joints_.size());
 
-				auto const local_matrix = MathLib::transpose(float4x4(&node->mTransformation.a1));
-				// Borrow those variables to store a local matrix
-				MatrixToDQ(local_matrix, iter->second.inverse_origin_real, iter->second.inverse_origin_dual,
-					iter->second.inverse_origin_scale);
+				iter->second.second = static_cast<int16_t>(parent_id);
 
-				iter->second.parent = static_cast<int16_t>(parent_id);
-
-				joints_.push_back(iter->second);
+				JointInfo joint_info;
+				joint_info.name = name;
+				joint_info.joint = iter->second.first;
+				joint_info.parent_id = iter->second.second;
+				joints_.push_back(std::move(joint_info));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
@@ -788,26 +833,26 @@ namespace
 		alloc_joints(scene->mRootNode, -1);
 	}
 
-	void MeshLoader::BuildActions(aiScene const * scene)
+	void MeshLoader::BuildAnimations(aiScene const * scene)
 	{
 		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
-		struct Animation
+		struct AssimpAnimation
 		{
 			std::string name;
 			int frame_num;
 			std::map<int/*joint_id*/, KeyFrameSet> resampled_frames;
 		};
 
-		std::vector<Animation> animations;
+		std::vector<AssimpAnimation> assimp_animations;
 
 		int const resample_fps = 25;
-		// for actions
+		// for animations
 		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ ianim)
 		{
 			aiAnimation const * cur_anim = scene->mAnimations[ianim];
 			float duration = static_cast<float>(cur_anim->mDuration / cur_anim->mTicksPerSecond);
-			Animation anim;
+			AssimpAnimation anim;
 			anim.name = cur_anim->mName.C_Str();
 			anim.frame_num = static_cast<int>(ceilf(duration * resample_fps));
 			if (anim.frame_num == 0)
@@ -854,8 +899,18 @@ namespace
 						scales.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
 					}
 
+					float4x4 parent_mat;
+					if (auto* parent_node = joints_[joint_id].joint->BoundSceneNode()->Parent())
+					{
+						parent_mat = parent_node->TransformToWorld();
+					}
+					else
+					{
+						parent_mat = float4x4::Identity();
+					}
+
 					// resample
-					this->ResampleJointTransform(anim.resampled_frames[joint_id], 0, anim.frame_num,
+					this->ResampleJointTransform(anim.resampled_frames[joint_id], parent_mat, 0, anim.frame_num,
 						static_cast<float>(cur_anim->mTicksPerSecond / resample_fps), poss, quats, scales);
 				}
 			}
@@ -867,34 +922,39 @@ namespace
 				{
 					KeyFrameSet default_tf;
 					default_tf.frame_id.push_back(0);
-					// Borrow those variables to store a local matrix
-					default_tf.bind_real.push_back(joints_[ji].inverse_origin_real);
-					default_tf.bind_dual.push_back(joints_[ji].inverse_origin_dual);
-					default_tf.bind_scale.push_back(joints_[ji].inverse_origin_scale);
+
+					auto const& node_mat = joints_[ji].joint->BoundSceneNode()->TransformToWorld();
+					Quaternion bind_real, bind_dual;
+					float bind_scale;
+					MatrixToDQ(node_mat, bind_real, bind_dual, bind_scale);
+
+					default_tf.bind_real.push_back(bind_real);
+					default_tf.bind_dual.push_back(bind_dual);
+					default_tf.bind_scale.push_back(bind_scale);
 					anim.resampled_frames.emplace(joint_id, default_tf);
 				}
 			}
 
-			animations.push_back(anim);
+			assimp_animations.push_back(anim);
 		}
 
 		auto kfs = MakeSharedPtr<std::vector<KeyFrameSet>>(joints_.size());
-		auto actions = MakeSharedPtr<std::vector<AnimationAction>>();
-		int action_frame_offset = 0;
-		for (auto const & anim : animations)
+		auto animations = MakeSharedPtr<std::vector<Animation>>();
+		int animation_frame_offset = 0;
+		for (auto const & anim : assimp_animations)
 		{
-			AnimationAction action;
-			action.name = anim.name;
-			action.start_frame = action_frame_offset;
-			action.end_frame = action_frame_offset + anim.frame_num;
-			actions->push_back(action);
+			Animation animation;
+			animation.name = anim.name;
+			animation.start_frame = animation_frame_offset;
+			animation.end_frame = animation_frame_offset + anim.frame_num;
+			animations->push_back(std::move(animation));
 
 			for (auto const & frame : anim.resampled_frames)
 			{
 				auto& kf = (*kfs)[frame.first];
 				for (size_t f = 0; f < frame.second.frame_id.size(); ++ f)
 				{
-					int const shifted_frame = frame.second.frame_id[f] + action_frame_offset;
+					int const shifted_frame = frame.second.frame_id[f] + animation_frame_offset;
 
 					kf.frame_id.push_back(shifted_frame);
 					kf.bind_real.push_back(frame.second.bind_real[f]);
@@ -905,17 +965,17 @@ namespace
 				this->CompressKeyFrameSet(kf);
 			}
 
-			action_frame_offset = action_frame_offset + anim.frame_num;
+			animation_frame_offset += anim.frame_num;
 		}
 
 		skinned_model.AttachKeyFrameSets(kfs);
-		skinned_model.AttachActions(actions);
+		skinned_model.AttachAnimations(animations);
 
 		skinned_model.FrameRate(resample_fps);
-		skinned_model.NumFrames(action_frame_offset);
+		skinned_model.NumFrames(animation_frame_offset);
 	}
 
-	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, int start_frame, int end_frame, float fps_scale,
+	void MeshLoader::ResampleJointTransform(KeyFrameSet& rkf, float4x4 const& parent_mat, int start_frame, int end_frame, float fps_scale,
 		std::vector<std::pair<float, float3>> const & poss, std::vector<std::pair<float, Quaternion>> const & quats,
 		std::vector<std::pair<float, float3>> const & scales)
 	{
@@ -955,6 +1015,10 @@ namespace
 				bind_dual_resampled = bind_dq_resampled.second;
 			}
 
+			float4x4 const node_mat =
+				MathLib::scaling(scale_resampled) * MathLib::udq_to_matrix(bind_real_resampled, bind_dual_resampled) * parent_mat;
+			MatrixToDQ(node_mat, bind_real_resampled, bind_dual_resampled, scale_resampled.x());
+
 			if (MathLib::SignBit(bind_real_resampled.w()) < 0)
 			{
 				bind_real_resampled = -bind_real_resampled;
@@ -970,18 +1034,6 @@ namespace
 
 	void MeshLoader::LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata)
 	{
-		auto ai_property_store_deleter = [](aiPropertyStore* props)
-		{
-			aiReleasePropertyStore(props);
-		};
-
-		std::unique_ptr<aiPropertyStore, decltype(ai_property_store_deleter)> props(aiCreatePropertyStore(), ai_property_store_deleter);
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
-		aiSetImportPropertyFloat(props.get(), AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_PP_SBP_REMOVE, 0);
-
-		aiSetImportPropertyInteger(props.get(), AI_CONFIG_GLOB_MEASURE_TIME, 1);
-
 		unsigned int ppsteps = aiProcess_JoinIdenticalVertices // join identical vertices/ optimize indexing
 			| aiProcess_ValidateDataStructure // perform a full validation of the loader's output
 			| aiProcess_RemoveRedundantMaterials // remove redundant materials
@@ -989,12 +1041,8 @@ namespace
 
 		uint32_t const num_lods = static_cast<uint32_t>(metadata.NumLods());
 
-		auto ai_scene_deleter = [](aiScene const * scene)
-		{
-			aiReleaseImport(scene);
-		};
-
-		std::vector<std::shared_ptr<aiScene const>> scenes(num_lods);
+		std::vector<Assimp::Importer> importers(num_lods);
+		std::vector<aiScene const*> scenes(num_lods);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			std::string_view const lod_file_name = (lod == 0) ? input_name : metadata.LodFileName(lod);
@@ -1005,22 +1053,28 @@ namespace
 				return;
 			}
 
-			scenes[lod].reset(aiImportFileExWithProperties(file_name.c_str(),
+			auto& importer = importers[lod];
+
+			importer.SetPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
+			importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
+			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, 0);
+			importer.SetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME, 1);
+
+			scenes[lod] = importer.ReadFile(file_name.c_str(),
 				ppsteps // configurable pp steps
 				| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
 				| aiProcess_Triangulate // triangulate polygons with more than 3 edges
 				| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
-				/*| aiProcess_FixInfacingNormals*/, // find normals facing inwards and inverts them
-				nullptr, props.get()), ai_scene_deleter);
+				/*| aiProcess_FixInfacingNormals*/);
 
 			if (!scenes[lod])
 			{
-				LogError() << "Assimp: Import file " << lod_file_name << " error: " << aiGetErrorString() << std::endl;
+				LogError() << "Assimp: Import file " << lod_file_name << " error: " << importer.GetErrorString() << std::endl;
 				return;
 			}
 		}
 
-		this->BuildJoints(scenes[0].get());
+		this->BuildJoints(scenes[0]);
 
 		bool const skinned = !joints_.empty();
 
@@ -1036,6 +1090,27 @@ namespace
 			this->BuildNodeData(num_lods, lod, -1, scenes[lod]->mRootNode);
 		}
 
+		for (auto& joint : joints_)
+		{
+			if (joint.parent_id == -1)
+			{
+				nodes_[0].node->AddComponent(joint.joint);
+			}
+			else
+			{
+				std::wstring joint_name;
+				Convert(joint_name, joint.name);
+				for (auto& node : nodes_)
+				{
+					if (node.node->Name() == joint_name)
+					{
+						node.node->AddComponent(joint.joint);
+						break;
+					}
+				}
+			}
+		}
+
 		if (skinned)
 		{
 			render_model_ = MakeSharedPtr<SkinnedModel>(nodes_[0].node);
@@ -1045,11 +1120,11 @@ namespace
 			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
 		}
 
-		this->BuildMaterials(scenes[0].get());
+		this->BuildMaterials(scenes[0]);
 
 		if (skinned)
 		{
-			this->BuildActions(scenes[0].get());
+			this->BuildAnimations(scenes[0]);
 		}
 
 		for (auto& mesh : meshes_)
@@ -1115,6 +1190,7 @@ namespace
 		for (uint32_t lod = 0; lod < model.NumLods(); ++ lod)
 		{
 			auto& ai_scene = scene_lods[lod];
+			bool skinned = false;
 
 			ai_scene.mNumMaterials = static_cast<uint32_t>(model.NumMaterials());
 			ai_scene.mMaterials = new aiMaterial*[ai_scene.mNumMaterials];
@@ -1127,29 +1203,29 @@ namespace
 
 				{
 					aiString name;
-					name.Set(mtl.name.c_str());
+					name.Set(mtl.Name().c_str());
 					ai_mtl.AddProperty(&name, AI_MATKEY_NAME);
 				}
 
 				{
 					if (is_gltf)
 					{
-						aiColor4D const ai_albedo(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z(), mtl.albedo.w());
+						aiColor4D const ai_albedo(mtl.Albedo().x(), mtl.Albedo().y(), mtl.Albedo().z(), mtl.Albedo().w());
 						ai_mtl.AddProperty(&ai_albedo, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
 
-						float ai_metallic = mtl.metalness;
+						float ai_metallic = mtl.Metalness();
 						ai_mtl.AddProperty(&ai_metallic, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
 					}
 					else
 					{
-						float3 const diffuse = mtl.albedo * (1 - mtl.metalness);
+						float3 const diffuse = mtl.Albedo() * (1 - mtl.Metalness());
 
 						aiColor3D const ai_diffuse(diffuse.x(), diffuse.y(), diffuse.z());
 						ai_mtl.AddProperty(&ai_diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 					}
 
 					float3 const specular = MathLib::lerp(float3(0.04f, 0.04f, 0.04f),
-						float3(mtl.albedo.x(), mtl.albedo.y(), mtl.albedo.z()), mtl.metalness);
+						float3(mtl.Albedo().x(), mtl.Albedo().y(), mtl.Albedo().z()), mtl.Metalness());
 
 					float const ai_shininess_strength = MathLib::max3(specular.x(), specular.y(), specular.z());
 					ai_mtl.AddProperty(&ai_shininess_strength, 1, AI_MATKEY_SHININESS_STRENGTH);
@@ -1159,36 +1235,36 @@ namespace
 					ai_mtl.AddProperty(&ai_specular, 1, AI_MATKEY_COLOR_SPECULAR);
 				}
 				{
-					aiColor3D const ai_emissive(mtl.emissive.x(), mtl.emissive.y(), mtl.emissive.z());
+					aiColor3D const ai_emissive(mtl.Emissive().x(), mtl.Emissive().y(), mtl.Emissive().z());
 					ai_mtl.AddProperty(&ai_emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 				}
 
 				{
-					ai_real const ai_opacity = mtl.albedo.w();
+					ai_real const ai_opacity = mtl.Albedo().w();
 					ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_OPACITY);
 				}
 
 				{
-					ai_real const ai_shininess = Glossiness2Shininess(mtl.glossiness);
+					ai_real const ai_shininess = Glossiness2Shininess(mtl.Glossiness());
 					ai_mtl.AddProperty(&ai_shininess, 1, AI_MATKEY_SHININESS);
 				}
 
 				{
-					int const ai_two_sided = mtl.two_sided;
+					int const ai_two_sided = mtl.TwoSided();
 					ai_mtl.AddProperty(&ai_two_sided, 1, AI_MATKEY_TWOSIDED);
 				}
 
 				if (is_gltf)
 				{
 					aiString ai_alpha_mode;
-					if (mtl.alpha_test > 0)
+					if (mtl.AlphaTestThreshold() > 0)
 					{
 						ai_alpha_mode.Set("MASK");
 
-						ai_real const ai_opacity = mtl.alpha_test;
+						ai_real const ai_opacity = mtl.AlphaTestThreshold();
 						ai_mtl.AddProperty(&ai_opacity, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 					}
-					else if (mtl.albedo.w() < 1)
+					else if (mtl.Albedo().w() < 1)
 					{
 						ai_alpha_mode.Set("BLEND");
 					}
@@ -1202,10 +1278,10 @@ namespace
 
 				// TODO: SSS
 
-				if (!mtl.tex_names[RenderMaterial::TS_Albedo].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Albedo).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Albedo]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Albedo));
 					if (is_gltf)
 					{
 						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
@@ -1216,10 +1292,10 @@ namespace
 					}
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Glossiness].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Glossiness]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness));
 					if (is_gltf)
 					{
 						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
@@ -1230,29 +1306,29 @@ namespace
 					}
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Emissive].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Emissive).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Emissive]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Emissive));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_EMISSIVE(0));
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Normal].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Normal).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Normal]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Normal));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_NORMALS(0));
 				}
 
-				if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
+				if (!mtl.TextureName(RenderMaterial::TS_Height).empty())
 				{
 					aiString name;
-					name.Set(mtl.tex_names[RenderMaterial::TS_Height]);
+					name.Set(mtl.TextureName(RenderMaterial::TS_Height));
 					ai_mtl.AddProperty(&name, AI_MATKEY_TEXTURE_HEIGHT(0));
 
-					if (!MathLib::equal<float>(mtl.height_offset_scale.y(), 0.06f))
+					if (!MathLib::equal<float>(mtl.HeightScale(), 0.06f))
 					{
-						ai_real const ai_bump_scaling = mtl.height_offset_scale.y();
+						ai_real const ai_bump_scaling = mtl.HeightScale();
 						ai_mtl.AddProperty(&ai_bump_scaling, 1, AI_MATKEY_BUMPSCALING);
 					}
 				}
@@ -1514,8 +1590,124 @@ namespace
 						}
 						break;
 
+					case VEU_BlendWeight:
+						break;
+
+					case VEU_BlendIndex:
+						break;
+
 					default:
 						KFL_UNREACHABLE("Unsupported vertex format.");
+					}
+				}
+
+				{
+					std::vector<uint8_t> blend_indices_data;
+					std::vector<uint8_t> blend_weight_data;
+					for (uint32_t vi = 0; vi < rl.NumVertexStreams(); ++vi)
+					{
+						auto const& ve = rl.VertexStreamFormat(vi)[0];
+						if (ve.usage == VEU_BlendIndex)
+						{
+							GraphicsBuffer::Mapper mapper(*rl.GetVertexStream(vi), BA_Read_Only);
+							uint8_t const* bi = mapper.Pointer<uint8_t>() + start_vertex * 4;
+							blend_indices_data.insert(blend_indices_data.end(), bi, bi + ai_mesh.mNumVertices * 4);
+						}
+						else if (ve.usage == VEU_BlendWeight)
+						{
+							GraphicsBuffer::Mapper mapper(*rl.GetVertexStream(vi), BA_Read_Only);
+							uint8_t const* bw = mapper.Pointer<uint8_t>() + start_vertex * 4;
+							blend_weight_data.insert(blend_weight_data.end(), bw, bw + ai_mesh.mNumVertices * 4);
+						}
+					}
+
+					std::vector<std::vector<uint8_t>> blend_indices;
+					std::vector<std::vector<float>> blend_weight;
+					std::vector<uint8_t> joint_indices;
+					if (!blend_indices_data.empty() && !blend_weight_data.empty())
+					{
+						blend_indices.resize(ai_mesh.mNumVertices);
+						blend_weight.resize(ai_mesh.mNumVertices);
+
+						for (uint32_t vi = 0; vi < ai_mesh.mNumVertices; ++vi)
+						{
+							for (uint32_t wi = 0; wi < 4; ++wi)
+							{
+								uint8_t const joint_index = (blend_indices_data[vi * 4 + wi]);
+								float const weight = blend_weight_data[vi * 4 + wi];
+								if (weight > 0)
+								{
+									blend_indices[vi].push_back(joint_index);
+									joint_indices.push_back(joint_index);
+									blend_weight[vi].push_back(weight / 255.0f);
+								};
+							}
+						}
+					}
+
+					std::sort(joint_indices.begin(), joint_indices.end());
+					joint_indices.erase(std::unique(joint_indices.begin(), joint_indices.end()), joint_indices.end());
+
+					if (!joint_indices.empty())
+					{
+						skinned = true;
+						SkinnedModel const& skinned_model = checked_cast<SkinnedModel const&>(model);
+
+						ai_mesh.mNumBones = static_cast<uint32_t>(joint_indices.size());
+						ai_mesh.mBones = new aiBone*[ai_mesh.mNumBones];
+						
+						std::map<uint32_t, uint32_t> joint_mapping;
+						for (uint32_t bi = 0; bi < ai_mesh.mNumBones; ++bi)
+						{
+							joint_mapping.emplace(joint_indices[bi], bi);
+						}
+
+						std::vector<std::vector<aiVertexWeight>> vertex_weights(ai_mesh.mNumBones);
+						for (uint32_t vi = 0; vi < ai_mesh.mNumVertices; ++vi)
+						{
+							for (uint32_t wi = 0; wi < blend_indices[vi].size(); ++wi)
+							{
+								auto& vw = vertex_weights[joint_mapping[blend_indices[vi][wi]]];
+								vw.push_back(aiVertexWeight(vi, blend_weight[vi][wi]));
+							}
+						}
+
+						for (uint32_t bi = 0; bi < ai_mesh.mNumBones; ++bi)
+						{
+							ai_mesh.mBones[bi] = new aiBone;
+
+							auto const* joint = skinned_model.GetJoint(joint_indices[bi]).get();
+							auto const* joint_node = joint->BoundSceneNode();
+
+							SceneNode const* mesh_node = nullptr;
+							model.RootNode()->Traverse([&mesh, &mesh_node](SceneNode& node)
+								{
+									node.ForEachComponentOfType<RenderableComponent>([&mesh, &node, &mesh_node](RenderableComponent& comp)
+										{
+											if (&comp.BoundRenderable() == &mesh)
+											{
+												mesh_node = &node;
+											}
+										});
+									return true;
+								});
+							BOOST_ASSERT(mesh_node != nullptr);
+
+							std::string joint_name;
+							Convert(joint_name, joint_node->Name());
+							ai_mesh.mBones[bi]->mName.Set(joint_name);
+
+							ai_mesh.mBones[bi]->mNumWeights = static_cast<uint32_t>(vertex_weights[bi].size());
+							ai_mesh.mBones[bi]->mWeights = new aiVertexWeight[ai_mesh.mBones[bi]->mNumWeights];
+							memcpy(ai_mesh.mBones[bi]->mWeights, vertex_weights[bi].data(),
+								ai_mesh.mBones[bi]->mNumWeights * sizeof(aiVertexWeight));
+
+							float4x4 const joint_mat = DQToMatrix(joint->BindReal(), joint->BindDual(), joint->BindScale());
+							float4x4 const node_mat = mesh_node->TransformToWorld();
+
+							float4x4 const offset_mat = MathLib::transpose(MathLib::inverse(joint_mat * MathLib::inverse(node_mat)));
+							memcpy(&ai_mesh.mBones[bi]->mOffsetMatrix.a1, &offset_mat, sizeof(offset_mat));
+						}
 					}
 				}
 
@@ -1561,6 +1753,103 @@ namespace
 				}
 			}
 
+			if (skinned)
+			{
+				SkinnedModel const& skinned_model = checked_cast<SkinnedModel const&>(model);
+
+				ai_scene.mNumAnimations = skinned_model.NumAnimations();
+				ai_scene.mAnimations = new aiAnimation*[ai_scene.mNumAnimations];
+
+				for (uint32_t ai = 0; ai < ai_scene.mNumAnimations; ++ai)
+				{
+					ai_scene.mAnimations[ai] = new aiAnimation;
+
+					auto& animations = *skinned_model.GetAnimations();
+					ai_scene.mAnimations[ai]->mName.Set(animations[ai].name);
+					ai_scene.mAnimations[ai]->mDuration = animations[ai].end_frame - animations[ai].start_frame;
+					ai_scene.mAnimations[ai]->mTicksPerSecond = skinned_model.FrameRate();
+
+					ai_scene.mAnimations[ai]->mNumChannels = 0;
+					std::vector<uint32_t> non_trivial_joint_indices;
+					for (uint32_t ji = 0; ji < skinned_model.NumJoints(); ++ji)
+					{
+						auto& key_frame_set = (*skinned_model.GetKeyFrameSets())[ji];
+						if (key_frame_set.frame_id.size() > 1)
+						{
+							non_trivial_joint_indices.push_back(ji);
+						}
+						else if (key_frame_set.frame_id.size() == 1)
+						{
+							float4x4 const& node_mat = skinned_model.GetJoint(ji)->BoundSceneNode()->TransformToWorld();
+							float4x4 const joint_mat =
+								MathLib::scaling(key_frame_set.bind_scale[0], key_frame_set.bind_scale[0], key_frame_set.bind_scale[0]) *
+								MathLib::udq_to_matrix(key_frame_set.bind_real[0], key_frame_set.bind_dual[0]);
+
+							for (uint32_t item = 0; item < float4x4::size(); ++item)
+							{
+								if (std::abs(node_mat[item] - joint_mat[item]) > 1e-3f)
+								{
+									non_trivial_joint_indices.push_back(ji);
+									break;
+								}
+							}
+						}
+					}
+
+					ai_scene.mAnimations[ai]->mNumChannels = static_cast<uint32_t>(non_trivial_joint_indices.size());
+					ai_scene.mAnimations[ai]->mChannels = new aiNodeAnim*[ai_scene.mAnimations[ai]->mNumChannels];
+					for (size_t ci = 0; ci < non_trivial_joint_indices.size(); ++ci)
+					{
+						uint32_t const ji = non_trivial_joint_indices[ci];
+						auto& key_frame_set = (*skinned_model.GetKeyFrameSets())[ji];
+						ai_scene.mAnimations[ai]->mChannels[ci] = new aiNodeAnim;
+						auto& node_anim = *ai_scene.mAnimations[ai]->mChannels[ci];
+
+						auto& joint_node = *skinned_model.GetJoint(ji)->BoundSceneNode();
+
+						std::string joint_name;
+						Convert(joint_name, joint_node.Name());
+						node_anim.mNodeName.Set(joint_name);
+
+						float4x4 parent_mat;
+						if (auto* parent_node = joint_node.Parent())
+						{
+							parent_mat = parent_node->TransformToWorld();
+						}
+						else
+						{
+							parent_mat = float4x4::Identity();
+						}
+
+						node_anim.mNumPositionKeys = node_anim.mNumRotationKeys = node_anim.mNumScalingKeys =
+							static_cast<uint32_t>(key_frame_set.frame_id.size());
+
+						node_anim.mPositionKeys = new aiVectorKey[node_anim.mNumPositionKeys];
+						node_anim.mRotationKeys = new aiQuatKey[node_anim.mNumPositionKeys];
+						node_anim.mScalingKeys = new aiVectorKey[node_anim.mNumPositionKeys];
+						for (uint32_t pi = 0; pi < node_anim.mNumPositionKeys; ++pi)
+						{
+							node_anim.mPositionKeys[pi].mTime = node_anim.mRotationKeys[pi].mTime = node_anim.mScalingKeys[pi].mTime =
+								static_cast<float>(key_frame_set.frame_id[pi] - animations[ai].start_frame) / skinned_model.FrameRate();
+
+							float4x4 const key_frame_mat =
+								MathLib::scaling(key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi]) *
+								MathLib::udq_to_matrix(key_frame_set.bind_real[pi], key_frame_set.bind_dual[pi]) *
+								MathLib::inverse(parent_mat);
+
+							float3 scale;
+							Quaternion rot;
+							float3 trans;
+							MathLib::decompose(scale, rot, trans, key_frame_mat);
+
+							node_anim.mPositionKeys[pi].mValue = Float3ToAiVector(trans);
+							node_anim.mRotationKeys[pi].mValue = QuatToAiQuat(rot);
+							node_anim.mScalingKeys[pi].mValue = Float3ToAiVector(scale);
+						}
+					}
+				}
+			}
+
 			ai_scene.mRootNode = new aiNode;
 			ai_scene.mRootNode->mParent = nullptr;
 			std::function<void(aiNode& ai_node, SceneNode const & node)> convert_node_subtree
@@ -1597,7 +1886,7 @@ namespace
 							}
 						});
 
-						for (uint32_t i = 0; i < node.Children().size(); ++ i)
+						for (uint32_t i = 0; i < ai_node.mNumChildren; ++i)
 						{
 							ai_node.mChildren[i] = new aiNode;
 							ai_node.mChildren[i]->mParent = &ai_node;
@@ -1609,7 +1898,7 @@ namespace
 			auto lod_output_name = (output_path.parent_path() / output_path.stem()).string();
 			if (scene_lods.size() > 1)
 			{
-				lod_output_name  += "_lod_" + std::to_string(lod);
+				lod_output_name  += std::format("_lod_{}", lod);
 			}
 			lod_output_name += output_ext.string();
 
@@ -1632,7 +1921,8 @@ namespace
 				}
 			}
 
-			aiExportScene(&ai_scene, format_id.c_str(), lod_output_name.c_str(), aiProcess_ConvertToLeftHanded);
+			Assimp::Exporter exporter;
+			exporter.Export(&ai_scene, format_id.c_str(), lod_output_name.c_str(), aiProcess_ConvertToLeftHanded);
 		}
 	}
 
@@ -1654,26 +1944,30 @@ namespace
 			render_model_->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>();
 			auto& mtl = *render_model_->GetMaterial(mtl_index);
 
-			mtl.name = "Material " + std::to_string(mtl_index);
+			mtl.Name(std::format("Material {}", mtl_index));
 
-			mtl.albedo = float4(0, 0, 0, 1);
-			mtl.metalness = 0;
-			mtl.glossiness = 0;
-			mtl.emissive = float3(0, 0, 0);
-			mtl.transparent = false;
-			mtl.alpha_test = 0;
-			mtl.sss = false;
-			mtl.two_sided = false;
+			mtl.Albedo(float4(0, 0, 0, 1));
+			mtl.Metalness(0);
+			mtl.Glossiness(0);
+			mtl.Emissive(float3(0, 0, 0));
+			mtl.Transparent(false);
+			mtl.AlphaTestThreshold(0);
+			mtl.Sss(false);
+			mtl.TwoSided(false);
 
-			mtl.detail_mode = RenderMaterial::SDM_Parallax;
-			mtl.height_offset_scale = float2(-0.5f, 0.06f);
-			mtl.tess_factors = float4(5, 5, 1, 9);
+			mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxMapping);
+			mtl.HeightOffset(-0.5f);
+			mtl.HeightScale(0.06f);
+			mtl.EdgeTessHint(5);
+			mtl.InsideTessHint(5);
+			mtl.MinTessFactor(1);
+			mtl.MaxTessFactor(9);
 
 			{
 				XMLAttributePtr attr = mtl_node->Attrib("name");
 				if (attr)
 				{
-					mtl.name = std::string(attr->ValueString());
+					mtl.Name(attr->ValueString());
 				}
 			}
 
@@ -1683,84 +1977,112 @@ namespace
 				XMLAttributePtr attr = albedo_node->Attrib("color");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &mtl.albedo[0]);
+					float4 albedo;
+					ExtractFVector<4>(attr->ValueString(), &albedo[0]);
+					mtl.Albedo(albedo);
 				}
 				attr = albedo_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Albedo] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Albedo, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
+				float4 albedo(0, 0, 0, 1);
+
 				XMLAttributePtr attr = mtl_node->Attrib("diffuse");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.albedo[0]);
+					ExtractFVector<3>(attr->ValueString(), &albedo[0]);
 				}
 				else
 				{
 					attr = mtl_node->Attrib("diffuse_r");
 					if (attr)
 					{
-						mtl.albedo.x() = attr->ValueFloat();
+						albedo.x() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("diffuse_g");
 					if (attr)
 					{
-						mtl.albedo.y() = attr->ValueFloat();
+						albedo.y() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("diffuse_b");
 					if (attr)
 					{
-						mtl.albedo.z() = attr->ValueFloat();
+						albedo.z() = attr->ValueFloat();
 					}
 				}
 
 				attr = mtl_node->Attrib("opacity");
 				if (attr)
 				{
-					mtl.albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
+					albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
 				}
+
+				mtl.Albedo(albedo);
 			}
 
-			XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
-			if (metalness_node)
+			XMLNodePtr metalness_glossiness_node = mtl_node->FirstNode("metalness_glossiness");
+			if (metalness_glossiness_node)
 			{
-				XMLAttributePtr attr = metalness_node->Attrib("value");
+				XMLAttributePtr attr = metalness_glossiness_node->Attrib("metalness");
 				if (attr)
 				{
-					mtl.metalness = attr->ValueFloat();
+					mtl.Metalness(attr->ValueFloat());
 				}
-				attr = metalness_node->Attrib("texture");
+				attr = metalness_glossiness_node->Attrib("glossiness");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Metalness] = std::string(attr->ValueString());
+					mtl.Glossiness(attr->ValueFloat());
 				}
-			}
-
-			XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
-			if (glossiness_node)
-			{
-				XMLAttributePtr attr = glossiness_node->Attrib("value");
+				attr = metalness_glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.glossiness = attr->ValueFloat();
-				}
-				attr = glossiness_node->Attrib("texture");
-				if (attr)
-				{
-					mtl.tex_names[RenderMaterial::TS_Glossiness] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
-				XMLAttributePtr attr = mtl_node->Attrib("shininess");
-				if (attr)
+				XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
+				if (metalness_node)
 				{
-					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
-					shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
-					mtl.glossiness = Shininess2Glossiness(shininess);
+					XMLAttributePtr attr = metalness_node->Attrib("value");
+					if (attr)
+					{
+						mtl.Metalness(attr->ValueFloat());
+					}
+					attr = metalness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
+					}
+				}
+
+				XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
+				if (glossiness_node)
+				{
+					XMLAttributePtr attr = glossiness_node->Attrib("value");
+					if (attr)
+					{
+						mtl.Glossiness(attr->ValueFloat());
+					}
+					attr = glossiness_node->Attrib("texture");
+					if (attr)
+					{
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
+					}
+				}
+				else
+				{
+					XMLAttributePtr attr = mtl_node->Attrib("shininess");
+					if (attr)
+					{
+						float shininess = mtl_node->Attrib("shininess")->ValueFloat();
+						shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
+						mtl.Glossiness(Shininess2Glossiness(shininess));
+					}
 				}
 			}
 
@@ -1770,39 +2092,45 @@ namespace
 				XMLAttributePtr attr = emissive_node->Attrib("color");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+					float3 emissive;
+					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
+					mtl.Emissive(emissive);
 				}
 				attr = emissive_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Emissive] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Emissive, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
+				float3 emissive(0, 0, 0);
+
 				XMLAttributePtr attr = mtl_node->Attrib("emit");
 				if (attr)
 				{
-					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
 				}
 				else
 				{
 					attr = mtl_node->Attrib("emit_r");
 					if (attr)
 					{
-						mtl.emissive.x() = attr->ValueFloat();
+						emissive.x() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("emit_g");
 					if (attr)
 					{
-						mtl.emissive.y() = attr->ValueFloat();
+						emissive.y() = attr->ValueFloat();
 					}
 					attr = mtl_node->Attrib("emit_b");
 					if (attr)
 					{
-						mtl.emissive.z() = attr->ValueFloat();
+						emissive.z() = attr->ValueFloat();
 					}
 				}
+
+				mtl.Emissive(emissive);
 			}
 			
 			XMLNodePtr normal_node = mtl_node->FirstNode("normal");
@@ -1811,7 +2139,7 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Normal] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Normal, std::string(attr->ValueString()));
 				}
 			}
 
@@ -1825,19 +2153,19 @@ namespace
 				XMLAttributePtr attr = height_node->Attrib("texture");
 				if (attr)
 				{
-					mtl.tex_names[RenderMaterial::TS_Height] = std::string(attr->ValueString());
+					mtl.TextureName(RenderMaterial::TS_Height, std::string(attr->ValueString()));
 				}
 
 				attr = height_node->Attrib("offset");
 				if (attr)
 				{
-					mtl.height_offset_scale.x() = attr->ValueFloat();
+					mtl.HeightOffset(attr->ValueFloat());
 				}
 
 				attr = height_node->Attrib("scale");
 				if (attr)
 				{
-					mtl.height_offset_scale.y() = attr->ValueFloat();
+					mtl.HeightScale(attr->ValueFloat());
 				}
 			}
 
@@ -1849,26 +2177,30 @@ namespace
 				{
 					std::string_view const mode_str = attr->ValueString();
 					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
-					if (CT_HASH("Flat Tessellation") == mode_hash)
+					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
 					{
-						mtl.detail_mode = RenderMaterial::SDM_FlatTessellation;
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping);
+					}
+					else if (CT_HASH("Flat Tessellation") == mode_hash)
+					{
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::FlatTessellation);
 					}
 					else if (CT_HASH("Smooth Tessellation") == mode_hash)
 					{
-						mtl.detail_mode = RenderMaterial::SDM_SmoothTessellation;
+						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::SmoothTessellation);
 					}
 				}
 
 				attr = detail_node->Attrib("height_offset");
 				if (attr)
 				{
-					mtl.height_offset_scale.x() = attr->ValueFloat();
+					mtl.HeightOffset(attr->ValueFloat());
 				}
 
 				attr = detail_node->Attrib("height_scale");
 				if (attr)
 				{
-					mtl.height_offset_scale.y() = attr->ValueFloat();
+					mtl.HeightScale(attr->ValueFloat());
 				}
 
 				XMLNodePtr tess_node = detail_node->FirstNode("tess");
@@ -1877,22 +2209,22 @@ namespace
 					attr = tess_node->Attrib("edge_hint");
 					if (attr)
 					{
-						mtl.tess_factors.x() = attr->ValueFloat();
+						mtl.EdgeTessHint(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("inside_hint");
 					if (attr)
 					{
-						mtl.tess_factors.y() = attr->ValueFloat();
+						mtl.InsideTessHint(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("min");
 					if (attr)
 					{
-						mtl.tess_factors.z() = attr->ValueFloat();
+						mtl.MinTessFactor(attr->ValueFloat());
 					}
 					attr = tess_node->Attrib("max");
 					if (attr)
 					{
-						mtl.tess_factors.w() = attr->ValueFloat();
+						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 				else
@@ -1900,22 +2232,22 @@ namespace
 					attr = detail_node->Attrib("edge_tess_hint");
 					if (attr)
 					{
-						mtl.tess_factors.x() = attr->ValueFloat();
+						mtl.EdgeTessHint(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("inside_tess_hint");
 					if (attr)
 					{
-						mtl.tess_factors.y() = attr->ValueFloat();
+						mtl.InsideTessHint(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("min_tess");
 					if (attr)
 					{
-						mtl.tess_factors.z() = attr->ValueFloat();
+						mtl.MinTessFactor(attr->ValueFloat());
 					}
 					attr = detail_node->Attrib("max_tess");
 					if (attr)
 					{
-						mtl.tess_factors.w() = attr->ValueFloat();
+						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 			}
@@ -1926,7 +2258,7 @@ namespace
 				XMLAttributePtr attr = transparent_node->Attrib("value");
 				if (attr)
 				{
-					mtl.transparent = attr->ValueInt() ? true : false;
+					mtl.Transparent(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -1936,7 +2268,7 @@ namespace
 				XMLAttributePtr attr = alpha_test_node->Attrib("value");
 				if (attr)
 				{
-					mtl.alpha_test = attr->ValueFloat();
+					mtl.AlphaTestThreshold(attr->ValueFloat());
 				}
 			}
 
@@ -1946,7 +2278,7 @@ namespace
 				XMLAttributePtr attr = sss_node->Attrib("value");
 				if (attr)
 				{
-					mtl.sss = attr->ValueInt() ? true : false;
+					mtl.Sss(attr->ValueInt() ? true : false);
 				}
 			}
 			else
@@ -1954,7 +2286,7 @@ namespace
 				XMLAttributePtr attr = mtl_node->Attrib("sss");
 				if (attr)
 				{
-					mtl.sss = attr->ValueInt() ? true : false;
+					mtl.Sss(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -1964,7 +2296,7 @@ namespace
 				XMLAttributePtr attr = two_sided_node->Attrib("value");
 				if (attr)
 				{
-					mtl.two_sided = attr->ValueInt() ? true : false;
+					mtl.TwoSided(attr->ValueInt() ? true : false);
 				}
 			}
 
@@ -1990,28 +2322,25 @@ namespace
 						|| (CT_HASH("Diffuse Color Map") == type_hash)
 						|| (CT_HASH("Albedo") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Albedo] = name;
+						mtl.TextureName(RenderMaterial::TS_Albedo, name);
 					}
-					else if (CT_HASH("Metalness") == type_hash)
+					else if ((CT_HASH("MetalnessGlossiness") == type_hash) || (CT_HASH("Metalness") == type_hash) ||
+							 (CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Metalness] = name;
-					}
-					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
-					{
-						mtl.tex_names[RenderMaterial::TS_Glossiness] = name;
+						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, name);
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Emissive] = name;
+						mtl.TextureName(RenderMaterial::TS_Emissive, name);
 					}
 					else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Normal] = name;
+						mtl.TextureName(RenderMaterial::TS_Normal, name);
 					}
 					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
 						|| (CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 					{
-						mtl.tex_names[RenderMaterial::TS_Height] = name;
+						mtl.TextureName(RenderMaterial::TS_Height, name);
 					}
 				}
 			}
@@ -2329,15 +2658,13 @@ namespace
 
 					std::string_view const index_str = attr->ValueString();
 					std::string_view const weight_str = weight_attr->ValueString();
-					std::vector<std::string> index_strs;
-					std::vector<std::string> weight_strs;
-					boost::algorithm::split(index_strs, index_str, boost::is_any_of(" "));
-					boost::algorithm::split(weight_strs, weight_str, boost::is_any_of(" "));
+					std::vector<std::string_view> index_strs = StringUtil::Split(index_str, StringUtil::EqualTo(' '));
+					std::vector<std::string_view> weight_strs = StringUtil::Split(weight_str, StringUtil::EqualTo(' '));
 					
 					for (size_t num_blend = 0; num_blend < index_strs.size(); ++ num_blend)
 					{
-						binding.push_back({ static_cast<uint32_t>(atoi(index_strs[num_blend].c_str())),
-							static_cast<float>(atof(weight_strs[num_blend].c_str())) });
+						binding.push_back(
+							{std::stoul(std::string(index_strs[num_blend])), std::stof(std::string(weight_strs[num_blend]))});
 					}
 				}
 				else
@@ -2594,10 +2921,13 @@ namespace
 	{
 		for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 		{
-			Joint joint;
+			auto joint = MakeSharedPtr<JointComponent>();
 
-			joint.name = std::string(bone_node->Attrib("name")->ValueString());
-			joint.parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+			std::string const joint_name = std::string(bone_node->Attrib("name")->ValueString());
+			int16_t const parent_id = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+
+			Quaternion joint_bind_real, joint_bind_dual;
+			float joint_bind_scale;
 
 			XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
 			if (bind_pos_node)
@@ -2612,9 +2942,9 @@ namespace
 				float scale = MathLib::length(bind_quat);
 				bind_quat /= scale;
 
-				joint.bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
-				joint.bind_real = bind_quat * scale;
-				joint.bind_scale = scale;
+				joint_bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+				joint_bind_real = bind_quat * scale;
+				joint_bind_scale = scale;
 			}
 			else
 			{
@@ -2626,14 +2956,14 @@ namespace
 				XMLAttributePtr attr = bind_real_node->Attrib("v");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &joint.bind_real[0]);
+					ExtractFVector<4>(attr->ValueString(), &joint_bind_real[0]);
 				}
 				else
 				{
-					joint.bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
-					joint.bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
-					joint.bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
-					joint.bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
+					joint_bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
+					joint_bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
+					joint_bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
+					joint_bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
 				}
 
 				XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
@@ -2644,29 +2974,33 @@ namespace
 				attr = bind_dual_node->Attrib("v");
 				if (attr)
 				{
-					ExtractFVector<4>(attr->ValueString(), &joint.bind_dual[0]);
+					ExtractFVector<4>(attr->ValueString(), &joint_bind_dual[0]);
 				}
 				else
 				{
-					joint.bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
-					joint.bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
-					joint.bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
-					joint.bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
+					joint_bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
+					joint_bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
+					joint_bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
+					joint_bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
 				}
 
-				joint.bind_scale = MathLib::length(joint.bind_real);
-				joint.bind_real /= joint.bind_scale;
-				if (MathLib::SignBit(joint.bind_real.w()) < 0)
+				joint_bind_scale = MathLib::length(joint_bind_real);
+				joint_bind_real /= joint_bind_scale;
+				if (MathLib::SignBit(joint_bind_real.w()) < 0)
 				{
-					joint.bind_real = -joint.bind_real;
-					joint.bind_scale = -joint.bind_scale;
+					joint_bind_real = -joint_bind_real;
+					joint_bind_scale = -joint_bind_scale;
 				}
 			}
 
-			std::tie(joint.inverse_origin_real, joint.inverse_origin_dual) = MathLib::inverse(joint.bind_real, joint.bind_dual);
-			joint.inverse_origin_scale = 1 / joint.bind_scale;
+			joint->BindParams(joint_bind_real, joint_bind_dual, joint_bind_scale);
+			joint->InitInverseOriginParams();
 
-			joints_.emplace_back(std::move(joint));
+			JointInfo joint_info;
+			joint_info.name = joint_name;
+			joint_info.joint = std::move(joint);
+			joint_info.parent_id = parent_id;
+			joints_.push_back(std::move(joint_info));
 		}
 	}
 
@@ -2874,31 +3208,31 @@ namespace
 			action_node = actions_chunk->FirstNode("action");
 		}
 
-		auto actions = MakeSharedPtr<std::vector<AnimationAction>>();
+		auto animations = MakeSharedPtr<std::vector<Animation>>();
 
-		AnimationAction action;
+		Animation animation;
 		if (action_node)
 		{
 			for (; action_node; action_node = action_node->NextSibling("action"))
 			{
-				action.name = std::string(action_node->Attrib("name")->ValueString());
+				animation.name = std::string(action_node->Attrib("name")->ValueString());
 
-				action.start_frame = action_node->Attrib("start")->ValueUInt();
-				action.end_frame = action_node->Attrib("end")->ValueUInt();
+				animation.start_frame = action_node->Attrib("start")->ValueUInt();
+				animation.end_frame = action_node->Attrib("end")->ValueUInt();
 
-				actions->push_back(action);
+				animations->push_back(animation);
 			}
 		}
 		else
 		{
-			action.name = "root";
-			action.start_frame = 0;
-			action.end_frame = skinned_model.NumFrames();
+			animation.name = "root";
+			animation.start_frame = 0;
+			animation.end_frame = skinned_model.NumFrames();
 
-			actions->push_back(action);
+			animations->push_back(animation);
 		}
 
-		skinned_model.AttachActions(actions);
+		skinned_model.AttachAnimations(animations);
 	}
 
 	void MeshLoader::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)
@@ -2907,7 +3241,7 @@ namespace
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
 		KlayGE::XMLDocument doc;
-		XMLNodePtr root = doc.Parse(file);
+		XMLNodePtr root = doc.Parse(*file);
 
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 
@@ -2923,6 +3257,44 @@ namespace
 		if (meshes_chunk)
 		{
 			this->CompileMeshesChunk(meshes_chunk);
+		}
+
+		if (!joints_.empty())
+		{
+			std::vector<NodeTransform> merged_nodes(joints_.size());
+
+			for (size_t i = 0; i < joints_.size(); ++i)
+			{
+				std::wstring joint_name;
+				Convert(joint_name, joints_[i].name);
+				NodeTransform node_transform;
+				node_transform.node = MakeSharedPtr<SceneNode>(joint_name, SceneNode::SOA_Cullable);
+				if (joints_[i].parent_id >= 0)
+				{
+					merged_nodes[joints_[i].parent_id].node->AddChild(node_transform.node);
+				}
+				node_transform.node->TransformToParent(float4x4::Identity());
+				node_transform.node->AddComponent(joints_[i].joint);
+				node_transform.parent_id = joints_[i].parent_id;
+				merged_nodes[i] = std::move(node_transform);
+			}
+
+			int16_t start_node_index = static_cast<int16_t>(joints_.size());
+			for (size_t i = 0; i < nodes_.size(); ++i)
+			{
+				if (nodes_[i].parent_id >= 0)
+				{
+					nodes_[i].parent_id += start_node_index;
+				}
+				else
+				{
+					merged_nodes[0].node->AddChild(nodes_[i].node);
+					nodes_[i].parent_id = 0;
+				}
+				merged_nodes.push_back(nodes_[i]);
+			}
+
+			nodes_ = std::move(merged_nodes);
 		}
 
 		if (skinned)
@@ -2953,10 +3325,12 @@ namespace
 				auto& kf = kfs[i];
 				if (kf.frame_id.empty())
 				{
+					auto const& joint = *joints_[i].joint;
+
 					Quaternion inv_parent_real;
 					Quaternion inv_parent_dual;
 					float inv_parent_scale;
-					if (joints_[i].parent < 0)
+					if (joints_[i].parent_id < 0)
 					{
 						inv_parent_real = Quaternion::Identity();
 						inv_parent_dual = Quaternion(0, 0, 0, 0);
@@ -2964,16 +3338,16 @@ namespace
 					}
 					else
 					{
-						std::tie(inv_parent_real, inv_parent_dual)
-							= MathLib::inverse(joints_[joints_[i].parent].bind_real, joints_[joints_[i].parent].bind_dual);
-						inv_parent_scale = 1 / joints_[joints_[i].parent].bind_scale;
+						auto const& parent_joint = *joints_[joints_[i].parent_id].joint;
+						std::tie(inv_parent_real, inv_parent_dual) = MathLib::inverse(parent_joint.BindReal(), parent_joint.BindDual());
+						inv_parent_scale = 1 / parent_joint.BindScale();
 					}
 
 					kf.frame_id.push_back(0);
-					kf.bind_real.push_back(MathLib::mul_real(joints_[i].bind_real, inv_parent_real));
-					kf.bind_dual.push_back(MathLib::mul_dual(joints_[i].bind_real, joints_[i].bind_dual * inv_parent_scale,
+					kf.bind_real.push_back(MathLib::mul_real(joint.BindReal(), inv_parent_real));
+					kf.bind_dual.push_back(MathLib::mul_dual(joint.BindReal(), joint.BindDual() * inv_parent_scale,
 						inv_parent_real, inv_parent_dual));
-					kf.bind_scale.push_back(joints_[i].bind_scale * inv_parent_scale);
+					kf.bind_scale.push_back(joint.BindScale() * inv_parent_scale);
 				}
 			}
 
@@ -3014,11 +3388,11 @@ namespace
 		{
 			if (joints_used[ji])
 			{
-				Joint const * j = &joints_[ji];
-				while ((j->parent != -1) && !joints_used[j->parent])
+				int16_t parent_id = joints_[ji].parent_id;
+				while ((parent_id != -1) && !joints_used[parent_id])
 				{
-					joints_used[j->parent] = true;
-					j = &joints_[j->parent];
+					joints_used[parent_id] = true;
+					parent_id = joints_[parent_id].parent_id;
 				}
 			}
 		}
@@ -3043,6 +3417,10 @@ namespace
 				BOOST_ASSERT(joint_mapping[ji] <= ji);
 				joints_[joint_mapping[ji]] = joints_[ji];
 				kfs[joint_mapping[ji]] = kfs[ji];
+			}
+			else
+			{
+				joints_[ji].joint->BoundSceneNode()->RemoveComponent(joints_[ji].joint.get());
 			}
 		}
 		joints_.resize(new_joint_id);
@@ -3553,12 +3931,13 @@ namespace
 		{
 			auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
+			std::vector<JointComponentPtr> joints;
 			for (auto& joint : joints_)
 			{
-				std::tie(joint.inverse_origin_real, joint.inverse_origin_dual) = MathLib::inverse(joint.bind_real, joint.bind_dual);
-				joint.inverse_origin_scale = 1 / joint.bind_scale;
+				joint.joint->InitInverseOriginParams();
+				joints.push_back(joint.joint);
 			}
-			skinned_model.AssignJoints(joints_.begin(), joints_.end());
+			skinned_model.AssignJoints(joints.begin(), joints.end());
 
 			// TODO: Run skinning on CPU to get the bounding box
 			for (uint32_t mesh_index = 0; mesh_index < render_meshes.size(); ++ mesh_index)
@@ -3601,6 +3980,10 @@ namespace
 		return render_model_;
 	}
 }
+
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 namespace KlayGE
 {

@@ -6,16 +6,17 @@ UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "9eadeccdc424
 SET(BUILD_SHARED_LIBS OFF)
 SET(BUILD_FRAMEWORK OFF)
 SET(OGG_ROOT ${VORBIS_PROJECT_DIR}/../libogg)
-SET(OGG_LIBRARIES ${EXTERNAL_PROJECT_DIR}/lib/libogg/${KLAYGE_PLATFORM_NAME}/ogg_static${KLAYGE_OUTPUT_SUFFIX})
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/External/libogg/ogg/include)
-IF(KLAYGE_PLATFORM_WINDOWS_STORE)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF()
+SET(OGG_LIBRARIES "ogg")
 if(KLAYGE_COMPILER_MSVC)
 	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
 endif()
 
 ADD_SUBDIRECTORY(${VORBIS_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vorbis")
+
+target_include_directories(vorbis
+	PUBLIC
+		${VORBIS_PROJECT_DIR}/include
+)
 
 SET_TARGET_PROPERTIES(vorbis PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${VORBIS_OUTPUT_DIR}
@@ -40,5 +41,16 @@ SET_TARGET_PROPERTIES(vorbisfile PROPERTIES
 
 foreach(target
 	"vorbis" "vorbisfile" "vorbisenc")
+	if(KLAYGE_COMPILER_CLANGCL OR KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_compile_definitions(${target}
+			PRIVATE
+				-D_CRT_SECURE_NO_WARNINGS
+		)
+	endif()
+	target_include_directories(${target}
+		PUBLIC
+			$<TARGET_PROPERTY:ogg,INTERFACE_INCLUDE_DIRECTORIES>
+	)
+
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/libvorbis")
 endforeach()

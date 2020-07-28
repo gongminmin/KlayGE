@@ -52,15 +52,6 @@ using namespace KlayGE;
 
 int main(int argc, char* argv[])
 {
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.hide_win = true;
-	context_cfg.graphics_cfg.hdr = false;
-	context_cfg.graphics_cfg.ppaa = false;
-	context_cfg.graphics_cfg.gamma = false;
-	context_cfg.graphics_cfg.color_grading = false;
-	Context::Instance().Config(context_cfg);
-
 	std::string input_name;
 	std::string metadata_name;
 	std::string output_name;
@@ -117,6 +108,15 @@ int main(int argc, char* argv[])
 		quiet = vm["quiet"].as<bool>();
 	}
 
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hide_win = true;
+	context_cfg.graphics_cfg.hdr = false;
+	context_cfg.graphics_cfg.ppaa = false;
+	context_cfg.graphics_cfg.gamma = false;
+	context_cfg.graphics_cfg.color_grading = false;
+	Context::Instance().Config(context_cfg);
+
 	std::string const full_input_name = ResLoader::Instance().Locate(input_name);
 	if (full_input_name.empty())
 	{
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 	filesystem::path const output_path(output_name);
 	if (output_path.extension() == ".model_bin")
 	{
-		uint32_t const MODEL_BIN_VERSION = 16;
+		uint32_t const MODEL_BIN_VERSION = 19;
 
 		ResIdentifierPtr output_file = ResLoader::Instance().Open(output_name);
 		if (output_file)

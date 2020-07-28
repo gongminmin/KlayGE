@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
@@ -15,6 +14,8 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+
+#include <iterator>
 
 #include "Model.hpp"
 
@@ -34,17 +35,6 @@ void DetailedSkinnedMesh::DoBuildMeshInfo(RenderModel const & model)
 	this->BindDeferredEffect(model_->Effect());
 }
 
-void DetailedSkinnedMesh::OnRenderBegin()
-{
-	SkinnedMesh::OnRenderBegin();
-	
-	if (model_->IsSkinned())
-	{
-		*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-		*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
-	}
-}
-
 void DetailedSkinnedMesh::VisualizeLighting()
 {
 	visualize_ = -1;
@@ -53,15 +43,15 @@ void DetailedSkinnedMesh::VisualizeLighting()
 
 void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
-	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
+	*(effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
+	*(effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
 	visualize_ = 0;
 	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
-	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
+	*(effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
 	visualize_ = 1;
 	this->UpdateTechniques();
 }
@@ -74,22 +64,22 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 	effect_attrs_ &= ~EA_SSS;
 	effect_attrs_ &= ~EA_SpecialShading;
 
-	if (mtl_->transparent)
+	if (mtl_->Transparent())
 	{
 		effect_attrs_ |= EA_TransparencyBack;
 		effect_attrs_ |= EA_TransparencyFront;
 	}
-	if (mtl_->alpha_test > 0)
+	if (mtl_->AlphaTestThreshold() > 0)
 	{
 		effect_attrs_ |= EA_AlphaTest;
 	}
-	if (mtl_->sss)
+	if (mtl_->Sss())
 	{
 		effect_attrs_ |= EA_SSS;
 	}
-	if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || textures_[RenderMaterial::TS_Emissive]
-		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
-		|| (effect_attrs_ & EA_Reflection))
+	if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
+		mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
+		(effect_attrs_ & EA_Reflection))
 	{
 		effect_attrs_ |= EA_SpecialShading;
 	}
@@ -103,9 +93,9 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	for (size_t i = 0; i < textures_.size(); ++ i)
+	for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 	{
-		textures_[i].reset();
+		mtl_->Texture(static_cast<RenderMaterial::TextureSlot>(i), ShaderResourceViewPtr());
 	}
 
 	StaticMesh::BuildMeshInfo(*model_);
@@ -117,9 +107,9 @@ void DetailedSkinnedMesh::UpdateTechniques()
 
 	if (visualize_ >= 0)
 	{
-		gbuffer_mrt_tech_ = model_->visualize_gbuffer_mrt_techs_[visualize_];
-		gbuffer_alpha_blend_back_mrt_tech_ = gbuffer_mrt_tech_;
-		gbuffer_alpha_blend_front_mrt_tech_ = gbuffer_mrt_tech_;
+		gbuffer_tech_ = model_->visualize_gbuffer_techs_[visualize_];
+		gbuffer_alpha_blend_back_tech_ = gbuffer_tech_;
+		gbuffer_alpha_blend_front_tech_ = gbuffer_tech_;
 	}
 }
 
@@ -448,25 +438,25 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	if (has_skinned)
 	{
-		effect_ = SyncLoadRenderEffects({ "MtlEditor.fxml", "GBufferSkinning.fxml" });
+		effect_ = SyncLoadRenderEffects(MakeSpan<std::string>({"MtlEditor.fxml", "GBufferSkinning.fxml"}));
 	}
 	else
 	{
 		effect_ = SyncLoadRenderEffect("MtlEditor.fxml");
 	}
 
-	std::string g_buffer_mrt_tech_str;
+	std::string g_buffer_tech_str;
 	for (int vis = 0; vis < 2; ++ vis)
 	{
 		if (0 == vis)
 		{
-			g_buffer_mrt_tech_str = "VisualizeVertexMRTTech";
+			g_buffer_tech_str = "VisualizeVertexTech";
 		}
 		else
 		{
-			g_buffer_mrt_tech_str = "VisualizeTextureMRTTech";
+			g_buffer_tech_str = "VisualizeTextureTech";
 		}
-		visualize_gbuffer_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_mrt_tech_str);
+		visualize_gbuffer_techs_[vis] = effect_->TechniqueByName(g_buffer_tech_str);
 	}
 
 	is_skinned_ = has_skinned;
@@ -480,7 +470,7 @@ void DetailedSkinnedModel::SetTime(float time)
 uint32_t DetailedSkinnedModel::CopyMaterial(uint32_t mtl_index)
 {
 	uint32_t new_index = static_cast<uint32_t>(materials_.size());
-	materials_.push_back(MakeSharedPtr<RenderMaterial>(*materials_[mtl_index]));
+	materials_.push_back(materials_[mtl_index]->Clone());
 	return new_index;
 }
 
@@ -501,19 +491,52 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 	std::vector<uint16_t> indices;
 
 	auto const& skinned_model = checked_cast<DetailedSkinnedModel const&>(model);
-	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++ i)
+
+	std::map<JointComponent const*, int16_t> joint_indices;
+	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++i)
 	{
-		auto& joint = skinned_model.GetJoint(i);
-		if (joint.parent > 0)
+		joint_indices.emplace(skinned_model.GetJoint(i).get(), static_cast<int16_t>(i));
+	}
+
+	struct JointInfo
+	{
+		JointComponent const* joint;
+		int16_t parent_id;
+	};
+
+	std::vector<JointInfo> joints(skinned_model.NumJoints());
+	for (uint32_t i = 0; i < skinned_model.NumJoints(); ++i)
+	{
+		joints[i].joint = skinned_model.GetJoint(i).get();
+
+		auto const* parent_node = joints[i].joint->BoundSceneNode()->Parent();
+		if (parent_node != nullptr)
+		{
+			auto const* parent_joint = parent_node->FirstComponentOfType<JointComponent>();
+			BOOST_ASSERT(joint_indices.find(parent_joint) != joint_indices.end());
+			joints[i].parent_id = static_cast<int16_t>(joint_indices[parent_joint]);
+		}
+		else
+		{
+			joints[i].parent_id = static_cast<int16_t>(-1);
+		}
+	}
+
+	for (uint32_t i = 0; i < static_cast<uint32_t>(joints.size()); ++ i)
+	{
+		auto const& joint = *joints[i].joint;
+		int16_t const parent_id = joints[i].parent_id;
+		auto const* parent_node = joint.BoundSceneNode()->Parent();
+		if (parent_node && parent_node->FirstComponentOfType<JointComponent>())
 		{
 			uint16_t const num_vertices = static_cast<uint16_t>(positions.size());
 
 			float const color = i / (skinned_model.NumJoints() - 1.0f);
 
-			Quaternion bind_real = joint.inverse_origin_real;
-			Quaternion bind_dual = joint.inverse_origin_dual;
-			float bind_scale = joint.inverse_origin_scale;
-			if (MathLib::SignBit(joint.inverse_origin_scale) > 0)
+			Quaternion bind_real = joint.InverseOriginReal();
+			Quaternion bind_dual = joint.InverseOriginDual();
+			float bind_scale = joint.InverseOriginScale();
+			if (MathLib::SignBit(bind_scale) > 0)
 			{
 				bind_dual *= bind_scale;
 			}
@@ -527,12 +550,12 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 			positions.push_back(float4(joint_pos.x(), joint_pos.y(), joint_pos.z(), color));
 			bone_indices.push_back(i);
 
-			auto& parent_joint = skinned_model.GetJoint(joint.parent);
+			auto& parent_joint = *parent_node->FirstComponentOfType<JointComponent>();
 
-			bind_real = parent_joint.inverse_origin_real;
-			bind_dual = parent_joint.inverse_origin_dual;
-			bind_scale = parent_joint.inverse_origin_scale;
-			if (MathLib::SignBit(parent_joint.inverse_origin_scale) > 0)
+			bind_real = parent_joint.InverseOriginReal();
+			bind_dual = parent_joint.InverseOriginDual();
+			bind_scale = parent_joint.InverseOriginScale();
+			if (MathLib::SignBit(bind_scale) > 0)
 			{
 				bind_dual *= bind_scale;
 			}
@@ -554,16 +577,16 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 			float3 const ny_dir = parent_joint_pos - y_dir * len * 0.1f;
 
 			positions.push_back(float4(px_dir.x(), px_dir.y(), px_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(ny_dir.x(), ny_dir.y(), ny_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(nx_dir.x(), nx_dir.y(), nx_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			positions.push_back(float4(py_dir.x(), py_dir.y(), py_dir.z(), color));
-			bone_indices.push_back(joint.parent);
+			bone_indices.push_back(parent_id);
 
 			indices.push_back(num_vertices + 0);
 			indices.push_back(num_vertices + 1);
@@ -681,17 +704,9 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 		init_data.row_pitch = sizeof(color_map);
 		init_data.slice_pitch = init_data.row_pitch * 1;
 		TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-			1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+			1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 		*(effect_->ParameterByName("color_map")) = color_map_tex;
 	}
 
 	hw_res_ready_ = true;
-}
-
-void SkeletonMesh::OnRenderBegin()
-{
-	SkinnedMesh::OnRenderBegin();
-
-	*(deferred_effect_->ParameterByName("joint_reals")) = model_->GetBindRealParts();
-	*(deferred_effect_->ParameterByName("joint_duals")) = model_->GetBindDualParts();
 }

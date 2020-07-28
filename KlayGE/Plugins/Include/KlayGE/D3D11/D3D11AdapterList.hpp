@@ -22,25 +22,25 @@ namespace KlayGE
 {
 	class D3D11Adapter;
 
-	class D3D11AdapterList
+	class D3D11AdapterList final
 	{
 	public:
-		D3D11AdapterList();
+		D3D11AdapterList() noexcept;
 
 		void Destroy();
 
-		void Enumerate(IDXGIFactory1Ptr const & gi_factory);
-		void Enumerate(IDXGIFactory6Ptr const & gi_factory);
+		void Enumerate(IDXGIFactory2* gi_factory);
+		void Enumerate(IDXGIFactory6* gi_factory);
 
-		size_t NumAdapter() const;
+		size_t NumAdapter() const noexcept;
 		D3D11Adapter& Adapter(size_t index) const;
 
-		uint32_t CurrentAdapterIndex() const;
-		void CurrentAdapterIndex(uint32_t index);
+		uint32_t CurrentAdapterIndex() const noexcept;
+		void CurrentAdapterIndex(uint32_t index) noexcept;
 
 	private:
 		std::vector<std::unique_ptr<D3D11Adapter>> adapters_;
-		uint32_t			current_adapter_;
+		uint32_t current_adapter_{0};
 	};
 
 	typedef std::shared_ptr<D3D11AdapterList> D3D11AdapterListPtr;

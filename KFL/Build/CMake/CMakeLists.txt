@@ -10,18 +10,18 @@ SET(BASE_DETAIL_HEADER_FILES
 SET(BASE_CXX17_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/any.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/filesystem.hpp
-	${KFL_PROJECT_DIR}/include/KFL/CXX17/iterator.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/optional.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/string_view.hpp
 )
 SET(BASE_CXX2a_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX2a/endian.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CXX2a/format.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CXX2a/span.hpp
 )
 SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/AlignedAllocator.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Architecture.hpp
-	${KFL_PROJECT_DIR}/include/KFL/ArrayRef.hpp
-	${KFL_PROJECT_DIR}/include/KFL/COMPtr.hpp
+	${KFL_PROJECT_DIR}/include/KFL/com_ptr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Compiler.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
@@ -35,6 +35,8 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
+	${KFL_PROJECT_DIR}/include/KFL/SmartPtrHelper.hpp
+	${KFL_PROJECT_DIR}/include/KFL/StringUtil.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Thread.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Timer.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Trace.hpp
@@ -102,15 +104,32 @@ SOURCE_GROUP("Base\\Header Files\\CXX2a" FILES ${BASE_CXX2a_HEADER_FILES})
 SOURCE_GROUP("Math\\Source Files" FILES ${MATH_SOURCE_FILES})
 SOURCE_GROUP("Math\\Header Files" FILES ${MATH_HEADER_FILES})
 
-ADD_DEFINITIONS(-DKFL_SOURCE)
-
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${KFL_PROJECT_DIR}/../External/rapidxml)
-INCLUDE_DIRECTORIES(${KFL_PROJECT_DIR}/include)
 ADD_LIBRARY(${LIB_NAME} STATIC
 	${BASE_SOURCE_FILES} ${BASE_HEADER_FILES} ${BASE_DETAIL_HEADER_FILES} ${BASE_CXX17_HEADER_FILES} ${BASE_CXX2a_HEADER_FILES}
 	${MATH_SOURCE_FILES} ${MATH_HEADER_FILES}
 )
+
+target_compile_definitions(${LIB_NAME}
+	PRIVATE
+		-DKFL_SOURCE
+)
+if(MSVC AND (MSVC_VERSION GREATER_EQUAL 1925))
+	target_compile_definitions(${LIB_NAME}
+		PUBLIC
+			-D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
+	)
+endif()
+
+target_include_directories(${LIB_NAME}
+	PUBLIC
+		# Not using target_link_libraries to prevent adding boost_container project
+		$<TARGET_PROPERTY:Boost::container,INTERFACE_INCLUDE_DIRECTORIES>
+		# Not using target_link_libraries to prevent depending on Boost::io
+		$<TARGET_PROPERTY:Boost::utility,INTERFACE_INCLUDE_DIRECTORIES>
+		${KFL_PROJECT_DIR}/include
+)
+
+add_dependencies(${LIB_NAME} fmt)
 
 SET(LIB_OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX})
 
@@ -128,4 +147,52 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KFL_PROJECT_DIR}/include/KFL/KFL.hpp")
 
-TARGET_LINK_LIBRARIES(${LIB_NAME})
+target_link_libraries(${LIB_NAME}
+	PUBLIC
+		Boost::assert
+		Boost::core
+		fmt
+		optional-lite
+		string-view-lite
+		GSL
+
+	PRIVATE
+		rapidxml
+)
+
+if(KLAYGE_WITH_GHC_FILESYSTEM)
+	target_link_libraries(${LIB_NAME}
+		PUBLIC
+			ghc_filesystem
+	)
+
+	add_dependencies(${LIB_NAME} ghc_filesystem)
+endif()
+
+if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_link_libraries(${LIB_NAME}
+			PUBLIC
+				kernel32
+		)
+	endif()
+else()
+	if(KLAYGE_COMPILER_GCC AND (NOT KLAYGE_PLATFORM_WINDOWS OR NOT (KLAYGE_COMPILER_VERSION EQUAL 81)))
+		target_link_libraries(${LIB_NAME}
+			PUBLIC
+				stdc++fs
+		)
+	elseif(KLAYGE_COMPILER_CLANG AND KLAYGE_PLATFORM_LINUX)
+		if(KLAYGE_COMPILER_VERSION LESS 70)
+			target_link_libraries(${LIB_NAME}
+				PUBLIC
+					c++experimental
+			)
+		elseif(KLAYGE_COMPILER_VERSION LESS 90)
+			target_link_libraries(${LIB_NAME}
+				PUBLIC
+					c++fs
+			)
+		endif()
+	endif()
+endif()

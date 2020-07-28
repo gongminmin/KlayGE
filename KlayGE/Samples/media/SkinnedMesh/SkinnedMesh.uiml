@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Parameters" caption="Parameters" x="-150" y="200" align_x="right" width="150" height="130">
+		<control type="check_box" id="Skinning" caption="Skinning" x="20" y="30" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="Playing" caption="Playing" x="20" y="70" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

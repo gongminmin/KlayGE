@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -34,8 +33,8 @@ namespace KlayGE
 		BOOST_ASSERT(texture->AccessHint() & EAH_GPU_Read);
 
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 
 		tex_ = texture;
 		pf_ = pf == EF_Unknown ? texture->Format() : pf;
@@ -61,14 +60,49 @@ namespace KlayGE
 	}
 
 
+	D3D11CubeTextureFaceShaderResourceView::D3D11CubeTextureFaceShaderResourceView(TexturePtr const& texture_cube, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(texture_cube->AccessHint() & EAH_GPU_Read);
+
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
+
+		tex_ = texture_cube;
+		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
+
+		first_array_index_ = array_index * 6 + face;
+		array_size_ = 1;
+		first_level_ = first_level;
+		num_levels_ = num_levels;
+		first_elem_ = 0;
+		num_elems_ = 0;
+
+		sr_src_ = texture_cube.get();
+	}
+
+	ID3D11ShaderResourceView* D3D11CubeTextureFaceShaderResourceView::RetrieveD3DShaderResourceView() const
+	{
+		if (!d3d_sr_view_ && tex_ && tex_->HWResourceReady())
+		{
+			uint32_t const array_index = first_array_index_ / 6;
+			Texture::CubeFaces const face = static_cast<Texture::CubeFaces>(first_array_index_ - array_index * 6);
+			d3d_sr_view_ = checked_cast<D3D11Texture&>(*tex_).RetrieveD3DShaderResourceView(pf_, array_index, face,
+				first_level_, num_levels_);
+		}
+		return d3d_sr_view_.get();
+	}
+
+
 	D3D11BufferShaderResourceView::D3D11BufferShaderResourceView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t first_elem,
 		uint32_t num_elems)
 	{
 		BOOST_ASSERT(gb->AccessHint() & EAH_GPU_Read);
 
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 
 		buff_ = gb;
 		pf_ = pf;
@@ -97,11 +131,8 @@ namespace KlayGE
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
-		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
-
-		this->BindDiscardFunc();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	void D3D11RenderTargetView::ClearColor(Color const & clr)
@@ -111,31 +142,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetView::Discard()
 	{
-		discard_func_();
-	}
-
-	void D3D11RenderTargetView::BindDiscardFunc()
-	{
-		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.D3D11RuntimeSubVer() >= 1)
-		{
-			discard_func_ = [this] { this->HWDiscard(); };
-		}
-		else
-		{
-			discard_func_ = [this] { this->FackDiscard(); };
-		}
-	}
-
-	void D3D11RenderTargetView::HWDiscard()
-	{
-		d3d_imm_ctx_1_->DiscardView(d3d_rt_view_.get());
-	}
-
-	void D3D11RenderTargetView::FackDiscard()
-	{
-		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearRenderTargetView(d3d_rt_view_.get(), clr);
+		d3d_imm_ctx_->DiscardView(d3d_rt_view_.get());
 	}
 
 	void D3D11RenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
@@ -304,11 +311,8 @@ namespace KlayGE
 		: rt_src_(src), rt_first_subres_(first_subres), rt_num_subres_(num_subres)
 	{
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
-		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
-
-		this->BindDiscardFunc();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	void D3D11DepthStencilView::ClearDepth(float depth)
@@ -329,30 +333,7 @@ namespace KlayGE
 
 	void D3D11DepthStencilView::Discard()
 	{
-		discard_func_();
-	}
-	
-	void D3D11DepthStencilView::BindDiscardFunc()
-	{
-		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.D3D11RuntimeSubVer() >= 1)
-		{
-			discard_func_ = [this] { this->HWDiscard(); };
-		}
-		else
-		{
-			discard_func_ = [this] { this->FackDiscard(); };
-		}
-	}
-
-	void D3D11DepthStencilView::HWDiscard()
-	{
-		d3d_imm_ctx_1_->DiscardView(d3d_ds_view_.get());
-	}
-
-	void D3D11DepthStencilView::FackDiscard()
-	{
-		d3d_imm_ctx_->ClearDepthStencilView(d3d_ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		d3d_imm_ctx_->DiscardView(d3d_ds_view_.get());
 	}
 
 	void D3D11DepthStencilView::OnAttached(FrameBuffer& fb)
@@ -502,11 +483,8 @@ namespace KlayGE
 		: ua_src_(src), ua_first_subres_(first_subres), ua_num_subres_(num_subres)
 	{
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3DDevice();
-		d3d_imm_ctx_ = re.D3DDeviceImmContext();
-		d3d_imm_ctx_1_ = re.D3DDeviceImmContext1();
-
-		this->BindDiscardFunc();
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	void D3D11UnorderedAccessView::Clear(float4 const & val)
@@ -521,31 +499,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::Discard()
 	{
-		discard_func_();
-	}
-
-	void D3D11UnorderedAccessView::BindDiscardFunc()
-	{
-		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.D3D11RuntimeSubVer() >= 1)
-		{
-			discard_func_ = [this] { this->HWDiscard(); };
-		}
-		else
-		{
-			discard_func_ = [this] { this->FackDiscard(); };
-		}
-	}
-
-	void D3D11UnorderedAccessView::HWDiscard()
-	{
-		d3d_imm_ctx_1_->DiscardView(d3d_ua_view_.get());
-	}
-
-	void D3D11UnorderedAccessView::FackDiscard()
-	{
-		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(d3d_ua_view_.get(), clr);
+		d3d_imm_ctx_->DiscardView(d3d_ua_view_.get());
 	}
 
 	void D3D11UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t index)

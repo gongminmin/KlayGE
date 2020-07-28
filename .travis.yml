@@ -15,7 +15,7 @@ cache:
     - KlayGE/Tools/media
     - KlayGE/Tutorials/media
 
-matrix:
+jobs:
   include:
     - os: windows
       env: MATRIX_EVAL="CC=cl.exe && CXX=cl.exe" PROJECT="vs2017" COMPILER="vc141" BUILD_DIR="$COMPILER"
@@ -29,28 +29,7 @@ matrix:
       env: MATRIX_EVAL="CC=gcc && CXX=g++" PROJECT="ninja" COMPILER="mingw" BUILD_DIR="$COMPILER"
 
     - os: linux
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-            - ninja-build
-            - wine
-            - wine-dev
-            - winetricks
-            - libx11-dev
-            - libgl1-mesa-dev
-            - libopenal-dev
-          update:
-            - true
-      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
-
-    - os: linux
       dist: xenial
-      sudo: required
       addons:
         apt:
           sources:
@@ -64,33 +43,29 @@ matrix:
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
-      dist: trusty
-      sudo: required
+      dist: bionic
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-5.0
+            - ubuntu-toolchain-r-test
           packages:
-            - clang-5.0
+            - g++-9
             - ninja-build
-            - wine
+            - wine32
             - wine-dev
             - winetricks
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
+          update: true
+      env: MATRIX_EVAL="CC=gcc-9 && CXX=g++-9" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
       dist: xenial
-      sudo: required
       addons:
         apt:
           sources:
@@ -106,9 +81,29 @@ matrix:
             - libx11-dev
             - libgl1-mesa-dev
             - libopenal-dev
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
+
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-10
+            - libc++-10-dev
+            - libc++abi-10-dev
+            - ninja-build
+            - wine32
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update: true
+      env: MATRIX_EVAL="CC=clang-10 && CXX=clang++-10" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
       osx_image: xcode9.4
@@ -118,9 +113,7 @@ matrix:
             - xquartz
           packages:
             - ninja
-            - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
     - os: osx
@@ -131,9 +124,7 @@ matrix:
             - xquartz
           packages:
             - ninja
-            - wine
-          update:
-            - true
+          update: true
       env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
 before_install:
@@ -142,6 +133,10 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       export WINEARCH=win32;
       winetricks;
+    fi
+  # macOS
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install https://raw.githubusercontent.com/sashkab/homebrew-core/b7f9fd6f8c198fe5eacb076aa2c6d41e2203597/Formula/wine.rb;
     fi
 
 script:
@@ -158,6 +153,8 @@ script:
     fi
   # Reset the repo to restore changes in External
   - git reset --hard
+  - git config --global user.email "dummy@example.com"
+  - git config --global user.name "Dummy Name"
   - python Build.py $PROJECT $COMPILER x64 Release
 
 before_cache:

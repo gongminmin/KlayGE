@@ -35,7 +35,14 @@
 #include <windows.h>
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION <= 140)
+#pragma warning(push)
+#pragma warning(disable: 4800) // BOOL to bool
+#endif
 #include <VersionHelpers.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION <= 140)
+#pragma warning(pop)
+#endif
 #endif
 #endif
 #ifdef KLAYGE_COMPILER_MSVC
@@ -64,7 +71,7 @@ namespace
 		*pebx = id[1];
 		*pecx = id[2];
 		*pedx = id[3];
-#elif (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG))
+#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 	#ifdef KLAYGE_CPU_X64
 		__asm__
 		(
@@ -262,7 +269,6 @@ namespace
 namespace KlayGE
 {
 	CPUInfo::CPUInfo()
-		: feature_mask_(0)
 	{
 		num_hw_threads_ = 1;
 		num_cores_ = 1;
@@ -374,7 +380,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		{
 			SYSTEM_INFO si;
-			::GetNativeSystemInfo(&si);
+			::GetSystemInfo(&si);
 			num_hw_threads_ = si.dwNumberOfProcessors;
 		}
 #elif defined KLAYGE_PLATFORM_LINUX

@@ -73,41 +73,40 @@ namespace KlayGE
 		dst_width_height_param_ = effect_->ParameterByName("dst_width_height");
 	}
 
-	void Blitter::Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-		TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-		bool linear)
+	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level, float src_x_offset,
+		float src_y_offset, float src_width, float src_height, TextureFilter filter)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		uint32_t const src_w = src->Width(src_level);
 		uint32_t const src_h = src->Height(src_level);
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h, 0);
-		*src_scale_param_ = float3(static_cast<float>(src_width) / src_w, static_cast<float>(src_height) / src_h, 1);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, 0);
+		*src_scale_param_ = float3(src_width / src_w, src_height / src_h, 1);
 
+		auto srv = rf.MakeTextureSrv(src, src_array_index, 1, src_level, 1);
 		RenderTechnique* tech;
 		if ((Texture::TT_Cube == src->Type()) || (src->ArraySize() > 1))
 		{
-			*src_2d_tex_array_param_ = src;
-			tech = linear ? blit_linear_2d_array_tech_ : blit_point_2d_array_tech_;
+			*src_2d_tex_array_param_ = srv;
+			tech = (filter == TextureFilter::Linear) ? blit_linear_2d_array_tech_ : blit_point_2d_array_tech_;
 		}
 		else
 		{
 			BOOST_ASSERT(0 == src_array_index);
 
-			*src_2d_tex_param_ = src;
-			tech = linear ? blit_linear_2d_tech_ : blit_point_2d_tech_;
+			*src_2d_tex_param_ = srv;
+			tech = (filter == TextureFilter::Linear) ? blit_linear_2d_tech_ : blit_point_2d_tech_;
 		}
 
 		FrameBufferPtr curr_fb = re.CurFrameBuffer();
@@ -116,19 +115,18 @@ namespace KlayGE
 		re.BindFrameBuffer(curr_fb);
 	}
 
-	void Blitter::Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-		TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-		bool linear)
+	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, TexturePtr const& src, uint32_t src_array_index,
+		uint32_t src_level, float src_x_offset, float src_y_offset, float src_z_offset, float src_width, float src_height, float src_depth,
+		TextureFilter filter)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		uint32_t const src_w = src->Width(src_level);
 		uint32_t const src_h = src->Height(src_level);
@@ -136,13 +134,11 @@ namespace KlayGE
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h,
-			static_cast<float>(src_z_offset) / src_d);
-		*src_scale_param_ = float3(static_cast<float>(src_width) / src_w, static_cast<float>(src_height) / src_h,
-			static_cast<float>(src_depth) / src_d);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, src_z_offset / src_d);
+		*src_scale_param_ = float3(src_width / src_w, src_height / src_h, src_depth / src_d);
 
-		*src_3d_tex_param_ = src;
-		RenderTechnique* tech = linear ? blit_linear_3d_tech_ : blit_point_3d_tech_;
+		*src_3d_tex_param_ = rf.MakeTextureSrv(src, src_array_index, 1, src_level, 1);
+		RenderTechnique* tech = (filter == TextureFilter::Linear) ? blit_linear_3d_tech_ : blit_point_3d_tech_;
 
 		FrameBufferPtr curr_fb = re.CurFrameBuffer();
 		for (uint32_t z = 0; z < dst_depth; ++ z)
@@ -154,22 +150,17 @@ namespace KlayGE
 		re.BindFrameBuffer(curr_fb);
 	}
 
-	void Blitter::Blit(TexturePtr const & dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-		TexturePtr const & src, uint32_t src_array_index, Texture::CubeFaces src_face, uint32_t src_level,
-		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-		bool linear)
+	void Blitter::Blit(TexturePtr const& dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, TexturePtr const& src,
+		uint32_t src_array_index, Texture::CubeFaces src_face, uint32_t src_level, float src_x_offset, float src_y_offset,
+		float src_width, float src_height, TextureFilter filter)
 	{
-		this->Blit(dst, dst_array_index * 6 + dst_face, dst_level,
-			dst_x_offset, dst_y_offset, dst_width, dst_height,
-			src, src_array_index * 6 + src_face, src_level,
-			src_x_offset, src_y_offset, src_width, src_height,
-			linear);
+		this->Blit(dst, dst_array_index * 6 + dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height, src,
+			src_array_index * 6 + src_face, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 	}
 
-	void Blitter::Blit(GraphicsBufferPtr const & dst, uint32_t dst_x_offset,
-		TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void Blitter::Blit(GraphicsBufferPtr const& dst, uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index,
+		uint32_t src_level, float src_x_offset, float src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
 		// TODO: Relax this limitation
 		BOOST_ASSERT(0 == dst_x_offset);
@@ -183,25 +174,27 @@ namespace KlayGE
 
 		*src_array_index_param_ = static_cast<int32_t>(src_array_index);
 		*src_level_param_ = static_cast<int32_t>(src_level);
-		*src_offset_param_ = float3(static_cast<float>(src_x_offset) / src_w, static_cast<float>(src_y_offset) / src_h, 0);
+		*src_offset_param_ = float3(src_x_offset / src_w, src_y_offset / src_h, 0);
 		*src_scale_param_ = float3(1.0f / src_w, 1.0f / src_h, 1);
 		*dst_width_height_param_ = float4(static_cast<float>(src_width), 0, 0, 0);
 
+		auto srv = rf.MakeTextureSrv(src, src_array_index, 1, src_level, 1);
 		RenderTechnique* tech;
 		if (src->ArraySize() > 1)
 		{
-			*src_2d_tex_array_param_ = src;
+			*src_2d_tex_array_param_ = srv;
 			tech = blit_2d_array_to_buff_tech_;
 		}
 		else
 		{
 			BOOST_ASSERT(0 == src_array_index);
 
-			*src_2d_tex_param_ = src;
+			*src_2d_tex_param_ = srv;
 			tech = blit_2d_to_buff_tech_;
 		}
 
-		std::vector<float> pos_data(src_width * src_height);
+		size_t const pos_size = src_width * src_height;
+		auto pos_data = MakeUniquePtr<float[]>(pos_size);
 		for (uint32_t y = 0; y < src_height; ++ y)
 		{
 			for (uint32_t x = 0; x < src_width; ++ x)
@@ -210,8 +203,8 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(
+			BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(pos_size * sizeof(pos_data[0])), pos_data.get());
 		tex_to_buff_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tex_to_buff_so_rl_->BindVertexStream(dst, VertexElement(VEU_Diffuse, 0, EF_ABGR32F));
@@ -233,15 +226,16 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(dst, dst_array_index, 1, dst_level));
-		frame_buffer_->GetViewport()->left = dst_x_offset;
-		frame_buffer_->GetViewport()->top = dst_y_offset;
-		frame_buffer_->GetViewport()->width = dst_width;
-		frame_buffer_->GetViewport()->height = dst_height;
+		frame_buffer_->Viewport()->Left(dst_x_offset);
+		frame_buffer_->Viewport()->Top(dst_y_offset);
+		frame_buffer_->Viewport()->Width(dst_width);
+		frame_buffer_->Viewport()->Height(dst_height);
 
 		*dst_width_height_param_ = float4(static_cast<float>(dst_width), static_cast<float>(dst_height),
 			1.0f / dst_width, 1.0f / dst_height);
 
-		std::vector<float> pos_data(dst_width * dst_height);
+		size_t const pos_size = dst_width * dst_height;
+		auto pos_data = MakeUniquePtr<float[]>(pos_size);
 		for (uint32_t y = 0; y < dst_height; ++ y)
 		{
 			for (uint32_t x = 0; x < dst_width; ++ x)
@@ -250,8 +244,8 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(
+			BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(pos_size * sizeof(pos_data[0])), pos_data.get());
 		buff_to_tex_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
 		buff_to_tex_rl_->BindVertexStream(src, VertexElement(VEU_Diffuse, 0, src_fmt));
 

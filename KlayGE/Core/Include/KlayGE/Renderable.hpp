@@ -22,7 +22,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/ArrayRef.hpp>
 #include <vector>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/SceneComponent.hpp>
@@ -38,6 +37,7 @@ namespace KlayGE
 		PC_Shading,
 		PC_Reflection,
 		PC_SpecialShading,
+		PC_SpecialShadingMultiView,
 		PC_SimpleForward,
 		PC_VDM,
 		PC_None
@@ -53,10 +53,14 @@ namespace KlayGE
 
 	enum PassRT
 	{
-		PRT_MRT = 0,
+		PRT_GBuffer = 0,
+		PRT_GBufferMultiView,
 		PRT_ShadowMap,
+		PRT_ShadowMapMultiView,
 		PRT_CascadedShadowMap,
+		PRT_CascadedShadowMapMultiView,
 		PRT_ReflectiveShadowMap,
+		PRT_ReflectiveShadowMapMultiView,
 		PRT_None
 	};
 
@@ -71,13 +75,21 @@ namespace KlayGE
 
 	enum PassType
 	{
-		PT_OpaqueGBufferMRT = MakePassType<PRT_MRT, PTB_Opaque, PC_GBuffer>::value,
-		PT_TransparencyBackGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyBack, PC_GBuffer>::value,
-		PT_TransparencyFrontGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyFront, PC_GBuffer>::value,
+		PT_OpaqueGBuffer = MakePassType<PRT_GBuffer, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBuffer = MakePassType<PRT_GBuffer, PTB_TransparencyFront, PC_GBuffer>::value,
+
+		PT_OpaqueGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBufferMultiView = MakePassType<PRT_GBufferMultiView, PTB_TransparencyFront, PC_GBuffer>::value,
 		
 		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
+
+		PT_GenShadowMapMultiView = MakePassType<PRT_ShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
+		PT_GenCascadedShadowMapMultiView = MakePassType<PRT_CascadedShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
+		PT_GenReflectiveShadowMapMultiView = MakePassType<PRT_ReflectiveShadowMapMultiView, PTB_None, PC_ShadowMap>::value,
 		
 		PT_Shadowing = MakePassType<PRT_None, PTB_None, PC_Shadowing>::value,
 
@@ -94,25 +106,29 @@ namespace KlayGE
 		PT_OpaqueSpecialShading = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShading>::value,
 		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
 		PT_TransparencyFrontSpecialShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShading>::value,
-		
+
+		PT_OpaqueSpecialShadingMultiView = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShadingMultiView>::value,
+		PT_TransparencyBackSpecialShadingMultiView = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShadingMultiView>::value,
+		PT_TransparencyFrontSpecialShadingMultiView = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShadingMultiView>::value,
+
 		PT_SimpleForward = MakePassType<PRT_None, PTB_None, PC_SimpleForward>::value,
 
 		PT_VDM = MakePassType<PRT_None, PTB_None, PC_VDM>::value
 	};
 
-	inline PassRT GetPassRT(PassType pt)
+	constexpr PassRT GetPassRT(PassType pt)
 	{
 		return static_cast<PassRT>(pt & 0xF);
 	}
-	inline PassTargetBuffer GetPassTargetBuffer(PassType pt)
+	constexpr PassTargetBuffer GetPassTargetBuffer(PassType pt)
 	{
 		return static_cast<PassTargetBuffer>((pt >> 4) & 0x3);
 	}
-	inline PassCategory GetPassCategory(PassType pt)
+	constexpr PassCategory GetPassCategory(PassType pt)
 	{
 		return static_cast<PassCategory>((pt >> 6) & 0xF);
 	}
-	inline PassType ComposePassType(PassRT rt, PassTargetBuffer tb, PassCategory cat)
+	constexpr PassType ComposePassType(PassRT rt, PassTargetBuffer tb, PassCategory cat)
 	{
 		return static_cast<PassType>((rt << 0) | (tb << 4) | (cat << 6));
 	}
@@ -189,6 +205,8 @@ namespace KlayGE
 		}
 
 		virtual void ModelMatrix(float4x4 const & mat);
+		virtual void InverseModelMatrix(float4x4 const& mat);
+		virtual void PrevModelMatrix(float4x4 const& mat);
 		virtual void BindSceneNode(SceneNode const * node);
 		SceneNode const * CurrSceneNode() const
 		{
@@ -213,6 +231,17 @@ namespace KlayGE
 		// For deferred only
 
 		virtual void Pass(PassType type);
+
+		virtual void IsSkinned(bool is_skinned)
+		{
+			is_skinned_ = is_skinned;
+		}
+
+		virtual void Material(RenderMaterialPtr const& mtl);
+		virtual RenderMaterialPtr const& Material() const
+		{
+			return mtl_;
+		}
 
 		virtual bool SpecialShading() const
 		{
@@ -283,68 +312,69 @@ namespace KlayGE
 
 		// For deferred only
 
-		RenderEffectPtr deferred_effect_;
-
-		RenderTechnique* gbuffer_mrt_tech_;
-		RenderTechnique* gbuffer_alpha_blend_back_mrt_tech_;
-		RenderTechnique* gbuffer_alpha_blend_front_mrt_tech_;
-		RenderTechnique* gen_sm_tech_;
-		RenderTechnique* gen_cascaded_sm_tech_;
+		RenderTechnique* gbuffer_tech_;
+		RenderTechnique* gbuffer_multi_view_tech_;
+		RenderTechnique* gbuffer_alpha_blend_back_tech_;
+		RenderTechnique* gbuffer_alpha_blend_back_multi_view_tech_;
+		RenderTechnique* gbuffer_alpha_blend_front_tech_;
+		RenderTechnique* gbuffer_alpha_blend_front_multi_view_tech_;
+		RenderTechnique* gen_shadow_map_tech_;
+		RenderTechnique* gen_shadow_map_multi_view_tech_;
+		RenderTechnique* gen_csm_tech_;
+		RenderTechnique* gen_csm_multi_view_tech_;
 		RenderTechnique* gen_rsm_tech_;
+		RenderTechnique* gen_rsm_multi_view_tech_;
 		RenderTechnique* reflection_tech_;
 		RenderTechnique* reflection_alpha_blend_back_tech_;
 		RenderTechnique* reflection_alpha_blend_front_tech_;
 		RenderTechnique* special_shading_tech_;
+		RenderTechnique* special_shading_multi_view_tech_;
 		RenderTechnique* special_shading_alpha_blend_back_tech_;
+		RenderTechnique* special_shading_alpha_blend_back_multi_view_tech_;
 		RenderTechnique* special_shading_alpha_blend_front_tech_;
+		RenderTechnique* special_shading_alpha_blend_front_multi_view_tech_;
 		RenderTechnique* simple_forward_tech_;
 		RenderTechnique* vdm_tech_;
 
 		float4x4 model_mat_ = float4x4::Identity();
+		float4x4 inv_model_mat_ = float4x4::Identity();
+		float4x4 prev_model_mat_ = float4x4::Identity();
+		bool model_mat_dirty_ = true;
 
 		PassType type_;
 		uint32_t effect_attrs_ = 0;
+		bool is_skinned_ = false;
 
 		RenderMaterialPtr mtl_;
 
-		RenderEffectParameter* mvp_param_;
-		RenderEffectParameter* model_view_param_;
-		RenderEffectParameter* forward_vec_param_;
 		RenderEffectParameter* frame_size_param_;
-		RenderEffectParameter* height_offset_scale_param_;
-		RenderEffectParameter* tess_factors_param_;
-		RenderEffectParameter* pos_center_param_;
-		RenderEffectParameter* pos_extent_param_;
-		RenderEffectParameter* tc_center_param_;
-		RenderEffectParameter* tc_extent_param_;
-		RenderEffectParameter* albedo_map_enabled_param_;
-		RenderEffectParameter* albedo_tex_param_;
-		RenderEffectParameter* albedo_clr_param_;
-		RenderEffectParameter* metalness_tex_param_;
-		RenderEffectParameter* metalness_clr_param_;
-		RenderEffectParameter* glossiness_tex_param_;
-		RenderEffectParameter* glossiness_clr_param_;
-		RenderEffectParameter* emissive_tex_param_;
-		RenderEffectParameter* emissive_clr_param_;
-		RenderEffectParameter* normal_map_enabled_param_;
-		RenderEffectParameter* normal_tex_param_;
-		RenderEffectParameter* height_map_parallax_enabled_param_;
-		RenderEffectParameter* height_map_tess_enabled_param_;
-		RenderEffectParameter* height_tex_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
-		RenderEffectParameter* alpha_test_threshold_param_;
+		RenderEffectParameter* half_exposure_x_framerate_param_;
+		RenderEffectParameter* motion_blur_radius_param_;
 
-		std::array<ShaderResourceViewPtr, RenderMaterial::TS_NumTextureSlots> textures_;
+		RenderEffectConstantBufferPtr mesh_cbuffer_;
+		RenderEffectConstantBufferPtr model_cbuffer_;
+		RenderEffectConstantBufferPtr camera_cbuffer_;
+		uint32_t visible_in_cameras_ = 0;
 	};
 
 	// TODO: Consider merging this with Renderable
 	class KLAYGE_CORE_API RenderableComponent : public SceneComponent
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
 		explicit RenderableComponent(RenderablePtr const& renderable);
+
+		SceneComponentPtr Clone() const override;
 
 		Renderable& BoundRenderable() const;
 

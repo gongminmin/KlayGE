@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
+#include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
@@ -44,21 +44,19 @@
 
 namespace KlayGE
 {
-	class MusicVoiceContext : public IXAudio2VoiceCallback
+	class MusicVoiceContext final : public IXAudio2VoiceCallback
 	{
 	public:
 		MusicVoiceContext()
 			: buffer_end_event_(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS))
 		{
 		}
-		virtual ~MusicVoiceContext()
-		{
-			::CloseHandle(buffer_end_event_);
-		}
+
+		virtual ~MusicVoiceContext() noexcept = default;
 
 		HANDLE GetBufferEndEvent() const
 		{
-			return buffer_end_event_;
+			return buffer_end_event_.get();
 		}
 
 		STDMETHOD_(void, OnVoiceProcessingPassStart)(UINT32)
@@ -75,7 +73,7 @@ namespace KlayGE
 		}
 		STDMETHOD_(void, OnBufferEnd)(void*)
 		{
-			::SetEvent(buffer_end_event_);
+			::SetEvent(buffer_end_event_.get());
 		}
 		STDMETHOD_(void, OnLoopEnd)(void*)
 		{
@@ -85,7 +83,7 @@ namespace KlayGE
 		}
 
 	private:
-		HANDLE buffer_end_event_;
+		Win32UniqueHandle buffer_end_event_;
 	};
 
 	XAMusicBuffer::XAMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume)

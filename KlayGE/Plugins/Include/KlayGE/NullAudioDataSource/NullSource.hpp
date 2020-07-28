@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class NullSource : public AudioDataSource
+	class NullSource final : public AudioDataSource
 	{
 	public:
 		NullSource();

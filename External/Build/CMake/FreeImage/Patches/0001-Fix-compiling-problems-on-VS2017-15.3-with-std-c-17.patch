@@ -1,0 +1,176 @@
+From 628a05ee01c9a8569b95ec1757cb976cd503662b Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 10 Sep 2018 21:06:48 -0700
+Subject: [PATCH 1/7] Fix compiling problems on VS2017 15.3+ with /std:c++17
+
+1. auto_ptr has been deprecated, change it to unique_ptr or shared_ptr.
+2. Fix LoadLibrary on unicode configuration.
+3. Remove deprecated binary_function.
+4. Fix other problems.
+---
+ Source/FreeImage/MultiPage.cpp               | 8 ++++----
+ Source/FreeImage/Plugin.cpp                  | 4 ++--
+ Source/LibRawLite/internal/libraw_x3f.cpp    | 2 +-
+ Source/LibRawLite/libraw/libraw_datastream.h | 6 +++---
+ Source/LibRawLite/src/libraw_datastream.cpp  | 8 ++++----
+ Source/MapIntrospector.h                     | 2 +-
+ Source/OpenEXR/IlmImf/ImfAttribute.cpp       | 6 +++++-
+ 7 files changed, 20 insertions(+), 16 deletions(-)
+
+diff --git a/Source/FreeImage/MultiPage.cpp b/Source/FreeImage/MultiPage.cpp
+index 4f260518..2bbfa4ae 100644
+--- a/Source/FreeImage/MultiPage.cpp
++++ b/Source/FreeImage/MultiPage.cpp
+@@ -271,8 +271,8 @@ FreeImage_OpenMultiBitmap(FREE_IMAGE_FORMAT fif, const char *filename, BOOL crea
+ 					}
+ 				}
+ 
+-				std::auto_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
+-				std::auto_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
++				std::unique_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
++				std::unique_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
+ 				header->m_filename = filename;
+ 				// io is default
+ 				header->node = node;
+@@ -337,8 +337,8 @@ FreeImage_OpenMultiBitmapFromHandle(FREE_IMAGE_FORMAT fif, FreeImageIO *io, fi_h
+ 				PluginNode *node = list->FindNodeFromFIF(fif);
+ 			
+ 				if (node) {
+-					std::auto_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
+-					std::auto_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
++					std::unique_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
++					std::unique_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
+ 					header->io = *io;
+ 					header->node = node;
+ 					header->fif = fif;
+diff --git a/Source/FreeImage/Plugin.cpp b/Source/FreeImage/Plugin.cpp
+index 11e72947..0908ed18 100644
+--- a/Source/FreeImage/Plugin.cpp
++++ b/Source/FreeImage/Plugin.cpp
+@@ -313,7 +313,7 @@ FreeImage_Initialise(BOOL load_local_plugins_only) {
+ 							strcpy(buffer, s_search_list[count]);
+ 							strncat(buffer, find_data.name, MAX_PATH + 200);
+ 
+-							HINSTANCE instance = LoadLibrary(buffer);
++							HINSTANCE instance = LoadLibraryA(buffer);
+ 
+ 							if (instance != NULL) {
+ 								FARPROC proc_address = GetProcAddress(instance, "_Init@8");
+@@ -518,7 +518,7 @@ FreeImage_RegisterLocalPlugin(FI_InitProc proc_address, const char *format, cons
+ FREE_IMAGE_FORMAT DLL_CALLCONV
+ FreeImage_RegisterExternalPlugin(const char *path, const char *format, const char *description, const char *extension, const char *regexpr) {
+ 	if (path != NULL) {
+-		HINSTANCE instance = LoadLibrary(path);
++		HINSTANCE instance = LoadLibraryA(path);
+ 
+ 		if (instance != NULL) {
+ 			FARPROC proc_address = GetProcAddress(instance, "_Init@8");
+diff --git a/Source/LibRawLite/internal/libraw_x3f.cpp b/Source/LibRawLite/internal/libraw_x3f.cpp
+index 49918e99..6adc0291 100644
+--- a/Source/LibRawLite/internal/libraw_x3f.cpp
++++ b/Source/LibRawLite/internal/libraw_x3f.cpp
+@@ -432,7 +432,7 @@ typedef struct x3f_header_s {
+ } x3f_header_t;
+ 
+ typedef struct x3f_info_s {
+-  char *error;
++  const char *error;
+   struct {
+ 	LibRaw_abstract_datastream *file;                 /* Use if more data is needed */
+   } input, output;
+diff --git a/Source/LibRawLite/libraw/libraw_datastream.h b/Source/LibRawLite/libraw/libraw_datastream.h
+index 1840adb2..801f4a73 100644
+--- a/Source/LibRawLite/libraw/libraw_datastream.h
++++ b/Source/LibRawLite/libraw/libraw_datastream.h
+@@ -112,14 +112,14 @@ protected:
+ };
+ 
+ #ifdef WIN32
+-template class DllDef std::auto_ptr<std::streambuf>;
++template class DllDef std::shared_ptr<std::streambuf>;
+ #endif
+ 
+ class DllDef LibRaw_file_datastream : public LibRaw_abstract_datastream
+ {
+ protected:
+-  std::auto_ptr<std::streambuf> f;       /* will close() automatically through dtor */
+-  std::auto_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
++  std::shared_ptr<std::streambuf> f;       /* will close() automatically through dtor */
++  std::shared_ptr<std::streambuf> saved_f; /* when *f is a subfile, *saved_f is the master file */
+   std::string filename;
+   INT64 _fsize;
+ #ifdef WIN32
+diff --git a/Source/LibRawLite/src/libraw_datastream.cpp b/Source/LibRawLite/src/libraw_datastream.cpp
+index bd9cf5ee..05ac8c5a 100644
+--- a/Source/LibRawLite/src/libraw_datastream.cpp
++++ b/Source/LibRawLite/src/libraw_datastream.cpp
+@@ -82,7 +82,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const char *fname)
+       _fsize = st.st_size;
+ #endif
+ 
+-    std::auto_ptr<std::filebuf> buf(new std::filebuf());
++    std::shared_ptr<std::filebuf> buf(new std::filebuf());
+     buf->open(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+     if (buf->is_open())
+     {
+@@ -99,7 +99,7 @@ LibRaw_file_datastream::LibRaw_file_datastream(const wchar_t *fname)
+     struct _stati64 st;
+     if (!_wstati64(wfilename.c_str(), &st))
+       _fsize = st.st_size;
+-    std::auto_ptr<std::filebuf> buf(new std::filebuf());
++    std::shared_ptr<std::filebuf> buf(new std::filebuf());
+     buf->open(wfilename.c_str(), std::ios_base::in | std::ios_base::binary);
+     if (buf->is_open())
+     {
+@@ -223,7 +223,7 @@ int LibRaw_file_datastream::subfile_open(const char *fn)
+   if (saved_f.get())
+     return EBUSY;
+   saved_f = f;
+-  std::auto_ptr<std::filebuf> buf(new std::filebuf());
++  std::shared_ptr<std::filebuf> buf(new std::filebuf());
+ 
+   buf->open(fn, std::ios_base::in | std::ios_base::binary);
+   if (!buf->is_open())
+@@ -246,7 +246,7 @@ int LibRaw_file_datastream::subfile_open(const wchar_t *fn)
+   if (saved_f.get())
+     return EBUSY;
+   saved_f = f;
+-  std::auto_ptr<std::filebuf> buf(new std::filebuf());
++  std::shared_ptr<std::filebuf> buf(new std::filebuf());
+ 
+   buf->open(fn, std::ios_base::in | std::ios_base::binary);
+   if (!buf->is_open())
+diff --git a/Source/MapIntrospector.h b/Source/MapIntrospector.h
+index 4c10c2ca..4b910e0f 100644
+--- a/Source/MapIntrospector.h
++++ b/Source/MapIntrospector.h
+@@ -95,7 +95,7 @@ template<class _Maptype>
+ class MapIntrospector: private _Maptype {
+ public:
+ 	static size_t GetNodesMemorySize(size_t node_count) {
+-		return (node_count + 1) * sizeof(_Node);
++		return (node_count + 1) * sizeof(typename MapIntrospector<_Maptype>::_Node);
+ 	}
+ };
+ 
+diff --git a/Source/OpenEXR/IlmImf/ImfAttribute.cpp b/Source/OpenEXR/IlmImf/ImfAttribute.cpp
+index cb4ac360..757c51eb 100644
+--- a/Source/OpenEXR/IlmImf/ImfAttribute.cpp
++++ b/Source/OpenEXR/IlmImf/ImfAttribute.cpp
+@@ -63,8 +63,12 @@ Attribute::~Attribute () {}
+ 
+ namespace {
+ 
+-struct NameCompare: std::binary_function <const char *, const char *, bool>
++struct NameCompare
+ {
++	typedef const char * first_argument_type;
++	typedef const char * second_argument_type;
++	typedef bool result_type;
++
+     bool
+     operator () (const char *x, const char *y) const
+     {
+-- 
+2.17.1.windows.2
+

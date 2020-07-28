@@ -44,9 +44,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ScriptFactory : boost::noncopyable
 	{
 	public:
-		virtual ~ScriptFactory()
-		{
-		}
+		virtual ~ScriptFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 		ScriptEngine& ScriptEngineInstance();

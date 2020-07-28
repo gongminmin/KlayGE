@@ -3,11 +3,8 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
-
-	<parameter type="float4x4" name="mvp"/>
-
-	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float3" name="look_at_vec"/>
+	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
 	<parameter type="texture2D" name="earth_day_tex">
 		<annotation type="string" name="SasResourceAddress" value="earth_day.dds"/>
@@ -30,11 +27,6 @@
 	<parameter type="float3" name="light_dir"/>
 	<parameter type="float3" name="beta" x="38.05" y="82.36" z="214.65"/>
 	<parameter type="float3" name="absorb" x="0.75" y="0.85" z="1"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<macro name="LN2" value="0.693147181"/>
 	<macro name="H50" value="(density * LN2)"/>
@@ -208,23 +200,31 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	
 	<shader>
 		<![CDATA[
-void PlanetVS(float4 pos		: POSITION,
+void PlanetVS(uint instance_id : SV_InstanceID,
+					float4 pos				: POSITION,
 					float2 tex				: TEXCOORD0,
 					out float2 oTex			: TEXCOORD0,
 					out float3 oPosOS		: TEXCOORD1,
 					out float3 oViewDir		: TEXCOORD2,
+					out float3 oEyePos		: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tex = tex * tc_extent + tc_center;
 
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float3 eye_pos = camera.eye_pos;
+
 	oTex = tex;
 	oPosOS = pos.xyz;
 	oPos = mul(float4(oPosOS, pos.w), mvp);
 	oViewDir = eye_pos - oPosOS;
+
+	oEyePos = eye_pos;
 }
 
-float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2) : SV_Target
+float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2, float3 eye_pos : TEXCOORD3) : SV_Target
 {
 	float3 color = 0;
 	view_dir = normalize(view_dir);	
@@ -271,23 +271,31 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 }
 
 
-void AtmosphereVS(float4 pos		: POSITION,
+void AtmosphereVS(uint instance_id : SV_InstanceID,
+					float4 pos		: POSITION,
 					float2 tex				: TEXCOORD0,
 					out float2 oTex			: TEXCOORD0,
 					out float3 oPosOS		: TEXCOORD1,
 					out float3 oViewDir		: TEXCOORD2,
+					out float3 oEyePos		: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tex = tex * tc_extent + tc_center;
 
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float3 eye_pos = camera.eye_pos;
+
 	oTex = tex;
 	oPosOS = pos.xyz * atmosphere_top;
 	oPos = mul(float4(oPosOS, pos.w), mvp);
 	oViewDir = oPosOS - eye_pos;
+
+	oEyePos = eye_pos;
 }
 
-float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2) : SV_Target
+float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2, float3 eye_pos : TEXCOORD3) : SV_Target
 {
 	float3 color = 0;
 	view_dir = normalize(view_dir);

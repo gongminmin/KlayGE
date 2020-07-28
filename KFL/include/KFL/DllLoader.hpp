@@ -35,7 +35,7 @@
 
 #include <string>
 
-#if defined(KLAYGE_COMPILER_MSVC)
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_CLANGCL)
 	#define DLL_PREFIX ""
 #else
 	#define DLL_PREFIX "lib"
@@ -52,7 +52,7 @@
 
 namespace KlayGE
 {
-	class DllLoader
+	class DllLoader final
 	{
 	public:
 		DllLoader();

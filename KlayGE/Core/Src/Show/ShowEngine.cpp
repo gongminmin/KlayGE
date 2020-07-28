@@ -21,15 +21,8 @@
 
 namespace KlayGE
 {
-	ShowEngine::ShowEngine()
-		: state_(SS_Uninit),
-			resume_playing_(false)
-	{
-	}
-
-	ShowEngine::~ShowEngine()
-	{
-	}
+	ShowEngine::ShowEngine() noexcept = default;
+	ShowEngine::~ShowEngine() noexcept = default;
 
 	void ShowEngine::Suspend()
 	{

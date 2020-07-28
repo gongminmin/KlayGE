@@ -86,7 +86,11 @@ namespace KlayGE
 		{ "flush", StdoutFlush, METH_VARARGS, "sys.stdout.write" },
 		{ 0, 0, 0, 0 } // sentinel
 	};
-	
+
+#if defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" // tp_print is deprecated
+#endif
 	PyTypeObject stdout_type =
 	{
 		PyVarObject_HEAD_INIT(0, 0)
@@ -94,10 +98,10 @@ namespace KlayGE
 		sizeof(PyObject),     /* tp_basicsize */
 		0,                    /* tp_itemsize */
 		0,                    /* tp_dealloc */
-		0,                    /* tp_print */
+		0,                    /* tp_vectorcall_offset */
 		0,                    /* tp_getattr */
 		0,                    /* tp_setattr */
-		0,                    /* tp_reserved */
+		0,                    /* tp_as_async */
 		0,                    /* tp_repr */
 		0,                    /* tp_as_number */
 		0,                    /* tp_as_sequence */
@@ -137,6 +141,8 @@ namespace KlayGE
 		0,                    /* tp_del */
 		0,                    /* tp_version_tag */
 		0,                    /* tp_finalize */
+		0,                    /* tp_vectorcall */
+		0,                    /* tp_print */
 
 #ifdef COUNT_ALLOCS
 		0,                    /* tp_allocs */
@@ -146,7 +152,10 @@ namespace KlayGE
 		0                     /* tp_next */
 #endif
 	};
-	
+#if defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+
 	PyModuleDef emb_module =
 	{
 		PyModuleDef_HEAD_INIT,
@@ -221,190 +230,352 @@ namespace KlayGE
 	}
 
 
-	PyObjectPtr CppType2PyObjectPtr(std::string const & t)
+	class PythonScriptVariable : public ScriptVariable
 	{
-		return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
-	}
+	public:
+		PyObjectPtr const& GetPyObject() const
+		{
+			return val_;
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(char* t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("s", t));
-	}
+		void SetPyObject(PyObjectPtr const& value)
+		{
+			val_ = value;
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(wchar_t* t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("u", t));
-	}
+	protected:
+		PyObjectPtr val_;
+	};
 
-	PyObjectPtr CppType2PyObjectPtr(int8_t t)
+	class PythonScriptVariableString final : public PythonScriptVariable
 	{
-		return MakePyObjectPtr(Py_BuildValue("b", t));
-	}
+	public:
+		ScriptVariable& operator=(std::string const& value) override
+		{
+			return this->operator=(value.c_str());
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(int16_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("h", t));
-	}
+		ScriptVariable& operator=(std::string_view value) override
+		{
+			return this->operator=(std::string(value));
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(int32_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("i", t));
-	}
+		ScriptVariable& operator=(char const* value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("s", value));
+			return *this;
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(int64_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("L", t));
-	}
+		ScriptVariable& operator=(char* value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("s", value));
+			return *this;
+		}
 
-	PyObjectPtr CppType2PyObjectPtr(uint8_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("B", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(uint16_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("H", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(uint32_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("I", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(uint64_t t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("K", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(double t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("d", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(float t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("f", t));
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(PyObject* t)
-	{
-		return MakePyObjectPtr(t);
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(PyObjectPtr const & t)
-	{
-		return t;
-	}
-
-	PyObjectPtr CppType2PyObjectPtr(std::any const & t)
-	{
-		if (std::any_cast<std::string>(&t) != nullptr)
+		bool TryValue(std::string& value) const override
 		{
-			return CppType2PyObjectPtr(std::any_cast<std::string>(t));
-		}
-		else if (std::any_cast<char*>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<char*>(t));
-		}
-		else if (std::any_cast<wchar_t*>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<wchar_t*>(t));
-		}
-		else if (std::any_cast<int8_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<int8_t>(t));
-		}
-		else if (std::any_cast<int16_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<int16_t>(t));
-		}
-		else if (std::any_cast<int32_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<int32_t>(t));
-		}
-		else if (std::any_cast<int64_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<int64_t>(t));
-		}
-		else if (std::any_cast<uint8_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<uint8_t>(t));
-		}
-		else if (std::any_cast<uint16_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<uint16_t>(t));
-		}
-		else if (std::any_cast<uint32_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<uint32_t>(t));
-		}
-		else if (std::any_cast<uint64_t>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<uint64_t>(t));
-		}
-		else if (std::any_cast<double>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<double>(t));
-		}
-		else if (std::any_cast<float>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<float>(t));
-		}
-		else if (std::any_cast<PyObject*>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<PyObject*>(t));
-		}
-		else if (std::any_cast<PyObjectPtr>(&t) != nullptr)
-		{
-			return CppType2PyObjectPtr(std::any_cast<PyObjectPtr>(t));
-		}
-		else
-		{
-			KFL_UNREACHABLE("Invalid type");
-		}
-	}
-
-	std::any PyObjectPtr2CppType(PyObjectPtr const & t)
-	{
-		std::any ret;
-		if (PyObject_TypeCheck(t.get(), &PyUnicode_Type))
-		{
-			ret = std::any(std::string(PyBytes_AsString(PyUnicode_AsASCIIString(t.get()))));
-		}
-		else if (PyObject_TypeCheck(t.get(), &PyLong_Type))
-		{
-			ret = std::any(static_cast<int32_t>(PyLong_AsLong(t.get())));
-		}
-		else if (PyObject_TypeCheck(t.get(), &PyFloat_Type))
-		{
-			ret = std::any(static_cast<float>(PyFloat_AsDouble(t.get())));
-		}
-		else if (PyObject_TypeCheck(t.get(), &PyList_Type))
-		{
-			size_t len = PyList_Size(t.get());
-			std::vector<std::any> v(len);
-			for (size_t i = 0; i < len; ++ i)
+			if (PyObject_TypeCheck(val_.get(), &PyUnicode_Type))
 			{
-				PyObjectPtr py_obj = MakePyObjectPtr(PyList_GetItem(t.get(), i));
-				Py_IncRef(py_obj.get());
-				v[i] = PyObjectPtr2CppType(py_obj);
+				value = std::string(PyBytes_AsString(PyUnicode_AsASCIIString(val_.get())));
+				return true;
 			}
-			ret = std::any(v);
+			return false;
 		}
-		else if (PyObject_TypeCheck(t.get(), &PyTuple_Type))
+	};
+
+	class PythonScriptVariableWString final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(std::wstring const& value) override
 		{
-			size_t len = PyTuple_Size(t.get());
-			std::vector<std::any> v(len);
-			for (size_t i = 0; i < len; ++ i)
-			{
-				PyObjectPtr py_obj = MakePyObjectPtr(PyTuple_GetItem(t.get(), i));
-				Py_IncRef(py_obj.get());
-				v[i] = PyObjectPtr2CppType(py_obj);
-			}
-			ret = std::any(v);
+			return this->operator=(value.c_str());
 		}
-		return ret;
-	}
+
+		ScriptVariable& operator=(std::wstring_view value) override
+		{
+			return this->operator=(std::wstring(value));
+		}
+
+		ScriptVariable& operator=(wchar_t const* value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("u", value));
+			return *this;
+		}
+
+		ScriptVariable& operator=(wchar_t* value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("u", value));
+			return *this;
+		}
+
+		bool TryValue(std::wstring& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyUnicode_Type))
+			{
+				Py_ssize_t size;
+				wchar_t* str = PyUnicode_AsWideCharString(val_.get(), &size);
+				value = std::wstring(str, str + size);
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableInt8 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(int8_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("b", value));
+			return *this;
+		}
+
+		bool TryValue(int8_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<int8_t>(PyLong_AsLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableInt16 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(int16_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("h", value));
+			return *this;
+		}
+
+		bool TryValue(int16_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<int16_t>(PyLong_AsLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableInt32 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(int32_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("i", value));
+			return *this;
+		}
+
+		bool TryValue(int32_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<int32_t>(PyLong_AsLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableInt64 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(int64_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("L", value));
+			return *this;
+		}
+
+		bool TryValue(int64_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<int64_t>(PyLong_AsLongLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableUInt8 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(uint8_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("B", value));
+			return *this;
+		}
+
+		bool TryValue(uint8_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<uint8_t>(PyLong_AsUnsignedLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableUInt16 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(uint16_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("H", value));
+			return *this;
+		}
+
+		bool TryValue(uint16_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<uint16_t>(PyLong_AsUnsignedLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableUInt32 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(uint32_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("I", value));
+			return *this;
+		}
+
+		bool TryValue(uint32_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<uint32_t>(PyLong_AsUnsignedLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableUInt64 final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(uint64_t value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("K", value));
+			return *this;
+		}
+
+		bool TryValue(uint64_t& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
+			{
+				value = static_cast<uint64_t>(PyLong_AsUnsignedLongLong(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableFloat final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(float value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("f", value));
+			return *this;
+		}
+
+		bool TryValue(float& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyFloat_Type))
+			{
+				value = static_cast<float>(PyFloat_AsDouble(val_.get()));
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableDouble final : public PythonScriptVariable
+	{
+	public:
+		ScriptVariable& operator=(double value) override
+		{
+			val_ = MakePyObjectPtr(Py_BuildValue("d", value));
+			return *this;
+		}
+
+		bool TryValue(double& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyFloat_Type))
+			{
+				value = PyFloat_AsDouble(val_.get());
+				return true;
+			}
+			return false;
+		}
+	};
+
+	class PythonScriptVariableVector final : public PythonScriptVariable
+	{
+	public:
+		PythonScriptVariableVector(PythonScriptModule const& script_module) : script_module_(script_module)
+		{
+		}
+
+		ScriptVariable& operator=(std::span<ScriptVariablePtr const> value) override
+		{
+			val_ = MakePyObjectPtr(PyTuple_New(value.size()));
+			for (int i = 0; i < value.size(); ++i)
+			{
+				PyObjectPtr py_item = checked_cast<PythonScriptVariable&>(*value[i]).GetPyObject();
+				Py_IncRef(py_item.get());
+				PyTuple_SetItem(val_.get(), i, py_item.get());
+			}
+			return *this;
+		}
+
+		bool TryValue(std::vector<ScriptVariablePtr>& value) const override
+		{
+			if (PyObject_TypeCheck(val_.get(), &PyList_Type))
+			{
+				size_t len = PyList_Size(val_.get());
+				value.resize(len);
+				for (size_t i = 0; i < len; ++i)
+				{
+					PyObjectPtr py_item = MakePyObjectPtr(PyList_GetItem(val_.get(), i));
+					Py_IncRef(py_item.get());
+					value[i] = script_module_.MakeVariable(py_item);
+				}
+
+				return true;
+			}
+			else if (PyObject_TypeCheck(val_.get(), &PyTuple_Type))
+			{
+				size_t len = PyTuple_Size(val_.get());
+				value.resize(len);
+				for (size_t i = 0; i < len; ++i)
+				{
+					PyObjectPtr py_item = MakePyObjectPtr(PyTuple_GetItem(val_.get(), i));
+					Py_IncRef(py_item.get());
+					value[i] = script_module_.MakeVariable(py_item);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+	private:
+		PythonScriptModule const& script_module_;
+	};
+
 
 	PythonScriptModule::PythonScriptModule(std::string const & name)
 	{
@@ -427,35 +598,227 @@ namespace KlayGE
 		module_.reset();
 	}
 
-	std::any PythonScriptModule::Value(std::string const & name)
+	ScriptVariablePtr PythonScriptModule::Value(std::string const & name)
 	{
-		PyObject* p = PyDict_GetItemString(dict_.get(), name.c_str());
-		Py_IncRef(p);
-		return MakePyObjectPtr(p);
+		PyObjectPtr p = MakePyObjectPtr(PyDict_GetItemString(dict_.get(), name.c_str()));
+		Py_IncRef(p.get());
+		return this->MakeVariable(p);
 	}
 
-	std::any PythonScriptModule::Call(std::string const & func_name, ArrayRef<std::any> args)
+	ScriptVariablePtr PythonScriptModule::Call(std::string const & func_name, std::span<ScriptVariablePtr const> args)
 	{
 		PyObjectPtr py_args = MakePyObjectPtr(PyTuple_New(args.size()));
-		for (size_t i = 0; i < args.size(); ++ i)
+		for (int i = 0; i < args.size(); ++i)
 		{
-			PyObjectPtr value = CppType2PyObjectPtr(args[i]);
-			Py_IncRef(value.get());
-			PyTuple_SetItem(py_args.get(), i, value.get());
+			PyObjectPtr py_value = checked_cast<PythonScriptVariable&>(*args[i]).GetPyObject();
+			Py_IncRef(py_value.get());
+			PyTuple_SetItem(py_args.get(), i, py_value.get());
 		}
 
-		PyObjectPtr func = std::any_cast<PyObjectPtr>(this->Value(func_name));
-		return PyObjectPtr2CppType(MakePyObjectPtr(PyObject_CallObject(func.get(), py_args.get())));
+		PyObjectPtr func = checked_cast<PythonScriptVariable&>(*this->Value(func_name)).GetPyObject();
+		return this->MakeVariable(MakePyObjectPtr(PyObject_CallObject(func.get(), py_args.get())));
 	}
 
-	std::any PythonScriptModule::RunString(std::string const & script)
+	ScriptVariablePtr PythonScriptModule::RunString(std::string const & script)
 	{
-		return MakePyObjectPtr(PyRun_String(script.c_str(), Py_file_input, dict_.get(), dict_.get()));
+		return this->MakeVariable(MakePyObjectPtr(PyRun_String(script.c_str(), Py_file_input, dict_.get(), dict_.get())));
 	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(std::string const& value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(std::string_view value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableString>();
+		*ret = std::move(value);
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(char const* value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(char* value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(std::wstring const& value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableWString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(std::wstring_view value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableWString>();
+		*ret = std::move(value);
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(wchar_t const* value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableWString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(wchar_t* value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableWString>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(int8_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableInt8>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(int16_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableInt16>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(int32_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableInt32>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(int64_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableInt64>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(uint8_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableUInt8>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(uint16_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableUInt16>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(uint32_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableUInt32>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(uint64_t value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableUInt64>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(float value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableFloat>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(double value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableDouble>();
+		*ret = value;
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(std::span<ScriptVariablePtr const> value) const
+	{
+		auto ret = MakeSharedPtr<PythonScriptVariableVector>(*this);
+		*ret = std::move(value);
+		return ret;
+	}
+
+	ScriptVariablePtr PythonScriptModule::MakeVariable(PyObjectPtr const& value) const
+	{
+		if (PyObject_TypeCheck(value.get(), &PyUnicode_Type))
+		{
+			return this->MakeVariable(std::string(PyBytes_AsString(PyUnicode_AsASCIIString(value.get()))));
+		}
+		else if (PyObject_TypeCheck(value.get(), &PyLong_Type))
+		{
+			return this->MakeVariable(static_cast<int32_t>(PyLong_AsLong(value.get())));
+		}
+		else if (PyObject_TypeCheck(value.get(), &PyFloat_Type))
+		{
+			return this->MakeVariable(static_cast<float>(PyFloat_AsDouble(value.get())));
+		}
+		else if (PyObject_TypeCheck(value.get(), &PyList_Type))
+		{
+			size_t const len = PyList_Size(value.get());
+			std::vector<ScriptVariablePtr> v(len);
+			for (size_t i = 0; i < len; ++i)
+			{
+				PyObjectPtr py_obj = MakePyObjectPtr(PyList_GetItem(value.get(), i));
+				Py_IncRef(py_obj.get());
+				v[i] = this->MakeVariable(py_obj);
+			}
+			return this->MakeVariable(v);
+		}
+		else if (PyObject_TypeCheck(value.get(), &PyTuple_Type))
+		{
+			size_t const len = PyTuple_Size(value.get());
+			std::vector<ScriptVariablePtr> v(len);
+			for (size_t i = 0; i < len; ++i)
+			{
+				PyObjectPtr py_obj = MakePyObjectPtr(PyTuple_GetItem(value.get(), i));
+				Py_IncRef(py_obj.get());
+				v[i] = this->MakeVariable(py_obj);
+			}
+			return this->MakeVariable(v);
+		}
+		else
+		{
+			auto ret = MakeSharedPtr<PythonScriptVariable>();
+			ret->SetPyObject(value);
+			return ret;
+		}
+	}
+
 
 	PythonEngine::PythonEngine()
 	{
 		Py_NoSiteFlag = 1;
+
+		PyPreConfig preconfig;
+		PyPreConfig_InitPythonConfig(&preconfig);
+
+		preconfig.utf8_mode = 1;
+
+		PyStatus status = Py_PreInitialize(&preconfig);
+		if (PyStatus_Exception(status))
+		{
+			Py_ExitStatusException(status);
+		}
+
 		std::wstring py_lib;
 		Convert(py_lib, ResLoader::Instance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
 		Py_SetPath(&py_lib[0]);

@@ -68,41 +68,46 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	PyObjectPtr MakePyObjectPtr(PyObject* p);
 
-	PyObjectPtr CppType2PyObjectPtr(std::string const & t);
-	PyObjectPtr CppType2PyObjectPtr(char* t);
-	PyObjectPtr CppType2PyObjectPtr(wchar_t* t);
-	PyObjectPtr CppType2PyObjectPtr(int8_t t);
-	PyObjectPtr CppType2PyObjectPtr(int16_t t);
-	PyObjectPtr CppType2PyObjectPtr(int32_t t);
-	PyObjectPtr CppType2PyObjectPtr(int64_t t);
-	PyObjectPtr CppType2PyObjectPtr(uint8_t t);
-	PyObjectPtr CppType2PyObjectPtr(uint16_t t);
-	PyObjectPtr CppType2PyObjectPtr(uint32_t t);
-	PyObjectPtr CppType2PyObjectPtr(uint64_t t);
-	PyObjectPtr CppType2PyObjectPtr(double t);
-	PyObjectPtr CppType2PyObjectPtr(float t);
-	PyObjectPtr CppType2PyObjectPtr(PyObject* t);
-	PyObjectPtr CppType2PyObjectPtr(PyObjectPtr const & t);
-	PyObjectPtr CppType2PyObjectPtr(std::any const & t);
-
 	// Py Script module
 	/////////////////////////////////////////////////////////////////////////////////
-	class PythonScriptModule : public ScriptModule
+	class PythonScriptModule final : public ScriptModule
 	{
 	public:
 		explicit PythonScriptModule(std::string const & name);
 		~PythonScriptModule() override;
 
-		std::any Value(std::string const & name) override;
-		std::any Call(std::string const & func_name, ArrayRef<std::any> args) override;
-		std::any RunString(std::string const & script) override;
+		ScriptVariablePtr Value(std::string const & name) override;
+		ScriptVariablePtr Call(std::string const & func_name, std::span<ScriptVariablePtr const> args) override;
+		ScriptVariablePtr RunString(std::string const & script) override;
+
+		ScriptVariablePtr MakeVariable(std::string const& value) const override;
+		ScriptVariablePtr MakeVariable(std::string_view value) const override;
+		ScriptVariablePtr MakeVariable(char const* value) const override;
+		ScriptVariablePtr MakeVariable(char* value) const override;
+		ScriptVariablePtr MakeVariable(std::wstring const& value) const override;
+		ScriptVariablePtr MakeVariable(std::wstring_view value) const override;
+		ScriptVariablePtr MakeVariable(wchar_t const* value) const override;
+		ScriptVariablePtr MakeVariable(wchar_t* value) const override;
+		ScriptVariablePtr MakeVariable(int8_t value) const override;
+		ScriptVariablePtr MakeVariable(int16_t value) const override;
+		ScriptVariablePtr MakeVariable(int32_t value) const override;
+		ScriptVariablePtr MakeVariable(int64_t value) const override;
+		ScriptVariablePtr MakeVariable(uint8_t value) const override;
+		ScriptVariablePtr MakeVariable(uint16_t value) const override;
+		ScriptVariablePtr MakeVariable(uint32_t value) const override;
+		ScriptVariablePtr MakeVariable(uint64_t value) const override;
+		ScriptVariablePtr MakeVariable(float value) const override;
+		ScriptVariablePtr MakeVariable(double value) const override;
+		ScriptVariablePtr MakeVariable(std::span<ScriptVariablePtr const> value) const override;
+
+		ScriptVariablePtr MakeVariable(PyObjectPtr const& value) const;
 
 	private:
 		PyObjectPtr module_;
 		PyObjectPtr dict_;
 	};
 
-	class PythonEngine : public ScriptEngine
+	class PythonEngine final : public ScriptEngine
 	{
 	public:
 		PythonEngine();

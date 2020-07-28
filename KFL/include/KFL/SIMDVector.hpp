@@ -91,7 +91,7 @@ namespace KlayGE
 		void swap(SIMDVectorF4& rhs);
 
 	private:
-		V4TYPE vec_;
+		V4TYPE vec_{};
 	};
 
 	inline void swap(SIMDVectorF4& lhs, SIMDVectorF4& rhs)

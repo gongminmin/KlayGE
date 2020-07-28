@@ -95,7 +95,7 @@ void ConditionalCopyBufferGS(point float4 in_pos[1] : SV_Position,
 
 	<parameter type="rw_byte_address_buffer" name="rw_output_primitives_buff"/>
 
-	<shader type="geometry_shader" major_version="5" minor_version="1">
+	<shader type="geometry_shader">
 		<![CDATA[
 #if KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT
 [maxvertexcount(1)]

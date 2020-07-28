@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_DEV_HELPER_API MeshMetadata
+	class KLAYGE_DEV_HELPER_API MeshMetadata final
 	{
 	public:
 		MeshMetadata();

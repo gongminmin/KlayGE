@@ -55,8 +55,8 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
 		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.data(), static_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
-		std::vector<char> tmp(mbs_len + 1);
-		WideCharToMultiByte(CP_ACP, 0, src.data(), static_cast<int>(src.size()), &tmp[0], mbs_len, nullptr, nullptr);
+		auto tmp = MakeUniquePtr<char[]>(mbs_len + 1);
+		WideCharToMultiByte(CP_ACP, 0, src.data(), static_cast<int>(src.size()), tmp.get(), mbs_len, nullptr, nullptr);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for wcstombs
 		std::vector<char> tmp;
@@ -73,15 +73,16 @@ namespace KlayGE
 			}
 		}
 		tmp.push_back('\0');
+		size_t const mbs_len = tmp.size() - 1;
 #else
 		std::setlocale(LC_CTYPE, "");
 
 		size_t const mbs_len = wcstombs(nullptr, src.data(), src.size());
-		std::vector<char> tmp(mbs_len + 1);
-		wcstombs(&tmp[0], src.data(), tmp.size());
+		auto tmp = MakeUniquePtr<char[]>(mbs_len + 1);
+		wcstombs(tmp.get(), src.data(), mbs_len + 1);
 #endif
 
-		dest.assign(tmp.begin(), tmp.end() - 1);
+		dest.assign(&tmp[0], &tmp[mbs_len]);
 
 		return dest;
 	}
@@ -101,8 +102,8 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
 		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.data(), static_cast<int>(src.size()), nullptr, 0);
-		std::vector<wchar_t> tmp(wcs_len + 1);
-		MultiByteToWideChar(CP_ACP, 0, src.data(), static_cast<int>(src.size()), &tmp[0], wcs_len);
+		auto tmp = MakeUniquePtr<wchar_t[]>(wcs_len + 1);
+		MultiByteToWideChar(CP_ACP, 0, src.data(), static_cast<int>(src.size()), tmp.get(), wcs_len);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for mbstowcs
 		std::vector<wchar_t> tmp;
@@ -121,15 +122,16 @@ namespace KlayGE
 			tmp.push_back(wch);
 		}
 		tmp.push_back(L'\0');
+		size_t const wcs_len = tmp.size() - 1;
 #else
 		std::setlocale(LC_CTYPE, "");
 
 		size_t const wcs_len = mbstowcs(nullptr, src.data(), src.size());
-		std::vector<wchar_t> tmp(wcs_len + 1);
-		mbstowcs(&tmp[0], src.data(), src.size());
+		auto tmp = MakeUniquePtr<wchar_t[]>(wcs_len + 1);
+		mbstowcs(tmp.get(), src.data(), src.size());
 #endif
 
-		dest.assign(tmp.begin(), tmp.end() - 1);
+		dest.assign(&tmp[0], &tmp[wcs_len]);
 
 		return dest;
 	}
@@ -192,16 +194,16 @@ namespace KlayGE
 #endif
 	}
 
-	std::string ReadShortString(ResIdentifierPtr const & res)
+	std::string ReadShortString(ResIdentifier& res)
 	{
 		uint8_t len;
-		res->read(&len, sizeof(len));
+		res.read(&len, sizeof(len));
 
 		std::string tmp;
 		if (len > 0)
 		{
 			tmp.resize(len);
-			res->read(&tmp[0], len * sizeof(tmp[0]));
+			res.read(&tmp[0], len * sizeof(tmp[0]));
 		}
 
 		return tmp;

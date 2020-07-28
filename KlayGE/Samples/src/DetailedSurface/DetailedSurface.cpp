@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,15 +13,16 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Light.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "DetailedSurface.hpp"
@@ -65,21 +65,10 @@ namespace
 			*(effect_->ParameterByName("na_length_tex")) = ASyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
-		{
-			KFL_UNUSED(model);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
-
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -258,7 +247,7 @@ DetailedSurfaceApp::DetailedSurfaceApp()
 void DetailedSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Open("DetailedSurface.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DetailedSurface.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
@@ -266,7 +255,7 @@ void DetailedSurfaceApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");
 
-	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_BC1, EF_ABGR8, EF_ARGB8 });
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);
 	juda_tex_->CacheProperty(1024, fmt, 4);
 

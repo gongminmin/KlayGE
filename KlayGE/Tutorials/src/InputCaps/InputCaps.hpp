@@ -25,6 +25,8 @@ private:
 	std::wstring joystick_str_;
 	std::wstring touch_str_;
 	std::wstring sensor_str_;
+
+	KlayGE::InputJoystickPtr joystick_;
 };
 
 #endif		// _DISTANCEMAPPING_HPP

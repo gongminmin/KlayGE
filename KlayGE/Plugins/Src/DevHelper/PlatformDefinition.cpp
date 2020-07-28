@@ -94,7 +94,7 @@ namespace KlayGE
 		ResIdentifierPtr plat = ResLoader::Instance().Open(name);
 
 		KlayGE::XMLDocument doc;
-		XMLNodePtr root = doc.Parse(plat);
+		XMLNodePtr root = doc.Parse(*plat);
 
 		platform = RetrieveAttrValue(root, "name", "");
 		major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
@@ -219,6 +219,7 @@ namespace KlayGE
 			= RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
 		device_caps.uavs_at_every_stage_support = RetrieveNodeValue(root, "uavs_at_every_stage_support", 0) ? true : false;
 		device_caps.explicit_multi_sample_support = RetrieveNodeValue(root, "explicit_multi_sample_support", 0) ? true : false;
+		device_caps.vp_rt_index_at_every_stage_support = RetrieveNodeValue(root, "vp_rt_index_at_every_stage_support", 0) ? true : false;
 
 		device_caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
 		device_caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;

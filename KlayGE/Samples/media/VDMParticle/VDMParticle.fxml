@@ -4,15 +4,14 @@
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4x4" name="model"/>
-
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float4" name="light_color"/>
 		<parameter type="float3" name="light_falloff"/>
-		<parameter type="float3" name="eye_pos"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="aniso_sampler">
@@ -22,28 +21,10 @@
 		<state name="max_anisotropy" value="8"/>
 	</parameter>
 
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
-
-	<parameter type="float4" name="albedo_clr"/>
-	<parameter type="float2" name="metalness_clr"/>
-	<parameter type="float2" name="glossiness_clr"/>
-	<parameter type="float4" name="emissive_clr"/>
-	<parameter type="int" name="albedo_map_enabled"/>
-
-	<parameter type="int" name="normal_map_enabled"/>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
-
 	<shader>
 		<![CDATA[
-void MeshVS(float4 position : POSITION,
+void MeshVS(uint instance_id : SV_InstanceID,
+					float4 position : POSITION,
 					float2 texcoord : TEXCOORD0,
 					float4 tangent_quat : TANGENT,
 					out float4 oL : TEXCOORD0,
@@ -53,10 +34,14 @@ void MeshVS(float4 position : POSITION,
 	position = float4(position.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float3 eye_pos = camera.eye_pos;
+
 	oPos = mul(position, mvp);
 	float4 pos_world = mul(position, model);
-	
+
 	float3x3 world_to_tangent;
 	world_to_tangent[0] = normalize(mul(transform_quat(float3(1, 0, 0), tangent_quat), (float3x3)model));
 	world_to_tangent[1] = normalize(mul(transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w), (float3x3)model));
@@ -82,15 +67,13 @@ float4 MeshPS(float4 L : TEXCOORD0, float4 H : TEXCOORD1) : SV_Target
 	{
 		albedo *= albedo_tex.Sample(aniso_sampler, uv).rgb;
 	}
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(aniso_sampler, uv).r;
-	}
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(aniso_sampler, uv).r;
+		float2 mg_tex = get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, uv));
+		metalness *= mg_tex.x;
+		glossiness *= mg_tex.y;
 	}
 	float shininess = Glossiness2Shininess(glossiness);
 	float3 emissive = emissive_clr.xyz;

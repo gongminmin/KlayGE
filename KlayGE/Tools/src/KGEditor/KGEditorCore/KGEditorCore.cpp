@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -10,7 +10,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
@@ -21,11 +21,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KFL/XMLDom.hpp>
 
-#include <sstream>
 #include <fstream>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <iterator>
+#include <sstream>
 
 #include "KGEditorCore.hpp"
 
@@ -44,7 +42,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("SimpleAxisTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float4 xyzs[] =
 			{
@@ -68,12 +65,6 @@ namespace
 
 			effect_attrs_ |= EA_SimpleForward;
 		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-		}
 	};
 
 	class RenderableTranslationAxis : public Renderable
@@ -87,8 +78,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -190,15 +179,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -213,8 +194,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -296,15 +275,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -319,8 +290,6 @@ namespace
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
 
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_ep_ = effect_->ParameterByName("model");
 			hl_axis_ep_ = effect_->ParameterByName("hl_axis");
 			*hl_axis_ep_ = int3(0, 0, 0);
 
@@ -459,15 +428,7 @@ namespace
 			*hl_axis_ep_ = int3(axis & 1UL, axis & 2UL, axis & 4UL);
 		}
 
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-			*model_ep_ = model_mat_;
-		}
-
 	private:
-		RenderEffectParameter* model_ep_;
 		RenderEffectParameter* hl_axis_ep_;
 	};
 
@@ -481,7 +442,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("GridTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			int const GRID_SIZE = 50;
 
@@ -505,12 +465,6 @@ namespace
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 			effect_attrs_ |= EA_SimpleForward;
-		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 }
@@ -536,7 +490,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-		auto const fmt = re.DeviceCaps().BestMatchRenderTargetFormat({ EF_ABGR8, EF_ABGR8 }, 1, 0);
+		auto const fmt = re.DeviceCaps().BestMatchRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ABGR8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
@@ -600,9 +554,9 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
-		system_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
+		system_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 		selective_fb_ = rf.MakeFrameBuffer();
-		selective_fb_->GetViewport()->camera = system_camera_;
+		selective_fb_->Viewport()->Camera(system_camera_);
 
 		this->UpdateSceneAABB();
 	}
@@ -742,7 +696,7 @@ namespace KlayGE
 			uint32_t urv = deferred_rendering_->Update(deferred_pass);
 			if (urv & App3DFramework::URV_Finished)
 			{
-				selective_tex_->CopyToTexture(*selective_cpu_tex_);
+				selective_tex_->CopyToTexture(*selective_cpu_tex_, TextureFilter::Point);
 				update_selective_buffer_ = false;
 			}
 
@@ -1249,9 +1203,9 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		CameraPtr camera = (0 == id) ? system_camera_ : this->GetCamera(id);
 
-		re.CurFrameBuffer()->GetViewport()->camera = camera;
-		re.DefaultFrameBuffer()->GetViewport()->camera = camera;
-		selective_fb_->GetViewport()->camera = camera;
+		re.CurFrameBuffer()->Viewport()->Camera(camera);
+		re.DefaultFrameBuffer()->Viewport()->Camera(camera);
+		selective_fb_->Viewport()->Camera(camera);
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
 	}
@@ -1827,7 +1781,7 @@ namespace KlayGE
 		if (file)
 		{
 			XMLDocument kges_doc;
-			XMLNodePtr kges_root = kges_doc.Parse(file);
+			XMLNodePtr kges_root = kges_doc.Parse(*file);
 			this->SceneName(std::string(kges_root->Attrib("name")->ValueString()));
 			{
 				XMLAttributePtr attr = kges_root->Attrib("skybox");
@@ -1883,11 +1837,10 @@ namespace KlayGE
 					if (attr_node)
 					{
 						std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
-						std::vector<std::string> tokens;
-						boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
+						std::vector<std::string_view> tokens = StringUtil::Split(attr_str, StringUtil::IsAnyOf(" \t|"));
 						for (auto& token : tokens)
 						{
-							boost::algorithm::trim(token);
+							token = StringUtil::Trim(token);
 
 							if ("no_shadow" == token)
 							{

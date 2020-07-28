@@ -88,11 +88,17 @@ private:
 	KlayGE::TexturePtr refract_obj_N_texture_f_;
 	KlayGE::TexturePtr refract_obj_N_texture_b_;
 	KlayGE::TexturePtr refract_obj_ds_tex_f_;
+	KlayGE::ShaderResourceViewPtr refract_obj_ds_srv_f_;
 	KlayGE::TexturePtr refract_obj_ds_tex_b_;
+	KlayGE::ShaderResourceViewPtr refract_obj_ds_srv_b_;
 	KlayGE::TexturePtr background_ds_tex_;
+	KlayGE::ShaderResourceViewPtr background_ds_srv_;
 	KlayGE::TexturePtr refract_obj_depth_tex_f_;
+	KlayGE::RenderTargetViewPtr refract_obj_depth_rtv_f_;
 	KlayGE::TexturePtr refract_obj_depth_tex_b_;
+	KlayGE::RenderTargetViewPtr refract_obj_depth_rtv_b_;
 	KlayGE::TexturePtr background_depth_tex_;
+	KlayGE::RenderTargetViewPtr background_depth_rtv_;
 	KlayGE::FrameBufferPtr background_fb_;	
 	KlayGE::FrameBufferPtr refract_obj_fb_d_f_;
 	KlayGE::FrameBufferPtr refract_obj_fb_d_b_;
@@ -100,17 +106,16 @@ private:
 	KlayGE::FrameBufferPtr refract_obj_fb_b_;
 
 	KlayGE::TexturePtr caustics_texture_;
+	KlayGE::ShaderResourceViewPtr caustics_srv_;
 	KlayGE::TexturePtr caustics_texture_filtered_;
 	KlayGE::FrameBufferPtr caustics_fb_;
 	KlayGE::PostProcessPtr caustics_map_pps_;
 
 	KlayGE::FrameBufferPtr shadow_cube_buffer_;
-	KlayGE::TexturePtr shadow_tex_;
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
 	KlayGE::FrameBufferPtr env_cube_buffer_;
-	KlayGE::TexturePtr env_tex_;
 	KlayGE::TexturePtr env_cube_tex_;
 	KlayGE::PostProcessPtr env_filter_pps_[6];
 	KlayGE::LightSourcePtr dummy_light_env_;

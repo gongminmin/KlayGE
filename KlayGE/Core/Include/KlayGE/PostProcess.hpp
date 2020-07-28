@@ -29,10 +29,11 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX17/string_view.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {
@@ -41,13 +42,11 @@ namespace KlayGE
 	public:
 		PostProcess(std::wstring_view name, bool volumetric);
 		PostProcess(std::wstring_view name, bool volumetric,
-			ArrayRef<std::string> param_names,
-			ArrayRef<std::string> input_pin_names,
-			ArrayRef<std::string> output_pin_names,
+			std::span<std::string const> param_names,
+			std::span<std::string const> input_pin_names,
+			std::span<std::string const> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
-		virtual ~PostProcess()
-		{
-		}
+		virtual ~PostProcess() noexcept;
 
 		virtual PostProcessPtr Clone();
 
@@ -116,15 +115,16 @@ namespace KlayGE
 		virtual uint32_t NumInputPins() const;
 		virtual uint32_t InputPinByName(std::string_view name) const;
 		virtual std::string const & InputPinName(uint32_t index) const;
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
-		virtual void InputPin(uint32_t index, ShaderResourceViewPtr const & tex);
-		virtual TexturePtr const & InputPin(uint32_t index) const;
+		virtual void InputPin(uint32_t index, ShaderResourceViewPtr const& srv);
+		virtual ShaderResourceViewPtr const& InputPin(uint32_t index) const;
 
 		virtual uint32_t NumOutputPins() const;
 		virtual uint32_t OutputPinByName(std::string_view name) const;
 		virtual std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		virtual TexturePtr const & OutputPin(uint32_t index) const;
+		virtual void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv);
+		virtual void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav);
+		virtual RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const;
+		virtual UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const;
 
 		bool Volumetric() const
 		{
@@ -178,7 +178,7 @@ namespace KlayGE
 		uint32_t cs_pixel_per_thread_z_;
 
 		std::vector<std::pair<std::string, ShaderResourceViewPtr>> input_pins_;
-		std::vector<std::pair<std::string, TexturePtr>> output_pins_;
+		std::vector<std::tuple<std::string, RenderTargetViewPtr, UnorderedAccessViewPtr>> output_pins_;
 		uint32_t num_bind_output_;
 		std::vector<std::pair<std::string, RenderEffectParameter*>> params_;
 		RenderEffectParameter* pp_mvp_param_;
@@ -201,91 +201,90 @@ namespace KlayGE
 	public:
 		explicit PostProcessChain(std::wstring const & name);
 		PostProcessChain(std::wstring const & name,
-			ArrayRef<std::string> param_names,
-			ArrayRef<std::string> input_pin_names,
-			ArrayRef<std::string> output_pin_names,
+			std::span<std::string const> param_names,
+			std::span<std::string const> input_pin_names,
+			std::span<std::string const> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
-		virtual ~PostProcessChain()
-		{
-		}
 
 		void Append(PostProcessPtr const & pp);
 		uint32_t NumPostProcesses() const;
 		PostProcessPtr const & GetPostProcess(uint32_t index) const;
 
-		virtual uint32_t NumParams() const;
-		virtual uint32_t ParamByName(std::string_view name) const;
-		virtual std::string const & ParamName(uint32_t index) const;
-		virtual void SetParam(uint32_t index, bool const & value);
-		virtual void SetParam(uint32_t index, uint32_t const & value);
-		virtual void SetParam(uint32_t index, int32_t const & value);
-		virtual void SetParam(uint32_t index, float const & value);
-		virtual void SetParam(uint32_t index, uint2 const & value);
-		virtual void SetParam(uint32_t index, uint3 const & value);
-		virtual void SetParam(uint32_t index, uint4 const & value);
-		virtual void SetParam(uint32_t index, int2 const & value);
-		virtual void SetParam(uint32_t index, int3 const & value);
-		virtual void SetParam(uint32_t index, int4 const & value);
-		virtual void SetParam(uint32_t index, float2 const & value);
-		virtual void SetParam(uint32_t index, float3 const & value);
-		virtual void SetParam(uint32_t index, float4 const & value);
-		virtual void SetParam(uint32_t index, float4x4 const & value);
-		virtual void SetParam(uint32_t index, std::vector<bool> const & value);
-		virtual void SetParam(uint32_t index, std::vector<uint32_t> const & value);
-		virtual void SetParam(uint32_t index, std::vector<int32_t> const & value);
-		virtual void SetParam(uint32_t index, std::vector<float> const & value);
-		virtual void SetParam(uint32_t index, std::vector<uint2> const & value);
-		virtual void SetParam(uint32_t index, std::vector<uint3> const & value);
-		virtual void SetParam(uint32_t index, std::vector<uint4> const & value);
-		virtual void SetParam(uint32_t index, std::vector<int2> const & value);
-		virtual void SetParam(uint32_t index, std::vector<int3> const & value);
-		virtual void SetParam(uint32_t index, std::vector<int4> const & value);
-		virtual void SetParam(uint32_t index, std::vector<float2> const & value);
-		virtual void SetParam(uint32_t index, std::vector<float3> const & value);
-		virtual void SetParam(uint32_t index, std::vector<float4> const & value);
-		virtual void SetParam(uint32_t index, std::vector<float4x4> const & value);
-		virtual void GetParam(uint32_t index, bool& value);
-		virtual void GetParam(uint32_t index, uint32_t& value);
-		virtual void GetParam(uint32_t index, int32_t& value);
-		virtual void GetParam(uint32_t index, float& value);
-		virtual void GetParam(uint32_t index, uint2& value);
-		virtual void GetParam(uint32_t index, uint3& value);
-		virtual void GetParam(uint32_t index, uint4& value);
-		virtual void GetParam(uint32_t index, int2& value);
-		virtual void GetParam(uint32_t index, int3& value);
-		virtual void GetParam(uint32_t index, int4& value);
-		virtual void GetParam(uint32_t index, float2& value);
-		virtual void GetParam(uint32_t index, float3& value);
-		virtual void GetParam(uint32_t index, float4& value);
-		virtual void GetParam(uint32_t index, float4x4& value);
-		virtual void GetParam(uint32_t index, std::vector<bool>& value);
-		virtual void GetParam(uint32_t index, std::vector<uint32_t>& value);
-		virtual void GetParam(uint32_t index, std::vector<int32_t>& value);
-		virtual void GetParam(uint32_t index, std::vector<float>& value);
-		virtual void GetParam(uint32_t index, std::vector<uint2>& value);
-		virtual void GetParam(uint32_t index, std::vector<uint3>& value);
-		virtual void GetParam(uint32_t index, std::vector<uint4>& value);
-		virtual void GetParam(uint32_t index, std::vector<int2>& value);
-		virtual void GetParam(uint32_t index, std::vector<int3>& value);
-		virtual void GetParam(uint32_t index, std::vector<int4>& value);
-		virtual void GetParam(uint32_t index, std::vector<float2>& value);
-		virtual void GetParam(uint32_t index, std::vector<float3>& value);
-		virtual void GetParam(uint32_t index, std::vector<float4>& value);
-		virtual void GetParam(uint32_t index, std::vector<float4x4>& value);
+		uint32_t NumParams() const override;
+		uint32_t ParamByName(std::string_view name) const override;
+		std::string const & ParamName(uint32_t index) const override;
+		void SetParam(uint32_t index, bool const & value) override;
+		void SetParam(uint32_t index, uint32_t const & value) override;
+		void SetParam(uint32_t index, int32_t const & value) override;
+		void SetParam(uint32_t index, float const & value) override;
+		void SetParam(uint32_t index, uint2 const & value) override;
+		void SetParam(uint32_t index, uint3 const & value) override;
+		void SetParam(uint32_t index, uint4 const & value) override;
+		void SetParam(uint32_t index, int2 const & value) override;
+		void SetParam(uint32_t index, int3 const & value) override;
+		void SetParam(uint32_t index, int4 const & value) override;
+		void SetParam(uint32_t index, float2 const & value) override;
+		void SetParam(uint32_t index, float3 const & value) override;
+		void SetParam(uint32_t index, float4 const & value) override;
+		void SetParam(uint32_t index, float4x4 const & value) override;
+		void SetParam(uint32_t index, std::vector<bool> const & value) override;
+		void SetParam(uint32_t index, std::vector<uint32_t> const & value) override;
+		void SetParam(uint32_t index, std::vector<int32_t> const & value) override;
+		void SetParam(uint32_t index, std::vector<float> const & value) override;
+		void SetParam(uint32_t index, std::vector<uint2> const & value) override;
+		void SetParam(uint32_t index, std::vector<uint3> const & value) override;
+		void SetParam(uint32_t index, std::vector<uint4> const & value) override;
+		void SetParam(uint32_t index, std::vector<int2> const & value) override;
+		void SetParam(uint32_t index, std::vector<int3> const & value) override;
+		void SetParam(uint32_t index, std::vector<int4> const & value) override;
+		void SetParam(uint32_t index, std::vector<float2> const & value) override;
+		void SetParam(uint32_t index, std::vector<float3> const & value) override;
+		void SetParam(uint32_t index, std::vector<float4> const & value) override;
+		void SetParam(uint32_t index, std::vector<float4x4> const & value) override;
+		void GetParam(uint32_t index, bool& value) override;
+		void GetParam(uint32_t index, uint32_t& value) override;
+		void GetParam(uint32_t index, int32_t& value) override;
+		void GetParam(uint32_t index, float& value) override;
+		void GetParam(uint32_t index, uint2& value) override;
+		void GetParam(uint32_t index, uint3& value) override;
+		void GetParam(uint32_t index, uint4& value) override;
+		void GetParam(uint32_t index, int2& value) override;
+		void GetParam(uint32_t index, int3& value) override;
+		void GetParam(uint32_t index, int4& value) override;
+		void GetParam(uint32_t index, float2& value) override;
+		void GetParam(uint32_t index, float3& value) override;
+		void GetParam(uint32_t index, float4& value) override;
+		void GetParam(uint32_t index, float4x4& value) override;
+		void GetParam(uint32_t index, std::vector<bool>& value) override;
+		void GetParam(uint32_t index, std::vector<uint32_t>& value) override;
+		void GetParam(uint32_t index, std::vector<int32_t>& value) override;
+		void GetParam(uint32_t index, std::vector<float>& value) override;
+		void GetParam(uint32_t index, std::vector<uint2>& value) override;
+		void GetParam(uint32_t index, std::vector<uint3>& value) override;
+		void GetParam(uint32_t index, std::vector<uint4>& value) override;
+		void GetParam(uint32_t index, std::vector<int2>& value) override;
+		void GetParam(uint32_t index, std::vector<int3>& value) override;
+		void GetParam(uint32_t index, std::vector<int4>& value) override;
+		void GetParam(uint32_t index, std::vector<float2>& value) override;
+		void GetParam(uint32_t index, std::vector<float3>& value) override;
+		void GetParam(uint32_t index, std::vector<float4>& value) override;
+		void GetParam(uint32_t index, std::vector<float4x4>& value) override;
 
-		virtual uint32_t NumInputPins() const;
-		virtual uint32_t InputPinByName(std::string_view name) const;
-		virtual std::string const & InputPinName(uint32_t index) const;
-		virtual void InputPin(uint32_t index, TexturePtr const & tex);
-		virtual TexturePtr const & InputPin(uint32_t index) const;
+		uint32_t NumInputPins() const override;
+		uint32_t InputPinByName(std::string_view name) const override;
+		std::string const& InputPinName(uint32_t index) const override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
+		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 
-		virtual uint32_t NumOutputPins() const;
-		virtual uint32_t OutputPinByName(std::string_view name) const;
-		virtual std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		virtual TexturePtr const & OutputPin(uint32_t index) const;
+		uint32_t NumOutputPins() const override;
+		uint32_t OutputPinByName(std::string_view name) const override;
+		std::string const& OutputPinName(uint32_t index) const override;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
+		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 
-		virtual void Apply();
+		void Apply() override;
 
 	protected:
 		std::vector<PostProcessPtr> pp_chain_;
@@ -297,9 +296,8 @@ namespace KlayGE
 	public:
 		SeparableBoxFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableBoxFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -323,9 +321,8 @@ namespace KlayGE
 	public:
 		SeparableGaussianFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableGaussianFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -350,9 +347,8 @@ namespace KlayGE
 	public:
 		SeparableBilateralFilterPostProcess(RenderEffectPtr const & effect, RenderTechnique* tech,
 			int kernel_radius, float multiplier, bool x_dir);
-		virtual ~SeparableBilateralFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -377,9 +373,8 @@ namespace KlayGE
 	{
 	public:
 		SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir);
-		virtual ~SeparableLogGaussianFilterPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
 		void KernelRadius(int radius);
@@ -414,25 +409,35 @@ namespace KlayGE
 			this->Append(MakeSharedPtr<T>(effect_y, tech_y, kernel_radius, multiplier, false));
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex)
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override
 		{
-			pp_chain_[0]->InputPin(index, tex);
+			pp_chain_[0]->InputPin(index, srv);
 
 			if (0 == index)
 			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-						1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				pp_chain_[0]->OutputPin(0, blur_x);
-				pp_chain_[1]->InputPin(0, blur_x);
+				auto const& tex = *srv->TextureResource();
+				if (!blur_x_tex_ || (blur_x_tex_->Width(0) != tex.Width(0)) || (blur_x_tex_->Height(0) != tex.Height(0)))
+				{
+					auto& rf = Context::Instance().RenderFactoryInstance();
+					blur_x_tex_ = rf.MakeTexture2D(tex.Width(0), tex.Height(0), 1, 1, tex.Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					blur_x_srv_ = rf.MakeTextureSrv(blur_x_tex_);
+					blur_x_rtv_ = rf.Make2DRtv(blur_x_tex_, 0, 1, 0);
+				}
+				pp_chain_[0]->OutputPin(0, blur_x_rtv_);
+				pp_chain_[1]->InputPin(0, blur_x_srv_);
 			}
 			else
 			{
-				pp_chain_[1]->InputPin(index, tex);
+				pp_chain_[1]->InputPin(index, srv);
 			}
 		}
 
 		using PostProcessChain::InputPin;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 
 
@@ -441,11 +446,16 @@ namespace KlayGE
 	public:
 		BicubicFilteringPostProcess();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		virtual void SetParam(uint32_t index, float2 const & value) override;
+		void SetParam(uint32_t index, float2 const& value) override;
 		using PostProcess::SetParam;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 
 	class KLAYGE_CORE_API LogGaussianBlurPostProcess : public PostProcessChain
@@ -455,8 +465,13 @@ namespace KlayGE
 
 		void ESMScaleFactor(float factor, Camera const & camera);
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& tex) override;
 		using PostProcess::InputPin;
+
+	private:
+		TexturePtr blur_x_tex_;
+		ShaderResourceViewPtr blur_x_srv_;
+		RenderTargetViewPtr blur_x_rtv_;
 	};
 }
 

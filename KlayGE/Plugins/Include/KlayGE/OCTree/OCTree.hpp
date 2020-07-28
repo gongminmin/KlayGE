@@ -33,7 +33,7 @@
 
 namespace KlayGE
 {
-	class OCTree : public SceneManager
+	class OCTree final : public SceneManager
 	{
 	public:
 		OCTree();
@@ -41,13 +41,14 @@ namespace KlayGE
 		void MaxTreeDepth(uint32_t max_tree_depth);
 		uint32_t MaxTreeDepth() const;
 
-		virtual void ClipScene() override;
+		void ClipScene() override;
 
-		virtual BoundOverlap AABBVisible(AABBox const & aabb) const override;
-		virtual BoundOverlap OBBVisible(OBBox const & obb) const override;
-		virtual BoundOverlap SphereVisible(Sphere const & sphere) const override;
+		BoundOverlap AABBVisible(AABBox const & aabb) const override;
+		BoundOverlap OBBVisible(OBBox const & obb) const override;
+		BoundOverlap SphereVisible(Sphere const & sphere) const override;
+		BoundOverlap FrustumVisible(Frustum const& frustum) const override;
 
-		virtual void ClearObject() override;
+		void ClearObject() override;
 
 		void OnSceneChanged() override;
 

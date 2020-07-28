@@ -51,7 +51,6 @@ public:
 	void SetUp() override
 	{
 		auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		stream_output_support_ = caps.stream_output_support;
 		draw_indirect_support_ = caps.draw_indirect_support;
 		uavs_at_every_stage_support_ = caps.uavs_at_every_stage_support;
 		gs_support_ = caps.gs_support;
@@ -59,11 +58,6 @@ public:
 
 	void TestCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
@@ -114,11 +108,6 @@ public:
 
 	void TestVertexIDToBuffer(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		uint32_t const num_vertices = 1024;
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
@@ -155,7 +144,7 @@ public:
 
 	void TestConditionalCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_ || !gs_support_)
+		if (!gs_support_)
 		{
 			return;
 		}
@@ -227,7 +216,7 @@ public:
 
 	void TestDrawIndirectCopyBuffer(float tolerance)
 	{
-		if (!stream_output_support_ || !gs_support_ || !draw_indirect_support_ || !uavs_at_every_stage_support_)
+		if (!gs_support_ || !draw_indirect_support_ || !uavs_at_every_stage_support_)
 		{
 			return;
 		}
@@ -271,7 +260,7 @@ public:
 		fb->Attach(0, vb_num_uav);
 
 		*(effect->ParameterByName("rw_output_primitives_buff")) = vb_num_uav;
-		
+
 		auto& re = rf.RenderEngineInstance();
 
 		for (uint32_t i = 0; i < 10; ++ i)
@@ -307,18 +296,19 @@ public:
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.BindSOBuffers(RenderLayoutPtr());
 
-			re.BindSOBuffers(rl_out);
-			re.Render(*effect, *copy_buffer_tech, *rl_intermediate);
-			re.BindSOBuffers(RenderLayoutPtr());
-
 			vb_num->CopyToBuffer(*vb_num_cpu);
-			uint64_t output_primitives;
+			uint32_t output_primitives;
 			{
 				GraphicsBuffer::Mapper mapper(*vb_num_cpu, BA_Read_Only);
 				output_primitives = *mapper.Pointer<uint32_t>();
 			}
 
 			EXPECT_TRUE(output_primitives == sanity_size);
+
+			re.BindSOBuffers(rl_out);
+			re.Render(*effect, *copy_buffer_tech, *rl_intermediate);
+			re.BindSOBuffers(RenderLayoutPtr());
+
 			EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
 				*vb_out, 0,
 				sanity_size * 4, tolerance));
@@ -327,11 +317,6 @@ public:
 
 	void TestMultipleBuffers(float tolerance)
 	{
-		if (!stream_output_support_)
-		{
-			return;
-		}
-
 		std::ranlux24_base gen;
 		std::uniform_int_distribution<> dis(-100, 100);
 
@@ -407,7 +392,6 @@ public:
 	}
 
 private:
-	bool stream_output_support_;
 	bool draw_indirect_support_;
 	bool uavs_at_every_stage_support_;
 	bool gs_support_;

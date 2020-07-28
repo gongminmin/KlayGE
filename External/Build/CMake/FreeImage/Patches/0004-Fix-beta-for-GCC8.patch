@@ -1,0 +1,40 @@
+From 886cf150fa0a58b1457e971dd02463b3296980d7 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Mon, 10 Sep 2018 21:27:32 -0700
+Subject: [PATCH 4/7] Fix "beta" for GCC8
+
+GCC 8+ has a predefined variable "beta". Change beta in Quantizers.h to beta1 to avoid the conflict.
+---
+ Source/FreeImage/NNQuantizer.cpp | 2 +-
+ Source/Quantizers.h              | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Source/FreeImage/NNQuantizer.cpp b/Source/FreeImage/NNQuantizer.cpp
+index f907c41d..8e654065 100644
+--- a/Source/FreeImage/NNQuantizer.cpp
++++ b/Source/FreeImage/NNQuantizer.cpp
+@@ -272,7 +272,7 @@ int NNQuantizer::contest(int b, int g, int r) {
+ 		*f++ -= betafreq;
+ 		*p++ += (betafreq << gammashift);
+ 	}
+-	freq[bestpos] += beta;
++	freq[bestpos] += beta1;
+ 	bias[bestpos] -= betagamma;
+ 	return bestbiaspos;
+ }
+diff --git a/Source/Quantizers.h b/Source/Quantizers.h
+index 7591c9bd..5617dba3 100644
+--- a/Source/Quantizers.h
++++ b/Source/Quantizers.h
+@@ -111,7 +111,7 @@ static const int gammashift = 10;
+ // static const int gamma = (((int)1) << gammashift);
+ /// beta = 1 / 1024
+ static const int betashift = 10;
+-static const int beta = (intbias >> betashift);
++static const int beta1 = (intbias >> betashift);
+ static const int betagamma = (intbias << (gammashift-betashift));
+ //@}
+ 
+-- 
+2.17.1.windows.2
+

@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -116,21 +115,21 @@ namespace KlayGE
 		d3d_texture_ = d3d_tex;
 	}
 
-	uint32_t D3D11Texture2D::Width(uint32_t level) const
+	uint32_t D3D11Texture2D::Width(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	uint32_t D3D11Texture2D::Height(uint32_t level) const
+	uint32_t D3D11Texture2D::Height(uint32_t level) const noexcept
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
-	void D3D11Texture2D::CopyToTexture(Texture& target)
+	void D3D11Texture2D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -161,15 +160,15 @@ namespace KlayGE
 				for (uint32_t level = 0; level < num_mips; ++ level)
 				{
 					this->ResizeTexture2D(target, index, level, 0, 0, target.Width(level), target.Height(level),
-						index, level, 0, 0, this->Width(level), this->Height(level), true);
+						index, level, 0, 0, this->Width(level), this->Height(level), filter);
 				}
 			}
 		}
 	}
 
-	void D3D11Texture2D::CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void D3D11Texture2D::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -206,13 +205,13 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 
-	void D3D11Texture2D::CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void D3D11Texture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
@@ -252,7 +251,7 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index * 6 + dst_face - CF_Positive_X, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 
@@ -435,27 +434,7 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
-	void D3D11Texture2D::BuildMipSubLevels()
-	{
-		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_Generate_Mips))
-		{
-			auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
-			d3d_imm_ctx_->GenerateMips(srv.get());
-		}
-		else
-		{
-			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-			{
-				for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-				{
-					this->ResizeTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level),
-						index, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1), true);
-				}
-			}
-		}
-	}
-
-	void D3D11Texture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D11Texture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 
@@ -491,7 +470,7 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(init_data.size() == array_size_ * num_mip_maps_);
 			subres_data.resize(init_data.size());
-			for (size_t i = 0; i < init_data.size(); ++ i)
+			for (int i = 0; i < init_data.size(); ++ i)
 			{
 				subres_data[i].pSysMem = init_data[i].data;
 				subres_data[i].SysMemPitch = init_data[i].row_pitch;
@@ -499,8 +478,8 @@ namespace KlayGE
 			}
 		}
 
-		ID3D11Texture2D* d3d_tex;
-		TIFHR(d3d_device_->CreateTexture2D(&desc, subres_data.data(), &d3d_tex));
-		d3d_texture_ = MakeCOMPtr(d3d_tex);
+		ID3D11Texture2DPtr d3d_tex;
+		TIFHR(d3d_device_->CreateTexture2D(&desc, subres_data.data(), d3d_tex.put()));
+		d3d_tex.as(IID_ID3D11Resource, d3d_texture_);
 	}
 }

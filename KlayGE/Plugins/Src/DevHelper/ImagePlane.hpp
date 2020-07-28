@@ -45,7 +45,7 @@ namespace KlayGE
 {
 	class TexMetadata;
 
-	class ImagePlane
+	class ImagePlane final
 	{
 	public:
 		bool Load(std::string_view name, TexMetadata const & metadata);

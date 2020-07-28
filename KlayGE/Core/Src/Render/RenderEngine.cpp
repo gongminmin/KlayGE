@@ -37,6 +37,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -57,9 +59,20 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
+#include <mutex>
 #include <string>
 
 #include <KlayGE/RenderEngine.hpp>
+
+namespace
+{
+	std::mutex default_mtl_instance_mutex;
+	std::mutex mtl_cb_instance_mutex;
+	std::mutex mesh_cb_instance_mutex;
+	std::mutex model_cb_instance_mutex;
+	std::mutex camera_cb_instance_mutex;
+	std::mutex mipmapper_instance_mutex;
+}
 
 namespace KlayGE
 {
@@ -76,9 +89,7 @@ namespace KlayGE
 
 	// Îö¹¹º¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::~RenderEngine()
-	{
-	}
+	RenderEngine::~RenderEngine() noexcept = default;
 
 	void RenderEngine::Suspend()
 	{
@@ -125,7 +136,7 @@ namespace KlayGE
 
 		screen_frame_buffer_camera_node_ =
 			MakeSharedPtr<SceneNode>(L"CameraNode", SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		screen_frame_buffer_camera_node_->AddComponent(screen_frame_buffer_->GetViewport()->camera);
+		screen_frame_buffer_camera_node_->AddComponent(screen_frame_buffer_->Viewport()->Camera());
 
 		uint32_t const screen_width = screen_frame_buffer_->Width();
 		uint32_t const screen_height = screen_frame_buffer_->Height();
@@ -179,10 +190,8 @@ namespace KlayGE
 		GraphicsBufferPtr vpp_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vpp_indices), &vpp_indices[0]);
 		vpp_rl_->BindIndexStream(vpp_ib, EF_R16UI);
 
-		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
-		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ * eff_dpi_scale + 0.5f);
-		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ * eff_dpi_scale + 0.5f);
+		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
+		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
 
 		hdr_enabled_ = settings.hdr;
 		if (settings.hdr)
@@ -204,8 +213,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				post_tone_mapping_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml",
-					"PostToneMapping" + std::to_string(i));
+				post_tone_mapping_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml", std::format("PostToneMapping{}", i));
 			}
 
 			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
@@ -245,13 +253,14 @@ namespace KlayGE
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
 
-		DepthStencilViewPtr ds_view;
+		DepthStencilViewPtr ds_dsv;
 		if (hdr_pp_ || post_tone_mapping_pp_ || (settings.stereo_method != STM_None))
 		{
 			ds_tex_ = this->ScreenDepthStencilTexture();
 			if (ds_tex_ && (screen_width == render_width) && (screen_height == render_height))
 			{
-				ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+				ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+				ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 			}
 			else
 			{
@@ -270,7 +279,9 @@ namespace KlayGE
 						fmt = EF_D16;
 					}
 					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-					ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+					KLAYGE_TEXTURE_DEBUG_NAME(ds_tex_);
+					ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+					ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 				}
 				else
 				{
@@ -285,7 +296,7 @@ namespace KlayGE
 
 						fmt = EF_D16;
 					}
-					ds_view = rf.Make2DDsv(render_width, render_height, fmt, 1, 0);
+					ds_dsv = rf.Make2DDsv(render_width, render_height, fmt, 1, 0);
 				}
 			}
 		}
@@ -293,56 +304,63 @@ namespace KlayGE
 		if ((settings.stereo_method != STM_None) || (settings.display_output_method != DOM_sRGB))
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
-			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			mono_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			ElementFormat const backup_fmts[] = { EF_B10G11R11F, settings.color_fmt, EF_ABGR8, EF_ARGB8 };
-			ArrayRef<ElementFormat> fmt_options = backup_fmts;
+			std::span<ElementFormat const> fmt_options = backup_fmts;
 			if (settings.display_output_method != DOM_sRGB)
 			{
-				fmt_options = fmt_options.Slice(1);
+				fmt_options = fmt_options.subspan(1);
 			}
 			auto fmt = caps.BestMatchTextureRenderTargetFormat(fmt_options, 1, 0);
 
-			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
-				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(mono_tex_, 0, 1, 0));
+			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(mono_tex_);
+			mono_srv_ = rf.MakeTextureSrv(mono_tex_);
+			mono_rtv_ = rf.Make2DRtv(mono_tex_, 0, 1, 0);
+			mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, mono_rtv_);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
 				= default_frame_buffers_[2] = mono_frame_buffer_;
 
 			overlay_frame_buffer_ = rf.MakeFrameBuffer();
-			overlay_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			overlay_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(overlay_tex_);
+			overlay_srv_ = rf.MakeTextureSrv(overlay_tex_);
 			overlay_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(overlay_tex_, 0, 1, 0));
 
-			DepthStencilViewPtr screen_size_ds_view;
+			DepthStencilViewPtr screen_size_ds_dsv;
 			if (need_resize)
 			{
-				screen_size_ds_view = rf.Make2DDsv(screen_width, screen_height, ds_view->Format(), 1, 0);
+				screen_size_ds_dsv = rf.Make2DDsv(screen_width, screen_height, ds_dsv->Format(), 1, 0);
 			}
 			else
 			{
-				screen_size_ds_view = ds_view;
+				screen_size_ds_dsv = ds_dsv;
 			}
-			overlay_frame_buffer_->Attach(screen_size_ds_view);
+			overlay_frame_buffer_->Attach(screen_size_ds_dsv);
 		}
 		else
 		{
 			if (need_resize)
 			{
 				resize_frame_buffer_ = rf.MakeFrameBuffer();
-				resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+				resize_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-				auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+				auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 				BOOST_ASSERT(fmt != EF_Unknown);
 
 				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
 					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(resize_tex_, 0, 1, 0));
+				KLAYGE_TEXTURE_DEBUG_NAME(resize_tex_);
+				resize_srv_ = rf.MakeTextureSrv(resize_tex_);
+				resize_rtv_ = rf.Make2DRtv(resize_tex_, 0, 1, 0);
+				resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, resize_rtv_);
 
 				ElementFormat ds_fmt;
 				if ((settings.depth_stencil_fmt != EF_Unknown) && caps.RenderTargetFormatSupport(settings.depth_stencil_fmt, 1, 0))
@@ -364,36 +382,45 @@ namespace KlayGE
 
 		if (smaa_edge_detection_pp_ || smaa_blending_weight_pp_)
 		{
-			auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+			auto fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_edges_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(smaa_edges_tex_);
+			smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
+			smaa_edges_rtv_ = rf.Make2DRtv(smaa_edges_tex_, 0, 1, 0);
 
-			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			smaa_blend_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(smaa_blend_tex_);
+			smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
+			smaa_blend_rtv_ = rf.Make2DRtv(smaa_blend_tex_, 0, 1, 0);
 
-			auto smaa_ds_view = rf.Make2DDsv(render_width, render_height, EF_D24S8, 1, 0);
+			auto smaa_ds_dsv = rf.Make2DDsv(render_width, render_height, EF_D24S8, 1, 0);
 
-			smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
-			smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+			smaa_edge_detection_pp_->OutputPin(0, smaa_edges_rtv_);
+			smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 
-			smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
-			smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
-			smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+			smaa_blending_weight_pp_->InputPin(0, smaa_edges_srv_);
+			smaa_blending_weight_pp_->OutputPin(0, smaa_blend_rtv_);
+			smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 		}
 		
 		if (post_tone_mapping_pp_)
 		{
 			post_tone_mapping_frame_buffer_ = rf.MakeFrameBuffer();
-			post_tone_mapping_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			post_tone_mapping_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
 			auto const fmt = caps.BestMatchTextureRenderTargetFormat((settings.display_output_method == DOM_sRGB)
-				? MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F }), 1, 0);
+				? MakeSpan({EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_B10G11R11F, EF_ABGR16F}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 
 			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0));
-			post_tone_mapping_frame_buffer_->Attach(ds_view);
+			KLAYGE_TEXTURE_DEBUG_NAME(post_tone_mapping_tex_);
+			post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
+			post_tone_mapping_rtv_ = rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0);
+			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, post_tone_mapping_rtv_);
+			post_tone_mapping_frame_buffer_->Attach(ds_dsv);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 		}
@@ -401,14 +428,16 @@ namespace KlayGE
 		if (hdr_pp_)
 		{
 			hdr_frame_buffer_ = rf.MakeFrameBuffer();
-			hdr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			hdr_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 
-			auto const fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
-				: MakeArrayRef({ EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }), 1, 0);
+			auto const fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeSpan({EF_B10G11R11F, EF_ABGR16F})
+				: MakeSpan({EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8}), 1, 0);
 			BOOST_ASSERT(fmt != EF_Unknown);
 			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+			KLAYGE_TEXTURE_DEBUG_NAME(hdr_tex_);
+			hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 			hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
-			hdr_frame_buffer_->Attach(ds_view);
+			hdr_frame_buffer_->Attach(ds_dsv);
 
 			default_frame_buffers_[0] = hdr_frame_buffer_;
 		}
@@ -463,12 +492,20 @@ namespace KlayGE
 		hdr_frame_buffer_.reset();
 
 		overlay_tex_.reset();
+		overlay_srv_.reset();
 		mono_tex_.reset();
+		mono_srv_.reset();
+		mono_rtv_.reset();
 		resize_tex_.reset();
+		resize_srv_.reset();
+		resize_rtv_.reset();
 		hdr_tex_.reset();
-		hdr_tex_.reset();
+		hdr_srv_.reset();
 		ds_tex_.reset();
+		ds_srv_.reset();
 		post_tone_mapping_tex_.reset();
+		post_tone_mapping_srv_.reset();
+		post_tone_mapping_rtv_.reset();
 
 		for (int i = 3; i >= 0; -- i)
 		{
@@ -646,13 +683,13 @@ namespace KlayGE
 		uint32_t const old_screen_width = default_frame_buffers_[3]->Width();
 		uint32_t const old_screen_height = default_frame_buffers_[3]->Height();
 
-		uint32_t const new_screen_width = width;
-		uint32_t const new_screen_height = height;
-
 		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 		float const eff_dpi_scale = win->EffectiveDPIScale();
-		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_width_scale_ * eff_dpi_scale + 0.5f);
-		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ * eff_dpi_scale + 0.5f);
+		uint32_t const new_screen_width = static_cast<uint32_t>(width * eff_dpi_scale + 0.5f);
+		uint32_t const new_screen_height = static_cast<uint32_t>(height * eff_dpi_scale + 0.5f);
+
+		uint32_t const new_render_width = static_cast<uint32_t>(width * default_render_width_scale_ + 0.5f);
+		uint32_t const new_render_height = static_cast<uint32_t>(height * default_render_height_scale_ + 0.5f);
 
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
@@ -662,21 +699,24 @@ namespace KlayGE
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			DepthStencilViewPtr ds_view;
+			DepthStencilViewPtr ds_dsv;
 			if (hdr_pp_ || post_tone_mapping_pp_ || (stereo_method_ != STM_None))
 			{
 				ElementFormat fmt = ds_tex_->Format();
 				ds_tex_ = this->ScreenDepthStencilTexture();
 				if (ds_tex_ && (new_screen_width == new_render_width) && (new_screen_height == new_render_height))
 				{
-					ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+					ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+					ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 				}
 				else
 				{
 					if (caps.depth_texture_support)
 					{
 						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-						ds_view = rf.Make2DDsv(ds_tex_, 0, 1, 0);
+						KLAYGE_TEXTURE_DEBUG_NAME(ds_tex_);
+						ds_srv_ = rf.MakeTextureSrv(ds_tex_);
+						ds_dsv = rf.Make2DDsv(ds_tex_, 0, 1, 0);
 					}
 					else
 					{
@@ -691,7 +731,7 @@ namespace KlayGE
 
 							fmt = EF_D16;
 						}
-						ds_view = rf.Make2DDsv(new_render_width, new_render_height, fmt, 1, 0);
+						ds_dsv = rf.Make2DDsv(new_render_width, new_render_height, fmt, 1, 0);
 					}
 				}
 			}
@@ -703,7 +743,10 @@ namespace KlayGE
 			{
 				ElementFormat fmt = mono_tex_->Format();
 				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-				mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(mono_tex_, 0, 1, 0));
+				KLAYGE_TEXTURE_DEBUG_NAME(mono_tex_);
+				mono_srv_ = rf.MakeTextureSrv(mono_tex_);
+				mono_rtv_ = rf.Make2DRtv(mono_tex_, 0, 1, 0);
+				mono_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, mono_rtv_);
 
 				default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = mono_frame_buffer_;
 			}
@@ -715,7 +758,7 @@ namespace KlayGE
 					if (!resize_frame_buffer_)
 					{
 						resize_frame_buffer_ = rf.MakeFrameBuffer();
-						resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+						resize_frame_buffer_->Viewport()->Camera(cur_frame_buffer_->Viewport()->Camera());
 					}
 
 					ElementFormat fmt;
@@ -725,12 +768,15 @@ namespace KlayGE
 					}
 					else
 					{
-						fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+						fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 						BOOST_ASSERT(fmt != EF_Unknown);
 					}
 
 					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-					resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(resize_tex_, 0, 1, 0));
+					KLAYGE_TEXTURE_DEBUG_NAME(resize_tex_);
+					resize_srv_ = rf.MakeTextureSrv(resize_tex_);
+					resize_rtv_ = rf.Make2DRtv(resize_tex_, 0, 1, 0);
+					resize_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, resize_rtv_);
 
 					ElementFormat ds_fmt;
 					if ((settings.depth_stencil_fmt != EF_Unknown) && caps.RenderTargetFormatSupport(settings.depth_stencil_fmt, 1, 0))
@@ -772,25 +818,34 @@ namespace KlayGE
 			{
 				smaa_edges_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_edges_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(smaa_edges_tex_);
+				smaa_edges_srv_ = rf.MakeTextureSrv(smaa_edges_tex_);
+				smaa_edges_rtv_ = rf.Make2DRtv(smaa_edges_tex_, 0, 1, 0);
 				smaa_blend_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_blend_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				KLAYGE_TEXTURE_DEBUG_NAME(smaa_blend_tex_);
+				smaa_blend_srv_ = rf.MakeTextureSrv(smaa_blend_tex_);
+				smaa_blend_rtv_ = rf.Make2DRtv(smaa_blend_tex_, 0, 1, 0);
 
-				auto smaa_ds_view = rf.Make2DDsv(new_render_width, new_render_height, EF_D24S8, 1, 0);
+				auto smaa_ds_dsv = rf.Make2DDsv(new_render_width, new_render_height, EF_D24S8, 1, 0);
 
-				smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
-				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+				smaa_edge_detection_pp_->OutputPin(0, smaa_edges_rtv_);
+				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 
-				smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
-				smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
-				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_view);
+				smaa_blending_weight_pp_->InputPin(0, smaa_edges_srv_);
+				smaa_blending_weight_pp_->OutputPin(0, smaa_blend_rtv_);
+				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(smaa_ds_dsv);
 			}
 			if (post_tone_mapping_pp_)
 			{
 				ElementFormat fmt = post_tone_mapping_tex_->Format();
 				post_tone_mapping_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write);
-				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0));
-				post_tone_mapping_frame_buffer_->Attach(ds_view);
+				KLAYGE_TEXTURE_DEBUG_NAME(post_tone_mapping_tex_);
+				post_tone_mapping_srv_ = rf.MakeTextureSrv(post_tone_mapping_tex_);
+				post_tone_mapping_rtv_ = rf.Make2DRtv(post_tone_mapping_tex_, 0, 1, 0);
+				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, post_tone_mapping_rtv_);
+				post_tone_mapping_frame_buffer_->Attach(ds_dsv);
 
 				default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 			}
@@ -799,8 +854,10 @@ namespace KlayGE
 				ElementFormat fmt = hdr_tex_->Format();
 				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0,
 					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+				KLAYGE_TEXTURE_DEBUG_NAME(hdr_tex_);
+				hdr_srv_ = rf.MakeTextureSrv(hdr_tex_);
 				hdr_frame_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(hdr_tex_, 0, 1, 0));
-				hdr_frame_buffer_->Attach(ds_view);
+				hdr_frame_buffer_->Attach(ds_dsv);
 
 				default_frame_buffers_[0] = hdr_frame_buffer_;
 			}
@@ -815,7 +872,7 @@ namespace KlayGE
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 
 		App3DFramework& app = Context::Instance().AppInstance();
-		app.OnResize(width, height);
+		app.OnResize(new_render_width, new_render_height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)
@@ -839,7 +896,7 @@ namespace KlayGE
 			}
 			else
 			{
-				hdr_tex_->BuildMipSubLevels();
+				hdr_tex_->BuildMipSubLevels(TextureFilter::Linear);
 				hdr_pp_->Apply();
 			}
 		}
@@ -863,7 +920,7 @@ namespace KlayGE
 		{
 			if (!skip)
 			{
-				CameraPtr const & camera = cur_frame_buffer_->GetViewport()->camera;
+				CameraPtr const& camera = cur_frame_buffer_->Viewport()->Camera();
 				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
 				float2 near_q(camera->NearPlane() * q, q);
 				smaa_edge_detection_pp_->SetParam(0, near_q);
@@ -945,10 +1002,10 @@ namespace KlayGE
 
 		if (!this->ScreenDepthStencilTexture() || need_resize)
 		{
-			auto const & ds_view = this->DefaultFrameBuffer()->AttachedDsv();
-			if (ds_view)
+			auto const & ds_dsv = this->DefaultFrameBuffer()->AttachedDsv();
+			if (ds_dsv)
 			{
-				ds_view->ClearDepth(1.0f);
+				ds_dsv->ClearDepth(1.0f);
 			}
 		}
 
@@ -992,6 +1049,11 @@ namespace KlayGE
 			color_grading_enabled_ = cg;
 			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
+	}
+
+	uint32_t RenderEngine::NumRealizedCameraInstances() const
+	{
+		return (num_camera_instances_ == 0) ? cur_frame_buffer_->Viewport()->NumCameras() : num_camera_instances_;
 	}
 
 	void RenderEngine::Refresh()
@@ -1040,7 +1102,7 @@ namespace KlayGE
 			this->BindFrameBuffer(screen_frame_buffer_);
 			if (stereoscopic_pp_)
 			{
-				Camera const & camera = *screen_frame_buffer_->GetViewport()->camera;
+				Camera const& camera = *screen_frame_buffer_->Viewport()->Camera();
 
 				stereoscopic_pp_->SetParam(0, stereo_separation_);
 				stereoscopic_pp_->SetParam(1, camera.NearPlane());
@@ -1053,7 +1115,7 @@ namespace KlayGE
 			{
 				if (STM_OculusVR == stereo_method_)
 				{
-					Viewport const & vp = *screen_frame_buffer_->GetViewport();
+					Viewport const& vp = *screen_frame_buffer_->Viewport();
 
 					float w = 0.5f;
 					float h = 1;
@@ -1061,7 +1123,7 @@ namespace KlayGE
 					float x_right = 0.5f;
 					float y = 0;
 
-					float aspect = static_cast<float>(vp.width / 2) / vp.height;
+					float aspect = static_cast<float>(vp.Width() / 2) / vp.Height();
 
 					float3 lens_center(x_left + (w + ovr_x_center_offset_ * 0.5f) * 0.5f,
 						x_right + (w - ovr_x_center_offset_ * 0.5f) * 0.5f, y + h * 0.5f);
@@ -1210,13 +1272,13 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				post_tone_mapping_pps_[i]->OutputPin(0, TexturePtr());
+				post_tone_mapping_pps_[i]->OutputPin(0, RenderTargetViewPtr());
 			}
 		}
 		if (hdr_pp_)
 		{
-			hdr_pp_->OutputPin(0, TexturePtr());
-			skip_hdr_pp_->OutputPin(0, TexturePtr());
+			hdr_pp_->OutputPin(0, RenderTargetViewPtr());
+			skip_hdr_pp_->OutputPin(0, RenderTargetViewPtr());
 		}
 
 		if (stereo_method_ != STM_None)
@@ -1227,18 +1289,18 @@ namespace KlayGE
 				{
 					for (size_t i = 0; i < 12; ++ i)
 					{
-						post_tone_mapping_pps_[i]->OutputPin(0, mono_tex_);
+						post_tone_mapping_pps_[i]->OutputPin(0, mono_rtv_);
 					}
 				}
 				if (hdr_pp_)
 				{
-					hdr_pp_->OutputPin(0, mono_tex_);
-					skip_hdr_pp_->OutputPin(0, mono_tex_);
+					hdr_pp_->OutputPin(0, mono_rtv_);
+					skip_hdr_pp_->OutputPin(0, mono_rtv_);
 				}
 
-				stereoscopic_pp_->InputPin(0, mono_tex_);
-				stereoscopic_pp_->InputPin(1, ds_tex_);
-				stereoscopic_pp_->InputPin(2, overlay_tex_);
+				stereoscopic_pp_->InputPin(0, mono_srv_);
+				stereoscopic_pp_->InputPin(1, ds_srv_);
+				stereoscopic_pp_->InputPin(2, overlay_srv_);
 			}
 		}
 		else if (display_output_method_ != DOM_sRGB)
@@ -1251,17 +1313,17 @@ namespace KlayGE
 				{
 					for (size_t i = 0; i < 12; ++ i)
 					{
-						post_tone_mapping_pps_[i]->OutputPin(0, mono_tex_);
+						post_tone_mapping_pps_[i]->OutputPin(0, mono_rtv_);
 					}
 				}
 				if (hdr_pp_)
 				{
-					hdr_pp_->OutputPin(0, mono_tex_);
-					skip_hdr_pp_->OutputPin(0, mono_tex_);
+					hdr_pp_->OutputPin(0, mono_rtv_);
+					skip_hdr_pp_->OutputPin(0, mono_rtv_);
 				}
 
-				hdr_display_pp_->InputPin(0, mono_tex_);
-				hdr_display_pp_->InputPin(1, overlay_tex_);
+				hdr_display_pp_->InputPin(0, mono_srv_);
+				hdr_display_pp_->InputPin(1, overlay_srv_);
 			}
 		}
 		else
@@ -1277,20 +1339,20 @@ namespace KlayGE
 				{
 					for (size_t i = 0; i < 12; ++ i)
 					{
-						post_tone_mapping_pps_[i]->OutputPin(0, resize_tex_);
+						post_tone_mapping_pps_[i]->OutputPin(0, resize_rtv_);
 					}
 				}
 				if (hdr_pp_)
 				{
-					hdr_pp_->OutputPin(0, resize_tex_);
-					skip_hdr_pp_->OutputPin(0, resize_tex_);
+					hdr_pp_->OutputPin(0, resize_rtv_);
+					skip_hdr_pp_->OutputPin(0, resize_rtv_);
 				}
 
 				if (resize_pps_[0])
 				{
 					for (size_t i = 0; i < 2; ++ i)
 					{
-						resize_pps_[i]->InputPin(0, resize_tex_);
+						resize_pps_[i]->InputPin(0, resize_srv_);
 					}
 				}
 			}
@@ -1300,28 +1362,28 @@ namespace KlayGE
 		{
 			if (hdr_pp_)
 			{
-				hdr_pp_->OutputPin(0, post_tone_mapping_tex_);
-				skip_hdr_pp_->OutputPin(0, post_tone_mapping_tex_);
+				hdr_pp_->OutputPin(0, post_tone_mapping_rtv_);
+				skip_hdr_pp_->OutputPin(0, post_tone_mapping_rtv_);
 			}
 
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_tex_);
-				post_tone_mapping_pps_[i]->InputPin(1, smaa_blend_tex_);
-				post_tone_mapping_pps_[i]->InputPin(2, smaa_edges_tex_);
+				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_srv_);
+				post_tone_mapping_pps_[i]->InputPin(1, smaa_blend_srv_);
+				post_tone_mapping_pps_[i]->InputPin(2, smaa_edges_srv_);
 			}
 
 			if (smaa_edge_detection_pp_)
 			{
-				smaa_edge_detection_pp_->InputPin(0, post_tone_mapping_tex_);
-				smaa_edge_detection_pp_->InputPin(1, ds_tex_);
+				smaa_edge_detection_pp_->InputPin(0, post_tone_mapping_srv_);
+				smaa_edge_detection_pp_->InputPin(1, ds_srv_);
 			}
 		}
 
 		if (hdr_pp_)
 		{
-			hdr_pp_->InputPin(0, hdr_tex_);
-			skip_hdr_pp_->InputPin(0, hdr_tex_);
+			hdr_pp_->InputPin(0, hdr_srv_);
+			skip_hdr_pp_->InputPin(0, hdr_srv_);
 		}
 	}
 
@@ -1352,17 +1414,33 @@ namespace KlayGE
 
 	void RenderEngine::Destroy()
 	{
+		default_material_.reset();
+		predefined_material_cb_.reset();
+		predefined_mesh_cb_.reset();
+		predefined_model_cb_.reset();
+		predefined_camera_cb_.reset();
+
+		mipmapper_.reset();
+
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		ds_tex_.reset();
+		ds_srv_.reset();
 		hdr_frame_buffer_.reset();
 		hdr_tex_.reset();
+		hdr_srv_.reset();
 		post_tone_mapping_frame_buffer_.reset();
 		post_tone_mapping_tex_.reset();
+		post_tone_mapping_srv_.reset();
+		post_tone_mapping_rtv_.reset();
 		resize_frame_buffer_.reset();
 		resize_tex_.reset();
+		resize_srv_.reset();
+		resize_rtv_.reset();
 		mono_frame_buffer_.reset();
 		mono_tex_.reset();
+		mono_srv_.reset();
+		mono_rtv_.reset();
 		for (int i = 0; i < 4; ++ i)
 		{
 			default_frame_buffers_[i].reset();
@@ -1370,9 +1448,14 @@ namespace KlayGE
 
 		overlay_frame_buffer_.reset();
 		overlay_tex_.reset();
+		overlay_srv_.reset();
 
 		smaa_edges_tex_.reset();
+		smaa_edges_srv_.reset();
+		smaa_edges_rtv_.reset();
 		smaa_blend_tex_.reset();
+		smaa_blend_srv_.reset();
+		smaa_blend_rtv_.reset();
 
 		so_buffers_.reset();
 
@@ -1407,5 +1490,286 @@ namespace KlayGE
 #endif
 
 		this->DoDestroy();
+	}
+
+	RenderMaterialPtr const& RenderEngine::DefaultMaterial() const
+	{
+		if (!default_material_)
+		{
+			std::lock_guard<std::mutex> lock(default_mtl_instance_mutex);
+			if (!default_material_)
+			{
+				default_material_ = MakeSharedPtr<RenderMaterial>();
+			}
+		}
+		return default_material_;
+	}
+
+	RenderEngine::PredefinedMaterialCBuffer const& RenderEngine::PredefinedMaterialCBufferInstance() const
+	{
+		if (!predefined_material_cb_)
+		{
+			std::lock_guard<std::mutex> lock(mtl_cb_instance_mutex);
+			if (!predefined_material_cb_)
+			{
+				predefined_material_cb_ = MakeUniquePtr<PredefinedMaterialCBuffer>();
+			}
+		}
+		return *predefined_material_cb_;
+	}
+
+	RenderEngine::PredefinedMeshCBuffer const& RenderEngine::PredefinedMeshCBufferInstance() const
+	{
+		if (!predefined_mesh_cb_)
+		{
+			std::lock_guard<std::mutex> lock(mesh_cb_instance_mutex);
+			if (!predefined_mesh_cb_)
+			{
+				predefined_mesh_cb_ = MakeUniquePtr<PredefinedMeshCBuffer>();
+			}
+		}
+		return *predefined_mesh_cb_;
+	}
+
+	RenderEngine::PredefinedModelCBuffer const& RenderEngine::PredefinedModelCBufferInstance() const
+	{
+		if (!predefined_model_cb_)
+		{
+			std::lock_guard<std::mutex> lock(model_cb_instance_mutex);
+			if (!predefined_model_cb_)
+			{
+				predefined_model_cb_ = MakeUniquePtr<PredefinedModelCBuffer>();
+			}
+		}
+		return *predefined_model_cb_;
+	}
+
+	RenderEngine::PredefinedCameraCBuffer const& RenderEngine::PredefinedCameraCBufferInstance() const
+	{
+		if (!predefined_camera_cb_)
+		{
+			std::lock_guard<std::mutex> lock(camera_cb_instance_mutex);
+			if (!predefined_camera_cb_)
+			{
+				predefined_camera_cb_ = MakeUniquePtr<PredefinedCameraCBuffer>();
+			}
+		}
+		return *predefined_camera_cb_;
+	}
+
+	Mipmapper const& RenderEngine::MipmapperInstance() const
+	{
+		if (!mipmapper_)
+		{
+			std::lock_guard<std::mutex> lock(mipmapper_instance_mutex);
+			if (!mipmapper_)
+			{
+				mipmapper_ = MakeUniquePtr<Mipmapper>();
+			}
+		}
+		return *mipmapper_;
+	}
+
+
+	RenderEngine::PredefinedMaterialCBuffer::PredefinedMaterialCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_material");
+
+		albedo_clr_offset_ = effect_->ParameterByName("albedo_clr")->CBufferOffset();
+		metalness_glossiness_factor_offset_ = effect_->ParameterByName("metalness_glossiness_factor")->CBufferOffset();
+		emissive_clr_offset_ = effect_->ParameterByName("emissive_clr")->CBufferOffset();
+		albedo_map_enabled_offset_ = effect_->ParameterByName("albedo_map_enabled")->CBufferOffset();
+		normal_map_enabled_offset_ = effect_->ParameterByName("normal_map_enabled")->CBufferOffset();
+		height_map_parallax_enabled_offset_ = effect_->ParameterByName("height_map_parallax_enabled")->CBufferOffset();
+		height_map_tess_enabled_offset_ = effect_->ParameterByName("height_map_tess_enabled")->CBufferOffset();
+		occlusion_map_enabled_offset_ = effect_->ParameterByName("occlusion_map_enabled")->CBufferOffset();
+		alpha_test_threshold_offset_ = effect_->ParameterByName("alpha_test_threshold")->CBufferOffset();
+		normal_scale_offset_ = effect_->ParameterByName("normal_scale")->CBufferOffset();
+		occlusion_strength_offset_ = effect_->ParameterByName("occlusion_strength")->CBufferOffset();
+		height_offset_scale_offset_ = effect_->ParameterByName("height_offset_scale")->CBufferOffset();
+		tess_factors_offset_ = effect_->ParameterByName("tess_factors")->CBufferOffset();
+
+		this->AlbedoClr(*predefined_cbuffer_) = float4(0, 0, 0, 1);
+		this->MetalnessGlossinessFactor(*predefined_cbuffer_) = float3(0, 0, 0);
+		this->EmissiveClr(*predefined_cbuffer_) = float4(0, 0, 0, 0);
+		this->AlbedoMapEnabled(*predefined_cbuffer_) = 0;
+		this->NormalMapEnabled(*predefined_cbuffer_) = 0;
+		this->HeightMapParallaxEnabled(*predefined_cbuffer_) = 0;
+		this->HeightMapTessEnabled(*predefined_cbuffer_) = 0;
+		this->OcclusionMapEnabled(*predefined_cbuffer_) = 0;
+		this->AlphaTestThreshold(*predefined_cbuffer_) = 0;
+		this->NormalScale(*predefined_cbuffer_) = 1;
+		this->OcclusionStrength(*predefined_cbuffer_) = 1;
+		this->HeightOffsetScale(*predefined_cbuffer_) = float2(-0.5f, 0.06f);
+		this->TessFactors(*predefined_cbuffer_) = float4(5, 5, 1, 9);
+	}
+
+	float4& RenderEngine::PredefinedMaterialCBuffer::AlbedoClr(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4>(albedo_clr_offset_);
+	}
+
+	float3& RenderEngine::PredefinedMaterialCBuffer::MetalnessGlossinessFactor(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float3>(metalness_glossiness_factor_offset_);
+	}
+	
+	float4& RenderEngine::PredefinedMaterialCBuffer::EmissiveClr(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4>(emissive_clr_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::AlbedoMapEnabled(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<int32_t>(albedo_map_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::NormalMapEnabled(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<int32_t>(normal_map_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapParallaxEnabled(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<int32_t>(height_map_parallax_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapTessEnabled(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<int32_t>(height_map_tess_enabled_offset_);
+	}
+
+	int32_t& RenderEngine::PredefinedMaterialCBuffer::OcclusionMapEnabled(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<int32_t>(occlusion_map_enabled_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::AlphaTestThreshold(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float>(alpha_test_threshold_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::NormalScale(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float>(normal_scale_offset_);
+	}
+
+	float& RenderEngine::PredefinedMaterialCBuffer::OcclusionStrength(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float>(occlusion_strength_offset_);
+	}
+
+	float2& RenderEngine::PredefinedMaterialCBuffer::HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float2>(height_offset_scale_offset_);
+	}
+
+	float4& RenderEngine::PredefinedMaterialCBuffer::TessFactors(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4>(tess_factors_offset_);
+	}
+
+
+	RenderEngine::PredefinedMeshCBuffer::PredefinedMeshCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_mesh");
+
+		pos_center_offset_ = effect_->ParameterByName("pos_center")->CBufferOffset();
+		pos_extent_offset_ = effect_->ParameterByName("pos_extent")->CBufferOffset();
+		tc_center_offset_ = effect_->ParameterByName("tc_center")->CBufferOffset();
+		tc_extent_offset_ = effect_->ParameterByName("tc_extent")->CBufferOffset();
+
+		this->PosCenter(*predefined_cbuffer_) = float3(0, 0, 0);
+		this->PosExtent(*predefined_cbuffer_) = float3(1, 1, 1);
+		this->TcCenter(*predefined_cbuffer_) = float2(0.5f, 0.5f);
+		this->TcExtent(*predefined_cbuffer_) = float2(0.5f, 0.5f);
+	}
+
+	float3& RenderEngine::PredefinedMeshCBuffer::PosCenter(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float3>(pos_center_offset_);
+	}
+
+	float3& RenderEngine::PredefinedMeshCBuffer::PosExtent(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float3>(pos_extent_offset_);
+	}
+
+	float2& RenderEngine::PredefinedMeshCBuffer::TcCenter(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float2>(tc_center_offset_);
+	}
+
+	float2& RenderEngine::PredefinedMeshCBuffer::TcExtent(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float2>(tc_extent_offset_);
+	}
+
+
+	RenderEngine::PredefinedModelCBuffer::PredefinedModelCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_model");
+
+		model_offset_ = effect_->ParameterByName("model")->CBufferOffset();
+		inv_model_offset_ = effect_->ParameterByName("inv_model")->CBufferOffset();
+
+		this->Model(*predefined_cbuffer_) = float4x4::Identity();
+		this->InvModel(*predefined_cbuffer_) = float4x4::Identity();
+	}
+
+	float4x4& RenderEngine::PredefinedModelCBuffer::Model(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4x4>(model_offset_);
+	}
+
+	float4x4& RenderEngine::PredefinedModelCBuffer::InvModel(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4x4>(inv_model_offset_);
+	}
+
+
+	RenderEngine::PredefinedCameraCBuffer::PredefinedCameraCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_camera");
+
+		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
+		camera_indices_offset_ = effect_->ParameterByName("camera_indices")->CBufferOffset();
+		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
+		prev_mvps_offset_ = effect_->ParameterByName("prev_mvps")->CBufferOffset();
+
+		this->NumCameras(*predefined_cbuffer_) = 1;
+
+		this->CameraIndices(*predefined_cbuffer_, 0) = 0;
+
+		CameraInfo empty = {};
+		this->Camera(*predefined_cbuffer_, 0) = empty;
+
+		this->PrevMvp(*predefined_cbuffer_, 0) = float4x4::Identity();
+	}
+
+	uint32_t& RenderEngine::PredefinedCameraCBuffer::NumCameras(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<uint32_t>(num_cameras_offset_);
+	}
+
+	uint32_t& RenderEngine::PredefinedCameraCBuffer::CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<uint32_t>(camera_indices_offset_) + index);
+	}
+
+	RenderEngine::PredefinedCameraCBuffer::CameraInfo& RenderEngine::PredefinedCameraCBuffer::Camera(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<CameraInfo>(cameras_offset_) + index);
+	}
+
+	float4x4& RenderEngine::PredefinedCameraCBuffer::PrevMvp(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<float4x4>(prev_mvps_offset_) + index);
 	}
 }

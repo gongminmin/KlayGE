@@ -111,4 +111,13 @@ namespace KlayGE
 	{
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
+
+
+	RenderStateObject::RenderStateObject(
+		RasterizerStateDesc const& rs_desc, DepthStencilStateDesc const& dss_desc, BlendStateDesc const& bs_desc)
+		: rs_desc_(rs_desc), dss_desc_(dss_desc), bs_desc_(bs_desc)
+	{
+	}
+
+	RenderStateObject::~RenderStateObject() noexcept = default;
 }

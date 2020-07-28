@@ -15,7 +15,7 @@ float3 TransparencyPositionAdjustmentNode(float3 position, float4 tangent_quat)
 		<node name="PositionAdjustmentNode" impl="TransparencyPositionAdjustmentNode"/>
 	</shader_graph_nodes>
 
-	<technique name="GBufferSSSMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="GBufferSSSTech" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -29,7 +29,7 @@ float3 TransparencyPositionAdjustmentNode(float3 position, float4 tangent_quat)
 			<state name="back_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendBackSSSMRTTech" inherit="GBufferAlphaBlendBackMRTTech" override="GBufferAlphaBlendBackMRTTech">
+	<technique name="GBufferAlphaBlendBackSSSTech" inherit="GBufferAlphaBlendBackTech" override="GBufferAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>

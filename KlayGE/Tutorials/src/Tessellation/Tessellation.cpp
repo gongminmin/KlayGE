@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -21,8 +20,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Tessellation.hpp"
@@ -142,7 +142,7 @@ void TessellationApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Tessellation.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Tessellation.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_tess_enabled_ = dialog_->IDFromName("Tessellation");

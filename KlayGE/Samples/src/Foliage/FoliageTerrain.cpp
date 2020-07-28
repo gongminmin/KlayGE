@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -8,6 +7,9 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Imposter.hpp>
+#include <KlayGE/Mesh.hpp>
+
+#include <iterator>
 
 #include "FoliageTerrain.hpp"
 
@@ -53,18 +55,18 @@ namespace KlayGE
 			std::string g_buffer_files[2];
 			g_buffer_files[0] = "GBufferFoliage.fxml";
 			uint32_t num = 1;
-			if (mtl_->two_sided)
+			if (mtl_->TwoSided())
 			{
 				g_buffer_files[1] = "GBufferTwoSided.fxml";
 				++ num;
 			}
-			this->BindDeferredEffect(SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num)));
+			this->BindDeferredEffect(SyncLoadRenderEffects(MakeSpan(g_buffer_files, num)));
 		}
 
 		void InstanceBuffer(uint32_t lod, GraphicsBufferPtr const & vb)
 		{
 			rls_[lod]->BindVertexStream(vb,
-				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+				MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -96,25 +98,30 @@ namespace KlayGE
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("GBufferFoliageImpostor.fxml"));
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			technique_ = gbuffer_mrt_tech_;
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferAlphaTestTech");
+			technique_ = gbuffer_tech_;
 
 			pos_aabb_ = aabbox;
+
+			mtl_ = MakeSharedPtr<RenderMaterial>();
+			mtl_->Albedo(float4(1, 1, 1, 1));
 		}
 
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
 			auto& rf = Context::Instance().RenderFactoryInstance();
-			textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(rt0_tex);
-			textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(rt1_tex);
+			mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(rt0_tex));
+			mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(rt1_tex));
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);
+
+			this->UpdateBoundBox();
 		}
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rls_[0]->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+			rls_[0]->BindVertexStream(vb, MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}),
 				RenderLayout::ST_Instance);
 		}
 
@@ -127,13 +134,13 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
-			Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+			Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
-			float4x4 billboard_mat = camera->InverseViewMatrix();
+			float4x4 billboard_mat = camera.InverseViewMatrix();
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
-			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
+			*(effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
 			Renderable::OnRenderBegin();
 		}
@@ -184,10 +191,12 @@ namespace KlayGE
 		foliage_dist_rl_->TopologyType(RenderLayout::TT_PointList);
 
 		auto const height_fmt = caps.BestMatchTextureRenderTargetFormat(
-			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+			caps.pack_to_rgba_required ? MakeSpan({EF_ABGR8, EF_ARGB8}) : MakeSpan({EF_R16F, EF_R32F}), 1, 0);
 		BOOST_ASSERT(height_fmt != EF_Unknown);
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		height_map_srv_ = rf.MakeTextureSrv(height_map_tex_);
+		height_map_rtv_ = rf.Make2DRtv(height_map_tex_, 0, 1, 0);
 		height_map_cpu_tex_ = rf.MakeTexture2D(height_map_tex_->Width(0), height_map_tex_->Height(0),
 			1, 1, height_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
@@ -206,14 +215,18 @@ namespace KlayGE
 		}
 		gradient_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, gradient_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		gradient_map_srv_ = rf.MakeTextureSrv(gradient_map_tex_);
+		gradient_map_rtv_ = rf.Make2DRtv(gradient_map_tex_, 0, 1, 0);
 		gradient_map_cpu_tex_ = rf.MakeTexture2D(gradient_map_tex_->Width(0), gradient_map_tex_->Height(0),
 			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
-		auto const mask_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const mask_fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(mask_fmt != EF_Unknown);
 
 		mask_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, mask_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		mask_map_srv_ = rf.MakeTextureSrv(mask_map_tex_);
+		mask_map_rtv_ = rf.Make2DRtv(mask_map_tex_, 0, 1, 0);
 		mask_map_cpu_tex_ = rf.MakeTexture2D(mask_map_tex_->Width(0), mask_map_tex_->Height(0),
 			1, 1, mask_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
@@ -221,14 +234,14 @@ namespace KlayGE
 		gradient_pp_ = SyncLoadPostProcess("ProceduralTerrain.ppml", "gradient");
 		mask_pp_ = SyncLoadPostProcess("ProceduralTerrain.ppml", "mask");
 
-		height_pp_->OutputPin(0, height_map_tex_);
+		height_pp_->OutputPin(0, height_map_rtv_);
 
-		gradient_pp_->InputPin(0, height_map_tex_);
-		gradient_pp_->OutputPin(0, gradient_map_tex_);
+		gradient_pp_->InputPin(0, height_map_srv_);
+		gradient_pp_->OutputPin(0, gradient_map_rtv_);
 
-		mask_pp_->InputPin(0, height_map_tex_);
-		mask_pp_->InputPin(1, gradient_map_tex_);
-		mask_pp_->OutputPin(0, mask_map_tex_);
+		mask_pp_->InputPin(0, height_map_srv_);
+		mask_pp_->InputPin(1, gradient_map_srv_);
+		mask_pp_->OutputPin(0, mask_map_rtv_);
 
 		float const total_size = tile_rings_.back()->TileSize() * tile_rings_.back()->OuterWidth();
 		float const tile_size = tile_rings_[0]->TileSize();
@@ -322,7 +335,7 @@ namespace KlayGE
 
 				plant_lod_instance_rls_[plant_type][lod] = rf.MakeRenderLayout();
 				plant_lod_instance_rls_[plant_type][lod]->BindVertexStream(plant_lod_instance_buffers_[plant_type][lod],
-					{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
+					MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}));
 
 				if (!use_draw_indirect_)
 				{
@@ -339,7 +352,7 @@ namespace KlayGE
 
 			plant_impostor_instance_rls_[plant_type] = rf.MakeRenderLayout();
 			plant_impostor_instance_rls_[plant_type]->BindVertexStream(plant_impostor_instance_buffers_[plant_type],
-				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
+				MakeSpan({VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F)}));
 
 			if (!use_draw_indirect_)
 			{
@@ -447,21 +460,21 @@ namespace KlayGE
 			re.BindFrameBuffer(fb);
 		}
 
-		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
+		height_map_tex_->CopyToTexture(*height_map_cpu_tex_, TextureFilter::Point);
 
-		Camera const * camera = fb->GetViewport()->camera.get();
+		Camera const& camera = *fb->Viewport()->Camera();
 		
-		auto const & frustum = camera->ViewFrustum();
+		auto const & frustum = camera.ViewFrustum();
 		std::vector<float4> view_frustum_planes(6);
 		for (size_t i = 0; i < view_frustum_planes.size(); ++ i)
 		{
 			view_frustum_planes[i] = float4(&frustum.FrustumPlane(static_cast<uint32_t>(i)).a());
 		}
 		*(foliage_dist_effect_->ParameterByName("model_mat")) = model_mat_;
-		*(foliage_dist_effect_->ParameterByName("eye_pos")) = camera->EyePos();
+		*(foliage_dist_effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		*(foliage_dist_effect_->ParameterByName("view_frustum_planes")) = view_frustum_planes;
 		*(foliage_dist_effect_->ParameterByName("foliage_texture_world_offset")) = texture_world_offset_;
-		*(foliage_dist_effect_->ParameterByName("fov_scale")) = camera->ProjMatrix()(0, 0);
+		*(foliage_dist_effect_->ParameterByName("fov_scale")) = camera.ProjMatrix()(0, 0);
 
 		uint32_t offset = sizeof(uint32_t);
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
@@ -596,8 +609,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
-		float2 const eye_pos_xz(camera->EyePos().x(), camera->EyePos().z());
+		Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
+		float2 const eye_pos_xz(camera.EyePos().x(), camera.EyePos().z());
 
 		*(effect_->ParameterByName("model_mat")) = model_mat_;
 		*(effect_->ParameterByName("eye_pos_xz")) = eye_pos_xz;

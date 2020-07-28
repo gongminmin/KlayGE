@@ -22,16 +22,19 @@
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
 namespace KlayGE
 {
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Camera : public SceneComponent, public std::enable_shared_from_this<Camera>
+	class KLAYGE_CORE_API Camera final : public SceneComponent, public std::enable_shared_from_this<Camera>
 	{
 	public:
 		Camera();
+
+		SceneComponentPtr Clone() const override;
 
 		float3 const& EyePos() const;
 		float3 LookAt() const;
@@ -85,6 +88,9 @@ namespace KlayGE
 		bool JitterMode() const;
 		void JitterMode(bool jitter);
 
+		void Active(RenderEffectConstantBuffer& camera_cbuffer, uint32_t index, float4x4 const& model_mat, float4x4 const& inv_model_mat,
+			float4x4 const& prev_model_mat, bool model_mat_dirty, float4x4 const& cascade_crop_mat, bool need_cascade_crop_mat) const;
+
 	private:
 		float		look_at_dist_ = 1;
 
@@ -106,6 +112,7 @@ namespace KlayGE
 		mutable float4x4	view_proj_mat_wo_adjust_;
 		mutable float4x4	inv_view_proj_mat_wo_adjust_;
 		mutable bool		view_proj_mat_wo_adjust_dirty_ = true;
+		mutable bool		camera_dirty_ = true;
 
 		mutable Frustum	frustum_;
 		mutable bool	frustum_dirty_ = true;

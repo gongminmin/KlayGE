@@ -49,6 +49,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthOfField.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MotionBlur.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
@@ -74,9 +75,11 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SAT.kfx
@@ -112,18 +115,13 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.glb.model_bin
 )
 
-SET(EXTRA_INCLUDE_DIRS
-	${KLAYGE_PROJECT_DIR}/../kfont/include)
-if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
-	SET(EXTRA_LINKED_DIRS
-		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
-endif()
-SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-	debug kfont${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-)
-
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)
 	SET(PACKAGE_GUID "AC840C84-9653-4F0C-BC5D-E30D102E5BEA")
 ENDIF()
 
 SETUP_SAMPLE(PostProcessing)
+
+target_link_libraries(PostProcessing
+	PRIVATE
+		kfont
+)

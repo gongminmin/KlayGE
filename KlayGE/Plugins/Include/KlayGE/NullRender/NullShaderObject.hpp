@@ -136,7 +136,7 @@ namespace KlayGE
 		std::vector<uint8_t> cbuff_indices_;
 	};
 
-	class D3D11VertexShaderStageObject : public D3DShaderStageObject
+	class D3D11VertexShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		D3D11VertexShaderStageObject();
@@ -157,25 +157,25 @@ namespace KlayGE
 		uint32_t vs_signature_;
 	};
 
-	class D3D12VertexShaderStageObject : public D3DShaderStageObject
+	class D3D12VertexShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		D3D12VertexShaderStageObject();
 	};
 
-	class D3DPixelShaderStageObject : public D3DShaderStageObject
+	class D3DPixelShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		explicit D3DPixelShaderStageObject(bool as_d3d12);
 	};
 
-	class D3DGeometryShaderStageObject : public D3DShaderStageObject
+	class D3DGeometryShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		explicit D3DGeometryShaderStageObject(bool as_d3d12);
 	};
 
-	class D3DComputeShaderStageObject : public D3DShaderStageObject
+	class D3DComputeShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		explicit D3DComputeShaderStageObject(bool as_d3d12);
@@ -204,13 +204,13 @@ namespace KlayGE
 		uint32_t block_size_x_, block_size_y_, block_size_z_;
 	};
 
-	class D3DHullShaderStageObject : public D3DShaderStageObject
+	class D3DHullShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		explicit D3DHullShaderStageObject(bool as_d3d12);
 	};
 
-	class D3DDomainShaderStageObject : public D3DShaderStageObject
+	class D3DDomainShaderStageObject final : public D3DShaderStageObject
 	{
 	public:
 		explicit D3DDomainShaderStageObject(bool as_d3d12);
@@ -285,7 +285,7 @@ namespace KlayGE
 		std::vector<std::pair<std::string, std::string>> tex_sampler_pairs_;
 	};
 
-	class OGLVertexShaderStageObject : public OGLShaderStageObject
+	class OGLVertexShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		explicit OGLVertexShaderStageObject(bool as_gles);
@@ -314,7 +314,7 @@ namespace KlayGE
 		std::vector<std::string> glsl_attrib_names_;
 	};
 
-	class OGLPixelShaderStageObject : public OGLShaderStageObject
+	class OGLPixelShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		explicit OGLPixelShaderStageObject(bool as_gles);
@@ -328,7 +328,7 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class OGLGeometryShaderStageObject : public OGLShaderStageObject
+	class OGLGeometryShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLGeometryShaderStageObject();
@@ -344,19 +344,19 @@ namespace KlayGE
 		GLint gs_max_output_vertex_ = 0;
 	};
 
-	class OGLESGeometryShaderStageObject : public OGLShaderStageObject
+	class OGLESGeometryShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		OGLESGeometryShaderStageObject();
 	};
 
-	class OGLComputeShaderStageObject : public OGLShaderStageObject
+	class OGLComputeShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		explicit OGLComputeShaderStageObject(bool as_gles);
 	};
 
-	class OGLHullShaderStageObject : public OGLShaderStageObject
+	class OGLHullShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		explicit OGLHullShaderStageObject(bool as_gles);
@@ -378,7 +378,7 @@ namespace KlayGE
 		uint32_t ds_output_primitive_ = 0;
 	};
 
-	class OGLDomainShaderStageObject : public OGLShaderStageObject
+	class OGLDomainShaderStageObject final : public OGLShaderStageObject
 	{
 	public:
 		explicit OGLDomainShaderStageObject(bool as_gles);
@@ -400,14 +400,14 @@ namespace KlayGE
 	};
 
 
-	class NullShaderObject : public ShaderObject
+	class NullShaderObject final : public ShaderObject
 	{
 	public:
 		NullShaderObject();
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind() override;
+		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
 	private:

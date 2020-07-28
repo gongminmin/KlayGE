@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API DepthOfField : public PostProcess
+	class KLAYGE_CORE_API DepthOfField final : public PostProcess
 	{
 	public:
 		DepthOfField();
@@ -53,10 +53,10 @@ namespace KlayGE
 		void ShowBlurFactor(bool show);
 		bool ShowBlurFactor() const;
 
-		void InputPin(uint32_t index, TexturePtr const& tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		PostProcessPtr sat_pp_;
@@ -84,7 +84,7 @@ namespace KlayGE
 		RenderEffectParameter* src_tex_param_;
 	};
 
-	class KLAYGE_CORE_API BokehFilter : public PostProcess
+	class KLAYGE_CORE_API BokehFilter final : public PostProcess
 	{
 	public:
 		BokehFilter();
@@ -98,13 +98,15 @@ namespace KlayGE
 		void LuminanceThreshold(float lum_threshold);
 		float LuminanceThreshold() const;
 
-		void InputPin(uint32_t index, TexturePtr const& tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void OutputPin(uint32_t index, TexturePtr const& tex, int level, int array_index, int face);
-		using PostProcess::OutputPin;
+		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
+		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		bool gs_support_;

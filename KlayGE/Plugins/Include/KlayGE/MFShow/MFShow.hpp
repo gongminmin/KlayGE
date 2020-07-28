@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <KFL/com_ptr.hpp>
 #include <KFL/Thread.hpp>
 
 #include <windows.h>
@@ -54,7 +55,7 @@ struct IMFMediaEngine;
 
 namespace KlayGE
 {
-	class MFShowEngine : public ShowEngine
+	class MFShowEngine final : public ShowEngine
 	{
 	public:
 		MFShowEngine();
@@ -107,14 +108,14 @@ namespace KlayGE
 		HMODULE mod_d3d11_ = nullptr;
 		HMODULE mod_mfplat_ = nullptr;
 
-		std::shared_ptr<IDXGIFactory1> dxgi_factory_;
-		std::shared_ptr<ID3D11Device> d3d_device_;
-		std::shared_ptr<ID3D11DeviceContext> d3d_imm_ctx_;
-		std::shared_ptr<IDXGIOutput> dxgi_output_;
-		std::shared_ptr<ID3D11Texture2D> d3d_present_tex_;
-		std::shared_ptr<ID3D11Texture2D> d3d_present_cpu_tex_;
-		std::shared_ptr<IMFDXGIDeviceManager> dxgi_dev_manager_;
-		std::shared_ptr<IMFMediaEngine> media_engine_;
+		com_ptr<IDXGIFactory1> dxgi_factory_;
+		com_ptr<ID3D11Device> d3d_device_;
+		com_ptr<ID3D11DeviceContext> d3d_imm_ctx_;
+		com_ptr<IDXGIOutput> dxgi_output_;
+		com_ptr<ID3D11Texture2D> d3d_present_tex_;
+		com_ptr<ID3D11Texture2D> d3d_present_cpu_tex_;
+		com_ptr<IMFDXGIDeviceManager> dxgi_dev_manager_;
+		com_ptr<IMFMediaEngine> media_engine_;
 
 		uint8_t dxgi_sub_ver_;
 		bool eos_ = false;

@@ -38,8 +38,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/lockfree/spsc_queue.hpp>
-
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
 
@@ -52,9 +50,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ResLoadingDesc : boost::noncopyable
 	{
 	public:
-		virtual ~ResLoadingDesc()
-		{
-		}
+		virtual ~ResLoadingDesc() noexcept;
 
 		virtual uint64_t Type() const = 0;
 
@@ -128,6 +124,11 @@ namespace KlayGE
 
 		void Update();
 
+		uint32_t NumLoadingResources() const
+		{
+			return static_cast<uint32_t>(loading_res_.size());
+		}
+
 	private:
 		std::string RealPath(std::string_view path);
 		std::string RealPath(std::string_view path,
@@ -168,11 +169,14 @@ namespace KlayGE
 		std::mutex loading_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_;
-		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>,
-			boost::lockfree::capacity<1024>> loading_res_queue_;
+
+		bool non_empty_loading_res_queue_ = false;
+		std::condition_variable loading_res_queue_cv_;
+		std::mutex loading_res_queue_mutex_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
 
 		std::unique_ptr<joiner<void>> loading_thread_;
-		volatile bool quit_;
+		volatile bool quit_{false};
 	};
 }
 

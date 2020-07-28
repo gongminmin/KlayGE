@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class D3D11GraphicsBuffer : public GraphicsBuffer
+	class D3D11GraphicsBuffer final : public GraphicsBuffer
 	{
 	public:
 		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
@@ -48,16 +48,15 @@ namespace KlayGE
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 
-	protected:
+	private:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);
 
-	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
-		ID3D11Device* d3d_device_;
-		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11Device1* d3d_device_;
+		ID3D11DeviceContext1* d3d_imm_ctx_;
 
 		ID3D11BufferPtr d3d_buffer_;
 

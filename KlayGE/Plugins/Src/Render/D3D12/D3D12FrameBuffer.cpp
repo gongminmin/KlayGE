@@ -50,10 +50,6 @@ namespace KlayGE
 		d3d_viewport_.MaxDepth = 1.0f;
 	}
 
-	D3D12FrameBuffer::~D3D12FrameBuffer()
-	{
-	}
-
 	std::wstring const & D3D12FrameBuffer::Description() const
 	{
 		static std::wstring const desc(L"Direct3D12 Framebuffer");
@@ -62,7 +58,8 @@ namespace KlayGE
 
 	void D3D12FrameBuffer::OnBind()
 	{
-		this->SetRenderTargets();
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		this->SetRenderTargets(d3d12_re.D3DRenderCmdList());
 
 		for (size_t i = 0; i < ua_views_.size(); ++ i)
 		{
@@ -74,7 +71,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D12FrameBuffer::SetRenderTargets()
+	void D3D12FrameBuffer::SetRenderTargets(ID3D12GraphicsCommandList* cmd_list)
 	{
 		if (views_dirty_)
 		{
@@ -83,12 +80,9 @@ namespace KlayGE
 			views_dirty_ = false;
 		}
 
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto* cmd_list = re.D3DRenderCmdList();
-
-		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()),
-			d3d_rt_handles_.empty() ? nullptr : &d3d_rt_handles_[0], false, d3d_ds_handle_ptr_);
-		re.RSSetViewports(1, &d3d_viewport_);
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d12_re.OMSetRenderTargets(cmd_list, d3d_rt_handles_, false, d3d_ds_handle_ptr_);
+		d3d12_re.RSSetViewports(cmd_list, MakeSpan<1>(d3d_viewport_));
 	}
 
 	void D3D12FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
@@ -151,7 +145,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12FrameBuffer::BindBarrier()
+	void D3D12FrameBuffer::BindBarrier(ID3D12GraphicsCommandList* cmd_list)
 	{
 		if (views_dirty_)
 		{
@@ -159,9 +153,6 @@ namespace KlayGE
 
 			views_dirty_ = false;
 		}
-
-		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{
@@ -225,10 +216,10 @@ namespace KlayGE
 			d3d_ds_handle_ptr_ = nullptr;
 		}
 
-		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
-		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
-		d3d_viewport_.Width = static_cast<float>(viewport_->width);
-		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->Left());
+		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->Top());
+		d3d_viewport_.Width = static_cast<float>(viewport_->Width());
+		d3d_viewport_.Height = static_cast<float>(viewport_->Height());
 
 		pso_hash_value_ = 0;
 		num_rts_ = 0;

@@ -36,21 +36,21 @@
 #include <map>
 #include <atomic>
 
+#include <KFL/SmartPtrHelper.hpp>
 #include <KlayGE/Fence.hpp>
 
 namespace KlayGE
 {
-	class D3D12Fence : public Fence
+	class D3D12Fence final : public Fence
 	{
 	public:
 		D3D12Fence();
-		virtual ~D3D12Fence();
 
 		virtual uint64_t Signal(FenceType ft) override;
 		virtual void Wait(uint64_t id) override;
 		virtual bool Completed(uint64_t id) override;
 
-		ID3D12Fence* D3DFence() const
+		ID3D12Fence* D3DFence() const noexcept
 		{
 			return fence_.get();
 		}
@@ -59,9 +59,9 @@ namespace KlayGE
 
 	private:
 		ID3D12FencePtr fence_;
-		HANDLE fence_event_;
-		uint64_t last_completed_val_;
-		std::atomic<uint64_t> fence_val_;
+		Win32UniqueHandle fence_event_;
+		uint64_t last_completed_val_{0};
+		std::atomic<uint64_t> fence_val_{1};
 	};
 }
 

@@ -171,7 +171,7 @@ namespace KlayGE
 	{
 	}
 
-	VectorStreamCallback::VectorStreamCallback(VectorStreamCallback&& rhs)
+	VectorStreamCallback::VectorStreamCallback(VectorStreamCallback&& rhs) noexcept
 		: data_(rhs.data_)
 	{
 	}
@@ -182,6 +182,12 @@ namespace KlayGE
 		data_.insert(data_.end(), p, p + count);
 		return static_cast<std::streambuf::int_type>(count);
 	}
+
+
+	VectorOutputStreamBuf::VectorOutputStreamBuf(std::vector<char_type>& data)
+		: CallbackOutputStreamBuf<VectorStreamCallback>(VectorStreamCallback(data))
+	{
+	}
 	
 	
 	StringStreamCallback::StringStreamCallback(std::basic_string<std::streambuf::char_type>& data)
@@ -189,7 +195,7 @@ namespace KlayGE
 	{
 	}
 
-	StringStreamCallback::StringStreamCallback(StringStreamCallback&& rhs)
+	StringStreamCallback::StringStreamCallback(StringStreamCallback&& rhs) noexcept
 		: data_(rhs.data_)
 	{
 	}
@@ -199,5 +205,11 @@ namespace KlayGE
 		auto const * p = static_cast<std::streambuf::char_type const *>(buff);
 		data_.insert(data_.end(), p, p + count);
 		return static_cast<std::streambuf::int_type>(count);
+	}
+
+
+	StringOutputStreamBuf::StringOutputStreamBuf(std::basic_string<char_type>& data)
+		: CallbackOutputStreamBuf<StringStreamCallback>(StringStreamCallback(data))
+	{
 	}
 }

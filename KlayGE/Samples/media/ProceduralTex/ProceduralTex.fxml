@@ -4,11 +4,10 @@
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="light_color"/>
@@ -153,7 +152,7 @@ float4 ElectroPS(float3 pos_os : TEXCOORD0,
 			<state name="pixel_shader" value="CloudPS()"/>
 		</pass>
 	</technique>
-	<technique name="ProceduralCloudElectroTex">
+	<technique name="ProceduralElectroTex">
 		<pass name="p0">
 			<state name="vertex_shader" value="ProceduralTexVS()"/>
 			<state name="pixel_shader" value="ElectroPS()"/>

@@ -289,7 +289,7 @@ namespace KlayGE
 #endif
 	}
 
-	uint2 Window::GetNSViewSize()
+	uint2 Window::GetNSViewSize() const
 	{
 		NSRect rect = ns_view_.frame;
 		return KlayGE::uint2(rect.size.width, rect.size.height);

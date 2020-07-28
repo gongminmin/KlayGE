@@ -47,6 +47,7 @@ namespace
 		uint8_t read_write_mask;
 		uint8_t padding[2];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D10) == 24);
 
 	struct DXBCSignatureParameterD3D11
 	{
@@ -60,6 +61,7 @@ namespace
 		uint8_t read_write_mask;
 		uint8_t padding[2];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D11) == 28);
 
 	struct DXBCSignatureParameterD3D11_1
 	{
@@ -74,6 +76,7 @@ namespace
 		uint8_t padding[2];
 		uint32_t min_precision;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(DXBCSignatureParameterD3D11_1) == 32);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
@@ -631,6 +634,147 @@ struct ShaderParser
 		return nullptr;
 	}
 
+	DXBCShaderVariableDesc ParseVariable(uint32_t const* first_token, uint32_t var_offset, uint32_t& type_offset) const
+	{
+		DXBCShaderVariableDesc ret;
+
+		const uint32_t* var_token = reinterpret_cast<uint32_t const*>(reinterpret_cast<char const*>(first_token) + var_offset);
+
+		uint32_t var_name_offset = KlayGE::LE2Native(*var_token);
+		++var_token;
+		ret.name = reinterpret_cast<char const*>(first_token) + var_name_offset;
+		ret.start_offset = KlayGE::LE2Native(*var_token);
+		++var_token;
+		ret.size = KlayGE::LE2Native(*var_token);
+		++var_token;
+		ret.flags = KlayGE::LE2Native(*var_token);
+		++var_token;
+		type_offset = KlayGE::LE2Native(*var_token);
+		++var_token;
+		uint32_t default_value_offset = KlayGE::LE2Native(*var_token);
+		++var_token;
+
+		if (program->version.major >= 5)
+		{
+			ret.start_texture = KlayGE::LE2Native(*var_token);
+			++var_token;
+			ret.texture_size = KlayGE::LE2Native(*var_token);
+			++var_token;
+			ret.start_sampler = KlayGE::LE2Native(*var_token);
+			++var_token;
+			ret.sampler_size = KlayGE::LE2Native(*var_token);
+			++var_token;
+		}
+		if (default_value_offset != 0)
+		{
+			ret.default_val = reinterpret_cast<char const*>(first_token) + default_value_offset;
+		}
+		else
+		{
+			ret.default_val = nullptr;
+		}
+
+		return ret;
+	}
+
+	DXBCShaderTypeDesc ParseType(uint32_t const* first_token, uint32_t type_offset) const
+	{
+		DXBCShaderTypeDesc ret;
+
+		uint16_t const* type_token = reinterpret_cast<uint16_t const*>(reinterpret_cast<char const*>(first_token) + type_offset);
+
+		ret.var_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*type_token));
+		++type_token;
+
+		ret.type = static_cast<ShaderVariableType>(KlayGE::LE2Native(*type_token));
+		++type_token;
+
+		ret.rows = KlayGE::LE2Native(*type_token);
+		++type_token;
+		ret.columns = KlayGE::LE2Native(*type_token);
+		++type_token;
+
+		ret.elements = KlayGE::LE2Native(*type_token);
+		++type_token;
+		ret.members = KlayGE::LE2Native(*type_token);
+		++type_token;
+
+		ret.offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+		type_token += 2;
+
+		ret.name = ShaderVariableTypeName(ret.type);
+
+		if (program->version.major >= 5)
+		{
+			uint32_t parent_type_offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));	// Guessing
+			type_token += 2;
+
+			if (parent_type_offset != 0)
+			{
+				uint16_t const* parent_type_token =
+					reinterpret_cast<uint16_t const*>(reinterpret_cast<char const*>(first_token) + parent_type_offset);
+
+				ShaderVariableClass parent_type_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*parent_type_token));
+				++parent_type_token;
+				KFL_UNUSED(parent_type_class);
+				uint16_t unknown1 = KlayGE::LE2Native(*parent_type_token);
+				++parent_type_token;
+				KFL_UNUSED(unknown1);
+			}
+
+			uint32_t unknown2 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			type_token += 2;
+			if (unknown2 != 0)
+			{
+				uint32_t const* unknown_token = reinterpret_cast<uint32_t const*>(reinterpret_cast<char const*>(first_token) + unknown2);
+				uint32_t unknown3 = KlayGE::LE2Native(*unknown_token);
+				++unknown_token;
+				KFL_UNUSED(unknown3);
+			}
+
+			uint32_t unknown4 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			type_token += 2;
+			KFL_UNUSED(unknown4);
+			uint32_t unknown5 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			type_token += 2;
+			KFL_UNUSED(unknown5);
+
+			uint32_t name_offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			type_token += 2;
+			if (name_offset != 0)
+			{
+				if (ret.var_class == SVC_STRUCT)
+				{
+					ret.name = reinterpret_cast<char const*>(reinterpret_cast<char const*>(first_token) + name_offset);
+				}
+			}
+		}
+
+		if (ret.members > 0)
+		{
+			ret.member_desc.resize(ret.members);
+
+			uint32_t const* member_token =
+				reinterpret_cast<uint32_t const*>(reinterpret_cast<char const*>(first_token) + ret.offset);
+
+			for (uint32_t m = 0; m < ret.members; ++m)
+			{
+				uint32_t const member_name_offset = KlayGE::LE2Native(*member_token);
+				++member_token;
+				ret.member_desc[m].name = reinterpret_cast<char const*>(first_token) + member_name_offset;
+
+				uint32_t const member_type_offset = KlayGE::LE2Native(*member_token);
+				++member_token;
+				ret.member_desc[m].type = ParseType(first_token, member_type_offset);
+
+				ret.member_desc[m].start_offset = KlayGE::LE2Native(*member_token);
+				++member_token;
+			}
+		}
+
+		return ret;
+	}
+
 	uint32_t ParseCBAndResourceBinding() const
 	{
 		BOOST_ASSERT_MSG(FOURCC_RDEF == resource_chunk->fourcc, "parameter chunk is not a resource chunk,parse_constant_buffer()");
@@ -654,6 +798,10 @@ struct ShaderParser
 		++ res_token;
 		// TODO: check here, compile_flags is unused.
 		KFL_UNUSED(compile_flags);
+
+		// TODO: check here, creator_offset is unused.
+		uint32_t creator_offset = KlayGE::LE2Native(*res_token);
+		KFL_UNUSED(creator_offset);
 
 		uint32_t const * resource_binding_tokens = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + resource_binding_offset);
 		program->resource_bindings.resize(num_resource_bindings);
@@ -691,73 +839,19 @@ struct ShaderParser
 			++ cb_tokens;
 			uint32_t var_offset = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
-			const uint32_t* var_token = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + var_offset);
 			cb.vars.resize(var_count);
 			for (uint32_t j = 0; j < var_count; ++ j)
 			{
 				DXBCShaderVariable& var = cb.vars[j];
-				uint32_t var_name_offset = KlayGE::LE2Native(*var_token);
-				++ var_token;
-				var.var_desc.name = reinterpret_cast<char const *>(first_token) + var_name_offset;
-				var.var_desc.start_offset = KlayGE::LE2Native(*var_token);
-				++ var_token;
-				var.var_desc.size = KlayGE::LE2Native(*var_token);
-				++ var_token;
-				var.var_desc.flags = KlayGE::LE2Native(*var_token);
-				++ var_token;
-				uint32_t type_offset = KlayGE::LE2Native(*var_token);
-				++ var_token;
-				uint32_t default_value_offset = KlayGE::LE2Native(*var_token);
-				++ var_token;
 
-				if (program->version.major >= 5)
-				{
-					var.var_desc.start_texture = KlayGE::LE2Native(*var_token);
-					++ var_token;
-					var.var_desc.texture_size = KlayGE::LE2Native(*var_token);
-					++ var_token;
-					var.var_desc.start_sampler = KlayGE::LE2Native(*var_token);
-					++ var_token;
-					var.var_desc.sampler_size = KlayGE::LE2Native(*var_token);
-					++ var_token;
+				uint32_t type_offset;
+				var.var_desc = ParseVariable(first_token, var_offset, type_offset);
+				var_offset += ((program->version.major >= 5) ? 10 : 6) * sizeof(uint32_t);
 
-				}
-				if (default_value_offset)
-				{
-					var.var_desc.default_val = reinterpret_cast<char const *>(first_token) + default_value_offset;
-				}
-				else
-				{
-					var.var_desc.default_val = nullptr;
-				}
-				if (type_offset)
+				if (type_offset > 0)
 				{
 					var.has_type_desc = true;
-					uint16_t const * type_token = reinterpret_cast<uint16_t const *>(reinterpret_cast<char const *>(first_token) + type_offset);
-
-					var.type_desc.var_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*type_token));
-					++ type_token;
-
-					var.type_desc.type = static_cast<ShaderVariableType>(KlayGE::LE2Native(*type_token));
-					++ type_token;
-
-					var.type_desc.rows = KlayGE::LE2Native(*type_token);
-					++ type_token;
-					var.type_desc.columns = KlayGE::LE2Native(*type_token);
-					++ type_token;
-
-					var.type_desc.elements = KlayGE::LE2Native(*type_token);
-					++ type_token;
-					var.type_desc.members = KlayGE::LE2Native(*type_token);
-					++ type_token;
-
-					uint32_t var_member_offset = KlayGE::LE2Native(*type_token) << 16;
-					++ type_token;
-					var_member_offset |= KlayGE::LE2Native(*type_token);
-					++ type_token;
-					
-					var.type_desc.offset = var_member_offset;
-					var.type_desc.name = ShaderVariableTypeName(var.type_desc.type);
+					var.type_desc = ParseType(first_token, type_offset);
 				}
 				else
 				{

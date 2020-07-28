@@ -42,6 +42,7 @@ private:
 	KlayGE::TexturePtr scene_tex_;
 	KlayGE::TexturePtr scene_depth_tex_;
 	KlayGE::TexturePtr scene_ds_tex_;
+	KlayGE::ShaderResourceViewPtr scene_ds_srv_;
 	KlayGE::FrameBufferPtr scene_fb_;
 	KlayGE::PostProcessPtr depth_to_linear_pp_;
 	KlayGE::PostProcessPtr copy_pp_;
@@ -51,7 +52,10 @@ private:
 	KlayGE::FirstPersonCameraController fpc_controller_;
 
 	std::vector<KlayGE::TexturePtr> low_res_color_texs_;
+	std::vector<KlayGE::ShaderResourceViewPtr> low_res_color_srvs_;
+	std::vector<KlayGE::RenderTargetViewPtr> low_res_color_rtvs_;
 	std::vector<KlayGE::TexturePtr> low_res_max_ds_texs_;
+	std::vector<KlayGE::ShaderResourceViewPtr> low_res_max_ds_srvs_;
 	std::vector<KlayGE::DepthStencilViewPtr> low_res_max_ds_views_;
 
 	KlayGE::FrameBufferPtr half_res_fb_;

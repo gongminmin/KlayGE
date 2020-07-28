@@ -40,10 +40,11 @@
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12Resource.hpp>
+#include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 
 namespace KlayGE
 {
-	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource
+	class D3D12GraphicsBuffer final : public GraphicsBuffer, public D3D12Resource
 	{
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, uint32_t structure_byte_stride);
@@ -77,11 +78,14 @@ namespace KlayGE
 		void ResetInitCount(uint64_t count);
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
+
+		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
 
 	private:
-		uint32_t counter_offset_;
+		std::unique_ptr<D3D12GpuMemoryBlock> gpu_mem_block_;
+		uint32_t counter_offset_{0};
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 
 		BufferAccess mapped_ba_;

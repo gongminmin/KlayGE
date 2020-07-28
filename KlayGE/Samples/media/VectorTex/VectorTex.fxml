@@ -2,15 +2,11 @@
 
 <effect>
 	<include name="ColorSpaceUtil.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="mv"/>
 	<parameter type="float3" name="eye_pos"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<parameter type="texture2D" name="vector_tex"/>
 	<parameter type="sampler" name="bilinear_sampler">

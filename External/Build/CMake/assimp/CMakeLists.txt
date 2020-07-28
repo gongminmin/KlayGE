@@ -1,7 +1,7 @@
 SET(ASSIMP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/assimp")
 SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "8c15a35609e8582945aec966f263d0ee821d63ae" "master" "v4.1.0")
+UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "0201fc57dca48910ca7f9fdf7457534ea6a57efc" "master" "v5.0.0")
 
 FOREACH(flag_var
 		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL)
@@ -27,6 +27,33 @@ set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
 set(IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_definitions(assimp
+		PRIVATE
+			-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
+	)
+
+	target_compile_options(assimp
+		PRIVATE
+			-Wno-pragma-pack
+			-Wno-unused-parameter
+			-Wno-sometimes-uninitialized
+			-Wno-invalid-offsetof
+			-Wno-sign-compare
+			-Wno-unknown-warning-option
+			-Wno-unused-variable
+			-Wno-unused-value
+			-Wno-unused-private-field
+			-Wno-unused-function
+			-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
+			-Wno-tautological-bitwise-compare
+	)
+	target_compile_options(IrrXML
+		PRIVATE
+			-Wno-pragma-pack
+	)
+endif()
 
 SET_TARGET_PROPERTIES(assimp PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${ASSIMP_OUTPUT_DIR}

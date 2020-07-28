@@ -44,7 +44,7 @@
 #include <KFL/AABBox.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
@@ -113,8 +113,8 @@ namespace KlayGE
 			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * 4 * sizeof(FontVert)), TransientBuffer::BF_Vertex);
 			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * INDEX_PER_CHAR * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
-			rls_[0]->BindVertexStream(tb_vb_->GetBuffer(), { VertexElement(VEU_Position, 0, EF_BGR32F),
-				VertexElement(VEU_Diffuse, 0, EF_ABGR8), VertexElement(VEU_TextureCoord, 0, EF_GR32F) });
+			rls_[0]->BindVertexStream(tb_vb_->GetBuffer(), MakeSpan({VertexElement(VEU_Position, 0, EF_BGR32F),
+				VertexElement(VEU_Diffuse, 0, EF_ABGR8), VertexElement(VEU_TextureCoord, 0, EF_GR32F)}));
 			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 
 			pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -133,7 +133,7 @@ namespace KlayGE
 			}
 		}
 
-		void OnRenderBegin()
+		void OnRenderBegin() override
 		{
 			if (!three_dim_)
 			{
@@ -152,7 +152,7 @@ namespace KlayGE
 			rls_[0]->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 		}
 
-		void OnRenderEnd()
+		void OnRenderEnd() override
 		{
 			pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -163,7 +163,7 @@ namespace KlayGE
 			tb_ib_->OnPresent();
 		}
 
-		void Render()
+		void Render() override
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -677,6 +677,7 @@ namespace KlayGE
 			{
 			}
 		};
+		KLAYGE_STATIC_ASSERT(sizeof(FontVert) == 24);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif

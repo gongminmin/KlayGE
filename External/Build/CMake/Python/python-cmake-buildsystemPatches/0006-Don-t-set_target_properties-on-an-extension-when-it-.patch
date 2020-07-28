@@ -1,0 +1,35 @@
+From 724d77bdc230305566d85f100dbc64989aea2acb Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 30 Dec 2017 12:41:39 -0800
+Subject: [PATCH 06/11] Don't set_target_properties on an extension when it's
+ disabled.
+
+---
+ cmake/extensions/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index ad82e91..4dd369d 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -493,7 +493,7 @@ add_python_extension(_decimal
+     ${_decimal_LIBRARIES}
+     ${_decimal_INCLUDEDIRS}
+ )
+-if(_decimal_compile_flags AND NOT BUILTIN_DECIMAL)
++if(_decimal_compile_flags AND ENABLE_DECIMAL AND NOT BUILTIN_DECIMAL)
+     set_target_properties(extension_decimal PROPERTIES COMPILE_FLAGS ${_decimal_compile_flags})
+ endif()
+ 
+@@ -735,7 +735,7 @@ else()
+     )
+ endif()
+ 
+-if(USE_LIBEDIT AND NOT BUILTIN_READLINE)
++if(USE_LIBEDIT AND ENABLE_READLINE AND NOT BUILTIN_READLINE)
+     set_target_properties(extension_readline PROPERTIES
+         COMPILE_DEFINITIONS "USE_LIBEDIT")
+ endif()
+-- 
+2.17.1.windows.2
+

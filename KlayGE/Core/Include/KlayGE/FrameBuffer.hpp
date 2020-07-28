@@ -59,7 +59,7 @@ namespace KlayGE
 
 	public:
 		FrameBuffer();
-		virtual ~FrameBuffer();
+		virtual ~FrameBuffer() noexcept;
 
 		static Attachment CalcAttachment(uint32_t index);
 
@@ -70,9 +70,9 @@ namespace KlayGE
 		uint32_t Width() const;
 		uint32_t Height() const;
 
-		ViewportPtr const & GetViewport() const;
-		ViewportPtr& GetViewport();
-		void SetViewport(ViewportPtr const & viewport);
+		ViewportPtr const & Viewport() const;
+		ViewportPtr& Viewport();
+		void Viewport(ViewportPtr const & viewport);
 
 		void Attach(Attachment att, RenderTargetViewPtr const & view);
 		void Detach(Attachment att);

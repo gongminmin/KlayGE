@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,13 +12,14 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/ParticleSystem.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -34,8 +34,7 @@ namespace
 	{
 	public:
 		explicit SwitchableMesh(std::wstring_view name)
-			: StaticMesh(name),
-				lighting_(true)
+			: StaticMesh(name)
 		{
 			gbuffers_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
 			no_lighting_gbuffers_effect_ = SyncLoadRenderEffect("DeepGBuffers.fxml");
@@ -59,7 +58,8 @@ namespace
 
 		void Transparency(float alpha)
 		{
-			mtl_->albedo.w() = alpha;
+			float4 const& albedo = mtl_->Albedo();
+			mtl_->Albedo(float4(albedo.x(), albedo.y(), albedo.z(), alpha));
 
 			if (!simple_forward_)
 			{
@@ -86,13 +86,13 @@ namespace
 				effect_attrs_ &= ~EA_SimpleForward;
 
 				this->ReceivesLighting(lighting_);
-				this->Transparency(mtl_->albedo.w());
+				this->Transparency(mtl_->Albedo().w());
 			}
 		}
 
 	private:
-		bool lighting_;
-		bool simple_forward_;
+		bool lighting_ = true;
+		bool simple_forward_ = false;
 
 		RenderEffectPtr gbuffers_effect_;
 		RenderEffectPtr no_lighting_gbuffers_effect_;
@@ -203,7 +203,7 @@ void DeepGBuffersApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DeepGBuffers.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DeepGBuffers.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 	id_receives_lighting_ = dialog_->IDFromName("Lighting");
 	id_transparency_static_ = dialog_->IDFromName("TransparencyStatic");
@@ -327,6 +327,14 @@ void DeepGBuffersApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t DeepGBuffersApp::DoUpdate(uint32_t pass)

@@ -368,7 +368,7 @@ namespace KlayGE
 		std::vector<TableInfo>::iterator smbios_index_iter_;
 	};
 
-	class KLAYGE_CORE_API Mainboard : boost::noncopyable
+	class KLAYGE_CORE_API Mainboard final : boost::noncopyable
 	{
 	public:
 		Mainboard();
@@ -393,7 +393,7 @@ namespace KlayGE
 		static char const * mainboard_type_name_[MainboardInfo::MT_Num];
 	};
 
-	class KLAYGE_CORE_API MemoryBank : boost::noncopyable
+	class KLAYGE_CORE_API MemoryBank final : boost::noncopyable
 	{
 	public:
 		MemoryBank();

@@ -88,9 +88,9 @@ namespace KlayGE
 			return gl_shader_;
 		}
 
-		virtual ArrayRef<std::string> GlslTfbVaryings() const
+		virtual std::span<std::string const> GlslTfbVaryings() const
 		{
-			return ArrayRef<std::string>();
+			return std::span<std::string const>();
 		}
 		virtual bool TfbSeparateAttribs() const
 		{
@@ -118,7 +118,7 @@ namespace KlayGE
 			KFL_UNUSED(dxbc2glsl);
 		}
 #endif
-		virtual void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
 		{
 			KFL_UNUSED(effect);
 			KFL_UNUSED(shader_desc_ids);
@@ -137,7 +137,7 @@ namespace KlayGE
 		GLuint gl_shader_ = 0;
 	};
 
-	class OGLESVertexShaderStageObject : public OGLESShaderStageObject
+	class OGLESVertexShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESVertexShaderStageObject();
@@ -155,9 +155,9 @@ namespace KlayGE
 			return glsl_attrib_names_;
 		}
 
-		ArrayRef<std::string> GlslTfbVaryings() const override
+		std::span<std::string const> GlslTfbVaryings() const override
 		{
-			return glsl_tfb_varyings_;
+			return MakeSpan(glsl_tfb_varyings_);
 		}
 		bool TfbSeparateAttribs() const override
 		{
@@ -170,7 +170,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 		void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl) override;
 #endif
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 		std::vector<VertexElementUsage> usages_;
@@ -181,7 +181,7 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 	};
 
-	class OGLESPixelShaderStageObject : public OGLESShaderStageObject
+	class OGLESPixelShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESPixelShaderStageObject();
@@ -195,19 +195,19 @@ namespace KlayGE
 		bool has_discard_ = true;
 	};
 
-	class OGLESGeometryShaderStageObject : public OGLESShaderStageObject
+	class OGLESGeometryShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESGeometryShaderStageObject();
 	};
 
-	class OGLESComputeShaderStageObject : public OGLESShaderStageObject
+	class OGLESComputeShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESComputeShaderStageObject();
 	};
 
-	class OGLESHullShaderStageObject : public OGLESShaderStageObject
+	class OGLESHullShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESHullShaderStageObject();
@@ -235,14 +235,14 @@ namespace KlayGE
 #endif
 	};
 
-	class OGLESDomainShaderStageObject : public OGLESShaderStageObject
+	class OGLESDomainShaderStageObject final : public OGLESShaderStageObject
 	{
 	public:
 		OGLESDomainShaderStageObject();
 
-		ArrayRef<std::string> GlslTfbVaryings() const override
+		std::span<std::string const> GlslTfbVaryings() const override
 		{
-			return glsl_tfb_varyings_;
+			return MakeSpan(glsl_tfb_varyings_);
 		}
 		bool TfbSeparateAttribs() const override
 		{
@@ -263,7 +263,7 @@ namespace KlayGE
 #endif
 
 	private:
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids);
+		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
 	private:
 #if KLAYGE_IS_DEV_PLATFORM
@@ -283,7 +283,7 @@ namespace KlayGE
 		SamplerStateObjectPtr sampler;
 	};
 
-	class OGLESShaderObject : public ShaderObject
+	class OGLESShaderObject final : public ShaderObject
 	{
 	public:
 		OGLESShaderObject();
@@ -291,8 +291,8 @@ namespace KlayGE
 
 		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
-		void Bind();
-		void Unbind();
+		void Bind(RenderEffect const& effect) override;
+		void Unbind() override;
 
 		GLint GetAttribLocation(VertexElementUsage usage, uint8_t usage_index);
 
@@ -341,13 +341,12 @@ namespace KlayGE
 		std::vector<GLuint> gl_bind_targets_;
 		std::vector<GLuint> gl_bind_textures_;
 		std::vector<GLuint> gl_bind_samplers_;
-		std::vector<GLuint> gl_bind_cbuffs_;
 
 		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 
-		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
+		std::vector<uint32_t> all_cbuff_indices_;
 	};
 
 	typedef std::shared_ptr<OGLESShaderObject> OGLESShaderObjectPtr;

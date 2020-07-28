@@ -109,9 +109,8 @@ namespace KlayGE
 		return 1;
 	}
 
-	void OGLESTexture::CopyToSubTexture1D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	void OGLESTexture::CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -122,15 +121,14 @@ namespace KlayGE
 		KFL_UNUSED(src_level);
 		KFL_UNUSED(src_x_offset);
 		KFL_UNUSED(src_width);
+		KFL_UNUSED(filter);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTexture2D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void OGLESTexture::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -145,15 +143,15 @@ namespace KlayGE
 		KFL_UNUSED(src_y_offset);
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
+		KFL_UNUSED(filter);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTexture3D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void OGLESTexture::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
+		uint32_t src_depth, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -172,15 +170,14 @@ namespace KlayGE
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
 		KFL_UNUSED(src_depth);
+		KFL_UNUSED(filter);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTextureCube(Texture& target,
-		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void OGLESTexture::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -197,6 +194,7 @@ namespace KlayGE
 		KFL_UNUSED(src_y_offset);
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
+		KFL_UNUSED(filter);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -304,11 +302,27 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::BuildMipSubLevels()
+	bool OGLESTexture::HwBuildMipSubLevels(TextureFilter filter)
 	{
+		if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+		{
+			if (filter != TextureFilter::Point)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (filter != TextureFilter::Linear)
+			{
+				return false;
+			}
+		}
+
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmap(target_type_);
+		return true;
 	}
 
 	void OGLESTexture::TexParameteri(GLenum pname, GLint param)

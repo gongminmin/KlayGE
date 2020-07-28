@@ -1,0 +1,110 @@
+From 2f2da57b7399876cd43532059c0333b301380ed0 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 7 Jul 2018 19:35:24 -0700
+Subject: [PATCH 1/3] Support UWP
+
+1. UWP detection.
+2. Fix some compiling problems on UWP configuration.
+---
+ CPP/7zip/Archive/Common/ItemNameUtils.cpp |  2 +-
+ CPP/Common/MyString.cpp                   |  2 +-
+ CPP/Common/MyString.h                     |  4 ++--
+ CPP/Common/MyWindows.h                    | 20 ++++++++++++++++++++
+ CPP/Windows/System.cpp                    |  2 +-
+ 5 files changed, 25 insertions(+), 5 deletions(-)
+
+diff --git a/CPP/7zip/Archive/Common/ItemNameUtils.cpp b/CPP/7zip/Archive/Common/ItemNameUtils.cpp
+index d5093a2..8ddb79c 100644
+--- a/CPP/7zip/Archive/Common/ItemNameUtils.cpp
++++ b/CPP/7zip/Archive/Common/ItemNameUtils.cpp
+@@ -67,7 +67,7 @@ bool HasTailSlash(const AString &name, UINT
+   if (name.IsEmpty())
+     return false;
+   char c =
+-    #if defined(_WIN32) && !defined(UNDER_CE)
++    #if defined(_WIN32) && !defined(UNDER_CE) && !defined(IS_WINDOWS_STORE)
+       *CharPrevExA((WORD)codePage, name, name.Ptr(name.Len()), 0);
+     #else
+       name.Back();
+diff --git a/CPP/Common/MyString.cpp b/CPP/Common/MyString.cpp
+index e2ec8a6..0071c4a 100644
+--- a/CPP/Common/MyString.cpp
++++ b/CPP/Common/MyString.cpp
+@@ -1611,7 +1611,7 @@ int MyStringCompareNoCase(const char *s1, const char *s2)
+ 
+ static inline UINT GetCurrentCodePage()
+ {
+-  #if defined(UNDER_CE) || !defined(_WIN32)
++  #if defined(UNDER_CE) || defined(IS_WINDOWS_STORE) || !defined(_WIN32)
+   return CP_ACP;
+   #else
+   return ::AreFileApisANSI() ? CP_ACP : CP_OEMCP;
+diff --git a/CPP/Common/MyString.h b/CPP/Common/MyString.h
+index 40de52c..bf4d9ba 100644
+--- a/CPP/Common/MyString.h
++++ b/CPP/Common/MyString.h
+@@ -152,7 +152,7 @@ inline wchar_t MyCharUpper(wchar_t c) throw()
+   if (c < 'a') return c;
+   if (c <= 'z') return (wchar_t)(c - 0x20);
+   if (c <= 0x7F) return c;
+-  #ifdef _WIN32
++  #ifdef IS_WINDOWS_DESKTOP
+     #ifdef _UNICODE
+       return (wchar_t)(unsigned)(UINT_PTR)CharUpperW((LPWSTR)(UINT_PTR)(unsigned)c);
+     #else
+@@ -171,7 +171,7 @@ inline wchar_t MyCharLower(wchar_t c) throw()
+   if (c < 'A') return c;
+   if (c <= 'Z') return (wchar_t)(c + 0x20);
+   if (c <= 0x7F) return c;
+-  #ifdef _WIN32
++  #ifdef IS_WINDOWS_DESKTOP
+     #ifdef _UNICODE
+       return (wchar_t)(unsigned)(UINT_PTR)CharLowerW((LPWSTR)(UINT_PTR)(unsigned)c);
+     #else
+diff --git a/CPP/Common/MyWindows.h b/CPP/Common/MyWindows.h
+index db3f35d..e7696fb 100644
+--- a/CPP/Common/MyWindows.h
++++ b/CPP/Common/MyWindows.h
+@@ -5,6 +5,26 @@
+ 
+ #ifdef _WIN32
+ 
++#if defined(__MINGW32__)
++#include <_mingw.h>
++#ifndef WINVER
++#define WINVER 0x0601
++#endif
++#else
++#include <sdkddkver.h>
++#endif
++
++#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
++  #include <winapifamily.h>
++  #if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
++    #define IS_WINDOWS_DESKTOP
++  #else
++    #define IS_WINDOWS_STORE
++  #endif
++#else
++  #define IS_WINDOWS_DESKTOP
++#endif
++
+ #include <windows.h>
+ 
+ #ifdef UNDER_CE
+diff --git a/CPP/Windows/System.cpp b/CPP/Windows/System.cpp
+index cc33169..bc71c25 100644
+--- a/CPP/Windows/System.cpp
++++ b/CPP/Windows/System.cpp
+@@ -103,7 +103,7 @@ bool GetRamSize(UInt64 &size)
+     stat.dwLength = sizeof(stat);
+   #endif
+   
+-  #ifdef _WIN64
++  #if defined(_WIN64) || defined(_M_ARM) || defined(_M_ARM64)
+     
+     if (!::GlobalMemoryStatusEx(&stat))
+       return false;
+-- 
+2.17.1.windows.2
+

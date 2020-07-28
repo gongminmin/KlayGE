@@ -32,6 +32,7 @@ private:
 	KlayGE::FrameBufferPtr scene_buffer_;
 
 	KlayGE::TexturePtr fog_tex_;
+	KlayGE::ShaderResourceViewPtr fog_srv_;
 	KlayGE::FrameBufferPtr fog_buffer_;
 
 	KlayGE::PostProcessPtr blend_pp_;

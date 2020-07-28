@@ -1,6 +1,11 @@
 SET(WPFTOOLKIT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/wpftoolkit")
 
-UpdateExternalLib("wpftoolkit" "https://github.com/gongminmin/wpftoolkit.git" "6d87d0dddcb18f51653c99b97b1ad49e33bbb60f" "FixForKlayGE" "master")
+UpdateExternalLib("wpftoolkit" "https://github.com/xceedsoftware/wpftoolkit" "aa93c693a581c6e97b7cec0c0d3c43faca4d1380" "" "" need_patch)
+if(need_patch)
+	foreach(patch "0001-Adjust-the-path-of-output-directory-and-sn.snk")
+		ApplyPatch("wpftoolkit" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
+	endforeach()
+endif()
 
 INCLUDE_EXTERNAL_MSPROJECT(
 	Xceed.Wpf.AvalonDock ${WPFTOOLKIT_PROJECT_DIR}/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj

@@ -56,10 +56,11 @@ namespace KlayGE
 	{
 		alGenBuffers(1, &buffer_);
 
-		std::vector<uint8_t> data(data_source_->Size());
-		data_source_->Read(data.data(), data.size());
+		size_t const data_size = data_source_->Size();
+		auto data = MakeUniquePtr<uint8_t[]>(data_size);
+		data_source_->Read(data.get(), data_size);
 
-		alBufferData(buffer_, Convert(format_), data.data(), static_cast<ALsizei>(data.size()), freq_);
+		alBufferData(buffer_, Convert(format_), data.get(), static_cast<ALsizei>(data_size), freq_);
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), sources_.data());
 

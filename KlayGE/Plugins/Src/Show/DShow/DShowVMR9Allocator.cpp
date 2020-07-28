@@ -11,8 +11,8 @@
 /////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX2a/span.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
@@ -27,10 +27,15 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
 #endif
 #include <d3d9.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
 #endif
 #ifdef KLAYGE_COMPILER_GCC
 #define _WIN32_WINNT_BACKUP _WIN32_WINNT
@@ -70,7 +75,7 @@ namespace KlayGE
 #endif
 		}
 
-		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
+		d3d_.reset(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
 
 		this->CreateDevice();
 	}
@@ -111,11 +116,9 @@ namespace KlayGE
 			vp_mode = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 		}
 
-		IDirect3DDevice9* d3d_device;
 		TIFHR(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
 			wnd_, vp_mode | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED,
-			&d3dpp_, &d3d_device));
-		d3d_device_ = MakeCOMPtr(d3d_device);
+			&d3dpp_, d3d_device_.put()));
 	}
 
 	void DShowVMR9Allocator::DeleteSurfaces()
@@ -183,19 +186,17 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 		static ElementFormat constexpr backup_fmts[] = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
-		ArrayRef<ElementFormat> fmt_options = backup_fmts;
+		std::span<ElementFormat const> fmt_options = backup_fmts;
 		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt_options = fmt_options.Slice(2);
+			fmt_options = fmt_options.subspan(2);
 		}
 		auto const fmt = caps.BestMatchTextureFormat(fmt_options);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
-		IDirect3DSurface9* surf;
 		TIFHR(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, nullptr));
-		cache_surf_ = MakeCOMPtr(surf);
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, cache_surf_.put(), nullptr));
 
 		return S_OK;
 	}
@@ -241,8 +242,7 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		vmr_surf_alloc_notify_ = MakeCOMPtr(lpIVMRSurfAllocNotify);
-		vmr_surf_alloc_notify_->AddRef();
+		vmr_surf_alloc_notify_.reset(lpIVMRSurfAllocNotify);
 
 		HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
 		TIFHR(vmr_surf_alloc_notify_->SetD3DDevice(d3d_device_.get(), hMonitor));

@@ -22,12 +22,12 @@
 
 namespace KlayGE
 {
-	class OGLESGraphicsBuffer : public GraphicsBuffer
+	class OGLESGraphicsBuffer final : public GraphicsBuffer
 	{
 	public:
 		explicit OGLESGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
 			uint32_t size_in_byte, uint32_t structure_byte_stride);
-		~OGLESGraphicsBuffer();
+		~OGLESGraphicsBuffer() override;
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
@@ -52,8 +52,8 @@ namespace KlayGE
 		}
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
 		GLuint vb_;

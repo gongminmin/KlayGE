@@ -49,6 +49,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ETC1Block) == 8);
 
 	struct ETC2TModeBlock
 	{
@@ -59,6 +60,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ETC2TModeBlock) == 8);
 
 	struct ETC2HModeBlock
 	{
@@ -69,6 +71,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ETC2HModeBlock) == 8);
 
 	struct ETC2PlanarModeBlock
 	{
@@ -81,6 +84,7 @@ namespace KlayGE
 		uint8_t rv_gv;
 		uint8_t gv_bv;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ETC2PlanarModeBlock) == 8);
 
 	union ETC2Block
 	{
@@ -89,11 +93,12 @@ namespace KlayGE
 		ETC2HModeBlock etc2_h_mode;
 		ETC2PlanarModeBlock etc2_planar_mode;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(ETC2Block) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API TexCompressionETC1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC1 final : public TexCompression
 	{
 	public:
 		struct Params
@@ -201,7 +206,7 @@ namespace KlayGE
 		uint8_t temp_selectors_[8];
 	};
 
-	class KLAYGE_CORE_API TexCompressionETC2RGB8 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC2RGB8 final : public TexCompression
 	{
 	public:
 		TexCompressionETC2RGB8();
@@ -214,10 +219,10 @@ namespace KlayGE
 		void DecodeETCPlanarModeInternal(ARGBColor32* argb, ETC2PlanarModeBlock const & etc2);
 
 	private:
-		TexCompressionETC1Ptr etc1_codec_;
+		std::unique_ptr<TexCompressionETC1> etc1_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 final : public TexCompression
 	{
 	public:
 		TexCompressionETC2RGB8A1();
@@ -226,8 +231,8 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		TexCompressionETC1Ptr etc1_codec_;
-		TexCompressionETC2RGB8Ptr etc2_rgb8_codec_;
+		std::unique_ptr<TexCompressionETC1> etc1_codec_;
+		std::unique_ptr<TexCompressionETC2RGB8> etc2_rgb8_codec_;
 	};
 }
 

@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,12 +12,13 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -128,7 +128,7 @@ void CascadedShadowMapApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("CascadedShadowMap.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");
@@ -254,6 +254,14 @@ void CascadedShadowMapApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)

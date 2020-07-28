@@ -47,35 +47,40 @@ namespace KlayGE
 		uint16_t clr_0, clr_1;
 		uint16_t bitmap[2];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BC1Block) == 8);
 
 	struct BC2Block
 	{
 		uint16_t alpha[4];
 		BC1Block bc1;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BC2Block) == 16);
 
 	struct BC4Block
 	{
 		uint8_t alpha_0, alpha_1;
 		uint8_t bitmap[6];
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BC4Block) == 8);
 
 	struct BC3Block
 	{
 		BC4Block alpha;
 		BC1Block bc1;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BC3Block) == 16);
 
 	struct BC5Block
 	{
 		BC4Block red;
 		BC4Block green;
 	};
+	KLAYGE_STATIC_ASSERT(sizeof(BC5Block) == 16);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API TexCompressionBC1 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC1 final : public TexCompression
 	{
 	public:
 		TexCompressionBC1();
@@ -93,7 +98,7 @@ namespace KlayGE
 		bool RefineBlock(ARGBColor32 const * argb, ARGBColor32& min_clr, ARGBColor32& max_clr, uint32_t mask) const;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC2 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC2 final : public TexCompression
 	{
 	public:
 		TexCompressionBC2();
@@ -105,7 +110,7 @@ namespace KlayGE
 		TexCompressionBC1 bc1_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC4 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC4 final : public TexCompression
 	{
 	public:
 		TexCompressionBC4();
@@ -114,7 +119,7 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC3 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC3 final : public TexCompression
 	{
 	public:
 		TexCompressionBC3();
@@ -127,7 +132,7 @@ namespace KlayGE
 		TexCompressionBC4 bc4_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC5 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC5 final : public TexCompression
 	{
 	public:
 		TexCompressionBC5();
@@ -139,7 +144,7 @@ namespace KlayGE
 		TexCompressionBC4 bc4_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC6U : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC6U final : public TexCompression
 	{
 	public:
 		TexCompressionBC6U();
@@ -200,7 +205,7 @@ namespace KlayGE
 		static int const mode_to_info_[];
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC6S : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC6S final : public TexCompression
 	{
 	public:
 		TexCompressionBC6S();
@@ -212,7 +217,7 @@ namespace KlayGE
 		TexCompressionBC6U bc6u_codec_;
 	};
 
-	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
+	class KLAYGE_CORE_API TexCompressionBC7 final : public TexCompression
 	{
 		static uint32_t const BC7_MAX_REGIONS = 3;
 		static uint32_t const BC7_NUM_CHANNELS = 4;

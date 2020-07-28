@@ -115,32 +115,10 @@ namespace KlayGE
 		return ret;
 	}
 
-	void UIListBox::SetItemData(int nIndex, std::any const & data)
-	{
-		items_[nIndex]->data = data;
-	}
-
-	int UIListBox::AddItem(std::wstring const & strText, std::any const & data)
+	void UIListBox::InsertItem(int nIndex, std::wstring const & strText)
 	{
 		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
-		pNewItem->data = data;
-		pNewItem->rcActive = IRect(0, 0, 0, 0);
-		pNewItem->bSelected = false;
-
-		int ret = static_cast<int>(items_.size());
-
-		items_.push_back(pNewItem);
-		scroll_bar_.SetTrackRange(0, items_.size());
-
-		return ret;
-	}
-
-	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, std::any const & data)
-	{
-		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
-		pNewItem->strText = strText;
-		pNewItem->data = data;
 		pNewItem->rcActive = IRect(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 

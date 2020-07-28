@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
@@ -116,16 +117,15 @@ namespace
 			std::vector<uint8_t>& code, std::string& error_msgs) const
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			ID3DBlob* code_blob = nullptr;
-			ID3DBlob* error_msgs_blob = nullptr;
+			com_ptr<ID3DBlob> code_blob;
+			com_ptr<ID3DBlob> error_msgs_blob;
 			HRESULT hr = DynamicD3DCompile_(src_data.c_str(), static_cast<UINT>(src_data.size()),
 				nullptr, defines, nullptr, entry_point,
-				target, flags1, flags2, &code_blob, &error_msgs_blob);
+				target, flags1, flags2, code_blob.put(), error_msgs_blob.put());
 			if (code_blob)
 			{
 				uint8_t const * p = static_cast<uint8_t const *>(code_blob->GetBufferPointer());
 				code.assign(p, p + code_blob->GetBufferSize());
-				code_blob->Release();
 			}
 			else
 			{
@@ -135,7 +135,6 @@ namespace
 			{
 				char const * p = static_cast<char const *>(error_msgs_blob->GetBufferPointer());
 				error_msgs.assign(p, p + error_msgs_blob->GetBufferSize());
-				error_msgs_blob->Release();
 			}
 			else
 			{
@@ -259,12 +258,11 @@ namespace
 		HRESULT D3DStripShader(std::vector<uint8_t> const & shader_code, uint32_t strip_flags, std::vector<uint8_t>& stripped_code)
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			ID3DBlob* stripped_blob = nullptr;
-			HRESULT hr = DynamicD3DStripShader_(&shader_code[0], static_cast<UINT>(shader_code.size()), strip_flags, &stripped_blob);
+			com_ptr<ID3DBlob> stripped_blob;
+			HRESULT hr = DynamicD3DStripShader_(&shader_code[0], static_cast<UINT>(shader_code.size()), strip_flags, stripped_blob.put());
 
 			uint8_t const * p = static_cast<uint8_t const *>(stripped_blob->GetBufferPointer());
 			stripped_code.assign(p, p + stripped_blob->GetBufferSize());
-			stripped_blob->Release();
 
 			return hr;
 #else
@@ -321,7 +319,7 @@ namespace KlayGE
 	{
 	}
 
-	ShaderStageObject::~ShaderStageObject() = default;
+	ShaderStageObject::~ShaderStageObject() noexcept = default;
 
 #if KLAYGE_IS_DEV_PLATFORM
 	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const & effect,
@@ -399,6 +397,11 @@ namespace KlayGE
 		if (caps.explicit_multi_sample_support)
 		{
 			D3D_SHADER_MACRO macro = { "KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1" };
+			macros.push_back(macro);
+		}
+		if (caps.vp_rt_index_at_every_stage_support)
+		{
+			D3D_SHADER_MACRO macro = {"KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT", "1"};
 			macros.push_back(macro);
 		}
 		{

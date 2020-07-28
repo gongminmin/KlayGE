@@ -5,25 +5,18 @@
 
 	<shader>
 		<![CDATA[
-float4 StoreGBufferRT0(float3 normal, float glossiness)
+void StoreGBuffer(float3 normal, float3 albedo, float2 metalness_glossiness, float2 motion_vec, float occlusion,
+			out float4 rt0, out float4 rt1, out float4 rt2)
 {
 	float p = sqrt(-normal.z * 8 + 8);
 	float2 enc = normal.xy / p + 0.5f;
 	float2 enc255 = enc * 255;
 	float2 residual = floor(frac(enc255) * 16);
-	return float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, glossiness);
-}
+	rt0 = float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, metalness_glossiness.y);
 
-float4 StoreGBufferRT1(float3 albedo, float metalness)
-{
-	return float4(albedo, metalness);
-}
+	rt1 = float4(albedo, metalness_glossiness.x);
 
-void StoreGBufferMRT(float3 normal, float glossiness, float3 albedo, float metalness,
-			out float4 rt0, out float4 rt1)
-{
-	rt0 = StoreGBufferRT0(normal, glossiness);
-	rt1 = StoreGBufferRT1(albedo, metalness);
+	rt2 = float4(motion_vec * 0.5f + 0.5f, occlusion, 1);
 }
 
 float3 GetNormal(float4 rt0)
@@ -52,6 +45,16 @@ float3 GetDiffuse(float4 rt1)
 float3 GetSpecular(float4 rt1)
 {
 	return SpecularColor(rt1.xyz, rt1.w);
+}
+
+float2 GetMotionVec(float4 rt2)
+{
+	return rt2.xy * 2 - 1;
+}
+
+float GetOcclusion(float4 rt2)
+{
+	return rt2.z;
 }
 
 

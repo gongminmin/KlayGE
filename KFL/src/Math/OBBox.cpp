@@ -170,7 +170,7 @@ namespace KlayGE
 	template <typename T>
 	bool OBBox_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
-		return MathLib::intersect_obb_frustum(*this, frustum) != BO_No;
+		return MathLib::intersect_obb_frustum(*this, frustum) != BoundOverlap::No;
 	}
 
 	template <typename T>

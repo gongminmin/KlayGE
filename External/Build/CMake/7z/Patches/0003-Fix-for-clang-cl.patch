@@ -1,0 +1,25 @@
+From a3940b167b64abcf3b95cd49cc9e8162702b4422 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 25 Feb 2020 21:59:46 -0800
+Subject: [PATCH 3/3] Fix for clang-cl
+
+---
+ C/AesOpt.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/C/AesOpt.c b/C/AesOpt.c
+index 9571c46..ba5d962 100644
+--- a/C/AesOpt.c
++++ b/C/AesOpt.c
+@@ -6,7 +6,7 @@
+ #include "CpuArch.h"
+ 
+ #ifdef MY_CPU_X86_OR_AMD64
+-#if (_MSC_VER > 1500) || (_MSC_FULL_VER >= 150030729)
++#if ((_MSC_VER > 1500) || (_MSC_FULL_VER >= 150030729)) && !defined(__clang__)
+ #define USE_INTEL_AES
+ #endif
+ #endif
+-- 
+2.17.1.windows.2
+

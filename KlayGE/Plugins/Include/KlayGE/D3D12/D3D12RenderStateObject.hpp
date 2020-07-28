@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class D3D12RenderStateObject : public RenderStateObject
+	class D3D12RenderStateObject final : public RenderStateObject
 	{
 	public:
 		D3D12RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
@@ -74,7 +74,7 @@ namespace KlayGE
 		mutable std::unordered_map<size_t, ID3D12PipelineStatePtr> psos_;
 	};
 
-	class D3D12SamplerStateObject : public SamplerStateObject
+	class D3D12SamplerStateObject final : public SamplerStateObject
 	{
 	public:
 		explicit D3D12SamplerStateObject(SamplerStateDesc const & desc);

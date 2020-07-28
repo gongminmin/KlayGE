@@ -2,8 +2,9 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/MeshConv/MeshConv.cpp
 )
 
-SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-	debug ToolCommon${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX} optimized ToolCommon${KLAYGE_OUTPUT_SUFFIX}
-	${KLAYGE_FILESYSTEM_LIBRARY})
-
 SETUP_TOOL(MeshConv)
+
+target_link_libraries(MeshConv
+	PRIVATE
+		ToolCommon
+)

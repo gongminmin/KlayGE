@@ -96,6 +96,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Light.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LightShaft.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Mesh.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Mipmapper.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/MotionBlur.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/MultiResLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ParticleSystem.cpp
@@ -150,6 +151,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Light.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LightShaft.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Mesh.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Mipmapper.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MotionBlur.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MultiResLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ParticleSystem.hpp
@@ -208,6 +210,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferFlatTess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferLine.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferParallaxOcclusionMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSmoothTess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSSS.fxml
@@ -222,6 +225,10 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Material.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mesh.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mipmapper.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ModelCamera.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
@@ -229,6 +236,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PrefixSum.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
@@ -376,14 +384,12 @@ SET(SCENE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneComponent.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneManager.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneNode.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Scene/SceneNodeHelper.cpp
 )
 
 SET(SCENE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneComponent.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneManager.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneNode.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SceneNodeHelper.hpp
 )
 
 SOURCE_GROUP("Scene Management\\Source Files" FILES ${SCENE_SOURCE_FILES})
@@ -478,37 +484,6 @@ SOURCE_GROUP("App Layer\\Source Files" FILES ${APP_SOURCE_FILES})
 SOURCE_GROUP("App Layer\\Header Files" FILES ${APP_HEADER_FILES})
 
 
-ADD_DEFINITIONS(-DKLAYGE_CORE_SOURCE)
-IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
-	FIND_PATH(WINE_PATH "winegcc" #searching for 'wine' may result in include path
-		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin)
-
-	IF(NOT WINE_PATH)
-		MESSAGE(FATAL_ERROR "Cound NOT find wine")
-	ENDIF()
-	ADD_DEFINITIONS(-DWINE_PATH=${WINE_PATH}/)
-ENDIF()
-
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/7z)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/include)
-IF(KLAYGE_PLATFORM_LINUX)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../glloader/include)
-ENDIF()
-IF(KLAYGE_PLATFORM_ANDROID)
-	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue)
-ENDIF()
-LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/lib/${KLAYGE_PLATFORM_NAME})
-if(KLAYGE_PLATFORM_WINDOWS OR (KLAYGE_PREFERRED_LIB_TYPE STREQUAL "STATIC"))
-	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
-endif()
-IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
-	LINK_DIRECTORIES(${KLAYGE_BIN_DIR})
-ENDIF()
-
 ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${BASE_SOURCE_FILES} ${BASE_HEADER_FILES}
 	${RENDERING_SOURCE_FILES} ${RENDERING_HEADER_FILES} ${RENDERING_EFFECT_FILES} ${RENDERING_POSTPROCESSOR_FILES}
@@ -523,20 +498,37 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${APP_SOURCE_FILES} ${APP_HEADER_FILES}
 )
 
-IF(KLAYGE_PLATFORM_WINDOWS)
-	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		ws2_32)
-ELSEIF(KLAYGE_PLATFORM_DARWIN)
-	FIND_LIBRARY(APPKIT AppKit "/")
-	FIND_LIBRARY(OPENGL OpenGL "/")
-	FIND_LIBRARY(COREVIDEO CoreVideo "/")
-	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		${APPKIT} ${OPENGL} ${COREVIDEO})
-ELSEIF(KLAYGE_PLATFORM_LINUX)
-	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		X11 GL
-		debug glloader${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader${KLAYGE_OUTPUT_SUFFIX})
+target_compile_definitions(${LIB_NAME}
+	PRIVATE
+		-DKLAYGE_CORE_SOURCE
+)
+IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
+	FIND_PATH(WINE_PATH "winegcc" #searching for 'wine' may result in include path
+		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin /usr/lib/wine)
+
+	IF(NOT WINE_PATH)
+		MESSAGE(FATAL_ERROR "Cound NOT find wine")
+	ENDIF()
+	target_compile_definitions(${LIB_NAME}
+		PRIVATE
+			-DWINE_PATH=${WINE_PATH}/
+	)
 ENDIF()
+
+if(KLAYGE_PLATFORM_WINDOWS AND KLAYGE_COMPILER_GCC)
+	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
+	target_compile_options(${LIB_NAME}
+		PRIVATE
+			-Wno-unknown-pragmas
+	)
+endif()
+
+target_include_directories(${LIB_NAME}
+	PUBLIC
+		# Not using target_link_libraries to prevent depending on Boost::smart_ptr
+		$<TARGET_PROPERTY:Boost::type_index,INTERFACE_INCLUDE_DIRECTORIES>
+		${KLAYGE_PROJECT_DIR}/Core/Include
+)
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${KLAYGE_OUTPUT_DIR}
@@ -562,26 +554,57 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
 
-TARGET_LINK_LIBRARIES(${LIB_NAME}
-	${EXTRA_LINKED_LIBRARIES}
-	debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-	debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-	${KLAYGE_FILESYSTEM_LIBRARY}
+target_link_libraries(${LIB_NAME}
+	PUBLIC
+		KFL
+	PRIVATE
+		kfont
+		7zxa
+		LZMA
 )
+if(KLAYGE_PLATFORM_WINDOWS)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			UniversalDXSDK
+			ws2_32
+	)
+elseif(KLAYGE_PLATFORM_DARWIN)
+	FIND_LIBRARY(APPKIT AppKit "/")
+	FIND_LIBRARY(OPENGL OpenGL "/")
+	FIND_LIBRARY(COREVIDEO CoreVideo "/")
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			glloader
+			${APPKIT} ${OPENGL} ${COREVIDEO}
+	)
+elseif(KLAYGE_PLATFORM_LINUX)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			glloader
+			X11 GL
+			dl pthread
+	)
+elseif(KLAYGE_PLATFORM_ANDROID)
+	target_link_libraries(${LIB_NAME}
+		PUBLIC
+			android_native_app_glue
+
+		PRIVATE
+			glloader_es
+			log android atomic
+	)
+elseif(KLAYGE_PLATFORM_IOS)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			glloader_es
+	)
+endif()
 
 add_dependencies(${LIB_NAME} KFL kfont 7zxa LZMA TableGen)
-if(KLAYGE_IS_DEV_PLATFORM)
-	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
-		add_dependencies(${LIB_NAME} UniversalDXSDKRedist)
-	endif()
-endif()
 if(KLAYGE_PLATFORM_LINUX)
 	add_dependencies(${LIB_NAME} glloader)
 elseif(KLAYGE_PLATFORM_ANDROID)
 	add_dependencies(${LIB_NAME} android_native_app_glue)
-endif()
-if(KLAYGE_WITH_BOOST_FILESYSTEM)
-	add_dependencies(${LIB_NAME} filesystem)
 endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

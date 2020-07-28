@@ -48,7 +48,7 @@ struct aiScene;
 
 namespace KlayGE
 {
-	class KLAYGE_DEV_HELPER_API MeshConverter
+	class KLAYGE_DEV_HELPER_API MeshConverter final
 	{
 	public:
 		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);

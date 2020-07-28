@@ -99,6 +99,7 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 
 	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_rt2_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_ds_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_depth_tex_ms"/>
 
@@ -107,8 +108,9 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 		out float4 out_rt0 : SV_Target0,
 		out float4 out_rt1 : SV_Target1,
-		out float out_depth : SV_Target2,
-		out float out_multi_sample_mark : SV_Target3)
+		out float4 out_rt2 : SV_Target2,
+		out float out_depth : SV_Target3,
+		out float out_multi_sample_mark : SV_Target4)
 {
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
@@ -146,11 +148,13 @@ void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 	
 	out_rt0 = g_buffer_rt0_tex_ms.Load(coord, min_index);
 	out_rt1 = g_buffer_rt1_tex_ms.Load(coord, min_index);
+	out_rt2 = g_buffer_rt2_tex_ms.Load(coord, min_index);
 	out_depth = non_linear_depth_to_linear(g_buffer_ds_tex_ms.Load(coord, min_index).x, near_q_far.x, near_q_far.y);
 	out_multi_sample_mark = is_multi_sample;
 #else
 	out_rt0 = 0;
 	out_rt1 = 0,
+	out_rt2 = 0,
 	out_depth = 0;
 	out_multi_sample_mark = 0;
 #endif
@@ -605,10 +609,12 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		float4 rt0 = g_buffer_rt0_tex_ms.Load(coord.xy, sample_index);
 		float4 rt1 = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
+		float4 rt2 = g_buffer_rt2_tex_ms.Load(coord.xy, sample_index);
 		float depth = g_buffer_depth_tex_ms.Load(coord.xy, sample_index).x;
 #else
 		float4 rt0 = g_buffer_rt0_tex.Load(coord);
 		float4 rt1 = g_buffer_rt1_tex.Load(coord);
+		float4 rt2 = g_buffer_rt2_tex.Load(coord);
 		float depth = depth_tex.Load(coord).x;
 #endif
 		float3 view_dir = -normalize(texcoord_to_view(tc));
@@ -618,6 +624,7 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 		float3 pos_es = view_dir * (depth / view_dir.z);
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
+		float occlusion = GetOcclusion(rt2);
 
 		tile_id.z = CalcDepthSlice(pos_es.z);
 
@@ -717,6 +724,8 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 		{
 			shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
 		}
+		
+		shading *= float4(occlusion.xxx, 1);
 	}
 	else
 	{
@@ -819,7 +828,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	<parameter type="rw_texture2D" elem_type="unorm float4" name="shadowing_rw_tex"/>
 	<cbuffer name="light_batch3">
 		<parameter type="float4x4" name="lights_view_proj" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
-		<parameter type="int" name="filtered_sms_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
+		<parameter type="int" name="filtered_shadow_maps_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 		<parameter type="float" name="esms_scale_factor" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 	</cbuffer>
 
@@ -921,7 +930,7 @@ bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_inde
 					light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
 					float len = length(lights_pos_es[i].xyz - pos_es);
 					new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-						filtered_sms_2d_light_index[i], esms_scale_factor[i]);
+						filtered_shadow_maps_2d_light_index[i], esms_scale_factor[i]);
 				}
 				else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
 				{

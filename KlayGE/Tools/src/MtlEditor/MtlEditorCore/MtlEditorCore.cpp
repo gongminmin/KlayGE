@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -11,7 +10,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/SkyBox.hpp>
-#include <KlayGE/SceneNodeHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -22,8 +21,9 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
 
 #include "MtlEditorCore.hpp"
 
@@ -42,7 +42,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float4 xyzs[] =
 			{
@@ -66,12 +65,6 @@ namespace
 
 			effect_attrs_ |= EA_SimpleForward;
 		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-		}
 	};
 
 	class RenderGrid : public Renderable
@@ -84,7 +77,6 @@ namespace
 
 			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
 			simple_forward_tech_ = effect_->TechniqueByName("GridTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float3 xyzs[(21 + 21) * 2];
 			for (int i = 0; i < 21; ++ i)
@@ -107,12 +99,6 @@ namespace
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 			effect_attrs_ |= EA_SimpleForward;
-		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 
@@ -138,8 +124,8 @@ namespace
 			rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Imposter.fxml"));
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
-			technique_ = gbuffer_mrt_tech_;
+			gbuffer_tech_ = effect_->TechniqueByName("ImpostorGBufferAlphaTest");
+			technique_ = gbuffer_tech_;
 
 			pos_aabb_ = aabbox;
 
@@ -150,8 +136,8 @@ namespace
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
 			auto& rf = Context::Instance().RenderFactoryInstance();
-			textures_[RenderMaterial::TS_Normal] = rf.MakeTextureSrv(rt0_tex);
-			textures_[RenderMaterial::TS_Albedo] = rf.MakeTextureSrv(rt1_tex);
+			mtl_->Texture(RenderMaterial::TS_Normal, rf.MakeTextureSrv(rt0_tex));
+			mtl_->Texture(RenderMaterial::TS_Albedo, rf.MakeTextureSrv(rt1_tex));
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);
@@ -161,16 +147,16 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
-			Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+			Camera const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
-			float4x4 billboard_mat = camera->InverseViewMatrix();
+			float4x4 billboard_mat = camera.InverseViewMatrix();
 			billboard_mat(3, 0) = 0;
 			billboard_mat(3, 1) = 0;
 			billboard_mat(3, 2) = 0;
-			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
+			*(effect_->ParameterByName("billboard_mat")) = billboard_mat;
 
-			float2 start_tc = imposter_->StartTexCoord(camera->EyePos() - pos_aabb_.Center());
-			*(deferred_effect_->ParameterByName("start_tc")) = start_tc;
+			float2 start_tc = imposter_->StartTexCoord(camera.EyePos() - pos_aabb_.Center());
+			*(effect_->ParameterByName("start_tc")) = start_tc;
 
 			Renderable::OnRenderBegin();
 		}
@@ -199,7 +185,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-		auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 
 		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
@@ -255,8 +241,8 @@ namespace KlayGE
 			clear_clr.g() = 0.133f;
 			clear_clr.b() = 0.325f;
 		}
-		;
-		auto const fmt = re.DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+
+		auto const fmt = re.DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_ABGR8, EF_ARGB8}));
 		BOOST_ASSERT(fmt != EF_Unknown);
 		uint32_t texel = ((fmt == EF_ABGR8) ? clear_clr.ABGR() : clear_clr.ARGB());
 		ElementInitData init_data[6];
@@ -266,7 +252,7 @@ namespace KlayGE
 			init_data[i].row_pitch = sizeof(uint32_t);
 			init_data[i].slice_pitch = init_data[i].row_pitch;
 		}
-		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan(init_data));
 
 		auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
@@ -287,7 +273,7 @@ namespace KlayGE
 		tb_controller_.AttachCamera(this->ActiveCamera());
 
 		selective_fb_ = rf.MakeFrameBuffer();
-		selective_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		selective_fb_->Viewport()->Camera(re.CurFrameBuffer()->Viewport()->Camera());
 	}
 
 	void MtlEditorCore::OnDestroy()
@@ -515,7 +501,7 @@ namespace KlayGE
 			uint32_t urv = deferred_rendering_->Update(deferred_pass);
 			if (urv & App3DFramework::URV_Finished)
 			{
-				selective_tex_->CopyToTexture(*selective_cpu_tex_);
+				selective_tex_->CopyToTexture(*selective_cpu_tex_, TextureFilter::Point);
 				update_selective_buffer_ = false;
 			}
 
@@ -692,92 +678,92 @@ namespace KlayGE
 
 	char const * MtlEditorCore::MaterialName(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->name.c_str();
+		return model_->GetMaterial(mtl_id)->Name().c_str();
 	}
 
 	float3 const & MtlEditorCore::AlbedoMaterial(uint32_t mtl_id) const
 	{
-		return *reinterpret_cast<float3*>(&model_->GetMaterial(mtl_id)->albedo);
+		return reinterpret_cast<float3 const&>(model_->GetMaterial(mtl_id)->Albedo());
 	}
 
 	float MtlEditorCore::MetalnessMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->metalness;
+		return model_->GetMaterial(mtl_id)->Metalness();
 	}
 
 	float MtlEditorCore::GlossinessMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->glossiness;
+		return model_->GetMaterial(mtl_id)->Glossiness();
 	}
 
 	float3 const & MtlEditorCore::EmissiveMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->emissive;
+		return model_->GetMaterial(mtl_id)->Emissive();
 	}
 
 	float MtlEditorCore::OpacityMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->albedo.w();
+		return model_->GetMaterial(mtl_id)->Albedo().w();
 	}
 
 	char const * MtlEditorCore::Texture(uint32_t mtl_id, uint32_t slot) const
 	{
-		return model_->GetMaterial(mtl_id)->tex_names[slot].c_str();
+		return model_->GetMaterial(mtl_id)->TextureName(static_cast<RenderMaterial::TextureSlot>(slot)).c_str();
 	}
 
 	uint32_t MtlEditorCore::DetailMode(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->detail_mode;
+		return static_cast<uint32_t>(model_->GetMaterial(mtl_id)->DetailMode());
 	}
 
 	float MtlEditorCore::HeightOffset(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->height_offset_scale.x();
+		return model_->GetMaterial(mtl_id)->HeightOffset();
 	}
 
 	float MtlEditorCore::HeightScale(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->height_offset_scale.y();
+		return model_->GetMaterial(mtl_id)->HeightScale();
 	}
 
 	float MtlEditorCore::EdgeTessHint(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->tess_factors.x();
+		return model_->GetMaterial(mtl_id)->EdgeTessHint();
 	}
 
 	float MtlEditorCore::InsideTessHint(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->tess_factors.y();
+		return model_->GetMaterial(mtl_id)->InsideTessHint();
 	}
 
 	float MtlEditorCore::MinTess(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->tess_factors.z();
+		return model_->GetMaterial(mtl_id)->MinTessFactor();
 	}
 
 	float MtlEditorCore::MaxTess(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->tess_factors.w();
+		return model_->GetMaterial(mtl_id)->MaxTessFactor();
 	}
 
 	bool MtlEditorCore::TransparentMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->transparent;
+		return model_->GetMaterial(mtl_id)->Transparent();
 	}
 
 	float MtlEditorCore::AlphaTestMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->alpha_test;
+		return model_->GetMaterial(mtl_id)->AlphaTestThreshold();
 	}
 
 	bool MtlEditorCore::SSSMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->sss;
+		return model_->GetMaterial(mtl_id)->Sss();
 	}
 
 	bool MtlEditorCore::TwoSidedMaterial(uint32_t mtl_id) const
 	{
-		return model_->GetMaterial(mtl_id)->two_sided;
+		return model_->GetMaterial(mtl_id)->TwoSided();
 	}
 
 	void MtlEditorCore::MaterialID(uint32_t mesh_id, uint32_t mtl_id)
@@ -790,110 +776,112 @@ namespace KlayGE
 	void MtlEditorCore::MaterialName(uint32_t mtl_id, std::string const & name)
 	{
 		auto mtl = model_->GetMaterial(mtl_id).get();
-		mtl->name = name;
+		mtl->Name(name);
 	}
 
 	void MtlEditorCore::AlbedoMaterial(uint32_t mtl_id, float3 const & value)
 	{
-		auto mtl = model_->GetMaterial(mtl_id).get();
-		mtl->albedo = float4(value.x(), value.y(), value.z(), mtl->albedo.w());
+		auto* mtl = model_->GetMaterial(mtl_id).get();
+		mtl->Albedo(float4(value.x(), value.y(), value.z(), mtl->Albedo().w()));
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::MetalnessMaterial(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->metalness = value;
+		model_->GetMaterial(mtl_id)->Metalness(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::GlossinessMaterial(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->glossiness = value;
+		model_->GetMaterial(mtl_id)->Glossiness(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::EmissiveMaterial(uint32_t mtl_id, float3 const & value)
 	{
-		model_->GetMaterial(mtl_id)->emissive = value;
+		model_->GetMaterial(mtl_id)->Emissive(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::OpacityMaterial(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->albedo.w() = value;
+		auto* mtl = model_->GetMaterial(mtl_id).get();
+		float4 const& albedo = mtl->Albedo();
+		mtl->Albedo(float4(albedo.x(), albedo.y(), albedo.z(), value));
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::Texture(uint32_t mtl_id, uint32_t slot, std::string const & name)
 	{
-		model_->GetMaterial(mtl_id)->tex_names[slot] = name;
+		model_->GetMaterial(mtl_id)->TextureName(static_cast<RenderMaterial::TextureSlot>(slot), name);
 		this->UpdateMaterial(mtl_id);
 	}
 
 	void MtlEditorCore::DetailMode(uint32_t mtl_id, uint32_t value)
 	{
-		model_->GetMaterial(mtl_id)->detail_mode = static_cast<RenderMaterial::SurfaceDetailMode>(value);
+		model_->GetMaterial(mtl_id)->DetailMode(static_cast<RenderMaterial::SurfaceDetailMode>(value));
 		this->UpdateEffectAttrib(mtl_id);
 		this->UpdateTechniques(mtl_id);
 	}
 
 	void MtlEditorCore::HeightOffset(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->height_offset_scale.x() = value;
+		model_->GetMaterial(mtl_id)->HeightOffset(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::HeightScale(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->height_offset_scale.y() = value;
+		model_->GetMaterial(mtl_id)->HeightScale(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::EdgeTessHint(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->tess_factors.x() = value;
+		model_->GetMaterial(mtl_id)->EdgeTessHint(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::InsideTessHint(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->tess_factors.y() = value;
+		model_->GetMaterial(mtl_id)->InsideTessHint(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::MinTess(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->tess_factors.z() = value;
+		model_->GetMaterial(mtl_id)->MinTessFactor(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::MaxTess(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->tess_factors.w() = value;
+		model_->GetMaterial(mtl_id)->MaxTessFactor(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::TransparentMaterial(uint32_t mtl_id, bool value)
 	{
-		model_->GetMaterial(mtl_id)->transparent = value;
+		model_->GetMaterial(mtl_id)->Transparent(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::AlphaTestMaterial(uint32_t mtl_id, float value)
 	{
-		model_->GetMaterial(mtl_id)->alpha_test = value;
+		model_->GetMaterial(mtl_id)->AlphaTestThreshold(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::SSSMaterial(uint32_t mtl_id, bool value)
 	{
-		model_->GetMaterial(mtl_id)->sss = value;
+		model_->GetMaterial(mtl_id)->Sss(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 
 	void MtlEditorCore::TwoSidedMaterial(uint32_t mtl_id, bool value)
 	{
-		model_->GetMaterial(mtl_id)->two_sided = value;
+		model_->GetMaterial(mtl_id)->TwoSided(value);
 		this->UpdateEffectAttrib(mtl_id);
 	}
 

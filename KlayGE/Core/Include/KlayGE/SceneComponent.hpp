@@ -45,9 +45,24 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneComponent : boost::noncopyable
 	{
 	public:
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS(BOOST_TYPE_INDEX_NO_BASE_CLASS)
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
+#endif
 
-		virtual ~SceneComponent();
+		virtual ~SceneComponent() noexcept;
+
+		virtual SceneComponentPtr Clone() const = 0;
+
+		template <typename T>
+		bool IsOfType() const
+		{
+			return (boost::typeindex::runtime_cast<T const*>(this) != nullptr);
+		}
 
 		virtual void BindSceneNode(SceneNode* node);
 		SceneNode* BoundSceneNode() const;

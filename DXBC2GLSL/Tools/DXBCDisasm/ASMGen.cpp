@@ -710,8 +710,7 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & c
 
 				// TODO: to be fixed here
 			case SVC_STRUCT:
-				out << ShaderVariableClassName(var.type_desc.var_class)
-					<< " " << var.type_desc.offset;
+				out << var.type_desc.name << " " << var.type_desc.offset;
 				break;
 
 			default:

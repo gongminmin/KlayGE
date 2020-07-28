@@ -17,67 +17,66 @@
 
 #include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_6.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
+#ifndef D3D10_NO_HELPERS
+#define D3D10_NO_HELPERS
+#endif
+#ifndef D3D11_NO_HELPERS
+#define D3D11_NO_HELPERS
 #endif
 #include <d3d11_4.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+
+#include <KFL/com_ptr.hpp>
 
 namespace KlayGE
 {
-	typedef std::shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
-	typedef std::shared_ptr<IDXGIFactory2>				IDXGIFactory2Ptr;
-	typedef std::shared_ptr<IDXGIFactory3>				IDXGIFactory3Ptr;
-	typedef std::shared_ptr<IDXGIFactory4>				IDXGIFactory4Ptr;
-	typedef std::shared_ptr<IDXGIFactory5>				IDXGIFactory5Ptr;
-	typedef std::shared_ptr<IDXGIFactory6>				IDXGIFactory6Ptr;
-	typedef std::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
-	typedef std::shared_ptr<IDXGIAdapter2>				IDXGIAdapter2Ptr;
-	typedef std::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
-	typedef std::shared_ptr<IDXGISwapChain1>			IDXGISwapChain1Ptr;
-	typedef std::shared_ptr<IDXGISwapChain2>			IDXGISwapChain2Ptr;
-	typedef std::shared_ptr<IDXGISwapChain3>			IDXGISwapChain3Ptr;
-	typedef std::shared_ptr<IDXGISwapChain4>			IDXGISwapChain4Ptr;
-	typedef std::shared_ptr<ID3D11Device>				ID3D11DevicePtr;
-	typedef std::shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
-	typedef std::shared_ptr<ID3D11Device2>				ID3D11Device2Ptr;
-	typedef std::shared_ptr<ID3D11Device3>				ID3D11Device3Ptr;
-	typedef std::shared_ptr<ID3D11Device4>				ID3D11Device4Ptr;
-	typedef std::shared_ptr<ID3D11Device5>				ID3D11Device5Ptr;
-	typedef std::shared_ptr<ID3D11DeviceContext>		ID3D11DeviceContextPtr;
-	typedef std::shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
-	typedef std::shared_ptr<ID3D11DeviceContext2>		ID3D11DeviceContext2Ptr;
-	typedef std::shared_ptr<ID3D11DeviceContext3>		ID3D11DeviceContext3Ptr;
-	typedef std::shared_ptr<ID3D11DeviceContext4>		ID3D11DeviceContext4Ptr;
-	typedef std::shared_ptr<ID3D11Resource>				ID3D11ResourcePtr;
-	typedef std::shared_ptr<ID3D11Texture1D>			ID3D11Texture1DPtr;
-	typedef std::shared_ptr<ID3D11Texture2D>			ID3D11Texture2DPtr;
-	typedef std::shared_ptr<ID3D11Texture3D>			ID3D11Texture3DPtr;
-	typedef std::shared_ptr<ID3D11Texture2D>			ID3D11TextureCubePtr;
-	typedef std::shared_ptr<ID3D11Buffer>				ID3D11BufferPtr;
-	typedef std::shared_ptr<ID3D11Fence>				ID3D11FencePtr;
-	typedef std::shared_ptr<ID3D11InputLayout>			ID3D11InputLayoutPtr;
-	typedef std::shared_ptr<ID3D11Query>				ID3D11QueryPtr;
-	typedef std::shared_ptr<ID3D11Predicate>			ID3D11PredicatePtr;
-	typedef std::shared_ptr<ID3D11VertexShader>			ID3D11VertexShaderPtr;
-	typedef std::shared_ptr<ID3D11PixelShader>			ID3D11PixelShaderPtr;
-	typedef std::shared_ptr<ID3D11GeometryShader>		ID3D11GeometryShaderPtr;
-	typedef std::shared_ptr<ID3D11ComputeShader>		ID3D11ComputeShaderPtr;
-	typedef std::shared_ptr<ID3D11HullShader>			ID3D11HullShaderPtr;
-	typedef std::shared_ptr<ID3D11DomainShader>			ID3D11DomainShaderPtr;
-	typedef std::shared_ptr<ID3D11RenderTargetView>		ID3D11RenderTargetViewPtr;
-	typedef std::shared_ptr<ID3D11DepthStencilView>		ID3D11DepthStencilViewPtr;
-	typedef std::shared_ptr<ID3D11UnorderedAccessView>	ID3D11UnorderedAccessViewPtr;
-	typedef std::shared_ptr<ID3D11RasterizerState>		ID3D11RasterizerStatePtr;
-	typedef std::shared_ptr<ID3D11RasterizerState1>		ID3D11RasterizerState1Ptr;
-	typedef std::shared_ptr<ID3D11DepthStencilState>	ID3D11DepthStencilStatePtr;
-	typedef std::shared_ptr<ID3D11BlendState>			ID3D11BlendStatePtr;
-	typedef std::shared_ptr<ID3D11BlendState1>			ID3D11BlendState1Ptr;
-	typedef std::shared_ptr<ID3D11SamplerState>			ID3D11SamplerStatePtr;
-	typedef std::shared_ptr<ID3D11ShaderResourceView>	ID3D11ShaderResourceViewPtr;
-}
+	using IDXGIFactory2Ptr = com_ptr<IDXGIFactory2>;
+	using IDXGIFactory3Ptr = com_ptr<IDXGIFactory3>;
+	using IDXGIFactory4Ptr = com_ptr<IDXGIFactory4>;
+	using IDXGIFactory5Ptr = com_ptr<IDXGIFactory5>;
+	using IDXGIFactory6Ptr = com_ptr<IDXGIFactory6>;
+	using IDXGIAdapter2Ptr = com_ptr<IDXGIAdapter2>;
+	using IDXGISwapChain1Ptr = com_ptr<IDXGISwapChain1>;
+	using IDXGISwapChain2Ptr = com_ptr<IDXGISwapChain2>;
+	using IDXGISwapChain3Ptr = com_ptr<IDXGISwapChain3>;
+	using IDXGISwapChain4Ptr = com_ptr<IDXGISwapChain4>;
+	using ID3D11Device1Ptr = com_ptr<ID3D11Device1>;
+	using ID3D11Device2Ptr = com_ptr<ID3D11Device2>;
+	using ID3D11Device3Ptr = com_ptr<ID3D11Device3>;
+	using ID3D11Device4Ptr = com_ptr<ID3D11Device4>;
+	using ID3D11Device5Ptr = com_ptr<ID3D11Device5>;
+	using ID3D11DeviceContext1Ptr = com_ptr<ID3D11DeviceContext1>;
+	using ID3D11DeviceContext2Ptr = com_ptr<ID3D11DeviceContext2>;
+	using ID3D11DeviceContext3Ptr = com_ptr<ID3D11DeviceContext3>;
+	using ID3D11DeviceContext4Ptr = com_ptr<ID3D11DeviceContext4>;
+	using ID3D11ResourcePtr = com_ptr<ID3D11Resource>;
+	using ID3D11Texture1DPtr = com_ptr<ID3D11Texture1D>;
+	using ID3D11Texture2DPtr = com_ptr<ID3D11Texture2D>;
+	using ID3D11Texture3DPtr = com_ptr<ID3D11Texture3D>;
+	using ID3D11TextureCubePtr = com_ptr<ID3D11Texture2D>;
+	using ID3D11BufferPtr = com_ptr<ID3D11Buffer>;
+	using ID3D11FencePtr = com_ptr<ID3D11Fence>;
+	using ID3D11InputLayoutPtr = com_ptr<ID3D11InputLayout>;
+	using ID3D11QueryPtr = com_ptr<ID3D11Query>;
+	using ID3D11PredicatePtr = com_ptr<ID3D11Predicate>;
+	using ID3D11VertexShaderPtr = com_ptr<ID3D11VertexShader>;
+	using ID3D11PixelShaderPtr = com_ptr<ID3D11PixelShader>;
+	using ID3D11GeometryShaderPtr = com_ptr<ID3D11GeometryShader>;
+	using ID3D11ComputeShaderPtr = com_ptr<ID3D11ComputeShader>;
+	using ID3D11HullShaderPtr = com_ptr<ID3D11HullShader>;
+	using ID3D11DomainShaderPtr = com_ptr<ID3D11DomainShader>;
+	using ID3D11RenderTargetViewPtr = com_ptr<ID3D11RenderTargetView>;
+	using ID3D11DepthStencilViewPtr = com_ptr<ID3D11DepthStencilView>;
+	using ID3D11UnorderedAccessViewPtr = com_ptr<ID3D11UnorderedAccessView>;
+	using ID3D11RasterizerState1Ptr = com_ptr<ID3D11RasterizerState1>;
+	using ID3D11DepthStencilStatePtr = com_ptr<ID3D11DepthStencilState>;
+	using ID3D11BlendState1Ptr = com_ptr<ID3D11BlendState1>;
+	using ID3D11SamplerStatePtr = com_ptr<ID3D11SamplerState>;
+	using ID3D11ShaderResourceViewPtr = com_ptr<ID3D11ShaderResourceView>;
 
-#endif		// _D3D11TYPEDEFS_HPP
+	constexpr uint32_t D3D11CalcSubresource(uint32_t mip_slice, uint32_t array_slice, uint32_t mip_levels) noexcept
+	{
+		return mip_slice + array_slice * mip_levels;
+	}
+} // namespace KlayGE
+
+#endif // _D3D11TYPEDEFS_HPP

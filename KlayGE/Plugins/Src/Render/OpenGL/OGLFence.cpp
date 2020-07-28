@@ -41,9 +41,7 @@
 
 namespace KlayGE
 {
-	OGLFence::OGLFence()
-	{
-	}
+	OGLFence::OGLFence() = default;
 
 	OGLFence::~OGLFence()
 	{

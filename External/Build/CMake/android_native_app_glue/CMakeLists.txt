@@ -1,11 +1,7 @@
-SET(NDK_VERSION 16b)
-
 SET(ANAG_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/android_native_app_glue")
 SET(ANAG_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/android_native_app_glue/${KLAYGE_PLATFORM_NAME}")
-SET(REL_PATH "External/Downloads/android_native_app_glue_${NDK_VERSION}.patched.7z")
-SET(PACKAGE_FILE_ID "b32103ef58937c827b9a1dba3070f49d8c9ec1c0")
 
-DOWNLOAD_PACKAGE("android_native_app_glue" ${REL_PATH} ${PACKAGE_FILE_ID} "${ANAG_PROJECT_DIR}/android_native_app_glue.c")
+UpdateExternalLib("android_native_app_glue" "https://github.com/gongminmin/android_native_app_glue.git" "7fafa2cccb91e9ebfa53bf750bd33f84aa426e4d")
 
 SET(ANAG_SOURCES
 	${ANAG_PROJECT_DIR}/android_native_app_glue.c
@@ -13,6 +9,11 @@ SET(ANAG_SOURCES
 )
 
 ADD_LIBRARY(android_native_app_glue ${ANAG_SOURCES})
+
+target_include_directories(android_native_app_glue
+	PUBLIC
+		${ANAG_PROJECT_DIR}
+)
 
 SET_TARGET_PROPERTIES(android_native_app_glue PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${ANAG_OUTPUT_DIR}

@@ -569,6 +569,16 @@ namespace KlayGE
 	void UIEditBox::CharHandler(Window const & /*win*/, wchar_t ch)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifndef VK_CANCEL
+#define VK_CANCEL 0x03
+#endif
+#ifndef VK_BACK
+#define VK_BACK 0x08
+#endif
+#ifndef VK_RETURN
+#define VK_RETURN 0x0D
+#endif
+
 		if (has_focus_)
 		{
 			switch (ch)

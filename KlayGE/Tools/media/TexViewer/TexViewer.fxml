@@ -1,8 +1,9 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="ModelCamera.fxml"/>
+
 	<parameter type="texture2D" name="texture_2d"/>
-	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float" name="zoom"/>
 	<parameter type="float" name="rgb_scale"/>
 	<parameter type="float4" name="color_mask"/>
@@ -15,10 +16,14 @@
 
 	<shader>
 		<![CDATA[
-void TexViewerVS(float2 pos : POSITION,
+void TexViewerVS(uint instance_id : SV_InstanceID,
+				float2 pos : POSITION,
 				out float2 oTex : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = float4(mul(float4(pos, 0, 1), mvp).xy, 0.5f, 1);
 	oPos.y = -oPos.y;
 	oTex = pos;

@@ -37,46 +37,46 @@
 
 namespace KlayGE
 {
-	class D3D12OcclusionQuery : public OcclusionQuery
+	class D3D12OcclusionQuery final : public OcclusionQuery
 	{
 	public:
 		D3D12OcclusionQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		uint64_t SamplesPassed();
+		uint64_t SamplesPassed() override;
 
 	private:
 		ID3D12QueryHeapPtr query_heap_;
 		ID3D12ResourcePtr query_result_;
 	};
 
-	class D3D12ConditionalRender : public ConditionalRender
+	class D3D12ConditionalRender final : public ConditionalRender
 	{
 	public:
 		D3D12ConditionalRender();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		void BeginConditionalRender();
-		void EndConditionalRender();
+		void BeginConditionalRender() override;
+		void EndConditionalRender() override;
 
-		bool AnySamplesPassed();
+		bool AnySamplesPassed() override;
 
 	private:
 		ID3D12QueryHeapPtr predicate_heap_;
 		ID3D12ResourcePtr predicate_result_;
 	};
 
-	class D3D12TimerQuery : public TimerQuery
+	class D3D12TimerQuery final : public TimerQuery
 	{
 	public:
 		D3D12TimerQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		double TimeElapsed() override;
 
@@ -85,13 +85,13 @@ namespace KlayGE
 		ID3D12ResourcePtr timestamp_result_;
 	};
 
-	class D3D12SOStatisticsQuery : public SOStatisticsQuery
+	class D3D12SOStatisticsQuery final : public SOStatisticsQuery
 	{
 	public:
 		D3D12SOStatisticsQuery();
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		uint64_t NumPrimitivesWritten() override;
 		uint64_t PrimitivesGenerated() override;

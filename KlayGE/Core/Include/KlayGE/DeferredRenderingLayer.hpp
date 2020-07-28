@@ -50,7 +50,7 @@
 namespace KlayGE
 {
 	enum VPAttribMask
-	{		
+	{
 		VPAM_Enabled = 1UL << 0,
 		VPAM_NoOpaque = 1UL << 1,
 		VPAM_NoTransparencyBack = 1UL << 2,
@@ -58,7 +58,13 @@ namespace KlayGE
 		VPAM_NoSimpleForward = 1UL << 4,
 		VPAM_NoGI = 1UL << 5,
 		VPAM_NoSSVO = 1UL << 6,
-		VPAM_NoDoF = 1UL << 7
+		VPAM_NoDoF = 1UL << 7,
+		VPAM_NoSSS = 1UL << 8,
+		VPAM_NoSSR = 1UL << 9,
+		VPAM_NoVDM = 1UL << 10,
+		VPAM_NoAtmospheric = 1UL << 11,
+		VPAM_NoTAA = 1UL << 12,
+		VPAM_NoMotionBlur = 1UL << 13,
 	};
 
 	struct PerViewport
@@ -79,19 +85,35 @@ namespace KlayGE
 		FrameBufferPtr g_buffer_fb;
 		FrameBufferPtr g_buffer_resolved_fb;
 		TexturePtr g_buffer_rt0_tex;
+		ShaderResourceViewPtr g_buffer_rt0_srv;
 		TexturePtr g_buffer_rt1_tex;
+		ShaderResourceViewPtr g_buffer_rt1_srv;
+		TexturePtr g_buffer_rt2_tex;
+		ShaderResourceViewPtr g_buffer_rt2_srv;
 		TexturePtr g_buffer_ds_tex;
+		ShaderResourceViewPtr g_buffer_ds_srv;
 		TexturePtr g_buffer_depth_tex;
+		ShaderResourceViewPtr g_buffer_depth_srv;
+		RenderTargetViewPtr g_buffer_depth_rtv;
 		TexturePtr g_buffer_resolved_rt0_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt0_srv;
 		TexturePtr g_buffer_resolved_rt1_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt1_srv;
+		TexturePtr g_buffer_resolved_rt2_tex;
+		ShaderResourceViewPtr g_buffer_resolved_rt2_srv;
 		TexturePtr g_buffer_resolved_depth_tex;
+		ShaderResourceViewPtr g_buffer_resolved_depth_srv;
+		RenderTargetViewPtr g_buffer_resolved_depth_rtv;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
+		std::vector<ShaderResourceViewPtr> g_buffer_min_max_depth_srvs;
+		std::vector<RenderTargetViewPtr> g_buffer_min_max_depth_rtvs;
 		ShaderResourceViewPtr g_buffer_stencil_srv;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
-		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_views;
+		std::vector<ShaderResourceViewPtr> g_buffer_vdm_max_ds_srvs;
+		std::vector<DepthStencilViewPtr> g_buffer_vdm_max_ds_dsvs;
 
 		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;
@@ -104,46 +126,72 @@ namespace KlayGE
 
 		FrameBufferPtr vdm_fb;
 		TexturePtr vdm_color_tex;
+		ShaderResourceViewPtr vdm_color_srv;
+		RenderTargetViewPtr vdm_color_rtv;
 		TexturePtr vdm_transition_tex;
+		ShaderResourceViewPtr vdm_transition_srv;
 		TexturePtr vdm_count_tex;
+		ShaderResourceViewPtr vdm_count_srv;
 
 		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
+		ShaderResourceViewPtr shading_srv;
+		RenderTargetViewPtr shading_rtv;
 
 		uint32_t num_cascades;
 		std::array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs;
+		std::array<ShaderResourceViewPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_srvs;
+		std::array<RenderTargetViewPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_slice_rtvs;
 
 		std::array<FrameBufferPtr, 2> merged_shading_fbs;
 		std::array<TexturePtr, 2> merged_shading_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_shading_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_shading_rtvs;
 		std::array<FrameBufferPtr, 2> merged_depth_fbs;
 		std::array<TexturePtr, 2> merged_depth_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_depth_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_depth_rtvs;
 		std::array<TexturePtr, 2> merged_shading_resolved_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_shading_resolved_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_shading_resolved_rtvs;
 		std::array<FrameBufferPtr, 2> merged_depth_resolved_fbs;
 		std::array<TexturePtr, 2> merged_depth_resolved_texs;
+		std::array<ShaderResourceViewPtr, 2> merged_depth_resolved_srvs;
+		std::array<RenderTargetViewPtr, 2> merged_depth_resolved_rtvs;
 		uint32_t curr_merged_buffer_index;
 
 		TexturePtr dof_tex;
+		ShaderResourceViewPtr dof_srv;
+		RenderTargetViewPtr dof_rtv;
+
+		TexturePtr motion_blur_tex;
+		ShaderResourceViewPtr motion_blur_srv;
+		RenderTargetViewPtr motion_blur_rtv;
 
 		TexturePtr small_ssvo_tex;
+		ShaderResourceViewPtr small_ssvo_srv;
+		RenderTargetViewPtr small_ssvo_rtv;
 		bool ssvo_enabled;
 
 		float4x4 view, proj;
 		float4x4 inv_view, inv_proj;
 		float4x4 proj_to_prev;
 
-		IndirectLightingLayerPtr il_layer;
+		std::unique_ptr<IndirectLightingLayer> il_layer;
 
 		std::vector<char> light_visibles;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		FrameBufferPtr lighting_fb;
 		TexturePtr lighting_tex;
+		ShaderResourceViewPtr lighting_srv;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
 
-		TexturePtr temp_shading_tex;
 		FrameBufferPtr temp_shading_fb;
+		TexturePtr temp_shading_tex;
+		ShaderResourceViewPtr temp_shading_srv;
 
 		TexturePtr temp_shading_tex_array;
 
@@ -154,13 +202,13 @@ namespace KlayGE
 #endif
 	};
 
-	class KLAYGE_CORE_API DeferredRenderingLayer : boost::noncopyable
+	class KLAYGE_CORE_API DeferredRenderingLayer final : boost::noncopyable
 	{
-		class DeferredRenderingJob : boost::noncopyable
+		class DeferredRenderingJob final : boost::noncopyable
 		{
 		public:
-			explicit DeferredRenderingJob(std::function<uint32_t()> const & job_func)
-				: func_(job_func)
+			explicit DeferredRenderingJob(std::function<uint32_t()> job_func)
+				: func_(std::move(job_func))
 			{
 			}
 
@@ -184,6 +232,8 @@ namespace KlayGE
 			DT_Diffuse,
 			DT_Specular,
 			DT_Shininess,
+			DT_MotionVec,
+			DT_Occlusion,
 			DT_Edge,
 			DT_SSVO,
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -213,6 +263,12 @@ namespace KlayGE
 		void DepthOfFieldEnabled(bool dof, bool bokeh);
 		void DepthFocus(float plane, float range);
 		void BokehLuminanceThreshold(float lum_threshold);
+		void MotionBlurEnabled(bool mb);
+		void MotionBlurExposure(float exposure);
+		float MotionBlurExposure() const;
+		void MotionBlurRadius(uint32_t blur_radius);
+		uint32_t MotionBlurRadius() const;
+		void MotionBlurReconstructionSamples(uint32_t reconstruction_samples);
 
 		void AddDecal(RenderDecalPtr const & decal);
 
@@ -229,9 +285,9 @@ namespace KlayGE
 		RenderEffectPtr const & GBufferEffect(RenderMaterial const * material, bool line, bool skinning) const;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		TexturePtr const & LightingTex(uint32_t vp) const
+		ShaderResourceViewPtr const & LightingSrv(uint32_t vp) const
 		{
-			return viewports_[vp].lighting_tex;
+			return viewports_[vp].lighting_srv;
 		}
 #endif
 		TexturePtr const & ShadingTex(uint32_t vp) const
@@ -262,18 +318,34 @@ namespace KlayGE
 		{
 			return viewports_[vp].merged_shading_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
+		ShaderResourceViewPtr const & PrevFrameResolvedShadingSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_shading_resolved_srvs[!viewports_[vp].curr_merged_buffer_index];
+		}
 		TexturePtr const & PrevFrameDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_texs[!viewports_[vp].curr_merged_buffer_index];
+		}
+		ShaderResourceViewPtr const & PrevFrameDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_srvs[!viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & PrevFrameResolvedDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
+		ShaderResourceViewPtr const & PrevFrameResolvedDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_resolved_srvs[!viewports_[vp].curr_merged_buffer_index];
+		}
 
 		TexturePtr const & SmallSSVOTex(uint32_t vp) const
 		{
 			return viewports_[vp].small_ssvo_tex;
+		}
+		ShaderResourceViewPtr const & SmallSSVOSrv(uint32_t vp) const
+		{
+			return viewports_[vp].small_ssvo_srv;
 		}
 
 		TexturePtr const & GBufferRT0Tex(uint32_t vp) const
@@ -284,6 +356,10 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_rt1_tex;
 		}
+		TexturePtr const& GBufferRT2Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_rt2_tex;
+		}
 		TexturePtr const & DepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_depth_tex;
@@ -292,13 +368,33 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_resolved_rt0_tex;
 		}
+		ShaderResourceViewPtr const& GBufferResolvedRT0Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt0_srv;
+		}
 		TexturePtr const & GBufferResolvedRT1Tex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_resolved_rt1_tex;
 		}
+		ShaderResourceViewPtr const& GBufferResolvedRT1Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt1_srv;
+		}
+		TexturePtr const& GBufferResolvedRT2Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt2_tex;
+		}
+		ShaderResourceViewPtr const& GBufferResolvedRT2Srv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt2_srv;
+		}
 		TexturePtr const & ResolvedDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_resolved_depth_tex;
+		}
+		ShaderResourceViewPtr const& ResolvedDepthSrv(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_depth_srv;
 		}
 		TexturePtr const & GBufferRT0BackupTex(uint32_t vp) const
 		{
@@ -333,9 +429,9 @@ namespace KlayGE
 		}
 
 		void SetCascadedShadowType(CascadedShadowLayerType type);
-		CascadedShadowLayerPtr const & GetCascadedShadowLayer() const
+		CascadedShadowLayer& GetCascadedShadowLayer() const
 		{
-			return cascaded_shadow_layer_;
+			return *cascaded_shadow_layer_;
 		}
 		int32_t CurrCascadeIndex() const
 		{
@@ -395,9 +491,9 @@ namespace KlayGE
 		void AccumulateToLightingTex(PerViewport const & pvp, PassTargetBuffer pass_tb);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type,
-			int32_t org_no, int32_t index_in_pass, bool is_profile) const;
+			int32_t light_index, int32_t index_in_pass, bool is_profile) const;
 		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
-			int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code) const;
+			int32_t& light_index, int32_t& index_in_pass, bool& is_profile, uint32_t code) const;
 
 		void BuildLightList();
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
@@ -415,7 +511,7 @@ namespace KlayGE
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
-		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
+		void PostGenerateShadowMap(PerViewport const & pvp, int32_t light_index, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateShadowingCS(PerViewport const & pvp);
@@ -431,12 +527,12 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
+		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t light_index);
 		void UpdateShading(PerViewport const & pvp, PassTargetBuffer pass_tb);
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, PassTargetBuffer pass_tb);
+			int32_t light_index, PassTargetBuffer pass_tb);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, PassTargetBuffer pass_tb,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
@@ -454,8 +550,8 @@ namespace KlayGE
 		uint32_t GBufferGenerationDRJob(PerViewport& pvp, PassType pass_type);
 		uint32_t GBufferProcessingDRJob(PerViewport const & pvp);
 		uint32_t OpaqueGBufferProcessingDRJob(PerViewport const & pvp);
-		uint32_t ShadowMapGenerationDRJob(PerViewport const & pvp, PassType pass_type, int32_t org_no, int32_t index_in_pass);
-		uint32_t IndirectLightingDRJob(PerViewport const & pvp, int32_t org_no);
+		uint32_t ShadowMapGenerationDRJob(PerViewport const & pvp, PassType pass_type, int32_t light_index, int32_t index_in_pass);
+		uint32_t IndirectLightingDRJob(PerViewport const & pvp, int32_t light_index);
 		uint32_t ShadowingDRJob(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		uint32_t ShadingDRJob(PerViewport const & pvp, PassType pass_type, int32_t index_in_pass);
 		uint32_t ReflectionDRJob(PerViewport const & pvp, PassType pass_type);
@@ -474,9 +570,10 @@ namespace KlayGE
 
 	private:
 		bool tex_array_support_;
+		bool flexible_srvs_support_;
 
 		// TODO: Remove the magic number
-		mutable RenderEffectPtr g_buffer_effects_[48];
+		mutable RenderEffectPtr g_buffer_effects_[64];
 
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -514,6 +611,9 @@ namespace KlayGE
 		KlayGE::PostProcessPtr bokeh_filter_pp_;
 		bool bokeh_filter_enabled_ = false;
 
+		KlayGE::PostProcessPtr motion_blur_pp_;
+		bool motion_blur_enabled_ = false;
+
 		float light_scale_;
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
@@ -529,8 +629,8 @@ namespace KlayGE
 		std::vector<LightSource*> lights_;
 		std::vector<RenderablePtr> decals_;
 
-		std::vector<std::shared_ptr<DeferredRenderingJob>> jobs_;
-		std::vector<std::shared_ptr<DeferredRenderingJob>>::iterator curr_job_iter_;
+		std::vector<std::unique_ptr<DeferredRenderingJob>> jobs_;
+		std::vector<std::unique_ptr<DeferredRenderingJob>>::iterator curr_job_iter_;
 
 		std::array<std::array<RenderTechnique*, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechnique* technique_no_lighting_;
@@ -573,17 +673,30 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS = 1;
 
 		int32_t projective_light_index_;
-		std::vector<std::pair<int32_t, uint32_t>> sm_light_indices_;
-		FrameBufferPtr sm_fb_;
-		TexturePtr sm_tex_;
-		TexturePtr sm_depth_tex_;
+		std::vector<std::pair<int32_t, uint32_t>> shadow_map_light_indices_;
+		FrameBufferPtr shadow_map_fb_;
+		TexturePtr shadow_map_tex_;
+		RenderTargetViewPtr shadow_map_rtv_;
+		TexturePtr shadow_map_depth_tex_;
+		ShaderResourceViewPtr shadow_map_depth_srv_;
+		FrameBufferPtr shadow_map_array_fb_;
+		TexturePtr shadow_map_array_tex_;
+		RenderTargetViewPtr shadow_map_array_rtv_;
+		TexturePtr shadow_map_array_depth_tex_;
+		ShaderResourceViewPtr shadow_map_array_depth_srvs_[6];
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_texs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_texs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_texs_;
+		TexturePtr unfiltered_shadow_map_2d_texs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		ShaderResourceViewPtr unfiltered_shadow_map_2d_srvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		TexturePtr filtered_shadow_map_2d_texs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		ShaderResourceViewPtr filtered_shadow_map_2d_srvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		RenderTargetViewPtr filtered_shadow_map_2d_slice_rtvs_[MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS];
+		TexturePtr filtered_shadow_map_cube_texs_[MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS];
+		ShaderResourceViewPtr filtered_shadow_map_cube_srvs_[MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS];
+		RenderTargetViewPtr
+			filtered_shadow_map_cube_face_rtvs_[(MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS) * 6];
 
-		PostProcessPtr sm_filter_pp_;
+		PostProcessPtr shadow_map_filter_pp_;
 		PostProcessPtr csm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
 		PostProcessPtr depth_to_linear_pps_[2];
@@ -591,6 +704,7 @@ namespace KlayGE
 
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
 		RenderEffectParameter* g_buffer_rt1_tex_param_;
+		RenderEffectParameter* g_buffer_rt2_tex_param_;
 		RenderEffectParameter* depth_tex_param_;
 		RenderEffectParameter* depth_tex_ms_param_;
 		RenderEffectParameter* shading_tex_param_;
@@ -607,10 +721,10 @@ namespace KlayGE
 		RenderEffectParameter* light_dir_es_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
-		RenderEffectParameter* filtered_sm_2d_tex_param_;
-		RenderEffectParameter* filtered_sm_2d_tex_array_param_;
-		RenderEffectParameter* filtered_sm_2d_light_index_param_;
-		RenderEffectParameter* filtered_sm_cube_tex_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_tex_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_tex_array_param_;
+		RenderEffectParameter* filtered_shadow_map_2d_light_index_param_;
+		RenderEffectParameter* filtered_shadow_map_cube_tex_param_;
 		RenderEffectParameter* inv_width_height_param_;
 		RenderEffectParameter* shadowing_tex_param_;
 		RenderEffectParameter* projective_shadowing_tex_param_;
@@ -628,6 +742,7 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderEffectParameter* g_buffer_rt0_tex_ms_param_;
 		RenderEffectParameter* g_buffer_rt1_tex_ms_param_;
+		RenderEffectParameter* g_buffer_rt2_tex_ms_param_;
 		RenderEffectParameter* g_buffer_ds_tex_ms_param_;
 		RenderEffectParameter* g_buffer_depth_tex_ms_param_;
 		RenderEffectParameter* g_buffer_stencil_tex_param_;
@@ -652,7 +767,7 @@ namespace KlayGE
 		RenderEffectParameter* projective_shadowing_rw_tex_param_;
 		RenderEffectParameter* shadowing_rw_tex_param_;
 		RenderEffectParameter* lights_view_proj_param_;
-		RenderEffectParameter* filtered_sms_2d_light_index_param_;
+		RenderEffectParameter* filtered_shadow_maps_2d_light_index_param_;
 		RenderEffectParameter* esms_scale_factor_param_;
 
 		RenderEffectParameter* near_q_far_param_;
@@ -703,7 +818,7 @@ namespace KlayGE
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
 
-		CascadedShadowLayerPtr cascaded_shadow_layer_;
+		std::unique_ptr<CascadedShadowLayer> cascaded_shadow_layer_;
 		float2 blur_size_light_space_;
 		int32_t curr_cascade_index_;
 

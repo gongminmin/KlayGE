@@ -1,4 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -53,7 +55,7 @@ namespace
 			for (int i = 0; i < num_exts; ++ i)
 			{
 				std::string name;
-				re.GetCustomAttrib("FEATURE_NAME_" + std::to_string(i), &name);
+				re.GetCustomAttrib(std::format("FEATURE_NAME_{}", i), &name);
 				std::string::size_type p = name.find("GL_VERSION_");
 				if (std::string::npos == p)
 				{
@@ -67,23 +69,23 @@ namespace
 			}
 		}
 
-		std::vector<std::any> store_to_py()
+		std::vector<ScriptVariablePtr> StoreToPy(ScriptModule const& module)
 		{
-			std::vector<std::any> ret;
+			std::vector<ScriptVariablePtr> ret;
 
-			ret.push_back(vendor_);
-			ret.push_back(renderer_);
-			ret.push_back(major_ver_);
-			ret.push_back(minor_ver_);
-			ret.push_back(glsl_major_ver_);
-			ret.push_back(glsl_minor_ver_);
+			ret.push_back(module.MakeVariable(vendor_));
+			ret.push_back(module.MakeVariable(renderer_));
+			ret.push_back(module.MakeVariable(major_ver_));
+			ret.push_back(module.MakeVariable(minor_ver_));
+			ret.push_back(module.MakeVariable(glsl_major_ver_));
+			ret.push_back(module.MakeVariable(glsl_minor_ver_));
 
 			std::string ext_str;
 			for (auto const & ext : extensions_)
 			{
 				ext_str += ext + ' ';
 			}
-			ret.push_back(ext_str);
+			ret.push_back(module.MakeVariable(ext_str));
 
 			return ret;
 		}
@@ -138,11 +140,11 @@ int main()
 	GLCompatibilityApp app;
 	app.Create();
 
-	information info;
-	std::vector<std::any> for_py = info.store_to_py();
-
 	ScriptEngine& scriptEng = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
 	ScriptModulePtr module = scriptEng.CreateModule("GLCompatibility");
+
+	information info;
+	std::vector<ScriptVariablePtr> for_py = info.StoreToPy(*module);
 
 	module->Call("gl_compatibility", for_py);
 

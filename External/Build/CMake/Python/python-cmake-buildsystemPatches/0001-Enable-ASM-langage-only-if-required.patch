@@ -1,0 +1,38 @@
+From 3f24152506559b442f7f72d85edf3640bab8de6a Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Thu, 21 Jan 2016 06:41:37 -0500
+Subject: [PATCH 01/11] Enable ASM langage only if required.
+
+---
+ CMakeLists.txt                  | 2 +-
+ cmake/extensions/CMakeLists.txt | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4118010..fe969d2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,7 +23,7 @@ if(APPLE)
+   message(STATUS "${_msg} - ${MACOSX_DEPLOYMENT_TARGET}")
+ endif()
+ 
+-project(Python C ASM)
++project(Python C)
+ 
+ if(POLICY CMP0042)
+     cmake_policy(SET CMP0042 OLD)
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index 7737d4e..9d20afb 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -340,6 +340,7 @@ else()
+             DEFINITIONS MACOSX
+         )
+     else()
++        enable_language(ASM)
+         if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+           set(_libffi_system_extra_src
+                 _ctypes/libffi/src/${_libffi_system_dir}/ffi64.c
+-- 
+2.17.1.windows.2
+

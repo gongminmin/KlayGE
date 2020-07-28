@@ -53,11 +53,16 @@
 #pragma warning(disable: 4244) // Conversion from doubel to int64
 #pragma warning(disable: 4456) // Declaration of 'name' hides previous local declaration
 #pragma warning(disable: 4702) // Unreachable code
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" // Ignore deprecated function calls
 #endif
 #define NANOSVG_IMPLEMENTATION
 #include <nanosvg.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic pop
 #endif
 #define NANOSVGRAST_IMPLEMENTATION
 #include <nanosvgrast.h>
@@ -224,7 +229,8 @@ int main(int argc, char* argv[])
 
 		rgba.resize(ras_width * ras_height * num_channels);
 		ResizeTexture(&rgba[0], ras_width * num_channels, ras_width * ras_height * num_channels, format, ras_width, ras_height, 1,
-			init_data[0].data, init_data[0].row_pitch, init_data[0].slice_pitch, format, ras_width, ras_height, depth, true);
+			init_data[0].data, init_data[0].row_pitch, init_data[0].slice_pitch, format, ras_width, ras_height, depth,
+			TextureFilter::Linear);
 
 		width = std::max(ras_width / 4, 1U);
 		height = std::max(ras_height / 4, 1U);
@@ -278,7 +284,7 @@ int main(int argc, char* argv[])
 	init_data.row_pitch = width * num_channels;
 	init_data.slice_pitch = width * height * num_channels;
 	TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, format, true);
-	out_tex->CreateHWResource(init_data, nullptr);
+	out_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 	SaveTexture(out_tex, out_name);
 
 	Context::Destroy();

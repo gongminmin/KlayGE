@@ -45,8 +45,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
@@ -61,12 +63,13 @@
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
+#include <iterator>
 #include <string>
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#include <charconv>
+#endif
 
 #include <boost/assert.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -74,10 +77,20 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0140;
+	uint32_t const KFX_VERSION = 0x0150;
 
 #if KLAYGE_IS_DEV_PLATFORM
-	ArrayRef<std::pair<char const *, size_t>> GetTypeDefines()
+	std::unique_ptr<RenderVariable> LoadVariable(
+		RenderEffect const& effect, XMLNode const& node, RenderEffectDataType type, uint32_t array_size);
+#endif
+	std::unique_ptr<RenderVariable> StreamInVariable(
+		RenderEffect const& effect, ResIdentifier& res, RenderEffectDataType type, uint32_t array_size);
+#if KLAYGE_IS_DEV_PLATFORM
+	void StreamOutVariable(std::ostream& os, RenderVariable const& var);
+#endif
+
+#if KLAYGE_IS_DEV_PLATFORM
+	std::span<std::pair<char const *, size_t> const> GetTypeDefines()
 	{
 #define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
 		static std::pair<char const *, size_t> const types[] =
@@ -137,15 +150,16 @@ namespace
 			NAME_AND_HASH("rasterizer_ordered_texture1DArray"),
 			NAME_AND_HASH("rasterizer_ordered_texture2D"),
 			NAME_AND_HASH("rasterizer_ordered_texture2DArray"),
-			NAME_AND_HASH("rasterizer_ordered_texture3D")
+			NAME_AND_HASH("rasterizer_ordered_texture3D"),
+			NAME_AND_HASH("struct"),
 		};
 #undef NAME_AND_HASH
 		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
 
-		return types;
+		return MakeSpan(types);
 	}
 
-	uint32_t TypeCodeFromName(std::string_view name)
+	RenderEffectDataType TypeFromName(std::string_view name)
 	{
 		auto const types = GetTypeDefines();
 
@@ -154,22 +168,22 @@ namespace
 		{
 			if (types[i].second == name_hash)
 			{
-				return i;
+				return static_cast<RenderEffectDataType>(i);
 			}
 		}
 
 		KFL_UNREACHABLE("Invalid type name");
 	}
 
-	std::string_view TypeNameFromCode(uint32_t code)
+	std::string_view TypeNameFromCode(RenderEffectDataType type)
 	{
 		auto const types = GetTypeDefines();
-		if (code < types.size())
+		if (type < types.size())
 		{
-			return types[code].first;
+			return types[type].first;
 		}
 
-		KFL_UNREACHABLE("Invalid type code");
+		KFL_UNREACHABLE("Invalid type");
 	}
 
 	ShadeMode ShadeModeFromName(std::string_view name)
@@ -454,7 +468,7 @@ namespace
 		}
 	}
 
-	int get_index(XMLNode const & node)
+	int RetrieveIndex(XMLNode const & node)
 	{
 		int index = 0;
 		XMLAttributePtr attr = node.Attrib("index");
@@ -465,7 +479,7 @@ namespace
 		return index;
 	}
 
-	std::string get_profile(XMLNode const & node)
+	std::string RetrieveProfile(XMLNode const & node)
 	{
 		XMLAttributePtr attr = node.Attrib("profile");
 		if (attr)
@@ -478,1014 +492,3406 @@ namespace
 		}
 	}
 
-	std::string get_func_name(XMLNode const & node)
+	std::string RetrieveFuncName(XMLNode const & node)
 	{
 		std::string_view value = node.Attrib("value")->ValueString();
 		return std::string(value.substr(0, value.find("(")));
 	}
-
-	std::unique_ptr<RenderVariable> read_var(XMLNode const & node, uint32_t type, uint32_t array_size)
-	{
-		std::unique_ptr<RenderVariable> var;
-		XMLAttributePtr attr;
-
-		switch (type)
-		{
-		case REDT_bool:
-			if (0 == array_size)
-			{
-				attr = node.Attrib("value");
-				bool tmp = false;
-				if (attr)
-				{
-					tmp = BoolFromStr(attr->ValueString());
-				}
-
-				var = MakeUniquePtr<RenderVariableBool>();
-				*var = tmp;
-			}
-			break;
-
-		case REDT_uint:
-			if (0 == array_size)
-			{
-				attr = node.Attrib("value");
-				uint32_t tmp = 0;
-				if (attr)
-				{
-					tmp = attr->ValueInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableUIntArray>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							if (index < strs.size())
-							{
-								boost::algorithm::trim(strs[index]);
-								init_val[index] = std::stoul(strs[index]);
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_int:
-			if (0 == array_size)
-			{
-				attr = node.Attrib("value");
-				int32_t tmp = 0;
-				if (attr)
-				{
-					tmp = attr->ValueInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableInt>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableIntArray>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							if (index < strs.size())
-							{
-								boost::algorithm::trim(strs[index]);
-								init_val[index] = std::stol(strs[index]);
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_string:
-			{
-				attr = node.Attrib("value");
-				std::string tmp;
-				if (attr)
-				{
-					tmp = std::string(attr->ValueString());
-				}
-
-				var = MakeUniquePtr<RenderVariableString>();
-				*var = tmp;
-			}
-			break;
-
-		case REDT_texture1D:
-		case REDT_texture2D:
-		case REDT_texture3D:
-		case REDT_textureCUBE:
-		case REDT_texture1DArray:
-		case REDT_texture2DArray:
-		case REDT_texture3DArray:
-		case REDT_textureCUBEArray:
-			var = MakeUniquePtr<RenderVariableTexture>();
-			*var = TexturePtr();
-			attr = node.Attrib("elem_type");
-			if (attr)
-			{
-				*var = std::string(attr->ValueString());
-			}
-			else
-			{
-				*var = std::string("float4");
-			}
-			break;
-
-		case REDT_rw_texture1D:
-		case REDT_rw_texture2D:
-		case REDT_rw_texture3D:
-		case REDT_rw_texture1DArray:
-		case REDT_rw_texture2DArray:
-		case REDT_rasterizer_ordered_texture1D:
-		case REDT_rasterizer_ordered_texture1DArray:
-		case REDT_rasterizer_ordered_texture2D:
-		case REDT_rasterizer_ordered_texture2DArray:
-		case REDT_rasterizer_ordered_texture3D:
-			var = MakeUniquePtr<RenderVariableRwTexture>();
-			*var = UnorderedAccessViewPtr();
-			attr = node.Attrib("elem_type");
-			if (attr)
-			{
-				*var = std::string(attr->ValueString());
-			}
-			else
-			{
-				*var = std::string("float4");
-			}
-			break;
-
-		case REDT_texture2DMS:
-		case REDT_texture2DMSArray:
-			{
-				var = MakeUniquePtr<RenderVariableTexture>();
-				*var = TexturePtr();
-
-				std::string elem_type;
-				attr = node.Attrib("elem_type");
-				if (attr)
-				{
-					elem_type = std::string(attr->ValueString());
-				}
-				else
-				{
-					elem_type = "float4";
-				}
-				
-				std::string sample_count;
-				attr = node.Attrib("sample_count");
-				if (attr)
-				{
-					sample_count = std::string(attr->ValueString());
-					*var = elem_type + ", " + sample_count;
-				}
-				else
-				{
-					*var = elem_type;
-				}
-			}
-			break;
-
-		case REDT_sampler:
-			{
-				SamplerStateDesc desc;
-
-				for (XMLNodePtr state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
-				{
-					std::string_view const name = state_node->Attrib("name")->ValueString();
-					size_t const name_hash = HashRange(name.begin(), name.end());
-
-					XMLAttributePtr const value_attr = state_node->Attrib("value");
-					std::string_view value_str;
-					if (value_attr)
-					{
-						value_str = value_attr->ValueString();
-					}
-
-					if (CT_HASH("filtering") == name_hash)
-					{
-						desc.filter = TexFilterOpFromName(value_str);
-					}
-					else if (CT_HASH("address_u") == name_hash)
-					{
-						desc.addr_mode_u = TexAddressingModeFromName(value_str);
-					}
-					else if (CT_HASH("address_v") == name_hash)
-					{
-						desc.addr_mode_v = TexAddressingModeFromName(value_str);
-					}
-					else if (CT_HASH("address_w") == name_hash)
-					{
-						desc.addr_mode_w = TexAddressingModeFromName(value_str);
-					}
-					else if (CT_HASH("max_anisotropy") == name_hash)
-					{
-						desc.max_anisotropy = static_cast<uint8_t>(value_attr->ValueUInt());
-					}
-					else if (CT_HASH("min_lod") == name_hash)
-					{
-						desc.min_lod = value_attr->ValueFloat();
-					}
-					else if (CT_HASH("max_lod") == name_hash)
-					{
-						desc.max_lod = value_attr->ValueFloat();
-					}
-					else if (CT_HASH("mip_map_lod_bias") == name_hash)
-					{
-						desc.mip_map_lod_bias = value_attr->ValueFloat();
-					}
-					else if (CT_HASH("cmp_func") == name_hash)
-					{
-						desc.cmp_func = CompareFunctionFromName(value_str);
-					}
-					else if (CT_HASH("border_clr") == name_hash)
-					{
-						attr = state_node->Attrib("r");
-						if (attr)
-						{
-							desc.border_clr.r() = attr->ValueFloat();
-						}
-						attr = state_node->Attrib("g");
-						if (attr)
-						{
-							desc.border_clr.g() = attr->ValueFloat();
-						}
-						attr = state_node->Attrib("b");
-						if (attr)
-						{
-							desc.border_clr.b() = attr->ValueFloat();
-						}
-						attr = state_node->Attrib("a");
-						if (attr)
-						{
-							desc.border_clr.a() = attr->ValueFloat();
-						}
-					}
-					else
-					{
-						KFL_UNREACHABLE("Invalid sampler state name");
-					}
-				}
-
-				var = MakeUniquePtr<RenderVariableSampler>();
-				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
-			}
-			break;
-
-		case REDT_shader:
-			{
-				ShaderDesc desc;
-				desc.profile = get_profile(node);
-				desc.func_name = get_func_name(node);
-
-				var = MakeUniquePtr<RenderVariableShader>();
-				*var = desc;
-			}
-			break;
-
-		case REDT_float:
-			if (0 == array_size)
-			{
-				float tmp = 0;
-				attr = node.Attrib("value");
-				if (attr)
-				{
-					tmp = attr->ValueFloat();
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableFloatArray>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0.0f);
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							if (index < strs.size())
-							{
-								boost::algorithm::trim(strs[index]);
-								init_val[index] = std::stof(strs[index]);
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_uint2:
-			if (0 == array_size)
-			{
-				uint2 tmp(0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueUInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueUInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt2>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt2Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 2; ++ j)
-							{
-								if (index * 2 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = std::stoul(strs[index * 2 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_uint3:
-			if (0 == array_size)
-			{
-				uint3 tmp(0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueUInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueUInt();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueUInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt3>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt3Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 3; ++ j)
-							{
-								if (index * 3 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = std::stoul(strs[index * 3 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_uint4:
-			if (0 == array_size)
-			{
-				uint4 tmp(0, 0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueUInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueUInt();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueUInt();
-				}
-				attr = node.Attrib("w");
-				if (attr)
-				{
-					tmp.w() = attr->ValueUInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt4>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt4Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 4; ++ j)
-							{
-								if (index * 4 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = std::stoul(strs[index * 4 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_int2:
-			if (0 == array_size)
-			{
-				int2 tmp(0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableInt2>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt2Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 2; ++ j)
-							{
-								if (index * 2 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = std::stol(strs[index * 2 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_int3:
-			if (0 == array_size)
-			{
-				int3 tmp(0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueInt();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableInt3>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt3Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 3; ++ j)
-							{
-								if (index * 3 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = std::stol(strs[index * 3 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_int4:
-			if (0 == array_size)
-			{
-				int4 tmp(0, 0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueInt();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueInt();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueInt();
-				}
-				attr = node.Attrib("w");
-				if (attr)
-				{
-					tmp.w() = attr->ValueInt();
-				}
-
-				var = MakeUniquePtr<RenderVariableInt4>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableInt4Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 4; ++ j)
-							{
-								if (index * 4 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = std::stol(strs[index * 4 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_float2:
-			if (0 == array_size)
-			{
-				float2 tmp(0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueFloat();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueFloat();
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat2>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableFloat2Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), float2(0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 2; ++ j)
-							{
-								if (index * 2 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = std::stof(strs[index * 2 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_float3:
-			if (0 == array_size)
-			{
-				float3 tmp(0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueFloat();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueFloat();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueFloat();
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat3>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableFloat3Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), float3(0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 3; ++ j)
-							{
-								if (index * 3 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = std::stof(strs[index * 3 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_float4:
-			if (0 == array_size)
-			{
-				float4 tmp(0, 0, 0, 0);
-				attr = node.Attrib("x");
-				if (attr)
-				{
-					tmp.x() = attr->ValueFloat();
-				}
-				attr = node.Attrib("y");
-				if (attr)
-				{
-					tmp.y() = attr->ValueFloat();
-				}
-				attr = node.Attrib("z");
-				if (attr)
-				{
-					tmp.z() = attr->ValueFloat();
-				}
-				attr = node.Attrib("w");
-				if (attr)
-				{
-					tmp.w() = attr->ValueFloat();
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat4>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableFloat4Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 4; ++ j)
-							{
-								if (index * 4 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = std::stof(strs[index * 4 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_float4x4:
-			if (0 == array_size)
-			{
-				float4x4 tmp(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-				for (int y = 0; y < 4; ++ y)
-				{
-					for (int x = 0; x < 4; ++ x)
-					{
-						attr = node.Attrib(std::string("_")
-							+ static_cast<char>('0' + y) + static_cast<char>('0' + x));
-						if (attr)
-						{
-							tmp[y * 4 + x] = attr->ValueFloat();
-						}
-					}
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat4x4>();
-				*var = tmp;
-			}
-			else
-			{
-				var = MakeUniquePtr<RenderVariableFloat4x4Array>();
-
-				XMLNodePtr value_node = node.FirstNode("value");
-				if (value_node)
-				{
-					value_node = value_node->FirstNode();
-					if (value_node && (XNT_CData == value_node->Type()))
-					{
-						std::string_view const value_str = value_node->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float4x4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 15) / 16)),
-							float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-						for (size_t index = 0; index < init_val.size(); ++ index)
-						{
-							for (size_t j = 0; j < 16; ++ j)
-							{
-								if (index * 16 + j < strs.size())
-								{
-									boost::algorithm::trim(strs[index * 16 + j]);
-									init_val[index][j] = std::stof(strs[index * 16 + j]);
-								}
-							}
-						}
-						*var = init_val;
-					}
-				}
-			}
-			break;
-
-		case REDT_buffer:
-		case REDT_structured_buffer:
-		case REDT_consume_structured_buffer:
-		case REDT_append_structured_buffer:
-			var = MakeUniquePtr<RenderVariableBuffer>();
-			*var = ShaderResourceViewPtr();
-			attr = node.Attrib("elem_type");
-			if (attr)
-			{
-				*var = std::string(attr->ValueString());
-			}
-			else
-			{
-				*var = std::string("float4");
-			}
-			break;
-
-		case REDT_rw_buffer:
-		case REDT_rw_structured_buffer:
-		case REDT_rasterizer_ordered_buffer:
-		case REDT_rasterizer_ordered_structured_buffer:
-			var = MakeUniquePtr<RenderVariableRwBuffer>();
-			*var = UnorderedAccessViewPtr();
-			attr = node.Attrib("elem_type");
-			if (attr)
-			{
-				*var = std::string(attr->ValueString());
-			}
-			else
-			{
-				*var = std::string("float4");
-			}
-			break;
-
-		case REDT_byte_address_buffer:
-			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-			*var = ShaderResourceViewPtr();
-			break;
-
-		case REDT_rw_byte_address_buffer:
-		case REDT_rasterizer_ordered_byte_address_buffer:
-			var = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
-			*var = UnorderedAccessViewPtr();
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid type");
-		}
-
-		return var;
-	}
 #endif
 
-	std::unique_ptr<RenderVariable> stream_in_var(ResIdentifierPtr const & res, uint32_t type, uint32_t array_size)
+	class RenderVariableIOable : public RenderVariable
 	{
-		std::unique_ptr<RenderVariable> var;
+	public:
+#if KLAYGE_IS_DEV_PLATFORM
+		virtual void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) = 0;
+#endif
 
+		virtual void StreamIn(RenderEffect const& effect, ResIdentifier& res) = 0;
+
+#if KLAYGE_IS_DEV_PLATFORM
+		virtual void StreamOut(std::ostream& os) const = 0;
+#endif
+	};
+
+	template <typename T>
+	class RenderVariableConcrete : public RenderVariableIOable
+	{
+	public:
+		explicit RenderVariableConcrete(bool in_cbuff = false)
+			: in_cbuff_(in_cbuff)
+		{
+			if (!in_cbuff_)
+			{
+				new (data_.val) T;
+			}
+		}
+
+		~RenderVariableConcrete() override
+		{
+			if (!in_cbuff_)
+			{
+				this->RetriveT().~T();
+			}
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = this->MakeInstance(in_cbuff_);
+			auto& concrete = checked_cast<RenderVariableConcrete<T>&>(*ret);
+			if (in_cbuff_)
+			{
+				concrete.data_ = data_;
+			}
+			T val;
+			this->Value(val);
+			concrete = val;
+			return ret;
+		}
+
+		RenderVariable& operator=(T const& value) override
+		{
+			if (in_cbuff_)
+			{
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				auto* cbuff = this->CBuffer();
+				T& val_in_cbuff = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
+				if (val_in_cbuff != value)
+				{
+					val_in_cbuff = value;
+					cbuff->Dirty(true);
+				}
+			}
+			else
+			{
+				this->RetriveT() = value;
+			}
+			return *this;
+		}
+
+		void Value(T& val) const override
+		{
+			if (in_cbuff_)
+			{
+				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				auto* cbuff = this->CBuffer();
+				val = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
+			}
+			else
+			{
+				val = this->RetriveT();
+			}
+		}
+
+		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride) override
+		{
+			if (!in_cbuff_)
+			{
+				T val = this->RetriveT();
+				this->RetriveT().~T();
+				in_cbuff_ = true;
+				CBufferDesc cbuff_desc;
+				cbuff_desc.effect = &effect;
+				cbuff_desc.cbuff_index = cbuff_index;
+				cbuff_desc.offset = offset;
+				cbuff_desc.stride = stride;
+				this->RetriveCBufferDesc() = std::move(cbuff_desc);
+				this->operator=(val);
+			}
+		}
+
+		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index) override
+		{
+			BOOST_ASSERT(in_cbuff_);
+			auto& cbuff_desc = this->RetriveCBufferDesc();
+			cbuff_desc.effect = &effect;
+			cbuff_desc.cbuff_index = cbuff_index;
+		}
+
+		bool InCBuffer() const override
+		{
+			return in_cbuff_;
+		}
+		RenderEffectConstantBuffer* CBuffer() const override
+		{
+			auto& cbuff_desc = this->RetriveCBufferDesc();
+			return cbuff_desc.effect->CBufferByIndex(cbuff_desc.cbuff_index);
+		}
+		uint32_t CBufferIndex() const override
+		{
+			return this->RetriveCBufferDesc().cbuff_index;
+		}
+		uint32_t CBufferOffset() const override
+		{
+			return this->RetriveCBufferDesc().offset;
+		}
+		uint32_t Stride() const override
+		{
+			return this->RetriveCBufferDesc().stride;
+		}
+
+	protected:
+		T& RetriveT()
+		{
+			union Raw2T
+			{
+				uint8_t* raw;
+				T* t;
+			} r2t;
+			r2t.raw = data_.val;
+			return *r2t.t;
+		}
+		T const& RetriveT() const
+		{
+			union Raw2T
+			{
+				uint8_t const* raw;
+				T const* t;
+			} r2t;
+			r2t.raw = data_.val;
+			return *r2t.t;
+		}
+
+		CBufferDesc& RetriveCBufferDesc()
+		{
+			return data_.cbuff_desc;
+		}
+		CBufferDesc const& RetriveCBufferDesc() const
+		{
+			return data_.cbuff_desc;
+		}
+
+		virtual std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) = 0;
+
+	protected:
+		bool in_cbuff_;
+		union VarData
+		{
+			CBufferDesc cbuff_desc;
+			uint8_t val[sizeof(T)];
+		};
+		VarData data_ = {};
+	};
+
+	class RenderVariableBool final : public RenderVariableConcrete<bool>
+	{
+	public:
+		explicit RenderVariableBool(bool in_cbuff = false)
+			: RenderVariableConcrete<bool>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			bool tmp = false;
+			if (auto attr = node.Attrib("value"))
+			{
+				tmp = BoolFromStr(attr->ValueString());
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			bool tmp;
+			res.read(&tmp, sizeof(tmp));
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			bool tmp;
+			this->Value(tmp);
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<bool>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableBool>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt final : public RenderVariableConcrete<uint32_t>
+	{
+	public:
+		explicit RenderVariableUInt(bool in_cbuff = false)
+			: RenderVariableConcrete<uint32_t>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			uint32_t tmp = 0;
+			if (auto attr = node.Attrib("value"))
+			{
+				tmp = attr->ValueUInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t tmp;
+			res.read(&tmp, sizeof(tmp));
+			*this = LE2Native(tmp);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			uint32_t tmp;
+			this->Value(tmp);
+			tmp = Native2LE(tmp);
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<uint32_t>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt final : public RenderVariableConcrete<int32_t>
+	{
+	public:
+		explicit RenderVariableInt(bool in_cbuff = false)
+			: RenderVariableConcrete<int32_t>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			int32_t tmp = 0;
+			if (auto attr = node.Attrib("value"))
+			{
+				tmp = attr->ValueInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			int32_t tmp;
+			res.read(&tmp, sizeof(tmp));
+			*this = LE2Native(tmp);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			int32_t tmp;
+			this->Value(tmp);
+			tmp = Native2LE(tmp);
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<int32_t>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat final : public RenderVariableConcrete<float>
+	{
+	public:
+		explicit RenderVariableFloat(bool in_cbuff = false)
+			: RenderVariableConcrete<float>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			float tmp = 0;
+			if (auto attr = node.Attrib("value"))
+			{
+				tmp = attr->ValueFloat();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			float tmp;
+			res.read(&tmp, sizeof(tmp));
+			*this = LE2Native(tmp);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			float tmp;
+			this->Value(tmp);
+			tmp = Native2LE(tmp);
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<float>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt2 final : public RenderVariableConcrete<uint2>
+	{
+	public:
+		explicit RenderVariableUInt2(bool in_cbuff = false)
+			: RenderVariableConcrete<uint2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			uint2 tmp(0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint2 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			uint2 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<uint2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt2>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt3 final : public RenderVariableConcrete<uint3>
+	{
+	public:
+		explicit RenderVariableUInt3(bool in_cbuff = false)
+			: RenderVariableConcrete<uint3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			uint3 tmp(0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint3 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			uint3 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<uint3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt3>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt4 final : public RenderVariableConcrete<uint4>
+	{
+	public:
+		explicit RenderVariableUInt4(bool in_cbuff = false)
+			: RenderVariableConcrete<uint4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			uint4 tmp(0, 0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			if (auto attr = node.Attrib("w"))
+			{
+				tmp.y() = attr->ValueUInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint4 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			uint4 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<uint4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt4>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt2 final : public RenderVariableConcrete<int2>
+	{
+	public:
+		explicit RenderVariableInt2(bool in_cbuff = false)
+			: RenderVariableConcrete<int2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			int2 tmp(0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			int2 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			int2 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<int2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt2>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt3 final : public RenderVariableConcrete<int3>
+	{
+	public:
+		explicit RenderVariableInt3(bool in_cbuff = false)
+			: RenderVariableConcrete<int3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			int3 tmp(0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.z() = attr->ValueInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			int3 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			int3 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<int3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt3>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt4 final : public RenderVariableConcrete<int4>
+	{
+	public:
+		explicit RenderVariableInt4(bool in_cbuff = false)
+			: RenderVariableConcrete<int4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			int4 tmp(0, 0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.z() = attr->ValueInt();
+			}
+			if (auto attr = node.Attrib("w"))
+			{
+				tmp.z() = attr->ValueInt();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			int4 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			int4 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<int4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt4>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat2 final : public RenderVariableConcrete<float2>
+	{
+	public:
+		explicit RenderVariableFloat2(bool in_cbuff = false)
+			: RenderVariableConcrete<float2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			float2 tmp(0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueFloat();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			float2 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			float2 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<float2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat2>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat3 final : public RenderVariableConcrete<float3>
+	{
+	public:
+		explicit RenderVariableFloat3(bool in_cbuff = false)
+			: RenderVariableConcrete<float3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			float3 tmp(0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.z() = attr->ValueFloat();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			float3 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			float3 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<float3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat3>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat4 final : public RenderVariableConcrete<float4>
+	{
+	public:
+		explicit RenderVariableFloat4(bool in_cbuff = false)
+			: RenderVariableConcrete<float4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			float4 tmp(0, 0, 0, 0);
+			if (auto attr = node.Attrib("x"))
+			{
+				tmp.x() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("y"))
+			{
+				tmp.y() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("z"))
+			{
+				tmp.z() = attr->ValueFloat();
+			}
+			if (auto attr = node.Attrib("w"))
+			{
+				tmp.w() = attr->ValueFloat();
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			float4 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			float4 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		using RenderVariableConcrete<float4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat4>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat4x4 final : public RenderVariableConcrete<float4x4>
+	{
+	public:
+		explicit RenderVariableFloat4x4(bool in_cbuff = false)
+			: RenderVariableConcrete<float4x4>(in_cbuff)
+		{
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableFloat4x4>(in_cbuff_);
+			if (in_cbuff_)
+			{
+				ret->data_ = data_;
+
+				float4x4 val;
+				RenderVariableConcrete<float4x4>::Value(val);
+				RenderVariableConcrete<float4x4>::operator=(val);
+			}
+			else
+			{
+				ret->RetriveT() = this->RetriveT();
+			}
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			float4x4 tmp(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			for (int y = 0; y < 4; ++y)
+			{
+				for (int x = 0; x < 4; ++x)
+				{
+					auto attr = node.Attrib(std::string("_") + static_cast<char>('0' + y) + static_cast<char>('0' + x));
+					if (attr)
+					{
+						tmp[y * 4 + x] = attr->ValueFloat();
+					}
+				}
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			float4x4 tmp;
+			res.read(&tmp, sizeof(tmp));
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = LE2Native(tmp[i]);
+			}
+			*this = tmp;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			float4x4 tmp;
+			this->Value(tmp);
+			for (size_t i = 0; i < tmp.size(); ++i)
+			{
+				tmp[i] = Native2LE(tmp[i]);
+			}
+			os.write(reinterpret_cast<char const*>(&tmp), sizeof(tmp));
+		}
+#endif
+
+		RenderVariable& operator=(float4x4 const& value) override
+		{
+			return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
+		}
+
+		void Value(float4x4& val) const override
+		{
+			RenderVariableConcrete<float4x4>::Value(val);
+			val = MathLib::transpose(val);
+		}
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat4x4>(in_cbuff);
+		}
+	};
+
+	class RenderVariableSampler final : public RenderVariableConcrete<SamplerStateObjectPtr>
+	{
+	public:
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			SamplerStateDesc desc;
+			for (XMLNodePtr state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
+			{
+				std::string_view const name = state_node->Attrib("name")->ValueString();
+				size_t const name_hash = HashRange(name.begin(), name.end());
+
+				XMLAttributePtr const value_attr = state_node->Attrib("value");
+				std::string_view value_str;
+				if (value_attr)
+				{
+					value_str = value_attr->ValueString();
+				}
+
+				if (CT_HASH("filtering") == name_hash)
+				{
+					desc.filter = TexFilterOpFromName(value_str);
+				}
+				else if (CT_HASH("address_u") == name_hash)
+				{
+					desc.addr_mode_u = TexAddressingModeFromName(value_str);
+				}
+				else if (CT_HASH("address_v") == name_hash)
+				{
+					desc.addr_mode_v = TexAddressingModeFromName(value_str);
+				}
+				else if (CT_HASH("address_w") == name_hash)
+				{
+					desc.addr_mode_w = TexAddressingModeFromName(value_str);
+				}
+				else if (CT_HASH("max_anisotropy") == name_hash)
+				{
+					desc.max_anisotropy = static_cast<uint8_t>(value_attr->ValueUInt());
+				}
+				else if (CT_HASH("min_lod") == name_hash)
+				{
+					desc.min_lod = value_attr->ValueFloat();
+				}
+				else if (CT_HASH("max_lod") == name_hash)
+				{
+					desc.max_lod = value_attr->ValueFloat();
+				}
+				else if (CT_HASH("mip_map_lod_bias") == name_hash)
+				{
+					desc.mip_map_lod_bias = value_attr->ValueFloat();
+				}
+				else if (CT_HASH("cmp_func") == name_hash)
+				{
+					desc.cmp_func = CompareFunctionFromName(value_str);
+				}
+				else if (CT_HASH("border_clr") == name_hash)
+				{
+					if (auto attr = state_node->Attrib("r"))
+					{
+						desc.border_clr.r() = attr->ValueFloat();
+					}
+					if (auto attr = state_node->Attrib("g"))
+					{
+						desc.border_clr.g() = attr->ValueFloat();
+					}
+					if (auto attr = state_node->Attrib("b"))
+					{
+						desc.border_clr.b() = attr->ValueFloat();
+					}
+					if (auto attr = state_node->Attrib("a"))
+					{
+						desc.border_clr.a() = attr->ValueFloat();
+					}
+				}
+				else
+				{
+					KFL_UNREACHABLE("Invalid sampler state name");
+				}
+			}
+
+			*this = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			SamplerStateDesc desc;
+			res.read(&desc, sizeof(desc));
+			desc.border_clr[0] = LE2Native(desc.border_clr[0]);
+			desc.border_clr[1] = LE2Native(desc.border_clr[1]);
+			desc.border_clr[2] = LE2Native(desc.border_clr[2]);
+			desc.border_clr[3] = LE2Native(desc.border_clr[3]);
+			desc.addr_mode_u = LE2Native(desc.addr_mode_u);
+			desc.addr_mode_v = LE2Native(desc.addr_mode_v);
+			desc.addr_mode_w = LE2Native(desc.addr_mode_w);
+			desc.filter = LE2Native(desc.filter);
+			desc.min_lod = LE2Native(desc.min_lod);
+			desc.max_lod = LE2Native(desc.max_lod);
+			desc.mip_map_lod_bias = LE2Native(desc.mip_map_lod_bias);
+			desc.cmp_func = LE2Native(desc.cmp_func);
+
+			*this = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			SamplerStateObjectPtr tmp;
+			this->Value(tmp);
+			SamplerStateDesc desc = tmp->GetDesc();
+			desc.border_clr[0] = Native2LE(desc.border_clr[0]);
+			desc.border_clr[1] = Native2LE(desc.border_clr[1]);
+			desc.border_clr[2] = Native2LE(desc.border_clr[2]);
+			desc.border_clr[3] = Native2LE(desc.border_clr[3]);
+			desc.addr_mode_u = Native2LE(desc.addr_mode_u);
+			desc.addr_mode_v = Native2LE(desc.addr_mode_v);
+			desc.addr_mode_w = Native2LE(desc.addr_mode_w);
+			desc.filter = Native2LE(desc.filter);
+			desc.min_lod = Native2LE(desc.min_lod);
+			desc.max_lod = Native2LE(desc.max_lod);
+			desc.mip_map_lod_bias = Native2LE(desc.mip_map_lod_bias);
+			desc.cmp_func = Native2LE(desc.cmp_func);
+			os.write(reinterpret_cast<char const*>(&desc), sizeof(desc));
+		}
+#endif
+
+		using RenderVariableConcrete<SamplerStateObjectPtr>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			KFL_UNUSED(in_cbuff);
+			return MakeUniquePtr<RenderVariableSampler>();
+		}
+	};
+
+	class RenderVariableString final : public RenderVariableConcrete<std::string>
+	{
+	public:
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			std::string tmp;
+			if (auto attr = node.Attrib("value"))
+			{
+				tmp = std::string(attr->ValueString());
+			}
+			*this = tmp;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			*this = ReadShortString(res);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::string tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp);
+		}
+#endif
+
+		using RenderVariableConcrete<std::string>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			KFL_UNUSED(in_cbuff);
+			return MakeUniquePtr<RenderVariableString>();
+		}
+	};
+
+	class RenderVariableShader final : public RenderVariableConcrete<ShaderDesc>
+	{
+	public:
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			ShaderDesc desc;
+			desc.profile = RetrieveProfile(node);
+			desc.func_name = RetrieveFuncName(node);
+			*this = desc;
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			ShaderDesc desc;
+			desc.profile = ReadShortString(res);
+			desc.func_name = ReadShortString(res);
+			*this = desc;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			ShaderDesc tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp.profile);
+			WriteShortString(os, tmp.func_name);
+		}
+#endif
+
+		using RenderVariableConcrete<ShaderDesc>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			KFL_UNUSED(in_cbuff);
+			return MakeUniquePtr<RenderVariableShader>();
+		}
+	};
+
+	template <typename T>
+	class RenderVariableArray : public RenderVariableConcrete<std::vector<T>>
+	{
+	public:
+		explicit RenderVariableArray(bool in_cbuff = false)
+			: RenderVariableConcrete<std::vector<T>>(in_cbuff)
+		{
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = this->MakeInstance(this->in_cbuff_);
+			auto& concrete = checked_cast<RenderVariableArray<T>&>(*ret);
+			if (this->in_cbuff_)
+			{
+				concrete.data_ = this->data_;
+				concrete.size_ = this->size_;
+
+				auto const& src_cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
+
+				auto const& dst_cbuff_desc = concrete.RetriveCBufferDesc();
+				uint8_t* dst = concrete.CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
+
+				for (size_t i = 0; i < size_; ++i)
+				{
+					*reinterpret_cast<T*>(dst) = *reinterpret_cast<T const*>(src);
+					src += src_cbuff_desc.stride;
+					dst += dst_cbuff_desc.stride;
+				}
+
+				concrete.CBuffer()->Dirty(true);
+			}
+			else
+			{
+				concrete.RetriveT() = this->RetriveT();
+			}
+			return ret;
+		}
+
+		RenderVariable& operator=(std::vector<T> const& value) override
+		{
+			return this->operator=(MakeSpan(value));
+		}
+
+		RenderVariable& operator=(std::span<T const> value) override
+		{
+			if (this->in_cbuff_)
+			{
+				uint8_t const* src = reinterpret_cast<uint8_t const*>(value.data());
+
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+
+				size_ = static_cast<uint32_t>(value.size());
+				for (int i = 0; i < value.size(); ++i)
+				{
+					*reinterpret_cast<T*>(dst) = *reinterpret_cast<T const*>(src);
+					src += sizeof(T);
+					dst += cbuff_desc.stride;
+				}
+
+				this->CBuffer()->Dirty(true);
+			}
+			else
+			{
+				this->RetriveT() = std::vector<T>(value.begin(), value.end());
+			}
+			return *this;
+		}
+
+		void Value(std::vector<T>& val) const override
+		{
+			if (this->in_cbuff_)
+			{
+				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+
+				val.resize(size_);
+
+				for (size_t i = 0; i < size_; ++i)
+				{
+					val[i] = *reinterpret_cast<T const*>(src);
+					src += cbuff_desc.stride;
+				}
+			}
+			else
+			{
+				val = this->RetriveT();
+			}
+		}
+
+	protected:
+		uint32_t size_ = 0;
+	};
+
+	class RenderVariableBoolArray final : public RenderVariableArray<uint32_t>
+	{
+	public:
+		explicit RenderVariableBoolArray(bool in_cbuff = false)
+			: RenderVariableArray<uint32_t>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<bool> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						if (index < strs.size())
+						{
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = BoolFromStr(strs[index]);
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<uint8_t> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+
+				std::vector<bool> bool_vec(init_val.size());
+				for (size_t i = 0; i < init_val.size(); ++i)
+				{
+					bool_vec[i] = init_val[i] ? true : false;
+				}
+				*this = bool_vec;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<bool> init_val;
+			this->Value(init_val);
+
+			uint32_t len = static_cast<uint32_t>(init_val.size());
+			len = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len), sizeof(len));
+			if (len > 0)
+			{
+				std::vector<uint8_t> const uint8_vec(init_val.begin(), init_val.end());
+				os.write(reinterpret_cast<char const*>(uint8_vec.data()), len * sizeof(uint8_vec[0]));
+			}
+		}
+#endif
+
+		RenderVariable& operator=(std::vector<bool> const& value) override
+		{
+			std::vector<uint8_t> const uint8_vec(value.begin(), value.end());
+			return this->operator=(MakeSpan(reinterpret_cast<bool const*>(uint8_vec.data()), uint8_vec.size()));
+		}
+
+		RenderVariable& operator=(std::span<bool const> value) override
+		{
+			if (this->in_cbuff_)
+			{
+				uint8_t const* src = reinterpret_cast<uint8_t const*>(value.data());
+
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+
+				size_ = static_cast<uint32_t>(value.size());
+				for (int i = 0; i < value.size(); ++i)
+				{
+					*reinterpret_cast<uint32_t*>(dst) = *reinterpret_cast<bool const*>(src);
+					src += sizeof(bool);
+					dst += cbuff_desc.stride;
+				}
+
+				this->CBuffer()->Dirty(true);
+			}
+			else
+			{
+				this->RetriveT() = std::vector<uint32_t>(value.begin(), value.end());
+			}
+			return *this;
+		}
+
+		void Value(std::vector<bool>& val) const override
+		{
+			if (this->in_cbuff_)
+			{
+				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
+
+				val.resize(size_);
+
+				for (size_t i = 0; i < size_; ++i)
+				{
+					val[i] = *reinterpret_cast<uint32_t const*>(src) ? true : false;
+					src += cbuff_desc.stride;
+				}
+			}
+			else
+			{
+				auto const& uint32_vec = this->RetriveT();
+				val.resize(uint32_vec.size());
+				for (size_t i = 0; i < uint32_vec.size(); ++i)
+				{
+					val[i] = uint32_vec[i] ? true : false;
+				}
+			}
+		}
+
+		using RenderVariableArray<uint32_t>::operator=;
+		using RenderVariableArray<uint32_t>::Value;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableBoolArray>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUIntArray final : public RenderVariableArray<uint32_t>
+	{
+	public:
+		explicit RenderVariableUIntArray(bool in_cbuff = false)
+			: RenderVariableArray<uint32_t>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						if (index < strs.size())
+						{
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stoul(std::string(strs[index]));
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<uint32_t> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = LE2Native(init_val[i]);
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<uint32_t> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = Native2LE(init_val[i]);
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<uint32_t>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUIntArray>(in_cbuff);
+		}
+	};
+
+	class RenderVariableIntArray final : public RenderVariableArray<int32_t>
+	{
+	public:
+		explicit RenderVariableIntArray(bool in_cbuff = false)
+			: RenderVariableArray<int32_t>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						if (index < strs.size())
+						{
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stol(std::string(strs[index]));
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<int32_t> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = LE2Native(init_val[i]);
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<int32_t> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = Native2LE(init_val[i]);
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<int32_t>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableIntArray>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloatArray final : public RenderVariableArray<float>
+	{
+	public:
+		explicit RenderVariableFloatArray(bool in_cbuff = false)
+			: RenderVariableArray<float>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						if (index < strs.size())
+						{
+							strs[index] = StringUtil::Trim(strs[index]);
+							init_val[index] = std::stof(std::string(strs[index]));
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<float> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = LE2Native(init_val[i]);
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<float> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					init_val[i] = Native2LE(init_val[i]);
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<float>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloatArray>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt2Array final : public RenderVariableArray<uint2>
+	{
+	public:
+		explicit RenderVariableUInt2Array(bool in_cbuff = false)
+			: RenderVariableArray<uint2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<uint2> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<uint2> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<uint2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt2Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt3Array final : public RenderVariableArray<uint3>
+	{
+	public:
+		explicit RenderVariableUInt3Array(bool in_cbuff = false)
+			: RenderVariableArray<uint3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<uint3> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<uint3> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<uint3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt3Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableUInt4Array final : public RenderVariableArray<uint4>
+	{
+	public:
+		explicit RenderVariableUInt4Array(bool in_cbuff = false)
+			: RenderVariableArray<uint4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<uint4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stoul(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<uint4> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<uint4> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<uint4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableUInt4Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt2Array final : public RenderVariableArray<int2>
+	{
+	public:
+		explicit RenderVariableInt2Array(bool in_cbuff = false)
+			: RenderVariableArray<int2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<int2> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<int2> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<int2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt2Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt3Array final : public RenderVariableArray<int3>
+	{
+	public:
+		explicit RenderVariableInt3Array(bool in_cbuff = false)
+			: RenderVariableArray<int3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<int3> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<int3> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<int3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt3Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableInt4Array final : public RenderVariableArray<int4>
+	{
+	public:
+		explicit RenderVariableInt4Array(bool in_cbuff = false)
+			: RenderVariableArray<int4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stol(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<int4> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<int4> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<int4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableInt4Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat2Array final : public RenderVariableArray<float2>
+	{
+	public:
+		explicit RenderVariableFloat2Array(bool in_cbuff = false)
+			: RenderVariableArray<float2>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<float2> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<float2> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<float2>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat2Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat3Array final : public RenderVariableArray<float3>
+	{
+	public:
+		explicit RenderVariableFloat3Array(bool in_cbuff = false)
+			: RenderVariableArray<float3>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<float3> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<float3> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<float3>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat3Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat4Array final : public RenderVariableArray<float4>
+	{
+	public:
+		explicit RenderVariableFloat4Array(bool in_cbuff = false)
+			: RenderVariableArray<float4>(in_cbuff)
+		{
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<float4> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<float4> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		using RenderVariableArray<float4>::operator=;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat4Array>(in_cbuff);
+		}
+	};
+
+	class RenderVariableFloat4x4Array final : public RenderVariableConcrete<std::vector<float4x4>>
+	{
+	public:
+		explicit RenderVariableFloat4x4Array(bool in_cbuff = false)
+			: RenderVariableConcrete<std::vector<float4x4>>(in_cbuff)
+		{
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableFloat4x4Array>(in_cbuff_);
+			if (in_cbuff_)
+			{
+				ret->data_ = data_;
+				ret->size_ = size_;
+
+				auto const& src_cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
+
+				auto const& dst_cbuff_desc = ret->RetriveCBufferDesc();
+				uint8_t* dst = ret->CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
+
+				memcpy(dst, src, size_ * sizeof(float4x4));
+
+				ret->CBuffer()->Dirty(true);
+			}
+			else
+			{
+				ret->RetriveT() = this->RetriveT();
+			}
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+
+			if (XMLNodePtr value_node = node.FirstNode("value"))
+			{
+				value_node = value_node->FirstNode();
+				if (value_node && (XNT_CData == value_node->Type()))
+				{
+					std::string_view const value_str = value_node->ValueString();
+					std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(','));
+					std::vector<float4x4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 15) / 16)),
+						float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+					size_t const dim = init_val[0].size();
+					for (size_t index = 0; index < init_val.size(); ++index)
+					{
+						for (size_t j = 0; j < dim; ++j)
+						{
+							if (index * dim + j < strs.size())
+							{
+								strs[index * dim + j] = StringUtil::Trim(strs[index * dim + j]);
+								init_val[index][j] = std::stof(std::string(strs[index * dim + j]));
+							}
+						}
+					}
+					*this = init_val;
+				}
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			uint32_t len;
+			res.read(&len, sizeof(len));
+			len = LE2Native(len);
+			if (len > 0)
+			{
+				std::vector<float4x4> init_val(len);
+				res.read(&init_val[0], len * sizeof(init_val[0]));
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = LE2Native(init_val[i][j]);
+					}
+				}
+				*this = init_val;
+			}
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::vector<float4x4> init_val;
+			this->Value(init_val);
+
+			uint32_t const len = static_cast<uint32_t>(init_val.size());
+			uint32_t const len_le = Native2LE(len);
+			os.write(reinterpret_cast<char const*>(&len_le), sizeof(len_le));
+			if (len > 0)
+			{
+				size_t const dim = init_val[0].size();
+				for (uint32_t i = 0; i < len; ++i)
+				{
+					for (size_t j = 0; j < dim; ++j)
+					{
+						init_val[i][j] = Native2LE(init_val[i][j]);
+					}
+				}
+				os.write(reinterpret_cast<char const*>(init_val.data()), len * sizeof(init_val[0]));
+			}
+		}
+#endif
+
+		RenderVariable& operator=(std::vector<float4x4> const& value) override
+		{
+			return this->operator=(MakeSpan(value));
+		}
+
+		RenderVariable& operator=(std::span<float4x4 const> value) override
+		{
+			if (in_cbuff_)
+			{
+				float4x4 const* src = value.data();
+
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				float4x4* dst = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
+
+				size_ = static_cast<uint32_t>(value.size());
+				for (int i = 0; i < value.size(); ++i)
+				{
+					*dst = MathLib::transpose(*src);
+					++src;
+					++dst;
+				}
+
+				this->CBuffer()->Dirty(true);
+			}
+			else
+			{
+				this->RetriveT() = std::vector<float4x4>(value.begin(), value.end());
+			}
+			return *this;
+		}
+
+		void Value(std::vector<float4x4>& val) const override
+		{
+			if (in_cbuff_)
+			{
+				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				float4x4 const* src = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
+
+				val.resize(size_);
+				float4x4* dst = val.data();
+
+				for (size_t i = 0; i < size_; ++i)
+				{
+					*dst = MathLib::transpose(*src);
+					++src;
+					++dst;
+				}
+			}
+			else
+			{
+				val = this->RetriveT();
+			}
+		}
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableFloat4x4Array>(in_cbuff);
+		}
+
+	private:
+		uint32_t size_ = 0;
+	};
+
+	class RenderVariableTexture final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableTexture>();
+			TexturePtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			*this = TexturePtr();
+
+			std::string elem_type;
+			if (auto attr = node.Attrib("elem_type"))
+			{
+				elem_type = std::string(attr->ValueString());
+			}
+			else
+			{
+				elem_type = "float4";
+			}
+
+			std::string sample_count;
+			if (auto attr = node.Attrib("sample_count"))
+			{
+				sample_count = std::string(attr->ValueString());
+				*this = elem_type + ", " + sample_count;
+			}
+			else
+			{
+				*this = elem_type;
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			*this = TexturePtr();
+			*this = ReadShortString(res);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::string tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp);
+		}
+#endif
+
+		RenderVariable& operator=(TexturePtr const& value) override
+		{
+			if (value)
+			{
+				uint32_t array_size = value->ArraySize();
+				uint32_t mipmap = value->NumMipMaps();
+
+				auto& rf = Context::Instance().RenderFactoryInstance();
+				val_ = rf.MakeTextureSrv(value, 0, array_size, 0, mipmap);
+			}
+			else
+			{
+				val_.reset();
+			}
+			return *this;
+		}
+
+		RenderVariable& operator=(ShaderResourceViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		RenderVariable& operator=(std::string const& value) override
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(TexturePtr& val) const override
+		{
+			if (val_)
+			{
+				val = val_->TextureResource();
+			}
+			else
+			{
+				val.reset();
+			}
+		}
+
+		void Value(ShaderResourceViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+		void Value(std::string& val) const override
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		ShaderResourceViewPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableRwTexture final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableRwTexture>();
+			UnorderedAccessViewPtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			*this = UnorderedAccessViewPtr();
+
+			if (auto attr = node.Attrib("elem_type"))
+			{
+				*this = std::string(attr->ValueString());
+			}
+			else
+			{
+				*this = std::string("float4");
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			*this = UnorderedAccessViewPtr();
+			*this = ReadShortString(res);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::string tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp);
+		}
+#endif
+
+		RenderVariable& operator=(TexturePtr const& value) override
+		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			switch (value->Type())
+			{
+			case Texture::TT_1D:
+				val_ = rf.Make1DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
+				break;
+
+			case Texture::TT_2D:
+				val_ = rf.Make2DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
+				break;
+
+			case Texture::TT_3D:
+				val_ = rf.Make3DUav(value, 0, 0, value->Depth(0), 0);
+				break;
+
+			case Texture::TT_Cube:
+				val_ = rf.MakeCubeUav(value, 0, 0);
+				break;
+			}
+			return *this;
+		}
+
+		RenderVariable& operator=(UnorderedAccessViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		RenderVariable& operator=(std::string const& value) override
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(TexturePtr& val) const override
+		{
+			val = val_->TextureResource();
+		}
+
+		void Value(UnorderedAccessViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+		void Value(std::string& val) const override
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		UnorderedAccessViewPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableBuffer final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableBuffer>();
+			ShaderResourceViewPtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			*this = ShaderResourceViewPtr();
+
+			if (auto attr = node.Attrib("elem_type"))
+			{
+				*this = std::string(attr->ValueString());
+			}
+			else
+			{
+				*this = std::string("float4");
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			*this = ShaderResourceViewPtr();
+			*this = ReadShortString(res);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::string tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp);
+		}
+#endif
+
+		RenderVariable& operator=(ShaderResourceViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		RenderVariable& operator=(std::string const& value) override
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(ShaderResourceViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+		void Value(std::string& val) const override
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		ShaderResourceViewPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableRwBuffer final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableRwBuffer>();
+			UnorderedAccessViewPtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(array_size);
+
+			*this = UnorderedAccessViewPtr();
+
+			if (auto attr = node.Attrib("elem_type"))
+			{
+				*this = std::string(attr->ValueString());
+			}
+			else
+			{
+				*this = std::string("float4");
+			}
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+
+			*this = UnorderedAccessViewPtr();
+			*this = ReadShortString(res);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			std::string tmp;
+			this->Value(tmp);
+			WriteShortString(os, tmp);
+		}
+#endif
+
+		RenderVariable& operator=(UnorderedAccessViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		RenderVariable& operator=(std::string const& value) override
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(UnorderedAccessViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+		void Value(std::string& val) const override
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		UnorderedAccessViewPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableByteAddressBuffer final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableByteAddressBuffer>();
+			ShaderResourceViewPtr val;
+			this->Value(val);
+			*ret = val;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(node);
+			KFL_UNUSED(array_size);
+			*this = ShaderResourceViewPtr();
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(res);
+			*this = ShaderResourceViewPtr();
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			KFL_UNUSED(os);
+		}
+#endif
+
+		RenderVariable& operator=(ShaderResourceViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		void Value(ShaderResourceViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+	protected:
+		ShaderResourceViewPtr val_;
+	};
+
+	class RenderVariableRwByteAddressBuffer final : public RenderVariableIOable
+	{
+	public:
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
+			UnorderedAccessViewPtr val;
+			this->Value(val);
+			*ret = val;
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(node);
+			KFL_UNUSED(array_size);
+			*this = UnorderedAccessViewPtr();
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(res);
+			*this = UnorderedAccessViewPtr();
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			KFL_UNUSED(os);
+		}
+#endif
+
+		RenderVariable& operator=(UnorderedAccessViewPtr const& value) override
+		{
+			val_ = value;
+			return *this;
+		}
+
+		void Value(UnorderedAccessViewPtr& val) const override
+		{
+			val = val_;
+		}
+
+	protected:
+		UnorderedAccessViewPtr val_;
+	};
+
+	class RenderVariableStruct final : public RenderVariableArray<uint8_t>
+	{
+	public:
+		explicit RenderVariableStruct(bool in_cbuff = false)
+			: RenderVariableArray<uint8_t>(in_cbuff)
+		{
+		}
+
+		RenderEffectStructType* StructType() const override
+		{
+			return struct_type_;
+		}
+
+		std::unique_ptr<RenderVariable> Clone() override
+		{
+			auto ret = RenderVariableArray<uint8_t>::Clone();
+
+			auto* struct_var = checked_cast<RenderVariableStruct*>(ret.get());
+			struct_var->struct_type_ = struct_type_;
+
+			return ret;
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		{
+			KFL_UNUSED(array_size);
+
+			struct_type_ = effect.StructTypeByName(node.Attrib("type")->ValueString());
+			BOOST_ASSERT(struct_type_);
+		}
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		{
+			struct_type_ = effect.StructTypeByName(ReadShortString(res));
+			BOOST_ASSERT(struct_type_);
+		}
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const override
+		{
+			WriteShortString(os, struct_type_->Name());
+		}
+#endif
+
+		using RenderVariableArray<uint8_t>::operator=;
+		using RenderVariableArray<uint8_t>::Value;
+
+	protected:
+		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		{
+			return MakeUniquePtr<RenderVariableStruct>(in_cbuff);
+		}
+
+	private:
+		RenderEffectStructType* struct_type_ = nullptr;
+	};
+
+	std::unique_ptr<RenderVariableIOable> RenderVariableFactory(RenderEffectDataType type, bool is_array)
+	{
+		std::unique_ptr<RenderVariableIOable> ret;
 		switch (type)
 		{
 		case REDT_bool:
-			if (0 == array_size)
+			if (is_array)
 			{
-				bool tmp;
-				res->read(&tmp, sizeof(tmp));
-
-				var = MakeUniquePtr<RenderVariableBool>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableBoolArray>();
+			}
+			else
+			{
+				ret = MakeUniquePtr<RenderVariableBool>();
 			}
 			break;
 
 		case REDT_uint:
-			if (0 == array_size)
+			if (is_array)
 			{
-				uint32_t tmp;
-				res->read(&tmp, sizeof(tmp));
-
-				var = MakeUniquePtr<RenderVariableUInt>();
-				*var = LE2Native(tmp);
+				ret = MakeUniquePtr<RenderVariableUIntArray>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableUIntArray>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<uint32_t> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = LE2Native(init_val[i]);
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableUInt>();
 			}
 			break;
 
 		case REDT_int:
-			if (0 == array_size)
+			if (is_array)
 			{
-				int32_t tmp;
-				res->read(&tmp, sizeof(tmp));
-
-				var = MakeUniquePtr<RenderVariableInt>();
-				*var = LE2Native(tmp);
+				ret = MakeUniquePtr<RenderVariableIntArray>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableIntArray>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int32_t> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = LE2Native(init_val[i]);
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableInt>();
 			}
 			break;
 
 		case REDT_string:
-			{
-				var = MakeUniquePtr<RenderVariableString>();
-				*var = ReadShortString(res);
-			}
+			ret = MakeUniquePtr<RenderVariableString>();
 			break;
 
 		case REDT_texture1D:
@@ -1498,11 +3904,7 @@ namespace
 		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			{
-				var = MakeUniquePtr<RenderVariableTexture>();
-				*var = TexturePtr();
-				*var = ReadShortString(res);
-			}
+			ret = MakeUniquePtr<RenderVariableTexture>();
 			break;
 
 		case REDT_rw_texture1D:
@@ -1515,432 +3917,135 @@ namespace
 		case REDT_rasterizer_ordered_texture2D:
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
-			{
-				var = MakeUniquePtr<RenderVariableRwTexture>();
-				*var = UnorderedAccessViewPtr();
-				*var = ReadShortString(res);
-			}
+			ret = MakeUniquePtr<RenderVariableRwTexture>();
 			break;
 
 		case REDT_sampler:
-			{
-				SamplerStateDesc desc;
-				res->read(&desc, sizeof(desc));
-				desc.border_clr[0] = LE2Native(desc.border_clr[0]);
-				desc.border_clr[1] = LE2Native(desc.border_clr[1]);
-				desc.border_clr[2] = LE2Native(desc.border_clr[2]);
-				desc.border_clr[3] = LE2Native(desc.border_clr[3]);
-				desc.addr_mode_u = LE2Native(desc.addr_mode_u);
-				desc.addr_mode_v = LE2Native(desc.addr_mode_v);
-				desc.addr_mode_w = LE2Native(desc.addr_mode_w);
-				desc.filter = LE2Native(desc.filter);
-				desc.min_lod = LE2Native(desc.min_lod);
-				desc.max_lod = LE2Native(desc.max_lod);
-				desc.mip_map_lod_bias = LE2Native(desc.mip_map_lod_bias);
-				desc.cmp_func = LE2Native(desc.cmp_func);
-
-				var = MakeUniquePtr<RenderVariableSampler>();
-				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
-			}
+			ret = MakeUniquePtr<RenderVariableSampler>();
 			break;
 
 		case REDT_shader:
-			{
-				ShaderDesc desc;
-				desc.profile = ReadShortString(res);
-				desc.func_name = ReadShortString(res);
-
-				var = MakeUniquePtr<RenderVariableShader>();
-				*var = desc;
-			}
+			ret = MakeUniquePtr<RenderVariableShader>();
 			break;
 
 		case REDT_float:
-			if (0 == array_size)
+			if (is_array)
 			{
-				float tmp;
-				res->read(&tmp, sizeof(tmp));
-
-				var = MakeUniquePtr<RenderVariableFloat>();
-				*var = LE2Native(tmp);
+				ret = MakeUniquePtr<RenderVariableFloatArray>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableFloatArray>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<float> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = LE2Native(init_val[i]);
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableFloat>();
 			}
 			break;
 
 		case REDT_uint2:
-			if (0 == array_size)
+			if (is_array)
 			{
-				uint2 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt2>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt2Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt2Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int2> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableUInt2>();
 			}
 			break;
 
 		case REDT_uint3:
-			if (0 == array_size)
+			if (is_array)
 			{
-				uint3 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt3>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt3Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt3Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int3> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableUInt3>();
 			}
 			break;
 
 		case REDT_uint4:
-			if (0 == array_size)
+			if (is_array)
 			{
-				uint4 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableUInt4>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt4Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt4Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int4> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableUInt4>();
 			}
 			break;
 
 		case REDT_int2:
-			if (0 == array_size)
+			if (is_array)
 			{
-				int2 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableInt2>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt2Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt2Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int2> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableInt2>();
 			}
 			break;
 
 		case REDT_int3:
-			if (0 == array_size)
+			if (is_array)
 			{
-				int3 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableInt3>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt3Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt3Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int3> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableInt3>();
 			}
 			break;
 
 		case REDT_int4:
-			if (0 == array_size)
+			if (is_array)
 			{
-				int4 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableInt4>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableInt4Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableInt4Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<int4> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableInt4>();
 			}
 			break;
 
 		case REDT_float2:
-			if (0 == array_size)
+			if (is_array)
 			{
-				float2 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat2>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableFloat2Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableFloat2Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<float2> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableFloat2>();
 			}
 			break;
 
 		case REDT_float3:
-			if (0 == array_size)
+			if (is_array)
 			{
-				float3 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat3>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableFloat3Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableFloat3Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<float3> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableFloat3>();
 			}
 			break;
 
 		case REDT_float4:
-			if (0 == array_size)
+			if (is_array)
 			{
-				float4 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat4>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableFloat4Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableFloat4Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<float4> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableFloat4>();
 			}
 			break;
 
 		case REDT_float4x4:
-			if (0 == array_size)
+			if (is_array)
 			{
-				float4x4 tmp;
-				res->read(&tmp, sizeof(tmp));
-				for (int i = 0; i < 16; ++ i)
-				{
-					tmp[i] = LE2Native(tmp[i]);
-				}
-
-				var = MakeUniquePtr<RenderVariableFloat4x4>();
-				*var = tmp;
+				ret = MakeUniquePtr<RenderVariableFloat4x4Array>();
 			}
 			else
 			{
-				var = MakeUniquePtr<RenderVariableFloat4x4Array>();
-
-				uint32_t len;
-				res->read(&len, sizeof(len));
-				len = LE2Native(len);
-				if (len > 0)
-				{
-					std::vector<float4x4> init_val(len);
-					res->read(&init_val[0], len * sizeof(init_val[0]));
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 16; ++ j)
-						{
-							init_val[i][j] = LE2Native(init_val[i][j]);
-						}
-					}
-					*var = init_val;
-				}
+				ret = MakeUniquePtr<RenderVariableFloat4x4>();
 			}
 			break;
 
@@ -1948,569 +4053,58 @@ namespace
 		case REDT_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
-			{
-				var = MakeUniquePtr<RenderVariableBuffer>();
-				*var = ShaderResourceViewPtr();
-				*var = ReadShortString(res);
-			}
+			ret = MakeUniquePtr<RenderVariableBuffer>();
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rasterizer_ordered_buffer:
 		case REDT_rasterizer_ordered_structured_buffer:
-			{
-				var = MakeUniquePtr<RenderVariableRwBuffer>();
-				*var = UnorderedAccessViewPtr();
-				*var = ReadShortString(res);
-			}
+			ret = MakeUniquePtr<RenderVariableRwBuffer>();
 			break;
 
 		case REDT_byte_address_buffer:
-			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-			*var = ShaderResourceViewPtr();
+			ret = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 			break;
 
 		case REDT_rw_byte_address_buffer:
 		case REDT_rasterizer_ordered_byte_address_buffer:
-			var = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
-			*var = UnorderedAccessViewPtr();
+			ret = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
+			break;
+
+		case REDT_struct:
+			ret = MakeUniquePtr<RenderVariableStruct>();
 			break;
 
 		default:
 			KFL_UNREACHABLE("Invalid type");
 		}
 
-		return var;
+		return ret;
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void stream_out_var(std::ostream& os, RenderVariable const & var, uint32_t type, uint32_t array_size)
+	std::unique_ptr<RenderVariable> LoadVariable(
+		RenderEffect const& effect, XMLNode const& node, RenderEffectDataType type, uint32_t array_size)
 	{
-		switch (type)
-		{
-		case REDT_bool:
-			if (0 == array_size)
-			{
-				bool tmp;
-				var.Value(tmp);
+		auto ret = RenderVariableFactory(type, array_size != 0);
+		ret->Load(effect, node, array_size);
+		return ret;
+	}
+#endif
 
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			break;
+	std::unique_ptr<RenderVariable> StreamInVariable(
+		RenderEffect const& effect, ResIdentifier& res, RenderEffectDataType type, uint32_t array_size)
+	{
+		auto ret = RenderVariableFactory(type, array_size != 0);
+		ret->StreamIn(effect, res);
+		return ret;
+	}
 
-		case REDT_uint:
-			if (0 == array_size)
-			{
-				uint32_t tmp;
-				var.Value(tmp);
-
-				tmp = Native2LE(tmp);
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<uint32_t> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = Native2LE(init_val[i]);
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_int:
-			if (0 == array_size)
-			{
-				int32_t tmp;
-				var.Value(tmp);
-
-				tmp = Native2LE(tmp);
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int32_t> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = Native2LE(init_val[i]);
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_string:
-			{
-				std::string tmp;
-				var.Value(tmp);
-				WriteShortString(os, tmp);
-			}
-			break;
-
-		case REDT_texture1D:
-		case REDT_texture2D:
-		case REDT_texture2DMS:
-		case REDT_texture3D:
-		case REDT_textureCUBE:
-		case REDT_texture1DArray:
-		case REDT_texture2DArray:
-		case REDT_texture2DMSArray:
-		case REDT_texture3DArray:
-		case REDT_textureCUBEArray:
-		case REDT_rw_texture1D:
-		case REDT_rw_texture2D:
-		case REDT_rw_texture3D:
-		case REDT_rw_texture1DArray:
-		case REDT_rw_texture2DArray:
-		case REDT_rasterizer_ordered_texture1D:
-		case REDT_rasterizer_ordered_texture1DArray:
-		case REDT_rasterizer_ordered_texture2D:
-		case REDT_rasterizer_ordered_texture2DArray:
-		case REDT_rasterizer_ordered_texture3D:
-			{
-				std::string tmp;
-				var.Value(tmp);
-				WriteShortString(os, tmp);
-			}
-			break;
-
-		case REDT_sampler:
-			{
-				SamplerStateObjectPtr tmp;
-				var.Value(tmp);
-				SamplerStateDesc desc = tmp->GetDesc();
-				desc.border_clr[0] = Native2LE(desc.border_clr[0]);
-				desc.border_clr[1] = Native2LE(desc.border_clr[1]);
-				desc.border_clr[2] = Native2LE(desc.border_clr[2]);
-				desc.border_clr[3] = Native2LE(desc.border_clr[3]);
-				desc.addr_mode_u = Native2LE(desc.addr_mode_u);
-				desc.addr_mode_v = Native2LE(desc.addr_mode_v);
-				desc.addr_mode_w = Native2LE(desc.addr_mode_w);
-				desc.filter = Native2LE(desc.filter);
-				desc.min_lod = Native2LE(desc.min_lod);
-				desc.max_lod = Native2LE(desc.max_lod);
-				desc.mip_map_lod_bias = Native2LE(desc.mip_map_lod_bias);
-				desc.cmp_func = Native2LE(desc.cmp_func);
-				os.write(reinterpret_cast<char const *>(&desc), sizeof(desc));
-			}
-			break;
-
-		case REDT_shader:
-			{
-				ShaderDesc tmp;
-				var.Value(tmp);
-				WriteShortString(os, tmp.profile);
-				WriteShortString(os, tmp.func_name);
-			}
-			break;
-
-		case REDT_float:
-			if (0 == array_size)
-			{
-				float tmp;
-				var.Value(tmp);
-
-				tmp = Native2LE(tmp);
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<float> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						init_val[i] = Native2LE(init_val[i]);
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_uint2:
-			if (0 == array_size)
-			{
-				uint2 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int2> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_uint3:
-			if (0 == array_size)
-			{
-				uint3 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int3> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_uint4:
-			if (0 == array_size)
-			{
-				uint4 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int4> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_int2:
-			if (0 == array_size)
-			{
-				int2 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int2> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_int3:
-			if (0 == array_size)
-			{
-				int3 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int3> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_int4:
-			if (0 == array_size)
-			{
-				int4 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<int4> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_float2:
-			if (0 == array_size)
-			{
-				float2 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 2; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<float2> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 2; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_float3:
-			if (0 == array_size)
-			{
-				float3 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 3; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<float3> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 3; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char*>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_float4:
-			if (0 == array_size)
-			{
-				float4 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 4; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<float4> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 4; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_float4x4:
-			if (0 == array_size)
-			{
-				float4x4 tmp;
-				var.Value(tmp);
-
-				for (int i = 0; i < 16; ++ i)
-				{
-					tmp[i] = Native2LE(tmp[i]);
-				}
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			}
-			else
-			{
-				std::vector<float4x4> init_val;
-				var.Value(init_val);
-
-				uint32_t len = static_cast<uint32_t>(init_val.size());
-				len = Native2LE(len);
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
-				{
-					for (uint32_t i = 0; i < len; ++ i)
-					{
-						for (int j = 0; j < 16; ++ j)
-						{
-							init_val[i][j] = Native2LE(init_val[i][j]);
-						}
-					}
-					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
-				}
-			}
-			break;
-
-		case REDT_buffer:
-		case REDT_structured_buffer:
-		case REDT_rw_buffer:
-		case REDT_rw_structured_buffer:
-		case REDT_consume_structured_buffer:
-		case REDT_append_structured_buffer:
-		case REDT_rasterizer_ordered_buffer:
-		case REDT_rasterizer_ordered_structured_buffer:
-			{
-				std::string tmp;
-				var.Value(tmp);
-				WriteShortString(os, tmp);
-			}
-			break;
-
-		case REDT_byte_address_buffer:
-		case REDT_rw_byte_address_buffer:
-		case REDT_rasterizer_ordered_byte_address_buffer:
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid type");
-		}
+#if KLAYGE_IS_DEV_PLATFORM
+	void StreamOutVariable(std::ostream& os, RenderVariable const& var)
+	{
+		checked_cast<RenderVariableIOable const&>(var).StreamOut(os);
 	}
 #endif
 }
@@ -2524,15 +4118,14 @@ namespace KlayGE
 		{
 			std::vector<std::string> res_name;
 
-			bool cloned;
+			bool cloned = false;
 			RenderEffectPtr effect;
 		};
 
 	public:
-		explicit EffectLoadingDesc(ArrayRef<std::string> name)
+		explicit EffectLoadingDesc(std::span<std::string const> name)
 		{
 			effect_desc_.res_name = std::vector<std::string>(name.begin(), name.end());
-			effect_desc_.cloned = false;
 			effect_desc_.effect = MakeSharedPtr<RenderEffect>();
 		}
 
@@ -2549,7 +4142,7 @@ namespace KlayGE
 
 		std::shared_ptr<void> CreateResource() override
 		{
-			effect_desc_.effect->Open(effect_desc_.res_name);
+			effect_desc_.effect->Load(effect_desc_.res_name);
 			return effect_desc_.effect;
 		}
 
@@ -2642,20 +4235,20 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
+	void RenderEffectAnnotation::Load(RenderEffect const& effect, XMLNode const& node)
 	{
-		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
-		name_ = std::string(node->Attrib("name")->ValueString());
-		var_ = read_var(*node, type_, 0);
+		type_ = TypeFromName(node.Attrib("type")->ValueString());
+		name_ = std::string(node.Attrib("name")->ValueString());
+		var_ = LoadVariable(effect, node, type_, 0);
 	}
 #endif
 
-	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
+	void RenderEffectAnnotation::StreamIn(RenderEffect const& effect, ResIdentifier& res)
 	{
-		res->read(&type_, sizeof(type_));
+		res.read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
 		name_ = ReadShortString(res);
-		var_ = stream_in_var(res, type_, 0);
+		var_ = StreamInVariable(effect, res, type_, 0);
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -2664,15 +4257,128 @@ namespace KlayGE
 		uint32_t t = Native2LE(type_);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
 		WriteShortString(os, name_);
-		stream_out_var(os, *var_, type_, 0);
+		StreamOutVariable(os, *var_);
 	}
 #endif
 
 
-	void RenderEffect::Open(ArrayRef<std::string> names)
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectStructType::Load(RenderEffect const& effect, XMLNode const& node)
+	{
+		name_ = std::string(node.Attrib("name")->ValueString());
+		name_hash_ = HashRange(name_.begin(), name_.end());
+
+		for (XMLNodePtr member_node = node.FirstNode("member"); member_node; member_node = member_node->NextSibling("member"))
+		{
+			RenderEffectDataType member_type;
+			auto member_type_name = member_node->Attrib("type")->ValueString();
+			if (effect.StructTypeByName(member_type_name) != nullptr)
+			{
+				member_type = REDT_struct;
+			}
+			else
+			{
+				member_type = TypeFromName(member_type_name);
+				member_type_name = "";
+			}
+
+			auto member_name = member_node->Attrib("name")->ValueString();
+
+			std::string member_array_size;
+			if (auto attr = member_node->Attrib("array_size"))
+			{
+				member_array_size = std::string(attr->ValueString());
+			}
+			
+			members_.push_back(std::make_tuple(
+				member_type, std::string(member_type_name), std::string(member_name), MakeSharedPtr<std::string>(member_array_size)));
+		}
+	}
+#endif
+
+	void RenderEffectStructType::StreamIn(ResIdentifier& res)
+	{
+		name_ = ReadShortString(res);
+		name_hash_ = HashRange(name_.begin(), name_.end());
+
+		uint8_t len;
+		res.read(reinterpret_cast<char*>(&len), sizeof(len));
+
+		members_.resize(len);
+		for (uint32_t i = 0; i < len; ++i)
+		{
+			uint8_t type;
+			res.read(reinterpret_cast<char*>(&type), sizeof(type));
+			std::get<0>(members_[i]) = static_cast<RenderEffectDataType>(type);
+
+			if (type == REDT_struct)
+			{
+				std::get<1>(members_[i]) = ReadShortString(res);
+			}
+
+			std::get<2>(members_[i]) = ReadShortString(res);
+			std::get<3>(members_[i]) = MakeSharedPtr<std::string>(ReadShortString(res));
+		}
+	}
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectStructType::StreamOut(std::ostream& os) const
+	{
+		WriteShortString(os, name_);
+
+		uint8_t len = static_cast<uint8_t>(members_.size());
+		os.write(reinterpret_cast<char const*>(&len), sizeof(len));
+
+		for (uint32_t i = 0; i < len; ++i)
+		{
+			uint8_t const type = static_cast<uint8_t>(std::get<0>(members_[i]));
+			os.write(reinterpret_cast<char const*>(&type), sizeof(type));
+
+			if (type == REDT_struct)
+			{
+				WriteShortString(os, std::get<1>(members_[i]));
+			}
+
+			WriteShortString(os, std::get<2>(members_[i]));
+			WriteShortString(os, *std::get<3>(members_[i]));
+		}
+	}
+#endif
+
+	uint32_t RenderEffectStructType::NumMembers() const
+	{
+		return static_cast<uint8_t>(members_.size());
+	}
+
+	RenderEffectDataType RenderEffectStructType::MemberType(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<0>(members_[index]);
+	}
+
+	std::string const& RenderEffectStructType::MemberTypeName(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<1>(members_[index]);
+	}
+
+	std::string const& RenderEffectStructType::MemberName(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<2>(members_[index]);
+	}
+
+	std::shared_ptr<std::string> const& RenderEffectStructType::MemberArraySize(uint32_t index) const
+	{
+		BOOST_ASSERT(index < this->NumMembers());
+		return std::get<3>(members_[index]);
+	}
+
+
+	void RenderEffect::Load(std::span<std::string const> names)
 	{
 		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
-		effect_template_->Open(names, *this);
+		effect_template_->Load(names, *this);
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -2707,7 +4413,7 @@ namespace KlayGE
 		dst_effect.cbuffers_.resize(cbuffers_.size());
 		for (size_t i = 0; i < cbuffers_.size(); ++i)
 		{
-			dst_effect.cbuffers_[i] = cbuffers_[i]->Clone(*this, dst_effect);
+			dst_effect.cbuffers_[i] = cbuffers_[i]->Clone(dst_effect);
 		}
 
 		dst_effect.shader_objs_.resize(shader_objs_.size());
@@ -2724,7 +4430,7 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < cbuffers_.size(); ++i)
 		{
-			cbuffers_[i]->Reclone(*dst_effect.cbuffers_[i], *this, dst_effect);
+			cbuffers_[i]->Reclone(*dst_effect.cbuffers_[i], dst_effect);
 		}
 
 		for (size_t i = 0; i < shader_objs_.size(); ++i)
@@ -2788,15 +4494,55 @@ namespace KlayGE
 
 	RenderEffectConstantBuffer* RenderEffect::CBufferByName(std::string_view name) const
 	{
+		uint32_t index = this->FindCBuffer(name);
+		if (index != static_cast<uint32_t>(-1))
+		{
+			return this->CBufferByIndex(index);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	uint32_t RenderEffect::FindCBuffer(std::string_view name) const
+	{
 		size_t const name_hash = HashRange(name.begin(), name.end());
-		for (auto const & cbuffer : cbuffers_)
+		for (uint32_t i = 0; i < cbuffers_.size(); ++i)
+		{
+			if (name_hash == cbuffers_[i]->NameHash())
+			{
+				return i;
+			}
+		}
+		return static_cast<uint32_t>(-1);
+	}
+
+	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff)
+	{
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (auto& cbuffer : cbuffers_)
 		{
 			if (name_hash == cbuffer->NameHash())
 			{
-				return cbuffer.get();
+				cbuffer = cbuff;
 			}
 		}
-		return nullptr;
+	}
+
+	uint32_t RenderEffect::NumStructTypes() const
+	{
+		return effect_template_->NumStructTypes();
+	}
+
+	RenderEffectStructType* RenderEffect::StructTypeByName(std::string_view name) const
+	{
+		return effect_template_->StructTypeByName(name);
+	}
+
+	RenderEffectStructType* RenderEffect::StructTypeByIndex(uint32_t index) const
+	{
+		return effect_template_->StructTypeByIndex(index);
 	}
 
 	uint32_t RenderEffect::NumTechniques() const
@@ -2881,7 +4627,7 @@ namespace KlayGE
 			std::string const include_name = std::string(attr->ValueString());
 
 			include_docs.push_back(MakeUniquePtr<XMLDocument>());
-			XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
+			XMLNodePtr include_root = include_docs.back()->Parse(*ResLoader::Instance().Open(include_name));
 
 			std::vector<std::string> include_names;
 			this->RecursiveIncludeNode(*include_root, include_names);
@@ -2907,8 +4653,8 @@ namespace KlayGE
 					else
 					{
 						include_docs.push_back(MakeUniquePtr<XMLDocument>());
-						XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
-						this->InsertIncludeNodes(doc, root, node, *recursive_include_root);
+						XMLNodePtr recursive_include_root = include_docs.back()->Parse(*ResLoader::Instance().Open(*iter));
+						this->InsertIncludeNodes(doc, root, *node, *recursive_include_root);
 
 						whole_include_names.push_back(*iter);
 						++ iter;
@@ -2928,12 +4674,12 @@ namespace KlayGE
 
 			if (!found)
 			{
-				this->InsertIncludeNodes(doc, root, node, *include_root);
+				this->InsertIncludeNodes(doc, root, *node, *include_root);
 				whole_include_names.push_back(include_name);
 			}
 
 			XMLNodePtr node_next = node->NextSibling("include");
-			root.RemoveNode(node);
+			root.RemoveNode(*node);
 			node = node_next;
 		}
 	}
@@ -2948,7 +4694,7 @@ namespace KlayGE
 			std::string const include_name = std::string(attr->ValueString());
 
 			XMLDocument include_doc;
-			XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
+			XMLNodePtr include_root = include_doc.Parse(*ResLoader::Instance().Open(include_name));
 			this->RecursiveIncludeNode(*include_root, include_names);
 
 			bool found = false;
@@ -2968,14 +4714,14 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEffectTemplate::InsertIncludeNodes(XMLDocument& target_doc, XMLNode& target_root,
-		XMLNodePtr const & target_place, XMLNode const & include_root) const
+	void RenderEffectTemplate::InsertIncludeNodes(
+		XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const
 	{
 		for (XMLNodePtr child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 		{
 			if ((XNT_Element == child_node->Type()) && (child_node->Name() != "include"))
 			{
-				target_root.InsertNode(target_place, target_doc.CloneNode(child_node));
+				target_root.InsertNode(target_place, target_doc.CloneNode(*child_node));
 			}
 		}
 	}
@@ -3000,17 +4746,17 @@ namespace KlayGE
 			if (parent_tech_name == inherit_name)
 			{
 				auto parent_node = this->ResolveInheritTechNode(doc, root, node);
-				new_tech_node = doc.CloneNode(parent_node);
+				new_tech_node = doc.CloneNode(*parent_node);
 
 				for (auto tech_anno_node = tech_node->FirstNode("annotation"); tech_anno_node;
 					tech_anno_node = tech_anno_node->NextSibling("annotation"))
 				{
-					new_tech_node->AppendNode(doc.CloneNode(tech_anno_node));
+					new_tech_node->AppendNode(doc.CloneNode(*tech_anno_node));
 				}
 				for (auto tech_macro_node = tech_node->FirstNode("macro"); tech_macro_node;
 					tech_macro_node = tech_macro_node->NextSibling("macro"))
 				{
-					new_tech_node->AppendNode(doc.CloneNode(tech_macro_node));
+					new_tech_node->AppendNode(doc.CloneNode(*tech_macro_node));
 				}
 				for (auto pass_node = tech_node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"))
 				{
@@ -3027,17 +4773,17 @@ namespace KlayGE
 							for (auto pass_anno_node = pass_node->FirstNode("annotation"); pass_anno_node;
 								pass_anno_node = pass_anno_node->NextSibling("annotation"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_anno_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_anno_node));
 							}
 							for (auto pass_macro_node = pass_node->FirstNode("macro"); pass_macro_node;
 								pass_macro_node = pass_macro_node->NextSibling("macro"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_macro_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_macro_node));
 							}
 							for (auto pass_state_node = pass_node->FirstNode("state"); pass_state_node;
 								pass_state_node = pass_state_node->NextSibling("state"))
 							{
-								new_pass_node->AppendNode(doc.CloneNode(pass_state_node));
+								new_pass_node->AppendNode(doc.CloneNode(*pass_state_node));
 							}
 
 							found_pass = true;
@@ -3047,11 +4793,11 @@ namespace KlayGE
 
 					if (!found_pass)
 					{
-						new_tech_node->AppendNode(doc.CloneNode(pass_node));
+						new_tech_node->AppendNode(doc.CloneNode(*pass_node));
 					}
 				}
 
-				new_tech_node->RemoveAttrib(new_tech_node->Attrib("name"));
+				new_tech_node->RemoveAttrib(*new_tech_node->Attrib("name"));
 				new_tech_node->AppendAttrib(doc.AllocAttribString("name", tech_name));
 
 				break;
@@ -3081,17 +4827,17 @@ namespace KlayGE
 					auto name = overrided_node->Attrib("name")->ValueString();
 					if (override_tech_name == name)
 					{
-						auto new_node = doc.CloneNode(this->ResolveInheritTechNode(doc, root, node));
-						new_node->RemoveAttrib(new_node->Attrib("name"));
+						auto new_node = doc.CloneNode(*this->ResolveInheritTechNode(doc, root, node));
+						new_node->RemoveAttrib(*new_node->Attrib("name"));
 						new_node->AppendAttrib(doc.AllocAttribString("name", name));
 						auto attr = new_node->Attrib("override");
 						if (attr)
 						{
-							new_node->RemoveAttrib(attr);
+							new_node->RemoveAttrib(*attr);
 						}
 
-						root.InsertNode(overrided_node, new_node);
-						root.RemoveNode(overrided_node);
+						root.InsertNode(*overrided_node, new_node);
+						root.RemoveNode(*overrided_node);
 						overrided_node = new_node;
 
 						break;
@@ -3109,6 +4855,12 @@ namespace KlayGE
 			{
 				macros_.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
 			}
+		}
+
+		for (XMLNodePtr node = root.FirstNode("struct"); node; node = node->NextSibling("struct"))
+		{
+			struct_types_.push_back(MakeUniquePtr<RenderEffectStructType>());
+			struct_types_.back()->Load(effect, *node);
 		}
 
 		std::vector<XMLNodePtr> parameter_nodes;
@@ -3129,9 +4881,22 @@ namespace KlayGE
 
 		for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
 		{
-			XMLNodePtr const & node = parameter_nodes[param_index];
+			XMLNode const& node = *parameter_nodes[param_index];
 
-			uint32_t type = TypeCodeFromName(node->Attrib("type")->ValueString());
+			RenderEffectDataType type = REDT_count;
+			auto type_name = node.Attrib("type")->ValueString();
+			for (auto const& struct_type : struct_types_)
+			{
+				if (type_name == struct_type->Name())
+				{
+					type = REDT_struct;
+					break;
+				}
+			}
+			if (type == REDT_count)
+			{
+				type = TypeFromName(type_name);
+			}
 			if ((type != REDT_sampler)
 				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture2DMS) && (type != REDT_texture3D)
 				&& (type != REDT_textureCUBE)
@@ -3151,7 +4916,7 @@ namespace KlayGE
 				&& (type != REDT_rasterizer_ordered_texture3D))
 			{
 				RenderEffectConstantBuffer* cbuff = nullptr;
-				XMLNodePtr parent_node = node->Parent();
+				XMLNodePtr parent_node = node.Parent();
 				std::string const cbuff_name = std::string(parent_node->AttribString("name", "global_cb"));
 				size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
@@ -3167,7 +4932,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					effect.cbuffers_.push_back(MakeUniquePtr<RenderEffectConstantBuffer>());
+					effect.cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>(effect));
 					cbuff = effect.cbuffers_.back().get();
 					cbuff->Load(cbuff_name);
 				}
@@ -3177,7 +4942,7 @@ namespace KlayGE
 			}
 
 			effect.params_.push_back(MakeUniquePtr<RenderEffectParameter>());
-			effect.params_.back()->Load(node);
+			effect.params_.back()->Load(effect, node);
 		}
 
 		for (XMLNodePtr shader_graph_nodes_node = root.FirstNode("shader_graph_nodes"); shader_graph_nodes_node;
@@ -3196,7 +4961,7 @@ namespace KlayGE
 				{
 					if (node_name_hash == gn.NameHash())
 					{
-						gn.Load(shader_node);
+						gn.Load(*shader_node);
 						found = true;
 						break;
 					}
@@ -3205,7 +4970,7 @@ namespace KlayGE
 				if (!found)
 				{
 					shader_graph_nodes_.push_back(RenderShaderGraphNode());
-					shader_graph_nodes_.back().Load(shader_node);
+					shader_graph_nodes_.back().Load(*shader_node);
 				}
 			}
 		}
@@ -3213,7 +4978,7 @@ namespace KlayGE
 		for (XMLNodePtr shader_node = root.FirstNode("shader"); shader_node; shader_node = shader_node->NextSibling("shader"))
 		{
 			shader_frags_.push_back(RenderShaderFragment());
-			shader_frags_.back().Load(shader_node);
+			shader_frags_.back().Load(*shader_node);
 		}
 
 		this->GenHLSLShaderText(effect);
@@ -3222,18 +4987,18 @@ namespace KlayGE
 		for (XMLNodePtr node = root.FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 		{
 			techniques_.push_back(MakeUniquePtr<RenderTechnique>());
-			techniques_.back()->Open(effect, node, index);
+			techniques_.back()->Load(effect, *node, index);
 		}
 	}
 #endif
 
-	void RenderEffectTemplate::Open(ArrayRef<std::string> names, RenderEffect& effect)
+	void RenderEffectTemplate::Load(std::span<std::string const> names, RenderEffect& effect)
 	{
-		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(names.back()));
-		std::filesystem::path last_fxml_directory = last_fxml_path.parent_path();
+		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
+		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
-		for (size_t i = 0; i < names.size(); ++ i)
+		for (int i = 0; i < names.size(); ++ i)
 		{
 			connected_name += std::filesystem::path(names[i]).stem().string();
 			if (i != names.size() - 1)
@@ -3245,10 +5010,10 @@ namespace KlayGE
 		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
 		if (kfx_name.empty())
 		{
-			kfx_name = (last_fxml_directory / (connected_name + ".kfx")).string();
+			kfx_name = (first_fxml_directory / (connected_name + ".kfx")).string();
 		}
 
-		res_name_ = (last_fxml_directory / (connected_name + ".fxml")).string();
+		res_name_ = (first_fxml_directory / (connected_name + ".fxml")).string();
 		res_name_hash_ = HashRange(res_name_.begin(), res_name_.end());
 #if KLAYGE_IS_DEV_PLATFORM
 		for (auto const & name : names)
@@ -3261,7 +5026,7 @@ namespace KlayGE
 				timestamp_ = std::max(timestamp_, source->Timestamp());
 
 				std::unique_ptr<XMLDocument> doc = MakeUniquePtr<XMLDocument>();
-				XMLNodePtr root = doc->Parse(source);
+				XMLNodePtr root = doc->Parse(*source);
 
 				std::vector<std::string> include_names;
 				this->RecursiveIncludeNode(*root, include_names);
@@ -3278,7 +5043,7 @@ namespace KlayGE
 		need_compile_ = false;
 #endif
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
-		if (!this->StreamIn(kfx_source, effect))
+		if (!kfx_source || !this->StreamIn(*kfx_source, effect))
 		{
 #if KLAYGE_IS_DEV_PLATFORM
 			effect.params_.clear();
@@ -3286,6 +5051,7 @@ namespace KlayGE
 			effect.shader_objs_.clear();
 
 			macros_.clear();
+			struct_types_.clear();
 			shader_frags_.clear();
 			hlsl_shader_.clear();
 			techniques_.clear();
@@ -3300,22 +5066,22 @@ namespace KlayGE
 			if (main_source)
 			{
 				frag_docs[0] = MakeUniquePtr<XMLDocument>();
-				XMLNodePtr root = frag_docs[0]->Parse(main_source);
+				XMLNodePtr root = frag_docs[0]->Parse(*main_source);
 				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
 
-				for (size_t i = 1; i < names.size(); ++ i)
+				for (int i = 1; i < names.size(); ++ i)
 				{
 					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
 					if (source)
 					{
 						frag_docs[i] = MakeUniquePtr<XMLDocument>();
-						XMLNodePtr frag_root = frag_docs[i]->Parse(source);
+						XMLNodePtr frag_root = frag_docs[i]->Parse(*source);
 
 						this->PreprocessIncludes(*frag_docs[i], *frag_root, include_docs);
 
 						for (auto frag_node = frag_root->FirstNode(); frag_node; frag_node = frag_node->NextSibling())
 						{
-							root->AppendNode(frag_docs[i]->CloneNode(frag_node));
+							root->AppendNode(frag_docs[i]->CloneNode(*frag_node));
 						}
 					}
 				}
@@ -3359,149 +5125,160 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderEffectTemplate::StreamIn(ResIdentifierPtr const & source, RenderEffect& effect)
+	bool RenderEffectTemplate::StreamIn(ResIdentifier& source, RenderEffect& effect)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		bool ret = false;
-		if (source)
+		
+		uint32_t fourcc;
+		source.read(&fourcc, sizeof(fourcc));
+		fourcc = LE2Native(fourcc);
+			
+		uint32_t ver;
+		source.read(&ver, sizeof(ver));
+		ver = LE2Native(ver);
+			
+		if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
 		{
-			uint32_t fourcc;
-			source->read(&fourcc, sizeof(fourcc));
-			fourcc = LE2Native(fourcc);
-			
-			uint32_t ver;
-			source->read(&ver, sizeof(ver));
-			ver = LE2Native(ver);
-			
-			if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
+			uint32_t shader_fourcc;
+			source.read(&shader_fourcc, sizeof(shader_fourcc));
+			shader_fourcc = LE2Native(shader_fourcc);
+
+			uint32_t shader_ver;
+			source.read(&shader_ver, sizeof(shader_ver));
+			shader_ver = LE2Native(shader_ver);
+
+			uint8_t shader_platform_name_len;
+			source.read(&shader_platform_name_len, sizeof(shader_platform_name_len));
+			std::string shader_platform_name(shader_platform_name_len, 0);
+			source.read(&shader_platform_name[0], shader_platform_name_len);
+
+			if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver)
+				&& (re.NativeShaderPlatformName() == shader_platform_name))
 			{
-				uint32_t shader_fourcc;
-				source->read(&shader_fourcc, sizeof(shader_fourcc));
-				shader_fourcc = LE2Native(shader_fourcc);
-
-				uint32_t shader_ver;
-				source->read(&shader_ver, sizeof(shader_ver));
-				shader_ver = LE2Native(shader_ver);
-
-				uint8_t shader_platform_name_len;
-				source->read(&shader_platform_name_len, sizeof(shader_platform_name_len));
-				std::string shader_platform_name(shader_platform_name_len, 0);
-				source->read(&shader_platform_name[0], shader_platform_name_len);
-
-				if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver)
-					&& (re.NativeShaderPlatformName() == shader_platform_name))
-				{
-					uint64_t timestamp;
-					source->read(&timestamp, sizeof(timestamp));
+				uint64_t timestamp;
+				source.read(&timestamp, sizeof(timestamp));
 #if KLAYGE_IS_DEV_PLATFORM
-					timestamp = LE2Native(timestamp);
-					if (timestamp_ <= timestamp)
+				timestamp = LE2Native(timestamp);
+				if (timestamp_ <= timestamp)
 #endif
+				{
+					shader_descs_.resize(1);
+
 					{
-						shader_descs_.resize(1);
+						uint16_t num_macros;
+						source.read(&num_macros, sizeof(num_macros));
+						num_macros = LE2Native(num_macros);
 
+						macros_.resize(num_macros);
+						for (uint32_t i = 0; i < num_macros; ++ i)
 						{
-							uint16_t num_macros;
-							source->read(&num_macros, sizeof(num_macros));
-							num_macros = LE2Native(num_macros);
+							std::string name = ReadShortString(source);
+							std::string value = ReadShortString(source);
+							macros_[i] = std::make_pair(std::make_pair(name, value), true);
+						}
+					}
 
-							macros_.resize(num_macros);
-							for (uint32_t i = 0; i < num_macros; ++ i)
+					{
+						uint16_t num_structs;
+						source.read(&num_structs, sizeof(num_structs));
+						num_structs = LE2Native(num_structs);
+
+						struct_types_.resize(num_structs);
+						for (uint32_t i = 0; i < num_structs; ++i)
+						{
+							struct_types_[i] = MakeUniquePtr<RenderEffectStructType>();
+							struct_types_[i]->StreamIn(source);
+						}
+					}
+
+					{
+						uint16_t num_cbufs;
+						source.read(&num_cbufs, sizeof(num_cbufs));
+						num_cbufs = LE2Native(num_cbufs);
+						effect.cbuffers_.resize(num_cbufs);
+						for (uint32_t i = 0; i < num_cbufs; ++ i)
+						{
+							effect.cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>(effect);
+							effect.cbuffers_[i]->StreamIn(source);
+						}
+					}
+
+					{
+						uint16_t num_params;
+						source.read(&num_params, sizeof(num_params));
+						num_params = LE2Native(num_params);
+						effect.params_.resize(num_params);
+						for (uint32_t i = 0; i < num_params; ++ i)
+						{
+							effect.params_[i] = MakeUniquePtr<RenderEffectParameter>();
+							effect.params_[i]->StreamIn(effect, source);
+						}
+					}
+
+					{
+						uint8_t num_shader_graph_nodes;
+						source.read(&num_shader_graph_nodes, sizeof(num_shader_graph_nodes));
+						shader_graph_nodes_.resize(num_shader_graph_nodes);
+						for (uint32_t i = 0; i < num_shader_graph_nodes; ++ i)
+						{
+							shader_graph_nodes_[i].StreamIn(source);
+						}
+					}
+
+					{
+						uint16_t num_shader_frags;
+						source.read(&num_shader_frags, sizeof(num_shader_frags));
+						num_shader_frags = LE2Native(num_shader_frags);
+						if (num_shader_frags > 0)
+						{
+							shader_frags_.resize(num_shader_frags);
+							for (uint32_t i = 0; i < num_shader_frags; ++ i)
 							{
-								std::string name = ReadShortString(source);
-								std::string value = ReadShortString(source);
-								macros_[i] = std::make_pair(std::make_pair(name, value), true);
+								shader_frags_[i].StreamIn(source);
 							}
 						}
+					}
 
+					{
+						uint16_t num_shader_descs;
+						source.read(&num_shader_descs, sizeof(num_shader_descs));
+						num_shader_descs = LE2Native(num_shader_descs);
+						shader_descs_.resize(num_shader_descs + 1);
+						for (uint32_t i = 1; i <= num_shader_descs; ++ i)
 						{
-							uint16_t num_cbufs;
-							source->read(&num_cbufs, sizeof(num_cbufs));
-							num_cbufs = LE2Native(num_cbufs);
-							effect.cbuffers_.resize(num_cbufs);
-							for (uint32_t i = 0; i < num_cbufs; ++ i)
-							{
-								effect.cbuffers_[i] = MakeUniquePtr<RenderEffectConstantBuffer>();
-								effect.cbuffers_[i]->StreamIn(source);
-							}
-						}
+							shader_descs_[i].profile = ReadShortString(source);
+							shader_descs_[i].func_name = ReadShortString(source);
+							source.read(&shader_descs_[i].macros_hash, sizeof(shader_descs_[i].macros_hash));
 
-						{
-							uint16_t num_params;
-							source->read(&num_params, sizeof(num_params));
-							num_params = LE2Native(num_params);
-							effect.params_.resize(num_params);
-							for (uint32_t i = 0; i < num_params; ++ i)
-							{
-								effect.params_[i] = MakeUniquePtr<RenderEffectParameter>();
-								effect.params_[i]->StreamIn(source);
-							}
-						}
+							source.read(&shader_descs_[i].tech_pass_type, sizeof(shader_descs_[i].tech_pass_type));
+							shader_descs_[i].tech_pass_type = LE2Native(shader_descs_[i].tech_pass_type);
 
-						{
-							uint8_t num_shader_graph_nodes;
-							source->read(&num_shader_graph_nodes, sizeof(num_shader_graph_nodes));
-							shader_graph_nodes_.resize(num_shader_graph_nodes);
-							for (uint32_t i = 0; i < num_shader_graph_nodes; ++ i)
+							uint8_t len;
+							source.read(&len, sizeof(len));
+							if (len > 0)
 							{
-								shader_graph_nodes_[i].StreamIn(source);
-							}
-						}
-
-						{
-							uint16_t num_shader_frags;
-							source->read(&num_shader_frags, sizeof(num_shader_frags));
-							num_shader_frags = LE2Native(num_shader_frags);
-							if (num_shader_frags > 0)
-							{
-								shader_frags_.resize(num_shader_frags);
-								for (uint32_t i = 0; i < num_shader_frags; ++ i)
+								shader_descs_[i].so_decl.resize(len);
+								source.read(&shader_descs_[i].so_decl[0], len * sizeof(shader_descs_[i].so_decl[0]));
+								for (uint32_t j = 0; j < len; ++ j)
 								{
-									shader_frags_[i].StreamIn(source);
+									shader_descs_[i].so_decl[j].usage = LE2Native(shader_descs_[i].so_decl[j].usage);
 								}
 							}
 						}
+					}
 
+					ret = true;
+					{
+						uint16_t num_techs;
+						source.read(&num_techs, sizeof(num_techs));
+						num_techs = LE2Native(num_techs);
+						techniques_.resize(num_techs);
+						for (uint32_t i = 0; i < num_techs; ++ i)
 						{
-							uint16_t num_shader_descs;
-							source->read(&num_shader_descs, sizeof(num_shader_descs));
-							num_shader_descs = LE2Native(num_shader_descs);
-							shader_descs_.resize(num_shader_descs + 1);
-							for (uint32_t i = 0; i < num_shader_descs; ++ i)
-							{
-								shader_descs_[i + 1].profile = ReadShortString(source);
-								shader_descs_[i + 1].func_name = ReadShortString(source);
-								source->read(&shader_descs_[i + 1].macros_hash, sizeof(shader_descs_[i + 1].macros_hash));
-
-								source->read(&shader_descs_[i + 1].tech_pass_type, sizeof(shader_descs_[i + 1].tech_pass_type));
-								shader_descs_[i + 1].tech_pass_type = LE2Native(shader_descs_[i + 1].tech_pass_type);
-
-								uint8_t len;
-								source->read(&len, sizeof(len));
-								if (len > 0)
-								{
-									shader_descs_[i + 1].so_decl.resize(len);
-									source->read(&shader_descs_[i + 1].so_decl[0], len * sizeof(shader_descs_[i + 1].so_decl[0]));
-									for (uint32_t j = 0; j < len; ++ j)
-									{
-										shader_descs_[i + 1].so_decl[j].usage = LE2Native(shader_descs_[i + 1].so_decl[j].usage);
-									}
-								}
-							}
-						}
-
-						ret = true;
-						{
-							uint16_t num_techs;
-							source->read(&num_techs, sizeof(num_techs));
-							num_techs = LE2Native(num_techs);
-							techniques_.resize(num_techs);
-							for (uint32_t i = 0; i < num_techs; ++ i)
-							{
-								techniques_[i] = MakeUniquePtr<RenderTechnique>();
-								ret &= techniques_[i]->StreamIn(effect, source, i);
-							}
+							techniques_[i] = MakeUniquePtr<RenderTechnique>();
+							ret &= techniques_[i]->StreamIn(effect, source, i);
 						}
 					}
 				}
@@ -3559,8 +5336,16 @@ namespace KlayGE
 		}
 
 		{
+			uint16_t num_structs = Native2LE(static_cast<uint16_t>(struct_types_.size()));
+			os.write(reinterpret_cast<char const*>(&num_structs), sizeof(num_structs));
+			for (uint32_t i = 0; i < struct_types_.size(); ++i)
+			{
+				struct_types_[i]->StreamOut(os);
+			}
+		}
+
+		{
 			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
-			num_cbufs = Native2LE(num_cbufs);
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
 			{
@@ -3570,7 +5355,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_params = Native2LE(static_cast<uint16_t>(effect.params_.size()));
-			num_params = Native2LE(num_params);
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
 			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
 			{
@@ -3589,7 +5373,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(shader_frags_.size()));
-			num_shader_frags = Native2LE(num_shader_frags);
 			os.write(reinterpret_cast<char const *>(&num_shader_frags), sizeof(num_shader_frags));
 			for (uint32_t i = 0; i < shader_frags_.size(); ++ i)
 			{
@@ -3599,26 +5382,23 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(shader_descs_.size() - 1));
-			num_shader_descs = Native2LE(num_shader_descs);
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
-			for (uint32_t i = 0; i < shader_descs_.size() - 1; ++ i)
+			for (uint32_t i = 1; i < shader_descs_.size(); ++i)
 			{
-				WriteShortString(os, shader_descs_[i + 1].profile);
-				WriteShortString(os, shader_descs_[i + 1].func_name);
+				WriteShortString(os, shader_descs_[i].profile);
+				WriteShortString(os, shader_descs_[i].func_name);
 
-				uint64_t tmp64 = Native2LE(shader_descs_[i + 1].macros_hash);
-				tmp64 = Native2LE(tmp64);
+				uint64_t tmp64 = Native2LE(shader_descs_[i].macros_hash);
 				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
 
-				uint32_t tmp32 = Native2LE(shader_descs_[i + 1].tech_pass_type);
-				tmp32 = Native2LE(tmp32);
+				uint32_t tmp32 = Native2LE(shader_descs_[i].tech_pass_type);
 				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
-				uint8_t len = static_cast<uint8_t>(shader_descs_[i + 1].so_decl.size());
+				uint8_t len = static_cast<uint8_t>(shader_descs_[i].so_decl.size());
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				for (uint32_t j = 0; j < len; ++ j)
 				{
-					ShaderDesc::StreamOutputDecl so_decl = shader_descs_[i + 1].so_decl[j];
+					ShaderDesc::StreamOutputDecl so_decl = shader_descs_[i].so_decl[j];
 					so_decl.usage = Native2LE(so_decl.usage);
 					os.write(reinterpret_cast<char const *>(&so_decl), sizeof(so_decl));
 				}
@@ -3627,7 +5407,6 @@ namespace KlayGE
 
 		{
 			uint16_t num_techs = Native2LE(static_cast<uint16_t>(techniques_.size()));
-			num_techs = Native2LE(num_techs);
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
@@ -3636,6 +5415,19 @@ namespace KlayGE
 		}
 	}
 #endif
+
+	RenderEffectStructType* RenderEffectTemplate::StructTypeByName(std::string_view name) const
+	{
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (auto const& struct_type : struct_types_)
+		{
+			if (name_hash == struct_type->NameHash())
+			{
+				return struct_type.get();
+			}
+		}
+		return nullptr;
+	}
 
 	RenderTechnique* RenderEffectTemplate::TechniqueByName(std::string_view name) const
 	{
@@ -3691,6 +5483,35 @@ namespace KlayGE
 		}
 		str += '\n';
 
+		for (uint32_t i = 0; i < this->NumStructTypes(); ++i)
+		{
+			RenderEffectStructType const& struct_type = *this->StructTypeByIndex(i);
+			str += "struct " + struct_type.Name() + "\n";
+			str += "{\n";
+			for (uint32_t j = 0; j < struct_type.NumMembers(); ++j)
+			{
+				RenderEffectDataType member_type = struct_type.MemberType(j);
+				if (member_type == REDT_struct)
+				{
+					str += struct_type.MemberTypeName(j);
+				}
+				else
+				{
+					str += std::string(TypeNameFromCode(member_type));
+				}
+
+				str += " " + struct_type.MemberName(j);
+
+				auto array_size_str = struct_type.MemberArraySize(j);
+				if (array_size_str && !array_size_str->empty())
+				{
+					str += "[" + *array_size_str + "]";
+				}
+				str += ";\n";
+			}
+			str += "};\n";
+		}
+
 		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
 			RenderEffectConstantBuffer const & cbuff = *effect.CBufferByIndex(i);
@@ -3737,10 +5558,21 @@ namespace KlayGE
 					break;
 
 				default:
-					str += std::string(TypeNameFromCode(param.Type())) + " " + param.Name();
-					if (param.ArraySize())
+					if (param.Type() == REDT_struct)
 					{
-						str += "[" + *param.ArraySize() + "]";
+						str += param.StructType()->Name();
+					}
+					else
+					{
+						str += std::string(TypeNameFromCode(param.Type()));
+					}
+
+					str += " " + param.Name();
+
+					auto array_size_str = param.ArraySize();
+					if (array_size_str && !array_size_str->empty())
+					{
+						str += "[" + *array_size_str + "]";
 					}
 					str += ";\n";
 					break;
@@ -4021,9 +5853,8 @@ namespace KlayGE
 			ShaderModel const & ver = effect_shader_frag.Version();
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 			{
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
-					+ std::to_string(static_cast<int>(ver.major_ver)) + ", "
-					+ std::to_string(static_cast<int>(ver.minor_ver)) + ")\n";
+				str += std::format(
+					"#if KLAYGE_SHADER_MODEL >= SHADER_MODEL({}, {})\n", static_cast<int>(ver.major_ver), static_cast<int>(ver.minor_ver));
 			}
 
 			str += effect_shader_frag.str() + "\n";
@@ -4053,13 +5884,13 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderTechnique::Open(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index)
+	void RenderTechnique::Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index)
 	{
-		name_ = std::string(node->Attrib("name")->ValueString());
+		name_ = std::string(node.Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		RenderTechnique* parent_tech = nullptr;
-		XMLAttributePtr inherit_attr = node->Attrib("inherit");
+		XMLAttributePtr inherit_attr = node.Attrib("inherit");
 		if (inherit_attr)
 		{
 			std::string_view const inherit = inherit_attr->ValueString();
@@ -4070,7 +5901,7 @@ namespace KlayGE
 		}
 
 		{
-			XMLNodePtr anno_node = node->FirstNode("annotation");
+			XMLNodePtr anno_node = node.FirstNode("annotation");
 			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -4083,7 +5914,7 @@ namespace KlayGE
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
 
-					annotation->Load(anno_node);
+					annotation->Load(effect, *anno_node);
 				}
 			}
 			else if (parent_tech)
@@ -4093,7 +5924,7 @@ namespace KlayGE
 		}
 
 		{
-			XMLNodePtr macro_node = node->FirstNode("macro");
+			XMLNodePtr macro_node = node.FirstNode("macro");
 			if (macro_node)
 			{
 				macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
@@ -4127,7 +5958,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!node->FirstNode("pass") && parent_tech)
+		if (!node.FirstNode("pass") && parent_tech)
 		{
 			is_validate_ = parent_tech->is_validate_;
 			has_discard_ = parent_tech->has_discard_;
@@ -4148,7 +5979,7 @@ namespace KlayGE
 
 					auto inherit_pass = parent_tech->passes_[index].get();
 
-					pass->Open(effect, tech_index, index, inherit_pass);
+					pass->Load(effect, tech_index, index, inherit_pass);
 					is_validate_ &= pass->Validate();
 				}
 			}
@@ -4170,7 +6001,7 @@ namespace KlayGE
 			}
 		
 			uint32_t index = 0;
-			for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
+			for (XMLNodePtr pass_node = node.FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
 			{
 				RenderPassPtr pass = MakeSharedPtr<RenderPass>();
 				passes_.push_back(pass);
@@ -4181,7 +6012,7 @@ namespace KlayGE
 					inherit_pass = parent_tech->passes_[index].get();
 				}
 
-				pass->Open(effect, pass_node, tech_index, index, inherit_pass);
+				pass->Load(effect, *pass_node, tech_index, index, inherit_pass);
 
 				is_validate_ &= pass->Validate();
 
@@ -4250,13 +6081,13 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderTechnique::StreamIn(RenderEffect& effect, ResIdentifierPtr const & res, uint32_t tech_index)
+	bool RenderTechnique::StreamIn(RenderEffect& effect, ResIdentifier& res, uint32_t tech_index)
 	{
 		name_ = ReadShortString(res);
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
+		res.read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
 			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -4266,12 +6097,12 @@ namespace KlayGE
 				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 				(*annotations_)[i] = annotation;
 				
-				annotation->StreamIn(res);
+				annotation->StreamIn(effect, res);
 			}
 		}
 
 		uint8_t num_macro;
-		res->read(&num_macro, sizeof(num_macro));
+		res.read(&num_macro, sizeof(num_macro));
 		if (num_macro > 0)
 		{
 			macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
@@ -4284,13 +6115,13 @@ namespace KlayGE
 			}
 		}
 
-		res->read(&transparent_, sizeof(transparent_));
-		res->read(&weight_, sizeof(weight_));
+		res.read(&transparent_, sizeof(transparent_));
+		res.read(&weight_, sizeof(weight_));
 		weight_ = LE2Native(weight_);
 
 		bool ret = true;
 		uint8_t num_passes;
-		res->read(&num_passes, sizeof(num_passes));
+		res.read(&num_passes, sizeof(num_passes));
 		passes_.resize(num_passes);
 		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
 		{
@@ -4377,14 +6208,14 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderPass::Open(RenderEffect& effect, XMLNodePtr const & node,
-		uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
+	void RenderPass::Load(
+		RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass)
 	{
-		name_ = std::string(node->Attrib("name")->ValueString());
+		name_ = std::string(node.Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		{
-			XMLNodePtr anno_node = node->FirstNode("annotation");
+			XMLNodePtr anno_node = node.FirstNode("annotation");
 			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -4397,7 +6228,7 @@ namespace KlayGE
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
 
-					annotation->Load(anno_node);
+					annotation->Load(effect, *anno_node);
 				}
 			}
 			else if (inherit_pass)
@@ -4407,7 +6238,7 @@ namespace KlayGE
 		}
 
 		{
-			XMLNodePtr macro_node = node->FirstNode("macro");
+			XMLNodePtr macro_node = node.FirstNode("macro");
 			if (macro_node)
 			{
 				macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
@@ -4476,7 +6307,7 @@ namespace KlayGE
 			shader_desc_ids_ = inherit_pass->shader_desc_ids_;
 		}
 
-		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
+		for (XMLNodePtr state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
 			std::string_view const name = state_node->Attrib("name")->ValueString();
 			size_t const state_name_hash = HashRange(name.begin(), name.end());
@@ -4534,52 +6365,52 @@ namespace KlayGE
 			}
 			else if (CT_HASH("blend_enable") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_enable[index] = BoolFromStr(value_str);
 			}
 			else if (CT_HASH("logic_op_enable") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.logic_op_enable[index] = BoolFromStr(value_str);
 			}
 			else if (CT_HASH("blend_op") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_op[index] = BlendOperationFromName(value_str);
 			}
 			else if (CT_HASH("src_blend") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.src_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("dest_blend") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.dest_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("blend_op_alpha") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_op_alpha[index] = BlendOperationFromName(value_str);
 			}
 			else if (CT_HASH("src_blend_alpha") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.src_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("dest_blend_alpha") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.dest_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("logic_op") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.logic_op[index] = LogicOperationFromName(value_str);
 			}
 			else if (CT_HASH("color_write_mask") == state_name_hash)
 			{
-				int index = get_index(*state_node);
+				int index = RetrieveIndex(*state_node);
 				bs_desc.color_write_mask[index] = static_cast<uint8_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("blend_factor") == state_name_hash)
@@ -4717,8 +6548,8 @@ namespace KlayGE
 				}
 
 				ShaderDesc sd;
-				sd.profile = get_profile(*state_node);
-				sd.func_name = get_func_name(*state_node);
+				sd.profile = RetrieveProfile(*state_node);
+				sd.func_name = RetrieveFuncName(*state_node);
 				sd.macros_hash = macros_hash;
 
 				if ((ShaderStage::Vertex == stage) || (ShaderStage::Geometry == stage))
@@ -4851,7 +6682,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderPass::Open(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
+	void RenderPass::Load(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
 		BOOST_ASSERT(inherit_pass);
 
@@ -4961,7 +6792,7 @@ namespace KlayGE
 		is_validate_ = shader_obj->Validate();
 	}
 
-	bool RenderPass::StreamIn(RenderEffect& effect, ResIdentifierPtr const& res, uint32_t tech_index, uint32_t pass_index)
+	bool RenderPass::StreamIn(RenderEffect& effect, ResIdentifier& res, uint32_t tech_index, uint32_t pass_index)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -4969,7 +6800,7 @@ namespace KlayGE
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
+		res.read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
 			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -4978,13 +6809,12 @@ namespace KlayGE
 			{
 				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 				(*annotations_)[i] = annotation;
-				
-				annotation->StreamIn(res);
+				annotation->StreamIn(effect, res);
 			}
 		}
 
 		uint8_t num_macro;
-		res->read(&num_macro, sizeof(num_macro));
+		res.read(&num_macro, sizeof(num_macro));
 		if (num_macro > 0)
 		{
 			macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
@@ -5001,14 +6831,14 @@ namespace KlayGE
 		DepthStencilStateDesc dss_desc;
 		BlendStateDesc bs_desc;
 
-		res->read(&rs_desc, sizeof(rs_desc));
+		res.read(&rs_desc, sizeof(rs_desc));
 		rs_desc.polygon_mode = LE2Native(rs_desc.polygon_mode);
 		rs_desc.shade_mode = LE2Native(rs_desc.shade_mode);
 		rs_desc.cull_mode = LE2Native(rs_desc.cull_mode);
 		rs_desc.polygon_offset_factor = LE2Native(rs_desc.polygon_offset_factor);
 		rs_desc.polygon_offset_units = LE2Native(rs_desc.polygon_offset_units);
 		
-		res->read(&dss_desc, sizeof(dss_desc));
+		res.read(&dss_desc, sizeof(dss_desc));
 		dss_desc.depth_func = LE2Native(dss_desc.depth_func);
 		dss_desc.front_stencil_func = LE2Native(dss_desc.front_stencil_func);
 		dss_desc.front_stencil_ref = LE2Native(dss_desc.front_stencil_ref);
@@ -5025,7 +6855,7 @@ namespace KlayGE
 		dss_desc.back_stencil_depth_fail = LE2Native(dss_desc.back_stencil_depth_fail);
 		dss_desc.back_stencil_pass = LE2Native(dss_desc.back_stencil_pass);
 
-		res->read(&bs_desc, sizeof(bs_desc));
+		res.read(&bs_desc, sizeof(bs_desc));
 		for (size_t i = 0; i < 4; ++ i)
 		{
 			bs_desc.blend_factor[i] = LE2Native(bs_desc.blend_factor[i]);
@@ -5043,7 +6873,7 @@ namespace KlayGE
 		
 		render_state_obj_ = rf.MakeRenderStateObject(rs_desc, dss_desc, bs_desc);
 
-		res->read(&shader_desc_ids_[0], shader_desc_ids_.size() * sizeof(shader_desc_ids_[0]));
+		res.read(&shader_desc_ids_[0], shader_desc_ids_.size() * sizeof(shader_desc_ids_[0]));
 		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
 		{
 			shader_desc_ids_[stage] = LE2Native(shader_desc_ids_[stage]);
@@ -5064,7 +6894,7 @@ namespace KlayGE
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + stage_index)
 				{
 					shader_stage = rf.MakeShaderStageObject(stage);
-					shader_stage->StreamIn(effect, shader_desc_ids_, *res);
+					shader_stage->StreamIn(effect, shader_desc_ids_, res);
 				}
 				else
 				{
@@ -5190,7 +7020,7 @@ namespace KlayGE
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		render_eng.SetStateObject(render_state_obj_);
 
-		this->GetShaderObject(effect)->Bind();
+		this->GetShaderObject(effect)->Bind(effect);
 	}
 
 	void RenderPass::Unbind(RenderEffect const & effect) const
@@ -5209,7 +7039,7 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderEffectConstantBuffer::StreamIn(ResIdentifierPtr const & res)
+	void RenderEffectConstantBuffer::StreamIn(ResIdentifier& res)
 	{
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = ReadShortString(res);
@@ -5217,10 +7047,10 @@ namespace KlayGE
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 
 		uint16_t len;
-		res->read(&len, sizeof(len));
+		res.read(&len, sizeof(len));
 		len = LE2Native(len);
 		param_indices_->resize(len);
-		res->read(&(*param_indices_)[0], len * sizeof((*param_indices_)[0]));
+		res.read(&(*param_indices_)[0], len * sizeof((*param_indices_)[0]));
 		for (uint32_t i = 0; i < len; ++ i)
 		{
 			(*param_indices_)[i] = LE2Native((*param_indices_)[i]);
@@ -5242,48 +7072,63 @@ namespace KlayGE
 	}
 #endif
 
-	std::unique_ptr<RenderEffectConstantBuffer> RenderEffectConstantBuffer::Clone(RenderEffect& src_effect, RenderEffect& dst_effect)
+	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect const& dst_effect)
 	{
-		auto ret = MakeUniquePtr<RenderEffectConstantBuffer>();
-
-		ret->name_ = name_;
-		ret->param_indices_ = param_indices_;
-		ret->buff_ = buff_;
-		ret->Resize(static_cast<uint32_t>(buff_.size()));
-
-		for (size_t i = 0; i < param_indices_->size(); ++ i)
-		{
-			RenderEffectParameter* src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
-			if (src_param->InCBuffer())
-			{
-				RenderEffectParameter* dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
-				dst_param->RebindToCBuffer(*ret);
-			}
-		}
-
+		auto ret = MakeSharedPtr<RenderEffectConstantBuffer>(dst_effect);
+		this->Reclone(*ret, dst_effect);
 		return ret;
 	}
 
-	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& src_effect, RenderEffect& dst_effect)
+	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
 		dst_cbuffer.name_ = name_;
-		dst_cbuffer.param_indices_ = param_indices_;
+		if (effect_->ResNameHash() == dst_effect.ResNameHash())
+		{
+			dst_cbuffer.param_indices_ = param_indices_;
+		}
+		else
+		{
+			dst_cbuffer.param_indices_ = MakeSharedPtr<std::vector<uint32_t>>(param_indices_->size());
+		}
 		dst_cbuffer.buff_ = buff_;
 		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
 
-		for (size_t i = 0; i < param_indices_->size(); ++i)
+		this->RebindParameters(dst_cbuffer, dst_effect);
+	}
+
+	void RenderEffectConstantBuffer::RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
+	{
+		if (effect_ != &dst_effect)
 		{
-			RenderEffectParameter* src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
-			if (src_param->InCBuffer())
+			for (uint32_t i = 0; i < param_indices_->size(); ++i)
 			{
-				RenderEffectParameter* dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
-				if (dst_param->InCBuffer())
+				uint32_t param_index = (*param_indices_)[i];
+				RenderEffectParameter* src_param = effect_->ParameterByIndex(param_index);
+				if (src_param->InCBuffer())
 				{
-					dst_param->RebindToCBuffer(dst_cbuffer);
-				}
-				else
-				{
-					dst_param->BindToCBuffer(dst_cbuffer, src_param->CBufferOffset(), src_param->Stride());
+					if (effect_->ResNameHash() != dst_effect.ResNameHash())
+					{
+						for (uint32_t j = 0; j < dst_effect.NumParameters(); ++j)
+						{
+							if (dst_effect.ParameterByIndex(j)->NameHash() == src_param->NameHash())
+							{
+								param_index = j;
+								break;
+							}
+						}
+					}
+
+					RenderEffectParameter* dst_param = dst_effect.ParameterByIndex(param_index);
+					if (dst_param->InCBuffer())
+					{
+						dst_param->RebindToCBuffer(dst_effect, src_param->CBufferIndex());
+					}
+					else
+					{
+						dst_param->BindToCBuffer(dst_effect, src_param->CBufferIndex(), src_param->CBufferOffset(), src_param->Stride());
+					}
+
+					(*dst_cbuffer.param_indices_)[i] = param_index;
 				}
 			}
 		}
@@ -5327,14 +7172,24 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectParameter::Load(XMLNodePtr const & node)
+	void RenderEffectParameter::Load(RenderEffect const& effect, XMLNode const& node)
 	{
-		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
+		auto type_name = node.Attrib("type")->ValueString();
+		auto* struct_type = effect.StructTypeByName(type_name);
+		if (struct_type)
+		{
+			type_ = REDT_struct;
+		}
+		else
+		{
+			type_ = TypeFromName(type_name);
+		}
+
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = std::string(node->Attrib("name")->ValueString());
+		name_->first = std::string(node.Attrib("name")->ValueString());
 		name_->second = HashRange(name_->first.begin(), name_->first.end());
 
-		XMLAttributePtr attr = node->Attrib("semantic");
+		XMLAttributePtr attr = node.Attrib("semantic");
 		if (attr)
 		{
 			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
@@ -5343,7 +7198,7 @@ namespace KlayGE
 		}
 
 		uint32_t as;
-		attr = node->Attrib("array_size");
+		attr = node.Attrib("array_size");
 		if (attr)
 		{
 			array_size_ = MakeSharedPtr<std::string>(attr->ValueString());
@@ -5357,17 +7212,17 @@ namespace KlayGE
 		{
 			as = 0;
 		}
-		var_ = read_var(*node, type_, as);
+		var_ = LoadVariable(effect, node, type_, as);
 
 		{
-			XMLNodePtr anno_node = node->FirstNode("annotation");
+			XMLNodePtr anno_node = node.FirstNode("annotation");
 			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					annotations_->push_back(MakeUniquePtr<RenderEffectAnnotation>());
-					annotations_->back()->Load(anno_node);
+					annotations_->back()->Load(effect, *anno_node);
 				}
 			}
 		}
@@ -5401,9 +7256,9 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
+	void RenderEffectParameter::StreamIn(RenderEffect const& effect, ResIdentifier& res)
 	{
-		res->read(&type_, sizeof(type_));
+		res.read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = ReadShortString(res);
@@ -5427,23 +7282,36 @@ namespace KlayGE
 		{
 			array_size_ = MakeSharedPtr<std::string>(as_str);
 
-			if (!boost::conversion::try_lexical_convert(as_str, as))
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+			char const* str = as_str.c_str();
+			std::from_chars_result result = std::from_chars(str, str + as_str.size(), as);
+			if (result.ec != std::errc())
 			{
 				as = 1;  // dummy array size
 			}
+#else
+			try
+			{
+				as = std::stoul(as_str);
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
+#endif
 		}
-		var_ = stream_in_var(res, type_, as);
+		var_ = StreamInVariable(effect, res, type_, as);
 
 		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
+		res.read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
 			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
 			annotations_->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{
-				(*annotations_)[i] = MakeUniquePtr<RenderEffectAnnotation>();				
-				(*annotations_)[i]->StreamIn(res);
+				(*annotations_)[i] = MakeUniquePtr<RenderEffectAnnotation>();
+				(*annotations_)[i]->StreamIn(effect, res);
 			}
 		}
 
@@ -5500,19 +7368,7 @@ namespace KlayGE
 			uint8_t len = 0;
 			os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 		}
-		uint32_t as;
-		if (array_size_)
-		{
-			if (!boost::conversion::try_lexical_convert(*array_size_, as))
-			{
-				as = 1;  // dummy array size
-			}
-		}
-		else
-		{
-			as = 0;
-		}
-		stream_out_var(os, *var_, type_, as);
+		StreamOutVariable(os, *var_);
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -5565,24 +7421,22 @@ namespace KlayGE
 		return this->HasSemantic() ? semantic_->second : 0;
 	}
 
-	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset, uint32_t stride)
+	void RenderEffectParameter::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
 	{
-		cbuff_ = &cbuff;
-		var_->BindToCBuffer(cbuff, offset, stride);
+		var_->BindToCBuffer(effect, cbuff_index, offset, stride);
 	}
 
-	void RenderEffectParameter::RebindToCBuffer(RenderEffectConstantBuffer& cbuff)
+	void RenderEffectParameter::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
 	{
-		cbuff_ = &cbuff;
-		var_->RebindToCBuffer(cbuff);
+		var_->RebindToCBuffer(effect, cbuff_index);
 	}
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderShaderFragment::Load(XMLNodePtr const & node)
+	void RenderShaderFragment::Load(XMLNode const& node)
 	{
 		stage_ = ShaderStage::NumStages;
-		XMLAttributePtr attr = node->Attrib("type");
+		XMLAttributePtr attr = node.Attrib("type");
 		if (attr)
 		{
 			std::string_view const type_str = attr->ValueString();
@@ -5615,11 +7469,11 @@ namespace KlayGE
 		}
 		
 		ver_ = ShaderModel(0, 0);
-		attr = node->Attrib("major_version");
+		attr = node.Attrib("major_version");
 		if (attr)
 		{
 			uint8_t minor_ver = 0;
-			XMLAttributePtr minor_attr = node->Attrib("minor_version");
+			XMLAttributePtr minor_attr = node.Attrib("minor_version");
 			if (minor_attr)
 			{
 				minor_ver = static_cast<uint8_t>(minor_attr->ValueInt());
@@ -5628,14 +7482,14 @@ namespace KlayGE
 		}
 		else
 		{
-			attr = node->Attrib("version");
+			attr = node.Attrib("version");
 			if (attr)
 			{
 				ver_ = ShaderModel(static_cast<uint8_t>(attr->ValueInt()), 0);
 			}
 		}
 
-		for (XMLNodePtr shader_text_node = node->FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
+		for (XMLNodePtr shader_text_node = node.FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
 		{
 			if ((XNT_Comment == shader_text_node->Type()) || (XNT_CData == shader_text_node->Type()))
 			{
@@ -5645,18 +7499,18 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderShaderFragment::StreamIn(ResIdentifierPtr const & res)
+	void RenderShaderFragment::StreamIn(ResIdentifier& res)
 	{
 		uint32_t tmp;
-		res->read(&tmp, sizeof(tmp));
+		res.read(&tmp, sizeof(tmp));
 		stage_ = static_cast<ShaderStage>(LE2Native(tmp));
-		res->read(&ver_, sizeof(ver_));
+		res.read(&ver_, sizeof(ver_));
 
 		uint32_t len;
-		res->read(&len, sizeof(len));
+		res.read(&len, sizeof(len));
 		len = LE2Native(len);
 		str_.resize(len);
-		res->read(&str_[0], len * sizeof(str_[0]));
+		res.read(&str_[0], len * sizeof(str_[0]));
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -5676,9 +7530,9 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderShaderGraphNode::Load(XMLNodePtr const & node)
+	void RenderShaderGraphNode::Load(XMLNode const& node)
 	{
-		XMLAttributePtr attr = node->Attrib("name");
+		XMLAttributePtr attr = node.Attrib("name");
 		BOOST_ASSERT(attr);
 
 		if (!name_.empty())
@@ -5690,7 +7544,7 @@ namespace KlayGE
 			name_ = std::string(attr->ValueString());
 			name_hash_ = HashRange(name_.begin(), name_.end());
 
-			attr = node->Attrib("return");
+			attr = node.Attrib("return");
 			if (attr)
 			{
 				return_type_ = std::string(attr->ValueString());
@@ -5700,7 +7554,7 @@ namespace KlayGE
 				return_type_ = "void";
 			}
 
-			for (XMLNodePtr param_node = node->FirstNode(); param_node; param_node = param_node->NextSibling())
+			for (XMLNodePtr param_node = node.FirstNode(); param_node; param_node = param_node->NextSibling())
 			{
 				XMLAttributePtr type_attr = param_node->Attrib("type");
 				XMLAttributePtr name_attr = param_node->Attrib("name");
@@ -5711,7 +7565,7 @@ namespace KlayGE
 			}
 		}
 
-		attr = node->Attrib("impl");
+		attr = node.Attrib("impl");
 		if (attr)
 		{
 			impl_ = std::string(attr->ValueString());
@@ -5719,7 +7573,7 @@ namespace KlayGE
 	}
 #endif
 
-	void RenderShaderGraphNode::StreamIn(ResIdentifierPtr const & res)
+	void RenderShaderGraphNode::StreamIn(ResIdentifier& res)
 	{
 		name_ = ReadShortString(res);
 		name_hash_ = HashRange(name_.begin(), name_.end());
@@ -5728,7 +7582,7 @@ namespace KlayGE
 		impl_ = ReadShortString(res);
 
 		uint8_t len;
-		res->read(&len, sizeof(len));
+		res.read(&len, sizeof(len));
 		params_.resize(len);
 		for (uint32_t i = 0; i < len; ++ i)
 		{
@@ -6007,6 +7861,88 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
+	RenderVariable& RenderVariable::operator=(std::span<bool const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint32_t const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<int32_t const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<float const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint2 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint3 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint4 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<int2 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<int3 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<int4 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<float2 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<float3 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<float4 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<float4x4 const> /*value*/)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<uint8_t> const& value)
+	{
+		KFL_UNUSED(value);
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	RenderVariable& RenderVariable::operator=(std::span<uint8_t const> value)
+	{
+		KFL_UNUSED(value);
+		KFL_UNREACHABLE("Can't be called");
+	}
+
 	void RenderVariable::Value(bool& /*value*/) const
 	{
 		KFL_UNREACHABLE("Can't be called");
@@ -6177,403 +8113,47 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset,
-			uint32_t stride)
+	void RenderVariable::Value(std::vector<uint8_t>& value) const
 	{
-		KFL_UNUSED(cbuff);
+		KFL_UNUSED(value);
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	void RenderVariable::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
+	{
+		KFL_UNUSED(effect);
+		KFL_UNUSED(cbuff_index);
 		KFL_UNUSED(offset);
 		KFL_UNUSED(stride);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::RebindToCBuffer(RenderEffectConstantBuffer& cbuff)
+	void RenderVariable::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
 	{
-		KFL_UNUSED(cbuff);
+		KFL_UNUSED(effect);
+		KFL_UNUSED(cbuff_index);
 		
 		KFL_UNREACHABLE("Can't be called");
-	}
-
-	RenderVariableFloat4x4::RenderVariableFloat4x4(bool in_cbuff)
-		: RenderVariableConcrete<float4x4>(in_cbuff)
-	{
-	}
-
-	RenderVariableFloat4x4::RenderVariableFloat4x4()
-		: RenderVariableConcrete<float4x4>()
-	{
-	}
-
-	std::unique_ptr<RenderVariable> RenderVariableFloat4x4::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableFloat4x4>(in_cbuff_);
-		if (in_cbuff_)
-		{
-			ret->data_ = data_;
-
-			float4x4 val;
-			RenderVariableConcrete<float4x4>::Value(val);			
-			RenderVariableConcrete<float4x4>::operator=(val);
-		}
-		else
-		{
-			ret->RetriveT() = this->RetriveT();
-		}
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableFloat4x4::operator=(float4x4 const & value)
-	{
-		return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
-	}
-
-	void RenderVariableFloat4x4::Value(float4x4& val) const
-	{
-		RenderVariableConcrete<float4x4>::Value(val);
-		val = MathLib::transpose(val);
-	}
-
-	RenderVariableFloat4x4Array::RenderVariableFloat4x4Array(bool in_cbuff)
-		: RenderVariableConcrete<std::vector<float4x4>>(in_cbuff)
-	{
-	}
-
-	RenderVariableFloat4x4Array::RenderVariableFloat4x4Array()
-		: RenderVariableConcrete<std::vector<float4x4>>()
-	{
-	}
-
-	std::unique_ptr<RenderVariable> RenderVariableFloat4x4Array::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableFloat4x4Array>(in_cbuff_);
-		if (in_cbuff_)
-		{
-			ret->data_ = data_;
-			ret->size_ = size_;
-
-			auto const & src_cbuff_desc = this->RetriveCBufferDesc();
-			uint8_t const * src = src_cbuff_desc.cbuff->VariableInBuff<uint8_t>(src_cbuff_desc.offset);
-
-			auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
-			uint8_t* dst = dst_cbuff_desc.cbuff->VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
-
-			memcpy(dst, src, size_ * sizeof(float4x4));
-
-			dst_cbuff_desc.cbuff->Dirty(true);
-		}
-		else
-		{
-			ret->RetriveT() = this->RetriveT();
-		}
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableFloat4x4Array::operator=(std::vector<float4x4> const & value)
-	{
-		if (in_cbuff_)
-		{
-			float4x4 const * src = value.data();
-
-			auto& cbuff_desc = this->RetriveCBufferDesc();
-			float4x4* dst = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
-
-			size_ = static_cast<uint32_t>(value.size());
-			for (size_t i = 0; i < value.size(); ++ i)
-			{
-				*dst = MathLib::transpose(*src);
-				++ src;
-				++ dst;
-			}
-
-			cbuff_desc.cbuff->Dirty(true);
-		}
-		else
-		{
-			this->RetriveT() = value;
-		}
-		return *this;
-	}
-
-	void RenderVariableFloat4x4Array::Value(std::vector<float4x4>& val) const
-	{
-		if (in_cbuff_)
-		{
-			auto const & cbuff_desc = this->RetriveCBufferDesc();
-			float4x4 const * src = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
-
-			val.resize(size_);
-			float4x4* dst = val.data();
-
-			for (size_t i = 0; i < size_; ++ i)
-			{
-				*dst = MathLib::transpose(*src);
-				++ src;
-				++ dst;
-			}
-		}
-		else
-		{
-			val = this->RetriveT();
-		}
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableTexture::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableTexture>();
-		TexturePtr val;
-		this->Value(val);
-		*ret = val;
-		std::string elem_type;
-		this->Value(elem_type);
-		*ret = elem_type;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableTexture::operator=(TexturePtr const & value)
-	{
-		if (value)
-		{
-			uint32_t array_size = value->ArraySize();
-			uint32_t mipmap = value->NumMipMaps();
-
-			auto& rf = Context::Instance().RenderFactoryInstance();
-			val_ = rf.MakeTextureSrv(value, 0, array_size, 0, mipmap);
-		}
-		else
-		{
-			val_.reset();
-		}
-		return *this;
-	}
-
-	RenderVariable& RenderVariableTexture::operator=(ShaderResourceViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableTexture::Value(TexturePtr& val) const
-	{
-		if (val_)
-		{
-			val = val_->TextureResource();
-		}
-		else
-		{
-			val.reset();
-		}
-	}
-
-	void RenderVariableTexture::Value(ShaderResourceViewPtr& val) const
-	{
-		val = val_;
-	}
-
-	RenderVariable& RenderVariableTexture::operator=(std::string const & value)
-	{
-		elem_type_ = value;
-		return *this;
-	}
-
-	void RenderVariableTexture::Value(std::string& val) const
-	{
-		val = elem_type_;
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableRwTexture::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableRwTexture>();
-		UnorderedAccessViewPtr val;
-		this->Value(val);
-		*ret = val;
-		std::string elem_type;
-		this->Value(elem_type);
-		*ret = elem_type;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableRwTexture::operator=(TexturePtr const & value)
-	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
-		switch (value->Type())
-		{
-		case Texture::TT_1D:
-			val_ = rf.Make1DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
-			break;
-
-		case Texture::TT_2D:
-			val_ = rf.Make2DUav(value, 0, static_cast<int>(value->ArraySize()), 0);
-			break;
-
-		case Texture::TT_3D:
-			val_ = rf.Make3DUav(value, 0, 0, value->Depth(0), 0);
-			break;
-
-		case Texture::TT_Cube:
-			val_ = rf.MakeCubeUav(value, 0, 0);
-			break;
-		}
-		return *this;
-	}
-
-	RenderVariable& RenderVariableRwTexture::operator=(UnorderedAccessViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableRwTexture::Value(TexturePtr& val) const
-	{
-		val = val_->TextureResource();
-	}
-
-	void RenderVariableRwTexture::Value(UnorderedAccessViewPtr& val) const
-	{
-		val = val_;
-	}
-
-	RenderVariable& RenderVariableRwTexture::operator=(std::string const & value)
-	{
-		elem_type_ = value;
-		return *this;
-	}
-
-	void RenderVariableRwTexture::Value(std::string& val) const
-	{
-		val = elem_type_;
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableBuffer::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableBuffer>();
-		ShaderResourceViewPtr val;
-		this->Value(val);
-		*ret = val;
-		std::string elem_type;
-		this->Value(elem_type);
-		*ret = elem_type;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableBuffer::operator=(ShaderResourceViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableBuffer::Value(ShaderResourceViewPtr& val) const
-	{
-		val = val_;
-	}
-
-	RenderVariable& RenderVariableBuffer::operator=(std::string const & value)
-	{
-		elem_type_ = value;
-		return *this;
-	}
-
-	void RenderVariableBuffer::Value(std::string& val) const
-	{
-		val = elem_type_;
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableRwBuffer::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableRwBuffer>();
-		UnorderedAccessViewPtr val;
-		this->Value(val);
-		*ret = val;
-		std::string elem_type;
-		this->Value(elem_type);
-		*ret = elem_type;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableRwBuffer::operator=(UnorderedAccessViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableRwBuffer::Value(UnorderedAccessViewPtr& val) const
-	{
-		val = val_;
-	}
-
-	RenderVariable& RenderVariableRwBuffer::operator=(std::string const & value)
-	{
-		elem_type_ = value;
-		return *this;
-	}
-
-	void RenderVariableRwBuffer::Value(std::string& val) const
-	{
-		val = elem_type_;
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableByteAddressBuffer::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableByteAddressBuffer>();
-		ShaderResourceViewPtr val;
-		this->Value(val);
-		*ret = val;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableByteAddressBuffer::operator=(ShaderResourceViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableByteAddressBuffer::Value(ShaderResourceViewPtr& val) const
-	{
-		val = val_;
-	}
-
-
-	std::unique_ptr<RenderVariable> RenderVariableRwByteAddressBuffer::Clone()
-	{
-		auto ret = MakeUniquePtr<RenderVariableRwByteAddressBuffer>();
-		UnorderedAccessViewPtr val;
-		this->Value(val);
-		*ret = val;
-		return std::move(ret);
-	}
-
-	RenderVariable& RenderVariableRwByteAddressBuffer::operator=(UnorderedAccessViewPtr const & value)
-	{
-		val_ = value;
-		return *this;
-	}
-
-	void RenderVariableRwByteAddressBuffer::Value(UnorderedAccessViewPtr& val) const
-	{
-		val = val_;
 	}
 
 
 	RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
-	RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	RenderEffectPtr SyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(std::string(effect_name)));
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
-	RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	RenderEffectPtr ASyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
 		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}

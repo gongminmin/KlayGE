@@ -22,7 +22,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -33,8 +32,9 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX2a/span.hpp>
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <system_error>
@@ -53,8 +53,6 @@ namespace KlayGE
 	{
 		// Store info
 		name_				= name;
-		width_				= settings.width;
-		height_				= settings.height;
 		isFullScreen_		= settings.full_screen;
 		color_bits_ = NumFormatBits(settings.color_fmt);
 
@@ -70,6 +68,10 @@ namespace KlayGE
 				this->OnSize(win, active);
 			});
 
+		float const dpi_scale = main_wnd->DPIScale();
+		width_ = static_cast<uint32_t>(settings.width * dpi_scale + 0.5f);
+		height_ = static_cast<uint32_t>(settings.height * dpi_scale + 0.5f);
+
 		static std::pair<int, int> constexpr all_versions[] =
 		{
 			std::make_pair(4, 6),
@@ -80,7 +82,7 @@ namespace KlayGE
 			std::make_pair(4, 1)
 		};
 
-		ArrayRef<std::pair<int, int>> available_versions;
+		std::span<std::pair<int, int> const> available_versions;
 		{
 			static std::string_view const all_version_names[] =
 			{
@@ -111,7 +113,7 @@ namespace KlayGE
 				}
 			}
 
-			available_versions = MakeArrayRef(all_versions).Slice(version_start_index);
+			available_versions = MakeSpan(all_versions).subspan(version_start_index);
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -302,9 +304,15 @@ namespace KlayGE
 		if (glloader_WGL_ARB_create_context())
 		{
 			int flags = 0;
-#ifndef KLAYGE_SHIP
-			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+#ifdef KLAYGE_DEBUG
+			bool const debug_context = true;
+#else
+			bool const debug_context = settings.debug_context;
 #endif
+			if (debug_context)
+			{
+				flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+			}
 
 			int attribs[] =
 			{
@@ -314,7 +322,7 @@ namespace KlayGE
 				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			for (size_t i = 0; i < available_versions.size(); ++ i)
+			for (int i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;
@@ -334,7 +342,6 @@ namespace KlayGE
 				}
 			}
 		}
-
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (isFullScreen_)
 		{
@@ -370,7 +377,7 @@ namespace KlayGE
 				GLX_CONTEXT_MINOR_VERSION_ARB, 0,
 				0
 			};
-			for (size_t i = 0; i < available_versions.size(); ++ i)
+			for (int i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;
@@ -434,10 +441,10 @@ namespace KlayGE
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		viewport_->left = 0;
-		viewport_->top = 0;
-		viewport_->width = width_;
-		viewport_->height = height_;
+		viewport_->Left(0);
+		viewport_->Top(0);
+		viewport_->Width(width_);
+		viewport_->Height(height_);
 
 		std::wstring vendor, renderer, version;
 		Convert(vendor, reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
@@ -471,8 +478,8 @@ namespace KlayGE
 		height_ = height;
 
 		// Notify viewports of resize
-		viewport_->width = width;
-		viewport_->height = height;
+		viewport_->Width(width);
+		viewport_->Height(height);
 	}
 
 	// 改变窗口位置
@@ -538,8 +545,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderWindow::WindowMovedOrResized()
+	void OGLRenderWindow::WindowMovedOrResized(Window const& win)
 	{
+		float const dpi_scale = win.DPIScale();
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
@@ -558,14 +567,15 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_DARWIN
-		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
+		uint2 screen = win.GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
 		{
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(
+				static_cast<uint32_t>(new_width / dpi_scale + 0.5f), static_cast<uint32_t>(new_height / dpi_scale + 0.5f));
 		}
 	}
 
@@ -616,18 +626,18 @@ namespace KlayGE
 #endif
 	}
 
-	void OGLRenderWindow::OnExitSizeMove(Window const & /*win*/)
+	void OGLRenderWindow::OnExitSizeMove(Window const& win)
 	{
-		this->WindowMovedOrResized();
+		this->WindowMovedOrResized(win);
 	}
 
-	void OGLRenderWindow::OnSize(Window const & win, bool active)
+	void OGLRenderWindow::OnSize(Window const& win, bool active)
 	{
 		if (active)
 		{
 			if (win.Ready())
 			{
-				this->WindowMovedOrResized();
+				this->WindowMovedOrResized(win);
 			}
 		}
 	}

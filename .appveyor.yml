@@ -7,7 +7,11 @@ platform:
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PROJECT: vs2019
+      COMPILER: vc142
+      BUILD_DIR: vc142
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: vs2015
       COMPILER: vc140
       BUILD_DIR: vc140
@@ -50,6 +54,8 @@ before_build:
   - git reset --hard
 
 build_script:
+  - git config --global user.email "dummy@example.com"
+  - git config --global user.name "Dummy Name"
   - python Build.py %PROJECT% %COMPILER% %PLATFORM% %CONFIGURATION%
 
 on_success:

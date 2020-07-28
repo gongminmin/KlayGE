@@ -275,6 +275,9 @@ namespace KlayGE
 	}
 
 
+
+	TexCompression::~TexCompression() noexcept = default;
+
 	void TexCompression::EncodeMem(uint32_t width, uint32_t height,
 		void* output, uint32_t out_row_pitch, uint32_t out_slice_pitch,
 		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch,
@@ -371,7 +374,7 @@ namespace KlayGE
 		{
 			uncompressed_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
 				1, 1, decoded_fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
-			in_tex->CopyToTexture(*uncompressed_tex);
+			in_tex->CopyToTexture(*uncompressed_tex, TextureFilter::Point);
 		}
 		else
 		{
@@ -410,7 +413,7 @@ namespace KlayGE
 
 		if (out_tex->Format() != decoded_fmt)
 		{
-			decoded_tex->CopyToTexture(*out_tex);
+			decoded_tex->CopyToTexture(*out_tex, TextureFilter::Point);
 		}
 	}
 

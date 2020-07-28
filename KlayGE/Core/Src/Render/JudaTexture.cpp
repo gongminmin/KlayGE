@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX2a/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -115,7 +117,7 @@ namespace KlayGE
 	int const THRESHOLD_BIAS = 10;
 
 	JudaTexture::JudaTexture(uint32_t num_tiles, uint32_t tile_size, ElementFormat format)
-		: root_(MakeSharedPtr<quadtree_node>()),
+		: root_(MakeSharedPtr<QuadTreeNode>()),
 			num_tiles_(num_tiles), tile_size_(tile_size), format_(format),
 			texel_size_(NumFormatBytes(format)),
 			decode_tick_(0), tile_tick_(0)
@@ -197,7 +199,7 @@ namespace KlayGE
 
 	uint32_t JudaTexture::NumNonEmptyNodes() const
 	{
-		return this->NumNonEmptySubNodes(root_);
+		return this->NumNonEmptySubNodes(*root_);
 	}
 
 	uint32_t JudaTexture::NumTiles() const
@@ -227,20 +229,20 @@ namespace KlayGE
 			return;
 		}
 
-		quadtree_node_ptr const & node = this->GetNode(shuff);
+		QuadTreeNode& node = this->GetNode(shuff);
 		for (int i = 0; i < 4; ++ i)
 		{
-			if (node->children[i])
+			if (node.children[i])
 			{
 				this->CompactNode(this->GetChildShuff(shuff, i));
 
-				if ((EMPTY_DATA_INDEX == node->children[i]->data_index)
-					&& !node->children[i]->children[0]
-					&& !node->children[i]->children[1]
-					&& !node->children[i]->children[2]
-					&& !node->children[i]->children[3])
+				if ((EMPTY_DATA_INDEX == node.children[i]->data_index)
+					&& !node.children[i]->children[0]
+					&& !node.children[i]->children[1]
+					&& !node.children[i]->children[2]
+					&& !node.children[i]->children[3])
 				{
-					node->children[i].reset();
+					node.children[i].reset();
 				}
 			}
 		}
@@ -277,13 +279,13 @@ namespace KlayGE
 			this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 			shuffs[i] = this->Pos2Shuff(level, tile_x, tile_y);
 
-			quadtree_node_ptr node = this->AddNode(shuffs[i]);
-			if (EMPTY_DATA_INDEX == node->data_index)
+			QuadTreeNode& node = this->AddNode(shuffs[i]);
+			if (EMPTY_DATA_INDEX == node.data_index)
 			{
-				node->data_index = this->AllocateDataBlock();
+				node.data_index = this->AllocateDataBlock();
 			}
-			node->attr = tile_attrs[i];
-			data_blocks_[node->data_index] = data[i];
+			node.attr = tile_attrs[i];
+			data_blocks_[node.data_index] = data[i];
 		}
 		
 		for (uint32_t ll = 0; ll < tree_levels_ - 1; ll += lower_levels_)
@@ -304,27 +306,26 @@ namespace KlayGE
 			for (size_t i = 0; i < upper_shuffs.size(); ++ i)
 			{
 				uint32_t shuff = upper_shuffs[i];
-				quadtree_node_ptr node = this->GetNode(shuff);
-				if (EMPTY_DATA_INDEX == node->data_index)
+				QuadTreeNode& node = this->GetNode(shuff);
+				if (EMPTY_DATA_INDEX == node.data_index)
 				{
-					node->data_index = this->AllocateDataBlock();
+					node.data_index = this->AllocateDataBlock();
 				}
-				node->attr = 0xFFFFFFFF;
-				data_blocks_[node->data_index].resize(full_tile_bytes);
-				this->DecodeATile(&data_blocks_[node->data_index], shuff, 1);
+				node.attr = 0xFFFFFFFF;
+				data_blocks_[node.data_index].resize(full_tile_bytes);
+				this->DecodeATile(&data_blocks_[node.data_index], shuff, 1);
 			}
 
 			for (size_t i = 0; i < shuffs.size(); ++ i)
 			{
 				uint32_t shuff = shuffs[i];
-				quadtree_node_ptr node = this->GetNode(shuff);
 
 				int offset_x = 0;
 				int offset_y = 0;
-				std::vector<uint8_t> up_data = data_blocks_[node->data_index];
+				std::vector<uint8_t> up_data = data_blocks_[this->GetNode(shuff).data_index];
 				for (int level = tree_levels_ - 1 - ll; level > std::max(0, static_cast<int>(tree_levels_ - 1 - ll - lower_levels_)); -- level)
 				{
-					node = this->GetNode(shuff);
+					QuadTreeNode& node = this->GetNode(shuff);
 
 					uint32_t level_tile_size = tile_size_ >> (tree_levels_ - 1 - ll - level);
 
@@ -334,20 +335,20 @@ namespace KlayGE
 					std::vector<uint8_t> temp_down(level_tile_size * level_tile_size * texel_size_);
 					this->Upsample(&temp_down[0], &temp_up[0], level_tile_size / 2, level_tile_size / 2, level_tile_size / 2 * texel_size_);
 
-					if (EMPTY_DATA_INDEX == node->data_index)
+					if (EMPTY_DATA_INDEX == node.data_index)
 					{
-						node->data_index = this->AllocateDataBlock();
+						node.data_index = this->AllocateDataBlock();
 					}
 					if (level != static_cast<int>(tree_levels_) - 1)
 					{
-						node->attr = 0xFFFFFFFF;
+						node.attr = 0xFFFFFFFF;
 					}
-					data_blocks_[node->data_index].resize(full_tile_bytes);
+					data_blocks_[node.data_index].resize(full_tile_bytes);
 					for (size_t y = 0; y < level_tile_size; ++ y)
 					{
 						for (size_t x = 0; x < level_tile_size; ++ x)
 						{
-							texel_op_.sub(&data_blocks_[node->data_index][((offset_y + y) * tile_size_ + (offset_x + x)) * texel_size_],
+							texel_op_.sub(&data_blocks_[node.data_index][((offset_y + y) * tile_size_ + (offset_x + x)) * texel_size_],
 								&up_data[(y * level_tile_size + x) * texel_size_], &temp_down[(y * level_tile_size + x) * texel_size_]);
 						}
 					}
@@ -357,16 +358,16 @@ namespace KlayGE
 					{
 						for (uint32_t x = 0; x < tile_size_; ++ x)
 						{
-							mse += texel_op_.mse(&data_blocks_[node->data_index][(y * tile_size_ + x) * texel_size_]);
-							bias = texel_op_.bias(bias, &data_blocks_[node->data_index][(y * tile_size_ + x) * texel_size_]);
+							mse += texel_op_.mse(&data_blocks_[node.data_index][(y * tile_size_ + x) * texel_size_]);
+							bias = texel_op_.bias(bias, &data_blocks_[node.data_index][(y * tile_size_ + x) * texel_size_]);
 						}
 					}
 					mse /= MathLib::sqr(tile_size_ * 255);
 					if ((mse < THRESHOLD_MSE) && (bias < THRESHOLD_BIAS))
 					{
-						this->DeallocateDataBlock(node->data_index);
-						node->data_index = EMPTY_DATA_INDEX;
-						node->attr = 0xFFFFFFFF;
+						this->DeallocateDataBlock(node.data_index);
+						node.data_index = EMPTY_DATA_INDEX;
+						node.attr = 0xFFFFFFFF;
 					}
 
 					uint32_t branch = this->GetLevelBranch(shuff, level);
@@ -381,7 +382,7 @@ namespace KlayGE
 				{
 					int level = std::max(0, static_cast<int>(tree_levels_ - 1 - ll - lower_levels_));
 
-					uint32_t data_index = this->GetNode(shuff)->data_index;
+					uint32_t data_index = this->GetNode(shuff).data_index;
 					uint32_t level_tile_size = tile_size_ >> (tree_levels_ - 1 - ll - level);
 
 					for (uint32_t y = 0; y < level_tile_size; ++ y)
@@ -453,7 +454,7 @@ namespace KlayGE
 		uint32_t const full_tile_bytes = cache_tile_size_ * cache_tile_size_ * texel_size_;
 		uint32_t target_level = this->ShuffLevel(shuff);
 
-		quadtree_node_ptr node = root_;
+		QuadTreeNode* node = root_.get();
 		if (0 == target_level)
 		{
 			std::memcpy(&data[0][0], this->RetriveATile(root_->data_index), full_tile_bytes);
@@ -527,7 +528,7 @@ namespace KlayGE
 
 					if (node)
 					{
-						node = node->children[branches[i]];
+						node = node->children[branches[i]].get();
 				
 						if (node && (node->data_index != EMPTY_DATA_INDEX))
 						{
@@ -564,7 +565,7 @@ namespace KlayGE
 		uint32_t target_level = this->ShuffLevel(shuff);
 
 		uint32_t ret_attr = 0xFFFFFFFF;
-		quadtree_node_ptr node = root_;
+		QuadTreeNode* node = root_.get();
 		if (0 == target_level)
 		{
 			ret_attr = root_->attr;
@@ -596,7 +597,7 @@ namespace KlayGE
 				{
 					if (node)
 					{
-						node = node->children[branches[i]];
+						node = node->children[branches[i]].get();
 				
 						if (node)
 						{
@@ -660,7 +661,7 @@ namespace KlayGE
 					auto comed_data = MakeUniquePtr<uint8_t[]>(comed_len);
 					input_file_->seekg(offsets[0], std::ios_base::beg);
 					input_file_->read(comed_data.get(), comed_len);
-					lzma_dec_.Decode(data.get(), MakeArrayRef(comed_data.get(), comed_len), full_tile_bytes);
+					lzma_dec_.Decode(data.get(), MakeSpan(comed_data.get(), comed_len), full_tile_bytes);
 				}
 				else
 				{
@@ -678,33 +679,33 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t JudaTexture::NumNonEmptySubNodes(quadtree_node_ptr const & node) const
+	uint32_t JudaTexture::NumNonEmptySubNodes(QuadTreeNode const& node) const
 	{
 		uint32_t n = 0;
-		if (node->data_index != EMPTY_DATA_INDEX)
+		if (node.data_index != EMPTY_DATA_INDEX)
 		{
 			++ n;
 		}
 		for (size_t i = 0; i < 4; ++ i)
 		{
-			if (node->children[i])
+			if (node.children[i])
 			{
-				n += this->NumNonEmptySubNodes(node->children[i]);
+				n += this->NumNonEmptySubNodes(*node.children[i]);
 			}
 		}
 		return n;
 	}
 
-	JudaTexture::quadtree_node_ptr const & JudaTexture::GetNode(uint32_t shuff)
+	JudaTexture::QuadTreeNode& JudaTexture::GetNode(uint32_t shuff)
 	{
 		uint32_t target_level = this->ShuffLevel(shuff);
-		quadtree_node_ptr* node = &root_;
+		QuadTreeNode* node = root_.get();
 		for (uint32_t level = 1; level <= target_level; ++ level)
 		{
 			uint32_t branch = this->GetLevelBranch(shuff, level);
-			if (*node)
+			if (node)
 			{
-				node = &((*node)->children[branch]);
+				node = node->children[branch].get();
 			}
 			else
 			{
@@ -715,19 +716,19 @@ namespace KlayGE
 		return *node;
 	}
 
-	JudaTexture::quadtree_node_ptr const & JudaTexture::AddNode(uint32_t shuff)
+	JudaTexture::QuadTreeNode& JudaTexture::AddNode(uint32_t shuff)
 	{
 		uint32_t target_level = this->ShuffLevel(shuff);
-		quadtree_node_ptr* node = &root_;
+		QuadTreeNode* node = root_.get();
 		for (uint32_t level = 1; level <= target_level; ++ level)
 		{
 			uint32_t branch = this->GetLevelBranch(shuff, level);
-			if (!(*node)->children[branch])
+			if (!node->children[branch])
 			{
-				(*node)->children[branch] = MakeSharedPtr<quadtree_node>();
+				node->children[branch] = MakeSharedPtr<QuadTreeNode>();
 			}
 			
-			node = &((*node)->children[branch]);
+			node = node->children[branch].get();
 		}
 
 		return *node;
@@ -926,19 +927,19 @@ namespace KlayGE
 
 		uint32_t data_index = 0;
 
-		std::vector<JudaTexture::quadtree_node_ptr> last_level;
+		std::vector<std::shared_ptr<JudaTexture::QuadTreeNode>> last_level;
 		std::vector<uint32_t> last_start_index_levels;
 		for (size_t i = 0; i < tree_levels; ++ i)
 		{
 			uint32_t size;
 			file->read(&size, sizeof(size));
 
-			std::vector<JudaTexture::quadtree_node_ptr> this_level(size);
+			std::vector<std::shared_ptr<JudaTexture::QuadTreeNode>> this_level(size);
 			std::vector<uint32_t> this_start_index_levels(size);
 			file->read(&this_start_index_levels[0], size * sizeof(this_start_index_levels[0]));
 			for (size_t j = 0; j < size; ++ j)
 			{
-				this_level[j] = MakeSharedPtr<JudaTexture::quadtree_node>();
+				this_level[j] = MakeSharedPtr<JudaTexture::QuadTreeNode>();
 
 				if (!(this_start_index_levels[j] >> 31))
 				{
@@ -1004,8 +1005,8 @@ namespace KlayGE
 	{
 		LZMACodec lzma_enc;
 
-		std::vector<JudaTexture::quadtree_node_ptr> this_level;
-		std::vector<JudaTexture::quadtree_node_ptr> next_level;
+		std::vector<JudaTexture::QuadTreeNode*> this_level;
+		std::vector<JudaTexture::QuadTreeNode*> next_level;
 
 		std::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
 		
@@ -1048,7 +1049,7 @@ namespace KlayGE
 		std::vector<uint32_t> non_empty_block_data_index;
 		non_empty_block_data_index.reserve(non_empty_nodes);
 
-		this_level.push_back(juda_tex->root_);
+		this_level.push_back(juda_tex->root_.get());
 		for (size_t i = 0; i < juda_tex->TreeLevels(); ++ i)
 		{
 			uint32_t size = static_cast<uint32_t>(this_level.size());
@@ -1076,7 +1077,7 @@ namespace KlayGE
 					{
 						if (this_level[j]->children[k])
 						{
-							next_level.push_back(this_level[j]->children[k]);
+							next_level.push_back(this_level[j]->children[k].get());
 							index |= (1UL << k);
 							++ num_nodes;
 						}
@@ -1234,7 +1235,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < tex_cache_array_.size(); ++ i)
 			{
-				*(effect.ParameterByName("juda_tex_cache_" + std::to_string(i))) = tex_cache_array_[i];
+				*(effect.ParameterByName(std::format("juda_tex_cache_{}", i))) = tex_cache_array_[i];
 			}
 			*(effect.ParameterByName("inv_juda_tex_cache_size")) = float2(1.0f / tex_cache_array_[0]->Width(0), 1.0f / tex_cache_array_[0]->Height(0));
 		}
@@ -1505,7 +1506,7 @@ namespace KlayGE
 					}
 				}
 
-				std::vector<uint8_t> tex_a_tile_data(mip_tile_with_border_size * mip_tile_with_border_size * texel_size_);
+				auto tex_a_tile_data = MakeUniquePtr<uint8_t[]>(mip_tile_with_border_size * mip_tile_with_border_size * texel_size_);
 				{
 					uint8_t* data_with_border = &tex_a_tile_data[0];
 					uint32_t const data_pitch = mip_tile_with_border_size * texel_size_;
@@ -1529,8 +1530,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -1642,8 +1643,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_tile_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_tile_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_tile_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_tile_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -1752,8 +1753,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -1866,8 +1867,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_tile_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_tile_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_tile_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_tile_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -1979,8 +1980,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_tile_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_tile_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_tile_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_tile_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -2093,8 +2094,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -2206,8 +2207,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_tile_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_tile_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_tile_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_tile_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -2316,8 +2317,8 @@ namespace KlayGE
 					{
 						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
-							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							auto border_coords_x = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
+							auto border_coords_y = MakeUniquePtr<int32_t[]>(mip_border_size * mip_border_size);
 							switch (addr_u)
 							{
 							case TAM_Mirror:
@@ -2449,7 +2450,7 @@ namespace KlayGE
 					uint32_t const block_bytes = BlockBytes(format);
 					uint32_t const bc_row_pitch = (mip_tile_with_border_size + block_width - 1) / block_width * block_bytes;
 					uint32_t const bc_slice_pitch = (mip_tile_with_border_size + block_height - 1) / block_height * bc_row_pitch;
-					std::vector<uint8_t> bc(bc_slice_pitch);
+					auto bc = MakeUniquePtr<uint8_t[]>(bc_slice_pitch);
 					{
 						uint8_t const * data_with_border = &tex_a_tile_data[0];
 						uint32_t const data_row_pitch = mip_tile_with_border_size * texel_size_;

@@ -16,6 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/com_ptr.hpp>
 
 #include <atomic>
 #include <mutex>
@@ -23,7 +24,7 @@
 
 namespace KlayGE
 {
-	class DShowVMR9Allocator : public IVMRSurfaceAllocator9, IVMRImagePresenter9
+	class DShowVMR9Allocator final : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:
 		static uint64_t constexpr USER_ID = 0xBAFEDCBA;
@@ -82,14 +83,14 @@ namespace KlayGE
 		HWND			wnd_;
 		std::atomic<int32_t>	ref_count_;
 
-		std::shared_ptr<IDirect3D9> d3d_;
-		std::shared_ptr<IDirect3DDevice9> d3d_device_;
+		com_ptr<IDirect3D9> d3d_;
+		com_ptr<IDirect3DDevice9> d3d_device_;
 
-		std::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
+		com_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
 		std::vector<IDirect3DSurface9*>	surfaces_;
 		uint32_t cur_surf_index_;
 
-		std::shared_ptr<IDirect3DSurface9> cache_surf_;
+		com_ptr<IDirect3DSurface9> cache_surf_;
 		TexturePtr			present_tex_;
 
 		HMODULE mod_d3d9_;

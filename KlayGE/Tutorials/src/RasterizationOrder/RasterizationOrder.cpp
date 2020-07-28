@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
@@ -22,8 +21,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "RasterizationOrder.hpp"
@@ -133,7 +133,7 @@ namespace
 			init_data.row_pitch = sizeof(color_map);
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
@@ -205,7 +205,7 @@ void RasterizationOrderApp::OnCreate()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	ras_order_fb_ = rf.MakeFrameBuffer();
-	ras_order_fb_->GetViewport()->camera = rf.RenderEngineInstance().DefaultFrameBuffer()->GetViewport()->camera;
+	ras_order_fb_->Viewport()->Camera(rf.RenderEngineInstance().DefaultFrameBuffer()->Viewport()->Camera());
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
@@ -221,7 +221,7 @@ void RasterizationOrderApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("RasterizationOrder.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("RasterizationOrder.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_color_map_ = dialog_params_->IDFromName("ColorMap");
 	id_capture_ = dialog_params_->IDFromName("Capture");
@@ -253,7 +253,7 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	ras_order_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(ras_order_tex_, 0, 1, 0));
 
-	copy_pp_->InputPin(0, ras_order_tex_);
+	copy_pp_->InputPin(0, rf.MakeTextureSrv(ras_order_tex_));
 
 	App3DFramework::OnResize(width, height);
 	UIManager::Instance().SettleCtrls();

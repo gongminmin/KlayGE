@@ -586,7 +586,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Mapping::Mapping(std::vector<D3D12_INPUT_ELEMENT_DESC>& elements, size_t stream, ArrayRef<VertexElement> vet,
+	void D3D12Mapping::Mapping(std::vector<D3D12_INPUT_ELEMENT_DESC>& elements, size_t stream, std::span<VertexElement const> vet,
 		RenderLayout::stream_type type, uint32_t freq)
 	{
 		elements.resize(vet.size());
