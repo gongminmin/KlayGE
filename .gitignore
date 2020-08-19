@@ -82,6 +82,7 @@ External/assimp
 External/boost
 External/cxxopts
 External/d3dcompiler
+External/dxsdk
 External/Downloads
 External/FreeImage
 External/freetype
@@ -95,6 +96,5 @@ External/Python
 External/python-cmake-buildsystem
 External/rapidjson
 External/rapidxml
-External/UniversalDXSDK
 External/wpftoolkit
 External/zlib

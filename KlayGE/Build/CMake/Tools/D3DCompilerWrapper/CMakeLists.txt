@@ -5,7 +5,7 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 	)
 
 	SET(EXTRA_INCLUDE_DIRS ${EXTRA_INCLUDE_DIRS}
-		${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include)
+		${KLAYGE_PROJECT_DIR}/../External/dxsdk/Include)
 
 	SETUP_TOOL(D3DCompilerWrapper)
 ELSE()

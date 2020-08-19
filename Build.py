@@ -987,7 +987,7 @@ if __name__ == "__main__":
 		BuildProjects("KlayGE", ".", build_info, compiler_info, ("ALL_BUILD", ), additional_options)
 
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
-		clean_dir_list = [ "7z", "assimp", "cxxopts", "FreeImage", "freetype", "GSL", "googletest", "libogg", "libvorbis", "nanosvg", "openal-soft", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "UniversalDXSDK", "wpftoolkit", "zlib" ]
+		clean_dir_list = [ "7z", "assimp", "cxxopts", "dxsdk", "FreeImage", "freetype", "GSL", "googletest", "libogg", "libvorbis", "nanosvg", "openal-soft", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "wpftoolkit", "zlib" ]
 		for dir in clean_dir_list:
 			dir_name = "External/" + dir
 			if os.path.isdir(dir_name):

@@ -167,7 +167,7 @@ if(KLAYGE_IS_DEV_PLATFORM)
 	add_subdirectory(googletest)
 	add_subdirectory(FreeImage)
 	add_subdirectory(cxxopts)
-	add_subdirectory(UniversalDXSDK)
+	add_subdirectory(dxsdk)
 
 	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
 		add_subdirectory(d3dcompiler)
