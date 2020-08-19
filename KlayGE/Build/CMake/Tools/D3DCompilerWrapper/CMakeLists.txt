@@ -8,7 +8,7 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 
 	target_link_libraries(D3DCompilerWrapper
 		PRIVATE
-			UniversalDXSDK
+			dxsdk
 	)
 ELSE()
 	FIND_PACKAGE(PythonInterp)

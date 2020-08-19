@@ -565,7 +565,7 @@ target_link_libraries(${LIB_NAME}
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE
-			UniversalDXSDK
+			dxsdk
 			ws2_32
 	)
 elseif(KLAYGE_PLATFORM_DARWIN)

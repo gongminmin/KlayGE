@@ -95,7 +95,7 @@ target_link_libraries(${LIB_NAME}
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_link_libraries(${LIB_NAME}
 		PRIVATE
-			UniversalDXSDK
+			dxsdk
 			xinput
 	)
 endif()
