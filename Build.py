@@ -1006,7 +1006,7 @@ if __name__ == "__main__":
 		BuildProjects("KlayGE", ".", build_info, compiler_info, ("ALL_BUILD", ), additional_options)
 
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
-		clean_dir_list = [ "7z", "android_native_app_glue", "assimp", "cxxopts", "d3dcompiler", "filesystem", "fmt", "FreeImage", "freetype", "googletest", "GSL", "libogg", "libvorbis", "nanosvg", "openal-soft", "optional-lite", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "string-view-lite", "UniversalDXSDK", "wpftoolkit", "zlib" ]
+		clean_dir_list = [ "7z", "android_native_app_glue", "assimp", "cxxopts", "d3dcompiler", "dxsdk", "filesystem", "fmt", "FreeImage", "freetype", "googletest", "GSL", "libogg", "libvorbis", "nanosvg", "openal-soft", "optional-lite", "Python", "python-cmake-buildsystem", "rapidjson", "rapidxml", "string-view-lite", "wpftoolkit", "zlib" ]
 		for dir in clean_dir_list:
 			dir_name = "External/" + dir
 			if os.path.isdir(dir_name):

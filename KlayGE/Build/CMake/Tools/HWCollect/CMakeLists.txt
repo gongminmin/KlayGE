@@ -15,6 +15,6 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 
 	target_link_libraries(HWCollect
 		PRIVATE
-			UniversalDXSDK
+			dxsdk
 	)
 endif()
