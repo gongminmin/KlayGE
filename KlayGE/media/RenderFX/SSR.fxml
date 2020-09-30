@@ -43,7 +43,7 @@
 
 	<shader>
 		<![CDATA[
-float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool front_side, float depth_threshold)
+float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, float4x4 proj, float3 near_q_far, bool front_side, float depth_threshold)
 {
 	normal = normalize(normal); // eye space normal 
 	float3 view_dir = normalize(pos_es); // eye space view direction
@@ -198,7 +198,7 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 
 	float3 pos_es = view_dir * (depth / view_dir.z);
 	float3 normal = GetNormal(rt0);
-	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0.1f);
+	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, proj, near_q_far, 1, 0.1f);
 	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(rt1)).x;
 	return float4(clr.xyz, saturate(clr.w * fresnel));
 }

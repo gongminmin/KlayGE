@@ -10,6 +10,8 @@
 
 	<parameter type="float4x4" name="back_mvp"/>
 	<parameter type="float4x4" name="back_model_view"/>
+	<parameter type="float4x4" name="back_proj"/>
+	<parameter type="float3" name="back_near_q_far"/>
 	<parameter type="float4x4" name="inv_view"/>
 	<parameter type="float3" name="eye_in_back_camera"/>
 
@@ -116,11 +118,11 @@ float4 ReflectReflectionPS(
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
 	{
-		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 0.1f);
+		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, proj, near_q_far, 1, 0.1f);
 	}
 	else if (reflect_vec_back.z < 0)
 	{
-		ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0, 0.1f);
+		ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, back_proj, back_near_q_far, 0, 0.1f);
 	}
 	else
 	{

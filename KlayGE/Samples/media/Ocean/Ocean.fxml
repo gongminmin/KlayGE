@@ -211,7 +211,7 @@ float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0, SS_TEXCOORD_TYPE 
 	fog *= fog * (3 - 2 * fog);
 	sky_reflection = lerp(fog_color, sky_reflection, fog);
 
-	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, 1, 500.0f);
+	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, proj, near_q_far, 1, 500.0f);
 	float3 reflection = lerp(sky_reflection, reflection4.xyz, reflection4.w);
 	return float4(reflection, 1);
 }

@@ -122,7 +122,10 @@ namespace
 			float4x4 const mv = model_mat_ * view;
 
 			*(effect_->ParameterByName("back_model_view")) = mv;
+			*(effect_->ParameterByName("back_proj")) = proj;
 			*(effect_->ParameterByName("back_mvp")) = mv * proj;
+			float4 const near_q_far = camera->NearQFarParam();
+			*(effect_->ParameterByName("back_near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & scene_camera = app.ActiveCamera();
