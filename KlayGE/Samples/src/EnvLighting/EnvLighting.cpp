@@ -563,7 +563,7 @@ namespace
 			{
 				float g = GImplicit(n_dot_v, n_dot_l);
 				float g_vis = g * v_dot_h / std::max(1e-6f, n_dot_h * n_dot_v);
-				float fc = pow(1 - v_dot_h, 5);
+				float fc = std::pow(1 - v_dot_h, 5.0f);
 				rg += float2(1 - fc, fc) * g_vis;
 			}
 		}
