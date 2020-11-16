@@ -6,6 +6,7 @@ platform:
   - x64
 
 environment:
+  ARTIFACTS_DIR_NAME: KlayGE_Samples
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PROJECT: vs2019
@@ -23,6 +24,10 @@ environment:
 
 configuration:
   - Release
+
+artifacts:
+  - path: Build/$(BUILD_DIR)/$(ARTIFACTS_DIR_NAME)
+    name: $(ARTIFACTS_DIR_NAME)_$(COMPILER)_$(PLATFORM)_$(CONFIGURATION)
 
 cache:
   - Build/%BUILD_DIR%/External
@@ -57,6 +62,11 @@ build_script:
   - git config --global user.email "dummy@example.com"
   - git config --global user.name "Dummy Name"
   - python Build.py %PROJECT% %COMPILER% %PLATFORM% %CONFIGURATION%
+
+after_build:
+  # Generate artifacts
+  - python Package.py Build/%BUILD_DIR%/%ARTIFACTS_DIR_NAME% %PROJECT% %COMPILER% %PLATFORM% %CONFIGURATION%
+  - echo %APPVEYOR_REPO_COMMIT% > Build/%BUILD_DIR%/%ARTIFACTS_DIR_NAME%/GIT-COMMIT.txt
 
 on_success:
   # Backup ninja files to a folder
