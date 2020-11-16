@@ -6,22 +6,32 @@ import os, sys
 from Build import BuildInfo
 
 def CopyToDst(src_name, dst_dir):
-	print("Copy %s to %s" % (src_name, dst_dir))
+	print("Copying %s to %s..." % (src_name, dst_dir))
 	import shutil
 	shutil.copy2(src_name, dst_dir)
 
-def DeployKlayGE(target_dir, build_info, compiler_arch):
+def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 	import glob
 
 	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
-	if "win" == build_info.target_platform:
+	if build_info.is_windows:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
-	elif ("linux" == build_info.target_platform) or ("darwin" == build_info.target_platform):
+		exe_suffix = "exe"
+	elif build_info.is_darwin:
+		bat_suffix = "sh"
+		dll_suffix = "dylib"
+		exe_suffix = ""
+	else:
 		bat_suffix = "sh"
 		dll_suffix = "so"
-	output_suffix = "_%s%d*" % (build_info.compiler_name, build_info.compiler_version)
-	lib_suffix = "%s.%s" % (output_suffix, dll_suffix)
+		exe_suffix = ""
+	output_suffix = "_%s%d" % (build_info.compiler_name, build_info.compiler_version)
+	if cfg == "Debug":
+		debug_suffix = "_d"
+	else:
+		debug_suffix = ""
+	lib_suffix = "%s%s.%s" % (output_suffix, debug_suffix, dll_suffix)
 
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
@@ -42,14 +52,10 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 
 	CopyToDst("KlayGE/bin/KlayGE.cfg", "%s/bin/" % target_dir);
 	
-	print("Deploying boost...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/boost_*.%s" % (compiler_arch, dll_suffix)):
-		CopyToDst(fname, bin_dst_dir);
-
 	print("Deploying 7z...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/7zxa*.%s" % (compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/7zxa%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/LZMA*.%s" % (compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/LZMA%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying DXSDK...\n")
@@ -83,7 +89,7 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 	print("Deploying KlayGE...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_DevHelper%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_DevHelper*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, "%sAudio/" % bin_dst_dir);
@@ -97,9 +103,9 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 		CopyToDst(fname, "%sScript/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/PlatformDeployer*" % compiler_arch):
+	for fname in glob.iglob("KlayGE/bin/win_%s/PlatformDeployer%s.%s" % (compiler_arch, debug_suffix, exe_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/ToolCommon*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/ToolCommon%s" % (compiler_arch, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
@@ -156,8 +162,9 @@ def DeployKlayGE(target_dir, build_info, compiler_arch):
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		target_dir = sys.argv[1]
-		bi = BuildInfo.FromArgv(sys.argv, 1)
-		for compiler_info in bi.compilers:
-			DeployKlayGE(target_dir, bi, compiler_info.arch)
+		build_info = BuildInfo.FromArgv(sys.argv, 1)
+		for cfg in build_info.cfg:
+			for compiler_info in build_info.compilers:
+				DeployKlayGE(target_dir, build_info, compiler_info.arch, cfg)
 	else:
-		print("Usage: DeployKlayGE.py target_dir [compiler] [arch] [config]")
+		print("Usage: DeployKlayGE.py target_dir [project] [compiler] [arch] [config]")
