@@ -13,8 +13,8 @@ class CfgBuildDefault:
 		self.cmake_path = "auto"
 
 		# Project type.
-		#   On Windows desktop, could be "vs2019", "vs2017", "vs2015", "make", "ninja", "auto".
-		#   On Windows store, could be "vs2019", "vs2017", "vs2015", "auto".
+		#   On Windows desktop, could be "vs2019", "vs2017", "make", "ninja", "auto".
+		#   On Windows store, could be "vs2019", "vs2017", "auto".
 		#   On Android, could be "make", "auto".
 		#   On Linux, could be "make", "ninja", "auto".
 		#   On macOS, could be "xcode", "ninja", "auto".
@@ -22,8 +22,8 @@ class CfgBuildDefault:
 		self.project = "auto"
 
 		# Compiler name.
-		#   On Windows desktop, could be "vc142", "vc141", "vc140", "mingw", "clangcl", "auto".
-		#   On Windows store, could be "vc142", "vc141", "vc140", "auto".
+		#   On Windows desktop, could be "vc142", "vc141", "mingw", "clangcl", "auto".
+		#   On Windows store, could be "vc142", "vc141", "auto".
 		#   On Android, could be "clang", "auto".
 		#   On Linux, could be "gcc", "auto".
 		#   On macOS, could be "clang", "auto".
@@ -315,9 +315,6 @@ class BuildInfo:
 					elif len(self.FindVS2017Folder(program_files_folder)) > 0:
 						project_type = "vs2017"
 						compiler = "vc141"
-					elif ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
-						project_type = "vs2015"
-						compiler = "vc140"
 					elif len(self.FindClang()) != 0:
 						project_type = "make"
 						compiler = "clang"
@@ -346,8 +343,6 @@ class BuildInfo:
 				compiler = "vc142"
 			elif project_type == "vs2017":
 				compiler = "vc141"
-			elif project_type == "vs2015":
-				compiler = "vc140"
 			elif project_type == "xcode":
 				compiler = "clang"
 
@@ -382,36 +377,6 @@ class BuildInfo:
 					else:
 						LogError("Could NOT find vc141 compiler.\n")
 					vcvarsall_options = ""
-			elif "vc140" == compiler:
-				if project_type == "vs2019":
-					try_folder = self.FindVS2019Folder(program_files_folder)
-					if len(try_folder) > 0:
-						compiler_root = try_folder
-						vcvarsall_path = "VCVARSALL.BAT"
-						vcvarsall_options = "-vcvars_ver=14.0"
-					else:
-						LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
-				elif project_type == "vs2017":
-					try_folder = self.FindVS2017Folder(program_files_folder)
-					if len(try_folder) > 0:
-						compiler_root = try_folder
-						vcvarsall_path = "VCVARSALL.BAT"
-						vcvarsall_options = "-vcvars_ver=14.0"
-					else:
-						LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
-				else:
-					if "VS140COMNTOOLS" in env:
-						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
-						vcvarsall_path = "..\\VCVARSALL.BAT"
-					else:
-						try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\bin\\"
-						try_vcvarsall = "..\\VCVARSALL.BAT"
-						if os.path.exists(try_folder + try_vcvarsall):
-							compiler_root = try_folder
-							vcvarsall_path = try_vcvarsall
-						else:
-							LogError("Could NOT find vc140 compiler.\n")
-					vcvarsall_options = ""
 			elif "clangcl" == compiler:
 				if project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
@@ -437,8 +402,6 @@ class BuildInfo:
 				project_type = "vs2019"
 			elif "vc141" == compiler:
 				project_type = "vs2017"
-			elif "vc140" == compiler:
-				project_type = "vs2015"
 			elif ("clang" == compiler) and (("darwin" == target_platform) or ("ios" == target_platform)):
 				project_type = "xcode"
 			else:
@@ -464,9 +427,6 @@ class BuildInfo:
 			elif "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141
-			elif "vc140" == compiler:
-				compiler_name = "vc"
-				compiler_version = 140
 			elif "clangcl" == compiler:
 				compiler_name = "clangcl"
 				compiler_version = self.RetrieveClangVersion(compiler_root + "../../Tools/Llvm/bin/")
@@ -480,24 +440,11 @@ class BuildInfo:
 			if "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141
-			elif "vc140" == compiler:
-				compiler_name = "vc"
-				compiler_version = 140
 			else:
 				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
 				compilers.append(CompilerInfo(self, arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
-		elif "vs2015" == project_type:
-			self.vs_version = 14
-			if "vc140" == compiler:
-				compiler_name = "vc"
-				compiler_version = 140
-			else:
-				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
-			multi_config = True
-			for arch in archs:
-				compilers.append(CompilerInfo(self, arch, "Visual Studio 14", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
@@ -539,11 +486,6 @@ class BuildInfo:
 			elif "vc141" == compiler:
 				compiler_name = "vc"
 				compiler_version = 141
-				for arch in archs:
-					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
-			elif "vc140" == compiler:
-				compiler_name = "vc"
-				compiler_version = 140
 				for arch in archs:
 					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			else:

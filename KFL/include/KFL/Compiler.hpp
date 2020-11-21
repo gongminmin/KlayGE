@@ -230,19 +230,15 @@
 		#define KLAYGE_COMPILER_VERSION 142
 	#elif _MSC_VER >= 1910
 		#define KLAYGE_COMPILER_VERSION 141
-	#elif _MSC_VER >= 1900
-		#define KLAYGE_COMPILER_VERSION 140
 	#else
-		#error "Unsupported compiler version. Please install vc14 or up."
+		#error "Unsupported compiler version. Please install vc 14.1 (VS2017) or up."
 	#endif
 
 	#if _MSVC_LANG > 201402L
 		#if _MSC_VER >= 1911
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#endif
-		#if _MSC_VER >= 1910
-			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-		#endif
+		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 		#if _MSC_VER >= 1914
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT

@@ -13,10 +13,6 @@ environment:
       COMPILER: vc142
       BUILD_DIR: vc142
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PROJECT: vs2015
-      COMPILER: vc140
-      BUILD_DIR: vc140
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: ninja
       COMPILER: mingw
       BUILD_DIR: mingw

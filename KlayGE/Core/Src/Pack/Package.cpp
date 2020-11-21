@@ -55,7 +55,7 @@
 #include <KlayGE/Package.hpp>
 
 #ifndef WINAPI
-#ifdef _MSC_VER
+#ifdef KLAYGE_COMPILER_MSVC
 #define WINAPI __stdcall
 #else
 #define WINAPI
