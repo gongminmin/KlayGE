@@ -1,12 +1,32 @@
-From 31e157369ec75ab89e4d2b58e43e82a728447a0e Mon Sep 17 00:00:00 2001
+From 91928de48163c7fd89d90bda20ccb73cb5394bb0 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 22:01:29 -0800
 Subject: [PATCH 7/7] Fix for clang-cl
 
 ---
- Source/LibWebP/src/dsp/dsp.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Source/FreeImage/PluginG3.cpp | 4 ++--
+ Source/LibWebP/src/dsp/dsp.h  | 2 +-
+ Source/Metadata/XTIFF.cpp     | 4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
 
+diff --git a/Source/FreeImage/PluginG3.cpp b/Source/FreeImage/PluginG3.cpp
+index 0a083b45..6c04cb8c 100644
+--- a/Source/FreeImage/PluginG3.cpp
++++ b/Source/FreeImage/PluginG3.cpp
+@@ -20,11 +20,11 @@
+ // Use at your own risk!
+ // ==========================================================
+ 
+-#include "../LibTIFF4/tiffiop.h"
+-
+ #include "FreeImage.h"
+ #include "Utilities.h"
+ 
++#include "../LibTIFF4/tiffiop.h"
++
+ // ==========================================================
+ // Plugin Interface
+ // ==========================================================
 diff --git a/Source/LibWebP/src/dsp/dsp.h b/Source/LibWebP/src/dsp/dsp.h
 index adf75554..6491950f 100644
 --- a/Source/LibWebP/src/dsp/dsp.h
@@ -20,6 +40,26 @@ index adf75554..6491950f 100644
  #define WEBP_MSC_SSE41  // Visual C++ SSE4.1 targets
  #endif
  
+diff --git a/Source/Metadata/XTIFF.cpp b/Source/Metadata/XTIFF.cpp
+index d5be902a..4eb5d0b6 100644
+--- a/Source/Metadata/XTIFF.cpp
++++ b/Source/Metadata/XTIFF.cpp
+@@ -29,13 +29,13 @@
+ #pragma warning (disable : 4786) // identifier was truncated to 'number' characters
+ #endif
+ 
+-#include "../LibTIFF4/tiffiop.h"
+-
+ #include "FreeImage.h"
+ #include "Utilities.h"
+ #include "FreeImageTag.h"
+ #include "FIRational.h"
+ 
++#include "../LibTIFF4/tiffiop.h"
++
+ // ----------------------------------------------------------
+ //   Extended TIFF Directory GEO Tag Support
+ // ----------------------------------------------------------
 -- 
 2.17.1.windows.2
 
