@@ -227,6 +227,7 @@ struct ShaderParser
 				BOOST_ASSERT_MSG(false, "Unhandled operand index representation");
 				repr = 0;
 			}
+			KLAYGE_ASSUME(i < std::size(op.indices));
 			op.indices[i].disp = 0;
 			// TODO: is disp supposed to be signed here??
 			switch (repr)

@@ -35,10 +35,10 @@
 #include <KFL/com_ptr.hpp>
 #include <KlayGE/HWDetect.hpp>
 
+#if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <KlayGE/SALWrapper.hpp>
-#if defined KLAYGE_PLATFORM_WINDOWS
-	#include <windows.h>
-	#include <dxgi1_2.h>
+#include <windows.h>
+#include <dxgi1_2.h>
 #endif
 
 #include <string>

@@ -264,8 +264,8 @@ namespace KlayGE
 			explicit CompressParams(uint32_t shape)
 				: rotation_mode(-1), index_mode(-1), shape_index(shape)
 			{
-				memset(p1, 0, sizeof(p1));
-				memset(p2, 0, sizeof(p2));
+				std::fill(std::begin(p1), std::end(p1), float4(0, 0, 0, 0));
+				std::fill(std::begin(p2), std::end(p2), float4(0, 0, 0, 0));
 				memset(indices, 0xFF, sizeof(indices));
 				memset(alpha_indices, 0xFF, sizeof(alpha_indices));
 				memset(pbit_combo, 0xFF, sizeof(pbit_combo));

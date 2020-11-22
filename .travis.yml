@@ -65,6 +65,24 @@ jobs:
       env: MATRIX_EVAL="CC=gcc-9 && CXX=g++-9" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
     - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-10
+            - ninja-build
+            - wine32
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update: true
+      env: MATRIX_EVAL="CC=gcc-10 && CXX=g++-10" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
+
+    - os: linux
       dist: xenial
       addons:
         apt:
