@@ -123,27 +123,27 @@ jobs:
           update: true
       env: MATRIX_EVAL="CC=clang-10 && CXX=clang++-10" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
-    - os: osx
-      osx_image: xcode9.4
-      addons:
-        homebrew:
-          casks:
-            - xquartz
-          packages:
-            - ninja
-          update: true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
+#    - os: osx
+#      osx_image: xcode9.4
+#      addons:
+#        homebrew:
+#          casks:
+#            - xquartz
+#          packages:
+#            - ninja
+#          update: true
+#      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
-    - os: osx
-      osx_image: xcode10.1
-      addons:
-        homebrew:
-          casks:
-            - xquartz
-          packages:
-            - ninja
-          update: true
-      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
+#    - os: osx
+#      osx_image: xcode10.1
+#      addons:
+#        homebrew:
+#          casks:
+#            - xquartz
+#          packages:
+#            - ninja
+#          update: true
+#      env: MATRIX_EVAL="CC=clang && CXX=clang++" PROJECT="ninja" COMPILER="clang" MACOSX_DEPLOYMENT_TARGET="10.14" BUILD_DIR="$COMPILER"
 
 before_install:
   - eval "${MATRIX_EVAL}"
