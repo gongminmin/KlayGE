@@ -20,14 +20,6 @@ jobs:
     - os: windows
       env: MATRIX_EVAL="CC=cl.exe && CXX=cl.exe" PROJECT="vs2017" COMPILER="vc141" BUILD_DIR="$COMPILER"
 
-    - os: windows
-      before_install:
-        - choco install ninja
-        # Workaround for CMake not wanting sh.exe on PATH for MinGW
-        - export PATH=${PATH%:/c/Program Files/Git/usr/bin}
-        - export PATH=/c/ProgramData/chocolatey/bin:$PATH
-      env: MATRIX_EVAL="CC=gcc && CXX=g++" PROJECT="ninja" COMPILER="mingw" BUILD_DIR="$COMPILER"
-
     - os: linux
       dist: xenial
       addons:

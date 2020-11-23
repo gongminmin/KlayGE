@@ -1,7 +1,12 @@
 set(OPENALSOFT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/openal-soft")
 set(OPENALSOFT_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/openal-soft/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "cee8100f1917ce21052b9cf255eeefdc839ae550")
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "cee8100f1917ce21052b9cf255eeefdc839ae550" "" "" need_patch)
+if(need_patch)
+	foreach(patch "0001-Fix-SAL-issues-in-GCC-10")
+		ApplyPatch("openal-soft" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
+	endforeach()
+endif()
 
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	set(ALSOFT_BACKEND_DSOUND ON CACHE BOOL "" FORCE)

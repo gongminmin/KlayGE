@@ -79,7 +79,7 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 	CopyToDst(src_bin_dir + "MotionBlurDoFPy.zip", dst_bin_dir)
 	CopyToDst(src_bin_dir + "ScenePlayerPy.zip", dst_bin_dir)		
 
-	if build_info.is_windows:
+	if build_info.is_windows and (build_info.compiler_name == "vc"):
 		win_dir = os.environ["windir"]
 		if cfg == "Debug":
 			vc_debug_suffix = "d"

@@ -12,11 +12,16 @@ environment:
       PROJECT: vs2019
       COMPILER: vc142
       BUILD_DIR: vc142
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PROJECT: ninja
+      COMPILER: mingw
+      BUILD_DIR: mingw
+      MINGW_PATH: C:\msys64\mingw64\bin
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: ninja
       COMPILER: mingw
       BUILD_DIR: mingw
-      MINGW_PATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+      MINGW_PATH: C:\msys64\mingw64\bin
 
 configuration:
   - Release
