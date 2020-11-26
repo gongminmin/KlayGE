@@ -65,12 +65,12 @@ namespace KlayGE
 
 		if (mod_d3d9_ != nullptr)
 		{
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 			DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 		}

@@ -152,7 +152,7 @@ namespace KlayGE
 			::MessageBoxW(nullptr, L"Can't load mfplat.dll", L"Error", MB_OK);
 		}
 
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
@@ -172,7 +172,7 @@ namespace KlayGE
 			DynamicMFCreateAttributes_ = reinterpret_cast<MFCreateAttributesFunc>(::GetProcAddress(mod_mfplat_, "MFCreateAttributes"));
 			DynamicMFShutdown_ = reinterpret_cast<MFShutdownFunc>(::GetProcAddress(mod_mfplat_, "MFShutdown"));
 		}
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 #else

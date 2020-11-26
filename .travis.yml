@@ -17,28 +17,12 @@ cache:
 
 jobs:
   include:
-    - os: windows
+    - name: VS2017 vc141
+      os: windows
       env: MATRIX_EVAL="CC=cl.exe && CXX=cl.exe" PROJECT="vs2017" COMPILER="vc141" BUILD_DIR="$COMPILER"
 
-    - os: linux
-      dist: xenial
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-8
-            - ninja-build
-            - wine
-            - wine-dev
-            - winetricks
-            - libx11-dev
-            - libgl1-mesa-dev
-            - libopenal-dev
-          update: true
-      env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
-
-    - os: linux
+    - name: Bionic gcc9
+      os: linux
       dist: bionic
       addons:
         apt:
@@ -56,7 +40,8 @@ jobs:
           update: true
       env: MATRIX_EVAL="CC=gcc-9 && CXX=g++-9" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
-    - os: linux
+    - name: Bionic gcc10
+      os: linux
       dist: bionic
       addons:
         apt:
@@ -74,7 +59,8 @@ jobs:
           update: true
       env: MATRIX_EVAL="CC=gcc-10 && CXX=g++-10" PROJECT="ninja" COMPILER="gcc" BUILD_DIR="$COMPILER"
 
-    - os: linux
+    - name: Xenial clang7
+      os: linux
       dist: xenial
       addons:
         apt:
@@ -94,7 +80,8 @@ jobs:
           update: true
       env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7" PROJECT="ninja" COMPILER="clang" BUILD_DIR="$COMPILER"
 
-    - os: linux
+    - name: Bionic clang10
+      os: linux
       dist: bionic
       addons:
         apt:

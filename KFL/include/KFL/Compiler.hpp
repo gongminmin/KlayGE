@@ -176,10 +176,10 @@
 
 	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 
-	#if GCC_VERSION >= 71
+	#if GCC_VERSION >= 90
 		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
-		#error "Unsupported compiler version. Please install g++ 7.1 or up."
+		#error "Unsupported compiler version. Please install g++ 9.0 or up."
 	#endif
 
 	#if __cplusplus < 201703L
@@ -194,16 +194,9 @@
 	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-	#if GCC_VERSION >= 80
-		#if !defined(__MINGW32__) || (GCC_VERSION != 81)
-			// MinGW-w64 8.1 can't use built-in filesystem due to a bug: https://sourceforge.net/p/mingw-w64/bugs/737/
-			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-		#endif
-		#if __cplusplus > 201703L
-			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-		#endif
-	#else
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+	#if __cplusplus > 201703L
+		#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
 	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

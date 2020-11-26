@@ -57,12 +57,12 @@ void DetectOSInfo(std::ostream& os)
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
 	HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 	RtlGetVersionFunc RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 	OSVERSIONINFOEXW os_ver_info;
@@ -275,13 +275,13 @@ void DetectGpuInfo(std::ostream& os)
 		os << "Unknown GPU";
 		return;
 	}
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 	CreateDXGIFactory1Func DynamicCreateDXGIFactory1
 		= reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(dxgi, "CreateDXGIFactory1"));
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 80)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 	if (!DynamicCreateDXGIFactory1)

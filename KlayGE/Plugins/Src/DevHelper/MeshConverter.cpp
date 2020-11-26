@@ -44,7 +44,7 @@
 #include <cstring>
 #include <iostream>
 
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 90)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-copy" // Ignore comparison between int and uint
 #endif

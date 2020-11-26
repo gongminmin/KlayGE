@@ -8,16 +8,19 @@ platform:
 environment:
   ARTIFACTS_DIR_NAME: KlayGE_Samples
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - job_name: VS2019 vc142
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PROJECT: vs2019
       COMPILER: vc142
       BUILD_DIR: vc142
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - job_name: MinGW gcc10
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PROJECT: ninja
       COMPILER: mingw
       BUILD_DIR: mingw
       MINGW_PATH: C:\msys64\mingw64\bin
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - job_name: MinGW gcc9
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PROJECT: ninja
       COMPILER: mingw
       BUILD_DIR: mingw
