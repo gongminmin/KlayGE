@@ -127,24 +127,20 @@
 			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
-			#if CLANG_VERSION >= 50
+			#if CLANG_VERSION >= 100
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 			#else
-				#error "Unsupported compiler version. Please install clang++ 5.0 or up."
+				#error "Unsupported compiler version. Please install clang++ 10.0 or up."
 			#endif
 
 			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-			#if CLANG_VERSION >= 70
-				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-				#if __cplusplus > 201703L
-					#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-					#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
-				#endif
-			#else
-				#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+			#if __cplusplus > 201703L
+				#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+				#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
 			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."

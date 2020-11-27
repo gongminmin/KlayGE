@@ -182,17 +182,5 @@ else()
 			PUBLIC
 				stdc++fs
 		)
-	elseif(KLAYGE_COMPILER_CLANG AND KLAYGE_PLATFORM_LINUX)
-		if(KLAYGE_COMPILER_VERSION LESS 70)
-			target_link_libraries(${LIB_NAME}
-				PUBLIC
-					c++experimental
-			)
-		elseif(KLAYGE_COMPILER_VERSION LESS 90)
-			target_link_libraries(${LIB_NAME}
-				PUBLIC
-					c++fs
-			)
-		endif()
 	endif()
 endif()
