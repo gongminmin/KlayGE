@@ -201,6 +201,7 @@ ELSE()
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override -Wno-missing-braces")
 		IF(KLAYGE_PLATFORM_LINUX)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+			set(CMAKE_LINKER "lld")
 			foreach(flag_var
 				CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS CMAKE_EXE_LINKER_FLAGS)
 				SET(${flag_var} "${${flag_var}} -lc++abi")

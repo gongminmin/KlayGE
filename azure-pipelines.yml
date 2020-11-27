@@ -76,7 +76,7 @@ stages:
         sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
         export WINEARCH=win32
         winetricks
       CC: clang-10
@@ -99,7 +99,7 @@ stages:
         sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main"
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
         export WINEARCH=win32
         winetricks
       CC: clang-11
