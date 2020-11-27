@@ -107,6 +107,29 @@ stages:
     steps:
     - template: CI/AzurePipelines/ContinuousBuild.yml
 
+
+  - job: Linux_clang11
+    pool:
+      vmImage: Ubuntu-18.04
+
+    variables:
+      project: ninja
+      compiler: clang
+      installCommand: |
+        sudo dpkg --add-architecture i386
+        wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main"
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        export WINEARCH=win32
+        winetricks
+      CC: clang-11
+      CXX: clang++-11
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
 #  - job: macOS_10_clang
 #    pool:
 #      vmImage: macOS 10.14
