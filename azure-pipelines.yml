@@ -1,0 +1,128 @@
+variables:
+  configuration: Release
+  platform: x64
+
+resources:
+- repo: self
+  fetchDepth: 5
+
+stages:
+- stage: Build
+  jobs:
+  - job: Windows_vc141
+    pool:
+      vmImage: VS2017-Win2016
+
+    variables:
+      project: vs2017
+      compiler: vc141
+      installCommand: 'choco install python3'
+      CC: cl.exe
+      CXX: cl.exe
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
+  - job: Linux_gcc9
+    pool:
+      vmImage: Ubuntu-18.04
+
+    variables:
+      project: ninja
+      compiler: gcc
+      installCommand: |
+        sudo dpkg --add-architecture i386
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        export WINEARCH=win32
+        winetricks
+      CC: gcc-9
+      CXX: g++-9
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
+  - job: Linux_gcc10
+    pool:
+      vmImage: Ubuntu-18.04
+
+    variables:
+      project: ninja
+      compiler: gcc
+      installCommand: |
+        sudo dpkg --add-architecture i386
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        export WINEARCH=win32
+        winetricks
+      CC: gcc-10
+      CXX: g++-10
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
+  - job: Linux_clang7
+    pool:
+      vmImage: Ubuntu-18.04
+
+    variables:
+      project: ninja
+      compiler: clang
+      installCommand: |
+        sudo dpkg --add-architecture i386
+        wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main"
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install clang-7 libc++-7-dev libc++abi-7-dev ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        export WINEARCH=win32
+        winetricks
+      CC: clang-7
+      CXX: clang++-7
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
+  - job: Linux_clang10
+    pool:
+      vmImage: Ubuntu-18.04
+
+    variables:
+      project: ninja
+      compiler: clang
+      installCommand: |
+        sudo dpkg --add-architecture i386
+        wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
+        export WINEARCH=win32
+        winetricks
+      CC: clang-10
+      CXX: clang++-10
+
+    steps:
+    - template: CI/AzurePipelines/ContinuousBuild.yml
+
+#  - job: macOS_10_clang
+#    pool:
+#      vmImage: macOS 10.14
+#
+#    variables:
+#      project: ninja
+#      compiler: clang
+#      installCommand: |
+#        brew tap gongminmin/core
+#        brew install --cask xquartz
+#        brew install ninja wine
+#        wine --version
+#        winegcc --version
+#      CC: clang
+#      CXX: clang++
+#      MACOSX_DEPLOYMENT_TARGET: 10.14
+#
+#    steps:
+#    - template: CI/AzurePipelines/ContinuousBuild.yml
