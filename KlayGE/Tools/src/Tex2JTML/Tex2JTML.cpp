@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
 	std::vector<std::string> tex_names;
 	std::string jtml_name;
 
-	cxxopts::Options options("ImageConv", "KlayGE Tex2JTML Generator");
+	cxxopts::Options options("Tex2JTML", "KlayGE Tex2JTML Generator");
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input textures names.", cxxopts::value<std::string>())

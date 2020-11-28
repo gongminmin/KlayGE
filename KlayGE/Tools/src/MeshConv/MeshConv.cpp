@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	std::string target_folder;
 	bool quiet = false;
 
-	cxxopts::Options options("ImageConv", "KlayGE Mesh Converter");
+	cxxopts::Options options("MeshConv", "KlayGE Mesh Converter");
 	options.add_options()
 		("H,help", "Produce help message")
 		("I,input-path", "Input mesh path.", cxxopts::value<std::string>())

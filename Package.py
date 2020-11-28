@@ -24,16 +24,17 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 		debug_suffix = "_d"
 	else:
 		debug_suffix = ""
-	exe_suffix = ""
-	dll_suffix = ""
 	if build_info.is_windows:
 		exe_suffix = ".exe"
+		lib_prefix = ""
 		dll_suffix = ".dll"
 	elif build_info.is_darwin:
 		exe_suffix = ""
+		lib_prefix = "lib"
 		dll_suffix = ".dylib"
 	else:
 		exe_suffix = ""
+		lib_prefix = "lib"
 		dll_suffix = ".so"
 
 	src_bin_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_arch)
@@ -52,7 +53,6 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 		"Foliage",
 		"GPUParticleSystem",
 		"JudaTexViewer",
-		"KGEConfig",
 		"Metalness",
 		"MotionBlurDoF",
 		"Ocean",
@@ -77,17 +77,7 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 		CopyToDst(src_bin_dir + exe_item + output_suffix + debug_suffix + exe_suffix, dst_bin_dir)
 
 	CopyToDst(src_bin_dir + "MotionBlurDoFPy.zip", dst_bin_dir)
-	CopyToDst(src_bin_dir + "ScenePlayerPy.zip", dst_bin_dir)		
-
-	if build_info.is_windows and (build_info.compiler_name == "vc"):
-		win_dir = os.environ["windir"]
-		if cfg == "Debug":
-			vc_debug_suffix = "d"
-		else:
-			vc_debug_suffix = ""
-		CopyToDst("%s/Sysnative/msvcp140%s.dll" % (win_dir, vc_debug_suffix), dst_bin_dir)
-		CopyToDst("%s/Sysnative/vcruntime140%s.dll" % (win_dir, vc_debug_suffix), dst_bin_dir)
-		CopyToDst("%s/Sysnative/vcruntime140_1%s.dll" % (win_dir, vc_debug_suffix), dst_bin_dir)
+	CopyToDst(src_bin_dir + "ScenePlayerPy.zip", dst_bin_dir)
 
 	CopyToDst("LICENSE", dst_sample_dir)
 	CopyToDst("README.md", dst_sample_dir)
@@ -152,19 +142,19 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 	import glob
 	for pd_item in pd_list:
 		resource_path = dst_sample_dir + pd_item[1]
-		subprocess.call([pd_path, "-P", platform, "-T", pd_item[0], "-I", resource_path], shell = True)
+		subprocess.call([pd_path, "-P", platform, "-T", pd_item[0], "-I", resource_path])
 		for file in glob.glob(resource_path):
 			print("Removing %s..." % file)
 			os.remove(file)
 
-	for file in glob.glob(dst_bin_dir + "KlayGE_DevHelper*" + dll_suffix):
+	for file in glob.glob(dst_bin_dir + lib_prefix + "KlayGE_DevHelper*" + dll_suffix):
 		os.remove(file)
 	os.remove(dst_bin_dir + "PlatformDeployer" + debug_suffix + exe_suffix)
-	for file in glob.glob(dst_bin_dir + "ToolCommon*" + dll_suffix):
+	for file in glob.glob(dst_bin_dir + lib_prefix + "ToolCommon*" + dll_suffix):
 		os.remove(file)
-	for file in glob.glob(dst_bin_dir + "assimp*" + dll_suffix):
+	for file in glob.glob(dst_bin_dir + lib_prefix + "assimp*" + dll_suffix):
 		os.remove(file)
-	for file in glob.glob(dst_bin_dir + "FreeImage*" + dll_suffix):
+	for file in glob.glob(dst_bin_dir + lib_prefix + "FreeImage*" + dll_suffix):
 		os.remove(file)	
 	for file in glob.glob(dst_sample_dir + "Samples/media/CascadedShadowMap/*.kmeta"):
 		os.remove(file)

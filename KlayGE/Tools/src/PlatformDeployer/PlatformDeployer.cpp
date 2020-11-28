@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 	std::string res_type;
 	std::string platform;
 
-	cxxopts::Options options("ImageConv", "KlayGE PlatformDeployer");
+	cxxopts::Options options("PlatformDeployer", "KlayGE PlatformDeployer");
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input resource name.", cxxopts::value<std::string>())

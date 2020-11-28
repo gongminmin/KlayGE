@@ -17,6 +17,7 @@ stages:
           project: vs2017
           compiler: vc141
           installCommand: 'choco install python3'
+          artifactSuffix: '_vc141_win_$(platform)_$(configuration)'
           CC: cl.exe
           CXX: cl.exe
 
@@ -31,6 +32,7 @@ stages:
             sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
+          artifactSuffix: '_gcc9_linux_$(platform)_$(configuration)'
           CC: gcc-9
           CXX: g++-9
 
@@ -45,6 +47,7 @@ stages:
             sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
+          artifactSuffix: '_gcc10_linux_$(platform)_$(configuration)'
           CC: gcc-10
           CXX: g++-10
 
@@ -61,6 +64,7 @@ stages:
             sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
+          artifactSuffix: '_clang10_linux_$(platform)_$(configuration)'
           CC: clang-10
           CXX: clang++-10
 
@@ -77,6 +81,7 @@ stages:
             sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
+          artifactSuffix: '_clang11_linux_$(platform)_$(configuration)'
           CC: clang-11
           CXX: clang++-11
 
@@ -90,6 +95,7 @@ stages:
 #            brew install ninja wine
 #            wine --version
 #            winegcc --version
+#          artifactSuffix: '_clang_darwin_$(platform)_$(configuration)'
 #          CC: clang
 #          CXX: clang++
 #          MACOSX_DEPLOYMENT_TARGET: 10.14
@@ -112,3 +118,20 @@ stages:
           scriptPath: Build.py
           arguments: '$(project) $(compiler) $(platform) $(configuration)'
 
+      - task: PythonScript@0
+        displayName: 'Generate artifacts'
+        inputs:
+          scriptPath: Package.py
+          arguments: '$(Build.ArtifactStagingDirectory) $(project) $(compiler) $(platform) $(configuration)'
+        condition: succeeded()
+
+      - bash: 'echo $BUILD_SOURCEVERSION > $BUILD_ARTIFACTSTAGINGDIRECTORY/GIT-COMMIT.txt'
+        displayName: 'Add commit info'
+        condition: succeeded()
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish artifacts'
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: KlayGE_Samples$(artifactSuffix)
+        condition: succeeded()

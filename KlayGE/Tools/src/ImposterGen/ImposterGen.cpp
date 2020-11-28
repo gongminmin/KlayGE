@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 	uint32_t size;
 	bool quiet = false;
 
-	cxxopts::Options options("ImageConv", "KlayGE Imposter Generator");
+	cxxopts::Options options("ImposterGen", "KlayGE Imposter Generator");
 	options.add_options()
 		("H,help", "Produce help message")
 		("I,input-name", "Input mesh name.", cxxopts::value<std::string>())

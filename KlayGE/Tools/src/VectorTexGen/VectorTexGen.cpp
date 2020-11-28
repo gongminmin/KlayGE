@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	uint32_t num_channels;
 	bool svg_input;
 
-	cxxopts::Options options("ImageConv", "KlayGE Vector Texture Converter");
+	cxxopts::Options options("VectorTexGen", "KlayGE Vector Texture Converter");
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input name (svg or dds).", cxxopts::value<std::string>())

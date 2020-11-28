@@ -551,7 +551,7 @@ class BuildInfo:
 
 		gcc_loc = subprocess.check_output(self.where_cmd + " g++", shell = True).decode()
 		if len(gcc_loc) == 0:
-			LogError("Could NOT find g++. Please install g++ 7.1+, set its path into CXX, or put its path into %%PATH%%.")
+			LogError("Could NOT find g++. Please install g++, set its path into CXX, or put its path into %%PATH%%.")
 		return gcc_loc.split(self.sep)[0]
 
 	def RetrieveGCCVersion(self):
@@ -569,7 +569,7 @@ class BuildInfo:
 
 		clang_loc = subprocess.check_output(self.where_cmd + " clang++", shell = True).decode()
 		if len(clang_loc) == 0:
-			LogError("Could NOT find g++. Please install clang++ 3.6+, set its path into CXX, or put its path into %%PATH%%.")
+			LogError("Could NOT find g++. Please install clang++, set its path into CXX, or put its path into %%PATH%%.")
 		return clang_loc.split(self.sep)[0]
 
 	def RetrieveClangVersion(self, path = ""):
@@ -580,8 +580,10 @@ class BuildInfo:
 			if not os.path.isdir(prebuilt_clang_path):
 				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
 			clang_path = prebuilt_clang_path + "\\clang"
-		else:
+		elif (len(path) > 0):
 			clang_path = path + "clang"
+		else:
+			clang_path = self.FindClang()
 		clang_ver = subprocess.check_output([clang_path, "--version"]).decode()
 		clang_ver_tokens = clang_ver.split()
 		for i in range(0, len(clang_ver_tokens)):

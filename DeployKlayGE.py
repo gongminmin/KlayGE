@@ -13,25 +13,29 @@ def CopyToDst(src_name, dst_dir):
 def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 	import glob
 
+	bin_src_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_arch)
 	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
 	if build_info.is_windows:
 		bat_suffix = "bat"
-		dll_suffix = "dll"
-		exe_suffix = "exe"
+		lib_prefix = ""
+		dll_suffix = ".dll"
+		exe_suffix = ".exe"
 	elif build_info.is_darwin:
 		bat_suffix = "sh"
-		dll_suffix = "dylib"
+		lib_prefix = "lib"
+		dll_suffix = ".dylib"
 		exe_suffix = ""
 	else:
 		bat_suffix = "sh"
-		dll_suffix = "so"
+		lib_prefix = "lib"
+		dll_suffix = ".so"
 		exe_suffix = ""
 	output_suffix = "_%s%d" % (build_info.compiler_name, build_info.compiler_version)
 	if cfg == "Debug":
 		debug_suffix = "_d"
 	else:
 		debug_suffix = ""
-	lib_suffix = "%s%s.%s" % (output_suffix, debug_suffix, dll_suffix)
+	lib_suffix = output_suffix + debug_suffix + dll_suffix
 
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
@@ -52,63 +56,80 @@ def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 
 	CopyToDst("KlayGE/bin/KlayGE.cfg", "%s/bin/" % target_dir);
 	
-	print("Deploying 7z...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/7zxa%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying 7z...")
+	for fname in glob.iglob("%s%s7zxa%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/LZMA%s" % (compiler_arch, lib_suffix)):
-		CopyToDst(fname, bin_dst_dir);
-
-	print("Deploying DXSDK...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/d3dcompiler_47.%s" % (compiler_arch, dll_suffix)):
+	for fname in glob.iglob("%s%sLZMA%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying OpenAL...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying DXSDK...")
+	for fname in glob.iglob("%sd3dcompiler_47.dll" % bin_src_dir):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying assimp...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/assimp%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying OpenAL...")
+	for fname in glob.iglob("%s%sOpenAL%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying FreeImage...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/FreeImage%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying assimp...")
+	for fname in glob.iglob("%s%sassimp%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying zlib...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/zlib%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying FreeImage...")
+	for fname in glob.iglob("%s%sFreeImage%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying glloader...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/glloader%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying zlib...")
+	for fname in glob.iglob("%s%szlib%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying kfont...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/kfont%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying glloader...")
+	for fname in glob.iglob("%s%sglloader%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying KlayGE...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core%s" % (compiler_arch, lib_suffix)):
+	print("\nDeploying kfont...")
+	for fname in glob.iglob("%s%skfont%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_DevHelper*%s" % (compiler_arch, lib_suffix)):
+
+	if build_info.is_windows and (build_info.compiler_name == "vc"):
+		print("\nDeploying vcredist...")
+		system32 = os.environ["SystemRoot"] + "/"
+		if cfg == "Debug":
+			vc_debug_suffix = "d"
+		else:
+			vc_debug_suffix = ""
+		import platform
+		if (platform.architecture()[0] == '32bit') and ('ProgramFiles(x86)' in os.environ):
+			system32 += "SysNative"
+		else:
+			system32 += "System32"
+		CopyToDst("%s/msvcp140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+		CopyToDst("%s/vcruntime140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+		if (build_info.compiler_version >= 142):
+			CopyToDst("%s/vcruntime140_1%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+
+	print("\nDeploying KlayGE...")
+	for fname in glob.iglob("%s%sKlayGE_Core%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%s%sKlayGE_DevHelper*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
+		CopyToDst(fname, bin_dst_dir);
+	for fname in glob.iglob("%sAudio/%sKlayGE_Audio*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sAudio/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Input/KlayGE_Input*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%sInput/%sKlayGE_Input*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sInput/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Render/KlayGE_Render*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%sRender/%sKlayGE_Render*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sRender/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Scene/KlayGE_Scene*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%sScene/%sKlayGE_Scene*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sScene/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Script/KlayGE_Script*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%sScript/%sKlayGE_Script*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sScript/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%sShow/%sKlayGE_Show*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/PlatformDeployer%s.%s" % (compiler_arch, debug_suffix, exe_suffix)):
+	for fname in glob.iglob("%sPlatformDeployer%s%s" % (bin_src_dir, debug_suffix, exe_suffix)):
 		CopyToDst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/ToolCommon%s" % (compiler_arch, lib_suffix)):
+	for fname in glob.iglob("%s%sToolCommon%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	print("Deploying media files...\n")
+	print("\nDeploying media files...")
 
 	if not os.path.exists("%s/media" % target_dir):
 		os.mkdir("%s/media" % target_dir);
