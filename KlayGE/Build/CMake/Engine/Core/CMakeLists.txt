@@ -606,6 +606,11 @@ if(KLAYGE_PLATFORM_LINUX)
 elseif(KLAYGE_PLATFORM_ANDROID)
 	add_dependencies(${LIB_NAME} android_native_app_glue)
 endif()
+if(KLAYGE_IS_DEV_PLATFORM)
+	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
+		add_dependencies(${LIB_NAME} D3DCompilerRedist)
+	endif()
+endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
 
