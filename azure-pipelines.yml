@@ -17,9 +17,10 @@ stages:
           project: vs2017
           compiler: vc141
           installCommand: 'choco install python3'
-          artifactSuffix: '_vc141_win_$(platform)_$(configuration)'
+          id: 'vc141_win_$(platform)_$(configuration)'
           CC: cl.exe
           CXX: cl.exe
+          BUILD_DIR: vc141
 
         Linux_gcc9:
           vmImage: Ubuntu-18.04
@@ -32,9 +33,10 @@ stages:
             sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
-          artifactSuffix: '_gcc9_linux_$(platform)_$(configuration)'
+          id: 'gcc9_linux_$(platform)_$(configuration)'
           CC: gcc-9
           CXX: g++-9
+          BUILD_DIR: gcc9
 
         Linux_gcc10:
           vmImage: Ubuntu-18.04
@@ -47,9 +49,10 @@ stages:
             sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
-          artifactSuffix: '_gcc10_linux_$(platform)_$(configuration)'
+          id: 'gcc10_linux_$(platform)_$(configuration)'
           CC: gcc-10
           CXX: g++-10
+          BUILD_DIR: gcc10
 
         Linux_clang10:
           vmImage: Ubuntu-18.04
@@ -64,9 +67,10 @@ stages:
             sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
-          artifactSuffix: '_clang10_linux_$(platform)_$(configuration)'
+          id: 'clang10_linux_$(platform)_$(configuration)'
           CC: clang-10
           CXX: clang++-10
+          BUILD_DIR: clang10
 
         Linux_clang11:
           vmImage: Ubuntu-18.04
@@ -81,9 +85,10 @@ stages:
             sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev libopenal-dev python3
             export WINEARCH=win32
             winetricks
-          artifactSuffix: '_clang11_linux_$(platform)_$(configuration)'
+          id: 'clang11_linux_$(platform)_$(configuration)'
           CC: clang-11
           CXX: clang++-11
+          BUILD_DIR: clang11
 
 #        macOS_10_clang:
 #          vmImage: macOS 10.14
@@ -95,9 +100,10 @@ stages:
 #            brew install ninja wine
 #            wine --version
 #            winegcc --version
-#          artifactSuffix: '_clang_darwin_$(platform)_$(configuration)'
+#          id: 'clang_darwin_$(platform)_$(configuration)'
 #          CC: clang
 #          CXX: clang++
+#          BUILD_DIR: clang
 #          MACOSX_DEPLOYMENT_TARGET: 10.14
 
     pool:
@@ -107,11 +113,76 @@ stages:
       - bash: eval '$(installCommand)'
         displayName: 'Install'
 
+      - task: Cache@2
+        inputs:
+          key: 'Build_External | "$(Agent.OS)" | $(id)'
+          path: Build/$(BUILD_DIR)/External
+        displayName: Cache Build/External
+
+      - task: Cache@2
+        inputs:
+          key: 'Build_Ninja | "$(Agent.OS)" | $(id)'
+          path: Build/$(BUILD_DIR)/Ninja
+          cacheHitVar: CACHE_RESTORED
+        displayName: Cache Build/ninja
+        condition: eq(variables.project, 'ninja')
+
+      - bash: |
+          mv Build/$(BUILD_DIR)/Ninja/ninja_deps Build/$(BUILD_DIR)/.ninja_deps
+          mv Build/$(BUILD_DIR)/Ninja/ninja_log Build/$(BUILD_DIR)/.ninja_log
+          rmdir Build/$(BUILD_DIR)/Ninja
+        displayName: 'Restore ninja files'
+        condition: and(eq(variables.CACHE_RESTORED, 'true'), eq(variables.project, 'ninja'))
+
+      - task: Cache@2
+        inputs:
+          key: 'External | "$(Agent.OS)"'
+          path: External
+        displayName: Cache External
+
+      - task: Cache@2
+        inputs:
+          key: 'KlayGE_media | "$(Agent.OS)"'
+          path: KlayGE/media
+        displayName: Cache KlayGE/media
+
+      - task: Cache@2
+        inputs:
+          key: 'KlayGE_Samples_media | "$(Agent.OS)"'
+          path: KlayGE/Samples/media
+        displayName: Cache KlayGE/Samples/media
+
+      - task: Cache@2
+        inputs:
+          key: 'KlayGE_Tests_media | "$(Agent.OS)"'
+          path: KlayGE/Tests/media
+        displayName: Cache KlayGE/Tests/media
+
+      - task: Cache@2
+        inputs:
+          key: 'KlayGE_Tools_media | "$(Agent.OS)"'
+          path: KlayGE/Tools/media
+        displayName: Cache KlayGE/Tools/media
+
+      - task: Cache@2
+        inputs:
+          key: 'KlayGE_Tutorials_media | "$(Agent.OS)"'
+          path: KlayGE/Tutorials/media
+        displayName: Cache KlayGE/Tutorials/media
+
       - script: |
           git config --global user.email "dummy@example.com"
           git config --global user.name "Dummy Name"
+          # Reset the repo to restore changes in External
+          git reset --hard
         displayName: 'Config git'
 
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+          architecture: 'x64'
+  
       - task: PythonScript@0
         displayName: 'Build'
         inputs:
@@ -133,5 +204,12 @@ stages:
         displayName: 'Publish artifacts'
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: KlayGE_Samples$(artifactSuffix)
+          artifactName: KlayGE_Samples_$(id)
         condition: succeeded()
+
+      - bash: |
+          mkdir Build/$(BUILD_DIR)/Ninja
+          mv -f Build/$(BUILD_DIR)/.ninja_deps Build/$(BUILD_DIR)/Ninja/ninja_deps
+          mv -f Build/$(BUILD_DIR)/.ninja_log Build/$(BUILD_DIR)/Ninja/ninja_log
+        displayName: 'Backup ninja files'
+        condition: and(succeeded(), eq(variables.project, 'ninja'))
