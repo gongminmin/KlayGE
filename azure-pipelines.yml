@@ -12,6 +12,16 @@ stages:
   - job: Build
     strategy:
       matrix:
+        Windows_vc142:
+          vmImage: windows-2019
+          project: vs2019
+          compiler: vc142
+          installCommand: 'choco install python3'
+          id: 'vc142_win_$(platform)_$(configuration)'
+          CC: cl.exe
+          CXX: cl.exe
+          BUILD_DIR: vc142
+
         Windows_vc141:
           vmImage: VS2017-Win2016
           project: vs2017
@@ -21,6 +31,16 @@ stages:
           CC: cl.exe
           CXX: cl.exe
           BUILD_DIR: vc141
+
+        Windows_gcc10:
+          vmImage: windows-2019
+          project: ninja
+          compiler: mingw
+          installCommand: 'choco install ninja python3'
+          id: 'gcc10_win_$(platform)_$(configuration)'
+          CC: gcc.exe
+          CXX: g++.exe
+          BUILD_DIR: mingw
 
         Linux_gcc9:
           vmImage: Ubuntu-18.04
@@ -112,6 +132,12 @@ stages:
     steps:
       - bash: eval '$(installCommand)'
         displayName: 'Install'
+
+      - pwsh: |
+          $mingwPath = "C:\msys64\mingw64\bin"
+          Write-Host "##vso[task.setvariable variable=PATH;]$mingwPath;${env:PATH}";
+        displayName: 'Config msys2 PATH'
+        condition: eq(variables.compiler, 'mingw')
 
       - task: Cache@2
         inputs:
