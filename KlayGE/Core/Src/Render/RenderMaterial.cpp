@@ -144,7 +144,7 @@ namespace
 				}
 				else
 				{
-					std::filesystem::path res_path(mtl_desc_.res_name);
+					FILESYSTEM_NS::path res_path(mtl_desc_.res_name);
 					mtl_desc_.mtl_data->name = res_path.stem().string();
 				}
 			}

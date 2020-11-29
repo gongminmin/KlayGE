@@ -94,7 +94,7 @@ void PackJTML(std::string const & jtml_name)
 {
 	Timer timer;
 
-	std::filesystem::path jtml_path = ResLoader::Instance().Locate(jtml_name);
+	FILESYSTEM_NS::path jtml_path = ResLoader::Instance().Locate(jtml_name);
 	std::string const jtml_folder = jtml_path.parent_path().string() + '/';
 	ResLoader::Instance().AddPath(jtml_folder);
 

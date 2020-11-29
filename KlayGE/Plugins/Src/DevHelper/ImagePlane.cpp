@@ -134,7 +134,7 @@ namespace KlayGE
 			return false;
 		}
 
-		std::string const ext_name = std::filesystem::path(name_str).extension().string();
+		std::string const ext_name = FILESYSTEM_NS::path(name_str).extension().string();
 		if (ext_name == ".dds")
 		{
 			TexturePtr in_tex = LoadSoftwareTexture(name_str);

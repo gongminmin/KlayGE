@@ -346,16 +346,16 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				filesystem::path arg_path(arg.begin(), arg.end());
+				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 
 				std::regex const filter(DosWildcardToRegex(file_name.string()));
 
-				filesystem::directory_iterator end_itr;
-				for (filesystem::directory_iterator i(parent); i != end_itr; ++ i)
+				FILESYSTEM_NS::directory_iterator end_itr;
+				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (filesystem::is_regular_file(i->status()))
+					if (FILESYSTEM_NS::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();

@@ -1115,7 +1115,7 @@ namespace
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
 
-			std::filesystem::path res_path(tex_desc_.res_name);
+			FILESYSTEM_NS::path res_path(tex_desc_.res_name);
 			bool const dds_ext = (res_path.extension().string() == ".dds");
 			tex_desc_.metadata_name = tex_desc_.res_name + ".kmeta";
 			tex_desc_.runtime_name = tex_desc_.res_name;
@@ -2117,7 +2117,7 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
-		std::filesystem::path res_path(tex_name.begin(), tex_name.end());
+		FILESYSTEM_NS::path res_path(tex_name.begin(), tex_name.end());
 		if (res_path.extension().string() != ".dds")
 		{
 #if KLAYGE_IS_DEV_PLATFORM

@@ -64,11 +64,11 @@ namespace KlayGE
 			MeshConverter mc;
 			auto model = mc.Load(input_name, metadata);
 
-			std::filesystem::path input_path(input_name.begin(), input_name.end());
-			std::filesystem::path output_path(output_name.begin(), output_name.end());
+			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
+			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
 			}
 
 			mc.Save(*model, output_path.string());
@@ -84,11 +84,11 @@ namespace KlayGE
 			TexConverter tc;
 			auto texture = tc.Load(input_name, metadata);
 
-			std::filesystem::path input_path(input_name.begin(), input_name.end());
-			std::filesystem::path output_path(output_name.begin(), output_name.end());
+			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
+			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
 			}
 
 			SaveTexture(texture, output_path.string());

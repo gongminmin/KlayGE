@@ -1075,7 +1075,7 @@ namespace KlayGE
 		char const * JIT_EXT_NAME = ".model_bin";
 
 		std::string runtime_name(model_name);
-		if (std::filesystem::path(runtime_name).extension() != JIT_EXT_NAME)
+		if (FILESYSTEM_NS::path(runtime_name).extension() != JIT_EXT_NAME)
 		{
 			std::string const metadata_name = runtime_name + ".kmeta";
 			runtime_name += JIT_EXT_NAME;
@@ -2144,7 +2144,7 @@ namespace KlayGE
 
 	void SaveModel(RenderModel const & model, std::string_view model_name)
 	{
-		std::filesystem::path output_path(model_name.begin(), model_name.end());
+		FILESYSTEM_NS::path output_path(model_name.begin(), model_name.end());
 		auto const output_ext = output_path.extension().string();
 		bool need_conversion = false;
 		if (output_ext != ".model_bin")

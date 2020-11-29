@@ -311,11 +311,11 @@ namespace KlayGE
 			ResLoader::Instance().DelPath(last_file_path_);
 		}
 
-		std::filesystem::path mesh_path = name;
+		FILESYSTEM_NS::path mesh_path = name;
 		last_file_path_ = mesh_path.parent_path().string();
 		ResLoader::Instance().AddPath(last_file_path_);
 
-		std::filesystem::path imposter_path = mesh_path;
+		FILESYSTEM_NS::path imposter_path = mesh_path;
 		imposter_path.replace_extension(".impml");
 		std::string imposter_name = imposter_path.string();
 

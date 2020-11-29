@@ -149,7 +149,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			auto output_tex = tc.Load(res_names[i], metadata);
 			if (output_tex)
 			{
-				filesystem::path res_path(res_names[i]);
+				FILESYSTEM_NS::path res_path(res_names[i]);
 				SaveTexture(output_tex, res_path.string() + ".dds");
 			}
 		}
@@ -167,7 +167,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			auto output_model = mc.Load(res_names[i], metadata);
 			if (output_model)
 			{
-				filesystem::path res_path(res_names[i]);
+				FILESYSTEM_NS::path res_path(res_names[i]);
 				SaveModel(*output_model, res_path.string() + ".model_bin");
 			}
 		}
@@ -282,16 +282,16 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				filesystem::path arg_path(arg.begin(), arg.end());
+				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 
 				std::regex const filter(DosWildcardToRegex(file_name.string()));
 
-				filesystem::directory_iterator end_itr;
-				for (filesystem::directory_iterator i(parent); i != end_itr; ++ i)
+				FILESYSTEM_NS::directory_iterator end_itr;
+				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (filesystem::is_regular_file(i->status()))
+					if (FILESYSTEM_NS::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();
@@ -317,7 +317,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		std::string ext_name = filesystem::path(res_names[0]).extension().string();
+		std::string ext_name = FILESYSTEM_NS::path(res_names[0]).extension().string();
 		if (".dds" == ext_name)
 		{
 			res_type = "albedo";

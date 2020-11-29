@@ -251,23 +251,23 @@ namespace KlayGE
 	std::string ResLoader::AbsPath(std::string_view path)
 	{
 		std::string path_str(path);
-		std::filesystem::path new_path(path_str);
+		FILESYSTEM_NS::path new_path(path_str);
 		if (!new_path.is_absolute())
 		{
-			std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
+			FILESYSTEM_NS::path full_path = FILESYSTEM_NS::path(exe_path_) / new_path;
 			std::error_code ec;
-			if (!std::filesystem::exists(full_path, ec))
+			if (!FILESYSTEM_NS::exists(full_path, ec))
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
 				try
 				{
-					full_path = std::filesystem::current_path() / new_path;
+					full_path = FILESYSTEM_NS::current_path() / new_path;
 				}
 				catch (...)
 				{
 					full_path = new_path;
 				}
-				if (!std::filesystem::exists(full_path, ec))
+				if (!FILESYSTEM_NS::exists(full_path, ec))
 				{
 					return "";
 				}
@@ -352,10 +352,10 @@ namespace KlayGE
 			if (pkt_offset != std::string_view::npos)
 			{
 				package_path = std::string(path.substr(0, pkt_offset + 3));
-				std::filesystem::path pkt_path(package_path);
+				FILESYSTEM_NS::path pkt_path(package_path);
 				std::error_code ec;
-				if (std::filesystem::exists(pkt_path, ec)
-					&& (std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
+				if (FILESYSTEM_NS::exists(pkt_path, ec) &&
+					(FILESYSTEM_NS::is_regular_file(pkt_path) || FILESYSTEM_NS::is_symlink(pkt_path)))
 				{
 					auto const next_slash_offset = path.find('/', pkt_offset + 3);
 					if ((path.size() > pkt_offset + 3) && (path[pkt_offset + 3] == '|'))
@@ -476,7 +476,7 @@ namespace KlayGE
 					}
 					if (!package)
 					{
-						uint64_t const timestamp = std::filesystem::last_write_time(package_path).time_since_epoch().count();
+						uint64_t const timestamp = FILESYSTEM_NS::last_write_time(package_path).time_since_epoch().count();
 						auto package_res = MakeSharedPtr<ResIdentifier>(
 							package_path, timestamp, MakeSharedPtr<std::ifstream>(package_path.c_str(), std::ios_base::binary));
 
@@ -543,7 +543,7 @@ namespace KlayGE
 #endif
 
 					std::error_code ec;
-					if (std::filesystem::exists(std::filesystem::path(res_name), ec))
+					if (FILESYSTEM_NS::exists(FILESYSTEM_NS::path(res_name), ec))
 					{
 						return res_name;
 					}
@@ -564,7 +564,7 @@ namespace KlayGE
 					}
 				}
 
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name.begin(), name.end()).is_absolute())
+				if ((std::get<1>(path) == 0) && FILESYSTEM_NS::path(name.begin(), name.end()).is_absolute())
 				{
 					break;
 				}
@@ -601,8 +601,8 @@ namespace KlayGE
 		std::string const & res_name = this->LocateFileIOS(name);
 		if (!res_name.empty())
 		{
-			std::filesystem::path res_path(res_name);
-			uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+			FILESYSTEM_NS::path res_path(res_name);
+			uint64_t const timestamp = FILESYSTEM_NS::last_write_time(res_path).time_since_epoch().count();
 			return MakeSharedPtr<ResIdentifier>(name, timestamp,
 				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 		}
@@ -618,11 +618,11 @@ namespace KlayGE
 					std::replace(res_name.begin(), res_name.end(), '\\', '/');
 #endif
 
-					std::filesystem::path res_path(res_name);
+					FILESYSTEM_NS::path res_path(res_name);
 					std::error_code ec;
-					if (std::filesystem::exists(res_path, ec))
+					if (FILESYSTEM_NS::exists(res_path, ec))
 					{
-						uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+						uint64_t const timestamp = FILESYSTEM_NS::last_write_time(res_path).time_since_epoch().count();
 						return MakeSharedPtr<ResIdentifier>(
 							name, timestamp, MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 					}
@@ -644,7 +644,7 @@ namespace KlayGE
 					}
 				}
 
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name.begin(), name.end()).is_absolute())
+				if ((std::get<1>(path) == 0) && FILESYSTEM_NS::path(name.begin(), name.end()).is_absolute())
 				{
 					break;
 				}
@@ -669,7 +669,7 @@ namespace KlayGE
 		if (!res_path.empty())
 		{
 #if !defined(KLAYGE_PLATFORM_ANDROID)
-			timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+			timestamp = FILESYSTEM_NS::last_write_time(res_path).time_since_epoch().count();
 #endif
 		}
 

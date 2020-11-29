@@ -110,21 +110,18 @@ stages:
           CXX: clang++-11
           BUILD_DIR: clang11
 
-#        macOS_10_clang:
-#          vmImage: macOS 10.14
-#          project: ninja
-#          compiler: clang
-#          installCommand: |
-#            brew tap gongminmin/core
-#            brew install --cask xquartz
-#            brew install ninja wine
-#            wine --version
-#            winegcc --version
-#          id: 'clang_darwin_$(platform)_$(configuration)'
-#          CC: clang
-#          CXX: clang++
-#          BUILD_DIR: clang
-#          MACOSX_DEPLOYMENT_TARGET: 10.14
+        macOS_clang11:
+          vmImage: macOS-10.14
+          project: ninja
+          compiler: clang
+          installCommand: |
+            brew install --cask xquartz wine-stable
+            brew install ninja mingw-w64
+          id: 'clang11_darwin_$(platform)_$(configuration)'
+          CC: clang
+          CXX: clang++
+          BUILD_DIR: clang
+          MACOSX_DEPLOYMENT_TARGET: 10.14
 
     pool:
       vmImage: $(vmImage)

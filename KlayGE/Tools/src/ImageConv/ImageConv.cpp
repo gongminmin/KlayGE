@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 		cout << "Could NOT find " << input_name << '.';
 
 		std::string const possible_output_name = ResLoader::Instance().Locate(input_name + ".dds");
-		if (std::filesystem::exists(possible_output_name))
+		if (FILESYSTEM_NS::exists(possible_output_name))
 		{
 			cout << " But " << possible_output_name << " does exist.";
 			ret = 0;
@@ -152,12 +152,12 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			output_name = (target_folder / filesystem::path(full_input_name).filename()).string() + ".dds";
+			output_name = (target_folder / FILESYSTEM_NS::path(full_input_name).filename()).string() + ".dds";
 		}
 	}
 
 	bool conversion = false;
-	filesystem::path const output_path(output_name);
+	FILESYSTEM_NS::path const output_path(output_name);
 	if (output_path.extension() == ".dds")
 	{
 		if (ResLoader::Instance().Locate(output_name).empty())

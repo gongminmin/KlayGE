@@ -4994,13 +4994,13 @@ namespace KlayGE
 
 	void RenderEffectTemplate::Load(std::span<std::string const> names, RenderEffect& effect)
 	{
-		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
-		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
+		FILESYSTEM_NS::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
+		FILESYSTEM_NS::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
 		for (int i = 0; i < names.size(); ++ i)
 		{
-			connected_name += std::filesystem::path(names[i]).stem().string();
+			connected_name += FILESYSTEM_NS::path(names[i]).stem().string();
 			if (i != names.size() - 1)
 			{
 				connected_name += '+';

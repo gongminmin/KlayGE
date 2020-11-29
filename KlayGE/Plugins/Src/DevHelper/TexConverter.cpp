@@ -76,7 +76,7 @@ namespace
 		input_name_ = std::string(input_name);
 		metadata_ = metadata;
 
-		auto in_folder = std::filesystem::path(ResLoader::Instance().Locate(input_name_)).parent_path().string();
+		auto in_folder = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name_)).parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)
 		{

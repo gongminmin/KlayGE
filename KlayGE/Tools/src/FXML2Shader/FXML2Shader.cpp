@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
 	fxml_name = ResLoader::Instance().Locate(fxml_name);
 	std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
-	filesystem::remove(kfx_name);
+	FILESYSTEM_NS::remove(kfx_name);
 
 	RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
 

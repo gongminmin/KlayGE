@@ -459,7 +459,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	filesystem::path output_path(argv[1]);
+	FILESYSTEM_NS::path output_path(argv[1]);
 	std::string y_file = output_path.stem().string() + "_y" + output_path.extension().string();
 	std::string c_file = output_path.stem().string() + "_c" + output_path.extension().string();
 

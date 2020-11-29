@@ -1166,7 +1166,7 @@ namespace
 
 	void MeshSaver::Save(RenderModel const & model, std::string_view output_name)
 	{
-		std::filesystem::path output_path(output_name.begin(), output_name.end());
+		FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
 
 		auto const output_ext = output_path.extension().string();
 		if (output_ext == ".model_bin")
@@ -1181,7 +1181,7 @@ namespace
 
 	void MeshSaver::SaveByAssimp(RenderModel const & model, std::string_view output_name)
 	{
-		std::filesystem::path const output_path(output_name.begin(), output_name.end());
+		FILESYSTEM_NS::path const output_path(output_name.begin(), output_name.end());
 		auto const output_ext = output_path.extension();
 
 		bool const is_gltf = (output_ext == ".gltf") || (output_ext == ".glb");
@@ -3536,7 +3536,7 @@ namespace
 			return RenderModelPtr();
 		}
 
-		std::filesystem::path input_path(input_name_str);
+		FILESYSTEM_NS::path input_path(input_name_str);
 		auto const in_folder = input_path.parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)

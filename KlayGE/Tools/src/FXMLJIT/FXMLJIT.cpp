@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
 	StringUtil::ToLower(platform);
 
-	filesystem::path target_folder;
+	FILESYSTEM_NS::path target_folder;
 	if (argc >= 4)
 	{
 		target_folder = argv[3];
@@ -93,15 +93,15 @@ int main(int argc, char* argv[])
 	re.SetCustomAttrib("FRAG_DEPTH_SUPPORT", &frag_depth_support);
 
 	std::string fxml_name(argv[2]);
-	filesystem::path fxml_path(fxml_name);
+	FILESYSTEM_NS::path fxml_path(fxml_name);
 	std::string const base_name = fxml_path.stem().string();
-	filesystem::path fxml_directory = fxml_path.parent_path();
+	FILESYSTEM_NS::path fxml_directory = fxml_path.parent_path();
 	ResLoader::Instance().AddPath(fxml_directory.string());
 
-	filesystem::path kfx_name(base_name + ".kfx");
-	filesystem::path kfx_path = fxml_directory / kfx_name;
+	FILESYSTEM_NS::path kfx_name(base_name + ".kfx");
+	FILESYSTEM_NS::path kfx_path = fxml_directory / kfx_name;
 	bool skip_jit = false;
-	if (filesystem::exists(fxml_path) && filesystem::exists(kfx_path))
+	if (FILESYSTEM_NS::exists(fxml_path) && FILESYSTEM_NS::exists(kfx_path))
 	{
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
@@ -167,11 +167,11 @@ int main(int argc, char* argv[])
 	}
 	if (!target_folder.empty())
 	{
-		filesystem::copy_file(kfx_path, target_folder / kfx_name, filesystem::copy_options::overwrite_existing);
+		FILESYSTEM_NS::copy_file(kfx_path, target_folder / kfx_name, FILESYSTEM_NS::copy_options::overwrite_existing);
 		kfx_path = target_folder / kfx_name;
 	}
 
-	if (filesystem::exists(kfx_path))
+	if (FILESYSTEM_NS::exists(kfx_path))
 	{
 		cout << "Compiled kfx has been saved to " << kfx_path << "." << endl;
 	}

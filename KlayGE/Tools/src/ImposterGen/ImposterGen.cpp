@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 	app.Create();
 
 	std::string input_name;
-	filesystem::path target_folder;
+	FILESYSTEM_NS::path target_folder;
 	uint32_t azimuth;
 	uint32_t elevation;
 	uint32_t size;
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
 	std::string meshml_name = ResLoader::Instance().Locate(input_name);
 
 	std::string file_name;
-	filesystem::path meshml_path(meshml_name);
+	FILESYSTEM_NS::path meshml_path(meshml_name);
 	if (target_folder.empty())
 	{
 		target_folder = meshml_path.parent_path();

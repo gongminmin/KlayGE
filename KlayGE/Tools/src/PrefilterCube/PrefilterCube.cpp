@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		filesystem::path output_path(argv[1]);
+		FILESYSTEM_NS::path output_path(argv[1]);
 		output = output_path.stem().string() + "_filtered.dds";
 	}
 

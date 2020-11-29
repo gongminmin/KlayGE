@@ -36,19 +36,28 @@
 #include <KFL/Config.hpp>
 
 #if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
-	#include <filesystem>
+	#if defined(KLAYGE_COMPILER_CLANG) && (defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS))
+		// libcxx on macOS has filesystem, but unuseable. Need to fallback to ghc's, and not redefine it to std.
+		#include <ghc/filesystem.hpp>
+		#define FILESYSTEM_NS ghc::filesystem
+	#else
+		#include <filesystem>
+		#define FILESYSTEM_NS std::filesystem
+	#endif
 #elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 	#include <experimental/filesystem>
 	namespace std
 	{
 		namespace filesystem = experimental::filesystem;
 	}
+	#define FILESYSTEM_NS std::filesystem
 #else
 	#include <ghc/filesystem.hpp>
 	namespace std
 	{
 		namespace filesystem = ghc::filesystem;
 	}
+	#define FILESYSTEM_NS std::filesystem
 #endif
 
 #endif		// KFL_CXX17_FILESYSTEM_HPP
