@@ -71,7 +71,7 @@ def GenerateCfgBuildFromDefault():
 def LogError(message):
 	print("[E] %s" % message)
 	sys.stdout.flush()
-	if 0 == sys.platform.find("win"):
+	if sys.platform.startswith("win"):
 		pause_cmd = "pause"
 	else:
 		pause_cmd = "read"
@@ -193,17 +193,17 @@ class BuildInfo:
 		env = os.environ
 
 		host_platform = sys.platform
-		if 0 == host_platform.find("win"):
+		if host_platform.startswith("win"):
 			host_platform = "win"
-		elif 0 == host_platform.find("linux"):
+		elif host_platform.startswith("linux"):
 			host_platform = "linux"
-		elif 0 == host_platform.find("darwin"):
+		elif host_platform.startswith("darwin"):
 			host_platform = "darwin"
 		if "auto" == cfg_build.target:
 			target_platform = host_platform
 		else:
 			target_platform = cfg_build.target
-			if 0 == target_platform.find("android"):
+			if target_platform.startswith("android"):
 				if not "ANDROID_NDK" in env:
 					LogError("You must define an ANDROID_NDK environment variable to your location of NDK.\n")
 
@@ -228,7 +228,7 @@ class BuildInfo:
 				else:
 					target_api_level = 22
 				self.target_api_level = target_api_level
-			elif 0 == target_platform.find("win_store"):
+			elif target_platform.startswith("win_store"):
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					target_api_level = target_platform[space_place + 1:]
@@ -261,10 +261,8 @@ class BuildInfo:
 			LogError("Unknown host architecture %s.\n" % self.host_arch)
 
 		if self.host_platform == "win":
-			self.where_cmd = "where"
 			self.sep = "\r\n"
 		else:
-			self.where_cmd = "which"
 			self.sep = "\n"
 
 		self.cmake_path = cfg_build.cmake_path
@@ -306,7 +304,7 @@ class BuildInfo:
 		if ("" == compiler) or self.is_clean:
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
-				if 0 == target_platform.find("win"):
+				if self.is_windows:
 					program_files_folder = self.FindProgramFilesFolder()
 
 					if len(self.FindVS2019Folder(program_files_folder)) > 0:
@@ -321,13 +319,13 @@ class BuildInfo:
 					elif len(self.FindGCC()) != 0:
 						project_type = "make"
 						compiler = "mingw"
-				elif ("linux" == target_platform):
+				elif self.is_linux:
 					project_type = "make"
 					compiler = "gcc"
-				elif ("android" == target_platform):
+				elif self.is_android:
 					project_type = "make"
 					compiler = "clang"
-				elif ("darwin" == target_platform) or ("ios" == target_platform):
+				elif self.is_darwin or self.is_ios:
 					project_type = "xcode"
 					compiler = "clang"
 				else:
@@ -346,7 +344,7 @@ class BuildInfo:
 			elif project_type == "xcode":
 				compiler = "clang"
 
-		if 0 == target_platform.find("win"):
+		if self.is_windows:
 			program_files_folder = self.FindProgramFilesFolder()
 
 			if "vc142" == compiler:
@@ -402,7 +400,7 @@ class BuildInfo:
 				project_type = "vs2019"
 			elif "vc141" == compiler:
 				project_type = "vs2017"
-			elif ("clang" == compiler) and (("darwin" == target_platform) or ("ios" == target_platform)):
+			elif ("clang" == compiler) and (self.is_darwin or self.is_ios):
 				project_type = "xcode"
 			else:
 				project_type = "make"
@@ -495,7 +493,7 @@ class BuildInfo:
 			compiler_version = 0
 			LogError("Unsupported project type %s.\n" % project_type)
 
-		if 0 == project_type.find("vs"):
+		if project_type.startswith("vs"):
 			self.proj_ext_name = "vcxproj"
 
 		self.project_type = project_type
@@ -549,7 +547,7 @@ class BuildInfo:
 				if len(gcc_loc) != 0:
 					return gcc_loc.split(self.sep)[0]
 
-		gcc_loc = subprocess.check_output(self.where_cmd + " g++", shell = True).decode()
+		gcc_loc = shutil.which("g++")
 		if len(gcc_loc) == 0:
 			LogError("Could NOT find g++. Please install g++, set its path into CXX, or put its path into %%PATH%%.")
 		return gcc_loc.split(self.sep)[0]
@@ -567,13 +565,13 @@ class BuildInfo:
 				if len(clang_loc) != 0:
 					return clang_loc.split(self.sep)[0]
 
-		clang_loc = subprocess.check_output(self.where_cmd + " clang++", shell = True).decode()
+		clang_loc = shutil.which("clang++")
 		if len(clang_loc) == 0:
 			LogError("Could NOT find g++. Please install clang++, set its path into CXX, or put its path into %%PATH%%.")
 		return clang_loc.split(self.sep)[0]
 
 	def RetrieveClangVersion(self, path = ""):
-		if ("android" == self.target_platform):
+		if self.is_android:
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
 			prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows\\bin"
@@ -594,7 +592,7 @@ class BuildInfo:
 
 	def FindProgramFilesFolder(self):
 		env = os.environ
-		if "AMD64" == platform.machine():
+		if platform.architecture()[0] == '64bit':
 			if "ProgramFiles(x86)" in env:
 				program_files_folder = env["ProgramFiles(x86)"]
 			else:
@@ -638,7 +636,7 @@ class BuildInfo:
 		return ""
 
 	def FindCMake(self):
-		cmake_loc = subprocess.check_output(self.where_cmd + " cmake", shell = True).decode()
+		cmake_loc = shutil.which("cmake")
 		if len(cmake_loc) == 0:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split(self.sep)[0]
@@ -727,7 +725,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if 0 == build_info.project_type.find("vs"):
+	if build_info.project_type.startswith("vs"):
 		toolset_name = "-T"
 		if build_info.compiler_name == "clangcl":
 			toolset_name += " ClangCL"
@@ -735,22 +733,22 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 			if not build_info.is_windows_store:
 				toolset_name += " v%s," % build_info.compiler_version
 			toolset_name += "host=x64"
-	elif ("android" == build_info.target_platform):
+	elif build_info.is_android:
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
 		toolset_name = "clang"
 
 	if (build_info.compiler_name != "vc") or (build_info.project_type == "ninja"):
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
-	if "android" == build_info.target_platform:
+	if build_info.is_android:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
-	elif "darwin" == build_info.target_platform:
+	elif build_info.is_darwin:
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
 		else:
 			LogError("Unsupported Darwin architecture.\n")
-	elif "ios" == build_info.target_platform:
+	elif build_info.is_ios:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/iOS.cmake\"" % curdir
 		if "arm" == compiler_info.arch:
 			additional_options += " -DIOS_PLATFORM=OS"
@@ -762,7 +760,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if compiler_info.is_cross_compiling:
 		additional_options += " -DKLAYGE_HOST_BIN_DIR=\"%s\"" % build_info.host_bin_dir
 
-	if 0 == build_info.project_type.find("vs"):
+	if build_info.project_type.startswith("vs"):
 		if "x64" == compiler_info.arch:
 			vc_option = "amd64"
 			vc_arch = "x64"
@@ -778,7 +776,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 			vc_option += " %s" % compiler_info.vcvarsall_options
 
 	if build_info.multi_config:
-		if 0 == build_info.project_type.find("vs"):
+		if build_info.project_type.startswith("vs"):
 			additional_options += " -A %s" % vc_arch
 			if build_info.compiler_name == "clangcl":
 				additional_options += " -DClangCL_Path=\"" + compiler_info.compiler_root + "../../Tools/Llvm/bin/\""
@@ -809,7 +807,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 				new_path += ";" + compiler_info.compiler_root
 			if "win" == build_info.host_platform:
 				cmake_cmd.AddCommand('@SET PATH=%s;%%PATH%%' % new_path)
-				if 0 == build_info.project_type.find("vs"):
+				if build_info.project_type.startswith("vs"):
 					cmake_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			else:
@@ -823,12 +821,12 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 						LogError("Config %s failed.\n" % name)
 
 			build_cmd = BatchCommand(build_info.host_platform)
-			if 0 == build_info.project_type.find("vs"):
+			if build_info.project_type.startswith("vs"):
 				build_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 				build_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			for config in build_info.cfg:
 				for target in project_list:
-					if 0 == build_info.project_type.find("vs"):
+					if build_info.project_type.startswith("vs"):
 						build_info.MSBuildAddBuildCommand(build_cmd, name, target, config, vc_arch)
 					elif "xcode" == build_info.project_type:
 						build_info.XCodeBuildAddBuildCommand(build_cmd, target, config)
@@ -844,7 +842,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 			make_name = "ninja"
 		else:
 			if "win" == build_info.host_platform:
-				if build_info.target_platform == "android":
+				if build_info.is_android:
 					prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
 					if not os.path.isdir(prebuilt_make_path):
 						prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
@@ -868,7 +866,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 
 				if not os.path.exists(build_dir):
 					os.makedirs(build_dir)
-					if build_info.target_platform == "android":
+					if build_info.is_android:
 						additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
 					elif ("clang" == build_info.compiler_name):
 						env = os.environ
@@ -881,7 +879,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 				os.chdir(build_dir)
 
 				additional_options += " -DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
-				if "android" == build_info.target_platform:
+				if build_info.is_android:
 					if "x86" == compiler_info.arch:
 						abi_arch = "x86"
 						toolchain_arch = "x86"

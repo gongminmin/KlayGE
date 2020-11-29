@@ -4,11 +4,7 @@
 from __future__ import print_function
 import os, shutil, sys
 from Build import BuildInfo
-from DeployKlayGE import DeployKlayGE
-
-def CopyToDst(src_name, dst_dir):
-	print("Copying %s to %s..." % (src_name, dst_dir))
-	shutil.copy2(src_name, dst_dir)
+from DeployKlayGE import DeployKlayGE, CopyToDst
 
 def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 	if not os.path.exists(tareget_dir):
