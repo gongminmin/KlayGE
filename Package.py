@@ -26,16 +26,17 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 		debug_suffix = ""
 	if build_info.is_windows:
 		exe_suffix = ".exe"
-		lib_prefix = ""
 		dll_suffix = ".dll"
 	elif build_info.is_darwin:
 		exe_suffix = ""
-		lib_prefix = "lib"
 		dll_suffix = ".dylib"
 	else:
 		exe_suffix = ""
-		lib_prefix = "lib"
 		dll_suffix = ".so"
+	if build_info.is_windows and ((build_info.compiler_name == "vc") or (build_info.compiler_name == "clangcl")):
+		lib_prefix = ""
+	else:
+		lib_prefix = "lib"
 
 	src_bin_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_arch)
 	dst_bin_dir = "%sbin/%s_%s/" % (dst_sample_dir, build_info.target_platform, compiler_arch)

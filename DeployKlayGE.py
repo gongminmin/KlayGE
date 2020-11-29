@@ -17,17 +17,14 @@ def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
 	if build_info.is_windows:
 		bat_suffix = "bat"
-		lib_prefix = ""
 		dll_suffix = ".dll"
 		exe_suffix = ".exe"
 	elif build_info.is_darwin:
 		bat_suffix = "sh"
-		lib_prefix = "lib"
 		dll_suffix = ".dylib"
 		exe_suffix = ""
 	else:
 		bat_suffix = "sh"
-		lib_prefix = "lib"
 		dll_suffix = ".so"
 		exe_suffix = ""
 	output_suffix = "_%s%d" % (build_info.compiler_name, build_info.compiler_version)
@@ -36,6 +33,11 @@ def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 	else:
 		debug_suffix = ""
 	lib_suffix = output_suffix + debug_suffix + dll_suffix
+
+	if build_info.is_windows and ((build_info.compiler_name == "vc") or (build_info.compiler_name == "clangcl")):
+		lib_prefix = ""
+	else:
+		lib_prefix = "lib"
 
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
