@@ -18,8 +18,6 @@ stages:
           compiler: vc142
           installCommand: 'choco install python3'
           id: 'vc142_win_$(platform)_$(configuration)'
-          CC: cl.exe
-          CXX: cl.exe
           BUILD_DIR: vc142
 
         Windows_vc141:
@@ -28,9 +26,15 @@ stages:
           compiler: vc141
           installCommand: 'choco install python3'
           id: 'vc141_win_$(platform)_$(configuration)'
-          CC: cl.exe
-          CXX: cl.exe
           BUILD_DIR: vc141
+
+        Windows_clangcl10:
+          vmImage: windows-2019
+          project: vs2019
+          compiler: clangcl
+          installCommand: 'choco install python3'
+          id: 'clangcl10_win_$(platform)_$(configuration)'
+          BUILD_DIR: clangcl10
 
         Windows_gcc10:
           vmImage: windows-2019
@@ -38,8 +42,6 @@ stages:
           compiler: mingw
           installCommand: 'choco install ninja python3'
           id: 'gcc10_win_$(platform)_$(configuration)'
-          CC: gcc.exe
-          CXX: g++.exe
           BUILD_DIR: mingw
 
         Linux_gcc9:
@@ -118,9 +120,7 @@ stages:
             brew install --cask xquartz wine-stable
             brew install ninja mingw-w64
           id: 'clang11_darwin_$(platform)_$(configuration)'
-          CC: clang
-          CXX: clang++
-          BUILD_DIR: clang
+          BUILD_DIR: clang11
           MACOSX_DEPLOYMENT_TARGET: 10.14
 
     pool:
