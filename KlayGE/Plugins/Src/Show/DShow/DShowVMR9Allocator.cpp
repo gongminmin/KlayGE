@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>

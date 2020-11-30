@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 
-#include <KFL/CXX2a/format.hpp>
+#include <KFL/CXX20/format.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>

@@ -29,7 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 
 #include <cstdarg>

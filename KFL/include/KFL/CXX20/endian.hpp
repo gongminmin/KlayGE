@@ -28,14 +28,14 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_CXX2A_ENDIAN_HPP
-#define KFL_CXX2A_ENDIAN_HPP
+#ifndef KFL_CXX20_ENDIAN_HPP
+#define KFL_CXX20_ENDIAN_HPP
 
 #pragma once
 
 #include <KFL/Config.hpp>
 
-#if defined(KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT)
+#if defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT)
 	#include <bit>
 #else
 	namespace std
@@ -60,4 +60,4 @@
 	}
 #endif
 
-#endif		// KFL_CXX2A_ENDIAN_HPP
+#endif		// KFL_CXX20_ENDIAN_HPP

@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.0+, g++ 7.1+, clang 5.0+, with C++14 or C++17 option on.
+// KlayGE requires vc 14.1+, g++ 9.0+, clang 9.0+, with C++14 or C++17 option on.
 
 // Macros for C++17 core features:
 // KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
@@ -44,10 +44,10 @@
 // KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 // KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 
-// Macros for C++2a library features:
-// KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-// KLAYGE_CXX2A_LIBRARY_FORMAT_SUPPORT
-// KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+// Macros for C++20 library features:
+// KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+// KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
+// KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 
 // Macros for TS library features:
 // KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
@@ -142,8 +142,8 @@
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 			#if __cplusplus > 201703L
-				#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
-				#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+				#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+				#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
@@ -195,7 +195,7 @@
 	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 	#if __cplusplus > 201703L
-		#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
 	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -243,10 +243,10 @@
 	#endif
 	#if _MSVC_LANG > 201703L
 		#if _MSC_VER >= 1922
-			#define KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
 		#endif
 		#if _MSC_VER >= 1926
-			#define KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 		#endif
 	#endif
 

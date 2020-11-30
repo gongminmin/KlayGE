@@ -35,7 +35,7 @@
 
 #include <string>
 
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 
 namespace KlayGE
 {

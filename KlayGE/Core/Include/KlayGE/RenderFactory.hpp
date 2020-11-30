@@ -35,7 +35,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 
 #include <string>
 #include <unordered_map>

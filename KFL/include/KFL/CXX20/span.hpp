@@ -28,14 +28,14 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_CXX2A_SPAN_HPP
-#define KFL_CXX2A_SPAN_HPP
+#ifndef KFL_CXX20_SPAN_HPP
+#define KFL_CXX20_SPAN_HPP
 
 #pragma once
 
 #include <KFL/Config.hpp>
 
-#if defined(KLAYGE_CXX2A_LIBRARY_SPAN_SUPPORT)
+#if defined(KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT)
 	#include <span>
 #else
 	#if defined(KLAYGE_COMPILER_GCC)
@@ -165,4 +165,4 @@ namespace KlayGE
 	}
 }
 
-#endif		// KFL_CXX2A_SPAN_HPP
+#endif		// KFL_CXX20_SPAN_HPP

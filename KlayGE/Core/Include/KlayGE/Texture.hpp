@@ -52,7 +52,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 
 #include <atomic>
 #include <string>

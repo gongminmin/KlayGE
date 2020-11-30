@@ -31,7 +31,7 @@
 #include <KFL/KFL.hpp>
 
 #include <KFL/CXX17/string_view.hpp>
-#include <KFL/CXX2a/format.hpp>
+#include <KFL/CXX20/format.hpp>
 
 #include <ostream>
 #include <string>

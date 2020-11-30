@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>

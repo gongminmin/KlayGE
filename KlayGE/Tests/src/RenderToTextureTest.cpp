@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <KFL/CXX2a/format.hpp>
+#include <KFL/CXX20/format.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>

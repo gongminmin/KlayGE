@@ -28,14 +28,14 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_CXX2A_FORMAT_HPP
-#define KFL_CXX2A_FORMAT_HPP
+#ifndef KFL_CXX20_FORMAT_HPP
+#define KFL_CXX20_FORMAT_HPP
 
 #pragma once
 
 #include <KFL/Config.hpp>
 
-#if defined(KLAYGE_CXX2A_LIBRARY_FORMAT_SUPPORT)
+#if defined(KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT)
 	#include <format>
 #else
 	#include <fmt/format.h>
@@ -74,4 +74,4 @@
 	}
 #endif
 
-#endif		// KFL_CXX2A_FORMAT_HPP
+#endif		// KFL_CXX20_FORMAT_HPP

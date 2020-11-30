@@ -31,7 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX17/filesystem.hpp>
-#include <KFL/CXX2a/span.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>

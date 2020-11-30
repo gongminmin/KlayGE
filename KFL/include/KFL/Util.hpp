@@ -36,7 +36,7 @@
 #include <KFL/PreDeclare.hpp>
 #include <KFL/CXX17.hpp>
 #include <KFL/CXX17/string_view.hpp>
-#include <KFL/CXX2a/endian.hpp>
+#include <KFL/CXX20/endian.hpp>
 
 #include <string>
 #include <functional>

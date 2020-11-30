@@ -31,7 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX17/filesystem.hpp>
-#include <KFL/CXX2a/format.hpp>
+#include <KFL/CXX20/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>

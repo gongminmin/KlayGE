@@ -38,7 +38,7 @@
 #include <DXBC2GLSL/GLSLGen.hpp>
 
 #include <KFL/CXX17.hpp>
-#include <KFL/CXX2a/format.hpp>
+#include <KFL/CXX20/format.hpp>
 
 #include <iterator>
 #include <string>
