@@ -37,9 +37,14 @@
 
 #if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
 	#if defined(KLAYGE_COMPILER_CLANG) && (defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS))
-		// libcxx on macOS has filesystem, but unuseable. Need to fallback to ghc's, and not redefine it to std.
-		#include <ghc/filesystem.hpp>
-		#define FILESYSTEM_NS ghc::filesystem
+		#if (MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_14)
+			// libcxx on macOS 10.14 has filesystem, but unuseable. Need to fallback to ghc's, and not redefine it to std.
+			#include <ghc/filesystem.hpp>
+			#define FILESYSTEM_NS ghc::filesystem
+		#else
+			#include <filesystem>
+			#define FILESYSTEM_NS std::filesystem
+		#endif
 	#else
 		#include <filesystem>
 		#define FILESYSTEM_NS std::filesystem

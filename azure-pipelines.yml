@@ -123,6 +123,17 @@ stages:
           BUILD_DIR: clang11
           MACOSX_DEPLOYMENT_TARGET: 10.14
 
+        macOS_clang12:
+          vmImage: macOS-10.15
+          project: ninja
+          compiler: clang
+          installCommand: |
+            brew install --cask xquartz wine-stable
+            brew install ninja mingw-w64
+          id: 'clang12_darwin_$(platform)_$(configuration)'
+          BUILD_DIR: clang12
+          MACOSX_DEPLOYMENT_TARGET: 10.15
+
     pool:
       vmImage: $(vmImage)
 
