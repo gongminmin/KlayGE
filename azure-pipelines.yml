@@ -159,37 +159,37 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'External | "$(Agent.OS)"'
+          key: 'External | "$(Agent.OS)" | $(id)'
           path: External
         displayName: Cache External
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_media | "$(Agent.OS)"'
+          key: 'KlayGE_media'
           path: KlayGE/media
         displayName: Cache KlayGE/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Samples_media | "$(Agent.OS)"'
+          key: 'KlayGE_Samples_media'
           path: KlayGE/Samples/media
         displayName: Cache KlayGE/Samples/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tests_media | "$(Agent.OS)"'
+          key: 'KlayGE_Tests_media'
           path: KlayGE/Tests/media
         displayName: Cache KlayGE/Tests/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tools_media | "$(Agent.OS)"'
+          key: 'KlayGE_Tools_media'
           path: KlayGE/Tools/media
         displayName: Cache KlayGE/Tools/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tutorials_media | "$(Agent.OS)"'
+          key: 'KlayGE_Tutorials_media'
           path: KlayGE/Tutorials/media
         displayName: Cache KlayGE/Tutorials/media
 

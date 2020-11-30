@@ -36,13 +36,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Thread.hpp>
 
-#if (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#else
 #include <AL/al.h>
 #include <AL/alc.h>
-#endif
 
 #include <vector>
 

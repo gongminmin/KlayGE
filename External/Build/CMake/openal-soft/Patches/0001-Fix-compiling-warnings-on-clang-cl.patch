@@ -1,0 +1,62 @@
+From ed363ca41998d3b4ae794a79caf6f05a6ea490f1 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 29 Nov 2020 17:52:53 -0800
+Subject: [PATCH] Fix compiling warnings on clang-cl
+
+---
+ Alc/hrtf.cpp          | 4 ++--
+ Alc/panning.cpp       | 2 +-
+ OpenAL32/alSource.cpp | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Alc/hrtf.cpp b/Alc/hrtf.cpp
+index d86c4ecf..c8c0dfe6 100644
+--- a/Alc/hrtf.cpp
++++ b/Alc/hrtf.cpp
+@@ -1021,7 +1021,7 @@ std::unique_ptr<HrtfEntry> LoadHrtf02(std::istream &data, const char *filename)
+             azcnt_end = std::copy_backward(azcnt_src, azcnt_src+num_evs, azcnt_end);
+             return ebase + num_evs;
+         };
+-        std::accumulate(evCount.cbegin(), evCount.cend(), size_t{0u}, copy_azs);
++        (void)std::accumulate(evCount.cbegin(), evCount.cend(), size_t{0u}, copy_azs);
+         assert(azCount_.begin() == azcnt_end);
+ 
+         /* Reestablish the IR offset for each elevation index, given the new
+@@ -1046,7 +1046,7 @@ std::unique_ptr<HrtfEntry> LoadHrtf02(std::istream &data, const char *filename)
+ 
+             return ebase + num_evs;
+         };
+-        std::accumulate(evCount.cbegin(), evCount.cend(), size_t{0u}, copy_irs);
++        (void)std::accumulate(evCount.cbegin(), evCount.cend(), size_t{0u}, copy_irs);
+         assert(coeffs_.begin() == coeffs_end);
+         assert(delays_.begin() == delays_end);
+ 
+diff --git a/Alc/panning.cpp b/Alc/panning.cpp
+index 0a3e89fc..1960efe6 100644
+--- a/Alc/panning.cpp
++++ b/Alc/panning.cpp
+@@ -877,7 +877,7 @@ void aluInitRenderer(ALCdevice *device, ALint hrtf_id, HrtfRequestMode hrtf_appr
+             device->HrtfName = entry.name;
+             return true;
+         };
+-        std::find_if(device->HrtfList.cbegin(), device->HrtfList.cend(), find_hrtf);
++        (void)std::find_if(device->HrtfList.cbegin(), device->HrtfList.cend(), find_hrtf);
+     }
+ 
+     if(device->mHrtf)
+diff --git a/OpenAL32/alSource.cpp b/OpenAL32/alSource.cpp
+index 3404cbf2..4da58959 100644
+--- a/OpenAL32/alSource.cpp
++++ b/OpenAL32/alSource.cpp
+@@ -2517,7 +2517,7 @@ START_API_FUNC
+     else
+     {
+         ALint count{FloatValsByProp(param)};
+-        if(count < 1 && count > 6)
++        if(count < 1 || count > 6)
+             alSetError(context.get(), AL_INVALID_ENUM, "Invalid float-vector property 0x%04x", param);
+         else
+         {
+-- 
+2.17.1.windows.2
+
