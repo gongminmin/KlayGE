@@ -1,14 +1,14 @@
-From 54618b66e44f0d82f8d3796e76ca8d8eb4419ee4 Mon Sep 17 00:00:00 2001
+From 127a264d4118d80eeac4e858cd8fdad0bc1b361f Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
-Subject: [PATCH 6/7] Fix for MinGW
+Subject: [PATCH 2/3] Fix for MinGW
 
 ---
  Modules/posixmodule.c | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 616b601385..51796835cf 100644
+index 726e3723f9..e67782aa74 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
 @@ -181,7 +181,7 @@ corresponding Unix manual entries for more information on calls.");

@@ -1,15 +1,14 @@
 SET(PY_VERSION_MAJOR 3)
 SET(PY_VERSION_MINOR 8)
-SET(PY_VERSION_PATCH 1)
+SET(PY_VERSION_PATCH 6)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/python/cpython.git" "1b293b60067f6f4a95984d064ce0f6b6d34c1216" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
+UpdateExternalLib("Python" "https://github.com/python/cpython.git" "db455296be5f792b8c12b7cd7f3962b52e4f44ee" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
 if(need_patch)
-	foreach(patch "0001-bpo-40653-Move-_dirnameW-out-of-ifdef-HAVE_SYMLINK-e" "0002-bpo-40650-Include-winsock2.h-in-pytime.c-instead-of-" "0003-bpo-35890-Use-RegQueryInfoKeyW-and-CryptAcquireConte"
-		"0004-bpo-40677-Define-IO_REPARSE_TAG_APPEXECLINK-explicit" "0005-Fix-for-clang-cl" "0006-Fix-for-MinGW" "0007-Fix-for-UWP")
+	foreach(patch "0001-Fix-for-clang-cl" "0002-Fix-for-MinGW" "0003-Fix-for-UWP")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")
 	endforeach()
 endif()
@@ -151,27 +150,34 @@ if(KLAYGE_COMPILER_CLANGCL)
 
 	target_compile_definitions(libpython-static
 		PRIVATE
-			-D_CRT_SECURE_NO_WARNINGS
+			_CRT_SECURE_NO_WARNINGS
 	)
 endif()
 
 target_compile_definitions(libpython-static
 	PRIVATE
-		-DPy_BUILD_CORE
+		Py_BUILD_CORE
 )
 if(KLAYGE_COMPILER_MSVC AND (MSVC_VERSION GREATER 1800))
 	target_compile_definitions(libpython-static
 		PRIVATE
-			-D_CRT_NON_CONFORMING_WCSTOK
+			_CRT_NON_CONFORMING_WCSTOK
 	)
 endif()
-if(KLAYGE_PLATFORM_WINDOWS_STORE)
+if(KLAYGE_PLATFORM_WINDOWS)
 	target_compile_definitions(libpython-static
 		PRIVATE
-			-D_WIN32_WINNT=0x0A00
-			-DWINVER=0x0A00
-			-DNTDDI_VERSION=0x0A000000
+			PY3_DLLNAME="python3"
 	)
+
+	if(KLAYGE_PLATFORM_WINDOWS_STORE)
+		target_compile_definitions(libpython-static
+			PRIVATE
+				_WIN32_WINNT=0x0A00
+				WINVER=0x0A00
+				NTDDI_VERSION=0x0A000000
+		)
+	endif()
 endif()
 
 if(KLAYGE_PLATFORM_WINDOWS)
