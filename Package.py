@@ -100,46 +100,46 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 		platform = "gl_4_6"
 
 	pd_list = (
-		("model", "media/Models/*.glb"),
-		("model", "Samples/media/AtmosphericScattering/*.glb"),
-		("model", "Samples/media/CascadedShadowMap/*.glb"),
-		("albedo", "Samples/media/CascadedShadowMap/*.jpg"),
-		("model", "Samples/media/CausticsMap/*.glb"),
-		("model", "Samples/media/Common/ScifiRoom/*.3DS"),
-		("albedo", "Samples/media/Common/ScifiRoom/*.JPG"),
-		("model", "Samples/media/Common/Sponza/*.glb"),
-		("albedo", "Samples/media/Common/Sponza/*.jpg"),
-		("albedo", "Samples/media/Common/Sponza/*.png"),
-		("model", "Samples/media/Common/*.glb"),
-		("model", "Samples/media/DeepGBuffers/*.glb"),
-		("albedo", "Samples/media/DeepGBuffers/*.jpg"),
-		("model", "Samples/media/Foliage/Grass1/*.glb"),
-		("albedo", "Samples/media/Foliage/Grass1/*.jpg"),
-		("model", "Samples/media/Foliage/Grass2/*.glb"),
-		("albedo", "Samples/media/Foliage/Grass2/*.png"),
-		("model", "Samples/media/Foliage/Tree1/*.meshml"),
-		("albedo", "Samples/media/Foliage/Tree1/*.jpg"),
-		("albedo", "Samples/media/Foliage/Tree1/*.png"),
-		("model", "Samples/media/Foliage/Tree2/*.meshml"),
-		("albedo", "Samples/media/Foliage/Tree2/*.jpg"),
-		("albedo", "Samples/media/Foliage/Tree2/*.png"),
-		("model", "Samples/media/Metalness/*.3ds"),
-		("model", "Samples/media/OIT/*.glb"),
-		("albedo", "Samples/media/OIT/*.jpg"),
-		("model", "Samples/media/SkinnedMesh/*.meshml"),
-		("model", "Samples/media/SSSSS/*.glb"),
-		("albedo", "Samples/media/SSSSS/*.jpg"),
-		("model", "Samples/media/SubSurface/*.glb"),
-		("albedo", "Samples/media/SubSurface/*.jpg"),
-		("albedo", "Samples/media/SubSurface/*.png"),
-		("model", "Samples/media/VDMParticle/*.glb"),
-		("albedo", "Samples/media/VDMParticle/*.jpg")
+		"media/Models/*.glb",
+		"Samples/media/AtmosphericScattering/*.glb",
+		"Samples/media/CascadedShadowMap/*.glb",
+		"Samples/media/CascadedShadowMap/*.jpg",
+		"Samples/media/CausticsMap/*.glb",
+		"Samples/media/Common/ScifiRoom/*.3DS",
+		"Samples/media/Common/ScifiRoom/*.JPG",
+		"Samples/media/Common/Sponza/*.glb",
+		"Samples/media/Common/Sponza/*.jpg",
+		"Samples/media/Common/Sponza/*.png",
+		"Samples/media/Common/*.glb",
+		"Samples/media/DeepGBuffers/*.glb",
+		"Samples/media/DeepGBuffers/*.jpg",
+		"Samples/media/Foliage/Grass1/*.glb",
+		"Samples/media/Foliage/Grass1/*.jpg",
+		"Samples/media/Foliage/Grass2/*.glb",
+		"Samples/media/Foliage/Grass2/*.png",
+		"Samples/media/Foliage/Tree1/*.meshml",
+		"Samples/media/Foliage/Tree1/*.jpg",
+		"Samples/media/Foliage/Tree1/*.png",
+		"Samples/media/Foliage/Tree2/*.meshml",
+		"Samples/media/Foliage/Tree2/*.jpg",
+		"Samples/media/Foliage/Tree2/*.png",
+		"Samples/media/Metalness/*.3ds",
+		"Samples/media/OIT/*.glb",
+		"Samples/media/OIT/*.jpg",
+		"Samples/media/SkinnedMesh/*.meshml",
+		"Samples/media/SSSSS/*.glb",
+		"Samples/media/SSSSS/*.jpg",
+		"Samples/media/SubSurface/*.glb",
+		"Samples/media/SubSurface/*.jpg",
+		"Samples/media/SubSurface/*.png",
+		"Samples/media/VDMParticle/*.glb",
+		"Samples/media/VDMParticle/*.jpg"
 	)
 
 	import glob
 	for pd_item in pd_list:
-		resource_path = dst_sample_dir + pd_item[1]
-		subprocess.call([pd_path, "-P", platform, "-T", pd_item[0], "-I", resource_path])
+		resource_path = dst_sample_dir + pd_item
+		subprocess.call([pd_path, "-P", platform, "-I", resource_path])
 		for file in glob.glob(resource_path):
 			print("Removing %s..." % file)
 			os.remove(file)

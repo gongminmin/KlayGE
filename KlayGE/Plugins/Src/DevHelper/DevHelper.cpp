@@ -109,9 +109,9 @@ namespace KlayGE
 		}
 
 	private:
-		KlayGE::TexMetadata LoadTexMetadata(std::string_view metadata_name, RenderDeviceCaps const * caps)
+		TexMetadata LoadTexMetadata(std::string_view metadata_name, RenderDeviceCaps const * caps)
 		{
-			KlayGE::TexMetadata metadata;
+			TexMetadata metadata;
 			if (!metadata_name.empty())
 			{
 				metadata.Load(metadata_name);

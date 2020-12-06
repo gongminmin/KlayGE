@@ -35,6 +35,8 @@
 
 #include <cstring>
 
+#include <FreeImage.h>
+
 #include <KlayGE/DevHelper/TexConverter.hpp>
 #include "ImagePlane.hpp"
 
@@ -51,6 +53,8 @@ namespace
 			Texture::TextureType& type,
 			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
+
+		static bool IsSupported(std::string_view input_name);
 
 	private:
 		bool Load();
@@ -180,6 +184,31 @@ namespace
 				image.UncompressedTex()->Width(0), image.UncompressedTex()->Height(0));
 			row_pitch = mapper.RowPitch();
 			slice_pitch = mapper.SlicePitch();
+		}
+	}
+
+	bool TexLoader::IsSupported(std::string_view input_name)
+	{
+		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
+		if (input_name_str.empty())
+		{
+			LogError() << "Could NOT find " << input_name << '.' << std::endl;
+			return false;
+		}
+
+		std::string const ext_name = FILESYSTEM_NS::path(input_name_str).extension().string();
+		if (ext_name == ".dds")
+		{
+			return true;
+		}
+		else
+		{
+			FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(input_name_str.c_str(), 0);
+			if (fif == FIF_UNKNOWN)
+			{
+				fif = FreeImage_GetFIFFromFilename(input_name_str.c_str());
+			}
+			return fif != FIF_UNKNOWN;
 		}
 	}
 
@@ -490,5 +519,10 @@ namespace KlayGE
 	{
 		return TexLoader::GetImageInfo(input_name, metadata,
 			type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+	}
+
+	bool TexConverter::IsSupported(std::string_view input_name)
+	{
+		return TexLoader::IsSupported(input_name);
 	}
 }

@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP
-#define KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP
+#ifndef KLAYGE_PLUGINS_MESH_CONVERTER_HPP
+#define KLAYGE_PLUGINS_MESH_CONVERTER_HPP
 
 #pragma once
 
@@ -53,7 +53,9 @@ namespace KlayGE
 	public:
 		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
 		void Save(RenderModel& model, std::string_view output_name);
+
+		static bool IsSupported(std::string_view input_name);
 	};
 }
 
-#endif		// KLAYGE_TOOLS_TOOL_COMMON_MESH_CONVERTER_HPP
+#endif		// KLAYGE_PLUGINS_MESH_CONVERTER_HPP

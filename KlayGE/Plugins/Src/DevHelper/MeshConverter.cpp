@@ -215,6 +215,7 @@ namespace
 	{
 	public:
 		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
+		bool IsSupported(std::string_view input_name) const;
 
 	private:
 		void RemoveUnusedJoints();
@@ -3979,6 +3980,33 @@ namespace
 
 		return render_model_;
 	}
+
+	bool MeshLoader::IsSupported(std::string_view input_name) const
+	{
+		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
+		if (input_name_str.empty())
+		{
+			LogError() << "Could NOT find " << input_name << '.' << std::endl;
+			return false;
+		}
+
+		FILESYSTEM_NS::path input_path(input_name_str);
+		auto input_ext = input_path.extension().string();
+		StringUtil::ToLower(input_ext);
+		if ((input_ext == ".model_bin") || (input_ext == ".meshml"))
+		{
+			return true;
+		}
+		else
+		{
+			input_ext = "*" + input_ext + ";";
+
+			Assimp::Importer importer;
+			std::string ext_list;
+			importer.GetExtensionList(ext_list);
+			return ext_list.find(input_ext) != std::string::npos;
+		}
+	}
 }
 
 #if defined(KLAYGE_COMPILER_GCC)
@@ -3997,6 +4025,12 @@ namespace KlayGE
 	{
 		MeshSaver ms;
 		ms.Save(model, output_name);
+	}
+
+	bool MeshConverter::IsSupported(std::string_view input_name)
+	{
+		MeshLoader ml;
+		return ml.IsSupported(input_name);
 	}
 }
 

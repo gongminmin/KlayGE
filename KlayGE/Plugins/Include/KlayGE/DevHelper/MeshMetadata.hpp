@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_TOOLS_TOOL_COMMON_MESH_METADATA_HPP
-#define KLAYGE_TOOLS_TOOL_COMMON_MESH_METADATA_HPP
+#ifndef KLAYGE_PLUGINS_MESH_METADATA_HPP
+#define KLAYGE_PLUGINS_MESH_METADATA_HPP
 
 #pragma once
 
@@ -150,4 +150,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// KLAYGE_TOOLS_TOOL_COMMON_MESH_METADATA_HPP
+#endif		// KLAYGE_PLUGINS_MESH_METADATA_HPP

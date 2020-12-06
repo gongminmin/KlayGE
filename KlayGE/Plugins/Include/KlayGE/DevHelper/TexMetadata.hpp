@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_TOOLS_TOOL_COMMON_TEX_METADATA_HPP
-#define KLAYGE_TOOLS_TOOL_COMMON_TEX_METADATA_HPP
+#ifndef KLAYGE_PLUGINS_TEX_METADATA_HPP
+#define KLAYGE_PLUGINS_TEX_METADATA_HPP
 
 #pragma once
 
@@ -56,7 +56,7 @@ namespace KlayGE
 		void Save(std::string const & name) const;
 		void DeviceDependentAdjustment(RenderDeviceCaps const & caps);
 
-		Texture::TextureType Type() const
+		Texture::TextureType TextureType() const
 		{
 			return type_;
 		}
@@ -230,4 +230,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// KLAYGE_TOOLS_TOOL_COMMON_TEX_METADATA_HPP
+#endif		// KLAYGE_PLUGINS_TEX_METADATA_HPP
