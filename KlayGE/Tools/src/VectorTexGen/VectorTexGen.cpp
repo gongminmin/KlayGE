@@ -86,12 +86,14 @@ int main(int argc, char* argv[])
 	bool svg_input;
 
 	cxxopts::Options options("VectorTexGen", "KlayGE Vector Texture Converter");
+	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input name (svg or dds).", cxxopts::value<std::string>())
 		("O,output-name", "Output name. Default is input-name.dds or svg, input-name.df.dds for dds.", cxxopts::value<std::string>())
 		("C,channels", "Number of channels.", cxxopts::value<uint32_t>(num_channels)->default_value("4"))
 		("v,version", "Version.");
+	// clang-format on
 
 	int const argc_backup = argc;
 	auto vm = options.parse(argc, argv);

@@ -311,6 +311,7 @@ int main(int argc, char* argv[])
 	std::string jtml_name;
 
 	cxxopts::Options options("Tex2JTML", "KlayGE Tex2JTML Generator");
+	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input textures names.", cxxopts::value<std::string>())
@@ -318,6 +319,7 @@ int main(int argc, char* argv[])
 		("N,num-tiles", "Number of tiles.", cxxopts::value<int>(num_tiles)->default_value("2048"))
 		("T,tile-size", "Tile size.", cxxopts::value<int>(tile_size)->default_value("128"))
 		("v,version", "Version.");
+	// clang-format on
 
 	int const argc_backup = argc;
 	auto vm = options.parse(argc, argv);

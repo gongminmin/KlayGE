@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
 	bool quiet = false;
 
 	cxxopts::Options options("ImposterGen", "KlayGE Imposter Generator");
+	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message")
 		("I,input-name", "Input mesh name.", cxxopts::value<std::string>())
@@ -215,6 +216,7 @@ int main(int argc, char* argv[])
 		("S,size", "Size of each imposter.", cxxopts::value<uint32_t>(size)->default_value("256"))
 		("q,quiet", "Quiet mode.", cxxopts::value<bool>()->implicit_value("true"))
 		("v,version", "Version.");
+	// clang-format on
 
 	int const argc_backup = argc;
 	auto vm = options.parse(argc, argv);

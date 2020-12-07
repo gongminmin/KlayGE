@@ -16,11 +16,11 @@
 using namespace KlayGE;
 using namespace std;
 
-class FXML2ShaderApp : public KlayGE::App3DFramework
+class Fxml2ShaderApp : public KlayGE::App3DFramework
 {
 public:
-	FXML2ShaderApp()
-		: App3DFramework("FXML2Shader")
+	Fxml2ShaderApp()
+		: App3DFramework("Fxml2Shader")
 	{
 	}
 
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		cout << "Usage: FXML2Shader xxx.fxml" << endl;
+		cout << "Usage: Fxml2Shader xxx.fxml" << endl;
 		return 1;
 	}
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 
-	FXML2ShaderApp app;
+	Fxml2ShaderApp app;
 	app.Create();
 
 	fxml_name = ResLoader::Instance().Locate(fxml_name);

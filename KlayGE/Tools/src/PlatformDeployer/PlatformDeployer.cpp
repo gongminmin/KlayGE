@@ -215,7 +215,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 				ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt;
 				if (!dest_folder.empty())
 				{
-					ofs << ' ' << dest_folder;
+					ofs << " \"" << dest_folder << "\"";
 				}
 				ofs << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
@@ -230,10 +230,10 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
 				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"";
+				ofs << "FxmlJit -P " << platform << " -I \"" << res_names[i] << "\"";
 				if (!dest_folder.empty())
 				{
-					ofs << ' ' << dest_folder;
+					ofs << " -D \"" << dest_folder << "\"";
 				}
 				ofs << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
@@ -260,6 +260,7 @@ int main(int argc, char* argv[])
 	std::string dest_folder;
 
 	cxxopts::Options options("PlatformDeployer", "KlayGE PlatformDeployer");
+	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-path", "Input resource path.", cxxopts::value<std::string>())
@@ -267,6 +268,7 @@ int main(int argc, char* argv[])
 		("P,platform", "Platform name.", cxxopts::value<std::string>())
 		("D,dest-folder", "Destination folder.", cxxopts::value<std::string>())
 		("v,version", "Version.");
+	// clang-format on
 
 	int const argc_backup = argc;
 	auto vm = options.parse(argc, argv);
@@ -282,6 +284,10 @@ int main(int argc, char* argv[])
 		cout << "KlayGE PlatformDeployer, Version 2.0.0" << endl;
 		Context::Destroy();
 		return 1;
+	}
+	if (vm.count("dest-folder") > 0)
+	{
+		dest_folder = vm["dest-folder"].as<std::string>();
 	}
 	if (vm.count("input-path") > 0)
 	{
@@ -413,10 +419,6 @@ int main(int argc, char* argv[])
 	else
 	{
 		platform = "d3d_11_0";
-	}
-	if (vm.count("dest-folder") > 0)
-	{
-		dest_folder = vm["dest-folder"].as<std::string>();
 	}
 
 	StringUtil::ToLower(res_type);

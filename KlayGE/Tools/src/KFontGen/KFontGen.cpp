@@ -513,6 +513,7 @@ int main(int argc, char* argv[])
 	CPUInfo cpu;
 
 	cxxopts::Options options("KFontGen", "KlayGE Font Generator");
+	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-name", "Input font name.", cxxopts::value<std::string>())
@@ -522,6 +523,7 @@ int main(int argc, char* argv[])
 		("C,char-size", "Character size.", cxxopts::value<uint32_t>(header.char_size)->default_value("32"))
 		("T,threads", "Number of Threads. (default: The number of CPU threads)", cxxopts::value<int>(num_threads))
 		("V,version", "Version.");
+	// clang-format on
 
 	int const argc_backup = argc;
 	auto vm = options.parse(argc, argv);
