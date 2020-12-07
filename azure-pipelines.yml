@@ -117,6 +117,7 @@ stages:
           project: ninja
           compiler: clang
           installCommand: |
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
             brew install --cask xquartz wine-stable
             brew install ninja mingw-w64
           id: 'clang11_darwin_$(platform)_$(configuration)'
@@ -128,6 +129,7 @@ stages:
           project: ninja
           compiler: clang
           installCommand: |
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
             brew install --cask xquartz wine-stable
             brew install ninja mingw-w64
           id: 'clang12_darwin_$(platform)_$(configuration)'
