@@ -50,7 +50,7 @@
 	{
 		using gsl::span;
 		using gsl::as_bytes;
-		using gsl::as_writeable_bytes;
+		using gsl::as_writable_bytes;
 	}
 #endif
 
@@ -63,7 +63,7 @@ namespace KlayGE
 	}
 
 	template <typename ElementType>
-	constexpr std::span<ElementType> MakeSpan(ElementType* ptr, typename std::span<ElementType>::index_type count)
+	constexpr std::span<ElementType> MakeSpan(ElementType* ptr, typename std::span<ElementType>::size_type count)
 	{
 		return std::span<ElementType>(ptr, count);
 	}
@@ -93,7 +93,7 @@ namespace KlayGE
 	}
 
 	template <typename Ptr>
-	constexpr std::span<typename Ptr::element_type> MakeSpan(Ptr& cont, std::ptrdiff_t count)
+	constexpr std::span<typename Ptr::element_type> MakeSpan(Ptr& cont, std::size_t count)
 	{
 		return std::span<typename Ptr::element_type>(cont, count);
 	}
@@ -128,37 +128,37 @@ namespace KlayGE
 		return std::span<T const, 1>(&val, 1);
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t FirstExtent, std::ptrdiff_t SecondExtent>
+	template <typename ElementType1, typename ElementType2, std::size_t FirstExtent, std::size_t SecondExtent>
 	constexpr bool operator==(std::span<ElementType1, FirstExtent> lhs, std::span<ElementType2, SecondExtent> rhs)
 	{
 		return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t Extent>
+	template <typename ElementType1, typename ElementType2, std::size_t Extent>
 	constexpr bool operator!=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t Extent>
+	template <typename ElementType1, typename ElementType2, std::size_t Extent>
 	constexpr bool operator<(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
 	{
 		return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t Extent>
+	template <typename ElementType1, typename ElementType2, std::size_t Extent>
 	constexpr bool operator<=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
 	{
 		return !(lhs > rhs);
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t Extent>
+	template <typename ElementType1, typename ElementType2, std::size_t Extent>
 	constexpr bool operator>(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
 	{
 		return rhs < lhs;
 	}
 
-	template <typename ElementType1, typename ElementType2, std::ptrdiff_t Extent>
+	template <typename ElementType1, typename ElementType2, std::size_t Extent>
 	constexpr bool operator>=(std::span<ElementType1, Extent> l, std::span<ElementType2, Extent> r)
 	{
 		return !(l < r);

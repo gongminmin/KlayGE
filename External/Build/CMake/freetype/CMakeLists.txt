@@ -1,7 +1,7 @@
 SET(FREETYPE_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/freetype")
 SET(FREETYPE_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/freetype/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("freetype" "https://git.savannah.gnu.org/git/freetype/freetype2.git" "81725773800029731617b95cee57cd32a8b46756")
+UpdateExternalLib("freetype" "https://git.savannah.nongnu.org/r/freetype/freetype2.git/" "6a2b3e4007e794bfc6c91030d0ed987f925164a8")
 
 SET(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
@@ -14,6 +14,13 @@ SET(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE CACHE BOOL "" FORCE)
 SET(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${FREETYPE_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/freetype")
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(freetype
+		PRIVATE
+			-Wno-unused-parameter
+	)
+endif()
 
 SET_TARGET_PROPERTIES(freetype PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${FREETYPE_OUTPUT_DIR}

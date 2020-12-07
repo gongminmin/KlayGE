@@ -169,7 +169,7 @@ namespace KlayGE
 				feature_levels = MakeSpan(all_feature_levels).subspan(feature_level_start_index);
 			}
 
-			for (int i = 0; i < feature_levels.size(); ++ i)
+			for (size_t i = 0; i < feature_levels.size(); ++i)
 			{
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter(),
 						feature_levels[i], IID_ID3D12Device, d3d_device.put_void())))

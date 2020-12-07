@@ -251,7 +251,7 @@ namespace KlayGE
 			EGL_CONTEXT_MINOR_VERSION, available_versions[0].second,
 			EGL_NONE
 		};
-		int test_version_index = 0;
+		size_t test_version_index = 0;
 		while ((nullptr == context_) && (test_version_index < available_versions.size()))
 		{
 			ctx_attr[1] = available_versions[test_version_index].first;

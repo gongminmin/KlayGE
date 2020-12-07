@@ -1847,7 +1847,7 @@ namespace
 				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
-				for (int i = 0; i < value.size(); ++i)
+				for (size_t i = 0; i < value.size(); ++i)
 				{
 					*reinterpret_cast<T*>(dst) = *reinterpret_cast<T const*>(src);
 					src += sizeof(T);
@@ -1977,7 +1977,7 @@ namespace
 				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
-				for (int i = 0; i < value.size(); ++i)
+				for (size_t i = 0; i < value.size(); ++i)
 				{
 					*reinterpret_cast<uint32_t*>(dst) = *reinterpret_cast<bool const*>(src);
 					src += sizeof(bool);
@@ -3260,7 +3260,7 @@ namespace
 				float4x4* dst = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
-				for (int i = 0; i < value.size(); ++i)
+				for (size_t i = 0; i < value.size(); ++i)
 				{
 					*dst = MathLib::transpose(*src);
 					++src;
@@ -4998,7 +4998,7 @@ namespace KlayGE
 		FILESYSTEM_NS::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
-		for (int i = 0; i < names.size(); ++ i)
+		for (size_t i = 0; i < names.size(); ++i)
 		{
 			connected_name += FILESYSTEM_NS::path(names[i]).stem().string();
 			if (i != names.size() - 1)
@@ -5069,7 +5069,7 @@ namespace KlayGE
 				XMLNodePtr root = frag_docs[0]->Parse(*main_source);
 				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
 
-				for (int i = 1; i < names.size(); ++ i)
+				for (size_t i = 1; i < names.size(); ++i)
 				{
 					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
 					if (source)

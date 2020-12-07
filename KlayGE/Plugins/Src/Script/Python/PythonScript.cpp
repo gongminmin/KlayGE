@@ -531,7 +531,7 @@ namespace KlayGE
 		ScriptVariable& operator=(std::span<ScriptVariablePtr const> value) override
 		{
 			val_ = MakePyObjectPtr(PyTuple_New(value.size()));
-			for (int i = 0; i < value.size(); ++i)
+			for (size_t i = 0; i < value.size(); ++i)
 			{
 				PyObjectPtr py_item = checked_cast<PythonScriptVariable&>(*value[i]).GetPyObject();
 				Py_IncRef(py_item.get());
@@ -608,7 +608,7 @@ namespace KlayGE
 	ScriptVariablePtr PythonScriptModule::Call(std::string const & func_name, std::span<ScriptVariablePtr const> args)
 	{
 		PyObjectPtr py_args = MakePyObjectPtr(PyTuple_New(args.size()));
-		for (int i = 0; i < args.size(); ++i)
+		for (size_t i = 0; i < args.size(); ++i)
 		{
 			PyObjectPtr py_value = checked_cast<PythonScriptVariable&>(*args[i]).GetPyObject();
 			Py_IncRef(py_value.get());

@@ -322,7 +322,7 @@ namespace KlayGE
 				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			for (int i = 0; i < available_versions.size(); ++ i)
+			for (size_t i = 0; i < available_versions.size(); ++i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;
@@ -377,7 +377,7 @@ namespace KlayGE
 				GLX_CONTEXT_MINOR_VERSION_ARB, 0,
 				0
 			};
-			for (int i = 0; i < available_versions.size(); ++ i)
+			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].first;
 				attribs[3] = available_versions[i].second;

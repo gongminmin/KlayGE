@@ -1,7 +1,7 @@
 SET(GOOGLETEST_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/googletest")
 SET(GOOGLETEST_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/googletest/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("googletest" "https://github.com/google/googletest.git" "2fe3bd994b3189899d93f1d5a881e725e046fdc2")
+UpdateExternalLib("googletest" "https://github.com/google/googletest.git" "703bd9caab50b139428cea1aaff9974ebee5742e")
 
 set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)

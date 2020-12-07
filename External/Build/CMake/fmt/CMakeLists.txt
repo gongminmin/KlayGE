@@ -1,7 +1,7 @@
 SET(fmt_project_dir "${EXTERNAL_PROJECT_DIR}/fmt")
 SET(fmt_output_dir "${EXTERNAL_PROJECT_DIR}/lib/fmt/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("fmt" "https://github.com/fmtlib/fmt.git" "2161a73f2bbd723700ca6cebe1ae49d41201a10e")
+UpdateExternalLib("fmt" "https://github.com/fmtlib/fmt.git" "7bdf0628b1276379886c7f6dda2cef2b3b374f0b")
 
 set(CPACK_BINARY_NSIS OFF CACHE BOOL "" FORCE)
 set(FMT_DOC OFF CACHE BOOL "" FORCE)

@@ -174,7 +174,7 @@ namespace KlayGE
 		{
 			vertex_streams_[index].format.assign(vet.begin(), vet.end());
 			uint32_t size = 0;
-			for (int i = 0; i < vet.size(); ++ i)
+			for (size_t i = 0; i < vet.size(); ++ i)
 			{
 				size += vet[i].element_size();
 			}

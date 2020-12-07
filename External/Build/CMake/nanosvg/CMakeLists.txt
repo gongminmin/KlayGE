@@ -1,6 +1,6 @@
 set(NANOSVG_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/nanosvg")
 
-UpdateExternalLib("nanosvg" "https://github.com/memononen/nanosvg.git" "2b08deeb553c723d151f908d786c64136d26d576")
+UpdateExternalLib("nanosvg" "https://github.com/memononen/nanosvg.git" "3e403ec72a9145cbbcc6c63d94a4caf079aafec2")
 
 add_library(nanosvg INTERFACE)
 target_include_directories(nanosvg

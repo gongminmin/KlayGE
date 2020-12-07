@@ -264,17 +264,17 @@ namespace KlayGE
 			: PostProcess(name, volumetric)
 	{
 		input_pins_.resize(input_pin_names.size());
-		for (int i = 0; i < input_pin_names.size(); ++ i)
+		for (size_t i = 0; i < input_pin_names.size(); ++ i)
 		{
 			input_pins_[i].first = input_pin_names[i];
 		}
 		output_pins_.resize(output_pin_names.size());
-		for (int i = 0; i < output_pin_names.size(); ++ i)
+		for (size_t i = 0; i < output_pin_names.size(); ++i)
 		{
 			std::get<0>(output_pins_[i]) = output_pin_names[i];
 		}
 		params_.resize(param_names.size());
-		for (int i = 0; i < param_names.size(); ++ i)
+		for (size_t i = 0; i < param_names.size(); ++i)
 		{
 			params_[i].first = param_names[i];
 		}

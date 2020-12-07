@@ -1,6 +1,6 @@
 set(GSL_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/GSL")
 
-UpdateExternalLib("GSL" "https://github.com/microsoft/GSL.git" "1212beae777dba02c230ece8c0c0ec12790047ea")
+UpdateExternalLib("GSL" "https://github.com/microsoft/GSL.git" "0f6dbc9e2915ef5c16830f3fa3565738de2a9230")
 
 set(GSL_TESTS OFF CACHE BOOL "" FORCE)
 set(VS_ADD_NATIVE_VISUALIZERS OFF CACHE BOOL "" FORCE)

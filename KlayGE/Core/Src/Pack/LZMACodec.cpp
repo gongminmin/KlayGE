@@ -150,7 +150,7 @@ namespace KlayGE
 
 	void LZMACodec::Encode(std::vector<uint8_t>& output, std::span<uint8_t const> input)
 	{
-		SizeT out_len = static_cast<SizeT>(std::max(input.size() * 11 / 10, static_cast<std::ptrdiff_t>(32)));
+		SizeT out_len = static_cast<SizeT>(std::max(input.size() * 11 / 10, static_cast<typename std::span<uint8_t const>::size_type>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
 		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len,

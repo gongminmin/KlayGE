@@ -1224,7 +1224,7 @@ namespace KlayGE
 			bool const tfb_separate_attribs = tfb_stage->TfbSeparateAttribs();
 
 			std::vector<GLchar const*> names(glsl_tfb_varyings.size());
-			for (int i = 0; i < glsl_tfb_varyings.size(); ++i)
+			for (size_t i = 0; i < glsl_tfb_varyings.size(); ++i)
 			{
 				names[i] = glsl_tfb_varyings[i].c_str();
 			}

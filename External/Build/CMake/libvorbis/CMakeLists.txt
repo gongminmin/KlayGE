@@ -1,22 +1,20 @@
 SET(VORBIS_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/libvorbis")
 SET(VORBIS_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/libvorbis/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "9eadeccdc4247127d91ac70555074239f5ce3529")
+UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "3c177d011684fce294edce5ea93f27d3453e6830")
 
 SET(BUILD_SHARED_LIBS OFF)
 SET(BUILD_FRAMEWORK OFF)
-SET(OGG_ROOT ${VORBIS_PROJECT_DIR}/../libogg)
-SET(OGG_LIBRARIES "ogg")
 if(KLAYGE_COMPILER_MSVC)
 	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
 endif()
 
-ADD_SUBDIRECTORY(${VORBIS_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vorbis")
+# To make libvorbis enable to find libogg
+add_library(Ogg::ogg ALIAS ogg)
+export(EXPORT OggTargets NAMESPACE Ogg:: FILE OggTargets.cmake)
+SET(CMAKE_DISABLE_FIND_PACKAGE_Ogg TRUE CACHE BOOL "" FORCE)
 
-target_include_directories(vorbis
-	PUBLIC
-		${VORBIS_PROJECT_DIR}/include
-)
+ADD_SUBDIRECTORY(${VORBIS_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vorbis")
 
 SET_TARGET_PROPERTIES(vorbis PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${VORBIS_OUTPUT_DIR}
@@ -41,16 +39,5 @@ SET_TARGET_PROPERTIES(vorbisfile PROPERTIES
 
 foreach(target
 	"vorbis" "vorbisfile" "vorbisenc")
-	if(KLAYGE_COMPILER_CLANGCL OR KLAYGE_PLATFORM_WINDOWS_STORE)
-		target_compile_definitions(${target}
-			PRIVATE
-				-D_CRT_SECURE_NO_WARNINGS
-		)
-	endif()
-	target_include_directories(${target}
-		PUBLIC
-			$<TARGET_PROPERTY:ogg,INTERFACE_INCLUDE_DIRECTORIES>
-	)
-
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/libvorbis")
 endforeach()

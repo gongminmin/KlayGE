@@ -286,7 +286,7 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(init_data.size() == num_mip_maps_);
 			subres_data.resize(init_data.size());
-			for (int i = 0; i < init_data.size(); ++ i)
+			for (size_t i = 0; i < init_data.size(); ++i)
 			{
 				subres_data[i].pSysMem = init_data[i].data;
 				subres_data[i].SysMemPitch = init_data[i].row_pitch;

@@ -1,6 +1,6 @@
 SET(WPFTOOLKIT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/wpftoolkit")
 
-UpdateExternalLib("wpftoolkit" "https://github.com/xceedsoftware/wpftoolkit" "aa93c693a581c6e97b7cec0c0d3c43faca4d1380" "" "" need_patch)
+UpdateExternalLib("wpftoolkit" "https://github.com/xceedsoftware/wpftoolkit" "95104c6105c793f23e85274c24b37dcb744f94db" "" "" need_patch)
 if(need_patch)
 	foreach(patch "0001-Adjust-the-path-of-output-directory-and-sn.snk")
 		ApplyPatch("wpftoolkit" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
