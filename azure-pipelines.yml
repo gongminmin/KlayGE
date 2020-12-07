@@ -149,13 +149,15 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'Build_External | "$(Agent.OS)" | $(id)'
+          key: 'Build_External | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
+          restoreKeys: 'Build_External | "$(Agent.OS)" | $(id)'
           path: Build/$(BUILD_DIR)/External
         displayName: Cache Build/External
 
       - task: Cache@2
         inputs:
-          key: 'Build_Ninja | "$(Agent.OS)" | $(id)'
+          key: 'Build_Ninja | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
+          restoreKeys: 'Build_Ninja | "$(Agent.OS)" | $(id)'
           path: Build/$(BUILD_DIR)/Ninja
           cacheHitVar: CACHE_RESTORED
         displayName: Cache Build/ninja
@@ -170,7 +172,11 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'External | "$(Agent.OS)" | $(id)'
+          key: 'External | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
+          restoreKeys: |
+            External | "$(Agent.OS)" | $(id)
+            External | "$(Agent.OS)"
+            External
           path: External
         displayName: Cache External
 
