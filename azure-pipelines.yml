@@ -16,7 +16,7 @@ stages:
           vmImage: windows-2019
           project: vs2019
           compiler: vc142
-          installCommand: 'choco install python3'
+          installCommand: ''
           id: 'vc142_win_$(platform)_$(configuration)'
           BUILD_DIR: vc142
 
@@ -24,7 +24,7 @@ stages:
           vmImage: VS2017-Win2016
           project: vs2017
           compiler: vc141
-          installCommand: 'choco install python3'
+          installCommand: ''
           id: 'vc141_win_$(platform)_$(configuration)'
           BUILD_DIR: vc141
 
@@ -32,7 +32,7 @@ stages:
           vmImage: windows-2019
           project: vs2019
           compiler: clangcl
-          installCommand: 'choco install python3'
+          installCommand: ''
           id: 'clangcl10_win_$(platform)_$(configuration)'
           BUILD_DIR: clangcl10
 
@@ -40,7 +40,7 @@ stages:
           vmImage: windows-2019
           project: ninja
           compiler: mingw
-          installCommand: 'choco install ninja python3'
+          installCommand: 'choco install ninja'
           id: 'gcc10_win_$(platform)_$(configuration)'
           BUILD_DIR: mingw
 
@@ -52,7 +52,7 @@ stages:
             sudo dpkg --add-architecture i386
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev python3
+            sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win32
             winetricks
           id: 'gcc9_linux_$(platform)_$(configuration)'
@@ -68,7 +68,7 @@ stages:
             sudo dpkg --add-architecture i386
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev python3
+            sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win32
             winetricks
           id: 'gcc10_linux_$(platform)_$(configuration)'
@@ -86,7 +86,7 @@ stages:
             sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev python3
+            sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win32
             winetricks
           id: 'clang10_linux_$(platform)_$(configuration)'
@@ -104,7 +104,7 @@ stages:
             sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main"
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev python3
+            sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win32
             winetricks
           id: 'clang11_linux_$(platform)_$(configuration)'
@@ -142,6 +142,7 @@ stages:
     steps:
       - bash: eval '$(installCommand)'
         displayName: 'Install'
+        condition: ne(variables.installCommand, '')
 
       - pwsh: |
           $mingwPath = "C:\msys64\mingw64\bin"
@@ -151,64 +152,52 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'Build_External | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
-          restoreKeys: 'Build_External | "$(Agent.OS)" | $(id)'
-          path: Build/$(BUILD_DIR)/External
-        displayName: Cache Build/External
+          key: 'Build | External/Build/**/CMakeLists.txt | $(id)'
+          restoreKeys: 'Build | $(id)'
+          path: Build/$(BUILD_DIR)
+        displayName: Cache Build
 
       - task: Cache@2
         inputs:
-          key: 'Build_Ninja | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
-          restoreKeys: 'Build_Ninja | "$(Agent.OS)" | $(id)'
-          path: Build/$(BUILD_DIR)/Ninja
-          cacheHitVar: CACHE_RESTORED
-        displayName: Cache Build/ninja
-        condition: eq(variables.project, 'ninja')
-
-      - bash: |
-          mv Build/$(BUILD_DIR)/Ninja/ninja_deps Build/$(BUILD_DIR)/.ninja_deps
-          mv Build/$(BUILD_DIR)/Ninja/ninja_log Build/$(BUILD_DIR)/.ninja_log
-          rmdir Build/$(BUILD_DIR)/Ninja
-        displayName: 'Restore ninja files'
-        condition: and(eq(variables.CACHE_RESTORED, 'true'), eq(variables.project, 'ninja'))
-
-      - task: Cache@2
-        inputs:
-          key: 'External | "$(Agent.OS)" | $(id) | "$(Build.SourceBranch)"'
+          key: 'External | External/Build/**/CMakeLists.txt | $(id)'
           restoreKeys: |
-            External | "$(Agent.OS)" | $(id)
-            External | "$(Agent.OS)"
+            External | External/Build/**/CMakeLists.txt
             External
           path: External
         displayName: Cache External
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_media'
+          key: 'KlayGE_media | KlayGE/Build/CMake/Engine/Core/CMakeLists.txt'
+          restoreKeys: 'KlayGE_media'
           path: KlayGE/media
         displayName: Cache KlayGE/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Samples_media'
+          key: 'KlayGE_Samples_media | KlayGE/Build/CMake/Samples/**/CMakeLists.txt'
+          restoreKeys: 'KlayGE_Samples_media'
           path: KlayGE/Samples/media
         displayName: Cache KlayGE/Samples/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tests_media'
+          key: 'KlayGE_Tests_media | KlayGE/Build/CMake/Tests/CMakeLists.txt'
+          restoreKeys: 'KlayGE_Tests_media'
           path: KlayGE/Tests/media
         displayName: Cache KlayGE/Tests/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tools_media'
+          key: 'KlayGE_Tools_media | KlayGE/Build/CMake/Tools/**/CMakeLists.txt'
+          restoreKeys: 'KlayGE_Tools_media'
           path: KlayGE/Tools/media
         displayName: Cache KlayGE/Tools/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tutorials_media'
+          key: 'KlayGE_Tutorials_media | KlayGE/Build/CMake/Tutorials/**/CMakeLists.txt'
+          restoreKeys: 'KlayGE_Tutorials_media'
           path: KlayGE/Tutorials/media
         displayName: Cache KlayGE/Tutorials/media
 
@@ -250,8 +239,9 @@ stages:
         condition: succeeded()
 
       - bash: |
-          mkdir Build/$(BUILD_DIR)/Ninja
-          mv -f Build/$(BUILD_DIR)/.ninja_deps Build/$(BUILD_DIR)/Ninja/ninja_deps
-          mv -f Build/$(BUILD_DIR)/.ninja_log Build/$(BUILD_DIR)/Ninja/ninja_log
-        displayName: 'Backup ninja files'
-        condition: and(succeeded(), eq(variables.project, 'ninja'))
+          rm -rf Build/$(BUILD_DIR)/DXBC2GLSL
+          rm -rf Build/$(BUILD_DIR)/glloader
+          rm -rf Build/$(BUILD_DIR)/KFL
+          rm -rf Build/$(BUILD_DIR)/kfont
+          rm -rf Build/$(BUILD_DIR)/KlayGE
+        displayName: 'Remove build files'
