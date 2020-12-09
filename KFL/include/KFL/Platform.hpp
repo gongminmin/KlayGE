@@ -80,8 +80,6 @@
 	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID
-#elif defined(__CYGWIN__)
-	#define KLAYGE_PLATFORM_CYGWIN
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
 #elif defined(__APPLE__)
