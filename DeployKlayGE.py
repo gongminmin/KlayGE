@@ -10,11 +10,11 @@ def CopyToDst(src_name, dst_dir):
 	import shutil
 	shutil.copy2(src_name, dst_dir)
 
-def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
+def DeployKlayGE(target_dir, build_info, compiler_info, cfg):
 	import glob
 
-	bin_src_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_arch)
-	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
+	bin_src_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_info.arch)
+	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_info.arch)
 	if build_info.is_windows:
 		bat_suffix = "bat"
 		dll_suffix = ".dll"
@@ -92,22 +92,27 @@ def DeployKlayGE(target_dir, build_info, compiler_arch, cfg):
 	for fname in glob.iglob("%s%skfont%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 
-	if build_info.is_windows and (build_info.compiler_name == "vc"):
-		print("\nDeploying vcredist...")
-		system32 = os.environ["SystemRoot"] + "/"
-		if cfg == "Debug":
-			vc_debug_suffix = "d"
-		else:
-			vc_debug_suffix = ""
-		import platform
-		if (platform.architecture()[0] == '32bit') and ('ProgramFiles(x86)' in os.environ):
-			system32 += "SysNative"
-		else:
-			system32 += "System32"
-		CopyToDst("%s/msvcp140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
-		CopyToDst("%s/vcruntime140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
-		if (build_info.compiler_version >= 142):
-			CopyToDst("%s/vcruntime140_1%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+	if build_info.is_windows:
+		if build_info.compiler_name == "vc":
+			print("\nDeploying vcredist...")
+			system32 = os.environ["SystemRoot"] + "/"
+			if cfg == "Debug":
+				vc_debug_suffix = "d"
+			else:
+				vc_debug_suffix = ""
+			import platform
+			if (platform.architecture()[0] == '32bit') and ('ProgramFiles(x86)' in os.environ):
+				system32 += "SysNative"
+			else:
+				system32 += "System32"
+			CopyToDst("%s/msvcp140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+			CopyToDst("%s/vcruntime140%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+			if (build_info.compiler_version >= 142):
+				CopyToDst("%s/vcruntime140_1%s.dll" % (system32, vc_debug_suffix), bin_dst_dir)
+		elif build_info.compiler_name == "mgw":
+			CopyToDst("%s/libwinpthread-1.dll" % compiler_info.compiler_root, bin_dst_dir)
+			CopyToDst("%s/libgcc_s_seh-1.dll" % compiler_info.compiler_root, bin_dst_dir)
+			CopyToDst("%s/libstdc++-6.dll" % compiler_info.compiler_root, bin_dst_dir)
 
 	print("\nDeploying KlayGE...")
 	for fname in glob.iglob("%s%sKlayGE_Core%s" % (bin_src_dir, lib_prefix, lib_suffix)):
@@ -188,6 +193,6 @@ if __name__ == "__main__":
 		build_info = BuildInfo.FromArgv(sys.argv, 1)
 		for cfg in build_info.cfg:
 			for compiler_info in build_info.compilers:
-				DeployKlayGE(target_dir, build_info, compiler_info.arch, cfg)
+				DeployKlayGE(target_dir, build_info, compiler_info, cfg)
 	else:
 		print("Usage: DeployKlayGE.py target_dir [project] [compiler] [arch] [config]")

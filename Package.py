@@ -6,14 +6,14 @@ import os, shutil, sys
 from Build import BuildInfo
 from DeployKlayGE import DeployKlayGE, CopyToDst
 
-def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
+def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 	if not os.path.exists(tareget_dir):
 		os.mkdir(tareget_dir)
-	dst_sample_dir = "%s/KlayGE_Samples_%s%d_%s_%s/" % (tareget_dir, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_arch)
+	dst_sample_dir = "%s/KlayGE_Samples_%s%d_%s_%s/" % (tareget_dir, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 	if os.path.exists(dst_sample_dir):
 		shutil.rmtree(dst_sample_dir)
 	os.mkdir(dst_sample_dir)
-	DeployKlayGE(dst_sample_dir, build_info, compiler_arch, cfg)
+	DeployKlayGE(dst_sample_dir, build_info, compiler_info, cfg)
 
 	output_suffix = "_%s%d" % (build_info.compiler_name, build_info.compiler_version)
 	if cfg == "Debug":
@@ -34,8 +34,8 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 	else:
 		lib_prefix = "lib"
 
-	src_bin_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_arch)
-	dst_bin_dir = "%sbin/%s_%s/" % (dst_sample_dir, build_info.target_platform, compiler_arch)
+	src_bin_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_info.arch)
+	dst_bin_dir = "%sbin/%s_%s/" % (dst_sample_dir, build_info.target_platform, compiler_info.arch)
 
 	exe_list = (
 		"AreaLighting",
@@ -139,8 +139,8 @@ def PackageSamples(tareget_dir, build_info, compiler_arch, cfg):
 	import glob
 	for pd_item in pd_list:
 		resource_path = dst_sample_dir + pd_item
-		subprocess.call([pd_path, "-P", platform, "-I", resource_path])
 		for file in glob.glob(resource_path):
+			subprocess.call([pd_path, "-P", platform, "-I", file])
 			print("Removing %s..." % file)
 			os.remove(file)
 
@@ -191,6 +191,6 @@ if __name__ == "__main__":
 		build_info = BuildInfo.FromArgv(sys.argv, 1)
 		for cfg in build_info.cfg:
 			for compiler_info in build_info.compilers:
-				PackageSamples(target_dir, build_info, compiler_info.arch, cfg)
+				PackageSamples(target_dir, build_info, compiler_info, cfg)
 	else:
 		print("Usage: PackageSamples.py target_dir [project] [compiler] [arch] [config]")
