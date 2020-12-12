@@ -15,7 +15,7 @@ endif()
 
 set(FILESYSTEM_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/filesystem")
 
-UpdateExternalLib("filesystem" "https://github.com/gulrak/filesystem.git" "3605e869150032ffdd9eae3db93e12f8711a0c82")
+UpdateExternalLib("filesystem" "https://github.com/gulrak/filesystem.git" "1edf4a333930f126f5dcd2f7919f0bf4fa3acecc")
 
 set(GHC_FILESYSTEM_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GHC_FILESYSTEM_BUILD_TESTS OFF CACHE BOOL "" FORCE)

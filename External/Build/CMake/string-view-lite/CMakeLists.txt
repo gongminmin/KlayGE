@@ -1,6 +1,6 @@
 set(STRING_VIEW_LITE_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/string-view-lite")
 
-UpdateExternalLib("string-view-lite" "https://github.com/martinmoene/string-view-lite.git" "52c8f40ffae21dcf88aa2a38111b0d6c18e5a1fe")
+UpdateExternalLib("string-view-lite" "https://github.com/martinmoene/string-view-lite.git" "3d2a4a7ebcc5dbdd55bd00026075c574a13c861b")
 
 set(STRING_VIEW_LITE_OPT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(STRING_VIEW_LITE_OPT_BUILD_TESTS OFF CACHE BOOL "" FORCE)

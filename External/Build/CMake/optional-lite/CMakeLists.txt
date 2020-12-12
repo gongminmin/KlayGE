@@ -1,6 +1,6 @@
 set(OPTIONAL_LITE_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/optional-lite")
 
-UpdateExternalLib("optional-lite" "https://github.com/martinmoene/optional-lite.git" "5e8a82ac029aebfd2f5708f183a00eda2be132cc")
+UpdateExternalLib("optional-lite" "https://github.com/martinmoene/optional-lite.git" "c94a958c188ac0befea23184977e159eb8512ff4")
 
 set(OPTIONAL_LITE_OPT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(OPTIONAL_LITE_OPT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
