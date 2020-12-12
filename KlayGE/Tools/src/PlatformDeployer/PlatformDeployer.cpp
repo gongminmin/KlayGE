@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
@@ -143,9 +144,35 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 		TexConverter tc;
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
-
+			std::string_view real_res_type;
 			auto metadata = LoadTextureMetadata(res_names[i], default_metadata);
+			switch (metadata.Slot())
+			{
+			case RenderMaterial::TS_Albedo:
+				real_res_type = "albedo";
+				break;
+			case RenderMaterial::TS_MetalnessGlossiness:
+				real_res_type = "metalness & glossiness";
+				break;
+			case RenderMaterial::TS_Emissive:
+				real_res_type = "emissive";
+				break;
+			case RenderMaterial::TS_Normal:
+				real_res_type = "normal";
+				break;
+			case RenderMaterial::TS_Height:
+				real_res_type = "height";
+				break;
+			case RenderMaterial::TS_Occlusion:
+				real_res_type = "occlusion";
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid texture slot");
+			}
+
+			std::cout << "Converting " << res_names[i] << " to " << real_res_type << std::endl;
+
 			auto output_tex = tc.Load(res_names[i], metadata);
 			if (output_tex)
 			{
@@ -264,7 +291,7 @@ int main(int argc, char* argv[])
 	options.add_options()
 		("H,help", "Produce help message.")
 		("I,input-path", "Input resource path.", cxxopts::value<std::string>())
-		("T,type", "Resource type.", cxxopts::value<std::string>())
+		("T,type", "Resource type (auto by default).", cxxopts::value<std::string>())
 		("P,platform", "Platform name.", cxxopts::value<std::string>())
 		("D,dest-folder", "Destination folder.", cxxopts::value<std::string>())
 		("v,version", "Version.");
