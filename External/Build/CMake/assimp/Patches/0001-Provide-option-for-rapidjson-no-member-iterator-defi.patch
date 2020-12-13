@@ -1,0 +1,28 @@
+From 42051b5d7433643f9823eae2d84e1899e693b78e Mon Sep 17 00:00:00 2001
+From: tellypresence <info@tellypresence.com>
+Date: Wed, 9 Dec 2020 20:21:43 +0900
+Subject: [PATCH] Provide option for rapidjson no-member-iterator define
+
+Originally added to fix warning on MSVC but breaks android build
+---
+ code/CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/code/CMakeLists.txt b/code/CMakeLists.txt
+index eec66a3..c1ec9b6 100644
+--- a/code/CMakeLists.txt
++++ b/code/CMakeLists.txt
+@@ -1051,6 +1051,10 @@ IF(HUNTER_ENABLED)
+ ELSE()
+   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
+   INCLUDE_DIRECTORIES( "../contrib" )
++  option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
++  if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
++    ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
++  endif()
+ ENDIF()
+ 
+ # VC2010 fixes
+-- 
+2.17.1.windows.2
+

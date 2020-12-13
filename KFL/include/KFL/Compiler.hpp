@@ -86,6 +86,9 @@
 			#endif
 
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+			#if __cplusplus > 201703L
+				#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+			#endif
 		#elif defined(__ANDROID__)
 			#if CLANG_VERSION >= 50
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -150,6 +153,9 @@
 	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 	#if __cplusplus > 201703L
 		#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+		#if GCC_VERSION >= 100
+			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+		#endif
 	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

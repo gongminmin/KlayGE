@@ -3,7 +3,7 @@ list(APPEND CMAKE_MODULE_PATH "${KLAYGE_CMAKE_MODULE_DIR}")
 
 project(KlayGE)
 
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.13)
 
 set(KLAYGE_MAJOR_VERSION 4)
 set(KLAYGE_MINOR_VERSION 16)

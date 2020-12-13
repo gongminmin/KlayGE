@@ -1,7 +1,12 @@
 SET(ASSIMP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/assimp")
 SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "0201fc57dca48910ca7f9fdf7457534ea6a57efc" "master" "v5.0.0")
+UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "1e2c3c9c016d7a557a364161ac3cd8fbee16c72d" "master" "v5.0.0" need_patch)
+if(need_patch)
+	foreach(patch "0001-Provide-option-for-rapidjson-no-member-iterator-defi")
+		ApplyPatch("assimp" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
+	endforeach()
+endif()
 
 FOREACH(flag_var
 		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL)
@@ -24,6 +29,7 @@ set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
+set(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR ON CACHE BOOL "" FORCE)
 set(IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
