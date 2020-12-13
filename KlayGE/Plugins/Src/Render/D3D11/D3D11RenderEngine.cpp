@@ -14,7 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/SmartPtrHelper.hpp>
@@ -63,7 +62,7 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext1::HSSetShaderResources),
 		std::mem_fn(&ID3D11DeviceContext1::DSSetShaderResources)
 	};
-	KLAYGE_STATIC_ASSERT(std::size(ShaderSetShaderResources) == NumShaderStages);
+	static_assert(std::size(ShaderSetShaderResources) == NumShaderStages);
 
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11SamplerState * const *)> const ShaderSetSamplers[] =
 	{
@@ -74,7 +73,7 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext1::HSSetSamplers),
 		std::mem_fn(&ID3D11DeviceContext1::DSSetSamplers)
 	};
-	KLAYGE_STATIC_ASSERT(std::size(ShaderSetSamplers) == NumShaderStages);
+	static_assert(std::size(ShaderSetSamplers) == NumShaderStages);
 
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11Buffer * const *)> const ShaderSetConstantBuffers[] =
 	{
@@ -85,7 +84,7 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext1::HSSetConstantBuffers),
 		std::mem_fn(&ID3D11DeviceContext1::DSSetConstantBuffers)
 	};
-	KLAYGE_STATIC_ASSERT(std::size(ShaderSetConstantBuffers) == NumShaderStages);
+	static_assert(std::size(ShaderSetConstantBuffers) == NumShaderStages);
 }
 
 namespace KlayGE

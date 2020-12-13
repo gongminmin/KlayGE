@@ -75,7 +75,7 @@ namespace KlayGE
 				return !(lhs == rhs);
 			}
 		};
-		KLAYGE_STATIC_ASSERT(sizeof(StreamOutputDecl) == 8);
+		static_assert(sizeof(StreamOutputDecl) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(pop)
 #endif

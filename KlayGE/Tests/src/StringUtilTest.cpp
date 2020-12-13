@@ -29,11 +29,10 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-
-#include <KFL/CXX17/string_view.hpp>
-
 #include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
+
+#include <string_view>
 
 #include "KlayGETests.hpp"
 

@@ -49,7 +49,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(ETC1Block) == 8);
+	static_assert(sizeof(ETC1Block) == 8);
 
 	struct ETC2TModeBlock
 	{
@@ -60,7 +60,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(ETC2TModeBlock) == 8);
+	static_assert(sizeof(ETC2TModeBlock) == 8);
 
 	struct ETC2HModeBlock
 	{
@@ -71,7 +71,7 @@ namespace KlayGE
 		uint16_t msb;
 		uint16_t lsb;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(ETC2HModeBlock) == 8);
+	static_assert(sizeof(ETC2HModeBlock) == 8);
 
 	struct ETC2PlanarModeBlock
 	{
@@ -84,7 +84,7 @@ namespace KlayGE
 		uint8_t rv_gv;
 		uint8_t gv_bv;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(ETC2PlanarModeBlock) == 8);
+	static_assert(sizeof(ETC2PlanarModeBlock) == 8);
 
 	union ETC2Block
 	{
@@ -93,7 +93,7 @@ namespace KlayGE
 		ETC2HModeBlock etc2_h_mode;
 		ETC2PlanarModeBlock etc2_planar_mode;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(ETC2Block) == 8);
+	static_assert(sizeof(ETC2Block) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif

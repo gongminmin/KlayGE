@@ -21,7 +21,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -93,7 +92,7 @@ namespace KlayGE
 				"4.2",
 				"4.1"
 			};
-			KLAYGE_STATIC_ASSERT(std::size(all_version_names) == std::size(all_versions));
+			static_assert(std::size(all_version_names) == std::size(all_versions));
 
 			uint32_t version_start_index = 0;
 			for (size_t index = 0; index < settings.options.size(); ++ index)

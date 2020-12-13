@@ -154,7 +154,7 @@ namespace
 			NAME_AND_HASH("struct"),
 		};
 #undef NAME_AND_HASH
-		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
+		static_assert(std::size(types) == REDT_count);
 
 		return MakeSpan(types);
 	}

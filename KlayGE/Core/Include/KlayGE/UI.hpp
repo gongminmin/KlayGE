@@ -20,13 +20,13 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/Signal.hpp>
 
 #include <array>
 #include <map>
+#include <string_view>
 
 namespace KlayGE
 {

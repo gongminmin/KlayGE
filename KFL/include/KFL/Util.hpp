@@ -34,11 +34,10 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
-#include <KFL/CXX17.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KFL/CXX20/endian.hpp>
 
 #include <string>
+#include <string_view>
 #include <functional>
 
 #include <boost/assert.hpp>
@@ -144,7 +143,7 @@ namespace KlayGE
 	template <typename T>
 	T Native2BE(T x) noexcept
 	{
-		KLAYGE_IF_CONSTEXPR (std::endian::native == std::endian::little)
+		if constexpr (std::endian::native == std::endian::little)
 		{
 			EndianSwitch<sizeof(T)>(&x);
 		}
@@ -153,7 +152,7 @@ namespace KlayGE
 	template <typename T>
 	T Native2LE(T x) noexcept
 	{
-		KLAYGE_IF_CONSTEXPR (std::endian::native == std::endian::big)
+		if constexpr (std::endian::native == std::endian::big)
 		{
 			EndianSwitch<sizeof(T)>(&x);
 		}

@@ -34,7 +34,8 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
+
+#include <string_view>
 
 struct IInArchive;
 

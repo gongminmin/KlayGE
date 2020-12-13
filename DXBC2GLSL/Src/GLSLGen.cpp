@@ -37,7 +37,6 @@
 
 #include <DXBC2GLSL/GLSLGen.hpp>
 
-#include <KFL/CXX17.hpp>
 #include <KFL/CXX20/format.hpp>
 
 #include <iterator>
@@ -68,7 +67,7 @@ namespace
 		"310 es",
 		"320 es"
 	};
-	KLAYGE_STATIC_ASSERT(GSV_NumVersions == std::size(GLSLVersionStr));
+	static_assert(GSV_NumVersions == std::size(GLSLVersionStr));
 
 
 	uint32_t bitcount32(uint32_t x)

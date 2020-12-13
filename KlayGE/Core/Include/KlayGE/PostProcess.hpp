@@ -28,12 +28,13 @@
 #include <vector>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderView.hpp>
+
+#include <string_view>
 
 namespace KlayGE
 {

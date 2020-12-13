@@ -34,10 +34,10 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 
 #include <string>
+#include <string_view>
 
 #include <KlayGE/DevHelper/DevHelper.hpp>
 

@@ -34,9 +34,9 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
+#include <string_view>
 #include <vector>
 
 #include <KlayGE/DevHelper/DevHelper.hpp>

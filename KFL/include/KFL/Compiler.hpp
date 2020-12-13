@@ -31,18 +31,12 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.1+, g++ 9.0+, clang 9.0+, with C++14 or C++17 option on.
+// KlayGE requires vc 14.1+, g++ 9.0+, clang 9.0+, with C++17 option on.
+// All C++17 core feature used in KlayGE should be available in all supported compilers.
 
-// Macros for C++17 core features:
-// KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-// KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-
-// Macros for C++17 library features:
-// KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+// Macros for optional C++17 library features:
 // KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 // KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-// KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-// KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 
 // Macros for C++20 library features:
 // KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
@@ -58,19 +52,13 @@
 
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+	#if __cplusplus < 201703L
+		#error "-std=c++17 must be turned on."
+	#endif
 
 	#if defined(_MSC_VER)
 		#define KLAYGE_COMPILER_CLANGCL
 		#define KLAYGE_COMPILER_NAME clangcl
-
-		#if __cplusplus < 201703L
-			#error "-std=c++17 must be turned on."
-		#endif
 
 		#if CLANG_VERSION >= 90
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -89,10 +77,6 @@
 	#else
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang
-
-		#if __cplusplus < 201703L
-			#error "-std=c++17 must be turned on."
-		#endif
 
 		#if defined(__APPLE__)
 			#if CLANG_VERSION >= 110
@@ -163,11 +147,6 @@
 		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 	#endif
 
-	#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 	#if __cplusplus > 201703L
 		#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
@@ -195,26 +174,23 @@
 
 	#if _MSC_VER >= 1920
 		#define KLAYGE_COMPILER_VERSION 142
-	#elif _MSC_VER >= 1910
+	#elif _MSC_VER >= 1911
 		#define KLAYGE_COMPILER_VERSION 141
 	#else
-		#error "Unsupported compiler version. Please install vc 14.1 (VS2017) or up."
+		#error "Unsupported compiler version. Please install VS2017 15.3 or up."
 	#endif
 
-	#if _MSVC_LANG > 201402L
-		#if _MSC_VER >= 1911
-			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
-		#endif
-		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#if _MSC_VER >= 1914
-			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-		#endif
-		#if _MSC_VER >= 1915
-			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		#endif
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+	#if _MSVC_LANG < 201703L
+		#error "/std:c++17 must be turned on."
+	#endif
+
+	#if _MSC_VER >= 1914
+		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+	#else
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+	#endif
+	#if _MSC_VER >= 1915
+		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 	#endif
 	#if _MSVC_LANG > 201703L
 		#if _MSC_VER >= 1922
@@ -223,10 +199,6 @@
 		#if _MSC_VER >= 1926
 			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 		#endif
-	#endif
-
-	#if !defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.

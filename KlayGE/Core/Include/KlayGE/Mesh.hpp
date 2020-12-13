@@ -28,7 +28,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
@@ -36,6 +35,7 @@
 #include <KlayGE/SceneComponent.hpp>
 
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 

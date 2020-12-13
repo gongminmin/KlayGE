@@ -33,8 +33,8 @@
 
 #pragma once
 
-#include <KFL/CXX17/string_view.hpp>
 #include <string>
+#include <string_view>
 #include <stdexcept>
 
 namespace KlayGE

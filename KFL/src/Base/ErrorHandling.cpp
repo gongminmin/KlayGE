@@ -30,11 +30,11 @@
 
 #include <KFL/KFL.hpp>
 
-#include <KFL/CXX17/string_view.hpp>
 #include <KFL/CXX20/format.hpp>
 
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <system_error>
 
 #include <KFL/ErrorHandling.hpp>
@@ -43,11 +43,7 @@ namespace KlayGE
 {
 	std::string CombineFileLine(std::string_view file, int line)
 	{
-#if defined(KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT)
 		return std::format("{}: {}", file, line);
-#else
-		return std::format("{}: {}", std::string(file), line);
-#endif
 	}
 
 	void Verify(bool x)

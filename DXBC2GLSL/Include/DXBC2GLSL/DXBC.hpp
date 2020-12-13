@@ -60,7 +60,7 @@ struct DXBCChunkHeader
 	uint32_t fourcc;
 	uint32_t size;
 };
-KLAYGE_STATIC_ASSERT(sizeof(DXBCChunkHeader) == 8);
+static_assert(sizeof(DXBCChunkHeader) == 8);
 
 // this is always little-endian!
 struct DXBCChunkSignatureHeader : public DXBCChunkHeader
@@ -68,7 +68,7 @@ struct DXBCChunkSignatureHeader : public DXBCChunkHeader
 	uint32_t count;
 	uint32_t offset;
 };
-KLAYGE_STATIC_ASSERT(sizeof(DXBCChunkSignatureHeader) == 16);
+static_assert(sizeof(DXBCChunkSignatureHeader) == 16);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

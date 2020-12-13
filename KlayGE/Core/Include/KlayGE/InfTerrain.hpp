@@ -83,14 +83,14 @@ namespace KlayGE
 			float neighbor_plus_x;
 			float neighbor_plus_y;
 		};
-		KLAYGE_STATIC_ASSERT(sizeof(Adjacency) == 16);
+		static_assert(sizeof(Adjacency) == 16);
 
 		struct InstanceData
 		{
 			float x, y;
 			Adjacency adjacency;
 		};
-		KLAYGE_STATIC_ASSERT(sizeof(InstanceData) == 24);
+		static_assert(sizeof(InstanceData) == 24);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

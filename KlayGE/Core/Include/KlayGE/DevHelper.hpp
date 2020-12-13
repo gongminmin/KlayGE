@@ -37,9 +37,10 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KFL/CXX17/string_view.hpp>
 #include <KFL/DllLoader.hpp>
 #include <KlayGE/Texture.hpp>
+
+#include <string_view>
 
 namespace KlayGE
 {

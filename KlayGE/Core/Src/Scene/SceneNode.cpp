@@ -29,10 +29,11 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
+
+#include <string_view>
 
 #include <boost/assert.hpp>
 

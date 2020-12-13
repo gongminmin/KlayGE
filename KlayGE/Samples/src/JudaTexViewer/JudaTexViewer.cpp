@@ -40,7 +40,7 @@ namespace
 		float2 pos;
 		uint32_t tile_id;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(tile_instance) == 12);
+	static_assert(sizeof(tile_instance) == 12);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

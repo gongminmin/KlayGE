@@ -91,7 +91,7 @@ namespace
 		uint32_t	b_bit_mask;			// mask for blue bits
 		uint32_t	rgb_alpha_bit_mask;	// mask for alpha channels
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(DDSPIXELFORMAT) == 32);
+	static_assert(sizeof(DDSPIXELFORMAT) == 32);
 
 	enum
 	{
@@ -143,7 +143,7 @@ namespace
 		uint32_t	caps2;
 		uint32_t	reserved[2];
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(DDSCAPS2) == 16);
+	static_assert(sizeof(DDSCAPS2) == 16);
 
 	enum
 	{
@@ -175,7 +175,7 @@ namespace
 		DDSCAPS2		dds_caps;			// direct draw surface capabilities
 		uint32_t		reserved2;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(DDSSURFACEDESC2) == 124);
+	static_assert(sizeof(DDSSURFACEDESC2) == 124);
 
 	enum D3D_RESOURCE_DIMENSION
 	{
@@ -203,7 +203,7 @@ namespace
 		uint32_t array_size;
 		uint32_t reserved;
 	};
-	KLAYGE_STATIC_ASSERT(sizeof(DDS_HEADER_DXT10) == 20);
+	static_assert(sizeof(DDS_HEADER_DXT10) == 20);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

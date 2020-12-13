@@ -41,7 +41,7 @@
 #include <vector>
 #include <functional>
 
-#include <KFL/CXX17/optional.hpp>
+#include <optional>
 
 namespace KlayGE
 {

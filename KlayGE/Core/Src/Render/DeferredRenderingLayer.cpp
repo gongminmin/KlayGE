@@ -91,7 +91,7 @@ namespace
 			uint8_t skinning : 1;
 			uint8_t detail_mode : 2;
 		} flags;
-		KLAYGE_STATIC_ASSERT(sizeof(Flags) == 1);
+		static_assert(sizeof(Flags) == 1);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif

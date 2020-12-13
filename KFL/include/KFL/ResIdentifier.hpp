@@ -34,10 +34,10 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <istream>
-#include <vector>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace KlayGE
 {

@@ -33,10 +33,9 @@
 
 #pragma once
 
-#include <KFL/CXX17/string_view.hpp>
-
 #include <algorithm>
 #include <locale>
+#include <string_view>
 #include <vector>
 
 #include <KFL/Util.hpp>

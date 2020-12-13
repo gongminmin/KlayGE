@@ -8,10 +8,7 @@ SET(BASE_DETAIL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Detail/AutoLink.hpp
 )
 SET(BASE_CXX17_HEADER_FILES
-	${KFL_PROJECT_DIR}/include/KFL/CXX17/any.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/filesystem.hpp
-	${KFL_PROJECT_DIR}/include/KFL/CXX17/optional.hpp
-	${KFL_PROJECT_DIR}/include/KFL/CXX17/string_view.hpp
 )
 SET(BASE_CXX20_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX20/endian.hpp
@@ -26,7 +23,6 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
-	${KFL_PROJECT_DIR}/include/KFL/CXX17.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ErrorHandling.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
@@ -152,8 +148,6 @@ target_link_libraries(${LIB_NAME}
 		Boost::assert
 		Boost::core
 		fmt
-		optional-lite
-		string-view-lite
 		GSL
 
 	PRIVATE

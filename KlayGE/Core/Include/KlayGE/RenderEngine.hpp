@@ -74,12 +74,12 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mipmapper.hpp>
 #include <KFL/Color.hpp>
 
+#include <string_view>
 #include <vector>
 
 namespace KlayGE
@@ -384,7 +384,7 @@ namespace KlayGE
 				alignas(16) float3 up_vec;
 				alignas(4) float padding2;
 			};
-			KLAYGE_STATIC_ASSERT(sizeof(CameraInfo) == 304);
+			static_assert(sizeof(CameraInfo) == 304);
 
 		public:
 			PredefinedCameraCBuffer();
