@@ -41,6 +41,8 @@
 
 #include <iostream>
 
+#include <nonstd/scope.hpp>
+
 #ifndef KLAYGE_DEBUG
 #define CXXOPTS_NO_RTTI
 #endif
@@ -56,6 +58,8 @@ uint32_t const KFX_VERSION = 0x0150;
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	std::vector<std::string> input_names;
 	std::string platform;
 	std::string dest_folder;
@@ -76,13 +80,11 @@ int main(int argc, char* argv[])
 	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
 		cout << options.help() << endl;
-		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("version") > 0)
 	{
 		cout << "KlayGE fxml compiler, Version 2.0.0" << endl;
-		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("dest-folder") > 0)
@@ -129,7 +131,6 @@ int main(int argc, char* argv[])
 	{
 		cout << "Need input fxml names." << endl;
 		cout << options.help() << endl;
-		Context::Destroy();
 		return 1;
 	}
 
@@ -256,8 +257,6 @@ int main(int argc, char* argv[])
 			cout << "Couldn't find " << fxml_name << "." << endl;
 		}
 	}
-
-	Context::Destroy();
 
 	return 0;
 }

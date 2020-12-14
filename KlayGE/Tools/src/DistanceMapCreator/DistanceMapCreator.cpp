@@ -18,6 +18,8 @@
 
 #include <boost/assert.hpp>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -234,6 +236,8 @@ public:
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	int width = 256, height = 256, depth = 16;
 
 	std::string src_name("height.dds");
@@ -360,5 +364,5 @@ int main(int argc, char* argv[])
 
 	cout << "Distance map is saved to " << distance_name << endl;
 
-	Context::Destroy();
+	return 0;
 }

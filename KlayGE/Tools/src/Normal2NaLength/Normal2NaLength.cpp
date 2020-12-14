@@ -11,6 +11,8 @@
 #include <vector>
 #include <cstring>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -322,6 +324,8 @@ namespace
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	if (argc < 3)
 	{
 		cout << "Usage: Normal2NaLength xxx.dds yyy.dds [BC4 | BC1 | R]" << endl;
@@ -332,7 +336,6 @@ int main(int argc, char* argv[])
 	if (in_file.empty())
 	{
 		cout << "Couldn't locate " << in_file << endl;
-		Context::Destroy();
 		return 1;
 	}
 
@@ -357,8 +360,6 @@ int main(int argc, char* argv[])
 	Normal2NaLength(in_file, argv[2], new_format);
 
 	cout << "Na Length map is saved to " << argv[2] << endl;
-
-	Context::Destroy();
 
 	return 0;
 }

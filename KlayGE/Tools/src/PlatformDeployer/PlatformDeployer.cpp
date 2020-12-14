@@ -44,6 +44,8 @@
 #include <vector>
 #include <regex>
 
+#include <nonstd/scope.hpp>
+
 #ifndef KLAYGE_DEBUG
 #define CXXOPTS_NO_RTTI
 #endif
@@ -281,6 +283,8 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	std::vector<std::string> res_names;
 	std::string res_type;
 	std::string platform;
@@ -303,13 +307,11 @@ int main(int argc, char* argv[])
 	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
 		cout << options.help() << endl;
-		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("version") > 0)
 	{
 		cout << "KlayGE PlatformDeployer, Version 2.0.0" << endl;
-		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("dest-folder") > 0)
@@ -356,7 +358,6 @@ int main(int argc, char* argv[])
 	{
 		cout << "Need input resources names." << endl;
 		cout << options.help() << endl;
-		Context::Destroy();
 		return 1;
 	}
 
@@ -392,7 +393,6 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				Context::Destroy();
 				return 1;
 			}
 		}
@@ -414,7 +414,6 @@ int main(int argc, char* argv[])
 	}
 	if (res_names.empty())
 	{
-		Context::Destroy();
 		return 0;
 	}
 
@@ -435,7 +434,6 @@ int main(int argc, char* argv[])
 		else
 		{
 			cout << "Need resource type name." << endl;
-			Context::Destroy();
 			return 1;
 		}
 	}
@@ -495,8 +493,6 @@ int main(int argc, char* argv[])
 
 	PlatformDefinition platform_def(platform + ".plat");
 	Deploy(res_names, res_type, platform_def.device_caps, platform, dest_folder);
-
-	Context::Destroy();
 
 	return 0;
 }

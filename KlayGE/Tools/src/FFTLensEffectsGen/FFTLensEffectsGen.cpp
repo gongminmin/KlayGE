@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -34,6 +36,8 @@ public:
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	if (argc < 2)
 	{
 		cout << "Usage: FFTLensEffectsGen xxx.dds" << endl;
@@ -152,6 +156,4 @@ int main(int argc, char* argv[])
 
 	SaveTexture(pattern_real_tex, "lens_effects_real.dds");
 	SaveTexture(pattern_imag_tex, "lens_effects_imag.dds");
-
-	Context::Destroy();
 }

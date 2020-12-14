@@ -46,6 +46,8 @@
 #include <vector>
 #include <regex>
 
+#include <nonstd/scope.hpp>
+
 #ifndef KLAYGE_DEBUG
 #define CXXOPTS_NO_RTTI
 #endif
@@ -305,6 +307,8 @@ void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t 
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	int num_tiles;
 	int tile_size;
 	std::vector<std::string> tex_names;
@@ -387,8 +391,6 @@ int main(int argc, char* argv[])
 	}
 
 	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
-
-	Context::Destroy();
 
 	return 0;
 }

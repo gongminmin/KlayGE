@@ -149,6 +149,7 @@ target_link_libraries(${LIB_NAME}
 		Boost::core
 		fmt
 		GSL
+		scope-lite
 
 	PRIVATE
 		rapidxml
