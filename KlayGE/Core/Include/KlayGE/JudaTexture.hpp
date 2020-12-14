@@ -85,7 +85,7 @@ namespace KlayGE
 	private:
 		void DecodeATile(std::vector<uint8_t>* data, uint32_t shuff, uint32_t mipmaps);
 		uint32_t DecodeAAttr(uint32_t shuff);
-		uint8_t* RetriveATile(uint32_t data_index);
+		uint8_t* RetrieveATile(uint32_t data_index);
 
 		uint32_t NumNonEmptySubNodes(QuadTreeNode const& node) const;
 		QuadTreeNode& GetNode(uint32_t shuff);

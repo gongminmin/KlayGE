@@ -68,6 +68,7 @@
 #ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 #include <charconv>
 #endif
+#include <variant>
 
 #include <boost/assert.hpp>
 
@@ -522,16 +523,12 @@ namespace
 		{
 			if (!in_cbuff_)
 			{
-				new (data_.val) T;
+				data_ = T{};
 			}
 		}
 
 		~RenderVariableConcrete() override
 		{
-			if (!in_cbuff_)
-			{
-				this->RetriveT().~T();
-			}
 		}
 
 		std::unique_ptr<RenderVariable> Clone() override
@@ -552,7 +549,7 @@ namespace
 		{
 			if (in_cbuff_)
 			{
-				auto& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				auto* cbuff = this->CBuffer();
 				T& val_in_cbuff = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 				if (val_in_cbuff != value)
@@ -563,7 +560,7 @@ namespace
 			}
 			else
 			{
-				this->RetriveT() = value;
+				this->RetrieveT() = value;
 			}
 			return *this;
 		}
@@ -572,13 +569,13 @@ namespace
 		{
 			if (in_cbuff_)
 			{
-				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				auto* cbuff = this->CBuffer();
 				val = *(cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 			}
 			else
 			{
-				val = this->RetriveT();
+				val = this->RetrieveT();
 			}
 		}
 
@@ -586,15 +583,14 @@ namespace
 		{
 			if (!in_cbuff_)
 			{
-				T val = this->RetriveT();
-				this->RetriveT().~T();
+				T val = this->RetrieveT();
 				in_cbuff_ = true;
 				CBufferDesc cbuff_desc;
 				cbuff_desc.effect = &effect;
 				cbuff_desc.cbuff_index = cbuff_index;
 				cbuff_desc.offset = offset;
 				cbuff_desc.stride = stride;
-				this->RetriveCBufferDesc() = std::move(cbuff_desc);
+				data_ = std::move(cbuff_desc);
 				this->operator=(val);
 			}
 		}
@@ -602,7 +598,7 @@ namespace
 		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index) override
 		{
 			BOOST_ASSERT(in_cbuff_);
-			auto& cbuff_desc = this->RetriveCBufferDesc();
+			auto& cbuff_desc = this->RetrieveCBufferDesc();
 			cbuff_desc.effect = &effect;
 			cbuff_desc.cbuff_index = cbuff_index;
 		}
@@ -613,63 +609,46 @@ namespace
 		}
 		RenderEffectConstantBuffer* CBuffer() const override
 		{
-			auto& cbuff_desc = this->RetriveCBufferDesc();
+			auto& cbuff_desc = this->RetrieveCBufferDesc();
 			return cbuff_desc.effect->CBufferByIndex(cbuff_desc.cbuff_index);
 		}
 		uint32_t CBufferIndex() const override
 		{
-			return this->RetriveCBufferDesc().cbuff_index;
+			return this->RetrieveCBufferDesc().cbuff_index;
 		}
 		uint32_t CBufferOffset() const override
 		{
-			return this->RetriveCBufferDesc().offset;
+			return this->RetrieveCBufferDesc().offset;
 		}
 		uint32_t Stride() const override
 		{
-			return this->RetriveCBufferDesc().stride;
+			return this->RetrieveCBufferDesc().stride;
 		}
 
 	protected:
-		T& RetriveT()
+		T& RetrieveT()
 		{
-			union Raw2T
-			{
-				uint8_t* raw;
-				T* t;
-			} r2t;
-			r2t.raw = data_.val;
-			return *r2t.t;
+			return std::get<T>(data_);
 		}
-		T const& RetriveT() const
+		T const& RetrieveT() const
 		{
-			union Raw2T
-			{
-				uint8_t const* raw;
-				T const* t;
-			} r2t;
-			r2t.raw = data_.val;
-			return *r2t.t;
+			return std::get<T>(data_);
 		}
 
-		CBufferDesc& RetriveCBufferDesc()
+		CBufferDesc& RetrieveCBufferDesc()
 		{
-			return data_.cbuff_desc;
+			return std::get<CBufferDesc>(data_);
 		}
-		CBufferDesc const& RetriveCBufferDesc() const
+		CBufferDesc const& RetrieveCBufferDesc() const
 		{
-			return data_.cbuff_desc;
+			return std::get<CBufferDesc>(data_);
 		}
 
 		virtual std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) = 0;
 
 	protected:
 		bool in_cbuff_;
-		union VarData
-		{
-			CBufferDesc cbuff_desc;
-			uint8_t val[sizeof(T)];
-		};
-		VarData data_ = {};
+		std::variant<CBufferDesc, T> data_;
 	};
 
 	class RenderVariableBool final : public RenderVariableConcrete<bool>
@@ -1490,7 +1469,7 @@ namespace
 			}
 			else
 			{
-				ret->RetriveT() = this->RetriveT();
+				ret->RetrieveT() = this->RetrieveT();
 			}
 			return ret;
 		}
@@ -1810,10 +1789,10 @@ namespace
 				concrete.data_ = this->data_;
 				concrete.size_ = this->size_;
 
-				auto const& src_cbuff_desc = this->RetriveCBufferDesc();
+				auto const& src_cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
 
-				auto const& dst_cbuff_desc = concrete.RetriveCBufferDesc();
+				auto const& dst_cbuff_desc = concrete.RetrieveCBufferDesc();
 				uint8_t* dst = concrete.CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
 
 				for (size_t i = 0; i < size_; ++i)
@@ -1827,7 +1806,7 @@ namespace
 			}
 			else
 			{
-				concrete.RetriveT() = this->RetriveT();
+				concrete.RetrieveT() = this->RetrieveT();
 			}
 			return ret;
 		}
@@ -1843,7 +1822,7 @@ namespace
 			{
 				uint8_t const* src = reinterpret_cast<uint8_t const*>(value.data());
 
-				auto& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
@@ -1858,7 +1837,7 @@ namespace
 			}
 			else
 			{
-				this->RetriveT() = std::vector<T>(value.begin(), value.end());
+				this->RetrieveT() = std::vector<T>(value.begin(), value.end());
 			}
 			return *this;
 		}
@@ -1867,7 +1846,7 @@ namespace
 		{
 			if (this->in_cbuff_)
 			{
-				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				val.resize(size_);
@@ -1880,7 +1859,7 @@ namespace
 			}
 			else
 			{
-				val = this->RetriveT();
+				val = this->RetrieveT();
 			}
 		}
 
@@ -1973,7 +1952,7 @@ namespace
 			{
 				uint8_t const* src = reinterpret_cast<uint8_t const*>(value.data());
 
-				auto& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t* dst = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
@@ -1988,7 +1967,7 @@ namespace
 			}
 			else
 			{
-				this->RetriveT() = std::vector<uint32_t>(value.begin(), value.end());
+				this->RetrieveT() = std::vector<uint32_t>(value.begin(), value.end());
 			}
 			return *this;
 		}
@@ -1997,7 +1976,7 @@ namespace
 		{
 			if (this->in_cbuff_)
 			{
-				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				val.resize(size_);
@@ -2010,7 +1989,7 @@ namespace
 			}
 			else
 			{
-				auto const& uint32_vec = this->RetriveT();
+				auto const& uint32_vec = this->RetrieveT();
 				val.resize(uint32_vec.size());
 				for (size_t i = 0; i < uint32_vec.size(); ++i)
 				{
@@ -3149,10 +3128,10 @@ namespace
 				ret->data_ = data_;
 				ret->size_ = size_;
 
-				auto const& src_cbuff_desc = this->RetriveCBufferDesc();
+				auto const& src_cbuff_desc = this->RetrieveCBufferDesc();
 				uint8_t const* src = this->CBuffer()->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
 
-				auto const& dst_cbuff_desc = ret->RetriveCBufferDesc();
+				auto const& dst_cbuff_desc = ret->RetrieveCBufferDesc();
 				uint8_t* dst = ret->CBuffer()->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
 
 				memcpy(dst, src, size_ * sizeof(float4x4));
@@ -3161,7 +3140,7 @@ namespace
 			}
 			else
 			{
-				ret->RetriveT() = this->RetriveT();
+				ret->RetrieveT() = this->RetrieveT();
 			}
 			return ret;
 		}
@@ -3256,7 +3235,7 @@ namespace
 			{
 				float4x4 const* src = value.data();
 
-				auto& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				float4x4* dst = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
@@ -3271,7 +3250,7 @@ namespace
 			}
 			else
 			{
-				this->RetriveT() = std::vector<float4x4>(value.begin(), value.end());
+				this->RetrieveT() = std::vector<float4x4>(value.begin(), value.end());
 			}
 			return *this;
 		}
@@ -3280,7 +3259,7 @@ namespace
 		{
 			if (in_cbuff_)
 			{
-				auto const& cbuff_desc = this->RetriveCBufferDesc();
+				auto const& cbuff_desc = this->RetrieveCBufferDesc();
 				float4x4 const* src = this->CBuffer()->template VariableInBuff<float4x4>(cbuff_desc.offset);
 
 				val.resize(size_);
@@ -3295,7 +3274,7 @@ namespace
 			}
 			else
 			{
-				val = this->RetriveT();
+				val = this->RetrieveT();
 			}
 		}
 

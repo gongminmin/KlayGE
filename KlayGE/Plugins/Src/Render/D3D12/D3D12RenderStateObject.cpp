@@ -56,7 +56,7 @@ namespace KlayGE
 		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphics_ps_desc = ps_desc_.graphics_ps_desc;
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphics_ps_desc = std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_);
 
 		graphics_ps_desc.RasterizerState.FillMode = D3D12Mapping::Mapping(rs_desc.polygon_mode);
 		graphics_ps_desc.RasterizerState.CullMode = D3D12Mapping::Mapping(rs_desc.cull_mode);
@@ -136,7 +136,7 @@ namespace KlayGE
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
 		{
-			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = ps_desc_.graphics_ps_desc;
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_);
 
 			d3d12_rl.UpdatePsoDesc(pso_desc, has_tessellation);
 			d3d12_so.UpdatePsoDesc(pso_desc);

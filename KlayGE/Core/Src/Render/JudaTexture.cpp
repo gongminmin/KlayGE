@@ -457,7 +457,7 @@ namespace KlayGE
 		QuadTreeNode* node = root_.get();
 		if (0 == target_level)
 		{
-			std::memcpy(&data[0][0], this->RetriveATile(root_->data_index), full_tile_bytes);
+			std::memcpy(&data[0][0], this->RetrieveATile(root_->data_index), full_tile_bytes);
 		}
 		else
 		{
@@ -510,7 +510,7 @@ namespace KlayGE
 						uint8_t const * src;
 						if (1 == ll_b)
 						{
-							src = this->RetriveATile(root_->data_index);
+							src = this->RetrieveATile(root_->data_index);
 						}
 						else
 						{
@@ -534,7 +534,8 @@ namespace KlayGE
 						{
 							uint32_t start_x = (start_sub_tile_x >> shift) * used_w * 2;
 							uint32_t start_y = (start_sub_tile_y >> shift) * used_h * 2;
-							uint8_t const * start_src = this->RetriveATile(node->data_index) + (start_y * tile_size_ + start_x) * texel_size_;
+							uint8_t const* start_src =
+								this->RetrieveATile(node->data_index) + (start_y * tile_size_ + start_x) * texel_size_;
 							uint8_t* dst = &temp[0];
 							for (size_t y = 0; y < used_h * 2; ++ y)
 							{
@@ -611,7 +612,7 @@ namespace KlayGE
 		return ret_attr;
 	}
 
-	uint8_t* JudaTexture::RetriveATile(uint32_t data_index)
+	uint8_t* JudaTexture::RetrieveATile(uint32_t data_index)
 	{
 		if (data_blocks_.empty())
 		{

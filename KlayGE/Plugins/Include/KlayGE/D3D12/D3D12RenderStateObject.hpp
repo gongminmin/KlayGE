@@ -36,6 +36,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 
+#include <variant>
+
 namespace KlayGE
 {
 	class D3D12RenderStateObject final : public RenderStateObject
@@ -52,24 +54,19 @@ namespace KlayGE
 
 		D3D12_RASTERIZER_DESC const & D3DRasterizerDesc() const
 		{
-			return ps_desc_.graphics_ps_desc.RasterizerState;
+			return std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_).RasterizerState;
 		}
 		D3D12_DEPTH_STENCIL_DESC const & D3DDepthStencilDesc() const
 		{
-			return ps_desc_.graphics_ps_desc.DepthStencilState;
+			return std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_).DepthStencilState;
 		}
 		D3D12_BLEND_DESC const & D3DBlendDesc() const
 		{
-			return ps_desc_.graphics_ps_desc.BlendState;
+			return std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_).BlendState;
 		}
 
 	private:
-		union PipelineStateDesc
-		{
-			D3D12_GRAPHICS_PIPELINE_STATE_DESC graphics_ps_desc;
-			D3D12_COMPUTE_PIPELINE_STATE_DESC compute_ps_desc;
-		};
-		PipelineStateDesc ps_desc_;
+		std::variant<D3D12_GRAPHICS_PIPELINE_STATE_DESC, D3D12_COMPUTE_PIPELINE_STATE_DESC> ps_desc_;
 
 		mutable std::unordered_map<size_t, ID3D12PipelineStatePtr> psos_;
 	};
