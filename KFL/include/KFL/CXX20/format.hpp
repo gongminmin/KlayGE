@@ -1,5 +1,5 @@
 /**
- * @file format.cpp
+ * @file format.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION

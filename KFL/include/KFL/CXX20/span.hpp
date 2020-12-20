@@ -1,5 +1,5 @@
 /**
- * @file span.cpp
+ * @file span.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION

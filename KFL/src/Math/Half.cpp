@@ -29,6 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/CXX20/bit.hpp>
 
 #include <KFL/Half.hpp>
 
@@ -36,13 +37,7 @@ namespace KlayGE
 {
 	half::half(float f) noexcept
 	{
-		union FNI
-		{
-			float f;
-			int32_t i;
-		} fni;
-		fni.f = f;
-		int32_t i = fni.i;
+		int32_t i = std::bit_cast<int32_t>(f);
 
 		int32_t s = (i >> 16) & 0x00008000;
 		int32_t e = ((i >> 23) & 0x000000FF) - (127 - 15);
@@ -132,13 +127,7 @@ namespace KlayGE
 
 		ret = s | (e << 23) | m;
 
-		union INF
-		{
-			int32_t i;
-			float f;
-		} inf;
-		inf.i = ret;
-		return inf.f;
+		return std::bit_cast<float>(ret);
 	}
 
 	half half::pos_inf() noexcept

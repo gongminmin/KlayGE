@@ -29,6 +29,7 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX20/bit.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -41,9 +42,6 @@
 #include <random>
 #include <vector>
 #include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-	#include <intrin.h>		// For _BitScanForward
-#endif
 
 #include <KlayGE/TexCompressionBC.hpp>
 #include "../Base/TableGen/Tables.hpp"
@@ -332,46 +330,6 @@ namespace
 		}
 	}
 
-	bool Bsf32(uint32_t& index, uint32_t v)
-	{
-#ifdef KLAYGE_COMPILER_MSVC
-		return _BitScanForward(reinterpret_cast<unsigned long*>(&index), v) != 0;
-#else
-		if (0 == v)
-		{
-			index = 0;
-			return 0;
-		}
-		else
-		{
-			v &= ~v + 1;
-			union FNU
-			{
-				float f;
-				uint32_t u;
-			} fnu;
-			fnu.f = static_cast<float>(v);
-			index = (fnu.u >> 23) - 127;
-			return 1;
-		}
-#endif
-	}
-
-	uint32_t CountBitsInMask(uint8_t n)
-	{
-		if (!n)
-		{
-			return 0;
-		}
-
-		uint32_t c;
-		for (c = 0; n; ++ c)
-		{
-			n &= n - 1;
-		}
-		return c;
-	}
-
 	uint8_t QuantizeChannel(uint8_t val, uint8_t mask, int bit = -1)
 	{
 		// If the mask is all the bits, then we can just return the value.
@@ -387,7 +345,7 @@ namespace
 			return 0xFF;
 		}
 
-		uint32_t prec = CountBitsInMask(mask);
+		uint32_t prec = std::popcount(mask);
 		const uint32_t step = 1 << (8 - prec);
 
 		BOOST_ASSERT(step - 1 == static_cast<uint8_t>(~mask));
@@ -438,8 +396,7 @@ namespace
 	{
 		BOOST_ASSERT((4 == buckets) || (8 == buckets) || (16 == buckets));
 
-		uint32_t index_prec;
-		Bsf32(index_prec, buckets);
+		const uint32_t index_prec = std::countr_zero(buckets);
 		BOOST_ASSERT((index_prec >= 2) && (index_prec <= 4));
 
 		std::pair<uint32_t, uint32_t> const * interp_vals = BC67_INTERPOLATION_VALUES[index_prec - 1];

@@ -34,7 +34,7 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
-#include <KFL/CXX20/endian.hpp>
+#include <KFL/CXX20/bit.hpp>
 
 #include <string>
 #include <string_view>

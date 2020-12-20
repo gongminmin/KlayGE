@@ -29,29 +29,6 @@
 
 namespace KlayGE
 {
-	inline uint32_t
-	float_to_uint32(float v)
-	{
-		union FNU
-		{
-			float f;
-			uint32_t u;
-		} fnu;
-		fnu.f = v;
-		return fnu.u;
-	}
-	inline float
-	uint32_to_float(uint32_t v)
-	{
-		union FNU
-		{
-			uint32_t u;
-			float f;
-		} unf;
-		unf.u = v;
-		return unf.f;
-	}
-
 	enum PolygonMode
 	{
 		PM_Point,

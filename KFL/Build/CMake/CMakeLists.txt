@@ -11,7 +11,7 @@ SET(BASE_CXX17_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/filesystem.hpp
 )
 SET(BASE_CXX20_HEADER_FILES
-	${KFL_PROJECT_DIR}/include/KFL/CXX20/endian.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CXX20/bit.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX20/format.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX20/span.hpp
 )
@@ -150,6 +150,7 @@ target_link_libraries(${LIB_NAME}
 		fmt
 		GSL
 		scope-lite
+		bit-lite
 
 	PRIVATE
 		rapidxml

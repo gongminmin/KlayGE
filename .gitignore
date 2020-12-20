@@ -79,6 +79,7 @@ KlayGE/Tools/src/TexViewer/TexViewer/Images
 External/7z
 External/android_native_app_glue
 External/assimp
+External/bit-lite
 External/boost
 External/cxxopts
 External/d3dcompiler

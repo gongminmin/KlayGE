@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX20/bit.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
@@ -565,11 +566,7 @@ namespace KlayGE
 				// E5B5 E5G6 E5R6
 				uint32_t const s = *reinterpret_cast<uint32_t const *>(p);
 
-				union FNI
-				{
-					float f;
-					int32_t i;
-				} result[4];
+				int32_t result[4];
 				uint32_t mantissa;
 				uint32_t exponent;
 
@@ -581,7 +578,7 @@ namespace KlayGE
 
 					if (0x1F == exponent) // INF or NAN
 					{
-						result[0].i = 0x7F800000 | (mantissa << 17);
+						result[0] = 0x7F800000 | (mantissa << 17);
 					}
 					else
 					{
@@ -610,7 +607,7 @@ namespace KlayGE
 							}
 						}
 
-						result[j].i = ((exponent + 112) << 23) | (mantissa << 17);
+						result[j] = ((exponent + 112) << 23) | (mantissa << 17);
 					}
 				}
 
@@ -620,7 +617,7 @@ namespace KlayGE
 
 				if (0x1F == exponent) // INF or NAN
 				{
-					result[2].i = 0x7F800000 | (mantissa << 17);
+					result[2] = 0x7F800000 | (mantissa << 17);
 				}
 				else
 				{
@@ -644,10 +641,10 @@ namespace KlayGE
 						}
 					}
 
-					result[2].i = ((exponent + 112) << 23) | (mantissa << 18);
+					result[2] = ((exponent + 112) << 23) | (mantissa << 18);
 				}
 
-				*output = Color(result[0].f, result[1].f, result[2].f, 1);
+				*output = Color(std::bit_cast<float>(result[0]), std::bit_cast<float>(result[1]), std::bit_cast<float>(result[2]), 1);
 			}
 			break;
 
@@ -1340,20 +1337,16 @@ namespace KlayGE
 				// E5B5 E5G6 E5R6
 				uint32_t result[3];
 
-				union FNI
-				{
-					float f;
-					int32_t i;
-				} ivalue[4];
-				ivalue[0].f = input->r();
-				ivalue[1].f = input->g();
-				ivalue[2].f = input->b();
+				int32_t ivalue[4];
+				ivalue[0] = std::bit_cast<int32_t>(input->r());
+				ivalue[1] = std::bit_cast<int32_t>(input->g());
+				ivalue[2] = std::bit_cast<int32_t>(input->b());
 
 				// X & Y Channels (5-bit exponent, 6-bit mantissa)
 				for (int j = 0; j < 2; ++ j)
 				{
-					uint32_t sign = ivalue[j].i & 0x80000000;
-					uint32_t ip = ivalue[j].i & 0x7FFFFFFF;
+					uint32_t sign = ivalue[j] & 0x80000000;
+					uint32_t ip = ivalue[j] & 0x7FFFFFFF;
 
 					if (0x7F800000 == (ip & 0x7F800000))
 					{
@@ -1399,8 +1392,8 @@ namespace KlayGE
 				}
 
 				// Z Channel (5-bit exponent, 5-bit mantissa)
-				uint32_t sign = ivalue[2].i & 0x80000000;
-				uint32_t ip = ivalue[2].i & 0x7FFFFFFF;
+				uint32_t sign = ivalue[2] & 0x80000000;
+				uint32_t ip = ivalue[2] & 0x7FFFFFFF;
 
 				if (0x7F800000 == (ip & 0x7F800000))
 				{

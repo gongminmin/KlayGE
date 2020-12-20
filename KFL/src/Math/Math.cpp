@@ -29,6 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/CXX20/bit.hpp>
 #include <KFL/Detail/MathHelper.hpp>
 
 #include <KFL/Math.hpp>
@@ -119,14 +120,7 @@ namespace KlayGE
 
 		float abs(float x) noexcept
 		{
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = x;
-			fni.i &= 0x7FFFFFFF;
-			return fni.f;
+			return std::abs(x);
 		}
 		
 		float sqrt(float x) noexcept
@@ -140,17 +134,13 @@ namespace KlayGE
 			float const threehalfs = 1.5f;
 
 			float const x2 = number * 0.5f;
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = number;											// evil floating point bit level hacking
-			fni.i = 0x5f375a86 - (fni.i >> 1);						// what the fuck?
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));	// 1st iteration
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
+			int32_t i = std::bit_cast<int32_t>(number);	// evil floating point bit level hacking
+			i = 0x5f375a86 - (i >> 1);					// what the fuck?
+			float f = std::bit_cast<float>(i);
+			f = f * (threehalfs - (x2 * f * f));		// 1st iteration
+			f = f * (threehalfs - (x2 * f * f));		// 2nd iteration, this can be removed
 
-			return fni.f;
+			return f;
 		}
 
 		float pow(float x, float y) noexcept
@@ -231,13 +221,7 @@ namespace KlayGE
 
 		float SignBit(float x) noexcept
 		{
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = x;
-			return static_cast<float>(SignBit(fni.i));
+			return static_cast<float>(SignBit(std::bit_cast<int32_t>(x)));
 		}
 
 
