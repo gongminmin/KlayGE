@@ -101,11 +101,11 @@ class CompilerInfo:
 class BuildInfo:
 	@classmethod
 	def FromArgv(BuildInfo, argv, base = 0):
-		project = ""
-		compiler = ""
-		archs = ""
-		cfg = ""
-		target = ""
+		project = None
+		compiler = None
+		archs = None
+		cfg = None
+		target = None
 
 		argc = len(argv)
 		if argc > base + 1:
@@ -143,35 +143,35 @@ class BuildInfo:
 			cfg_build.cmake_path
 		except:
 			cfg_build.cmake_path = "auto"
-		if len(project) > 0:
+		if project is not None:
 			cfg_build.project = project
 		else:
 			try:
 				cfg_build.project
 			except:
 				cfg_build.project = "auto"
-		if (len(compiler) > 0) and (compiler.lower() != "clean"):
+		if (compiler is not None) and (compiler.lower() != "clean"):
 			cfg_build.compiler = compiler
 		else:
 			try:
 				cfg_build.compiler
 			except:
 				cfg_build.compiler = "auto"
-		if len(archs) > 0:
+		if archs is not None:
 			cfg_build.arch = archs
 		else:
 			try:
 				cfg_build.arch
 			except:
 				cfg_build.arch = ("x64", )
-		if len(cfg) > 0:
+		if cfg is not None:
 			cfg_build.config = cfg
 		else:
 			try:
 				cfg_build.config
 			except:
 				cfg_build.config = ("Debug", "RelWithDebInfo")
-		if len(target) > 0:
+		if target is not None:
 			cfg_build.target = target
 		else:
 			try:
@@ -300,23 +300,23 @@ class BuildInfo:
 		if len(cfg_build.project) > 0:
 			project_type = cfg_build.project
 		else:
-			project_type = ""
-		if ("" == compiler) or self.is_clean:
-			compiler = ""
+			project_type = None
+		if (compiler is None) or self.is_clean:
+			compiler = None
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if self.is_windows:
 					program_files_folder = self.FindProgramFilesFolder()
 
-					if len(self.FindVS2019Folder(program_files_folder)) > 0:
+					if self.FindVS2019Folder(program_files_folder) is not None:
 						project_type = "vs2019"
 						compiler = "vc142"
-					elif len(self.FindVS2017Folder(program_files_folder)) > 0:
+					elif self.FindVS2017Folder(program_files_folder) is not None:
 						project_type = "vs2017"
 						compiler = "vc141"
-					elif len(self.FindClang()) != 0:
+					elif self.FindClang(False) is not None:
 						project_type = "make"
 						compiler = "clang"
-					elif len(self.FindGCC()) != 0:
+					elif self.FindGCC(False) is not None:
 						project_type = "make"
 						compiler = "mingw"
 				elif self.is_linux:
@@ -336,7 +336,7 @@ class BuildInfo:
 				if cfg_build.compiler != "auto":
 					compiler = cfg_build.compiler
 
-		if (project_type != "") and (compiler == ""):
+		if (project_type is not None) and (compiler is None):
 			if project_type == "vs2019":
 				compiler = "vc142"
 			elif project_type == "vs2017":
@@ -350,7 +350,7 @@ class BuildInfo:
 			if "vc142" == compiler:
 				if project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
-					if len(try_folder) > 0:
+					if try_folder is not None:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
 						vcvarsall_options = ""
@@ -361,7 +361,7 @@ class BuildInfo:
 			elif "vc141" == compiler:
 				if project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
-					if len(try_folder) > 0:
+					if try_folder is not None:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
 						vcvarsall_options = "-vcvars_ver=14.1"
@@ -369,7 +369,7 @@ class BuildInfo:
 						LogError("Could NOT find vc141 compiler toolset for VS2019.\n")
 				else:
 					try_folder = self.FindVS2017Folder(program_files_folder)
-					if len(try_folder) > 0:
+					if try_folder is not None:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
 					else:
@@ -378,7 +378,7 @@ class BuildInfo:
 			elif "clangcl" == compiler:
 				if project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
-					if len(try_folder) > 0:
+					if try_folder is not None:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
 						vcvarsall_options = ""
@@ -387,15 +387,15 @@ class BuildInfo:
 				else:
 					LogError("Could NOT find clang-cl compiler.\n")
 			elif "clang" == compiler:
-				clang_loc = self.FindClang()
+				clang_loc = self.FindClang(True)
 				compiler_root = clang_loc[0:clang_loc.rfind("\\clang++") + 1]
 			elif "mingw" == compiler:
-				gcc_loc = self.FindGCC()
+				gcc_loc = self.FindGCC(True)
 				compiler_root = gcc_loc[0:gcc_loc.rfind("\\g++") + 1]
 		else:
 			compiler_root = ""
 
-		if "" == project_type:
+		if project_type is None:
 			if "vc142" == compiler:
 				project_type = "vs2019"
 			elif "vc141" == compiler:
@@ -405,14 +405,14 @@ class BuildInfo:
 			else:
 				project_type = "make"
 
-		if "" == archs:
+		if archs is None:
 			archs = cfg_build.arch
-			if "" == archs:
+			if archs is None:
 				archs = ("x64", )
 
-		if "" == cfg:
+		if cfg is None:
 			cfg = cfg_build.config
-			if "" == cfg:
+			if cfg is None:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		multi_config = False
@@ -512,16 +512,13 @@ class BuildInfo:
 
 		self.DisplayInfo();
 
-	def MSBuildAddBuildCommand(self, batch_cmd, sln_name, proj_name, config, arch = ""):
+	def MSBuildAddBuildCommand(self, batch_cmd, sln_name, proj_name, config, arch):
 		batch_cmd.AddCommand('@SET VisualStudioVersion=%d.0' % self.vs_version)
 		if len(proj_name) != 0:
 			file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 		else:
 			file_name = "%s.sln" % sln_name
-		config_str = "Configuration=%s" % config
-		if len(arch) != 0:
-			config_str = "%s,Platform=%s" % (config_str, arch)
-		batch_cmd.AddCommand('@MSBuild %s /nologo /m:%d /v:m /p:%s' % (file_name, self.jobs, config_str))
+		batch_cmd.AddCommand('@MSBuild %s /nologo /m:%d /v:m /p:Configuration=%s,Platform=%s' % (file_name, self.jobs, config, arch))
 		batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 
 	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
@@ -539,7 +536,7 @@ class BuildInfo:
 			batch_cmd.AddCommand("%s %s" % (make_name, make_options))
 			batch_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
 
-	def FindGCC(self):
+	def FindGCC(self, required):
 		if self.host_platform != "win":
 			env = os.environ
 			if "CXX" in env:
@@ -548,16 +545,20 @@ class BuildInfo:
 					return gcc_loc.split(self.sep)[0]
 
 		gcc_loc = shutil.which("g++")
-		if len(gcc_loc) == 0:
-			LogError("Could NOT find g++. Please install g++, set its path into CXX, or put its path into %%PATH%%.")
-		return gcc_loc.split(self.sep)[0]
+		if gcc_loc is None:
+			if required:
+				LogError("Could NOT find g++. Please install g++, set its path into CXX, or put its path into %%PATH%%.")
+			else:
+				return None
+		else:			
+			return gcc_loc.split(self.sep)[0]
 
 	def RetrieveGCCVersion(self):
-		gcc_ver = subprocess.check_output([self.FindGCC(), "-dumpfullversion"]).decode()
+		gcc_ver = subprocess.check_output([self.FindGCC(True), "-dumpfullversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
-	def FindClang(self):
+	def FindClang(self, required):
 		if self.host_platform != "win":
 			env = os.environ
 			if "CXX" in env:
@@ -566,11 +567,15 @@ class BuildInfo:
 					return clang_loc.split(self.sep)[0]
 
 		clang_loc = shutil.which("clang++")
-		if len(clang_loc) == 0:
-			LogError("Could NOT find g++. Please install clang++, set its path into CXX, or put its path into %%PATH%%.")
-		return clang_loc.split(self.sep)[0]
+		if clang_loc is None:
+			if required:
+				LogError("Could NOT find clang++. Please install clang++, set its path into CXX, or put its path into %%PATH%%.")
+			else:
+				return None
+		else:
+			return clang_loc.split(self.sep)[0]
 
-	def RetrieveClangVersion(self, path = ""):
+	def RetrieveClangVersion(self, path = None):
 		if self.is_android:
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -578,10 +583,10 @@ class BuildInfo:
 			if not os.path.isdir(prebuilt_clang_path):
 				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
 			clang_path = prebuilt_clang_path + "\\clang"
-		elif (len(path) > 0):
+		elif path is not None:
 			clang_path = path + "clang"
 		else:
-			clang_path = self.FindClang()
+			clang_path = self.FindClang(True)
 		clang_ver = subprocess.check_output([clang_path, "--version"]).decode()
 		clang_ver_tokens = clang_ver.split()
 		for i in range(0, len(clang_ver_tokens)):
@@ -633,11 +638,11 @@ class BuildInfo:
 					try_vcvarsall = "VCVARSALL.BAT"
 					if os.path.exists(try_folder + try_vcvarsall):
 						return try_folder
-		return ""
+		return None
 
 	def FindCMake(self):
 		cmake_loc = shutil.which("cmake")
-		if len(cmake_loc) == 0:
+		if cmake_loc is None:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split(self.sep)[0]
 
