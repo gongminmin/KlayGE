@@ -32,7 +32,7 @@ class CfgBuildDefault:
 
 		# Target CPU architecture.
 		#   On Windows desktop, could be "arm64", "x64".
-		#   On Windows store, could be "arm64", "arm", "x64".
+		#   On Windows store, could be "arm64", "x64".
 		#   On Android, cound be "arm64-v8a", "x86", "x86_64".
 		#   On Linux, could be "x64".
 		#   On macOS, could be "x64".
@@ -769,9 +769,6 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 		if "x64" == compiler_info.arch:
 			vc_option = "amd64"
 			vc_arch = "x64"
-		elif "arm" == compiler_info.arch:
-			vc_option = "amd64_arm"
-			vc_arch = "ARM"
 		elif "arm64" == compiler_info.arch:
 			vc_option = "amd64_arm64"
 			vc_arch = "ARM64"

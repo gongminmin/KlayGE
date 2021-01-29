@@ -39,11 +39,8 @@
 	#elif defined(_M_ARM64)
 		#define KLAYGE_CPU_ARM64
 		#define KLAYGE_COMPILER_TARGET arm64
-	#elif defined(_M_ARM)
-		#define KLAYGE_CPU_ARM
-		#define KLAYGE_COMPILER_TARGET arm
 	#else
-		#error "Unknown CPU type. In msvc, x64, arm, and arm64 are supported."
+		#error "Unknown CPU type. In msvc, x64 and arm64 are supported."
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 	#if defined(__x86_64__)
@@ -126,9 +123,7 @@
 		#endif
 	#endif
 #elif defined KLAYGE_CPU_ARM
-	#if defined(KLAYGE_COMPILER_MSVC)
-		#define KLAYGE_NEON_SUPPORT
-	#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+	#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 		#ifdef __ARM_NEON__
 			#define KLAYGE_NEON_SUPPORT
 		#endif

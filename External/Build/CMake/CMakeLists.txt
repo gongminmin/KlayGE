@@ -134,7 +134,7 @@ if(KLAYGE_IS_DEV_PLATFORM)
 	add_subdirectory(FreeImage)
 	add_subdirectory(cxxopts)
 
-	if((NOT (KLAYGE_ARCH_NAME STREQUAL "arm")) AND (NOT (KLAYGE_ARCH_NAME STREQUAL "arm64")))
+	if(NOT (KLAYGE_ARCH_NAME STREQUAL "arm64"))
 		add_subdirectory(d3dcompiler)
 	endif()
 endif()
