@@ -109,12 +109,6 @@ target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DKFL_SOURCE
 )
-if(MSVC AND (MSVC_VERSION GREATER_EQUAL 1925))
-	target_compile_definitions(${LIB_NAME}
-		PUBLIC
-			-D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
-	)
-endif()
 
 target_include_directories(${LIB_NAME}
 	PUBLIC

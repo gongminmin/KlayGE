@@ -50,17 +50,15 @@ namespace KlayGE
 		typedef my_void_t type;
 	};
 
-	typedef std::thread::id thread_id;
-
 	// Threadof operator simulation for threadof(0) expression
-	inline thread_id threadof(int)
+	inline std::thread::id threadof(int)
 	{
 		return std::this_thread::get_id();
 	}
 
 	// Threadof operator simulation for threadof(joiner) expression
 	template <typename Joiner>
-	inline thread_id threadof(Joiner const & j)
+	inline std::thread::id threadof(Joiner const & j)
 	{
 		return j.get_thread_id();
 	}
@@ -148,7 +146,7 @@ namespace KlayGE
 			this->do_detach();
 		}
 
-		thread_id get_thread_id() const
+		std::thread::id get_thread_id() const
 		{
 			return id_;
 		}
@@ -163,7 +161,7 @@ namespace KlayGE
 		std::shared_ptr<result_opt>		result_;
 		volatile bool					joined_;
 		std::mutex						joiner_mutex_;
-		thread_id						id_;
+		std::thread::id					id_;
 	};
 
 
@@ -176,7 +174,7 @@ namespace KlayGE
 	public:
 		typedef typename joiner_base_t::const_result_type_ref const_result_type_ref;
 
-		thread_id get_thread_id() const
+		std::thread::id get_thread_id() const
 		{
 			return handle_ ? handle_->get_thread_id() : threadof(0);
 		}
@@ -259,7 +257,7 @@ namespace KlayGE
 		class threaded final
 		{
 			typedef threaded<Threadable, JoinerImpl>				threaded_t;
-			typedef typename std::result_of<Threadable()>::type		result_t;
+			typedef typename std::invoke_result<Threadable>::type	result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
 			typedef std::optional<my_void_t>						void_optional_t;
@@ -342,9 +340,9 @@ namespace KlayGE
 	public:
 		// Launches threadable function in a new thread. Returns a joiner that can be used to wait thread completion.
 		template <typename Threadable>
-		joiner<typename std::result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename std::invoke_result<Threadable>::type> operator()(Threadable const & function)
 		{
-			typedef typename std::result_of<Threadable()>::type		result_t;
+			typedef typename std::invoke_result<Threadable>::type	result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_simple_thread_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;
@@ -362,7 +360,7 @@ namespace KlayGE
 	// Threader function that creates a new thread to execute the Threadable. Just creates a temporary object of class threader
 	//  and uses operator()(Threadable)
 	template <typename Threadable>
-	inline joiner<typename std::result_of<Threadable()>::type> create_thread(Threadable const & function)
+	inline joiner<typename std::invoke_result<Threadable>::type> create_thread(Threadable const & function)
 	{
 		return threader()(function);
 	}
@@ -426,14 +424,14 @@ namespace KlayGE
 			// Wakes up a pooled thread saying it should die
 			void kill();
 
-			thread_id get_thread_id() const
+			std::thread::id get_thread_id() const
 			{
 				return id_;
 			}
 
-			void set_thread_id(thread_id id)
+			void set_thread_id(std::thread::id id)
 			{
-				id_ = id;
+				id_ = std::move(id);
 			}
 
 			std::shared_ptr<thread_pool_join_info> thpool_join_info_;
@@ -442,7 +440,7 @@ namespace KlayGE
 			std::mutex				wake_up_mut_;
 			std::condition_variable	wake_up_cond_;
 			std::weak_ptr<thread_pool_common_data_t>	data_;
-			thread_id				id_;
+			std::thread::id			id_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
@@ -575,9 +573,9 @@ namespace KlayGE
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
-		joiner<typename std::result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename std::invoke_result<Threadable>::type> operator()(Threadable const & function)
 		{
-			typedef typename std::result_of<Threadable()>::type		result_t;
+			typedef typename std::invoke_result<Threadable>::type	result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_thread_pool_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;
