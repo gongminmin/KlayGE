@@ -1,9 +1,9 @@
 SET(ASSIMP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/assimp")
 SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "1e2c3c9c016d7a557a364161ac3cd8fbee16c72d" "master" "v5.0.0" need_patch)
+UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "b2af2b21375e1f2b2ee3273c776bdfd3e8fb6b94" "master" "v5.0.0" need_patch)
 if(need_patch)
-	foreach(patch "0001-Provide-option-for-rapidjson-no-member-iterator-defi")
+	foreach(patch "0001-Export-zlib-if-it-s-built-outside")
 		ApplyPatch("assimp" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
 	endforeach()
 endif()
@@ -55,10 +55,6 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
 			-Wno-tautological-bitwise-compare
 	)
-	target_compile_options(IrrXML
-		PRIVATE
-			-Wno-pragma-pack
-	)
 endif()
 
 SET_TARGET_PROPERTIES(assimp PROPERTIES
@@ -84,7 +80,7 @@ SET_TARGET_PROPERTIES(assimp PROPERTIES
 add_dependencies(assimp ${KLAYGE_ZLIB_NAME})
 
 foreach(target
-	"assimp" "IrrXML" "uninstall")
+	"assimp")
 	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
 endforeach()
 if(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs)
