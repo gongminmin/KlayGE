@@ -319,10 +319,10 @@ namespace
 	};
 
 	// Returns pointer to sorted array.
-	template<typename T, typename Q>
+	template <typename T, typename Q>
 	T* IndirectRadixSort(uint32_t num_indices, T* indices0, T* indices1, Q const * keys, uint32_t key_ofs, uint32_t key_size, bool init_indices)
 	{
-		BOOST_ASSERT((key_ofs >= 0) && (key_ofs < sizeof(T)));
+		BOOST_ASSERT(key_ofs < sizeof(T));
 		BOOST_ASSERT((key_size >= 1) && (key_size <= 4));
 
 		if (init_indices)
