@@ -13,11 +13,6 @@ FOREACH(flag_var
 	STRING(REPLACE "${NO_RTTI_FLAG}" "${RTTI_FLAG}" ${flag_var} "${${flag_var}}")
 ENDFOREACH()
 
-IF(MINGW)
-	# To fix a problem that Importer/StepFile/StepFileGen1.cpp is too big
-	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1")
-ENDIF()
-
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(ASSIMP_OPT_BUILD_PACKAGES OFF CACHE BOOL "" FORCE)
@@ -36,30 +31,6 @@ set(ASSIMP_NO_EXPORT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR ON CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
-
-if(KLAYGE_COMPILER_CLANGCL)
-	target_compile_definitions(assimp
-		PRIVATE
-			-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
-	)
-
-	target_compile_options(assimp
-		PRIVATE
-			-Wno-pragma-pack
-			-Wno-unused-parameter
-			-Wno-sometimes-uninitialized
-			-Wno-invalid-offsetof
-			-Wno-sign-compare
-			-Wno-unknown-warning-option
-			-Wno-unused-variable
-			-Wno-unused-value
-			-Wno-unused-private-field
-			-Wno-unused-function
-			-Wno-unused-command-line-argument # C compiler doesn't know /std:c++17
-			-Wno-tautological-bitwise-compare
-			-Wno-ignored-qualifiers
-	)
-endif()
 
 SET_TARGET_PROPERTIES(assimp PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${ASSIMP_OUTPUT_DIR}
