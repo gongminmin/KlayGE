@@ -1,7 +1,7 @@
-From 073ca9d5468585d0f9f239d1e2978e216d5e9bd2 Mon Sep 17 00:00:00 2001
+From b5b2acde5c3ca35ace052481cfb2be86df549422 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 28 Jan 2021 23:20:18 -0800
-Subject: [PATCH] Export zlib if it's built outside
+Subject: [PATCH 1/2] Export zlib if it's built outside
 
 ---
  CMakeLists.txt | 6 ++++++

@@ -1,0 +1,38 @@
+From 2a2d4a79ddaaac4c9853f146735149eb38a11638 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Fri, 29 Jan 2021 23:54:22 -0800
+Subject: [PATCH 2/2] Fix compiling issues in clang-cl
+
+---
+ include/assimp/Exceptional.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/include/assimp/Exceptional.h b/include/assimp/Exceptional.h
+index 6c18438..ddde8c1 100644
+--- a/include/assimp/Exceptional.h
++++ b/include/assimp/Exceptional.h
+@@ -75,6 +75,10 @@ public:
+     template<typename... T>
+     explicit DeadlyImportError(T&&... args) :
+             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
++
++#if defined(_MSC_VER) && defined(__clang__)
++    DeadlyImportError(DeadlyImportError& other) = delete;
++#endif
+ };
+ 
+ class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
+@@ -83,6 +87,10 @@ public:
+     template<typename... T>
+     explicit DeadlyExportError(T&&... args) :
+             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
++
++#if defined(_MSC_VER) && defined(__clang__)
++    DeadlyExportError(DeadlyExportError& other) = delete;
++#endif
+ };
+ 
+ #ifdef _MSC_VER
+-- 
+2.17.1.windows.2
+
