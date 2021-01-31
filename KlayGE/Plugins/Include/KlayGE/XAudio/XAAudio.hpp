@@ -39,27 +39,106 @@
 #include <vector>
 #include <windows.h>
 #include <KlayGE/SALWrapper.hpp>
-#if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
 #include <xaudio2.h>
-#include <x3daudio.h>
+
+#ifdef KLAYGE_COMPILER_GCC
+#define X3DAUDIO_SPEED_OF_SOUND 343.5f
+#define X3DAUDIO_CALCULATE_MATRIX 0x00000001
+#define X3DAUDIO_CALCULATE_DOPPLER 0x00000020
+
+typedef uint8_t X3DAUDIO_HANDLE[20];
+
+struct X3DAUDIO_DSP_SETTINGS
+{
+	float* pMatrixCoefficients;
+	float* pDelayTimes;
+	uint32_t SrcChannelCount;
+	uint32_t DstChannelCount;
+
+	float LPFDirectCoefficient;
+	float LPFReverbCoefficient;
+	float ReverbLevel;
+	float DopplerFactor;
+	float EmitterToListenerAngle;
+
+	float EmitterToListenerDistance;
+	float EmitterVelocityComponent;
+	float ListenerVelocityComponent;
+};
+
+struct X3DAUDIO_VECTOR
+{
+	float x;
+	float y;
+	float z;
+};
+
+struct X3DAUDIO_CONE
+{
+	float InnerAngle;
+	float OuterAngle;
+
+	float InnerVolume;
+	float OuterVolume;
+	float InnerLPF;
+	float OuterLPF;
+	float InnerReverb;
+	float OuterReverb;
+};
+
+struct X3DAUDIO_DISTANCE_CURVE_POINT
+{
+	float Distance;
+	float DSPSetting;
+};
+
+struct X3DAUDIO_DISTANCE_CURVE
+{
+	X3DAUDIO_DISTANCE_CURVE_POINT* pPoints;
+	uint32_t PointCount;
+};
+
+struct X3DAUDIO_EMITTER
+{
+	X3DAUDIO_CONE* pCone;
+	X3DAUDIO_VECTOR OrientFront;
+	X3DAUDIO_VECTOR OrientTop;
+
+	X3DAUDIO_VECTOR Position;
+	X3DAUDIO_VECTOR Velocity;
+
+	float InnerRadius;
+	float InnerRadiusAngle;
+
+	uint32_t ChannelCount;
+	float ChannelRadius;
+	float* pChannelAzimuths;
+
+	X3DAUDIO_DISTANCE_CURVE* pVolumeCurve;
+	X3DAUDIO_DISTANCE_CURVE* pLFECurve;
+	X3DAUDIO_DISTANCE_CURVE* pLPFDirectCurve;
+	X3DAUDIO_DISTANCE_CURVE* pLPFReverbCurve;
+	X3DAUDIO_DISTANCE_CURVE* pReverbCurve;
+
+	float CurveDistanceScaler;
+	float DopplerScaler;
+};
+
+struct X3DAUDIO_LISTENER
+{
+	X3DAUDIO_VECTOR OrientFront;
+	X3DAUDIO_VECTOR OrientTop;
+
+	X3DAUDIO_VECTOR Position;
+	X3DAUDIO_VECTOR Velocity;
+
+	X3DAUDIO_CONE* pCone;
+};
 #else
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-// This GCC diagnostic ignored line doesn't work, because this warning is emitted by preprocessor
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
+#include <x3daudio.h>
 #endif
-#include <xaudio2.legacy.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
-#endif
-#include <x3daudio.legacy.h>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+
+#if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)
 #define XAUDIO2_DLL_A  "xaudio2_7.dll"
 #define XAUDIO2_DLL_W L"xaudio2_7.dll"
 #endif
@@ -223,7 +302,7 @@ namespace KlayGE
 		HMODULE mod_xaudio2_;
 		typedef HRESULT (WINAPI *XAudio2CreateFunc)(IXAudio2** ppXAudio2, UINT32 flags, XAUDIO2_PROCESSOR XAudio2Processor);
 		XAudio2CreateFunc DynamicXAudio2Create_;
-		typedef HRESULT (WINAPI *X3DAudioInitializeFunc)(UINT32 SpeakerChannelMask, FLOAT32 SpeedOfSound, X3DAUDIO_HANDLE Instance);
+		typedef HRESULT (WINAPI *X3DAudioInitializeFunc)(UINT32 SpeakerChannelMask, float SpeedOfSound, X3DAUDIO_HANDLE Instance);
 		X3DAudioInitializeFunc DynamicX3DAudioInitialize_;
 		typedef void (WINAPI *X3DAudioCalculateFunc)(const X3DAUDIO_HANDLE Instance, const X3DAUDIO_LISTENER* pListener,
 			const X3DAUDIO_EMITTER* pEmitter, UINT32 Flags, X3DAUDIO_DSP_SETTINGS* pDSPSettings);

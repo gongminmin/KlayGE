@@ -129,7 +129,12 @@ namespace KlayGE
 
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)
 		XAUDIO2_DEVICE_DETAILS details;
+#ifdef KLAYGE_COMPILER_GCC
+		com_ptr<IXAudio27> xaudio27 = xaudio_.as<IXAudio27>(IID_IXAudio27);
+		TIFHR(xaudio27->GetDeviceDetails(0, &details));
+#else
 		TIFHR(xaudio_->GetDeviceDetails(0, &details));
+#endif
 
 		DWORD channel_mask = details.OutputFormat.dwChannelMask;
 		mastering_channels_ = details.OutputFormat.Format.nChannels;

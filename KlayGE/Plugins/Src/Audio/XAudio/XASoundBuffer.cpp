@@ -36,6 +36,7 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <functional>
+#include <limits>
 #include <random>
 
 #include <boost/assert.hpp>
@@ -163,7 +164,7 @@ namespace KlayGE
 		{
 			X3DAUDIO_EMITTER emitter{};
 			emitter.ChannelCount = 1;
-			emitter.CurveDistanceScaler = FLT_MIN;
+			emitter.CurveDistanceScaler = std::numeric_limits<float>::min();
 			emitter.OrientFront = { dir_.x(), dir_.y(), dir_.z() };
 			emitter.OrientTop = { 0, 1, 0 };
 			emitter.Position = { pos_.x(), pos_.y(), pos_.z() };

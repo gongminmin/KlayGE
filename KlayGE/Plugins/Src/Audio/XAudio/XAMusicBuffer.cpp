@@ -37,6 +37,7 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <functional>
+#include <limits>
 
 #include <boost/assert.hpp>
 
@@ -106,7 +107,7 @@ namespace KlayGE
 		source_voice_ = std::shared_ptr<IXAudio2SourceVoice>(source_voice, std::mem_fn(&IXAudio2SourceVoice::DestroyVoice));
 
 		emitter_.ChannelCount = 1;
-		emitter_.CurveDistanceScaler = FLT_MIN;
+		emitter_.CurveDistanceScaler = std::numeric_limits<float>::min();
 		emitter_.OrientTop = { 0, 1, 0 };
 
 		output_matrix_.resize(ae.MasteringVoiceChannels());

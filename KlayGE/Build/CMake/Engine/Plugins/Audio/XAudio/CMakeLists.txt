@@ -18,13 +18,7 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${XAUDIO_AE_SOURCE_FILES} ${XAUDIO_AE_HEADER_FILES}
 )
 
-IF(KLAYGE_COMPILER_GCC)
-	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	target_compile_options(${LIB_NAME}
-		PRIVATE
-			-Wno-unknown-pragmas
-	)
-elseif(KLAYGE_COMPILER_CLANGCL)
+if(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(${LIB_NAME}
 		PRIVATE
 			-Wno-delete-abstract-non-virtual-dtor
@@ -67,5 +61,12 @@ target_link_libraries(${LIB_NAME}
 		${KLAYGE_CORELIB_NAME}
 		dxsdk
 )
+
+if(KLAYGE_COMPILER_GCC)
+	target_link_libraries(${LIB_NAME}
+		PRIVATE
+			xaudio2_8
+	)
+endif()
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
