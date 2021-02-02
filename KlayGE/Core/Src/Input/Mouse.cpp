@@ -167,9 +167,10 @@ namespace KlayGE
 		{
 			iam.UpdateInputActions(ret, MS_Y, action_param_);
 		}
-		if (offset_.z() != 0)
+		if (offset_.z() != last_offset_z_)
 		{
 			iam.UpdateInputActions(ret, MS_Z, action_param_);
+			last_offset_z_ = offset_.z();
 		}
 		bool any_button = false;
 		for (uint16_t i = 0; i < this->NumButtons(); ++ i)

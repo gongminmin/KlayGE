@@ -487,6 +487,7 @@ namespace KlayGE
 	protected:
 		int2 abs_pos_;
 		int3 offset_;
+		int32_t last_offset_z_ = 0;
 
 		uint32_t num_buttons_;
 		std::array<std::array<bool, 8>, 2> buttons_;
