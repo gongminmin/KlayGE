@@ -41,9 +41,8 @@
 #include <cstring>
 #include <iterator>
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>

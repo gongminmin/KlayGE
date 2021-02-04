@@ -41,7 +41,6 @@
 #include <limits>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>

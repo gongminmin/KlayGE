@@ -18,7 +18,7 @@
 #include <vector>
 
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 
 namespace KlayGE
 {

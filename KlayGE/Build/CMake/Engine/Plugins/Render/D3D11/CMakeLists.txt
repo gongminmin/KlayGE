@@ -6,7 +6,6 @@ SET(D3D11_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Fence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11FrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11GraphicsBuffer.cpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Mapping.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Query.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderFactory.cpp
@@ -20,6 +19,7 @@ SET(D3D11_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture2D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture3D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11TextureCube.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Util.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11VideoMode.cpp
 )
 
@@ -29,7 +29,6 @@ SET(D3D11_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Fence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11FrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11GraphicsBuffer.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Mapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Query.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderEngine.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactory.hpp
@@ -39,7 +38,7 @@ SET(D3D11_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderWindow.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11ShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Texture.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Typedefs.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Util.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11VideoMode.hpp
 )
 

@@ -8,7 +8,6 @@ SET(D3D12_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12GpuMemoryAllocator.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12InterfaceLoader.cpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Mapping.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Query.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12RenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12RenderFactory.cpp
@@ -23,6 +22,7 @@ SET(D3D12_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Texture2D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Texture3D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12TextureCube.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Util.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12VideoMode.cpp
 )
 
@@ -34,7 +34,6 @@ SET(D3D12_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12InterfaceLoader.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Mapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Query.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderEngine.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderFactory.hpp
@@ -45,7 +44,7 @@ SET(D3D12_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Resource.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12ShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Texture.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Typedefs.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Util.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12VideoMode.hpp
 )
 

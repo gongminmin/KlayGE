@@ -33,7 +33,7 @@
 #include <algorithm>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 
 namespace KlayGE

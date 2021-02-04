@@ -1,5 +1,5 @@
 /**
- * @file D3D12Mapping.hpp
+ * @file D3D12Util.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,20 +28,46 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _D3D12MAPPING_HPP
-#define _D3D12MAPPING_HPP
+#ifndef KLAYGE_PLUGINS_D3D12_UTIL_HPP
+#define KLAYGE_PLUGINS_D3D12_UTIL_HPP
 
 #pragma once
 
+#include <KFL/com_ptr.hpp>
+#include <KlayGE/SALWrapper.hpp>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#undef __out
+#endif
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
+	using IDXGIFactory4Ptr = com_ptr<IDXGIFactory4>;
+	using IDXGIFactory5Ptr = com_ptr<IDXGIFactory5>;
+	using IDXGIFactory6Ptr = com_ptr<IDXGIFactory6>;
+	using IDXGIAdapter2Ptr = com_ptr<IDXGIAdapter2>;
+	using IDXGISwapChain3Ptr = com_ptr<IDXGISwapChain3>;
+	using IDXGISwapChain4Ptr = com_ptr<IDXGISwapChain4>;
+	using ID3D12DevicePtr = com_ptr<ID3D12Device>;
+	using ID3D12CommandAllocatorPtr = com_ptr<ID3D12CommandAllocator>;
+	using ID3D12CommandQueuePtr = com_ptr<ID3D12CommandQueue>;
+	using ID3D12CommandSignaturePtr = com_ptr<ID3D12CommandSignature>;
+	using ID3D12GraphicsCommandListPtr = com_ptr<ID3D12GraphicsCommandList>;
+	using ID3D12DescriptorHeapPtr = com_ptr<ID3D12DescriptorHeap>;
+	using ID3D12QueryHeapPtr = com_ptr<ID3D12QueryHeap>;
+	using ID3D12ResourcePtr = com_ptr<ID3D12Resource>;
+	using ID3D12FencePtr = com_ptr<ID3D12Fence>;
+	using ID3D12PipelineStatePtr = com_ptr<ID3D12PipelineState>;
+	using ID3D12RootSignaturePtr = com_ptr<ID3D12RootSignature>;
+
 	class D3D12Mapping final
 	{
 	public:
@@ -65,11 +91,11 @@ namespace KlayGE
 		static void Mapping(std::vector<D3D12_INPUT_ELEMENT_DESC>& elements, size_t stream, std::span<VertexElement const> vet,
 			RenderLayout::stream_type type, uint32_t freq);
 
-		static D3D12_SO_DECLARATION_ENTRY Mapping(ShaderDesc::StreamOutputDecl const & decl);
+		static D3D12_SO_DECLARATION_ENTRY Mapping(ShaderDesc::StreamOutputDecl const& decl);
 
 		static DXGI_FORMAT MappingFormat(ElementFormat pf);
 		static ElementFormat MappingFormat(DXGI_FORMAT d3dfmt);
 	};
-}
+} // namespace KlayGE
 
-#endif			// _D3D12MAPPING_HPP
+#endif // KLAYGE_PLUGINS_D3D12_UTIL_HPP

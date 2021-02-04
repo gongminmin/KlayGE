@@ -37,7 +37,7 @@
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12Resource.hpp>
 
 namespace KlayGE

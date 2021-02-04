@@ -50,7 +50,6 @@
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>

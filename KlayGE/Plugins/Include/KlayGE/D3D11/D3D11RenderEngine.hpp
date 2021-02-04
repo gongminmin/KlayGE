@@ -31,7 +31,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/D3D11/D3D11AdapterList.hpp>
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 #include <KlayGE/D3D11/D3D11GraphicsBuffer.hpp>
 
 namespace KlayGE

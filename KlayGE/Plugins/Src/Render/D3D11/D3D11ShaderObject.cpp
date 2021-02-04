@@ -53,7 +53,6 @@
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11RenderStateObject.hpp>
-#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 

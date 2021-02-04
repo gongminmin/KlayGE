@@ -17,7 +17,7 @@
 
 #include <vector>
 #include <string>
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 #include <KlayGE/D3D11/D3D11VideoMode.hpp>
 
 namespace KlayGE

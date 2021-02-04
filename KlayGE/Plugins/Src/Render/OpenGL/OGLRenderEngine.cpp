@@ -61,7 +61,7 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>

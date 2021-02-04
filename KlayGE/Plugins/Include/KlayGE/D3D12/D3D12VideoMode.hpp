@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 
 namespace KlayGE
 {

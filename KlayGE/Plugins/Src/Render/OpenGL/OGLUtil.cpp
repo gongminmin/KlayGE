@@ -31,7 +31,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 
 namespace KlayGE
 {

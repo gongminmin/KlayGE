@@ -20,7 +20,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 

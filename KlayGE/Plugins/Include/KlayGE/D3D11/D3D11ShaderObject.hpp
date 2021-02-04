@@ -37,7 +37,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KFL/CXX20/span.hpp>
 
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 
 #if KLAYGE_IS_DEV_PLATFORM
 struct ID3D11ShaderReflection;

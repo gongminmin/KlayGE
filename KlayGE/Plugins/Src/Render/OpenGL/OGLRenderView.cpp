@@ -22,7 +22,7 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>

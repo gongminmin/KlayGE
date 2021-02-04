@@ -10,7 +10,6 @@ SET(OPENGLES_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESFence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESFrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESGraphicsBuffer.cpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESMapping.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESQuery.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESRenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESRenderFactory.cpp
@@ -24,13 +23,13 @@ SET(OPENGLES_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESTexture2D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESTexture3D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESTextureCube.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESUtil.cpp
 )
 
 SET(OPENGLES_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESFence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESFrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESMapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESQuery.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderEngine.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderFactory.hpp
@@ -40,6 +39,7 @@ SET(OPENGLES_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderWindow.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESTexture.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESUtil.hpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${OPENGLES_RE_SOURCE_FILES})

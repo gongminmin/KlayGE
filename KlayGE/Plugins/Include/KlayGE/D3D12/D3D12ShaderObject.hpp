@@ -36,7 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 
 #if KLAYGE_IS_DEV_PLATFORM
 struct ID3D12ShaderReflection;

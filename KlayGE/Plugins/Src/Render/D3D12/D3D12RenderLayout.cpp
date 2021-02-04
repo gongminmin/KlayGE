@@ -40,7 +40,6 @@
 #include <cstring>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 

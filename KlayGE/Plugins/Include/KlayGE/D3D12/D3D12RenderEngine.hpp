@@ -47,7 +47,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12AdapterList.hpp>
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 

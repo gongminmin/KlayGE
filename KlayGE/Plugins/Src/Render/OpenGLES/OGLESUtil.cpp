@@ -26,8 +26,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESTexture.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 
 namespace KlayGE
 {

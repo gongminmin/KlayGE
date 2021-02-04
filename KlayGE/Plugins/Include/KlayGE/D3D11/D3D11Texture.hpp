@@ -18,7 +18,7 @@
 #include <unordered_map>
 
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 #include <KlayGE/D3D11/D3D11RenderView.hpp>
 
 namespace KlayGE

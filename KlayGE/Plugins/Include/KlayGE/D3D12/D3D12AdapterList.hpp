@@ -34,7 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12Adapter.hpp>
 
 namespace KlayGE

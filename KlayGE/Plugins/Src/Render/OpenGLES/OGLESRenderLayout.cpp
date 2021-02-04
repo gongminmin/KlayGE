@@ -20,7 +20,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderLayout.hpp>

@@ -56,7 +56,6 @@
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>

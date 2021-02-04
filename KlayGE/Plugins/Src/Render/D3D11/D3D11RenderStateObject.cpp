@@ -20,7 +20,6 @@
 #include <limits>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11RenderStateObject.hpp>
 
 namespace KlayGE

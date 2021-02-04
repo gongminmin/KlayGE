@@ -71,7 +71,7 @@
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderView.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>

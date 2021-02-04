@@ -22,7 +22,6 @@
 #include <cstring>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11GraphicsBuffer.hpp>
 #include <KlayGE/D3D11/D3D11RenderLayout.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>

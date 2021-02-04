@@ -1,17 +1,35 @@
-// D3D11Typedefs.hpp
-// KlayGE 一些D3D11相关的typedef 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2009
-// Homepage: http://www.klayge.org
-//
-// 3.8.0
-// 初次建立 (2008.9.21)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file D3D11Util.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
-#ifndef _D3D11TYPEDEFS_HPP
-#define _D3D11TYPEDEFS_HPP
+#ifndef KLAYGE_PLUGINS_D3D11_UTIL_HPP
+#define KLAYGE_PLUGINS_D3D11_UTIL_HPP
 
 #pragma once
 
@@ -26,6 +44,13 @@
 #include <d3d11_4.h>
 
 #include <KFL/com_ptr.hpp>
+
+#include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX20/span.hpp>
+#include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
@@ -77,6 +102,36 @@ namespace KlayGE
 	{
 		return mip_slice + array_slice * mip_levels;
 	}
+
+	class D3D11Mapping final
+	{
+	public:
+		static uint32_t MappingColorMask(uint32_t mask);
+
+		static D3D11_COMPARISON_FUNC Mapping(CompareFunction func);
+
+		static D3D11_STENCIL_OP Mapping(StencilOperation op);
+
+		static D3D11_MAP Mapping(TextureMapAccess tma, Texture::TextureType type, uint32_t access_hint, uint32_t numMipMaps);
+
+		static D3D11_BLEND Mapping(AlphaBlendFactor factor);
+		static D3D11_CULL_MODE Mapping(CullMode mode);
+		static D3D11_FILL_MODE Mapping(PolygonMode mode);
+		static D3D11_BLEND_OP Mapping(BlendOperation bo);
+		static D3D11_TEXTURE_ADDRESS_MODE Mapping(TexAddressingMode mode);
+		static D3D11_FILTER Mapping(TexFilterOp filter);
+		static D3D11_DEPTH_WRITE_MASK Mapping(bool depth_write_mask);
+		static D3D11_LOGIC_OP Mapping(LogicOperation lo);
+
+		static D3D11_PRIMITIVE_TOPOLOGY Mapping(RenderLayout::topology_type tt);
+		static void Mapping(std::vector<D3D11_INPUT_ELEMENT_DESC>& elements, size_t stream, std::span<VertexElement const> vet,
+			RenderLayout::stream_type type, uint32_t freq);
+
+		static D3D11_SO_DECLARATION_ENTRY Mapping(ShaderDesc::StreamOutputDecl const& decl);
+
+		static DXGI_FORMAT MappingFormat(ElementFormat pf);
+		static ElementFormat MappingFormat(DXGI_FORMAT d3dfmt);
+	};
 } // namespace KlayGE
 
-#endif // _D3D11TYPEDEFS_HPP
+#endif // KLAYGE_PLUGINS_D3D11_UTIL_HPP

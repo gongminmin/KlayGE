@@ -37,7 +37,7 @@
 
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12Resource.hpp>
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>

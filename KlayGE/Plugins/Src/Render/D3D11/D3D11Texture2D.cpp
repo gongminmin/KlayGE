@@ -23,9 +23,8 @@
 
 #include <cstring>
 
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <KlayGE/D3D11/D3D11Util.hpp>
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 
 namespace KlayGE

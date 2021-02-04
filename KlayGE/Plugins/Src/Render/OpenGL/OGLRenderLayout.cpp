@@ -26,7 +26,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>

@@ -4,7 +4,6 @@ SET(OPENGL_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLFence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLFrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLGraphicsBuffer.cpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLMapping.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLQuery.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLRenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLRenderFactory.cpp
@@ -18,13 +17,13 @@ SET(OPENGL_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLTexture2D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLTexture3D.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLTextureCube.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLUtil.cpp
 )
 
 SET(OPENGL_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLFence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLFrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLGraphicsBuffer.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLMapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLQuery.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderEngine.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderFactory.hpp
@@ -34,6 +33,7 @@ SET(OPENGL_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderWindow.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLTexture.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLUtil.hpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${OPENGL_RE_SOURCE_FILES})
