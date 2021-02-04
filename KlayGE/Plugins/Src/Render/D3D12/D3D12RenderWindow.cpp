@@ -300,7 +300,7 @@ namespace KlayGE
 		this->UpdateSurfacesPtrs();
 
 #ifdef KLAYGE_DEBUG
-		if (auto d3d_info_queue = d3d_device.try_as<ID3D12InfoQueue>(IID_ID3D12InfoQueue))
+		if (auto d3d_info_queue = d3d_device.try_as<ID3D12InfoQueue>())
 		{
 			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
@@ -634,14 +634,14 @@ namespace KlayGE
 			d3d_cmd_queue, static_cast<IUnknown*>(uwp::get_abi(wnd_)), &sc_desc1_, nullptr, sc.put());
 #endif
 
-		sc.as(IID_IDXGISwapChain3, swap_chain_);
+		sc.as(swap_chain_);
 
 		frame_latency_waitable_obj_ = MakeWin32UniqueHandle(swap_chain_->GetFrameLatencyWaitableObject());
 
 		if (try_hdr_display)
 		{
 			IDXGISwapChain4Ptr sc4;
-			if (swap_chain_.try_as(IID_IDXGISwapChain4, sc4))
+			if (swap_chain_.try_as(sc4))
 			{
 				UINT color_space_support;
 				if (SUCCEEDED(sc4->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020, &color_space_support))

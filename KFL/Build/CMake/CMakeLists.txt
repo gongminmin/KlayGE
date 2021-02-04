@@ -38,6 +38,7 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Trace.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Types.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Util.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Uuid.hpp
 	${KFL_PROJECT_DIR}/include/KFL/XMLDom.hpp
 )
 SET(BASE_SOURCE_FILES

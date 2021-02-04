@@ -83,6 +83,11 @@ namespace KlayGE
 	#endif
 #endif
 
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+DEFINE_UUID_OF(ILocationEvents);
+DEFINE_UUID_OF(ILatLongReport);
+#endif
+
 namespace KlayGE
 {
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -328,7 +333,7 @@ namespace KlayGE
 					locator_ = location;
 
 					location_event_.reset(new MsgInputLocationEvents(this), false);
-					auto sensor_event = location_event_.as<ILocationEvents>(IID_ILocationEvents);
+					auto sensor_event = location_event_.as<ILocationEvents>();
 					for (DWORD index = 0; index < std::size(REPORT_TYPES); ++ index)
 					{
 						hr = locator_->RegisterForReport(sensor_event.get(), REPORT_TYPES[index], 1000);
@@ -426,7 +431,7 @@ namespace KlayGE
 	{
 		if (IID_ILatLongReport == report_type)
 		{
-			if (auto lat_long_report = com_ptr<ILocationReport>(location_report).try_as<ILatLongReport>(IID_ILatLongReport))
+			if (auto lat_long_report = com_ptr<ILocationReport>(location_report).try_as<ILatLongReport>())
 			{
 				double lat = 0;
 				double lng = 0;

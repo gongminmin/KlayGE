@@ -213,8 +213,8 @@ namespace KlayGE
 						&this_out_feature_level, this_imm_ctx.put());
 					if (SUCCEEDED(hr))
 					{
-						d3d_device = this_device.as<ID3D11Device1>(IID_ID3D11Device1);
-						d3d_imm_ctx = this_imm_ctx.as<ID3D11DeviceContext1>(IID_ID3D11DeviceContext1);
+						d3d_device = this_device.as<ID3D11Device1>();
+						d3d_imm_ctx = this_imm_ctx.as<ID3D11DeviceContext1>();
 						out_feature_level = this_out_feature_level;
 						break;
 					}
@@ -227,11 +227,11 @@ namespace KlayGE
 					{
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
-							if (auto dxgi_device = d3d_device.try_as<IDXGIDevice2>(IID_IDXGIDevice2))
+							if (auto dxgi_device = d3d_device.try_as<IDXGIDevice2>())
 							{
 								com_ptr<IDXGIAdapter> ada;
 								dxgi_device->GetAdapter(ada.put());
-								adapter_->ResetAdapter(ada.as<IDXGIAdapter2>(IID_IDXGIAdapter2).get());
+								adapter_->ResetAdapter(ada.as<IDXGIAdapter2>().get());
 								adapter_->Enumerate();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
@@ -417,7 +417,7 @@ namespace KlayGE
 		swap_chain_1_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
 
-		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>(IID_ID3D10Multithread))
+		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>())
 		{
 			d3d_multithread->SetMultithreadProtected(true);
 		}
@@ -425,7 +425,7 @@ namespace KlayGE
 		this->UpdateSurfacesPtrs();
 
 #ifdef KLAYGE_DEBUG
-		if (auto d3d_info_queue = d3d_device.try_as<ID3D11InfoQueue>(IID_ID3D11InfoQueue))
+		if (auto d3d_info_queue = d3d_device.try_as<ID3D11InfoQueue>())
 		{
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
@@ -754,7 +754,7 @@ namespace KlayGE
 		if (dxgi_async_swap_chain_)
 		{
 			IDXGISwapChain3Ptr sc3;
-			if (swap_chain_1_.try_as(IID_IDXGISwapChain3, sc3))
+			if (swap_chain_1_.try_as(sc3))
 			{
 				frame_latency_waitable_obj_ = MakeWin32UniqueHandle(sc3->GetFrameLatencyWaitableObject());
 			}
@@ -763,7 +763,7 @@ namespace KlayGE
 		if (try_hdr_display)
 		{
 			IDXGISwapChain4Ptr sc4;
-			if (swap_chain_1_.try_as(IID_IDXGISwapChain4, sc4))
+			if (swap_chain_1_.try_as(sc4))
 			{
 				UINT color_space_support;
 				if (SUCCEEDED(sc4->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020, &color_space_support))

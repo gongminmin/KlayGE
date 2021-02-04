@@ -254,6 +254,6 @@ namespace KlayGE
 
 		ID3D11Texture1DPtr texture;
 		TIFHR(d3d_device_->CreateTexture1D(&desc, subres_data.data(), texture.put()));
-		texture.as(IID_ID3D11Resource, d3d_texture_);
+		texture.as(d3d_texture_);
 	}
 }

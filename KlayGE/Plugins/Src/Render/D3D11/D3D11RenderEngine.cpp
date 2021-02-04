@@ -156,16 +156,16 @@ namespace KlayGE
 			TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, gi_factory_2_.put_void()));
 		}
 		dxgi_sub_ver_ = 2;
-		if (gi_factory_2_.try_as(IID_IDXGIFactory3, gi_factory_3_))
+		if (gi_factory_2_.try_as(gi_factory_3_))
 		{
 			dxgi_sub_ver_ = 3;
-			if (gi_factory_2_.try_as(IID_IDXGIFactory4, gi_factory_4_))
+			if (gi_factory_2_.try_as(gi_factory_4_))
 			{
 				dxgi_sub_ver_ = 4;
-				if (gi_factory_2_.try_as(IID_IDXGIFactory5, gi_factory_5_))
+				if (gi_factory_2_.try_as(gi_factory_5_))
 				{
 					dxgi_sub_ver_ = 5;
-					if (gi_factory_2_.try_as(IID_IDXGIFactory6, gi_factory_6_))
+					if (gi_factory_2_.try_as(gi_factory_6_))
 					{
 						dxgi_sub_ver_ = 6;
 					}
@@ -841,7 +841,7 @@ namespace KlayGE
 	{
 		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
-			if (auto dxgi_device = d3d_device_1_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
+			if (auto dxgi_device = d3d_device_1_.try_as<IDXGIDevice3>())
 			{
 				dxgi_device->Trim();
 			}
@@ -1192,18 +1192,18 @@ namespace KlayGE
 		d3d_imm_ctx_1_.reset(imm_ctx);
 		d3d_11_runtime_sub_ver_ = 1;
 
-		if (d3d_device_1_.try_as(IID_ID3D11Device2, d3d_device_2_) && d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext2, d3d_imm_ctx_2_))
+		if (d3d_device_1_.try_as(d3d_device_2_) && d3d_imm_ctx_1_.try_as(d3d_imm_ctx_2_))
 		{
 			d3d_11_runtime_sub_ver_ = 2;
-			if (d3d_device_1_.try_as(IID_ID3D11Device3, d3d_device_3_) && d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext3, d3d_imm_ctx_3_))
+			if (d3d_device_1_.try_as(d3d_device_3_) && d3d_imm_ctx_1_.try_as(d3d_imm_ctx_3_))
 			{
 				d3d_11_runtime_sub_ver_ = 3;
-				if (d3d_device_1_.try_as(IID_ID3D11Device4, d3d_device_4_))
+				if (d3d_device_1_.try_as(d3d_device_4_))
 				{
 					d3d_11_runtime_sub_ver_ = 4;
 						
-					d3d_device_1_.try_as(IID_ID3D11Device5, d3d_device_5_);
-					d3d_imm_ctx_1_.try_as(IID_ID3D11DeviceContext4, d3d_imm_ctx_4_);
+					d3d_device_1_.try_as(d3d_device_5_);
+					d3d_imm_ctx_1_.try_as(d3d_imm_ctx_4_);
 				}
 			}
 		}

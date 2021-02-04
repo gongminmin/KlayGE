@@ -95,10 +95,10 @@ namespace KlayGE
 			IID_IDXGIFactory4, gi_factory_4_.put_void()));
 		dxgi_sub_ver_ = 4;
 
-		if (gi_factory_4_.try_as(IID_IDXGIFactory5, gi_factory_5_))
+		if (gi_factory_4_.try_as(gi_factory_5_))
 		{
 			dxgi_sub_ver_ = 5;
-			if (gi_factory_4_.try_as(IID_IDXGIFactory6, gi_factory_6_))
+			if (gi_factory_4_.try_as(gi_factory_6_))
 			{
 				dxgi_sub_ver_ = 6;
 			}
@@ -1076,7 +1076,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::DoSuspend()
 	{
-		if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
+		if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>())
 		{
 			dxgi_device->Trim();
 		}

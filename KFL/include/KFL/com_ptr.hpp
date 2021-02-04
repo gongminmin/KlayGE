@@ -34,11 +34,9 @@
 #pragma once
 
 #include <KFL/ErrorHandling.hpp>
-#include <boost/assert.hpp>
+#include <KFL/Uuid.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#include <guiddef.h>
-#endif
+#include <boost/assert.hpp>
 
 namespace KlayGE
 {
@@ -206,44 +204,34 @@ namespace KlayGE
 			}
 		}
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 		template <typename U>
-		com_ptr<U> try_as(GUID const& riid) const noexcept
+		com_ptr<U> try_as() const noexcept
 		{
-#ifdef KLAYGE_COMPILER_MSVC
-			BOOST_ASSERT(riid == __uuidof(U));
-#endif
-
 			com_ptr<U> ret;
-			ptr_->QueryInterface(riid, ret.put_void());
+			ptr_->QueryInterface(UuidOf<U>(), ret.put_void());
 			return ret;
 		}
 
 		template <typename U>
-		bool try_as(GUID const& riid, com_ptr<U>& to) const noexcept
+		bool try_as(com_ptr<U>& to) const noexcept
 		{
-			to = this->try_as<U>(riid);
+			to = this->try_as<U>();
 			return static_cast<bool>(to);
 		}
 
 		template <typename U>
-		com_ptr<U> as(GUID const& riid) const
+		com_ptr<U> as() const
 		{
-#ifdef KLAYGE_COMPILER_MSVC
-			BOOST_ASSERT(riid == __uuidof(U));
-#endif
-
 			com_ptr<U> ret;
-			TIFHR(ptr_->QueryInterface(riid, ret.put_void()));
+			TIFHR(ptr_->QueryInterface(UuidOf<U>(), ret.put_void()));
 			return ret;
 		}
 
 		template <typename U>
-		void as(GUID const& riid, com_ptr<U>& to) const
+		void as(com_ptr<U>& to) const
 		{
-			to = this->as<U>(riid);
+			to = this->as<U>();
 		}
-#endif
 
 	private:
 		void internal_add_ref() noexcept

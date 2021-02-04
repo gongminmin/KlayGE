@@ -75,7 +75,7 @@ namespace KlayGE
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>(IID_IDXGIAdapter2).get());
+				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get());
 				adapter->Enumerate();
 				adapters_.push_back(std::move(adapter));
 			}
@@ -109,7 +109,7 @@ namespace KlayGE
 
 		if (adapters_.empty())
 		{
-			auto gi_factory2 = com_ptr<IDXGIFactory6>(gi_factory).as<IDXGIFactory2>(IID_IDXGIFactory2);
+			auto gi_factory2 = com_ptr<IDXGIFactory6>(gi_factory).as<IDXGIFactory2>();
 			this->Enumerate(gi_factory2.get());
 		}
 

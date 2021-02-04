@@ -49,6 +49,10 @@
 using namespace std;
 using namespace KlayGE;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+DEFINE_UUID_OF(IDXGIAdapter2);
+#endif
+
 void DetectOSInfo(std::ostream& os)
 {
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -305,7 +309,7 @@ void DetectGpuInfo(std::ostream& os)
 				DXGI_ADAPTER_DESC1 adapter_desc;
 				adapter->GetDesc1(&adapter_desc);
 
-				if (auto adapter2 = adapter.try_as<IDXGIAdapter2>(IID_IDXGIAdapter2))
+				if (auto adapter2 = adapter.try_as<IDXGIAdapter2>())
 				{
 					DXGI_ADAPTER_DESC2 desc2;
 					adapter2->GetDesc2(&desc2);

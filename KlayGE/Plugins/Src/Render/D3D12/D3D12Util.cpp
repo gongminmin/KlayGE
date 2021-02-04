@@ -43,6 +43,17 @@
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12Util.hpp>
 
+DEFINE_UUID_OF(IDXGIFactory4);
+DEFINE_UUID_OF(IDXGIFactory5);
+DEFINE_UUID_OF(IDXGIFactory6);
+DEFINE_UUID_OF(IDXGIAdapter2);
+DEFINE_UUID_OF(IDXGIDevice3);
+DEFINE_UUID_OF(IDXGISwapChain3);
+DEFINE_UUID_OF(IDXGISwapChain4);
+#ifdef KLAYGE_DEBUG
+DEFINE_UUID_OF(ID3D12InfoQueue);
+#endif
+
 namespace KlayGE
 {
 	// 从KlayGE的ColorMask转换到D3DCOLORWRITEENABLE所使用的格式

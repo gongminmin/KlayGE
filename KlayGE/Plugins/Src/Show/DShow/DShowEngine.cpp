@@ -53,6 +53,11 @@
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 #include <KlayGE/DShow/DShow.hpp>
 
+DEFINE_UUID_OF(IVMRFilterConfig9);
+DEFINE_UUID_OF(IVMRSurfaceAllocatorNotify9);
+DEFINE_UUID_OF(IMediaControl);
+DEFINE_UUID_OF(IMediaEvent);
+
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
@@ -138,12 +143,12 @@ namespace KlayGE
 		TIFHR(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
 			IID_IBaseFilter, filter_.put_void()));
 
-		auto filter_config = filter_.as<IVMRFilterConfig9>(IID_IVMRFilterConfig9);
+		auto filter_config = filter_.as<IVMRFilterConfig9>();
 
 		TIFHR(filter_config->SetRenderingMode(VMR9Mode_Renderless));
 		TIFHR(filter_config->SetNumberOfStreams(1));
 
-		auto vmr_surf_alloc_notify = filter_.as<IVMRSurfaceAllocatorNotify9>(IID_IVMRSurfaceAllocatorNotify9);
+		auto vmr_surf_alloc_notify = filter_.as<IVMRSurfaceAllocatorNotify9>();
 
 		// create our surface allocator
 		vmr_allocator_.reset(new DShowVMR9Allocator(Context::Instance().AppInstance().MainWnd()->HWnd()), false);
@@ -155,8 +160,8 @@ namespace KlayGE
 
 		TIFHR(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
 
-		graph_.as(IID_IMediaControl, media_control_);
-		graph_.as(IID_IMediaEvent, media_event_);
+		graph_.as(media_control_);
+		graph_.as(media_event_);
 
 		std::wstring fn;
 		Convert(fn, fileName);

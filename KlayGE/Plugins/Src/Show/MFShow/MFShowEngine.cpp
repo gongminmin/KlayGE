@@ -63,6 +63,12 @@
 DEFINE_GUID(IID_IMFMediaEngineClassFactory, 0x4D645ACE, 0x26AA, 0x4688, 0x9B, 0xE1, 0xDF, 0x35, 0x16, 0x99, 0x0B, 0x93);
 DEFINE_GUID(IID_IMFMediaEngineNotify, 0xFEE7C112, 0xE776, 0x42B5, 0x9B, 0xBF, 0x00, 0x48, 0x52, 0x4E, 0x2B, 0xD5);
 
+DEFINE_UUID_OF(IDXGIFactory2);
+DEFINE_UUID_OF(IDXGIFactory4);
+DEFINE_UUID_OF(ID3D10Multithread);
+DEFINE_UUID_OF(IDXGIDevice2);
+DEFINE_UUID_OF(IDXGIDevice3);
+
 namespace KlayGE
 {
 	class MediaEngineNotify : public IMFMediaEngineNotify
@@ -222,10 +228,10 @@ namespace KlayGE
 
 		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, dxgi_factory_.put_void()));
 		dxgi_sub_ver_ = 1;
-		if (dxgi_factory_.try_as<IDXGIFactory2>(IID_IDXGIFactory2))
+		if (dxgi_factory_.try_as<IDXGIFactory2>())
 		{
 			dxgi_sub_ver_ = 2;
-			if (dxgi_factory_.try_as<IDXGIFactory4>(IID_IDXGIFactory4))
+			if (dxgi_factory_.try_as<IDXGIFactory4>())
 			{
 				dxgi_sub_ver_ = 4;
 			}
@@ -306,12 +312,12 @@ namespace KlayGE
 		d3d_device_ = d3d_device;
 		d3d_imm_ctx_ = d3d_imm_ctx;
 
-		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>(IID_ID3D10Multithread))
+		if (auto d3d_multithread = d3d_device.try_as<ID3D10Multithread>())
 		{
 			d3d_multithread->SetMultithreadProtected(true);
 		}
 
-		if (auto dxgi_device = d3d_device.try_as<IDXGIDevice2>(IID_IDXGIDevice2))
+		if (auto dxgi_device = d3d_device.try_as<IDXGIDevice2>())
 		{
 			dxgi_device->SetMaximumFrameLatency(1);
 		}
@@ -514,7 +520,7 @@ namespace KlayGE
 
 	void MFShowEngine::DoSuspend()
 	{
-		if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>(IID_IDXGIDevice3))
+		if (auto dxgi_device = d3d_device_.try_as<IDXGIDevice3>())
 		{
 			dxgi_device->Trim();
 		}

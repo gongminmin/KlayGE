@@ -41,6 +41,10 @@
 
 #include <KlayGE/XAudio/XAAudio.hpp>
 
+#if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) && defined(KLAYGE_COMPILER_GCC)
+DEFINE_UUID_OF(IXAudio27);
+#endif
+
 namespace KlayGE
 {
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & data_source)
@@ -130,7 +134,7 @@ namespace KlayGE
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)
 		XAUDIO2_DEVICE_DETAILS details;
 #ifdef KLAYGE_COMPILER_GCC
-		com_ptr<IXAudio27> xaudio27 = xaudio_.as<IXAudio27>(IID_IXAudio27);
+		com_ptr<IXAudio27> xaudio27 = xaudio_.as<IXAudio27>();
 		TIFHR(xaudio27->GetDeviceDetails(0, &details));
 #else
 		TIFHR(xaudio_->GetDeviceDetails(0, &details));
