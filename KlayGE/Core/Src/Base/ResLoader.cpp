@@ -203,8 +203,7 @@ namespace KlayGE
 #endif
 #endif
 
-		loading_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
-			[this] { this->LoadingThreadFunc(); }));
+		loading_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoadingThreadFunc(); });
 	}
 
 	ResLoader::~ResLoader()
@@ -217,7 +216,7 @@ namespace KlayGE
 			loading_res_queue_cv_.notify_one();
 		}
 
-		(*loading_thread_)();
+		loading_thread_.wait();
 	}
 
 	ResLoader& ResLoader::Instance()

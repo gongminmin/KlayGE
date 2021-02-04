@@ -249,7 +249,7 @@ namespace KlayGE
 		bool stopped_;
 		std::condition_variable play_cond_;
 		std::mutex play_mutex_;
-		joiner<void> play_thread_;
+		std::future<void> play_thread_;
 
 		X3DAUDIO_EMITTER emitter_;
 		X3DAUDIO_DSP_SETTINGS dsp_settings_;

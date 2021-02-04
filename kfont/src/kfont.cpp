@@ -30,13 +30,13 @@
 
 #include <KFL/KFL.hpp>
 #include <KFL/DllLoader.hpp>
-#include <KFL/Thread.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <mutex>
 
 #include <boost/assert.hpp>
 

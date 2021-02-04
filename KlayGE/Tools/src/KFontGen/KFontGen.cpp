@@ -295,13 +295,13 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 						int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code,
 						uint32_t internal_char_size, uint32_t char_size)
 {
-	thread_pool tp(1, num_threads);
+	ThreadPool tp(1, num_threads);
 
 	std::vector<int32_t> cur_num_char(num_threads, 0);
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
-	std::vector<joiner<void>> joiners(num_threads);
+	std::vector<std::future<void>> joiners(num_threads);
 
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -333,7 +333,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		std::atomic<int32_t> cur_package(0);
 		for (int i = 0; i < num_threads; ++ i)
 		{
-			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
+			joiners[i] = tp.QueueThread(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
 				&validate_chars[0], &char_info[0], &char_dist_data[0], cur_num_char[i],
 				cur_package, static_cast<uint32_t>(validate_chars.size()),
 				std::ref(min_values[i]), std::ref(max_values[i]), 64));
@@ -377,7 +377,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		min_value = 1;
 		for (int i = 0; i < num_threads; ++ i)
 		{
-			joiners[i]();
+			joiners[i].wait();
 
 			min_value = std::min(min_value, min_values[i]);
 			max_value = std::max(max_value, max_values[i]);
@@ -449,9 +449,9 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 				uint32_t char_size_sq, float min_value, float max_value,
 				int16_t& base, int16_t& scale)
 {
-	thread_pool tp(1, num_threads);
+	ThreadPool tp(1, num_threads);
 
-	std::vector<joiner<void>> joiners(num_threads);
+	std::vector<std::future<void>> joiners(num_threads);
 
 	float fscale = max_value - min_value;
 	base = static_cast<int16_t>(min_value * 32768 + 0.5f);
@@ -480,13 +480,13 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		param.char_size_sq = char_size_sq;
 		param.s = s;
 		param.e = e;
-		joiners[i] = tp([&lzma_dists, &mses, param, i] { quantizer_chars(lzma_dists[i], mses[i], param); });
+		joiners[i] = tp.QueueThread([&lzma_dists, &mses, param, i] { quantizer_chars(lzma_dists[i], mses[i], param); });
 	}
 
 	float mse = 0;
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i]();
+		joiners[i].wait();
 
 		mse += mses[i];
 		lzma_dist.insert(lzma_dist.end(), lzma_dists[i].begin(), lzma_dists[i].end());

@@ -190,7 +190,7 @@ namespace KlayGE
 		curr_buffer_index_ = 0;
 		loop_ = loop;
 
-		play_thread_ = Context::Instance().ThreadPool()([this] { this->LoopUpdateBuffer(); });
+		play_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoopUpdateBuffer(); });
 
 		stopped_ = false;
 		{
@@ -208,7 +208,7 @@ namespace KlayGE
 		{
 			stopped_ = true;
 			::SetEvent(checked_cast<MusicVoiceContext&>(*voice_call_back_).GetBufferEndEvent());
-			play_thread_();
+			play_thread_.wait();
 		}
 
 		HRESULT hr = source_voice_->Stop();

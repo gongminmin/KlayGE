@@ -778,14 +778,14 @@ namespace KlayGE
 
 		CPUInfo cpu;
 		uint32_t const num_threads = cpu.NumHWThreads();
-		thread_pool tp(1, num_threads);
-		std::vector<joiner<void>> joiners(num_threads);
+		ThreadPool tp(1, num_threads);
+		std::vector<std::future<void>> joiners(num_threads);
 
 		uint32_t const tex_region_height = ((tex_height + num_threads - 1) / num_threads + block_height - 1) & ~(block_height - 1);
 		std::vector<TexturePtr> new_tex_regions(num_threads);
 		for (uint32_t i = 0; i < num_threads; ++ i)
 		{
-			joiners[i] = tp(
+			joiners[i] = tp.QueueThread(
 				[block_height, tex_width, tex_height, tex_region_height, i, format, row_pitch,
 					&new_tex_data, &new_tex_regions, this]
 				{
@@ -818,7 +818,7 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < num_threads; ++ i)
 		{
-			joiners[i]();
+			joiners[i].wait();
 		}
 
 		new_tex->CreateHWResource(MakeSpan<1>(init_data), nullptr);

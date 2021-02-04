@@ -136,7 +136,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		receiveThread_ = Context::Instance().ThreadPool()(ReceiveThreadFunc(this));
+		receiveThread_ = Context::Instance().ThreadPoolInstance().QueueThread(ReceiveThreadFunc(this));
 
 		return true;
 	}
@@ -151,7 +151,7 @@ namespace KlayGE
 			socket_.Send(&msg, sizeof(msg));
 
 			receiveLoop_ = false;
-			receiveThread_();
+			receiveThread_.wait();
 		}
 	}
 

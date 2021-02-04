@@ -170,7 +170,7 @@ namespace KlayGE
 		DevHelper& DevHelperInstance();
 #endif
 
-		thread_pool& ThreadPool()
+		ThreadPool& ThreadPoolInstance()
 		{
 			return *gtp_instance_;
 		}
@@ -215,7 +215,7 @@ namespace KlayGE
 		DllLoader dev_helper_loader_;
 #endif
 
-		std::unique_ptr<thread_pool> gtp_instance_;
+		std::unique_ptr<ThreadPool> gtp_instance_;
 	};
 }
 

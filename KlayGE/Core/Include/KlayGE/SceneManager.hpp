@@ -28,6 +28,7 @@
 #include <KFL/Frustum.hpp>
 #include <KFL/Thread.hpp>
 
+#include <optional>
 #include <vector>
 #include <unordered_map>
 
@@ -145,7 +146,7 @@ namespace KlayGE
 		uint32_t num_dispatch_calls_;
 
 		std::mutex update_mutex_;
-		std::unique_ptr<joiner<void>> update_thread_;
+		std::optional<std::future<void>> update_thread_;
 		volatile bool quit_;
 
 		bool deferred_mode_;

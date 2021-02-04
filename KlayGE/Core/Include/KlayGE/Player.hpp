@@ -60,7 +60,7 @@ namespace KlayGE
 		char		playerID_;
 		std::string	name_;
 
-		joiner<void>	receiveThread_;
+		std::future<void>	receiveThread_;
 		bool			receiveLoop_;
 
 		std::list<std::vector<char>> sendQueue_;

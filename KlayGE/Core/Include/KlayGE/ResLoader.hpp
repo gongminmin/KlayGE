@@ -175,7 +175,7 @@ namespace KlayGE
 		std::mutex loading_res_queue_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
 
-		std::unique_ptr<joiner<void>> loading_thread_;
+		std::future<void> loading_thread_;
 		volatile bool quit_{false};
 	};
 }

@@ -82,9 +82,9 @@ namespace KlayGE
 	SceneManager::~SceneManager()
 	{
 		quit_ = true;
-		if (update_thread_)
+		if (update_thread_.has_value())
 		{
-			(*update_thread_)();
+			update_thread_->wait();
 		}
 
 		this->ClearObject();
@@ -382,8 +382,7 @@ namespace KlayGE
 
 		if (!update_thread_ && !quit_)
 		{
-			update_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
-				[this] { this->UpdateThreadFunc(); }));
+			update_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->UpdateThreadFunc(); });
 		}
 
 		{

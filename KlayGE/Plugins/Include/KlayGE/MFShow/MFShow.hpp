@@ -126,7 +126,7 @@ namespace KlayGE
 		bool present_tex_dirty_ = false;
 
 		std::mutex mutex_;
-		joiner<void> play_thread_;
+		std::future<void> play_thread_;
 
 		TexturePtr present_tex_;
 	};

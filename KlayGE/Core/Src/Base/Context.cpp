@@ -118,7 +118,7 @@ namespace KlayGE
 #endif
 #endif
 
-		gtp_instance_ = MakeUniquePtr<thread_pool>(1, 16);
+		gtp_instance_ = MakeUniquePtr<ThreadPool>(1, 16);
 	}
 
 	Context::~Context()

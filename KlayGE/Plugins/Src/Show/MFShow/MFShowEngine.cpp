@@ -369,7 +369,7 @@ namespace KlayGE
 		this->Stop();
 
 		this->StopTimer();
-		play_thread_();
+		play_thread_.wait();
 
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
@@ -400,7 +400,7 @@ namespace KlayGE
 
 		stop_timer_ = false;
 
-		play_thread_ = Context::Instance().ThreadPool()([this] { this->RealVSyncTimer(); });
+		play_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->RealVSyncTimer(); });
 	}
 
 	void MFShowEngine::StopTimer()

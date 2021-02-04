@@ -48,11 +48,7 @@ namespace KlayGE
 	class XMLAttribute;
 	typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
 
-	class bad_join;
-	template <typename ResultType>
-	class joiner;
-	class threader;
-	class thread_pool;
+	class ThreadPool;
 
 	class half;
 	template <typename T, int N>
