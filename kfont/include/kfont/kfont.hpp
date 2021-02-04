@@ -120,7 +120,7 @@ namespace KlayGE
 		int16_t dist_scale_;
 		std::unordered_map<int32_t, std::pair<int32_t, uint32_t>> char_index_advance_;
 		std::vector<font_info> char_info_;
-		std::vector<size_t> distances_addr_{1, 0};
+		std::vector<size_t> distances_addr_{0};
 		std::vector<uint8_t> distances_lzma_;
 		ResIdentifierPtr kfont_input_;
 		int64_t distances_lzma_start_;
