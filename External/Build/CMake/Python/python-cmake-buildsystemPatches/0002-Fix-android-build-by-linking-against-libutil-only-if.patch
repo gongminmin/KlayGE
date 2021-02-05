@@ -1,7 +1,7 @@
-From 3f77cd11b4ec20785b5e3105e094b731560aa8b6 Mon Sep 17 00:00:00 2001
+From 4dba53dd24ac57823044bf82588fabd8621ac784 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:20:12 -0500
-Subject: [PATCH 02/11] Fix android build by linking against libutil only if
+Subject: [PATCH 02/13] Fix android build by linking against libutil only if
  found
 
 This commit fixes the following configure error:

@@ -1,7 +1,7 @@
-From 83ab73e02bf5c2d4cdf7d189380532f7ae810ce8 Mon Sep 17 00:00:00 2001
+From f239ef2f9fc74dfe3a8fef6520e4159ab6423dbc Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 23 Jan 2018 23:38:33 -0800
-Subject: [PATCH 07/11] Make building python executable, python development,
+Subject: [PATCH 07/13] Make building python executable, python development,
  freeze importlib and pgen optional.
 
 ---

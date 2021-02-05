@@ -1,0 +1,32 @@
+From c3f83d247809985191b699a297396c6e5978c077 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Fri, 11 Dec 2020 23:27:12 -0800
+Subject: [PATCH 12/13] Skip CMP0045 on CMake >= 3.0.1
+
+The policy CMP0045 is set to old because of a CMake bug. It was fixed in CMake 3.0.0, we don't need the CMP0045 setting. Also, on newer CMake, this line is triggering a warning about CMP0045 will be removed in the future.
+---
+ cmake/CMakeExpandImportedTargets.cmake | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/cmake/CMakeExpandImportedTargets.cmake b/cmake/CMakeExpandImportedTargets.cmake
+index ac8cb9d..4fe0d33 100644
+--- a/cmake/CMakeExpandImportedTargets.cmake
++++ b/cmake/CMakeExpandImportedTargets.cmake
+@@ -52,9 +52,11 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
+       endif()
+    endif()
+ 
+-   # XXX ignore warning 'get_target_property() called with non-existent target'
+-   if(POLICY CMP0045)
+-     cmake_policy(SET CMP0045 OLD)
++   if(CMAKE_VERSION VERSION_LESS 3.0.1)
++      # XXX ignore warning 'get_target_property() called with non-existent target'
++      if(POLICY CMP0045)
++         cmake_policy(SET CMP0045 OLD)
++      endif()
+    endif()
+ 
+    # handle imported library targets
+-- 
+2.17.1.windows.2
+

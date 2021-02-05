@@ -1,7 +1,7 @@
-From 1b71030141cf7c8f8d3d4d24a29165c4e23292bf Mon Sep 17 00:00:00 2001
+From 5c17a86e0764d30fdccb0372f8f274740e4bde27 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 02:57:58 -0500
-Subject: [PATCH 04/11] Fix android build error specifying multiprocessing
+Subject: [PATCH 04/13] Fix android build error specifying multiprocessing
  extension requirements.
 
 This commit will fix the following build error:

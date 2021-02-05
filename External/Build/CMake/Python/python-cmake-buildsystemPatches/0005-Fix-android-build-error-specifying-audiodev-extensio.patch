@@ -1,7 +1,7 @@
-From 508fdece4cb7552a06e09888f3a9e0608fe8f1a0 Mon Sep 17 00:00:00 2001
+From d80d02dcadc14e2d79250a1fe7a5e19fc053a71e Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 02:59:34 -0500
-Subject: [PATCH 05/11] Fix android build error specifying audiodev extensions
+Subject: [PATCH 05/13] Fix android build error specifying audiodev extensions
  requirements.
 
 This commit introduce the variable HAVE_SYS_SOUNDCARD_H and fix the

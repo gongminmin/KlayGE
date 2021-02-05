@@ -1,7 +1,7 @@
-From b91fd31ea4a798639afdb9002496bbd5c7479ddd Mon Sep 17 00:00:00 2001
+From d4a236faeb15469f335b61db640c2497e8ce5287 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 18 Feb 2020 22:48:24 -0800
-Subject: [PATCH 11/11] Adapt to python 3.8
+Subject: [PATCH 11/13] Adapt to python 3.8
 
 ---
  CMakeLists.txt                  |  3 +++

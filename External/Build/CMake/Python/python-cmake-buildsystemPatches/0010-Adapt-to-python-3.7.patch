@@ -1,7 +1,7 @@
-From d224642ff82ee7012098a2aad4ea783b8ec63b8c Mon Sep 17 00:00:00 2001
+From 533f30c39a1409970d3c105b5fb30d09d5a6174c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 17 Jan 2019 23:55:48 -0800
-Subject: [PATCH 10/11] Adapt to python 3.7
+Subject: [PATCH 10/13] Adapt to python 3.7
 
 ---
  cmake/ConfigureChecks.cmake     |  4 ++++

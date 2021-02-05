@@ -19,7 +19,8 @@ if(need_patch)
 		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
 		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Don-t-set_target_properties-on-an-extension-when-it-"
 		"0007-Make-building-python-executable-python-development-f" "0008-Fix-some-problems-with-Android-and-iOS"
-		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7" "0011-Adapt-to-python-3.8")
+		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7" "0011-Adapt-to-python-3.8" "0012-Skip-CMP0045-on-CMake-3.0.1"
+		"0013-No-need-to-dereference-system-variables-in-if")
 		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/python-cmake-buildsystemPatches/${patch}.patch")
 	endforeach()
 endif()
@@ -105,6 +106,8 @@ set(WITH_COMPUTED_GOTOS OFF CACHE BOOL "" FORCE)
 set(WITH_DOC_STRINGS OFF CACHE BOOL "" FORCE)
 set(WITH_TSC OFF CACHE BOOL "" FORCE)
 set(USE_BUILTIN_ZLIB OFF CACHE BOOL "" FORCE)
+
+set(_download_${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}_md5 "")
 
 IF(CMAKE_CROSSCOMPILING)
 	STRING(TOLOWER ${CMAKE_SYSTEM_NAME} lc_system_name)

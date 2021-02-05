@@ -1,7 +1,7 @@
-From 008a56a6cf8a8382fee4a368e088396bd889bd9a Mon Sep 17 00:00:00 2001
+From 7a4ea2d8852c483f1e0914b523dec9db43d2c5de Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 10 Jan 2018 22:01:45 -0800
-Subject: [PATCH 08/11] Fix some problems with Android and iOS.
+Subject: [PATCH 08/13] Fix some problems with Android and iOS.
 
 ---
  CMakeLists.txt              | 2 +-

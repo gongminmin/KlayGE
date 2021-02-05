@@ -1,7 +1,7 @@
-From 626f0f41a88a09a8a4196fdf6c9513b58b479b8d Mon Sep 17 00:00:00 2001
+From 1ea116f6893e5541bcb30559f9359a95530a7125 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:21:34 -0500
-Subject: [PATCH 03/11] Fix build error when curses is enabled but curses
+Subject: [PATCH 03/13] Fix build error when curses is enabled but curses
  header are not installer.
 
 This commit fixes the following build error:

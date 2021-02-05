@@ -1,7 +1,7 @@
-From 724d77bdc230305566d85f100dbc64989aea2acb Mon Sep 17 00:00:00 2001
+From b86c09b44155e6b4cb615cb7acd63cbdd4fc2c3c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 30 Dec 2017 12:41:39 -0800
-Subject: [PATCH 06/11] Don't set_target_properties on an extension when it's
+Subject: [PATCH 06/13] Don't set_target_properties on an extension when it's
  disabled.
 
 ---

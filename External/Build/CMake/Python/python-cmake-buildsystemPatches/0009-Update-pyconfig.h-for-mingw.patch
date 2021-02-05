@@ -1,7 +1,7 @@
-From b26b21ea5087fa64a518f7a8b593a7fb595d365c Mon Sep 17 00:00:00 2001
+From d259151dcc3092d343da73294a8a038b431bf57d Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 9 Jan 2019 23:00:01 -0800
-Subject: [PATCH 09/11] Update pyconfig.h for mingw
+Subject: [PATCH 09/13] Update pyconfig.h for mingw
 
 ---
  CMakeLists.txt                |  2 +-
