@@ -78,7 +78,7 @@ namespace KlayGE
 
 			for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 			{
-				boost::container::flat_map<uint16_t, InputActionParamPtr> actions;
+				std::map<uint16_t, InputActionParamPtr> actions;
 
 				// 访问所有设备
 				for (auto const & device : devices_)

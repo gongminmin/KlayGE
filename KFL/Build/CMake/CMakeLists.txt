@@ -113,8 +113,6 @@ target_compile_definitions(${LIB_NAME}
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		# Not using target_link_libraries to prevent adding boost_container project
-		$<TARGET_PROPERTY:Boost::container,INTERFACE_INCLUDE_DIRECTORIES>
 		# Not using target_link_libraries to prevent depending on Boost::io
 		$<TARGET_PROPERTY:Boost::utility,INTERFACE_INCLUDE_DIRECTORIES>
 		${KFL_PROJECT_DIR}/include

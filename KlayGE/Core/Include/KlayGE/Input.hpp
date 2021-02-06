@@ -39,19 +39,11 @@
 #include <KFL/Timer.hpp>
 #include <KlayGE/Signal.hpp>
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing" // Ignore aliasing in flat_tree.hpp
-#endif
-#include <boost/container/flat_map.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-
 #include <vector>
 #include <string>
 #include <bitset>
 #include <array>
+#include <map>
 
 namespace KlayGE
 {
@@ -357,12 +349,12 @@ namespace KlayGE
 		uint16_t Action(uint16_t key) const;
 
 	private:
-		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
+		std::map<uint16_t, uint16_t> actionMap_;
 	};
 
 	typedef Signal::Signal<void(InputEngine const& sender, InputAction const& action)> input_signal;
 	typedef std::shared_ptr<input_signal> action_handler_t;
-	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
+	typedef std::map<uint32_t, InputActionMap> action_maps_t;
 
 	//  ‰»Î“˝«Ê
 	/////////////////////////////////////////////////////////////////////////////////

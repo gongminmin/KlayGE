@@ -41,14 +41,6 @@
 #include <vector>
 
 #include <boost/operators.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing" // Ignore aliasing in flat_tree.hpp
-#endif
-#include <boost/container/flat_map.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
 
 namespace KlayGE
 {
@@ -173,7 +165,7 @@ namespace KlayGE
 	private:
 		std::vector<ElementFormat> vertex_formats_;
 		std::vector<ElementFormat> texture_formats_;
-		boost::container::flat_map<ElementFormat, std::vector<uint32_t>> render_target_formats_;
+		std::map<ElementFormat, std::vector<uint32_t>> render_target_formats_;
 		std::vector<ElementFormat> uav_formats_;
 	};
 }

@@ -7,16 +7,10 @@
 #include <KlayGE/ResLoader.hpp>
 #include <kfont/kfont.hpp>
 
+#include <map>
 #include <numeric>
+
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing" // Ignore aliasing in flat_tree.hpp
-#endif
-#include <boost/container/flat_map.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
 
 #include "AsciiArtsPP.hpp"
 
@@ -109,7 +103,7 @@ namespace
 	class ascii_lums_builder
 	{
 	private:
-		typedef boost::container::flat_map<float, uint8_t> lum_to_char_type;
+		typedef std::map<float, uint8_t> lum_to_char_type;
 		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator>> diff_lum_to_iter_type;
 
 	public:
