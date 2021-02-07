@@ -177,7 +177,7 @@ namespace KlayGE
 	}
 
 	template <typename To, typename From>
-	inline typename std::add_rvalue_reference<To>::type checked_cast(From& p) noexcept
+	inline typename std::add_lvalue_reference<To>::type checked_cast(From& p) noexcept
 	{
 		typedef typename std::remove_reference<To>::type RawToType;
 		BOOST_ASSERT(dynamic_cast<RawToType*>(&p) == static_cast<RawToType*>(&p));
@@ -185,7 +185,7 @@ namespace KlayGE
 	}
 
 	template <typename To, typename From>
-	inline typename std::add_rvalue_reference<To const>::type checked_cast(From const& p) noexcept
+	inline typename std::add_lvalue_reference<To const>::type checked_cast(From const& p) noexcept
 	{
 		typedef typename std::remove_reference<To const>::type RawToType;
 		BOOST_ASSERT(dynamic_cast<RawToType const*>(&p) == static_cast<RawToType const*>(&p));
