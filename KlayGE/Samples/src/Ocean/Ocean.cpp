@@ -243,7 +243,7 @@ namespace
 			TexturePtr disp_param_tex = LoadSoftwareTexture("OceanDisplacementParam.dds");
 
 			bool use_load_tex;
-			if (disp_tex && grad_tex, disp_param_tex
+			if (disp_tex && grad_tex && disp_param_tex
 				&& (disp_tex->ArraySize() == ocean_param_.num_frames)
 				&& (disp_tex->Width(0) == static_cast<uint32_t>(ocean_param_.dmap_dim))
 				&& (disp_tex->Height(0) == disp_tex->Width(0))
