@@ -268,6 +268,11 @@ namespace glloader
 		void DumpEntries(char const * name)
 		{
 			HMODULE dll = ::LoadLibraryExA(name, NULL, DONT_RESOLVE_DLL_REFERENCES);
+			if (dll == 0)
+			{
+				return;
+			}
+
 			assert(IMAGE_DOS_SIGNATURE == reinterpret_cast<PIMAGE_DOS_HEADER>(dll)->e_magic);
 			PIMAGE_NT_HEADERS header = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<BYTE*>(dll) + reinterpret_cast<PIMAGE_DOS_HEADER>(dll)->e_lfanew);
 			assert(IMAGE_NT_SIGNATURE == header->Signature);

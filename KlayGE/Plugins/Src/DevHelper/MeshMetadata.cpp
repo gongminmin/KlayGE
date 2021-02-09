@@ -37,8 +37,15 @@
 #include <iterator>
 #include <fstream>
 
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 6313) // Incorrect operator: zero-valued flag cannot be tested with bitwise-and
+#endif
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/DevHelper/MeshMetadata.hpp>
 

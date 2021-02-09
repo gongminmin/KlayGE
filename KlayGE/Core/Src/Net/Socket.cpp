@@ -31,8 +31,8 @@
 		WSAIniter()
 		{
 			WSADATA wsaData;
-
-			WSAStartup(MAKEWORD(2, 0), &wsaData);
+			const int err = WSAStartup(MAKEWORD(2, 0), &wsaData);
+			KlayGE::Verify(err == 0);
 		}
 
 		~WSAIniter()

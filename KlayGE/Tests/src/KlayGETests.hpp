@@ -1,3 +1,10 @@
+#ifndef KLAYGE_TESTS_HPP
+#define KLAYGE_TESTS_HPP
+
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(disable : 6326) // Potential comparison of a constant with another constant.
+#endif
+
 #include <gtest/gtest.h>
 
 namespace KlayGE
@@ -10,3 +17,5 @@ namespace KlayGE
 		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,
 		uint32_t width, uint32_t height, float tolerance);
 }
+
+#endif	// KLAYGE_TESTS_HPP

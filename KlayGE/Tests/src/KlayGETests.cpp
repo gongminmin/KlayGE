@@ -228,7 +228,8 @@ int main(int argc, char** argv)
 	int ret_val = RUN_ALL_TESTS();
 	if (ret_val != 0)
 	{
-		getchar();
+		int ch = getchar();
+		KFL_UNUSED(ch);
 	}
 
 	return ret_val;

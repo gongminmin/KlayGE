@@ -37,7 +37,14 @@
 #include <charconv>
 #endif
 
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 6313) // Incorrect operator: zero-valued flag cannot be tested with bitwise-and
+#endif
 #include <rapidxml.hpp>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4100) // 'flags': unreferenced formal parameter

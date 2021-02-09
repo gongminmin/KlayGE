@@ -34,6 +34,7 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
+#define KLAYGE_COMPILER_MSVC
 #elif defined(__GNUC__)
 #define KLAYGE_COMPILER_GCC
 #elif defined(__clang__)
@@ -302,10 +303,17 @@ int main(int argc, char* argv[])
 		{
 			fp = fopen(output_file, "wb");
 
-			D3D11_SHADER_DESC desc;
+			D3D11_SHADER_DESC desc{};
 			reflection->GetDesc(&desc);
 			fwrite(&desc.Version, sizeof(desc.Version), 1, fp);
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 28199) // FALSE POSITIVE: Using possibly uninitialized memory 'desc'
+#endif
 			WriteString(desc.Creator, fp);
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 			fwrite(&desc.Flags, sizeof(desc.Flags), 1, fp);
 			fwrite(&desc.ConstantBuffers, sizeof(desc.ConstantBuffers), 1, fp);
 			fwrite(&desc.BoundResources, sizeof(desc.BoundResources), 1, fp);

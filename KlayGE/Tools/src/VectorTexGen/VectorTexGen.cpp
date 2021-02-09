@@ -52,9 +52,15 @@
 
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
-#pragma warning(disable: 4244) // Conversion from doubel to int64
-#pragma warning(disable: 4456) // Declaration of 'name' hides previous local declaration
-#pragma warning(disable: 4702) // Unreachable code
+#pragma warning(disable : 4244) // Conversion from doubel to int64
+#pragma warning(disable : 4456) // Declaration of 'name' hides previous local declaration
+#pragma warning(disable : 4702) // Unreachable code
+#pragma warning(disable : 6001) // Using uninitialized memory '*grad->stops'
+#pragma warning(disable : 6031) // Return value ignored: 'sscanf'
+#pragma warning(disable : 6246) // Local declaration of 'name' hides declaration of the same name in outer scope
+#pragma warning(disable : 6308) // 'realloc' might return null pointer
+#pragma warning(disable : 6385) // Reading invalid data from 'grad->stops'
+#pragma warning(disable : 6386) // Buffer overrun while writing to 'grad->stops'
 #elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" // Ignore deprecated function calls
@@ -66,8 +72,15 @@
 #elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic pop
 #endif
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 6308) // 'realloc' might return null pointer
+#endif
 #define NANOSVGRAST_IMPLEMENTATION
 #include <nanosvgrast.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 
 using namespace std;
 using namespace KlayGE;

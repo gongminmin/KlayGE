@@ -430,7 +430,7 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				FreeLibrary(mod_xaudio);
 			}
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -464,7 +464,7 @@ INT_PTR CALLBACK Input_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("MsgInput")));
 			}
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -496,7 +496,7 @@ INT_PTR CALLBACK Show_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPARA
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
 			SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DShow")));
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -619,14 +619,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					HWND hFactoryCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_FACTORY_COMBO);
 					int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-					TCHAR buf[256];
+					TCHAR buf[256] = {};
 					SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					Convert(cfg.render_factory_name, buf);
 				}
 				{
 					HWND hResCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_RES_COMBO);
 					int n = static_cast<int>(SendMessage(hResCombo, CB_GETCURSEL, 0, 0));
-					TCHAR buf[256];
+					TCHAR buf[256] = {};
 					SendMessage(hResCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					std::string str;
 					Convert(str, buf);
@@ -775,21 +775,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[AUDIO_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.audio_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[INPUT_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.input_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[SHOW_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.show_factory_name, buf);
 			}
