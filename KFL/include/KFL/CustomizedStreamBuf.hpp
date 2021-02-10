@@ -68,12 +68,7 @@ namespace KlayGE
 	class CallbackOutputStreamBuf : public std::streambuf, boost::noncopyable
 	{
 	public:
-		explicit CallbackOutputStreamBuf(Callback const & cb)
-			: cb_(cb)
-		{
-		}
-
-		explicit CallbackOutputStreamBuf(Callback&& cb)
+		explicit CallbackOutputStreamBuf(Callback cb) noexcept
 			: cb_(std::move(cb))
 		{
 		}

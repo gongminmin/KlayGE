@@ -75,8 +75,7 @@ namespace KlayGE
 		}
 		Quaternion_T(Quaternion_T const & rhs) noexcept;
 		Quaternion_T(Quaternion_T&& rhs) noexcept;
-		constexpr Quaternion_T(T x, T y, T z, T w) noexcept
-			: quat_(x, y, z, w)
+		constexpr Quaternion_T(T x, T y, T z, T w) noexcept : quat_(std::move(x), std::move(y), std::move(z), std::move(w))
 		{
 		}
 

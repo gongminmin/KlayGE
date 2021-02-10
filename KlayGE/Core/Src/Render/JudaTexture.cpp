@@ -669,7 +669,7 @@ namespace KlayGE
 					memset(data.get(), 0, full_tile_bytes);
 				}
 
-				iter = decoded_block_cache_.emplace(data_index, DecodedBlockInfo(std::move(data), decode_tick_)).first;
+				iter = decoded_block_cache_.emplace(data_index, DecodedBlockInfo{std::move(data), decode_tick_}).first;
 			}
 
 			return iter->second.data.get();

@@ -57,15 +57,9 @@ namespace KlayGE
 		OBBox_T(Vector_T<T, 3> const & center,
 				Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
 				Vector_T<T, 3> const & extent) noexcept;
-		constexpr OBBox_T(Vector_T<T, 3> const & center,
-				Quaternion_T<T> const & rotation,
-				Vector_T<T, 3> const & extent) noexcept
-			: center_(center), rotation_(rotation), extent_(extent)
-		{
-		}
-		constexpr OBBox_T(Vector_T<T, 3>&& center,
-				Quaternion_T<T>&& rotation,
-				Vector_T<T, 3>&& extent) noexcept
+		constexpr OBBox_T(Vector_T<T, 3> center,
+				Quaternion_T<T> rotation,
+				Vector_T<T, 3> extent) noexcept
 			: center_(std::move(center)), rotation_(std::move(rotation)), extent_(std::move(extent))
 		{
 		}

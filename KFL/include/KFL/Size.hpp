@@ -81,9 +81,10 @@ namespace KlayGE
 			: size_(rhs.size_)
 		{
 		}
-		Size_T(Size_T&& rhs) noexcept;
-		constexpr Size_T(T cx, T cy) noexcept
-			: size_(cx, cy)
+		constexpr Size_T(Size_T&& rhs) noexcept : size_(std::move(rhs.size_))
+		{
+		}
+		constexpr Size_T(T cx, T cy) noexcept : size_(std::move(cx), std::move(cy))
 		{
 		}
 

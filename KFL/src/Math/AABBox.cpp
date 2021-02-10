@@ -37,21 +37,12 @@
 namespace KlayGE
 {
 	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) noexcept
-				: min_(vMin), max_(vMax)
-	{
-		BOOST_ASSERT(vMin.x() <= vMax.x());
-		BOOST_ASSERT(vMin.y() <= vMax.y());
-		BOOST_ASSERT(vMin.z() <= vMax.z());
-	}
-
-	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax) noexcept
+	AABBox_T<T>::AABBox_T(Vector_T<T, 3> vMin, Vector_T<T, 3> vMax) noexcept
 		: min_(std::move(vMin)), max_(std::move(vMax))
 	{
-		BOOST_ASSERT(vMin.x() <= vMax.x());
-		BOOST_ASSERT(vMin.y() <= vMax.y());
-		BOOST_ASSERT(vMin.z() <= vMax.z());
+		BOOST_ASSERT(min_.x() <= max_.x());
+		BOOST_ASSERT(min_.y() <= max_.y());
+		BOOST_ASSERT(min_.z() <= max_.z());
 	}
 
 	template <typename T>

@@ -54,8 +54,8 @@ namespace KlayGE
 			: radius_()
 		{
 		}
-		constexpr Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept
-			: center_(center), radius_(radius)
+		constexpr Sphere_T(Vector_T<T, 3> center, T radius) noexcept
+			: center_(std::move(center)), radius_(std::move(radius))
 		{
 		}
 		Sphere_T(Sphere_T const & rhs) noexcept;

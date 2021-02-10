@@ -166,11 +166,6 @@ namespace KlayGE
 		{
 			std::unique_ptr<uint8_t[]> data;
 			uint64_t tick;
-
-			DecodedBlockInfo(std::unique_ptr<uint8_t[]>&& d, uint64_t t)
-				: data(std::move(d)), tick(t)
-			{
-			}
 		};
 		std::unordered_map<uint32_t, DecodedBlockInfo> decoded_block_cache_;
 		uint64_t decode_tick_;

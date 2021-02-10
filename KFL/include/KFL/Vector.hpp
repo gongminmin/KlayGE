@@ -102,33 +102,15 @@ namespace KlayGE
 			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs.data());
 		}
 
-		constexpr Vector_T(T const & x, T const & y) noexcept
-			: vec_{ x, y }
+		constexpr Vector_T(T x, T y) noexcept : vec_{std::move(x), std::move(y)}
 		{
 			static_assert(2 == elem_num, "Must be 2D vector.");
 		}
-		constexpr Vector_T(T&& x, T&& y) noexcept
-			: vec_{ std::move(x), std::move(y) }
-		{
-			static_assert(2 == elem_num, "Must be 2D vector.");
-		}
-		constexpr Vector_T(T const & x, T const & y, T const & z) noexcept
-			: vec_{ x, y, z }
+		constexpr Vector_T(T x, T y, T z) noexcept : vec_{std::move(x), std::move(y), std::move(z)}
 		{
 			static_assert(3 == elem_num, "Must be 3D vector.");
 		}
-		constexpr Vector_T(T&& x, T&& y, T&& z) noexcept
-			: vec_{ std::move(x), std::move(y), std::move(z) }
-		{
-			static_assert(3 == elem_num, "Must be 3D vector.");
-		}
-		constexpr Vector_T(T const & x, T const & y, T const & z, T const & w) noexcept
-			: vec_{ x, y, z, w }
-		{
-			static_assert(4 == elem_num, "Must be 4D vector.");
-		}
-		constexpr Vector_T(T&& x, T&& y, T&& z, T&& w) noexcept
-			: vec_{ std::move(x), std::move(y), std::move(z), std::move(w) }
+		constexpr Vector_T(T x, T y, T z, T w) noexcept : vec_{std::move(x), std::move(y), std::move(z), std::move(w)}
 		{
 			static_assert(4 == elem_num, "Must be 4D vector.");
 		}

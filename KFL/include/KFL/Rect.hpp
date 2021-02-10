@@ -88,7 +88,7 @@ namespace KlayGE
 		}
 		Rect_T(Rect_T&& rhs) noexcept;
 		constexpr Rect_T(T left, T top, T right, T bottom) noexcept
-			: rect_(left, top, right, bottom)
+			: rect_(std::move(left), std::move(top), std::move(right), std::move(bottom))
 		{
 		}
 

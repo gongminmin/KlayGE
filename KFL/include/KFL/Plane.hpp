@@ -68,16 +68,12 @@ namespace KlayGE
 		}
 		Plane_T(Plane_T const & rhs) noexcept;
 		Plane_T(Plane_T&& rhs) noexcept;
-		constexpr Plane_T(Vector_T<T, elem_num> const & rhs) noexcept
-			: plane_(rhs)
-		{
-		}
-		constexpr Plane_T(Vector_T<T, elem_num>&& rhs) noexcept
+		explicit constexpr Plane_T(Vector_T<T, elem_num> rhs) noexcept
 			: plane_(std::move(rhs))
 		{
 		}
 		constexpr Plane_T(T a, T b, T c, T d) noexcept
-			: plane_(a, b, c, d)
+			: plane_(std::move(a), std::move(b), std::move(c), std::move(d))
 		{
 		}
 

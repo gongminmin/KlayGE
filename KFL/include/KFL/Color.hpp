@@ -76,7 +76,7 @@ namespace KlayGE
 		Color_T(Color_T const & rhs) noexcept;
 		Color_T(Color_T&& rhs) noexcept;
 		constexpr Color_T(T r, T g, T b, T a) noexcept
-			: col_(r, g, b, a)
+			: col_(std::move(r), std::move(g), std::move(b), std::move(a))
 		{
 		}
 		explicit Color_T(uint32_t dw) noexcept;

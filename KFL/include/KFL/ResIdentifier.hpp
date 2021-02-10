@@ -46,12 +46,12 @@ namespace KlayGE
 	public:
 		ResIdentifier(std::string_view name, uint64_t timestamp,
 				std::shared_ptr<std::istream> const & is)
-			: ResIdentifier(name, timestamp, is, std::shared_ptr<std::streambuf>())
+			: ResIdentifier(std::move(name), timestamp, is, std::shared_ptr<std::streambuf>())
 		{
 		}
 		ResIdentifier(std::string_view name, uint64_t timestamp,
 				std::shared_ptr<std::istream> const & is, std::shared_ptr<std::streambuf> const & streambuf)
-			: res_name_(name), timestamp_(timestamp), istream_(is), streambuf_(streambuf)
+			: res_name_(std::move(name)), timestamp_(timestamp), istream_(is), streambuf_(streambuf)
 		{
 		}
 

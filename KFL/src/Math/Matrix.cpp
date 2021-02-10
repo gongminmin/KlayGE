@@ -62,10 +62,25 @@ namespace KlayGE
 		T f31, T f32, T f33, T f34,
 		T f41, T f42, T f43, T f44) noexcept
 	{
-		m_[0][0] = f11;	m_[0][1] = f12;	m_[0][2] = f13;	m_[0][3] = f14;
-		m_[1][0] = f21;	m_[1][1] = f22;	m_[1][2] = f23;	m_[1][3] = f24;
-		m_[2][0] = f31;	m_[2][1] = f32;	m_[2][2] = f33;	m_[2][3] = f34;
-		m_[3][0] = f41;	m_[3][1] = f42;	m_[3][2] = f43;	m_[3][3] = f44;
+		m_[0][0] = std::move(f11);
+		m_[0][1] = std::move(f12);
+		m_[0][2] = std::move(f13);
+		m_[0][3] = std::move(f14);
+
+		m_[1][0] = std::move(f21);
+		m_[1][1] = std::move(f22);
+		m_[1][2] = std::move(f23);
+		m_[1][3] = std::move(f24);
+
+		m_[2][0] = std::move(f31);
+		m_[2][1] = std::move(f32);
+		m_[2][2] = std::move(f33);
+		m_[2][3] = std::move(f34);
+
+		m_[3][0] = std::move(f41);
+		m_[3][1] = std::move(f42);
+		m_[3][2] = std::move(f43);
+		m_[3][3] = std::move(f44);
 	}
 
 	template <typename T>

@@ -196,7 +196,7 @@ namespace KlayGE
 
 	std::string ReadShortString(ResIdentifier& res)
 	{
-		uint8_t len;
+		uint8_t len = 0;
 		res.read(&len, sizeof(len));
 
 		std::string tmp;
