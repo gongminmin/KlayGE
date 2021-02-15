@@ -234,9 +234,9 @@ public:
 		auto vb_in = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
 		auto vb_sanity = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read | EAH_CPU_Write, num_vertices * sizeof(float4), nullptr);
 
-		uint32_t const indirect_args[] = { 0, 1, 0, 0 };
+		DrawIndirectArgs const indirect_args{0, 1, 0, 0};
 		auto vb_num = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_DrawIndirectArgs | EAH_GPU_Unordered | EAH_Raw,
-			sizeof(indirect_args), indirect_args, sizeof(uint32_t));
+			sizeof(indirect_args), &indirect_args, sizeof(uint32_t));
 		auto vb_num_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb_num->Size(), nullptr);
 
 		auto rl_in = rf.MakeRenderLayout();
@@ -288,7 +288,7 @@ public:
 				}
 			}
 
-			vb_num->UpdateSubresource(0, sizeof(indirect_args), indirect_args);
+			vb_num->UpdateSubresource(0, sizeof(indirect_args), &indirect_args);
 
 			re.BindSOBuffers(rl_intermediate);
 			re.BindFrameBuffer(fb);

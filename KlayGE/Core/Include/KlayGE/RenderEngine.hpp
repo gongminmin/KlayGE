@@ -545,6 +545,39 @@ namespace KlayGE
 
 		mutable std::unique_ptr<Mipmapper> mipmapper_;
 	};
+
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
+	struct DrawIndirectArgs
+	{
+		uint32_t num_vertices_per_instance;
+		uint32_t num_instances;
+		uint32_t start_vertex_location;
+		uint32_t start_instance_location;
+	};
+	static_assert(sizeof(DrawIndirectArgs) == 16);
+
+	struct DrawIndirectIndexedArgs
+	{
+		uint32_t num_indices_per_instance;
+		uint32_t num_instances;
+		uint32_t start_index_location;
+		int32_t base_vertex_location;
+		uint32_t start_instance_location;
+	};
+	static_assert(sizeof(DrawIndirectIndexedArgs) == 20);
+
+	struct DispatchIndirectArgs
+	{
+		uint32_t tgx;
+		uint32_t tgy;
+		uint32_t tgz;
+	};
+	static_assert(sizeof(DispatchIndirectArgs) == 12);
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
 }
 
 #endif			// _RENDERENGINE_HPP

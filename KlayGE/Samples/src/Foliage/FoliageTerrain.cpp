@@ -362,8 +362,8 @@ namespace KlayGE
 
 		if (use_draw_indirect_)
 		{
-			std::vector<uint32_t> lod_indirect_args;
-			std::vector<uint32_t> imposter_indirect_args(plant_meshes_.size() * 4);
+			std::vector<DrawIndirectIndexedArgs> lod_indirect_args;
+			std::vector<DrawIndirectArgs> imposter_indirect_args(plant_meshes_.size());
 			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 			{
 				for (uint32_t lod = 0; lod < plant_meshes_[plant_type]->NumLods(); ++ lod)
@@ -372,26 +372,23 @@ namespace KlayGE
 					{
 						auto const& mesh = checked_cast<FoliageMesh&>(*plant_meshes_[plant_type]->Mesh(i));
 						auto const& rl = mesh.GetRenderLayout(lod);
-
-						lod_indirect_args.insert(lod_indirect_args.end(),
-							{ rl.NumIndices(), 0, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation() });
+						lod_indirect_args.push_back(DrawIndirectIndexedArgs{rl.NumIndices(), 0, rl.StartIndexLocation(),
+							static_cast<int32_t>(rl.StartVertexLocation()), rl.StartInstanceLocation()});
 					}
 				}
 
 				{
 					auto const& mesh = checked_cast<FoliageImpostorMesh&>(*plant_impostor_meshes_[plant_type]);
 					auto const& rl = mesh.GetRenderLayout();
-
-					imposter_indirect_args[plant_type * 4 + 0] = rl.NumVertices();
-					imposter_indirect_args[plant_type * 4 + 1] = 0;
-					imposter_indirect_args[plant_type * 4 + 2] = rl.StartVertexLocation();
-					imposter_indirect_args[plant_type * 4 + 3] = rl.StartInstanceLocation();
+					imposter_indirect_args[plant_type] = {rl.NumVertices(), 0, rl.StartVertexLocation(), rl.StartInstanceLocation()};
 				}
 			}
 			plant_lod_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
-				static_cast<uint32_t>(lod_indirect_args.size() * sizeof(uint32_t)), lod_indirect_args.data(), sizeof(uint32_t));
+				static_cast<uint32_t>(lod_indirect_args.size() * sizeof(lod_indirect_args[0])), lod_indirect_args.data(),
+				sizeof(lod_indirect_args[0]));
 			plant_impostor_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
-				static_cast<uint32_t>(imposter_indirect_args.size() * sizeof(uint32_t)), imposter_indirect_args.data(), sizeof(uint32_t));
+				static_cast<uint32_t>(imposter_indirect_args.size() * sizeof(imposter_indirect_args[0])), imposter_indirect_args.data(),
+				sizeof(imposter_indirect_args[0]));
 
 			uint32_t offset = 0;
 			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
@@ -405,7 +402,7 @@ namespace KlayGE
 
 						rl.BindIndirectArgs(plant_lod_primitive_indirect_args_);
 						rl.IndirectArgsOffset(offset);
-						offset += 5 * sizeof(uint32_t);
+						offset += sizeof(lod_indirect_args[0]);
 					}
 				}
 
@@ -414,7 +411,7 @@ namespace KlayGE
 					auto& rl = mesh.GetRenderLayout();
 
 					rl.BindIndirectArgs(plant_impostor_primitive_indirect_args_);
-					rl.IndirectArgsOffset(static_cast<uint32_t>(plant_type * 4 * sizeof(uint32_t)));
+					rl.IndirectArgsOffset(static_cast<uint32_t>(plant_type * sizeof(imposter_indirect_args[0])));
 				}
 			}
 		}
@@ -513,7 +510,7 @@ namespace KlayGE
 					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumMeshes(); ++ i)
 					{
 						plant_primitive_written_buff_->CopyToSubBuffer(*plant_lod_primitive_indirect_args_, offset, 0, sizeof(uint32_t));
-						offset += 5 * sizeof(uint32_t);
+						offset += sizeof(DrawIndirectIndexedArgs);
 					}
 				}
 				else
@@ -557,7 +554,7 @@ namespace KlayGE
 				re.Render(*foliage_dist_effect_, *foliage_impostor_dist_rw_tech_, *foliage_dist_rl_);
 
 				plant_primitive_written_buff_->CopyToSubBuffer(*plant_impostor_primitive_indirect_args_,
-					static_cast<uint32_t>((plant_type * 4 + 1) * sizeof(uint32_t)), 0, sizeof(uint32_t));
+					static_cast<uint32_t>(plant_type * sizeof(DrawIndirectArgs) + sizeof(uint32_t)), 0, sizeof(uint32_t));
 			}
 			else
 			{
