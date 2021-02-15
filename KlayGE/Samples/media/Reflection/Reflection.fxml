@@ -133,7 +133,7 @@ float4 DualSideSSRReflectionPS(
 	return ssr;
 }
 
-void DualSideSSRSpecialShadingVS(uint instance_id : SV_InstanceID,
+void SSRSpecialShadingVS(uint instance_id : SV_InstanceID,
 			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
@@ -177,7 +177,7 @@ void DualSideSSRSpecialShadingVS(uint instance_id : SV_InstanceID,
 #endif
 }
 
-float4 DualSideSSRSpecialShadingPS(
+float4 SSRSpecialShadingPS(
 			SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 			float3 pos_es : TEXCOORD1,
 			float3 normal_os : TEXCOORD2,
@@ -253,7 +253,7 @@ void DualSideSSRReflectionNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc_front[3] :
 	}
 }
 
-struct DualSideSSRSpecialShadingPS_In
+struct SSRSpecialShadingPS_In
 {
 	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0;
 	float3 pos_es : TEXCOORD1;
@@ -265,12 +265,12 @@ struct DualSideSSRSpecialShadingPS_In
 };
 
 [maxvertexcount(3)]
-void DualSideSSRSpecialShadingNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD0, triangle float3 in_pos_es[3] : TEXCOORD1,
+void SSRSpecialShadingNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD0, triangle float3 in_pos_es[3] : TEXCOORD1,
 	triangle float3 in_normal_os[3] : TEXCOORD2, triangle float3 in_pos_os[3] : TEXCOORD3, triangle float2 in_texcoord[3] : TEXCOORD4,
 	triangle float in_rt_index[3] : TEXCOORD5, triangle float4 in_position[3] : POSITION,
-	inout TriangleStream<DualSideSSRSpecialShadingPS_In> out_stream)
+	inout TriangleStream<SSRSpecialShadingPS_In> out_stream)
 {
-	DualSideSSRSpecialShadingPS_In output;
+	SSRSpecialShadingPS_In output;
 	output.rt_index = (uint)in_rt_index[0];
 
 	[unroll]
@@ -302,7 +302,7 @@ void DualSideSSRSpecialShadingNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : T
 		</pass>
 	</technique>
 
-	<technique name="DualSideSSRSpecialShadingTech" inherit="SpecialShadingTech">
+	<technique name="SSRSpecialShadingTech" inherit="SpecialShadingTech">
 		<pass name="p0">
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -312,13 +312,13 @@ void DualSideSSRSpecialShadingNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : T
 			<state name="src_blend_alpha" value="zero"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="DualSideSSRSpecialShadingVS()"/>
-			<state name="pixel_shader" value="DualSideSSRSpecialShadingPS()"/>
+			<state name="vertex_shader" value="SSRSpecialShadingVS()"/>
+			<state name="pixel_shader" value="SSRSpecialShadingPS()"/>
 		</pass>
 	</technique>
-	<technique name="DualSideSSRSpecialShadingNoVpRtTech" inherit="DualSideSSRSpecialShadingTech">
+	<technique name="SSRSpecialShadingNoVpRtTech" inherit="SSRSpecialShadingTech">
 		<pass name="p0">
-			<state name="geometry_shader" value="DualSideSSRSpecialShadingNoVpRtGS()"/>
+			<state name="geometry_shader" value="SSRSpecialShadingNoVpRtGS()"/>
 		</pass>
 	</technique>
 
@@ -411,84 +411,6 @@ float4 SingleSideSSRReflectionPS(
 
 	return ssr;
 }
-
-void SingleSideSSRSpecialShadingVS(uint instance_id : SV_InstanceID,
-			float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-			out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
-			out float3 oPosES : TEXCOORD1,
-			out float3 oNormalOS : TEXCOORD2,
-			out float3 oPosOS : TEXCOORD3,
-			out float2 oTexcoord : TEXCOORD4,
-#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
-			out uint oRtIndex : SV_RenderTargetArrayIndex,
-			out float4 oPos : SV_Position
-#else
-			out float oRtIndex : TEXCOORD5,
-			out float4 oPos : POSITION
-#endif
-			)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-
-	uint camera_index = CameraIndex(instance_id);
-	KlayGECameraInfo camera = cameras[camera_index];
-	float4x4 mvp = camera.mvp;
-	float4x4 model_view = camera.model_view;
-
-	oPos = mul(pos, mvp);
-	oPosES = mul(pos, model_view).xyz;
-
-	oTexcoord = texcoord;
-	
-	tangent_quat = tangent_quat * 2 - 1;
-	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
-	oPosOS = pos.xyz * 200;
-
-	oTc = EncodeSSTexcoord(oPos);
-
-#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
-	oRtIndex = camera_index;
-#else
-	oRtIndex = camera_index + 0.5f;
-#endif
-}
-
-float4 SingleSideSSRSpecialShadingPS(
-			SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
-			float3 pos_es : TEXCOORD1,
-			float3 normal_os : TEXCOORD2,
-			float3 pos_os : TEXCOORD3,
-			float2 texcoord : TEXCOORD4,
-			uint rt_index : SV_RenderTargetArrayIndex) : SV_Target
-{
-	float2 tc = DecodeSSTexcoord(ss_tc);
-
-	KlayGECameraInfo camera = cameras[rt_index];
-	float4x4 model_view = camera.model_view;
-
-	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
-	float3 normal = normal_os + bump * 0.001f;
-	float3 normal_es = normalize(mul(normal, (float3x3)model_view));
-
-	float3 albedo = albedo_clr.rgb;
-	if (albedo_map_enabled)
-	{
-		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	float metalness = metalness_glossiness_factor.x;
-	if (metalness_glossiness_factor.z > 0.5f)
-	{
-		metalness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).x;
-	}
-	
-	float3 specular = SpecularColor(albedo, metalness);
-	
-	float fresnel = FresnelTerm(-normalize(pos_es), normal_es, specular).x;
-	return float4(reflection_tex.Sample(reflection_sampler, tc).xyz, fresnel);
-}
 		]]>
 	</shader>
 
@@ -538,26 +460,6 @@ void SingleSideSSRReflectionNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEX
 		</pass>
 	</technique>
 	<technique name="SingleSideSSRReflectionNoVpRtTech" inherit="SingleSideSSRReflectionTech">
-		<pass name="p0">
-			<state name="geometry_shader" value="SingleSideSSRReflectionNoVpRtGS()"/>
-		</pass>
-	</technique>
-
-	<technique name="SingleSideSSRSpecialShadingTech" inherit="SpecialShadingTech">
-		<pass name="p0">
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="one"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="zero"/>
-			<state name="dest_blend_alpha" value="one"/>
-
-			<state name="vertex_shader" value="SingleSideSSRSpecialShadingVS()"/>
-			<state name="pixel_shader" value="SingleSideSSRSpecialShadingPS()"/>
-		</pass>
-	</technique>
-	<technique name="SingleSideSSRSpecialShadingNoVpRtTech" inherit="SingleSideSSRSpecialShadingTech">
 		<pass name="p0">
 			<state name="geometry_shader" value="SingleSideSSRReflectionNoVpRtGS()"/>
 		</pass>

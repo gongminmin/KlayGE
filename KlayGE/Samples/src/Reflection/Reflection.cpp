@@ -52,12 +52,12 @@ namespace
 			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
 			{
 				reflection_tech_ = effect_->TechniqueByName("DualSideSSRReflectionTech");
-				special_shading_tech_ = effect_->TechniqueByName("DualSideSSRSpecialShadingTech");
+				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingTech");
 			}
 			else
 			{
 				reflection_tech_ = effect_->TechniqueByName("DualSideSSRReflectionNoVpRtTech");
-				special_shading_tech_ = effect_->TechniqueByName("DualSideSSRSpecialShadingNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingNoVpRtTech");
 			}
 
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
@@ -175,12 +175,12 @@ namespace
 			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
 			{
 				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionTech");
-				special_shading_tech_ = effect_->TechniqueByName("SingleSideSSRSpecialShadingTech");
+				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingTech");
 			}
 			else
 			{
 				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionNoVpRtTech");
-				special_shading_tech_ = effect_->TechniqueByName("SingleSideSSRSpecialShadingNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingNoVpRtTech");
 			}
 
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
@@ -500,28 +500,31 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 	if (0 == pass)
 	{
-		CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
+		if (teapot_node_)
+		{
+			CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
 
-		float3 eye = screen_camera_->EyePos();
-		float3 at = screen_camera_->LookAt();
+			float3 eye = screen_camera_->EyePos();
+			float3 at = screen_camera_->LookAt();
 
-		auto& teapot_mesh = teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>();
+			auto& teapot_mesh = teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>();
 
-		float3 center = MathLib::transform_coord(teapot_mesh.PosBound().Center(), teapot_node_->TransformToWorld());
-		float3 direction = eye - at;
+			float3 center = MathLib::transform_coord(teapot_mesh.PosBound().Center(), teapot_node_->TransformToWorld());
+			float3 direction = eye - at;
 
-		back_camera->LookAtDist(MathLib::length(direction));
-		back_camera->BoundSceneNode()->TransformToWorld(
-			MathLib::inverse(MathLib::look_at_lh(center, center + direction, screen_camera_->UpVec())));
-		back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
+			back_camera->LookAtDist(MathLib::length(direction));
+			back_camera->BoundSceneNode()->TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(center, center + direction, screen_camera_->UpVec())));
+			back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
 
-		teapot_mesh.BackCamera(back_camera);
+			teapot_mesh.BackCamera(back_camera);
 
-		teapot_mesh.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
-		teapot_mesh.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
-		teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
-		teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
-
+			teapot_mesh.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
+			teapot_mesh.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
+			teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
+			teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
+		}
+		
 		auto& plane = plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>();
 		plane.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
 		plane.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
@@ -540,16 +543,13 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			teapot_node_->Visible(true);
 		}
 	}
-	if (plane_node_)
+	if (0 == deferred_rendering_->ActiveViewport())
 	{
-		if (0 == deferred_rendering_->ActiveViewport())
-		{
-			plane_node_->Visible(false);
-		}
-		else
-		{
-			plane_node_->Visible(true);
-		}
+		plane_node_->Visible(false);
+	}
+	else
+	{
+		plane_node_->Visible(true);
 	}
 
 	return urt;
