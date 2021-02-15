@@ -30,11 +30,10 @@ using namespace KlayGE;
 
 namespace
 {
-	class ReflectMesh : public StaticMesh
+	class DualSideSSRMesh : public StaticMesh
 	{
 	public:
-		explicit ReflectMesh(std::wstring_view name)
-			: StaticMesh(name)
+		explicit DualSideSSRMesh(std::wstring_view name) : StaticMesh(name)
 		{
 		}
 
@@ -52,13 +51,13 @@ namespace
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
 			{
-				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
-				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
+				reflection_tech_ = effect_->TechniqueByName("DualSideSSRReflectionTech");
+				special_shading_tech_ = effect_->TechniqueByName("DualSideSSRSpecialShadingTech");
 			}
 			else
 			{
-				reflection_tech_ = effect_->TechniqueByName("ReflectReflectionNoVpRtTech");
-				special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingNoVpRtTech");
+				reflection_tech_ = effect_->TechniqueByName("DualSideSSRReflectionNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("DualSideSSRSpecialShadingNoVpRtTech");
 			}
 
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
@@ -73,7 +72,7 @@ namespace
 		void OnRenderBegin()
 		{
 			StaticMesh::OnRenderBegin();
-					
+
 			switch (type_)
 			{
 			case PT_OpaqueReflection:
@@ -158,28 +157,112 @@ namespace
 			*(effect_->ParameterByName("skybox_tex")) = y_cube;
 			*(effect_->ParameterByName("skybox_C_tex")) = c_cube;
 		}
-
-	private:
-		TexturePtr front_refl_tex_;
-		TexturePtr front_refl_depth_tex_;
-		TexturePtr back_refl_tex_;
-		TexturePtr back_refl_depth_tex_;
 	};
 
-	class DinoMesh : public StaticMesh
+	class SingleSideSSRPlane : public RenderablePlane
 	{
 	public:
-		explicit DinoMesh(std::wstring_view name)
-			: StaticMesh(name)
+		explicit SingleSideSSRPlane() : RenderablePlane(20.0f, 20.0f, 1, 1, true, true)
 		{
+			mtl_ = SyncLoadRenderMaterial("ReflectPlane.mtlml");
+
+			effect_attrs_ |= EA_Reflection;
+
+			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
+			technique_ = special_shading_tech_;
+
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
+			{
+				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionTech");
+				special_shading_tech_ = effect_->TechniqueByName("SingleSideSSRSpecialShadingTech");
+			}
+			else
+			{
+				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionNoVpRtTech");
+				special_shading_tech_ = effect_->TechniqueByName("SingleSideSSRSpecialShadingNoVpRtTech");
+			}
+
+			reflection_alpha_blend_back_tech_ = reflection_tech_;
+			reflection_alpha_blend_front_tech_ = reflection_tech_;
+
+			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
+			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
+
+			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");
 		}
 
-	private:
-		void DoBuildMeshInfo(RenderModel const & model) override
+		void OnRenderBegin() override
 		{
-			StaticMesh::DoBuildMeshInfo(model);
+			model_mat_ = MathLib::rotation_x(DEG90) * MathLib::translation(0.0f, -0.2f, 0.0f);
 
-			mtl_ = SyncLoadRenderMaterial("DinoMesh.mtlml");
+			RenderablePlane::OnRenderBegin();
+
+			switch (type_)
+			{
+			case PT_OpaqueReflection:
+			case PT_TransparencyBackReflection:
+			case PT_TransparencyFrontReflection:
+			{
+				App3DFramework const& app = Context::Instance().AppInstance();
+				Camera const& camera = app.ActiveCamera();
+				*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
+				*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+				float4 const near_q_far = camera.NearQFarParam();
+				*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
+				*(effect_->ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
+				*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
+			}
+			break;
+
+			default:
+				break;
+			}
+		}
+
+		void FrontReflectionTex(TexturePtr const& tex)
+		{
+			*(effect_->ParameterByName("front_side_tex")) = tex;
+		}
+		void FrontReflectionDepthTex(TexturePtr const& tex)
+		{
+			*(effect_->ParameterByName("front_side_depth_tex")) = tex;
+		}
+
+		void BackReflectionTex(TexturePtr const& tex)
+		{
+			*(effect_->ParameterByName("back_side_tex")) = tex;
+		}
+		void BackReflectionDepthTex(TexturePtr const& tex)
+		{
+			*(effect_->ParameterByName("back_side_depth_tex")) = tex;
+		}
+
+		void MinSamples(int32_t samples)
+		{
+			*(effect_->ParameterByName("min_samples")) = samples;
+		}
+		void MaxSamples(int32_t samples)
+		{
+			*(effect_->ParameterByName("max_samples")) = samples;
+		}
+
+		void EnbleReflection(bool enable)
+		{
+			if (enable)
+			{
+				effect_attrs_ |= EA_SpecialShading;
+			}
+			else
+			{
+				effect_attrs_ &= ~EA_SpecialShading;
+			}
+		}
+
+		void SkyBox(TexturePtr const& y_cube, TexturePtr const& c_cube)
+		{
+			*(effect_->ParameterByName("skybox_tex")) = y_cube;
+			*(effect_->ParameterByName("skybox_C_tex")) = c_cube;
 		}
 	};
 
@@ -217,29 +300,59 @@ ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
 
 void ScreenSpaceReflectionApp::OnCreate()
 {
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Reflection.uiml"));
+	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");
+
+	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
+	id_min_sample_num_slider_ = parameter_dialog_->IDFromName("min_sample_num_slider");
+	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().Connect([this](UISlider const& sender) {
+		this->MinSampleNumHandler(sender);
+	});
+
+	id_max_sample_num_static_ = parameter_dialog_->IDFromName("max_sample_num_static");
+	id_max_sample_num_slider_ = parameter_dialog_->IDFromName("max_sample_num_slider");
+	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().Connect([this](UISlider const& sender) {
+		this->MaxSampleNumHandler(sender);
+	});
+
+	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
+	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
+		this->EnbleReflectionHandler(sender);
+	});
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	loading_percentage_ = 0;
 	c_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_ = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	teapot_model_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, nullptr,
-		CreateModelFactory<RenderModel>, CreateMeshFactory<ReflectMesh>);
-	auto dino_model = ASyncLoadModel("dino50.glb", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable,
-		[](RenderModel& model)
-		{
-			model.RootNode()->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+	teapot_model_ = ASyncLoadModel(
+		"teapot.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable,
+		[this](RenderModel& model) {
+			teapot_node_ = model.RootNode();
+			teapot_node_->TransformToParent(MathLib::scaling(float3(15, 15, 15)));
+			teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().SkyBox(y_cube_, c_cube_);
 			AddToSceneRootHelper(model);
-		},
-		CreateModelFactory<RenderModel>, CreateMeshFactory<DinoMesh>);
 
-	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
+			this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
+			this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
+			this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
+		},
+		CreateModelFactory<RenderModel>, CreateMeshFactory<DualSideSSRMesh>);
+	auto dino_model = ASyncLoadModel("dino50.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable, [](RenderModel& model) {
+		model.Mesh(0)->Material(SyncLoadRenderMaterial("DinoMesh.mtlml"));
+		model.RootNode()->TransformToParent(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+		AddToSceneRootHelper(model);
+	});
+
+	this->LookAt(float3(3.0f, 3.0f, -6.75f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.05f);
 
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
+	plane_node_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<SingleSideSSRPlane>()), SceneNode::SOA_Cullable);
+	plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().SkyBox(y_cube_, c_cube_);
+	root_node.AddChild(plane_node_);
 
 	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
 	screen_camera_path_->AttachCamera(this->ActiveCamera());
@@ -267,6 +380,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	skybox_ = MakeSharedPtr<RenderableSkyBox>();
+	checked_cast<RenderableSkyBox&>(*skybox_).CompressedCubeMap(y_cube_, c_cube_);			
 	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_), SceneNode::SOA_NotCastShadow));
 
 	back_refl_fb_ = rf.MakeFrameBuffer();
@@ -287,35 +401,6 @@ void ScreenSpaceReflectionApp::OnCreate()
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
-
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Reflection.uiml"));
-	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");
-
-	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
-	id_min_sample_num_slider_ = parameter_dialog_->IDFromName("min_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().Connect(
-		[this](UISlider const & sender)
-		{
-			this->MinSampleNumHandler(sender);
-		});
-	this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
-
-	id_max_sample_num_static_ = parameter_dialog_->IDFromName("max_sample_num_static");
-	id_max_sample_num_slider_ = parameter_dialog_->IDFromName("max_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().Connect(
-		[this](UISlider const & sender)
-		{
-			this->MaxSampleNumHandler(sender);
-		});
-	this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
-
-	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
-	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().Connect(
-		[this](UICheckBox const & sender)
-		{
-			this->EnbleReflectionHandler(sender);
-		});
-	this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
 }
 
 void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height)
@@ -354,9 +439,10 @@ void ScreenSpaceReflectionApp::InputHandler(KlayGE::InputEngine const & /*sender
 void ScreenSpaceReflectionApp::MinSampleNumHandler(KlayGE::UISlider const & sender)
 {
 	int32_t sample_num = sender.GetValue();
-	if (teapot_)
+	if (teapot_node_)
 	{
-		teapot_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<ReflectMesh>().MinSamples(sample_num);
+		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().MinSamples(sample_num);
+		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().MinSamples(sample_num);
 
 		std::wostringstream oss;
 		oss << "Min Samples: " << sample_num;
@@ -367,9 +453,10 @@ void ScreenSpaceReflectionApp::MinSampleNumHandler(KlayGE::UISlider const & send
 void ScreenSpaceReflectionApp::MaxSampleNumHandler(KlayGE::UISlider const & sender)
 {
 	int32_t sample_num = sender.GetValue();
-	if (teapot_)
+	if (teapot_node_)
 	{
-		teapot_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<ReflectMesh>().MaxSamples(sample_num);
+		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().MaxSamples(sample_num);
+		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().MaxSamples(sample_num);
 
 		std::wostringstream oss;
 		oss << "Max Samples: " << sample_num;
@@ -380,9 +467,10 @@ void ScreenSpaceReflectionApp::MaxSampleNumHandler(KlayGE::UISlider const & send
 void ScreenSpaceReflectionApp::EnbleReflectionHandler(KlayGE::UICheckBox const & sender)
 {
 	bool enabled = sender.GetChecked();
-	if (teapot_)
+	if (teapot_node_)
 	{
-		teapot_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<ReflectMesh>().EnbleReflection(enabled);
+		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().EnbleReflection(enabled);
+		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().EnbleReflection(enabled);
 	}
 }
 
@@ -412,75 +500,55 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 	if (0 == pass)
 	{
-		if (loading_percentage_ < 100)
-		{
-			if (loading_percentage_ < 30)
-			{
-				if (teapot_model_->HWResourceReady())
-				{
-					teapot_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(teapot_model_->Mesh(0)), SceneNode::SOA_Cullable);
-					teapot_->TransformToParent(MathLib::scaling(float3(15, 15, 15)));
-					{
-						auto& scene_mgr = Context::Instance().SceneManagerInstance();
-						std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
-						scene_mgr.SceneRootNode().AddChild(teapot_);
-					}
+		CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
 
-					this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
-					this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
-					this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
+		float3 eye = screen_camera_->EyePos();
+		float3 at = screen_camera_->LookAt();
 
-					loading_percentage_ = 30;
-				}
-			}
-			else if (loading_percentage_ < 40)
-			{
-				if (y_cube_->HWResourceReady() && c_cube_->HWResourceReady())
-				{
-					checked_cast<RenderableSkyBox&>(*skybox_).CompressedCubeMap(y_cube_, c_cube_);
-					teapot_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<ReflectMesh>().SkyBox(y_cube_, c_cube_);
+		auto& teapot_mesh = teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>();
 
-					loading_percentage_ = 100;
-				}
-			}
-		}
-		else
-		{
-			CameraPtr const& back_camera = back_refl_fb_->Viewport()->Camera();
+		float3 center = MathLib::transform_coord(teapot_mesh.PosBound().Center(), teapot_node_->TransformToWorld());
+		float3 direction = eye - at;
 
-			float3 eye = screen_camera_->EyePos();
-			float3 at = screen_camera_->LookAt();
+		back_camera->LookAtDist(MathLib::length(direction));
+		back_camera->BoundSceneNode()->TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(center, center + direction, screen_camera_->UpVec())));
+		back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
 
-			auto& teapot_mesh = teapot_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<ReflectMesh>();
+		teapot_mesh.BackCamera(back_camera);
 
-			float3 center = MathLib::transform_coord(teapot_mesh.PosBound().Center(), teapot_->TransformToWorld());
-			float3 direction = eye - at;
+		teapot_mesh.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
+		teapot_mesh.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
+		teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
+		teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
 
-			back_camera->LookAtDist(MathLib::length(direction));
-			back_camera->BoundSceneNode()->TransformToWorld(
-				MathLib::inverse(MathLib::look_at_lh(center, center + direction, screen_camera_->UpVec())));
-			back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
-
-			teapot_mesh.BackCamera(back_camera);
-
-			teapot_mesh.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
-			teapot_mesh.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
-			teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
-			teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
-		}
+		auto& plane = plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>();
+		plane.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
+		plane.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
 	}
 
 	urt = deferred_rendering_->Update(pass);
 
-	if (teapot_)
+	if (teapot_node_)
 	{
 		if (0 == deferred_rendering_->ActiveViewport())
 		{
-			teapot_->Visible(false);
+			teapot_node_->Visible(false);
 		}
 		else
 		{
-			teapot_->Visible(true);
+			teapot_node_->Visible(true);
+		}
+	}
+	if (plane_node_)
+	{
+		if (0 == deferred_rendering_->ActiveViewport())
+		{
+			plane_node_->Visible(false);
+		}
+		else
+		{
+			plane_node_->Visible(true);
 		}
 	}
 

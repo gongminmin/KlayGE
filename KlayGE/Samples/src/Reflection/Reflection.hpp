@@ -26,8 +26,6 @@ private:
 private:
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneNodePtr teapot_;
-
 	KlayGE::FontPtr font_;
 
 	KlayGE::RenderablePtr skybox_;
@@ -42,9 +40,11 @@ private:
 	KlayGE::CameraPathControllerPtr screen_camera_path_;
 
 	KlayGE::RenderModelPtr teapot_model_;
+	KlayGE::SceneNodePtr teapot_node_;
+	KlayGE::RenderablePtr plane_renderable_;
+	KlayGE::SceneNodePtr plane_node_;
 	KlayGE::TexturePtr y_cube_;
 	KlayGE::TexturePtr c_cube_;
-	KlayGE::uint32_t loading_percentage_;
 
 	KlayGE::UIDialogPtr parameter_dialog_;
 	int id_min_sample_num_static_;
