@@ -852,7 +852,8 @@ namespace
 		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ ianim)
 		{
 			aiAnimation const * cur_anim = scene->mAnimations[ianim];
-			float duration = static_cast<float>(cur_anim->mDuration / cur_anim->mTicksPerSecond);
+			// For some reason mDuration is in milliseconds, not ticks. Assimp issue #3462.
+			float duration = static_cast<float>(cur_anim->mDuration / 1000);
 			AssimpAnimation anim;
 			anim.name = cur_anim->mName.C_Str();
 			anim.frame_num = static_cast<int>(ceilf(duration * resample_fps));
@@ -1767,7 +1768,9 @@ namespace
 
 					auto& animations = *skinned_model.GetAnimations();
 					ai_scene.mAnimations[ai]->mName.Set(animations[ai].name);
-					ai_scene.mAnimations[ai]->mDuration = animations[ai].end_frame - animations[ai].start_frame;
+					// For some reason mDuration is in milliseconds, not ticks. Assimp issue #3462.
+					ai_scene.mAnimations[ai]->mDuration =
+						static_cast<float>(animations[ai].end_frame - animations[ai].start_frame) / skinned_model.FrameRate() * 1000;
 					ai_scene.mAnimations[ai]->mTicksPerSecond = skinned_model.FrameRate();
 
 					ai_scene.mAnimations[ai]->mNumChannels = 0;
@@ -1830,8 +1833,9 @@ namespace
 						node_anim.mScalingKeys = new aiVectorKey[node_anim.mNumPositionKeys];
 						for (uint32_t pi = 0; pi < node_anim.mNumPositionKeys; ++pi)
 						{
+							// For some reason mTime is in ticks, not seconds. Assimp issue #3462.
 							node_anim.mPositionKeys[pi].mTime = node_anim.mRotationKeys[pi].mTime = node_anim.mScalingKeys[pi].mTime =
-								static_cast<float>(key_frame_set.frame_id[pi] - animations[ai].start_frame) / skinned_model.FrameRate();
+								key_frame_set.frame_id[pi] - animations[ai].start_frame;
 
 							float4x4 const key_frame_mat =
 								MathLib::scaling(key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi], key_frame_set.bind_scale[pi]) *
