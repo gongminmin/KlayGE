@@ -173,6 +173,9 @@ namespace KlayGE
 		RenderTargetViewPtr small_ssvo_rtv;
 		bool ssvo_enabled;
 
+		TexturePtr merged_shading_resolved_before_ssr_tex;
+		ShaderResourceViewPtr merged_shading_resolved_before_ssr_srv;
+
 		float4x4 view, proj;
 		float4x4 inv_view, inv_proj;
 		float4x4 proj_to_prev;
@@ -253,7 +256,7 @@ namespace KlayGE
 
 		void SSGIEnabled(uint32_t vp, bool ssgi);
 		void SSVOEnabled(uint32_t vp, bool ssvo);
-		void SSSEnabled(bool ssr);
+		void SSSEnabled(bool sss);
 		void SSSStrength(float strength);
 		void SSSCorrection(float correction);
 		void TranslucencyEnabled(bool trans);
@@ -804,6 +807,7 @@ namespace KlayGE
 		bool has_reflective_objs_;
 		bool has_simple_forward_objs_;
 		bool has_vdm_objs_;
+		bool has_ssr_objs_;
 
 		PostProcessPtr atmospheric_pp_;
 

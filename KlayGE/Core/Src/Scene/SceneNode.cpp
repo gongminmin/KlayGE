@@ -591,12 +591,12 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneNode::Reflection() const
+	bool SceneNode::ObjectReflection() const
 	{
 		auto const* renderable_comp = this->FirstComponentOfType<RenderableComponent>();
 		if (renderable_comp != nullptr)
 		{
-			return renderable_comp->BoundRenderable().Reflection();
+			return renderable_comp->BoundRenderable().ObjectReflection();
 		}
 		else
 		{
@@ -623,6 +623,19 @@ namespace KlayGE
 		if (renderable_comp != nullptr)
 		{
 			return renderable_comp->BoundRenderable().VDM();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool SceneNode::ScreenSpaceReflection() const
+	{
+		auto const* renderable_comp = this->FirstComponentOfType<RenderableComponent>();
+		if (renderable_comp != nullptr)
+		{
+			return renderable_comp->BoundRenderable().ScreenSpaceReflection();
 		}
 		else
 		{

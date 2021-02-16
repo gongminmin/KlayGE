@@ -238,7 +238,7 @@ namespace KlayGE
 					}
 					else if (urt_ & App3DFramework::URV_ReflectionOnly)
 					{
-						add &= obj->Reflection();
+						add &= obj->ObjectReflection();
 					}
 				}
 

@@ -35,7 +35,8 @@ namespace KlayGE
 		PC_Shadowing,
 		PC_IndirectLighting,
 		PC_Shading,
-		PC_Reflection,
+		PC_ObjectReflection,
+		PC_ScreenSpaceReflection,
 		PC_SpecialShading,
 		PC_SpecialShadingMultiView,
 		PC_SimpleForward,
@@ -99,9 +100,9 @@ namespace KlayGE
 		PT_TransparencyBackShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_Shading>::value,
 		PT_TransparencyFrontShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_Shading>::value,
 
-		PT_OpaqueReflection = MakePassType<PRT_None, PTB_Opaque, PC_Reflection>::value,
-		PT_TransparencyBackReflection = MakePassType<PRT_None, PTB_TransparencyBack, PC_Reflection>::value,
-		PT_TransparencyFrontReflection = MakePassType<PRT_None, PTB_TransparencyFront, PC_Reflection>::value,
+		PT_OpaqueReflection = MakePassType<PRT_None, PTB_Opaque, PC_ObjectReflection>::value,
+		PT_TransparencyBackReflection = MakePassType<PRT_None, PTB_TransparencyBack, PC_ObjectReflection>::value,
+		PT_TransparencyFrontReflection = MakePassType<PRT_None, PTB_TransparencyFront, PC_ObjectReflection>::value,
 		
 		PT_OpaqueSpecialShading = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShading>::value,
 		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
@@ -143,10 +144,11 @@ namespace KlayGE
 			EA_TransparencyBack = 1UL << 1,
 			EA_TransparencyFront = 1UL << 2,
 			EA_AlphaTest = 1UL << 3,
-			EA_Reflection = 1UL << 4,
+			EA_ObjectReflection = 1UL << 4,
 			EA_SimpleForward = 1UL << 5,
 			EA_SSS = 1UL << 6,
-			EA_VDM = 1UL << 7
+			EA_VDM = 1UL << 7,
+			EA_ScreenSpaceReflection = 1UL << 8,
 		};
 
 	public:
@@ -263,9 +265,9 @@ namespace KlayGE
 		{
 			return effect_attrs_ & EA_SSS ? true : false;
 		}
-		virtual bool Reflection() const
+		virtual bool ObjectReflection() const
 		{
-			return effect_attrs_ & EA_Reflection ? true : false;
+			return effect_attrs_ & EA_ObjectReflection ? true : false;
 		}
 		virtual bool SimpleForward() const
 		{
@@ -274,6 +276,10 @@ namespace KlayGE
 		virtual bool VDM() const
 		{
 			return effect_attrs_ & EA_VDM ? true : false;
+		}
+		virtual bool ScreenSpaceReflection() const
+		{
+			return effect_attrs_ & EA_ScreenSpaceReflection ? true : false;
 		}
 
 	protected:

@@ -994,9 +994,9 @@ namespace KlayGE
 		viewports_[vp].ssvo_enabled = ssvo;
 	}
 
-	void DeferredRenderingLayer::SSSEnabled(bool ssr)
+	void DeferredRenderingLayer::SSSEnabled(bool sss)
 	{
-		sss_enabled_ = ssr;
+		sss_enabled_ = sss;
 	}
 
 	void DeferredRenderingLayer::SSSStrength(float strength)
@@ -1480,6 +1480,13 @@ namespace KlayGE
 			pvp.motion_blur_rtv = rf.Make2DRtv(pvp.motion_blur_tex, 0, 1, 0);
 		}
 
+		if (!(attrib & VPAM_NoSSR))
+		{
+			pvp.merged_shading_resolved_before_ssr_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			KLAYGE_TEXTURE_DEBUG_NAME(pvp.merged_shading_resolved_before_ssr_tex);
+			pvp.merged_shading_resolved_before_ssr_srv = rf.MakeTextureSrv(pvp.merged_shading_resolved_before_ssr_tex);
+		}
+
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
@@ -1830,6 +1837,7 @@ namespace KlayGE
 		has_reflective_objs_ = false;
 		has_simple_forward_objs_ = false;
 		has_vdm_objs_ = false;
+		has_ssr_objs_ = false;
 		visible_scene_nodes_.clear();
 		scene_mgr.SceneRootNode().Traverse(
 			[this, &has_opaque_objs, &has_transparency_back_objs, &has_transparency_front_objs](SceneNode& node)
@@ -1854,7 +1862,7 @@ namespace KlayGE
 						{
 							has_sss_objs_ = true;
 						}
-						if (node.Reflection())
+						if (node.ObjectReflection())
 						{
 							has_reflective_objs_ = true;
 						}
@@ -1865,6 +1873,10 @@ namespace KlayGE
 						if (node.VDM())
 						{
 							has_vdm_objs_ = true;
+						}
+						if (node.ScreenSpaceReflection())
+						{
+							has_ssr_objs_ = true;
 						}
 					}
 
@@ -2238,7 +2250,7 @@ namespace KlayGE
 			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
 				[this, vp_index, pass_tb]
 				{
-					return this->ReflectionDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_Reflection));
+					return this->ReflectionDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_ObjectReflection));
 				}));
 #ifndef KLAYGE_SHIP
 			jobs_.push_back(MakeUniquePtr<DeferredRenderingJob>(
@@ -3124,11 +3136,14 @@ namespace KlayGE
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
+			pvp.merged_shading_texs[pvp.curr_merged_buffer_index]->CopyToTexture(
+				*pvp.merged_shading_resolved_before_ssr_tex, TextureFilter::Point);
+
 			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
 			ssr_pp->InputPin(0, pvp.g_buffer_rt0_srv);
 			ssr_pp->InputPin(1, pvp.g_buffer_rt1_srv);
 			ssr_pp->InputPin(2, pvp.g_buffer_resolved_depth_srv);
-			ssr_pp->InputPin(3, pvp.merged_shading_resolved_srvs[!pvp.curr_merged_buffer_index]);
+			ssr_pp->InputPin(3, pvp.merged_shading_resolved_before_ssr_srv);
 			ssr_pp->InputPin(4, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
 			ssr_pp->Apply();
 		}
@@ -4738,7 +4753,7 @@ namespace KlayGE
 #endif
 		}
 
-		if (has_reflective_objs_ && ssr_enabled_)
+		if (has_ssr_objs_ && ssr_enabled_)
 		{
 #ifndef KLAYGE_SHIP
 			ssr_pp_perf_->Begin();

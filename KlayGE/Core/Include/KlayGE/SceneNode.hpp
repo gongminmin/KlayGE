@@ -190,9 +190,10 @@ namespace KlayGE
 		bool TransparencyBackFace() const;
 		bool TransparencyFrontFace() const;
 		bool SSS() const;
-		bool Reflection() const;
+		bool ObjectReflection() const;
 		bool SimpleForward() const;
 		bool VDM() const;
+		bool ScreenSpaceReflection() const;
 
 	private:
 		void FindAllNode(std::vector<SceneNode*>& nodes, std::wstring_view name);

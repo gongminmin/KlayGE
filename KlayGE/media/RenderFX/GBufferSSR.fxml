@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<effect>
+	<technique name="GBufferSSRTech" inherit="GBufferTech" override="GBufferTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="64"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="64"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="64"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="64"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendBackSSRTech" inherit="GBufferAlphaBlendBackTech" override="GBufferAlphaBlendBackTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="64"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="64"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="64"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="64"/>
+		</pass>
+	</technique>
+</effect>

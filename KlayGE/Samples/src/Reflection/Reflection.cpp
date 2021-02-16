@@ -43,7 +43,7 @@ namespace
 
 			mtl_ = SyncLoadRenderMaterial("ReflectMesh.mtlml");
 
-			effect_attrs_ |= EA_Reflection;
+			effect_attrs_ |= EA_ObjectReflection;
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
 			technique_ = special_shading_tech_;
@@ -166,103 +166,9 @@ namespace
 		{
 			mtl_ = SyncLoadRenderMaterial("ReflectPlane.mtlml");
 
-			effect_attrs_ |= EA_Reflection;
+			effect_attrs_ |= EA_ScreenSpaceReflection;
 
-			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
-			technique_ = special_shading_tech_;
-
-			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			if (re.DeviceCaps().vp_rt_index_at_every_stage_support)
-			{
-				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionTech");
-				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingTech");
-			}
-			else
-			{
-				reflection_tech_ = effect_->TechniqueByName("SingleSideSSRReflectionNoVpRtTech");
-				special_shading_tech_ = effect_->TechniqueByName("SSRSpecialShadingNoVpRtTech");
-			}
-
-			reflection_alpha_blend_back_tech_ = reflection_tech_;
-			reflection_alpha_blend_front_tech_ = reflection_tech_;
-
-			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
-			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
-
-			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");
-		}
-
-		void OnRenderBegin() override
-		{
-			model_mat_ = MathLib::rotation_x(DEG90) * MathLib::translation(0.0f, -0.2f, 0.0f);
-
-			RenderablePlane::OnRenderBegin();
-
-			switch (type_)
-			{
-			case PT_OpaqueReflection:
-			case PT_TransparencyBackReflection:
-			case PT_TransparencyFrontReflection:
-			{
-				App3DFramework const& app = Context::Instance().AppInstance();
-				Camera const& camera = app.ActiveCamera();
-				*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
-				*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
-				float4 const near_q_far = camera.NearQFarParam();
-				*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
-				*(effect_->ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
-				*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
-			}
-			break;
-
-			default:
-				break;
-			}
-		}
-
-		void FrontReflectionTex(TexturePtr const& tex)
-		{
-			*(effect_->ParameterByName("front_side_tex")) = tex;
-		}
-		void FrontReflectionDepthTex(TexturePtr const& tex)
-		{
-			*(effect_->ParameterByName("front_side_depth_tex")) = tex;
-		}
-
-		void BackReflectionTex(TexturePtr const& tex)
-		{
-			*(effect_->ParameterByName("back_side_tex")) = tex;
-		}
-		void BackReflectionDepthTex(TexturePtr const& tex)
-		{
-			*(effect_->ParameterByName("back_side_depth_tex")) = tex;
-		}
-
-		void MinSamples(int32_t samples)
-		{
-			*(effect_->ParameterByName("min_samples")) = samples;
-		}
-		void MaxSamples(int32_t samples)
-		{
-			*(effect_->ParameterByName("max_samples")) = samples;
-		}
-
-		void EnbleReflection(bool enable)
-		{
-			if (enable)
-			{
-				effect_attrs_ |= EA_SpecialShading;
-			}
-			else
-			{
-				effect_attrs_ &= ~EA_SpecialShading;
-			}
-		}
-
-		void SkyBox(TexturePtr const& y_cube, TexturePtr const& c_cube)
-		{
-			*(effect_->ParameterByName("skybox_tex")) = y_cube;
-			*(effect_->ParameterByName("skybox_C_tex")) = c_cube;
+			this->BindDeferredEffect(SyncLoadRenderEffects(MakeSpan<std::string>({"GBuffer.fxml", "GBufferSSR.fxml"})));
 		}
 	};
 
@@ -351,7 +257,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
 	plane_node_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<SingleSideSSRPlane>()), SceneNode::SOA_Cullable);
-	plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().SkyBox(y_cube_, c_cube_);
+	plane_node_->TransformToParent(MathLib::rotation_x(DEG90) * MathLib::translation(0.0f, -0.2f, 0.0f));
 	root_node.AddChild(plane_node_);
 
 	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
@@ -442,7 +348,6 @@ void ScreenSpaceReflectionApp::MinSampleNumHandler(KlayGE::UISlider const & send
 	if (teapot_node_)
 	{
 		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().MinSamples(sample_num);
-		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().MinSamples(sample_num);
 
 		std::wostringstream oss;
 		oss << "Min Samples: " << sample_num;
@@ -456,7 +361,6 @@ void ScreenSpaceReflectionApp::MaxSampleNumHandler(KlayGE::UISlider const & send
 	if (teapot_node_)
 	{
 		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().MaxSamples(sample_num);
-		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().MaxSamples(sample_num);
 
 		std::wostringstream oss;
 		oss << "Max Samples: " << sample_num;
@@ -470,7 +374,6 @@ void ScreenSpaceReflectionApp::EnbleReflectionHandler(KlayGE::UICheckBox const &
 	if (teapot_node_)
 	{
 		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().EnbleReflection(enabled);
-		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().EnbleReflection(enabled);
 	}
 }
 
@@ -524,10 +427,6 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
 			teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
 		}
-		
-		auto& plane = plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>();
-		plane.FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
-		plane.FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
 	}
 
 	urt = deferred_rendering_->Update(pass);

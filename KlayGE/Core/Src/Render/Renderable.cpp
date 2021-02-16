@@ -493,7 +493,7 @@ namespace KlayGE
 
 		if ((mtl_->Emissive().x() > 0) || (mtl_->Emissive().y() > 0) || (mtl_->Emissive().z() > 0) ||
 			mtl_->Texture(RenderMaterial::TS_Emissive) || (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront) ||
-			(effect_attrs_ & EA_Reflection))
+			(effect_attrs_ & EA_ObjectReflection))
 		{
 			effect_attrs_ |= EA_SpecialShading;
 		}
