@@ -3,7 +3,7 @@ SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME
 
 UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "b2af2b21375e1f2b2ee3273c776bdfd3e8fb6b94" "master" "v5.0.0" need_patch)
 if(need_patch)
-	foreach(patch "0001-Export-zlib-if-it-s-built-outside" "0002-Fix-compiling-issues-in-clang-cl")
+	foreach(patch "0001-Export-zlib-if-it-s-built-outside" "0002-Fix-compiling-issues-in-clang-cl" "0003-Export-the-animation-name-to-gltf2")
 		ApplyPatch("assimp" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
 	endforeach()
 endif()

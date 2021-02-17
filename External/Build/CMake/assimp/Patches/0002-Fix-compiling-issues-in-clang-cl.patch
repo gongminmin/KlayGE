@@ -1,7 +1,7 @@
 From 82755c31e2b4ff32900671c8428d1fa26e56f820 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Fri, 29 Jan 2021 23:54:22 -0800
-Subject: [PATCH 2/2] Fix compiling issues in clang-cl
+Subject: [PATCH 2/3] Fix compiling issues in clang-cl
 
 ---
  code/AssetLib/AC/ACLoader.h  | 2 +-
