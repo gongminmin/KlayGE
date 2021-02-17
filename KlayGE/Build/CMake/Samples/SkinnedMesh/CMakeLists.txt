@@ -1,5 +1,5 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SkinnedMesh/archer.dds" "655B155B74EF1AFEA0CDF782ED2451D77FF6FE59")
-DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SkinnedMesh/archer_attacking.meshml" "0821B86AFBED144E383E1912DA1F3452338832D8")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SkinnedMesh/archer.tga" "A65038D6F15EF38A9EAC048A717461278173F651")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/SkinnedMesh/archer_attacking.glb" "C91854984B1CFF27F152D76B38E9DFA1B191545B")
 
 set(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/SkinnedMesh/SkinnedMesh.cpp
@@ -80,8 +80,8 @@ set(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SkinnedMesh/archer.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SkinnedMesh/archer_attacking.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/SkinnedMesh/archer.tga.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/SkinnedMesh/archer_attacking.glb.model_bin
 )
 
 if(KLAYGE_PLATFORM_WINDOWS_STORE)

@@ -10,7 +10,7 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/memorial_bc6u.dds" "2360
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe.dds" "f614b2494da0b649e0c14a2648213a3c95da8bcc")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe_bc6s.dds" "f3b28807c56a1c8b99d1fe8d831d6a653539abd1")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/anim.fbx" "529AD0044C9F4EA1296384F0CC9BD28061E1742D")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/anim.meshml" "09C3DDAC3D799F87F18B478BEC58F17522C8F613")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/anim.glb" "9CC4480521136D2AA938FD70621AF58FCBFE587F")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a.lod.meshml" "4212E01180D2D6B3EB7B69C1AAF197C1332BED8B")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a.lod_autocenter.meshml" "43C2FEED0019A3518BF5E7B7BFF8E9DFDCA2B09A")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a.lod_axismapping.meshml" "16676D7CC4199C658CF9C6D913F6F6A5DBB1DD95")

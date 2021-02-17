@@ -59,7 +59,7 @@ SkinnedMeshApp::SkinnedMeshApp()
 
 void SkinnedMeshApp::OnCreate()
 {
-	skinned_model_ = checked_pointer_cast<SkinnedModel>(SyncLoadModel("archer_attacking.meshml", EAH_GPU_Read | EAH_Immutable,
+	skinned_model_ = checked_pointer_cast<SkinnedModel>(SyncLoadModel("archer_attacking.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, AddToSceneRootHelper, CreateModelFactory<SkinnedModel>, CreateMeshFactory<SkinnedMesh>));
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);

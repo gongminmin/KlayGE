@@ -538,8 +538,8 @@ public:
 									sanity_tc.y() = ((sanity_texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1)
 										* sanity_tc_extent.y() + sanity_tc_center.y();
 
-									EXPECT_LT(std::abs(tc.x() - sanity_tc.x()), 0.0012f);
-									EXPECT_LT(std::abs(tc.y() - sanity_tc.y()), 0.0012f);
+									EXPECT_LT(std::abs(tc.x() - sanity_tc.x()), 0.0018f);
+									EXPECT_LT(std::abs(tc.y() - sanity_tc.y()), 0.0018f);
 								}
 
 								if (diffuse_stream != -1)
@@ -784,15 +784,10 @@ TEST_F(MeshConverterTest, StaticLodTransforms)
 
 TEST_F(MeshConverterTest, AnimationPassThrough)
 {
-	RunTest("anim.fbx", "", "anim.meshml");
+	RunTest("anim.fbx", "", "anim.glb");
 }
 
 TEST_F(MeshConverterTest, StaticMeshML)
 {
 	RunTest("tree2a.lod.meshml", "", "tree2a.lod.meshml");
-}
-
-TEST_F(MeshConverterTest, AnimationMeshML)
-{
-	RunTest("anim.meshml", "", "anim.meshml");
 }
