@@ -15,8 +15,8 @@ def update(app_time, elapsed_time):
 		</update>
 	</light>
 
-	<model name="room" meshml="ScifiRoom/Scifi.3DS"/>
-	<model name="teapot" meshml="teapot.glb">
+	<model name="room" model="ScifiRoom/Scifi.3DS"/>
+	<model name="teapot" model="teapot.glb">
 		<attr value="moveable"/>
 		<update>
 			<![CDATA[

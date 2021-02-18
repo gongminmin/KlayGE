@@ -419,7 +419,7 @@ namespace MtlEditor
 		{
 			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
-			dlg.DefaultExt = ".meshml";
+			dlg.DefaultExt = ".glb";
 			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.dae;*.dxf;*.csm;"
 				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5mesh;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
 				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x;*.gltf;*.glb|All Files|*.*";
@@ -1206,9 +1206,9 @@ namespace MtlEditor
 			}
 			else
 			{
-				Uri uri_meshml = new Uri(opened_file_);
+				Uri uri_model = new Uri(opened_file_);
 				Uri uri_tex = new Uri(name);
-				Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
+				Uri relative_uri = uri_model.MakeRelativeUri(uri_tex);
 				return relative_uri.ToString();
 			}
 		}

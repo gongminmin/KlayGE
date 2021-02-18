@@ -813,14 +813,14 @@ namespace KlayGE
 		this->UpdateHelperObjs();
 	}
 
-	uint32_t KGEditorCore::AddModel(std::string const & meshml_name)
+	uint32_t KGEditorCore::AddModel(std::string const & model_name)
 	{
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
 
-		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
+		ResLoader::Instance().AddPath(model_name.substr(0, model_name.find_last_of('\\')));
 
-		auto model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
+		auto model = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, AddToSceneRootHelper);
 		auto scene_node = model->RootNode();
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
@@ -829,12 +829,12 @@ namespace KlayGE
 		}
 
 		EntityInfo mi;
-		std::string::size_type begin = meshml_name.rfind('\\') + 1;
-		std::string::size_type end = meshml_name.rfind('.') - begin;
-		mi.name = meshml_name.substr(begin, end);
+		std::string::size_type begin = model_name.rfind('\\') + 1;
+		std::string::size_type end = model_name.rfind('.') - begin;
+		mi.name = model_name.substr(begin, end);
 		mi.type = ET_Model;
 		mi.model = model;
-		mi.meshml_name = meshml_name;
+		mi.model_name = model_name;
 		mi.obb = MathLib::convert_to_obbox(model->RootNode()->PosBoundOS());
 		mi.trf_pivot = mi.obb.Center();
 		mi.trf_pos = float3(0, 0, 0);
@@ -1795,7 +1795,7 @@ namespace KlayGE
 			{
 				if ("model" == node->Name())
 				{
-					add_model_event_(std::string(node->Attrib("meshml")->ValueString()).c_str());
+					add_model_event_(std::string(node->Attrib("model")->ValueString()).c_str());
 
 					EntityInfo& oi = entities_[last_entity_id_];
 					oi.name = std::string(node->Attrib("name")->ValueString());
@@ -2027,7 +2027,7 @@ namespace KlayGE
 			{
 			case ET_Model:
 			{
-				ofs << "\t<model name=\"" << iter->second.name << "\" meshml=\"" << iter->second.meshml_name << "\">" << endl;
+				ofs << "\t<model name=\"" << iter->second.name << "\" model=\"" << iter->second.model_name << "\">" << endl;
 				this->SaveTransformNodes(ofs, iter->second);
 				ofs << "\t</model>" << endl;
 			}

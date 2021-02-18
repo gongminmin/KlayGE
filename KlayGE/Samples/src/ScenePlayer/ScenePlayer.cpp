@@ -640,7 +640,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			}
 		}
 
-		XMLAttributePtr attr = model_node->Attrib("meshml");
+		XMLAttributePtr attr = model_node->Attrib("model");
 		BOOST_ASSERT(attr);
 
 		auto scene_obj = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);

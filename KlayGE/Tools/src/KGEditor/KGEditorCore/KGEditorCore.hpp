@@ -40,7 +40,7 @@ namespace KlayGE
 			std::string name;
 			EntityType type;
 			RenderModelPtr model;
-			std::string meshml_name;
+			std::string model_name;
 			LightSourcePtr light;
 			std::string projective_tex_name;
 			CameraPtr camera;
@@ -88,7 +88,7 @@ namespace KlayGE
 
 		void SetControlMode(ControlMode mode);
 
-		uint32_t AddModel(std::string const & meshml_name);
+		uint32_t AddModel(std::string const& model_name);
 		void ClearModels();
 
 		uint32_t AddLight(LightSource::LightType type, std::string const & name);

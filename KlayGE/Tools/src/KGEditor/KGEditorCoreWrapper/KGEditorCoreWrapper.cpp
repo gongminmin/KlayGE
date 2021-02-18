@@ -120,9 +120,9 @@ namespace KlayGE
 		core_->SetControlMode(static_cast<KGEditorCore::ControlMode>(mode));
 	}
 
-	uint32_t KGEditorCoreWrapper::AddModel(String^ meshml_name)
+	uint32_t KGEditorCoreWrapper::AddModel(String^ model_name)
 	{
-		return core_->AddModel(StringToStd(meshml_name));
+		return core_->AddModel(StringToStd(model_name));
 	}
 
 	void KGEditorCoreWrapper::ClearModels()

@@ -85,7 +85,7 @@ private:
 	}
 };
 
-void GeneratesImposters(std::string const & meshml_name, std::string const & target_folder, std::string const & output_name,
+void GeneratesImposters(std::string const & model_name, std::string const & target_folder, std::string const & output_name,
 	uint32_t num_azimuth, uint32_t num_elevation, uint32_t size)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -107,7 +107,7 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	imposter_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 		Color(0, 0, 0, 0), 1, 0);
 
-	auto scene_model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
+	auto scene_model = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr);
 
 	auto const & aabbox = scene_model->RootNode()->PosBoundOS();
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
 	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message")
-		("I,input-name", "Input mesh name.", cxxopts::value<std::string>())
+		("I,input-name", "Input model name.", cxxopts::value<std::string>())
 		("T,target-folder", "Target folder.", cxxopts::value<std::string>())
 		("A,azimuth", "Num of view angles in XoZ plane.", cxxopts::value<uint32_t>(azimuth)->default_value("8"))
 		("E,elevation", "Num of view angles in XoY plane.", cxxopts::value<uint32_t>(elevation)->default_value("8"))
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		cout << "Need input meshml name." << endl;
+		cout << "Need input model name." << endl;
 		cout << options.help() << endl;
 		return 1;
 	}
@@ -246,17 +246,17 @@ int main(int argc, char* argv[])
 		target_folder = vm["target-folder"].as<std::string>();
 	}
 
-	std::string meshml_name = ResLoader::Instance().Locate(input_name);
+	std::string model_name = ResLoader::Instance().Locate(input_name);
 
 	std::string file_name;
-	FILESYSTEM_NS::path meshml_path(meshml_name);
+	FILESYSTEM_NS::path model_path(model_name);
 	if (target_folder.empty())
 	{
-		target_folder = meshml_path.parent_path();
+		target_folder = model_path.parent_path();
 	}
-	file_name = meshml_path.stem().string();
+	file_name = model_path.stem().string();
 
-	GeneratesImposters(meshml_name, target_folder.string(), file_name, azimuth, elevation, size);
+	GeneratesImposters(model_name, target_folder.string(), file_name, azimuth, elevation, size);
 
 	if (!quiet)
 	{
