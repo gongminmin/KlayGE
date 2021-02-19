@@ -45,7 +45,20 @@ namespace
 			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("VDMParticle.fxml");
-			technique_ = effect_->TechniqueByName("Mesh");
+		}
+
+		void Material(RenderMaterialPtr const& mtl) override
+		{
+			StaticMesh::Material(mtl);
+
+			if (this->AlphaTest())
+			{
+				technique_ = effect_->TechniqueByName("MeshAlphaTest");
+			}
+			else
+			{
+				technique_ = effect_->TechniqueByName("Mesh");
+			}
 		}
 
 		void OnRenderBegin()

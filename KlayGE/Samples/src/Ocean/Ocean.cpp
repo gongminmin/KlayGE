@@ -232,8 +232,6 @@ namespace
 			// pointy crests.
 			ocean_param_.choppy_scale		= 1.1f;
 
-			ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
-
 			use_tex_array_ = re.DeviceCaps().max_texture_array_length >= ocean_param_.num_frames;
 
 			ocean_renderable.PatchLength(ocean_param_.patch_length);
@@ -412,8 +410,7 @@ namespace
 		{
 			reflect_eye = MathLib::transform_coord(eye, reflect_mat_);
 			reflect_at = MathLib::transform_coord(at, reflect_mat_);
-			reflect_up = MathLib::transform_normal(up, reflect_mat_);
-			reflect_up *= -1.0f;
+			reflect_up = -MathLib::transform_normal(up, reflect_mat_);
 		}
 
 		int DMapDim() const
@@ -523,6 +520,11 @@ namespace
 	private:
 		void GenWaveTextures()
 		{
+			if (!ocean_simulator_)
+			{
+				ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
+			}
+
 			auto& ocean_renderable = this->BoundRenderableOfType<RenderOcean>();
 			ocean_renderable.PatchLength(ocean_param_.patch_length);
 

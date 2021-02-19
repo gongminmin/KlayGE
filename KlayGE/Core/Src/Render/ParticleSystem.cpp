@@ -1099,7 +1099,7 @@ namespace KlayGE
 
 	PointParticleEmitter::PointParticleEmitter(ParticleSystemPtr const& ps)
 		: ParticleEmitter(ps),
-			random_dis_(0, 10000)
+			random_dis_(0, 1)
 	{
 	}
 
@@ -1137,7 +1137,7 @@ namespace KlayGE
 
 	float PointParticleEmitter::RandomGen()
 	{
-		return MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 1.0f);
+		return MathLib::clamp(random_dis_(gen_), 0.0f, 1.0f);
 	}
 
 

@@ -59,7 +59,7 @@ public:
 	void TestCopyBuffer(float tolerance)
 	{
 		std::ranlux24_base gen;
-		std::uniform_int_distribution<> dis(-100, 100);
+		std::uniform_real_distribution<float> dis(-100, 100);
 
 		auto effect = SyncLoadRenderEffect("StreamOutput/StreamOutputTest.fxml");
 		auto tech = effect->TechniqueByName("CopyBuffer");
@@ -87,10 +87,10 @@ public:
 				float4* input_data = mapper.Pointer<float4>();
 				for (uint32_t j = 0; j < num_vertices; ++ j)
 				{
-					float const x = static_cast<float>(dis(gen));
-					float const y = static_cast<float>(dis(gen));
-					float const z = static_cast<float>(dis(gen));
-					float const w = static_cast<float>(dis(gen));
+					float const x = dis(gen);
+					float const y = dis(gen);
+					float const z = dis(gen);
+					float const w = dis(gen);
 
 					input_data[j] = float4(x, y, z, w);
 				}

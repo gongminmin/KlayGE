@@ -333,7 +333,8 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 	back_refl_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(back_refl_tex_, 0, 1, 0));
 	back_refl_fb_->Attach(rf.Make2DDsv(back_refl_ds_tex_, 0, 1, 0));
 
-	deferred_rendering_->SetupViewport(0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
+	deferred_rendering_->SetupViewport(
+		0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO | VPAM_NoSSR);
 
 	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
@@ -392,7 +393,6 @@ void ScreenSpaceReflectionApp::EnableCameraPath(KlayGE::UICheckBox const& sender
 	}
 	else
 	{
-
 		screen_camera_path_->DetachCamera();
 	}
 }
@@ -461,14 +461,6 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 		{
 			teapot_node_->Visible(true);
 		}
-	}
-	if (0 == deferred_rendering_->ActiveViewport())
-	{
-		plane_node_->Visible(false);
-	}
-	else
-	{
-		plane_node_->Visible(true);
 	}
 
 	return urt;

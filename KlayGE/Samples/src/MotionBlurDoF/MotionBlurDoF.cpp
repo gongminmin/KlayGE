@@ -26,7 +26,6 @@
 #include <KlayGE/ScriptFactory.hpp>
 
 #include <iterator>
-#include <random>
 #include <sstream>
 
 #include "SampleCommon.hpp"

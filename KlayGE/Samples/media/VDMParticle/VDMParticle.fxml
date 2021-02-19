@@ -67,6 +67,15 @@ float4 MeshPS(float4 L : TEXCOORD0, float4 H : TEXCOORD1) : SV_Target
 	{
 		albedo *= albedo_tex.Sample(aniso_sampler, uv).rgb;
 	}
+#if ALPHA_TEST
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(aniso_sampler, uv).a;
+	}
+	clip(opacity - alpha_test_threshold);
+#endif
+	
 	float metalness = metalness_glossiness_factor.x;
 	float glossiness = metalness_glossiness_factor.y;
 	if (metalness_glossiness_factor.z > 0.5f)
@@ -108,5 +117,9 @@ float4 MeshPS(float4 L : TEXCOORD0, float4 H : TEXCOORD1) : SV_Target
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="MeshPS()"/>
 		</pass>
+	</technique>
+
+	<technique name="MeshAlphaTest" inherit="Mesh">
+		<macro name="ALPHA_TEST" value="1"/>
 	</technique>
 </effect>

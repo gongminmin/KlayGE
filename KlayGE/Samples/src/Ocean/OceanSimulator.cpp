@@ -6,6 +6,8 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 
+#include <random>
+
 #include "OceanSimulator.hpp"
 
 namespace
@@ -16,10 +18,10 @@ namespace
 	float const GRAV_ACCEL = 9.8f;	// The acceleration of gravity, m/s^2
 
 	// Generating gaussian random number with mean 0 and standard deviation 1.
-	float Gauss()
+	float Gauss(std::ranlux24_base& gen, std::uniform_real_distribution<float> const& random_dis)
 	{
-		float u1 = rand() / static_cast<float>(RAND_MAX);
-		float u2 = rand() / static_cast<float>(RAND_MAX);
+		float u1 = random_dis(gen);
+		float u2 = random_dis(gen);
 		if (u1 < 1e-6f)
 		{
 			u1 = 1e-6f;
@@ -87,7 +89,8 @@ namespace KlayGE
 	{
 		float2 K;
 
-		srand(0);
+		std::ranlux24_base gen;
+		std::uniform_real_distribution<float> random_dis(0, 1);
 		
 		float interval = 2 * PI / param_.time_peroid;
 		for (int i = 0; i <= param_.dmap_dim; ++ i)
@@ -100,7 +103,7 @@ namespace KlayGE
 				K.x() = (-param_.dmap_dim / 2.0f + j) * (2 * PI / param_.patch_length);
 
 				float phil = ((0 == K.x()) && (0 == K.y())) ? 0 : sqrt(Phillips(K, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
-				out_h0[i * (param_.dmap_dim + 1) + j] = phil * float2(Gauss(), Gauss());
+				out_h0[i * (param_.dmap_dim + 1) + j] = phil * float2(Gauss(gen, random_dis), Gauss(gen, random_dis));
 
 				// The angular frequency is following the dispersion relation:
 				//            out_omega^2 = g*k
@@ -159,6 +162,25 @@ namespace KlayGE
 
 		param_ = params;
 
+		auto const& caps = rf.RenderEngineInstance().DeviceCaps();
+		uint32_t tex_creation_flags = EAH_GPU_Read | EAH_GPU_Write;
+		if (caps.cs_support)
+		{
+			if (caps.max_shader_model >= ShaderModel(5, 0))
+			{
+				fft_ = MakeUniquePtr<GpuFftCS5>(params.dmap_dim, params.dmap_dim, false);
+				tex_creation_flags |= EAH_GPU_Unordered;
+			}
+			else
+			{
+				fft_ = MakeUniquePtr<GpuFftCS4>(params.dmap_dim, params.dmap_dim, false);
+			}
+		}
+		else
+		{
+			fft_ = MakeUniquePtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
+		}
+
 		int height_map_size = (params.dmap_dim + 1) * (params.dmap_dim + 1);
 		std::vector<float2> h0_data(height_map_size);
 		std::vector<float> omega_data(height_map_size);
@@ -186,9 +208,9 @@ namespace KlayGE
 		gradient_fb_ = rf.MakeFrameBuffer();
 		gradient_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(gradient_tex_, 0, 1, 0));
 
-		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags);
 		out_real_srv_ = rf.MakeTextureSrv(out_real_tex_);
-		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags);
 		out_imag_srv_ = rf.MakeTextureSrv(out_imag_tex_);
 		tex_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(out_real_tex_, 0, 1, 0));
 		tex_fb_->Attach(FrameBuffer::Attachment::Color1, rf.Make2DRtv(out_imag_tex_, 0, 1, 0));
@@ -207,7 +229,5 @@ namespace KlayGE
 		*(effect_->ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
 		*(effect_->ParameterByName("displacement_tex")) = displacement_tex_;
 		*(effect_->ParameterByName("dxyz_tex")) = out_real_tex_;
-
-		fft_ = MakeUniquePtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
 	}
 }

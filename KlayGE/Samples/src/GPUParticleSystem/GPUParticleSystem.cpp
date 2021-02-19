@@ -263,7 +263,7 @@ namespace
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
 				model_mat_(float4x4::Identity()),
 				rt_index_(true), accumulate_time_(0),
-				random_dis_(-500, +500)
+				random_dis_(-0.05f, +0.05f)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
@@ -686,7 +686,7 @@ namespace
 	private:
 		float RandomGen()
 		{
-			return MathLib::clamp(random_dis_(gen_) * 0.0001f, -0.05f, +0.05f);
+			return MathLib::clamp(random_dis_(gen_), -0.05f, +0.05f);
 		}
 
 	private:
@@ -716,7 +716,7 @@ namespace
 		float inv_emit_freq_;
 
 		ranlux24_base gen_;
-		uniform_int_distribution<> random_dis_;
+		uniform_real_distribution<float> random_dis_;
 
 		RenderTechnique* update_so_tech_;
 		RenderTechnique* update_mrt_tech_;

@@ -378,7 +378,7 @@ namespace KlayGE
 
 	private:
 		std::ranlux24_base gen_;
-		std::uniform_int_distribution<> random_dis_;
+		std::uniform_real_distribution<float> random_dis_;
 	};
 
 	class KLAYGE_CORE_API PolylineParticleUpdater final : public ParticleUpdater
