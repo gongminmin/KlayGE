@@ -223,7 +223,12 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
 	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
-		this->EnbleReflectionHandler(sender);
+		this->EnableReflectionHandler(sender);
+	});
+
+	id_enable_camera_path_ = parameter_dialog_->IDFromName("enable_camera_path");
+	parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
+		this->EnableCameraPath(sender);
 	});
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -240,7 +245,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 			this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
 			this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
-			this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
+			this->EnableReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
 		},
 		CreateModelFactory<RenderModel>, CreateMeshFactory<DualSideSSRMesh>);
 	auto dino_model = ASyncLoadModel("dino50.glb", EAH_GPU_Read | EAH_Immutable, SceneNode::SOA_Cullable, [](RenderModel& model) {
@@ -261,7 +266,6 @@ void ScreenSpaceReflectionApp::OnCreate()
 	root_node.AddChild(plane_node_);
 
 	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
-	screen_camera_path_->AttachCamera(this->ActiveCamera());
 	auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	camera_node->AddComponent(this->ActiveCamera().shared_from_this());
 	root_node.AddChild(camera_node);
@@ -307,6 +311,8 @@ void ScreenSpaceReflectionApp::OnCreate()
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
+
+	this->EnableCameraPath(*parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_));
 }
 
 void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height)
@@ -368,12 +374,26 @@ void ScreenSpaceReflectionApp::MaxSampleNumHandler(KlayGE::UISlider const & send
 	}
 }
 
-void ScreenSpaceReflectionApp::EnbleReflectionHandler(KlayGE::UICheckBox const & sender)
+void ScreenSpaceReflectionApp::EnableReflectionHandler(KlayGE::UICheckBox const & sender)
 {
 	bool enabled = sender.GetChecked();
 	if (teapot_node_)
 	{
 		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().EnbleReflection(enabled);
+	}
+}
+
+void ScreenSpaceReflectionApp::EnableCameraPath(KlayGE::UICheckBox const& sender)
+{
+	bool enabled = sender.GetChecked();
+	if (enabled)
+	{
+		screen_camera_path_->AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+
+		screen_camera_path_->DetachCamera();
 	}
 }
 
