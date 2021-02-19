@@ -199,10 +199,6 @@ namespace KlayGE
 			private:
 				void Disconnect(void* slot_void) override
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
-
 					auto iter = std::remove_if(slots_.begin(), slots_.end(), [slot_void](std::shared_ptr<CallbackFunction> const& slot) {
 						return reinterpret_cast<void*>(slot.get()) == slot_void;
 					});
