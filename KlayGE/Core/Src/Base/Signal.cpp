@@ -30,6 +30,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <mutex>
+
 #include <KlayGE/Signal.hpp>
 
 namespace KlayGE
@@ -39,6 +41,30 @@ namespace KlayGE
 		namespace Detail
 		{
 			SignalBase::~SignalBase() noexcept = default;
+
+			Mutex::~Mutex() noexcept = default;
+
+			class StdMutex : public Mutex
+			{
+			public:
+				void Lock() override
+				{
+					mutex_.lock();
+				}
+
+				void Unlock() override
+				{
+					mutex_.unlock();
+				}
+
+			private:
+				std::mutex mutex_;
+			};
+
+			std::unique_ptr<Mutex> CreateMutex()
+			{
+				return MakeUniquePtr<StdMutex>();
+			}
 		}
 
 		Connection::Connection() noexcept = default;

@@ -38,10 +38,9 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
-#ifndef __CLR_VER
-#include <mutex>
-#endif
 #include <vector>
+
+#include <nonstd/scope.hpp>
 
 #include <boost/noncopyable.hpp>
 
@@ -83,6 +82,18 @@ namespace KlayGE
 
 		namespace Detail
 		{
+			// CLR doesn't support std::mutex. Need a wrapper.
+			class KLAYGE_CORE_API Mutex
+			{
+			public:
+				virtual ~Mutex() noexcept;
+
+				virtual void Lock() = 0;
+				virtual void Unlock() = 0;
+			};
+
+			KLAYGE_CORE_API std::unique_ptr<Mutex> CreateMutex();
+
 			class KLAYGE_CORE_API SignalBase : boost::noncopyable
 			{
 				friend class KlayGE::Signal::Connection;
@@ -131,9 +142,8 @@ namespace KlayGE
 			public:
 				Connection Connect(CallbackFunction const& cb)
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
+					mutex_->Lock();
 
 					slots_.emplace_back(MakeSharedPtr<CallbackFunction>(cb));
 					return Connection(*this, std::static_pointer_cast<void>(slots_.back()));
@@ -141,9 +151,8 @@ namespace KlayGE
 
 				void Disconnect(Connection const& connection)
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
+					mutex_->Lock();
 
 					BOOST_ASSERT(&connection.Signal() == this);
 					this->Disconnect(connection.Slot());
@@ -151,9 +160,8 @@ namespace KlayGE
 
 				CombinerResultType operator()(Args... args) const
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
+					mutex_->Lock();
 
 					Combiner combiner;
 					for (auto const& slot : slots_)
@@ -171,27 +179,28 @@ namespace KlayGE
 
 				size_t Size() const
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
+					mutex_->Lock();
+
 					return slots_.size();
 				}
 
 				bool Empty() const
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lock(mutex_);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
+					mutex_->Lock();
+
 					return slots_.empty();
 				}
 
 				void Swap(SignalTemplateBase& rhs)
 				{
-#ifndef __CLR_VER
-					std::unique_lock<std::mutex> lhs_lock(mutex_, std::defer_lock);
-					std::unique_lock<std::mutex> rhs_lock(rhs.mutex_, std::defer_lock);
-					std::lock(lhs_lock, rhs_lock);
-#endif
+					auto on_exit = nonstd::make_scope_exit([this, rhs] {
+						rhs.mutex_->Unlock();
+						mutex_->Unlock();
+					});
+					mutex_->Lock();
+					rhs.mutex_->Lock();
 
 					std::swap(slots_, rhs.slots_);
 				}
@@ -207,9 +216,7 @@ namespace KlayGE
 
 			private:
 				std::vector<std::shared_ptr<CallbackFunction>> slots_;
-#ifndef __CLR_VER
-				mutable std::mutex mutex_;
-#endif
+				std::unique_ptr<Mutex> mutex_ = CreateMutex();
 			};
 		} // namespace Detail
 
