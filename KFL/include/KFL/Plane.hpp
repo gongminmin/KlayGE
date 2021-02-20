@@ -45,7 +45,7 @@ namespace KlayGE
 	class Plane_T final : boost::equality_comparable<Plane_T<T>>
 	{
 	public:
-		enum { elem_num = 4 };
+		static constexpr size_t elem_num = 4;
 
 		typedef T value_type;
 
@@ -62,28 +62,29 @@ namespace KlayGE
 		constexpr Plane_T() noexcept
 		{
 		}
-		explicit constexpr Plane_T(T const * rhs) noexcept
-			: plane_(rhs)
+		explicit constexpr Plane_T(T const* rhs) noexcept : plane_(rhs)
 		{
 		}
-		Plane_T(Plane_T const & rhs) noexcept;
-		Plane_T(Plane_T&& rhs) noexcept;
-		explicit constexpr Plane_T(Vector_T<T, elem_num> rhs) noexcept
-			: plane_(std::move(rhs))
+		constexpr Plane_T(Plane_T const& rhs) noexcept : plane_(rhs.plane_)
 		{
 		}
-		constexpr Plane_T(T a, T b, T c, T d) noexcept
-			: plane_(std::move(a), std::move(b), std::move(c), std::move(d))
+		constexpr Plane_T(Plane_T&& rhs) noexcept : plane_(std::move(rhs.plane_))
+		{
+		}
+		explicit constexpr Plane_T(Vector_T<T, elem_num> rhs) noexcept : plane_(std::move(rhs))
+		{
+		}
+		constexpr Plane_T(T a, T b, T c, T d) noexcept : plane_(std::move(a), std::move(b), std::move(c), std::move(d))
 		{
 		}
 
-		static size_t size() noexcept
+		static constexpr size_t size() noexcept
 		{
 			return elem_num;
 		}
 
 		// 取向量
-		iterator begin() noexcept
+		constexpr iterator begin() noexcept
 		{
 			return plane_.begin();
 		}
@@ -91,7 +92,7 @@ namespace KlayGE
 		{
 			return plane_.begin();
 		}
-		iterator end() noexcept
+		constexpr iterator end() noexcept
 		{
 			return plane_.end();
 		}
@@ -99,7 +100,7 @@ namespace KlayGE
 		{
 			return plane_.end();
 		}
-		reference operator[](size_t index) noexcept
+		constexpr reference operator[](size_t index) noexcept
 		{
 			return plane_[index];
 		}
@@ -108,7 +109,7 @@ namespace KlayGE
 			return plane_[index];
 		}
 
-		reference a() noexcept
+		constexpr reference a() noexcept
 		{
 			return plane_[0];
 		}
@@ -116,7 +117,7 @@ namespace KlayGE
 		{
 			return plane_[0];
 		}
-		reference b() noexcept
+		constexpr reference b() noexcept
 		{
 			return plane_[1];
 		}
@@ -124,7 +125,7 @@ namespace KlayGE
 		{
 			return plane_[1];
 		}
-		reference c() noexcept
+		constexpr reference c() noexcept
 		{
 			return plane_[2];
 		}
@@ -132,7 +133,7 @@ namespace KlayGE
 		{
 			return plane_[2];
 		}
-		reference d() noexcept
+		constexpr reference d() noexcept
 		{
 			return plane_[3];
 		}
@@ -148,12 +149,23 @@ namespace KlayGE
 		Plane_T& operator=(Vector_T<T, elem_num>&& rhs) noexcept;
 
 		// 一元操作符
-		Plane_T const operator+() const noexcept;
+		constexpr Plane_T const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Plane_T const operator-() const noexcept;
 
 		// 取法向向量
-		Vector_T<T, 3> const Normal() const noexcept;
+		constexpr Vector_T<T, 3> const& Normal() const noexcept
+		{
+			return plane_.template AsVector<3>();
+		}
 		void Normal(Vector_T<T, 3> const & rhs) noexcept;
+
+		constexpr Vector_T<T, 4> const& AsVector4() const noexcept
+		{
+			return plane_;
+		}
 
 		bool operator==(Plane_T<T> const & rhs) const noexcept;
 

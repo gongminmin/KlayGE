@@ -37,20 +37,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Sphere_T<T>::Sphere_T(Sphere_T<T> const & rhs) noexcept
-		: center_(rhs.center_),
-			radius_(rhs.radius_)
-	{
-	}
-
-	template <typename T>
-	Sphere_T<T>::Sphere_T(Sphere_T<T>&& rhs) noexcept
-		: center_(std::move(rhs.center_)),
-			radius_(std::move(rhs.radius_))
-	{
-	}
-
-	template <typename T>
 	Sphere_T<T>& Sphere_T<T>::operator+=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		this->Center() += rhs;
@@ -93,18 +79,6 @@ namespace KlayGE
 	{
 		center_ = std::move(rhs.center_);
 		radius_ = std::move(rhs.radius_);
-		return *this;
-	}
-
-	template <typename T>
-	Sphere_T<T> const & Sphere_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
-	Sphere_T<T> const & Sphere_T<T>::operator-() const noexcept
-	{
 		return *this;
 	}
 
@@ -155,7 +129,6 @@ namespace KlayGE
 	{
 		return (center_ == rhs.center_) && (radius_ == rhs.radius_);
 	}
-
 
 	template class Sphere_T<float>;
 }

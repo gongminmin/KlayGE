@@ -58,12 +58,6 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Size_T<T> const Size_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
 	Size_T<T> const Size_T<T>::operator-() const noexcept
 	{
 #ifdef KLAYGE_COMPILER_MSVC

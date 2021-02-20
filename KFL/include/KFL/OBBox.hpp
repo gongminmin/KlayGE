@@ -50,21 +50,23 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		constexpr OBBox_T() noexcept
-			: extent_(0, 0, 0)
+		constexpr OBBox_T() noexcept : extent_(0, 0, 0)
 		{
 		}
-		OBBox_T(Vector_T<T, 3> const & center,
-				Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
-				Vector_T<T, 3> const & extent) noexcept;
-		constexpr OBBox_T(Vector_T<T, 3> center,
-				Quaternion_T<T> rotation,
-				Vector_T<T, 3> extent) noexcept
+		OBBox_T(Vector_T<T, 3> const& center, Vector_T<T, 3> const& x_axis, Vector_T<T, 3> const& y_axis, Vector_T<T, 3> const& z_axis,
+			Vector_T<T, 3> const& extent) noexcept;
+		constexpr OBBox_T(Vector_T<T, 3> center, Quaternion_T<T> rotation, Vector_T<T, 3> extent) noexcept
 			: center_(std::move(center)), rotation_(std::move(rotation)), extent_(std::move(extent))
 		{
 		}
-		OBBox_T(OBBox_T<T> const & rhs) noexcept;
-		OBBox_T(OBBox_T<T>&& rhs) noexcept;
+		constexpr OBBox_T(OBBox_T<T> const& rhs) noexcept
+			: Bound_T<T>(rhs), center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
+		{
+		}
+		constexpr OBBox_T(OBBox_T<T>&& rhs) noexcept
+			: Bound_T<T>(rhs), center_(std::move(rhs.center_)), rotation_(std::move(rhs.rotation_)), extent_(std::move(rhs.extent_))
+		{
+		}
 
 		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) noexcept;
 		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs) noexcept;
@@ -73,9 +75,6 @@ namespace KlayGE
 
 		OBBox_T<T>& operator=(OBBox_T<T> const & rhs) noexcept;
 		OBBox_T<T>& operator=(OBBox_T<T>&& rhs) noexcept;
-
-		OBBox_T<T> const operator+() const noexcept;
-		OBBox_T<T> const operator-() const noexcept;
 
 		virtual bool IsEmpty() const noexcept override;
 		virtual bool VecInBound(Vector_T<T, 3> const & v) const noexcept override;

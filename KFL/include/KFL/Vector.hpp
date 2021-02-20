@@ -72,7 +72,7 @@ namespace KlayGE
 		typedef typename DetailType::size_type			size_type;
 		typedef typename DetailType::difference_type	difference_type;
 
-		enum { elem_num = N };
+		static constexpr size_t elem_num = N;
 
 	public:
 		constexpr Vector_T() noexcept
@@ -90,7 +90,7 @@ namespace KlayGE
 		{
 			detail::vector_helper<T, N>::DoCopy(vec_.data(), rhs.data());
 		}
-		Vector_T(Vector_T&& rhs) noexcept
+		constexpr Vector_T(Vector_T&& rhs) noexcept
 			: vec_(std::move(rhs.vec_))
 		{
 		}
@@ -115,7 +115,7 @@ namespace KlayGE
 			static_assert(4 == elem_num, "Must be 4D vector.");
 		}
 
-		static size_t size() noexcept
+		static constexpr size_t size() noexcept
 		{
 			return elem_num;
 		}
@@ -127,7 +127,7 @@ namespace KlayGE
 		}
 
 		// 取向量
-		iterator begin() noexcept
+		constexpr iterator begin() noexcept
 		{
 			return vec_.begin();
 		}
@@ -135,7 +135,7 @@ namespace KlayGE
 		{
 			return vec_.begin();
 		}
-		iterator end() noexcept
+		constexpr iterator end() noexcept
 		{
 			return vec_.end();
 		}
@@ -143,7 +143,7 @@ namespace KlayGE
 		{
 			return vec_.end();
 		}
-		reference operator[](size_t index) noexcept
+		constexpr reference operator[](size_t index) noexcept
 		{
 			return vec_[index];
 		}
@@ -152,7 +152,7 @@ namespace KlayGE
 			return vec_[index];
 		}
 
-		pointer data() noexcept
+		constexpr pointer data() noexcept
 		{
 			return &vec_[0];
 		}
@@ -161,7 +161,7 @@ namespace KlayGE
 			return &vec_[0];
 		}
 
-		reference x() noexcept
+		constexpr reference x() noexcept
 		{
 			static_assert(elem_num >= 1, "Must be 1D vector.");
 			return vec_[0];
@@ -172,7 +172,7 @@ namespace KlayGE
 			return vec_[0];
 		}
 
-		reference y() noexcept
+		constexpr reference y() noexcept
 		{
 			static_assert(elem_num >= 2, "Must be 2D vector.");
 			return vec_[1];
@@ -183,7 +183,7 @@ namespace KlayGE
 			return vec_[1];
 		}
 
-		reference z() noexcept
+		constexpr reference z() noexcept
 		{
 			static_assert(elem_num >= 3, "Must be 3D vector.");
 			return vec_[2];
@@ -194,7 +194,7 @@ namespace KlayGE
 			return vec_[2];
 		}
 
-		reference w() noexcept
+		constexpr reference w() noexcept
 		{
 			static_assert(elem_num >= 4, "Must be 4D vector.");
 			return vec_[3];
@@ -277,8 +277,10 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		Vector_T const operator+() const noexcept
-			{ return *this; }
+		constexpr Vector_T const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Vector_T const operator-() const noexcept
 		{
 			Vector_T temp(*this);
@@ -294,6 +296,13 @@ namespace KlayGE
 		bool operator==(Vector_T const & rhs) const noexcept
 		{
 			return detail::vector_helper<T, N>::DoEqual(vec_.data(), rhs.data());
+		}
+
+		template <int M>
+		constexpr Vector_T<T, M> const& AsVector() const noexcept
+		{
+			static_assert(M <= N, "Could not get a larger vector.");
+			return reinterpret_cast<Vector_T<T, M> const&>(*this);
 		}
 
 	private:

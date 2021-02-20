@@ -35,18 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Frustum_T<T>::Frustum_T(Frustum_T<T> const & rhs) noexcept
-		: planes_(rhs.planes_), corners_(rhs.corners_)
-	{
-	}
-
-	template <typename T>
-	Frustum_T<T>::Frustum_T(Frustum_T<T>&& rhs) noexcept
-		: planes_(std::move(rhs.planes_)), corners_(std::move(rhs.corners_))
-	{
-	}
-
-	template <typename T>
 	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T> const & rhs) noexcept
 	{
 		if (this != &rhs)

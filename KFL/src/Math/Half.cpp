@@ -192,12 +192,6 @@ namespace KlayGE
 		return *this;
 	}
 
-	// Ò»Ôª²Ù×÷·û
-	half const half::operator+() const noexcept
-	{
-		return *this;
-	}
-
 	half const half::operator-() const noexcept
 	{
 		half temp(*this);

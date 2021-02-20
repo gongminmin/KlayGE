@@ -45,8 +45,12 @@ namespace KlayGE
 		constexpr Frustum_T() noexcept
 		{
 		}
-		Frustum_T(Frustum_T<T> const & rhs) noexcept;
-		Frustum_T(Frustum_T<T>&& rhs) noexcept;
+		constexpr Frustum_T(Frustum_T<T> const& rhs) noexcept : planes_(rhs.planes_), corners_(rhs.corners_)
+		{
+		}
+		constexpr Frustum_T(Frustum_T<T>&& rhs) noexcept : planes_(std::move(rhs.planes_)), corners_(std::move(rhs.corners_))
+		{
+		}
 
 		Frustum_T& operator=(Frustum_T const & rhs) noexcept;
 		Frustum_T& operator=(Frustum_T&& rhs) noexcept;

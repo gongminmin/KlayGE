@@ -56,8 +56,12 @@ namespace KlayGE
 		{
 		}
 		AABBox_T(Vector_T<T, 3> vMin, Vector_T<T, 3> vMax) noexcept;
-		AABBox_T(AABBox_T<T> const & rhs) noexcept;
-		AABBox_T(AABBox_T<T>&& rhs) noexcept;
+		constexpr AABBox_T(AABBox_T<T> const& rhs) noexcept : Bound_T<T>(rhs), min_(rhs.min_), max_(rhs.max_)
+		{
+		}
+		constexpr AABBox_T(AABBox_T<T>&& rhs) noexcept : Bound_T<T>(rhs), min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
+		{
+		}
 
 		// 赋值操作符
 		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) noexcept;
@@ -69,10 +73,6 @@ namespace KlayGE
 
 		AABBox_T<T>& operator=(AABBox_T<T> const & rhs) noexcept;
 		AABBox_T<T>& operator=(AABBox_T<T>&& rhs) noexcept;
-
-		// 一元操作符
-		AABBox_T<T> const operator+() const noexcept;
-		AABBox_T<T> const operator-() const noexcept;
 
 		// 属性
 		T Width() const noexcept;
@@ -89,7 +89,7 @@ namespace KlayGE
 		Vector_T<T, 3> const RightBottomFar() const noexcept;
 		Vector_T<T, 3> const RightTopFar() const noexcept;
 
-		Vector_T<T, 3>& Min() noexcept
+		constexpr Vector_T<T, 3>& Min() noexcept
 		{
 			return min_;
 		}
@@ -97,7 +97,7 @@ namespace KlayGE
 		{
 			return min_;
 		}
-		Vector_T<T, 3>& Max() noexcept
+		constexpr Vector_T<T, 3>& Max() noexcept
 		{
 			return max_;
 		}

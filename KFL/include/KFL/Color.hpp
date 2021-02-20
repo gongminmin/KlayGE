@@ -52,7 +52,7 @@ namespace KlayGE
 							boost::equality_comparable<Color_T<T>>>>>>>
 	{
 	public:
-		enum { elem_num = 4 };
+		static constexpr size_t elem_num = 4;
 
 		typedef T value_type;
 
@@ -69,20 +69,30 @@ namespace KlayGE
 		constexpr Color_T() noexcept
 		{
 		}
-		explicit constexpr Color_T(T const * rhs) noexcept
-			: col_(rhs)
+		explicit constexpr Color_T(T const* rhs) noexcept : col_(rhs)
 		{
 		}
-		Color_T(Color_T const & rhs) noexcept;
-		Color_T(Color_T&& rhs) noexcept;
+		constexpr Color_T(Color_T const& rhs) noexcept : col_(rhs.col_)
+		{
+		}
+		constexpr Color_T(Color_T&& rhs) noexcept : col_(std::move(rhs.col_))
+		{
+		}
 		constexpr Color_T(T r, T g, T b, T a) noexcept
 			: col_(std::move(r), std::move(g), std::move(b), std::move(a))
 		{
 		}
-		explicit Color_T(uint32_t dw) noexcept;
+		constexpr explicit Color_T(uint32_t dw) noexcept
+		{
+			T constexpr rcp = 1 / T(255);
+			this->a() = rcp * (static_cast<T>(static_cast<uint8_t>(dw >> 24)));
+			this->r() = rcp * (static_cast<T>(static_cast<uint8_t>(dw >> 16)));
+			this->g() = rcp * (static_cast<T>(static_cast<uint8_t>(dw >> 8)));
+			this->b() = rcp * (static_cast<T>(static_cast<uint8_t>(dw >> 0)));
+		}
 
 		// 取颜色
-		iterator begin() noexcept
+		constexpr iterator begin() noexcept
 		{
 			return col_.begin();
 		}
@@ -90,7 +100,7 @@ namespace KlayGE
 		{
 			return col_.begin();
 		}
-		iterator end() noexcept
+		constexpr iterator end() noexcept
 		{
 			return col_.end();
 		}
@@ -98,7 +108,7 @@ namespace KlayGE
 		{
 			return col_.end();
 		}
-		reference operator[](size_t index) noexcept
+		constexpr reference operator[](size_t index) noexcept
 		{
 			return col_[index];
 		}
@@ -107,7 +117,7 @@ namespace KlayGE
 			return col_[index];
 		}
 
-		reference r() noexcept
+		constexpr reference r() noexcept
 		{
 			return col_[0];
 		}
@@ -115,7 +125,7 @@ namespace KlayGE
 		{
 			return col_[0];
 		}
-		reference g() noexcept
+		constexpr reference g() noexcept
 		{
 			return col_[1];
 		}
@@ -123,7 +133,7 @@ namespace KlayGE
 		{
 			return col_[1];
 		}
-		reference b() noexcept
+		constexpr reference b() noexcept
 		{
 			return col_[2];
 		}
@@ -131,7 +141,7 @@ namespace KlayGE
 		{
 			return col_[2];
 		}
-		reference a() noexcept
+		constexpr reference a() noexcept
 		{
 			return col_[3];
 		}
@@ -156,8 +166,16 @@ namespace KlayGE
 		Color_T& operator=(Color_T&& rhs) noexcept;
 
 		// 一元操作符
-		Color_T const operator+() const noexcept;
+		constexpr Color_T const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Color_T const operator-() const noexcept;
+
+		constexpr Vector_T<T, elem_num> const& AsVector()
+		{
+			return col_;
+		}
 
 		bool operator==(Color_T<T> const & rhs) const noexcept;
 

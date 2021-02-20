@@ -82,7 +82,6 @@ namespace KlayGE
 	{
 	public:
 		constexpr half() noexcept
-			: value_()
 		{
 		}
 		explicit half(float f) noexcept;
@@ -117,13 +116,16 @@ namespace KlayGE
 		half& operator=(half const & rhs) noexcept;
 
 		// Ò»Ôª²Ù×÷·û
-		half const operator+() const noexcept;
+		constexpr half const& operator+() const noexcept
+		{
+			return *this;
+		}
 		half const operator-() const noexcept;
 
 		bool operator==(half const & rhs) noexcept;
 
 	private:
-		uint16_t value_;
+		uint16_t value_{};
 	};
 }
 

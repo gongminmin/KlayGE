@@ -46,20 +46,6 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T> const & rhs) noexcept
-			: Bound_T<T>(rhs),
-				min_(rhs.min_), max_(rhs.max_)
-	{
-	}
-
-	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T>&& rhs) noexcept
-		: Bound_T<T>(rhs),
-			min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
-	{
-	}
-
-	template <typename T>
 	AABBox_T<T>& AABBox_T<T>::operator+=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		min_ += rhs;
@@ -122,18 +108,6 @@ namespace KlayGE
 		min_ = std::move(rhs.min_);
 		max_ = std::move(rhs.max_);
 		return *this;
-	}
-
-	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator-() const noexcept
-	{
-		return AABBox_T<T>(-this->Max(), -this->Min());
 	}
 
 	template <typename T>
@@ -271,7 +245,6 @@ namespace KlayGE
 	{
 		return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 	}
-
 
 	template class AABBox_T<float>;
 }
