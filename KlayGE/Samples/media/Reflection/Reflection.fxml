@@ -12,7 +12,6 @@
 	<parameter type="float4x4" name="back_model_view"/>
 	<parameter type="float4x4" name="back_proj"/>
 	<parameter type="float3" name="back_near_q_far"/>
-	<parameter type="float4x4" name="inv_view"/>
 	<parameter type="float3" name="eye_in_back_camera"/>
 
 	<parameter type="textureCUBE" name="skybox_tex"/>

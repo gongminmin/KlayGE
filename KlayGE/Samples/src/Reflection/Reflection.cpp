@@ -228,7 +228,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 
 	id_enable_camera_path_ = parameter_dialog_->IDFromName("enable_camera_path");
 	parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
-		this->EnableCameraPath(sender);
+		this->EnableCameraPathHandler(sender);
 	});
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -312,7 +312,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	this->EnableCameraPath(*parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_));
+	this->EnableCameraPathHandler(*parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_));
 }
 
 void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height)
@@ -384,7 +384,7 @@ void ScreenSpaceReflectionApp::EnableReflectionHandler(KlayGE::UICheckBox const 
 	}
 }
 
-void ScreenSpaceReflectionApp::EnableCameraPath(KlayGE::UICheckBox const& sender)
+void ScreenSpaceReflectionApp::EnableCameraPathHandler(KlayGE::UICheckBox const& sender)
 {
 	bool enabled = sender.GetChecked();
 	if (enabled)

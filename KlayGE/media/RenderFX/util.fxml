@@ -44,7 +44,7 @@ float4 decode_hdr_yc(float y, float4 c)
 	float2 C = get_xy_channel(c);
 	C *= C;
 	
-	return float4(Y * float3(C.g, (1.0f - C.g - C.r), C.r) / float3(0.2126f, 0.7152f, 0.0722f), 1);
+	return float4(Y * float3(C.g, (1.0f - C.g - C.r), C.r) / float3(0.2126f, 0.7152f, 0.0722f), y >= 1e-6f);
 }
 
 float mipmap_level(float2 uv, float2 texture_size)

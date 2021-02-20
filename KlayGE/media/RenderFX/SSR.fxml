@@ -8,6 +8,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_proj"/>
 		<parameter type="float3" name="near_q_far"/>
 		<parameter type="float" name="ray_length"/>
@@ -40,6 +41,9 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+
+	<parameter type="textureCUBE" name="ssr_skybox_tex"/>
+	<parameter type="textureCUBE" name="ssr_skybox_C_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -163,7 +167,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, floa
 		}
 		else
 		{
-			ret = 0;
+			float3 reflect_vec_ws = mul(reflect_vec, (float3x3)inv_view);
+			float4 sky = decode_hdr_yc(ssr_skybox_tex.SampleLevel(ssr_linear_sampler, reflect_vec_ws, 0).r,
+				ssr_skybox_C_tex.SampleLevel(ssr_linear_sampler, reflect_vec_ws, 0));
+
+			ret = sky;
 		}
 
 		return ret;

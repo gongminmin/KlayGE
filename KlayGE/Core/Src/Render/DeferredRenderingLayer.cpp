@@ -3145,6 +3145,15 @@ namespace KlayGE
 			ssr_pp->InputPin(2, pvp.g_buffer_resolved_depth_srv);
 			ssr_pp->InputPin(3, pvp.merged_shading_resolved_before_ssr_srv);
 			ssr_pp->InputPin(4, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
+
+			ShaderResourceViewPtr skybox_tex;
+			ShaderResourceViewPtr skybox_C_tex;
+			skylight_y_cube_tex_param_->Value(skybox_tex);
+			skylight_c_cube_tex_param_->Value(skybox_C_tex);
+
+			ssr_pp->InputPin(5, skybox_tex);
+			ssr_pp->InputPin(6, skybox_C_tex);
+
 			ssr_pp->Apply();
 		}
 	}

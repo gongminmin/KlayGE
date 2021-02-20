@@ -22,7 +22,7 @@ private:
 	void MinSampleNumHandler(KlayGE::UISlider const & sender);
 	void MaxSampleNumHandler(KlayGE::UISlider const & sender);
 	void EnableReflectionHandler(KlayGE::UICheckBox const& sender);
-	void EnableCameraPath(KlayGE::UICheckBox const& sender);
+	void EnableCameraPathHandler(KlayGE::UICheckBox const& sender);
 
 private:
 	KlayGE::TrackballCameraController tb_controller_;

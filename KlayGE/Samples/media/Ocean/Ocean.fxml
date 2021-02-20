@@ -31,7 +31,6 @@
 		<parameter type="float3" name="disp_range1"/>
 		<parameter type="float" name="interpolate_frac"/>
 		<parameter type="float4x4" name="view"/>
-		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="opaque_shading_tex"/>
