@@ -18,7 +18,7 @@ namespace
 	float const GRAV_ACCEL = 9.8f;	// The acceleration of gravity, m/s^2
 
 	// Generating gaussian random number with mean 0 and standard deviation 1.
-	float Gauss(std::ranlux24_base& gen, std::uniform_real_distribution<float> const& random_dis)
+	float Gauss(std::ranlux24_base& gen, std::uniform_real_distribution<float>& random_dis)
 	{
 		float u1 = random_dis(gen);
 		float u2 = random_dis(gen);
