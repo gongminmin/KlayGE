@@ -22,6 +22,7 @@ private:
 	void MinSampleNumHandler(KlayGE::UISlider const & sender);
 	void MaxSampleNumHandler(KlayGE::UISlider const & sender);
 	void EnableReflectionHandler(KlayGE::UICheckBox const& sender);
+	void EnablePprHandler(KlayGE::UICheckBox const& sender);
 	void EnableCameraPathHandler(KlayGE::UICheckBox const& sender);
 
 private:
@@ -53,6 +54,7 @@ private:
 	int id_max_sample_num_static_;
 	int id_max_sample_num_slider_;
 	int id_enable_reflection_;
+	int id_enable_ppr_;
 	int id_enable_camera_path_;
 };
 

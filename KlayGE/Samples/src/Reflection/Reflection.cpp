@@ -166,9 +166,21 @@ namespace
 		{
 			mtl_ = SyncLoadRenderMaterial("ReflectPlane.mtlml");
 
-			effect_attrs_ |= EA_ScreenSpaceReflection;
-
 			this->BindDeferredEffect(SyncLoadRenderEffects(MakeSpan<std::string>({"GBuffer.fxml", "GBufferSSR.fxml"})));
+		}
+
+		void EnblePpr(bool enable)
+		{
+			if (enable)
+			{
+				effect_attrs_ &= ~EA_ScreenSpaceReflection;
+				effect_attrs_ |= EA_PixelProjectedReflection;
+			}
+			else
+			{
+				effect_attrs_ &= ~EA_PixelProjectedReflection;
+				effect_attrs_ |= EA_ScreenSpaceReflection;
+			}
 		}
 	};
 
@@ -224,6 +236,11 @@ void ScreenSpaceReflectionApp::OnCreate()
 	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
 	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
 		this->EnableReflectionHandler(sender);
+	});
+
+	id_enable_ppr_ = parameter_dialog_->IDFromName("enable_ppr");
+	parameter_dialog_->Control<UICheckBox>(id_enable_ppr_)->OnChangedEvent().Connect([this](UICheckBox const& sender) {
+		this->EnablePprHandler(sender);
 	});
 
 	id_enable_camera_path_ = parameter_dialog_->IDFromName("enable_camera_path");
@@ -312,6 +329,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
+	this->EnablePprHandler(*parameter_dialog_->Control<UICheckBox>(id_enable_ppr_));
 	this->EnableCameraPathHandler(*parameter_dialog_->Control<UICheckBox>(id_enable_camera_path_));
 }
 
@@ -334,7 +352,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 	back_refl_fb_->Attach(rf.Make2DDsv(back_refl_ds_tex_, 0, 1, 0));
 
 	deferred_rendering_->SetupViewport(
-		0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO | VPAM_NoSSR);
+		0, back_refl_fb_, VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO | VPAM_NoSSR | VPAM_NoPPR);
 
 	screen_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 }
@@ -381,6 +399,15 @@ void ScreenSpaceReflectionApp::EnableReflectionHandler(KlayGE::UICheckBox const 
 	if (teapot_node_)
 	{
 		teapot_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<DualSideSSRMesh>().EnbleReflection(enabled);
+	}
+}
+
+void ScreenSpaceReflectionApp::EnablePprHandler(KlayGE::UICheckBox const& sender)
+{
+	bool enabled = sender.GetChecked();
+	if (plane_node_)
+	{
+		plane_node_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<SingleSideSSRPlane>().EnblePpr(enabled);
 	}
 }
 
@@ -447,6 +474,8 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			teapot_mesh.BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
 			teapot_mesh.BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
 		}
+
+		deferred_rendering_->PPRPlane(MathLib::mul(Plane(0, 0, -1, 0), MathLib::transpose(plane_node_->InverseTransformToWorld())));
 	}
 
 	urt = deferred_rendering_->Update(pass);

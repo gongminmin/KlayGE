@@ -50,6 +50,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/MotionBlur.hpp>
+#include <KlayGE/PPRPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
 #include <KlayGE/SSSBlur.hpp>
@@ -462,6 +463,8 @@ namespace KlayGE
 		}
 #endif
 
+		ppr_enabled_ = cs_cldr_;
+
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
@@ -756,6 +759,11 @@ namespace KlayGE
 		{
 			ssr_pps_[i] = MakeSharedPtr<SSRPostProcess>(i != 0);
 
+			if (cs_cldr_)
+			{
+				ppr_pps_[i] = MakeSharedPtr<PPRPostProcess>(i != 0);
+			}
+
 			sss_blur_pps_[i] = MakeSharedPtr<SSSBlurPP>(i != 0);
 			sss_blur_pps_[i]->SetParam(0, 1.0f);
 			sss_blur_pps_[i]->SetParam(1, 1.0f);
@@ -945,6 +953,10 @@ namespace KlayGE
 		}
 		sss_blur_pp_perf_ = profiler.CreatePerfRange(0, "SSS Blur PP");
 		ssr_pp_perf_ = profiler.CreatePerfRange(0, "SSR PP");
+		if (cs_cldr_)
+		{
+			ppr_pp_perf_ = profiler.CreatePerfRange(0, "PPR PP");
+		}
 		atmospheric_pp_perf_ = profiler.CreatePerfRange(0, "Atmospheric PP");
 		taa_pp_perf_ = profiler.CreatePerfRange(0, "TAA PP");
 		vdm_perf_ = profiler.CreatePerfRange(0, "VDM");
@@ -1031,6 +1043,29 @@ namespace KlayGE
 	void DeferredRenderingLayer::SSREnabled(bool ssr)
 	{
 		ssr_enabled_ = ssr;
+	}
+
+	void DeferredRenderingLayer::PPREnabled(bool ppr)
+	{
+		if (cs_cldr_)
+		{
+			ppr_enabled_ = ppr;
+		}
+		else
+		{
+			ppr_enabled_ = false;
+		}
+	}
+
+	void DeferredRenderingLayer::PPRPlane(Plane const& plane)
+	{
+		for (int i = 0; i < 2; ++i)
+		{
+			if (ppr_pps_[i])
+			{
+				ppr_pps_[i]->SetParam(0, reinterpret_cast<float4 const&>(plane));
+			}
+		}
 	}
 
 	void DeferredRenderingLayer::TemporalAAEnabled(bool taa)
@@ -1157,6 +1192,11 @@ namespace KlayGE
 		sample_count = 1;
 		sample_quality = 0;
 #endif
+
+		if (!cs_cldr_)
+		{
+			attrib |= VPAM_NoPPR;
+		}
 
 		PerViewport& pvp = viewports_[index];
 		pvp.attrib = attrib;
@@ -1480,7 +1520,7 @@ namespace KlayGE
 			pvp.motion_blur_rtv = rf.Make2DRtv(pvp.motion_blur_tex, 0, 1, 0);
 		}
 
-		if (!(attrib & VPAM_NoSSR))
+		if (!(attrib & VPAM_NoSSR) && !(attrib & VPAM_NoPPR))
 		{
 			pvp.merged_shading_resolved_before_ssr_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			KLAYGE_TEXTURE_DEBUG_NAME(pvp.merged_shading_resolved_before_ssr_tex);
@@ -1838,6 +1878,7 @@ namespace KlayGE
 		has_simple_forward_objs_ = false;
 		has_vdm_objs_ = false;
 		has_ssr_objs_ = false;
+		has_ppr_objs_ = false;
 		visible_scene_nodes_.clear();
 		scene_mgr.SceneRootNode().Traverse(
 			[this, &has_opaque_objs, &has_transparency_back_objs, &has_transparency_front_objs](SceneNode& node)
@@ -1877,6 +1918,10 @@ namespace KlayGE
 						if (node.ScreenSpaceReflection())
 						{
 							has_ssr_objs_ = true;
+						}
+						if (node.PixelProjectedReflection())
+						{
+							has_ppr_objs_ = true;
 						}
 					}
 
@@ -3155,6 +3200,35 @@ namespace KlayGE
 			ssr_pp->InputPin(6, skybox_C_tex);
 
 			ssr_pp->Apply();
+		}
+	}
+
+	void DeferredRenderingLayer::AddPPR(PerViewport const& pvp)
+	{
+		if (!(pvp.attrib & VPAM_NoPPR))
+		{
+			auto* ppr_pp = ppr_pps_[pvp.sample_count != 1].get();
+
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+			pvp.merged_shading_texs[pvp.curr_merged_buffer_index]->CopyToTexture(
+				*pvp.merged_shading_resolved_before_ssr_tex, TextureFilter::Point);
+
+			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
+			ppr_pp->InputPin(0, pvp.g_buffer_rt0_srv);
+			ppr_pp->InputPin(1, pvp.g_buffer_rt1_srv);
+			ppr_pp->InputPin(2, pvp.merged_shading_resolved_before_ssr_srv);
+			ppr_pp->InputPin(3, pvp.merged_depth_srvs[pvp.curr_merged_buffer_index]);
+
+			ShaderResourceViewPtr skybox_tex;
+			ShaderResourceViewPtr skybox_C_tex;
+			skylight_y_cube_tex_param_->Value(skybox_tex);
+			skylight_c_cube_tex_param_->Value(skybox_C_tex);
+
+			ppr_pp->InputPin(4, skybox_tex);
+			ppr_pp->InputPin(5, skybox_C_tex);
+
+			ppr_pp->Apply();
 		}
 	}
 
@@ -4770,6 +4844,17 @@ namespace KlayGE
 			this->AddSSR(pvp);
 #ifndef KLAYGE_SHIP
 			ssr_pp_perf_->End();
+#endif
+		}
+
+		if (has_ppr_objs_ && ppr_enabled_)
+		{
+#ifndef KLAYGE_SHIP
+			ppr_pp_perf_->Begin();
+#endif
+			this->AddPPR(pvp);
+#ifndef KLAYGE_SHIP
+			ppr_pp_perf_->End();
 #endif
 		}
 

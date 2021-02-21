@@ -37,6 +37,7 @@ namespace KlayGE
 		PC_Shading,
 		PC_ObjectReflection,
 		PC_ScreenSpaceReflection,
+		PC_PixelProjectedReflection,
 		PC_SpecialShading,
 		PC_SpecialShadingMultiView,
 		PC_SimpleForward,
@@ -149,6 +150,7 @@ namespace KlayGE
 			EA_SSS = 1UL << 6,
 			EA_VDM = 1UL << 7,
 			EA_ScreenSpaceReflection = 1UL << 8,
+			EA_PixelProjectedReflection = 1UL << 9
 		};
 
 	public:
@@ -280,6 +282,10 @@ namespace KlayGE
 		virtual bool ScreenSpaceReflection() const
 		{
 			return effect_attrs_ & EA_ScreenSpaceReflection ? true : false;
+		}
+		virtual bool PixelProjectedReflection() const
+		{
+			return effect_attrs_ & EA_PixelProjectedReflection ? true : false;
 		}
 
 	protected:

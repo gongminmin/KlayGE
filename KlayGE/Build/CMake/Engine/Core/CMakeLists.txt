@@ -101,6 +101,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/MultiResLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ParticleSystem.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/PostProcess.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/PPRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Query.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Renderable.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderableHelper.cpp
@@ -156,6 +157,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MultiResLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ParticleSystem.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PostProcess.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PPRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Query.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Renderable.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderableHelper.hpp
@@ -237,6 +239,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PPR.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PrefixSum.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml

@@ -65,6 +65,7 @@ namespace KlayGE
 		VPAM_NoAtmospheric = 1UL << 11,
 		VPAM_NoTAA = 1UL << 12,
 		VPAM_NoMotionBlur = 1UL << 13,
+		VPAM_NoPPR = 1UL << 14,
 	};
 
 	struct PerViewport
@@ -262,6 +263,8 @@ namespace KlayGE
 		void TranslucencyEnabled(bool trans);
 		void TranslucencyStrength(float strength);
 		void SSREnabled(bool ssr);
+		void PPREnabled(bool ppr);
+		void PPRPlane(Plane const& plane);
 		void TemporalAAEnabled(bool taa);
 		void DepthOfFieldEnabled(bool dof, bool bokeh);
 		void DepthFocus(float plane, float range);
@@ -525,6 +528,7 @@ namespace KlayGE
 		void AddTranslucency(uint32_t light_index, PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void AddSSS(PerViewport const & pvp);
 		void AddSSR(PerViewport const & pvp);
+		void AddPPR(PerViewport const& pvp);
 		void AddVDM(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
@@ -602,6 +606,9 @@ namespace KlayGE
 
 		PostProcessPtr ssr_pps_[2];
 		bool ssr_enabled_;
+
+		PostProcessPtr ppr_pps_[2];
+		bool ppr_enabled_;
 
 		PostProcessPtr taa_pp_;
 		bool taa_enabled_;
@@ -808,6 +815,7 @@ namespace KlayGE
 		bool has_simple_forward_objs_;
 		bool has_vdm_objs_;
 		bool has_ssr_objs_;
+		bool has_ppr_objs_;
 
 		PostProcessPtr atmospheric_pp_;
 
@@ -849,6 +857,7 @@ namespace KlayGE
 		std::array<PerfRangePtr, PTB_None> special_shading_perfs_;
 		PerfRangePtr sss_blur_pp_perf_;
 		PerfRangePtr ssr_pp_perf_;
+		PerfRangePtr ppr_pp_perf_;
 		PerfRangePtr atmospheric_pp_perf_;
 		PerfRangePtr taa_pp_perf_;
 		PerfRangePtr vdm_perf_;

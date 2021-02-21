@@ -646,6 +646,19 @@ namespace KlayGE
 		}
 	}
 
+	bool SceneNode::PixelProjectedReflection() const
+	{
+		auto const* renderable_comp = this->FirstComponentOfType<RenderableComponent>();
+		if (renderable_comp != nullptr)
+		{
+			return renderable_comp->BoundRenderable().PixelProjectedReflection();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	void SceneNode::UpdatePosBoundSubtree()
 	{
 		for (auto const & child : children_)

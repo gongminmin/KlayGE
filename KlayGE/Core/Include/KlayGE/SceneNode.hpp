@@ -194,6 +194,7 @@ namespace KlayGE
 		bool SimpleForward() const;
 		bool VDM() const;
 		bool ScreenSpaceReflection() const;
+		bool PixelProjectedReflection() const;
 
 	private:
 		void FindAllNode(std::vector<SceneNode*>& nodes, std::wstring_view name);
