@@ -5,7 +5,6 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 

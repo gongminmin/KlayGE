@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 #include <KFL/StringUtil.hpp>
 #include <KlayGE/App3D.hpp>

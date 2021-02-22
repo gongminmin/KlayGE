@@ -36,7 +36,6 @@
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>

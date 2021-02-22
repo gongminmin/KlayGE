@@ -338,97 +338,73 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Open(cfg_file);
 		if (file)
 		{
-			XMLDocument cfg_doc;
-			XMLNodePtr cfg_root = cfg_doc.Parse(*file);
+			std::unique_ptr<XMLDocument> cfg_doc = LoadXml(*file);
+			XMLNode const* cfg_root = cfg_doc->RootNode();
 
-			XMLNodePtr context_node = cfg_root->FirstNode("context");
-			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");
+			XMLNode const* context_node = cfg_root->FirstNode("context");
+			XMLNode const* graphics_node = cfg_root->FirstNode("graphics");
 
-			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
-			if (rf_node)
+			if (XMLNode const* rf_node = context_node->FirstNode("render_factory"))
 			{
 				rf_name = std::string(rf_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
-			if (af_node)
+			if (XMLNode const* af_node = context_node->FirstNode("audio_factory"))
 			{
 				af_name = std::string(af_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr if_node = context_node->FirstNode("input_factory");
-			if (if_node)
+			if (XMLNode const* if_node = context_node->FirstNode("input_factory"))
 			{
 				if_name = std::string(if_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
-			if (sf_node)
+			if (XMLNode const* sf_node = context_node->FirstNode("show_factory"))
 			{
 				sf_name = std::string(sf_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr scf_node = context_node->FirstNode("script_factory");
-			if (scf_node)
+			if (XMLNode const* scf_node = context_node->FirstNode("script_factory"))
 			{
 				scf_name = std::string(scf_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
-			if (sm_node)
+			if (XMLNode const* sm_node = context_node->FirstNode("scene_manager"))
 			{
 				sm_name = std::string(sm_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr adsf_node = context_node->FirstNode("audio_data_source_factory");
-			if (adsf_node)
+			if (XMLNode const* adsf_node = context_node->FirstNode("audio_data_source_factory"))
 			{
 				adsf_name = std::string(adsf_node->Attrib("name")->ValueString());
 			}
-
-			XMLNodePtr perf_profiler_node = context_node->FirstNode("perf_profiler");
-			if (perf_profiler_node)
+			if (XMLNode const* perf_profiler_node = context_node->FirstNode("perf_profiler"))
 			{
 				perf_profiler = perf_profiler_node->Attrib("enabled")->ValueInt() ? true : false;
 			}
-
-			XMLNodePtr location_sensor_node = context_node->FirstNode("location_sensor");
-			if (location_sensor_node)
+			if (XMLNode const* location_sensor_node = context_node->FirstNode("location_sensor"))
 			{
 				location_sensor = location_sensor_node->Attrib("enabled")->ValueInt() ? true : false;
 			}
 
-			XMLNodePtr frame_node = graphics_node->FirstNode("frame");
-			XMLAttributePtr attr;
-			attr = frame_node->Attrib("width");
-			if (attr)
+			XMLNode const* frame_node = graphics_node->FirstNode("frame");
+			if (XMLAttribute const* attr = frame_node->Attrib("width"))
 			{
 				width = attr->ValueInt();
 			}
-			attr = frame_node->Attrib("height");
-			if (attr)
+			if (XMLAttribute const* attr = frame_node->Attrib("height"))
 			{
 				height = attr->ValueInt();
 			}
 			std::string color_fmt_str = "ARGB8";
-			attr = frame_node->Attrib("color_fmt");
-			if (attr)
+			if (XMLAttribute const* attr = frame_node->Attrib("color_fmt"))
 			{
 				color_fmt_str = std::string(attr->ValueString());
 			}
 			std::string depth_stencil_fmt_str = "D16";
-			attr = frame_node->Attrib("depth_stencil_fmt");
-			if (attr)
+			if (XMLAttribute const* attr = frame_node->Attrib("depth_stencil_fmt"))
 			{
 				depth_stencil_fmt_str = std::string(attr->ValueString());
 			}
-			attr = frame_node->Attrib("fullscreen");
-			if (attr)
+			if (XMLAttribute const* attr = frame_node->Attrib("fullscreen"))
 			{
 				full_screen = BoolFromStr(attr->ValueString());
 			}
-			attr = frame_node->Attrib("keep_screen_on");
-			if (attr)
+			if (XMLAttribute const* attr = frame_node->Attrib("keep_screen_on"))
 			{
 				keep_screen_on = BoolFromStr(attr->ValueString());
 			}
@@ -469,66 +445,56 @@ namespace KlayGE
 				depth_stencil_fmt = EF_Unknown;
 			}
 
-			XMLNodePtr sample_node = frame_node->FirstNode("sample");
-			attr = sample_node->Attrib("count");
-			if (attr)
+			XMLNode const* sample_node = frame_node->FirstNode("sample");
+			if (XMLAttribute const* attr = sample_node->Attrib("count"))
 			{
 				sample_count = attr->ValueInt();
 			}
-			attr = sample_node->Attrib("quality");
-			if (attr)
+			if (XMLAttribute const* attr = sample_node->Attrib("quality"))
 			{
 				sample_quality = attr->ValueInt();
 			}
 
-			XMLNodePtr sync_interval_node = graphics_node->FirstNode("sync_interval");
-			attr = sync_interval_node->Attrib("value");
-			if (attr)
+			XMLNode const* sync_interval_node = graphics_node->FirstNode("sync_interval");
+			if (XMLAttribute const* attr = sync_interval_node->Attrib("value"))
 			{
 				sync_interval = attr->ValueInt();
 			}
 
-			XMLNodePtr hdr_node = graphics_node->FirstNode("hdr");
-			attr = hdr_node->Attrib("value");
-			if (attr)
+			XMLNode const* hdr_node = graphics_node->FirstNode("hdr");
+			if (XMLAttribute const* attr = hdr_node->Attrib("value"))
 			{
 				hdr = BoolFromStr(attr->ValueString());
 			}
-			attr = hdr_node->Attrib("bloom");
-			if (attr)
+			if (XMLAttribute const* attr = hdr_node->Attrib("bloom"))
 			{
 				bloom = attr->ValueFloat();
 			}
-			attr = hdr_node->Attrib("blue_shift");
-			if (attr)
+			if (XMLAttribute const* attr = hdr_node->Attrib("blue_shift"))
 			{
 				blue_shift = BoolFromStr(attr->ValueString());
 			}
 
-			XMLNodePtr ppaa_node = graphics_node->FirstNode("ppaa");
-			attr = ppaa_node->Attrib("value");
-			if (attr)
+			XMLNode const* ppaa_node = graphics_node->FirstNode("ppaa");
+			if (XMLAttribute const* attr = ppaa_node->Attrib("value"))
 			{
 				ppaa = BoolFromStr(attr->ValueString());
 			}
 
-			XMLNodePtr gamma_node = graphics_node->FirstNode("gamma");
-			attr = gamma_node->Attrib("value");
-			if (attr)
+			XMLNode const* gamma_node = graphics_node->FirstNode("gamma");
+			if (XMLAttribute const* attr = gamma_node->Attrib("value"))
 			{
 				gamma = BoolFromStr(attr->ValueString());
 			}
 
-			XMLNodePtr color_grading_node = graphics_node->FirstNode("color_grading");
-			attr = color_grading_node->Attrib("value");
-			if (attr)
+			XMLNode const* color_grading_node = graphics_node->FirstNode("color_grading");
+			if (XMLAttribute const* attr = color_grading_node->Attrib("value"))
 			{
 				color_grading = BoolFromStr(attr->ValueString());
 			}
 
-			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
-			attr = stereo_node->Attrib("method");
-			if (attr)
+			XMLNode const* stereo_node = graphics_node->FirstNode("stereo");
+			if (XMLAttribute const* attr = stereo_node->Attrib("method"))
 			{
 				std::string_view const method_str = attr->ValueString();
 				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
@@ -581,15 +547,13 @@ namespace KlayGE
 			{
 				stereo_method = STM_None;
 			}
-			attr = stereo_node->Attrib("separation");
-			if (attr)
+			if (XMLAttribute const* attr = stereo_node->Attrib("separation"))
 			{
 				stereo_separation = attr->ValueFloat();
 			}
 
-			XMLNodePtr output_node = graphics_node->FirstNode("output");
-			attr = output_node->Attrib("method");
-			if (attr)
+			XMLNode const* output_node = graphics_node->FirstNode("output");
+			if (XMLAttribute const* attr = output_node->Attrib("method"))
 			{
 				std::string_view const method_str = attr->ValueString();
 				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
@@ -603,13 +567,11 @@ namespace KlayGE
 				}
 			}
 
-			attr = output_node->Attrib("white");
-			if (attr)
+			if (XMLAttribute const* attr = output_node->Attrib("white"))
 			{
 				paper_white = attr->ValueUInt();
 			}
-			attr = output_node->Attrib("max_lum");
-			if (attr)
+			if (XMLAttribute const* attr = output_node->Attrib("max_lum"))
 			{
 				display_max_luminance = attr->ValueUInt();
 			}
@@ -623,11 +585,9 @@ namespace KlayGE
 				color_fmt = EF_A2BGR10;
 			}
 
-			XMLNodePtr options_node = graphics_node->FirstNode("options");
-			if (options_node)
+			if (XMLNode const* options_node = graphics_node->FirstNode("options"))
 			{
-				attr = options_node->Attrib("str");
-				if (attr)
+				if (XMLAttribute const* attr = options_node->Attrib("str"))
 				{
 					std::string_view const options_str = attr->ValueString();
 
@@ -643,9 +603,8 @@ namespace KlayGE
 				}
 			}
 
-			XMLNodePtr debug_context_node = graphics_node->FirstNode("debug_context");
-			attr = debug_context_node->Attrib("value");
-			if (attr)
+			XMLNode const* debug_context_node = graphics_node->FirstNode("debug_context");
+			if (XMLAttribute const* attr = debug_context_node->Attrib("value"))
 			{
 				debug_context = BoolFromStr(attr->ValueString());
 			}
@@ -728,218 +687,234 @@ namespace KlayGE
 	void Context::SaveCfg(std::string const & cfg_file)
 	{
 		XMLDocument cfg_doc;
-		XMLNodePtr root = cfg_doc.AllocNode(XNT_Element, "configure");
-		cfg_doc.RootNode(root);
+		auto root = cfg_doc.AllocNode(XMLNodeType::Element, "configure");
 
-		XMLNodePtr context_node = cfg_doc.AllocNode(XNT_Element, "context");
 		{
-			XMLNodePtr rf_node = cfg_doc.AllocNode(XNT_Element, "render_factory");
-			rf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.render_factory_name));
-			context_node->AppendNode(rf_node);
+			auto context_node = cfg_doc.AllocNode(XMLNodeType::Element, "context");
+			{
+				auto rf_node = cfg_doc.AllocNode(XMLNodeType::Element, "render_factory");
+				rf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.render_factory_name));
+				context_node->AppendNode(std::move(rf_node));
 
-			XMLNodePtr af_node = cfg_doc.AllocNode(XNT_Element, "audio_factory");
-			af_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_factory_name));
-			context_node->AppendNode(af_node);
+				auto af_node = cfg_doc.AllocNode(XMLNodeType::Element, "audio_factory");
+				af_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_factory_name));
+				context_node->AppendNode(std::move(af_node));
 
-			XMLNodePtr if_node = cfg_doc.AllocNode(XNT_Element, "input_factory");
-			if_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.input_factory_name));
-			context_node->AppendNode(if_node);
+				auto if_node = cfg_doc.AllocNode(XMLNodeType::Element, "input_factory");
+				if_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.input_factory_name));
+				context_node->AppendNode(std::move(if_node));
 
-			XMLNodePtr sm_node = cfg_doc.AllocNode(XNT_Element, "scene_manager");
-			sm_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.scene_manager_name));
-			context_node->AppendNode(sm_node);
+				auto sm_node = cfg_doc.AllocNode(XMLNodeType::Element, "scene_manager");
+				sm_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.scene_manager_name));
+				context_node->AppendNode(std::move(sm_node));
 
-			XMLNodePtr sf_node = cfg_doc.AllocNode(XNT_Element, "show_factory");
-			sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
-			context_node->AppendNode(sf_node);
+				auto sf_node = cfg_doc.AllocNode(XMLNodeType::Element, "show_factory");
+				sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
+				context_node->AppendNode(std::move(sf_node));
 
-			XMLNodePtr scf_node = cfg_doc.AllocNode(XNT_Element, "script_factory");
-			scf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.script_factory_name));
-			context_node->AppendNode(scf_node);
+				auto scf_node = cfg_doc.AllocNode(XMLNodeType::Element, "script_factory");
+				scf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.script_factory_name));
+				context_node->AppendNode(std::move(scf_node));
 
-			XMLNodePtr adsf_node = cfg_doc.AllocNode(XNT_Element, "audio_data_source_factory");
-			adsf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_data_source_factory_name));
-			context_node->AppendNode(adsf_node);
+				auto adsf_node = cfg_doc.AllocNode(XMLNodeType::Element, "audio_data_source_factory");
+				adsf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_data_source_factory_name));
+				context_node->AppendNode(std::move(adsf_node));
 
-			XMLNodePtr perf_profiler_node = cfg_doc.AllocNode(XNT_Element, "perf_profiler");
-			perf_profiler_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.perf_profiler));
-			context_node->AppendNode(perf_profiler_node);
+				auto perf_profiler_node = cfg_doc.AllocNode(XMLNodeType::Element, "perf_profiler");
+				perf_profiler_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.perf_profiler));
+				context_node->AppendNode(std::move(perf_profiler_node));
 
-			XMLNodePtr location_sensor_node = cfg_doc.AllocNode(XNT_Element, "location_sensor");
-			location_sensor_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.location_sensor));
-			context_node->AppendNode(location_sensor_node);
+				auto location_sensor_node = cfg_doc.AllocNode(XMLNodeType::Element, "location_sensor");
+				location_sensor_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.location_sensor));
+				context_node->AppendNode(std::move(location_sensor_node));
+			}
+			root->AppendNode(std::move(context_node));
 		}
-		root->AppendNode(context_node);
-
-		XMLNodePtr graphics_node = cfg_doc.AllocNode(XNT_Element, "graphics");
 		{
-			XMLNodePtr frame_node = cfg_doc.AllocNode(XNT_Element, "frame");
-			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("width", cfg_.graphics_cfg.width));
-			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("height", cfg_.graphics_cfg.height));
-
-			std::string color_fmt_str;
-			switch (cfg_.graphics_cfg.color_fmt)
+			auto graphics_node = cfg_doc.AllocNode(XMLNodeType::Element, "graphics");
 			{
-			case EF_ARGB8:
-				color_fmt_str = "ARGB8";
-				break;
+				{
+					auto frame_node = cfg_doc.AllocNode(XMLNodeType::Element, "frame");
+					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("width", cfg_.graphics_cfg.width));
+					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("height", cfg_.graphics_cfg.height));
 
-			case EF_ABGR8:
-				color_fmt_str = "ABGR8";
-				break;
+					std::string color_fmt_str;
+					switch (cfg_.graphics_cfg.color_fmt)
+					{
+					case EF_ARGB8:
+						color_fmt_str = "ARGB8";
+						break;
 
-			case EF_A2BGR10:
-				color_fmt_str = "A2BGR10";
-				break;
+					case EF_ABGR8:
+						color_fmt_str = "ABGR8";
+						break;
 
-			case EF_ABGR16F:
-				color_fmt_str = "ABGR16F";
-				break;
+					case EF_A2BGR10:
+						color_fmt_str = "A2BGR10";
+						break;
 
-			default:
-				color_fmt_str = "ARGB8";
-				break;
+					case EF_ABGR16F:
+						color_fmt_str = "ABGR16F";
+						break;
+
+					default:
+						color_fmt_str = "ARGB8";
+						break;
+					}
+					frame_node->AppendAttrib(cfg_doc.AllocAttribString("color_fmt", color_fmt_str));
+
+					std::string depth_stencil_fmt_str;
+					switch (cfg_.graphics_cfg.depth_stencil_fmt)
+					{
+					case EF_D16:
+						depth_stencil_fmt_str = "D16";
+						break;
+
+					case EF_D24S8:
+						depth_stencil_fmt_str = "D24S8";
+						break;
+
+					case EF_D32F:
+						depth_stencil_fmt_str = "D32F";
+						break;
+
+					default:
+						depth_stencil_fmt_str = "None";
+						break;
+					}
+					frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));
+
+					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("fullscreen", cfg_.graphics_cfg.full_screen));
+					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("keep_screen_on", cfg_.graphics_cfg.keep_screen_on));
+
+					{
+						auto sample_node = cfg_doc.AllocNode(XMLNodeType::Element, "sample");
+						sample_node->AppendAttrib(cfg_doc.AllocAttribInt("count", cfg_.graphics_cfg.sample_count));
+						sample_node->AppendAttrib(cfg_doc.AllocAttribInt("quality", cfg_.graphics_cfg.sample_quality));
+						frame_node->AppendNode(std::move(sample_node));
+					}
+
+					graphics_node->AppendNode(std::move(frame_node));
+				}
+				{
+					auto sync_interval_node = cfg_doc.AllocNode(XMLNodeType::Element, "sync_interval");
+					sync_interval_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.sync_interval));
+					graphics_node->AppendNode(std::move(sync_interval_node));
+				}
+				{
+					auto hdr_node = cfg_doc.AllocNode(XMLNodeType::Element, "hdr");
+					hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
+					hdr_node->AppendAttrib(cfg_doc.AllocAttribFloat("bloom", cfg_.graphics_cfg.bloom));
+					hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("blue_shift", cfg_.graphics_cfg.blue_shift));
+					graphics_node->AppendNode(std::move(hdr_node));
+				}
+				{
+					auto ppaa_node = cfg_doc.AllocNode(XMLNodeType::Element, "ppaa");
+					ppaa_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.ppaa));
+					graphics_node->AppendNode(std::move(ppaa_node));
+				}
+				{
+					auto gamma_node = cfg_doc.AllocNode(XMLNodeType::Element, "gamma");
+					gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));
+					graphics_node->AppendNode(std::move(gamma_node));
+				}
+				{
+					auto color_grading_node = cfg_doc.AllocNode(XMLNodeType::Element, "color_grading");
+					color_grading_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.color_grading));
+					graphics_node->AppendNode(std::move(color_grading_node));
+				}
+				{
+					auto stereo_node = cfg_doc.AllocNode(XMLNodeType::Element, "stereo");
+					std::string method_str;
+					switch (cfg_.graphics_cfg.stereo_method)
+					{
+					case STM_None:
+						method_str = "none";
+						break;
+
+					case STM_ColorAnaglyph_RedCyan:
+						method_str = "red_cyan";
+						break;
+
+					case STM_ColorAnaglyph_YellowBlue:
+						method_str = "yellow_blue";
+						break;
+
+					case STM_ColorAnaglyph_GreenRed:
+						method_str = "green_red";
+						break;
+
+					case STM_LCDShutter:
+						method_str = "lcd_shutter";
+						break;
+
+					case STM_HorizontalInterlacing:
+						method_str = "hor_interlacing";
+						break;
+
+					case STM_VerticalInterlacing:
+						method_str = "ver_interlacing";
+						break;
+
+					case STM_Horizontal:
+						method_str = "horizontal";
+						break;
+
+					case STM_Vertical:
+						method_str = "vertical";
+						break;
+
+					case STM_OculusVR:
+						method_str = "oculus_vr";
+						break;
+
+					default:
+						method_str = "none";
+						break;
+					}
+					stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
+
+					std::ostringstream oss;
+					oss.precision(2);
+					oss << std::fixed << cfg_.graphics_cfg.stereo_separation;
+					stereo_node->AppendAttrib(cfg_doc.AllocAttribString("separation", oss.str()));
+
+					graphics_node->AppendNode(std::move(stereo_node));
+				}
+				{
+					auto output_node = cfg_doc.AllocNode(XMLNodeType::Element, "output");
+					std::string method_str;
+					switch (cfg_.graphics_cfg.display_output_method)
+					{
+					case DOM_HDR10:
+						method_str = "hdr10";
+						break;
+
+					default:
+						method_str = "srgb";
+						break;
+					}
+					output_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
+
+					output_node->AppendAttrib(cfg_doc.AllocAttribString("white", std::to_string(cfg_.graphics_cfg.paper_white)));
+					output_node->AppendAttrib(
+						cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
+
+					graphics_node->AppendNode(std::move(output_node));
+				}
+				{
+					auto debug_context_node = cfg_doc.AllocNode(XMLNodeType::Element, "debug_context");
+					debug_context_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.debug_context));
+					graphics_node->AppendNode(std::move(debug_context_node));
+				}
 			}
-			frame_node->AppendAttrib(cfg_doc.AllocAttribString("color_fmt", color_fmt_str));
-
-			std::string depth_stencil_fmt_str;
-			switch (cfg_.graphics_cfg.depth_stencil_fmt)
-			{
-			case EF_D16:
-				depth_stencil_fmt_str = "D16";
-				break;
-
-			case EF_D24S8:
-				depth_stencil_fmt_str = "D24S8";
-				break;
-
-			case EF_D32F:
-				depth_stencil_fmt_str = "D32F";
-				break;
-
-			default:
-				depth_stencil_fmt_str = "None";
-				break;
-			}
-			frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));
-
-			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("fullscreen", cfg_.graphics_cfg.full_screen));
-			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("keep_screen_on", cfg_.graphics_cfg.keep_screen_on));
-
-			{
-				XMLNodePtr sample_node = cfg_doc.AllocNode(XNT_Element, "sample");
-				sample_node->AppendAttrib(cfg_doc.AllocAttribInt("count", cfg_.graphics_cfg.sample_count));
-				sample_node->AppendAttrib(cfg_doc.AllocAttribInt("quality", cfg_.graphics_cfg.sample_quality));
-				frame_node->AppendNode(sample_node);
-			}
-
-			graphics_node->AppendNode(frame_node);
-
-			XMLNodePtr sync_interval_node = cfg_doc.AllocNode(XNT_Element, "sync_interval");
-			sync_interval_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.sync_interval));
-			graphics_node->AppendNode(sync_interval_node);
-
-			XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
-			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
-			hdr_node->AppendAttrib(cfg_doc.AllocAttribFloat("bloom", cfg_.graphics_cfg.bloom));
-			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("blue_shift", cfg_.graphics_cfg.blue_shift));
-			graphics_node->AppendNode(hdr_node);
-
-			XMLNodePtr ppaa_node = cfg_doc.AllocNode(XNT_Element, "ppaa");
-			ppaa_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.ppaa));
-			graphics_node->AppendNode(ppaa_node);
-
-			XMLNodePtr gamma_node = cfg_doc.AllocNode(XNT_Element, "gamma");
-			gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));
-			graphics_node->AppendNode(gamma_node);
-
-			XMLNodePtr color_grading_node = cfg_doc.AllocNode(XNT_Element, "color_grading");
-			color_grading_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.color_grading));
-			graphics_node->AppendNode(color_grading_node);
-
-			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
-			std::string method_str;
-			switch (cfg_.graphics_cfg.stereo_method)
-			{
-			case STM_None:
-				method_str = "none";
-				break;
-
-			case STM_ColorAnaglyph_RedCyan:
-				method_str = "red_cyan";
-				break;
-
-			case STM_ColorAnaglyph_YellowBlue:
-				method_str = "yellow_blue";
-				break;
-
-			case STM_ColorAnaglyph_GreenRed:
-				method_str = "green_red";
-				break;
-
-			case STM_LCDShutter:
-				method_str = "lcd_shutter";
-				break;
-
-			case STM_HorizontalInterlacing:
-				method_str = "hor_interlacing";
-				break;
-
-			case STM_VerticalInterlacing:
-				method_str = "ver_interlacing";
-				break;
-
-			case STM_Horizontal:
-				method_str = "horizontal";
-				break;
-
-			case STM_Vertical:
-				method_str = "vertical";
-				break;
-
-			case STM_OculusVR:
-				method_str = "oculus_vr";
-				break;
-
-			default:
-				method_str = "none";
-				break;
-			}
-			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
-
-			std::ostringstream oss;
-			oss.precision(2);
-			oss << std::fixed << cfg_.graphics_cfg.stereo_separation;
-			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("separation", oss.str()));
-
-			graphics_node->AppendNode(stereo_node);
-
-			XMLNodePtr output_node = cfg_doc.AllocNode(XNT_Element, "output");
-			switch (cfg_.graphics_cfg.display_output_method)
-			{
-			case DOM_HDR10:
-				method_str = "hdr10";
-				break;
-
-			default:
-				method_str = "srgb";
-				break;
-			}
-			output_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
-
-			output_node->AppendAttrib(cfg_doc.AllocAttribString("white", std::to_string(cfg_.graphics_cfg.paper_white)));
-			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
-
-			graphics_node->AppendNode(output_node);
-
-			XMLNodePtr debug_context_node = cfg_doc.AllocNode(XNT_Element, "debug_context");
-			debug_context_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.debug_context));
-			graphics_node->AppendNode(debug_context_node);
+			root->AppendNode(std::move(graphics_node));
 		}
-		root->AppendNode(graphics_node);
+
+		cfg_doc.RootNode(std::move(root));
 
 		std::ofstream ofs(cfg_file.c_str());
-		cfg_doc.Print(ofs);
+		SaveXml(cfg_doc, ofs);
 	}
 
 	void Context::Config(ContextCfg const & cfg)

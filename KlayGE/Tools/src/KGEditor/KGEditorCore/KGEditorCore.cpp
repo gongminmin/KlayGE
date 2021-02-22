@@ -1780,18 +1780,17 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Open(file_name);
 		if (file)
 		{
-			XMLDocument kges_doc;
-			XMLNodePtr kges_root = kges_doc.Parse(*file);
+			std::unique_ptr<XMLDocument> kges_doc = LoadXml(*file);
+			XMLNode const* kges_root = kges_doc->RootNode();
 			this->SceneName(std::string(kges_root->Attrib("name")->ValueString()));
 			{
-				XMLAttributePtr attr = kges_root->Attrib("skybox");
-				if (attr)
+				if (XMLAttribute const* attr = kges_root->Attrib("skybox"))
 				{
 					this->SkyboxName(std::string(attr->ValueString()));
 				}
 			}
 
-			for (XMLNodePtr node = kges_root->FirstNode(); node; node = node->NextSibling())
+			for (XMLNode const* node = kges_root->FirstNode(); node; node = node->NextSibling())
 			{
 				if ("model" == node->Name())
 				{
@@ -1800,7 +1799,7 @@ namespace KlayGE
 					EntityInfo& oi = entities_[last_entity_id_];
 					oi.name = std::string(node->Attrib("name")->ValueString());
 
-					this->LoadTransformNodes(node, oi);
+					this->LoadTransformNodes(*node, oi);
 
 					float4x4 model_mat = MathLib::transformation<float>(&oi.trf_pivot, nullptr, &oi.trf_scale,
 						&oi.trf_pivot, &oi.trf_rotate, &oi.trf_pos);
@@ -1833,8 +1832,7 @@ namespace KlayGE
 					oi.name = std::string(node->Attrib("name")->ValueString());
 
 					int32_t light_attr = 0;
-					XMLNodePtr attr_node = node->FirstNode("attr");
-					if (attr_node)
+					if (XMLNode const* attr_node = node->FirstNode("attr"))
 					{
 						std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
 						std::vector<std::string_view> tokens = StringUtil::Split(attr_str, StringUtil::IsAnyOf(" \t|"));
@@ -1864,8 +1862,7 @@ namespace KlayGE
 
 					float3 dir(0, 0, 1);
 					float3 pos(0, 0, 0);
-					XMLNodePtr color_node = node->FirstNode("color");
-					if (color_node)
+					if (XMLNode const* color_node = node->FirstNode("color"))
 					{
 						float3 color;
 						auto v = color_node->Attrib("v")->ValueString();
@@ -1875,8 +1872,7 @@ namespace KlayGE
 					}
 					if (light->Type() != LightSource::LT_Ambient)
 					{
-						XMLNodePtr dir_node = node->FirstNode("dir");
-						if (dir_node)
+						if (XMLNode const* dir_node = node->FirstNode("dir"))
 						{
 							auto v = dir_node->Attrib("v")->ValueString();
 							MemInputStreamBuf stream_buff(v.data(), v.size());
@@ -1886,16 +1882,14 @@ namespace KlayGE
 					if ((LightSource::LT_Point == light->Type()) || (LightSource::LT_Spot == light->Type())
 						|| (LightSource::LT_SphereArea == light->Type()) || (LightSource::LT_TubeArea == light->Type()))
 					{
-						XMLNodePtr pos_node = node->FirstNode("pos");
-						if (pos_node)
+						if (XMLNode const* pos_node = node->FirstNode("pos"))
 						{
 							auto v = pos_node->Attrib("v")->ValueString();
 							MemInputStreamBuf stream_buff(v.data(), v.size());
 							std::istream(&stream_buff) >> pos.x() >> pos.y() >> pos.z();
 						}
 
-						XMLNodePtr fall_off_node = node->FirstNode("fall_off");
-						if (fall_off_node)
+						if (XMLNode const* fall_off_node = node->FirstNode("fall_off"))
 						{
 							float3 fall_off;
 							auto v = fall_off_node->Attrib("v")->ValueString();
@@ -1906,11 +1900,9 @@ namespace KlayGE
 
 						if ((LightSource::LT_Point == light->Type()) || (LightSource::LT_Spot == light->Type()))
 						{
-							XMLNodePtr projective_node = node->FirstNode("projective");
-							if (projective_node)
+							if (XMLNode const* projective_node = node->FirstNode("projective"))
 							{
-								XMLAttributePtr attr = projective_node->Attrib("name");
-								if (attr)
+								if (XMLAttribute const* attr = projective_node->Attrib("name"))
 								{
 									TexturePtr projective = ASyncLoadTexture(std::string(attr->ValueString()),
 										EAH_GPU_Read | EAH_Immutable);
@@ -1920,8 +1912,7 @@ namespace KlayGE
 
 							if (LightSource::LT_Spot == light->Type())
 							{
-								XMLNodePtr angle_node = node->FirstNode("angle");
-								if (angle_node)
+								if (XMLNode const* angle_node = node->FirstNode("angle"))
 								{
 									light->InnerAngle(angle_node->Attrib("inner")->ValueFloat());
 									light->OuterAngle(angle_node->Attrib("outer")->ValueFloat());
@@ -1934,7 +1925,7 @@ namespace KlayGE
 
 					light->BoundSceneNode()->TransformToParent(MathLib::inverse(MathLib::look_at_lh(pos, pos + dir)));
 
-					this->LoadTransformNodes(node, oi);
+					this->LoadTransformNodes(*node, oi);
 				}
 				else
 				{
@@ -1951,22 +1942,19 @@ namespace KlayGE
 					float3 look_at(0, 0, 0);
 					float3 up(0, 1, 0);
 
-					XMLNodePtr eye_pos_node = node->FirstNode("eye_pos");
-					if (eye_pos_node)
+					if (XMLNode const* eye_pos_node = node->FirstNode("eye_pos"))
 					{
 						auto v = eye_pos_node->Attrib("v")->ValueString();
 						MemInputStreamBuf stream_buff(v.data(), v.size());
 						std::istream(&stream_buff) >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
 					}
-					XMLNodePtr look_at_node = node->FirstNode("look_at");
-					if (look_at_node)
+					if (XMLNode const* look_at_node = node->FirstNode("look_at"))
 					{
 						auto v = look_at_node->Attrib("v")->ValueString();
 						MemInputStreamBuf stream_buff(v.data(), v.size());
 						std::istream(&stream_buff) >> look_at.x() >> look_at.y() >> look_at.z();
 					}
-					XMLNodePtr up_node = node->FirstNode("up");
-					if (up_node)
+					if (XMLNode const* up_node = node->FirstNode("up"))
 					{
 						auto v = up_node->Attrib("v")->ValueString();
 						MemInputStreamBuf stream_buff(v.data(), v.size());
@@ -1980,29 +1968,25 @@ namespace KlayGE
 					float near_plane = 1;
 					float far_plane = 1000;
 
-					XMLNodePtr fov_node = node->FirstNode("fov");
-					if (fov_node)
+					if (XMLNode const* fov_node = node->FirstNode("fov"))
 					{
 						fov = fov_node->Attrib("s")->ValueFloat();
 					}
-					XMLNodePtr aspect_node = node->FirstNode("aspect");
-					if (aspect_node)
+					if (XMLNode const* aspect_node = node->FirstNode("aspect"))
 					{
 						aspect = aspect_node->Attrib("s")->ValueFloat();
 					}
-					XMLNodePtr near_plane_node = node->FirstNode("near");
-					if (near_plane_node)
+					if (XMLNode const* near_plane_node = node->FirstNode("near"))
 					{
 						near_plane = near_plane_node->Attrib("s")->ValueFloat();
 					}
-					XMLNodePtr far_plane_node = node->FirstNode("far");
-					if (far_plane_node)
+					if (XMLNode const* far_plane_node = node->FirstNode("far"))
 					{
 						far_plane = far_plane_node->Attrib("s")->ValueFloat();
 					}
 					camera->ProjParams(fov, aspect, near_plane, far_plane);
 
-					this->LoadTransformNodes(node, oi);
+					this->LoadTransformNodes(*node, oi);
 				}
 			}
 
@@ -2154,10 +2138,9 @@ namespace KlayGE
 		this->ClearModels();
 	}
 
-	void KGEditorCore::LoadTransformNodes(XMLNodePtr const & node, EntityInfo& oi)
+	void KGEditorCore::LoadTransformNodes(XMLNode const& node, EntityInfo& oi)
 	{
-		XMLNodePtr pivot_node = node->FirstNode("pivot");
-		if (!!pivot_node)
+		if (XMLNode const* pivot_node = node.FirstNode("pivot"))
 		{
 			auto v = pivot_node->Attrib("v")->ValueString();
 			MemInputStreamBuf stream_buff(v.data(), v.size());
@@ -2168,8 +2151,7 @@ namespace KlayGE
 			oi.trf_pivot = oi.obb.Center();
 		}
 
-		XMLNodePtr scale_node = node->FirstNode("scale");
-		if (!!scale_node)
+		if (XMLNode const* scale_node = node.FirstNode("scale"))
 		{
 			auto v = scale_node->Attrib("v")->ValueString();
 			MemInputStreamBuf stream_buff(v.data(), v.size());
@@ -2180,8 +2162,7 @@ namespace KlayGE
 			oi.trf_scale = float3(1, 1, 1);
 		}
 
-		XMLNodePtr rotate_node = node->FirstNode("rotate");
-		if (!!rotate_node)
+		if (XMLNode const* rotate_node = node.FirstNode("rotate"))
 		{
 			auto v = rotate_node->Attrib("v")->ValueString();
 			MemInputStreamBuf stream_buff(v.data(), v.size());
@@ -2192,8 +2173,7 @@ namespace KlayGE
 			oi.trf_rotate = Quaternion::Identity();
 		}
 
-		XMLNodePtr translate_node = node->FirstNode("translate");
-		if (!!translate_node)
+		if (XMLNode const* translate_node = node.FirstNode("translate"))
 		{
 			auto v = translate_node->Attrib("v")->ValueString();
 			MemInputStreamBuf stream_buff(v.data(), v.size());

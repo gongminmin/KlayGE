@@ -797,16 +797,15 @@ namespace KlayGE
 	{
 		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
 
-		XMLDocument doc;
-		XMLNodePtr root = doc.Parse(res);
+		std::unique_ptr<XMLDocument> doc = LoadXml(res);
+		XMLNode const* root = doc->RootNode();
 
-		XMLAttributePtr attr = root->Attrib("frame_rate");
-		if (attr)
+		if (XMLAttribute const* attr = root->Attrib("frame_rate"))
 		{
 			ret->FrameRate(attr->ValueUInt());
 		}
 
-		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
+		for (XMLNode const* curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
 			std::string_view const type_str = curve_node->Attrib("type")->ValueString();
 			size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
@@ -833,7 +832,7 @@ namespace KlayGE
 			}
 			uint32_t num_frames = curve_node->Attrib("num_frames")->ValueUInt();
 			uint32_t curve_id = ret->AddCurve(type, num_frames);
-			for (XMLNodePtr key_node = curve_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+			for (XMLNode const* key_node = curve_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 			{
 				float frame_id = key_node->Attrib("frame")->ValueFloat();
 
@@ -857,8 +856,7 @@ namespace KlayGE
 				}
 
 				bool corner;
-				attr = key_node->Attrib("corner");
-				if (attr)
+				if (XMLAttribute const* attr = key_node->Attrib("corner"))
 				{
 					corner = (attr->ValueInt() != 0);
 				}
@@ -877,14 +875,13 @@ namespace KlayGE
 	void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path)
 	{
 		XMLDocument doc;
-		XMLNodePtr root = doc.AllocNode(XNT_Element, "camera_path");
-		doc.RootNode(root);
+		auto root = doc.AllocNode(XMLNodeType::Element, "camera_path");
 
 		root->AppendAttrib(doc.AllocAttribUInt("frame_rate", path->FrameRate()));
 
 		for (uint32_t curve_id = 0; curve_id < path->NumCurves(); ++ curve_id)
 		{
-			XMLNodePtr curve_node = doc.AllocNode(XNT_Element, "curve");
+			auto curve_node = doc.AllocNode(XMLNodeType::Element, "curve");
 			std::string type_str;
 			CameraPathController::InterpolateType type = path->CurveType(curve_id);
 			switch (type)
@@ -913,7 +910,7 @@ namespace KlayGE
 
 			for (uint32_t key_id = 0; key_id < path->NumControlPoints(curve_id); ++ key_id)
 			{
-				XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
+				auto key_node = doc.AllocNode(XMLNodeType::Element, "key");
 
 				key_node->AppendAttrib(doc.AllocAttribFloat("frame", path->FrameID(curve_id, key_id)));
 
@@ -935,10 +932,13 @@ namespace KlayGE
 
 				key_node->AppendAttrib(doc.AllocAttribUInt("corner", path->Corner(curve_id, key_id)));
 
-				curve_node->AppendNode(key_node);
+				curve_node->AppendNode(std::move(key_node));
 			}
-		}
 
-		doc.Print(os);
+			root->AppendNode(std::move(curve_node));
+		}
+		doc.RootNode(std::move(root));
+
+		SaveXml(doc, os);
 	}
 }

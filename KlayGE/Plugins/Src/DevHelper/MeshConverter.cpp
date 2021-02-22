@@ -237,19 +237,17 @@ namespace
 		void LoadFromAssimp(std::string_view input_name, MeshMetadata const & metadata);
 
 		// From MeshML
-		void CompileMaterialsChunk(XMLNodePtr const & materials_chunk);
-		void CompileMeshBoundingBox(XMLNodePtr const & mesh_node, uint32_t mesh_index,
-			bool& recompute_pos_bb, bool& recompute_tc_bb);
-		void CompileMeshesChunk(XMLNodePtr const & meshes_chunk);
-		void CompileMeshLodChunk(XMLNodePtr const & lod_node, uint32_t mesh_index, uint32_t lod,
-			bool recompute_pos_bb, bool recompute_tc_bb);
-		void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, uint32_t mesh_index, uint32_t lod,
-			bool recompute_pos_bb, bool recompute_tc_bb);
-		void CompileMeshesTrianglesChunk(XMLNodePtr const & triangles_chunk, uint32_t mesh_index, uint32_t lod);
-		void CompileBonesChunk(XMLNodePtr const & bones_chunk);
-		void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk);
-		void CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index);
-		void CompileActionsChunk(XMLNodePtr const & animations_chunk);
+		void CompileMaterialsChunk(XMLNode const& materials_chunk);
+		void CompileMeshBoundingBox(XMLNode const& mesh_node, uint32_t mesh_index, bool& recompute_pos_bb, bool& recompute_tc_bb);
+		void CompileMeshesChunk(XMLNode const& meshes_chunk);
+		void CompileMeshLodChunk(XMLNode const& lod_node, uint32_t mesh_index, uint32_t lod, bool recompute_pos_bb, bool recompute_tc_bb);
+		void CompileMeshesVerticesChunk(
+			XMLNode const& vertices_chunk, uint32_t mesh_index, uint32_t lod, bool recompute_pos_bb, bool recompute_tc_bb);
+		void CompileMeshesTrianglesChunk(XMLNode const& triangles_chunk, uint32_t mesh_index, uint32_t lod);
+		void CompileBonesChunk(XMLNode const& bones_chunk);
+		void CompileKeyFramesChunk(XMLNode const& key_frames_chunk);
+		void CompileBBKeyFramesChunk(XMLNode const* bb_kfs_chunk, uint32_t mesh_index);
+		void CompileActionsChunk(XMLNode const& animations_chunk);
 		void LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata);
 
 	private:
@@ -1934,11 +1932,10 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileMaterialsChunk(XMLNodePtr const & materials_chunk)
+	void MeshLoader::CompileMaterialsChunk(XMLNode const& materials_chunk)
 	{
 		uint32_t num_mtls = 0;
-		for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node;
-			mtl_node = mtl_node->NextSibling("material"))
+		for (XMLNode const* mtl_node = materials_chunk.FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"))
 		{
 			++ num_mtls;
 		}
@@ -1946,8 +1943,8 @@ namespace
 		render_model_->NumMaterials(num_mtls);
 
 		uint32_t mtl_index = 0;
-		for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node;
-			mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
+		for (XMLNode const* mtl_node = materials_chunk.FirstNode("material"); mtl_node;
+			 mtl_node = mtl_node->NextSibling("material"), ++mtl_index)
 		{
 			render_model_->GetMaterial(mtl_index) = MakeSharedPtr<RenderMaterial>();
 			auto& mtl = *render_model_->GetMaterial(mtl_index);
@@ -1971,26 +1968,20 @@ namespace
 			mtl.MinTessFactor(1);
 			mtl.MaxTessFactor(9);
 
+			if (XMLAttribute const* attr = mtl_node->Attrib("name"))
 			{
-				XMLAttributePtr attr = mtl_node->Attrib("name");
-				if (attr)
-				{
-					mtl.Name(attr->ValueString());
-				}
+				mtl.Name(attr->ValueString());
 			}
 
-			XMLNodePtr albedo_node = mtl_node->FirstNode("albedo");
-			if (albedo_node)
+			if (XMLNode const* albedo_node = mtl_node->FirstNode("albedo"))
 			{
-				XMLAttributePtr attr = albedo_node->Attrib("color");
-				if (attr)
+				if (XMLAttribute const* attr = albedo_node->Attrib("color"))
 				{
 					float4 albedo;
 					ExtractFVector<4>(attr->ValueString(), &albedo[0]);
 					mtl.Albedo(albedo);
 				}
-				attr = albedo_node->Attrib("texture");
-				if (attr)
+				if (XMLAttribute const* attr = albedo_node->Attrib("texture"))
 				{
 					mtl.TextureName(RenderMaterial::TS_Albedo, std::string(attr->ValueString()));
 				}
@@ -1998,114 +1989,94 @@ namespace
 			else
 			{
 				float4 albedo(0, 0, 0, 1);
-
-				XMLAttributePtr attr = mtl_node->Attrib("diffuse");
-				if (attr)
+				if (XMLAttribute const* diffuse_attr = mtl_node->Attrib("diffuse"))
 				{
-					ExtractFVector<3>(attr->ValueString(), &albedo[0]);
+					ExtractFVector<3>(diffuse_attr->ValueString(), &albedo[0]);
 				}
 				else
 				{
-					attr = mtl_node->Attrib("diffuse_r");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("diffuse_r"))
 					{
 						albedo.x() = attr->ValueFloat();
 					}
-					attr = mtl_node->Attrib("diffuse_g");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("diffuse_g"))
 					{
 						albedo.y() = attr->ValueFloat();
 					}
-					attr = mtl_node->Attrib("diffuse_b");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("diffuse_b"))
 					{
 						albedo.z() = attr->ValueFloat();
 					}
 				}
 
-				attr = mtl_node->Attrib("opacity");
-				if (attr)
+				if (XMLAttribute const* attr = mtl_node->Attrib("opacity"))
 				{
-					albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
+					albedo.w() = attr->ValueFloat();
 				}
 
 				mtl.Albedo(albedo);
 			}
 
-			XMLNodePtr metalness_glossiness_node = mtl_node->FirstNode("metalness_glossiness");
-			if (metalness_glossiness_node)
+			if (XMLNode const* metalness_glossiness_node = mtl_node->FirstNode("metalness_glossiness"))
 			{
-				XMLAttributePtr attr = metalness_glossiness_node->Attrib("metalness");
-				if (attr)
+				if (XMLAttribute const* attr = metalness_glossiness_node->Attrib("metalness"))
 				{
 					mtl.Metalness(attr->ValueFloat());
 				}
-				attr = metalness_glossiness_node->Attrib("glossiness");
-				if (attr)
+				if (XMLAttribute const* attr = metalness_glossiness_node->Attrib("glossiness"))
 				{
 					mtl.Glossiness(attr->ValueFloat());
 				}
-				attr = metalness_glossiness_node->Attrib("texture");
-				if (attr)
+				if (XMLAttribute const* attr = metalness_glossiness_node->Attrib("texture"))
 				{
 					mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 				}
 			}
 			else
 			{
-				XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
-				if (metalness_node)
+				if (XMLNode const* metalness_node = mtl_node->FirstNode("metalness"))
 				{
-					XMLAttributePtr attr = metalness_node->Attrib("value");
-					if (attr)
+					if (XMLAttribute const* attr = metalness_node->Attrib("value"))
 					{
 						mtl.Metalness(attr->ValueFloat());
 					}
-					attr = metalness_node->Attrib("texture");
-					if (attr)
+					if (XMLAttribute const* attr = metalness_node->Attrib("texture"))
 					{
 						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 					}
 				}
 
-				XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
-				if (glossiness_node)
+				if (XMLNode const* glossiness_node = mtl_node->FirstNode("glossiness"))
 				{
-					XMLAttributePtr attr = glossiness_node->Attrib("value");
-					if (attr)
+					if (XMLAttribute const* attr = glossiness_node->Attrib("value"))
 					{
 						mtl.Glossiness(attr->ValueFloat());
 					}
-					attr = glossiness_node->Attrib("texture");
-					if (attr)
+					if (XMLAttribute const* attr = glossiness_node->Attrib("texture"))
 					{
 						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, std::string(attr->ValueString()));
 					}
 				}
 				else
 				{
-					XMLAttributePtr attr = mtl_node->Attrib("shininess");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("shininess"))
 					{
-						float shininess = mtl_node->Attrib("shininess")->ValueFloat();
+						float shininess = attr->ValueFloat();
 						shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
 						mtl.Glossiness(Shininess2Glossiness(shininess));
 					}
 				}
 			}
 
-			XMLNodePtr emissive_node = mtl_node->FirstNode("emissive");
-			if (emissive_node)
+			if (XMLNode const* emissive_node = mtl_node->FirstNode("emissive"))
 			{
-				XMLAttributePtr attr = emissive_node->Attrib("color");
-				if (attr)
+				if (XMLAttribute const* attr = emissive_node->Attrib("color"))
 				{
 					float3 emissive;
 					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
 					mtl.Emissive(emissive);
 				}
-				attr = emissive_node->Attrib("texture");
-				if (attr)
+				if (XMLAttribute const* attr = emissive_node->Attrib("texture"))
 				{
 					mtl.TextureName(RenderMaterial::TS_Emissive, std::string(attr->ValueString()));
 				}
@@ -2113,26 +2084,21 @@ namespace
 			else
 			{
 				float3 emissive(0, 0, 0);
-
-				XMLAttributePtr attr = mtl_node->Attrib("emit");
-				if (attr)
+				if (XMLAttribute const* emit_attr = mtl_node->Attrib("emit"))
 				{
-					ExtractFVector<3>(attr->ValueString(), &emissive[0]);
+					ExtractFVector<3>(emit_attr->ValueString(), &emissive[0]);
 				}
 				else
 				{
-					attr = mtl_node->Attrib("emit_r");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("emit_r"))
 					{
 						emissive.x() = attr->ValueFloat();
 					}
-					attr = mtl_node->Attrib("emit_g");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("emit_g"))
 					{
 						emissive.y() = attr->ValueFloat();
 					}
-					attr = mtl_node->Attrib("emit_b");
-					if (attr)
+					if (XMLAttribute const* attr = mtl_node->Attrib("emit_b"))
 					{
 						emissive.z() = attr->ValueFloat();
 					}
@@ -2141,47 +2107,38 @@ namespace
 				mtl.Emissive(emissive);
 			}
 			
-			XMLNodePtr normal_node = mtl_node->FirstNode("normal");
-			if (normal_node)
+			if (XMLNode const* normal_node = mtl_node->FirstNode("normal"))
 			{
-				XMLAttributePtr attr = normal_node->Attrib("texture");
-				if (attr)
+				if (XMLAttribute const* attr = normal_node->Attrib("texture"))
 				{
 					mtl.TextureName(RenderMaterial::TS_Normal, std::string(attr->ValueString()));
 				}
 			}
 
-			XMLNodePtr height_node = mtl_node->FirstNode("height");
+			XMLNode const* height_node = mtl_node->FirstNode("height");
 			if (!height_node)
 			{
 				height_node = mtl_node->FirstNode("bump");
 			}
 			if (height_node)
 			{
-				XMLAttributePtr attr = height_node->Attrib("texture");
-				if (attr)
+				if (XMLAttribute const* attr = height_node->Attrib("texture"))
 				{
 					mtl.TextureName(RenderMaterial::TS_Height, std::string(attr->ValueString()));
 				}
-
-				attr = height_node->Attrib("offset");
-				if (attr)
+				if (XMLAttribute const* attr = height_node->Attrib("offset"))
 				{
 					mtl.HeightOffset(attr->ValueFloat());
 				}
-
-				attr = height_node->Attrib("scale");
-				if (attr)
+				if (XMLAttribute const* attr = height_node->Attrib("scale"))
 				{
 					mtl.HeightScale(attr->ValueFloat());
 				}
 			}
 
-			XMLNodePtr detail_node = mtl_node->FirstNode("detail");
-			if (detail_node)
+			if (XMLNode const* detail_node = mtl_node->FirstNode("detail"))
 			{
-				XMLAttributePtr attr = detail_node->Attrib("mode");
-				if (attr)
+				if (XMLAttribute const* attr = detail_node->Attrib("mode"))
 				{
 					std::string_view const mode_str = attr->ValueString();
 					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
@@ -2199,91 +2156,76 @@ namespace
 					}
 				}
 
-				attr = detail_node->Attrib("height_offset");
-				if (attr)
+				if (XMLAttribute const* attr = detail_node->Attrib("height_offset"))
 				{
 					mtl.HeightOffset(attr->ValueFloat());
 				}
-
-				attr = detail_node->Attrib("height_scale");
-				if (attr)
+				if (XMLAttribute const* attr = detail_node->Attrib("height_scale"))
 				{
 					mtl.HeightScale(attr->ValueFloat());
 				}
 
-				XMLNodePtr tess_node = detail_node->FirstNode("tess");
-				if (tess_node)
+				if (XMLNode const* tess_node = detail_node->FirstNode("tess"))
 				{
-					attr = tess_node->Attrib("edge_hint");
-					if (attr)
+					if (XMLAttribute const* attr = tess_node->Attrib("edge_hint"))
 					{
 						mtl.EdgeTessHint(attr->ValueFloat());
 					}
-					attr = tess_node->Attrib("inside_hint");
-					if (attr)
+					if (XMLAttribute const* attr = tess_node->Attrib("inside_hint"))
 					{
 						mtl.InsideTessHint(attr->ValueFloat());
 					}
-					attr = tess_node->Attrib("min");
-					if (attr)
+					if (XMLAttribute const* attr = tess_node->Attrib("min"))
 					{
 						mtl.MinTessFactor(attr->ValueFloat());
 					}
-					attr = tess_node->Attrib("max");
-					if (attr)
+					if (XMLAttribute const* attr = tess_node->Attrib("max"))
 					{
 						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 				else
 				{
-					attr = detail_node->Attrib("edge_tess_hint");
-					if (attr)
+					if (XMLAttribute const* attr = detail_node->Attrib("edge_tess_hint"))
 					{
 						mtl.EdgeTessHint(attr->ValueFloat());
 					}
-					attr = detail_node->Attrib("inside_tess_hint");
-					if (attr)
+					if (XMLAttribute const* attr = detail_node->Attrib("inside_tess_hint"))
 					{
 						mtl.InsideTessHint(attr->ValueFloat());
 					}
-					attr = detail_node->Attrib("min_tess");
-					if (attr)
+					if (XMLAttribute const* attr = detail_node->Attrib("min_tess"))
 					{
 						mtl.MinTessFactor(attr->ValueFloat());
 					}
-					attr = detail_node->Attrib("max_tess");
-					if (attr)
+					if (XMLAttribute const* attr = detail_node->Attrib("max_tess"))
 					{
 						mtl.MaxTessFactor(attr->ValueFloat());
 					}
 				}
 			}
 
-			XMLNodePtr transparent_node = mtl_node->FirstNode("transparent");
-			if (transparent_node)
+			if (XMLNode const* transparent_node = mtl_node->FirstNode("transparent"))
 			{
-				XMLAttributePtr attr = transparent_node->Attrib("value");
+				XMLAttribute const* attr = transparent_node->Attrib("value");
 				if (attr)
 				{
 					mtl.Transparent(attr->ValueInt() ? true : false);
 				}
 			}
 
-			XMLNodePtr alpha_test_node = mtl_node->FirstNode("alpha_test");
-			if (alpha_test_node)
+			if (XMLNode const* alpha_test_node = mtl_node->FirstNode("alpha_test"))
 			{
-				XMLAttributePtr attr = alpha_test_node->Attrib("value");
+				XMLAttribute const* attr = alpha_test_node->Attrib("value");
 				if (attr)
 				{
 					mtl.AlphaTestThreshold(attr->ValueFloat());
 				}
 			}
 
-			XMLNodePtr sss_node = mtl_node->FirstNode("sss");
-			if (sss_node)
+			if (XMLNode const* sss_node = mtl_node->FirstNode("sss"))
 			{
-				XMLAttributePtr attr = sss_node->Attrib("value");
+				XMLAttribute const* attr = sss_node->Attrib("value");
 				if (attr)
 				{
 					mtl.Sss(attr->ValueInt() ? true : false);
@@ -2291,28 +2233,25 @@ namespace
 			}
 			else
 			{
-				XMLAttributePtr attr = mtl_node->Attrib("sss");
+				XMLAttribute const* attr = mtl_node->Attrib("sss");
 				if (attr)
 				{
 					mtl.Sss(attr->ValueInt() ? true : false);
 				}
 			}
 
-			XMLNodePtr two_sided_node = mtl_node->FirstNode("two_sided");
-			if (two_sided_node)
+			if (XMLNode const* two_sided_node = mtl_node->FirstNode("two_sided"))
 			{
-				XMLAttributePtr attr = two_sided_node->Attrib("value");
-				if (attr)
+				if (XMLAttribute const* attr = two_sided_node->Attrib("value"))
 				{
 					mtl.TwoSided(attr->ValueInt() ? true : false);
 				}
 			}
 
-			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
+			XMLNode const* tex_node = mtl_node->FirstNode("texture");
 			if (!tex_node)
 			{
-				XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
-				if (textures_chunk)
+				if (XMLNode const* textures_chunk = mtl_node->FirstNode("textures_chunk"))
 				{
 					tex_node = textures_chunk->FirstNode("texture");
 				}
@@ -2355,40 +2294,32 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileMeshBoundingBox(XMLNodePtr const & mesh_node, uint32_t mesh_index,
-		bool& recompute_pos_bb, bool& recompute_tc_bb)
+	void MeshLoader::CompileMeshBoundingBox(XMLNode const& mesh_node, uint32_t mesh_index, bool& recompute_pos_bb, bool& recompute_tc_bb)
 	{
-		XMLNodePtr pos_bb_node = mesh_node->FirstNode("pos_bb");
-		if (pos_bb_node)
+		if (XMLNode const* pos_bb_node = mesh_node.FirstNode("pos_bb"))
 		{
 			float3 pos_min_bb, pos_max_bb;
+			if (XMLAttribute const* attr = pos_bb_node->Attrib("min"))
 			{
-				XMLAttributePtr attr = pos_bb_node->Attrib("min");
-				if (attr)
-				{
-					ExtractFVector<3>(attr->ValueString(), &pos_min_bb[0]);
-				}
-				else
-				{
-					XMLNodePtr pos_min_node = pos_bb_node->FirstNode("min");
-					pos_min_bb.x() = pos_min_node->Attrib("x")->ValueFloat();
-					pos_min_bb.y() = pos_min_node->Attrib("y")->ValueFloat();
-					pos_min_bb.z() = pos_min_node->Attrib("z")->ValueFloat();
-				}
+				ExtractFVector<3>(attr->ValueString(), &pos_min_bb[0]);
 			}
+			else
 			{
-				XMLAttributePtr attr = pos_bb_node->Attrib("max");
-				if (attr)
-				{
-					ExtractFVector<3>(attr->ValueString(), &pos_max_bb[0]);
-				}
-				else
-				{
-					XMLNodePtr pos_max_node = pos_bb_node->FirstNode("max");
-					pos_max_bb.x() = pos_max_node->Attrib("x")->ValueFloat();
-					pos_max_bb.y() = pos_max_node->Attrib("y")->ValueFloat();
-					pos_max_bb.z() = pos_max_node->Attrib("z")->ValueFloat();
-				}
+				XMLNode const* pos_min_node = pos_bb_node->FirstNode("min");
+				pos_min_bb.x() = pos_min_node->Attrib("x")->ValueFloat();
+				pos_min_bb.y() = pos_min_node->Attrib("y")->ValueFloat();
+				pos_min_bb.z() = pos_min_node->Attrib("z")->ValueFloat();
+			}
+			if (XMLAttribute const* attr = pos_bb_node->Attrib("max"))
+			{
+				ExtractFVector<3>(attr->ValueString(), &pos_max_bb[0]);
+			}
+			else
+			{
+				XMLNode const* pos_max_node = pos_bb_node->FirstNode("max");
+				pos_max_bb.x() = pos_max_node->Attrib("x")->ValueFloat();
+				pos_max_bb.y() = pos_max_node->Attrib("y")->ValueFloat();
+				pos_max_bb.z() = pos_max_node->Attrib("z")->ValueFloat();
 			}
 			meshes_[mesh_index].pos_bb = AABBox(pos_min_bb, pos_max_bb);
 
@@ -2399,35 +2330,28 @@ namespace
 			recompute_pos_bb = true;
 		}
 
-		XMLNodePtr tc_bb_node = mesh_node->FirstNode("tc_bb");
-		if (tc_bb_node)
+		if (XMLNode const* tc_bb_node = mesh_node.FirstNode("tc_bb"))
 		{
 			float3 tc_min_bb, tc_max_bb;
+			if (XMLAttribute const* attr = tc_bb_node->Attrib("min"))
 			{
-				XMLAttributePtr attr = tc_bb_node->Attrib("min");
-				if (attr)
-				{
-					ExtractFVector<2>(attr->ValueString(), &tc_min_bb[0]);
-				}
-				else
-				{
-					XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
-					tc_min_bb.x() = tc_min_node->Attrib("x")->ValueFloat();
-					tc_min_bb.y() = tc_min_node->Attrib("y")->ValueFloat();
-				}
+				ExtractFVector<2>(attr->ValueString(), &tc_min_bb[0]);
 			}
+			else
 			{
-				XMLAttributePtr attr = tc_bb_node->Attrib("max");
-				if (attr)
-				{
-					ExtractFVector<2>(attr->ValueString(), &tc_max_bb[0]);
-				}
-				else
-				{
-					XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");
-					tc_max_bb.x() = tc_max_node->Attrib("x")->ValueFloat();
-					tc_max_bb.y() = tc_max_node->Attrib("y")->ValueFloat();
-				}
+				XMLNode const* tc_min_node = tc_bb_node->FirstNode("min");
+				tc_min_bb.x() = tc_min_node->Attrib("x")->ValueFloat();
+				tc_min_bb.y() = tc_min_node->Attrib("y")->ValueFloat();
+			}
+			if (XMLAttribute const* attr = tc_bb_node->Attrib("max"))
+			{
+				ExtractFVector<2>(attr->ValueString(), &tc_max_bb[0]);
+			}
+			else
+			{
+				XMLNode const* tc_max_node = tc_bb_node->FirstNode("max");
+				tc_max_bb.x() = tc_max_node->Attrib("x")->ValueFloat();
+				tc_max_bb.y() = tc_max_node->Attrib("y")->ValueFloat();
 			}
 
 			tc_min_bb.z() = 0;
@@ -2442,10 +2366,10 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileMeshesChunk(XMLNodePtr const & meshes_chunk)
+	void MeshLoader::CompileMeshesChunk(XMLNode const& meshes_chunk)
 	{
 		uint32_t num_meshes = 0;
-		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
+		for (XMLNode const* mesh_node = meshes_chunk.FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
 		{
 			++ num_meshes;
 		}
@@ -2453,7 +2377,7 @@ namespace
 		nodes_.resize(num_meshes);
 
 		uint32_t mesh_index = 0;
-		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
+		for (XMLNode const* mesh_node = meshes_chunk.FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 		{
 			auto const name = std::string(mesh_node->Attrib("name")->ValueString());
 			std::wstring wname;
@@ -2476,18 +2400,16 @@ namespace
 
 			bool recompute_pos_bb;
 			bool recompute_tc_bb;
-			this->CompileMeshBoundingBox(mesh_node, mesh_index, recompute_pos_bb, recompute_tc_bb);
+			this->CompileMeshBoundingBox(*mesh_node, mesh_index, recompute_pos_bb, recompute_tc_bb);
 			if (recompute_pos_bb && recompute_tc_bb)
 			{
-				XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
-				if (vertices_chunk)
+				if (XMLNode const* vertices_chunk = mesh_node->FirstNode("vertices_chunk"))
 				{
-					this->CompileMeshBoundingBox(vertices_chunk, mesh_index, recompute_pos_bb, recompute_tc_bb);
+					this->CompileMeshBoundingBox(*vertices_chunk, mesh_index, recompute_pos_bb, recompute_tc_bb);
 				}
 			}
 
-			XMLNodePtr lod_node = mesh_node->FirstNode("lod");
-			if (lod_node)
+			if (XMLNode const* lod_node = mesh_node->FirstNode("lod"))
 			{
 				uint32_t mesh_lod = 0;
 				for (; lod_node; lod_node = lod_node->NextSibling("lod"))
@@ -2495,7 +2417,7 @@ namespace
 					++ mesh_lod;
 				}
 
-				std::vector<XMLNodePtr> lod_nodes(mesh_lod);
+				std::vector<XMLNode const*> lod_nodes(mesh_lod);
 				for (lod_node = mesh_node->FirstNode("lod"); lod_node; lod_node = lod_node->NextSibling("lod"))
 				{
 					uint32_t const lod = lod_node->Attrib("value")->ValueUInt();
@@ -2506,7 +2428,7 @@ namespace
 
 				for (uint32_t lod = 0; lod < mesh_lod; ++ lod)
 				{
-					this->CompileMeshLodChunk(lod_nodes[lod], mesh_index, lod, recompute_pos_bb, recompute_tc_bb);
+					this->CompileMeshLodChunk(*lod_nodes[lod], mesh_index, lod, recompute_pos_bb, recompute_tc_bb);
 
 					recompute_pos_bb = false;
 					recompute_tc_bb = false;
@@ -2516,7 +2438,7 @@ namespace
 			{
 				meshes_[mesh_index].lods.resize(1);
 
-				this->CompileMeshLodChunk(mesh_node, mesh_index, 0, recompute_pos_bb, recompute_tc_bb);
+				this->CompileMeshLodChunk(*mesh_node, mesh_index, 0, recompute_pos_bb, recompute_tc_bb);
 
 				recompute_pos_bb = false;
 				recompute_tc_bb = false;
@@ -2524,25 +2446,22 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileMeshLodChunk(XMLNodePtr const & lod_node, uint32_t mesh_index, uint32_t lod,
-		bool recompute_pos_bb, bool recompute_tc_bb)
+	void MeshLoader::CompileMeshLodChunk(
+		XMLNode const& lod_node, uint32_t mesh_index, uint32_t lod, bool recompute_pos_bb, bool recompute_tc_bb)
 	{
-		XMLNodePtr vertices_chunk = lod_node->FirstNode("vertices_chunk");
-		if (vertices_chunk)
+		if (XMLNode const* vertices_chunk = lod_node.FirstNode("vertices_chunk"))
 		{
-			this->CompileMeshesVerticesChunk(vertices_chunk, mesh_index, lod,
-				recompute_pos_bb, recompute_tc_bb);
+			this->CompileMeshesVerticesChunk(*vertices_chunk, mesh_index, lod, recompute_pos_bb, recompute_tc_bb);
 		}
 
-		XMLNodePtr triangles_chunk = lod_node->FirstNode("triangles_chunk");
-		if (triangles_chunk)
+		if (XMLNode const* triangles_chunk = lod_node.FirstNode("triangles_chunk"))
 		{
-			CompileMeshesTrianglesChunk(triangles_chunk, mesh_index, lod);
+			this->CompileMeshesTrianglesChunk(*triangles_chunk, mesh_index, lod);
 		}
 	}
 
-	void MeshLoader::CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, uint32_t mesh_index, uint32_t lod,
-		bool recompute_pos_bb, bool recompute_tc_bb)
+	void MeshLoader::CompileMeshesVerticesChunk(
+		XMLNode const& vertices_chunk, uint32_t mesh_index, uint32_t lod, bool recompute_pos_bb, bool recompute_tc_bb)
 	{
 		auto& mesh = meshes_[mesh_index];
 		auto& mesh_lod = mesh.lods[lod];
@@ -2558,22 +2477,20 @@ namespace
 		bool has_binormal = false;
 		bool has_tangent_quat = false;
 
-		for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+		for (XMLNode const* vertex_node = vertices_chunk.FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 		{
 			{
 				float3 pos;
-				XMLAttributePtr attr = vertex_node->Attrib("x");
-				if (attr)
+				if (XMLAttribute const* x_attr = vertex_node->Attrib("x"))
 				{
-					pos.x() = vertex_node->Attrib("x")->ValueFloat();
+					pos.x() = x_attr->ValueFloat();
 					pos.y() = vertex_node->Attrib("y")->ValueFloat();
 					pos.z() = vertex_node->Attrib("z")->ValueFloat();
 
-					attr = vertex_node->Attrib("u");
-					if (attr)
+					if (XMLAttribute const* u_attr = vertex_node->Attrib("u"))
 					{
 						float3 tex_coord;
-						tex_coord.x() = vertex_node->Attrib("u")->ValueFloat();
+						tex_coord.x() = u_attr->ValueFloat();
 						tex_coord.y() = vertex_node->Attrib("v")->ValueFloat();
 						tex_coord.z() = 0;
 						mesh_lod.texcoords[0].push_back(tex_coord);
@@ -2586,14 +2503,12 @@ namespace
 				mesh_lod.positions.push_back(pos);
 			}
 
-			XMLNodePtr diffuse_node = vertex_node->FirstNode("diffuse");
-			if (diffuse_node)
+			if (XMLNode const* diffuse_node = vertex_node->FirstNode("diffuse"))
 			{
 				has_diffuse = true;
 
 				float4 diffuse;
-				XMLAttributePtr attr = diffuse_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = diffuse_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &diffuse[0]);
 				}
@@ -2607,14 +2522,12 @@ namespace
 				mesh_lod.diffuses.push_back(Color(diffuse.x(), diffuse.y(), diffuse.z(), diffuse.w()));
 			}
 
-			XMLNodePtr specular_node = vertex_node->FirstNode("specular");
-			if (specular_node)
+			if (XMLNode const* specular_node = vertex_node->FirstNode("specular"))
 			{
 				has_specular = true;
 
 				float3 specular;
-				XMLAttributePtr attr = specular_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = specular_node->Attrib("v"))
 				{
 					ExtractFVector<3>(attr->ValueString(), &specular[0]);
 				}
@@ -2629,16 +2542,14 @@ namespace
 
 			if (!vertex_node->Attrib("u"))
 			{
-				XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
-				if (tex_coord_node)
+				if (XMLNode const* tex_coord_node = vertex_node->FirstNode("tex_coord"))
 				{
 					has_tex_coord = true;
 
 					float3 tex_coord;
-					XMLAttributePtr attr = tex_coord_node->Attrib("u");
-					if (attr)
+					if (XMLAttribute const* attr = tex_coord_node->Attrib("u"))
 					{
-						tex_coord.x() = tex_coord_node->Attrib("u")->ValueFloat();
+						tex_coord.x() = attr->ValueFloat();
 						tex_coord.y() = tex_coord_node->Attrib("v")->ValueFloat();
 					}
 					else
@@ -2650,19 +2561,18 @@ namespace
 				}
 			}
 
-			XMLNodePtr weight_node = vertex_node->FirstNode("weight");
-			if (weight_node)
+			if (XMLNode const* weight_node = vertex_node->FirstNode("weight"))
 			{
 				std::vector<std::pair<uint32_t, float>> binding;
 
-				XMLAttributePtr attr = weight_node->Attrib("joint");
+				XMLAttribute const* attr = weight_node->Attrib("joint");
 				if (!attr)
 				{
 					attr = weight_node->Attrib("bone_index");
 				}
 				if (attr)
 				{
-					XMLAttributePtr weight_attr = weight_node->Attrib("weight");
+					XMLAttribute const* weight_attr = weight_node->Attrib("weight");
 
 					std::string_view const index_str = attr->ValueString();
 					std::string_view const weight_str = weight_attr->ValueString();
@@ -2689,14 +2599,12 @@ namespace
 				mesh_lod.joint_bindings.emplace_back(std::move(binding));
 			}
 						
-			XMLNodePtr normal_node = vertex_node->FirstNode("normal");
-			if (normal_node)
+			if (XMLNode const* normal_node = vertex_node->FirstNode("normal"))
 			{
 				has_normal = true;
 
 				float3 normal;
-				XMLAttributePtr attr = normal_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = normal_node->Attrib("v"))
 				{
 					ExtractFVector<3>(attr->ValueString(), &normal[0]);
 				}
@@ -2709,14 +2617,12 @@ namespace
 				mesh_lod.normals.push_back(normal);
 			}
 
-			XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
-			if (tangent_node)
+			if (XMLNode const* tangent_node = vertex_node->FirstNode("tangent"))
 			{
 				has_tangent = true;
 
 				float4 tangent;
-				XMLAttributePtr attr = tangent_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = tangent_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &tangent[0]);
 				}
@@ -2738,14 +2644,12 @@ namespace
 				mesh_tangents.push_back(tangent);
 			}
 
-			XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
-			if (binormal_node)
+			if (XMLNode const* binormal_node = vertex_node->FirstNode("binormal"))
 			{
 				has_binormal = true;
 
 				float3 binormal;
-				XMLAttributePtr attr = binormal_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = binormal_node->Attrib("v"))
 				{
 					ExtractFVector<3>(attr->ValueString(), &binormal[0]);
 				}
@@ -2758,14 +2662,12 @@ namespace
 				mesh_binormals.push_back(binormal);
 			}
 
-			XMLNodePtr tangent_quat_node = vertex_node->FirstNode("tangent_quat");
-			if (tangent_quat_node)
+			if (XMLNode const* tangent_quat_node = vertex_node->FirstNode("tangent_quat"))
 			{
 				has_tangent_quat = true;
 
 				Quaternion tangent_quat;
-				XMLAttributePtr const & attr = tangent_quat_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = tangent_quat_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &tangent_quat[0]);
 				}
@@ -2900,16 +2802,15 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileMeshesTrianglesChunk(XMLNodePtr const & triangles_chunk, uint32_t mesh_index, uint32_t lod)
+	void MeshLoader::CompileMeshesTrianglesChunk(XMLNode const& triangles_chunk, uint32_t mesh_index, uint32_t lod)
 	{
 		auto& mesh = meshes_[mesh_index];
 		auto& mesh_lod = mesh.lods[lod];
 
-		for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
+		for (XMLNode const* tri_node = triangles_chunk.FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 		{
 			uint32_t ind[3];
-			XMLAttributePtr attr = tri_node->Attrib("index");
-			if (attr)
+			if (XMLAttribute const* attr = tri_node->Attrib("index"))
 			{
 				ExtractUIVector<3>(attr->ValueString(), &ind[0]);
 			}
@@ -2925,9 +2826,9 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileBonesChunk(XMLNodePtr const & bones_chunk)
+	void MeshLoader::CompileBonesChunk(XMLNode const& bones_chunk)
 	{
-		for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
+		for (XMLNode const* bone_node = bones_chunk.FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 		{
 			auto joint = MakeSharedPtr<JointComponent>();
 
@@ -2937,13 +2838,12 @@ namespace
 			Quaternion joint_bind_real, joint_bind_dual;
 			float joint_bind_scale;
 
-			XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
-			if (bind_pos_node)
+			if (XMLNode const* bind_pos_node = bone_node->FirstNode("bind_pos"))
 			{
 				float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
 					bind_pos_node->Attrib("z")->ValueFloat());
 
-				XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
+				XMLNode const* bind_quat_node = bone_node->FirstNode("bind_quat");
 				Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
 					bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
 
@@ -2956,13 +2856,12 @@ namespace
 			}
 			else
 			{
-				XMLNodePtr bind_real_node = bone_node->FirstNode("real");
+				XMLNode const* bind_real_node = bone_node->FirstNode("real");
 				if (!bind_real_node)
 				{
 					bind_real_node = bone_node->FirstNode("bind_real");
 				}
-				XMLAttributePtr attr = bind_real_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = bind_real_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &joint_bind_real[0]);
 				}
@@ -2974,13 +2873,12 @@ namespace
 					joint_bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
 				}
 
-				XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
+				XMLNode const* bind_dual_node = bone_node->FirstNode("dual");
 				if (!bind_dual_node)
 				{
 					bind_dual_node = bone_node->FirstNode("bind_dual");
 				}
-				attr = bind_dual_node->Attrib("v");
-				if (attr)
+				if (XMLAttribute const* attr = bind_dual_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &joint_bind_dual[0]);
 				}
@@ -3012,30 +2910,28 @@ namespace
 		}
 	}
 
-	void MeshLoader::CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk)
+	void MeshLoader::CompileKeyFramesChunk(XMLNode const& key_frames_chunk)
 	{
 		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 
-		XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
-		if (nf_attr)
+		if (XMLAttribute const* nf_attr = key_frames_chunk.Attrib("num_frames"))
 		{
 			skinned_model.NumFrames(nf_attr->ValueUInt());
 		}
 		else
 		{
-			int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
-			int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
+			int32_t start_frame = key_frames_chunk.Attrib("start_frame")->ValueInt();
+			int32_t end_frame = key_frames_chunk.Attrib("end_frame")->ValueInt();
 			skinned_model.NumFrames(end_frame - start_frame);
 		}
-		skinned_model.FrameRate(key_frames_chunk->Attrib("frame_rate")->ValueUInt());
+		skinned_model.FrameRate(key_frames_chunk.Attrib("frame_rate")->ValueUInt());
 
 		auto kfss = MakeSharedPtr<std::vector<KeyFrameSet>>();
 		kfss->resize(joints_.size());
 		uint32_t joint_id = 0;
-		for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
+		for (XMLNode const* kf_node = key_frames_chunk.FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
 		{
-			XMLAttributePtr joint_attr = kf_node->Attrib("joint");
-			if (joint_attr)
+			if (XMLAttribute const* joint_attr = kf_node->Attrib("joint"))
 			{
 				joint_id = joint_attr->ValueUInt();
 			}
@@ -3046,10 +2942,9 @@ namespace
 			KeyFrameSet& kfs = (*kfss)[joint_id];
 
 			int32_t frame_id = -1;
-			for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+			for (XMLNode const* key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 			{
-				XMLAttributePtr id_attr = key_node->Attrib("id");
-				if (id_attr)
+				if (XMLAttribute const* id_attr = key_node->Attrib("id"))
 				{
 					frame_id = id_attr->ValueInt();
 				}
@@ -3061,13 +2956,12 @@ namespace
 
 				Quaternion bind_real, bind_dual;
 				float bind_scale;
-				XMLNodePtr pos_node = key_node->FirstNode("pos");
-				if (pos_node)
+				if (XMLNode const* pos_node = key_node->FirstNode("pos"))
 				{
 					float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
 						pos_node->Attrib("z")->ValueFloat());
 
-					XMLNodePtr quat_node = key_node->FirstNode("quat");
+					XMLNode const* quat_node = key_node->FirstNode("quat");
 					bind_real = Quaternion(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
 						quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
 
@@ -3078,13 +2972,12 @@ namespace
 				}
 				else
 				{
-					XMLNodePtr bind_real_node = key_node->FirstNode("real");
+					XMLNode const* bind_real_node = key_node->FirstNode("real");
 					if (!bind_real_node)
 					{
 						bind_real_node = key_node->FirstNode("bind_real");
 					}
-					XMLAttributePtr attr = bind_real_node->Attrib("v");
-					if (attr)
+					if (XMLAttribute const* attr = bind_real_node->Attrib("v"))
 					{
 						ExtractFVector<4>(attr->ValueString(), &bind_real[0]);
 					}
@@ -3096,13 +2989,12 @@ namespace
 						bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
 					}
 
-					XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
+					XMLNode const* bind_dual_node = key_node->FirstNode("dual");
 					if (!bind_dual_node)
 					{
 						bind_dual_node = key_node->FirstNode("bind_dual");
 					}
-					attr = bind_dual_node->Attrib("v");
-					if (attr)
+					if (XMLAttribute const* attr = bind_dual_node->Attrib("v"))
 					{
 						ExtractFVector<4>(attr->ValueString(), &bind_dual[0]);
 					}
@@ -3134,7 +3026,7 @@ namespace
 		skinned_model.AttachKeyFrameSets(kfss);
 	}
 
-	void MeshLoader::CompileBBKeyFramesChunk(XMLNodePtr const & bb_kfs_chunk, uint32_t mesh_index)
+	void MeshLoader::CompileBBKeyFramesChunk(XMLNode const* bb_kfs_chunk, uint32_t mesh_index)
 	{
 		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 		auto& skinned_mesh = checked_cast<SkinnedMesh&>(*skinned_model.Mesh(mesh_index));
@@ -3142,17 +3034,16 @@ namespace
 		auto bb_kfs = MakeSharedPtr<AABBKeyFrameSet>();
 		if (bb_kfs_chunk)
 		{
-			for (XMLNodePtr bb_kf_node = bb_kfs_chunk->FirstNode("bb_key_frame"); bb_kf_node;
+			for (XMLNode const* bb_kf_node = bb_kfs_chunk->FirstNode("bb_key_frame"); bb_kf_node;
 				bb_kf_node = bb_kf_node->NextSibling("bb_key_frame"))
 			{
 				bb_kfs->frame_id.clear();
 				bb_kfs->bb.clear();
 
 				int32_t frame_id = -1;
-				for (XMLNodePtr key_node = bb_kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+				for (XMLNode const* key_node = bb_kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 				{
-					XMLAttributePtr id_attr = key_node->Attrib("id");
-					if (id_attr)
+					if (XMLAttribute const* id_attr = key_node->Attrib("id"))
 					{
 						frame_id = id_attr->ValueInt();
 					}
@@ -3163,26 +3054,24 @@ namespace
 					bb_kfs->frame_id.push_back(frame_id);
 
 					float3 bb_min, bb_max;
-					XMLAttributePtr attr = key_node->Attrib("min");
-					if (attr)
+					if (XMLAttribute const* attr = key_node->Attrib("min"))
 					{
 						ExtractFVector<3>(attr->ValueString(), &bb_min[0]);
 					}
 					else
 					{
-						XMLNodePtr min_node = key_node->FirstNode("min");
+						XMLNode const* min_node = key_node->FirstNode("min");
 						bb_min.x() = min_node->Attrib("x")->ValueFloat();
 						bb_min.y() = min_node->Attrib("y")->ValueFloat();
 						bb_min.z() = min_node->Attrib("z")->ValueFloat();
 					}
-					attr = key_node->Attrib("max");
-					if (attr)
+					if (XMLAttribute const* attr = key_node->Attrib("max"))
 					{
 						ExtractFVector<3>(attr->ValueString(), &bb_max[0]);
 					}
 					else
 					{
-						XMLNodePtr max_node = key_node->FirstNode("max");
+						XMLNode const* max_node = key_node->FirstNode("max");
 						bb_max.x() = max_node->Attrib("x")->ValueFloat();
 						bb_max.y() = max_node->Attrib("y")->ValueFloat();
 						bb_max.z() = max_node->Attrib("z")->ValueFloat();
@@ -3206,20 +3095,14 @@ namespace
 		skinned_mesh.AttachFramePosBounds(bb_kfs);
 	}
 
-	void MeshLoader::CompileActionsChunk(XMLNodePtr const & actions_chunk)
+	void MeshLoader::CompileActionsChunk(XMLNode const& actions_chunk)
 	{
 		auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
-
-		XMLNodePtr action_node;
-		if (actions_chunk)
-		{
-			action_node = actions_chunk->FirstNode("action");
-		}
 
 		auto animations = MakeSharedPtr<std::vector<Animation>>();
 
 		Animation animation;
-		if (action_node)
+		if (XMLNode const* action_node = actions_chunk.FirstNode("action"))
 		{
 			for (; action_node; action_node = action_node->NextSibling("action"))
 			{
@@ -3248,23 +3131,21 @@ namespace
 		KFL_UNUSED(metadata);
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
-		KlayGE::XMLDocument doc;
-		XMLNodePtr root = doc.Parse(*file);
+		std::unique_ptr<XMLDocument> doc = LoadXml(*file);
+		XMLNode const* root = doc->RootNode();
 
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 
-		XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
-		if (bones_chunk)
+		if (XMLNode const* bones_chunk = root->FirstNode("bones_chunk"))
 		{
-			this->CompileBonesChunk(bones_chunk);
+			this->CompileBonesChunk(*bones_chunk);
 		}
 
 		bool const skinned = !joints_.empty();
 
-		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
-		if (meshes_chunk)
+		if (XMLNode const* meshes_chunk = root->FirstNode("meshes_chunk"))
 		{
-			this->CompileMeshesChunk(meshes_chunk);
+			this->CompileMeshesChunk(*meshes_chunk);
 		}
 
 		if (!joints_.empty())
@@ -3314,16 +3195,14 @@ namespace
 			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
 		}
 
-		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
-		if (materials_chunk)
+		if (XMLNode const* materials_chunk = root->FirstNode("materials_chunk"))
 		{
-			this->CompileMaterialsChunk(materials_chunk);
+			this->CompileMaterialsChunk(*materials_chunk);
 		}
 
-		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
-		if (key_frames_chunk)
+		if (XMLNode const* key_frames_chunk = root->FirstNode("key_frames_chunk"))
 		{
-			this->CompileKeyFramesChunk(key_frames_chunk);
+			this->CompileKeyFramesChunk(*key_frames_chunk);
 
 			auto& skinned_model = checked_cast<SkinnedModel&>(*render_model_);
 			auto& kfs = *skinned_model.GetKeyFrameSets();
@@ -3359,17 +3238,16 @@ namespace
 				}
 			}
 
-			XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
+			XMLNode const* bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
 			for (uint32_t mesh_index = 0; mesh_index < skinned_model.NumMeshes(); ++ mesh_index)
 			{
 				this->CompileBBKeyFramesChunk(bb_kfs_chunk, mesh_index);
 			}
 		}
 
-		XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
-		if (actions_chunk)
+		if (XMLNode const* actions_chunk = root->FirstNode("actions_chunk"))
 		{
-			this->CompileActionsChunk(actions_chunk);
+			this->CompileActionsChunk(*actions_chunk);
 		}
 	}
 

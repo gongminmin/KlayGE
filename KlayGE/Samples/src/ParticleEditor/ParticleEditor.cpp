@@ -17,7 +17,6 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>

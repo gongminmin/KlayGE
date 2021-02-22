@@ -42,11 +42,8 @@ namespace KlayGE
 	class DllLoader;
 
 	class XMLDocument;
-	typedef std::shared_ptr<XMLDocument> XMLDocumentPtr;
 	class XMLNode;
-	typedef std::shared_ptr<XMLNode> XMLNodePtr;
 	class XMLAttribute;
-	typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
 
 	class ThreadPool;
 

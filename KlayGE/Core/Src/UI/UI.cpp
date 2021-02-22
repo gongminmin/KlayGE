@@ -59,12 +59,11 @@ namespace
 		}
 	}
 
-	bool ReadBool(KlayGE::XMLNodePtr& node, std::string const & name, bool default_val)
+	bool ReadBool(KlayGE::XMLNode const& node, std::string const & name, bool default_val)
 	{
 		bool ret = default_val;
 
-		KlayGE::XMLAttributePtr attr = node->Attrib(name);
-		if (attr)
+		if (KlayGE::XMLAttribute const* attr = node.Attrib(name))
 		{
 			ret = BoolFromStr(attr->ValueString());
 		}
@@ -411,32 +410,30 @@ namespace KlayGE
 			inited_ = true;
 		}
 
-		XMLDocument doc;
-		XMLNodePtr root = doc.Parse(source);
-
-		XMLAttributePtr attr;
+		std::unique_ptr<XMLDocument> doc = LoadXml(source);
+		XMLNode* root = doc->RootNode();
 
 		std::vector<std::unique_ptr<XMLDocument>> include_docs;
-		for (XMLNodePtr node = root->FirstNode("include"); node;)
+		for (XMLNode const* node = root->FirstNode("include"); node;)
 		{
-			attr = node->Attrib("name");
-			include_docs.push_back(MakeUniquePtr<XMLDocument>());
-			XMLNodePtr include_root = include_docs.back()->Parse(*ResLoader::Instance().Open(std::string(attr->ValueString())));
+			XMLAttribute const* attr = node->Attrib("name");
+			include_docs.push_back(LoadXml(*ResLoader::Instance().Open(std::string(attr->ValueString()))));
+			XMLNode const* include_root = include_docs.back()->RootNode();
 
-			for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+			for (XMLNode const* child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 			{
-				if (XNT_Element == child_node->Type())
+				if (XMLNodeType::Element == child_node->Type())
 				{
-					root->InsertNode(*node, doc.CloneNode(*child_node));
+					root->InsertAfterNode(*node, doc->CloneNode(*child_node));
 				}
 			}
 
-			XMLNodePtr node_next = node->NextSibling("include");
+			XMLNode const* node_next = node->NextSibling("include");
 			root->RemoveNode(*node);
 			node = node_next;
 		}
 
-		for (XMLNodePtr node = root->FirstNode("dialog"); node; node = node->NextSibling("dialog"))
+		for (XMLNode const* node = root->FirstNode("dialog"); node; node = node->NextSibling("dialog"))
 		{
 			UIDialogPtr dlg;
 			{
@@ -450,8 +447,7 @@ namespace KlayGE
 				y = node->Attrib("y")->ValueInt();
 				width = node->Attrib("width")->ValueInt();
 				height = node->Attrib("height")->ValueInt();
-				attr = node->Attrib("align_x");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("align_x"))
 				{
 					std::string_view const align_x_str = attr->ValueString();
 					if ("left" == align_x_str)
@@ -468,8 +464,7 @@ namespace KlayGE
 						align_x = UIDialog::CA_Center;
 					}
 				}
-				attr = node->Attrib("align_y");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("align_y"))
 				{
 					std::string_view const align_y_str = attr->ValueString();
 					if ("top" == align_y_str)
@@ -498,27 +493,23 @@ namespace KlayGE
 				Convert(wcaption, caption);
 				dlg->SetCaptionText(wcaption);
 
-				dlg->EnableCaption(ReadBool(node, "show_caption", true));
-				dlg->AlwaysInOpacity(ReadBool(node, "opacity", false));
+				dlg->EnableCaption(ReadBool(*node, "show_caption", true));
+				dlg->AlwaysInOpacity(ReadBool(*node, "opacity", false));
 
 				Color bg_clr(0.4f, 0.6f, 0.8f, 1);
-				attr = node->Attrib("bg_color_r");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("bg_color_r"))
 				{
 					bg_clr.r() = attr->ValueFloat();
 				}
-				attr = node->Attrib("bg_color_g");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("bg_color_g"))
 				{
 					bg_clr.g() = attr->ValueFloat();
 				}
-				attr = node->Attrib("bg_color_b");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("bg_color_b"))
 				{
 					bg_clr.b() = attr->ValueFloat();
 				}
-				attr = node->Attrib("bg_color_a");
-				if (attr)
+				if (XMLAttribute const* attr = node->Attrib("bg_color_a"))
 				{
 					bg_clr.a() = attr->ValueFloat();
 				}
@@ -530,14 +521,14 @@ namespace KlayGE
 			}
 
 			std::vector<std::string_view> ctrl_ids;
-			for (XMLNodePtr ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
+			for (XMLNode const* ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
 			{
 				ctrl_ids.push_back(ctrl_node->Attrib("id")->ValueString());
 			}
 			std::sort(ctrl_ids.begin(), ctrl_ids.end());
 			ctrl_ids.erase(std::unique(ctrl_ids.begin(), ctrl_ids.end()), ctrl_ids.end());
 
-			for (XMLNodePtr ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
+			for (XMLNode const* ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
 			{
 				int32_t x, y;
 				uint32_t width, height;
@@ -556,10 +547,9 @@ namespace KlayGE
 				y = ctrl_node->Attrib("y")->ValueInt();
 				width = ctrl_node->Attrib("width")->ValueInt();
 				height = ctrl_node->Attrib("height")->ValueInt();
-				is_default = ReadBool(ctrl_node, "is_default", false);
-				visible = ReadBool(ctrl_node, "visible", true);
-				attr = ctrl_node->Attrib("align_x");
-				if (attr)
+				is_default = ReadBool(*ctrl_node, "is_default", false);
+				visible = ReadBool(*ctrl_node, "visible", true);
+				if (XMLAttribute const* attr = ctrl_node->Attrib("align_x"))
 				{
 					std::string_view const align_x_str = attr->ValueString();
 					if ("left" == align_x_str)
@@ -576,8 +566,7 @@ namespace KlayGE
 						align_x = UIDialog::CA_Center;
 					}
 				}
-				attr = ctrl_node->Attrib("align_y");
-				if (attr)
+				if (XMLAttribute const* attr = ctrl_node->Attrib("align_y"))
 				{
 					std::string_view const align_y_str = attr->ValueString();
 					if ("top" == align_y_str)
@@ -622,8 +611,7 @@ namespace KlayGE
 				else if (CT_HASH("tex_button") == type_str_hash)
 				{
 					TexturePtr tex;
-					attr = ctrl_node->Attrib("texture");
-					if (attr)
+					if (XMLAttribute const* attr = ctrl_node->Attrib("texture"))
 					{
 						std::string_view const tex_name = attr->ValueString();
 						tex = SyncLoadTexture(std::string(tex_name), EAH_GPU_Read | EAH_Immutable);
@@ -635,7 +623,7 @@ namespace KlayGE
 				else if (CT_HASH("check_box") == type_str_hash)
 				{
 					std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
-					bool checked = ReadBool(ctrl_node, "checked", false);
+					bool checked = ReadBool(*ctrl_node, "checked", false);
 					uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 					std::wstring wcaption;
 					Convert(wcaption, caption);
@@ -646,7 +634,7 @@ namespace KlayGE
 				{
 					std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 					int32_t button_group = ctrl_node->Attrib("button_group")->ValueInt();
-					bool checked = ReadBool(ctrl_node, "checked", false);
+					bool checked = ReadBool(*ctrl_node, "checked", false);
 					uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 					std::wstring wcaption;
 					Convert(wcaption, caption);
@@ -673,8 +661,7 @@ namespace KlayGE
 				else if (CT_HASH("list_box") == type_str_hash)
 				{
 					UIListBox::STYLE style = UIListBox::SINGLE_SELECTION;
-					attr = ctrl_node->Attrib("style");
-					if (attr)
+					if (XMLAttribute const* attr = ctrl_node->Attrib("style"))
 					{
 						std::string_view const style_str = attr->ValueString();
 						if ("single" == style_str)
@@ -690,7 +677,7 @@ namespace KlayGE
 					dlg->AddControl(MakeSharedPtr<UIListBox>(dlg, id,
 						int4(x, y, width, height), style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION));
 
-					for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
+					for (XMLNode const* item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 					{
 						std::string_view const caption = item_node->Attrib("name")->ValueString();
 						std::wstring wcaption;
@@ -698,8 +685,7 @@ namespace KlayGE
 						dlg->Control<UIListBox>(id)->AddItem(wcaption);
 					}
 
-					attr = ctrl_node->Attrib("selected");
-					if (attr)
+					if (XMLAttribute const* attr = ctrl_node->Attrib("selected"))
 					{
 						dlg->Control<UIListBox>(id)->SelectItem(attr->ValueInt());
 					}
@@ -710,7 +696,7 @@ namespace KlayGE
 					dlg->AddControl(MakeSharedPtr<UIComboBox>(dlg, id,
 						int4(x, y, width, height), hotkey, is_default));
 
-					for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
+					for (XMLNode const* item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 					{
 						std::string_view const caption = item_node->Attrib("name")->ValueString();
 						std::wstring wcaption;
@@ -718,8 +704,7 @@ namespace KlayGE
 						dlg->Control<UIComboBox>(id)->AddItem(wcaption);
 					}
 
-					attr = ctrl_node->Attrib("selected");
-					if (attr)
+					if (XMLAttribute const* attr = ctrl_node->Attrib("selected"))
 					{
 						dlg->Control<UIComboBox>(id)->SetSelectedByIndex(attr->ValueInt());
 					}

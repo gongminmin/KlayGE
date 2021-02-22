@@ -123,22 +123,21 @@ namespace
 
 			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
 
-			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(*psmm_input);
+			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*psmm_input);
+			XMLNode const* root = doc->RootNode();
 
 			{
-				XMLNodePtr particle_node = root->FirstNode("particle");
+				XMLNode const* particle_node = root->FirstNode("particle");
 				{
-					XMLNodePtr alpha_node = particle_node->FirstNode("alpha");
+					XMLNode const* alpha_node = particle_node->FirstNode("alpha");
 					ps_desc_.ps_data->particle_alpha_from_tex = std::string(alpha_node->Attrib("from")->ValueString());
 					ps_desc_.ps_data->particle_alpha_to_tex = std::string(alpha_node->Attrib("to")->ValueString());
 				}
 				{
-					XMLNodePtr color_node = particle_node->FirstNode("color");
+					XMLNode const* color_node = particle_node->FirstNode("color");
 					{
 						Color from;
-						XMLAttributePtr attr = color_node->Attrib("from");
-						if (attr)
+						if (XMLAttribute const* attr = color_node->Attrib("from"))
 						{
 							std::string_view const value_str = attr->ValueString();
 							std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
@@ -159,8 +158,7 @@ namespace
 						ps_desc_.ps_data->particle_color_from = from;
 
 						Color to;
-						attr = color_node->Attrib("to");
-						if (attr)
+						if (XMLAttribute const* attr = color_node->Attrib("to"))
 						{
 							std::string_view const value_str = attr->ValueString();
 							std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
@@ -184,10 +182,9 @@ namespace
 			}
 
 			{
-				XMLNodePtr emitter_node = root->FirstNode("emitter");
+				XMLNode const* emitter_node = root->FirstNode("emitter");
 
-				XMLAttributePtr type_attr = emitter_node->Attrib("type");
-				if (type_attr)
+				if (XMLAttribute const* type_attr = emitter_node->Attrib("type"))
 				{
 					ps_desc_.ps_data->emitter_type = std::string(type_attr->ValueString());
 				}
@@ -196,26 +193,20 @@ namespace
 					ps_desc_.ps_data->emitter_type = "point";
 				}
 
-				XMLNodePtr freq_node = emitter_node->FirstNode("frequency");
-				if (freq_node)
+				if (XMLNode const* freq_node = emitter_node->FirstNode("frequency"))
 				{
-					XMLAttributePtr attr = freq_node->Attrib("value");
+					XMLAttribute const* attr = freq_node->Attrib("value");
 					ps_desc_.ps_data->frequency = attr->ValueFloat();
 				}
-
-				XMLNodePtr angle_node = emitter_node->FirstNode("angle");
-				if (angle_node)
+				if (XMLNode const* angle_node = emitter_node->FirstNode("angle"))
 				{
-					XMLAttributePtr attr = angle_node->Attrib("value");
+					XMLAttribute const* attr = angle_node->Attrib("value");
 					ps_desc_.ps_data->angle = attr->ValueInt() * DEG2RAD;
 				}
-
-				XMLNodePtr pos_node = emitter_node->FirstNode("pos");
-				if (pos_node)
+				if (XMLNode const* pos_node = emitter_node->FirstNode("pos"))
 				{
 					float3 min_pos(0, 0, 0);
-					XMLAttributePtr attr = pos_node->Attrib("min");
-					if (attr)
+					if (XMLAttribute const* attr = pos_node->Attrib("min"))
 					{
 						std::string_view const value_str = attr->ValueString();
 						std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
@@ -235,8 +226,7 @@ namespace
 					ps_desc_.ps_data->min_pos = min_pos;
 			
 					float3 max_pos(0, 0, 0);
-					attr = pos_node->Attrib("max");
-					if (attr)
+					if (XMLAttribute const* attr = pos_node->Attrib("max"))
 					{
 						std::string_view const value_str = attr->ValueString();
 						std::vector<std::string_view> strs = StringUtil::Split(value_str, StringUtil::EqualTo(' '));
@@ -255,21 +245,17 @@ namespace
 					}			
 					ps_desc_.ps_data->max_pos = max_pos;
 				}
-
-				XMLNodePtr vel_node = emitter_node->FirstNode("vel");
-				if (vel_node)
+				if (XMLNode const* vel_node = emitter_node->FirstNode("vel"))
 				{
-					XMLAttributePtr attr = vel_node->Attrib("min");
+					XMLAttribute const* attr = vel_node->Attrib("min");
 					ps_desc_.ps_data->min_vel = attr->ValueFloat();
 
 					attr = vel_node->Attrib("max");
 					ps_desc_.ps_data->max_vel = attr->ValueFloat();
 				}
-
-				XMLNodePtr life_node = emitter_node->FirstNode("life");
-				if (life_node)
+				if (XMLNode const* life_node = emitter_node->FirstNode("life"))
 				{
-					XMLAttributePtr attr = life_node->Attrib("min");
+					XMLAttribute const* attr = life_node->Attrib("min");
 					ps_desc_.ps_data->min_life = attr->ValueFloat();
 
 					attr = life_node->Attrib("max");
@@ -278,10 +264,9 @@ namespace
 			}
 
 			{
-				XMLNodePtr updater_node = root->FirstNode("updater");
+				XMLNode const* updater_node = root->FirstNode("updater");
 
-				XMLAttributePtr type_attr = updater_node->Attrib("type");
-				if (type_attr)
+				if (XMLAttribute const* type_attr = updater_node->Attrib("type"))
 				{
 					ps_desc_.ps_data->updater_type = std::string(type_attr->ValueString());
 				}
@@ -292,18 +277,19 @@ namespace
 
 				if ("polyline" == ps_desc_.ps_data->updater_type)
 				{
-					for (XMLNodePtr node = updater_node->FirstNode("curve"); node; node = node->NextSibling("curve"))
+					for (XMLNode const* node = updater_node->FirstNode("curve"); node; node = node->NextSibling("curve"))
 					{
 						std::vector<float2> xys;
-						for (XMLNodePtr ctrl_point_node = node->FirstNode("ctrl_point"); ctrl_point_node; ctrl_point_node = ctrl_point_node->NextSibling("ctrl_point"))
+						for (XMLNode const* ctrl_point_node = node->FirstNode("ctrl_point"); ctrl_point_node;
+							 ctrl_point_node = ctrl_point_node->NextSibling("ctrl_point"))
 						{
-							XMLAttributePtr attr_x = ctrl_point_node->Attrib("x");
-							XMLAttributePtr attr_y = ctrl_point_node->Attrib("y");
+							XMLAttribute const* attr_x = ctrl_point_node->Attrib("x");
+							XMLAttribute const* attr_y = ctrl_point_node->Attrib("y");
 
 							xys.push_back(float2(attr_x->ValueFloat(), attr_y->ValueFloat()));
 						}
 
-						XMLAttributePtr attr = node->Attrib("name");
+						XMLAttribute const* attr = node->Attrib("name");
 						std::string_view const name = attr->ValueString();
 						size_t const name_hash = HashRange(name.begin(), name.end());
 						if (CT_HASH("size_over_life") == name_hash)
@@ -959,21 +945,20 @@ namespace KlayGE
 
 	void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name)
 	{
-		KlayGE::XMLDocument doc;
+		XMLDocument doc;
 
-		XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
-		doc.RootNode(root);
+		auto root = doc.AllocNode(XMLNodeType::Element, "particle_system");
 
 		{
-			XMLNodePtr particle_node = doc.AllocNode(XNT_Element, "particle");
+			auto particle_node = doc.AllocNode(XMLNodeType::Element, "particle");
 			{
-				XMLNodePtr alpha_node = doc.AllocNode(XNT_Element, "alpha");
+				auto alpha_node = doc.AllocNode(XMLNodeType::Element, "alpha");
 				alpha_node->AppendAttrib(doc.AllocAttribString("from", ps->ParticleAlphaFromTex()));
 				alpha_node->AppendAttrib(doc.AllocAttribString("to", ps->ParticleAlphaToTex()));
-				particle_node->AppendNode(alpha_node);
+				particle_node->AppendNode(std::move(alpha_node));
 			}
 			{
-				XMLNodePtr color_node = doc.AllocNode(XNT_Element, "color");
+				auto color_node = doc.AllocNode(XMLNodeType::Element, "color");
 				{
 					Color const & from = ps->ParticleColorFrom();
 					color_node->AppendAttrib(doc.AllocAttribString("from", std::format("{} {} {}", from.r(), from.g(), from.b())));
@@ -981,119 +966,121 @@ namespace KlayGE
 					Color const & to = ps->ParticleColorTo();
 					color_node->AppendAttrib(doc.AllocAttribString("to", std::format("{} {} {}", to.r(), to.g(), to.b())));
 				}
-				particle_node->AppendNode(color_node);
+				particle_node->AppendNode(std::move(color_node));
 			}
-			root->AppendNode(particle_node);
+			root->AppendNode(std::move(particle_node));
 		}
 
 		for (uint32_t i = 0; i < ps->NumEmitters(); ++ i)
 		{
 			ParticleEmitterPtr const & particle_emitter = ps->Emitter(i);
 
-			XMLNodePtr emitter_node = doc.AllocNode(XNT_Element, "emitter");
+			auto emitter_node = doc.AllocNode(XMLNodeType::Element, "emitter");
 			emitter_node->AppendAttrib(doc.AllocAttribString("type", particle_emitter->Type()));
 
 			{
-				XMLNodePtr freq_node = doc.AllocNode(XNT_Element, "frequency");
+				auto freq_node = doc.AllocNode(XMLNodeType::Element, "frequency");
 				freq_node->AppendAttrib(doc.AllocAttribFloat("value", particle_emitter->Frequency()));
-				emitter_node->AppendNode(freq_node);
+				emitter_node->AppendNode(std::move(freq_node));
 			}
 			{
-				XMLNodePtr angle_node = doc.AllocNode(XNT_Element, "angle");
+				auto angle_node = doc.AllocNode(XMLNodeType::Element, "angle");
 				angle_node->AppendAttrib(doc.AllocAttribInt("value", static_cast<int>(particle_emitter->EmitAngle() * RAD2DEG + 0.5f)));
-				emitter_node->AppendNode(angle_node);
+				emitter_node->AppendNode(std::move(angle_node));
 			}
 			{
-				XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
+				auto pos_node = doc.AllocNode(XMLNodeType::Element, "pos");
 				pos_node->AppendAttrib(
 					doc.AllocAttribString("min", std::format("{} {} {}", particle_emitter->MinPosition().x(),
 													 particle_emitter->MinPosition().y(), particle_emitter->MinPosition().z())));
 				pos_node->AppendAttrib(
 					doc.AllocAttribString("max", std::format("{} {} {}", particle_emitter->MaxPosition().x(),
 													 particle_emitter->MaxPosition().y(), particle_emitter->MaxPosition().z())));
-				emitter_node->AppendNode(pos_node);
+				emitter_node->AppendNode(std::move(pos_node));
 			}		
 			{
-				XMLNodePtr vel_node = doc.AllocNode(XNT_Element, "vel");
+				auto vel_node = doc.AllocNode(XMLNodeType::Element, "vel");
 				vel_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinVelocity()));
 				vel_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxVelocity()));
-				emitter_node->AppendNode(vel_node);
+				emitter_node->AppendNode(std::move(vel_node));
 			}
 			{
-				XMLNodePtr life_node = doc.AllocNode(XNT_Element, "life");
+				auto life_node = doc.AllocNode(XMLNodeType::Element, "life");
 				life_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinLife()));
 				life_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxLife()));
-				emitter_node->AppendNode(life_node);
+				emitter_node->AppendNode(std::move(life_node));
 			}
-			root->AppendNode(emitter_node);
+			root->AppendNode(std::move(emitter_node));
 		}
 
 		for (uint32_t i = 0; i < ps->NumUpdaters(); ++ i)
 		{
 			ParticleUpdaterPtr const & particle_updater = ps->Updater(i);
 
-			XMLNodePtr updater_node = doc.AllocNode(XNT_Element, "updater");
+			auto updater_node = doc.AllocNode(XMLNodeType::Element, "updater");
 			updater_node->AppendAttrib(doc.AllocAttribString("type", particle_updater->Type()));
 
 			if ("polyline" == particle_updater->Type())
 			{
 				std::shared_ptr<PolylineParticleUpdater> polyline_updater = checked_pointer_cast<PolylineParticleUpdater>(particle_updater);
 
-				XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				auto size_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
 				size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
 				std::vector<float2> const & size_over_life = polyline_updater->SizeOverLife();
 				for (size_t j = 0; j < size_over_life.size(); ++ j)
 				{
 					float2 const & pt = size_over_life[j];
 
-					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
-					size_over_life_node->AppendNode(ctrl_point_node);
+					size_over_life_node->AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(size_over_life_node);
+				updater_node->AppendNode(std::move(size_over_life_node));
 
-				XMLNodePtr mass_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				auto mass_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
 				mass_over_life_node->AppendAttrib(doc.AllocAttribString("name", "mass_over_life"));
 				std::vector<float2> const & mass_over_life = polyline_updater->MassOverLife();
 				for (size_t j = 0; j < mass_over_life.size(); ++ j)
 				{
 					float2 const & pt = mass_over_life[j];
 
-					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
-					mass_over_life_node->AppendNode(ctrl_point_node);
+					mass_over_life_node->AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(mass_over_life_node);
+				updater_node->AppendNode(std::move(mass_over_life_node));
 
-				XMLNodePtr opacity_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				auto opacity_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
 				opacity_over_life_node->AppendAttrib(doc.AllocAttribString("name", "opacity_over_life"));
 				std::vector<float2> const & opacity_over_life = polyline_updater->OpacityOverLife();
 				for (size_t j = 0; j < opacity_over_life.size(); ++ j)
 				{
 					float2 const & pt = opacity_over_life[j];
 
-					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
-					opacity_over_life_node->AppendNode(ctrl_point_node);
+					opacity_over_life_node->AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(opacity_over_life_node);
+				updater_node->AppendNode(std::move(opacity_over_life_node));
 			}
 
-			root->AppendNode(updater_node);
+			root->AppendNode(std::move(updater_node));
 		}
+
+		doc.RootNode(std::move(root));
 
 		std::ofstream ofs(psml_name.c_str());
 		if (!ofs)
 		{
 			ofs.open((ResLoader::Instance().LocalFolder() + psml_name).c_str());
 		}
-		doc.Print(ofs);
+		SaveXml(doc, ofs);
 	}
 
 

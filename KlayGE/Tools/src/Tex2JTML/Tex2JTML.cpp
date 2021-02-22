@@ -35,7 +35,6 @@
 #include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/ResLoader.hpp>

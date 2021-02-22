@@ -29,9 +29,12 @@
  */
 
 #include <KFL/KFL.hpp>
-#include <KFL/Util.hpp>
-#include <KFL/ResIdentifier.hpp>
 
+#include <KFL/ResIdentifier.hpp>
+#include <KFL/StringUtil.hpp>
+#include <KFL/Util.hpp>
+
+#include <iterator>
 #include <string>
 #ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 #include <charconv>
@@ -47,7 +50,7 @@
 #endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
-#pragma warning(disable: 4100) // 'flags': unreferenced formal parameter
+#pragma warning(disable : 4100) // 'flags': unreferenced formal parameter
 #elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'flags'
@@ -66,123 +69,299 @@
 
 #include <KFL/XMLDom.hpp>
 
+using namespace KlayGE;
+
+namespace
+{
+	std::unique_ptr<XMLAttribute> CreateXmlAttribFromRapidXmlAttrib(XMLDocument& doc, rapidxml::xml_attribute<char> const& attrib)
+	{
+		return doc.AllocAttribString(
+			std::string_view(attrib.name(), attrib.name_size()), std::string_view(attrib.value(), attrib.value_size()));
+	}
+
+	rapidxml::xml_attribute<char>* CreateXmlAttribFromRapidXmlAttrib(rapidxml::xml_document<char>& doc, XMLAttribute const& attrib)
+	{
+		auto* ret = doc.allocate_attribute();
+
+		std::string_view const name = attrib.Name();
+		std::string_view const value = attrib.ValueString();
+		ret->name(name.data(), name.size());
+		ret->value(value.data(), value.size());
+
+		return ret;
+	}
+
+	std::unique_ptr<XMLNode> CreateXmlNodeFromRapidXmlNode(XMLDocument& doc, rapidxml::xml_node<char> const& node)
+	{
+		XMLNodeType type;
+		switch (node.type())
+		{
+		case rapidxml::node_document:
+			type = XMLNodeType::Document;
+			break;
+
+		case rapidxml::node_element:
+			type = XMLNodeType::Element;
+			break;
+
+		case rapidxml::node_data:
+			type = XMLNodeType::Data;
+			break;
+
+		case rapidxml::node_cdata:
+			type = XMLNodeType::CData;
+			break;
+
+		case rapidxml::node_comment:
+			type = XMLNodeType::Comment;
+			break;
+
+		case rapidxml::node_declaration:
+			type = XMLNodeType::Declaration;
+			break;
+
+		case rapidxml::node_doctype:
+			type = XMLNodeType::Doctype;
+			break;
+
+		case rapidxml::node_pi:
+		default:
+			type = XMLNodeType::PI;
+			break;
+		}
+
+		auto ret = doc.AllocNode(type, std::string_view(node.name(), node.name_size()));
+		ret->Value(std::string_view(node.value(), node.value_size()));
+
+		for (auto* child = node.first_node(); child; child = child->next_sibling())
+		{
+			ret->AppendNode(CreateXmlNodeFromRapidXmlNode(doc, *child));
+		}
+		for (auto* attr = node.first_attribute(); attr; attr = attr->next_attribute())
+		{
+			ret->AppendAttrib(CreateXmlAttribFromRapidXmlAttrib(doc, *attr));
+		}
+
+		return ret;
+	}
+
+	rapidxml::xml_node<char>* CreateXmlNodeFromRapidXmlNode(rapidxml::xml_document<char>& doc, XMLNode const& node)
+	{
+		rapidxml::node_type type;
+		switch (node.Type())
+		{
+		case XMLNodeType::Document:
+			type = rapidxml::node_document;
+			break;
+
+		case XMLNodeType::Element:
+			type = rapidxml::node_element;
+			break;
+
+		case XMLNodeType::Data:
+			type = rapidxml::node_data;
+			break;
+
+		case XMLNodeType::CData:
+			type = rapidxml::node_cdata;
+			break;
+
+		case XMLNodeType::Comment:
+			type = rapidxml::node_comment;
+			break;
+
+		case XMLNodeType::Declaration:
+			type = rapidxml::node_declaration;
+			break;
+
+		case XMLNodeType::Doctype:
+			type = rapidxml::node_doctype;
+			break;
+
+		case XMLNodeType::PI:
+		default:
+			type = rapidxml::node_pi;
+			break;
+		}
+
+		auto* ret = doc.allocate_node(type);
+
+		std::string_view const name = node.Name();
+		std::string_view const value = node.ValueString();
+		ret->name(name.data(), name.size());
+		ret->value(value.data(), value.size());
+
+		for (auto child = node.FirstNode(); child; child = child->NextSibling())
+		{
+			ret->append_node(CreateXmlNodeFromRapidXmlNode(doc, *child));
+		}
+		for (auto attr = node.FirstAttrib(); attr; attr = attr->NextAttrib())
+		{
+			ret->append_attribute(CreateXmlAttribFromRapidXmlAttrib(doc, *attr));
+		}
+
+		return ret;
+	}
+
+	bool TryConvertStringToValue(std::string const& value_str, int32_t& val)
+	{
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stol(value_str);
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
+	}
+
+	bool TryConvertStringToValue(std::string const& value_str, uint32_t& val)
+	{
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stoul(value_str);
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
+	}
+
+	bool TryConvertStringToValue(std::string const& value_str, float& val)
+	{
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+		char const* str = value_str.data();
+		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
+		return (result.ec == std::errc());
+#else
+		try
+		{
+			val = std::stof(value_str);
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+#endif
+	}
+
+	bool TryConvertStringToValue(std::string const& value_str, bool& val)
+	{
+		std::string lower_value_str = value_str;
+		StringUtil::ToLower(lower_value_str);
+		if (lower_value_str == "true")
+		{
+			val = true;
+			return true;
+		}
+		else if (lower_value_str == "false")
+		{
+			val = false;
+			return true;
+		}
+		else
+		{
+			uint32_t uint_val;
+			bool const ret = TryConvertStringToValue(value_str, uint_val);
+			val = (uint_val != 0) ? true : false;
+			return ret;
+		}
+	}
+} // namespace
+
 namespace KlayGE
 {
-	XMLDocument::XMLDocument()
-		: doc_(MakeSharedPtr<rapidxml::xml_document<char>>())
+	XMLNode* XMLDocument::RootNode() const
 	{
+		return root_.get();
 	}
 
-	XMLNodePtr XMLDocument::Parse(ResIdentifier& source)
+	void XMLDocument::RootNode(std::unique_ptr<XMLNode> new_node)
 	{
-		source.seekg(0, std::ios_base::end);
-		int len = static_cast<int>(source.tellg());
-		source.seekg(0, std::ios_base::beg);
-		xml_src_ = MakeUniquePtr<char[]>(len + 1);
-		source.read(&xml_src_[0], len);
-		xml_src_[len] = 0;
-
-		doc_->parse<0>(xml_src_.get());
-		root_ = MakeSharedPtr<XMLNode>(doc_->first_node());
-
-		return root_;
+		root_ = std::move(new_node);
 	}
 
-	void XMLDocument::Print(std::ostream& os)
+	std::unique_ptr<XMLNode> XMLDocument::CloneNode(XMLNode const& node)
 	{
-		os << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
-		os << *doc_;
-	}
+		auto ret = this->AllocNode(node.Type(), node.Name());
+		ret->Value(node.ValueString());
 
-	XMLNodePtr XMLDocument::CloneNode(XMLNode const& node)
-	{
-		return MakeSharedPtr<XMLNode>(doc_->clone_node(node.node_));
-	}
-
-	XMLNodePtr XMLDocument::AllocNode(XMLNodeType type, std::string_view name)
-	{
-		return MakeSharedPtr<XMLNode>(*doc_, type, name);
-	}
-	
-	XMLAttributePtr XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
-	{
-		return this->AllocAttribString(name, std::to_string(value));
-	}
-
-	XMLAttributePtr XMLDocument::AllocAttribUInt(std::string_view name, uint32_t value)
-	{
-		return this->AllocAttribString(name, std::to_string(value));
-	}
-
-	XMLAttributePtr XMLDocument::AllocAttribFloat(std::string_view name, float value)
-	{
-		return this->AllocAttribString(name, std::to_string(value));
-	}
-
-	XMLAttributePtr XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
-	{
-		return MakeSharedPtr<XMLAttribute>(*doc_, std::string_view(doc_->allocate_string(name.data(), name.size()), name.size()),
-			std::string_view(doc_->allocate_string(value.data(), value.size()), value.size()));
-	}
-
-	void XMLDocument::RootNode(XMLNodePtr const & new_node)
-	{
-		doc_->remove_all_nodes();
-		doc_->append_node(new_node->node_);
-		root_ = new_node;
-	}
-
-
-	XMLNode::XMLNode(rapidxml::xml_node<char>* node)
-		: node_(node)
-	{
-		if (node_ != nullptr)
+		for (auto child = node.FirstNode(); child; child = child->NextSibling())
 		{
-			name_ = std::string_view(node_->name(), node_->name_size());
+			ret->AppendNode(this->CloneNode(*child));
 		}
-	}
-
-	XMLNode::XMLNode(rapidxml::xml_document<char>& doc, XMLNodeType type, std::string_view name)
-		: name_(name)
-	{
-		rapidxml::node_type xtype;
-		switch (type)
+		for (auto attr = node.FirstAttrib(); attr; attr = attr->NextAttrib())
 		{
-		case XNT_Document:
-			xtype = rapidxml::node_document;
-			break;
-
-		case XNT_Element:
-			xtype = rapidxml::node_element;
-			break;
-
-		case XNT_Data:
-			xtype = rapidxml::node_data;
-			break;
-
-		case XNT_CData:
-			xtype = rapidxml::node_cdata;
-			break;
-
-		case XNT_Comment:
-			xtype = rapidxml::node_comment;
-			break;
-
-		case XNT_Declaration:
-			xtype = rapidxml::node_declaration;
-			break;
-
-		case XNT_Doctype:
-			xtype = rapidxml::node_doctype;
-			break;
-
-		case XNT_PI:
-		default:
-			xtype = rapidxml::node_pi;
-			break;
+			ret->AppendAttrib(this->CloneAttrib(*attr));
 		}
 
-		node_ = doc.allocate_node(xtype, name.data(), nullptr, name.size());
+		return ret;
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::CloneAttrib(XMLAttribute const& attrib)
+	{
+		return this->AllocAttribString(attrib.Name(), attrib.ValueString());
+	}
+
+	std::unique_ptr<XMLNode> XMLDocument::AllocNode(XMLNodeType type, std::string_view name)
+	{
+		auto ret = MakeUniquePtr<XMLNode>(type);
+		ret->Name(name);
+		return ret;
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttrib(std::string_view name)
+	{
+		auto ret = MakeUniquePtr<XMLAttribute>();
+		ret->Name(name);
+		return ret;
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribBool(std::string_view name, bool value)
+	{
+		return this->AllocAttribString(name, std::to_string(value ? 1U : 0U));
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
+	{
+		return this->AllocAttribString(name, std::to_string(value));
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribUInt(std::string_view name, uint32_t value)
+	{
+		return this->AllocAttribString(name, std::to_string(value));
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribFloat(std::string_view name, float value)
+	{
+		return this->AllocAttribString(name, std::to_string(value));
+	}
+
+	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
+	{
+		auto ret = this->AllocAttrib(name);
+		ret->Value(value);
+		return ret;
+	}
+
+
+	XMLNode::XMLNode(XMLNodeType type) : type_(type)
+	{
 	}
 
 	std::string_view XMLNode::Name() const
@@ -190,105 +369,126 @@ namespace KlayGE
 		return name_;
 	}
 
+	void XMLNode::Name(std::string_view name)
+	{
+		name_ = name;
+	}
+
 	XMLNodeType XMLNode::Type() const
 	{
-		switch (node_->type())
-		{
-		case rapidxml::node_document:
-			return XNT_Document;
-
-		case rapidxml::node_element:
-			return XNT_Element;
-
-		case rapidxml::node_data:
-			return XNT_Data;
-
-		case rapidxml::node_cdata:
-			return XNT_CData;
-
-		case rapidxml::node_comment:
-			return XNT_Comment;
-
-		case rapidxml::node_declaration:
-			return XNT_Declaration;
-
-		case rapidxml::node_doctype:
-			return XNT_Doctype;
-
-		case rapidxml::node_pi:
-		default:
-			return XNT_PI;
-		}
+		return type_;
 	}
 
-	XMLNodePtr XMLNode::Parent() const
+	XMLNode* XMLNode::Parent() const
 	{
-		auto* node = node_->parent();
-		if (node)
+		return parent_;
+	}
+
+	void XMLNode::Parent(XMLNode* parent)
+	{
+		parent_ = parent;
+	}
+
+	XMLAttribute* XMLNode::FirstAttrib(std::string_view name) const
+	{
+		for (auto const& attr : attrs_)
 		{
-			return MakeSharedPtr<XMLNode>(node);
+			if (attr->Name() == name)
+			{
+				return attr.get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLAttribute* XMLNode::NextAttrib(XMLAttribute const& attrib, std::string_view name) const
+	{
+		for (auto iter = attrs_.begin(); iter != attrs_.end(); ++iter)
+		{
+			if (iter->get() == &attrib)
+			{
+				++iter;
+				for (; iter != attrs_.end(); ++iter)
+				{
+					if ((*iter)->Name() == name)
+					{
+						return iter->get();
+					}
+				}
+				break;
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLAttribute* XMLNode::LastAttrib(std::string_view name) const
+	{
+		for (auto iter = attrs_.rbegin(); iter != attrs_.rend(); ++iter)
+		{
+			if ((*iter)->Name() == name)
+			{
+				return iter->get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLAttribute* XMLNode::FirstAttrib() const
+	{
+		if (attrs_.empty())
+		{
+			return nullptr;
 		}
 		else
 		{
-			return XMLNodePtr();
+			return attrs_.front().get();
 		}
 	}
 
-	XMLAttributePtr XMLNode::FirstAttrib(std::string_view name) const
+	XMLAttribute* XMLNode::NextAttrib(XMLAttribute const& attrib) const
 	{
-		auto* attr = node_->first_attribute(name.data(), name.size());
-		if (attr)
+		for (auto iter = attrs_.begin(); iter != attrs_.end(); ++iter)
 		{
-			return MakeSharedPtr<XMLAttribute>(attr);
+			if (iter->get() == &attrib)
+			{
+				++iter;
+				if (iter != attrs_.end())
+				{
+					return iter->get();
+				}
+				break;
+			}
 		}
-		else
-		{
-			return XMLAttributePtr();
-		}
+
+		return nullptr;
 	}
-	
-	XMLAttributePtr XMLNode::LastAttrib(std::string_view name) const
+
+	XMLAttribute* XMLNode::LastAttrib() const
 	{
-		auto* attr = node_->last_attribute(name.data(), name.size());
-		if (attr)
+		if (attrs_.empty())
 		{
-			return MakeSharedPtr<XMLAttribute>(attr);
+			return nullptr;
 		}
 		else
 		{
-			return XMLAttributePtr();
+			return attrs_.back().get();
 		}
 	}
 
-	XMLAttributePtr XMLNode::FirstAttrib() const
-	{
-		auto* attr = node_->first_attribute();
-		if (attr)
-		{
-			return MakeSharedPtr<XMLAttribute>(attr);
-		}
-		else
-		{
-			return XMLAttributePtr();
-		}
-	}
-
-	XMLAttributePtr XMLNode::LastAttrib() const
-	{
-		auto* attr = node_->last_attribute();
-		if (attr)
-		{
-			return MakeSharedPtr<XMLAttribute>(attr);
-		}
-		else
-		{
-			return XMLAttributePtr();
-		}
-	}
-
-	XMLAttributePtr XMLNode::Attrib(std::string_view name) const
+	XMLAttribute* XMLNode::Attrib(std::string_view name) const
 	{
 		return this->FirstAttrib(name);
+	}
+
+	bool XMLNode::TryConvertAttrib(std::string_view name, bool& val, bool default_val) const
+	{
+		val = default_val;
+
+		auto attr = this->Attrib(name);
+		return attr ? attr->TryConvertValue(val) : true;
 	}
 
 	bool XMLNode::TryConvertAttrib(std::string_view name, int32_t& val, int32_t default_val) const
@@ -296,7 +496,7 @@ namespace KlayGE
 		val = default_val;
 
 		auto attr = this->Attrib(name);
-		return attr ? attr->TryConvert(val) : true;
+		return attr ? attr->TryConvertValue(val) : true;
 	}
 
 	bool XMLNode::TryConvertAttrib(std::string_view name, uint32_t& val, uint32_t default_val) const
@@ -304,7 +504,7 @@ namespace KlayGE
 		val = default_val;
 
 		auto attr = this->Attrib(name);
-		return attr ? attr->TryConvert(val) : true;
+		return attr ? attr->TryConvertValue(val) : true;
 	}
 
 	bool XMLNode::TryConvertAttrib(std::string_view name, float& val, float default_val) const
@@ -312,7 +512,13 @@ namespace KlayGE
 		val = default_val;
 
 		auto attr = this->Attrib(name);
-		return attr ? attr->TryConvert(val) : true;
+		return attr ? attr->TryConvertValue(val) : true;
+	}
+
+	bool XMLNode::AttribBool(std::string_view name, bool default_val) const
+	{
+		auto attr = this->Attrib(name);
+		return attr ? attr->ValueBool() : default_val;
 	}
 
 	int32_t XMLNode::AttribInt(std::string_view name, int32_t default_val) const
@@ -339,156 +545,177 @@ namespace KlayGE
 		return attr ? attr->ValueString() : default_val;
 	}
 
-	XMLNodePtr XMLNode::FirstNode(std::string_view name) const
+	XMLNode* XMLNode::FirstNode(std::string_view name) const
 	{
-		auto* node = node_->first_node(name.data(), name.size());
-		if (node)
+		for (auto const& node : children_)
 		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::LastNode(std::string_view name) const
-	{
-		auto* node = node_->last_node(name.data(), name.size());
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::FirstNode() const
-	{
-		auto* node = node_->first_node();
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::LastNode() const
-	{
-		auto* node = node_->last_node();
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::PrevSibling(std::string_view name) const
-	{
-		auto* node = node_->previous_sibling(name.data(), name.size());
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::NextSibling(std::string_view name) const
-	{
-		auto* node = node_->next_sibling(name.data(), name.size());
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::PrevSibling() const
-	{
-		auto* node = node_->previous_sibling();
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	XMLNodePtr XMLNode::NextSibling() const
-	{
-		auto* node = node_->next_sibling();
-		if (node)
-		{
-			return MakeSharedPtr<XMLNode>(node);
-		}
-		else
-		{
-			return XMLNodePtr();
-		}
-	}
-
-	void XMLNode::InsertNode(XMLNode const& location, XMLNodePtr const & new_node)
-	{
-		node_->insert_node(location.node_, new_node->node_);
-		for (size_t i = 0; i < children_.size(); ++ i)
-		{
-			if (children_[i]->node_ == location.node_)
+			if (node->Name() == name)
 			{
-				children_.insert(children_.begin() + i, new_node);
+				return node.get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLNode* XMLNode::LastNode(std::string_view name) const
+	{
+		for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter)
+		{
+			if ((*iter)->Name() == name)
+			{
+				return iter->get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLNode* XMLNode::FirstNode() const
+	{
+		if (children_.empty())
+		{
+			return nullptr;
+		}
+		else
+		{
+			return children_.front().get();
+		}
+	}
+
+	XMLNode* XMLNode::LastNode() const
+	{
+		if (children_.empty())
+		{
+			return nullptr;
+		}
+		else
+		{
+			return children_.back().get();
+		}
+	}
+
+	XMLNode* XMLNode::PrevSibling(std::string_view name) const
+	{
+		XMLNode* ret = nullptr;
+		for (auto iter = parent_->children_.begin(); iter != parent_->children_.end(); ++iter)
+		{
+			if ((*iter)->Name() == name)
+			{
+				ret = iter->get();
+			}
+			if (iter->get() == this)
+			{
+				return ret;
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLNode* XMLNode::NextSibling(std::string_view name) const
+	{
+		for (auto iter = parent_->children_.begin(); iter != parent_->children_.end(); ++iter)
+		{
+			if (iter->get() == this)
+			{
+				++iter;
+				for (; iter != parent_->children_.end(); ++iter)
+				{
+					if ((*iter)->Name() == name)
+					{
+						return iter->get();
+					}
+				}
+				break;
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLNode* XMLNode::PrevSibling() const
+	{
+		for (auto iter = parent_->children_.begin(); iter != parent_->children_.end(); ++iter)
+		{
+			if (iter->get() == this)
+			{
+				if (iter != parent_->children_.begin())
+				{
+					--iter;
+					return iter->get();
+				}
+				break;
+			}
+		}
+
+		return nullptr;
+	}
+
+	XMLNode* XMLNode::NextSibling() const
+	{
+		for (auto iter = parent_->children_.begin(); iter != parent_->children_.end(); ++iter)
+		{
+			if (iter->get() == this)
+			{
+				++iter;
+				if (iter != parent_->children_.end())
+				{
+					return iter->get();
+				}
+				break;
+			}
+		}
+
+		return nullptr;
+	}
+
+	void XMLNode::InsertAfterNode(XMLNode const& location, std::unique_ptr<XMLNode> new_node)
+	{
+		for (auto iter = children_.begin(); iter != children_.end(); ++iter)
+		{
+			if (iter->get() == &location)
+			{
+				new_node->Parent(this);
+				children_.insert(iter, std::move(new_node));
 				break;
 			}
 		}
 	}
 
-	void XMLNode::InsertAttrib(XMLAttribute const &location, XMLAttributePtr const & new_attr)
+	void XMLNode::InsertAfterAttrib(XMLAttribute const& location, std::unique_ptr<XMLAttribute> new_attr)
 	{
-		node_->insert_attribute(location.attr_, new_attr->attr_);
-		for (size_t i = 0; i < attrs_.size(); ++ i)
+		for (auto iter = attrs_.begin(); iter != attrs_.end(); ++iter)
 		{
-			if (attrs_[i]->attr_ == location.attr_)
+			if (iter->get() == &location)
 			{
-				attrs_.insert(attrs_.begin() + i, new_attr);
+				new_attr->Parent(this);
+				attrs_.insert(iter, std::move(new_attr));
 				break;
 			}
 		}
 	}
 
-	void XMLNode::AppendNode(XMLNodePtr const & new_node)
+	void XMLNode::AppendNode(std::unique_ptr<XMLNode> new_node)
 	{
-		node_->append_node(new_node->node_);
-		children_.push_back(new_node);
+		new_node->Parent(this);
+		children_.emplace_back(std::move(new_node));
 	}
 
-	void XMLNode::AppendAttrib(XMLAttributePtr const & new_attr)
+	void XMLNode::AppendAttrib(std::unique_ptr<XMLAttribute> new_attr)
 	{
-		node_->append_attribute(new_attr->attr_);
-		attrs_.push_back(new_attr);
+		new_attr->Parent(this);
+		attrs_.emplace_back(std::move(new_attr));
 	}
 
 	void XMLNode::RemoveNode(XMLNode const& node)
 	{
-		node_->remove_node(node.node_);
-		for (size_t i = 0; i < children_.size(); ++ i)
+		for (auto iter = children_.begin(); iter != children_.end(); ++iter)
 		{
-			if (children_[i]->node_ == node.node_)
+			if (iter->get() == &node)
 			{
-				children_.erase(children_.begin() + i);
+				(*iter)->parent_ = nullptr;
+				children_.erase(iter);
 				break;
 			}
 		}
@@ -496,229 +723,247 @@ namespace KlayGE
 
 	void XMLNode::RemoveAttrib(XMLAttribute const& attr)
 	{
-		node_->remove_attribute(attr.attr_);
-		for (size_t i = 0; i < attrs_.size(); ++ i)
+		for (auto iter = attrs_.begin(); iter != attrs_.end(); ++iter)
 		{
-			if (attrs_[i]->attr_ == attr.attr_)
+			if (iter->get() == &attr)
 			{
-				attrs_.erase(attrs_.begin() + i);
+				(*iter)->Parent(nullptr);
+				attrs_.erase(iter);
 				break;
 			}
 		}
 	}
 
-	bool XMLNode::TryConvert(int32_t& val) const
+	void XMLNode::ClearChildren()
 	{
-		std::string_view const value_str = this->ValueString();
-
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
+		for (auto iter = children_.begin(); iter != children_.end(); ++iter)
 		{
-			val = std::stol(std::string(value_str));
-			return true;
+			(*iter)->Parent(nullptr);
 		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+		children_.clear();
 	}
 
-	bool XMLNode::TryConvert(uint32_t& val) const
+	void XMLNode::ClearAttribs()
 	{
-		std::string_view const value_str = this->ValueString();
-
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
+		for (auto iter = attrs_.begin(); iter != attrs_.end(); ++iter)
 		{
-			val = std::stoul(std::string(value_str));
-			return true;
+			(*iter)->Parent(nullptr);
 		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+		attrs_.clear();
 	}
 
-	bool XMLNode::TryConvert(float& val) const
+	bool XMLNode::TryConvertValue(bool& val) const
 	{
-		std::string_view const value_str = this->ValueString();
+		return TryConvertStringToValue(value_, val);
+	}
 
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
-		{
-			val = std::stof(std::string(value_str));
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+	bool XMLNode::TryConvertValue(int32_t& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLNode::TryConvertValue(uint32_t& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLNode::TryConvertValue(float& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLNode::ValueBool() const
+	{
+		bool val = false;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	int32_t XMLNode::ValueInt() const
 	{
-		return std::stol(std::string(this->ValueString()));
+		int32_t val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	uint32_t XMLNode::ValueUInt() const
 	{
-		return std::stoul(std::string(this->ValueString()));
+		uint32_t val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	float XMLNode::ValueFloat() const
 	{
-		return std::stof(std::string(this->ValueString()));
+		float val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	std::string_view XMLNode::ValueString() const
 	{
-		return std::string_view(node_->value(), node_->value_size());
+		return value_;
 	}
 
-
-	XMLAttribute::XMLAttribute(rapidxml::xml_attribute<char>* attr)
-		: attr_(attr)
+	void XMLNode::Value(bool value)
 	{
-		if (attr_ != nullptr)
-		{
-			auto const * xml_attr = attr_;
-			name_ = std::string_view(xml_attr->name(), xml_attr->name_size());
-			value_ = std::string_view(xml_attr->value(), xml_attr->value_size());
-		}
+		value_ = std::to_string(value ? 1U : 0U);
 	}
 
-	XMLAttribute::XMLAttribute(rapidxml::xml_document<char>& doc, std::string_view name, std::string_view value)
-		: name_(name), value_(value)
+	void XMLNode::Value(int32_t value)
 	{
-		attr_ = doc.allocate_attribute(name.data(), value.data(), name.size(), value.size());
+		value_ = std::to_string(value);
 	}
+
+	void XMLNode::Value(uint32_t value)
+	{
+		value_ = std::to_string(value);
+	}
+
+	void XMLNode::Value(float value)
+	{
+		value_ = std::to_string(value);
+	}
+
+	void XMLNode::Value(std::string_view value)
+	{
+		value_ = value;
+	}
+
 
 	std::string_view XMLAttribute::Name() const
 	{
 		return name_;
 	}
 
-	XMLAttributePtr XMLAttribute::NextAttrib(std::string_view name) const
+	void XMLAttribute::Name(std::string_view name)
 	{
-		auto* attr = attr_->next_attribute(name.data(), name.size());
-		if (attr)
-		{
-			return MakeSharedPtr<XMLAttribute>(attr);
-		}
-		else
-		{
-			return XMLAttributePtr();
-		}
+		name_ = name;
 	}
 
-	XMLAttributePtr XMLAttribute::NextAttrib() const
+	XMLNode* XMLAttribute::Parent() const
 	{
-		auto* attr = attr_->next_attribute();
-		if (attr)
-		{
-			return MakeSharedPtr<XMLAttribute>(attr);
-		}
-		else
-		{
-			return XMLAttributePtr();
-		}
+		return parent_;
 	}
 
-	bool XMLAttribute::TryConvert(int32_t& val) const
+	void XMLAttribute::Parent(XMLNode* parent)
 	{
-		std::string_view const value_str = this->ValueString();
-
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
-		{
-			val = std::stol(std::string(value_str));
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+		parent_ = parent;
 	}
 
-	bool XMLAttribute::TryConvert(uint32_t& val) const
+	XMLAttribute* XMLAttribute::NextAttrib(std::string_view name) const
 	{
-		std::string_view const value_str = this->ValueString();
-
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
-		{
-			val = std::stoul(std::string(value_str));
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+		return parent_->NextAttrib(*this, name);
 	}
 
-	bool XMLAttribute::TryConvert(float& val) const
+	XMLAttribute* XMLAttribute::NextAttrib() const
 	{
-		std::string_view const value_str = this->ValueString();
+		return parent_->NextAttrib(*this);
+	}
 
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		char const* str = value_str.data();
-		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
-		return (result.ec == std::errc());
-#else
-		try
-		{
-			val = std::stof(std::string(value_str));
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-#endif
+	bool XMLAttribute::TryConvertValue(bool& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLAttribute::TryConvertValue(int32_t& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLAttribute::TryConvertValue(uint32_t& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLAttribute::TryConvertValue(float& val) const
+	{
+		return TryConvertStringToValue(value_, val);
+	}
+
+	bool XMLAttribute::ValueBool() const
+	{
+		uint32_t val = 0;
+		this->TryConvertValue(val);
+		return val ? true : false;
 	}
 
 	int32_t XMLAttribute::ValueInt() const
 	{
-		return std::stol(std::string(this->ValueString()));
+		int32_t val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	uint32_t XMLAttribute::ValueUInt() const
 	{
-		return std::stoul(std::string(this->ValueString()));
+		uint32_t val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	float XMLAttribute::ValueFloat() const
 	{
-		return std::stof(std::string(this->ValueString()));
+		float val = 0;
+		this->TryConvertValue(val);
+		return val;
 	}
 
 	std::string_view XMLAttribute::ValueString() const
 	{
 		return value_;
 	}
-}
+
+	void XMLAttribute::Value(bool value)
+	{
+		value_ = std::to_string(value ? 1U : 0U);
+	}
+
+	void XMLAttribute::Value(int32_t value)
+	{
+		value_ = std::to_string(value);
+	}
+
+	void XMLAttribute::Value(uint32_t value)
+	{
+		value_ = std::to_string(value);
+	}
+
+	void XMLAttribute::Value(float value)
+	{
+		value_ = std::to_string(value);
+	}
+
+	void XMLAttribute::Value(std::string_view value)
+	{
+		value_ = value;
+	}
+
+	std::unique_ptr<XMLDocument> LoadXml(ResIdentifier& source)
+	{
+		source.seekg(0, std::ios_base::end);
+		int len = static_cast<int>(source.tellg());
+		source.seekg(0, std::ios_base::beg);
+		auto xml_src = MakeUniquePtr<char[]>(len + 1);
+		source.read(&xml_src[0], len);
+		xml_src[len] = 0;
+
+		rapidxml::xml_document<char> doc;
+		doc.parse<0>(xml_src.get());
+
+		auto ret = MakeUniquePtr<XMLDocument>();
+		ret->RootNode(CreateXmlNodeFromRapidXmlNode(*ret, *doc.first_node()));
+
+		return ret;
+	}
+
+	void SaveXml(XMLDocument const& dom, std::ostream& os)
+	{
+		rapidxml::xml_document<char> doc;
+		rapidxml::xml_node<char>* root_node = CreateXmlNodeFromRapidXmlNode(doc, *dom.RootNode());
+		doc.append_node(root_node);
+
+		os << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
+		os << doc;
+	}
+} // namespace KlayGE

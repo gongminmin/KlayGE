@@ -31,7 +31,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderMaterial.hpp>

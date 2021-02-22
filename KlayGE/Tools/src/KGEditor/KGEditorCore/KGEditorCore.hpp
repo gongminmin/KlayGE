@@ -166,7 +166,7 @@ namespace KlayGE
 		void UpdateSceneAABB();
 		void UpdateProxyScaling();
 		float4x4 CalcAdaptiveScaling(EntityInfo const & ei, uint32_t pixels, float3& scaling);
-		void LoadTransformNodes(XMLNodePtr const & node, EntityInfo& ei);
+		void LoadTransformNodes(XMLNode const& node, EntityInfo& ei);
 		void SaveTransformNodes(std::ostream& os, EntityInfo const & ei);
 
 		EntityInfo& GetEntityInfo(uint32_t id);

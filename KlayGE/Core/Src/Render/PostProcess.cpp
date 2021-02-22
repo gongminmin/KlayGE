@@ -98,22 +98,21 @@ namespace
 
 			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
 
-			KlayGE::XMLDocument doc;
-			XMLNodePtr root = doc.Parse(*ppmm_input);
+			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*ppmm_input);
+			XMLNode const* root = doc->RootNode();
 
 			pp_desc_.pp_data->cs_data_per_thread_x = 1;
 			pp_desc_.pp_data->cs_data_per_thread_y = 1;
 			pp_desc_.pp_data->cs_data_per_thread_z = 1;
 
-			for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
+			for (XMLNode const* pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
 			{
 				std::string_view name = pp_node->Attrib("name")->ValueString();
 				if (pp_desc_.pp_name == name)
 				{
 					Convert(pp_desc_.pp_data->name, name);
 
-					XMLAttributePtr vol_attr = pp_node->Attrib("volumetric");
-					if (vol_attr)
+					if (XMLAttribute const* vol_attr = pp_node->Attrib("volumetric"))
 					{
 						pp_desc_.pp_data->volumetric = (vol_attr->ValueInt() != 0);
 					}
@@ -122,48 +121,43 @@ namespace
 						pp_desc_.pp_data->volumetric = false;
 					}
 
-					XMLNodePtr params_chunk = pp_node->FirstNode("params");
-					if (params_chunk)
+					if (XMLNode const* params_chunk = pp_node->FirstNode("params"))
 					{
-						for (XMLNodePtr p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
+						for (XMLNode const* p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
 						{
 							pp_desc_.pp_data->param_names.push_back(std::string(p_node->Attrib("name")->ValueString()));
 						}
 					}
-					XMLNodePtr input_chunk = pp_node->FirstNode("input");
-					if (input_chunk)
+					if (XMLNode const* input_chunk = pp_node->FirstNode("input"))
 					{
-						for (XMLNodePtr pin_node = input_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+						for (XMLNode const* pin_node = input_chunk->FirstNode("pin"); pin_node;
+							 pin_node = pin_node->NextSibling("pin"))
 						{
 							pp_desc_.pp_data->input_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
 						}
 					}
-					XMLNodePtr output_chunk = pp_node->FirstNode("output");
-					if (output_chunk)
+					if (XMLNode const* output_chunk = pp_node->FirstNode("output"))
 					{
-						for (XMLNodePtr pin_node = output_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+						for (XMLNode const* pin_node = output_chunk->FirstNode("pin"); pin_node;
+							 pin_node = pin_node->NextSibling("pin"))
 						{
 							pp_desc_.pp_data->output_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
 						}
 					}
-					XMLNodePtr shader_chunk = pp_node->FirstNode("shader");
-					if (shader_chunk)
+					if (XMLNode const* shader_chunk = pp_node->FirstNode("shader"))
 					{
 						pp_desc_.pp_data->effect_name = std::string(shader_chunk->Attrib("effect")->ValueString());
 						pp_desc_.pp_data->tech_name = std::string(shader_chunk->Attrib("tech")->ValueString());
 
-						XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
-						if (attr)
+						if (XMLAttribute const* attr = shader_chunk->Attrib("cs_data_per_thread_x"))
 						{
 							pp_desc_.pp_data->cs_data_per_thread_x = attr->ValueUInt();
 						}
-						attr = shader_chunk->Attrib("cs_data_per_thread_y");
-						if (attr)
+						if (XMLAttribute const* attr = shader_chunk->Attrib("cs_data_per_thread_y"))
 						{
 							pp_desc_.pp_data->cs_data_per_thread_y = attr->ValueUInt();
 						}
-						attr = shader_chunk->Attrib("cs_data_per_thread_z");
-						if (attr)
+						if (XMLAttribute const* attr = shader_chunk->Attrib("cs_data_per_thread_z"))
 						{
 							pp_desc_.pp_data->cs_data_per_thread_z = attr->ValueUInt();
 						}

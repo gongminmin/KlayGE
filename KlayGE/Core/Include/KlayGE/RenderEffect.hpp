@@ -615,7 +615,7 @@ namespace KlayGE
 		void InsertIncludeNodes(
 			XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const;
 
-		XMLNodePtr ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNodePtr const & tech_node);
+		std::unique_ptr<XMLNode> ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNode const* tech_node);
 		void ResolveOverrideTechs(XMLDocument& doc, XMLNode& root);
 
 		void Load(XMLNode const & root, RenderEffect& effect);
