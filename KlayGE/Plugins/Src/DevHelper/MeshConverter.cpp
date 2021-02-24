@@ -41,8 +41,11 @@
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/ResLoader.hpp>
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <map>
+#include <vector>
 
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
@@ -214,7 +217,7 @@ namespace
 	class MeshLoader
 	{
 	public:
-		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
+		RenderModelPtr Load(MeshMetadata const & metadata);
 		bool IsSupported(std::string_view input_name) const;
 
 	private:
@@ -3532,8 +3535,9 @@ namespace
 	}
 
 
-	RenderModelPtr MeshLoader::Load(std::string_view input_name, MeshMetadata const & metadata)
+	RenderModelPtr MeshLoader::Load(MeshMetadata const & metadata)
 	{
+		std::string_view const input_name = metadata.LodFileName(0);
 		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
 		if (input_name_str.empty())
 		{
@@ -4019,10 +4023,10 @@ namespace
 
 namespace KlayGE
 {
-	RenderModelPtr MeshConverter::Load(std::string_view input_name, MeshMetadata const & metadata)
+	RenderModelPtr MeshConverter::Load(MeshMetadata const & metadata)
 	{
 		MeshLoader ml;
-		return ml.Load(input_name, metadata);
+		return ml.Load(metadata);
 	}
 
 	void MeshConverter::Save(RenderModel& model, std::string_view output_name)

@@ -175,7 +175,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 			std::cout << "Converting " << res_names[i] << " to " << real_res_type << std::endl;
 
-			auto output_tex = tc.Load(res_names[i], metadata);
+			auto output_tex = tc.Load(metadata);
 			if (output_tex)
 			{
 				FILESYSTEM_NS::path res_path(res_names[i]);
@@ -197,7 +197,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
 			auto metadata = LoadMeshMetadata(res_names[i], default_metadata);
-			auto output_model = mc.Load(res_names[i], metadata);
+			auto output_model = mc.Load(metadata);
 			if (output_model)
 			{
 				FILESYSTEM_NS::path res_path(res_names[i]);

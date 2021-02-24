@@ -38,6 +38,7 @@
 #include <KlayGE/Texture.hpp>
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <KlayGE/DevHelper/DevHelper.hpp>

@@ -53,10 +53,16 @@ public:
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name)
 	{
-		MeshMetadata metadata(metadata_name);
+		std::string metadata_name_ptr(metadata_name);
+		if (metadata_name.empty())
+		{
+			metadata_name_ptr = std::string(input_name) + ".kmeta";
+		}
+
+		MeshMetadata metadata(metadata_name_ptr);
 
 		MeshConverter mc;
-		auto target = mc.Load(input_name, metadata);
+		auto target = mc.Load(metadata);
 		EXPECT_TRUE(target);
 
 		auto sanity_model = LoadSoftwareModel(sanity_name);

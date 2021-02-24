@@ -52,11 +52,11 @@ public:
 		ResLoader::Instance().AddPath("../../Tests/media/TexConverter");
 	}
 
-	void TestMipmapPoT2D(std::string_view input_name, TexMetadata const& input_metadata, TextureFilter filter,
+	void TestMipmapPoT2D(TexMetadata const& input_metadata, TextureFilter filter,
 		TexMetadata const& sanity_metadata, float threshold)
 	{
 		TexConverter tc;
-		auto input_tex = tc.Load(input_name, input_metadata);
+		auto input_tex = tc.Load(input_metadata);
 		EXPECT_TRUE(input_tex);
 
 		uint32_t const array_size = input_tex->ArraySize();
@@ -81,7 +81,7 @@ public:
 		Mipmapper mipmapper;
 		mipmapper.BuildSubLevels(input_tex, filter);
 
-		auto sanity_tex = tc.Load(input_name, sanity_metadata);
+		auto sanity_tex = tc.Load(sanity_metadata);
 		EXPECT_TRUE(sanity_tex);
 
 		for (uint32_t index = 0; index < array_size; ++index)
@@ -111,7 +111,7 @@ TEST_F(MipmapperTest, MipmapPoT2DPoint)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(false);
 	
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Point, sanity_metadata, 2.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Point, sanity_metadata, 2.0f / 255);
 }
 
 TEST_F(MipmapperTest, MipmapPoT2DLinear)
@@ -130,7 +130,7 @@ TEST_F(MipmapperTest, MipmapPoT2DLinear)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(true);
 
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Linear, sanity_metadata, 3.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Linear, sanity_metadata, 3.0f / 255);
 }
 
 TEST_F(MipmapperTest, MipmapPoT2DArrayPoint)
@@ -149,7 +149,7 @@ TEST_F(MipmapperTest, MipmapPoT2DArrayPoint)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(false);
 
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Point, sanity_metadata, 2.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Point, sanity_metadata, 2.0f / 255);
 }
 
 TEST_F(MipmapperTest, MipmapPoT2DArrayLinear)
@@ -168,7 +168,7 @@ TEST_F(MipmapperTest, MipmapPoT2DArrayLinear)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(true);
 
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Linear, sanity_metadata, 3.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Linear, sanity_metadata, 3.0f / 255);
 }
 
 TEST_F(MipmapperTest, MipmapPoTSRGB2DPoint)
@@ -187,7 +187,7 @@ TEST_F(MipmapperTest, MipmapPoTSRGB2DPoint)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(false);
 
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Point, sanity_metadata, 4.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Point, sanity_metadata, 4.0f / 255);
 }
 
 TEST_F(MipmapperTest, MipmapPoTSRGB2DLinear)
@@ -206,5 +206,5 @@ TEST_F(MipmapperTest, MipmapPoTSRGB2DLinear)
 	sanity_metadata.AutoGenMipmap(true);
 	sanity_metadata.LinearMipmap(true);
 
-	TestMipmapPoT2D("lion.jpg", input_metadata, TextureFilter::Linear, sanity_metadata, 4.0f / 255);
+	TestMipmapPoT2D(input_metadata, TextureFilter::Linear, sanity_metadata, 4.0f / 255);
 }

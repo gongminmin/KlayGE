@@ -5,5 +5,7 @@
 
 	"slot": "albedo",
 
-	"prefered_format": "ARGB8"
+	"prefered_format": "ARGB8",
+
+	"source": "lion.jpg"
 }

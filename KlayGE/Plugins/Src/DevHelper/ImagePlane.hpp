@@ -37,7 +37,6 @@
 #include <KlayGE/ElementFormat.hpp>
 
 #include <string_view>
-#include <vector>
 
 #include <KlayGE/DevHelper/DevHelper.hpp>
 

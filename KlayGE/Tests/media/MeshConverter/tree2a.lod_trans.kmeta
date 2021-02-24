@@ -8,10 +8,13 @@
 	"rotation": [ 0, 0, 0, 1 ],
 	"scale": [ 0.5, 0.5, 0.5 ],
 
-	"lod":
-	[
-		"tree2a_lod0.obj",
-		"tree2a_lod1.obj",
-		"tree2a_lod2.obj"
-	]
+	"source":
+	{
+		"lod":
+		[
+			"tree2a_lod0.obj",
+			"tree2a_lod1.obj",
+			"tree2a_lod2.obj"
+		]
+	}
 }

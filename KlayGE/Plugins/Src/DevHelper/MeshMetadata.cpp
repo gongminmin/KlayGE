@@ -47,72 +47,13 @@
 #pragma warning(pop)
 #endif
 
+#include "MetadataUtil.hpp"
+
 #include <KlayGE/DevHelper/MeshMetadata.hpp>
-
-namespace
-{
-	float GetFloat(rapidjson::Value const & value)
-	{
-		if (value.IsFloat())
-		{
-			return value.GetFloat();
-		}
-		else if (value.IsDouble())
-		{
-			return static_cast<float>(value.GetDouble());
-		}
-		else if (value.IsInt())
-		{
-			return static_cast<float>(value.GetInt());
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<float>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<float>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<float>(value.GetUint64());
-		}
-		else
-		{
-			KFL_UNREACHABLE("Invalid value type.");
-		}
-	}
-
-	int GetInt(rapidjson::Value const & value)
-	{
-		if (value.IsInt())
-		{
-			return value.GetInt();
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<int>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<int>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<int>(value.GetUint64());
-		}
-		else
-		{
-			KFL_UNREACHABLE("Invalid value type.");
-		}
-	}
-}
 
 namespace KlayGE
 {
-	MeshMetadata::MeshMetadata()
-	{
-	}
+	MeshMetadata::MeshMetadata() = default;
 
 	MeshMetadata::MeshMetadata(std::string_view name)
 	{
@@ -218,19 +159,6 @@ namespace KlayGE
 				new_metadata.flip_winding_order_ = flip_winding_order_val.GetBool();
 			}
 
-			if (document.HasMember("lod"))
-			{
-				auto const & lod_val = document["lod"];
-				BOOST_ASSERT(lod_val.IsArray());
-				new_metadata.lod_file_names_.resize(lod_val.Size());
-				uint32_t index = 0;
-				for (auto iter = lod_val.Begin(); iter != lod_val.End(); ++ iter, ++ index)
-				{
-					BOOST_ASSERT(iter->IsString());
-					new_metadata.lod_file_names_[index] = iter->GetString();
-				}
-			}
-
 			if (document.HasMember("materials"))
 			{
 				auto const & materials_val = document["materials"];
@@ -244,11 +172,41 @@ namespace KlayGE
 				}
 			}
 
+			if (document.HasMember("source"))
+			{
+				auto const& source_val = document["source"];
+				if (source_val.IsString())
+				{
+					new_metadata.lod_file_names_.assign(1, source_val.GetString());
+				}
+				else
+				{
+					if (source_val.HasMember("lod"))
+					{
+						auto const& lod_val = source_val["lod"];
+						BOOST_ASSERT(lod_val.IsArray());
+						new_metadata.lod_file_names_.resize(lod_val.Size());
+						uint32_t index = 0;
+						for (auto iter = lod_val.Begin(); iter != lod_val.End(); ++iter, ++index)
+						{
+							BOOST_ASSERT(iter->IsString());
+							new_metadata.lod_file_names_[index] = iter->GetString();
+						}
+					}
+				}
+			}
+
 			new_metadata.UpdateTransforms();
 		}
 		else if(!name.empty())
 		{
 			LogInfo() << "Could NOT find " << name << ". Fallback to default metadata." << std::endl;
+		}		
+
+		if (new_metadata.lod_file_names_.empty())
+		{
+			std::string_view const implicit_source_name = name.substr(0, name.rfind(".kmeta"));
+			new_metadata.lod_file_names_.assign(1, std::string(implicit_source_name));
 		}
 
 		*this = std::move(new_metadata);
@@ -338,20 +296,6 @@ namespace KlayGE
 			document.AddMember("flip_winding_order", flip_winding_order_, allocator);
 		}
 
-		if ((lod_file_names_.size() > 1) || ((lod_file_names_.size() == 1) && (lod_file_names_[0].size() > 1)))
-		{
-			rapidjson::Value array_names_val;
-			array_names_val.SetArray();
-
-			for (size_t i = 0; i < lod_file_names_.size(); ++ i)
-			{
-				auto const & str = lod_file_names_[i];
-				array_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
-			}
-
-			document.AddMember("lod", array_names_val, allocator);
-		}
-
 		if (!material_file_names_.empty())
 		{
 			rapidjson::Value mtl_names_val;
@@ -360,10 +304,33 @@ namespace KlayGE
 			for (size_t i = 0; i < material_file_names_.size(); ++i)
 			{
 				auto const & str = material_file_names_[i];
-				mtl_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+				mtl_names_val.PushBack(rapidjson::Value(str.c_str(), allocator), allocator);
 			}
 
 			document.AddMember("materials", mtl_names_val, allocator);
+		}
+
+		if (lod_file_names_.size() == 1)
+		{
+			auto const& str = lod_file_names_[0];
+			document.AddMember("source", rapidjson::Value(str.c_str(), allocator), allocator);
+		}
+		else
+		{
+			rapidjson::Value array_names_val;
+			array_names_val.SetArray();
+
+			for (size_t i = 0; i < lod_file_names_.size(); ++i)
+			{
+				auto const& str = lod_file_names_[i];
+				array_names_val.PushBack(rapidjson::Value(str.c_str(), allocator), allocator);
+			}
+
+			rapidjson::Value lod_val;
+			lod_val.SetObject();
+			lod_val.AddMember("lod", array_names_val, allocator);
+
+			document.AddMember("source", lod_val, allocator);
 		}
 
 		rapidjson::StringBuffer sb;

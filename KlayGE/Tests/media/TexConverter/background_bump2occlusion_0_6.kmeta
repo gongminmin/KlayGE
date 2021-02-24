@@ -11,5 +11,7 @@
 	{
 		"to_occlusion": true,
 		"occlusion_amplitude": 0.6
-	}
+	},
+
+	"source": "background.jpg"
 }

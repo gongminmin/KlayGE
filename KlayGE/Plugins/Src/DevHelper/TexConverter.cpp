@@ -33,7 +33,9 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
 
+#include <algorithm>
 #include <cstring>
+#include <vector>
 
 #include <FreeImage.h>
 
@@ -47,12 +49,11 @@ namespace
 	class TexLoader
 	{
 	public:
-		TexturePtr Load(std::string_view input_name, TexMetadata const & metadata);
+		TexturePtr Load(TexMetadata const& metadata);
 
-		static void GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
-			Texture::TextureType& type,
-			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
+		static void GetImageInfo(TexMetadata const& metadata, Texture::TextureType& type, uint32_t& width, uint32_t& height,
+			uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size, ElementFormat& format, uint32_t& row_pitch,
+			uint32_t& slice_pitch);
 
 		static bool IsSupported(std::string_view input_name);
 
@@ -61,8 +62,6 @@ namespace
 		TexturePtr StoreToTexture();
 
 	private:
-		std::string input_name_;
-
 		TexMetadata metadata_;
 
 		std::vector<std::vector<std::shared_ptr<ImagePlane>>> planes_;
@@ -73,14 +72,13 @@ namespace
 		ElementFormat format_;
 	};
 
-	TexturePtr TexLoader::Load(std::string_view input_name, TexMetadata const & metadata)
+	TexturePtr TexLoader::Load(TexMetadata const & metadata)
 	{
 		TexturePtr ret;
 
-		input_name_ = std::string(input_name);
 		metadata_ = metadata;
 
-		auto in_folder = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name_)).parent_path().string();
+		auto in_folder = FILESYSTEM_NS::path(ResLoader::Instance().Locate(metadata_.PlaneFileName(0, 0))).parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)
 		{
@@ -100,13 +98,11 @@ namespace
 		return ret;
 	}
 
-	void TexLoader::GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
-		Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	void TexLoader::GetImageInfo(TexMetadata const& metadata, Texture::TextureType& type, uint32_t& width, uint32_t& height,
+		uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size, ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		ImagePlane image;
-		image.Load(input_name, metadata);
+		image.Load(metadata.PlaneFileName(0, 0), metadata);
 
 		type = Texture::TT_2D;
 		width = image.Width();
@@ -217,16 +213,18 @@ namespace
 		array_size_ = metadata_.ArraySize();
 
 		planes_.resize(array_size_);
-		planes_[0].resize(1);
-		planes_[0][0] = MakeSharedPtr<ImagePlane>();
-		auto& first_image = *planes_[0][0];
-
-		if (!first_image.Load(input_name_, metadata_))
+		for (uint32_t arr = 0; arr < array_size_; ++arr)
 		{
-			LogError() << "Could NOT load " << input_name_ << '.' << std::endl;
-			return false;
+			std::string_view const plane_file_name = metadata_.PlaneFileName(arr, 0);
+			planes_[arr].push_back(MakeSharedPtr<ImagePlane>());
+			if (!planes_[arr][0]->Load(plane_file_name, metadata_))
+			{
+				LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
+				return false;
+			}
 		}
 
+		auto& first_image = *planes_[0][0];
 		width_ = first_image.Width();
 		height_ = first_image.Height();
 		if (first_image.CompressedTex())
@@ -276,18 +274,6 @@ namespace
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
 				planes_[arr].resize(num_mipmaps_);
-
-				if (arr > 0)
-				{
-					std::string_view const plane_file_name = metadata_.PlaneFileName(arr, 0);
-					planes_[arr][0] = MakeSharedPtr<ImagePlane>();
-					if (!planes_[arr][0]->Load(plane_file_name, metadata_))
-					{
-						LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
-						return false;
-					}
-				}
-
 				for (uint32_t m = 1; m < num_mipmaps_; ++ m)
 				{
 					planes_[arr][m] = MakeSharedPtr<ImagePlane>();
@@ -300,31 +286,28 @@ namespace
 			{
 				planes_[arr].resize(num_mipmaps_);
 
-				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				for (uint32_t m = 1; m < num_mipmaps_; ++ m)
 				{
-					if ((arr != 0) || (m != 0))
+					std::string_view const plane_file_name = metadata_.PlaneFileName(arr, m);
+					planes_[arr][m] = MakeSharedPtr<ImagePlane>();
+					if (plane_file_name.empty())
 					{
-						std::string_view const plane_file_name = metadata_.PlaneFileName(arr, m);
-						planes_[arr][m] = MakeSharedPtr<ImagePlane>();
-						if (plane_file_name.empty())
+						if (m == 0)
 						{
-							if (m == 0)
-							{
-								*planes_[arr][m] = planes_[0][0]->ResizeTo(width_, height_, false);
-							}
-							else
-							{
-								*planes_[arr][m] = planes_[arr][0]->ResizeTo(
-									std::max(1U, width_ >> m), std::max(1U, height_ >> m), metadata_.LinearMipmap());
-							}
+							*planes_[arr][m] = planes_[0][0]->ResizeTo(width_, height_, false);
 						}
 						else
 						{
-							if (!planes_[arr][m]->Load(plane_file_name, metadata_))
-							{
-								LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
-								return false;
-							}
+							*planes_[arr][m] = planes_[arr][0]->ResizeTo(
+								std::max(1U, width_ >> m), std::max(1U, height_ >> m), metadata_.LinearMipmap());
+						}
+					}
+					else
+					{
+						if (!planes_[arr][m]->Load(plane_file_name, metadata_))
+						{
+							LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
+							return false;
 						}
 					}
 				}
@@ -506,19 +489,16 @@ namespace
 
 namespace KlayGE
 {
-	TexturePtr TexConverter::Load(std::string_view input_name, TexMetadata const & metadata)
+	TexturePtr TexConverter::Load(TexMetadata const& metadata)
 	{
 		TexLoader tl;
-		return tl.Load(input_name, metadata);
+		return tl.Load(metadata);
 	}
 
-	void TexConverter::GetImageInfo(std::string_view input_name, TexMetadata const & metadata,
-		Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	void TexConverter::GetImageInfo(TexMetadata const& metadata, Texture::TextureType& type, uint32_t& width, uint32_t& height,
+		uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size, ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
-		return TexLoader::GetImageInfo(input_name, metadata,
-			type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+		return TexLoader::GetImageInfo(metadata, type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
 	}
 
 	bool TexConverter::IsSupported(std::string_view input_name)

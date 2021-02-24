@@ -55,6 +55,12 @@ namespace KlayGE
 		{
 			KFL_UNUSED(caps);
 
+			std::string metadata_name_ptr(metadata_name);
+			if (metadata_name.empty())
+			{
+				metadata_name_ptr = std::string(input_name) + ".kmeta";
+			}
+
 			MeshMetadata metadata;
 			if (!metadata_name.empty())
 			{
@@ -62,7 +68,7 @@ namespace KlayGE
 			}
 
 			MeshConverter mc;
-			auto model = mc.Load(input_name, metadata);
+			auto model = mc.Load(metadata);
 
 			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
 			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
@@ -79,10 +85,16 @@ namespace KlayGE
 		TexturePtr ConvertTexture(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
 			RenderDeviceCaps const * caps) override
 		{
-			auto metadata = this->LoadTexMetadata(metadata_name, caps);
+			std::string metadata_name_ptr(metadata_name);
+			if (metadata_name.empty())
+			{
+				metadata_name_ptr = std::string(input_name) + ".kmeta";
+			}
+
+			auto metadata = this->LoadTexMetadata(metadata_name_ptr, caps);
 
 			TexConverter tc;
-			auto texture = tc.Load(input_name, metadata);
+			auto texture = tc.Load(metadata);
 
 			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
 			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
@@ -101,11 +113,16 @@ namespace KlayGE
 			uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 			ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch) override
 		{
-			auto metadata = this->LoadTexMetadata(metadata_name, caps);
+			std::string metadata_name_ptr(metadata_name);
+			if (metadata_name.empty())
+			{
+				metadata_name_ptr = std::string(input_name) + ".kmeta";
+			}
+
+			auto metadata = this->LoadTexMetadata(metadata_name_ptr, caps);
 
 			TexConverter tc;
-			tc.GetImageInfo(input_name, metadata,
-				type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+			tc.GetImageInfo(metadata, type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
 		}
 
 	private:

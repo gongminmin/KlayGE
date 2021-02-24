@@ -10,5 +10,7 @@
 	"bump":
 	{
 		"to_occlusion": true
-	}
+	},
+
+	"source": "background.jpg"
 }

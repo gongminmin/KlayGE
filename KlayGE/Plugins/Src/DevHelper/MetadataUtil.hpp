@@ -1,5 +1,5 @@
 /**
- * @file TexConverter.hpp
+ * @file MetadataUtil.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,32 +28,26 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_PLUGINS_TEX_CONVERTER_HPP
-#define KLAYGE_PLUGINS_TEX_CONVERTER_HPP
+#ifndef KLAYGE_PLUGINS_METADATA_UTIL_HPP
+#define KLAYGE_PLUGINS_METADATA_UTIL_HPP
 
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/ElementFormat.hpp>
 
-#include <string_view>
-
-#include <KlayGE/DevHelper/DevHelper.hpp>
-#include <KlayGE/DevHelper/TexMetadata.hpp>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 6313) // Incorrect operator: zero-valued flag cannot be tested with bitwise-and
+#endif
+#include <rapidjson/document.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {
-	class KLAYGE_DEV_HELPER_API TexConverter final
-	{
-	public:
-		TexturePtr Load(TexMetadata const& metadata);
+	float GetFloat(rapidjson::Value const& value);
+	int GetInt(rapidjson::Value const& value);
+} // namespace KlayGE
 
-		static void GetImageInfo(TexMetadata const& metadata, Texture::TextureType& type, uint32_t& width, uint32_t& height,
-			uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size, ElementFormat& format, uint32_t& row_pitch,
-			uint32_t& slice_pitch);
-
-		static bool IsSupported(std::string_view input_name);
-	};
-}
-
-#endif		// KLAYGE_PLUGINS_TEX_CONVERTER_HPP
+#endif // KLAYGE_PLUGINS_METADATA_UTIL_HPP

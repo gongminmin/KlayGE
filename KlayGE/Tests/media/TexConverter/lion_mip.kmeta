@@ -14,5 +14,7 @@
 		"auto_gen": true,
 		"num_levels": 0,
 		"linear": true
-	}
+	},
+
+	"source": "lion.jpg"
 }

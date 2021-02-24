@@ -5,5 +5,7 @@
 
 	"slot": "normal",
 
-	"prefered_format": "BC3"
+	"prefered_format": "BC3",
+
+	"source": "lion_ddn.jpg"
 }

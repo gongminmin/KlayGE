@@ -40,6 +40,8 @@
 #include <KlayGE/TexCompressionETC.hpp>
 #include <KlayGE/Texture.hpp>
 
+#include <vector>
+
 #include <FreeImage.h>
 
 #include "ImagePlane.hpp"

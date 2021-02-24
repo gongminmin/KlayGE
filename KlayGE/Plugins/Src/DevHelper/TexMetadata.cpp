@@ -48,76 +48,16 @@
 #pragma warning(pop)
 #endif
 
+#include "MetadataUtil.hpp"
+
 #include <KlayGE/DevHelper/TexMetadata.hpp>
-
-namespace
-{
-	float GetFloat(rapidjson::Value const & value)
-	{
-		if (value.IsFloat())
-		{
-			return value.GetFloat();
-		}
-		else if (value.IsDouble())
-		{
-			return static_cast<float>(value.GetDouble());
-		}
-		else if (value.IsInt())
-		{
-			return static_cast<float>(value.GetInt());
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<float>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<float>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<float>(value.GetUint64());
-		}
-		else
-		{
-			KFL_UNREACHABLE("Invalid value type.");
-		}
-	}
-
-	int GetInt(rapidjson::Value const & value)
-	{
-		if (value.IsInt())
-		{
-			return value.GetInt();
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<int>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<int>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<int>(value.GetUint64());
-		}
-		else
-		{
-			KFL_UNREACHABLE("Invalid value type.");
-		}
-	}
-}
 
 namespace KlayGE
 {
-	TexMetadata::TexMetadata()
-	{
-	}
+	TexMetadata::TexMetadata() = default;
 
-	TexMetadata::TexMetadata(std::string_view name)
+	TexMetadata::TexMetadata(std::string_view name) : TexMetadata(name, true)
 	{
-		this->Load(name, true);
 	}
 
 	TexMetadata::TexMetadata(std::string_view name, bool assign_default_values)
@@ -383,41 +323,71 @@ namespace KlayGE
 				}
 			}
 
-			if (document.HasMember("array"))
-			{
-				auto const & array_val = document["array"];
-				BOOST_ASSERT(array_val.IsArray());
-
-				for (auto array_iter = array_val.Begin(); array_iter != array_val.End(); ++ array_iter)
+			auto load_sources = [](rapidjson::Value const& value) {
+				std::vector<std::string> ret;
+				if (value.IsArray())
 				{
-					if (array_iter->IsArray())
+					for (auto iter = value.Begin(); iter != value.End(); ++iter)
 					{
-						std::vector<std::string> mip_names;
-						for (auto mip_iter = array_iter->Begin(); mip_iter != array_iter->End(); ++ mip_iter)
-						{
-							BOOST_ASSERT(mip_iter->IsString());
-
-							mip_names.push_back(mip_iter->GetString());
-						}
-
-						new_metadata.plane_file_names_.push_back(std::move(mip_names));
-					}
-					else
-					{
-						BOOST_ASSERT(array_iter->IsString());
-
-						new_metadata.plane_file_names_.push_back(std::vector<std::string>(1, std::string(array_iter->GetString())));
+						BOOST_ASSERT(iter->IsString());
+						ret.push_back(iter->GetString());
 					}
 				}
-			}
-			else
+				else
+				{
+					BOOST_ASSERT(value.IsString());
+					ret.push_back(value.GetString());
+				}
+
+				return ret;
+			};
+
+			if (document.HasMember("source"))
 			{
-				new_metadata.plane_file_names_.assign(1, std::vector<std::string>(1, std::string(name)));
+				auto const& source_val = document["source"];
+				if (source_val.IsString())
+				{
+					new_metadata.plane_file_names_.push_back(load_sources(source_val));
+				}
+				else
+				{
+					if (source_val.HasMember("mips"))
+					{
+						auto const& mips_val = source_val["mips"];
+						BOOST_ASSERT(mips_val.IsArray());
+						new_metadata.plane_file_names_.push_back(load_sources(mips_val));
+					}
+					else if (source_val.HasMember("array"))
+					{
+						auto const& array_val = source_val["array"];
+						BOOST_ASSERT(array_val.IsArray());
+						for (auto array_iter = array_val.Begin(); array_iter != array_val.End(); ++array_iter)
+						{
+							if (array_iter->IsString())
+							{
+								new_metadata.plane_file_names_.push_back(load_sources(*array_iter));
+							}
+							else
+							{
+								BOOST_ASSERT(array_iter->IsObject() && array_iter->HasMember("mips"));
+								auto const& mips_val = (*array_iter)["mips"];
+								BOOST_ASSERT(mips_val.IsArray());
+								new_metadata.plane_file_names_.push_back(load_sources(mips_val));
+							}
+						}
+					}
+				}
 			}
 		}
 		else if (!name.empty())
 		{
 			LogInfo() << "Could NOT find " << name << ". Fallback to default metadata." << std::endl;
+		}
+
+		if (new_metadata.plane_file_names_.empty())
+		{
+			std::string_view const implicit_source_name = name.substr(0, name.rfind(".kmeta"));
+			new_metadata.plane_file_names_.assign(1, std::vector<std::string>(1, std::string(implicit_source_name)));
 		}
 
 		*this = std::move(new_metadata);
@@ -460,7 +430,7 @@ namespace KlayGE
 		default:
 			KFL_UNREACHABLE("Invalid texture slot.");
 		}
-		document.AddMember("slot", rapidjson::StringRef(slot_str.c_str(), static_cast<rapidjson::SizeType>(slot_str.size())), allocator);
+		document.AddMember("slot", rapidjson::Value(slot_str.c_str(), allocator), allocator);
 
 		std::string preferred_format_str;
 		if (prefered_format_ != EF_Unknown)
@@ -518,9 +488,7 @@ namespace KlayGE
 				preferred_format_str = "Unknown";
 				break;
 			}
-			document.AddMember("prefered_format",
-				rapidjson::StringRef(preferred_format_str.c_str(), static_cast<rapidjson::SizeType>(preferred_format_str.size())),
-				allocator);
+			document.AddMember("prefered_format", rapidjson::Value(preferred_format_str.c_str(), allocator), allocator);
 		}
 
 		if (force_srgb_)
@@ -591,7 +559,34 @@ namespace KlayGE
 			document.AddMember("bump", bump_val, allocator);
 		}
 
-		if ((plane_file_names_.size() > 1) || ((plane_file_names_.size() == 1) && (plane_file_names_[0].size() > 1)))
+		auto store_mips = [this, &allocator](size_t index) {
+			rapidjson::Value mip_names_val;
+			mip_names_val.SetArray();
+			for (size_t i = 0; i < plane_file_names_[index].size(); ++i)
+			{
+				auto const& str = plane_file_names_[index][i];
+				mip_names_val.PushBack(rapidjson::Value(str.c_str(), allocator), allocator);
+			}
+
+			rapidjson::Value ret;
+			ret.SetObject();
+			ret.AddMember("mips", mip_names_val, allocator);
+			return ret;
+		};
+			
+		rapidjson::Value source_val;
+		if (plane_file_names_.size() == 1)
+		{
+			if (plane_file_names_[0].size() == 1)
+			{
+				source_val.SetString(plane_file_names_[0][0].c_str(), allocator);
+			}
+			else
+			{
+				source_val = store_mips(0);
+			}
+		}
+		else
 		{
 			rapidjson::Value array_names_val;
 			array_names_val.SetArray();
@@ -600,24 +595,19 @@ namespace KlayGE
 			{
 				if (plane_file_names_[i].size() > 1)
 				{
-					rapidjson::Value mip_names_val;
-					mip_names_val.SetArray();
-					for (size_t j = 0; j < plane_file_names_[i].size(); ++ j)
-					{
-						auto const & str = plane_file_names_[i][j];
-						mip_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
-					}
-					array_names_val.PushBack(mip_names_val, allocator);
+					array_names_val.PushBack(store_mips(i), allocator);
 				}
 				else
 				{
-					auto const & str = plane_file_names_[i][0];
-					array_names_val.PushBack(rapidjson::StringRef(str.c_str(), str.size()), allocator);
+					auto const& str = plane_file_names_[i][0];
+					array_names_val.PushBack(rapidjson::Value(str.c_str(), allocator), allocator);
 				}
 			}
 
-			document.AddMember("array", array_names_val, allocator);
+			source_val.SetObject();
+			source_val.AddMember("array", array_names_val, allocator);
 		}
+		document.AddMember("source", source_val, allocator);
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);

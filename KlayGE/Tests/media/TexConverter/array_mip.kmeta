@@ -16,22 +16,34 @@
 		"linear": true
 	},
 
-	"array":
-	[
+	"source":
+	{
+		"array":
 		[
-			"lion.jpg",
-			"lion_half.jpg",
-			"lion_quarter.jpg"
-		],
-		[
-			"background.jpg",
-			"background_half.jpg",
-			"background_quarter.jpg"
-		],
-		[
-			"lion_ddn.jpg",
-			"lion_ddn_half.jpg",
-			"lion_ddn_quarter.jpg"
+			{
+				"mips":
+				[
+					"lion.jpg",
+					"lion_half.jpg",
+					"lion_quarter.jpg"
+				]
+			},
+			{
+				"mips":
+				[
+					"background.jpg",
+					"background_half.jpg",
+					"background_quarter.jpg"
+				]
+			},
+			{
+				"mips":
+				[
+					"lion_ddn.jpg",
+					"lion_ddn_half.jpg",
+					"lion_ddn_quarter.jpg"
+				]
+			}
 		]
-	]
+	}
 }

@@ -52,10 +52,16 @@ public:
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name, float tolerance)
 	{
-		TexMetadata metadata(metadata_name, false);
+		std::string metadata_name_ptr(metadata_name);
+		if (metadata_name.empty())
+		{
+			metadata_name_ptr = std::string(input_name) + ".kmeta";
+		}
+
+		TexMetadata metadata(metadata_name_ptr, false);
 
 		TexConverter tc;
-		auto target = tc.Load(input_name, metadata);
+		auto target = tc.Load(metadata);
 		EXPECT_TRUE(target);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
@@ -151,7 +157,7 @@ TEST_F(TexConverterTest, DDSSRGB)
 
 TEST_F(TexConverterTest, DDSChannel)
 {
-	RunTest("lion_bc1.dds", "lion_channel.kmeta", "lion_bc1_channel.dds", 1.0f / 255);
+	RunTest("lion_bc1.dds", "lion_bc1_channel.kmeta", "lion_bc1_channel.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, NormalCompressionBC5)

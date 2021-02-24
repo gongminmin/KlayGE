@@ -5,8 +5,10 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/ImagePlane.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/MeshConverter.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/MeshMetadata.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/MetadataUtil.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/PlatformDefinition.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/TexConverter.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/TexMetadata.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/TexMetadata.cpp
 )
 
@@ -18,6 +20,7 @@ SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/DevHelper/TexConverter.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/DevHelper/TexMetadata.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/ImagePlane.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/DevHelper/MetadataUtil.hpp
 )
 
 SET(PLAT_CONF_FILES

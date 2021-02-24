@@ -16,9 +16,12 @@
 		"linear": false
 	},
 
-	"array":
-	[
-		"lion.jpg",
-		"background.jpg"
-	]
+	"source":
+	{
+		"array":
+		[
+			"lion.jpg",
+			"background.jpg"
+		]
+	}
 }

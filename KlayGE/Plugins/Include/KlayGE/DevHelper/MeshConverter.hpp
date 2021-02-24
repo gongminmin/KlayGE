@@ -36,9 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Mesh.hpp>
 
-#include <map>
 #include <string_view>
-#include <vector>
 
 #include <KlayGE/DevHelper/DevHelper.hpp>
 #include <KlayGE/DevHelper/MeshMetadata.hpp>
@@ -51,7 +49,7 @@ namespace KlayGE
 	class KLAYGE_DEV_HELPER_API MeshConverter final
 	{
 	public:
-		RenderModelPtr Load(std::string_view input_name, MeshMetadata const & metadata);
+		RenderModelPtr Load(MeshMetadata const & metadata);
 		void Save(RenderModel& model, std::string_view output_name);
 
 		static bool IsSupported(std::string_view input_name);
