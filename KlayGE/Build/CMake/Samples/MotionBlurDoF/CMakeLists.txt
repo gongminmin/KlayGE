@@ -1,4 +1,4 @@
-FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(Python3)
 
 SET(EXE_NAME "MotionBlurDoF")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
@@ -94,4 +94,4 @@ SETUP_SAMPLE(MotionBlurDoF)
 
 ADD_CUSTOM_COMMAND(TARGET MotionBlurDoF
 	PRE_BUILD
-	COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MakePyZip.py")
+	COMMAND "${Python3_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MakePyZip.py")

@@ -11,7 +11,7 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 			dxsdk
 	)
 ELSE()
-	FIND_PACKAGE(PythonInterp)
+	FIND_PACKAGE(Python3)
 
 	if(KLAYGE_PLATFORM_DARWIN)
 		set(winegcc "x86_64-w64-mingw32-gcc") # Use MinGW-w64 as a workaround
@@ -27,7 +27,7 @@ ELSE()
 	ENDIF()
 
 	ADD_CUSTOM_TARGET(D3DCompilerWrapper ALL
-		COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp" "${KLAYGE_BIN_DIR}/D3DCompilerWrapper$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>" "-I${KLAYGE_PROJECT_DIR}/Core/Include"
+		COMMAND "${Python3_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp" "${KLAYGE_BIN_DIR}/D3DCompilerWrapper$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>" "-I${KLAYGE_PROJECT_DIR}/Core/Include"
 	)
 
 	SET_TARGET_PROPERTIES(D3DCompilerWrapper PROPERTIES FOLDER "KlayGE/Tools")

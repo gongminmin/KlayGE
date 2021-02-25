@@ -7,13 +7,13 @@ SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windo
 SET(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
 SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
 
-FIND_PACKAGE(PythonInterp)
-IF(PYTHONINTERP_FOUND)
-	IF(${PYTHON_VERSION_STRING} VERSION_LESS "2.7.0")
-		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 2.7.0 or up.")
+FIND_PACKAGE(Python3)
+IF(Python3_Interpreter_FOUND)
+	IF(${Python3_VERSION} VERSION_LESS "3.0.0")
+		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 3.0.0 or up.")
 	ENDIF()
 ELSE()
-	MESSAGE(FATAL_ERROR "Could NOT find Python. Please install Python 2.7.0 or up first.")
+	MESSAGE(FATAL_ERROR "Could NOT find Python. Please install Python 3.0.0 or up first.")
 ENDIF()
 
 FUNCTION(DOWNLOAD_DEPENDENCY RELATIVE_PATH FILE_ID)

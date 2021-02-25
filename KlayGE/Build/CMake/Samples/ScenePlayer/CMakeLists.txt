@@ -1,4 +1,4 @@
-FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(Python3)
 
 SET(EXE_NAME "ScenePlayer")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
@@ -178,4 +178,4 @@ SETUP_SAMPLE(ScenePlayer)
 
 ADD_CUSTOM_COMMAND(TARGET ScenePlayer
 	PRE_BUILD
-	COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/MakePyZip.py")
+	COMMAND "${Python3_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/MakePyZip.py")

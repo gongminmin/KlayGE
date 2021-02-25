@@ -1,4 +1,4 @@
-FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(Python3)
 
 SET(EXE_NAME "GLCompatibility")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
@@ -24,4 +24,4 @@ SETUP_TOOL(GLCompatibility)
 
 ADD_CUSTOM_COMMAND(TARGET GLCompatibility
 	PRE_BUILD
-	COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/MakePyZip.py")
+	COMMAND "${Python3_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/MakePyZip.py")
