@@ -743,7 +743,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("D3D_DEVICE") == name_hash)
 		{
 			*static_cast<ID3D11Device1**>(value) = d3d_device_1_.get();

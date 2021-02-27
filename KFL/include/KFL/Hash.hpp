@@ -34,7 +34,9 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
+#include <KFL/CXX20/span.hpp>
 
+#include <string>
 #include <string_view>
 
 namespace KlayGE
@@ -114,6 +116,24 @@ namespace KlayGE
 		size_t seed = 0;
 		HashRange(seed, first, last);
 		return seed;
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::span<T const> s)
+	{
+		return HashRange(s.begin(), s.end());
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::basic_string_view<T> sv)
+	{
+		return HashRange(sv.begin(), sv.end());
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::basic_string<T> const& str)
+	{
+		return HashValue(std::basic_string_view<T>(str));
 	}
 }
 

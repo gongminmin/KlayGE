@@ -2140,8 +2140,7 @@ namespace
 			{
 				if (XMLAttribute const* attr = detail_node->Attrib("mode"))
 				{
-					std::string_view const mode_str = attr->ValueString();
-					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
+					size_t const mode_hash = HashValue(attr->ValueString());
 					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
 					{
 						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping);
@@ -2260,8 +2259,7 @@ namespace
 			{
 				for (; tex_node; tex_node = tex_node->NextSibling("texture"))
 				{
-					auto const type = tex_node->Attrib("type")->ValueString();
-					size_t const type_hash = HashRange(type.begin(), type.end());
+					size_t const type_hash = HashValue(tex_node->Attrib("type")->ValueString());
 
 					std::string const name(tex_node->Attrib("name")->ValueString());
 

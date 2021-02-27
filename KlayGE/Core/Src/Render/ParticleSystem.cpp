@@ -290,8 +290,7 @@ namespace
 						}
 
 						XMLAttribute const* attr = node->Attrib("name");
-						std::string_view const name = attr->ValueString();
-						size_t const name_hash = HashRange(name.begin(), name.end());
+						size_t const name_hash = HashValue(attr->ValueString());
 						if (CT_HASH("size_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;

@@ -164,7 +164,7 @@ namespace
 	{
 		auto const types = GetTypeDefines();
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < types.size(); ++ i)
 		{
 			if (types[i].second == name_hash)
@@ -195,7 +195,7 @@ namespace
 			CT_HASH("gouraud")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(sms_hash); ++ i)
 		{
 			if (sms_hash[i] == name_hash)
@@ -221,7 +221,7 @@ namespace
 			CT_HASH("greater")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(cfs_hash); ++ i)
 		{
 			if (cfs_hash[i] == name_hash)
@@ -242,7 +242,7 @@ namespace
 			CT_HASH("back")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(cms_hash); ++ i)
 		{
 			if (cms_hash[i] == name_hash)
@@ -263,7 +263,7 @@ namespace
 			CT_HASH("fill")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(pms_hash); ++ i)
 		{
 			if (pms_hash[i] == name_hash)
@@ -298,7 +298,7 @@ namespace
 			CT_HASH("inv_src1_color")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(abfs_hash); ++ i)
 		{
 			if (abfs_hash[i] == name_hash)
@@ -321,7 +321,7 @@ namespace
 			CT_HASH("max")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(bops_hash); ++ i)
 		{
 			if (bops_hash[i] == name_hash)
@@ -347,7 +347,7 @@ namespace
 			CT_HASH("decr_wrap")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(sops_hash); ++ i)
 		{
 			if (sops_hash[i] == name_hash)
@@ -385,7 +385,7 @@ namespace
 			cmp = 0;
 			f = name;
 		}
-		size_t const f_hash = HashRange(f.begin(), f.end());
+		size_t const f_hash = HashValue(std::move(f));
 		for (uint32_t i = 0; i < std::size(tfs_hash); ++ i)
 		{
 			if (tfs_hash[i] == f_hash)
@@ -411,7 +411,7 @@ namespace
 			CT_HASH("border")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(tams_hash); ++ i)
 		{
 			if (tams_hash[i] == name_hash)
@@ -445,7 +445,7 @@ namespace
 			CT_HASH("or_inverted")
 		};
 
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < std::size(lops_hash); ++ i)
 		{
 			if (lops_hash[i] == name_hash)
@@ -1550,8 +1550,7 @@ namespace
 			SamplerStateDesc desc;
 			for (XMLNode const* state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 			{
-				std::string_view const name = state_node->Attrib("name")->ValueString();
-				size_t const name_hash = HashRange(name.begin(), name.end());
+				size_t const name_hash = HashValue(state_node->Attrib("name")->ValueString());
 
 				XMLAttribute const* value_attr = state_node->Attrib("value");
 				std::string_view value_str;
@@ -4243,7 +4242,7 @@ namespace KlayGE
 	void RenderEffectStructType::Load(RenderEffect const& effect, XMLNode const& node)
 	{
 		name_ = std::string(node.Attrib("name")->ValueString());
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		for (XMLNode const* member_node = node.FirstNode("member"); member_node; member_node = member_node->NextSibling("member"))
 		{
@@ -4276,7 +4275,7 @@ namespace KlayGE
 	void RenderEffectStructType::StreamIn(ResIdentifier& res)
 	{
 		name_ = ReadShortString(res);
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		uint8_t len;
 		res.read(reinterpret_cast<char*>(&len), sizeof(len));
@@ -4445,7 +4444,7 @@ namespace KlayGE
 
 	RenderEffectParameter* RenderEffect::ParameterByName(std::string_view name) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (auto const & param : params_)
 		{
 			if (name_hash == param->NameHash())
@@ -4458,7 +4457,7 @@ namespace KlayGE
 
 	RenderEffectParameter* RenderEffect::ParameterBySemantic(std::string_view semantic) const
 	{
-		size_t const semantic_hash = HashRange(semantic.begin(), semantic.end());
+		size_t const semantic_hash = HashValue(std::move(semantic));
 		for (auto const & param : params_)
 		{
 			if (semantic_hash == param->SemanticHash())
@@ -4484,7 +4483,7 @@ namespace KlayGE
 
 	uint32_t RenderEffect::FindCBuffer(std::string_view name) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < cbuffers_.size(); ++i)
 		{
 			if (name_hash == cbuffers_[i]->NameHash())
@@ -4497,7 +4496,7 @@ namespace KlayGE
 
 	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff)
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (auto& cbuffer : cbuffers_)
 		{
 			if (name_hash == cbuffer->NameHash())
@@ -4928,8 +4927,7 @@ namespace KlayGE
 				auto name_attr = shader_node->Attrib("name");
 				BOOST_ASSERT(name_attr);
 
-				auto const & node_name = name_attr->ValueString();
-				size_t const node_name_hash = HashRange(node_name.begin(), node_name.end());
+				size_t const node_name_hash = HashValue(name_attr->ValueString());
 				bool found = false;
 				for (auto& gn : shader_graph_nodes_)
 				{
@@ -4988,7 +4986,7 @@ namespace KlayGE
 		}
 
 		res_name_ = (first_fxml_directory / (connected_name + ".fxml")).string();
-		res_name_hash_ = HashRange(res_name_.begin(), res_name_.end());
+		res_name_hash_ = HashValue(res_name_);
 #if KLAYGE_IS_DEV_PLATFORM
 		for (auto const & name : names)
 		{
@@ -5392,7 +5390,7 @@ namespace KlayGE
 
 	RenderEffectStructType* RenderEffectTemplate::StructTypeByName(std::string_view name) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (auto const& struct_type : struct_types_)
 		{
 			if (name_hash == struct_type->NameHash())
@@ -5405,7 +5403,7 @@ namespace KlayGE
 
 	RenderTechnique* RenderEffectTemplate::TechniqueByName(std::string_view name) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		for (auto const & tech : techniques_)
 		{
 			if (name_hash == tech->NameHash())
@@ -5861,7 +5859,7 @@ namespace KlayGE
 	void RenderTechnique::Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index)
 	{
 		name_ = std::string(node.Attrib("name")->ValueString());
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		RenderTechnique* parent_tech = nullptr;
 		if (XMLAttribute const* inherit_attr = node.Attrib("inherit"))
@@ -6051,7 +6049,7 @@ namespace KlayGE
 	bool RenderTechnique::StreamIn(RenderEffect& effect, ResIdentifier& res, uint32_t tech_index)
 	{
 		name_ = ReadShortString(res);
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		uint8_t num_anno;
 		res.read(&num_anno, sizeof(num_anno));
@@ -6179,7 +6177,7 @@ namespace KlayGE
 		RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass)
 	{
 		name_ = std::string(node.Attrib("name")->ValueString());
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		if (XMLNode const* anno_node = node.FirstNode("annotation"))
 		{
@@ -6270,8 +6268,7 @@ namespace KlayGE
 
 		for (XMLNode const* state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
-			std::string_view const name = state_node->Attrib("name")->ValueString();
-			size_t const state_name_hash = HashRange(name.begin(), name.end());
+			size_t const state_name_hash = HashValue(state_node->Attrib("name")->ValueString());
 
 			XMLAttribute const* value_attr = state_node->Attrib("value");
 			std::string_view value_str;
@@ -6517,8 +6514,7 @@ namespace KlayGE
 						{
 							ShaderDesc::StreamOutputDecl decl;
 
-							std::string_view const usage_str = entry_node->Attrib("usage")->ValueString();
-							size_t const usage_str_hash = HashRange(usage_str.begin(), usage_str.end());
+							size_t const usage_str_hash = HashValue(entry_node->Attrib("usage")->ValueString());
 							if (XMLAttribute const* attr = entry_node->Attrib("usage_index"))
 							{
 								decl.usage_index = static_cast<uint8_t>(attr->ValueInt());
@@ -6750,7 +6746,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = ReadShortString(res);
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		uint8_t num_anno;
 		res.read(&num_anno, sizeof(num_anno));
@@ -6987,7 +6983,7 @@ namespace KlayGE
 	{
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = name;
-		name_->second = HashRange(name_->first.begin(), name_->first.end());
+		name_->second = HashValue(name_->first);
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 	}
 #endif
@@ -6996,7 +6992,7 @@ namespace KlayGE
 	{
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = ReadShortString(res);
-		name_->second = HashRange(name_->first.begin(), name_->first.end());
+		name_->second = HashValue(name_->first);
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 
 		uint16_t len;
@@ -7140,13 +7136,13 @@ namespace KlayGE
 
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = std::string(node.Attrib("name")->ValueString());
-		name_->second = HashRange(name_->first.begin(), name_->first.end());
+		name_->second = HashValue(name_->first);
 
 		if (XMLAttribute const* attr = node.Attrib("semantic"))
 		{
 			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
 			semantic_->first = std::string(attr->ValueString());
-			semantic_->second = HashRange(semantic_->first.begin(), semantic_->first.end());
+			semantic_->second = HashValue(semantic_->first);
 		}
 
 		uint32_t as;
@@ -7210,14 +7206,14 @@ namespace KlayGE
 		type_ = LE2Native(type_);
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = ReadShortString(res);
-		name_->second = HashRange(name_->first.begin(), name_->first.end());
+		name_->second = HashValue(name_->first);
 
 		std::string sem = ReadShortString(res);
 		if (!sem.empty())
 		{
 			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
 			semantic_->first = sem;
-			semantic_->second = HashRange(sem.begin(), sem.end());
+			semantic_->second = HashValue(sem);
 		}
 
 		uint32_t as;
@@ -7386,8 +7382,7 @@ namespace KlayGE
 		stage_ = ShaderStage::NumStages;
 		if (XMLAttribute const* attr = node.Attrib("type"))
 		{
-			std::string_view const type_str = attr->ValueString();
-			size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
+			size_t const type_str_hash = HashValue(attr->ValueString());
 			if (CT_HASH("vertex_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Vertex;
@@ -7486,7 +7481,7 @@ namespace KlayGE
 		else
 		{
 			name_ = std::string(attr->ValueString());
-			name_hash_ = HashRange(name_.begin(), name_.end());
+			name_hash_ = HashValue(name_);
 
 			attr = node.Attrib("return");
 			if (attr)
@@ -7520,7 +7515,7 @@ namespace KlayGE
 	void RenderShaderGraphNode::StreamIn(ResIdentifier& res)
 	{
 		name_ = ReadShortString(res);
-		name_hash_ = HashRange(name_.begin(), name_.end());
+		name_hash_ = HashValue(name_);
 
 		return_type_ = ReadShortString(res);
 		impl_ = ReadShortString(res);

@@ -79,7 +79,7 @@ namespace
 			std::string_view(attrib.name(), attrib.name_size()), std::string_view(attrib.value(), attrib.value_size()));
 	}
 
-	rapidxml::xml_attribute<char>* CreateXmlAttribFromRapidXmlAttrib(rapidxml::xml_document<char>& doc, XMLAttribute const& attrib)
+	rapidxml::xml_attribute<char>* CreateRapidXmlAttribFromXmlAttrib(rapidxml::xml_document<char>& doc, XMLAttribute const& attrib)
 	{
 		auto* ret = doc.allocate_attribute();
 
@@ -145,7 +145,7 @@ namespace
 		return ret;
 	}
 
-	rapidxml::xml_node<char>* CreateXmlNodeFromRapidXmlNode(rapidxml::xml_document<char>& doc, XMLNode const& node)
+	rapidxml::xml_node<char>* CreateRapidXmlNodeFromXmlNode(rapidxml::xml_document<char>& doc, XMLNode const& node)
 	{
 		rapidxml::node_type type;
 		switch (node.Type())
@@ -193,11 +193,11 @@ namespace
 
 		for (auto child = node.FirstNode(); child; child = child->NextSibling())
 		{
-			ret->append_node(CreateXmlNodeFromRapidXmlNode(doc, *child));
+			ret->append_node(CreateRapidXmlNodeFromXmlNode(doc, *child));
 		}
 		for (auto attr = node.FirstAttrib(); attr; attr = attr->NextAttrib())
 		{
-			ret->append_attribute(CreateXmlAttribFromRapidXmlAttrib(doc, *attr));
+			ret->append_attribute(CreateRapidXmlAttribFromXmlAttrib(doc, *attr));
 		}
 
 		return ret;
@@ -321,41 +321,41 @@ namespace KlayGE
 	std::unique_ptr<XMLNode> XMLDocument::AllocNode(XMLNodeType type, std::string_view name)
 	{
 		auto ret = MakeUniquePtr<XMLNode>(type);
-		ret->Name(name);
+		ret->Name(std::move(name));
 		return ret;
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttrib(std::string_view name)
 	{
 		auto ret = MakeUniquePtr<XMLAttribute>();
-		ret->Name(name);
+		ret->Name(std::move(name));
 		return ret;
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribBool(std::string_view name, bool value)
 	{
-		return this->AllocAttribString(name, std::to_string(value ? 1U : 0U));
+		return this->AllocAttribString(std::move(name), std::to_string(value ? 1U : 0U));
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
 	{
-		return this->AllocAttribString(name, std::to_string(value));
+		return this->AllocAttribString(std::move(name), std::to_string(value));
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribUInt(std::string_view name, uint32_t value)
 	{
-		return this->AllocAttribString(name, std::to_string(value));
+		return this->AllocAttribString(std::move(name), std::to_string(value));
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribFloat(std::string_view name, float value)
 	{
-		return this->AllocAttribString(name, std::to_string(value));
+		return this->AllocAttribString(std::move(name), std::to_string(value));
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
 	{
-		auto ret = this->AllocAttrib(name);
-		ret->Value(value);
+		auto ret = this->AllocAttrib(std::move(name));
+		ret->Value(std::move(value));
 		return ret;
 	}
 
@@ -371,7 +371,7 @@ namespace KlayGE
 
 	void XMLNode::Name(std::string_view name)
 	{
-		name_ = name;
+		name_ = std::move(name);
 	}
 
 	XMLNodeType XMLNode::Type() const
@@ -480,14 +480,14 @@ namespace KlayGE
 
 	XMLAttribute* XMLNode::Attrib(std::string_view name) const
 	{
-		return this->FirstAttrib(name);
+		return this->FirstAttrib(std::move(name));
 	}
 
 	bool XMLNode::TryConvertAttrib(std::string_view name, bool& val, bool default_val) const
 	{
 		val = default_val;
 
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->TryConvertValue(val) : true;
 	}
 
@@ -495,7 +495,7 @@ namespace KlayGE
 	{
 		val = default_val;
 
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->TryConvertValue(val) : true;
 	}
 
@@ -503,7 +503,7 @@ namespace KlayGE
 	{
 		val = default_val;
 
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->TryConvertValue(val) : true;
 	}
 
@@ -511,37 +511,37 @@ namespace KlayGE
 	{
 		val = default_val;
 
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->TryConvertValue(val) : true;
 	}
 
 	bool XMLNode::AttribBool(std::string_view name, bool default_val) const
 	{
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->ValueBool() : default_val;
 	}
 
 	int32_t XMLNode::AttribInt(std::string_view name, int32_t default_val) const
 	{
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->ValueInt() : default_val;
 	}
 
 	uint32_t XMLNode::AttribUInt(std::string_view name, uint32_t default_val) const
 	{
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->ValueUInt() : default_val;
 	}
 
 	float XMLNode::AttribFloat(std::string_view name, float default_val) const
 	{
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->ValueFloat() : default_val;
 	}
 
 	std::string_view XMLNode::AttribString(std::string_view name, std::string_view default_val) const
 	{
-		auto attr = this->Attrib(name);
+		auto attr = this->Attrib(std::move(name));
 		return attr ? attr->ValueString() : default_val;
 	}
 
@@ -827,7 +827,7 @@ namespace KlayGE
 
 	void XMLNode::Value(std::string_view value)
 	{
-		value_ = value;
+		value_ = std::move(value);
 	}
 
 
@@ -838,7 +838,7 @@ namespace KlayGE
 
 	void XMLAttribute::Name(std::string_view name)
 	{
-		name_ = name;
+		name_ = std::move(name);
 	}
 
 	XMLNode* XMLAttribute::Parent() const
@@ -853,7 +853,7 @@ namespace KlayGE
 
 	XMLAttribute* XMLAttribute::NextAttrib(std::string_view name) const
 	{
-		return parent_->NextAttrib(*this, name);
+		return parent_->NextAttrib(*this, std::move(name));
 	}
 
 	XMLAttribute* XMLAttribute::NextAttrib() const
@@ -936,7 +936,7 @@ namespace KlayGE
 
 	void XMLAttribute::Value(std::string_view value)
 	{
-		value_ = value;
+		value_ = std::move(value);
 	}
 
 	std::unique_ptr<XMLDocument> LoadXml(ResIdentifier& source)
@@ -960,7 +960,7 @@ namespace KlayGE
 	void SaveXml(XMLDocument const& dom, std::ostream& os)
 	{
 		rapidxml::xml_document<char> doc;
-		rapidxml::xml_node<char>* root_node = CreateXmlNodeFromRapidXmlNode(doc, *dom.RootNode());
+		rapidxml::xml_node<char>* root_node = CreateRapidXmlNodeFromXmlNode(doc, *dom.RootNode());
 		doc.append_node(root_node);
 
 		os << "<?xml version=\"1.0\"?>" << std::endl << std::endl;

@@ -411,7 +411,7 @@ namespace KlayGE
 			{
 				virtual_path_str.push_back('/');
 			}
-			uint64_t const virtual_path_hash = HashRange(virtual_path_str.begin(), virtual_path_str.end());
+			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
 
 			bool found = false;
 			for (auto const & path : paths_)
@@ -447,7 +447,7 @@ namespace KlayGE
 			{
 				virtual_path_str.push_back('/');
 			}
-			uint64_t const virtual_path_hash = HashRange(virtual_path_str.begin(), virtual_path_str.end());
+			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
 
 			bool found = false;
 			for (auto const & path : paths_)
@@ -500,7 +500,7 @@ namespace KlayGE
 			{
 				virtual_path_str.push_back('/');
 			}
-			uint64_t const virtual_path_hash = HashRange(virtual_path_str.begin(), virtual_path_str.end());
+			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
 
 			for (auto iter = paths_.begin(); iter != paths_.end(); ++ iter)
 			{

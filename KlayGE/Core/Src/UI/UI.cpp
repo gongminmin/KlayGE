@@ -589,8 +589,7 @@ namespace KlayGE
 					dlg->CtrlLocation(id, loc);
 				}
 
-				std::string_view const type_str = ctrl_node->Attrib("type")->ValueString();
-				size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
+				size_t const type_str_hash = HashValue(ctrl_node->Attrib("type")->ValueString());
 				if (CT_HASH("static") == type_str_hash)
 				{
 					std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();

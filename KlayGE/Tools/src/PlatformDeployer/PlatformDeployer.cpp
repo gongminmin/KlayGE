@@ -130,7 +130,7 @@ MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const &
 void Deploy(std::vector<std::string> const& res_names, std::string_view res_type, RenderDeviceCaps const& caps, std::string_view platform,
 	std::string_view dest_folder)
 {
-	size_t const res_type_hash = HashRange(res_type.begin(), res_type.end());
+	size_t const res_type_hash = HashValue(std::move(res_type));
 
 	if ((CT_HASH("albedo") == res_type_hash)
 		|| (CT_HASH("emissive") == res_type_hash)

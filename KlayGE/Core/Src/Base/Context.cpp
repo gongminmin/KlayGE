@@ -496,8 +496,7 @@ namespace KlayGE
 			XMLNode const* stereo_node = graphics_node->FirstNode("stereo");
 			if (XMLAttribute const* attr = stereo_node->Attrib("method"))
 			{
-				std::string_view const method_str = attr->ValueString();
-				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
+				size_t const method_str_hash = HashValue(attr->ValueString());
 				if (CT_HASH("none") == method_str_hash)
 				{
 					stereo_method = STM_None;
@@ -555,8 +554,7 @@ namespace KlayGE
 			XMLNode const* output_node = graphics_node->FirstNode("output");
 			if (XMLAttribute const* attr = output_node->Attrib("method"))
 			{
-				std::string_view const method_str = attr->ValueString();
-				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
+				size_t const method_str_hash = HashValue(attr->ValueString());
 				if (CT_HASH("hdr10") == method_str_hash)
 				{
 					display_output_method = DOM_HDR10;

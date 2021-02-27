@@ -75,7 +75,7 @@ namespace KlayGE
 
 	void NullRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("MAJOR_VERSION") == name_hash)
 		{
 			*static_cast<uint32_t*>(value) = major_version_;
@@ -92,7 +92,7 @@ namespace KlayGE
 
 	void NullRenderEngine::SetCustomAttrib(std::string_view name, void* value)
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("PLATFORM") == name_hash)
 		{
 			native_shader_platform_name_ = *static_cast<std::string*>(value);
