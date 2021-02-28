@@ -31,63 +31,38 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/JsonDom.hpp>
 
 #include "MetadataUtil.hpp"
 
 namespace KlayGE
 {
-	float GetFloat(rapidjson::Value const& value)
+	float GetFloat(JsonValue const& value)
 	{
-		if (value.IsFloat())
+		switch (value.Type())
 		{
-			return value.GetFloat();
-		}
-		else if (value.IsDouble())
-		{
-			return static_cast<float>(value.GetDouble());
-		}
-		else if (value.IsInt())
-		{
-			return static_cast<float>(value.GetInt());
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<float>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<float>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<float>(value.GetUint64());
-		}
-		else
-		{
+		case JsonValueType::Float:
+			return value.ValueFloat();
+		case JsonValueType::Int:
+			return static_cast<float>(value.ValueInt());
+		case JsonValueType::UInt:
+			return static_cast<float>(value.ValueUInt());
+
+		default:
 			KFL_UNREACHABLE("Invalid value type.");
 		}
 	}
 
-	int GetInt(rapidjson::Value const& value)
+	int GetInt(JsonValue const& value)
 	{
-		if (value.IsInt())
+		switch (value.Type())
 		{
-			return value.GetInt();
-		}
-		else if (value.IsUint())
-		{
-			return static_cast<int>(value.GetUint());
-		}
-		else if (value.IsInt64())
-		{
-			return static_cast<int>(value.GetInt64());
-		}
-		else if (value.IsUint64())
-		{
-			return static_cast<int>(value.GetUint64());
-		}
-		else
-		{
+		case JsonValueType::Int:
+			return value.ValueInt();
+		case JsonValueType::UInt:
+			return static_cast<int>(value.ValueUInt());
+
+		default:
 			KFL_UNREACHABLE("Invalid value type.");
 		}
 	}

@@ -88,7 +88,6 @@ target_link_libraries(${LIB_NAME}
 	PRIVATE
 		assimp
 		FreeImage
-		rapidjson
 		${KLAYGE_CORELIB_NAME}
 )
 

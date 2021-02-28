@@ -26,6 +26,7 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ErrorHandling.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
+	${KFL_PROJECT_DIR}/include/KFL/JsonDom.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
@@ -46,6 +47,7 @@ SET(BASE_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Base/CustomizedStreamBuf.cpp
 	${KFL_PROJECT_DIR}/src/Base/DllLoader.cpp
 	${KFL_PROJECT_DIR}/src/Base/ErrorHandling.cpp
+	${KFL_PROJECT_DIR}/src/Base/JsonDom.cpp
 	${KFL_PROJECT_DIR}/src/Base/Log.cpp
 	${KFL_PROJECT_DIR}/src/Base/Thread.cpp
 	${KFL_PROJECT_DIR}/src/Base/Timer.cpp
@@ -146,6 +148,7 @@ target_link_libraries(${LIB_NAME}
 		bit-lite
 
 	PRIVATE
+		rapidjson
 		rapidxml
 )
 

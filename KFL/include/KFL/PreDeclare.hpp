@@ -45,6 +45,9 @@ namespace KlayGE
 	class XMLNode;
 	class XMLAttribute;
 
+	class JsonDocument;
+	class JsonValue;
+
 	class ThreadPool;
 
 	class half;

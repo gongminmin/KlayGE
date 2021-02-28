@@ -35,19 +35,10 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable : 6313) // Incorrect operator: zero-valued flag cannot be tested with bitwise-and
-#endif
-#include <rapidjson/document.h>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#endif
-
 namespace KlayGE
 {
-	float GetFloat(rapidjson::Value const& value);
-	int GetInt(rapidjson::Value const& value);
+	float GetFloat(JsonValue const& value);
+	int GetInt(JsonValue const& value);
 } // namespace KlayGE
 
 #endif // KLAYGE_PLUGINS_METADATA_UTIL_HPP
