@@ -113,6 +113,7 @@ namespace KlayGE
 
 	std::unique_ptr<JsonDocument> LoadJson(ResIdentifier& source);
 	void SaveJson(JsonDocument const& dom, std::ostream& os);
+	void SaveJson(XMLDocument const& dom, std::ostream& os);
 } // namespace KlayGE
 
 #endif // KFL_JSON_DOM_HPP

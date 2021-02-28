@@ -264,22 +264,19 @@ namespace
 	{
 		std::string lower_value_str = value_str;
 		StringUtil::ToLower(lower_value_str);
-		if (lower_value_str == "true")
+		if ((lower_value_str == "true") || (lower_value_str == "1"))
 		{
 			val = true;
 			return true;
 		}
-		else if (lower_value_str == "false")
+		else if ((lower_value_str == "false") || (lower_value_str == "0"))
 		{
 			val = false;
 			return true;
 		}
 		else
 		{
-			uint32_t uint_val;
-			bool const ret = TryConvertStringToValue(value_str, uint_val);
-			val = (uint_val != 0) ? true : false;
-			return ret;
+			return false;
 		}
 	}
 } // namespace

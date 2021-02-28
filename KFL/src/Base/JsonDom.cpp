@@ -48,6 +48,7 @@
 #endif
 
 #include <KFL/JsonDom.hpp>
+#include <KFL/XMLDom.hpp>
 
 using namespace KlayGE;
 
@@ -516,6 +517,123 @@ namespace
 			KFL_UNREACHABLE("Invalid type");
 		}
 	}
+
+	template <typename T>
+	void FillJsonValueFromXML(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, T const& xml)
+	{
+		bool bool_value;
+		if (xml.TryConvertValue(bool_value))
+		{
+			rapidjson_value.SetBool(bool_value);
+		}
+		else
+		{
+			int32_t int_value;
+			if (xml.TryConvertValue(int_value))
+			{
+				rapidjson_value.SetInt(int_value);
+			}
+			else
+			{
+				uint32_t uint_value;
+				if (xml.TryConvertValue(uint_value))
+				{
+					rapidjson_value.SetUint(uint_value);
+				}
+				else
+				{
+					float float_value;
+					if (xml.TryConvertValue(float_value))
+					{
+						rapidjson_value.SetDouble(float_value);
+					}
+					else
+					{
+						auto& allocator = rapidjson_doc.GetAllocator();
+
+						std::string_view const value_sv = xml.ValueString();
+						rapidjson_value.SetString(value_sv.data(), static_cast<rapidjson::SizeType>(value_sv.size()), allocator);
+					}
+				}
+			}
+		}
+	}
+
+	void AppendJsonValueFromDomNode(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, XMLNode const& node)
+	{
+		auto& allocator = rapidjson_doc.GetAllocator();
+
+		if (node.FirstNode() || node.FirstAttrib())
+		{
+			rapidjson_value.SetObject();
+
+			std::vector<std::vector<XMLNode*>> cache;
+			for (auto* child = node.FirstNode(); child; child = child->NextSibling())
+			{
+				bool found = false;
+				for (auto& objects : cache)
+				{
+					if (objects[0]->Name() == child->Name())
+					{
+						objects.push_back(child);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					cache.emplace_back(std::vector<XMLNode*>{child});
+				}
+			}
+			for (auto const& objects : cache)
+			{
+				if (objects.size() == 1)
+				{
+					rapidjson::Value item_value;
+					AppendJsonValueFromDomNode(rapidjson_doc, item_value, *objects[0]);
+					rapidjson_value.AddMember(
+						rapidjson::Value(objects[0]->Name().data(), static_cast<rapidjson::SizeType>(objects[0]->Name().size()), allocator),
+						item_value, allocator);
+				}
+				else
+				{
+					rapidjson::Value array_value;
+					array_value.SetArray();
+					for (auto const& item : objects)
+					{
+						rapidjson::Value item_value;
+						AppendJsonValueFromDomNode(rapidjson_doc, item_value, *item);
+						array_value.PushBack(item_value, allocator);
+					}
+					rapidjson_value.AddMember(
+						rapidjson::Value(objects[0]->Name().data(), static_cast<rapidjson::SizeType>(objects[0]->Name().size()), allocator),
+						array_value, allocator);
+				}
+			}
+			for (auto attr = node.FirstAttrib(); attr; attr = attr->NextAttrib())
+			{
+				std::string name_str = "@" + std::string(attr->Name());
+				rapidjson::Value attr_name(name_str.c_str(), static_cast<rapidjson::SizeType>(name_str.size()), allocator);
+
+				rapidjson::Value attr_value;
+				FillJsonValueFromXML(rapidjson_doc, attr_value, *attr);
+
+				rapidjson_value.AddMember(attr_name, attr_value, allocator);
+			}
+
+			if (!node.ValueString().empty())
+			{
+				rapidjson::Value node_value;
+				FillJsonValueFromXML(rapidjson_doc, node_value, node);
+				rapidjson_value.AddMember("#text", node_value, allocator);
+			}
+		}
+		else
+		{
+			FillJsonValueFromXML(rapidjson_doc, rapidjson_value, node);
+		}
+	}
 } // namespace
 
 namespace KlayGE
@@ -787,6 +905,17 @@ namespace KlayGE
 	{
 		rapidjson::Document doc;
 		SetRapidJsonValueFromJsonValue(doc, doc, *dom.RootValue());
+
+		rapidjson::StringBuffer sb;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+		doc.Accept(writer);
+		os << sb.GetString();
+	}
+
+	void SaveJson(XMLDocument const& dom, std::ostream& os)
+	{
+		rapidjson::Document doc;
+		AppendJsonValueFromDomNode(doc, doc, *dom.RootNode());
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
