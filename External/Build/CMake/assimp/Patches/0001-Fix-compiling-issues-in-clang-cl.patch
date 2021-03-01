@@ -1,15 +1,16 @@
-From 82755c31e2b4ff32900671c8428d1fa26e56f820 Mon Sep 17 00:00:00 2001
+From 7ca415f1d0cb566486859e0c88c68d052a598190 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
-Date: Fri, 29 Jan 2021 23:54:22 -0800
-Subject: [PATCH 2/3] Fix compiling issues in clang-cl
+Date: Sun, 28 Feb 2021 21:44:05 -0800
+Subject: [PATCH] Fix compiling issues in clang-cl
 
 ---
  code/AssetLib/AC/ACLoader.h  | 2 +-
  include/assimp/Exceptional.h | 8 ++++++++
- 2 files changed, 9 insertions(+), 1 deletion(-)
+ include/assimp/metadata.h    | 2 +-
+ 3 files changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/code/AssetLib/AC/ACLoader.h b/code/AssetLib/AC/ACLoader.h
-index c0bf978..2861944 100644
+index 5167394e..77de16b8 100644
 --- a/code/AssetLib/AC/ACLoader.h
 +++ b/code/AssetLib/AC/ACLoader.h
 @@ -116,7 +116,7 @@ public:
@@ -22,7 +23,7 @@ index c0bf978..2861944 100644
  
      // Represents an AC3D object
 diff --git a/include/assimp/Exceptional.h b/include/assimp/Exceptional.h
-index 6c18438..ddde8c1 100644
+index dab681b2..36d60d63 100644
 --- a/include/assimp/Exceptional.h
 +++ b/include/assimp/Exceptional.h
 @@ -75,6 +75,10 @@ public:
@@ -47,6 +48,19 @@ index 6c18438..ddde8c1 100644
  };
  
  #ifdef _MSC_VER
+diff --git a/include/assimp/metadata.h b/include/assimp/metadata.h
+index 2f8421c1..fdc88be5 100644
+--- a/include/assimp/metadata.h
++++ b/include/assimp/metadata.h
+@@ -351,7 +351,7 @@ struct aiMetadata {
+             *static_cast<T *>(mValues[index].mData) = value;
+         } else {
+             if (nullptr != mValues[index].mData) {
+-                delete mValues[index].mData;
++                delete static_cast<T *>(mValues[index].mData);
+                 mValues[index].mData = nullptr;
+             }
+             mValues[index].mData = new T(value);
 -- 
 2.17.1.windows.2
 
