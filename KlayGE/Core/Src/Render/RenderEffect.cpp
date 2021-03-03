@@ -457,18 +457,6 @@ namespace
 		KFL_UNREACHABLE("Invalid LogicOperation name");
 	}
 
-	bool BoolFromStr(std::string_view name)
-	{
-		if (("true" == name) || ("1" == name))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	int RetrieveIndex(XMLNode const & node)
 	{
 		int index = 0;
@@ -666,7 +654,7 @@ namespace
 			bool tmp = false;
 			if (auto attr = node.Attrib("value"))
 			{
-				tmp = BoolFromStr(attr->ValueString());
+				tmp = attr->ValueBool();
 			}
 			*this = tmp;
 		}
@@ -1890,7 +1878,7 @@ namespace
 						if (index < strs.size())
 						{
 							strs[index] = StringUtil::Trim(strs[index]);
-							init_val[index] = BoolFromStr(strs[index]);
+							init_val[index] = (strs[index] == "true") || (strs[index] == "1");
 						}
 					}
 					*this = init_val;
@@ -5988,8 +5976,7 @@ namespace KlayGE
 					std::string_view const state_name = state_node->Attrib("name")->ValueString();
 					if ("blend_enable" == state_name)
 					{
-						std::string_view const value_str = state_node->Attrib("value")->ValueString();
-						if (BoolFromStr(value_str))
+						if (state_node->Attrib("value")->ValueBool())
 						{
 							transparent_ = true;
 						}
@@ -6291,7 +6278,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("front_face_ccw") == state_name_hash)
 			{
-				rs_desc.front_face_ccw = BoolFromStr(value_str);
+				rs_desc.front_face_ccw = value_attr->ValueBool();
 			}
 			else if (CT_HASH("polygon_offset_factor") == state_name_hash)
 			{
@@ -6303,33 +6290,33 @@ namespace KlayGE
 			}
 			else if (CT_HASH("depth_clip_enable") == state_name_hash)
 			{
-				rs_desc.depth_clip_enable = BoolFromStr(value_str);
+				rs_desc.depth_clip_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("scissor_enable") == state_name_hash)
 			{
-				rs_desc.scissor_enable = BoolFromStr(value_str);
+				rs_desc.scissor_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("multisample_enable") == state_name_hash)
 			{
-				rs_desc.multisample_enable = BoolFromStr(value_str);
+				rs_desc.multisample_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("alpha_to_coverage_enable") == state_name_hash)
 			{
-				bs_desc.alpha_to_coverage_enable = BoolFromStr(value_str);
+				bs_desc.alpha_to_coverage_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("independent_blend_enable") == state_name_hash)
 			{
-				bs_desc.independent_blend_enable = BoolFromStr(value_str);
+				bs_desc.independent_blend_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("blend_enable") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
-				bs_desc.blend_enable[index] = BoolFromStr(value_str);
+				bs_desc.blend_enable[index] = value_attr->ValueBool();
 			}
 			else if (CT_HASH("logic_op_enable") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
-				bs_desc.logic_op_enable[index] = BoolFromStr(value_str);
+				bs_desc.logic_op_enable[index] = value_attr->ValueBool();
 			}
 			else if (CT_HASH("blend_op") == state_name_hash)
 			{
@@ -6396,11 +6383,11 @@ namespace KlayGE
 			}
 			else if (CT_HASH("depth_enable") == state_name_hash)
 			{
-				dss_desc.depth_enable = BoolFromStr(value_str);
+				dss_desc.depth_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("depth_write_mask") == state_name_hash)
 			{
-				dss_desc.depth_write_mask = BoolFromStr(value_str);
+				dss_desc.depth_write_mask = value_attr->ValueBool();
 			}
 			else if (CT_HASH("depth_func") == state_name_hash)
 			{
@@ -6408,7 +6395,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("front_stencil_enable") == state_name_hash)
 			{
-				dss_desc.front_stencil_enable = BoolFromStr(value_str);
+				dss_desc.front_stencil_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("front_stencil_func") == state_name_hash)
 			{
@@ -6440,7 +6427,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("back_stencil_enable") == state_name_hash)
 			{
-				dss_desc.back_stencil_enable = BoolFromStr(value_str);
+				dss_desc.back_stencil_enable = value_attr->ValueBool();
 			}
 			else if (CT_HASH("back_stencil_func") == state_name_hash)
 			{

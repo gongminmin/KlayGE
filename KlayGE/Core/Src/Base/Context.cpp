@@ -80,18 +80,6 @@ extern "C"
 namespace
 {
 	std::mutex singleton_mutex;
-
-	bool BoolFromStr(std::string_view name)
-	{
-		if (("true" == name) || ("1" == name))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 }
 
 namespace KlayGE
@@ -402,11 +390,11 @@ namespace KlayGE
 			}
 			if (XMLAttribute const* attr = frame_node->Attrib("fullscreen"))
 			{
-				full_screen = BoolFromStr(attr->ValueString());
+				full_screen = attr->ValueBool();
 			}
 			if (XMLAttribute const* attr = frame_node->Attrib("keep_screen_on"))
 			{
-				keep_screen_on = BoolFromStr(attr->ValueString());
+				keep_screen_on = attr->ValueBool();
 			}
 
 			size_t const color_fmt_str_hash = RT_HASH(color_fmt_str.c_str());
@@ -464,7 +452,7 @@ namespace KlayGE
 			XMLNode const* hdr_node = graphics_node->FirstNode("hdr");
 			if (XMLAttribute const* attr = hdr_node->Attrib("value"))
 			{
-				hdr = BoolFromStr(attr->ValueString());
+				hdr = attr->ValueBool();
 			}
 			if (XMLAttribute const* attr = hdr_node->Attrib("bloom"))
 			{
@@ -472,25 +460,25 @@ namespace KlayGE
 			}
 			if (XMLAttribute const* attr = hdr_node->Attrib("blue_shift"))
 			{
-				blue_shift = BoolFromStr(attr->ValueString());
+				blue_shift = attr->ValueBool();
 			}
 
 			XMLNode const* ppaa_node = graphics_node->FirstNode("ppaa");
 			if (XMLAttribute const* attr = ppaa_node->Attrib("value"))
 			{
-				ppaa = BoolFromStr(attr->ValueString());
+				ppaa = attr->ValueBool();
 			}
 
 			XMLNode const* gamma_node = graphics_node->FirstNode("gamma");
 			if (XMLAttribute const* attr = gamma_node->Attrib("value"))
 			{
-				gamma = BoolFromStr(attr->ValueString());
+				gamma = attr->ValueBool();
 			}
 
 			XMLNode const* color_grading_node = graphics_node->FirstNode("color_grading");
 			if (XMLAttribute const* attr = color_grading_node->Attrib("value"))
 			{
-				color_grading = BoolFromStr(attr->ValueString());
+				color_grading = attr->ValueBool();
 			}
 
 			XMLNode const* stereo_node = graphics_node->FirstNode("stereo");
@@ -604,7 +592,7 @@ namespace KlayGE
 			XMLNode const* debug_context_node = graphics_node->FirstNode("debug_context");
 			if (XMLAttribute const* attr = debug_context_node->Attrib("value"))
 			{
-				debug_context = BoolFromStr(attr->ValueString());
+				debug_context = attr->ValueBool();
 			}
 		}
 

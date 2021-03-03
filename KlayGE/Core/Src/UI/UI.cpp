@@ -47,25 +47,13 @@ namespace
 {
 	std::mutex singleton_mutex;
 
-	bool BoolFromStr(std::string_view name)
-	{
-		if (("true" == name) || ("1" == name))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	bool ReadBool(KlayGE::XMLNode const& node, std::string const & name, bool default_val)
 	{
 		bool ret = default_val;
 
 		if (KlayGE::XMLAttribute const* attr = node.Attrib(name))
 		{
-			ret = BoolFromStr(attr->ValueString());
+			ret = attr->ValueBool();
 		}
 
 		return ret;
