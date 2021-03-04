@@ -34,3 +34,9 @@ If you want contribute some code, please check [Workflow of Contributing Code](h
 # Links
 * Website: http://www.klayge.org
 * Wiki: http://www.klayge.org/wiki
+
+# License
+
+KlayGE's default license is the GNU General Public License 2.0 (See [LICENSE](./LICENSE)). In other words, anyone can use it and access to its source code, as long as the project which uses KlayGE must be released under GPL 2.0 license.
+
+KlayGE dependents on several external libraries. They are distributed under their own terms. See [LICENSE-External](./LICENSE-External.md).
