@@ -59,6 +59,7 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unknown-pragmas
 			-Wno-ignored-attributes
 			-Wno-unused-function
+			-Wno-unused-value
 	)
 endif()
 if(KLAYGE_PLATFORM_WINDOWS)

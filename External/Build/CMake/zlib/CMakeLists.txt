@@ -1,7 +1,12 @@
 set(ZLIB_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/zlib")
 set(ZLIB_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/zlib/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("zlib" "https://github.com/madler/zlib.git" "cacf7f1d4e3d44d871b605da3b647f07d718623f")
+UpdateExternalLib("zlib" "https://github.com/madler/zlib.git" "cacf7f1d4e3d44d871b605da3b647f07d718623f" "" "" need_patch)
+if(need_patch)
+	foreach(patch "0001-Fix-.rc-compiling-issues-in-clang-cl")
+		ApplyPatch("zlib" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
+	endforeach()
+endif()
 
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 set(AMD64 OFF CACHE BOOL "" FORCE)
