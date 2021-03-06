@@ -331,7 +331,7 @@ namespace KlayGE
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribBool(std::string_view name, bool value)
 	{
-		return this->AllocAttribString(std::move(name), std::to_string(value ? 1U : 0U));
+		return this->AllocAttribString(std::move(name), value ? "true" : "false");
 	}
 
 	std::unique_ptr<XMLAttribute> XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
@@ -804,7 +804,7 @@ namespace KlayGE
 
 	void XMLNode::Value(bool value)
 	{
-		value_ = std::to_string(value ? 1U : 0U);
+		value_ = value ? "true" : "false";
 	}
 
 	void XMLNode::Value(int32_t value)
@@ -880,9 +880,9 @@ namespace KlayGE
 
 	bool XMLAttribute::ValueBool() const
 	{
-		uint32_t val = 0;
+		bool val = false;
 		this->TryConvertValue(val);
-		return val ? true : false;
+		return val;
 	}
 
 	int32_t XMLAttribute::ValueInt() const
@@ -913,7 +913,7 @@ namespace KlayGE
 
 	void XMLAttribute::Value(bool value)
 	{
-		value_ = std::to_string(value ? 1U : 0U);
+		value_ = value ? "true" : "false";
 	}
 
 	void XMLAttribute::Value(int32_t value)
