@@ -45,7 +45,7 @@ namespace KlayGE
 	{
 	public:
 		D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource);
-		~D3D12GpuMemoryPage();
+		~D3D12GpuMemoryPage() noexcept;
 
 		ID3D12Resource* Resource() const noexcept
 		{
@@ -129,7 +129,7 @@ namespace KlayGE
 	private:
 		void Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes,
 			uint32_t alignment);
-		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value);
+		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock* mem_block, uint64_t fence_value);
 		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes) const;
 
 	private:
@@ -143,18 +143,30 @@ namespace KlayGE
 		{
 			D3D12GpuMemoryPagePtr page;
 
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
 			struct FreeRange
 			{
 				uint32_t first_offset;
 				uint32_t last_offset;
 			};
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
 			std::vector<FreeRange> free_list;
 
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
 			struct StallRange
 			{
 				FreeRange free_range;
 				uint64_t fence_value;
 			};
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
 			std::vector<StallRange> stall_list;
 		};
 		std::vector<PageInfo> pages_;

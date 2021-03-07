@@ -448,15 +448,26 @@ namespace KlayGE
 
 	void D3D12GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((0 == access_hint_) || (access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
 		{
-			uint8_t* p = static_cast<uint8_t*>(this->Map(BA_Write_Only));
-			memcpy(p + offset, data, size);
-			this->Unmap();
+			auto new_gpu_mem_block = re.AllocMemBlock(true, size_in_byte_);
+			uint8_t* dst = static_cast<uint8_t*>(new_gpu_mem_block->CpuAddress());
+			if (offset > 0)
+			{
+				memcpy(dst, gpu_mem_block_->CpuAddress(), offset);
+			}
+			memcpy(dst + offset, data, size);
+
+			re.DeallocMemBlock(true, std::move(gpu_mem_block_));
+
+			gpu_mem_block_ = std::move(new_gpu_mem_block);
+			d3d_resource_ = gpu_mem_block_->Resource();
+			d3d_resource_offset_ = gpu_mem_block_->Offset();
+			gpu_vaddr_ = gpu_mem_block_->GpuAddress();
 		}
 		else
 		{
-			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto* cmd_list = re.D3DRenderCmdList();
 
 			auto upload_mem_block = re.AllocMemBlock(true, size);

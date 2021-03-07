@@ -307,7 +307,7 @@ namespace KlayGE
 		uint32_t curr_frame_index_ = 0;
 
 		FencePtr frame_fence_;
-		uint64_t frame_fence_value_;
+		uint64_t frame_fence_value_ = 0;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself

@@ -35,8 +35,8 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
+#include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
 namespace KlayGE
 {
@@ -44,10 +44,10 @@ namespace KlayGE
 		: is_upload_(is_upload), resource_(std::move(resource)), gpu_addr_(resource_->GetGPUVirtualAddress())
 	{
 		D3D12_RANGE const read_range{0, 0};
-		resource_->Map(0, &read_range, &cpu_addr_);
+		TIFHR(resource_->Map(0, &read_range, &cpu_addr_));
 	}
 
-	D3D12GpuMemoryPage::~D3D12GpuMemoryPage()
+	D3D12GpuMemoryPage::~D3D12GpuMemoryPage() noexcept
 	{
 		D3D12_RANGE const write_range{0, 0};
 		resource_->Unmap(0, is_upload_ ? nullptr : &write_range);
@@ -104,19 +104,20 @@ namespace KlayGE
 
 		for (auto& page_info : pages_)
 		{
-			for (auto iter = page_info.free_list.begin(); iter != page_info.free_list.end(); ++iter)
+			auto const iter = std::lower_bound(page_info.free_list.begin(), page_info.free_list.end(), aligned_size,
+				[](PageInfo::FreeRange const& free_range, uint32_t aligned_size) {
+					return free_range.first_offset + aligned_size > free_range.last_offset;
+				});
+			if (iter != page_info.free_list.end())
 			{
-				if (iter->first_offset + aligned_size <= iter->last_offset)
+				mem_block->Reset(*page_info.page, iter->first_offset, aligned_size);
+				iter->first_offset += aligned_size;
+				if (iter->first_offset == iter->last_offset)
 				{
-					mem_block->Reset(*page_info.page, iter->first_offset, aligned_size);
-					iter->first_offset += aligned_size;
-					if (iter->first_offset == iter->last_offset)
-					{
-						page_info.free_list.erase(iter);
-					}
-
-					return;
+					page_info.free_list.erase(iter);
 				}
+
+				return;
 			}
 		}
 
@@ -124,24 +125,24 @@ namespace KlayGE
 		new_page_info.page = this->CreatePage(DefaultPageSize);
 		new_page_info.free_list.push_back({aligned_size, DefaultPageSize});
 		mem_block->Reset(*new_page_info.page, 0, aligned_size);
-		pages_.push_back(std::move(new_page_info));
+		pages_.emplace_back(std::move(new_page_info));
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
-		this->Deallocate(lock, mem_block, fence_value);
+		this->Deallocate(lock, mem_block.get(), fence_value);
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(
-		std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value)
+		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock* mem_block, uint64_t fence_value)
 	{
 		KFL_UNUSED(proof_of_lock);
 
-		if (!mem_block)
+		if (mem_block == nullptr)
 		{
 			return;
-		}		
+		}
 
 		if (mem_block->Size() <= DefaultPageSize)
 		{
@@ -163,7 +164,7 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		this->Deallocate(lock, mem_block, fence_value);
+		this->Deallocate(lock, mem_block.get(), fence_value);
 		this->Allocate(lock, mem_block, size_in_bytes, alignment);
 	}
 
@@ -177,11 +178,38 @@ namespace KlayGE
 			{
 				if (stall_iter->fence_value <= fence_value)
 				{
-					auto const free_iter = std::lower_bound(page.free_list.begin(), page.free_list.end(), stall_iter->free_range.first_offset,
-						[](PageInfo::FreeRange& free_range, uint32_t first_offset) { return free_range.first_offset < first_offset; });
-					if ((free_iter == page.free_list.end()) || (free_iter->first_offset != stall_iter->free_range.last_offset))
+					auto const free_iter = std::lower_bound(page.free_list.begin(), page.free_list.end(),
+						stall_iter->free_range.first_offset, [](PageInfo::FreeRange const& free_range, uint32_t first_offset) {
+							return free_range.first_offset < first_offset;
+						});
+					if (free_iter == page.free_list.end())
 					{
-						page.free_list.insert(free_iter, stall_iter->free_range);
+						if (page.free_list.empty() || (page.free_list.back().last_offset != stall_iter->free_range.first_offset))
+						{
+							page.free_list.emplace_back(std::move(stall_iter->free_range));
+						}
+						else
+						{
+							page.free_list.back().last_offset = stall_iter->free_range.last_offset;
+						}
+					}
+					else if (free_iter->first_offset != stall_iter->free_range.last_offset)
+					{
+						bool merge_with_prev = false;
+						if (free_iter != page.free_list.begin())
+						{
+							auto const prev_free_iter = std::prev(free_iter);
+							if (prev_free_iter->last_offset == free_iter->first_offset)
+							{
+								prev_free_iter->last_offset = free_iter->last_offset;
+								merge_with_prev = true;
+							}
+						}
+
+						if (!merge_with_prev)
+						{
+							page.free_list.emplace(free_iter, std::move(stall_iter->free_range));
+						}
 					}
 					else
 					{
