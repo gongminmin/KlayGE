@@ -322,11 +322,8 @@ namespace KlayGE
 			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<OGLESShaderObjectTemplate> gl_so_template);
 
 	private:
-		void CreateHwResources(ShaderStage stage, RenderEffect const& effect) override;
 		void DoLinkShaders(RenderEffect const & effect) override;
 
-		void AppendTexSamplerBinds(
-			ShaderStage stage, RenderEffect const& effect, std::vector<std::pair<std::string, std::string>> const& tex_sampler_pairs);
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);
 

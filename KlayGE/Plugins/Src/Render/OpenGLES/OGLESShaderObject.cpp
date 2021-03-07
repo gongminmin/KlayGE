@@ -975,6 +975,28 @@ namespace KlayGE
 				auto const* shader_stage = checked_cast<OGLESShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 				if (shader_stage)
 				{
+					uint32_t const mask = 1UL << static_cast<uint32_t>(stage);
+					for (auto const& tex_sampler : shader_stage->TexSamplerPairs())
+					{
+						std::string const combined_sampler_name = tex_sampler.first + "_" + tex_sampler.second;
+
+						bool found = false;
+						for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++k)
+						{
+							if (std::get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
+							{
+								std::get<3>(tex_sampler_binds_[k]) |= mask;
+								found = true;
+								break;
+							}
+						}
+						if (!found)
+						{
+							tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name, effect.ParameterByName(tex_sampler.first),
+								effect.ParameterByName(tex_sampler.second), mask));
+						}
+					}
+
 					for (size_t pi = 0; pi < shader_stage->PNames().size(); ++pi)
 					{
 						GLint location = glGetUniformLocation(glsl_program_, shader_stage->GlslResNames()[pi].c_str());
@@ -1161,37 +1183,6 @@ namespace KlayGE
 		else
 		{
 			return -1;
-		}
-	}
-
-	void OGLESShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
-	{
-		this->AppendTexSamplerBinds(stage, effect, checked_cast<OGLESShaderStageObject&>(*this->Stage(stage)).TexSamplerPairs());
-	}
-
-	void OGLESShaderObject::AppendTexSamplerBinds(
-		ShaderStage stage, RenderEffect const& effect, std::vector<std::pair<std::string, std::string>> const& tex_sampler_pairs)
-	{
-		uint32_t const mask = 1UL << static_cast<uint32_t>(stage);
-		for (auto const& tex_sampler : tex_sampler_pairs)
-		{
-			std::string const combined_sampler_name = tex_sampler.first + "_" + tex_sampler.second;
-
-			bool found = false;
-			for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++k)
-			{
-				if (std::get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
-				{
-					std::get<3>(tex_sampler_binds_[k]) |= mask;
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-			{
-				tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name, effect.ParameterByName(tex_sampler.first),
-					effect.ParameterByName(tex_sampler.second), mask));
-			}
 		}
 	}
 

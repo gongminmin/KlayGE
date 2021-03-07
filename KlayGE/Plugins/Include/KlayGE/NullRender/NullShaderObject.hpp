@@ -424,7 +424,6 @@ namespace KlayGE
 			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<NullShaderObjectTemplate> null_so_template);
 
 	private:
-		void CreateHwResources(ShaderStage stage, RenderEffect const & effect) override;
 		void DoLinkShaders(RenderEffect const & effect) override;
 
 		void OGLAppendTexSamplerBinds(

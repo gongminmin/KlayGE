@@ -928,55 +928,126 @@ namespace KlayGE
 	{
 	}
 
-	void D3D12ShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
-	{
-		auto& shader_stage = checked_cast<D3D12ShaderStageObject&>(*this->Stage(stage));
-		if (!shader_stage.ShaderCodeBlob().empty())
-		{
-			auto const & shader_desc = shader_stage.GetD3D12ShaderDesc();
-
-			uint32_t const stage_idnex = static_cast<uint32_t>(stage);
-
-			samplers_[stage_idnex].resize(shader_desc.num_samplers);
-			srvsrcs_[stage_idnex].resize(shader_desc.num_srvs, std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
-			srv_handles_[stage_idnex].resize(shader_desc.num_srvs);
-			uavsrcs_[stage_idnex].resize(shader_desc.num_uavs, std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
-			uav_handles_[stage_idnex].resize(shader_desc.num_uavs);
-
-			for (size_t i = 0; i < shader_desc.res_desc.size(); ++i)
-			{
-				RenderEffectParameter* p = effect.ParameterByName(shader_desc.res_desc[i].name);
-				BOOST_ASSERT(p);
-
-				uint32_t offset = shader_desc.res_desc[i].bind_point;
-				if (D3D_SIT_SAMPLER == shader_desc.res_desc[i].type)
-				{
-					SamplerStateObjectPtr sampler;
-					p->Value(sampler);
-					if (sampler)
-					{
-						samplers_[stage_idnex][offset] = checked_cast<D3D12SamplerStateObject&>(*sampler).D3DDesc();
-					}
-				}
-				else
-				{
-					param_binds_[stage_idnex].push_back(this->GetBindFunc(stage, offset, p));
-				}
-			}
-		}
-	}
-
 	void D3D12ShaderObject::DoLinkShaders(RenderEffect const & effect)
 	{
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		std::array<uint32_t, NumShaderStages * 4> num;
+		uint32_t num_sampler = 0;
+		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+		{
+			auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
+			if (shader_stage)
+			{
+				auto const& shader_desc = shader_stage->GetD3D12ShaderDesc();
+				num[stage * 4 + 0] = static_cast<uint32_t>(shader_desc.cb_desc.size());
+
+				if (!shader_stage->ShaderCodeBlob().empty())
+				{
+					d3d_so_template_->num_srvs_[stage] = shader_desc.num_srvs;
+					d3d_so_template_->num_uavs_[stage] = shader_desc.num_uavs;
+					d3d_so_template_->num_samplers_[stage] = shader_desc.num_samplers;
+
+					num_sampler += shader_desc.num_samplers;
+				}
+			}
+			else
+			{
+				num[stage * 4 + 0] = 0;
+
+				d3d_so_template_->num_srvs_[stage] = 0;
+				d3d_so_template_->num_uavs_[stage] = 0;
+				d3d_so_template_->num_samplers_[stage] = 0;
+			}
+
+			num[stage * 4 + 1] = d3d_so_template_->num_srvs_[stage];
+			num[stage * 4 + 2] = d3d_so_template_->num_uavs_[stage];
+			num[stage * 4 + 3] = d3d_so_template_->num_samplers_[stage];
+		}
+
+		bool has_stream_output = false;
+		if (this->Stage(ShaderStage::Geometry) &&
+			checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Geometry)).HasStreamOutput())
+		{
+			has_stream_output = true;
+		}
+		else if (this->Stage(ShaderStage::Domain) &&
+				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Domain)).HasStreamOutput())
+		{
+			has_stream_output = true;
+		}
+		else if (this->Stage(ShaderStage::Vertex) &&
+				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).HasStreamOutput())
+		{
+			has_stream_output = true;
+		}
+
+		d3d_so_template_->root_signature_ = re.CreateRootSignature(num, !!this->Stage(ShaderStage::Vertex), has_stream_output);
+
+		uint32_t srv_starts[NumShaderStages + 1];
+		uint32_t uav_starts[NumShaderStages + 1];
+		srv_starts[0] = uav_starts[0] = 0;
+		for (uint32_t stage = 1; stage <= NumShaderStages; ++stage)
+		{
+			srv_starts[stage] = srv_starts[stage - 1] + d3d_so_template_->num_srvs_[stage - 1];
+			uav_starts[stage] = uav_starts[stage - 1] + d3d_so_template_->num_uavs_[stage - 1];
+		}
+
+		d3d_so_template_->num_total_srvs_ = srv_starts[NumShaderStages];
+		srv_uav_handles_.resize(srv_starts[NumShaderStages] + uav_starts[NumShaderStages]);
+		srv_uav_srcs_.resize(srv_uav_handles_.size(), std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
+
+		ID3D12Device* device = re.D3DDevice();
+
+		uint32_t const sampler_desc_size = re.SamplerDescSize();
+		D3D12_CPU_DESCRIPTOR_HANDLE cpu_sampler_handle{};
+		if (num_sampler > 0)
+		{
+			D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;
+			sampler_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+			sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
+			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			sampler_heap_desc.NodeMask = 0;
+			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_so_template_->sampler_heap_.put_void()));
+
+			cpu_sampler_handle = d3d_so_template_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();			
+		}
+
 		std::vector<uint32_t> all_cbuff_indices;
 		for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
 		{
 			auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 			if (shader_stage)
 			{
+				auto const& shader_desc = shader_stage->GetD3D12ShaderDesc();
+				if (!shader_stage->ShaderCodeBlob().empty())
+				{
+					for (size_t i = 0; i < shader_desc.res_desc.size(); ++i)
+					{
+						RenderEffectParameter* p = effect.ParameterByName(shader_desc.res_desc[i].name);
+						BOOST_ASSERT(p);
+
+						uint32_t offset = shader_desc.res_desc[i].bind_point;
+						if (D3D_SIT_SAMPLER == shader_desc.res_desc[i].type)
+						{
+							SamplerStateObjectPtr sampler;
+							p->Value(sampler);
+							if (sampler)
+							{
+								auto const& sampler_desc = checked_cast<D3D12SamplerStateObject&>(*sampler).D3DDesc();
+								device->CreateSampler(&sampler_desc, cpu_sampler_handle);
+								cpu_sampler_handle.ptr += sampler_desc_size;
+							}
+						}
+						else
+						{
+							param_binds_[stage].push_back(this->GetBindFunc(srv_starts[stage], uav_starts[stage], offset, p));
+						}
+					}
+				}
+
 				if (!shader_stage->CBufferIndices().empty())
 				{
-					auto const& shader_desc = shader_stage->GetD3D12ShaderDesc();
 					auto const& cbuff_indices = shader_stage->CBufferIndices();
 
 					all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices.begin(), cbuff_indices.end());
@@ -1021,84 +1092,6 @@ namespace KlayGE
 				}
 			}
 		}
-
-		this->CreateRootSignature();
-
-		num_handles_ = 0;
-		for (uint32_t i = 0; i < NumShaderStages; ++ i)
-		{
-			num_handles_ += static_cast<uint32_t>(srv_handles_[i].size() + uav_handles_[i].size());
-		}
-	}
-
-	void D3D12ShaderObject::CreateRootSignature()
-	{
-		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12Device* device = re.D3DDevice();
-
-		std::array<uint32_t, NumShaderStages * 4> num;
-		uint32_t num_sampler = 0;
-		for (uint32_t i = 0; i < NumShaderStages; ++ i)
-		{
-			auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(i)).get());
-			if (shader_stage)
-			{
-				auto const& shader_desc = shader_stage->GetD3D12ShaderDesc();
-				num[i * 4 + 0] = static_cast<uint32_t>(shader_desc.cb_desc.size());
-			}
-			else
-			{
-				num[i * 4 + 0] = 0;
-			}
-			num[i * 4 + 1] = static_cast<uint32_t>(srv_handles_[i].size());
-			num[i * 4 + 2] = static_cast<uint32_t>(uav_handles_[i].size());
-			num[i * 4 + 3] = static_cast<uint32_t>(samplers_[i].size());
-
-			num_sampler += num[i * 4 + 3];
-		}
-
-		bool has_stream_output = false;
-		if (this->Stage(ShaderStage::Geometry) &&
-			checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Geometry)).HasStreamOutput())
-		{
-			has_stream_output = true;
-		}
-		else if (this->Stage(ShaderStage::Domain) &&
-				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Domain)).HasStreamOutput())
-		{
-			has_stream_output = true;
-		}
-		else if (this->Stage(ShaderStage::Vertex) &&
-				 checked_cast<D3D12ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).HasStreamOutput())
-		{
-			has_stream_output = true;
-		}
-
-		d3d_so_template_->root_signature_ = re.CreateRootSignature(num, !!this->Stage(ShaderStage::Vertex), has_stream_output);
-
-		if (num_sampler > 0)
-		{
-			D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;
-			sampler_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-			sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
-			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			sampler_heap_desc.NodeMask = 0;
-			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_so_template_->sampler_heap_.put_void()));
-
-			UINT const sampler_desc_size = re.SamplerDescSize();
-			D3D12_CPU_DESCRIPTOR_HANDLE cpu_sampler_handle = d3d_so_template_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();
-			for (uint32_t i = 0; i < NumShaderStages; ++ i)
-			{
-				if (!samplers_[i].empty())
-				{
-					for (uint32_t j = 0; j < samplers_[i].size(); ++ j)
-					{
-						device->CreateSampler(&samplers_[i][j], cpu_sampler_handle);
-						cpu_sampler_handle.ptr += sampler_desc_size;
-					}
-				}
-			}
-		}
 	}
 
 	ShaderObjectPtr D3D12ShaderObject::Clone(RenderEffect const & effect)
@@ -1108,36 +1101,41 @@ namespace KlayGE
 		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
 
+		ret->srv_uav_handles_.resize(srv_uav_handles_.size());
+		ret->srv_uav_srcs_.resize(srv_uav_srcs_.size(), std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
+
+		uint32_t srv_starts[NumShaderStages + 1];
+		uint32_t uav_starts[NumShaderStages + 1];
+		srv_starts[0] = uav_starts[0] = 0;
+		for (uint32_t stage = 1; stage <= NumShaderStages; ++stage)
+		{
+			srv_starts[stage] = srv_starts[stage - 1] + d3d_so_template_->num_srvs_[stage - 1];
+			uav_starts[stage] = uav_starts[stage - 1] + d3d_so_template_->num_uavs_[stage - 1];
+		}
+
 		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t i = 0; i < NumShaderStages; ++ i)
 		{
-			ret->samplers_[i] = samplers_[i];
-			ret->srvsrcs_[i].resize(srvsrcs_[i].size(),
-				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
-			ret->srv_handles_[i].resize(srv_handles_[i].size());
-			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
-			ret->uav_handles_[i].resize(uav_handles_[i].size());
-
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			for (auto const & pb : param_binds_[i])
 			{
-				ret->param_binds_[i].push_back(ret->GetBindFunc(static_cast<ShaderStage>(i), pb.offset,
-					effect.ParameterByName(pb.param->Name())));
+				ret->param_binds_[i].push_back(
+					ret->GetBindFunc(srv_starts[i], uav_starts[i], pb.offset, effect.ParameterByName(pb.param->Name())));
 			}
 		}
-
-		ret->num_handles_ = num_handles_;
 
 		return ret;
 	}
 
-	D3D12ShaderObject::ParameterBind D3D12ShaderObject::GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param)
+	D3D12ShaderObject::ParameterBind D3D12ShaderObject::GetBindFunc(
+		uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter* param)
 	{
-		uint32_t const stage_idnex = static_cast<uint32_t>(stage);
-
 		ParameterBind ret;
 		ret.param = param;
 		ret.offset = offset;
+
+		uint32_t const srv_offset = srv_stage_base + offset;
+		uint32_t const uav_offset = d3d_so_template_->num_total_srvs_ + uav_stage_base + offset;
 
 		switch (param->Type())
 		{
@@ -1168,7 +1166,7 @@ namespace KlayGE
 		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D12ShaderParameterTextureSRV(srvsrcs_[stage_idnex][offset], srv_handles_[stage_idnex][offset], param);
+			ret.func = SetD3D12ShaderParameterTextureSRV(srv_uav_srcs_[srv_offset], srv_uav_handles_[srv_offset], param);
 			break;
 
 		case REDT_buffer:
@@ -1176,7 +1174,7 @@ namespace KlayGE
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-			ret.func = SetD3D12ShaderParameterGraphicsBufferSRV(srvsrcs_[stage_idnex][offset], srv_handles_[stage_idnex][offset], param);
+			ret.func = SetD3D12ShaderParameterGraphicsBufferSRV(srv_uav_srcs_[srv_offset], srv_uav_handles_[srv_offset], param);
 			break;
 
 		case REDT_rw_texture1D:
@@ -1189,7 +1187,7 @@ namespace KlayGE
 		case REDT_rasterizer_ordered_texture2D:
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
-			ret.func = SetD3D12ShaderParameterTextureUAV(uavsrcs_[stage_idnex][offset], uav_handles_[stage_idnex][offset], param);
+			ret.func = SetD3D12ShaderParameterTextureUAV(srv_uav_srcs_[uav_offset], srv_uav_handles_[uav_offset], param);
 			break;
 
 		case REDT_rw_buffer:
@@ -1198,7 +1196,7 @@ namespace KlayGE
 		case REDT_rasterizer_ordered_buffer:
 		case REDT_rasterizer_ordered_structured_buffer:
 		case REDT_rasterizer_ordered_byte_address_buffer:
-			ret.func = SetD3D12ShaderParameterGraphicsBufferUAV(uavsrcs_[stage_idnex][offset], uav_handles_[stage_idnex][offset], param);
+			ret.func = SetD3D12ShaderParameterGraphicsBufferUAV(srv_uav_srcs_[uav_offset], srv_uav_handles_[uav_offset], param);
 			break;
 
 		default:
@@ -1219,31 +1217,20 @@ namespace KlayGE
 			{
 				pb.func();
 			}
+		}
 
-			D3D12_RESOURCE_STATES state_after
-				= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-			for (auto const & srvsrc : srvsrcs_[stage])
+		D3D12_RESOURCE_STATES const srv_state_after =
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		D3D12_RESOURCE_STATES const uav_state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		for (uint32_t i = 0; i < srv_uav_srcs_.size(); ++i)
+		{
+			auto const state_after = i < d3d_so_template_->num_total_srvs_ ? srv_state_after : uav_state_after;
+			auto res = std::get<0>(srv_uav_srcs_[i]);
+			if (res != nullptr)
 			{
-				auto res = std::get<0>(srvsrc);
-				if (res != nullptr)
+				for (uint32_t subres = 0; subres < std::get<2>(srv_uav_srcs_[i]); ++subres)
 				{
-					for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++subres)
-					{
-						res->UpdateResourceBarrier(cmd_list, std::get<1>(srvsrc) + subres, state_after);
-					}
-				}
-			}
-
-			state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-			for (auto const & uavsrc : uavsrcs_[stage])
-			{
-				auto res = std::get<0>(uavsrc);
-				if (res != nullptr)
-				{
-					for (uint32_t subres = 0; subres < std::get<2>(uavsrc); ++subres)
-					{
-						res->UpdateResourceBarrier(cmd_list, std::get<1>(uavsrc) + subres, state_after);
-					}
+					res->UpdateResourceBarrier(cmd_list, std::get<1>(srv_uav_srcs_[i]) + subres, state_after);
 				}
 			}
 		}

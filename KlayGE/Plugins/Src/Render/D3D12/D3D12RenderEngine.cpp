@@ -618,15 +618,16 @@ namespace KlayGE
 	{
 		auto const& d3d12_so = checked_cast<D3D12ShaderObject const&>(so);
 
-		uint32_t const num_handles = d3d12_so.NumHandles();
+		uint32_t const num_srv_uav_handles = d3d12_so.NumSrvUavHandles();
 
 		std::array<ID3D12DescriptorHeap*, 2> heaps;
 		uint32_t num_heaps = 0;
 
 		ID3D12DescriptorHeap* cbv_srv_uav_heap = nullptr;
-		if (num_handles > 0)
+		if (num_srv_uav_handles > 0)
 		{
-			cbv_srv_uav_heap = per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num_handles);
+			cbv_srv_uav_heap =
+				per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num_srv_uav_handles);
 			heaps[num_heaps] = cbv_srv_uav_heap;
 			++ num_heaps;
 		}
@@ -662,13 +663,17 @@ namespace KlayGE
 		if (cbv_srv_uav_heap != nullptr)
 		{
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
-			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
+			auto const& srv_uav_handles = d3d12_so.SrvUavHandles();
+			uint32_t num_srvs_uavs = static_cast<uint32_t>(srv_uav_handles.size());
+			d3d_device_->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_srvs_uavs, num_srvs_uavs, srv_uav_handles.data(), nullptr,
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 			for (uint32_t i = 0; i < NumShaderStages; ++i)
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(i);
-				auto const & srv_handles = d3d12_so.SrvHandles(stage);
-				if (!srv_handles.empty())
+				uint32_t const num_srvs = d3d12_so.NumSrvs(stage);
+				if (num_srvs > 0)
 				{
 					if (stage != ShaderStage::Compute)
 					{
@@ -679,11 +684,6 @@ namespace KlayGE
 						cmd_list->SetComputeRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 					}
 
-					uint32_t const num_srvs = static_cast<uint32_t>(srv_handles.size());
-					d3d_device_->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_srvs, num_srvs, srv_handles.data(), nullptr,
-						D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-					cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_srvs;
 					gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_srvs;
 
 					++ root_param_index;
@@ -692,8 +692,8 @@ namespace KlayGE
 			for (uint32_t i = 0; i < NumShaderStages; ++i)
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(i);
-				auto const & uav_handles = d3d12_so.UavHandles(stage);
-				if (!uav_handles.empty())
+				uint32_t const num_uavs = d3d12_so.NumUavs(stage);
+				if (num_uavs > 0)
 				{
 					if (stage != ShaderStage::Compute)
 					{
@@ -704,11 +704,6 @@ namespace KlayGE
 						cmd_list->SetComputeRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 					}
 
-					uint32_t const num_uavs = static_cast<uint32_t>(uav_handles.size());
-					d3d_device_->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_uavs, num_uavs, uav_handles.data(), nullptr,
-						D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-					cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_uavs;
 					gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_uavs;
 
 					++ root_param_index;

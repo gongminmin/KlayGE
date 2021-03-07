@@ -355,7 +355,6 @@ namespace KlayGE
 	private:
 		ParameterBind GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param);
 
-		void CreateHwResources(ShaderStage stage, RenderEffect const & effect) override;
 		void DoLinkShaders(RenderEffect const & effect) override;
 
 	private:

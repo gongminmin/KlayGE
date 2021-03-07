@@ -274,38 +274,41 @@ namespace KlayGE
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
+		uint32_t NumSrvs(ShaderStage stage) const
+		{
+			return d3d_so_template_->num_srvs_[static_cast<uint32_t>(stage)];
+		}
+		uint32_t NumUavs(ShaderStage stage) const
+		{
+			return d3d_so_template_->num_uavs_[static_cast<uint32_t>(stage)];
+		}
 		uint32_t NumSamplers(ShaderStage stage) const
 		{
-			return static_cast<uint32_t>(samplers_[static_cast<uint32_t>(stage)].size());
+			return d3d_so_template_->num_samplers_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& SrvHandles(ShaderStage stage) const
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& SrvUavHandles() const noexcept
 		{
-			return srv_handles_[static_cast<uint32_t>(stage)];
-		}
-
-		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& UavHandles(ShaderStage stage) const
-		{
-			return uav_handles_[static_cast<uint32_t>(stage)];
+			return srv_uav_handles_;
 		}
 
 		uint32_t NumCBuffers(ShaderStage stage) const;
 		D3D12_GPU_VIRTUAL_ADDRESS CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const;
 
-		ID3D12RootSignature* RootSignature() const
+		ID3D12RootSignature* RootSignature() const noexcept
 		{
 			return d3d_so_template_->root_signature_.get();
 		}
-		ID3D12DescriptorHeap* SamplerHeap() const
+		ID3D12DescriptorHeap* SamplerHeap() const noexcept
 		{
 			return d3d_so_template_->sampler_heap_.get();
 		}
 
-		void* GetD3D12ShaderObjectTemplate()
+		void* GetD3D12ShaderObjectTemplate() noexcept
 		{
 			return d3d_so_template_.get();
 		}
-		void const * GetD3D12ShaderObjectTemplate() const
+		void const* GetD3D12ShaderObjectTemplate() const noexcept
 		{
 			return d3d_so_template_.get();
 		}
@@ -313,9 +316,9 @@ namespace KlayGE
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc);
 		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc);
 
-		uint32_t NumHandles() const
+		uint32_t NumSrvUavHandles() const noexcept
 		{
-			return num_handles_;
+			return static_cast<uint32_t>(srv_uav_handles_.size());
 		}
 
 	private:
@@ -323,6 +326,12 @@ namespace KlayGE
 		{
 			ID3D12RootSignaturePtr root_signature_;
 			ID3D12DescriptorHeapPtr sampler_heap_;
+
+			std::array<uint32_t, NumShaderStages> num_srvs_{};
+			std::array<uint32_t, NumShaderStages> num_uavs_{};
+			std::array<uint32_t, NumShaderStages> num_samplers_{};
+
+			uint32_t num_total_srvs_;
 		};
 
 		struct ParameterBind
@@ -337,25 +346,16 @@ namespace KlayGE
 			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<D3D12ShaderObjectTemplate> d3d_so_template);
 
 	private:
-		ParameterBind GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param);
+		ParameterBind GetBindFunc(uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter* param);
 
-		void CreateHwResources(ShaderStage stage, RenderEffect const& effect) override;
 		void DoLinkShaders(RenderEffect const & effect) override;
-
-		void CreateRootSignature();
 
 	private:
 		const std::shared_ptr<D3D12ShaderObjectTemplate> d3d_so_template_;
 
 		std::array<std::vector<ParameterBind>, NumShaderStages> param_binds_;
-
-		std::array<std::vector<D3D12_SAMPLER_DESC>, NumShaderStages> samplers_;
-		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
-		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, NumShaderStages> srv_handles_;
-		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, NumShaderStages> uavsrcs_;
-		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, NumShaderStages> uav_handles_;
-
-		uint32_t num_handles_;
+		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> srv_uav_srcs_;
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> srv_uav_handles_;
 	};
 
 	typedef std::shared_ptr<D3D12ShaderObject> D3D12ShaderObjectPtr;

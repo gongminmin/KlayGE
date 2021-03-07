@@ -216,7 +216,6 @@ namespace KlayGE
 		ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template);
 
 	private:
-		virtual void CreateHwResources(ShaderStage stage, RenderEffect const& effect) = 0;
 		virtual void DoLinkShaders(RenderEffect const & effect) = 0;
 
 	protected:

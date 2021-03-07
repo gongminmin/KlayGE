@@ -1349,17 +1349,19 @@ namespace KlayGE
 	{
 	}
 
-	void NullShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const & effect)
+	void NullShaderObject::DoLinkShaders(RenderEffect const & effect)
 	{
 		if (null_so_template_->as_gl_ || null_so_template_->as_gles_)
 		{
-			this->OGLAppendTexSamplerBinds(stage, effect, checked_cast<OGLShaderStageObject*>(this->Stage(stage).get())->TexSamplerPairs());
+			for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
+			{
+				auto const* shader_stage = checked_cast<OGLShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
+				if (shader_stage)
+				{
+					this->OGLAppendTexSamplerBinds(static_cast<ShaderStage>(stage), effect, shader_stage->TexSamplerPairs());
+				}
+			}
 		}
-	}
-
-	void NullShaderObject::DoLinkShaders(RenderEffect const & effect)
-	{
-		KFL_UNUSED(effect);
 	}
 
 	// OpenGL/OpenGLES

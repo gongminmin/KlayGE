@@ -606,10 +606,6 @@ namespace KlayGE
 				auto const& shader_stage = this->Stage(stage);
 				if (shader_stage)
 				{
-					if (shader_stage->Validate())
-					{
-						this->CreateHwResources(stage, effect);
-					}
 					is_validate_ &= shader_stage->Validate();
 				}
 			}

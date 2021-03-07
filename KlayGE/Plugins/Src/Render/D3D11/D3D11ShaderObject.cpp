@@ -987,45 +987,6 @@ namespace KlayGE
 	{
 	}
 
-	void D3D11ShaderObject::CreateHwResources(ShaderStage stage, RenderEffect const& effect)
-	{
-		auto& shader_stage = checked_cast<D3D11ShaderStageObject&>(*this->Stage(stage));
-		if (!shader_stage.ShaderCodeBlob().empty())
-		{
-			auto const & shader_desc = shader_stage.GetD3D11ShaderDesc();
-
-			uint32_t const stage_index = static_cast<uint32_t>(stage);
-
-			samplers_[stage_index].resize(shader_desc.num_samplers);
-			srvsrcs_[stage_index].resize(shader_desc.num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
-			srvs_[stage_index].resize(shader_desc.num_srvs);
-			uavsrcs_.resize(shader_desc.num_uavs, nullptr);
-			uavs_.resize(shader_desc.num_uavs);
-			uav_init_counts_.resize(shader_desc.num_uavs);
-
-			for (size_t i = 0; i < shader_desc.res_desc.size(); ++ i)
-			{
-				RenderEffectParameter* p = effect.ParameterByName(shader_desc.res_desc[i].name);
-				BOOST_ASSERT(p);
-
-				uint32_t offset = shader_desc.res_desc[i].bind_point;
-				if (D3D_SIT_SAMPLER == shader_desc.res_desc[i].type)
-				{
-					SamplerStateObjectPtr sampler;
-					p->Value(sampler);
-					if (sampler)
-					{
-						samplers_[stage_index][offset] = checked_cast<D3D11SamplerStateObject&>(*sampler).D3DSamplerState();
-					}
-				}
-				else
-				{
-					param_binds_[stage_index].push_back(this->GetBindFunc(stage, offset, p));
-				}
-			}
-		}
-	}
-
 	void D3D11ShaderObject::DoLinkShaders(RenderEffect const & effect)
 	{
 		for (size_t stage = 0; stage < NumShaderStages; ++stage)
@@ -1033,6 +994,39 @@ namespace KlayGE
 			auto const* shader_stage = checked_cast<D3D11ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 			if (shader_stage)
 			{
+				if (!shader_stage->ShaderCodeBlob().empty())
+				{
+					auto const& shader_desc = shader_stage->GetD3D11ShaderDesc();
+
+					samplers_[stage].resize(shader_desc.num_samplers);
+					srvsrcs_[stage].resize(shader_desc.num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
+					srvs_[stage].resize(shader_desc.num_srvs);
+					uavsrcs_.resize(shader_desc.num_uavs, nullptr);
+					uavs_.resize(shader_desc.num_uavs);
+					uav_init_counts_.resize(shader_desc.num_uavs);
+
+					for (size_t i = 0; i < shader_desc.res_desc.size(); ++i)
+					{
+						RenderEffectParameter* p = effect.ParameterByName(shader_desc.res_desc[i].name);
+						BOOST_ASSERT(p);
+
+						uint32_t offset = shader_desc.res_desc[i].bind_point;
+						if (D3D_SIT_SAMPLER == shader_desc.res_desc[i].type)
+						{
+							SamplerStateObjectPtr sampler;
+							p->Value(sampler);
+							if (sampler)
+							{
+								samplers_[stage][offset] = checked_cast<D3D11SamplerStateObject&>(*sampler).D3DSamplerState();
+							}
+						}
+						else
+						{
+							param_binds_[stage].push_back(this->GetBindFunc(static_cast<ShaderStage>(stage), offset, p));
+						}
+					}
+				}
+
 				if (!shader_stage->CBufferIndices().empty())
 				{
 					auto const& shader_desc = shader_stage->GetD3D11ShaderDesc();
