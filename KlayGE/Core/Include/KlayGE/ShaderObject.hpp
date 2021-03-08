@@ -201,25 +201,25 @@ namespace KlayGE
 			return is_validate_;
 		}
 
-		bool HWResourceReady() const
+		bool HWResourceReady() const noexcept
 		{
 			return hw_res_ready_;
 		}
 
 	protected:
-		struct ShaderObjectTemplate
+		struct Immutable
 		{
 			std::array<ShaderStageObjectPtr, NumShaderStages> shader_stages_;
 		};
 
 	public:
-		ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template);
+		ShaderObject(std::shared_ptr<Immutable> so_template);
 
 	private:
 		virtual void DoLinkShaders(RenderEffect const & effect) = 0;
 
 	protected:
-		const std::shared_ptr<ShaderObjectTemplate> so_template_;
+		const std::shared_ptr<Immutable> immutable_;
 		
 		bool is_validate_;
 		bool shader_stages_dirty_ = true;

@@ -589,24 +589,24 @@ namespace
 			cbuff_desc.cbuff_index = cbuff_index;
 		}
 
-		bool InCBuffer() const override
+		bool InCBuffer() const noexcept override
 		{
 			return in_cbuff_;
 		}
-		RenderEffectConstantBuffer* CBuffer() const override
+		RenderEffectConstantBuffer* CBuffer() const noexcept override
 		{
 			auto& cbuff_desc = this->RetrieveCBufferDesc();
 			return cbuff_desc.effect->CBufferByIndex(cbuff_desc.cbuff_index);
 		}
-		uint32_t CBufferIndex() const override
+		uint32_t CBufferIndex() const noexcept override
 		{
 			return this->RetrieveCBufferDesc().cbuff_index;
 		}
-		uint32_t CBufferOffset() const override
+		uint32_t CBufferOffset() const noexcept override
 		{
 			return this->RetrieveCBufferDesc().offset;
 		}
-		uint32_t Stride() const override
+		uint32_t Stride() const noexcept override
 		{
 			return this->RetrieveCBufferDesc().stride;
 		}
@@ -621,11 +621,11 @@ namespace
 			return std::get<T>(data_);
 		}
 
-		CBufferDesc& RetrieveCBufferDesc()
+		CBufferDesc& RetrieveCBufferDesc() noexcept
 		{
 			return std::get<CBufferDesc>(data_);
 		}
-		CBufferDesc const& RetrieveCBufferDesc() const
+		CBufferDesc const& RetrieveCBufferDesc() const noexcept
 		{
 			return std::get<CBufferDesc>(data_);
 		}
@@ -3765,7 +3765,7 @@ namespace
 		{
 		}
 
-		RenderEffectStructType* StructType() const override
+		RenderEffectStructType* StructType() const noexcept override
 		{
 			return struct_type_;
 		}
@@ -4254,8 +4254,8 @@ namespace KlayGE
 				member_array_size = std::string(attr->ValueString());
 			}
 			
-			members_.push_back(std::make_tuple(
-				member_type, std::string(member_type_name), std::string(member_name), MakeSharedPtr<std::string>(member_array_size)));
+			members_.emplace_back(StrcutMemberType{
+				member_type, std::string(member_type_name), std::string(member_name), MakeSharedPtr<std::string>(member_array_size)});
 		}
 	}
 #endif
@@ -4273,15 +4273,15 @@ namespace KlayGE
 		{
 			uint8_t type;
 			res.read(reinterpret_cast<char*>(&type), sizeof(type));
-			std::get<0>(members_[i]) = static_cast<RenderEffectDataType>(type);
+			members_[i].type = static_cast<RenderEffectDataType>(type);
 
 			if (type == REDT_struct)
 			{
-				std::get<1>(members_[i]) = ReadShortString(res);
+				members_[i].type_name = ReadShortString(res);
 			}
 
-			std::get<2>(members_[i]) = ReadShortString(res);
-			std::get<3>(members_[i]) = MakeSharedPtr<std::string>(ReadShortString(res));
+			members_[i].name = ReadShortString(res);
+			members_[i].array_size = MakeSharedPtr<std::string>(ReadShortString(res));
 		}
 	}
 
@@ -4295,66 +4295,186 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < len; ++i)
 		{
-			uint8_t const type = static_cast<uint8_t>(std::get<0>(members_[i]));
+			uint8_t const type = static_cast<uint8_t>(members_[i].type);
 			os.write(reinterpret_cast<char const*>(&type), sizeof(type));
 
 			if (type == REDT_struct)
 			{
-				WriteShortString(os, std::get<1>(members_[i]));
+				WriteShortString(os, members_[i].type_name);
 			}
 
-			WriteShortString(os, std::get<2>(members_[i]));
-			WriteShortString(os, *std::get<3>(members_[i]));
+			WriteShortString(os, members_[i].name);
+			WriteShortString(os, *members_[i].array_size);
 		}
 	}
 #endif
 
-	uint32_t RenderEffectStructType::NumMembers() const
+	uint32_t RenderEffectStructType::NumMembers() const noexcept
 	{
 		return static_cast<uint8_t>(members_.size());
 	}
 
-	RenderEffectDataType RenderEffectStructType::MemberType(uint32_t index) const
+	RenderEffectDataType RenderEffectStructType::MemberType(uint32_t index) const noexcept
 	{
 		BOOST_ASSERT(index < this->NumMembers());
-		return std::get<0>(members_[index]);
+		return members_[index].type;
 	}
 
-	std::string const& RenderEffectStructType::MemberTypeName(uint32_t index) const
+	std::string const& RenderEffectStructType::MemberTypeName(uint32_t index) const noexcept
 	{
 		BOOST_ASSERT(index < this->NumMembers());
-		return std::get<1>(members_[index]);
+		return members_[index].type_name;
 	}
 
-	std::string const& RenderEffectStructType::MemberName(uint32_t index) const
+	std::string const& RenderEffectStructType::MemberName(uint32_t index) const noexcept
 	{
 		BOOST_ASSERT(index < this->NumMembers());
-		return std::get<2>(members_[index]);
+		return members_[index].name;
 	}
 
-	std::shared_ptr<std::string> const& RenderEffectStructType::MemberArraySize(uint32_t index) const
+	std::shared_ptr<std::string> const& RenderEffectStructType::MemberArraySize(uint32_t index) const noexcept
 	{
 		BOOST_ASSERT(index < this->NumMembers());
-		return std::get<3>(members_[index]);
+		return members_[index].array_size;
 	}
 
 
 	void RenderEffect::Load(std::span<std::string const> names)
 	{
-		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
-		effect_template_->Load(names, *this);
+		if (!immutable_)
+		{
+			immutable_ = MakeSharedPtr<Immutable>();
+		}
+
+		FILESYSTEM_NS::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
+		FILESYSTEM_NS::path first_fxml_directory = first_fxml_path.parent_path();
+
+		std::string connected_name;
+		for (size_t i = 0; i < names.size(); ++i)
+		{
+			connected_name += FILESYSTEM_NS::path(names[i]).stem().string();
+			if (i != names.size() - 1)
+			{
+				connected_name += '+';
+			}
+		}
+
+		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
+		if (kfx_name.empty())
+		{
+			kfx_name = (first_fxml_directory / (connected_name + ".kfx")).string();
+		}
+
+		immutable_->res_name = (first_fxml_directory / (connected_name + ".fxml")).string();
+		immutable_->res_name_hash = HashValue(immutable_->res_name);
+#if KLAYGE_IS_DEV_PLATFORM
+		for (auto const& name : names)
+		{
+			immutable_->timestamp = 0;
+
+			ResIdentifierPtr source = ResLoader::Instance().Open(name);
+			if (source)
+			{
+				immutable_->timestamp = std::max(immutable_->timestamp, source->Timestamp());
+
+				std::unique_ptr<XMLDocument> doc = LoadXml(*source);
+				XMLNode const* root = doc->RootNode();
+
+				std::vector<std::string> include_names;
+				this->RecursiveIncludeNode(*root, include_names);
+
+				for (auto const& include_name : include_names)
+				{
+					immutable_->timestamp = std::max(immutable_->timestamp, ResLoader::Instance().Timestamp(include_name));
+				}
+			}
+		}
+#endif
+
+#if KLAYGE_IS_DEV_PLATFORM
+		immutable_->need_compile = false;
+#endif
+		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
+		if (!kfx_source || !this->StreamIn(*kfx_source))
+		{
+#if KLAYGE_IS_DEV_PLATFORM
+			params_.clear();
+			cbuffers_.clear();
+			shader_objs_.clear();
+
+			immutable_->macros.clear();
+			immutable_->struct_types.clear();
+			immutable_->shader_frags.clear();
+			immutable_->hlsl_shader.clear();
+			immutable_->techniques.clear();
+			immutable_->shader_graph_nodes.clear();
+
+			immutable_->shader_descs.resize(1);
+
+			std::vector<std::unique_ptr<XMLDocument>> include_docs;
+			std::vector<std::unique_ptr<XMLDocument>> frag_docs(names.size());
+
+			ResIdentifierPtr main_source = ResLoader::Instance().Open(names[0]);
+			if (main_source)
+			{
+				frag_docs[0] = LoadXml(*main_source);
+				XMLNode* root = frag_docs[0]->RootNode();
+				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
+
+				for (size_t i = 1; i < names.size(); ++i)
+				{
+					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
+					if (source)
+					{
+						frag_docs[i] = LoadXml(*source);
+						XMLNode* frag_root = frag_docs[i]->RootNode();
+
+						this->PreprocessIncludes(*frag_docs[i], *frag_root, include_docs);
+
+						for (auto frag_node = frag_root->FirstNode(); frag_node; frag_node = frag_node->NextSibling())
+						{
+							root->AppendNode(frag_docs[i]->CloneNode(*frag_node));
+						}
+					}
+				}
+
+				this->ResolveOverrideTechs(*frag_docs[0], *root);
+
+				this->Load(*root);
+
+				immutable_->kfx_name = kfx_name;
+				immutable_->need_compile = true;
+			}
+#endif
+		}
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffect::CompileShaders()
 	{
-		effect_template_->CompileShaders(*this);
+		if (immutable_->need_compile)
+		{
+			uint32_t tech_index = 0;
+			for (auto const& tech : immutable_->techniques)
+			{
+				tech->CompileShaders(*this, tech_index);
+				++tech_index;
+			}
+
+			std::ofstream ofs(immutable_->kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
+			this->StreamOut(ofs);
+		}
 	}
 #endif
 
 	void RenderEffect::CreateHwShaders()
 	{
-		effect_template_->CreateHwShaders(*this);
+		uint32_t tech_index = 0;
+		for (auto const& tech : immutable_->techniques)
+		{
+			tech->CreateHwShaders(*this, tech_index);
+			++tech_index;
+		}
 	}
 
 	RenderEffectPtr RenderEffect::Clone()
@@ -4366,7 +4486,7 @@ namespace KlayGE
 
 	void RenderEffect::CloneInPlace(RenderEffect& dst_effect)
 	{
-		dst_effect.effect_template_ = effect_template_;
+		dst_effect.immutable_ = immutable_;
 
 		dst_effect.params_.resize(params_.size());
 		for (size_t i = 0; i < params_.size(); ++i)
@@ -4406,44 +4526,21 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderEffect::HWResourceReady() const
+	bool RenderEffect::HWResourceReady() const noexcept
 	{
 		if (!hw_res_ready_)
 		{
 			hw_res_ready_ = true;
-			for (uint32_t i = 0; i < effect_template_->NumTechniques(); ++i)
+			for (uint32_t i = 0; i < this->NumTechniques(); ++i)
 			{
-				hw_res_ready_ &= effect_template_->TechniqueByIndex(i)->HWResourceReady(*this);
+				hw_res_ready_ &= this->TechniqueByIndex(i)->HWResourceReady(*this);
 			}
 		}
 
 		return hw_res_ready_;
 	}
 
-	std::string const & RenderEffect::ResName() const
-	{
-		return effect_template_->ResName();
-	}
-
-	size_t RenderEffect::ResNameHash() const
-	{
-		return effect_template_->ResNameHash();
-	}
-
-	RenderEffectParameter* RenderEffect::ParameterByName(std::string_view name) const
-	{
-		size_t const name_hash = HashValue(std::move(name));
-		for (auto const & param : params_)
-		{
-			if (name_hash == param->NameHash())
-			{
-				return param.get();
-			}
-		}
-		return nullptr;
-	}
-
-	RenderEffectParameter* RenderEffect::ParameterBySemantic(std::string_view semantic) const
+	RenderEffectParameter* RenderEffect::ParameterBySemantic(std::string_view semantic) const noexcept
 	{
 		size_t const semantic_hash = HashValue(std::move(semantic));
 		for (auto const & param : params_)
@@ -4456,7 +4553,26 @@ namespace KlayGE
 		return nullptr;
 	}
 
-	RenderEffectConstantBuffer* RenderEffect::CBufferByName(std::string_view name) const
+	RenderEffectParameter* RenderEffect::ParameterByName(std::string_view name) const noexcept
+	{
+		size_t const name_hash = HashValue(std::move(name));
+		for (auto const & param : params_)
+		{
+			if (name_hash == param->NameHash())
+			{
+				return param.get();
+			}
+		}
+		return nullptr;
+	}
+
+	RenderEffectParameter* RenderEffect::ParameterByIndex(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumParameters());
+		return params_[n].get();
+	}
+
+	RenderEffectConstantBuffer* RenderEffect::CBufferByName(std::string_view name) const noexcept
 	{
 		uint32_t index = this->FindCBuffer(name);
 		if (index != static_cast<uint32_t>(-1))
@@ -4469,7 +4585,13 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t RenderEffect::FindCBuffer(std::string_view name) const
+	RenderEffectConstantBuffer* RenderEffect::CBufferByIndex(uint32_t index) const noexcept
+	{
+		BOOST_ASSERT(index < this->NumCBuffers());
+		return cbuffers_[index].get();
+	}
+
+	uint32_t RenderEffect::FindCBuffer(std::string_view name) const noexcept
 	{
 		size_t const name_hash = HashValue(std::move(name));
 		for (uint32_t i = 0; i < cbuffers_.size(); ++i)
@@ -4482,7 +4604,7 @@ namespace KlayGE
 		return static_cast<uint32_t>(-1);
 	}
 
-	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff)
+	void RenderEffect::BindCBufferByName(std::string_view name, RenderEffectConstantBufferPtr const& cbuff) noexcept
 	{
 		size_t const name_hash = HashValue(std::move(name));
 		for (auto& cbuffer : cbuffers_)
@@ -4494,69 +4616,89 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t RenderEffect::NumStructTypes() const
+	void RenderEffect::BindCBufferByIndex(uint32_t index, RenderEffectConstantBufferPtr const& cbuff) noexcept
 	{
-		return effect_template_->NumStructTypes();
+		BOOST_ASSERT(index < this->NumCBuffers());
+		cbuffers_[index] = cbuff;
 	}
 
-	RenderEffectStructType* RenderEffect::StructTypeByName(std::string_view name) const
+	
+
+	RenderEffectStructType* RenderEffect::StructTypeByName(std::string_view name) const noexcept
 	{
-		return effect_template_->StructTypeByName(name);
+		size_t const name_hash = HashValue(std::move(name));
+		for (auto const& struct_type : immutable_->struct_types)
+		{
+			if (name_hash == struct_type->NameHash())
+			{
+				return struct_type.get();
+			}
+		}
+		return nullptr;
 	}
 
-	RenderEffectStructType* RenderEffect::StructTypeByIndex(uint32_t index) const
+	RenderEffectStructType* RenderEffect::StructTypeByIndex(uint32_t index) const noexcept
 	{
-		return effect_template_->StructTypeByIndex(index);
+		BOOST_ASSERT(index < this->NumStructTypes());
+		return immutable_->struct_types[index].get();
 	}
 
-	uint32_t RenderEffect::NumTechniques() const
+	RenderTechnique* RenderEffect::TechniqueByName(std::string_view name) const noexcept
 	{
-		return effect_template_->NumTechniques();
+		size_t const name_hash = HashValue(std::move(name));
+		for (auto const& tech : immutable_->techniques)
+		{
+			if (name_hash == tech->NameHash())
+			{
+				return tech.get();
+			}
+		}
+		return nullptr;
 	}
 
-	RenderTechnique* RenderEffect::TechniqueByName(std::string_view name) const
+	RenderTechnique* RenderEffect::TechniqueByIndex(uint32_t n) const noexcept
 	{
-		return effect_template_->TechniqueByName(name);
+		BOOST_ASSERT(n < this->NumTechniques());
+		return immutable_->techniques[n].get();
 	}
 
-	RenderTechnique* RenderEffect::TechniqueByIndex(uint32_t n) const
+	RenderShaderFragment const& RenderEffect::ShaderFragmentByIndex(uint32_t n) const noexcept
 	{
-		return effect_template_->TechniqueByIndex(n);
-	}
-
-	uint32_t RenderEffect::NumShaderFragments() const
-	{
-		return effect_template_->NumShaderFragments();
-	}
-
-	RenderShaderFragment const & RenderEffect::ShaderFragmentByIndex(uint32_t n) const
-	{
-		return effect_template_->ShaderFragmentByIndex(n);
+		BOOST_ASSERT(n < this->NumShaderFragments());
+		return immutable_->shader_frags[n];
 	}
 
 	uint32_t RenderEffect::AddShaderDesc(ShaderDesc const & sd)
 	{
-		return effect_template_->AddShaderDesc(sd);
+		for (uint32_t i = 0; i < immutable_->shader_descs.size(); ++i)
+		{
+			if (immutable_->shader_descs[i] == sd)
+			{
+				return i;
+			}
+		}
+
+		uint32_t id = static_cast<uint32_t>(immutable_->shader_descs.size());
+		immutable_->shader_descs.push_back(sd);
+		return id;
 	}
 
-	ShaderDesc& RenderEffect::GetShaderDesc(uint32_t id)
+	ShaderDesc& RenderEffect::GetShaderDesc(uint32_t id) noexcept
 	{
-		return effect_template_->GetShaderDesc(id);
+		BOOST_ASSERT(id < immutable_->shader_descs_.size());
+		return immutable_->shader_descs[id];
 	}
 
-	ShaderDesc const & RenderEffect::GetShaderDesc(uint32_t id) const
+	ShaderDesc const& RenderEffect::GetShaderDesc(uint32_t id) const noexcept
 	{
-		return effect_template_->GetShaderDesc(id);
+		BOOST_ASSERT(id < immutable_->shader_descs_.size());
+		return immutable_->shader_descs[id];
 	}
 
-	uint32_t RenderEffect::NumMacros() const
+	std::pair<std::string, std::string> const& RenderEffect::MacroByIndex(uint32_t n) const noexcept
 	{
-		return effect_template_->NumMacros();
-	}
-
-	std::pair<std::string, std::string> const & RenderEffect::MacroByIndex(uint32_t n) const
-	{
-		return effect_template_->MacroByIndex(n);
+		BOOST_ASSERT(n < this->NumMacros());
+		return immutable_->macros[n].first;
 	}
 
 	uint32_t RenderEffect::AddShaderObject()
@@ -4566,21 +4708,14 @@ namespace KlayGE
 		return index;
 	}
 
-#if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffect::GenHLSLShaderText()
+	ShaderObjectPtr const& RenderEffect::ShaderObjectByIndex(uint32_t n) const noexcept
 	{
-		effect_template_->GenHLSLShaderText(*this);
+		BOOST_ASSERT(n < shader_objs_.size());
+		return shader_objs_[n];
 	}
 
-	std::string const & RenderEffect::HLSLShaderText() const
-	{
-		return effect_template_->HLSLShaderText();
-	}
-#endif
-
-
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectTemplate::PreprocessIncludes(XMLDocument& doc, XMLNode& root, std::vector<std::unique_ptr<XMLDocument>>& include_docs)
+	void RenderEffect::PreprocessIncludes(XMLDocument& doc, XMLNode& root, std::vector<std::unique_ptr<XMLDocument>>& include_docs)
 	{
 		std::vector<std::string> whole_include_names;
 		for (XMLNode const* node = root.FirstNode("include"); node;)
@@ -4648,7 +4783,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEffectTemplate::RecursiveIncludeNode(XMLNode const & root, std::vector<std::string>& include_names) const
+	void RenderEffect::RecursiveIncludeNode(XMLNode const& root, std::vector<std::string>& include_names) const
 	{
 		for (XMLNode const* node = root.FirstNode("include"); node; node = node->NextSibling("include"))
 		{
@@ -4678,7 +4813,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEffectTemplate::InsertIncludeNodes(
+	void RenderEffect::InsertIncludeNodes(
 		XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const
 	{
 		for (XMLNode const* child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
@@ -4690,7 +4825,7 @@ namespace KlayGE
 		}
 	}
 
-	std::unique_ptr<XMLNode> RenderEffectTemplate::ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNode const* tech_node)
+	std::unique_ptr<XMLNode> RenderEffect::ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNode const* tech_node)
 	{
 		auto inherit_attr = tech_node->Attrib("inherit");
 		if (!inherit_attr)
@@ -4771,7 +4906,7 @@ namespace KlayGE
 		return new_tech_node;
 	}
 
-	void RenderEffectTemplate::ResolveOverrideTechs(XMLDocument& doc, XMLNode& root)
+	void RenderEffect::ResolveOverrideTechs(XMLDocument& doc, XMLNode& root)
 	{
 		std::vector<XMLNode const*> tech_nodes;
 		for (XMLNode const* node = root.FirstNode("technique"); node; node = node->NextSibling("technique"))
@@ -4811,17 +4946,17 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEffectTemplate::Load(XMLNode const & root, RenderEffect& effect)
+	void RenderEffect::Load(XMLNode const& root)
 	{
 		for (XMLNode const* macro_node = root.FirstNode("macro"); macro_node; macro_node = macro_node->NextSibling("macro"))
 		{
-			macros_.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
+			immutable_->macros.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
 		}
 
 		for (XMLNode const* node = root.FirstNode("struct"); node; node = node->NextSibling("struct"))
 		{
-			struct_types_.push_back(MakeUniquePtr<RenderEffectStructType>());
-			struct_types_.back()->Load(effect, *node);
+			immutable_->struct_types.push_back(MakeUniquePtr<RenderEffectStructType>());
+			immutable_->struct_types.back()->Load(*this, *node);
 		}
 
 		std::vector<XMLNode const*> parameter_nodes;
@@ -4846,7 +4981,7 @@ namespace KlayGE
 
 			RenderEffectDataType type = REDT_count;
 			auto type_name = node.Attrib("type")->ValueString();
-			for (auto const& struct_type : struct_types_)
+			for (auto const& struct_type : immutable_->struct_types)
 			{
 				if (type_name == struct_type->Name())
 				{
@@ -4882,19 +5017,19 @@ namespace KlayGE
 				size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
 				bool found = false;
-				for (size_t i = 0; i < effect.cbuffers_.size(); ++ i)
+				for (size_t i = 0; i < cbuffers_.size(); ++ i)
 				{
-					if (effect.cbuffers_[i]->NameHash() == cbuff_name_hash)
+					if (cbuffers_[i]->NameHash() == cbuff_name_hash)
 					{
-						cbuff = effect.cbuffers_[i].get();
+						cbuff = cbuffers_[i].get();
 						found = true;
 						break;
 					}
 				}
 				if (!found)
 				{
-					effect.cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>(effect));
-					cbuff = effect.cbuffers_.back().get();
+					cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>(*this));
+					cbuff = cbuffers_.back().get();
 					cbuff->Load(cbuff_name);
 				}
 				BOOST_ASSERT(cbuff);
@@ -4902,8 +5037,8 @@ namespace KlayGE
 				cbuff->AddParameter(param_index);
 			}
 
-			effect.params_.push_back(MakeUniquePtr<RenderEffectParameter>());
-			effect.params_.back()->Load(effect, node);
+			params_.push_back(MakeUniquePtr<RenderEffectParameter>());
+			params_.back()->Load(*this, node);
 		}
 
 		for (XMLNode const* shader_graph_nodes_node = root.FirstNode("shader_graph_nodes"); shader_graph_nodes_node;
@@ -4917,7 +5052,7 @@ namespace KlayGE
 
 				size_t const node_name_hash = HashValue(name_attr->ValueString());
 				bool found = false;
-				for (auto& gn : shader_graph_nodes_)
+				for (auto& gn : immutable_->shader_graph_nodes)
 				{
 					if (node_name_hash == gn.NameHash())
 					{
@@ -4929,163 +5064,30 @@ namespace KlayGE
 
 				if (!found)
 				{
-					shader_graph_nodes_.push_back(RenderShaderGraphNode());
-					shader_graph_nodes_.back().Load(*shader_node);
+					immutable_->shader_graph_nodes.push_back(RenderShaderGraphNode());
+					immutable_->shader_graph_nodes.back().Load(*shader_node);
 				}
 			}
 		}
 
 		for (XMLNode const* shader_node = root.FirstNode("shader"); shader_node; shader_node = shader_node->NextSibling("shader"))
 		{
-			shader_frags_.push_back(RenderShaderFragment());
-			shader_frags_.back().Load(*shader_node);
+			immutable_->shader_frags.push_back(RenderShaderFragment());
+			immutable_->shader_frags.back().Load(*shader_node);
 		}
 
-		this->GenHLSLShaderText(effect);
+		this->GenHLSLShaderText();
 
 		uint32_t index = 0;
 		for (XMLNode const* node = root.FirstNode("technique"); node; node = node->NextSibling("technique"), ++index)
 		{
-			techniques_.push_back(MakeUniquePtr<RenderTechnique>());
-			techniques_.back()->Load(effect, *node, index);
+			immutable_->techniques.push_back(MakeUniquePtr<RenderTechnique>());
+			immutable_->techniques.back()->Load(*this, *node, index);
 		}
 	}
 #endif
 
-	void RenderEffectTemplate::Load(std::span<std::string const> names, RenderEffect& effect)
-	{
-		FILESYSTEM_NS::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
-		FILESYSTEM_NS::path first_fxml_directory = first_fxml_path.parent_path();
-
-		std::string connected_name;
-		for (size_t i = 0; i < names.size(); ++i)
-		{
-			connected_name += FILESYSTEM_NS::path(names[i]).stem().string();
-			if (i != names.size() - 1)
-			{
-				connected_name += '+';
-			}
-		}
-
-		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
-		if (kfx_name.empty())
-		{
-			kfx_name = (first_fxml_directory / (connected_name + ".kfx")).string();
-		}
-
-		res_name_ = (first_fxml_directory / (connected_name + ".fxml")).string();
-		res_name_hash_ = HashValue(res_name_);
-#if KLAYGE_IS_DEV_PLATFORM
-		for (auto const & name : names)
-		{
-			timestamp_ = 0;
-
-			ResIdentifierPtr source = ResLoader::Instance().Open(name);
-			if (source)
-			{
-				timestamp_ = std::max(timestamp_, source->Timestamp());
-
-				std::unique_ptr<XMLDocument> doc = LoadXml(*source);
-				XMLNode const* root = doc->RootNode();
-
-				std::vector<std::string> include_names;
-				this->RecursiveIncludeNode(*root, include_names);
-
-				for (auto const & include_name : include_names)
-				{
-					timestamp_ = std::max(timestamp_, ResLoader::Instance().Timestamp(include_name));
-				}
-			}
-		}
-#endif
-
-#if KLAYGE_IS_DEV_PLATFORM
-		need_compile_ = false;
-#endif
-		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
-		if (!kfx_source || !this->StreamIn(*kfx_source, effect))
-		{
-#if KLAYGE_IS_DEV_PLATFORM
-			effect.params_.clear();
-			effect.cbuffers_.clear();
-			effect.shader_objs_.clear();
-
-			macros_.clear();
-			struct_types_.clear();
-			shader_frags_.clear();
-			hlsl_shader_.clear();
-			techniques_.clear();
-			shader_graph_nodes_.clear();
-
-			shader_descs_.resize(1);
-
-			std::vector<std::unique_ptr<XMLDocument>> include_docs;
-			std::vector<std::unique_ptr<XMLDocument>> frag_docs(names.size());
-
-			ResIdentifierPtr main_source = ResLoader::Instance().Open(names[0]);
-			if (main_source)
-			{
-				frag_docs[0] = LoadXml(*main_source);
-				XMLNode* root = frag_docs[0]->RootNode();
-				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
-
-				for (size_t i = 1; i < names.size(); ++i)
-				{
-					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
-					if (source)
-					{
-						frag_docs[i] = LoadXml(*source);
-						XMLNode* frag_root = frag_docs[i]->RootNode();
-
-						this->PreprocessIncludes(*frag_docs[i], *frag_root, include_docs);
-
-						for (auto frag_node = frag_root->FirstNode(); frag_node; frag_node = frag_node->NextSibling())
-						{
-							root->AppendNode(frag_docs[i]->CloneNode(*frag_node));
-						}
-					}
-				}
-
-				this->ResolveOverrideTechs(*frag_docs[0], *root);
-
-				this->Load(*root, effect);
-
-				kfx_name_ = kfx_name;
-				need_compile_ = true;
-			}
-#endif
-		}
-	}
-
-#if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectTemplate::CompileShaders(RenderEffect& effect)
-	{
-		if (need_compile_)
-		{
-			uint32_t tech_index = 0;
-			for (auto const& tech : techniques_)
-			{
-				tech->CompileShaders(effect, tech_index);
-				++tech_index;
-			}
-
-			std::ofstream ofs(kfx_name_.c_str(), std::ios_base::binary | std::ios_base::out);
-			this->StreamOut(ofs, effect);
-		}
-	}
-#endif
-
-	void RenderEffectTemplate::CreateHwShaders(RenderEffect& effect)
-	{
-		uint32_t tech_index = 0;
-		for (auto const& tech : techniques_)
-		{
-			tech->CreateHwShaders(effect, tech_index);
-			++tech_index;
-		}
-	}
-
-	bool RenderEffectTemplate::StreamIn(ResIdentifier& source, RenderEffect& effect)
+	bool RenderEffect::StreamIn(ResIdentifier& source)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -5121,83 +5123,75 @@ namespace KlayGE
 				source.read(&timestamp, sizeof(timestamp));
 #if KLAYGE_IS_DEV_PLATFORM
 				timestamp = LE2Native(timestamp);
-				if (timestamp_ <= timestamp)
+				if (immutable_->timestamp <= timestamp)
 #endif
 				{
-					shader_descs_.resize(1);
+					immutable_->shader_descs.resize(1);
 
 					{
 						uint16_t num_macros;
 						source.read(&num_macros, sizeof(num_macros));
 						num_macros = LE2Native(num_macros);
 
-						macros_.resize(num_macros);
-						for (uint32_t i = 0; i < num_macros; ++ i)
+						immutable_->macros.resize(num_macros);
+						for (auto& macro : immutable_->macros)
 						{
 							std::string name = ReadShortString(source);
 							std::string value = ReadShortString(source);
-							macros_[i] = std::make_pair(std::make_pair(name, value), true);
+							macro = {{std::move(name), std::move(value)}, true};
 						}
 					}
-
 					{
 						uint16_t num_structs;
 						source.read(&num_structs, sizeof(num_structs));
 						num_structs = LE2Native(num_structs);
 
-						struct_types_.resize(num_structs);
-						for (uint32_t i = 0; i < num_structs; ++i)
+						immutable_->struct_types.resize(num_structs);
+						for (auto& struct_type : immutable_->struct_types)
 						{
-							struct_types_[i] = MakeUniquePtr<RenderEffectStructType>();
-							struct_types_[i]->StreamIn(source);
+							struct_type = MakeUniquePtr<RenderEffectStructType>();
+							struct_type->StreamIn(source);
 						}
 					}
-
 					{
 						uint16_t num_cbufs;
 						source.read(&num_cbufs, sizeof(num_cbufs));
 						num_cbufs = LE2Native(num_cbufs);
-						effect.cbuffers_.resize(num_cbufs);
-						for (uint32_t i = 0; i < num_cbufs; ++ i)
+						cbuffers_.resize(num_cbufs);
+						for (auto& cbuff : cbuffers_)
 						{
-							effect.cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>(effect);
-							effect.cbuffers_[i]->StreamIn(source);
+							cbuff = MakeSharedPtr<RenderEffectConstantBuffer>(*this);
+							cbuff->StreamIn(source);
 						}
 					}
-
 					{
 						uint16_t num_params;
 						source.read(&num_params, sizeof(num_params));
 						num_params = LE2Native(num_params);
-						effect.params_.resize(num_params);
-						for (uint32_t i = 0; i < num_params; ++ i)
+						params_.resize(num_params);
+						for (auto& param : params_)
 						{
-							effect.params_[i] = MakeUniquePtr<RenderEffectParameter>();
-							effect.params_[i]->StreamIn(effect, source);
+							param = MakeUniquePtr<RenderEffectParameter>();
+							param->StreamIn(*this, source);
 						}
 					}
-
 					{
 						uint8_t num_shader_graph_nodes;
 						source.read(&num_shader_graph_nodes, sizeof(num_shader_graph_nodes));
-						shader_graph_nodes_.resize(num_shader_graph_nodes);
-						for (uint32_t i = 0; i < num_shader_graph_nodes; ++ i)
+						immutable_->shader_graph_nodes.resize(num_shader_graph_nodes);
+						for (auto& node : immutable_->shader_graph_nodes)
 						{
-							shader_graph_nodes_[i].StreamIn(source);
+							node.StreamIn(source);
 						}
 					}
-
 					{
 						uint16_t num_shader_frags;
 						source.read(&num_shader_frags, sizeof(num_shader_frags));
 						num_shader_frags = LE2Native(num_shader_frags);
-						if (num_shader_frags > 0)
+						immutable_->shader_frags.resize(num_shader_frags);
+						for (auto& frag : immutable_->shader_frags)
 						{
-							shader_frags_.resize(num_shader_frags);
-							for (uint32_t i = 0; i < num_shader_frags; ++ i)
-							{
-								shader_frags_[i].StreamIn(source);
-							}
+							frag.StreamIn(source);
 						}
 					}
 
@@ -5205,25 +5199,26 @@ namespace KlayGE
 						uint16_t num_shader_descs;
 						source.read(&num_shader_descs, sizeof(num_shader_descs));
 						num_shader_descs = LE2Native(num_shader_descs);
-						shader_descs_.resize(num_shader_descs + 1);
+						immutable_->shader_descs.resize(num_shader_descs + 1);
 						for (uint32_t i = 1; i <= num_shader_descs; ++ i)
 						{
-							shader_descs_[i].profile = ReadShortString(source);
-							shader_descs_[i].func_name = ReadShortString(source);
-							source.read(&shader_descs_[i].macros_hash, sizeof(shader_descs_[i].macros_hash));
+							immutable_->shader_descs[i].profile = ReadShortString(source);
+							immutable_->shader_descs[i].func_name = ReadShortString(source);
+							source.read(&immutable_->shader_descs[i].macros_hash, sizeof(immutable_->shader_descs[i].macros_hash));
 
-							source.read(&shader_descs_[i].tech_pass_type, sizeof(shader_descs_[i].tech_pass_type));
-							shader_descs_[i].tech_pass_type = LE2Native(shader_descs_[i].tech_pass_type);
+							source.read(&immutable_->shader_descs[i].tech_pass_type, sizeof(immutable_->shader_descs[i].tech_pass_type));
+							immutable_->shader_descs[i].tech_pass_type = LE2Native(immutable_->shader_descs[i].tech_pass_type);
 
 							uint8_t len;
 							source.read(&len, sizeof(len));
 							if (len > 0)
 							{
-								shader_descs_[i].so_decl.resize(len);
-								source.read(&shader_descs_[i].so_decl[0], len * sizeof(shader_descs_[i].so_decl[0]));
+								immutable_->shader_descs[i].so_decl.resize(len);
+								source.read(
+									&immutable_->shader_descs[i].so_decl[0], len * sizeof(immutable_->shader_descs[i].so_decl[0]));
 								for (uint32_t j = 0; j < len; ++ j)
 								{
-									shader_descs_[i].so_decl[j].usage = LE2Native(shader_descs_[i].so_decl[j].usage);
+									immutable_->shader_descs[i].so_decl[j].usage = LE2Native(immutable_->shader_descs[i].so_decl[j].usage);
 								}
 							}
 						}
@@ -5234,11 +5229,11 @@ namespace KlayGE
 						uint16_t num_techs;
 						source.read(&num_techs, sizeof(num_techs));
 						num_techs = LE2Native(num_techs);
-						techniques_.resize(num_techs);
+						immutable_->techniques.resize(num_techs);
 						for (uint32_t i = 0; i < num_techs; ++ i)
 						{
-							techniques_[i] = MakeUniquePtr<RenderTechnique>();
-							ret &= techniques_[i]->StreamIn(effect, source, i);
+							immutable_->techniques[i] = MakeUniquePtr<RenderTechnique>();
+							ret &= immutable_->techniques[i]->StreamIn(*this, source, i);
 						}
 					}
 				}
@@ -5249,7 +5244,7 @@ namespace KlayGE
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectTemplate::StreamOut(std::ostream& os, RenderEffect const & effect) const
+	void RenderEffect::StreamOut(std::ostream& os) const
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -5269,14 +5264,14 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&shader_platform_name_len), sizeof(shader_platform_name_len));
 		os.write(&re.NativeShaderPlatformName()[0], shader_platform_name_len);
 
-		uint64_t timestamp = Native2LE(timestamp_);
+		uint64_t timestamp = Native2LE(immutable_->timestamp);
 		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
 
 		{
 			uint16_t num_macros = 0;
-			for (uint32_t i = 0; i < macros_.size(); ++ i)
+			for (auto const& macro :  immutable_->macros)
 			{
-				if (macros_[i].second)
+				if (macro.second)
 				{
 					++ num_macros;
 				}
@@ -5285,80 +5280,74 @@ namespace KlayGE
 			num_macros = Native2LE(num_macros);
 			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
-			for (uint32_t i = 0; i < macros_.size(); ++ i)
+			for (auto const& macro : immutable_->macros)
 			{
-				if (macros_[i].second)
+				if (macro.second)
 				{
-					WriteShortString(os, macros_[i].first.first);
-					WriteShortString(os, macros_[i].first.second);
+					WriteShortString(os, macro.first.first);
+					WriteShortString(os, macro.first.second);
 				}
 			}
 		}
-
 		{
-			uint16_t num_structs = Native2LE(static_cast<uint16_t>(struct_types_.size()));
+			uint16_t num_structs = Native2LE(static_cast<uint16_t>(immutable_->struct_types.size()));
 			os.write(reinterpret_cast<char const*>(&num_structs), sizeof(num_structs));
-			for (uint32_t i = 0; i < struct_types_.size(); ++i)
+			for (auto const& struct_type : immutable_->struct_types)
 			{
-				struct_types_[i]->StreamOut(os);
+				struct_type->StreamOut(os);
 			}
 		}
-
 		{
-			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
+			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(cbuffers_.size()));
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
-			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
+			for (auto const& cbuff : cbuffers_)
 			{
-				effect.cbuffers_[i]->StreamOut(os);
+				cbuff->StreamOut(os);
 			}
 		}
-
 		{
-			uint16_t num_params = Native2LE(static_cast<uint16_t>(effect.params_.size()));
+			uint16_t num_params = Native2LE(static_cast<uint16_t>(params_.size()));
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
-			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
+			for (auto const& param : params_)
 			{
-				effect.params_[i]->StreamOut(os);
+				param->StreamOut(os);
 			}
 		}
-
 		{
-			uint8_t num_shader_graph_nodes = static_cast<uint8_t>(shader_graph_nodes_.size());
+			uint8_t num_shader_graph_nodes = static_cast<uint8_t>(immutable_->shader_graph_nodes.size());
 			os.write(reinterpret_cast<char const *>(&num_shader_graph_nodes), sizeof(num_shader_graph_nodes));
-			for (uint32_t i = 0; i < shader_graph_nodes_.size(); ++ i)
+			for (auto const& node : immutable_->shader_graph_nodes)
 			{
-				shader_graph_nodes_[i].StreamOut(os);
+				node.StreamOut(os);
 			}
 		}
-
 		{
-			uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(shader_frags_.size()));
+			uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(immutable_->shader_frags.size()));
 			os.write(reinterpret_cast<char const *>(&num_shader_frags), sizeof(num_shader_frags));
-			for (uint32_t i = 0; i < shader_frags_.size(); ++ i)
+			for (auto const& frag : immutable_->shader_frags)
 			{
-				shader_frags_[i].StreamOut(os);
+				frag.StreamOut(os);
 			}
 		}
-
 		{
-			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(shader_descs_.size() - 1));
+			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(immutable_->shader_descs.size() - 1));
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
-			for (uint32_t i = 1; i < shader_descs_.size(); ++i)
+			for (uint32_t i = 1; i < immutable_->shader_descs.size(); ++i)
 			{
-				WriteShortString(os, shader_descs_[i].profile);
-				WriteShortString(os, shader_descs_[i].func_name);
+				WriteShortString(os, immutable_->shader_descs[i].profile);
+				WriteShortString(os, immutable_->shader_descs[i].func_name);
 
-				uint64_t tmp64 = Native2LE(shader_descs_[i].macros_hash);
+				uint64_t tmp64 = Native2LE(immutable_->shader_descs[i].macros_hash);
 				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
 
-				uint32_t tmp32 = Native2LE(shader_descs_[i].tech_pass_type);
+				uint32_t tmp32 = Native2LE(immutable_->shader_descs[i].tech_pass_type);
 				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
-				uint8_t len = static_cast<uint8_t>(shader_descs_[i].so_decl.size());
+				uint8_t len = static_cast<uint8_t>(immutable_->shader_descs[i].so_decl.size());
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				for (uint32_t j = 0; j < len; ++ j)
 				{
-					ShaderDesc::StreamOutputDecl so_decl = shader_descs_[i].so_decl[j];
+					ShaderDesc::StreamOutputDecl so_decl = immutable_->shader_descs[i].so_decl[j];
 					so_decl.usage = Native2LE(so_decl.usage);
 					os.write(reinterpret_cast<char const *>(&so_decl), sizeof(so_decl));
 				}
@@ -5366,103 +5355,48 @@ namespace KlayGE
 		}
 
 		{
-			uint16_t num_techs = Native2LE(static_cast<uint16_t>(techniques_.size()));
+			uint16_t num_techs = Native2LE(static_cast<uint16_t>(immutable_->techniques.size()));
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
-			for (uint32_t i = 0; i < techniques_.size(); ++ i)
+			for (uint32_t i = 0; i < immutable_->techniques.size(); ++i)
 			{
-				techniques_[i]->StreamOut(effect, os, i);
+				immutable_->techniques[i]->StreamOut(*this, os, i);
 			}
 		}
 	}
 #endif
 
-	RenderEffectStructType* RenderEffectTemplate::StructTypeByName(std::string_view name) const
-	{
-		size_t const name_hash = HashValue(std::move(name));
-		for (auto const& struct_type : struct_types_)
-		{
-			if (name_hash == struct_type->NameHash())
-			{
-				return struct_type.get();
-			}
-		}
-		return nullptr;
-	}
-
-	RenderTechnique* RenderEffectTemplate::TechniqueByName(std::string_view name) const
-	{
-		size_t const name_hash = HashValue(std::move(name));
-		for (auto const & tech : techniques_)
-		{
-			if (name_hash == tech->NameHash())
-			{
-				return tech.get();
-			}
-		}
-		return nullptr;
-	}
-
-	uint32_t RenderEffectTemplate::AddShaderDesc(ShaderDesc const & sd)
-	{
-		for (uint32_t i = 0; i < shader_descs_.size(); ++ i)
-		{
-			if (shader_descs_[i] == sd)
-			{
-				return i;
-			}
-		}
-
-		uint32_t id = static_cast<uint32_t>(shader_descs_.size());
-		shader_descs_.push_back(sd);
-		return id;
-	}
-
-	ShaderDesc& RenderEffectTemplate::GetShaderDesc(uint32_t id)
-	{
-		BOOST_ASSERT(id < shader_descs_.size());
-		return shader_descs_[id];
-	}
-
-	ShaderDesc const & RenderEffectTemplate::GetShaderDesc(uint32_t id) const
-	{
-		BOOST_ASSERT(id < shader_descs_.size());
-		return shader_descs_[id];
-	}
-
 #if KLAYGE_IS_DEV_PLATFORM
-	void RenderEffectTemplate::GenHLSLShaderText(RenderEffect const & effect)
+	void RenderEffect::GenHLSLShaderText()
 	{
-		std::string& str = hlsl_shader_;
+		std::string& str = immutable_->hlsl_shader;
 
 		str += "#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))\n\n";
 
-		for (uint32_t i = 0; i < this->NumMacros(); ++ i)
+		for (auto const& macro : immutable_->macros)
 		{
-			std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
-			str += "#define " + name_value.first + " " + name_value.second + "\n";
+			str += "#define " + macro.first.first + " " + macro.first.second + "\n";
 		}
 		str += '\n';
 
-		for (uint32_t i = 0; i < this->NumStructTypes(); ++i)
+		for (auto const& struct_type : immutable_->struct_types)
 		{
-			RenderEffectStructType const& struct_type = *this->StructTypeByIndex(i);
-			str += "struct " + struct_type.Name() + "\n";
+			str += "struct " + struct_type->Name() + "\n";
 			str += "{\n";
-			for (uint32_t j = 0; j < struct_type.NumMembers(); ++j)
+			for (uint32_t j = 0; j < struct_type->NumMembers(); ++j)
 			{
-				RenderEffectDataType member_type = struct_type.MemberType(j);
+				RenderEffectDataType member_type = struct_type->MemberType(j);
 				if (member_type == REDT_struct)
 				{
-					str += struct_type.MemberTypeName(j);
+					str += struct_type->MemberTypeName(j);
 				}
 				else
 				{
 					str += std::string(TypeNameFromCode(member_type));
 				}
 
-				str += " " + struct_type.MemberName(j);
+				str += " " + struct_type->MemberName(j);
 
-				auto array_size_str = struct_type.MemberArraySize(j);
+				auto array_size_str = struct_type->MemberArraySize(j);
 				if (array_size_str && !array_size_str->empty())
 				{
 					str += "[" + *array_size_str + "]";
@@ -5472,15 +5406,14 @@ namespace KlayGE
 			str += "};\n";
 		}
 
-		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
+		for (auto const& cbuff : cbuffers_)
 		{
-			RenderEffectConstantBuffer const & cbuff = *effect.CBufferByIndex(i);
-			str += "cbuffer " + cbuff.Name() + "\n";
+			str += "cbuffer " + cbuff->Name() + "\n";
 			str += "{\n";
 
-			for (uint32_t j = 0; j < cbuff.NumParameters(); ++ j)
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++j)
 			{
-				RenderEffectParameter const & param = *effect.ParameterByIndex(cbuff.ParameterIndex(j));
+				RenderEffectParameter const& param = *this->ParameterByIndex(cbuff->ParameterIndex(j));
 				switch (param.Type())
 				{
 				case REDT_texture1D:
@@ -5529,8 +5462,8 @@ namespace KlayGE
 
 					str += " " + param.Name();
 
-					auto array_size_str = param.ArraySize();
-					if (array_size_str && !array_size_str->empty())
+					auto const* array_size_str = param.ArraySize();
+					if ((array_size_str != nullptr) && !array_size_str->empty())
 					{
 						str += "[" + *array_size_str + "]";
 					}
@@ -5542,12 +5475,10 @@ namespace KlayGE
 			str += "};\n";
 		}
 
-		for (uint32_t i = 0; i < effect.NumParameters(); ++ i)
+		for (auto const& param : params_)
 		{
-			RenderEffectParameter& param = *effect.ParameterByIndex(i);
-
 			std::string elem_type;
-			switch (param.Type())
+			switch (param->Type())
 			{
 			case REDT_texture1D:
 			case REDT_texture2D:
@@ -5577,15 +5508,15 @@ namespace KlayGE
 			case REDT_rasterizer_ordered_texture2D:
 			case REDT_rasterizer_ordered_texture2DArray:
 			case REDT_rasterizer_ordered_texture3D:
-				param.Var().Value(elem_type);
+				param->Var().Value(elem_type);
 				break;
 
 			default:
 				break;
 			}
 
-			std::string const & param_name = param.Name();
-			switch (param.Type())
+			std::string const & param_name = param->Name();
+			switch (param->Type())
 			{
 			case REDT_texture1D:
 				str += "Texture1D<" + elem_type + "> " + param_name + ";\n";
@@ -5764,20 +5695,18 @@ namespace KlayGE
 			}
 		}
 
-		if (this->NumShaderGraphNodes() > 0)
+		if (!immutable_->shader_graph_nodes.empty())
 		{
-			for (uint32_t i = 0; i < this->NumShaderGraphNodes(); ++ i)
+			for (auto const& node : immutable_->shader_graph_nodes)
 			{
-				auto const & node = this->ShaderGraphNodesByIndex(i);
 				str += node.GenDeclarationCode();
 			}
 			str += '\n';
 		}
 
-		for (uint32_t i = 0; i < this->NumShaderFragments(); ++ i)
+		for (auto const& frag : immutable_->shader_frags)
 		{
-			RenderShaderFragment const & effect_shader_frag = this->ShaderFragmentByIndex(i);
-			ShaderStage const shader_stage = effect_shader_frag.Stage();
+			ShaderStage const shader_stage = frag.Stage();
 			switch (shader_stage)
 			{
 			case ShaderStage::Vertex:
@@ -5810,14 +5739,14 @@ namespace KlayGE
 			default:
 				KFL_UNREACHABLE("Invalid shader type");
 			}
-			ShaderModel const & ver = effect_shader_frag.Version();
+			ShaderModel const & ver = frag.Version();
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 			{
 				str += std::format(
 					"#if KLAYGE_SHADER_MODEL >= SHADER_MODEL({}, {})\n", static_cast<int>(ver.major_ver), static_cast<int>(ver.minor_ver));
 			}
 
-			str += effect_shader_frag.str() + "\n";
+			str += frag.str() + "\n";
 
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 			{
@@ -5829,12 +5758,11 @@ namespace KlayGE
 			}
 		}
 
-		if (this->NumShaderGraphNodes() > 0)
+		if (!immutable_->shader_graph_nodes.empty())
 		{
 			str += '\n';
-			for (uint32_t i = 0; i < this->NumShaderGraphNodes(); ++ i)
+			for (auto const& node : immutable_->shader_graph_nodes)
 			{
-				auto const & node = this->ShaderGraphNodesByIndex(i);
 				str += node.GenDefinitionCode();
 			}
 			str += '\n';
@@ -6103,10 +6031,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&num_anno), sizeof(num_anno));
 		for (uint32_t i = 0; i < num_anno; ++ i)
 		{
-			RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
-			(*annotations_)[i] = annotation;
-				
-			annotation->StreamOut(os);
+			(*annotations_)[i]->StreamOut(os);
 		}
 
 		uint8_t num_macro;
@@ -6138,7 +6063,25 @@ namespace KlayGE
 	}
 #endif
 
-	bool RenderTechnique::HWResourceReady(RenderEffect const& effect) const
+	RenderEffectAnnotation const& RenderTechnique::Annotation(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumAnnotations());
+		return *(*annotations_)[n];
+	}
+
+	std::pair<std::string, std::string> const& RenderTechnique::MacroByIndex(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumMacros());
+		return (*macros_)[n];
+	}
+
+	RenderPass const& RenderTechnique::Pass(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumPasses());
+		return *passes_[n];
+	}
+
+	bool RenderTechnique::HWResourceReady(RenderEffect const& effect) const noexcept
 	{
 		bool hw_res_ready = true;
 		for (auto const& pass : passes_)
@@ -6964,45 +6907,69 @@ namespace KlayGE
 		this->GetShaderObject(effect)->Unbind();
 	}
 
+	RenderEffectAnnotation const& RenderPass::Annotation(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumAnnotations());
+		return *(*annotations_)[n];
+	}
+
+	std::pair<std::string, std::string> const& RenderPass::MacroByIndex(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumMacros());
+		return (*macros_)[n];
+	}
+
+	
+	RenderEffectConstantBuffer::RenderEffectConstantBuffer(RenderEffect const& effect) : effect_(effect)
+	{
+	}
 
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::Load(std::string const & name)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = name;
-		name_->second = HashValue(name_->first);
+		if (!immutable_)
+		{
+			immutable_ = MakeSharedPtr<Immutable>();
+		}
+
+		immutable_->name = name;
+		immutable_->name_hash = HashValue(name);
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 	}
 #endif
 
 	void RenderEffectConstantBuffer::StreamIn(ResIdentifier& res)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = ReadShortString(res);
-		name_->second = HashValue(name_->first);
+		if (!immutable_)
+		{
+			immutable_ = MakeSharedPtr<Immutable>();
+		}
+
+		immutable_->name = ReadShortString(res);
+		immutable_->name_hash = HashValue(immutable_->name);
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 
 		uint16_t len;
 		res.read(&len, sizeof(len));
 		len = LE2Native(len);
 		param_indices_->resize(len);
-		res.read(&(*param_indices_)[0], len * sizeof((*param_indices_)[0]));
-		for (uint32_t i = 0; i < len; ++ i)
+		res.read(param_indices_->data(), len * sizeof((*param_indices_)[0]));
+		for (auto& param_index : *param_indices_)
 		{
-			(*param_indices_)[i] = LE2Native((*param_indices_)[i]);
+			param_index = LE2Native(param_index);
 		}
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::StreamOut(std::ostream& os) const
 	{
-		WriteShortString(os, name_->first);
+		WriteShortString(os, immutable_->name);
 
 		uint16_t len = Native2LE(static_cast<uint16_t>(param_indices_->size()));
 		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-		for (size_t i = 0; i < param_indices_->size(); ++ i)
+		for (auto param_index : *param_indices_)
 		{
-			uint32_t tmp = Native2LE((*param_indices_)[i]);
+			uint32_t const tmp = Native2LE(param_index);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 	}
@@ -7017,8 +6984,7 @@ namespace KlayGE
 
 	void RenderEffectConstantBuffer::Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
-		dst_cbuffer.name_ = name_;
-		if (effect_->ResNameHash() == dst_effect.ResNameHash())
+		if (effect_.ResNameHash() == dst_effect.ResNameHash())
 		{
 			dst_cbuffer.param_indices_ = param_indices_;
 		}
@@ -7026,6 +6992,7 @@ namespace KlayGE
 		{
 			dst_cbuffer.param_indices_ = MakeSharedPtr<std::vector<uint32_t>>(param_indices_->size());
 		}
+		dst_cbuffer.immutable_ = immutable_;
 		dst_cbuffer.buff_ = buff_;
 		dst_cbuffer.Resize(static_cast<uint32_t>(buff_.size()));
 
@@ -7034,15 +7001,15 @@ namespace KlayGE
 
 	void RenderEffectConstantBuffer::RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect)
 	{
-		if (effect_ != &dst_effect)
+		if (&effect_ != &dst_effect)
 		{
 			for (uint32_t i = 0; i < param_indices_->size(); ++i)
 			{
 				uint32_t param_index = (*param_indices_)[i];
-				RenderEffectParameter* src_param = effect_->ParameterByIndex(param_index);
+				RenderEffectParameter* src_param = effect_.ParameterByIndex(param_index);
 				if (src_param->InCBuffer())
 				{
-					if (effect_->ResNameHash() != dst_effect.ResNameHash())
+					if (effect_.ResNameHash() != dst_effect.ResNameHash())
 					{
 						for (uint32_t j = 0; j < dst_effect.NumParameters(); ++j)
 						{
@@ -7073,6 +7040,12 @@ namespace KlayGE
 	void RenderEffectConstantBuffer::AddParameter(uint32_t index)
 	{
 		param_indices_->push_back(index);
+	}
+
+	uint32_t RenderEffectConstantBuffer::ParameterIndex(uint32_t index) const noexcept
+	{
+		BOOST_ASSERT(index < this->NumParameters());
+		return (*param_indices_)[index];
 	}
 
 	void RenderEffectConstantBuffer::Resize(uint32_t size)
@@ -7110,32 +7083,35 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::Load(RenderEffect const& effect, XMLNode const& node)
 	{
+		if (!immutable_)
+		{
+			immutable_ = MakeSharedPtr<Immutable>();
+		}
+
 		auto type_name = node.Attrib("type")->ValueString();
 		auto* struct_type = effect.StructTypeByName(type_name);
 		if (struct_type)
 		{
-			type_ = REDT_struct;
+			immutable_->type = REDT_struct;
 		}
 		else
 		{
-			type_ = TypeFromName(type_name);
+			immutable_->type = TypeFromName(type_name);
 		}
 
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = std::string(node.Attrib("name")->ValueString());
-		name_->second = HashValue(name_->first);
+		immutable_->name = std::string(node.Attrib("name")->ValueString());
+		immutable_->name_hash = HashValue(immutable_->name);
 
 		if (XMLAttribute const* attr = node.Attrib("semantic"))
 		{
-			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
-			semantic_->first = std::string(attr->ValueString());
-			semantic_->second = HashValue(semantic_->first);
+			immutable_->semantic = std::string(attr->ValueString());
+			immutable_->semantic_hash = HashValue(immutable_->semantic);
 		}
 
 		uint32_t as;
 		if (XMLAttribute const* attr = node.Attrib("array_size"))
 		{
-			array_size_ = MakeSharedPtr<std::string>(attr->ValueString());
+			immutable_->array_size = MakeUniquePtr<std::string>(attr->ValueString());
 
 			if (!attr->TryConvertValue(as))
 			{
@@ -7146,31 +7122,32 @@ namespace KlayGE
 		{
 			as = 0;
 		}
-		var_ = LoadVariable(effect, node, type_, as);
+		var_ = LoadVariable(effect, node, immutable_->type, as);
 
 		if (XMLNode const* anno_node = node.FirstNode("annotation"))
 		{
-			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
+			immutable_->annotations = MakeUniquePtr<std::remove_reference<decltype(*immutable_->annotations)>::type>();
 			for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 			{
-				annotations_->push_back(MakeUniquePtr<RenderEffectAnnotation>());
-				annotations_->back()->Load(effect, *anno_node);
+				immutable_->annotations->push_back(MakeUniquePtr<RenderEffectAnnotation>());
+				immutable_->annotations->back()->Load(effect, *anno_node);
 			}
 		}
 
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture2DMS == type_)
-			|| (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
-			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture2DMSArray == type_)
-			|| (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
+		if (immutable_->annotations && ((REDT_texture1D == immutable_->type) || (REDT_texture2D == immutable_->type) ||
+										   (REDT_texture2DMS == immutable_->type) || (REDT_texture3D == immutable_->type) ||
+										   (REDT_textureCUBE == immutable_->type) || (REDT_texture1DArray == immutable_->type) ||
+										   (REDT_texture2DArray == immutable_->type) || (REDT_texture2DMSArray == immutable_->type) ||
+										   (REDT_texture3DArray == immutable_->type) || (REDT_textureCUBEArray == immutable_->type)))
 		{
-			for (size_t i = 0; i < annotations_->size(); ++ i)
+			for (size_t i = 0; i < immutable_->annotations->size(); ++i)
 			{
-				if (REDT_string == (*annotations_)[i]->Type())
+				if (REDT_string == (*immutable_->annotations)[i]->Type())
 				{
-					if ("SasResourceAddress" == (*annotations_)[i]->Name())
+					if ("SasResourceAddress" == (*immutable_->annotations)[i]->Name())
 					{
 						std::string val;
-						(*annotations_)[i]->Value(val);
+						(*immutable_->annotations)[i]->Value(val);
 
 						if (ResLoader::Instance().Locate(val).empty())
 						{
@@ -7189,19 +7166,26 @@ namespace KlayGE
 
 	void RenderEffectParameter::StreamIn(RenderEffect const& effect, ResIdentifier& res)
 	{
-		res.read(&type_, sizeof(type_));
-		type_ = LE2Native(type_);
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = ReadShortString(res);
-		name_->second = HashValue(name_->first);
+		if (!immutable_)
+		{
+			immutable_ = MakeSharedPtr<Immutable>();
+		}
+
+		res.read(&immutable_->type, sizeof(immutable_->type));
+		immutable_->type = LE2Native(immutable_->type);
+		immutable_->name = ReadShortString(res);
+		immutable_->name_hash = HashValue(immutable_->name);
 
 		std::string sem = ReadShortString(res);
 		if (!sem.empty())
 		{
-			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
-			semantic_->first = sem;
-			semantic_->second = HashValue(sem);
+			immutable_->semantic = sem;
 		}
+		else
+		{
+			immutable_->semantic.clear();
+		}
+		immutable_->semantic_hash = HashValue(sem);
 
 		uint32_t as;
 		std::string as_str = ReadShortString(res);
@@ -7211,7 +7195,7 @@ namespace KlayGE
 		}
 		else
 		{
-			array_size_ = MakeSharedPtr<std::string>(as_str);
+			immutable_->array_size = MakeUniquePtr<std::string>(as_str);
 
 #ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 			char const* str = as_str.c_str();
@@ -7231,34 +7215,35 @@ namespace KlayGE
 			}
 #endif
 		}
-		var_ = StreamInVariable(effect, res, type_, as);
+		var_ = StreamInVariable(effect, res, immutable_->type, as);
 
 		uint8_t num_anno;
 		res.read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
-			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
-			annotations_->resize(num_anno);
+			immutable_->annotations = MakeUniquePtr<std::remove_reference<decltype(*immutable_->annotations)>::type>();
+			immutable_->annotations->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{
-				(*annotations_)[i] = MakeUniquePtr<RenderEffectAnnotation>();
-				(*annotations_)[i]->StreamIn(effect, res);
+				(*immutable_->annotations)[i] = MakeUniquePtr<RenderEffectAnnotation>();
+				(*immutable_->annotations)[i]->StreamIn(effect, res);
 			}
 		}
 
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture2DMS == type_)
-			|| (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
-			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture2DMSArray == type_)
-			|| (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
+		if (immutable_->annotations && ((REDT_texture1D == immutable_->type) || (REDT_texture2D == immutable_->type) ||
+										   (REDT_texture2DMS == immutable_->type) || (REDT_texture3D == immutable_->type) ||
+										   (REDT_textureCUBE == immutable_->type) || (REDT_texture1DArray == immutable_->type) ||
+										   (REDT_texture2DArray == immutable_->type) || (REDT_texture2DMSArray == immutable_->type) ||
+										   (REDT_texture3DArray == immutable_->type) || (REDT_textureCUBEArray == immutable_->type)))
 		{
-			for (size_t i = 0; i < annotations_->size(); ++ i)
+			for (size_t i = 0; i < immutable_->annotations->size(); ++i)
 			{
-				if (REDT_string == (*annotations_)[i]->Type())
+				if (REDT_string == (*immutable_->annotations)[i]->Type())
 				{
-					if ("SasResourceAddress" == (*annotations_)[i]->Name())
+					if ("SasResourceAddress" == (*immutable_->annotations)[i]->Name())
 					{
 						std::string val;
-						(*annotations_)[i]->Value(val);
+						(*immutable_->annotations)[i]->Value(val);
 
 						if (ResLoader::Instance().Locate(val).empty())
 						{
@@ -7277,12 +7262,12 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::StreamOut(std::ostream& os) const
 	{
-		uint32_t t = Native2LE(type_);
+		uint32_t t = Native2LE(immutable_->type);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
-		WriteShortString(os, name_->first);
-		if (semantic_)
+		WriteShortString(os, immutable_->name);
+		if (!immutable_->semantic.empty())
 		{
-			WriteShortString(os, semantic_->first);
+			WriteShortString(os, immutable_->semantic);
 		}
 		else
 		{
@@ -7290,9 +7275,9 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 		}
 
-		if (array_size_)
+		if (immutable_->array_size)
 		{
-			WriteShortString(os, *array_size_);
+			WriteShortString(os, *immutable_->array_size);
 		}
 		else
 		{
@@ -7302,9 +7287,9 @@ namespace KlayGE
 		StreamOutVariable(os, *var_);
 
 		uint8_t num_anno;
-		if (annotations_)
+		if (immutable_->annotations)
 		{
-			num_anno = static_cast<uint8_t>(annotations_->size());
+			num_anno = static_cast<uint8_t>(immutable_->annotations->size());
 		}
 		else
 		{
@@ -7313,7 +7298,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&num_anno), sizeof(num_anno));
 		for (uint32_t i = 0; i < num_anno; ++ i)
 		{
-			(*annotations_)[i]->StreamOut(os);
+			(*immutable_->annotations)[i]->StreamOut(os);
 		}
 	}
 #endif
@@ -7322,23 +7307,23 @@ namespace KlayGE
 	{
 		std::unique_ptr<RenderEffectParameter> ret = MakeUniquePtr<RenderEffectParameter>();
 
-		ret->name_ = name_;
-		ret->semantic_ = semantic_;
-
-		ret->type_ = type_;
+		ret->immutable_ = immutable_;
 		ret->var_ = var_->Clone();
-		ret->array_size_ = array_size_;
-
-		ret->annotations_ = annotations_;
 
 		return ret;
+	}
+
+	RenderVariable const& RenderEffectParameter::Var() const noexcept
+	{
+		BOOST_ASSERT(var_);
+		return *var_;
 	}
 
 	std::string const & RenderEffectParameter::Semantic() const
 	{
 		if (this->HasSemantic())
 		{
-			return semantic_->first;
+			return immutable_->semantic;
 		}
 		else
 		{
@@ -7347,9 +7332,15 @@ namespace KlayGE
 		}
 	}
 
-	size_t RenderEffectParameter::SemanticHash() const
+	size_t RenderEffectParameter::SemanticHash() const noexcept
 	{
-		return this->HasSemantic() ? semantic_->second : 0;
+		return this->HasSemantic() ? immutable_->semantic_hash : 0;
+	}
+
+	RenderEffectAnnotation const& RenderEffectParameter::Annotation(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumAnnotations());
+		return *(*immutable_->annotations)[n];
 	}
 
 	void RenderEffectParameter::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
@@ -7360,6 +7351,12 @@ namespace KlayGE
 	void RenderEffectParameter::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
 	{
 		var_->RebindToCBuffer(effect, cbuff_index);
+	}
+
+	RenderEffectConstantBuffer& RenderEffectParameter::CBuffer() const noexcept
+	{
+		BOOST_ASSERT(this->InCBuffer());
+		return *var_->CBuffer();
 	}
 
 
@@ -7532,6 +7529,17 @@ namespace KlayGE
 		}
 	}
 #endif
+	
+	std::pair<std::string, std::string> const& RenderShaderGraphNode::Parameter(uint32_t n) const noexcept
+	{
+		BOOST_ASSERT(n < this->NumParameters());
+		return params_[n];
+	}
+
+	void RenderShaderGraphNode::OverrideImpl(std::string_view impl)
+	{
+		impl_ = std::string(std::move(impl));
+	}
 
 #if KLAYGE_IS_DEV_PLATFORM
 	std::string RenderShaderGraphNode::GenDeclarationCode() const

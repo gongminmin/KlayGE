@@ -350,7 +350,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit D3D11ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template);
+		explicit D3D11ShaderObject(std::shared_ptr<Immutable> immutable);
 
 	private:
 		ParameterBind GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param);

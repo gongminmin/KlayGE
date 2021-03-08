@@ -1303,34 +1303,32 @@ namespace KlayGE
 	}
 
 
-	NullShaderObject::NullShaderObject()
-		: NullShaderObject(MakeSharedPtr<ShaderObjectTemplate>(), MakeSharedPtr<NullShaderObjectTemplate>())
+	NullShaderObject::NullShaderObject() : NullShaderObject(MakeSharedPtr<Immutable>(), MakeSharedPtr<NullImmutable>())
 	{
 		auto const& re = checked_cast<NullRenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		std::string_view const platform_name = re.NativeShaderPlatformName();
 		if (platform_name.find("d3d_11_") == 0)
 		{
-			null_so_template_->as_d3d11_ = true;
+			null_immutable_->as_d3d11_ = true;
 		}
 		else if (platform_name.find("d3d_12_") == 0)
 		{
-			null_so_template_->as_d3d12_ = true;
+			null_immutable_->as_d3d12_ = true;
 		}
 #ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		else if (platform_name.find("gl_") == 0)
 		{
-			null_so_template_->as_gl_ = true;
+			null_immutable_->as_gl_ = true;
 		}
 		else if (platform_name.find("gles_") == 0)
 		{
-			null_so_template_->as_gles_ = true;
+			null_immutable_->as_gles_ = true;
 		}
 #endif
 	}
 	
-	NullShaderObject::NullShaderObject(
-		std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<NullShaderObjectTemplate> null_so_template)
-		: ShaderObject(std::move(so_template)), null_so_template_(std::move(null_so_template))
+	NullShaderObject::NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable)
+		: ShaderObject(std::move(immutable)), null_immutable_(std::move(null_immutable))
 	{
 	}
 
@@ -1351,7 +1349,7 @@ namespace KlayGE
 
 	void NullShaderObject::DoLinkShaders(RenderEffect const & effect)
 	{
-		if (null_so_template_->as_gl_ || null_so_template_->as_gles_)
+		if (null_immutable_->as_gl_ || null_immutable_->as_gles_)
 		{
 			for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
 			{

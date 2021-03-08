@@ -917,14 +917,12 @@ namespace KlayGE
 	}
 
 
-	D3D12ShaderObject::D3D12ShaderObject()
-		: D3D12ShaderObject(MakeSharedPtr<ShaderObjectTemplate>(), MakeSharedPtr<D3D12ShaderObjectTemplate>())
+	D3D12ShaderObject::D3D12ShaderObject() : D3D12ShaderObject(MakeSharedPtr<Immutable>(), MakeSharedPtr<D3D12Immutable>())
 	{
 	}
 
-	D3D12ShaderObject::D3D12ShaderObject(
-		std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<D3D12ShaderObjectTemplate> d3d_so_template)
-		: ShaderObject(std::move(so_template)), d3d_so_template_(std::move(d3d_so_template))
+	D3D12ShaderObject::D3D12ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D12Immutable> d3d_immutable)
+		: ShaderObject(std::move(immutable)), d3d_immutable_(std::move(d3d_immutable))
 	{
 	}
 
@@ -944,9 +942,9 @@ namespace KlayGE
 
 				if (!shader_stage->ShaderCodeBlob().empty())
 				{
-					d3d_so_template_->num_srvs_[stage] = shader_desc.num_srvs;
-					d3d_so_template_->num_uavs_[stage] = shader_desc.num_uavs;
-					d3d_so_template_->num_samplers_[stage] = shader_desc.num_samplers;
+					d3d_immutable_->num_srvs_[stage] = shader_desc.num_srvs;
+					d3d_immutable_->num_uavs_[stage] = shader_desc.num_uavs;
+					d3d_immutable_->num_samplers_[stage] = shader_desc.num_samplers;
 
 					num_sampler += shader_desc.num_samplers;
 				}
@@ -955,14 +953,14 @@ namespace KlayGE
 			{
 				num[stage * 4 + 0] = 0;
 
-				d3d_so_template_->num_srvs_[stage] = 0;
-				d3d_so_template_->num_uavs_[stage] = 0;
-				d3d_so_template_->num_samplers_[stage] = 0;
+				d3d_immutable_->num_srvs_[stage] = 0;
+				d3d_immutable_->num_uavs_[stage] = 0;
+				d3d_immutable_->num_samplers_[stage] = 0;
 			}
 
-			num[stage * 4 + 1] = d3d_so_template_->num_srvs_[stage];
-			num[stage * 4 + 2] = d3d_so_template_->num_uavs_[stage];
-			num[stage * 4 + 3] = d3d_so_template_->num_samplers_[stage];
+			num[stage * 4 + 1] = d3d_immutable_->num_srvs_[stage];
+			num[stage * 4 + 2] = d3d_immutable_->num_uavs_[stage];
+			num[stage * 4 + 3] = d3d_immutable_->num_samplers_[stage];
 		}
 
 		bool has_stream_output = false;
@@ -982,18 +980,18 @@ namespace KlayGE
 			has_stream_output = true;
 		}
 
-		d3d_so_template_->root_signature_ = re.CreateRootSignature(num, !!this->Stage(ShaderStage::Vertex), has_stream_output);
+		d3d_immutable_->root_signature_ = re.CreateRootSignature(num, !!this->Stage(ShaderStage::Vertex), has_stream_output);
 
 		uint32_t srv_starts[NumShaderStages + 1];
 		uint32_t uav_starts[NumShaderStages + 1];
 		srv_starts[0] = uav_starts[0] = 0;
 		for (uint32_t stage = 1; stage <= NumShaderStages; ++stage)
 		{
-			srv_starts[stage] = srv_starts[stage - 1] + d3d_so_template_->num_srvs_[stage - 1];
-			uav_starts[stage] = uav_starts[stage - 1] + d3d_so_template_->num_uavs_[stage - 1];
+			srv_starts[stage] = srv_starts[stage - 1] + d3d_immutable_->num_srvs_[stage - 1];
+			uav_starts[stage] = uav_starts[stage - 1] + d3d_immutable_->num_uavs_[stage - 1];
 		}
 
-		d3d_so_template_->num_total_srvs_ = srv_starts[NumShaderStages];
+		d3d_immutable_->num_total_srvs_ = srv_starts[NumShaderStages];
 		srv_uav_handles_.resize(srv_starts[NumShaderStages] + uav_starts[NumShaderStages]);
 		srv_uav_srcs_.resize(srv_uav_handles_.size(), std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 
@@ -1008,9 +1006,9 @@ namespace KlayGE
 			sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
 			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			sampler_heap_desc.NodeMask = 0;
-			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_so_template_->sampler_heap_.put_void()));
+			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_immutable_->sampler_heap_.put_void()));
 
-			cpu_sampler_handle = d3d_so_template_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();			
+			cpu_sampler_handle = d3d_immutable_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();			
 		}
 
 		std::vector<uint32_t> all_cbuff_indices;
@@ -1096,7 +1094,7 @@ namespace KlayGE
 
 	ShaderObjectPtr D3D12ShaderObject::Clone(RenderEffect const & effect)
 	{
-		D3D12ShaderObjectPtr ret = MakeSharedPtr<D3D12ShaderObject>(so_template_, d3d_so_template_);
+		D3D12ShaderObjectPtr ret = MakeSharedPtr<D3D12ShaderObject>(immutable_, d3d_immutable_);
 
 		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
@@ -1109,8 +1107,8 @@ namespace KlayGE
 		srv_starts[0] = uav_starts[0] = 0;
 		for (uint32_t stage = 1; stage <= NumShaderStages; ++stage)
 		{
-			srv_starts[stage] = srv_starts[stage - 1] + d3d_so_template_->num_srvs_[stage - 1];
-			uav_starts[stage] = uav_starts[stage - 1] + d3d_so_template_->num_uavs_[stage - 1];
+			srv_starts[stage] = srv_starts[stage - 1] + d3d_immutable_->num_srvs_[stage - 1];
+			uav_starts[stage] = uav_starts[stage - 1] + d3d_immutable_->num_uavs_[stage - 1];
 		}
 
 		std::vector<uint32_t> all_cbuff_indices;
@@ -1135,7 +1133,7 @@ namespace KlayGE
 		ret.offset = offset;
 
 		uint32_t const srv_offset = srv_stage_base + offset;
-		uint32_t const uav_offset = d3d_so_template_->num_total_srvs_ + uav_stage_base + offset;
+		uint32_t const uav_offset = d3d_immutable_->num_total_srvs_ + uav_stage_base + offset;
 
 		switch (param->Type())
 		{
@@ -1224,7 +1222,7 @@ namespace KlayGE
 		D3D12_RESOURCE_STATES const uav_state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		for (uint32_t i = 0; i < srv_uav_srcs_.size(); ++i)
 		{
-			auto const state_after = i < d3d_so_template_->num_total_srvs_ ? srv_state_after : uav_state_after;
+			auto const state_after = i < d3d_immutable_->num_total_srvs_ ? srv_state_after : uav_state_after;
 			auto res = std::get<0>(srv_uav_srcs_[i]);
 			if (res != nullptr)
 			{
@@ -1278,7 +1276,7 @@ namespace KlayGE
 
 	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc)
 	{
-		pso_desc.pRootSignature = d3d_so_template_->root_signature_.get();
+		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
 		pso_desc.StreamOutput.pSODeclaration = nullptr;
 		pso_desc.StreamOutput.NumEntries = 0;
@@ -1350,7 +1348,7 @@ namespace KlayGE
 
 	void D3D12ShaderObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc)
 	{
-		pso_desc.pRootSignature = d3d_so_template_->root_signature_.get();
+		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
 		auto const* cs_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(ShaderStage::Compute).get());
 		if (cs_stage)

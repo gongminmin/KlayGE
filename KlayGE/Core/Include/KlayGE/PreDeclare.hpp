@@ -96,8 +96,6 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderDecal> RenderDecalPtr;
 	class RenderEffect;
 	typedef std::shared_ptr<RenderEffect> RenderEffectPtr;
-	class RenderEffectTemplate;
-	typedef std::shared_ptr<RenderEffectTemplate> RenderEffectTemplatePtr;
 	class RenderTechnique;
 	class RenderPass;
 	typedef std::shared_ptr<RenderPass> RenderPassPtr;

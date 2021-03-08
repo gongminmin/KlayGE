@@ -979,11 +979,11 @@ namespace KlayGE
 	}
 
 
-	D3D11ShaderObject::D3D11ShaderObject() : D3D11ShaderObject(MakeSharedPtr<ShaderObjectTemplate>())
+	D3D11ShaderObject::D3D11ShaderObject() : D3D11ShaderObject(MakeSharedPtr<Immutable>())
 	{
 	}
 
-	D3D11ShaderObject::D3D11ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template) : ShaderObject(std::move(so_template))
+	D3D11ShaderObject::D3D11ShaderObject(std::shared_ptr<Immutable> immutable) : ShaderObject(std::move(immutable))
 	{
 	}
 
@@ -1077,7 +1077,7 @@ namespace KlayGE
 
 	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect const & effect)
 	{
-		auto ret = MakeSharedPtr<D3D11ShaderObject>(so_template_);
+		auto ret = MakeSharedPtr<D3D11ShaderObject>(immutable_);
 
 		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;

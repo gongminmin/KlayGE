@@ -276,15 +276,15 @@ namespace KlayGE
 
 		uint32_t NumSrvs(ShaderStage stage) const
 		{
-			return d3d_so_template_->num_srvs_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_srvs_[static_cast<uint32_t>(stage)];
 		}
 		uint32_t NumUavs(ShaderStage stage) const
 		{
-			return d3d_so_template_->num_uavs_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_uavs_[static_cast<uint32_t>(stage)];
 		}
 		uint32_t NumSamplers(ShaderStage stage) const
 		{
-			return d3d_so_template_->num_samplers_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_samplers_[static_cast<uint32_t>(stage)];
 		}
 
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& SrvUavHandles() const noexcept
@@ -297,20 +297,20 @@ namespace KlayGE
 
 		ID3D12RootSignature* RootSignature() const noexcept
 		{
-			return d3d_so_template_->root_signature_.get();
+			return d3d_immutable_->root_signature_.get();
 		}
 		ID3D12DescriptorHeap* SamplerHeap() const noexcept
 		{
-			return d3d_so_template_->sampler_heap_.get();
+			return d3d_immutable_->sampler_heap_.get();
 		}
 
 		void* GetD3D12ShaderObjectTemplate() noexcept
 		{
-			return d3d_so_template_.get();
+			return d3d_immutable_.get();
 		}
 		void const* GetD3D12ShaderObjectTemplate() const noexcept
 		{
-			return d3d_so_template_.get();
+			return d3d_immutable_.get();
 		}
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc);
@@ -322,7 +322,7 @@ namespace KlayGE
 		}
 
 	private:
-		struct D3D12ShaderObjectTemplate
+		struct D3D12Immutable
 		{
 			ID3D12RootSignaturePtr root_signature_;
 			ID3D12DescriptorHeapPtr sampler_heap_;
@@ -342,8 +342,7 @@ namespace KlayGE
 		};
 
 	public:
-		D3D12ShaderObject(
-			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<D3D12ShaderObjectTemplate> d3d_so_template);
+		D3D12ShaderObject(std::shared_ptr<Immutable> so_template, std::shared_ptr<D3D12Immutable> d3d_so_template);
 
 	private:
 		ParameterBind GetBindFunc(uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter* param);
@@ -351,7 +350,7 @@ namespace KlayGE
 		void DoLinkShaders(RenderEffect const & effect) override;
 
 	private:
-		const std::shared_ptr<D3D12ShaderObjectTemplate> d3d_so_template_;
+		const std::shared_ptr<D3D12Immutable> d3d_immutable_;
 
 		std::array<std::vector<ParameterBind>, NumShaderStages> param_binds_;
 		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> srv_uav_srcs_;

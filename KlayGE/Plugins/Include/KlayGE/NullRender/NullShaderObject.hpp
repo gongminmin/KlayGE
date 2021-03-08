@@ -411,7 +411,7 @@ namespace KlayGE
 		void Unbind() override;
 
 	private:
-		struct NullShaderObjectTemplate
+		struct NullImmutable
 		{
 			bool as_d3d11_ = false;
 			bool as_d3d12_ = false;
@@ -420,8 +420,7 @@ namespace KlayGE
 		};
 
 	public:
-		NullShaderObject(
-			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<NullShaderObjectTemplate> null_so_template);
+		NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable);
 
 	private:
 		void DoLinkShaders(RenderEffect const & effect) override;
@@ -430,7 +429,7 @@ namespace KlayGE
 			ShaderStage stage, RenderEffect const& effect, std::vector<std::pair<std::string, std::string>> const& tex_sampler_pairs);
 
 	private:
-		const std::shared_ptr<NullShaderObjectTemplate> null_so_template_;
+		const std::shared_ptr<NullImmutable> null_immutable_;
 
 		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> gl_tex_sampler_binds_;
 	};

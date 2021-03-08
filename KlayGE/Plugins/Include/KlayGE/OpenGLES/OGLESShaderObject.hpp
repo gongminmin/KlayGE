@@ -302,7 +302,7 @@ namespace KlayGE
 		}
 
 	private:
-		struct OGLESShaderObjectTemplate
+		struct OGLESImmutable
 		{
 			GLenum glsl_bin_format_;
 			std::vector<uint8_t> glsl_bin_program_;
@@ -318,8 +318,7 @@ namespace KlayGE
 		};
 
 	public:
-		OGLESShaderObject(
-			std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<OGLESShaderObjectTemplate> gl_so_template);
+		OGLESShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLESImmutable> gl_immutable);
 
 	private:
 		void DoLinkShaders(RenderEffect const & effect) override;
@@ -328,7 +327,7 @@ namespace KlayGE
 		void AttachUBOs(RenderEffect const & effect);
 
 	private:
-		const std::shared_ptr<OGLESShaderObjectTemplate> gl_so_template_;
+		const std::shared_ptr<OGLESImmutable> gl_immutable_;
 
 		GLuint glsl_program_;
 

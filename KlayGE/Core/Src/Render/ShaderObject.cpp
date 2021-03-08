@@ -569,11 +569,11 @@ namespace KlayGE
 #endif
 
 
-	ShaderObject::ShaderObject() : ShaderObject(MakeSharedPtr<ShaderObjectTemplate>())
+	ShaderObject::ShaderObject() : ShaderObject(MakeSharedPtr<ShaderObject::Immutable>())
 	{
 	}
 
-	ShaderObject::ShaderObject(std::shared_ptr<ShaderObjectTemplate> so_template) : so_template_(std::move(so_template))
+	ShaderObject::ShaderObject(std::shared_ptr<ShaderObject::Immutable> so_template) : immutable_(std::move(so_template))
 	{
 	}
 
@@ -581,7 +581,7 @@ namespace KlayGE
 
 	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage)
 	{
-		auto& curr_shader_stage = so_template_->shader_stages_[static_cast<uint32_t>(stage)];
+		auto& curr_shader_stage = immutable_->shader_stages_[static_cast<uint32_t>(stage)];
 		if (curr_shader_stage != shader_stage)
 		{
 			curr_shader_stage = shader_stage;
@@ -592,7 +592,7 @@ namespace KlayGE
 	
 	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const
 	{
-		return so_template_->shader_stages_[static_cast<uint32_t>(stage)];
+		return immutable_->shader_stages_[static_cast<uint32_t>(stage)];
 	}
 
 	void ShaderObject::LinkShaders(RenderEffect const & effect)

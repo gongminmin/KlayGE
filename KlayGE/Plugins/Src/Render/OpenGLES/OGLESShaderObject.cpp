@@ -930,14 +930,12 @@ namespace KlayGE
 	}
 
 
-	OGLESShaderObject::OGLESShaderObject()
-		: OGLESShaderObject(MakeSharedPtr<ShaderObjectTemplate>(), MakeSharedPtr<OGLESShaderObjectTemplate>())
+	OGLESShaderObject::OGLESShaderObject() : OGLESShaderObject(MakeSharedPtr<Immutable>(), MakeSharedPtr<OGLESImmutable>())
 	{
 	}
 
-	OGLESShaderObject::OGLESShaderObject(
-		std::shared_ptr<ShaderObjectTemplate> so_template, std::shared_ptr<OGLESShaderObjectTemplate> gl_so_template)
-		: ShaderObject(std::move(so_template)), gl_so_template_(std::move(gl_so_template))
+	OGLESShaderObject::OGLESShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLESImmutable> gl_immutable)
+		: ShaderObject(std::move(immutable)), gl_immutable_(std::move(gl_immutable))
 	{
 		glsl_program_ = glCreateProgram();
 	}
@@ -964,9 +962,9 @@ namespace KlayGE
 				{
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
-					gl_so_template_->glsl_bin_program_.resize(len);
-					glGetProgramBinary(glsl_program_, len, nullptr, &gl_so_template_->glsl_bin_format_,
-						gl_so_template_->glsl_bin_program_.data());
+					gl_immutable_->glsl_bin_program_.resize(len);
+					glGetProgramBinary(
+						glsl_program_, len, nullptr, &gl_immutable_->glsl_bin_format_, gl_immutable_->glsl_bin_program_.data());
 				}
 			}
 
@@ -1068,7 +1066,7 @@ namespace KlayGE
 
 	ShaderObjectPtr OGLESShaderObject::Clone(RenderEffect const & effect)
 	{
-		OGLESShaderObjectPtr ret = MakeSharedPtr<OGLESShaderObject>(so_template_, gl_so_template_);
+		OGLESShaderObjectPtr ret = MakeSharedPtr<OGLESShaderObject>(immutable_, gl_immutable_);
 
 		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
@@ -1084,11 +1082,11 @@ namespace KlayGE
 
 		if (ret->is_validate_)
 		{
-			if (!gl_so_template_->glsl_bin_program_.empty())
+			if (!gl_immutable_->glsl_bin_program_.empty())
 			{
 				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-				glProgramBinary(ret->glsl_program_, gl_so_template_->glsl_bin_format_,
-					gl_so_template_->glsl_bin_program_.data(), static_cast<GLsizei>(gl_so_template_->glsl_bin_program_.size()));
+				glProgramBinary(ret->glsl_program_, gl_immutable_->glsl_bin_format_, gl_immutable_->glsl_bin_program_.data(),
+					static_cast<GLsizei>(gl_immutable_->glsl_bin_program_.size()));
 
 #ifdef KLAYGE_DEBUG
 				GLint linked = false;
