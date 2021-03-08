@@ -170,7 +170,7 @@ namespace KlayGE
 			for (size_t i = 0; i < feature_levels.size(); ++i)
 			{
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter(),
-						feature_levels[i], IID_ID3D12Device, d3d_device.put_void())))
+						feature_levels[i], UuidOf<ID3D12Device>(), d3d_device.put_void())))
 				{
 					D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 					req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
@@ -587,7 +587,7 @@ namespace KlayGE
 		{
 			com_ptr<ID3D12Resource> bb12;
 			TIFHR(swap_chain_->GetBuffer(static_cast<UINT>(i),
-				IID_ID3D12Resource, bb12.put_void()));
+				UuidOf<ID3D12Resource>(), bb12.put_void()));
 			render_targets_[i] = MakeSharedPtr<D3D12Texture2D>(bb12);
 		}
 		

@@ -62,6 +62,14 @@
 #endif
 #endif
 
+DEFINE_UUID_OF(IArchiveExtractCallback);
+DEFINE_UUID_OF(IArchiveOpenCallback);
+DEFINE_UUID_OF(ICryptoGetTextPassword);
+DEFINE_UUID_OF(IInArchive);
+DEFINE_UUID_OF(IInStream);
+DEFINE_UUID_OF(IStreamGetSize);
+DEFINE_UUID_OF(IOutStream);
+
 namespace
 {
 	using namespace KlayGE;
@@ -121,9 +129,9 @@ namespace
 			return ret;
 		}
 
-		HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
+		HRESULT CreateObject(GUID const& cls_id, GUID const& interface_id, void** out_object)
 		{
-			return createObjectFunc_(clsID, interfaceID, outObject);
+			return create_object_(&cls_id, &interface_id, out_object);
 		}
 
 	private:
@@ -131,14 +139,13 @@ namespace
 		{
 			dll_loader_.Load(DLL_PREFIX "7zxa" DLL_SUFFIX);
 
-			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
-
-			BOOST_ASSERT(createObjectFunc_);
+			create_object_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
+			BOOST_ASSERT(create_object_);
 		}
 
 	private:
 		DllLoader dll_loader_;
-		CreateObjectFunc createObjectFunc_;
+		CreateObjectFunc create_object_;
 	};
 }
 
@@ -155,7 +162,8 @@ namespace KlayGE
 		BOOST_ASSERT(archive_is);
 
 		com_ptr<IInArchive> archive;
-		TIFHR(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, archive.put_void()));
+		TIFHR(SevenZipLoader::Instance().CreateObject(
+			CLSID_CFormat7z, reinterpret_cast<GUID const&>(UuidOf<IInArchive>()), archive.put_void()));
 
 		com_ptr<IInStream> file(new InStream(archive_is), false);
 		com_ptr<IArchiveOpenCallback> ocb(new ArchiveOpenCallback(password), false);

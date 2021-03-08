@@ -698,7 +698,7 @@ namespace KlayGE
 
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&tex_desc, init_state, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
-			IID_ID3D12Resource, d3d_resource_.put_void()));
+			UuidOf<ID3D12Resource>(), d3d_resource_.put_void()));
 
 		if (!init_data.empty())
 		{

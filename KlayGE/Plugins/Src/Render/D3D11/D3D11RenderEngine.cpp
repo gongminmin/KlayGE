@@ -144,7 +144,7 @@ namespace KlayGE
 			HRESULT hr = E_FAIL;
 			for (auto const& flags : available_dxgi_factory_flags)
 			{
-				hr = DynamicCreateDXGIFactory2_(flags, IID_IDXGIFactory2, gi_factory_2_.put_void());
+				hr = DynamicCreateDXGIFactory2_(flags, UuidOf<IDXGIFactory2>(), gi_factory_2_.put_void());
 				if (SUCCEEDED(hr))
 				{
 					break;
@@ -153,7 +153,7 @@ namespace KlayGE
 		}
 		else
 		{
-			TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, gi_factory_2_.put_void()));
+			TIFHR(DynamicCreateDXGIFactory1_(UuidOf<IDXGIFactory2>(), gi_factory_2_.put_void()));
 		}
 		dxgi_sub_ver_ = 2;
 		if (gi_factory_2_.try_as(gi_factory_3_))

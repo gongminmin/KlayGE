@@ -4685,13 +4685,13 @@ namespace KlayGE
 
 	ShaderDesc& RenderEffect::GetShaderDesc(uint32_t id) noexcept
 	{
-		BOOST_ASSERT(id < immutable_->shader_descs_.size());
+		BOOST_ASSERT(id < immutable_->shader_descs.size());
 		return immutable_->shader_descs[id];
 	}
 
 	ShaderDesc const& RenderEffect::GetShaderDesc(uint32_t id) const noexcept
 	{
-		BOOST_ASSERT(id < immutable_->shader_descs_.size());
+		BOOST_ASSERT(id < immutable_->shader_descs.size());
 		return immutable_->shader_descs[id];
 	}
 

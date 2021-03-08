@@ -63,11 +63,14 @@
 DEFINE_GUID(IID_IMFMediaEngineClassFactory, 0x4D645ACE, 0x26AA, 0x4688, 0x9B, 0xE1, 0xDF, 0x35, 0x16, 0x99, 0x0B, 0x93);
 DEFINE_GUID(IID_IMFMediaEngineNotify, 0xFEE7C112, 0xE776, 0x42B5, 0x9B, 0xBF, 0x00, 0x48, 0x52, 0x4E, 0x2B, 0xD5);
 
-DEFINE_UUID_OF(IDXGIFactory2);
-DEFINE_UUID_OF(IDXGIFactory4);
 DEFINE_UUID_OF(ID3D10Multithread);
 DEFINE_UUID_OF(IDXGIDevice2);
 DEFINE_UUID_OF(IDXGIDevice3);
+DEFINE_UUID_OF(IDXGIFactory1);
+DEFINE_UUID_OF(IDXGIFactory2);
+DEFINE_UUID_OF(IDXGIFactory4);
+DEFINE_UUID_OF(IMFMediaEngineClassFactory);
+DEFINE_UUID_OF(IMFMediaEngineNotify);
 
 namespace KlayGE
 {
@@ -83,7 +86,7 @@ namespace KlayGE
 
 		STDMETHODIMP QueryInterface(REFIID riid, void** ppv)
 		{
-			if (riid == IID_IMFMediaEngineNotify)
+			if (reinterpret_cast<Uuid const&>(riid) == UuidOf<IMFMediaEngineNotify>())
 			{
 				*ppv = static_cast<IMFMediaEngineNotify*>(this);
 			}
@@ -226,7 +229,7 @@ namespace KlayGE
 
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, dxgi_factory_.put_void()));
+		TIFHR(DynamicCreateDXGIFactory1_(UuidOf<IDXGIFactory1>(), dxgi_factory_.put_void()));
 		dxgi_sub_ver_ = 1;
 		if (dxgi_factory_.try_as<IDXGIFactory2>())
 		{
@@ -332,7 +335,7 @@ namespace KlayGE
 
 		com_ptr<IMFMediaEngineClassFactory> me_factory;
 		TIFHR(::CoCreateInstance(CLSID_MFMediaEngineClassFactory, nullptr, CLSCTX_INPROC_SERVER,
-			IID_IMFMediaEngineClassFactory, me_factory.put_void()));
+			UuidOf<IMFMediaEngineClassFactory>(), me_factory.put_void()));
 
 		com_ptr<IMFAttributes> mf_attributes;
 		TIFHR(DynamicMFCreateAttributes_(mf_attributes.put(), 1));

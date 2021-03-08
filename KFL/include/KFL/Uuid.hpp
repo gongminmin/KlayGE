@@ -72,6 +72,16 @@ namespace KlayGE
 #endif
 	};
 
+	inline bool operator==(Uuid const& lhs, Uuid const& rhs) noexcept
+	{
+		return !memcmp(&lhs, &rhs, sizeof(Uuid));
+	}
+
+	inline bool operator!=(Uuid const& lhs, Uuid const& rhs) noexcept
+	{
+		return !(lhs == rhs);
+	}
+
 	template <typename T>
 	Uuid const& UuidOf();
 

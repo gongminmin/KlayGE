@@ -145,7 +145,7 @@ namespace KlayGE
 			auto d3d_device = d3d12_re.D3DDevice();
 
 			com_ptr<ID3D12PipelineState> d3d_pso;
-			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
 			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
@@ -173,7 +173,7 @@ namespace KlayGE
 			auto d3d_device = d3d12_re.D3DDevice();
 
 			com_ptr<ID3D12PipelineState> d3d_pso;
-			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
 			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 

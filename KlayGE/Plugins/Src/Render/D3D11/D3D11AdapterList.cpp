@@ -95,7 +95,7 @@ namespace KlayGE
 		UINT adapter_no = 0;
 		com_ptr<IDXGIAdapter2> dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter2, dxgi_adapter.release_and_put_void())))
+			UuidOf<IDXGIAdapter2>(), dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{

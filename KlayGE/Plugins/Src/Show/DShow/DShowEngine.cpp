@@ -53,10 +53,12 @@
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 #include <KlayGE/DShow/DShow.hpp>
 
-DEFINE_UUID_OF(IVMRFilterConfig9);
-DEFINE_UUID_OF(IVMRSurfaceAllocatorNotify9);
+DEFINE_UUID_OF(IBaseFilter);
+DEFINE_UUID_OF(IGraphBuilder);
 DEFINE_UUID_OF(IMediaControl);
 DEFINE_UUID_OF(IMediaEvent);
+DEFINE_UUID_OF(IVMRFilterConfig9);
+DEFINE_UUID_OF(IVMRSurfaceAllocatorNotify9);
 
 namespace KlayGE
 {
@@ -138,10 +140,10 @@ namespace KlayGE
 		this->Init();
 
 		TIFHR(::CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_ALL,
-			IID_IGraphBuilder, graph_.put_void()));
+			UuidOf<IGraphBuilder>(), graph_.put_void()));
 
 		TIFHR(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
-			IID_IBaseFilter, filter_.put_void()));
+			UuidOf<IBaseFilter>(), filter_.put_void()));
 
 		auto filter_config = filter_.as<IVMRFilterConfig9>();
 

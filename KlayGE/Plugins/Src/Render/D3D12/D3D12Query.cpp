@@ -49,7 +49,7 @@ namespace KlayGE
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
 			query_heap_.put_void()));
 
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -74,7 +74,7 @@ namespace KlayGE
 
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			IID_ID3D12Resource, query_result_.put_void()));
+			UuidOf<ID3D12Resource>(), query_result_.put_void()));
 	}
 
 	void D3D12OcclusionQuery::Begin()
@@ -122,7 +122,7 @@ namespace KlayGE
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
 
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
 			predicate_heap_.put_void()));
 
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -147,7 +147,7 @@ namespace KlayGE
 
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			IID_ID3D12Resource, predicate_result_.put_void()));
+			UuidOf<ID3D12Resource>(), predicate_result_.put_void()));
 	}
 
 	void D3D12ConditionalRender::Begin()
@@ -210,7 +210,7 @@ namespace KlayGE
 		timestamp_query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
 		timestamp_query_heap_desc.Count = 2;
 		timestamp_query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&timestamp_query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&timestamp_query_heap_desc, UuidOf<ID3D12QueryHeap>(),
 			timestamp_heap_.put_void()));
 
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -235,7 +235,7 @@ namespace KlayGE
 
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			IID_ID3D12Resource, timestamp_result_.put_void()));
+			UuidOf<ID3D12Resource>(), timestamp_result_.put_void()));
 	}
 
 	void D3D12TimerQuery::Begin()
@@ -286,7 +286,7 @@ namespace KlayGE
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_SO_STATISTICS;
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
 			so_stat_query_heap_.put_void()));
 
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -310,7 +310,7 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			IID_ID3D12Resource, so_stat_query_result_.put_void()));
+			UuidOf<ID3D12Resource>(), so_stat_query_result_.put_void()));
 	}
 
 	void D3D12SOStatisticsQuery::Begin()

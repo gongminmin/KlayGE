@@ -44,7 +44,7 @@ namespace KlayGE
 		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
-		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, fence_.put_void()));
+		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, UuidOf<ID3D12Fence>(), fence_.put_void()));
 
 		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}

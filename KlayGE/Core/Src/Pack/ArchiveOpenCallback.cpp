@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/Uuid.hpp>
 
 #include <CPP/Common/MyWindows.h>
 
@@ -64,13 +65,13 @@ namespace KlayGE
 
 	STDMETHODIMP ArchiveOpenCallback::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
-		if (IID_ICryptoGetTextPassword == iid)
+		if (UuidOf<ICryptoGetTextPassword>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<ICryptoGetTextPassword*>(this);
 			this->AddRef();
 			return S_OK;
 		}
-		else if (IID_IArchiveOpenCallback == iid)
+		else if (UuidOf<IArchiveOpenCallback>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<IArchiveOpenCallback*>(this);
 			this->AddRef();

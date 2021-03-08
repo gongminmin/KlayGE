@@ -231,7 +231,7 @@ namespace KlayGE
 			}
 
 			TIFHR(re.D3DDevice()->CreateCommittedResource(
-				&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, IID_ID3D12Resource, d3d_resource_.put_void()));
+				&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, UuidOf<ID3D12Resource>(), d3d_resource_.put_void()));
 
 			d3d_resource_offset_ = 0;
 			gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();

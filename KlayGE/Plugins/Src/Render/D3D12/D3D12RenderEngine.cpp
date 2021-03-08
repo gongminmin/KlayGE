@@ -79,7 +79,7 @@ namespace KlayGE
 		if (debug_context)
 		{
 			com_ptr<ID3D12Debug> debug_ctrl;
-			if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12GetDebugInterface(IID_ID3D12Debug, debug_ctrl.put_void())))
+			if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12GetDebugInterface(UuidOf<ID3D12Debug>(), debug_ctrl.put_void())))
 			{
 				BOOST_ASSERT(debug_ctrl);
 				debug_ctrl->EnableDebugLayer();
@@ -92,7 +92,7 @@ namespace KlayGE
 		native_shader_version_ = 6;
 
 		TIFHR(D3D12InterfaceLoader::Instance().CreateDXGIFactory2(dxgi_factory_flags,
-			IID_IDXGIFactory4, gi_factory_4_.put_void()));
+			UuidOf<IDXGIFactory4>(), gi_factory_4_.put_void()));
 		dxgi_sub_ver_ = 4;
 
 		if (gi_factory_4_.try_as(gi_factory_5_))
@@ -295,7 +295,7 @@ namespace KlayGE
 		queue_desc.Priority = 0;
 		queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		queue_desc.NodeMask = 0;
-		TIFHR(d3d_device_->CreateCommandQueue(&queue_desc, IID_ID3D12CommandQueue, d3d_cmd_queue_.release_and_put_void()));
+		TIFHR(d3d_device_->CreateCommandQueue(&queue_desc, UuidOf<ID3D12CommandQueue>(), d3d_cmd_queue_.release_and_put_void()));
 
 		Verify(!!d3d_device_);
 
@@ -306,7 +306,7 @@ namespace KlayGE
 		rtv_desc_heap.NumDescriptors = NUM_BACK_BUFFERS * 2 + NUM_MAX_RENDER_TARGET_VIEWS;
 		rtv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtv_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
 			rtv_desc_heap_.release_and_put_void()));
 		rtv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -315,7 +315,7 @@ namespace KlayGE
 		dsv_desc_heap.NumDescriptors = 2 + NUM_MAX_DEPTH_STENCIL_VIEWS;
 		dsv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsv_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
 			dsv_desc_heap_.release_and_put_void()));
 		dsv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
@@ -324,7 +324,7 @@ namespace KlayGE
 		cbv_srv_uav_desc_heap.NumDescriptors = NUM_MAX_CBV_SRV_UAVS;
 		cbv_srv_uav_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		cbv_srv_uav_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
 			cbv_srv_uav_desc_heap_.release_and_put_void()));
 		cbv_srv_uav_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
@@ -366,7 +366,7 @@ namespace KlayGE
 			cmd_signature_desc.NodeMask = 1;
 
 			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
-				IID_ID3D12CommandSignature, draw_indirect_signature_.put_void()));
+				UuidOf<ID3D12CommandSignature>(), draw_indirect_signature_.put_void()));
 		}
 		{
 			D3D12_INDIRECT_ARGUMENT_DESC indirect_param;
@@ -379,7 +379,7 @@ namespace KlayGE
 			cmd_signature_desc.NodeMask = 1;
 
 			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
-				IID_ID3D12CommandSignature, draw_indexed_indirect_signature_.put_void()));
+				UuidOf<ID3D12CommandSignature>(), draw_indexed_indirect_signature_.put_void()));
 		}
 		{
 			D3D12_INDIRECT_ARGUMENT_DESC indirect_param;
@@ -392,7 +392,7 @@ namespace KlayGE
 			cmd_signature_desc.NodeMask = 1;
 
 			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
-				IID_ID3D12CommandSignature, dispatch_indirect_signature_.put_void()));
+				UuidOf<ID3D12CommandSignature>(), dispatch_indirect_signature_.put_void()));
 		}
 
 		this->FillRenderDeviceCaps();
@@ -1841,7 +1841,7 @@ namespace KlayGE
 				signature.put(), error.put()));
 			ID3D12RootSignaturePtr rs;
 			TIFHR(d3d_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
-				IID_ID3D12RootSignature, rs.put_void()));
+				UuidOf<ID3D12RootSignature>(), rs.put_void()));
 			
 			iter = root_signatures_.emplace(hash_val, std::move(rs)).first;
 		}
@@ -1859,7 +1859,7 @@ namespace KlayGE
 		if (iter == graphics_psos_.end())
 		{
 			ID3D12PipelineStatePtr d3d_pso;
-			TIFHR(d3d_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			TIFHR(d3d_device_->CreateGraphicsPipelineState(&desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
 			iter = graphics_psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
@@ -1876,7 +1876,7 @@ namespace KlayGE
 		if (iter == compute_psos_.end())
 		{
 			ID3D12PipelineStatePtr d3d_pso;
-			TIFHR(d3d_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, d3d_pso.put_void()));
+			TIFHR(d3d_device_->CreateComputePipelineState(&desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
 			iter = compute_psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
@@ -1964,11 +1964,11 @@ namespace KlayGE
 		for (auto& context : per_frame_contexts_)
 		{
 			TIFHR(d3d_device->CreateCommandAllocator(
-				D3D12_COMMAND_LIST_TYPE_DIRECT, IID_ID3D12CommandAllocator, context.d3d_cmd_allocator.release_and_put_void()));
+				D3D12_COMMAND_LIST_TYPE_DIRECT, UuidOf<ID3D12CommandAllocator>(), context.d3d_cmd_allocator.release_and_put_void()));
 		}
 
 		TIFHR(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, per_frame_contexts_[0].d3d_cmd_allocator.get(), nullptr,
-			IID_ID3D12GraphicsCommandList, d3d_cmd_list_.release_and_put_void()));
+			UuidOf<ID3D12GraphicsCommandList>(), d3d_cmd_list_.release_and_put_void()));
 	}
 
 	D3D12RenderEngine::PerThreadContext::~PerThreadContext()
@@ -2070,7 +2070,7 @@ namespace KlayGE
 			cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			cbv_srv_heap_desc.NodeMask = 0;
 			ID3D12DescriptorHeapPtr heap;
-			TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, heap.put_void()));
+			TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, UuidOf<ID3D12DescriptorHeap>(), heap.put_void()));
 			ret = heap.get();
 			
 			cbv_srv_uav_heap_cache_[num].actives.emplace_back(std::move(heap));

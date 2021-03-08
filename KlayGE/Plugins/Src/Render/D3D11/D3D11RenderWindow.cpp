@@ -707,7 +707,7 @@ namespace KlayGE
 		}
 
 		ID3D11Texture2DPtr back_buffer;
-		TIFHR(swap_chain_1_->GetBuffer(0, IID_ID3D11Texture2D, back_buffer.put_void()));
+		TIFHR(swap_chain_1_->GetBuffer(0, UuidOf<ID3D11Texture2D>(), back_buffer.put_void()));
 		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(back_buffer);
 
 		render_target_view_ = rf.Make2DRtv(back_buffer_, 0, 1, 0);

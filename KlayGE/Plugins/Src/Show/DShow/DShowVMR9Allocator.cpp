@@ -51,6 +51,10 @@
 
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
+DEFINE_UUID_OF(IUnknown);
+DEFINE_UUID_OF(IVMRImagePresenter9);
+DEFINE_UUID_OF(IVMRSurfaceAllocator9);
+
 namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
@@ -342,7 +346,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (IID_IVMRSurfaceAllocator9 == riid)
+			if (UuidOf<IVMRSurfaceAllocator9>() == reinterpret_cast<Uuid const&>(riid))
 			{
 				*ppvObject = static_cast<IVMRSurfaceAllocator9*>(this);
 				this->AddRef();
@@ -350,7 +354,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (IID_IVMRImagePresenter9 == riid)
+				if (UuidOf<IVMRImagePresenter9>() == reinterpret_cast<Uuid const&>(riid))
 				{
 					*ppvObject = static_cast<IVMRImagePresenter9*>(this);
 					this->AddRef();
@@ -358,7 +362,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (IID_IUnknown == riid)
+					if (UuidOf<IUnknown>() == reinterpret_cast<Uuid const&>(riid))
 					{
 						*ppvObject = static_cast<IUnknown*>(static_cast<IVMRSurfaceAllocator9*>(this));
 						this->AddRef();

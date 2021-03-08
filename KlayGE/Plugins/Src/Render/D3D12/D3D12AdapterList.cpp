@@ -94,7 +94,7 @@ namespace KlayGE
 			{
 				com_ptr<ID3D12Device> device;
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
-					IID_ID3D12Device, device.put_void())))
+					UuidOf<ID3D12Device>(), device.put_void())))
 				{
 					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get());
 					adapter->Enumerate();
@@ -117,13 +117,13 @@ namespace KlayGE
 		UINT adapter_no = 0;
 		IDXGIAdapter2Ptr dxgi_adapter;
 		while (SUCCEEDED(gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-			IID_IDXGIAdapter2, dxgi_adapter.release_and_put_void())))
+			UuidOf<IDXGIAdapter2>(), dxgi_adapter.release_and_put_void())))
 		{
 			if (dxgi_adapter != nullptr)
 			{
 				com_ptr<ID3D12Device> device;
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
-					IID_ID3D12Device, device.put_void())))
+					UuidOf<ID3D12Device>(), device.put_void())))
 				{
 					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get());
 					adapter->Enumerate();

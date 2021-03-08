@@ -52,6 +52,10 @@ DEFINE_GUID(CLSID_WbemLocator, 0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xa
 
 #include <KlayGE/HWDetect.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+DEFINE_UUID_OF(IWbemLocator);
+#endif
+
 namespace KlayGE
 {
 	char const * Mainboard::mainboard_type_name_[MainboardInfo::MT_Num] =
@@ -166,7 +170,7 @@ namespace KlayGE
 
 		bool CreateInstance()
 		{
-			HRESULT hr = ::CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator,
+			HRESULT hr = ::CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, UuidOf<IWbemLocator>(),
 				wbem_locator_.release_and_put_void());
 			if (FAILED(hr))
 			{

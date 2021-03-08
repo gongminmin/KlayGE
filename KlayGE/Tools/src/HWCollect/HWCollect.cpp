@@ -51,6 +51,7 @@ using namespace KlayGE;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 DEFINE_UUID_OF(IDXGIAdapter2);
+DEFINE_UUID_OF(IDXGIFactory1);
 #endif
 
 void DetectOSInfo(std::ostream& os)
@@ -298,7 +299,7 @@ void DetectGpuInfo(std::ostream& os)
 #endif
 
 	IDXGIFactory1* factory;
-	if (SUCCEEDED((*DynamicCreateDXGIFactory1)(IID_IDXGIFactory1, reinterpret_cast<void**>(&factory))))
+	if (SUCCEEDED((*DynamicCreateDXGIFactory1)(UuidOf<IDXGIFactory1>(), reinterpret_cast<void**>(&factory))))
 	{
 		UINT adapter_no = 0;
 		com_ptr<IDXGIAdapter1> adapter;

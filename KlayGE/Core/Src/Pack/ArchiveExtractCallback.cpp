@@ -64,13 +64,13 @@ namespace KlayGE
 
 	STDMETHODIMP ArchiveExtractCallback::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
-		if (IID_ICryptoGetTextPassword == iid)
+		if (UuidOf<ICryptoGetTextPassword>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<ICryptoGetTextPassword*>(this);
 			this->AddRef();
 			return S_OK;
 		}
-		else if (IID_IArchiveExtractCallback == iid)
+		else if (UuidOf<IArchiveExtractCallback>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<IArchiveExtractCallback*>(this);
 			this->AddRef();

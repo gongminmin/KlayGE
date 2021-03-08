@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/Uuid.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <boost/assert.hpp>
@@ -70,13 +72,13 @@ namespace KlayGE
 
 	STDMETHODIMP InStream::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
-		if (IID_IInStream == iid)
+		if (UuidOf<IInStream>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<IInStream*>(this);
 			this->AddRef();
 			return S_OK;
 		}
-		else if (IID_IStreamGetSize == iid)
+		else if (UuidOf<IStreamGetSize>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<IStreamGetSize*>(this);
 			this->AddRef();
@@ -162,7 +164,7 @@ namespace KlayGE
 
 	STDMETHODIMP OutStream::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
-		if (IID_IOutStream == iid)
+		if (UuidOf<IOutStream>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<void*>(this);
 			this->AddRef();

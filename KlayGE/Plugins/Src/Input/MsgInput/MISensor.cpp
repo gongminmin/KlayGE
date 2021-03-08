@@ -57,6 +57,15 @@ namespace KlayGE
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 
+DEFINE_UUID_OF(IUnknown);
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+DEFINE_UUID_OF(ILatLongReport);
+DEFINE_UUID_OF(ILocation);
+DEFINE_UUID_OF(ILocationEvents);
+#endif
+DEFINE_UUID_OF(ISensorEvents);
+DEFINE_UUID_OF(ISensorManager);
+
 #if (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	#if !(defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 100))
 		// Magnetometer Accuracy Data Types
@@ -83,11 +92,6 @@ namespace KlayGE
 	#endif
 #endif
 
-#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
-DEFINE_UUID_OF(ILocationEvents);
-DEFINE_UUID_OF(ILatLongReport);
-#endif
-
 namespace KlayGE
 {
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -109,11 +113,11 @@ namespace KlayGE
 				return E_POINTER;
 			}
 
-			if (IID_IUnknown == iid)
+			if (UuidOf<IUnknown>() == reinterpret_cast<Uuid const&>(iid))
 			{
 				*ppv = static_cast<IUnknown*>(this);
 			}
-			else if (IID_ILocationEvents == iid)
+			else if (UuidOf<ILocationEvents>() == reinterpret_cast<Uuid const&>(iid))
 			{
 				*ppv = static_cast<ILocationEvents*>(this);
 			}
@@ -190,11 +194,11 @@ namespace KlayGE
 				return E_POINTER;
 			}
 
-			if (IID_IUnknown == iid)
+			if (UuidOf<IUnknown>() == reinterpret_cast<Uuid const&>(iid))
 			{
 				*ppv = static_cast<IUnknown*>(this);
 			}
-			else if (IID_ISensorEvents == iid)
+			else if (UuidOf<ISensorEvents>() == reinterpret_cast<Uuid const&>(iid))
 			{
 				*ppv = static_cast<ISensorEvents*>(this);
 			}
@@ -323,10 +327,10 @@ namespace KlayGE
 		{
 			com_ptr<ILocation> location;
 			hr = ::CoCreateInstance(CLSID_Location, nullptr, CLSCTX_INPROC_SERVER,
-				IID_ILocation, location.put_void());
+				UuidOf<ILocation>(), location.put_void());
 			if (SUCCEEDED(hr))
 			{
-				IID REPORT_TYPES[] = { IID_ILatLongReport };
+				IID REPORT_TYPES[] = { UuidOf<ILatLongReport>() };
 				hr = location->RequestPermissions(nullptr, REPORT_TYPES, static_cast<ULONG>(std::size(REPORT_TYPES)), true);
 				if (SUCCEEDED(hr))
 				{
@@ -345,7 +349,7 @@ namespace KlayGE
 
 		com_ptr<ISensorManager> sensor_mgr;
 		hr = ::CoCreateInstance(CLSID_SensorManager, nullptr, CLSCTX_INPROC_SERVER,
-			IID_ISensorManager, sensor_mgr.put_void());
+			UuidOf<ISensorManager>(), sensor_mgr.put_void());
 		if (SUCCEEDED(hr))
 		{
 			hr = sensor_mgr->GetSensorsByCategory(SENSOR_CATEGORY_MOTION, motion_sensor_collection_.put());
@@ -400,7 +404,7 @@ namespace KlayGE
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		if (locator_)
 		{
-			IID REPORT_TYPES[] = { IID_ILatLongReport };
+			IID REPORT_TYPES[] = { UuidOf<ILatLongReport>() };
 			for (DWORD index = 0; index < std::size(REPORT_TYPES); ++ index)
 			{
 				locator_->UnregisterForReport(REPORT_TYPES[index]);
@@ -429,7 +433,7 @@ namespace KlayGE
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 	void MsgInputSensor::OnLocationChanged(REFIID report_type, ILocationReport* location_report)
 	{
-		if (IID_ILatLongReport == report_type)
+		if (UuidOf<ILatLongReport>() == reinterpret_cast<Uuid const&>(report_type))
 		{
 			if (auto lat_long_report = com_ptr<ILocationReport>(location_report).try_as<ILatLongReport>())
 			{

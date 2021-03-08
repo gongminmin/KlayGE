@@ -1006,7 +1006,7 @@ namespace KlayGE
 			sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
 			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			sampler_heap_desc.NodeMask = 0;
-			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, d3d_immutable_->sampler_heap_.put_void()));
+			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, UuidOf<ID3D12DescriptorHeap>(), d3d_immutable_->sampler_heap_.put_void()));
 
 			cpu_sampler_handle = d3d_immutable_->sampler_heap_->GetCPUDescriptorHandleForHeapStart();			
 		}

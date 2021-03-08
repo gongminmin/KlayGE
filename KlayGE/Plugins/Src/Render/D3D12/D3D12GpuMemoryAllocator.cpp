@@ -97,8 +97,8 @@ namespace KlayGE
 		if (aligned_size > DefaultPageSize)
 		{
 			auto large_page = this->CreatePage(aligned_size);
-			large_pages_.push_back(large_page);
 			mem_block->Reset(*large_page, 0, size_in_bytes);
+			large_pages_.emplace_back(std::move(large_page));
 			return;
 		}
 
@@ -282,7 +282,7 @@ namespace KlayGE
 
 		ID3D12ResourcePtr resource;
 		TIFHR(device->CreateCommittedResource(
-			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, IID_ID3D12Resource, resource.put_void()));
+			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, UuidOf<ID3D12Resource>(), resource.put_void()));
 
 		return MakeSharedPtr<D3D12GpuMemoryPage>(is_upload_, std::move(resource));
 	}

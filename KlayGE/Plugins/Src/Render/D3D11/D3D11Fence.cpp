@@ -105,7 +105,7 @@ namespace KlayGE
 		auto* d3d_device = re.D3DDevice5();
 		BOOST_ASSERT(d3d_device != nullptr);
 
-		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, IID_ID3D11Fence, fence_.put_void());
+		d3d_device->CreateFence(0, D3D11_FENCE_FLAG_NONE, UuidOf<ID3D11Fence>(), fence_.put_void());
 
 		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}
