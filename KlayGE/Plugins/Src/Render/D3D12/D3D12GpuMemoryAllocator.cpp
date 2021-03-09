@@ -130,19 +130,18 @@ namespace KlayGE
 
 	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)
 	{
-		std::lock_guard<std::mutex> lock(allocation_mutex_);
-		this->Deallocate(lock, mem_block.get(), fence_value);
+		if (mem_block)
+		{
+			std::lock_guard<std::mutex> lock(allocation_mutex_);
+			this->Deallocate(lock, mem_block.get(), fence_value);
+		}
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(
 		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock* mem_block, uint64_t fence_value)
 	{
 		KFL_UNUSED(proof_of_lock);
-
-		if (mem_block == nullptr)
-		{
-			return;
-		}
+		BOOST_ASSERT(mem_block != nullptr);
 
 		if (mem_block->Size() <= DefaultPageSize)
 		{

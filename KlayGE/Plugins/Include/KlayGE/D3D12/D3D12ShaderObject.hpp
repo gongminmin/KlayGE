@@ -299,9 +299,9 @@ namespace KlayGE
 		{
 			return d3d_immutable_->root_signature_.get();
 		}
-		ID3D12DescriptorHeap* SamplerHeap() const noexcept
+		D3D12GpuDescriptorBlock* SamplerDescBlock() const noexcept
 		{
-			return d3d_immutable_->sampler_heap_.get();
+			return d3d_immutable_->sampler_desc_block_.get();
 		}
 
 		void* GetD3D12ShaderObjectTemplate() noexcept
@@ -324,8 +324,10 @@ namespace KlayGE
 	private:
 		struct D3D12Immutable
 		{
+			~D3D12Immutable();
+
 			ID3D12RootSignaturePtr root_signature_;
-			ID3D12DescriptorHeapPtr sampler_heap_;
+			std::unique_ptr<D3D12GpuDescriptorBlock> sampler_desc_block_;
 
 			std::array<uint32_t, NumShaderStages> num_srvs_{};
 			std::array<uint32_t, NumShaderStages> num_uavs_{};

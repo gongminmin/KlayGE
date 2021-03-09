@@ -154,6 +154,12 @@ namespace KlayGE
 			max_fence_value = std::max(max_fence_value, context->FrameFenceValue(curr_frame_index_));
 		}
 
+		rtv_desc_allocator_.ClearStallPages(max_fence_value);
+		dsv_desc_allocator_.ClearStallPages(max_fence_value);
+		cbv_srv_uav_desc_allocator_.ClearStallPages(max_fence_value);
+		dynamic_cbv_srv_uav_desc_allocator_.ClearStallPages(max_fence_value);
+		sampler_desc_allocator_.ClearStallPages(max_fence_value);
+
 		upload_mem_allocator_.ClearStallPages(max_fence_value);
 		readback_mem_allocator_.ClearStallPages(max_fence_value);
 		per_frame_contexts_[curr_frame_index_].ClearStallResources();
@@ -301,38 +307,7 @@ namespace KlayGE
 
 		frame_fence_ = Context::Instance().RenderFactoryInstance().MakeFence();
 
-		D3D12_DESCRIPTOR_HEAP_DESC rtv_desc_heap;
-		rtv_desc_heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtv_desc_heap.NumDescriptors = NUM_BACK_BUFFERS * 2 + NUM_MAX_RENDER_TARGET_VIEWS;
-		rtv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtv_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
-			rtv_desc_heap_.release_and_put_void()));
-		rtv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		D3D12_DESCRIPTOR_HEAP_DESC dsv_desc_heap;
-		dsv_desc_heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		dsv_desc_heap.NumDescriptors = 2 + NUM_MAX_DEPTH_STENCIL_VIEWS;
-		dsv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		dsv_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
-			dsv_desc_heap_.release_and_put_void()));
-		dsv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_uav_desc_heap;
-		cbv_srv_uav_desc_heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbv_srv_uav_desc_heap.NumDescriptors = NUM_MAX_CBV_SRV_UAVS;
-		cbv_srv_uav_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		cbv_srv_uav_desc_heap.NodeMask = 0;
-		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, UuidOf<ID3D12DescriptorHeap>(),
-			cbv_srv_uav_desc_heap_.release_and_put_void()));
-		cbv_srv_uav_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		sampler_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-
-		rtv_heap_occupied_.reset();
-		dsv_heap_occupied_.reset();
-		cbv_srv_uav_heap_occupied_.reset();
+		null_srv_uav_desc_block_ = this->AllocCbvSrvUavDescBlock(2);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC null_srv_desc;
 		null_srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -342,8 +317,7 @@ namespace KlayGE
 		null_srv_desc.Texture2D.MostDetailedMip = 0;
 		null_srv_desc.Texture2D.PlaneSlice = 0;
 		null_srv_desc.Texture2D.ResourceMinLODClamp = 0;
-		null_srv_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
-		null_srv_handle_.ptr += this->AllocCBVSRVUAV();
+		null_srv_handle_ = null_srv_uav_desc_block_->CpuHandle();
 		d3d_device_->CreateShaderResourceView(nullptr, &null_srv_desc, null_srv_handle_);
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC null_uav_desc;
@@ -351,8 +325,7 @@ namespace KlayGE
 		null_uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		null_uav_desc.Texture2D.MipSlice = 0;
 		null_uav_desc.Texture2D.PlaneSlice = 0;
-		null_uav_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
-		null_uav_handle_.ptr += this->AllocCBVSRVUAV();
+		null_uav_handle_ = {null_srv_uav_desc_block_->CpuHandle().ptr + this->CbvSrvUavDescSize()};
 		d3d_device_->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle_);
 
 		{
@@ -623,18 +596,17 @@ namespace KlayGE
 		std::array<ID3D12DescriptorHeap*, 2> heaps;
 		uint32_t num_heaps = 0;
 
-		ID3D12DescriptorHeap* cbv_srv_uav_heap = nullptr;
+		std::unique_ptr<D3D12GpuDescriptorBlock> scb_srv_uav_desc_block;
 		if (num_srv_uav_handles > 0)
 		{
-			cbv_srv_uav_heap =
-				per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num_srv_uav_handles);
-			heaps[num_heaps] = cbv_srv_uav_heap;
+			scb_srv_uav_desc_block = this->AllocDynamicCbvSrvUavDescBlock(num_srv_uav_handles);
+			heaps[num_heaps] = scb_srv_uav_desc_block->Heap();
 			++ num_heaps;
 		}
-		auto* sampler_heap = d3d12_so.SamplerHeap();
-		if (sampler_heap)
+		auto* sampler_desc_block = d3d12_so.SamplerDescBlock();
+		if (sampler_desc_block)
 		{
-			heaps[num_heaps] = sampler_heap;
+			heaps[num_heaps] = sampler_desc_block->Heap();
 			++ num_heaps;
 		}
 
@@ -660,15 +632,15 @@ namespace KlayGE
 			}
 		}
 
-		if (cbv_srv_uav_heap != nullptr)
+		if (scb_srv_uav_desc_block)
 		{
-			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
+			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = scb_srv_uav_desc_block->CpuHandle();
 			auto const& srv_uav_handles = d3d12_so.SrvUavHandles();
 			uint32_t num_srvs_uavs = static_cast<uint32_t>(srv_uav_handles.size());
 			d3d_device_->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_srvs_uavs, num_srvs_uavs, srv_uav_handles.data(), nullptr,
 				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
+			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = scb_srv_uav_desc_block->GpuHandle();
 			for (uint32_t i = 0; i < NumShaderStages; ++i)
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(i);
@@ -684,7 +656,7 @@ namespace KlayGE
 						cmd_list->SetComputeRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 					}
 
-					gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_srvs;
+					gpu_cbv_srv_uav_handle.ptr += this->CbvSrvUavDescSize() * num_srvs;
 
 					++ root_param_index;
 				}
@@ -704,21 +676,23 @@ namespace KlayGE
 						cmd_list->SetComputeRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 					}
 
-					gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size_ * num_uavs;
+					gpu_cbv_srv_uav_handle.ptr += this->CbvSrvUavDescSize() * num_uavs;
 
 					++ root_param_index;
 				}
 			}
+
+			this->DeallocDynamicCbvSrvUavDescBlock(std::move(scb_srv_uav_desc_block));
 		}
 
-		if (sampler_heap)
+		if (sampler_desc_block != nullptr)
 		{
-			D3D12_GPU_DESCRIPTOR_HANDLE gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
+			D3D12_GPU_DESCRIPTOR_HANDLE gpu_sampler_handle = sampler_desc_block->GpuHandle();
 
 			for (uint32_t i = 0; i < NumShaderStages; ++ i)
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(i);
-				auto const& num_samplers = d3d12_so.NumSamplers(stage);
+				uint32_t const num_samplers = d3d12_so.NumSamplers(stage);
 				if (num_samplers > 0)
 				{
 					if (stage != ShaderStage::Compute)
@@ -730,7 +704,7 @@ namespace KlayGE
 						cmd_list->SetComputeRootDescriptorTable(root_param_index, gpu_sampler_handle);
 					}
 
-					gpu_sampler_handle.ptr += sampler_desc_size_ * num_samplers;
+					gpu_sampler_handle.ptr += this->SamplerDescSize() * num_samplers;
 
 					++ root_param_index;
 				}
@@ -999,6 +973,12 @@ namespace KlayGE
 		this->SyncRenderCmd();
 		this->SyncLoadCmd();
 
+		rtv_desc_allocator_.ClearStallPages(frame_fence_value_);
+		dsv_desc_allocator_.ClearStallPages(frame_fence_value_);
+		cbv_srv_uav_desc_allocator_.ClearStallPages(frame_fence_value_);
+		dynamic_cbv_srv_uav_desc_allocator_.ClearStallPages(frame_fence_value_);
+		sampler_desc_allocator_.ClearStallPages(frame_fence_value_);
+
 		upload_mem_allocator_.ClearStallPages(frame_fence_value_);
 		readback_mem_allocator_.ClearStallPages(frame_fence_value_);
 		per_frame_contexts_[curr_frame_index_].ClearStallResources();
@@ -1028,6 +1008,8 @@ namespace KlayGE
 	{
 		adapterList_.Destroy();
 
+		cbv_srv_uav_desc_allocator_.Deallocate(std::move(null_srv_uav_desc_block_), render_thread_cmd_contexts_[0]->FrameFenceValue(0));
+
 		for (auto& context : render_thread_cmd_contexts_)
 		{
 			context.reset();
@@ -1052,9 +1034,11 @@ namespace KlayGE
 		draw_indexed_indirect_signature_.reset();
 		dispatch_indirect_signature_.reset();
 
-		cbv_srv_uav_desc_heap_.reset();
-		dsv_desc_heap_.reset();
-		rtv_desc_heap_.reset();
+		sampler_desc_allocator_.Clear();
+		dynamic_cbv_srv_uav_desc_allocator_.Clear();
+		cbv_srv_uav_desc_allocator_.Clear();
+		dsv_desc_allocator_.Clear();
+		rtv_desc_allocator_.Clear();
 
 		upload_mem_allocator_.Clear();
 		readback_mem_allocator_.Clear();
@@ -1557,71 +1541,6 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D12RenderEngine::AllocRTV()
-	{
-		for (size_t i = 0; i < rtv_heap_occupied_.size(); ++ i)
-		{
-			if (!rtv_heap_occupied_[i])
-			{
-				rtv_heap_occupied_[i] = true;
-				return static_cast<uint32_t>(NUM_BACK_BUFFERS * 2 + i) * rtv_desc_size_;
-			}
-		}
-
-		KFL_UNREACHABLE("Can't allocate more RTVs");
-	}
-
-	uint32_t D3D12RenderEngine::AllocDSV()
-	{
-		for (size_t i = 0; i < dsv_heap_occupied_.size(); ++ i)
-		{
-			if (!dsv_heap_occupied_[i])
-			{
-				dsv_heap_occupied_[i] = true;
-				return static_cast<uint32_t>(2 + i) * dsv_desc_size_;
-			}
-		}
-
-		KFL_UNREACHABLE("Can't allocate more DSVs");
-	}
-
-	uint32_t D3D12RenderEngine::AllocCBVSRVUAV()
-	{
-		for (size_t i = 0; i < cbv_srv_uav_heap_occupied_.size(); ++ i)
-		{
-			if (!cbv_srv_uav_heap_occupied_[i])
-			{
-				cbv_srv_uav_heap_occupied_[i] = true;
-				return static_cast<uint32_t>(i) * cbv_srv_uav_desc_size_;
-			}
-		}
-		KFL_UNREACHABLE("Can't allocate more CBVs/SRVs/UAVs");
-	}
-
-	void D3D12RenderEngine::DeallocRTV(uint32_t offset)
-	{
-		uint32_t const index = offset / rtv_desc_size_;
-		if (index >= NUM_BACK_BUFFERS * 2)
-		{
-			rtv_heap_occupied_[index - NUM_BACK_BUFFERS * 2] = false;
-		}
-	}
-
-	void D3D12RenderEngine::DeallocDSV(uint32_t offset)
-	{
-		uint32_t const index = offset / dsv_desc_size_;
-		if (index >= 2)
-		{
-			dsv_heap_occupied_[index - 2] = false;
-		}
-	}
-
-	void D3D12RenderEngine::DeallocCBVSRVUAV(uint32_t offset)
-	{
-		uint32_t const index = offset / cbv_srv_uav_desc_size_;
-		cbv_srv_uav_heap_occupied_[index] = false;
-	}
-
 	ID3D12RootSignaturePtr const & D3D12RenderEngine::CreateRootSignature(
 			std::array<uint32_t, NumShaderStages * 4> const & num,
 			bool has_vs, bool has_stream_output)
@@ -1915,6 +1834,56 @@ namespace KlayGE
 		return ret;
 	}
 
+	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12RenderEngine::AllocRtvDescBlock(uint32_t size)
+	{
+		return rtv_desc_allocator_.Allocate(size);
+	}
+
+	void D3D12RenderEngine::DeallocRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block)
+	{
+		rtv_desc_allocator_.Deallocate(std::move(desc_block), frame_fence_value_);
+	}
+
+	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12RenderEngine::AllocDsvDescBlock(uint32_t size)
+	{
+		return dsv_desc_allocator_.Allocate(size);
+	}
+
+	void D3D12RenderEngine::DeallocDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block)
+	{
+		dsv_desc_allocator_.Deallocate(std::move(desc_block), frame_fence_value_);
+	}
+
+	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12RenderEngine::AllocCbvSrvUavDescBlock(uint32_t size)
+	{
+		return cbv_srv_uav_desc_allocator_.Allocate(size);
+	}
+
+	void D3D12RenderEngine::DeallocCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block)
+	{
+		cbv_srv_uav_desc_allocator_.Deallocate(std::move(desc_block), frame_fence_value_);
+	}
+
+	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12RenderEngine::AllocDynamicCbvSrvUavDescBlock(uint32_t size)
+	{
+		return dynamic_cbv_srv_uav_desc_allocator_.Allocate(size);
+	}
+
+	void D3D12RenderEngine::DeallocDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block)
+	{
+		dynamic_cbv_srv_uav_desc_allocator_.Deallocate(std::move(desc_block), frame_fence_value_);
+	}
+
+	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12RenderEngine::AllocSamplerDescBlock(uint32_t size)
+	{
+		return sampler_desc_allocator_.Allocate(size);
+	}
+	
+	void D3D12RenderEngine::DeallocSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block)
+	{
+		sampler_desc_allocator_.Deallocate(std::move(desc_block), frame_fence_value_);
+	}
+
 	std::unique_ptr<D3D12GpuMemoryBlock> D3D12RenderEngine::AllocMemBlock(bool is_upload, uint32_t size_in_bytes)
 	{
 		return (is_upload ? upload_mem_allocator_ : readback_mem_allocator_).Allocate(size_in_bytes);
@@ -1950,11 +1919,6 @@ namespace KlayGE
 			cmd_list->ResourceBarrier(static_cast<UINT>(res_barriers->size()), res_barriers->data());
 			res_barriers->clear();
 		}
-	}
-
-	ID3D12DescriptorHeap* D3D12RenderEngine::CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num)
-	{
-		return per_frame_contexts_[curr_frame_index_].CreateDynamicCBVSRVUAVDescriptorHeap(d3d_device_.get(), num);
 	}
 
 
@@ -2045,37 +2009,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::PerFrameContext::Destroy()
 	{
-		cbv_srv_uav_heap_cache_.clear();
 		stall_resources_.clear();
-	}
-
-	ID3D12DescriptorHeap* D3D12RenderEngine::PerFrameContext::CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num)
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-
-		ID3D12DescriptorHeap* ret;
-		auto iter = cbv_srv_uav_heap_cache_.find(num);
-		if ((iter != cbv_srv_uav_heap_cache_.end()) && !iter->second.stalls.empty())
-		{
-			auto heap = std::move(iter->second.stalls.back());
-			ret = heap.get();
-			iter->second.actives.emplace_back(std::move(heap));
-			iter->second.stalls.pop_back();
-		}
-		else
-		{
-			D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-			cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			cbv_srv_heap_desc.NumDescriptors = num;
-			cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			cbv_srv_heap_desc.NodeMask = 0;
-			ID3D12DescriptorHeapPtr heap;
-			TIFHR(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, UuidOf<ID3D12DescriptorHeap>(), heap.put_void()));
-			ret = heap.get();
-			
-			cbv_srv_uav_heap_cache_[num].actives.emplace_back(std::move(heap));
-		}
-		return ret;
 	}
 
 	void D3D12RenderEngine::PerFrameContext::AddStallResource(ID3D12ResourcePtr const& resource)
@@ -2090,13 +2024,6 @@ namespace KlayGE
 	void D3D12RenderEngine::PerFrameContext::ClearStallResources()
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
-
-		for (auto& item : cbv_srv_uav_heap_cache_)
-		{
-			item.second.stalls.insert(item.second.stalls.end(), item.second.actives.begin(), item.second.actives.end());
-			item.second.actives.clear();
-		}
-
 		stall_resources_.clear();
 	}
 }

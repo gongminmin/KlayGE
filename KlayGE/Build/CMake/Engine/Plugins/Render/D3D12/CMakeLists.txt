@@ -5,6 +5,7 @@ SET(D3D12_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12AdapterList.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Fence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12FrameBuffer.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12GpuDescriptorAllocator.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12GpuMemoryAllocator.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12InterfaceLoader.cpp
@@ -31,6 +32,7 @@ SET(D3D12_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12AdapterList.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Fence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12FrameBuffer.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12GpuDescriptorAllocator.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12InterfaceLoader.hpp

@@ -54,14 +54,14 @@ namespace KlayGE
 		D3D12ShaderResourceViewSimulation(D3D12Resource const * res, D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc);
 		~D3D12ShaderResourceViewSimulation();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
+		D3D12_CPU_DESCRIPTOR_HANDLE Handle() const noexcept
 		{
-			return handle_;
+			return desc_->CpuHandle();
 		}
 
 	private:
 		D3D12Resource const * res_;
-		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
+		std::unique_ptr<D3D12GpuDescriptorBlock> desc_;
 	};
 	typedef std::shared_ptr<D3D12ShaderResourceViewSimulation> D3D12ShaderResourceViewSimulationPtr;
 
@@ -72,14 +72,14 @@ namespace KlayGE
 		D3D12RenderTargetViewSimulation(D3D12Resource const * res, D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc);
 		~D3D12RenderTargetViewSimulation();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
+		D3D12_CPU_DESCRIPTOR_HANDLE Handle() const noexcept
 		{
-			return handle_;
+			return desc_->CpuHandle();
 		}
 
 	private:
 		D3D12Resource const * res_;
-		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
+		std::unique_ptr<D3D12GpuDescriptorBlock> desc_;
 	};
 	typedef std::shared_ptr<D3D12RenderTargetViewSimulation> D3D12RenderTargetViewSimulationPtr;
 
@@ -90,14 +90,14 @@ namespace KlayGE
 		D3D12DepthStencilViewSimulation(D3D12Resource const * res, D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc);
 		~D3D12DepthStencilViewSimulation();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
+		D3D12_CPU_DESCRIPTOR_HANDLE Handle() const noexcept
 		{
-			return handle_;
+			return desc_->CpuHandle();
 		}
 
 	private:
 		D3D12Resource const * res_;
-		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
+		std::unique_ptr<D3D12GpuDescriptorBlock> desc_;
 	};
 	typedef std::shared_ptr<D3D12DepthStencilViewSimulation> D3D12DepthStencilViewSimulationPtr;
 
@@ -108,15 +108,15 @@ namespace KlayGE
 		D3D12UnorderedAccessViewSimulation(D3D12Resource const * res, D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc);
 		~D3D12UnorderedAccessViewSimulation();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
+		D3D12_CPU_DESCRIPTOR_HANDLE Handle() const noexcept
 		{
-			return handle_;
+			return desc_->CpuHandle();
 		}
 
 	private:
 		D3D12Resource const * res_;
 		ID3D12ResourcePtr counter_;
-		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
+		std::unique_ptr<D3D12GpuDescriptorBlock> desc_;
 		uint32_t counter_offset_;
 	};
 	typedef std::shared_ptr<D3D12UnorderedAccessViewSimulation> D3D12UnorderedAccessViewSimulationPtr;

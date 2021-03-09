@@ -48,6 +48,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12AdapterList.hpp>
 #include <KlayGE/D3D12/D3D12Util.hpp>
+#include <KlayGE/D3D12/D3D12GpuDescriptorAllocator.hpp>
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 
@@ -56,10 +57,7 @@ namespace KlayGE
 	class D3D12AdapterList;
 	class D3D12Adapter;
 
-	static uint32_t const NUM_BACK_BUFFERS = 3;
-	static uint32_t const NUM_MAX_RENDER_TARGET_VIEWS = 8 * 1024;
-	static uint32_t const NUM_MAX_DEPTH_STENCIL_VIEWS = 4 * 1024;
-	static uint32_t const NUM_MAX_CBV_SRV_UAVS = 32 * 1024;
+	static uint32_t const NUM_BACK_BUFFERS = 3;;
 
 	inline uint32_t CalcSubresource(uint32_t MipSlice, uint32_t ArraySlice, uint32_t PlaneSlice, uint32_t MipLevels, uint32_t ArraySize)
 	{
@@ -135,33 +133,21 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		ID3D12DescriptorHeap* RTVDescHeap() const noexcept
+		uint32_t RtvDescSize() const noexcept
 		{
-			return rtv_desc_heap_.get();
+			return rtv_desc_allocator_.DescriptorSize();
 		}
-		ID3D12DescriptorHeap* DSVDescHeap() const noexcept
+		uint32_t DsvDescSize() const noexcept
 		{
-			return dsv_desc_heap_.get();
+			return dsv_desc_allocator_.DescriptorSize();
 		}
-		ID3D12DescriptorHeap* CBVSRVUAVDescHeap() const noexcept
+		uint32_t CbvSrvUavDescSize() const noexcept
 		{
-			return cbv_srv_uav_desc_heap_.get();
-		}
-		uint32_t RTVDescSize() const noexcept
-		{
-			return rtv_desc_size_;
-		}
-		uint32_t DSVDescSize() const noexcept
-		{
-			return dsv_desc_size_;
-		}
-		uint32_t CBVSRVUAVDescSize() const noexcept
-		{
-			return cbv_srv_uav_desc_size_;
+			return cbv_srv_uav_desc_allocator_.DescriptorSize();
 		}
 		uint32_t SamplerDescSize() const noexcept
 		{
-			return sampler_desc_size_;
+			return sampler_desc_allocator_.DescriptorSize();
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE NullSrvHandle() const noexcept
@@ -173,18 +159,22 @@ namespace KlayGE
 			return null_uav_handle_;
 		}
 
-		uint32_t AllocRTV();
-		uint32_t AllocDSV();
-		uint32_t AllocCBVSRVUAV();
-		void DeallocRTV(uint32_t offset);
-		void DeallocDSV(uint32_t offset);
-		void DeallocCBVSRVUAV(uint32_t offset);
-
 		ID3D12RootSignaturePtr const & CreateRootSignature(
 			std::array<uint32_t, NumShaderStages * 4> const & num,
 			bool has_vs, bool has_stream_output);
 		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
+
+		std::unique_ptr<D3D12GpuDescriptorBlock> AllocRtvDescBlock(uint32_t size);
+		void DeallocRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDsvDescBlock(uint32_t size);
+		void DeallocDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		std::unique_ptr<D3D12GpuDescriptorBlock> AllocCbvSrvUavDescBlock(uint32_t size);
+		void DeallocCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDynamicCbvSrvUavDescBlock(uint32_t size);
+		void DeallocDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		std::unique_ptr<D3D12GpuDescriptorBlock> AllocSamplerDescBlock(uint32_t size);
+		void DeallocSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
 
 		std::unique_ptr<D3D12GpuMemoryBlock> AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
 		void DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block);
@@ -194,8 +184,6 @@ namespace KlayGE
 
 		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, std::span<D3D12_RESOURCE_BARRIER const> barriers);
 		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
-
-		ID3D12DescriptorHeap* CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
@@ -288,18 +276,10 @@ namespace KlayGE
 
 			void Destroy();
 
-			ID3D12DescriptorHeap* CreateDynamicCBVSRVUAVDescriptorHeap(ID3D12Device* d3d_device, uint32_t num);
-
 			void AddStallResource(ID3D12ResourcePtr const& resource);
 			void ClearStallResources();
 
 		private:
-			struct CbvSrcUavHeaps
-			{
-				std::vector<ID3D12DescriptorHeapPtr> actives;
-				std::vector<ID3D12DescriptorHeapPtr> stalls;
-			};
-			std::map<uint32_t, CbvSrcUavHeaps> cbv_srv_uav_heap_cache_;
 			std::vector<ID3D12ResourcePtr> stall_resources_;
 			std::mutex mutex_;
 		};
@@ -336,17 +316,14 @@ namespace KlayGE
 		uint32_t curr_num_render_targets_ = 0;
 		D3D12_CPU_DESCRIPTOR_HANDLE const* curr_depth_stencil_ = nullptr;
 
-		ID3D12DescriptorHeapPtr rtv_desc_heap_;
-		uint32_t rtv_desc_size_;
-		ID3D12DescriptorHeapPtr dsv_desc_heap_;
-		uint32_t dsv_desc_size_;
-		ID3D12DescriptorHeapPtr cbv_srv_uav_desc_heap_;
-		uint32_t cbv_srv_uav_desc_size_;
-		uint32_t sampler_desc_size_;
-		std::bitset<NUM_MAX_RENDER_TARGET_VIEWS> rtv_heap_occupied_;
-		std::bitset<NUM_MAX_DEPTH_STENCIL_VIEWS> dsv_heap_occupied_;
-		std::bitset<NUM_MAX_CBV_SRV_UAVS> cbv_srv_uav_heap_occupied_;
+		D3D12GpuDescriptorAllocator rtv_desc_allocator_{D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE};
+		D3D12GpuDescriptorAllocator dsv_desc_allocator_{D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE};
+		D3D12GpuDescriptorAllocator cbv_srv_uav_desc_allocator_{D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE};
+		D3D12GpuDescriptorAllocator dynamic_cbv_srv_uav_desc_allocator_{
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE};
+		D3D12GpuDescriptorAllocator sampler_desc_allocator_{D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE};
 
+		std::unique_ptr<D3D12GpuDescriptorBlock> null_srv_uav_desc_block_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_uav_handle_;
 
