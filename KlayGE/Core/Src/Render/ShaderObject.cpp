@@ -315,7 +315,7 @@ namespace
 
 namespace KlayGE
 {
-	ShaderStageObject::ShaderStageObject(ShaderStage stage) : stage_(stage)
+	ShaderStageObject::ShaderStageObject(ShaderStage stage) noexcept : stage_(stage)
 	{
 	}
 
@@ -573,11 +573,11 @@ namespace KlayGE
 	{
 	}
 
-	ShaderObject::ShaderObject(std::shared_ptr<ShaderObject::Immutable> so_template) : immutable_(std::move(so_template))
+	ShaderObject::ShaderObject(std::shared_ptr<ShaderObject::Immutable> immutable) noexcept : immutable_(std::move(immutable))
 	{
 	}
 
-	ShaderObject::~ShaderObject() = default;
+	ShaderObject::~ShaderObject() noexcept = default;
 
 	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage)
 	{
@@ -590,23 +590,23 @@ namespace KlayGE
 		}
 	}
 	
-	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const
+	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const noexcept
 	{
 		return immutable_->shader_stages_[static_cast<uint32_t>(stage)];
 	}
 
-	void ShaderObject::LinkShaders(RenderEffect const & effect)
+	void ShaderObject::LinkShaders(RenderEffect& effect)
 	{
 		if (shader_stages_dirty_)
 		{
-			is_validate_ = true;
+			immutable_->is_validate_ = true;
 			for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
 			{
 				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
 				auto const& shader_stage = this->Stage(stage);
 				if (shader_stage)
 				{
-					is_validate_ &= shader_stage->Validate();
+					immutable_->is_validate_ &= shader_stage->Validate();
 				}
 			}
 

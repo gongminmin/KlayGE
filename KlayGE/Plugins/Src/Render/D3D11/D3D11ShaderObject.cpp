@@ -63,149 +63,149 @@ namespace
 	class SetD3D11ShaderParameterTextureSRV final
 	{
 	public:
-		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
-				ID3D11ShaderResourceView*& srv, RenderEffectParameter* param)
-			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
+		SetD3D11ShaderParameterTextureSRV(
+			std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameter const& param)
+			: srvsrc_(srvsrc), srv_(srv), param_(param)
 		{
 		}
 
 		void operator()()
 		{
 			ShaderResourceViewPtr srv;
-			param_->Value(srv);
+			param_.Value(srv);
 			if (srv)
 			{
 				if (srv->TextureResource())
 				{
-					*srvsrc_ = std::make_tuple(srv->TextureResource().get(),
+					srvsrc_ = std::make_tuple(srv->TextureResource().get(),
 						srv->FirstArrayIndex() * srv->TextureResource()->NumMipMaps() + srv->FirstLevel(),
 						srv->ArraySize() * srv->NumLevels());
 				}
 				else
 				{
-					std::get<0>(*srvsrc_) = nullptr;
+					std::get<0>(srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
+				srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
 			}
 			else
 			{
-				std::get<0>(*srvsrc_) = nullptr;
-				*srv_ = nullptr;
+				std::get<0>(srvsrc_) = nullptr;
+				srv_ = nullptr;
 			}
 		}
 
 	private:
-		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceView** srv_;
-		RenderEffectParameter* param_;
+		std::tuple<void*, uint32_t, uint32_t>& srvsrc_;
+		ID3D11ShaderResourceView*& srv_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferSRV final
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
-				ID3D11ShaderResourceView*& srv, RenderEffectParameter* param)
-			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
+		SetD3D11ShaderParameterGraphicsBufferSRV(
+			std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameter const& param)
+			: srvsrc_(srvsrc), srv_(srv), param_(param)
 		{
 		}
 
 		void operator()()
 		{
 			ShaderResourceViewPtr srv;
-			param_->Value(srv);
+			param_.Value(srv);
 			if (srv)
 			{
 				if (srv->BufferResource())
 				{
-					*srvsrc_ = std::make_tuple(srv->BufferResource().get(), 0, 1);
+					srvsrc_ = std::make_tuple(srv->BufferResource().get(), 0, 1);
 				}
 				else
 				{
-					std::get<0>(*srvsrc_) = nullptr;
+					std::get<0>(srvsrc_) = nullptr;
 				}
-				*srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
+				srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
 			}
 			else
 			{
-				std::get<0>(*srvsrc_) = nullptr;
-				*srv_ = nullptr;
+				std::get<0>(srvsrc_) = nullptr;
+				srv_ = nullptr;
 			}
 		}
 
 	private:
-		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceView** srv_;
-		RenderEffectParameter* param_;
+		std::tuple<void*, uint32_t, uint32_t>& srvsrc_;
+		ID3D11ShaderResourceView*& srv_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D11ShaderParameterTextureUAV final
 	{
 	public:
 		SetD3D11ShaderParameterTextureUAV(
-			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter* param)
-			: uavsrc_(&uavsrc), uav_(&uav), uav_init_count_(&uav_init_count), param_(param)
+			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter const& param)
+			: uavsrc_(uavsrc), uav_(uav), uav_init_count_(uav_init_count), param_(param)
 		{
 		}
 
 		void operator()()
 		{
 			UnorderedAccessViewPtr uav;
-			param_->Value(uav);
+			param_.Value(uav);
 			if (uav)
 			{
-				*uavsrc_ = uav->TextureResource().get();
+				uavsrc_ = uav->TextureResource().get();
 				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
-				*uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
-				*uav_init_count_ = d3d11_uav.InitCount();
+				uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
+				uav_init_count_ = d3d11_uav.InitCount();
 			}
 			else
 			{
-				*uavsrc_ = nullptr;
-				*uav_ = nullptr;
-				*uav_init_count_ = 0;
+				uavsrc_ = nullptr;
+				uav_ = nullptr;
+				uav_init_count_ = 0;
 			}
 		}
 
 	private:
-		void** uavsrc_;
-		ID3D11UnorderedAccessView** uav_;
-		uint32_t* uav_init_count_;
-		RenderEffectParameter* param_;
+		void*& uavsrc_;
+		ID3D11UnorderedAccessView*& uav_;
+		uint32_t& uav_init_count_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferUAV final
 	{
 	public:
 		SetD3D11ShaderParameterGraphicsBufferUAV(
-			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter* param)
-			: uavsrc_(&uavsrc), uav_(&uav), uav_init_count_(&uav_init_count), param_(param)
+			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter const& param)
+			: uavsrc_(uavsrc), uav_(uav), uav_init_count_(uav_init_count), param_(param)
 		{
 		}
 
 		void operator()()
 		{
 			UnorderedAccessViewPtr uav;
-			param_->Value(uav);
+			param_.Value(uav);
 			if (uav)
 			{
-				*uavsrc_ = uav->BufferResource().get();
+				uavsrc_ = uav->BufferResource().get();
 				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
-				*uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
-				*uav_init_count_ = d3d11_uav.InitCount();
+				uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
+				uav_init_count_ = d3d11_uav.InitCount();
 			}
 			else
 			{
-				*uavsrc_ = nullptr;
-				*uav_ = nullptr;
-				*uav_init_count_ = 0;
+				uavsrc_ = nullptr;
+				uav_ = nullptr;
+				uav_init_count_ = 0;
 			}
 		}
 
 	private:
-		void** uavsrc_;
-		ID3D11UnorderedAccessView** uav_;
-		uint32_t* uav_init_count_;
-		RenderEffectParameter* param_;
+		void*& uavsrc_;
+		ID3D11UnorderedAccessView*& uav_;
+		uint32_t& uav_init_count_;
+		RenderEffectParameter const& param_;
 	};
 }
 
@@ -601,6 +601,11 @@ namespace KlayGE
 		hw_res_ready_ = true;
 	}
 
+	std::span<uint8_t const> D3D11ShaderStageObject::ShaderCodeBlob() const
+	{
+		return MakeSpan(shader_code_);
+	}
+
 	void D3D11ShaderStageObject::FillCBufferIndices(RenderEffect const& effect)
 	{
 		if (!shader_desc_.cb_desc.empty())
@@ -979,15 +984,16 @@ namespace KlayGE
 	}
 
 
-	D3D11ShaderObject::D3D11ShaderObject() : D3D11ShaderObject(MakeSharedPtr<Immutable>())
+	D3D11ShaderObject::D3D11ShaderObject() : D3D11ShaderObject(MakeSharedPtr<Immutable>(), MakeSharedPtr<D3D11Immutable>())
 	{
 	}
 
-	D3D11ShaderObject::D3D11ShaderObject(std::shared_ptr<Immutable> immutable) : ShaderObject(std::move(immutable))
+	D3D11ShaderObject::D3D11ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D11Immutable> d3d_immutable) noexcept
+		: ShaderObject(std::move(immutable)), d3d_immutable_(std::move(d3d_immutable))
 	{
 	}
 
-	void D3D11ShaderObject::DoLinkShaders(RenderEffect const & effect)
+	void D3D11ShaderObject::DoLinkShaders(RenderEffect& effect)
 	{
 		for (size_t stage = 0; stage < NumShaderStages; ++stage)
 		{
@@ -998,7 +1004,7 @@ namespace KlayGE
 				{
 					auto const& shader_desc = shader_stage->GetD3D11ShaderDesc();
 
-					samplers_[stage].resize(shader_desc.num_samplers);
+					d3d_immutable_->samplers_[stage].resize(shader_desc.num_samplers);
 					srvsrcs_[stage].resize(shader_desc.num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 					srvs_[stage].resize(shader_desc.num_srvs);
 					uavsrcs_.resize(shader_desc.num_uavs, nullptr);
@@ -1017,12 +1023,12 @@ namespace KlayGE
 							p->Value(sampler);
 							if (sampler)
 							{
-								samplers_[stage][offset] = checked_cast<D3D11SamplerStateObject&>(*sampler).D3DSamplerState();
+								d3d_immutable_->samplers_[stage][offset] = checked_cast<D3D11SamplerStateObject&>(*sampler).D3DSamplerState();
 							}
 						}
 						else
 						{
-							param_binds_[stage].push_back(this->GetBindFunc(static_cast<ShaderStage>(stage), offset, p));
+							param_binds_[stage].push_back(this->GetBindFunc(static_cast<ShaderStage>(stage), offset, *p));
 						}
 					}
 				}
@@ -1075,11 +1081,10 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect const & effect)
+	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect& dst_effect)
 	{
-		auto ret = MakeSharedPtr<D3D11ShaderObject>(immutable_);
+		auto ret = MakeSharedPtr<D3D11ShaderObject>(immutable_, d3d_immutable_);
 
-		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
 		ret->uavsrcs_.resize(uavsrcs_.size(), nullptr);
 		ret->uavs_.resize(uavs_.size());
@@ -1087,7 +1092,6 @@ namespace KlayGE
 
 		for (size_t i = 0; i < NumShaderStages; ++ i)
 		{
-			ret->samplers_[i] = samplers_[i];
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 
@@ -1095,22 +1099,22 @@ namespace KlayGE
 			for (auto const & pb : param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(static_cast<ShaderStage>(i), pb.offset,
-					effect.ParameterByName(pb.param->Name())));
+					*dst_effect.ParameterByName(pb.param->Name())));
 			}
 		}
 
 		return ret;
 	}
 
-	D3D11ShaderObject::ParameterBind D3D11ShaderObject::GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param)
+	D3D11ShaderObject::ParameterBind D3D11ShaderObject::GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter const& param)
 	{
 		uint32_t const stage_index = static_cast<uint32_t>(stage);
 
 		ParameterBind ret;
-		ret.param = param;
+		ret.param = &param;
 		ret.offset = offset;
 
-		switch (param->Type())
+		switch (param.Type())
 		{
 		case REDT_bool:
 		case REDT_uint:
@@ -1242,9 +1246,9 @@ namespace KlayGE
 					re.SetShaderResources(stage, srvsrcs_[stage_index], srvs_[stage_index]);
 				}
 
-				if (!samplers_[stage_index].empty())
+				if (!d3d_immutable_->samplers_[stage_index].empty())
 				{
-					re.SetSamplers(stage, samplers_[stage_index]);
+					re.SetSamplers(stage, d3d_immutable_->samplers_[stage_index]);
 				}
 
 				auto const& cbuff_indices = shader_stage->CBufferIndices();
@@ -1283,10 +1287,10 @@ namespace KlayGE
 
 	std::span<uint8_t const> D3D11ShaderObject::VsCode() const
 	{
-		return MakeSpan(checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).ShaderCodeBlob());
+		return checked_cast<D3D11ShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).ShaderCodeBlob();
 	}
 
-	uint32_t D3D11ShaderObject::VsSignature() const
+	uint32_t D3D11ShaderObject::VsSignature() const noexcept
 	{
 		return checked_cast<D3D11VertexShaderStageObject&>(*this->Stage(ShaderStage::Vertex)).VsSignature();
 	}

@@ -57,7 +57,7 @@
 namespace KlayGE
 {
 	template <typename ElementType>
-	constexpr std::span<ElementType> MakeSpan()
+	constexpr std::span<ElementType> MakeSpan() noexcept
 	{
 		return std::span<ElementType>();
 	}
@@ -129,37 +129,37 @@ namespace KlayGE
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t FirstExtent, std::size_t SecondExtent>
-	constexpr bool operator==(std::span<ElementType1, FirstExtent> lhs, std::span<ElementType2, SecondExtent> rhs)
+	constexpr bool operator==(std::span<ElementType1, FirstExtent> lhs, std::span<ElementType2, SecondExtent> rhs) noexcept
 	{
 		return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t Extent>
-	constexpr bool operator!=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
+	constexpr bool operator!=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs) noexcept
 	{
 		return !(lhs == rhs);
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t Extent>
-	constexpr bool operator<(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
+	constexpr bool operator<(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs) noexcept
 	{
 		return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t Extent>
-	constexpr bool operator<=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
+	constexpr bool operator<=(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs) noexcept
 	{
 		return !(lhs > rhs);
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t Extent>
-	constexpr bool operator>(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs)
+	constexpr bool operator>(std::span<ElementType1, Extent> lhs, std::span<ElementType2, Extent> rhs) noexcept
 	{
 		return rhs < lhs;
 	}
 
 	template <typename ElementType1, typename ElementType2, std::size_t Extent>
-	constexpr bool operator>=(std::span<ElementType1, Extent> l, std::span<ElementType2, Extent> r)
+	constexpr bool operator>=(std::span<ElementType1, Extent> l, std::span<ElementType2, Extent> r) noexcept
 	{
 		return !(l < r);
 	}

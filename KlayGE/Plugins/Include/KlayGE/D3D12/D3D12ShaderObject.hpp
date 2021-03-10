@@ -92,33 +92,30 @@ namespace KlayGE
 		void CreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
-		std::vector<uint8_t> const& ShaderCodeBlob() const
-		{
-			return shader_code_;
-		}
+		std::span<uint8_t const> ShaderCodeBlob() const;
 
-		std::string const& ShaderProfile() const
+		std::string const& ShaderProfile() const noexcept
 		{
 			return shader_profile_;
 		}
 
-		D3D12ShaderDesc const& GetD3D12ShaderDesc() const
+		D3D12ShaderDesc const& GetD3D12ShaderDesc() const noexcept
 		{
 			return shader_desc_;
 		}
 
-		std::vector<uint8_t> const& CBufferIndices() const
+		std::vector<uint8_t> const& CBufferIndices() const noexcept
 		{
 			return cbuff_indices_;
 		}
 
-		virtual bool HasStreamOutput() const
+		virtual bool HasStreamOutput() const noexcept
 		{
 			return false;
 		}
 
-		virtual void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const;
-		virtual void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const;
+		virtual void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept;
+		virtual void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept;
 
 	private:
 		std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const override;
@@ -145,12 +142,12 @@ namespace KlayGE
 	public:
 		D3D12VertexShaderStageObject();
 
-		bool HasStreamOutput() const override
+		bool HasStreamOutput() const noexcept override
 		{
 			return !so_decl_.empty();
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -166,12 +163,12 @@ namespace KlayGE
 	public:
 		D3D12PixelShaderStageObject();
 
-		bool HasDiscard() const override
+		bool HasDiscard() const noexcept override
 		{
 			return has_discard_;
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		bool has_discard_ = true;
@@ -182,12 +179,12 @@ namespace KlayGE
 	public:
 		D3D12GeometryShaderStageObject();
 
-		bool HasStreamOutput() const override
+		bool HasStreamOutput() const noexcept override
 		{
 			return !so_decl_.empty();
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -203,20 +200,20 @@ namespace KlayGE
 	public:
 		D3D12ComputeShaderStageObject();
 
-		uint32_t BlockSizeX() const override
+		uint32_t BlockSizeX() const noexcept override
 		{
 			return block_size_x_;
 		}
-		uint32_t BlockSizeY() const override
+		uint32_t BlockSizeY() const noexcept override
 		{
 			return block_size_y_;
 		}
-		uint32_t BlockSizeZ() const override
+		uint32_t BlockSizeZ() const noexcept override
 		{
 			return block_size_z_;
 		}
 
-		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		void StageSpecificStreamIn(ResIdentifier& res) override;
@@ -236,7 +233,7 @@ namespace KlayGE
 	public:
 		D3D12HullShaderStageObject();
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -248,12 +245,12 @@ namespace KlayGE
 	public:
 		D3D12DomainShaderStageObject();
 
-		bool HasStreamOutput() const override
+		bool HasStreamOutput() const noexcept override
 		{
 			return !so_decl_.empty();
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const override;
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -269,20 +266,20 @@ namespace KlayGE
 	public:
 		D3D12ShaderObject();
 
-		ShaderObjectPtr Clone(RenderEffect const & effect) override;
+		ShaderObjectPtr Clone(RenderEffect& dst_effect) override;
 
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
-		uint32_t NumSrvs(ShaderStage stage) const
+		uint32_t NumSrvs(ShaderStage stage) const noexcept
 		{
 			return d3d_immutable_->num_srvs_[static_cast<uint32_t>(stage)];
 		}
-		uint32_t NumUavs(ShaderStage stage) const
+		uint32_t NumUavs(ShaderStage stage) const noexcept
 		{
 			return d3d_immutable_->num_uavs_[static_cast<uint32_t>(stage)];
 		}
-		uint32_t NumSamplers(ShaderStage stage) const
+		uint32_t NumSamplers(ShaderStage stage) const noexcept
 		{
 			return d3d_immutable_->num_samplers_[static_cast<uint32_t>(stage)];
 		}
@@ -292,8 +289,8 @@ namespace KlayGE
 			return srv_uav_handles_;
 		}
 
-		uint32_t NumCBuffers(ShaderStage stage) const;
-		D3D12_GPU_VIRTUAL_ADDRESS CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const;
+		uint32_t NumCBuffers(ShaderStage stage) const noexcept;
+		D3D12_GPU_VIRTUAL_ADDRESS CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const noexcept;
 
 		ID3D12RootSignature* RootSignature() const noexcept
 		{
@@ -313,8 +310,8 @@ namespace KlayGE
 			return d3d_immutable_.get();
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc);
-		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc);
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) noexcept;
+		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) noexcept;
 
 		uint32_t NumSrvUavHandles() const noexcept
 		{
@@ -338,18 +335,18 @@ namespace KlayGE
 
 		struct ParameterBind
 		{
-			RenderEffectParameter* param;
+			RenderEffectParameter const* param;
 			uint32_t offset;
 			std::function<void()> func;
 		};
 
 	public:
-		D3D12ShaderObject(std::shared_ptr<Immutable> so_template, std::shared_ptr<D3D12Immutable> d3d_so_template);
+		D3D12ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D12Immutable> d3d_immutable) noexcept;
 
 	private:
-		ParameterBind GetBindFunc(uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter* param);
+		ParameterBind GetBindFunc(uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter const& param);
 
-		void DoLinkShaders(RenderEffect const & effect) override;
+		void DoLinkShaders(RenderEffect& effect) override;
 
 	private:
 		const std::shared_ptr<D3D12Immutable> d3d_immutable_;

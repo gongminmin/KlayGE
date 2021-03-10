@@ -111,9 +111,9 @@ namespace
 		SetOGLShaderParameter(std::vector<TextureBind>& buffers,
 					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures, std::vector<GLuint>& gl_bind_samplers,
 					GLint location, GLuint stage,
-					RenderEffectParameter* buff_param)
-			: buffers_(&buffers),
-				gl_bind_targets_(&gl_bind_targets), gl_bind_textures_(&gl_bind_textures), gl_bind_samplers_(&gl_bind_samplers),
+					RenderEffectParameter const& buff_param)
+			: buffers_(buffers),
+				gl_bind_targets_(gl_bind_targets), gl_bind_textures_(gl_bind_textures), gl_bind_samplers_(gl_bind_samplers),
 				location_(location), stage_(stage), buff_param_(buff_param)
 		{
 		}
@@ -121,33 +121,33 @@ namespace
 		void operator()()
 		{
 			ShaderResourceViewPtr srv;
-			buff_param_->Value(srv);
-			(*buffers_)[stage_].buff_srv = srv;
+			buff_param_.Value(srv);
+			buffers_[stage_].buff_srv = srv;
 
 			if (srv)
 			{
 				auto& gl_srv = checked_cast<OGLShaderResourceView&>(*srv);
-				gl_srv.RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
+				gl_srv.RetrieveGLTargetTexture(gl_bind_targets_[stage_], gl_bind_textures_[stage_]);
 			}
 			else
 			{
-				(*gl_bind_targets_)[stage_] = GL_TEXTURE_BUFFER;
-				(*gl_bind_textures_)[stage_] = 0;
+				gl_bind_targets_[stage_] = GL_TEXTURE_BUFFER;
+				gl_bind_textures_[stage_] = 0;
 			}
-			(*gl_bind_samplers_)[stage_] = 0;
+			gl_bind_samplers_[stage_] = 0;
 
 			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform1i(location_, stage_);
 		}
 
 	private:
-		std::vector<TextureBind>* buffers_;
-		std::vector<GLuint>* gl_bind_targets_;
-		std::vector<GLuint>* gl_bind_textures_;
-		std::vector<GLuint>* gl_bind_samplers_;
+		std::vector<TextureBind>& buffers_;
+		std::vector<GLuint>& gl_bind_targets_;
+		std::vector<GLuint>& gl_bind_textures_;
+		std::vector<GLuint>& gl_bind_samplers_;
 		GLint location_;
 		GLuint stage_;
-		RenderEffectParameter* buff_param_;
+		RenderEffectParameter const& buff_param_;
 	};
 
 	template <>
@@ -157,9 +157,9 @@ namespace
 		SetOGLShaderParameter(std::vector<TextureBind>& samplers,
 					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures, std::vector<GLuint>& gl_bind_samplers,
 					GLint location, GLuint stage,
-					RenderEffectParameter* tex_param, RenderEffectParameter* sampler_param)
-			: samplers_(&samplers),
-				gl_bind_targets_(&gl_bind_targets), gl_bind_textures_(&gl_bind_textures), gl_bind_samplers_(&gl_bind_samplers),
+					RenderEffectParameter const& tex_param, RenderEffectParameter const& sampler_param)
+			: samplers_(samplers),
+				gl_bind_targets_(gl_bind_targets), gl_bind_textures_(gl_bind_textures), gl_bind_samplers_(gl_bind_samplers),
 				location_(location), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
 		{
 		}
@@ -167,24 +167,24 @@ namespace
 		void operator()()
 		{
 			ShaderResourceViewPtr srv;
-			tex_param_->Value(srv);
-			(*samplers_)[stage_].tex_srv = srv;
+			tex_param_.Value(srv);
+			samplers_[stage_].tex_srv = srv;
 
-			sampler_param_->Value((*samplers_)[stage_].sampler);
+			sampler_param_.Value(samplers_[stage_].sampler);
 
 			if (srv)
 			{
 				auto& gl_srv = checked_cast<OGLShaderResourceView&>(*srv);
-				auto& gl_sampler = checked_cast<OGLSamplerStateObject&>(*(*samplers_)[stage_].sampler);
+				auto& gl_sampler = checked_cast<OGLSamplerStateObject&>(*samplers_[stage_].sampler);
 
-				gl_srv.RetrieveGLTargetTexture((*gl_bind_targets_)[stage_], (*gl_bind_textures_)[stage_]);
-				(*gl_bind_samplers_)[stage_] = gl_sampler.GLSampler();
+				gl_srv.RetrieveGLTargetTexture(gl_bind_targets_[stage_], gl_bind_textures_[stage_]);
+				gl_bind_samplers_[stage_] = gl_sampler.GLSampler();
 			}
 			else
 			{
-				(*gl_bind_targets_)[stage_] = GL_TEXTURE_2D;
-				(*gl_bind_textures_)[stage_] = 0;
-				(*gl_bind_samplers_)[stage_] = 0;
+				gl_bind_targets_[stage_] = GL_TEXTURE_2D;
+				gl_bind_textures_[stage_] = 0;
+				gl_bind_samplers_[stage_] = 0;
 			}
 
 			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -192,14 +192,14 @@ namespace
 		}
 
 	private:
-		std::vector<TextureBind>* samplers_;
-		std::vector<GLuint>* gl_bind_targets_;
-		std::vector<GLuint>* gl_bind_textures_;
-		std::vector<GLuint>* gl_bind_samplers_;
+		std::vector<TextureBind>& samplers_;
+		std::vector<GLuint>& gl_bind_targets_;
+		std::vector<GLuint>& gl_bind_textures_;
+		std::vector<GLuint>& gl_bind_samplers_;
 		GLint location_;
 		GLuint stage_;
-		RenderEffectParameter* tex_param_;
-		RenderEffectParameter* sampler_param_;
+		RenderEffectParameter const& tex_param_;
+		RenderEffectParameter const& sampler_param_;
 	};
 
 	void PrintGlslErrorAtLine(std::string const& glsl, int err_line)
@@ -1031,7 +1031,7 @@ namespace KlayGE
 	{
 	}
 
-	OGLShaderObject::OGLShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLImmutable> gl_immutable)
+	OGLShaderObject::OGLShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLImmutable> gl_immutable) noexcept
 		: ShaderObject(std::move(immutable)), gl_immutable_(std::move(gl_immutable))
 	{
 		glsl_program_ = glCreateProgram();
@@ -1042,16 +1042,16 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	void OGLShaderObject::DoLinkShaders(RenderEffect const & effect)
+	void OGLShaderObject::DoLinkShaders(RenderEffect& effect)
 	{
-		if (is_validate_)
+		if (immutable_->is_validate_)
 		{
 			glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
 			this->LinkGLSL();
 			this->AttachUBOs(effect);
 
-			if (is_validate_)
+			if (immutable_->is_validate_)
 			{
 				GLint num = 0;
 				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
@@ -1097,7 +1097,7 @@ namespace KlayGE
 						GLint location = glGetUniformLocation(glsl_program_, shader_stage->GlslResNames()[pi].c_str());
 						if (location != -1)
 						{
-							RenderEffectParameter* p = effect.ParameterByName(shader_stage->PNames()[pi]);
+							RenderEffectParameter const* p = effect.ParameterByName(shader_stage->PNames()[pi]);
 							if (p)
 							{
 								BOOST_ASSERT(REDT_buffer == p->Type());
@@ -1113,7 +1113,7 @@ namespace KlayGE
 								gl_bind_samplers_.resize(index + 1);
 
 								pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(textures_,
-									gl_bind_targets_, gl_bind_textures_, gl_bind_samplers_, location, index, p);
+									gl_bind_targets_, gl_bind_textures_, gl_bind_samplers_, location, index, *p);
 
 								param_binds_.push_back(pb);
 							}
@@ -1137,7 +1137,7 @@ namespace KlayGE
 
 										pb.func = SetOGLShaderParameter<TexturePtr>(textures_,
 											gl_bind_targets_, gl_bind_textures_, gl_bind_samplers_,
-											location, index, std::get<1>(tex_sampler_binds_[i]), std::get<2>(tex_sampler_binds_[i]));
+											location, index, *std::get<1>(tex_sampler_binds_[i]), *std::get<2>(tex_sampler_binds_[i]));
 
 										param_binds_.push_back(pb);
 
@@ -1161,23 +1161,22 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect const & effect)
+	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect& dst_effect)
 	{
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>(immutable_, gl_immutable_);
 
-		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 		{
 			std::get<0>(ret->tex_sampler_binds_[i]) = std::get<0>(tex_sampler_binds_[i]);
-			std::get<1>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(std::get<1>(tex_sampler_binds_[i])->Name());
-			std::get<2>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(std::get<2>(tex_sampler_binds_[i])->Name());
+			std::get<1>(ret->tex_sampler_binds_[i]) = dst_effect.ParameterByName(std::get<1>(tex_sampler_binds_[i])->Name());
+			std::get<2>(ret->tex_sampler_binds_[i]) = dst_effect.ParameterByName(std::get<2>(tex_sampler_binds_[i])->Name());
 			std::get<3>(ret->tex_sampler_binds_[i]) = std::get<3>(tex_sampler_binds_[i]);
 		}
 
-		if (ret->is_validate_)
+		if (ret->immutable_->is_validate_)
 		{
 			if (!gl_immutable_->glsl_bin_program_.empty())
 			{
@@ -1206,13 +1205,13 @@ namespace KlayGE
 				ret->LinkGLSL();
 			}
 
-			ret->AttachUBOs(effect);
+			ret->AttachUBOs(dst_effect);
 			ret->attrib_locs_ = attrib_locs_;
 			for (auto const & pb : param_binds_)
 			{
 				if (pb.param)
 				{
-					RenderEffectParameter* p = effect.ParameterByName(pb.param->Name());
+					RenderEffectParameter const* p = dst_effect.ParameterByName(pb.param->Name());
 					BOOST_ASSERT(REDT_buffer == p->Type());
 
 					ParameterBind new_pb;
@@ -1227,7 +1226,7 @@ namespace KlayGE
 
 					new_pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(ret->textures_,
 						ret->gl_bind_targets_, ret->gl_bind_textures_, ret->gl_bind_samplers_,
-						new_pb.location, index, p);
+						new_pb.location, index, *p);
 
 					ret->param_binds_.push_back(new_pb);
 				}
@@ -1253,8 +1252,8 @@ namespace KlayGE
 							new_pb.func = SetOGLShaderParameter<TexturePtr>(ret->textures_,
 								ret->gl_bind_targets_, ret->gl_bind_textures_, ret->gl_bind_samplers_,
 								new_pb.location, index,
-								std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
-								std::get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
+								*std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
+								*std::get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
 
 							ret->param_binds_.push_back(new_pb);
 
@@ -1409,10 +1408,10 @@ namespace KlayGE
 			}
 		}
 #endif
-		is_validate_ &= linked ? true : false;
+		immutable_->is_validate_ &= linked ? true : false;
 	}
 
-	void OGLShaderObject::AttachUBOs(RenderEffect const & effect)
+	void OGLShaderObject::AttachUBOs(RenderEffect& effect)
 	{
 		GLint active_ubos = 0;
 		glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);

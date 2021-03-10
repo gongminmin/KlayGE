@@ -64,13 +64,13 @@ namespace KlayGE
 			uint8_t component_count;
 			uint8_t slot;
 
-			friend bool operator==(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
+			friend bool operator==(StreamOutputDecl const& lhs, StreamOutputDecl const& rhs) noexcept
 			{
 				return (lhs.usage == rhs.usage) && (lhs.usage_index == rhs.usage_index)
 					&& (lhs.start_component == rhs.start_component) && (lhs.component_count == rhs.component_count)
 					&& (lhs.slot == rhs.slot);
 			}
-			friend bool operator!=(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
+			friend bool operator!=(StreamOutputDecl const& lhs, StreamOutputDecl const& rhs) noexcept
 			{
 				return !(lhs == rhs);
 			}
@@ -81,12 +81,12 @@ namespace KlayGE
 #endif
 		std::vector<StreamOutputDecl> so_decl;
 
-		friend bool operator==(ShaderDesc const & lhs, ShaderDesc const & rhs)
+		friend bool operator==(ShaderDesc const& lhs, ShaderDesc const& rhs) noexcept
 		{
 			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name)
 				&& (lhs.macros_hash == rhs.macros_hash) && (lhs.so_decl == rhs.so_decl);
 		}
-		friend bool operator!=(ShaderDesc const & lhs, ShaderDesc const & rhs)
+		friend bool operator!=(ShaderDesc const& lhs, ShaderDesc const& rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -108,7 +108,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ShaderStageObject : boost::noncopyable
 	{
 	public:
-		explicit ShaderStageObject(ShaderStage stage);
+		explicit ShaderStageObject(ShaderStage stage) noexcept;
 		virtual ~ShaderStageObject() noexcept;
 
 		virtual void StreamIn(
@@ -119,32 +119,32 @@ namespace KlayGE
 		virtual void CreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
 
-		bool Validate() const
+		bool Validate() const noexcept
 		{
 			return is_validate_;
 		}
 
 		// Pixel shader only
-		virtual bool HasDiscard() const
+		virtual bool HasDiscard() const noexcept
 		{
 			return false;
 		}
 
 		// Compute shader only
-		virtual uint32_t BlockSizeX() const
+		virtual uint32_t BlockSizeX() const noexcept
 		{
 			return 0;
 		}
-		virtual uint32_t BlockSizeY() const
+		virtual uint32_t BlockSizeY() const noexcept
 		{
 			return 0;
 		}
-		virtual uint32_t BlockSizeZ() const
+		virtual uint32_t BlockSizeZ() const noexcept
 		{
 			return 0;
 		}
 
-		bool HWResourceReady() const
+		bool HWResourceReady() const noexcept
 		{
 			return hw_res_ready_;
 		}
@@ -177,7 +177,7 @@ namespace KlayGE
 	protected:
 		const ShaderStage stage_;
 
-		bool is_validate_;
+		bool is_validate_ = false;
 		bool hw_res_ready_ = false;
 	};
 
@@ -185,20 +185,20 @@ namespace KlayGE
 	{
 	public:
 		ShaderObject();
-		virtual ~ShaderObject();
+		virtual ~ShaderObject() noexcept;
 
 		void AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage);
-		ShaderStageObjectPtr const& Stage(ShaderStage stage) const;
+		ShaderStageObjectPtr const& Stage(ShaderStage stage) const noexcept;
 
-		void LinkShaders(RenderEffect const & effect);
-		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
+		void LinkShaders(RenderEffect& effect);
+		virtual ShaderObjectPtr Clone(RenderEffect& dst_effect) = 0;
 
 		virtual void Bind(RenderEffect const& effect) = 0;
 		virtual void Unbind() = 0;
 
-		bool Validate() const
+		bool Validate() const noexcept
 		{
-			return is_validate_;
+			return immutable_->is_validate_;
 		}
 
 		bool HWResourceReady() const noexcept
@@ -210,18 +210,17 @@ namespace KlayGE
 		struct Immutable
 		{
 			std::array<ShaderStageObjectPtr, NumShaderStages> shader_stages_;
+			bool is_validate_;
 		};
 
-	public:
-		ShaderObject(std::shared_ptr<Immutable> so_template);
+		explicit ShaderObject(std::shared_ptr<Immutable> immutable) noexcept;
 
 	private:
-		virtual void DoLinkShaders(RenderEffect const & effect) = 0;
+		virtual void DoLinkShaders(RenderEffect& effect) = 0;
 
 	protected:
-		const std::shared_ptr<Immutable> immutable_;
-		
-		bool is_validate_;
+		std::shared_ptr<Immutable> const immutable_;
+
 		bool shader_stages_dirty_ = true;
 
 		bool hw_res_ready_ = false;

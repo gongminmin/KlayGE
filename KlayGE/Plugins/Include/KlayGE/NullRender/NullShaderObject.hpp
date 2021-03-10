@@ -94,10 +94,7 @@ namespace KlayGE
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 		void CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
-		std::vector<uint8_t> const& ShaderCodeBlob() const
-		{
-			return shader_code_;
-		}
+		std::span<uint8_t const> ShaderCodeBlob() const;
 
 		std::string const& ShaderProfile() const
 		{
@@ -180,15 +177,15 @@ namespace KlayGE
 	public:
 		explicit D3DComputeShaderStageObject(bool as_d3d12);
 
-		uint32_t BlockSizeX() const override
+		uint32_t BlockSizeX() const noexcept override
 		{
 			return block_size_x_;
 		}
-		uint32_t BlockSizeY() const override
+		uint32_t BlockSizeY() const noexcept override
 		{
 			return block_size_y_;
 		}
-		uint32_t BlockSizeZ() const override
+		uint32_t BlockSizeZ() const noexcept override
 		{
 			return block_size_z_;
 		}
@@ -229,36 +226,36 @@ namespace KlayGE
 			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 		void CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
-		std::string const& GlslSource() const
+		std::string const& GlslSource() const noexcept
 		{
 			return glsl_src_;
 		}
 
-		std::string const& ShaderFuncName() const
+		std::string const& ShaderFuncName() const noexcept
 		{
 			return shader_func_name_;
 		}
 
-		std::vector<std::string> const& PNames() const
+		std::vector<std::string> const& PNames() const noexcept
 		{
 			return pnames_;
 		}
 
-		std::vector<std::string> const& GlslResNames() const
+		std::vector<std::string> const& GlslResNames() const noexcept
 		{
 			return glsl_res_names_;
 		}
 
-		std::vector<std::pair<std::string, std::string>> const& TexSamplerPairs() const
+		std::vector<std::pair<std::string, std::string>> const& TexSamplerPairs() const noexcept
 		{
 			return tex_sampler_pairs_;
 		}
 
-		virtual uint32_t DsPartitioning() const
+		virtual uint32_t DsPartitioning() const noexcept
 		{
 			return 0;
 		}
-		virtual uint32_t DsOutputPrimitive() const
+		virtual uint32_t DsOutputPrimitive() const noexcept
 		{
 			return 0;
 		}
@@ -319,7 +316,7 @@ namespace KlayGE
 	public:
 		explicit OGLPixelShaderStageObject(bool as_gles);
 
-		bool HasDiscard() const override
+		bool HasDiscard() const noexcept override
 		{
 			return has_discard_;
 		}
@@ -361,11 +358,11 @@ namespace KlayGE
 	public:
 		explicit OGLHullShaderStageObject(bool as_gles);
 
-		uint32_t DsPartitioning() const override
+		uint32_t DsPartitioning() const noexcept override
 		{
 			return ds_partitioning_;
 		}
-		uint32_t DsOutputPrimitive() const override
+		uint32_t DsOutputPrimitive() const noexcept override
 		{
 			return ds_output_primitive_;
 		}
@@ -385,11 +382,11 @@ namespace KlayGE
 
 		void DsParameters(uint32_t partitioning, uint32_t output_primitive);
 
-		uint32_t DsPartitioning() const override
+		uint32_t DsPartitioning() const noexcept override
 		{
 			return ds_partitioning_;
 		}
-		uint32_t DsOutputPrimitive() const override
+		uint32_t DsOutputPrimitive() const noexcept override
 		{
 			return ds_output_primitive_;
 		}
@@ -405,7 +402,7 @@ namespace KlayGE
 	public:
 		NullShaderObject();
 
-		ShaderObjectPtr Clone(RenderEffect const & effect) override;
+		ShaderObjectPtr Clone(RenderEffect& dst_effect) override;
 
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
@@ -420,10 +417,10 @@ namespace KlayGE
 		};
 
 	public:
-		NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable);
+		NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable) noexcept;
 
 	private:
-		void DoLinkShaders(RenderEffect const & effect) override;
+		void DoLinkShaders(RenderEffect& effect) override;
 
 		void OGLAppendTexSamplerBinds(
 			ShaderStage stage, RenderEffect const& effect, std::vector<std::pair<std::string, std::string>> const& tex_sampler_pairs);
@@ -431,7 +428,7 @@ namespace KlayGE
 	private:
 		const std::shared_ptr<NullImmutable> null_immutable_;
 
-		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> gl_tex_sampler_binds_;
+		std::vector<std::tuple<std::string, RenderEffectParameter const*, RenderEffectParameter const*, uint32_t>> gl_tex_sampler_binds_;
 	};
 }
 

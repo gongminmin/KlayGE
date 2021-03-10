@@ -93,47 +93,44 @@ namespace KlayGE
 		void CreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 
-		std::vector<uint8_t> const& ShaderCodeBlob() const
-		{
-			return shader_code_;
-		}
+		std::span<uint8_t const> ShaderCodeBlob() const;
 
-		std::string const& ShaderProfile() const
+		std::string const& ShaderProfile() const noexcept
 		{
 			return shader_profile_;
 		}
 
-		D3D11ShaderDesc const& GetD3D11ShaderDesc() const
+		D3D11ShaderDesc const& GetD3D11ShaderDesc() const noexcept
 		{
 			return shader_desc_;
 		}
 
-		std::vector<uint8_t> const& CBufferIndices() const
+		std::vector<uint8_t> const& CBufferIndices() const noexcept
 		{
 			return cbuff_indices_;
 		}
 
-		virtual ID3D11VertexShader* HwVertexShader() const
+		virtual ID3D11VertexShader* HwVertexShader() const noexcept
 		{
 			return nullptr;
 		}
-		virtual ID3D11PixelShader* HwPixelShader() const
+		virtual ID3D11PixelShader* HwPixelShader() const noexcept
 		{
 			return nullptr;
 		}
-		virtual ID3D11GeometryShader* HwGeometryShader() const
+		virtual ID3D11GeometryShader* HwGeometryShader() const noexcept
 		{
 			return nullptr;
 		}
-		virtual ID3D11ComputeShader* HwComputeShader() const
+		virtual ID3D11ComputeShader* HwComputeShader() const noexcept
 		{
 			return nullptr;
 		}
-		virtual ID3D11HullShader* HwHullShader() const
+		virtual ID3D11HullShader* HwHullShader() const noexcept
 		{
 			return nullptr;
 		}
-		virtual ID3D11DomainShader* HwDomainShader() const
+		virtual ID3D11DomainShader* HwDomainShader() const noexcept
 		{
 			return nullptr;
 		}
@@ -169,16 +166,16 @@ namespace KlayGE
 	public:
 		D3D11VertexShaderStageObject();
 
-		ID3D11VertexShader* HwVertexShader() const override
+		ID3D11VertexShader* HwVertexShader() const noexcept override
 		{
 			return vertex_shader_.get();
 		}
-		ID3D11GeometryShader* HwGeometryShader() const override
+		ID3D11GeometryShader* HwGeometryShader() const noexcept override
 		{
 			return geometry_shader_.get();
 		}
 
-		uint32_t VsSignature() const
+		uint32_t VsSignature() const noexcept
 		{
 			return vs_signature_;
 		}
@@ -206,12 +203,12 @@ namespace KlayGE
 	public:
 		D3D11PixelShaderStageObject();
 
-		bool HasDiscard() const override
+		bool HasDiscard() const noexcept override
 		{
 			return has_discard_;
 		}
 
-		ID3D11PixelShader* HwPixelShader() const override
+		ID3D11PixelShader* HwPixelShader() const noexcept override
 		{
 			return pixel_shader_.get();
 		}
@@ -231,7 +228,7 @@ namespace KlayGE
 	public:
 		D3D11GeometryShaderStageObject();
 
-		ID3D11GeometryShader* HwGeometryShader() const override
+		ID3D11GeometryShader* HwGeometryShader() const noexcept override
 		{
 			return geometry_shader_.get();
 		}
@@ -250,20 +247,20 @@ namespace KlayGE
 	public:
 		D3D11ComputeShaderStageObject();
 
-		ID3D11ComputeShader* HwComputeShader() const override
+		ID3D11ComputeShader* HwComputeShader() const noexcept override
 		{
 			return compute_shader_.get();
 		}
 
-		uint32_t BlockSizeX() const override
+		uint32_t BlockSizeX() const noexcept override
 		{
 			return block_size_x_;
 		}
-		uint32_t BlockSizeY() const override
+		uint32_t BlockSizeY() const noexcept override
 		{
 			return block_size_y_;
 		}
-		uint32_t BlockSizeZ() const override
+		uint32_t BlockSizeZ() const noexcept override
 		{
 			return block_size_z_;
 		}
@@ -290,7 +287,7 @@ namespace KlayGE
 	public:
 		D3D11HullShaderStageObject();
 
-		ID3D11HullShader* HwHullShader() const override
+		ID3D11HullShader* HwHullShader() const noexcept override
 		{
 			return hull_shader_.get();
 		}
@@ -309,11 +306,11 @@ namespace KlayGE
 	public:
 		D3D11DomainShaderStageObject();
 
-		ID3D11DomainShader* HwDomainShader() const override
+		ID3D11DomainShader* HwDomainShader() const noexcept override
 		{
 			return domain_shader_.get();
 		}
-		ID3D11GeometryShader* HwGeometryShader() const override
+		ID3D11GeometryShader* HwGeometryShader() const noexcept override
 		{
 			return geometry_shader_.get();
 		}
@@ -333,34 +330,40 @@ namespace KlayGE
 	public:
 		D3D11ShaderObject();
 
-		ShaderObjectPtr Clone(RenderEffect const & effect) override;
+		ShaderObjectPtr Clone(RenderEffect& dst_effect) override;
 
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
 		std::span<uint8_t const> VsCode() const;
-		uint32_t VsSignature() const;
+		uint32_t VsSignature() const noexcept;
 
 	private:
+		struct D3D11Immutable
+		{
+			std::array<std::vector<ID3D11SamplerState*>, NumShaderStages> samplers_;
+		};
+
 		struct ParameterBind
 		{
-			RenderEffectParameter* param;
+			RenderEffectParameter const* param;
 			uint32_t offset;
 			std::function<void()> func;
 		};
 
 	public:
-		explicit D3D11ShaderObject(std::shared_ptr<Immutable> immutable);
+		D3D11ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D11Immutable> d3d_immutable) noexcept;
 
 	private:
-		ParameterBind GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter* param);
+		ParameterBind GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter const& param);
 
-		void DoLinkShaders(RenderEffect const & effect) override;
+		void DoLinkShaders(RenderEffect& effect) override;
 
 	private:
+		const std::shared_ptr<D3D11Immutable> d3d_immutable_;
+
 		std::array<std::vector<ParameterBind>, NumShaderStages> param_binds_;
 
-		std::array<std::vector<ID3D11SamplerState*>, NumShaderStages> samplers_;
 		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, NumShaderStages> srvsrcs_;
 		std::array<std::vector<ID3D11ShaderResourceView*>, NumShaderStages> srvs_;
 		std::vector<void*> uavsrcs_;

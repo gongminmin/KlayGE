@@ -66,32 +66,32 @@ namespace KlayGE
 		void CreateHwShader(
 			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override;
 		
-		std::string const& GlslSource() const
+		std::string const& GlslSource() const noexcept
 		{
 			return glsl_src_;
 		}
 
-		std::string const& ShaderFuncName() const
+		std::string const& ShaderFuncName() const noexcept
 		{
 			return shader_func_name_;
 		}
 
-		std::vector<std::string> const& PNames() const
+		std::vector<std::string> const& PNames() const noexcept
 		{
 			return pnames_;
 		}
 
-		std::vector<std::string> const& GlslResNames() const
+		std::vector<std::string> const& GlslResNames() const noexcept
 		{
 			return glsl_res_names_;
 		}
 
-		std::vector<std::pair<std::string, std::string>> const& TexSamplerPairs() const
+		std::vector<std::pair<std::string, std::string>> const& TexSamplerPairs() const noexcept
 		{
 			return tex_sampler_pairs_;
 		}
 
-		GLuint GlShader() const
+		GLuint GlShader() const noexcept
 		{
 			return gl_shader_;
 		}
@@ -100,16 +100,16 @@ namespace KlayGE
 		{
 			return std::span<std::string const>();
 		}
-		virtual bool TfbSeparateAttribs() const
+		virtual bool TfbSeparateAttribs() const noexcept
 		{
 			return false;
 		}
 
-		virtual uint32_t DsPartitioning() const
+		virtual uint32_t DsPartitioning() const noexcept
 		{
 			return 0;
 		}
-		virtual uint32_t DsOutputPrimitive() const
+		virtual uint32_t DsOutputPrimitive() const noexcept
 		{
 			return 0;
 		}
@@ -148,15 +148,15 @@ namespace KlayGE
 	public:
 		OGLVertexShaderStageObject();
 
-		std::vector<VertexElementUsage> const& Usages() const
+		std::vector<VertexElementUsage> const& Usages() const noexcept
 		{
 			return usages_;
 		}
-		std::vector<uint8_t> const& UsageIndices() const
+		std::vector<uint8_t> const& UsageIndices() const noexcept
 		{
 			return usage_indices_;
 		}
-		std::vector<std::string> const& GlslAttribNames() const
+		std::vector<std::string> const& GlslAttribNames() const noexcept
 		{
 			return glsl_attrib_names_;
 		}
@@ -165,7 +165,7 @@ namespace KlayGE
 		{
 			return MakeSpan(glsl_tfb_varyings_);
 		}
-		bool TfbSeparateAttribs() const override
+		bool TfbSeparateAttribs() const noexcept override
 		{
 			return tfb_separate_attribs_;
 		}
@@ -200,7 +200,7 @@ namespace KlayGE
 		{
 			return MakeSpan(glsl_tfb_varyings_);
 		}
-		bool TfbSeparateAttribs() const override
+		bool TfbSeparateAttribs() const noexcept override
 		{
 			return tfb_separate_attribs_;
 		}
@@ -231,11 +231,11 @@ namespace KlayGE
 	public:
 		OGLHullShaderStageObject();
 
-		uint32_t DsPartitioning() const override
+		uint32_t DsPartitioning() const noexcept override
 		{
 			return ds_partitioning_;
 		}
-		uint32_t DsOutputPrimitive() const override
+		uint32_t DsOutputPrimitive() const noexcept override
 		{
 			return ds_output_primitive_;
 		}
@@ -257,18 +257,18 @@ namespace KlayGE
 		{
 			return MakeSpan(glsl_tfb_varyings_);
 		}
-		bool TfbSeparateAttribs() const override
+		bool TfbSeparateAttribs() const noexcept override
 		{
 			return tfb_separate_attribs_;
 		}
 
 		void DsParameters(uint32_t partitioning, uint32_t output_primitive);
 
-		uint32_t DsPartitioning() const override
+		uint32_t DsPartitioning() const noexcept override
 		{
 			return ds_partitioning_;
 		}
-		uint32_t DsOutputPrimitive() const override
+		uint32_t DsOutputPrimitive() const noexcept override
 		{
 			return ds_output_primitive_;
 		}
@@ -290,14 +290,14 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject() override;
 
-		ShaderObjectPtr Clone(RenderEffect const & effect) override;
+		ShaderObjectPtr Clone(RenderEffect& dst_effect) override;
 
 		void Bind(RenderEffect const& effect) override;
 		void Unbind() override;
 
 		GLint GetAttribLocation(VertexElementUsage usage, uint8_t usage_index);
 
-		GLuint GLSLProgram() const
+		GLuint GLSLProgram() const noexcept
 		{
 			return glsl_program_;
 		}
@@ -312,20 +312,20 @@ namespace KlayGE
 		struct ParameterBind
 		{
 			std::string combined_sampler_name;
-			RenderEffectParameter* param;
+			RenderEffectParameter const* param;
 			int location;
 			int tex_sampler_bind_index;
 			std::function<void()> func;
 		};
 
 	public:
-		OGLShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLImmutable> gl_immutable);
+		OGLShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<OGLImmutable> gl_immutable) noexcept;
 
 	private:
-		void DoLinkShaders(RenderEffect const & effect) override;
+		void DoLinkShaders(RenderEffect& effect) override;
 
 		void LinkGLSL();
-		void AttachUBOs(RenderEffect const & effect);
+		void AttachUBOs(RenderEffect& effect);
 
 	private:
 		const std::shared_ptr<OGLImmutable> gl_immutable_;

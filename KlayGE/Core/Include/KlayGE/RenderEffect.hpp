@@ -164,6 +164,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(UnorderedAccessViewPtr const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
+		virtual RenderVariable& operator=(std::string_view value);
 		virtual RenderVariable& operator=(ShaderDesc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
 		virtual RenderVariable& operator=(std::vector<uint32_t> const & value);
@@ -217,6 +218,7 @@ namespace KlayGE
 		virtual void Value(UnorderedAccessViewPtr& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(std::string& val) const;
+		virtual void Value(std::string_view& val) const;
 		virtual void Value(ShaderDesc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<uint32_t>& val) const;
@@ -242,19 +244,19 @@ namespace KlayGE
 		{
 			return false;
 		}
-		virtual RenderEffectConstantBuffer* CBuffer() const noexcept
+		virtual RenderEffectConstantBuffer* CBuffer() const
 		{
 			return nullptr;
 		}
-		virtual uint32_t CBufferIndex() const noexcept
+		virtual uint32_t CBufferIndex() const
 		{
 			return 0;
 		}
-		virtual uint32_t CBufferOffset() const noexcept
+		virtual uint32_t CBufferOffset() const
 		{
 			return 0;
 		}
-		virtual uint32_t Stride() const noexcept
+		virtual uint32_t Stride() const
 		{
 			return 0;
 		}
@@ -269,9 +271,16 @@ namespace KlayGE
 		};
 	};
 
-	class KLAYGE_CORE_API RenderEffectAnnotation final : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectAnnotation final
 	{
 	public:
+		RenderEffectAnnotation();
+		RenderEffectAnnotation(RenderEffectAnnotation&& rhs) noexcept;
+		RenderEffectAnnotation& operator=(RenderEffectAnnotation&& rhs) noexcept;
+
+		RenderEffectAnnotation(RenderEffectAnnotation const& rhs) = delete;
+		RenderEffectAnnotation& operator=(RenderEffectAnnotation const& rhs) = delete;
+
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
 #endif
@@ -389,9 +398,16 @@ namespace KlayGE
 		std::string impl_;
 	};
 
-	class KLAYGE_CORE_API RenderEffectStructType final : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectStructType final
 	{
 	public:
+		RenderEffectStructType();
+		RenderEffectStructType(RenderEffectStructType&& rhs) noexcept;
+		RenderEffectStructType& operator=(RenderEffectStructType&& rhs) noexcept;
+
+		RenderEffectStructType(RenderEffectStructType const& rhs) = delete;
+		RenderEffectStructType& operator=(RenderEffectStructType const& rhs) = delete;
+
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
 #endif
@@ -460,9 +476,12 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameter* ParameterBySemantic(std::string_view semantic) const noexcept;
-		RenderEffectParameter* ParameterByName(std::string_view name) const noexcept;
-		RenderEffectParameter* ParameterByIndex(uint32_t n) const noexcept;
+		RenderEffectParameter* ParameterBySemantic(std::string_view semantic) noexcept;
+		RenderEffectParameter const* ParameterBySemantic(std::string_view semantic) const noexcept;
+		RenderEffectParameter* ParameterByName(std::string_view name) noexcept;
+		RenderEffectParameter const* ParameterByName(std::string_view name) const noexcept;
+		RenderEffectParameter* ParameterByIndex(uint32_t n) noexcept;
+		RenderEffectParameter const* ParameterByIndex(uint32_t n) const noexcept;
 
 		uint32_t NumCBuffers() const noexcept
 		{
@@ -545,9 +564,9 @@ namespace KlayGE
 			bool need_compile;
 #endif
 
-			std::vector<std::unique_ptr<RenderEffectStructType>> struct_types;
+			std::vector<RenderEffectStructType> struct_types;
 
-			std::vector<std::unique_ptr<RenderTechnique>> techniques;
+			std::vector<RenderTechnique> techniques;
 
 			std::vector<std::pair<std::pair<std::string, std::string>, bool>> macros;
 			std::vector<RenderShaderFragment> shader_frags;
@@ -562,16 +581,23 @@ namespace KlayGE
 
 		std::shared_ptr<Immutable> immutable_;
 
-		std::vector<std::unique_ptr<RenderEffectParameter>> params_;
+		std::vector<RenderEffectParameter> params_;
 		std::vector<RenderEffectConstantBufferPtr> cbuffers_;
 		std::vector<ShaderObjectPtr> shader_objs_;
 
 		mutable bool hw_res_ready_ = false;
 	};
 
-	class KLAYGE_CORE_API RenderTechnique final : boost::noncopyable
+	class KLAYGE_CORE_API RenderTechnique final
 	{
 	public:
+		RenderTechnique();
+		RenderTechnique(RenderTechnique&& rhs) noexcept;
+		RenderTechnique& operator=(RenderTechnique&& rhs) noexcept;
+
+		RenderTechnique(RenderTechnique const& rhs) = delete;
+		RenderTechnique& operator=(RenderTechnique const& rhs) = delete;
+
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index);
 		void CompileShaders(RenderEffect& effect, uint32_t tech_index);
@@ -719,7 +745,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectConstantBuffer final : boost::noncopyable
 	{
 	public:
-		explicit RenderEffectConstantBuffer(RenderEffect const& effect);
+		explicit RenderEffectConstantBuffer(RenderEffect& effect);
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(std::string const & name);
@@ -730,9 +756,9 @@ namespace KlayGE
 		void StreamOut(std::ostream& os) const;
 #endif
 
-		RenderEffectConstantBufferPtr Clone(RenderEffect const& dst_effect);
-		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect);
-		RenderEffect const& OwnerEffect() const noexcept
+		RenderEffectConstantBufferPtr Clone(RenderEffect& dst_effect);
+		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
+		RenderEffect& OwnerEffect() noexcept
 		{
 			return effect_;
 		}
@@ -800,10 +826,10 @@ namespace KlayGE
 		void BindHWBuff(GraphicsBufferPtr const & buff);
 
 	private:
-		void RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect const& dst_effect);
+		void RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
 
 	private:
-		RenderEffect const& effect_;
+		RenderEffect& effect_;
 
 		struct Immutable final : boost::noncopyable
 		{
@@ -819,9 +845,16 @@ namespace KlayGE
 		bool dirty_ = true;
 	};
 
-	class KLAYGE_CORE_API RenderEffectParameter final : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectParameter final
 	{
 	public:
+		RenderEffectParameter();
+		RenderEffectParameter(RenderEffectParameter&& rhs) noexcept;
+		RenderEffectParameter& operator=(RenderEffectParameter && rhs) noexcept;
+
+		RenderEffectParameter(RenderEffectParameter const& rhs) = delete;
+		RenderEffectParameter& operator=(RenderEffectParameter const& rhs) = delete;
+
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
 #endif
@@ -831,7 +864,7 @@ namespace KlayGE
 		void StreamOut(std::ostream& os) const;
 #endif
 
-		std::unique_ptr<RenderEffectParameter> Clone();
+		RenderEffectParameter Clone();
 
 		RenderEffectDataType Type() const noexcept
 		{
@@ -886,33 +919,36 @@ namespace KlayGE
 
 		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
 		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
-		RenderEffectConstantBuffer& CBuffer() const noexcept;
+		RenderEffectConstantBuffer& CBuffer() const;
 		bool InCBuffer() const noexcept
 		{
 			return var_->InCBuffer();
 		}
-		uint32_t CBufferIndex() const noexcept
+		uint32_t CBufferIndex() const
 		{
 			return var_->CBufferIndex();
 		}
-		uint32_t CBufferOffset() const noexcept
+		uint32_t CBufferOffset() const
 		{
 			return var_->CBufferOffset();
 		}
-		uint32_t Stride() const noexcept
+		uint32_t Stride() const
 		{
 			return var_->Stride();
 		}
 		template <typename T>
-		T const* MemoryInCBuff() const noexcept
+		T const* MemoryInCBuff() const
 		{
 			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
 		}
 		template <typename T>
-		T* MemoryInCBuff() noexcept
+		T* MemoryInCBuff()
 		{
 			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
 		}
+
+	private:
+		void ProcessAnnotation(RenderEffectAnnotation& anno);
 
 	private:
 		struct Immutable final : boost::noncopyable
@@ -925,7 +961,7 @@ namespace KlayGE
 			RenderEffectDataType type;
 			std::unique_ptr<std::string> array_size;
 
-			std::unique_ptr<std::vector<std::unique_ptr<RenderEffectAnnotation>>> annotations;
+			std::unique_ptr<std::vector<RenderEffectAnnotation>> annotations;
 		};
 
 		std::shared_ptr<Immutable> immutable_;

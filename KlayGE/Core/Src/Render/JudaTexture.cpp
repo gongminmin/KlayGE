@@ -1225,7 +1225,7 @@ namespace KlayGE
 		return tex_indirect_;
 	}
 
-	void JudaTexture::SetParams(RenderEffect const & effect)
+	void JudaTexture::SetParams(RenderEffect& effect)
 	{
 		if (tex_cache_)
 		{

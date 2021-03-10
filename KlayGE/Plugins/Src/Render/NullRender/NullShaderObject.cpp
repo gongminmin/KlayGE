@@ -439,6 +439,11 @@ namespace KlayGE
 		hw_res_ready_ = true;
 	}
 
+	std::span<uint8_t const> D3DShaderStageObject::ShaderCodeBlob() const
+	{
+		return MakeSpan(shader_code_);
+	}
+
 	void D3DShaderStageObject::FillCBufferIndices(RenderEffect const& effect)
 	{
 		if (!shader_desc_.cb_desc.empty())
@@ -1327,14 +1332,14 @@ namespace KlayGE
 #endif
 	}
 	
-	NullShaderObject::NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable)
+	NullShaderObject::NullShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<NullImmutable> null_immutable) noexcept
 		: ShaderObject(std::move(immutable)), null_immutable_(std::move(null_immutable))
 	{
 	}
 
-	ShaderObjectPtr NullShaderObject::Clone(RenderEffect const & effect)
+	ShaderObjectPtr NullShaderObject::Clone(RenderEffect& dst_effect)
 	{
-		KFL_UNUSED(effect);
+		KFL_UNUSED(dst_effect);
 		return MakeSharedPtr<NullShaderObject>();
 	}
 
@@ -1347,7 +1352,7 @@ namespace KlayGE
 	{
 	}
 
-	void NullShaderObject::DoLinkShaders(RenderEffect const & effect)
+	void NullShaderObject::DoLinkShaders(RenderEffect& effect)
 	{
 		if (null_immutable_->as_gl_ || null_immutable_->as_gles_)
 		{

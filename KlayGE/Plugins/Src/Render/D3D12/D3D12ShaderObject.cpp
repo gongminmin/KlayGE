@@ -68,8 +68,8 @@ namespace
 	{
 	public:
 		SetD3D12ShaderParameterTextureSRV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc,
-			D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle, RenderEffectParameter* param)
-			: srvsrc_(&srvsrc), srv_handle_(&srv_handle), param_(param)
+			D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle, RenderEffectParameter const& param)
+			: srvsrc_(srvsrc), srv_handle_(srv_handle), param_(param)
 		{
 		}
 
@@ -77,43 +77,43 @@ namespace
 		{
 			D3D12ShaderResourceViewSimulation* srv_sim;
 			ShaderResourceViewPtr srv;
-			param_->Value(srv);
+			param_.Value(srv);
 			if (srv)
 			{
 				if (srv->TextureResource())
 				{
-					*srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(srv->TextureResource().get()),
+					srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(srv->TextureResource().get()),
 						srv->FirstArrayIndex() * srv->TextureResource()->NumMipMaps() + srv->FirstLevel(),
 						srv->ArraySize() * srv->NumLevels());
 				}
 				else
 				{
-					std::get<0>(*srvsrc_) = nullptr;
+					std::get<0>(srvsrc_) = nullptr;
 				}
 				srv_sim = checked_cast<D3D12ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
-				std::get<0>(*srvsrc_) = nullptr;
+				std::get<0>(srvsrc_) = nullptr;
 				srv_sim = nullptr;
 			}
 
 			auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			*srv_handle_ = srv_sim ? srv_sim->Handle() : re.NullSrvHandle();
+			srv_handle_ = srv_sim ? srv_sim->Handle() : re.NullSrvHandle();
 		}
 
 	private:
-		std::tuple<D3D12Resource*, uint32_t, uint32_t>* srvsrc_;
-		D3D12_CPU_DESCRIPTOR_HANDLE* srv_handle_;
-		RenderEffectParameter* param_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc_;
+		D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D12ShaderParameterGraphicsBufferSRV final
 	{
 	public:
 		SetD3D12ShaderParameterGraphicsBufferSRV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc,
-			D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle, RenderEffectParameter* param)
-			: srvsrc_(&srvsrc), srv_handle_(&srv_handle), param_(param)
+			D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle, RenderEffectParameter const& param)
+			: srvsrc_(srvsrc), srv_handle_(srv_handle), param_(param)
 		{
 		}
 
@@ -121,41 +121,41 @@ namespace
 		{
 			D3D12ShaderResourceViewSimulation* srv_sim;
 			ShaderResourceViewPtr srv;
-			param_->Value(srv);
+			param_.Value(srv);
 			if (srv)
 			{
 				if (srv->BufferResource())
 				{
-					*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(srv->BufferResource().get()), 0, 1);
+					srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(srv->BufferResource().get()), 0, 1);
 				}
 				else
 				{
-					std::get<0>(*srvsrc_) = nullptr;
+					std::get<0>(srvsrc_) = nullptr;
 				}
 				srv_sim = checked_cast<D3D12ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView().get();
 			}
 			else
 			{
-				std::get<0>(*srvsrc_) = nullptr;
+				std::get<0>(srvsrc_) = nullptr;
 				srv_sim = nullptr;
 			}
 
 			auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			*srv_handle_ = srv_sim ? srv_sim->Handle() : re.NullSrvHandle();
+			srv_handle_ = srv_sim ? srv_sim->Handle() : re.NullSrvHandle();
 		}
 
 	private:
-		std::tuple<D3D12Resource*, uint32_t, uint32_t>* srvsrc_;
-		D3D12_CPU_DESCRIPTOR_HANDLE* srv_handle_;
-		RenderEffectParameter* param_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc_;
+		D3D12_CPU_DESCRIPTOR_HANDLE& srv_handle_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D12ShaderParameterTextureUAV final
 	{
 	public:
 		SetD3D12ShaderParameterTextureUAV(
-			std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc, D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle, RenderEffectParameter* param)
-			: uavsrc_(&uavsrc), uav_handle_(&uav_handle), param_(param)
+			std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc, D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle, RenderEffectParameter const& param)
+			: uavsrc_(uavsrc), uav_handle_(uav_handle), param_(param)
 		{
 		}
 
@@ -163,42 +163,42 @@ namespace
 		{
 			D3D12UnorderedAccessViewSimulation* uav_sim;
 			UnorderedAccessViewPtr uav;
-			param_->Value(uav);
+			param_.Value(uav);
 			if (uav)
 			{
 				if (uav->TextureResource())
 				{
 					auto* tex = checked_cast<D3D12Texture*>(uav->TextureResource().get());
-					*uavsrc_ = std::make_tuple(tex, uav->FirstArrayIndex() * uav->TextureResource()->NumMipMaps() + uav->Level(), 1);
+					uavsrc_ = std::make_tuple(tex, uav->FirstArrayIndex() * uav->TextureResource()->NumMipMaps() + uav->Level(), 1);
 				}
 				else
 				{
-					std::get<0>(*uavsrc_) = nullptr;
+					std::get<0>(uavsrc_) = nullptr;
 				}
 				uav_sim = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
-				std::get<0>(*uavsrc_) = nullptr;
+				std::get<0>(uavsrc_) = nullptr;
 				uav_sim = nullptr;
 			}
 
 			auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			*uav_handle_ = uav_sim ? uav_sim->Handle() : re.NullUavHandle();
+			uav_handle_ = uav_sim ? uav_sim->Handle() : re.NullUavHandle();
 		}
 
 	private:
-		std::tuple<D3D12Resource*, uint32_t, uint32_t>* uavsrc_;
-		D3D12_CPU_DESCRIPTOR_HANDLE* uav_handle_;
-		RenderEffectParameter* param_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc_;
+		D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle_;
+		RenderEffectParameter const& param_;
 	};
 
 	class SetD3D12ShaderParameterGraphicsBufferUAV final
 	{
 	public:
 		SetD3D12ShaderParameterGraphicsBufferUAV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc,
-			D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle, RenderEffectParameter* const& param)
-			: uavsrc_(&uavsrc), uav_handle_(&uav_handle), param_(param)
+			D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle, RenderEffectParameter const& param)
+			: uavsrc_(uavsrc), uav_handle_(uav_handle), param_(param)
 		{
 		}
 
@@ -206,33 +206,33 @@ namespace
 		{
 			D3D12UnorderedAccessViewSimulation* uav_sim;
 			UnorderedAccessViewPtr uav;
-			param_->Value(uav);
+			param_.Value(uav);
 			if (uav)
 			{
 				if (uav->BufferResource())
 				{
-					*uavsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get()), 0, 1);
+					uavsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(uav->BufferResource().get()), 0, 1);
 				}
 				else
 				{
-					std::get<0>(*uavsrc_) = nullptr;
+					std::get<0>(uavsrc_) = nullptr;
 				}
 				uav_sim = checked_cast<D3D12UnorderedAccessView&>(*uav).RetrieveD3DUnorderedAccessView();
 			}
 			else
 			{
-				std::get<0>(*uavsrc_) = nullptr;
+				std::get<0>(uavsrc_) = nullptr;
 				uav_sim = nullptr;
 			}
 
 			auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			*uav_handle_ = uav_sim ? uav_sim->Handle() : re.NullUavHandle();
+			uav_handle_ = uav_sim ? uav_sim->Handle() : re.NullUavHandle();
 		}
 
 	private:
-		std::tuple<D3D12Resource*, uint32_t, uint32_t>* uavsrc_;
-		D3D12_CPU_DESCRIPTOR_HANDLE* uav_handle_;
-		RenderEffectParameter* param_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>& uavsrc_;
+		D3D12_CPU_DESCRIPTOR_HANDLE& uav_handle_;
+		RenderEffectParameter const& param_;
 	};
 }
 
@@ -242,13 +242,13 @@ namespace KlayGE
 	{
 	}
 
-	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		KFL_UNUSED(pso_desc);
 		KFL_UNREACHABLE("Couldn't update graphics pipeline state for this shader stage.");
 	}
 
-	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		KFL_UNUSED(pso_desc);
 		KFL_UNREACHABLE("Couldn't update compute pipeline state for this shader stage.");
@@ -633,6 +633,11 @@ namespace KlayGE
 		hw_res_ready_ = true;
 	}
 
+	std::span<uint8_t const> D3D12ShaderStageObject::ShaderCodeBlob() const
+	{
+		return MakeSpan(shader_code_);
+	}
+
 	void D3D12ShaderStageObject::FillCBufferIndices(RenderEffect const& effect)
 	{
 		if (!shader_desc_.cb_desc.empty())
@@ -678,7 +683,7 @@ namespace KlayGE
 		is_available_ = true;
 	}
 
-	void D3D12VertexShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12VertexShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.VS.pShaderBytecode = shader_code_.data();
 		pso_desc.VS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -721,7 +726,7 @@ namespace KlayGE
 		is_available_ = true;
 	}
 
-	void D3D12PixelShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12PixelShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.PS.pShaderBytecode = shader_code_.data();
 		pso_desc.PS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -735,7 +740,7 @@ namespace KlayGE
 		is_available_ = caps.gs_support;
 	}
 
-	void D3D12GeometryShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12GeometryShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.GS.pShaderBytecode = shader_code_.data();
 		pso_desc.GS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -782,7 +787,7 @@ namespace KlayGE
 		is_available_ = caps.cs_support;
 	}
 
-	void D3D12ComputeShaderStageObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12ComputeShaderStageObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.CS.pShaderBytecode = shader_code_.data();
 		pso_desc.CS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -839,7 +844,7 @@ namespace KlayGE
 		is_available_ = caps.hs_support;
 	}
 
-	void D3D12HullShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12HullShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.HS.pShaderBytecode = shader_code_.data();
 		pso_desc.HS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -865,7 +870,7 @@ namespace KlayGE
 		is_available_ = caps.ds_support;
 	}
 
-	void D3D12DomainShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const
+	void D3D12DomainShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.DS.pShaderBytecode = shader_code_.data();
 		pso_desc.DS.BytecodeLength = static_cast<UINT>(shader_code_.size());
@@ -921,12 +926,12 @@ namespace KlayGE
 	{
 	}
 
-	D3D12ShaderObject::D3D12ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D12Immutable> d3d_immutable)
+	D3D12ShaderObject::D3D12ShaderObject(std::shared_ptr<Immutable> immutable, std::shared_ptr<D3D12Immutable> d3d_immutable) noexcept
 		: ShaderObject(std::move(immutable)), d3d_immutable_(std::move(d3d_immutable))
 	{
 	}
 
-	void D3D12ShaderObject::DoLinkShaders(RenderEffect const & effect)
+	void D3D12ShaderObject::DoLinkShaders(RenderEffect& effect)
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -1033,7 +1038,7 @@ namespace KlayGE
 						}
 						else
 						{
-							param_binds_[stage].push_back(this->GetBindFunc(srv_starts[stage], uav_starts[stage], offset, p));
+							param_binds_[stage].push_back(this->GetBindFunc(srv_starts[stage], uav_starts[stage], offset, *p));
 						}
 					}
 				}
@@ -1086,11 +1091,10 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr D3D12ShaderObject::Clone(RenderEffect const & effect)
+	ShaderObjectPtr D3D12ShaderObject::Clone(RenderEffect& dst_effect)
 	{
 		D3D12ShaderObjectPtr ret = MakeSharedPtr<D3D12ShaderObject>(immutable_, d3d_immutable_);
 
-		ret->is_validate_ = is_validate_;
 		ret->hw_res_ready_ = hw_res_ready_;
 
 		ret->srv_uav_handles_.resize(srv_uav_handles_.size());
@@ -1112,7 +1116,7 @@ namespace KlayGE
 			for (auto const & pb : param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(
-					ret->GetBindFunc(srv_starts[i], uav_starts[i], pb.offset, effect.ParameterByName(pb.param->Name())));
+					ret->GetBindFunc(srv_starts[i], uav_starts[i], pb.offset, *dst_effect.ParameterByName(pb.param->Name())));
 			}
 		}
 
@@ -1120,16 +1124,16 @@ namespace KlayGE
 	}
 
 	D3D12ShaderObject::ParameterBind D3D12ShaderObject::GetBindFunc(
-		uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter* param)
+		uint32_t srv_stage_base, uint32_t uav_stage_base, uint32_t offset, RenderEffectParameter const& param)
 	{
 		ParameterBind ret;
-		ret.param = param;
+		ret.param = &param;
 		ret.offset = offset;
 
 		uint32_t const srv_offset = srv_stage_base + offset;
 		uint32_t const uav_offset = d3d_immutable_->num_total_srvs_ + uav_stage_base + offset;
 
-		switch (param->Type())
+		switch (param.Type())
 		{
 		case REDT_bool:
 		case REDT_uint:
@@ -1248,7 +1252,7 @@ namespace KlayGE
 	{
 	}
 
-	uint32_t D3D12ShaderObject::NumCBuffers(ShaderStage stage) const
+	uint32_t D3D12ShaderObject::NumCBuffers(ShaderStage stage) const noexcept
 	{
 		auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 		if (shader_stage)
@@ -1258,7 +1262,8 @@ namespace KlayGE
 		return 0;
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS D3D12ShaderObject::CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const
+	D3D12_GPU_VIRTUAL_ADDRESS D3D12ShaderObject::CBufferGpuVAddr(
+		RenderEffect const& effect, ShaderStage stage, uint32_t index) const noexcept
 	{
 		auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 		if (shader_stage)
@@ -1268,7 +1273,7 @@ namespace KlayGE
 		return 0;
 	}
 
-	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc)
+	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) noexcept
 	{
 		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
@@ -1340,7 +1345,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12ShaderObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc)
+	void D3D12ShaderObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) noexcept
 	{
 		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
