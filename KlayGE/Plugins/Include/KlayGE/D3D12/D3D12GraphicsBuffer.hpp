@@ -65,12 +65,12 @@ namespace KlayGE
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 
-		uint32_t CounterOffset() const
+		uint32_t CounterOffset() const noexcept
 		{
 			return counter_offset_;
 		}
 
-		D3D12_GPU_VIRTUAL_ADDRESS GPUVirtualAddress() const
+		D3D12_GPU_VIRTUAL_ADDRESS GpuVirtualAddress() const noexcept
 		{
 			return gpu_vaddr_;
 		}

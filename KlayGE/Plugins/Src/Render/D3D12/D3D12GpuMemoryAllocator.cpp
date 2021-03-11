@@ -38,6 +38,11 @@
 #include <KlayGE/D3D12/D3D12GpuMemoryAllocator.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
+namespace
+{
+	static constexpr uint32_t DefaultPageSize = 2 * 1024 * 1024;
+}
+
 namespace KlayGE
 {
 	D3D12GpuMemoryPage::D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource)
@@ -163,7 +168,10 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		this->Deallocate(lock, mem_block.get(), fence_value);
+		if (mem_block)
+		{
+			this->Deallocate(lock, mem_block.get(), fence_value);
+		}
 		this->Allocate(lock, mem_block, size_in_bytes, alignment);
 	}
 
@@ -198,9 +206,9 @@ namespace KlayGE
 						if (free_iter != page.free_list.begin())
 						{
 							auto const prev_free_iter = std::prev(free_iter);
-							if (prev_free_iter->last_offset == free_iter->first_offset)
+							if (prev_free_iter->last_offset == stall_iter->free_range.first_offset)
 							{
-								prev_free_iter->last_offset = free_iter->last_offset;
+								prev_free_iter->last_offset = stall_iter->free_range.last_offset;
 								merge_with_prev = true;
 							}
 						}

@@ -126,24 +126,22 @@ namespace KlayGE
 		D3D12GpuDescriptorPagePtr CreatePage(uint32_t size) const;
 
 	private:
-		static constexpr uint32_t DefaultPageSize = 2 * 1024;
-
-		D3D12_DESCRIPTOR_HEAP_TYPE type_;
-		D3D12_DESCRIPTOR_HEAP_FLAGS flags_;
+		D3D12_DESCRIPTOR_HEAP_TYPE const type_;
+		D3D12_DESCRIPTOR_HEAP_FLAGS const flags_;
 
 		std::mutex allocation_mutex_;
 
 		struct PageInfo
 		{
-			D3D12GpuDescriptorPagePtr heap;
+			D3D12GpuDescriptorPagePtr page;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
 #endif
 			struct FreeRange
 			{
-				uint32_t first_offset;
-				uint32_t last_offset;
+				uint16_t first_offset;
+				uint16_t last_offset;
 			};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
@@ -164,8 +162,6 @@ namespace KlayGE
 			std::vector<StallRange> stall_list;
 		};
 		std::vector<PageInfo> pages_;
-
-		std::vector<D3D12GpuDescriptorPagePtr> large_pages_;
 	};
 } // namespace KlayGE
 

@@ -4307,7 +4307,7 @@ namespace KlayGE
 			}
 			
 			members_.emplace_back(StrcutMemberType{
-				member_type, std::string(member_type_name), std::string(member_name), MakeSharedPtr<std::string>(member_array_size)});
+				member_type, std::string(member_type_name), std::string(member_name), MakeUniquePtr<std::string>(member_array_size)});
 		}
 	}
 #endif
@@ -4333,7 +4333,7 @@ namespace KlayGE
 			}
 
 			members_[i].name = ReadShortString(res);
-			members_[i].array_size = MakeSharedPtr<std::string>(ReadShortString(res));
+			members_[i].array_size = MakeUniquePtr<std::string>(ReadShortString(res));
 		}
 	}
 
@@ -4384,10 +4384,10 @@ namespace KlayGE
 		return members_[index].name;
 	}
 
-	std::shared_ptr<std::string> const& RenderEffectStructType::MemberArraySize(uint32_t index) const noexcept
+	std::string const* RenderEffectStructType::MemberArraySize(uint32_t index) const noexcept
 	{
 		BOOST_ASSERT(index < this->NumMembers());
-		return members_[index].array_size;
+		return members_[index].array_size.get();
 	}
 
 
@@ -5450,6 +5450,7 @@ namespace KlayGE
 	void RenderEffect::GenHLSLShaderText()
 	{
 		std::string& str = immutable_->hlsl_shader;
+		str.clear();
 
 		str += "#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))\n\n";
 
@@ -5477,8 +5478,8 @@ namespace KlayGE
 
 				str += " " + struct_type.MemberName(j);
 
-				auto array_size_str = struct_type.MemberArraySize(j);
-				if (array_size_str && !array_size_str->empty())
+				auto const* array_size_str = struct_type.MemberArraySize(j);
+				if ((array_size_str != nullptr) && !array_size_str->empty())
 				{
 					str += "[" + *array_size_str + "]";
 				}

@@ -41,7 +41,9 @@
 namespace
 {
 	uint32_t descriptor_size[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES]{};
-}
+
+	uint16_t const default_descriptor_page_size[] = {32 * 1024, 1 * 1024, 8 * 1024, 4 * 1024};
+} // namespace
 
 namespace KlayGE
 {
@@ -101,13 +103,8 @@ namespace KlayGE
 			desc_block = MakeUniquePtr<D3D12GpuDescriptorBlock>();
 		}
 
-		if (size > DefaultPageSize)
-		{
-			auto large_page = this->CreatePage(size);
-			desc_block->Reset(*large_page, 0, size);
-			large_pages_.emplace_back(std::move(large_page));
-			return;
-		}
+		uint16_t const default_page_size = default_descriptor_page_size[type_];
+		BOOST_ASSERT(size <= default_page_size);
 
 		for (auto& page_info : pages_)
 		{
@@ -117,8 +114,8 @@ namespace KlayGE
 				});
 			if (iter != page_info.free_list.end())
 			{
-				desc_block->Reset(*page_info.heap, iter->first_offset, size);
-				iter->first_offset += size;
+				desc_block->Reset(*page_info.page, iter->first_offset, size);
+				iter->first_offset += static_cast<uint16_t>(size);
 				if (iter->first_offset == iter->last_offset)
 				{
 					page_info.free_list.erase(iter);
@@ -129,9 +126,9 @@ namespace KlayGE
 		}
 
 		PageInfo new_page_info;
-		new_page_info.heap = this->CreatePage(DefaultPageSize);
-		new_page_info.free_list.push_back({size, DefaultPageSize});
-		desc_block->Reset(*new_page_info.heap, 0, size);
+		new_page_info.page = this->CreatePage(default_page_size);
+		new_page_info.free_list.push_back({static_cast<uint16_t>(size), default_page_size});
+		desc_block->Reset(*new_page_info.page, 0, size);
 		pages_.emplace_back(std::move(new_page_info));
 	}
 
@@ -150,13 +147,17 @@ namespace KlayGE
 		KFL_UNUSED(proof_of_lock);
 		BOOST_ASSERT(desc_block != nullptr);
 
-		if (desc_block->Size() <= DefaultPageSize)
+		uint16_t const default_page_size = default_descriptor_page_size[type_];
+
+		if (desc_block->Size() <= default_page_size)
 		{
 			for (auto& page : pages_)
 			{
-				if (page.heap->Heap() == desc_block->Heap())
+				if (page.page->Heap() == desc_block->Heap())
 				{
-					page.stall_list.push_back({{desc_block->Offset(), desc_block->Offset() + desc_block->Size()}, fence_value});
+					page.stall_list.push_back(
+						{{static_cast<uint16_t>(desc_block->Offset()), static_cast<uint16_t>(desc_block->Offset() + desc_block->Size())},
+							fence_value});
 					return;
 				}
 			}
@@ -169,7 +170,10 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		this->Deallocate(lock, desc_block.get(), fence_value);
+		if (desc_block)
+		{
+			this->Deallocate(lock, desc_block.get(), fence_value);
+		}
 		this->Allocate(lock, desc_block, size);
 	}
 
@@ -204,9 +208,9 @@ namespace KlayGE
 						if (free_iter != page.free_list.begin())
 						{
 							auto const prev_free_iter = std::prev(free_iter);
-							if (prev_free_iter->last_offset == free_iter->first_offset)
+							if (prev_free_iter->last_offset == stall_iter->free_range.first_offset)
 							{
-								prev_free_iter->last_offset = free_iter->last_offset;
+								prev_free_iter->last_offset = stall_iter->free_range.last_offset;
 								merge_with_prev = true;
 							}
 						}
@@ -238,8 +242,6 @@ namespace KlayGE
 				}
 			}
 		}
-
-		large_pages_.clear();
 	}
 
 	void D3D12GpuDescriptorAllocator::Clear()
@@ -247,7 +249,6 @@ namespace KlayGE
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
 		pages_.clear();
-		large_pages_.clear();
 	}
 
 	D3D12GpuDescriptorPagePtr D3D12GpuDescriptorAllocator::CreatePage(uint32_t size) const

@@ -265,6 +265,7 @@ namespace KlayGE
 	{
 	public:
 		D3D12ShaderObject();
+		~D3D12ShaderObject() override;
 
 		ShaderObjectPtr Clone(RenderEffect& dst_effect) override;
 
@@ -284,17 +285,16 @@ namespace KlayGE
 			return d3d_immutable_->num_samplers_[static_cast<uint32_t>(stage)];
 		}
 
-		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> const& SrvUavHandles() const noexcept
-		{
-			return srv_uav_handles_;
-		}
-
 		uint32_t NumCBuffers(ShaderStage stage) const noexcept;
 		D3D12_GPU_VIRTUAL_ADDRESS CBufferGpuVAddr(RenderEffect const& effect, ShaderStage stage, uint32_t index) const noexcept;
 
 		ID3D12RootSignature* RootSignature() const noexcept
 		{
 			return d3d_immutable_->root_signature_.get();
+		}
+		D3D12GpuDescriptorBlock* SrvUavDescBlock() const noexcept
+		{
+			return srv_uav_desc_block_.get();
 		}
 		D3D12GpuDescriptorBlock* SamplerDescBlock() const noexcept
 		{
@@ -310,13 +310,8 @@ namespace KlayGE
 			return d3d_immutable_.get();
 		}
 
-		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) noexcept;
-		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) noexcept;
-
-		uint32_t NumSrvUavHandles() const noexcept
-		{
-			return static_cast<uint32_t>(srv_uav_handles_.size());
-		}
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept;
+		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept;
 
 	private:
 		struct D3D12Immutable
@@ -354,6 +349,7 @@ namespace KlayGE
 		std::array<std::vector<ParameterBind>, NumShaderStages> param_binds_;
 		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> srv_uav_srcs_;
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> srv_uav_handles_;
+		std::unique_ptr<D3D12GpuDescriptorBlock> srv_uav_desc_block_;
 	};
 
 	typedef std::shared_ptr<D3D12ShaderObject> D3D12ShaderObjectPtr;

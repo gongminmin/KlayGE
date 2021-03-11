@@ -133,8 +133,6 @@ namespace KlayGE
 		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes) const;
 
 	private:
-		static constexpr uint32_t DefaultPageSize = 2 * 1024 * 1024;
-
 		bool const is_upload_;
 
 		std::mutex allocation_mutex_;

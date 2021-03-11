@@ -430,7 +430,7 @@ namespace KlayGE
 		RenderEffectDataType MemberType(uint32_t index) const noexcept;
 		std::string const& MemberTypeName(uint32_t index) const noexcept;
 		std::string const& MemberName(uint32_t index) const noexcept;
-		std::shared_ptr<std::string> const& MemberArraySize(uint32_t index) const noexcept;
+		std::string const* MemberArraySize(uint32_t index) const noexcept;
 
 	private:
 		std::string name_;
@@ -441,7 +441,7 @@ namespace KlayGE
 			RenderEffectDataType type;
 			std::string type_name;
 			std::string name;
-			std::shared_ptr<std::string> array_size;
+			std::unique_ptr<std::string> array_size;
 		};
 		std::vector<StrcutMemberType> members_;
 	};
@@ -553,6 +553,7 @@ namespace KlayGE
 		void Load(XMLNode const& root);
 #endif
 
+	private:
 		struct Immutable final : boost::noncopyable
 		{
 			std::string res_name;
@@ -878,7 +879,7 @@ namespace KlayGE
 
 		RenderVariable const& Var() const noexcept;
 
-		std::string* ArraySize() const noexcept
+		std::string const* ArraySize() const noexcept
 		{
 			return immutable_->array_size.get();
 		}

@@ -167,14 +167,19 @@ namespace KlayGE
 
 		std::unique_ptr<D3D12GpuDescriptorBlock> AllocRtvDescBlock(uint32_t size);
 		void DeallocRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		void RenewRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
 		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDsvDescBlock(uint32_t size);
 		void DeallocDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		void RenewDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
 		std::unique_ptr<D3D12GpuDescriptorBlock> AllocCbvSrvUavDescBlock(uint32_t size);
 		void DeallocCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		void RenewCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
 		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDynamicCbvSrvUavDescBlock(uint32_t size);
 		void DeallocDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		void RenewDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
 		std::unique_ptr<D3D12GpuDescriptorBlock> AllocSamplerDescBlock(uint32_t size);
 		void DeallocSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
+		void RenewSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
 
 		std::unique_ptr<D3D12GpuMemoryBlock> AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
 		void DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block);

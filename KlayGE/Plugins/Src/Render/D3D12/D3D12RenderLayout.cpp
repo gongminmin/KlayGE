@@ -88,7 +88,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
-			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
+			vbvs_[i].BufferLocation = d3dvb.GpuVirtualAddress();
 		}
 
 		if (this->InstanceStream())
@@ -96,13 +96,13 @@ namespace KlayGE
 			uint32_t const number = num_vertex_streams;
 
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
-			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
+			vbvs_[number].BufferLocation = d3dvb.GpuVirtualAddress();
 		}
 
 		if (this->UseIndices())
 		{
 			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
-			ibv_.BufferLocation = ib.GPUVirtualAddress();
+			ibv_.BufferLocation = ib.GpuVirtualAddress();
 		}
 
 		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -125,7 +125,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
-			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
+			vbvs_[i].BufferLocation = d3dvb.GpuVirtualAddress();
 			vbvs_[i].SizeInBytes = d3dvb.Size();
 			vbvs_[i].StrideInBytes = this->VertexSize(i);
 		}
@@ -135,7 +135,7 @@ namespace KlayGE
 			uint32_t const number = num_vertex_streams;
 
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
-			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
+			vbvs_[number].BufferLocation = d3dvb.GpuVirtualAddress();
 			vbvs_[number].SizeInBytes = d3dvb.Size();
 			vbvs_[number].StrideInBytes = this->InstanceSize();
 		}
@@ -143,7 +143,7 @@ namespace KlayGE
 		if (this->UseIndices())
 		{
 			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
-			ibv_.BufferLocation = ib.GPUVirtualAddress();
+			ibv_.BufferLocation = ib.GpuVirtualAddress();
 			ibv_.SizeInBytes = ib.Size();
 			ibv_.Format = D3D12Mapping::MappingFormat(index_format_);
 		}

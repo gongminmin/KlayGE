@@ -931,6 +931,15 @@ namespace KlayGE
 	{
 	}
 
+	D3D12ShaderObject::~D3D12ShaderObject()
+	{
+		if (srv_uav_desc_block_ && Context::Instance().RenderFactoryValid())
+		{
+			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeallocDynamicCbvSrvUavDescBlock(std::move(srv_uav_desc_block_));
+		}
+	}
+
 	void D3D12ShaderObject::DoLinkShaders(RenderEffect& effect)
 	{
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -1246,6 +1255,16 @@ namespace KlayGE
 				}
 			}
 		}
+
+		if (!srv_uav_handles_.empty())
+		{
+			re.RenewDynamicCbvSrvUavDescBlock(srv_uav_desc_block_, static_cast<uint32_t>(srv_uav_handles_.size()));
+
+			auto const cpu_cbv_srv_uav_handle = srv_uav_desc_block_->CpuHandle();
+			uint32_t num_srvs_uavs = static_cast<uint32_t>(srv_uav_handles_.size());
+			re.D3DDevice()->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_srvs_uavs, num_srvs_uavs, srv_uav_handles_.data(), nullptr,
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
 	}
 
 	void D3D12ShaderObject::Unbind()
@@ -1268,12 +1287,12 @@ namespace KlayGE
 		auto const* shader_stage = checked_cast<D3D12ShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 		if (shader_stage)
 		{
-			return checked_cast<D3D12GraphicsBuffer&>(*effect.CBufferByIndex(shader_stage->CBufferIndices()[index])->HWBuff()).GPUVirtualAddress();
+			return checked_cast<D3D12GraphicsBuffer&>(*effect.CBufferByIndex(shader_stage->CBufferIndices()[index])->HWBuff()).GpuVirtualAddress();
 		}
 		return 0;
 	}
 
-	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) noexcept
+	void D3D12ShaderObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
@@ -1345,7 +1364,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12ShaderObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) noexcept
+	void D3D12ShaderObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
 		pso_desc.pRootSignature = d3d_immutable_->root_signature_.get();
 
