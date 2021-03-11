@@ -529,12 +529,12 @@ namespace KlayGE
 		uint32_t num_camera_instances_ = 0;
 
 #ifndef KLAYGE_SHIP
-		PerfRangePtr hdr_pp_perf_;
-		PerfRangePtr smaa_pp_perf_;
-		PerfRangePtr post_tone_mapping_pp_perf_;
-		PerfRangePtr resize_pp_perf_;
-		PerfRangePtr hdr_display_pp_perf_;
-		PerfRangePtr stereoscopic_pp_perf_;
+		PerfRegion* hdr_pp_perf_;
+		PerfRegion* smaa_pp_perf_;
+		PerfRegion* post_tone_mapping_pp_perf_;
+		PerfRegion* resize_pp_perf_;
+		PerfRegion* hdr_display_pp_perf_;
+		PerfRegion* stereoscopic_pp_perf_;
 #endif
 
 		mutable RenderMaterialPtr default_material_;

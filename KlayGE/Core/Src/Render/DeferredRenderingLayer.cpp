@@ -937,32 +937,32 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = PerfProfiler::Instance();
-		shadow_map_perf_ = profiler.CreatePerfRange(0, "Gen shadow map");
+		shadow_map_perf_ = profiler.CreatePerfRegion(0, "Gen shadow map");
 		std::string buffer_name[] = { "Opaque", "Transparency back", "TransparencyFront" };
 		for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
 		{
-			gbuffer_perfs_[i] = profiler.CreatePerfRange(0, "GBuffer (" + buffer_name[i] + ")");
-			shadowing_perfs_[i] = profiler.CreatePerfRange(0, "Shadowing (" + buffer_name[i] + ")");
-			indirect_lighting_perfs_[i] = profiler.CreatePerfRange(0, "Indirect lighting (" + buffer_name[i] + ")");
+			gbuffer_perfs_[i] = profiler.CreatePerfRegion(0, "GBuffer (" + buffer_name[i] + ")");
+			shadowing_perfs_[i] = profiler.CreatePerfRegion(0, "Shadowing (" + buffer_name[i] + ")");
+			indirect_lighting_perfs_[i] = profiler.CreatePerfRegion(0, "Indirect lighting (" + buffer_name[i] + ")");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-			clustering_perfs_[i] = profiler.CreatePerfRange(0, "Clustering (" + buffer_name[i] + ")");
+			clustering_perfs_[i] = profiler.CreatePerfRegion(0, "Clustering (" + buffer_name[i] + ")");
 #endif
-			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
-			reflection_perfs_[i] = profiler.CreatePerfRange(0, "Reflection (" + buffer_name[i] + ")");
-			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
+			shading_perfs_[i] = profiler.CreatePerfRegion(0, "Shading (" + buffer_name[i] + ")");
+			reflection_perfs_[i] = profiler.CreatePerfRegion(0, "Reflection (" + buffer_name[i] + ")");
+			special_shading_perfs_[i] = profiler.CreatePerfRegion(0, "Special shading (" + buffer_name[i] + ")");
 		}
-		sss_blur_pp_perf_ = profiler.CreatePerfRange(0, "SSS Blur PP");
-		ssr_pp_perf_ = profiler.CreatePerfRange(0, "SSR PP");
+		sss_blur_pp_perf_ = profiler.CreatePerfRegion(0, "SSS Blur PP");
+		ssr_pp_perf_ = profiler.CreatePerfRegion(0, "SSR PP");
 		if (cs_cldr_)
 		{
-			ppr_pp_perf_ = profiler.CreatePerfRange(0, "PPR PP");
+			ppr_pp_perf_ = profiler.CreatePerfRegion(0, "PPR PP");
 		}
-		atmospheric_pp_perf_ = profiler.CreatePerfRange(0, "Atmospheric PP");
-		taa_pp_perf_ = profiler.CreatePerfRange(0, "TAA PP");
-		vdm_perf_ = profiler.CreatePerfRange(0, "VDM");
-		vdm_composition_pp_perf_ = profiler.CreatePerfRange(0, "VDM composition PP");
-		depth_of_field_perf_ = profiler.CreatePerfRange(0, "Depth of Field PP");
-		bokeh_filter_perf_ = profiler.CreatePerfRange(0, "Bokeh Filter PP");
+		atmospheric_pp_perf_ = profiler.CreatePerfRegion(0, "Atmospheric PP");
+		taa_pp_perf_ = profiler.CreatePerfRegion(0, "TAA PP");
+		vdm_perf_ = profiler.CreatePerfRegion(0, "VDM");
+		vdm_composition_pp_perf_ = profiler.CreatePerfRegion(0, "VDM composition PP");
+		depth_of_field_perf_ = profiler.CreatePerfRegion(0, "Depth of Field PP");
+		bokeh_filter_perf_ = profiler.CreatePerfRegion(0, "Bokeh Filter PP");
 #endif
 	}
 
@@ -4435,13 +4435,13 @@ namespace KlayGE
 	}
 
 
-	uint32_t DeferredRenderingLayer::BeginPerfProfileDRJob(PerfRange& perf)
+	uint32_t DeferredRenderingLayer::BeginPerfProfileDRJob(PerfRegion& perf)
 	{
 		perf.Begin();
 		return 0;
 	}
 
-	uint32_t DeferredRenderingLayer::EndPerfProfileDRJob(PerfRange& perf)
+	uint32_t DeferredRenderingLayer::EndPerfProfileDRJob(PerfRegion& perf)
 	{
 		perf.End();
 		return 0;

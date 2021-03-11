@@ -464,29 +464,29 @@ namespace KlayGE
 		uint32_t NumVerticesRendered() const;
 
 #ifndef KLAYGE_SHIP
-		PerfRangePtr const & ShadowMapPerf() const
+		PerfRegion const& ShadowMapPerf() const noexcept
 		{
-			return shadow_map_perf_;
+			return *shadow_map_perf_;
 		}
-		PerfRangePtr const & GBufferPerf(PassTargetBuffer ptb) const
+		PerfRegion const& GBufferPerf(PassTargetBuffer ptb) const noexcept
 		{
-			return gbuffer_perfs_[ptb];
+			return *gbuffer_perfs_[ptb];
 		}
-		PerfRangePtr const & ShadowingPerf(PassTargetBuffer ptb) const
+		PerfRegion const& ShadowingPerf(PassTargetBuffer ptb) const noexcept
 		{
-			return shadowing_perfs_[ptb];
+			return *shadowing_perfs_[ptb];
 		}
-		PerfRangePtr const & IndirectLightingPerf(PassTargetBuffer ptb) const
+		PerfRegion const& IndirectLightingPerf(PassTargetBuffer ptb) const noexcept
 		{
-			return indirect_lighting_perfs_[ptb];
+			return *indirect_lighting_perfs_[ptb];
 		}
-		PerfRangePtr const & ShadingPerf(PassTargetBuffer ptb) const
+		PerfRegion const& ShadingPerf(PassTargetBuffer ptb) const noexcept
 		{
-			return shading_perfs_[ptb];
+			return *shading_perfs_[ptb];
 		}
-		PerfRangePtr const & SpecialShadingPerf(PassTargetBuffer ptb) const
+		PerfRegion const& SpecialShadingPerf(PassTargetBuffer ptb) const noexcept
 		{
-			return special_shading_perfs_[ptb];
+			return *special_shading_perfs_[ptb];
 		}
 #endif
 
@@ -551,8 +551,8 @@ namespace KlayGE
 #endif
 		void CreateVDMDepthMaxMap(PerViewport const & pvp);
 
-		uint32_t BeginPerfProfileDRJob(PerfRange& perf);
-		uint32_t EndPerfProfileDRJob(PerfRange& perf);
+		uint32_t BeginPerfProfileDRJob(PerfRegion& perf);
+		uint32_t EndPerfProfileDRJob(PerfRegion& perf);
 		uint32_t RenderingStatsDRJob();
 		uint32_t GBufferGenerationDRJob(PerViewport& pvp, PassType pass_type);
 		uint32_t GBufferProcessingDRJob(PerViewport const & pvp);
@@ -845,25 +845,25 @@ namespace KlayGE
 		uint32_t num_vertices_rendered_;
 
 #ifndef KLAYGE_SHIP
-		PerfRangePtr shadow_map_perf_;
-		std::array<PerfRangePtr, PTB_None> gbuffer_perfs_;
-		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
-		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
+		PerfRegion* shadow_map_perf_;
+		std::array<PerfRegion*, PTB_None> gbuffer_perfs_;
+		std::array<PerfRegion*, PTB_None> shadowing_perfs_;
+		std::array<PerfRegion*, PTB_None> indirect_lighting_perfs_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		std::array<PerfRangePtr, PTB_None> clustering_perfs_;
+		std::array<PerfRegion*, PTB_None> clustering_perfs_;
 #endif
-		std::array<PerfRangePtr, PTB_None> shading_perfs_;
-		std::array<PerfRangePtr, PTB_None> reflection_perfs_;
-		std::array<PerfRangePtr, PTB_None> special_shading_perfs_;
-		PerfRangePtr sss_blur_pp_perf_;
-		PerfRangePtr ssr_pp_perf_;
-		PerfRangePtr ppr_pp_perf_;
-		PerfRangePtr atmospheric_pp_perf_;
-		PerfRangePtr taa_pp_perf_;
-		PerfRangePtr vdm_perf_;
-		PerfRangePtr vdm_composition_pp_perf_;
-		PerfRangePtr depth_of_field_perf_;
-		PerfRangePtr bokeh_filter_perf_;
+		std::array<PerfRegion*, PTB_None> shading_perfs_;
+		std::array<PerfRegion*, PTB_None> reflection_perfs_;
+		std::array<PerfRegion*, PTB_None> special_shading_perfs_;
+		PerfRegion* sss_blur_pp_perf_;
+		PerfRegion* ssr_pp_perf_;
+		PerfRegion* ppr_pp_perf_;
+		PerfRegion* atmospheric_pp_perf_;
+		PerfRegion* taa_pp_perf_;
+		PerfRegion* vdm_perf_;
+		PerfRegion* vdm_composition_pp_perf_;
+		PerfRegion* depth_of_field_perf_;
+		PerfRegion* bokeh_filter_perf_;
 #endif
 	};
 }

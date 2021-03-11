@@ -40,8 +40,7 @@ namespace KlayGE
 	class ResLoadingDesc;
 	typedef std::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
 	class ResLoader;
-	class PerfRange;
-	typedef std::shared_ptr<PerfRange> PerfRangePtr;
+	class PerfRegion;
 	class PerfProfiler;
 	typedef std::shared_ptr<PerfProfiler> PerfProfilerPtr;
 

@@ -451,12 +451,12 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = PerfProfiler::Instance();
-		hdr_pp_perf_ = profiler.CreatePerfRange(0, "HDR PP");
-		smaa_pp_perf_ = profiler.CreatePerfRange(0, "SMAA PP");
-		post_tone_mapping_pp_perf_ = profiler.CreatePerfRange(0, "Post tone mapping PP");
-		resize_pp_perf_ = profiler.CreatePerfRange(0, "Resize PP");
-		hdr_display_pp_perf_ = profiler.CreatePerfRange(0, "HDR display PP");
-		stereoscopic_pp_perf_ = profiler.CreatePerfRange(0, "Stereoscopic PP");
+		hdr_pp_perf_ = profiler.CreatePerfRegion(0, "HDR PP");
+		smaa_pp_perf_ = profiler.CreatePerfRegion(0, "SMAA PP");
+		post_tone_mapping_pp_perf_ = profiler.CreatePerfRegion(0, "Post tone mapping PP");
+		resize_pp_perf_ = profiler.CreatePerfRegion(0, "Resize PP");
+		hdr_display_pp_perf_ = profiler.CreatePerfRegion(0, "HDR display PP");
+		stereoscopic_pp_perf_ = profiler.CreatePerfRegion(0, "Stereoscopic PP");
 #endif
 	}
 
@@ -1479,15 +1479,6 @@ namespace KlayGE
 		{
 			post_tone_mapping_pps_[i].reset();
 		}
-
-#ifndef KLAYGE_SHIP
-		hdr_pp_perf_.reset();
-		smaa_pp_perf_.reset();
-		post_tone_mapping_pp_perf_.reset();
-		resize_pp_perf_.reset();
-		hdr_display_pp_perf_.reset();
-		stereoscopic_pp_perf_.reset();
-#endif
 
 		this->DoDestroy();
 	}
