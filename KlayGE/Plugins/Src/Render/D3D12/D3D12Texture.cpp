@@ -55,6 +55,11 @@ namespace KlayGE
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Read));
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Write));
 		}
+
+		if (!IsSRGB(format_) && (type == TT_2D) && (access_hint_ & EAH_Generate_Mips))
+		{
+			access_hint_ |= EAH_GPU_Unordered;
+		}
 	}
 
 	std::wstring const & D3D12Texture::Name() const
