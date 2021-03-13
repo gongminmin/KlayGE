@@ -469,10 +469,9 @@ namespace KlayGE
 	uint32_t CameraPathController::AddCurve(CameraPathController::InterpolateType type, uint32_t num_frames)
 	{
 		uint32_t curve_id = static_cast<uint32_t>(curves_.size());
-		CameraCurve curve;
+		auto& curve = curves_.emplace_back();
 		curve.type = type;
 		curve.num_frames = num_frames;
-		curves_.push_back(curve);
 		return curve_id;
 	}
 

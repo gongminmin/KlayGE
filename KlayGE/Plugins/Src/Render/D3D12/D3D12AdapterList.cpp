@@ -96,9 +96,8 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
 					UuidOf<ID3D12Device>(), device.put_void())))
 				{
-					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get());
-					adapter->Enumerate();
-					adapters_.push_back(std::move(adapter));
+					auto& adapter = *adapters_.emplace_back(MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get()));
+					adapter.Enumerate();
 				}
 			}
 
@@ -125,9 +124,8 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter.get(), D3D_FEATURE_LEVEL_11_0,
 					UuidOf<ID3D12Device>(), device.put_void())))
 				{
-					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get());
-					adapter->Enumerate();
-					adapters_.push_back(std::move(adapter));
+					auto& adapter = *adapters_.emplace_back(MakeUniquePtr<D3D12Adapter>(adapter_no, dxgi_adapter.get()));
+					adapter.Enumerate();
 				}
 			}
 

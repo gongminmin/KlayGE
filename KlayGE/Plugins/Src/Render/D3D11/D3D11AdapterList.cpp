@@ -75,9 +75,8 @@ namespace KlayGE
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				auto adapter = MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get());
-				adapter->Enumerate();
-				adapters_.push_back(std::move(adapter));
+				auto& adapter = *adapters_.emplace_back(MakeUniquePtr<D3D11Adapter>(adapter_no, dxgi_adapter.as<IDXGIAdapter2>().get()));
+				adapter.Enumerate();
 			}
 
 			++ adapter_no;

@@ -828,7 +828,7 @@ namespace KlayGE
 			model->Mesh(i)->ObjectID(entity_id);
 		}
 
-		EntityInfo mi;
+		auto& mi = entities_.emplace(entity_id, EntityInfo()).first->second;
 		std::string::size_type begin = model_name.rfind('\\') + 1;
 		std::string::size_type end = model_name.rfind('.') - begin;
 		mi.name = model_name.substr(begin, end);
@@ -841,7 +841,6 @@ namespace KlayGE
 		mi.trf_scale = float3(1, 1, 1);
 		mi.trf_rotate = Quaternion::Identity();
 		mi.scene_node = scene_node;
-		entities_.insert(std::make_pair(entity_id, mi));
 
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
@@ -925,7 +924,7 @@ namespace KlayGE
 			light_proxy->Mesh(i)->ObjectID(entity_id);
 		}
 
-		EntityInfo li;
+		auto& li = entities_.emplace(entity_id, EntityInfo()).first->second;
 		li.name = name;
 		li.type = ET_Light;
 		li.model = light_proxy;
@@ -936,7 +935,6 @@ namespace KlayGE
 		li.trf_scale = float3(1, 1, 1);
 		li.trf_rotate = Quaternion::Identity();
 		li.scene_node = light_node;
-		entities_.insert(std::make_pair(entity_id, li));
 
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
@@ -983,7 +981,7 @@ namespace KlayGE
 			camera_proxy->Mesh(i)->ObjectID(entity_id);
 		}
 
-		EntityInfo ci;
+		auto& ci = entities_.emplace(entity_id, EntityInfo()).first->second;
 		ci.name = name;
 		ci.type = ET_Camera;
 		ci.model = camera_proxy;
@@ -994,7 +992,6 @@ namespace KlayGE
 		ci.trf_scale = float3(1, 1, 1);
 		ci.trf_rotate = Quaternion::Identity();
 		ci.scene_node = camera_node;
-		entities_.insert(std::make_pair(entity_id, ci));
 
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();

@@ -365,8 +365,8 @@ namespace KlayGE
 						hr = motion_sensor_collection_->GetAt(i, &sensor);
 						if (SUCCEEDED(hr))
 						{
-							com_ptr<ISensorEvents> motion_event(new MsgInputMotionSensorEvents(this), false);
-							motion_sensor_events_.push_back(motion_event);
+							auto& motion_event =
+								motion_sensor_events_.emplace_back(com_ptr<ISensorEvents>(new MsgInputMotionSensorEvents(this), false));
 							sensor->SetEventSink(motion_event.get());
 						}
 					}
@@ -386,9 +386,8 @@ namespace KlayGE
 						hr = orientation_sensor_collection_->GetAt(i, sensor.put());
 						if (SUCCEEDED(hr))
 						{
-							com_ptr<ISensorEvents> orientation_event(new MsgInputOrientationSensorEvents(this), false);
-							orientation_sensor_events_.push_back(orientation_event);
-
+							auto& orientation_event = orientation_sensor_events_.emplace_back(
+								com_ptr<ISensorEvents>(new MsgInputOrientationSensorEvents(this), false));
 							sensor->SetEventSink(orientation_event.get());
 						}
 					}

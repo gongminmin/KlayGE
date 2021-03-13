@@ -35,10 +35,10 @@ namespace KlayGE
 		std::vector<float3> vertices;
 		for (int i = 0; i < SUN_FLARENUM; ++ i)
 		{
-			vertices.push_back(float3(-1, +1, i + 0.1f));
-			vertices.push_back(float3(+1, +1, i + 0.1f));
-			vertices.push_back(float3(-1, -1, i + 0.1f));
-			vertices.push_back(float3(+1, -1, i + 0.1f));
+			vertices.emplace_back(-1.0f, +1.0f, i + 0.1f);
+			vertices.emplace_back(+1.0f, +1.0f, i + 0.1f);
+			vertices.emplace_back(-1.0f, -1.0f, i + 0.1f);
+			vertices.emplace_back(+1.0f, -1.0f, i + 0.1f);
 		}
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,

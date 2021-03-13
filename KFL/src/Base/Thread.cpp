@@ -157,10 +157,9 @@ namespace KlayGE
 
 		for (size_t i = 0; i < number; ++ i)
 		{
-			auto th_info = MakeSharedPtr<ThreadInfo>(*this);
+			auto& th_info = threads_.emplace_back(MakeSharedPtr<ThreadInfo>(*this));
 			auto thread = std::thread([th_info]() { WaitFunction(th_info); });
 			thread.detach();
-			threads_.push_back(std::move(th_info));
 		}
 	}
 

@@ -346,116 +346,86 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < api_special_macros.size(); ++i)
 		{
-			D3D_SHADER_MACRO macro = { api_special_macros[i].first, api_special_macros[i].second };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{api_special_macros[i].first, api_special_macros[i].second});
 		}
 
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_FLIPPING", flipping_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_RENDER_TO_TEX_ARRAY", render_to_tex_array_str.c_str() };
-			macros.push_back(macro);
-		}
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_SHADER_MODEL", max_sm_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_FLIPPING", flipping_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_RENDER_TO_TEX_ARRAY", render_to_tex_array_str.c_str()});
 		if (!caps.fp_color_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_NO_FP_COLOR", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_NO_FP_COLOR", "1"});
 		}
 		if (caps.pack_to_rgba_required)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_PACK_TO_RGBA", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_PACK_TO_RGBA", "1"});
 		}
 		if (caps.UavFormatSupport(EF_ABGR16F))
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_TYPED_UAV_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_TYPED_UAV_SUPPORT", "1"});
 		}
 		if (caps.uavs_at_every_stage_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT", "1"});
 		}
 		if (caps.explicit_multi_sample_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1"});
 		}
 		if (caps.vp_rt_index_at_every_stage_support)
 		{
-			D3D_SHADER_MACRO macro = {"KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT", "1"};
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT", "1"});
 		}
 		{
-			D3D_SHADER_MACRO macro_shader_type = { "", "1" };
+			char const* type_name;
 			switch (stage)
 			{
 			case ShaderStage::Vertex:
-				macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
+				type_name = "KLAYGE_VERTEX_SHADER";
 				break;
 
 			case ShaderStage::Pixel:
-				macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
+				type_name = "KLAYGE_PIXEL_SHADER";
 				break;
 
 			case ShaderStage::Geometry:
-				macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
+				type_name = "KLAYGE_GEOMETRY_SHADER";
 				break;
 
 			case ShaderStage::Compute:
-				macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
+				type_name = "KLAYGE_COMPUTE_SHADER";
 				break;
 
 			case ShaderStage::Hull:
-				macro_shader_type.Name = "KLAYGE_HULL_SHADER";
+				type_name = "KLAYGE_HULL_SHADER";
 				break;
 
 			case ShaderStage::Domain:
-				macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
+				type_name = "KLAYGE_DOMAIN_SHADER";
 				break;
 
 			default:
 				KFL_UNREACHABLE("Invalid shader stage");
 			}
-			macros.push_back(macro_shader_type);
+			macros.emplace_back(D3D_SHADER_MACRO{type_name, "1"});
 		}
 
 		for (uint32_t i = 0; i < tech.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
-			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{name_value.first.c_str(), name_value.second.c_str()});
 		}
 
 		for (uint32_t i = 0; i < pass.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
-			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{name_value.first.c_str(), name_value.second.c_str()});
 		}
 
-		{
-			D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
-			macros.push_back(macro_end);
-		}
+		macros.emplace_back(D3D_SHADER_MACRO{nullptr, nullptr});
 
 		D3DCompilerLoader::Instance().D3DCompile(hlsl_shader_text, &macros[0],
 			func_name, shader_profile,
@@ -508,7 +478,7 @@ namespace KlayGE
 							err_str = "(0): " + err_str;
 						}
 
-						msgs.push_back(err_str);
+						msgs.emplace_back(std::move(err_str));
 					}
 				}
 			}

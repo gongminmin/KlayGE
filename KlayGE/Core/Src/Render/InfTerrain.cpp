@@ -52,14 +52,10 @@ namespace KlayGE
 			addr.x() = 0;
 			for (uint32_t x = 0; x < num_grids - 1; ++ x, addr.x() += increment.x())
 			{
-				float2 p(addr.x() * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
-				vertices.push_back(p);
+				vertices.emplace_back(addr.x() * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
 				increment.x() *= increate_rate;
 			}
-			{
-				float2 p((addr.x() + far_plane) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
-				vertices.push_back(p);
-			}
+			vertices.emplace_back((addr.x() + far_plane) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
 
 			increment.y() *= increate_rate;
 		}
@@ -68,15 +64,10 @@ namespace KlayGE
 			addr.x() = 0;
 			for (uint32_t x = 0; x < num_grids - 1; ++ x, addr.x() += increment.x())
 			{
-				float2 p(addr.x() * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
-				vertices.push_back(p);
-
+				vertices.emplace_back(addr.x() * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
 				increment.x() *= increate_rate;
 			}
-			{
-				float2 p((addr.x() + far_plane) * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
-				vertices.push_back(p);
-			}
+			vertices.emplace_back((addr.x() + far_plane) * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
 		}
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,

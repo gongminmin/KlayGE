@@ -223,7 +223,7 @@ void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, std::vector<JT
 {
 	if (node->TextureDesc())
 	{
-		JTMLImageRecord jir;
+		auto& jir = jirs.emplace_back();
 		jir.u = TAM_Wrap;
 		jir.v = TAM_Wrap;
 		jir.x = node->Rect().left() / tile_size;
@@ -231,7 +231,6 @@ void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, std::vector<JT
 		jir.w = node->Rect().Width() / tile_size;
 		jir.h = node->Rect().Height() / tile_size;
 		jir.name = node->TextureDesc()->name;
-		jirs.push_back(jir);
 	}
 	if (!node->IsLeaf())
 	{
@@ -347,7 +346,7 @@ int main(int argc, char* argv[])
 			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				tex_names.push_back(std::string(arg));
+				tex_names.emplace_back(arg);
 			}
 			else
 			{

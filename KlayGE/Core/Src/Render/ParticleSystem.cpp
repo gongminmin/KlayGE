@@ -286,7 +286,7 @@ namespace
 							XMLAttribute const* attr_x = ctrl_point_node->Attrib("x");
 							XMLAttribute const* attr_y = ctrl_point_node->Attrib("y");
 
-							xys.push_back(float2(attr_x->ValueFloat(), attr_y->ValueFloat()));
+							xys.emplace_back(attr_x->ValueFloat(), attr_y->ValueFloat());
 						}
 
 						XMLAttribute const* attr = node->Attrib("name");

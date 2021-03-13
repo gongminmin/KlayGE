@@ -624,21 +624,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttribute const* attr = model_node->Attrib("model");
 		BOOST_ASSERT(attr);
 
-		auto scene_obj = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+		auto& scene_obj = scene_objs_.emplace_back(MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable));
 		scene_obj->TransformToParent(obj_mat);
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scene_obj);
-		RenderModelPtr model = ASyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable,
+		scene_models_.emplace_back(ASyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable,
 			obj_attr,
 			[scene_obj](RenderModel& model)
 			{
 				AddToSceneHelper(*scene_obj, model);
-			});
-		scene_models_.push_back(model);
+			}));
 		if (!update_script.empty())
 		{
 			scene_obj->OnSubThreadUpdate().Connect(SceneNodeUpdate(update_script));
 		}
-		scene_objs_.push_back(scene_obj);
 	}
 
 	{

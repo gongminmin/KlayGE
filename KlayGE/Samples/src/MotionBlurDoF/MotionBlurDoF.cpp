@@ -752,18 +752,19 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 					auto teapot = MakeSharedPtr<Teapot>();
 					teapot->Instance(MathLib::translation(pos), clr);
+					auto& teapot_node = teapot->RootNode();
+					teapots_.emplace_back(std::move(teapot));
 
-					teapot->RootNode()->ClearComponents();
-					teapot->RootNode()->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
+					teapot_node->ClearComponents();
+					teapot_node->AddComponent(MakeSharedPtr<RenderableComponent>(renderInstance_));
 					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).Exposure(exposure_);
 					checked_cast<MotionBlurRenderMesh&>(*renderInstance_).BlurRadius(blur_radius_);
-					teapots_.push_back(teapot);
 
-					teapot->RootNode()->SubThreadUpdate(0, 0);
-					teapot->RootNode()->MainThreadUpdate(0, 0);
+					teapot_node->SubThreadUpdate(0, 0);
+					teapot_node->MainThreadUpdate(0, 0);
 
 					std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
-					scene_mgr.SceneRootNode().AddChild(teapot->RootNode());
+					scene_mgr.SceneRootNode().AddChild(teapot_node);
 				}
 
 				++ loading_percentage_;

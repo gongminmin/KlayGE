@@ -250,7 +250,7 @@ namespace KlayGE
 	
 	void JudaTexture::AddImageEntry(std::string const & name, uint32_t x, uint32_t y, uint32_t w, uint32_t h, TexAddressingMode addr_u, TexAddressingMode addr_v, Color const & border_clr)
 	{
-		ImageEntry entry;
+		auto& entry = image_entries_.emplace_back();
 		entry.name = name;
 		entry.x = static_cast<uint16_t>(x);
 		entry.y = static_cast<uint16_t>(y);
@@ -258,7 +258,6 @@ namespace KlayGE
 		entry.h = static_cast<uint16_t>(h);
 		entry.addr_u_v = static_cast<uint8_t>((addr_v << 4) | addr_u);
 		entry.border_clr = border_clr;
-		image_entries_.push_back(entry);
 	}
 
 	void JudaTexture::CommitTiles(std::vector<std::vector<uint8_t>> const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs)

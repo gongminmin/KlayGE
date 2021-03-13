@@ -104,27 +104,24 @@ namespace
 	{
 		for (int i = 0; i < n; ++ i)
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = v.y() = v.z() = 0;
-			vb.push_back(v);
 		}
 
 		float outer_radius = radius / cos(PI / n);
 		for (int i = 0; i < n; ++ i)
 		{
-			T v;
+			T& v = vb.emplace_back();
 			float angle = i * 2 * PI / n;
 			v.x() = outer_radius * cos(angle);
 			v.y() = outer_radius * sin(angle);
 			v.z() = height;
-			vb.push_back(v);
 		}
 
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = v.y() = 0;
 			v.z() = height;
-			vb.push_back(v);
 		}
 
 		for (int i = 0; i < n; ++ i)
@@ -158,46 +155,40 @@ namespace
 	{
 		for (int i = 0; i < 4; ++ i)
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = v.y() = v.z() = 0;
-			vb.push_back(v);
 		}
 
 		float outer_radius = radius * sqrt(2.0f);
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -outer_radius;
 			v.y() = -outer_radius;
 			v.z() = height;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +outer_radius;
 			v.y() = -outer_radius;
 			v.z() = height;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +outer_radius;
 			v.y() = +outer_radius;
 			v.z() = height;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -outer_radius;
 			v.y() = +outer_radius;
 			v.z() = height;
-			vb.push_back(v);
 		}
 
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = v.y() = 0;
 			v.z() = height;
-			vb.push_back(v);
 		}
 
 		for (int i = 0; i < 4; ++ i)
@@ -236,61 +227,53 @@ namespace
 	void CreateBoxMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float half_length)
 	{
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -half_length;
 			v.y() = +half_length;
 			v.z() = -half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +half_length;
 			v.y() = +half_length;
 			v.z() = -half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +half_length;
 			v.y() = -half_length;
 			v.z() = -half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -half_length;
 			v.y() = -half_length;
 			v.z() = -half_length;
-			vb.push_back(v);
 		}
 
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -half_length;
 			v.y() = +half_length;
 			v.z() = +half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +half_length;
 			v.y() = +half_length;
 			v.z() = +half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = +half_length;
 			v.y() = -half_length;
 			v.z() = +half_length;
-			vb.push_back(v);
 		}
 		{
-			T v;
+			T& v = vb.emplace_back();
 			v.x() = -half_length;
 			v.y() = -half_length;
 			v.z() = +half_length;
-			vb.push_back(v);
 		}
 
 		ib.push_back(vertex_base + 0);

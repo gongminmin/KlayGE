@@ -545,10 +545,10 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 				MathLib::scaling(MathLib::abs(bind_scale), MathLib::abs(bind_scale), bind_scale)
 				* MathLib::to_matrix(bind_real)
 				* MathLib::translation(MathLib::udq_to_trans(bind_real, bind_dual)));
-			float3 joint_pos = MathLib::transform_coord(float3(0, 0, 0), mat);
+			float3 const joint_pos = MathLib::transform_coord(float3(0, 0, 0), mat);
 
-			positions.push_back(float4(joint_pos.x(), joint_pos.y(), joint_pos.z(), color));
-			bone_indices.push_back(i);
+			positions.emplace_back(joint_pos.x(), joint_pos.y(), joint_pos.z(), color);
+			bone_indices.emplace_back(i);
 
 			auto& parent_joint = *parent_node->FirstComponentOfType<JointComponent>();
 
@@ -576,17 +576,17 @@ SkeletonMesh::SkeletonMesh(RenderModel const & model)
 			float3 const nx_dir = parent_joint_pos - x_dir * len * 0.1f;
 			float3 const ny_dir = parent_joint_pos - y_dir * len * 0.1f;
 
-			positions.push_back(float4(px_dir.x(), px_dir.y(), px_dir.z(), color));
-			bone_indices.push_back(parent_id);
+			positions.emplace_back(px_dir.x(), px_dir.y(), px_dir.z(), color);
+			bone_indices.emplace_back(parent_id);
 
-			positions.push_back(float4(ny_dir.x(), ny_dir.y(), ny_dir.z(), color));
-			bone_indices.push_back(parent_id);
+			positions.emplace_back(ny_dir.x(), ny_dir.y(), ny_dir.z(), color);
+			bone_indices.emplace_back(parent_id);
 
-			positions.push_back(float4(nx_dir.x(), nx_dir.y(), nx_dir.z(), color));
-			bone_indices.push_back(parent_id);
+			positions.emplace_back(nx_dir.x(), nx_dir.y(), nx_dir.z(), color);
+			bone_indices.emplace_back(parent_id);
 
-			positions.push_back(float4(py_dir.x(), py_dir.y(), py_dir.z(), color));
-			bone_indices.push_back(parent_id);
+			positions.emplace_back(py_dir.x(), py_dir.y(), py_dir.z(), color);
+			bone_indices.emplace_back(parent_id);
 
 			indices.push_back(num_vertices + 0);
 			indices.push_back(num_vertices + 1);

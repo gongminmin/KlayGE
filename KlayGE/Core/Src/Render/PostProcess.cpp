@@ -125,7 +125,7 @@ namespace
 					{
 						for (XMLNode const* p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
 						{
-							pp_desc_.pp_data->param_names.push_back(std::string(p_node->Attrib("name")->ValueString()));
+							pp_desc_.pp_data->param_names.emplace_back(p_node->Attrib("name")->ValueString());
 						}
 					}
 					if (XMLNode const* input_chunk = pp_node->FirstNode("input"))
@@ -133,7 +133,7 @@ namespace
 						for (XMLNode const* pin_node = input_chunk->FirstNode("pin"); pin_node;
 							 pin_node = pin_node->NextSibling("pin"))
 						{
-							pp_desc_.pp_data->input_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
+							pp_desc_.pp_data->input_pin_names.emplace_back(pin_node->Attrib("name")->ValueString());
 						}
 					}
 					if (XMLNode const* output_chunk = pp_node->FirstNode("output"))
@@ -141,7 +141,7 @@ namespace
 						for (XMLNode const* pin_node = output_chunk->FirstNode("pin"); pin_node;
 							 pin_node = pin_node->NextSibling("pin"))
 						{
-							pp_desc_.pp_data->output_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
+							pp_desc_.pp_data->output_pin_names.emplace_back(pin_node->Attrib("name")->ValueString());
 						}
 					}
 					if (XMLNode const* shader_chunk = pp_node->FirstNode("shader"))

@@ -329,7 +329,9 @@ namespace
 		int16_t index = -1;
 		if (lod == 0)
 		{
-			NodeTransform node_transform;
+			index = static_cast<int16_t>(nodes_.size());
+
+			auto& node_transform = nodes_.emplace_back();
 			node_transform.node = MakeSharedPtr<SceneNode>(name, SceneNode::SOA_Cullable);
 			node_transform.node->TransformToParent(trans_mat);
 			if (node->mNumMeshes > 0)
@@ -341,9 +343,6 @@ namespace
 			{
 				nodes_[parent_id].node->AddChild(node_transform.node);
 			}
-
-			index = static_cast<int16_t>(nodes_.size());
-			nodes_.push_back(node_transform);
 		}
 		else
 		{
@@ -706,7 +705,7 @@ namespace
 									if (weight >= 0.5f / 255)
 									{
 										int const vertex_id = bone->mWeights[wi].mVertexId;
-										meshes_[mi].lods[lod].joint_bindings[vertex_id].push_back({ ji, weight });
+										meshes_[mi].lods[lod].joint_bindings[vertex_id].emplace_back(ji, weight);
 									}
 								}
 
@@ -817,11 +816,10 @@ namespace
 
 				iter->second.second = static_cast<int16_t>(parent_id);
 
-				JointInfo joint_info;
+				auto& joint_info = joints_.emplace_back();
 				joint_info.name = name;
 				joint_info.joint = iter->second.first;
 				joint_info.parent_id = iter->second.second;
-				joints_.push_back(std::move(joint_info));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; ++ i)
@@ -855,7 +853,7 @@ namespace
 			aiAnimation const * cur_anim = scene->mAnimations[ianim];
 			// For some reason mDuration is in milliseconds, not ticks. Assimp issue #3462.
 			float duration = static_cast<float>(cur_anim->mDuration / 1000);
-			AssimpAnimation anim;
+			auto& anim = assimp_animations.emplace_back();
 			anim.name = cur_anim->mName.C_Str();
 			anim.frame_num = static_cast<int>(ceilf(duration * resample_fps));
 			if (anim.frame_num == 0)
@@ -885,21 +883,21 @@ namespace
 					for (unsigned int i = 0; i < cur_joint->mNumPositionKeys; ++ i)
 					{
 						auto const & p = cur_joint->mPositionKeys[i];
-						poss.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
+						poss.emplace_back(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue));
 					}
 
 					std::vector<std::pair<float, Quaternion>> quats;
 					for (unsigned int i = 0; i < cur_joint->mNumRotationKeys; ++ i)
 					{
 						auto const & p = cur_joint->mRotationKeys[i];
-						quats.push_back(std::make_pair(static_cast<float>(p.mTime), AiQuatToQuat(p.mValue)));
+						quats.emplace_back(static_cast<float>(p.mTime), AiQuatToQuat(p.mValue));
 					}
 
 					std::vector<std::pair<float, float3>> scales;
 					for (unsigned int i = 0; i < cur_joint->mNumScalingKeys; ++ i)
 					{
 						auto const & p = cur_joint->mScalingKeys[i];
-						scales.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
+						scales.emplace_back(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue));
 					}
 
 					float4x4 parent_mat;
@@ -927,18 +925,14 @@ namespace
 					default_tf.frame_id.push_back(0);
 
 					auto const& node_mat = joints_[ji].joint->BoundSceneNode()->TransformToWorld();
-					Quaternion bind_real, bind_dual;
-					float bind_scale;
+					auto& bind_real = default_tf.bind_real.emplace_back();
+					auto& bind_dual = default_tf.bind_dual.emplace_back();
+					float& bind_scale = default_tf.bind_scale.emplace_back();
 					MatrixToDQ(node_mat, bind_real, bind_dual, bind_scale);
 
-					default_tf.bind_real.push_back(bind_real);
-					default_tf.bind_dual.push_back(bind_dual);
-					default_tf.bind_scale.push_back(bind_scale);
 					anim.resampled_frames.emplace(joint_id, default_tf);
 				}
 			}
-
-			assimp_animations.push_back(anim);
 		}
 
 		auto kfs = MakeSharedPtr<std::vector<KeyFrameSet>>(joints_.size());
@@ -2478,7 +2472,7 @@ namespace
 		for (XMLNode const* vertex_node = vertices_chunk.FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 		{
 			{
-				float3 pos;
+				auto& pos = mesh_lod.positions.emplace_back();
 				if (XMLAttribute const* x_attr = vertex_node->Attrib("x"))
 				{
 					pos.x() = x_attr->ValueFloat();
@@ -2487,18 +2481,16 @@ namespace
 
 					if (XMLAttribute const* u_attr = vertex_node->Attrib("u"))
 					{
-						float3 tex_coord;
+						auto& tex_coord = mesh_lod.texcoords[0].emplace_back();
 						tex_coord.x() = u_attr->ValueFloat();
 						tex_coord.y() = vertex_node->Attrib("v")->ValueFloat();
 						tex_coord.z() = 0;
-						mesh_lod.texcoords[0].push_back(tex_coord);
 					}
 				}
 				else
 				{
 					ExtractFVector<3>(vertex_node->Attrib("v")->ValueString(), &pos[0]);
 				}
-				mesh_lod.positions.push_back(pos);
 			}
 
 			if (XMLNode const* diffuse_node = vertex_node->FirstNode("diffuse"))
@@ -2517,7 +2509,7 @@ namespace
 					diffuse.z() = diffuse_node->Attrib("b")->ValueFloat();
 					diffuse.w() = diffuse_node->Attrib("a")->ValueFloat();										
 				}
-				mesh_lod.diffuses.push_back(Color(diffuse.x(), diffuse.y(), diffuse.z(), diffuse.w()));
+				mesh_lod.diffuses.emplace_back(diffuse.x(), diffuse.y(), diffuse.z(), diffuse.w());
 			}
 
 			if (XMLNode const* specular_node = vertex_node->FirstNode("specular"))
@@ -2535,7 +2527,7 @@ namespace
 					specular.y() = specular_node->Attrib("g")->ValueFloat();
 					specular.z() = specular_node->Attrib("b")->ValueFloat();
 				}
-				mesh_lod.speculars.push_back(Color(specular.x(), specular.y(), specular.z(), 1));
+				mesh_lod.speculars.emplace_back(specular.x(), specular.y(), specular.z(), 1.0f);
 			}
 
 			if (!vertex_node->Attrib("u"))
@@ -2544,7 +2536,7 @@ namespace
 				{
 					has_tex_coord = true;
 
-					float3 tex_coord;
+					auto& tex_coord = mesh_lod.texcoords[0].emplace_back();
 					if (XMLAttribute const* attr = tex_coord_node->Attrib("u"))
 					{
 						tex_coord.x() = attr->ValueFloat();
@@ -2555,13 +2547,12 @@ namespace
 						ExtractFVector<2>(tex_coord_node->Attrib("v")->ValueString(), &tex_coord[0]);
 					}
 					tex_coord.z() = 0;
-					mesh_lod.texcoords[0].push_back(tex_coord);
 				}
 			}
 
 			if (XMLNode const* weight_node = vertex_node->FirstNode("weight"))
 			{
-				std::vector<std::pair<uint32_t, float>> binding;
+				auto& binding = mesh_lod.joint_bindings.emplace_back();
 
 				XMLAttribute const* attr = weight_node->Attrib("joint");
 				if (!attr)
@@ -2579,29 +2570,26 @@ namespace
 					
 					for (size_t num_blend = 0; num_blend < index_strs.size(); ++ num_blend)
 					{
-						binding.push_back(
-							{std::stoul(std::string(index_strs[num_blend])), std::stof(std::string(weight_strs[num_blend]))});
+						binding.emplace_back(
+							std::stoul(std::string(index_strs[num_blend])), std::stof(std::string(weight_strs[num_blend])));
 					}
 				}
 				else
 				{
 					while (weight_node)
 					{
-						binding.push_back({ weight_node->Attrib("bone_index")->ValueUInt(),
-							weight_node->Attrib("weight")->ValueFloat() });
+						binding.emplace_back(weight_node->Attrib("bone_index")->ValueUInt(), weight_node->Attrib("weight")->ValueFloat());
 
 						weight_node = weight_node->NextSibling("weight");
 					}
 				}
-
-				mesh_lod.joint_bindings.emplace_back(std::move(binding));
 			}
 						
 			if (XMLNode const* normal_node = vertex_node->FirstNode("normal"))
 			{
 				has_normal = true;
 
-				float3 normal;
+				auto& normal = mesh_lod.normals.emplace_back();
 				if (XMLAttribute const* attr = normal_node->Attrib("v"))
 				{
 					ExtractFVector<3>(attr->ValueString(), &normal[0]);
@@ -2612,14 +2600,13 @@ namespace
 					normal.y() = normal_node->Attrib("y")->ValueFloat();
 					normal.z() = normal_node->Attrib("z")->ValueFloat();
 				}
-				mesh_lod.normals.push_back(normal);
 			}
 
 			if (XMLNode const* tangent_node = vertex_node->FirstNode("tangent"))
 			{
 				has_tangent = true;
 
-				float4 tangent;
+				auto& tangent = mesh_tangents.emplace_back();
 				if (XMLAttribute const* attr = tangent_node->Attrib("v"))
 				{
 					ExtractFVector<4>(attr->ValueString(), &tangent[0]);
@@ -2639,14 +2626,13 @@ namespace
 						tangent.w() = 1;
 					}
 				}
-				mesh_tangents.push_back(tangent);
 			}
 
 			if (XMLNode const* binormal_node = vertex_node->FirstNode("binormal"))
 			{
 				has_binormal = true;
 
-				float3 binormal;
+				auto& binormal = mesh_binormals.emplace_back();
 				if (XMLAttribute const* attr = binormal_node->Attrib("v"))
 				{
 					ExtractFVector<3>(attr->ValueString(), &binormal[0]);
@@ -2657,7 +2643,6 @@ namespace
 					binormal.y() = binormal_node->Attrib("y")->ValueFloat();
 					binormal.z() = binormal_node->Attrib("z")->ValueFloat();
 				}
-				mesh_binormals.push_back(binormal);
 			}
 
 			if (XMLNode const* tangent_quat_node = vertex_node->FirstNode("tangent_quat"))
@@ -2677,13 +2662,9 @@ namespace
 					tangent_quat.w() = tangent_quat_node->Attrib("w")->ValueFloat();
 				}
 
-				float3 const tangent = MathLib::transform_quat(float3(1, 0, 0), tangent_quat);
-				float3 const binormal = MathLib::transform_quat(float3(0, 1, 0), tangent_quat) * MathLib::sgn(tangent_quat.w());
-				float3 const normal = MathLib::transform_quat(float3(0, 0, 1), tangent_quat);
-
-				mesh_lod.tangents.push_back(tangent);
-				mesh_lod.binormals.push_back(binormal);
-				mesh_lod.normals.push_back(normal);
+				mesh_lod.tangents.emplace_back(MathLib::transform_quat(float3(1, 0, 0), tangent_quat));
+				mesh_lod.binormals.emplace_back(MathLib::transform_quat(float3(0, 1, 0), tangent_quat) * MathLib::sgn(tangent_quat.w()));
+				mesh_lod.normals.emplace_back(MathLib::transform_quat(float3(0, 0, 1), tangent_quat));
 			}
 		}
 
@@ -2900,11 +2881,10 @@ namespace
 			joint->BindParams(joint_bind_real, joint_bind_dual, joint_bind_scale);
 			joint->InitInverseOriginParams();
 
-			JointInfo joint_info;
+			auto& joint_info = joints_.emplace_back();
 			joint_info.name = joint_name;
 			joint_info.joint = std::move(joint);
 			joint_info.parent_id = parent_id;
-			joints_.push_back(std::move(joint_info));
 		}
 	}
 
@@ -2952,8 +2932,9 @@ namespace
 				}
 				kfs.frame_id.push_back(frame_id);
 
-				Quaternion bind_real, bind_dual;
-				float bind_scale;
+				auto& bind_real = kfs.bind_real.emplace_back();
+				auto& bind_dual = kfs.bind_dual.emplace_back();
+				float& bind_scale = kfs.bind_scale.emplace_back();
 				if (XMLNode const* pos_node = key_node->FirstNode("pos"))
 				{
 					float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
@@ -3012,10 +2993,6 @@ namespace
 						bind_scale = -bind_scale;
 					}
 				}
-
-				kfs.bind_real.push_back(bind_real);
-				kfs.bind_dual.push_back(bind_dual);
-				kfs.bind_scale.push_back(bind_scale);
 			}
 
 			this->CompressKeyFrameSet(kfs);
@@ -3075,7 +3052,7 @@ namespace
 						bb_max.z() = max_node->Attrib("z")->ValueFloat();
 					}
 
-					bb_kfs->bb.push_back(AABBox(bb_min, bb_max));
+					bb_kfs->bb.emplace_back(bb_min, bb_max);
 				}
 			}
 		}
@@ -3503,47 +3480,47 @@ namespace
 		{
 			int stream_index = 0;
 			{
-				merged_ves.push_back(VertexElement(VEU_Position, 0, EF_SIGNED_ABGR16));
+				merged_ves.emplace_back(VertexElement(VEU_Position, 0, EF_SIGNED_ABGR16));
 				position_stream = stream_index;
 			}
 			if (has_tangent_quat_)
 			{
-				merged_ves.push_back(VertexElement(VEU_Tangent, 0, EF_ABGR8));
+				merged_ves.emplace_back(VertexElement(VEU_Tangent, 0, EF_ABGR8));
 				++ stream_index;
 				tangent_quat_stream = stream_index;
 			}
 			else if (has_normal_)
 			{
-				merged_ves.push_back(VertexElement(VEU_Normal, 0, EF_ABGR8));
+				merged_ves.emplace_back(VertexElement(VEU_Normal, 0, EF_ABGR8));
 				++ stream_index;
 				normal_stream = stream_index;
 			}
 			if (has_diffuse_)
 			{
-				merged_ves.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
+				merged_ves.emplace_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
 				++ stream_index;
 				diffuse_stream = stream_index;
 			}
 			if (has_specular_)
 			{
-				merged_ves.push_back(VertexElement(VEU_Specular, 0, EF_ABGR8));
+				merged_ves.emplace_back(VertexElement(VEU_Specular, 0, EF_ABGR8));
 				++ stream_index;
 				specular_stream = stream_index;
 			}
 			if (has_texcoord_)
 			{
-				merged_ves.push_back(VertexElement(VEU_TextureCoord, 0, EF_SIGNED_GR16));
+				merged_ves.emplace_back(VertexElement(VEU_TextureCoord, 0, EF_SIGNED_GR16));
 				++ stream_index;
 				texcoord_stream = stream_index;
 			}
 
 			if (skinned)
 			{
-				merged_ves.push_back(VertexElement(VEU_BlendWeight, 0, EF_ABGR8));
+				merged_ves.emplace_back(VertexElement(VEU_BlendWeight, 0, EF_ABGR8));
 				++ stream_index;
 				blend_weights_stream = stream_index;
 
-				merged_ves.push_back(VertexElement(VEU_BlendIndex, 0, EF_ABGR8UI));
+				merged_ves.emplace_back(VertexElement(VEU_BlendIndex, 0, EF_ABGR8UI));
 				++ stream_index;
 				blend_indices_stream = stream_index;
 			}
@@ -3781,7 +3758,7 @@ namespace
 			std::wstring wname;
 			KlayGE::Convert(wname, mesh.name);
 
-			StaticMeshPtr render_mesh;
+			auto& render_mesh = render_meshes.emplace_back();
 			if (skinned)
 			{
 				render_mesh = MakeSharedPtr<SkinnedMesh>(wname);
@@ -3790,7 +3767,6 @@ namespace
 			{
 				render_mesh = MakeSharedPtr<StaticMesh>(wname);
 			}
-			render_meshes.push_back(render_mesh);
 
 			render_mesh->MaterialID(mesh.mtl_id);
 			render_mesh->PosBound(mesh.pos_bb);

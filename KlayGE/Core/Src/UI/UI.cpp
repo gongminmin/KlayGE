@@ -981,8 +981,7 @@ namespace KlayGE
 	void UIManager::DrawString(std::wstring const & strText, uint32_t font_index,
 		IRect const & rc, float depth, Color const & clr, uint32_t align)
 	{
-		strings_[font_index].push_back(string_cache());
-		string_cache& sc = strings_[font_index].back();
+		auto& sc = strings_[font_index].emplace_back();
 		sc.rc = rc;
 		sc.depth = depth;
 		sc.clr = clr;
@@ -1421,9 +1420,9 @@ namespace KlayGE
 
 						if (k == intersected_groups.size())
 						{
-							intersected_groups.push_back(std::vector<size_t>());
-							intersected_groups.back().push_back(j);
-							intersected_groups.back().push_back(i);
+							auto& group = intersected_groups.emplace_back();
+							group.push_back(j);
+							group.push_back(i);
 						}
 
 						break;

@@ -448,7 +448,7 @@ namespace KlayGE
 						reflection_cb->GetDesc(&d3d_cb_desc);
 						if ((D3D_CT_CBUFFER == d3d_cb_desc.Type) || (D3D_CT_TBUFFER == d3d_cb_desc.Type))
 						{
-							D3D11ShaderDesc::ConstantBufferDesc cb_desc;
+							auto& cb_desc = shader_desc_.cb_desc.emplace_back();
 							cb_desc.name = d3d_cb_desc.Name;
 							cb_desc.name_hash = RT_HASH(d3d_cb_desc.Name);
 							cb_desc.size = d3d_cb_desc.Size;
@@ -463,17 +463,14 @@ namespace KlayGE
 								D3D11_SHADER_TYPE_DESC type_desc;
 								reflection_var->GetType()->GetDesc(&type_desc);
 
-								D3D11ShaderDesc::ConstantBufferDesc::VariableDesc vd;
+								auto& vd = cb_desc.var_desc.emplace_back();
 								vd.name = var_desc.Name;
 								vd.start_offset = var_desc.StartOffset;
 								vd.type = static_cast<uint8_t>(type_desc.Type);
 								vd.rows = static_cast<uint8_t>(type_desc.Rows);
 								vd.columns = static_cast<uint8_t>(type_desc.Columns);
 								vd.elements = static_cast<uint16_t>(type_desc.Elements);
-								cb_desc.var_desc.push_back(vd);
 							}
-
-							shader_desc_.cb_desc.push_back(cb_desc);
 						}
 					}
 
@@ -536,11 +533,10 @@ namespace KlayGE
 						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 							if (effect.ParameterByName(si_desc.Name))
 							{
-								D3D11ShaderDesc::BoundResourceDesc brd;
+								auto& brd = shader_desc_.res_desc.emplace_back();
 								brd.name = si_desc.Name;
 								brd.type = static_cast<uint8_t>(si_desc.Type);
 								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-								shader_desc_.res_desc.push_back(brd);
 							}
 							break;
 

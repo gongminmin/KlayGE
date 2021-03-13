@@ -61,8 +61,7 @@ namespace KlayGE
 			valid_max_ = 0;
 		}
 
-		SubAlloc alloc(0, size_in_byte);
-		free_list_.push_back(alloc);
+		free_list_.emplace_back(0, size_in_byte);
 
 		App3DFramework const & app = Context::Instance().AppInstance();
 		retired_frames_.push_back(RetiredFrame(app.TotalNumFrames() + 1));

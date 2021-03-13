@@ -481,10 +481,9 @@ namespace KlayGE
 		{
 			do
 			{
-				MemoryDeviceInfo device;
+				auto& device = devices_.emplace_back();
 				memset(&device, 0, sizeof(device));
 				this->DataFill(device);
-				devices_.push_back(device);
 			} while (SMBios::Instance().FindNextTargetType());
 		}
 	}

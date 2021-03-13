@@ -36,9 +36,9 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < BLUR_ITERATE_NUM; ++ i)
 		{
-			PostProcessPtr radial_blur_pp = SyncLoadPostProcess("LightShaft.ppml", 0 == i ? "LightShaftRadialBlurCombine" : "LightShaftRadialBlur");
+			auto& radial_blur_pp = radial_blur_pps_.emplace_back(
+				SyncLoadPostProcess("LightShaft.ppml", 0 == i ? "LightShaftRadialBlurCombine" : "LightShaftRadialBlur"));
 			radial_blur_pp->SetParam(0, float2(static_cast<float>(RADIAL_SAMPLE_NUM), 1.0f / RADIAL_SAMPLE_NUM));
-			radial_blur_pps_.push_back(radial_blur_pp);
 		}
 
 		apply_pp_ = SyncLoadPostProcess("LightShaft.ppml", "ApplyLightShaftEffect");

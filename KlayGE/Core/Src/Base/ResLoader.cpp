@@ -171,7 +171,7 @@ namespace KlayGE
 		local_path_ = exe_path_;
 #endif
 
-		paths_.push_back(std::make_tuple(CT_HASH(""), 0, "", PackagePtr()));
+		paths_.emplace_back(CT_HASH(""), 0, "", PackagePtr());
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 		this->AddPath("Assets/");
@@ -483,7 +483,7 @@ namespace KlayGE
 					}
 				}
 
-				paths_.push_back(std::make_tuple(virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), real_path, package));
+				paths_.emplace_back(virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), real_path, std::move(package));
 			}
 		}
 	}

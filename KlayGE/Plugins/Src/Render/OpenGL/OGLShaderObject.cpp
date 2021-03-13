@@ -366,7 +366,7 @@ namespace KlayGE
 				sampler_name.resize(len8);
 				res.read(&sampler_name[0], len8);
 
-				tex_sampler_pairs_.push_back({tex_name, sampler_name});
+				tex_sampler_pairs_.emplace_back(tex_name, sampler_name);
 			}
 
 			this->StageSpecificStreamIn(res);
@@ -590,7 +590,7 @@ namespace KlayGE
 							for (size_t j = 0; j < sampler_names.size(); ++j)
 							{
 								std::string const combined_sampler_name = std::string(tex_names[i]) + "_" + sampler_names[j];
-								tex_sampler_pairs_.push_back({tex_names[i], sampler_names[j]});
+								tex_sampler_pairs_.emplace_back(tex_names[i], sampler_names[j]);
 
 								pnames_.push_back(combined_sampler_name);
 								glsl_res_names_.push_back(combined_sampler_name);
@@ -1087,8 +1087,8 @@ namespace KlayGE
 						}
 						if (!found)
 						{
-							tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name, effect.ParameterByName(tex_sampler.first),
-								effect.ParameterByName(tex_sampler.second), mask));
+							tex_sampler_binds_.emplace_back(combined_sampler_name, effect.ParameterByName(tex_sampler.first),
+								effect.ParameterByName(tex_sampler.second), mask);
 						}
 					}
 
@@ -1102,7 +1102,7 @@ namespace KlayGE
 							{
 								BOOST_ASSERT(REDT_buffer == p->Type());
 
-								ParameterBind pb;
+								auto& pb = param_binds_.emplace_back();
 								pb.param = p;
 								pb.location = location;
 
@@ -1114,8 +1114,6 @@ namespace KlayGE
 
 								pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(textures_,
 									gl_bind_targets_, gl_bind_textures_, gl_bind_samplers_, location, index, *p);
-
-								param_binds_.push_back(pb);
 							}
 							else
 							{
@@ -1123,7 +1121,7 @@ namespace KlayGE
 								{
 									if (std::get<0>(tex_sampler_binds_[i]) == shader_stage->PNames()[pi])
 									{
-										ParameterBind pb;
+										auto& pb = param_binds_.emplace_back();
 										pb.combined_sampler_name = std::get<0>(tex_sampler_binds_[i]);
 										pb.param = nullptr;
 										pb.location = location;
@@ -1138,8 +1136,6 @@ namespace KlayGE
 										pb.func = SetOGLShaderParameter<TexturePtr>(textures_,
 											gl_bind_targets_, gl_bind_textures_, gl_bind_samplers_,
 											location, index, *std::get<1>(tex_sampler_binds_[i]), *std::get<2>(tex_sampler_binds_[i]));
-
-										param_binds_.push_back(pb);
 
 										break;
 									}
@@ -1214,7 +1210,7 @@ namespace KlayGE
 					RenderEffectParameter const* p = dst_effect.ParameterByName(pb.param->Name());
 					BOOST_ASSERT(REDT_buffer == p->Type());
 
-					ParameterBind new_pb;
+					auto& new_pb = ret->param_binds_.emplace_back();
 					new_pb.param = p;
 					new_pb.location = pb.location;
 
@@ -1227,8 +1223,6 @@ namespace KlayGE
 					new_pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(ret->textures_,
 						ret->gl_bind_targets_, ret->gl_bind_textures_, ret->gl_bind_samplers_,
 						new_pb.location, index, *p);
-
-					ret->param_binds_.push_back(new_pb);
 				}
 				else
 				{
@@ -1237,7 +1231,7 @@ namespace KlayGE
 					{
 						if (std::get<0>(ret->tex_sampler_binds_[j]) == pname)
 						{
-							ParameterBind new_pb;
+							auto& new_pb = ret->param_binds_.emplace_back();
 							new_pb.combined_sampler_name = pname;
 							new_pb.param = nullptr;
 							new_pb.location = pb.location;
@@ -1254,8 +1248,6 @@ namespace KlayGE
 								new_pb.location, index,
 								*std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
 								*std::get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
-
-							ret->param_binds_.push_back(new_pb);
 
 							break;
 						}
@@ -1490,7 +1482,7 @@ namespace KlayGE
 					auto struct_iter = struct_offsets.find(struct_name);
 					if (struct_iter == struct_offsets.end())
 					{
-						struct_offsets.insert(std::make_pair(struct_name, uniform_offsets[j]));
+						struct_offsets.emplace(struct_name, uniform_offsets[j]);
 					}
 					else
 					{

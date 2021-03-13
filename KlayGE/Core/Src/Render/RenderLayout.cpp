@@ -84,13 +84,12 @@ namespace KlayGE
 				}
 			}
 
-			StreamUnit vs;
+			auto& vs = vertex_streams_.emplace_back();
 			vs.stream = buffer;
 			vs.format.assign(vet.begin(), vet.end());
 			vs.vertex_size = size;
 			vs.type = type;
 			vs.freq = freq;
-			vertex_streams_.push_back(vs);
 		}
 		else
 		{

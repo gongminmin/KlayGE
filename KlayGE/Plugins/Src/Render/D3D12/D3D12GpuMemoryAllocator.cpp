@@ -126,11 +126,10 @@ namespace KlayGE
 			}
 		}
 
-		PageInfo new_page_info;
+		auto& new_page_info = pages_.emplace_back();
 		new_page_info.page = this->CreatePage(DefaultPageSize);
 		new_page_info.free_list.push_back({aligned_size, DefaultPageSize});
 		mem_block->Reset(*new_page_info.page, 0, aligned_size);
-		pages_.emplace_back(std::move(new_page_info));
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)

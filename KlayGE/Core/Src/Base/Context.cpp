@@ -584,7 +584,7 @@ namespace KlayGE
 						std::string::size_type const loc = opt.find(':');
 						std::string_view opt_name = opt.substr(0, loc);
 						std::string_view opt_val = opt.substr(loc + 1);
-						graphics_options.emplace_back(std::string(opt_name), std::string(opt_val));
+						graphics_options.emplace_back(opt_name, opt_val);
 					}
 				}
 			}

@@ -1806,8 +1806,7 @@ namespace KlayGE
 		{
 			if (allow_creation)
 			{
-				res_barriers_.push_back(std::make_pair(cmd_list, std::vector<D3D12_RESOURCE_BARRIER>()));
-				ret = &res_barriers_.back().second;
+				ret = &res_barriers_.emplace_back(cmd_list, std::vector<D3D12_RESOURCE_BARRIER>()).second;
 			}
 			else
 			{

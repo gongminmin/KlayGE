@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				input_names.push_back(std::string(arg));
+				input_names.emplace_back(arg);
 			}
 			else
 			{

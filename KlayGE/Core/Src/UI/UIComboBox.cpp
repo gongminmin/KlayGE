@@ -546,15 +546,13 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!strText.empty());
 
-		// Create a new item and set the data
-		std::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
-		pItem->strText = strText;
-		pItem->rcActive = IRect(0, 0, 0, 0);
-		pItem->bVisible = false;
-
 		int ret = static_cast<int>(items_.size());
 
-		items_.push_back(pItem);
+		// Create a new item and set the data
+		auto& item = *items_.emplace_back(MakeSharedPtr<UIComboBoxItem>());
+		item.strText = strText;
+		item.rcActive = IRect(0, 0, 0, 0);
+		item.bVisible = false;
 
 		// Update the scroll bar with new range
 		scroll_bar_.SetTrackRange(0, items_.size());

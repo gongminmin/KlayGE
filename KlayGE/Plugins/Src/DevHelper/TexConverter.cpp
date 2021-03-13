@@ -216,8 +216,8 @@ namespace
 		for (uint32_t arr = 0; arr < array_size_; ++arr)
 		{
 			std::string_view const plane_file_name = metadata_.PlaneFileName(arr, 0);
-			planes_[arr].push_back(MakeSharedPtr<ImagePlane>());
-			if (!planes_[arr][0]->Load(plane_file_name, metadata_))
+			auto& image = planes_[arr].emplace_back(MakeSharedPtr<ImagePlane>());
+			if (!image->Load(plane_file_name, metadata_))
 			{
 				LogError() << "Could NOT load " << plane_file_name << '.' << std::endl;
 				return false;

@@ -99,13 +99,12 @@ namespace KlayGE
 
 						for (auto const & mode_desc : mode_descs)
 						{
-							D3D12VideoMode const video_mode(mode_desc.Width, mode_desc.Height,
-								mode_desc.Format);
+							D3D12VideoMode video_mode(mode_desc.Width, mode_desc.Height, mode_desc.Format);
 
 							// 如果找到一个新模式, 加入模式列表
 							if (std::find(modes_.begin(), modes_.end(), video_mode) == modes_.end())
 							{
-								modes_.push_back(std::move(video_mode));
+								modes_.emplace_back(std::move(video_mode));
 							}
 						}
 					}

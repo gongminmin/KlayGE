@@ -4782,7 +4782,7 @@ namespace KlayGE
 	std::pair<std::string, std::string> const& RenderEffect::MacroByIndex(uint32_t n) const noexcept
 	{
 		BOOST_ASSERT(n < this->NumMacros());
-		return immutable_->macros[n].first;
+		return immutable_->macros[n];
 	}
 
 	uint32_t RenderEffect::AddShaderObject()
@@ -4809,11 +4809,10 @@ namespace KlayGE
 
 			std::string const include_name = std::string(attr->ValueString());
 
-			include_docs.push_back(LoadXml(*ResLoader::Instance().Open(include_name)));
-			XMLNode const* include_root = include_docs.back()->RootNode();
+			auto const& include_root = *include_docs.emplace_back(LoadXml(*ResLoader::Instance().Open(include_name)))->RootNode();
 
 			std::vector<std::string> include_names;
-			this->RecursiveIncludeNode(*include_root, include_names);
+			this->RecursiveIncludeNode(include_root, include_names);
 
 			if (!include_names.empty())
 			{
@@ -4835,9 +4834,9 @@ namespace KlayGE
 					}
 					else
 					{
-						include_docs.push_back(LoadXml(*ResLoader::Instance().Open(*iter)));
-						XMLNode const* recursive_include_root = include_docs.back()->RootNode();
-						this->InsertIncludeNodes(doc, root, *node, *recursive_include_root);
+						auto const& recursive_include_root =
+							*include_docs.emplace_back(LoadXml(*ResLoader::Instance().Open(*iter)))->RootNode();
+						this->InsertIncludeNodes(doc, root, *node, recursive_include_root);
 
 						whole_include_names.push_back(*iter);
 						++ iter;
@@ -4857,7 +4856,7 @@ namespace KlayGE
 
 			if (!found)
 			{
-				this->InsertIncludeNodes(doc, root, *node, *include_root);
+				this->InsertIncludeNodes(doc, root, *node, include_root);
 				whole_include_names.push_back(include_name);
 			}
 
@@ -4892,7 +4891,7 @@ namespace KlayGE
 
 			if (!found)
 			{
-				include_names.push_back(std::string(include_name));
+				include_names.emplace_back(include_name);
 			}
 		}
 	}
@@ -5034,7 +5033,7 @@ namespace KlayGE
 	{
 		for (XMLNode const* macro_node = root.FirstNode("macro"); macro_node; macro_node = macro_node->NextSibling("macro"))
 		{
-			immutable_->macros.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
+			immutable_->macros.emplace_back(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString());
 		}
 
 		for (XMLNode const* node = root.FirstNode("struct"); node; node = node->NextSibling("struct"))
@@ -5112,8 +5111,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					cbuffers_.push_back(MakeSharedPtr<RenderEffectConstantBuffer>(*this));
-					cbuff = cbuffers_.back().get();
+					cbuff = cbuffers_.emplace_back(MakeSharedPtr<RenderEffectConstantBuffer>(*this)).get();
 					cbuff->Load(cbuff_name);
 				}
 				BOOST_ASSERT(cbuff);
@@ -5148,16 +5146,16 @@ namespace KlayGE
 
 				if (!found)
 				{
-					immutable_->shader_graph_nodes.push_back(RenderShaderGraphNode());
-					immutable_->shader_graph_nodes.back().Load(*shader_node);
+					auto& node = immutable_->shader_graph_nodes.emplace_back();
+					node.Load(*shader_node);
 				}
 			}
 		}
 
 		for (XMLNode const* shader_node = root.FirstNode("shader"); shader_node; shader_node = shader_node->NextSibling("shader"))
 		{
-			immutable_->shader_frags.push_back(RenderShaderFragment());
-			immutable_->shader_frags.back().Load(*shader_node);
+			auto& frag = immutable_->shader_frags.emplace_back();
+			frag.Load(*shader_node);
 		}
 
 		this->GenHLSLShaderText();
@@ -5222,7 +5220,7 @@ namespace KlayGE
 						{
 							std::string name = ReadShortString(source);
 							std::string value = ReadShortString(source);
-							macro = {{std::move(name), std::move(value)}, true};
+							macro = {std::move(name), std::move(value)};
 						}
 					}
 					{
@@ -5349,25 +5347,13 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
 
 		{
-			uint16_t num_macros = 0;
-			for (auto const& macro :  immutable_->macros)
-			{
-				if (macro.second)
-				{
-					++ num_macros;
-				}
-			}
-
-			num_macros = Native2LE(num_macros);
+			uint16_t num_macros = Native2LE(static_cast<uint16_t>(immutable_->macros.size()));
 			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
 			for (auto const& macro : immutable_->macros)
 			{
-				if (macro.second)
-				{
-					WriteShortString(os, macro.first.first);
-					WriteShortString(os, macro.first.second);
-				}
+				WriteShortString(os, macro.first);
+				WriteShortString(os, macro.second);
 			}
 		}
 		{
@@ -5456,7 +5442,7 @@ namespace KlayGE
 
 		for (auto const& macro : immutable_->macros)
 		{
-			str += "#define " + macro.first.first + " " + macro.first.second + "\n";
+			str += "#define " + macro.first + " " + macro.second + "\n";
 		}
 		str += '\n';
 
@@ -5941,13 +5927,12 @@ namespace KlayGE
 			{
 				for (uint32_t index = 0; index < parent_tech->passes_.size(); ++ index)
 				{
-					RenderPassPtr pass = MakeSharedPtr<RenderPass>();
-					passes_.push_back(pass);
+					auto& pass = *passes_.emplace_back(MakeSharedPtr<RenderPass>());
 
 					auto inherit_pass = parent_tech->passes_[index].get();
 
-					pass->Load(effect, tech_index, index, inherit_pass);
-					is_validate_ &= pass->Validate();
+					pass.Load(effect, tech_index, index, inherit_pass);
+					is_validate_ &= pass.Validate();
 				}
 			}
 		}
@@ -5970,8 +5955,7 @@ namespace KlayGE
 			uint32_t index = 0;
 			for (XMLNode const* pass_node = node.FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
 			{
-				RenderPassPtr pass = MakeSharedPtr<RenderPass>();
-				passes_.push_back(pass);
+				auto& pass = *passes_.emplace_back(MakeSharedPtr<RenderPass>());
 
 				RenderPass* inherit_pass = nullptr;
 				if (parent_tech && (index < parent_tech->passes_.size()))
@@ -5979,9 +5963,9 @@ namespace KlayGE
 					inherit_pass = parent_tech->passes_[index].get();
 				}
 
-				pass->Load(effect, *pass_node, tech_index, index, inherit_pass);
+				pass.Load(effect, *pass_node, tech_index, index, inherit_pass);
 
-				is_validate_ &= pass->Validate();
+				is_validate_ &= pass.Validate();
 
 				for (XMLNode const* state_node = pass_node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 				{
@@ -5997,12 +5981,12 @@ namespace KlayGE
 					}
 				}
 
-				auto const* shader_obj = pass->GetShaderObject(effect).get();
-				if (auto const* ps_stage = shader_obj->Stage(ShaderStage::Pixel).get())
+				auto const& shader_obj = *pass.GetShaderObject(effect);
+				if (auto const* ps_stage = shader_obj.Stage(ShaderStage::Pixel).get())
 				{
 					has_discard_ |= ps_stage->HasDiscard();
 				}
-				has_tessellation_ |= !!shader_obj->Stage(ShaderStage::Hull);
+				has_tessellation_ |= !!shader_obj.Stage(ShaderStage::Hull);
 			}
 			if (transparent_)
 			{
@@ -6077,7 +6061,7 @@ namespace KlayGE
 			{
 				std::string name = ReadShortString(res);
 				std::string value = ReadShortString(res);
-				(*macros_)[i] = std::make_pair(name, value);
+				(*macros_)[i] = {std::move(name), std::move(value)};
 			}
 		}
 
@@ -6204,10 +6188,8 @@ namespace KlayGE
 			}
 			for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 			{
-				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
-				annotations_->push_back(annotation);
-
-				annotation->Load(effect, *anno_node);
+				auto& annotation = *annotations_->emplace_back(MakeSharedPtr<RenderEffectAnnotation>());
+				annotation.Load(effect, *anno_node);
 			}
 		}
 		else if (inherit_pass)
@@ -6528,7 +6510,7 @@ namespace KlayGE
 					{
 						for (XMLNode const* entry_node = so_node->FirstNode("entry"); entry_node; entry_node = entry_node->NextSibling("entry"))
 						{
-							ShaderDesc::StreamOutputDecl decl;
+							auto& decl = sd.so_decl.emplace_back();
 
 							size_t const usage_str_hash = HashValue(entry_node->Attrib("usage")->ValueString());
 							if (XMLAttribute const* attr = entry_node->Attrib("usage_index"))
@@ -6604,8 +6586,6 @@ namespace KlayGE
 							{
 								decl.slot = 0;
 							}
-
-							sd.so_decl.push_back(decl);
 						}
 					}
 				}
@@ -6788,7 +6768,7 @@ namespace KlayGE
 			{
 				std::string name = ReadShortString(res);
 				std::string value = ReadShortString(res);
-				(*macros_)[i] = std::make_pair(name, value);
+				(*macros_)[i] = {std::move(name), std::move(value)};
 			}
 		}
 

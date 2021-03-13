@@ -674,7 +674,7 @@ namespace KlayGE
 			if (iter->get() == &location)
 			{
 				new_node->Parent(this);
-				children_.insert(iter, std::move(new_node));
+				children_.emplace(iter, std::move(new_node));
 				break;
 			}
 		}
@@ -687,7 +687,7 @@ namespace KlayGE
 			if (iter->get() == &location)
 			{
 				new_attr->Parent(this);
-				attrs_.insert(iter, std::move(new_attr));
+				attrs_.emplace(iter, std::move(new_attr));
 				break;
 			}
 		}

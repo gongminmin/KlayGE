@@ -569,7 +569,7 @@ namespace KlayGE
 
 			std::vector<RenderTechnique> techniques;
 
-			std::vector<std::pair<std::pair<std::string, std::string>, bool>> macros;
+			std::vector<std::pair<std::string, std::string>> macros;
 			std::vector<RenderShaderFragment> shader_frags;
 #if KLAYGE_IS_DEV_PLATFORM
 			std::string hlsl_shader;

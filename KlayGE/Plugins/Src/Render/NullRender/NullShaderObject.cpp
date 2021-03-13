@@ -309,7 +309,7 @@ namespace KlayGE
 						reflection_cb->GetDesc(&d3d_cb_desc);
 						if ((D3D_CT_CBUFFER == d3d_cb_desc.Type) || (D3D_CT_TBUFFER == d3d_cb_desc.Type))
 						{
-							D3DShaderDesc::ConstantBufferDesc cb_desc;
+							auto& cb_desc = shader_desc_.cb_desc.emplace_back();
 							cb_desc.name = d3d_cb_desc.Name;
 							cb_desc.name_hash = RT_HASH(d3d_cb_desc.Name);
 							cb_desc.size = d3d_cb_desc.Size;
@@ -324,17 +324,14 @@ namespace KlayGE
 								D3D11_SHADER_TYPE_DESC type_desc;
 								reflection_var->GetType()->GetDesc(&type_desc);
 
-								D3DShaderDesc::ConstantBufferDesc::VariableDesc vd;
+								auto& vd = cb_desc.var_desc.emplace_back();
 								vd.name = var_desc.Name;
 								vd.start_offset = var_desc.StartOffset;
 								vd.type = static_cast<uint8_t>(type_desc.Type);
 								vd.rows = static_cast<uint8_t>(type_desc.Rows);
 								vd.columns = static_cast<uint8_t>(type_desc.Columns);
 								vd.elements = static_cast<uint16_t>(type_desc.Elements);
-								cb_desc.var_desc.push_back(vd);
 							}
-
-							shader_desc_.cb_desc.push_back(cb_desc);
 						}
 					}
 
@@ -397,11 +394,10 @@ namespace KlayGE
 						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 							if (effect.ParameterByName(si_desc.Name))
 							{
-								D3DShaderDesc::BoundResourceDesc brd;
+								auto& brd = shader_desc_.res_desc.emplace_back();
 								brd.name = si_desc.Name;
 								brd.type = static_cast<uint8_t>(si_desc.Type);
 								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-								shader_desc_.res_desc.push_back(brd);
 							}
 							break;
 
@@ -675,7 +671,7 @@ namespace KlayGE
 				sampler_name.resize(len8);
 				res.read(&sampler_name[0], len8);
 
-				tex_sampler_pairs_.push_back({ tex_name, sampler_name });
+				tex_sampler_pairs_.emplace_back(tex_name, sampler_name);
 			}
 
 			this->StageSpecificStreamIn(res);
@@ -979,7 +975,7 @@ namespace KlayGE
 							for (size_t j = 0; j < sampler_names.size(); ++j)
 							{
 								std::string const combined_sampler_name = std::string(tex_names[i]) + "_" + sampler_names[j];
-								tex_sampler_pairs_.push_back({ tex_names[i], sampler_names[j] });
+								tex_sampler_pairs_.emplace_back(tex_names[i], sampler_names[j]);
 
 								pnames_.push_back(combined_sampler_name);
 								glsl_res_names_.push_back(combined_sampler_name);
@@ -1389,8 +1385,8 @@ namespace KlayGE
 			}
 			if (!found)
 			{
-				gl_tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name, effect.ParameterByName(tex_sampler.first),
-					effect.ParameterByName(tex_sampler.second), mask));
+				gl_tex_sampler_binds_.emplace_back(
+					combined_sampler_name, effect.ParameterByName(tex_sampler.first), effect.ParameterByName(tex_sampler.second), mask);
 			}
 		}
 	}

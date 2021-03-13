@@ -125,11 +125,10 @@ namespace KlayGE
 			}
 		}
 
-		PageInfo new_page_info;
+		auto& new_page_info = pages_.emplace_back();
 		new_page_info.page = this->CreatePage(default_page_size);
 		new_page_info.free_list.push_back({static_cast<uint16_t>(size), default_page_size});
 		desc_block->Reset(*new_page_info.page, 0, size);
-		pages_.emplace_back(std::move(new_page_info));
 	}
 
 	void D3D12GpuDescriptorAllocator::Deallocate(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block, uint64_t fence_value)

@@ -86,14 +86,14 @@ void TutorFramework::OnCreate()
 	renderableFile_->TransformToParent(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
 
 	std::vector<KlayGE::float3> vertices;
-	vertices.push_back(KlayGE::float3(0.5f, -0.25f,  0.25f));
-	vertices.push_back(KlayGE::float3(1.0f, -0.25f,  0.25f));
-	vertices.push_back(KlayGE::float3(1.0f, -0.25f, -0.25f));
-	vertices.push_back(KlayGE::float3(0.5f, -0.25f, -0.25f));
-	vertices.push_back(KlayGE::float3(0.5f,  0.25f,  0.25f));
-	vertices.push_back(KlayGE::float3(1.0f,  0.25f,  0.25f));
-	vertices.push_back(KlayGE::float3(1.0f,  0.25f, -0.25f));
-	vertices.push_back(KlayGE::float3(0.5f,  0.25f, -0.25f));
+	vertices.emplace_back(0.5f, -0.25f,  0.25f);
+	vertices.emplace_back(1.0f, -0.25f,  0.25f);
+	vertices.emplace_back(1.0f, -0.25f, -0.25f);
+	vertices.emplace_back(0.5f, -0.25f, -0.25f);
+	vertices.emplace_back(0.5f,  0.25f,  0.25f);
+	vertices.emplace_back(1.0f,  0.25f,  0.25f);
+	vertices.emplace_back(1.0f,  0.25f, -0.25f);
+	vertices.emplace_back(0.5f,  0.25f, -0.25f);
 
 	KlayGE::RenderModelPtr model = KlayGE::MakeSharedPtr<KlayGE::RenderModel>(L"model", KlayGE::SceneNode::SOA_Cullable);
 
