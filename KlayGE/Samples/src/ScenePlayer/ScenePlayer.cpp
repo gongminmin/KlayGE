@@ -26,6 +26,10 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#include <commdlg.h>
+#endif
+
 #include <fstream>
 #include <iterator>
 #include <sstream>

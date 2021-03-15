@@ -31,6 +31,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <unknwnbase.h>
+#endif
 #include <CPP/Common/MyWindows.h>
 
 #include "ArchiveExtractCallback.hpp"

@@ -32,6 +32,9 @@
 #include <KFL/Util.hpp>
 #include <KFL/Uuid.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <unknwnbase.h>
+#endif
 #include <CPP/Common/MyWindows.h>
 
 #include "ArchiveOpenCallback.hpp"

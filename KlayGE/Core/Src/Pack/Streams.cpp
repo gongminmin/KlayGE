@@ -35,6 +35,9 @@
 
 #include <boost/assert.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <unknwnbase.h>
+#endif
 #include <CPP/Common/MyWindows.h>
 
 #include "Streams.hpp"

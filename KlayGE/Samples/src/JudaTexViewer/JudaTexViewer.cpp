@@ -18,6 +18,10 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#include <commdlg.h>
+#endif
+
 #include <iterator>
 #include <sstream>
 #include <vector>

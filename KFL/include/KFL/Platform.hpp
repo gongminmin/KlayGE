@@ -45,8 +45,8 @@
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
-	#ifndef WINDOWS_LEAN_AND_MEAN
-		#define WINDOWS_LEAN_AND_MEAN
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
 	#endif
 
 	#if defined(__MINGW32__)
@@ -77,6 +77,11 @@
 		#endif
 	#else
 		#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
+	#endif
+
+	#include <windows.h>
+	#ifndef _NTDEF_
+		using NTSTATUS = LONG;
 	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID

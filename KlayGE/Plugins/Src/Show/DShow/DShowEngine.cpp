@@ -20,6 +20,7 @@
 
 #include <boost/assert.hpp>
 #include <windows.h>
+#include <combaseapi.h>
 #include <uuids.h>
 #include <control.h>
 #if defined(KLAYGE_COMPILER_GCC)

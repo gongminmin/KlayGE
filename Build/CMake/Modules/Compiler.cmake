@@ -1,7 +1,7 @@
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "/W4 /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
+	set(CMAKE_CXX_FLAGS "/std:c++17 /W4 /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
 
 	set(CMAKE_CXX_STANDARD 17)
 
@@ -20,8 +20,6 @@ if(MSVC)
 			message(FATAL_ERROR "Unsupported compiler version. Please install clang-cl 9.0 or up.")
 		endif()
 
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-
 		set(CMAKE_C_FLAGS "/W4 /WX /bigobj /Gw")
 	else()
 		SET(KLAYGE_COMPILER_NAME "vc")
@@ -34,7 +32,7 @@ if(MSVC)
 			message(FATAL_ERROR "Unsupported compiler version. Please install VS2017 15.3 or up.")
 		ENDIF()
 
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:throwingNew /permissive-")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive-")
 		IF(KLAYGE_PLATFORM_WINDOWS_STORE OR (KLAYGE_ARCH_NAME STREQUAL "arm64"))
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
 		ENDIF()

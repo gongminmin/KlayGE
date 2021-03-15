@@ -19,6 +19,10 @@
 
 #include <KlayGE/SSRPostProcess.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#include <commdlg.h>
+#endif
+
 #include <iterator>
 #include <sstream>
 
