@@ -396,7 +396,7 @@ namespace glloader
 		gl_features_extractor()
 		{
 #ifdef GLLOADER_WGL
-			DynamicWglGetProcAddress = (wglGetProcAddressFUNC)(glloader_get_gl_proc_address("wglGetProcAddress"));
+			DynamicWglGetProcAddress = reinterpret_cast<wglGetProcAddressFUNC>(glloader_get_gl_proc_address("wglGetProcAddress"));
 #endif
 
 			gl_features();
@@ -441,7 +441,7 @@ namespace glloader
 				std::vector<std::string> gl_exts;
 				if (major >= 3)
 				{
-					LOAD_FUNC1(glGetStringi);
+					glGetStringi = reinterpret_cast<glGetStringiFUNC>(glloader_get_gl_proc_address("glGetStringi"));
 					GLint num_exts;
 					glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
 					gl_exts.resize(num_exts);
@@ -582,7 +582,8 @@ namespace glloader
 #ifdef GLLOADER_WGL
 			std::string exts_str;
 
-			LOAD_FUNC1(wglGetExtensionsStringARB);
+			wglGetExtensionsStringARB =
+				reinterpret_cast<wglGetExtensionsStringARBFUNC>(glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
 			if (wglGetExtensionsStringARB != NULL)
 			{
 				typedef HDC (WINAPI *wglGetCurrentDCFUNC)();
@@ -592,7 +593,8 @@ namespace glloader
 			}
 			else
 			{
-				LOAD_FUNC1(wglGetExtensionsStringEXT);
+				wglGetExtensionsStringEXT =
+					reinterpret_cast<wglGetExtensionsStringEXTFUNC>(glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
 				if (wglGetExtensionsStringEXT != NULL)
 				{
 					exts_str = wglGetExtensionsStringEXT();
@@ -607,9 +609,9 @@ namespace glloader
 		void glx_version(int& major, int& minor)
 		{
 #ifdef GLLOADER_GLX
-			LOAD_FUNC1(glXQueryVersion);
-			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay 
-				= (glXGetCurrentDisplayFUNC)(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
+			glXQueryVersion = reinterpret_cast<glXQueryVersionFUNC>(glloader_get_gl_proc_address("glXQueryVersion"));
+			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay =
+				reinterpret_cast<glXGetCurrentDisplayFUNC>(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
 			glXQueryVersion(DynamicGlXGetCurrentDisplay(), &major, &minor);
 #else
 			major = minor = 0;
@@ -618,9 +620,9 @@ namespace glloader
 		void glx_features()
 		{
 #ifdef GLLOADER_GLX
-			LOAD_FUNC1(glXGetClientString);
+			glXGetClientString = reinterpret_cast<glXGetClientStringFUNC>(glloader_get_gl_proc_address("glXGetClientString"));
 			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay 
-				= (glXGetCurrentDisplayFUNC)(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
+				= reinterpret_cast<glXGetCurrentDisplayFUNC>(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
 			char const * str = glXGetClientString(DynamicGlXGetCurrentDisplay(), GLX_EXTENSIONS);
 			if (str != NULL)
 			{
@@ -779,7 +781,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 	std::vector<std::map<std::string, std::string>> const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
-		ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));
+		ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));
 		if (NULL == ret)
 		{
 			if (!gl_dll_entries[i].empty())
@@ -788,7 +790,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 					= gl_dll_entries[i].find(name);
 				if (iter != gl_dll_entries[i].end())
 				{
-					ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), iter->second.c_str()));
+					ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), iter->second.c_str()));
 				}
 			}
 		}
@@ -808,9 +810,9 @@ void* get_gl_proc_address_by_api(const char* name)
 	void* ret = NULL;
 
 #if defined(GLLOADER_GLES) && !defined(GLLOADER_EAGL)
-	ret = (void*)(eglGetProcAddress(name));
+	ret = reinterpret_cast<void*>(eglGetProcAddress(name));
 #elif defined(GLLOADER_WGL)
-	ret = (void*)(DynamicWglGetProcAddress(name));
+	ret = reinterpret_cast<void*>(DynamicWglGetProcAddress(name));
 #elif defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
 	CFBundleRef bundle = glloader::gl_dll_container::instance().gl_bundle();
 
@@ -818,7 +820,7 @@ void* get_gl_proc_address_by_api(const char* name)
 	ret = CFBundleGetFunctionPointerForName(bundle, function_name);
 	CFRelease(function_name);
 #elif defined(GLLOADER_GLX)
-	ret = (void*)(glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
+	ret = reinterpret_cast<void*>(glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
 #endif
 
 	return ret;

@@ -92,8 +92,8 @@ namespace
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 			dll_loader_.Load(DLL_PREFIX "LZMA" DLL_SUFFIX);
 
-			lzma_compress_func_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
-			lzma_uncompress_func_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
+			lzma_compress_func_ = reinterpret_cast<LzmaCompressFunc>(dll_loader_.GetProcAddress("LzmaCompress"));
+			lzma_uncompress_func_ = reinterpret_cast<LzmaUncompressFunc>(dll_loader_.GetProcAddress("LzmaUncompress"));
 #else
 			lzma_compress_func_ = ::LzmaCompress;
 			lzma_uncompress_func_ = ::LzmaUncompress;

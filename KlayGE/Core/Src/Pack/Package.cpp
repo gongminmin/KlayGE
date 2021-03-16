@@ -142,7 +142,7 @@ namespace
 		{
 			dll_loader_.Load(DLL_PREFIX "7zxa" DLL_SUFFIX);
 
-			create_object_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
+			create_object_ = reinterpret_cast<CreateObjectFunc>(dll_loader_.GetProcAddress("CreateObject"));
 			BOOST_ASSERT(create_object_);
 		}
 

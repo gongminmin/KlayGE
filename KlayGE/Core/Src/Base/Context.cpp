@@ -290,14 +290,14 @@ namespace KlayGE
 #endif
 		static char const * available_sms_array[] = { "OCTree" };
 
-		int width = 800;
-		int height = 600;
+		uint32_t width = 800;
+		uint32_t height = 600;
 		ElementFormat color_fmt = EF_ARGB8;
 		ElementFormat depth_stencil_fmt = EF_D16;
-		int sample_count = 1;
-		int sample_quality = 0;
+		uint32_t sample_count = 1;
+		uint32_t sample_quality = 0;
 		bool full_screen = false;
-		int sync_interval = 0;
+		uint32_t sync_interval = 0;
 		bool hdr = false;
 		bool ppaa = false;
 		bool gamma = false;
@@ -372,11 +372,11 @@ namespace KlayGE
 			XMLNode const* frame_node = graphics_node->FirstNode("frame");
 			if (XMLAttribute const* attr = frame_node->Attrib("width"))
 			{
-				width = attr->ValueInt();
+				width = attr->ValueUInt();
 			}
 			if (XMLAttribute const* attr = frame_node->Attrib("height"))
 			{
-				height = attr->ValueInt();
+				height = attr->ValueUInt();
 			}
 			std::string color_fmt_str = "ARGB8";
 			if (XMLAttribute const* attr = frame_node->Attrib("color_fmt"))
@@ -436,17 +436,17 @@ namespace KlayGE
 			XMLNode const* sample_node = frame_node->FirstNode("sample");
 			if (XMLAttribute const* attr = sample_node->Attrib("count"))
 			{
-				sample_count = attr->ValueInt();
+				sample_count = attr->ValueUInt();
 			}
 			if (XMLAttribute const* attr = sample_node->Attrib("quality"))
 			{
-				sample_quality = attr->ValueInt();
+				sample_quality = attr->ValueUInt();
 			}
 
 			XMLNode const* sync_interval_node = graphics_node->FirstNode("sync_interval");
 			if (XMLAttribute const* attr = sync_interval_node->Attrib("value"))
 			{
-				sync_interval = attr->ValueInt();
+				sync_interval = attr->ValueUInt();
 			}
 
 			XMLNode const* hdr_node = graphics_node->FirstNode("hdr");
@@ -721,8 +721,8 @@ namespace KlayGE
 			{
 				{
 					auto frame_node = cfg_doc.AllocNode(XMLNodeType::Element, "frame");
-					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("width", cfg_.graphics_cfg.width));
-					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("height", cfg_.graphics_cfg.height));
+					frame_node->AppendAttrib(cfg_doc.AllocAttribUInt("width", cfg_.graphics_cfg.width));
+					frame_node->AppendAttrib(cfg_doc.AllocAttribUInt("height", cfg_.graphics_cfg.height));
 
 					std::string color_fmt_str;
 					switch (cfg_.graphics_cfg.color_fmt)
@@ -775,8 +775,8 @@ namespace KlayGE
 
 					{
 						auto sample_node = cfg_doc.AllocNode(XMLNodeType::Element, "sample");
-						sample_node->AppendAttrib(cfg_doc.AllocAttribInt("count", cfg_.graphics_cfg.sample_count));
-						sample_node->AppendAttrib(cfg_doc.AllocAttribInt("quality", cfg_.graphics_cfg.sample_quality));
+						sample_node->AppendAttrib(cfg_doc.AllocAttribUInt("count", cfg_.graphics_cfg.sample_count));
+						sample_node->AppendAttrib(cfg_doc.AllocAttribUInt("quality", cfg_.graphics_cfg.sample_quality));
 						frame_node->AppendNode(std::move(sample_node));
 					}
 
@@ -784,7 +784,7 @@ namespace KlayGE
 				}
 				{
 					auto sync_interval_node = cfg_doc.AllocNode(XMLNodeType::Element, "sync_interval");
-					sync_interval_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.sync_interval));
+					sync_interval_node->AppendAttrib(cfg_doc.AllocAttribUInt("value", cfg_.graphics_cfg.sync_interval));
 					graphics_node->AppendNode(std::move(sync_interval_node));
 				}
 				{
@@ -941,7 +941,7 @@ namespace KlayGE
 		std::string path = render_path + "/" + fn;
 		render_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
+		MakeRenderFactoryFunc mrf = reinterpret_cast<MakeRenderFactoryFunc>(render_loader_.GetProcAddress("MakeRenderFactory"));
 		if (mrf != nullptr)
 		{
 			mrf(render_factory_);
@@ -970,7 +970,7 @@ namespace KlayGE
 		std::string path = audio_path + "/" + fn;
 		audio_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
+		MakeAudioFactoryFunc maf = reinterpret_cast<MakeAudioFactoryFunc>(audio_loader_.GetProcAddress("MakeAudioFactory"));
 		if (maf != nullptr)
 		{
 			maf(audio_factory_);
@@ -999,7 +999,7 @@ namespace KlayGE
 		std::string path = input_path + "/" + fn;
 		input_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
+		MakeInputFactoryFunc mif = reinterpret_cast<MakeInputFactoryFunc>(input_loader_.GetProcAddress("MakeInputFactory"));
 		if (mif != nullptr)
 		{
 			mif(input_factory_);
@@ -1028,7 +1028,7 @@ namespace KlayGE
 		std::string path = show_path + "/" + fn;
 		show_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
+		MakeShowFactoryFunc msf = reinterpret_cast<MakeShowFactoryFunc>(show_loader_.GetProcAddress("MakeShowFactory"));
 		if (msf != nullptr)
 		{
 			msf(show_factory_);
@@ -1057,7 +1057,7 @@ namespace KlayGE
 		std::string path = script_path + "/" + fn;
 		script_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeScriptFactoryFunc msf = (MakeScriptFactoryFunc)script_loader_.GetProcAddress("MakeScriptFactory");
+		MakeScriptFactoryFunc msf = reinterpret_cast<MakeScriptFactoryFunc>(script_loader_.GetProcAddress("MakeScriptFactory"));
 		if (msf != nullptr)
 		{
 			msf(script_factory_);
@@ -1086,7 +1086,7 @@ namespace KlayGE
 		std::string path = sm_path + "/" + fn;
 		sm_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
+		MakeSceneManagerFunc msm = reinterpret_cast<MakeSceneManagerFunc>(sm_loader_.GetProcAddress("MakeSceneManager"));
 		if (msm != nullptr)
 		{
 			msm(scene_mgr_);
@@ -1115,7 +1115,8 @@ namespace KlayGE
 		std::string path = adsf_path + "/" + fn;
 		ads_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
+		MakeAudioDataSourceFactoryFunc madsf =
+			reinterpret_cast<MakeAudioDataSourceFactoryFunc>(ads_loader_.GetProcAddress("MakeAudioDataSourceFactory"));
 		if (madsf != nullptr)
 		{
 			madsf(audio_data_src_factory_);
@@ -1142,7 +1143,7 @@ namespace KlayGE
 
 		dev_helper_loader_.Load(ResLoader::Instance().Locate(path));
 
-		MakeDevHelperFunc mdh = (MakeDevHelperFunc)dev_helper_loader_.GetProcAddress("MakeDevHelper");
+		MakeDevHelperFunc mdh = reinterpret_cast<MakeDevHelperFunc>(dev_helper_loader_.GetProcAddress("MakeDevHelper"));
 		if (mdh != nullptr)
 		{
 			mdh(dev_helper_);
