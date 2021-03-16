@@ -596,7 +596,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			reinterpret_cast<float&>(sw_cbuffer_[sw_alpha_test_threshold_offset_]) = value;
+			sw_cbuffer_[sw_alpha_test_threshold_offset_] = std::bit_cast<uint32_t>(value);
 		}
 		else
 		{
@@ -609,7 +609,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			return reinterpret_cast<float const&>(sw_cbuffer_[sw_alpha_test_threshold_offset_]);
+			return std::bit_cast<float>(sw_cbuffer_[sw_alpha_test_threshold_offset_]);
 		}
 		else
 		{
@@ -621,7 +621,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			reinterpret_cast<float&>(sw_cbuffer_[sw_normal_scale_offset_]) = value;
+			sw_cbuffer_[sw_normal_scale_offset_] = std::bit_cast<uint32_t>(value);
 		}
 		else
 		{
@@ -634,7 +634,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			return reinterpret_cast<float const&>(sw_cbuffer_[sw_normal_scale_offset_]);
+			return std::bit_cast<float>(sw_cbuffer_[sw_normal_scale_offset_]);
 		}
 		else
 		{
@@ -646,7 +646,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			reinterpret_cast<float&>(sw_cbuffer_[sw_occlusion_strength_offset_]) = value;
+			sw_cbuffer_[sw_occlusion_strength_offset_] = std::bit_cast<uint32_t>(value);
 		}
 		else
 		{
@@ -659,7 +659,7 @@ namespace KlayGE
 	{
 		if (is_sw_mode_)
 		{
-			return reinterpret_cast<float const&>(sw_cbuffer_[sw_occlusion_strength_offset_]);
+			return std::bit_cast<float>(sw_cbuffer_[sw_occlusion_strength_offset_]);
 		}
 		else
 		{

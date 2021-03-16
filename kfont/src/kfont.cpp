@@ -421,7 +421,7 @@ namespace KlayGE
 		int32_t ci;
 		if (size > 0)
 		{
-			ci = static_cast<uint32_t>(distances_addr_.size() - 1);
+			ci = static_cast<int32_t>(distances_addr_.size() - 1);
 			uint32_t offset = static_cast<uint32_t>(distances_lzma_.size());
 			distances_addr_.back() = offset;
 			distances_addr_.push_back(offset + size);

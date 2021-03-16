@@ -1489,7 +1489,7 @@ namespace KlayGE
 			ppDevice, pFeatureLevel, ppImmediateContext);
 	}
 
-	void D3D11RenderEngine::OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result)
+	void D3D11RenderEngine::OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result) noexcept
 	{
 		KFL_UNUSED(instance);
 		KFL_UNUSED(context);

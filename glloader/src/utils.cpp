@@ -587,8 +587,8 @@ namespace glloader
 			if (wglGetExtensionsStringARB != NULL)
 			{
 				typedef HDC (WINAPI *wglGetCurrentDCFUNC)();
-				wglGetCurrentDCFUNC DynamicWglGetCurrentDC
-					= (wglGetCurrentDCFUNC)(glloader_get_gl_proc_address("wglGetCurrentDC"));
+				wglGetCurrentDCFUNC DynamicWglGetCurrentDC =
+					reinterpret_cast<wglGetCurrentDCFUNC>(glloader_get_gl_proc_address("wglGetCurrentDC"));
 				exts_str = wglGetExtensionsStringARB(DynamicWglGetCurrentDC());
 			}
 			else

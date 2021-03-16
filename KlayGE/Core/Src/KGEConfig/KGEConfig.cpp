@@ -540,7 +540,7 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 
 	ShowWindow(hTab, SW_SHOWNORMAL);
 
-	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	HFONT hFont = reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
 	::SendMessage(hTab, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 
 	TCITEM tci;
@@ -601,7 +601,7 @@ INT_PTR CreateButtons(HWND hWnd, HINSTANCE hInstance)
 				hInstance,
 				nullptr);
 
-	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	HFONT hFont = reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
 	::SendMessage(hOKButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 	::SendMessage(hCancelButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 

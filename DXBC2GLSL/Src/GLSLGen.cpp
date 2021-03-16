@@ -37,6 +37,7 @@
 
 #include <DXBC2GLSL/GLSLGen.hpp>
 
+#include <KFL/CXX20/bit.hpp>
 #include <KFL/CXX20/format.hpp>
 
 #include <iterator>
@@ -7746,7 +7747,7 @@ void GLSLGen::ToImmConstBuffer(std::ostream& out, ShaderDecl const & dcl)
 			}
 			else
 			{
-				out << *reinterpret_cast<int const *>(&data[i * 4 + j]);
+				out << std::bit_cast<int>(data[i * 4 + j]);
 			}
 			if (j != 3)
 			{

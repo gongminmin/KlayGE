@@ -120,7 +120,8 @@ struct ShaderParser
 	template <typename T>
 	void ReadToken(T* tok)
 	{
-		*reinterpret_cast<uint32_t*>(tok) = this->Read32();
+		uint32_t const a = this->Read32();
+		memcpy(tok, &a, sizeof(a));
 	}
 
 	uint64_t Read64()
@@ -700,14 +701,17 @@ struct ShaderParser
 		ret.members = KlayGE::LE2Native(*type_token);
 		++type_token;
 
-		ret.offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+		memcpy(&ret.offset, type_token, sizeof(uint16_t) * 2);
+		ret.offset = KlayGE::LE2Native(ret.offset);
 		type_token += 2;
 
 		ret.name = ShaderVariableTypeName(ret.type);
 
 		if (program->version.major >= 5)
 		{
-			uint32_t parent_type_offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));	// Guessing
+			uint32_t parent_type_offset;
+			memcpy(&parent_type_offset, type_token, sizeof(uint16_t) * 2);
+			parent_type_offset = KlayGE::LE2Native(parent_type_offset); // Guessing
 			type_token += 2;
 
 			if (parent_type_offset != 0)
@@ -723,7 +727,9 @@ struct ShaderParser
 				KFL_UNUSED(unknown1);
 			}
 
-			uint32_t unknown2 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			uint32_t unknown2;
+			memcpy(&unknown2, type_token, sizeof(uint16_t) * 2);
+			unknown2 = KlayGE::LE2Native(unknown2);
 			type_token += 2;
 			if (unknown2 != 0)
 			{
@@ -733,14 +739,20 @@ struct ShaderParser
 				KFL_UNUSED(unknown3);
 			}
 
-			uint32_t unknown4 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			uint32_t unknown4;
+			memcpy(&unknown4, type_token, sizeof(uint16_t) * 2);
+			unknown4 = KlayGE::LE2Native(unknown4);
 			type_token += 2;
 			KFL_UNUSED(unknown4);
-			uint32_t unknown5 = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			uint32_t unknown5;
+			memcpy(&unknown5, type_token, sizeof(uint16_t) * 2);
+			unknown5 = KlayGE::LE2Native(unknown5);
 			type_token += 2;
 			KFL_UNUSED(unknown5);
 
-			uint32_t name_offset = KlayGE::LE2Native(*reinterpret_cast<uint32_t const*>(type_token));
+			uint32_t name_offset;
+			memcpy(&name_offset, type_token, sizeof(uint16_t) * 2);
+			name_offset = KlayGE::LE2Native(name_offset);
 			type_token += 2;
 			if (name_offset != 0)
 			{

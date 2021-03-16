@@ -49,7 +49,7 @@
 
 namespace KlayGE
 {
-	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 	{
 		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		if (win != nullptr)
@@ -63,7 +63,7 @@ namespace KlayGE
 	}
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam)
+	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam) noexcept
 	{
 		KFL_UNUSED(dc_mon);
 		KFL_UNUSED(rc_mon);

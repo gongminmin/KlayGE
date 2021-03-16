@@ -29,6 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/CXX20/bit.hpp>
 #include "ASMGen.hpp"
 #include "DXBC2GLSL/Utils.hpp"
 #include <iomanip>
@@ -357,7 +358,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 					}
 					else
 					{
-						out << *reinterpret_cast<int const *>(&data[i * 4 + j]);
+						out << std::bit_cast<int>(data[i * 4 + j]);
 					}
 					if (j != 3)
 					{

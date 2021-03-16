@@ -146,7 +146,7 @@ namespace KlayGE
 		D3D11AdapterList const & D3DAdapters() const noexcept;
 		D3D11Adapter& ActiveAdapter() const;
 
-		static void CALLBACK OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result);
+		static void CALLBACK OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result) noexcept;
 
 	private:
 		typedef HRESULT(WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
