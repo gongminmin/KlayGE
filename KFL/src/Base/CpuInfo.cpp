@@ -140,10 +140,11 @@ namespace
 		CFM_ApicIdCoreIdSize_AMD	= 0x0000F000,
 	};
 
+#if defined KLAYGE_PLATFORM_LINUX
 	class ApicExtractor
 	{
 	public:
-		ApicExtractor(uint8_t log_procs_per_pkg, uint8_t cores_per_pkg)
+		ApicExtractor(uint8_t log_procs_per_pkg, uint8_t cores_per_pkg) noexcept
 			: log_procs_per_pkg_(log_procs_per_pkg), cores_per_pkg_(cores_per_pkg)
 		{
 			smt_id_mask_.width = this->GetMaskWidth(log_procs_per_pkg_ / cores_per_pkg_);
@@ -155,38 +156,38 @@ namespace
 			smt_id_mask_.mask = static_cast<uint8_t>(~(0xFF << smt_id_mask_.width));
 		}
 
-		uint8_t SmtId(uint8_t apic_id) const
+		uint8_t SmtId(uint8_t apic_id) const noexcept
 		{
 			return apic_id & smt_id_mask_.mask;
 		}
 
-		uint8_t CoreId(uint8_t apic_id) const
+		uint8_t CoreId(uint8_t apic_id) const noexcept
 		{
 			return (apic_id & core_id_mask_.mask) >> smt_id_mask_.width;
 		}
 
-		uint8_t PackageId(uint8_t apic_id) const
+		uint8_t PackageId(uint8_t apic_id) const noexcept
 		{
 			return (apic_id & pkg_id_mask_.mask) >> (smt_id_mask_.width + core_id_mask_.width);
 		}
 
-		uint8_t PackageCoreId(uint8_t apic_id) const
+		uint8_t PackageCoreId(uint8_t apic_id) const noexcept
 		{
 			return (apic_id & (pkg_id_mask_.mask | core_id_mask_.mask)) >> smt_id_mask_.width;
 		}
 
-		uint8_t LogProcsPerPkg() const
+		uint8_t LogProcsPerPkg() const noexcept
 		{
 			return log_procs_per_pkg_;
 		}
 
-		uint8_t CoresPerPkg() const
+		uint8_t CoresPerPkg() const noexcept
 		{
 			return cores_per_pkg_;
 		}
 
 	private:
-		static uint8_t GetMaskWidth(uint8_t max_ids)
+		static uint8_t GetMaskWidth(uint8_t max_ids) noexcept
 		{
 			-- max_ids;
 
@@ -214,6 +215,7 @@ namespace
 		id_mask_t	core_id_mask_;
 		id_mask_t	pkg_id_mask_;
 	};
+#endif
 
 	class Cpuid
 	{
@@ -261,7 +263,7 @@ namespace
 
 namespace KlayGE
 {
-	CPUInfo::CPUInfo()
+	CpuInfo::CpuInfo()
 	{
 		num_hw_threads_ = 1;
 		num_cores_ = 1;
@@ -384,18 +386,18 @@ namespace KlayGE
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
-		std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpi_;
+		std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpis_;
 
-		DWORD cbBuffer = 0;
-		GetLogicalProcessorInformation(nullptr, &cbBuffer);
+		DWORD buffer_size = 0;
+		::GetLogicalProcessorInformation(nullptr, &buffer_size);
 
-		slpi_.resize(cbBuffer / sizeof(slpi_[0]));
-		GetLogicalProcessorInformation(&slpi_[0], &cbBuffer);
+		slpis_.resize(buffer_size / sizeof(slpis_[0]));
+		::GetLogicalProcessorInformation(slpis_.data(), &buffer_size);
 
 		num_cores_ = 0;
-		for (size_t i = 0; i < slpi_.size(); ++ i)
+		for (auto& slpi : slpis_)
 		{
-			if (::RelationProcessorCore == slpi_[i].Relationship)
+			if (::RelationProcessorCore == slpi.Relationship)
 			{
 				++ num_cores_;
 			}
@@ -478,10 +480,10 @@ namespace KlayGE
 
 				cpu_set_t current_cpu;
 				// Call cpuid on each active logical processor in the system affinity.
-				for (int j = 0; j < num_hw_threads_; ++j)
+				for (uint32_t j = 0; j < num_hw_threads_; ++j)
 				{
 					CPU_ZERO(&current_cpu);
-					CPU_SET(j, &current_cpu);
+					CPU_SET(static_cast<int>(j), &current_cpu);
 					if (0 == sched_setaffinity(0, sizeof(current_cpu), &current_cpu))
 					{
 						// Allow the thread to switch to masked logical processor.

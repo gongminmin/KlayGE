@@ -778,7 +778,7 @@ namespace KlayGE
 
 		std::vector<uint8_t> new_tex_data(slice_pitch);
 
-		CPUInfo cpu;
+		CpuInfo cpu;
 		uint32_t const num_threads = cpu.NumHWThreads();
 		ThreadPool tp(1, num_threads);
 		std::vector<std::future<void>> joiners(num_threads);

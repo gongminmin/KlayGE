@@ -645,7 +645,7 @@ namespace KlayGE
 	{
 		virtual ~InputActionParam()
 		{
-		};
+		}
 
 		InputEngine::InputDeviceType type;
 	};

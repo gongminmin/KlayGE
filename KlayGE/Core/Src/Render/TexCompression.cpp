@@ -200,7 +200,7 @@ namespace KlayGE
 		case EF_SIGNED_ETC2_R11:
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
-			return NumFormatBytes(format) * 4;;
+			return NumFormatBytes(format) * 4;
 
 		default:
 			BOOST_ASSERT(!IsCompressedFormat(format));
@@ -266,7 +266,7 @@ namespace KlayGE
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
-			return EF_GR8;;
+			return EF_GR8;
 
 		default:
 			BOOST_ASSERT(!IsCompressedFormat(format));

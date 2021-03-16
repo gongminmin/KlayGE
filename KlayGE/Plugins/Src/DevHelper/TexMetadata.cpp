@@ -88,7 +88,6 @@ namespace KlayGE
 
 				default:
 					KFL_UNREACHABLE("Invalid texture slot.");
-					break;
 				}
 			}
 

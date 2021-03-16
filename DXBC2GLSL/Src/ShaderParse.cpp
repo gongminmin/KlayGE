@@ -101,9 +101,9 @@ struct ShaderParser
 		: program(program)
 	{
 		resource_chunk = dxbc.resource_chunk;
-		input_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.input_signature);
-		output_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.output_signature);
-		patch_constant_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.patch_constant_signature);
+		input_signature = static_cast<DXBCChunkSignatureHeader const*>(dxbc.input_signature);
+		output_signature = static_cast<DXBCChunkSignatureHeader const*>(dxbc.output_signature);
+		patch_constant_signature = static_cast<DXBCChunkSignatureHeader const*>(dxbc.patch_constant_signature);
 		uint32_t size = KlayGE::LE2Native(dxbc.shader_chunk->size);
 		tokens = reinterpret_cast<uint32_t const *>(dxbc.shader_chunk + 1);
 		tokens_end = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(tokens) + size);
@@ -125,8 +125,8 @@ struct ShaderParser
 
 	uint64_t Read64()
 	{
-		uint32_t a = this->Read32();
-		uint32_t b = this->Read32();
+		uint32_t const a = this->Read32();
+		uint32_t const b = this->Read32();
 		return static_cast<uint64_t>(a) | (static_cast<uint64_t>(b) << 32);
 	}
 
@@ -325,7 +325,7 @@ struct ShaderParser
 			{
 				std::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
 				program->dcls.push_back(dcl);
-				reinterpret_cast<TokenizedShaderInstruction&>(*dcl) = insntok;
+				static_cast<TokenizedShaderInstruction&>(*dcl) = insntok;
 
 				TokenizedShaderInstructionExtended exttok;
 				memcpy(&exttok, &insntok, sizeof(exttok));
@@ -334,7 +334,7 @@ struct ShaderParser
 					this->ReadToken(&exttok);
 				}
 
-#define READ_OP_ANY dcl->op = KlayGE::MakeSharedPtr<ShaderOperand>(); this->ReadOp(*dcl->op);
+#define READ_OP_ANY dcl->op = KlayGE::MakeSharedPtr<ShaderOperand>(); this->ReadOp(*dcl->op)
 #define READ_OP(FILE) READ_OP_ANY
 				//check(dcl->op->file == SOT_##FILE);
 
@@ -537,7 +537,7 @@ struct ShaderParser
 				}
 				std::shared_ptr<ShaderInstruction> insn = KlayGE::MakeSharedPtr<ShaderInstruction>();
 				program->insns.push_back(insn);
-				reinterpret_cast<TokenizedShaderInstruction&>(*insn) = insntok;
+				static_cast<TokenizedShaderInstruction&>(*insn) = insntok;
 
 				TokenizedShaderInstructionExtended exttok;
 				memcpy(&exttok, &insntok, sizeof(exttok));

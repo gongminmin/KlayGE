@@ -203,7 +203,6 @@ namespace KlayGE
 			case BA_Write_No_Overwrite:
 				// TODO
 				KFL_UNREACHABLE("Not implemented");
-				break;
 			}
 
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())

@@ -37,10 +37,10 @@
 
 namespace KlayGE
 {
-	class CPUInfo final
+	class CpuInfo final
 	{
 	public:
-		enum CPUFeature
+		enum CpuFeature
 		{
 			CF_HTT = 1UL << 0,
 			CF_MMX = 1UL << 1,
@@ -65,27 +65,27 @@ namespace KlayGE
 		};
 
 	public:
-		CPUInfo();
+		CpuInfo();
 
-		std::string const & CPUString() const
+		std::string const& CPUString() const noexcept
 		{
 			return cpu_string_;
 		}
-		std::string const & CPUBrandString() const
+		std::string const& CPUBrandString() const noexcept
 		{
 			return cpu_brand_string_;
 		}
 
-		bool IsFeatureSupport(CPUFeature feature) const
+		bool IsFeatureSupport(CpuFeature feature) const noexcept
 		{
 			return feature_mask_ & feature ? true : false;
 		}
 
-		int NumHWThreads() const
+		uint32_t NumHWThreads() const noexcept
 		{
 			return num_hw_threads_;
 		}
-		int NumCores() const
+		uint32_t NumCores() const noexcept
 		{
 			return num_cores_;
 		}
@@ -95,8 +95,8 @@ namespace KlayGE
 		std::string cpu_brand_string_;
 		uint64_t feature_mask_{0};
 
-		int num_hw_threads_;
-		int num_cores_;
+		uint32_t num_hw_threads_;
+		uint32_t num_cores_;
 	};
 }
 

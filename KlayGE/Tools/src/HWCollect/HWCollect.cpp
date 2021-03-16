@@ -249,7 +249,7 @@ void DetectOSInfo(std::ostream& os)
 
 void DetectCpuInfo(std::ostream& os)
 {
-	CPUInfo cpu_info;
+	CpuInfo cpu_info;
 	if ("GenuineIntel" == cpu_info.CPUString())
 	{
 		os << "Intel CPU";

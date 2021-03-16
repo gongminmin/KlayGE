@@ -45,6 +45,8 @@ namespace
 		{
 		}
 
+		virtual ~ShadowMapped() = default;
+
 		virtual void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
 			gen_sm_pass_ = gen_sm;
@@ -562,7 +564,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
-		break;
 
 	default:
 		if (re.DeviceCaps().render_to_texture_array_support)
@@ -630,6 +631,5 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			return App3DFramework::URV_Finished;
 		}
-		break;
 	}
 }

@@ -73,7 +73,7 @@ namespace KlayGE
 	// 取数中的第 n bit
 	constexpr uint32_t GetBit(uint32_t x, uint32_t n) noexcept
 	{
-		return (x >> n) & 1;
+		return (x >> n) & 1U;
 	}
 	// 置数中的第 n bit为1
 	constexpr uint32_t SetBit(uint32_t x, uint32_t n) noexcept
@@ -84,7 +84,7 @@ namespace KlayGE
 	// 取低字节
 	constexpr uint16_t LO_U8(uint16_t x) noexcept
 	{
-		return x & 0xFF;
+		return x & 0xFFU;
 	}
 	// 取高字节
 	constexpr uint16_t HI_U8(uint16_t x) noexcept
@@ -95,7 +95,7 @@ namespace KlayGE
 	// 取低字
 	constexpr uint32_t LO_U16(uint32_t x) noexcept
 	{
-		return x & 0xFFFF;
+		return x & 0xFFFFU;
 	}
 	// 取高字
 	constexpr uint32_t HI_U16(uint32_t x) noexcept

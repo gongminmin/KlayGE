@@ -939,7 +939,7 @@ namespace KlayGE
 	std::unique_ptr<XMLDocument> LoadXml(ResIdentifier& source)
 	{
 		source.seekg(0, std::ios_base::end);
-		int len = static_cast<int>(source.tellg());
+		size_t const len = static_cast<size_t>(source.tellg());
 		source.seekg(0, std::ios_base::beg);
 		auto xml_src = MakeUniquePtr<char[]>(len + 1);
 		source.read(&xml_src[0], len);

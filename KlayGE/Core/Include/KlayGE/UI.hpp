@@ -989,7 +989,7 @@ namespace KlayGE
 		int GetValue() const
 		{
 			return value_;
-		};
+		}
 
 		void GetRange(int &nMin, int &nMax) const
 		{

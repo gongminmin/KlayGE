@@ -510,7 +510,7 @@ int main(int argc, char* argv[])
 	int end_code;
 	int num_threads;
 
-	CPUInfo cpu;
+	CpuInfo cpu;
 
 	cxxopts::Options options("KFontGen", "KlayGE Font Generator");
 	// clang-format off

@@ -405,7 +405,7 @@ struct ShaderProgram
 std::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
 
 // Return the opcode's input type
-inline ShaderImmType GetOpInType(uint32_t opcode)
+inline ShaderImmType GetOpInType(ShaderOpcode opcode)
 {
 	ShaderImmType sit;
 	switch (opcode)
@@ -502,7 +502,7 @@ inline ShaderImmType GetOpInType(uint32_t opcode)
 }
 
 // Return the opcode's output type
-inline ShaderImmType GetOpOutType(uint32_t opcode)
+inline ShaderImmType GetOpOutType(ShaderOpcode opcode)
 {
 	ShaderImmType sit;
 	switch (opcode)
@@ -602,7 +602,7 @@ inline ShaderImmType GetOpOutType(uint32_t opcode)
 }
 
 // Return the number of outputs
-inline uint32_t GetNumOutputs(uint32_t opcode)
+inline uint32_t GetNumOutputs(ShaderOpcode opcode)
 {
 	uint32_t ret;
 	switch (opcode)

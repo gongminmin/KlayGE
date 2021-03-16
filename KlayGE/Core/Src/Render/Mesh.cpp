@@ -1694,7 +1694,10 @@ namespace KlayGE
 
 		return model;
 	}
+} // namespace KlayGE
 
+namespace
+{
 	void WriteMaterialsChunk(std::vector<RenderMaterialPtr> const & mtls, std::ostream& os)
 	{
 		for (size_t i = 0; i < mtls.size(); ++ i)
@@ -2140,7 +2143,10 @@ namespace KlayGE
 		len = Native2LE(len);
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
+} // namespace
 
+namespace KlayGE
+{
 	void SaveModel(RenderModel const & model, std::string_view model_name)
 	{
 		FILESYSTEM_NS::path output_path(model_name.begin(), model_name.end());
@@ -2311,7 +2317,7 @@ namespace KlayGE
 			}
 		}
 
-		SaveModel(output_path.string(), mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+		::SaveModel(output_path.string(), mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 			nodes, renderables,
@@ -2488,4 +2494,4 @@ namespace KlayGE
 
 		return camera_model;
 	}
-}
+} // namespace KlayGE

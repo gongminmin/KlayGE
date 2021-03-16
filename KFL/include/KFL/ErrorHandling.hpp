@@ -48,10 +48,10 @@ namespace KlayGE
 } // namespace KlayGE
 
 // Throw error code
-#define TEC(x) throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__));
+#define TEC(x) throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__))
 
 // Throw error message
-#define TMSG(msg) throw std::runtime_error(msg);
+#define TMSG(msg) throw std::runtime_error(msg)
 
 // Throw if failed (error code)
 #define TIFEC(x)   \

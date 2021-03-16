@@ -267,24 +267,26 @@ namespace KlayGE
 
 			for (auto const & ci : temp_char_index)
 			{
-				int const index = ci.second;
+				uint32_t const index = static_cast<uint32_t>(ci.second);
 
-				int16_t tmp;
-				tmp = Native2LE(char_info_[index].top);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].left);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].width);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].height);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				int16_t itmp;
+				itmp = Native2LE(char_info_[index].top);
+				kfont_output.write(reinterpret_cast<char*>(&itmp), sizeof(itmp));
+				itmp = Native2LE(char_info_[index].left);
+				kfont_output.write(reinterpret_cast<char*>(&itmp), sizeof(itmp));
+				uint16_t utmp;
+				utmp = Native2LE(char_info_[index].width);
+				kfont_output.write(reinterpret_cast<char*>(&utmp), sizeof(utmp));
+				utmp = Native2LE(char_info_[index].height);
+				kfont_output.write(reinterpret_cast<char*>(&utmp), sizeof(utmp));
 			}
 
 			for (auto const & ci : temp_char_index)
 			{
-				uint32_t index = ci.second;
-				size_t addr = distances_addr_[index];
-				uint64_t len = distances_addr_[index + 1] - addr;
+				uint32_t const index = static_cast<uint32_t>(ci.second);
+
+				size_t const addr = distances_addr_[index];
+				uint64_t const len = distances_addr_[index + 1] - addr;
 				uint64_t len_le = Native2LE(len);
 				kfont_output.write(reinterpret_cast<char*>(&len_le), sizeof(len_le));
 				kfont_output.write(reinterpret_cast<char*>(&distances_lzma_[addr]),
