@@ -170,7 +170,7 @@ namespace KlayGE
 
 		bool CreateInstance()
 		{
-			HRESULT hr = ::CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, UuidOf<IWbemLocator>(),
+			HRESULT hr = ::CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, UuidOf<IWbemLocator>(),
 				wbem_locator_.release_and_put_void());
 			if (FAILED(hr))
 			{

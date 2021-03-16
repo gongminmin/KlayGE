@@ -101,7 +101,7 @@ namespace
 	typedef PROC (WINAPI *wglGetProcAddressFUNC)(LPCSTR lpszProc);
 	wglGetProcAddressFUNC DynamicWglGetProcAddress;
 #endif
-}
+} // namespace
 
 namespace glloader
 {
@@ -110,7 +110,7 @@ namespace glloader
 	public:
 		static gl_dll_container& instance()
 		{
-			if (NULL == inst_)
+			if (inst_ == nullptr)
 			{
 				inst_ = new gl_dll_container;
 			}
@@ -120,7 +120,7 @@ namespace glloader
 		static void delete_instance()
 		{
 			delete inst_;
-			inst_ = NULL;
+			inst_ = nullptr;
 		}
 
 		std::vector<void*> const & gl_dlls() const
@@ -144,22 +144,22 @@ namespace glloader
 		{
 #if defined(GLLOADER_WINDOWS_PLATFORM)
 	#ifdef GLLOADER_GLES
-			void* ogl_dll = ::LoadLibraryExA("libEGL.dll", NULL, 0);
-			if (ogl_dll != NULL)
+			void* ogl_dll = ::LoadLibraryExA("libEGL.dll", nullptr, 0);
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 				this->DumpEntries("libEGL.dll");
 
-				ogl_dll = ::LoadLibraryExA("libGLESv3.dll", NULL, 0);
-				if (ogl_dll != NULL)
+				ogl_dll = ::LoadLibraryExA("libGLESv3.dll", nullptr, 0);
+				if (ogl_dll != nullptr)
 				{
 					gl_dlls_.push_back(ogl_dll);
 					this->DumpEntries("libGLESv3.dll");
 				}
 				else
 				{
-					ogl_dll = ::LoadLibraryExA("libGLESv2.dll", NULL, 0);
-					if (ogl_dll != NULL)
+					ogl_dll = ::LoadLibraryExA("libGLESv2.dll", nullptr, 0);
+					if (ogl_dll != nullptr)
 					{
 						gl_dlls_.push_back(ogl_dll);
 						this->DumpEntries("libGLESv2.dll");
@@ -168,16 +168,16 @@ namespace glloader
 			}
 			else
 			{
-				ogl_dll = ::LoadLibraryExA("libGLES20.dll", NULL, 0);
-				if (ogl_dll != NULL)
+				ogl_dll = ::LoadLibraryExA("libGLES20.dll", nullptr, 0);
+				if (ogl_dll != nullptr)
 				{
 					gl_dlls_.push_back(ogl_dll);
 					this->DumpEntries("libGLES20.dll");
 				}
 				else
 				{
-					ogl_dll = ::LoadLibraryExA("atioglxx.dll", NULL, 0);
-					if (ogl_dll != NULL)
+					ogl_dll = ::LoadLibraryExA("atioglxx.dll", nullptr, 0);
+					if (ogl_dll != nullptr)
 					{
 						gl_dlls_.push_back(ogl_dll);
 						this->DumpEntries("atioglxx.dll");
@@ -185,8 +185,8 @@ namespace glloader
 				}
 			}
 	#else
-			void* ogl_dll = ::LoadLibraryExA("opengl32.dll", NULL, 0);
-			if (ogl_dll != NULL)
+			void* ogl_dll = ::LoadLibraryExA("opengl32.dll", nullptr, 0);
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 				this->DumpEntries("opengl32.dll");
@@ -197,17 +197,17 @@ namespace glloader
 			// http://forum.imgtec.com/discussion/comment/18323#Comment_18323
 			// For PowerVR_SDK, we need to load libGLESv2 before libEGL
 			void* ogl_dll = ::dlopen("libGLESv2.dylib", RTLD_LAZY);
-			if (ogl_dll != NULL)
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 			}
 			ogl_dll = ::dlopen("libGLESv3.dylib", RTLD_LAZY);
-			if (ogl_dll != NULL)
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 			}
 			ogl_dll = ::dlopen("libEGL.dylib", RTLD_LAZY);
-			if (ogl_dll != NULL)
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 			}
@@ -218,22 +218,22 @@ namespace glloader
 	#else
 			gl_bundle_ = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
 	#endif
-			assert(gl_bundle_ != NULL);
+			assert(gl_bundle_ != nullptr);
 #elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM)
 	#ifdef GLLOADER_GLES
 			void* ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
-			if (ogl_dll != NULL)
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 				ogl_dll = ::dlopen("libGLESv3.so", RTLD_LAZY);
-				if (ogl_dll != NULL)
+				if (ogl_dll != nullptr)
 				{
 					gl_dlls_.push_back(ogl_dll);
 				}
 				else
 				{
 					ogl_dll = ::dlopen("libGLESv2.so", RTLD_LAZY);
-					if (ogl_dll != NULL)
+					if (ogl_dll != nullptr)
 					{
 						gl_dlls_.push_back(ogl_dll);
 					}
@@ -241,7 +241,7 @@ namespace glloader
 			}
 	#else
 			void* ogl_dll = ::dlopen("libGL.so", RTLD_LAZY);
-			if (ogl_dll != NULL)
+			if (ogl_dll != nullptr)
 			{
 				gl_dlls_.push_back(ogl_dll);
 			}
@@ -251,12 +251,12 @@ namespace glloader
 
 		~gl_dll_container()
 		{
-			for (size_t i = 0; i < gl_dlls_.size(); ++ i)
+			for (auto const& gl_dll : gl_dlls_)
 			{
 #if defined(GLLOADER_WINDOWS_PLATFORM)
-				::FreeLibrary(static_cast<HMODULE>(gl_dlls_[i]));
+				::FreeLibrary(static_cast<HMODULE>(gl_dll));
 #elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
-				::dlclose(gl_dlls_[i]);
+				::dlclose(gl_dll);
 #endif
 			}
 #if defined(GLLOADER_APPLE_PLATFORM)
@@ -267,8 +267,8 @@ namespace glloader
 #if defined(GLLOADER_WINDOWS_PLATFORM)
 		void DumpEntries(char const * name)
 		{
-			HMODULE dll = ::LoadLibraryExA(name, NULL, DONT_RESOLVE_DLL_REFERENCES);
-			if (dll == 0)
+			HMODULE dll = ::LoadLibraryExA(name, nullptr, DONT_RESOLVE_DLL_REFERENCES);
+			if (dll == nullptr)
 			{
 				return;
 			}
@@ -288,9 +288,9 @@ namespace glloader
 			::FreeLibrary(dll);
 
 			bool decorated = false;
-			for (size_t i = 0; i < entries.size(); ++ i)
+			for (auto const& entry : entries)
 			{
-				if (('_' == entries[i][0]) || ('@' == entries[i][0]) || ('?' == entries[i][0]))
+				if (('_' == entry[0]) || ('@' == entry[0]) || ('?' == entry[0]))
 				{
 					decorated = true;
 					break;
@@ -300,18 +300,18 @@ namespace glloader
 			gl_dll_entries_.resize(gl_dll_entries_.size() + 1);
 			if (decorated)
 			{
-				for (size_t i = 0; i < entries.size(); ++ i)
+				for (auto& entry : entries)
 				{
-					if (('_' == entries[i][0]) || ('@' == entries[i][0]) || ('?' == entries[i][0]))
+					if (('_' == entry[0]) || ('@' == entry[0]) || ('?' == entry[0]))
 					{
-						std::string::size_type at_pos = entries[i].find("@", 1);
+						std::string::size_type at_pos = entry.find("@", 1);
 						if (at_pos != std::string::npos)
 						{
-							gl_dll_entries_.back().insert(std::make_pair(entries[i].substr(1, at_pos - 1), entries[i]));
+							gl_dll_entries_.back().insert(std::make_pair(entry.substr(1, at_pos - 1), entry));
 						}
 						else
 						{
-							gl_dll_entries_.back().insert(std::make_pair(entries[i].substr(1), entries[i]));
+							gl_dll_entries_.back().insert(std::make_pair(entry.substr(1), entry));
 						}
 					}
 				}
@@ -335,7 +335,7 @@ namespace glloader
 	public:
 		static gl_features_extractor& instance()
 		{
-			if (NULL == inst_)
+			if (inst_ == nullptr)
 			{
 				inst_ = new gl_features_extractor;
 			}
@@ -345,7 +345,7 @@ namespace glloader
 		static void delete_instance()
 		{
 			delete inst_;
-			inst_ = NULL;
+			inst_ = nullptr;
 		}
 
 		bool is_supported(std::string const & name)
@@ -411,7 +411,7 @@ namespace glloader
 		void gl_version(int& major, int& minor)
 		{
 			GLubyte const * str = glGetString(GL_VERSION);
-			if (str != NULL)
+			if (str != nullptr)
 			{
 				std::string const ver(reinterpret_cast<char const *>(str));
 				std::string::size_type const pos(ver.find("."));
@@ -444,16 +444,16 @@ namespace glloader
 					glGetStringi = reinterpret_cast<glGetStringiFUNC>(glloader_get_gl_proc_address("glGetStringi"));
 					GLint num_exts;
 					glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
-					gl_exts.resize(num_exts);
-					for (GLint i = 0; i < num_exts; ++ i)
+					gl_exts.resize(static_cast<size_t>(num_exts));
+					for (GLuint i = 0; i < static_cast<GLuint>(num_exts); ++ i)
 					{
-						gl_exts[i] = reinterpret_cast<char const *>(glGetStringi(GL_EXTENSIONS, i));
+						gl_exts[i] = reinterpret_cast<char const*>(glGetStringi(GL_EXTENSIONS, i));
 					}
 				}
 				else
 				{
 					GLubyte const * str = glGetString(GL_EXTENSIONS);
-					if (str != NULL)
+					if (str != nullptr)
 					{
 						gl_exts = split(reinterpret_cast<char const *>(str));
 					}
@@ -584,7 +584,7 @@ namespace glloader
 
 			wglGetExtensionsStringARB =
 				reinterpret_cast<wglGetExtensionsStringARBFUNC>(glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
-			if (wglGetExtensionsStringARB != NULL)
+			if (wglGetExtensionsStringARB != nullptr)
 			{
 				typedef HDC (WINAPI *wglGetCurrentDCFUNC)();
 				wglGetCurrentDCFUNC DynamicWglGetCurrentDC =
@@ -595,7 +595,7 @@ namespace glloader
 			{
 				wglGetExtensionsStringEXT =
 					reinterpret_cast<wglGetExtensionsStringEXTFUNC>(glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
-				if (wglGetExtensionsStringEXT != NULL)
+				if (wglGetExtensionsStringEXT != nullptr)
 				{
 					exts_str = wglGetExtensionsStringEXT();
 				}
@@ -624,7 +624,7 @@ namespace glloader
 			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay 
 				= reinterpret_cast<glXGetCurrentDisplayFUNC>(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
 			char const * str = glXGetClientString(DynamicGlXGetCurrentDisplay(), GLX_EXTENSIONS);
-			if (str != NULL)
+			if (str != nullptr)
 			{
 				std::vector<std::string> glx_exts = split(str);
 				glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
@@ -661,7 +661,7 @@ namespace glloader
 		{
 #ifdef GLLOADER_EGL
 			char const * str = eglQueryString(eglGetCurrentDisplay(), EGL_VERSION);
-			if (str != NULL)
+			if (str != nullptr)
 			{
 				std::string const ver(reinterpret_cast<char const *>(str));
 				std::string::size_type const pos(ver.find("."));
@@ -682,7 +682,7 @@ namespace glloader
 		{
 #ifdef GLLOADER_EGL
 			char const * str = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
-			if (str != NULL)
+			if (str != nullptr)
 			{
 				std::vector<std::string> egl_exts = split(str);
 				egl_exts.erase(std::remove(egl_exts.begin(), egl_exts.end(), ""), egl_exts.end());
@@ -726,8 +726,8 @@ namespace glloader
 		static gl_features_extractor* inst_;
 	};
 
-	gl_dll_container* gl_dll_container::inst_ = NULL;
-	gl_features_extractor* gl_features_extractor::inst_ = NULL;
+	gl_dll_container* gl_dll_container::inst_ = nullptr;
+	gl_features_extractor* gl_features_extractor::inst_ = nullptr;
 }
 
 void promote_low_high(char const * low_name, char const * high_name)
@@ -771,34 +771,43 @@ void glloader_uninit()
 	glloader::gl_dll_container::delete_instance();
 }
 
-void* get_gl_proc_address_by_dll(const char* name)
+static void* get_gl_proc_address_by_dll(const char* name)
 {
-	void* ret = NULL;
+	void* ret = nullptr;
 
-	std::vector<void*> const & gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
+	std::vector<void*> const& gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
 
 #if defined(GLLOADER_WINDOWS_PLATFORM)
-	std::vector<std::map<std::string, std::string>> const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
-	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
+	std::vector<std::map<std::string, std::string>> const& gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
+	for (size_t i = 0; i < gl_dlls.size(); ++i)
 	{
-		ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));
-		if (NULL == ret)
+		auto gl_dll = static_cast<HMODULE>(gl_dlls[i]);
+		ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dll), name));
+		if (ret == nullptr)
 		{
 			if (!gl_dll_entries[i].empty())
 			{
-				std::map<std::string, std::string>::const_iterator iter
-					= gl_dll_entries[i].find(name);
+				std::map<std::string, std::string>::const_iterator iter = gl_dll_entries[i].find(name);
 				if (iter != gl_dll_entries[i].end())
 				{
-					ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), iter->second.c_str()));
+					ret = reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(gl_dll), iter->second.c_str()));
 				}
 			}
 		}
+
+		if (ret != nullptr)
+		{
+			break;
+		}
 	}
 #elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
-	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
+	for (auto* gl_dll : gl_dlls)
 	{
-		ret = ::dlsym(gl_dlls[i], name);
+		ret = ::dlsym(gl_dll, name);
+		if (ret != nullptr)
+		{
+			break;
+		}
 	}
 #endif
 
@@ -807,7 +816,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 
 void* get_gl_proc_address_by_api(const char* name)
 {
-	void* ret = NULL;
+	void* ret = nullptr;
 
 #if defined(GLLOADER_GLES) && !defined(GLLOADER_EAGL)
 	ret = reinterpret_cast<void*>(eglGetProcAddress(name));
@@ -829,13 +838,13 @@ void* get_gl_proc_address_by_api(const char* name)
 void* glloader_get_gl_proc_address(const char* name)
 {
 	void* ret = get_gl_proc_address_by_dll(name);
-	if (NULL == ret)
+	if (ret == nullptr)
 	{
 		ret = get_gl_proc_address_by_api(name);
 	}
 
 #ifdef GLLOADER_DEBUG
-	if (NULL == ret)
+	if (ret == nullptr)
 	{
 #if defined(GLLOADER_ANDROID_PLATFORM)
 		LOGW("%s is missing!\n", name);
@@ -850,7 +859,7 @@ void* glloader_get_gl_proc_address(const char* name)
 
 int glloader_is_supported(char const * name)
 {
-	assert(name != NULL);
+	assert(name != nullptr);
 
 	return glloader::gl_features_extractor::instance().is_supported(name);
 }
@@ -868,6 +877,6 @@ char const * glloader_get_feature_name(int index)
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }

@@ -55,12 +55,12 @@ namespace KlayGE
 		char* data = nullptr;
 		if (!PyArg_ParseTuple(args, "s", &data))
 		{
-			return 0;
+			return nullptr;
 		}
 
 		if (nullptr == data)
 		{
-			return 0;
+			return nullptr;
 		}
 
 		size_t const len = strlen(data);
@@ -84,7 +84,7 @@ namespace KlayGE
 	{
 		{ "write", StdoutWrite, METH_VARARGS, "sys.stdout.write" },
 		{ "flush", StdoutFlush, METH_VARARGS, "sys.stdout.write" },
-		{ 0, 0, 0, 0 } // sentinel
+		{nullptr, nullptr, 0, nullptr} // sentinel
 	};
 
 #if defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
@@ -93,63 +93,63 @@ namespace KlayGE
 #endif
 	PyTypeObject stdout_type =
 	{
-		PyVarObject_HEAD_INIT(0, 0)
+		PyVarObject_HEAD_INIT(nullptr, 0)
 		"emb.StdoutType",     /* tp_name */
 		sizeof(PyObject),     /* tp_basicsize */
 		0,                    /* tp_itemsize */
-		0,                    /* tp_dealloc */
+		nullptr,              /* tp_dealloc */
 		0,                    /* tp_vectorcall_offset */
-		0,                    /* tp_getattr */
-		0,                    /* tp_setattr */
-		0,                    /* tp_as_async */
-		0,                    /* tp_repr */
-		0,                    /* tp_as_number */
-		0,                    /* tp_as_sequence */
-		0,                    /* tp_as_mapping */
-		0,                    /* tp_hash  */
-		0,                    /* tp_call */
-		0,                    /* tp_str */
-		0,                    /* tp_getattro */
-		0,                    /* tp_setattro */
-		0,                    /* tp_as_buffer */
+		nullptr,              /* tp_getattr */
+		nullptr,              /* tp_setattr */
+		nullptr,              /* tp_as_async */
+		nullptr,              /* tp_repr */
+		nullptr,              /* tp_as_number */
+		nullptr,              /* tp_as_sequence */
+		nullptr,              /* tp_as_mapping */
+		nullptr,              /* tp_hash  */
+		nullptr,              /* tp_call */
+		nullptr,              /* tp_str */
+		nullptr,              /* tp_getattro */
+		nullptr,              /* tp_setattro */
+		nullptr,              /* tp_as_buffer */
 		Py_TPFLAGS_DEFAULT,   /* tp_flags */
 		"emb.Stdout objects", /* tp_doc */
-		0,                    /* tp_traverse */
-		0,                    /* tp_clear */
-		0,                    /* tp_richcompare */
+		nullptr,              /* tp_traverse */
+		nullptr,              /* tp_clear */
+		nullptr,              /* tp_richcompare */
 		0,                    /* tp_weaklistoffset */
-		0,                    /* tp_iter */
-		0,                    /* tp_iternext */
+		nullptr,              /* tp_iter */
+		nullptr,              /* tp_iternext */
 		Stdout_methods,       /* tp_methods */
-		0,                    /* tp_members */
-		0,                    /* tp_getset */
-		0,                    /* tp_base */
-		0,                    /* tp_dict */
-		0,                    /* tp_descr_get */
-		0,                    /* tp_descr_set */
+		nullptr,              /* tp_members */
+		nullptr,              /* tp_getset */
+		nullptr,              /* tp_base */
+		nullptr,              /* tp_dict */
+		nullptr,              /* tp_descr_get */
+		nullptr,              /* tp_descr_set */
 		0,                    /* tp_dictoffset */
-		0,                    /* tp_init */
-		0,                    /* tp_alloc */
-		0,                    /* tp_new */
-		0,                    /* tp_free */
-		0,                    /* tp_is_gc */
-		0,                    /* tp_bases */
-		0,                    /* tp_mro */
-		0,                    /* tp_cache */
-		0,                    /* tp_subclasses */
-		0,                    /* tp_weaklist */
-		0,                    /* tp_del */
+		nullptr,              /* tp_init */
+		nullptr,              /* tp_alloc */
+		nullptr,              /* tp_new */
+		nullptr,              /* tp_free */
+		nullptr,              /* tp_is_gc */
+		nullptr,              /* tp_bases */
+		nullptr,              /* tp_mro */
+		nullptr,              /* tp_cache */
+		nullptr,              /* tp_subclasses */
+		nullptr,              /* tp_weaklist */
+		nullptr,              /* tp_del */
 		0,                    /* tp_version_tag */
-		0,                    /* tp_finalize */
-		0,                    /* tp_vectorcall */
-		0,                    /* tp_print */
+		nullptr,              /* tp_finalize */
+		nullptr,              /* tp_vectorcall */
+		nullptr,              /* tp_print */
 
 #ifdef COUNT_ALLOCS
-		0,                    /* tp_allocs */
-		0,                    /* tp_frees */
-		0,                    /* tp_maxalloc */
-		0,                    /* tp_prev */
-		0                     /* tp_next */
+		nullptr,              /* tp_allocs */
+		nullptr,              /* tp_frees */
+		nullptr,              /* tp_maxalloc */
+		nullptr,              /* tp_prev */
+		nullptr               /* tp_next */
 #endif
 	};
 #if defined(KLAYGE_COMPILER_CLANG)
@@ -159,8 +159,8 @@ namespace KlayGE
 	PyModuleDef emb_module =
 	{
 		PyModuleDef_HEAD_INIT,
-		"emb", 0, -1, 0,
-		0, 0, 0, 0
+		"emb", nullptr, -1, nullptr,
+		nullptr, nullptr, nullptr, nullptr
 	};
 	
 	PyObjectPtr stdout_obj;
@@ -174,7 +174,7 @@ namespace KlayGE
 		stdout_type.tp_new = PyType_GenericNew;
 		if (PyType_Ready(&stdout_type) < 0)
 		{
-			return 0;
+			return nullptr;
 		}
 
 		PyObject* m = PyModule_Create(&emb_module);
@@ -193,7 +193,7 @@ namespace KlayGE
 		{
 			stdout_saved_obj = MakePyObjectPtr(PySys_GetObject("stdout"));
 			Py_IncRef(stdout_saved_obj.get());
-			stdout_obj = MakePyObjectPtr(stdout_type.tp_new(&stdout_type, 0, 0));
+			stdout_obj = MakePyObjectPtr(stdout_type.tp_new(&stdout_type, nullptr, nullptr));
 			Py_IncRef(stdout_obj.get());
 		}
 

@@ -91,7 +91,7 @@ namespace KlayGE
 				for (auto const & format : formats)
 				{
 					UINT num = 0;
-					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, 0);
+					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, nullptr);
 					if (num > 0)
 					{
 						std::vector<DXGI_MODE_DESC> mode_descs(num);

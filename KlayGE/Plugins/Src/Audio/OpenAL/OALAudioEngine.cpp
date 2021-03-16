@@ -80,7 +80,7 @@ namespace KlayGE
 	OALAudioEngine::OALAudioEngine()
 	{
 		ALCdevice* device = alcOpenDevice(nullptr);
-		ALCcontext* context = alcCreateContext(device, 0);
+		ALCcontext* context = alcCreateContext(device, nullptr);
 
 		alcMakeContextCurrent(context);
 
@@ -101,7 +101,7 @@ namespace KlayGE
 		ALCcontext* context = alcGetCurrentContext();
 		ALCdevice* device = alcGetContextsDevice(context);
 
-		alcMakeContextCurrent(0);
+		alcMakeContextCurrent(nullptr);
 
 		alcDestroyContext(context);
 		alcCloseDevice(device);

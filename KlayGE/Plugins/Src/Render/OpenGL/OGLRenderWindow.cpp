@@ -175,7 +175,7 @@ namespace KlayGE
 			wc.hIconSm = nullptr;
 			::RegisterClassExW(&wc);
 
-			HWND dummy_wnd = ::CreateWindowW(wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, 0, 0, wc.hInstance, nullptr);
+			HWND dummy_wnd = ::CreateWindowW(wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
 			HDC dummy_dc = ::GetDC(dummy_wnd);
 
 			PIXELFORMATDESCRIPTOR pfd;

@@ -49,7 +49,7 @@ enum nTabDialogs
 };
 
 HWND hTab = nullptr; // Handle to tab control.
-HWND hTabDlg[NTABS] = {0}; // Array of handle to tab dialogs.
+HWND hTabDlg[NTABS] = {nullptr}; // Array of handle to tab dialogs.
 int iCurSelTab = 0;
 
 HWND hOKButton;
@@ -854,7 +854,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,
-		width, height, 0, 0, hInstance, nullptr);
+		width, height, nullptr, nullptr, hInstance, nullptr);
 
 	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);

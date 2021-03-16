@@ -486,7 +486,7 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_Albedo, str.C_Str());
 			}
 
@@ -494,7 +494,8 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &str, nullptr, nullptr, nullptr,
+					nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 			}
 			else
@@ -503,7 +504,7 @@ namespace
 				if (count > 0)
 				{
 					aiString str;
-					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
+					aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 					render_mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, str.C_Str());
 				}
 			}
@@ -512,7 +513,7 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_Emissive, str.C_Str());
 			}
 
@@ -520,7 +521,7 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_Normal, str.C_Str());
 
 				float normal_scale;
@@ -532,7 +533,7 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_Height, str.C_Str());
 			}
 
@@ -540,7 +541,7 @@ namespace
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_LIGHTMAP, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_LIGHTMAP, 0, &str, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 				render_mtl.TextureName(RenderMaterial::TS_Occlusion, str.C_Str());
 
 				float occlusion_strength;

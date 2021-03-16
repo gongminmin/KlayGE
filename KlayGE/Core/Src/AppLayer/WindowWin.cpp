@@ -150,7 +150,7 @@ namespace KlayGE
 			// Create our main window
 			// Pass pointer to self
 			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(), win_style_, settings.left, settings.top,
-				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+				rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInst, nullptr);
 
 			default_wnd_proc_ = ::DefWindowProc;
 			external_wnd_ = false;

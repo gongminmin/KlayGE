@@ -509,7 +509,7 @@ namespace KlayGE
 
 	TexCompressionETC1::Params::Params()
 		: quality_(TCM_Quality),
-			num_src_pixels_(0), src_pixels_(0),
+			num_src_pixels_(0), src_pixels_(nullptr),
 			use_color4_(false),
 			scan_delta_size_(1),
 			base_color5_(0),

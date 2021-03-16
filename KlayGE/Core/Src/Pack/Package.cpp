@@ -170,7 +170,7 @@ namespace KlayGE
 
 		com_ptr<IInStream> file(new InStream(archive_is), false);
 		com_ptr<IArchiveOpenCallback> ocb(new ArchiveOpenCallback(password), false);
-		TIFHR(archive->Open(file.get(), 0, ocb.get()));
+		TIFHR(archive->Open(file.get(), nullptr, ocb.get()));
 
 		TIFHR(archive->GetNumberOfItems(&num_items_));
 
