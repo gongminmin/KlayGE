@@ -93,6 +93,8 @@ namespace
 			value_ = value;
 		}
 
+		using JsonValue::Value;
+
 	private:
 		bool value_{};
 	};
@@ -121,6 +123,8 @@ namespace
 		{
 			value_ = value;
 		}
+
+		using JsonValue::Value;
 
 	private:
 		int32_t value_{};
@@ -151,6 +155,8 @@ namespace
 			value_ = value;
 		}
 
+		using JsonValue::Value;
+
 	private:
 		uint32_t value_{};
 	};
@@ -180,6 +186,8 @@ namespace
 			value_ = value;
 		}
 
+		using JsonValue::Value;
+
 	private:
 		float value_{};
 	};
@@ -208,6 +216,8 @@ namespace
 		{
 			value_ = std::string(std::move(value));
 		}
+
+		using JsonValue::Value;
 
 	private:
 		std::string value_;
@@ -244,10 +254,14 @@ namespace
 			}
 		}
 
+		using JsonValue::InsertAfterValue;
+
 		void AppendValue(std::unique_ptr<JsonValue> new_value) override
 		{
 			values_.emplace_back(std::move(new_value));
 		}
+
+		using JsonValue::AppendValue;
 
 		void RemoveValue(JsonValue const& value) override
 		{
@@ -276,6 +290,8 @@ namespace
 			values_ = std::move(values);
 		}
 
+		using JsonValue::Value;
+
 		void ValueIndex(uint32_t index, std::unique_ptr<JsonValue> value) override
 		{
 			if (values_.size() < index + 1)
@@ -285,6 +301,8 @@ namespace
 
 			values_[index] = std::move(value);
 		}
+
+		using JsonValue::ValueIndex;
 
 	private:
 		std::vector<std::unique_ptr<JsonValue>> values_;
@@ -333,10 +351,14 @@ namespace
 			}
 		}
 
+		using JsonValue::InsertAfterValue;
+
 		void AppendValue(std::string_view name, std::unique_ptr<JsonValue> new_value) override
 		{
 			values_.emplace_back(std::move(name), std::move(new_value));
 		}
+
+		using JsonValue::AppendValue;
 
 		void RemoveValue(JsonValue const& value) override
 		{
@@ -365,6 +387,8 @@ namespace
 			values_ = std::move(values);
 		}
 
+		using JsonValue::Value;
+
 		void ValueIndex(uint32_t index, std::string_view name, std::unique_ptr<JsonValue> value) override
 		{
 			if (values_.size() < index + 1)
@@ -374,6 +398,8 @@ namespace
 
 			values_[index] = {std::string(std::move(name)), std::move(value)};
 		}
+
+		using JsonValue::ValueIndex;
 
 	private:
 		std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values_;

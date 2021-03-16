@@ -97,8 +97,8 @@ struct ShaderParser
 	DXBCChunkSignatureHeader const * patch_constant_signature;
 	std::shared_ptr<ShaderProgram> program;
 
-	ShaderParser(const DXBCContainer& dxbc, std::shared_ptr<ShaderProgram> const & program)
-		: program(program)
+	ShaderParser(const DXBCContainer& dxbc, std::shared_ptr<ShaderProgram> const & prog)
+		: program(prog)
 	{
 		resource_chunk = dxbc.resource_chunk;
 		input_signature = static_cast<DXBCChunkSignatureHeader const*>(dxbc.input_signature);

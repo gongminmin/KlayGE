@@ -31,7 +31,9 @@
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
+#if KLAYGE_COMPILER_VERSION >= 142
 #pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
+#endif
 #endif
 #include <winrt/Windows.System.Display.h>
 #include <winrt/Windows.UI.Core.h>

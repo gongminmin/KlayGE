@@ -110,8 +110,8 @@ namespace KlayGE
 		for (auto& page_info : pages_)
 		{
 			auto const iter = std::lower_bound(page_info.free_list.begin(), page_info.free_list.end(), aligned_size,
-				[](PageInfo::FreeRange const& free_range, uint32_t aligned_size) {
-					return free_range.first_offset + aligned_size > free_range.last_offset;
+				[](PageInfo::FreeRange const& free_range, uint32_t s) {
+					return free_range.first_offset + s > free_range.last_offset;
 				});
 			if (iter != page_info.free_list.end())
 			{

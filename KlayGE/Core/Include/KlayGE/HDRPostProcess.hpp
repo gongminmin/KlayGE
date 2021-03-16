@@ -99,6 +99,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		using PostProcess::OutputPin;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply() override;
 
@@ -116,6 +117,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, UnorderedAccessViewPtr const& uav) override;
+		using PostProcess::OutputPin;
 		UnorderedAccessViewPtr const& UavOutputPin(uint32_t index) const override;
 		void Apply() override;
 
@@ -132,6 +134,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		using PostProcess::OutputPin;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply() override;
 
@@ -150,6 +153,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		using PostProcess::OutputPin;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply() override;
 
@@ -190,6 +194,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		ShaderResourceViewPtr const& InputPin(uint32_t index) const override;
 		void OutputPin(uint32_t index, RenderTargetViewPtr const& rtv) override;
+		using PostProcess::OutputPin;
 		RenderTargetViewPtr const& RtvOutputPin(uint32_t index) const override;
 		void Apply() override;
 

@@ -148,6 +148,7 @@ namespace KlayGE
 		}
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -169,6 +170,7 @@ namespace KlayGE
 		}
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		bool has_discard_ = true;
@@ -185,6 +187,7 @@ namespace KlayGE
 		}
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -214,6 +217,7 @@ namespace KlayGE
 		}
 
 		void UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		void StageSpecificStreamIn(ResIdentifier& res) override;
@@ -234,6 +238,7 @@ namespace KlayGE
 		D3D12HullShaderStageObject();
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		void StageSpecificCreateHwShader(
@@ -251,6 +256,7 @@ namespace KlayGE
 		}
 
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept override;
+		using D3D12ShaderStageObject::UpdatePsoDesc;
 
 	private:
 		void StageSpecificCreateHwShader(

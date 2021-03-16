@@ -235,7 +235,6 @@ namespace KlayGE
 		RenderEffectParameter* detail_noise_param_;
 		RenderEffectParameter* detail_uv_param_;
 		RenderEffectParameter* sample_spacing_param_;
-		RenderEffectParameter* frame_size_param_;
 		std::array<RenderEffectParameter*, 4> terrain_tex_layer_params_;
 		std::array<RenderEffectParameter*, 4> terrain_tex_layer_scale_params_;
 

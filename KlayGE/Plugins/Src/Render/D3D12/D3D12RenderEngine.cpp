@@ -277,11 +277,11 @@ namespace KlayGE
 
 		if (STM_LCDShutter == settings.stereo_method)
 		{
-			stereo_method_ = SM_None;
+			d3d12_stereo_method_ = SM_None;
 
 			if (gi_factory_4_->IsWindowedStereoEnabled())
 			{
-				stereo_method_ = SM_DXGI;
+				d3d12_stereo_method_ = SM_DXGI;
 			}
 		}
 	}
@@ -1357,7 +1357,7 @@ namespace KlayGE
 		uint32_t const height = mono_tex_->Height(0);
 		D3D12RenderWindowPtr win = checked_pointer_cast<D3D12RenderWindow>(screen_frame_buffer_);
 
-		switch (stereo_method_)
+		switch (d3d12_stereo_method_)
 		{
 		case SM_DXGI:
 			{

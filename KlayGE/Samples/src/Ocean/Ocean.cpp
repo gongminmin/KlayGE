@@ -371,25 +371,25 @@ namespace
 						dirty_ = false;
 					}
 
-					auto& ocean_renderable = this->BoundRenderableOfType<RenderOcean>();
+					auto& ocean = this->BoundRenderableOfType<RenderOcean>();
 
 					float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 					float frame = (t - floor(t)) * ocean_param_.num_frames;
 					int frame0 = static_cast<int>(frame);
 					int frame1 = frame0 + 1;
-					ocean_renderable.InterpolateFrac(frame - frame0);
+					ocean.InterpolateFrac(frame - frame0);
 					frame0 %= ocean_param_.num_frames;
 					frame1 %= ocean_param_.num_frames;
 					if (use_tex_array_)
 					{
-						ocean_renderable.Frames(int2(frame0, frame1));
+						ocean.Frames(int2(frame0, frame1));
 					}
 					else
 					{
-						ocean_renderable.DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
-						ocean_renderable.GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
+						ocean.DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
+						ocean.GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
 					}
-					ocean_renderable.DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
+					ocean.DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
 						displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
 				});
 		}

@@ -596,13 +596,12 @@ namespace KlayGE
 		render_particles_ = MakeSharedPtr<RenderParticles>(gs_support_);
 		root_node_->AddComponent(MakeSharedPtr<RenderableComponent>(render_particles_));
 
-		root_node_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+		root_node_->OnMainThreadUpdate().Connect([this, &rf](SceneNode& node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(node);
 				KFL_UNUSED(app_time);
 				KFL_UNUSED(elapsed_time);
 
-				auto& rf = Context::Instance().RenderFactoryInstance();
 				auto const& caps = rf.RenderEngineInstance().DeviceCaps();
 				if (!caps.arbitrary_multithread_rendering_support)
 				{
@@ -610,7 +609,7 @@ namespace KlayGE
 					this->UpdateParticleBufferNoLock();
 				}
 			});
-		root_node_->OnSubThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+		root_node_->OnSubThreadUpdate().Connect([this, &rf](SceneNode& node, float app_time, float elapsed_time)
 			{
 				KFL_UNUSED(node);
 				KFL_UNUSED(app_time);
@@ -619,7 +618,6 @@ namespace KlayGE
 
 				this->UpdateParticlesNoLock(elapsed_time);
 
-				auto& rf = Context::Instance().RenderFactoryInstance();
 				auto const& caps = rf.RenderEngineInstance().DeviceCaps();
 				if (caps.arbitrary_multithread_rendering_support)
 				{

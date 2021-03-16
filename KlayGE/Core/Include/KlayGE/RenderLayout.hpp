@@ -55,8 +55,8 @@ namespace KlayGE
 		VertexElement()
 		{
 		}
-		VertexElement(VertexElementUsage usage, uint8_t usage_index, ElementFormat format)
-			: usage(usage), usage_index(usage_index), format(format)
+		VertexElement(VertexElementUsage u, uint8_t ui, ElementFormat f)
+			: usage(u), usage_index(ui), format(f)
 		{
 		}
 

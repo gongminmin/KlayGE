@@ -498,6 +498,9 @@ namespace
 #if KLAYGE_IS_DEV_PLATFORM
 		virtual void StreamOut(std::ostream& os) const = 0;
 #endif
+
+		using RenderVariable::operator=;
+		using RenderVariable::Value;
 	};
 
 	template <typename T>
@@ -551,6 +554,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(T& val) const override
 		{
 			if (in_cbuff_)
@@ -564,6 +569,8 @@ namespace
 				val = this->RetrieveT();
 			}
 		}
+
+		using RenderVariableIOable::Value;
 
 		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride) override
 		{
@@ -1513,11 +1520,15 @@ namespace
 			return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
 		}
 
+		using RenderVariableConcrete<float4x4>::operator=;
+
 		void Value(float4x4& val) const override
 		{
 			RenderVariableConcrete<float4x4>::Value(val);
 			val = MathLib::transpose(val);
 		}
+
+		using RenderVariableConcrete<float4x4>::Value;
 
 	protected:
 		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
@@ -1827,6 +1838,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableConcrete<std::vector<T>>::operator=;
+
 		void Value(std::vector<T>& val) const override
 		{
 			if (this->in_cbuff_)
@@ -1847,6 +1860,8 @@ namespace
 				val = this->RetrieveT();
 			}
 		}
+
+		using RenderVariableConcrete<std::vector<T>>::Value;
 
 	protected:
 		uint32_t size_ = 0;
@@ -3240,6 +3255,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableConcrete<std::vector<float4x4>>::operator=;
+
 		void Value(std::vector<float4x4>& val) const override
 		{
 			if (in_cbuff_)
@@ -3262,6 +3279,8 @@ namespace
 				val = this->RetrieveT();
 			}
 		}
+
+		using RenderVariableConcrete<std::vector<float4x4>>::Value;
 
 	protected:
 		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
@@ -3371,6 +3390,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(TexturePtr& val) const override
 		{
 			if (val_)
@@ -3397,6 +3418,8 @@ namespace
 		{
 			val = elem_type_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		ShaderResourceViewPtr val_;
@@ -3496,6 +3519,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(TexturePtr& val) const override
 		{
 			val = val_->TextureResource();
@@ -3515,6 +3540,8 @@ namespace
 		{
 			val = elem_type_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		UnorderedAccessViewPtr val_;
@@ -3590,6 +3617,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(ShaderResourceViewPtr& val) const override
 		{
 			val = val_;
@@ -3604,6 +3633,8 @@ namespace
 		{
 			val = elem_type_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		ShaderResourceViewPtr val_;
@@ -3679,6 +3710,8 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(UnorderedAccessViewPtr& val) const override
 		{
 			val = val_;
@@ -3693,6 +3726,8 @@ namespace
 		{
 			val = elem_type_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		UnorderedAccessViewPtr val_;
@@ -3741,10 +3776,14 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(ShaderResourceViewPtr& val) const override
 		{
 			val = val_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		ShaderResourceViewPtr val_;
@@ -3792,10 +3831,14 @@ namespace
 			return *this;
 		}
 
+		using RenderVariableIOable::operator=;
+
 		void Value(UnorderedAccessViewPtr& val) const override
 		{
 			val = val_;
 		}
+
+		using RenderVariableIOable::Value;
 
 	protected:
 		UnorderedAccessViewPtr val_;

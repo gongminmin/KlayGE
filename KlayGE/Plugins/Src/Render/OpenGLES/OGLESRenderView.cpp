@@ -370,7 +370,7 @@ namespace KlayGE
 
 	OGLESTexture1DRenderTargetView::OGLESTexture1DRenderTargetView(TexturePtr const & texture_1d, ElementFormat pf, int array_index,
 		int array_size, int level)
-		: array_index_(array_index), array_size_(array_size), level_(level)
+		: array_index_(array_index)
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d->Type());
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture_1d->ArraySize())));
@@ -387,6 +387,9 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture_1d->Format() : pf;
 		sample_count_ = texture_1d->SampleCount();
 		sample_quality_ = texture_1d->SampleQuality();
+
+		array_size_ = array_size;
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
@@ -480,7 +483,7 @@ namespace KlayGE
 
 	OGLESTexture2DRenderTargetView::OGLESTexture2DRenderTargetView(TexturePtr const & texture_2d, ElementFormat pf, int array_index,
 		int array_size, int level)
-		: array_index_(array_index), array_size_(array_size), level_(level)
+		: array_index_(array_index)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d->Type());
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture_2d->ArraySize())));
@@ -497,6 +500,9 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture_2d->Format() : pf;
 		sample_count_ = texture_2d->SampleCount();
 		sample_quality_ = texture_2d->SampleQuality();
+
+		array_size_ = array_size;
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
@@ -590,7 +596,7 @@ namespace KlayGE
 
 	OGLESTexture3DRenderTargetView::OGLESTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
 		uint32_t slice, int level)
-		: slice_(slice), level_(level), copy_to_tex_(0)
+		: slice_(slice), copy_to_tex_(0)
 	{
 		KFL_UNUSED(array_index);
 
@@ -605,6 +611,8 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture_3d->Format() : pf;
 		sample_count_ = texture_3d->SampleCount();
 		sample_quality_ = texture_3d->SampleQuality();
+
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
@@ -737,7 +745,7 @@ namespace KlayGE
 
 	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
 		Texture::CubeFaces face, int level)
-		: face_(face), level_(level)
+		: face_(face)
 	{
 		KFL_UNUSED(array_index);
 
@@ -751,13 +759,15 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
+
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
 
 	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
 		int level)
-		: face_(static_cast<Texture::CubeFaces>(-1)), level_(level)
+		: face_(static_cast<Texture::CubeFaces>(-1))
 	{
 		KFL_UNUSED(array_index);
 
@@ -771,6 +781,8 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture_cube->Format() : pf;
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
+
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
@@ -804,7 +816,7 @@ namespace KlayGE
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(gl_fbo_);
-		if (face_ >= 0)
+		if (static_cast<int>(face_) >= 0)
 		{
 			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -832,7 +844,7 @@ namespace KlayGE
 		re.BindFramebuffer(gl_fbo_);
 
 		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
-		if (face_ >= 0)
+		if (static_cast<int>(face_) >= 0)
 		{
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
 					GL_COLOR_ATTACHMENT0 + index,
@@ -851,8 +863,7 @@ namespace KlayGE
 
 	OGLESTextureDepthStencilView::OGLESTextureDepthStencilView(uint32_t width, uint32_t height,
 									ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
-		: target_type_(0), array_index_(0), level_(-1),
-			sample_count_(sample_count), sample_quality_(sample_quality)
+		: target_type_(0), array_index_(0)
 	{
 		KFL_UNUSED(array_index_);
 		KFL_UNUSED(level_);
@@ -865,6 +876,9 @@ namespace KlayGE
 		pf_ = pf;
 		sample_count_ = sample_count;
 		sample_quality_ = sample_quality;
+
+		array_size_ = 0;
+		level_ = 0;
 
 		GLint internalFormat;
 		GLenum glformat;
@@ -895,7 +909,7 @@ namespace KlayGE
 	OGLESTextureDepthStencilView::OGLESTextureDepthStencilView(TexturePtr const & texture, ElementFormat pf, int array_index, int array_size,
 		int level)
 		: target_type_(checked_cast<OGLESTexture&>(*texture).GLType()),
-			array_index_(array_index), array_size_(array_size), level_(level)
+			array_index_(array_index)
 	{
 		BOOST_ASSERT((Texture::TT_2D == texture->Type()) || (Texture::TT_Cube == texture->Type()));
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture->ArraySize())));
@@ -908,6 +922,9 @@ namespace KlayGE
 		pf_ = pf == EF_Unknown ? texture->Format() : pf;
 		sample_count_ = texture->SampleCount();
 		sample_quality_ = texture->SampleQuality();
+
+		array_size_ = array_size;
+		level_ = level;
 
 		this->RetrieveGLTexture();
 	}
@@ -932,7 +949,7 @@ namespace KlayGE
 	void OGLESTextureDepthStencilView::OnAttached(FrameBuffer& fb)
 	{
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
-		if (level_ < 0)
+		if (array_size_ == 0)
 		{
 			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(gl_fbo_);
@@ -1021,7 +1038,7 @@ namespace KlayGE
 		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
-		if (level_ < 0)
+		if (array_size_ == 0)
 		{
 			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(gl_fbo_);
@@ -1105,7 +1122,7 @@ namespace KlayGE
 
 	OGLESTextureCubeFaceDepthStencilView::OGLESTextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf,
 		int array_index, Texture::CubeFaces face, int level)
-		: face_(face), level_(level)
+		: face_(face)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(IsDepthFormat(texture_cube->Format()));
@@ -1123,10 +1140,12 @@ namespace KlayGE
 		sample_count_ = texture_cube->SampleCount();
 		sample_quality_ = texture_cube->SampleQuality();
 
+		level_ = level;
+
 		this->RetrieveGLTexture();
 	}
 
-	void OGLESTextureCubeFaceDepthStencilView::ClearColor(Color const & /*clr*/)
+	void OGLESTextureCubeFaceDepthStencilView::ClearColor(Color const& /*clr*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}

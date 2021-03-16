@@ -103,7 +103,6 @@ namespace KlayGE
 		bool HwBuildMipSubLevels(TextureFilter filter) override;
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
 
-	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data) override;
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t width,
 			uint32_t height, void*& data, uint32_t& row_pitch) override;
@@ -170,7 +169,7 @@ namespace KlayGE
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
-	private:
+	protected:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data) override;
 		void Unmap1D(uint32_t array_index, uint32_t level) override;
 
@@ -182,6 +181,11 @@ namespace KlayGE
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
 		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
+
+		using D3D11Texture::FillSRVDesc;
+		using D3D11Texture::FillRTVDesc;
+		using D3D11Texture::FillDSVDesc;
+		using D3D11Texture::FillUAVDesc;
 
 	private:
 		uint32_t width_;
@@ -207,7 +211,7 @@ namespace KlayGE
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
-	private:
+	protected:
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t width,
 			uint32_t height, void*& data, uint32_t& row_pitch) override;
 		void Unmap2D(uint32_t array_index, uint32_t level) override;
@@ -220,6 +224,11 @@ namespace KlayGE
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
 		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
+
+		using D3D11Texture::FillSRVDesc;
+		using D3D11Texture::FillRTVDesc;
+		using D3D11Texture::FillDSVDesc;
+		using D3D11Texture::FillUAVDesc;
 
 	private:
 		uint32_t width_;
@@ -243,7 +252,7 @@ namespace KlayGE
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
-	private:
+	protected:
 		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) override;
 		void Unmap3D(uint32_t array_index, uint32_t level) override;
@@ -258,6 +267,11 @@ namespace KlayGE
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
 		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(
 			ElementFormat pf, uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level) const override;
+
+		using D3D11Texture::FillSRVDesc;
+		using D3D11Texture::FillRTVDesc;
+		using D3D11Texture::FillDSVDesc;
+		using D3D11Texture::FillUAVDesc;
 
 	private:
 		uint32_t width_;
@@ -285,7 +299,7 @@ namespace KlayGE
 
 		void CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint) override;
 
-	private:
+	protected:
 		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset,
 			uint32_t width, uint32_t height, void*& data, uint32_t& row_pitch) override;
 		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
@@ -304,6 +318,11 @@ namespace KlayGE
 			ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t level) const override;
 		D3D11_UNORDERED_ACCESS_VIEW_DESC FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 			CubeFaces first_face, uint32_t num_faces, uint32_t level) const override;
+
+		using D3D11Texture::FillSRVDesc;
+		using D3D11Texture::FillRTVDesc;
+		using D3D11Texture::FillDSVDesc;
+		using D3D11Texture::FillUAVDesc;
 
 	private:
 		uint32_t width_;

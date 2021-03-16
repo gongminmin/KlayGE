@@ -130,8 +130,6 @@ namespace KlayGE
 
 	private:
 		int array_index_;
-		int array_size_;
-		int level_;
 	};
 
 
@@ -149,8 +147,6 @@ namespace KlayGE
 
 	private:
 		int array_index_;
-		int array_size_;
-		int level_;
 	};
 
 
@@ -174,7 +170,6 @@ namespace KlayGE
 
 	private:
 		uint32_t slice_;
-		int level_;
 		int copy_to_tex_;
 		GLuint gl_tex_2d_;
 	};
@@ -196,7 +191,6 @@ namespace KlayGE
 
 	private:
 		Texture::CubeFaces face_;
-		int level_;
 	};
 
 
@@ -237,9 +231,6 @@ namespace KlayGE
 	private:
 		GLenum target_type_;
 		int array_index_;
-		int array_size_;
-		int level_;
-		uint32_t sample_count_, sample_quality_;
 		GLuint gl_rbo_;
 	};
 
@@ -256,7 +247,6 @@ namespace KlayGE
 
 	private:
 		Texture::CubeFaces face_;
-		int level_;
 	};
 }
 

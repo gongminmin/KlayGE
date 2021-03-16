@@ -108,10 +108,8 @@ namespace KlayGE
 
 		for (auto& page_info : pages_)
 		{
-			auto const iter = std::lower_bound(
-				page_info.free_list.begin(), page_info.free_list.end(), size, [](PageInfo::FreeRange const& free_range, uint32_t size) {
-					return free_range.first_offset + size > free_range.last_offset;
-				});
+			auto const iter = std::lower_bound(page_info.free_list.begin(), page_info.free_list.end(), size,
+				[](PageInfo::FreeRange const& free_range, uint32_t s) { return free_range.first_offset + s > free_range.last_offset; });
 			if (iter != page_info.free_list.end())
 			{
 				desc_block->Reset(*page_info.page, iter->first_offset, size);

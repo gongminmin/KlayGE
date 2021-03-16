@@ -61,6 +61,8 @@ namespace
 			}
 		}
 
+		using StaticMesh::Material;
+
 		void OnRenderBegin()
 		{
 			StaticMesh::OnRenderBegin();

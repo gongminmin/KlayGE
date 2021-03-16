@@ -243,6 +243,9 @@ namespace KlayGE
 			val_ = value;
 		}
 
+		using ScriptVariable::operator=;
+		using ScriptVariable::TryValue;
+
 	protected:
 		PyObjectPtr val_;
 	};
@@ -272,6 +275,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(std::string& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyUnicode_Type))
@@ -281,6 +286,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableWString final : public PythonScriptVariable
@@ -308,6 +315,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(std::wstring& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyUnicode_Type))
@@ -319,6 +328,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableInt8 final : public PythonScriptVariable
@@ -330,6 +341,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(int8_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -339,6 +352,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableInt16 final : public PythonScriptVariable
@@ -350,6 +365,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(int16_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -359,6 +376,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableInt32 final : public PythonScriptVariable
@@ -370,6 +389,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(int32_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -379,6 +400,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableInt64 final : public PythonScriptVariable
@@ -390,6 +413,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(int64_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -399,6 +424,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableUInt8 final : public PythonScriptVariable
@@ -410,6 +437,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(uint8_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -419,6 +448,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableUInt16 final : public PythonScriptVariable
@@ -430,6 +461,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(uint16_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -439,6 +472,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableUInt32 final : public PythonScriptVariable
@@ -450,6 +485,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(uint32_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -459,6 +496,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableUInt64 final : public PythonScriptVariable
@@ -470,6 +509,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(uint64_t& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyLong_Type))
@@ -479,6 +520,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableFloat final : public PythonScriptVariable
@@ -490,6 +533,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(float& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyFloat_Type))
@@ -499,6 +544,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableDouble final : public PythonScriptVariable
@@ -510,6 +557,8 @@ namespace KlayGE
 			return *this;
 		}
 
+		using PythonScriptVariable::operator=;
+
 		bool TryValue(double& value) const override
 		{
 			if (PyObject_TypeCheck(val_.get(), &PyFloat_Type))
@@ -519,6 +568,8 @@ namespace KlayGE
 			}
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 	};
 
 	class PythonScriptVariableVector final : public PythonScriptVariable
@@ -539,6 +590,8 @@ namespace KlayGE
 			}
 			return *this;
 		}
+
+		using PythonScriptVariable::operator=;
 
 		bool TryValue(std::vector<ScriptVariablePtr>& value) const override
 		{
@@ -571,6 +624,8 @@ namespace KlayGE
 
 			return false;
 		}
+
+		using PythonScriptVariable::TryValue;
 
 	private:
 		PythonScriptModule const& script_module_;

@@ -337,13 +337,13 @@ namespace KlayGE
 		D3D12GpuMemoryAllocator upload_mem_allocator_{true};
 		D3D12GpuMemoryAllocator readback_mem_allocator_{false};
 
-		enum StereoMethod
+		enum D3D12StereoMethod
 		{
 			SM_None,
 			SM_DXGI
 		};
 
-		StereoMethod stereo_method_;
+		D3D12StereoMethod d3d12_stereo_method_;
 
 		ID3D12CommandSignaturePtr draw_indirect_signature_;
 		ID3D12CommandSignaturePtr draw_indexed_indirect_signature_;

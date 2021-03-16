@@ -261,7 +261,6 @@ namespace
 			: Renderable(L"GPUParticleSystem"),
 				max_num_particles_(max_num_particles),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
-				model_mat_(float4x4::Identity()),
 				rt_index_(true), accumulate_time_(0),
 				random_dis_(-0.05f, +0.05f)
 		{
@@ -543,11 +542,6 @@ namespace
 			*(effect_->ParameterByName("ps_model_mat")) = model_mat;
 		}
 
-		float4x4 const & ModelMatrix() const
-		{
-			return model_mat_;
-		}
-
 		void AutoEmit(float freq)
 		{
 			inv_emit_freq_ = 1.0f / freq;
@@ -673,11 +667,6 @@ namespace
 			return particle_pos_srv_[!rt_index_];
 		}
 
-		GraphicsBufferPtr VelVB() const
-		{
-			return particle_vel_vb_[!rt_index_];
-		}
-
 		ShaderResourceViewPtr VelSrv() const
 		{
 			return particle_vel_srv_[!rt_index_];
@@ -692,8 +681,6 @@ namespace
 	private:
 		int max_num_particles_;
 		int tex_width_, tex_height_;
-
-		float4x4 model_mat_;
 
 		TexturePtr particle_pos_texture_[2];
 		TexturePtr particle_vel_texture_[2];

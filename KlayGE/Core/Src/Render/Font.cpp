@@ -672,8 +672,8 @@ namespace KlayGE
 			FontVert()
 			{
 			}
-			FontVert(float3 const & pos, uint32_t clr, float2 const & tex)
-				: pos(pos), clr(clr), tex(tex)
+			FontVert(float3 const & p, uint32_t c, float2 const & t)
+				: pos(p), clr(c), tex(t)
 			{
 			}
 		};

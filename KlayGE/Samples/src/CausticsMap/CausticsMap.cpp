@@ -246,11 +246,6 @@ namespace
 			scene_texture_ = scene_texture;
 		}
 
-		void SetEnvCubeCamera(CameraPtr const & camera)
-		{
-			env_cube_camera_ = camera;
-		}
-
 		void SetEnvCube(TexturePtr const & texture)
 		{
 			env_cube_ = texture;
@@ -361,7 +356,6 @@ namespace
 		uint32_t pass_;
 		LightSourcePtr light_;
 		TexturePtr scene_texture_;
-		CameraPtr env_cube_camera_;
 		TexturePtr env_cube_;
 	};
 
