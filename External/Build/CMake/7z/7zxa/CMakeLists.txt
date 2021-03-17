@@ -234,7 +234,14 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 if(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(${LIB_NAME}
 		PRIVATE
-			-w
+			-Wno-dangling-else
+			-Wno-delete-non-abstract-non-virtual-dtor
+			-Wno-logical-op-parentheses
+			-Wno-microsoft-exception-spec
+			-Wno-reorder-ctor
+			-Wno-sign-compare
+			-Wno-unused-function
+			-Wno-unused-private-field
 	)
 endif()
 
