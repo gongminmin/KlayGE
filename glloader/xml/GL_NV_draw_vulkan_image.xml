@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_NV_draw_vulkan_image" reg_no="501">
 	<typedefs>
-		<typedef type="void" synonym="(GLLOADER_APIENTRY *VULKANPROCNV)()"/>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *VULKANPROCNV)(void)"/>
 	</typedefs>
 
 	<functions>

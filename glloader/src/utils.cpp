@@ -814,7 +814,7 @@ static void* get_gl_proc_address_by_dll(const char* name)
 	return ret;
 }
 
-void* get_gl_proc_address_by_api(const char* name)
+static void* get_gl_proc_address_by_api(const char* name)
 {
 	void* ret = nullptr;
 

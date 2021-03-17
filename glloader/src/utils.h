@@ -29,11 +29,11 @@ extern "C"
 void promote_low_high(char const * low_name, char const * high_name);
 void promote_high(char const * high_name);
 
-void gl_init();
-void wgl_init();
-void glx_init();
-void gles_init();
-void egl_init();
+void gl_init(void);
+void wgl_init(void);
+void glx_init(void);
+void gles_init(void);
+void egl_init(void);
 
 #ifdef __cplusplus
 }
