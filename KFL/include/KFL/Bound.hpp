@@ -39,9 +39,7 @@ namespace KlayGE
 	class Bound_T
 	{
 	public:
-		virtual ~Bound_T() noexcept
-		{
-		}
+		virtual ~Bound_T() noexcept = default;
 
 		virtual bool IsEmpty() const noexcept = 0;
 

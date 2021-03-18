@@ -83,7 +83,7 @@ namespace KlayGE
 		namespace Detail
 		{
 			// CLR doesn't support std::mutex. Need a wrapper.
-			class KLAYGE_CORE_API Mutex
+			class KLAYGE_CORE_API Mutex : boost::noncopyable
 			{
 			public:
 				virtual ~Mutex() noexcept;

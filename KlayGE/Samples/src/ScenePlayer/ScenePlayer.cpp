@@ -56,9 +56,7 @@ namespace
 			*script_ = std::string(StringUtil::Trim(script));
 		}
 
-		virtual ~PyScriptUpdate()
-		{
-		}
+		virtual ~PyScriptUpdate() = default;
 
 		ScriptVariablePtr Run(float app_time, float elapsed_time)
 		{

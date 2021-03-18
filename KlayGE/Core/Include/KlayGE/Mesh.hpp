@@ -151,7 +151,7 @@ namespace KlayGE
 		bool hw_res_ready_;
 	};
 
-	class KLAYGE_CORE_API RenderModel
+	class KLAYGE_CORE_API RenderModel : boost::noncopyable
 	{
 	public:
 		explicit RenderModel(SceneNodePtr const & root_node);

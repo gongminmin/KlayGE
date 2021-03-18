@@ -55,7 +55,7 @@ namespace KlayGE
 		float init_life;
 	};
 
-	class KLAYGE_CORE_API ParticleEmitter
+	class KLAYGE_CORE_API ParticleEmitter : boost::noncopyable
 	{
 	public:
 		explicit ParticleEmitter(ParticleSystemPtr const& ps);
@@ -202,7 +202,7 @@ namespace KlayGE
 		float max_size_;
 	};
 
-	class KLAYGE_CORE_API ParticleUpdater
+	class KLAYGE_CORE_API ParticleUpdater : boost::noncopyable
 	{
 	public:
 		explicit ParticleUpdater(ParticleSystemPtr const& ps);

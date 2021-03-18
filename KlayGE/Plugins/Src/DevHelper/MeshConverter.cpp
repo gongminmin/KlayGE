@@ -1854,7 +1854,7 @@ namespace
 			ai_scene.mRootNode = new aiNode;
 			ai_scene.mRootNode->mParent = nullptr;
 			std::function<void(aiNode& ai_node, SceneNode const & node)> convert_node_subtree
-				= [&convert_node_subtree, model](aiNode& ai_node, SceneNode const & node)
+				= [&convert_node_subtree, &model](aiNode& ai_node, SceneNode const & node)
 					{
 						std::string name;
 						KlayGE::Convert(name, node.Name());
