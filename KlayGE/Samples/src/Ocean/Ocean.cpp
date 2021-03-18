@@ -413,10 +413,6 @@ namespace
 			reflect_up = -MathLib::transform_normal(up, reflect_mat_);
 		}
 
-		int DMapDim() const
-		{
-			return ocean_param_.dmap_dim;
-		}
 		void DMapDim(int dmap_dim)
 		{
 			if (ocean_param_.dmap_dim != dmap_dim)
@@ -426,10 +422,6 @@ namespace
 			}
 		}
 
-		float PatchLength() const
-		{
-			return ocean_param_.patch_length;
-		}
 		void PatchLength(float patch_length)
 		{
 			if (!MathLib::equal(ocean_param_.patch_length, patch_length))
@@ -439,10 +431,6 @@ namespace
 			}
 		}
 
-		float TimeScale() const
-		{
-			return ocean_param_.time_scale;
-		}
 		void TimeScale(float time_scale)
 		{
 			if (!MathLib::equal(ocean_param_.time_scale, time_scale))
@@ -452,10 +440,6 @@ namespace
 			}
 		}
 
-		float WaveAmplitude() const
-		{
-			return ocean_param_.wave_amplitude;
-		}
 		void WaveAmplitude(float amp)
 		{
 			if (!MathLib::equal(ocean_param_.wave_amplitude, amp))
@@ -465,10 +449,6 @@ namespace
 			}
 		}
 
-		float WindSpeedX() const
-		{
-			return ocean_param_.wind_speed.x();
-		}
 		void WindSpeedX(float speed)
 		{
 			if (!MathLib::equal(ocean_param_.wind_speed.x(), speed))
@@ -478,10 +458,6 @@ namespace
 			}
 		}
 
-		float WindSpeedY() const
-		{
-			return ocean_param_.wind_speed.y();
-		}
 		void WindSpeedY(float speed)
 		{
 			if (!MathLib::equal(ocean_param_.wind_speed.y(), speed))
@@ -491,10 +467,6 @@ namespace
 			}
 		}
 
-		float WindDependency() const
-		{
-			return ocean_param_.wind_dependency;
-		}
 		void WindDependency(float dep)
 		{
 			if (!MathLib::equal(ocean_param_.wind_dependency, dep))
@@ -504,10 +476,6 @@ namespace
 			}
 		}
 
-		float ChoppyScale() const
-		{
-			return ocean_param_.choppy_scale;
-		}
 		void ChoppyScale(float choppy)
 		{
 			if (!MathLib::equal(ocean_param_.choppy_scale, choppy))
