@@ -47,21 +47,10 @@
 #include <map>
 #include <vector>
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-copy" // Ignore comparison between int and uint
-#endif
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
-#if defined(KLAYGE_COMPILER_CLANGCL)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpragma-pack" // Ignore cross header #pragma pack
-#endif
 #include <assimp/scene.h>
-#if defined(KLAYGE_COMPILER_CLANGCL)
-#pragma clang diagnostic pop
-#endif
 #include <assimp/pbrmaterial.h>
 
 #include <KlayGE/DevHelper/MeshConverter.hpp>

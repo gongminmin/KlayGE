@@ -18,13 +18,6 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${XAUDIO_AE_SOURCE_FILES} ${XAUDIO_AE_HEADER_FILES}
 )
 
-if(KLAYGE_COMPILER_CLANGCL)
-	target_compile_options(${LIB_NAME}
-		PRIVATE
-			-Wno-delete-abstract-non-virtual-dtor
-	)
-endif()
-
 target_include_directories(${LIB_NAME}
 	PRIVATE
 		${KLAYGE_PROJECT_DIR}/Plugins/Include
