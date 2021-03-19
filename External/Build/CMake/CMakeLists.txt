@@ -102,7 +102,7 @@ endfunction()
 FOREACH(flag_var
 		CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 	IF(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
-		STRING(REPLACE "/W4" "/W0" ${flag_var} "${${flag_var}}")
+		STRING(REPLACE "/Wall" "/W0" ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "/WX" "/WX-" ${flag_var} "${${flag_var}}")
 	ELSE()
 		STRING(REPLACE "-Wall" "-w" ${flag_var} "${${flag_var}}")

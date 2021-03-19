@@ -1,7 +1,7 @@
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "/std:c++17 /W4 /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
+	set(CMAKE_CXX_FLAGS "/std:c++17 /Wall /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
 
 	set(CMAKE_CXX_STANDARD 17)
 
@@ -20,7 +20,61 @@ if(MSVC)
 			message(FATAL_ERROR "Unsupported compiler version. Please install clang-cl 9.0 or up.")
 		endif()
 
-		set(CMAKE_C_FLAGS "/W4 /WX /bigobj /Gw")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat") # No need to compatible to C++98
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat-pedantic")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-cast-align")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-covered-switch-default")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-dynamic-exception-spec")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-documentation")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-documentation-unknown-command")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-double-promotion")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-exit-time-destructors")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extra-semi")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extra-semi-stmt")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-float-equal")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-global-constructors")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-anonymous-struct")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-conversion")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-float-conversion")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-float-conversion")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-destructor-override")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-language-extension-token")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-id-macro") # Allow macros with __ prefix
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-exception-spec")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-noreturn")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-variable-declarations")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nested-anon-types")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-system-include-path") # Allow windows.h
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-virtual-dtor")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-old-style-cast")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-std-move-in-c++11")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-conversion")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-signed-enum-bitfield")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-switch-enum") # NEVER turn it on. A bad designed warning.
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undef") # Ignore undefined macros
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-func-template") # clang-cl couldn't understand explicit specialization from other compile units
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-zero-as-null-pointer-constant")
+		if(KLAYGE_COMPILER_VERSION GREATER_EQUAL "110")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-destructor-override")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
+		endif()
+
+		set(CMAKE_C_FLAGS "/Wall /WX /bigobj /Gw")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-covered-switch-default")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-documentation")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-documentation-unknown-command")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-double-promotion")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-extra-semi-stmt")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-float-equal")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-int-conversion")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-float-conversion")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-language-extension-token")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-reserved-id-macro") # Allow macros with __ prefix
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-sign-conversion")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-switch-enum") # NEVER turn it on. A bad designed warning.
 	else()
 		SET(KLAYGE_COMPILER_NAME "vc")
 		SET(KLAYGE_COMPILER_MSVC TRUE)
@@ -86,6 +140,35 @@ if(MSVC)
 
 			SET(CMAKE_STATIC_LINKER_FLAGS "/WX")
 		ENDIF()
+
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4061") # False positive on missing enum in switch case (This is a bad designed warning because there are "default"s to handle un-cased enums)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4255") # Allow func() to func(void) in some Windows SDK
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4365") # Ignore int to size_t
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4464") # Allow .. in include path
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4514") # Allow unused inline function
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4625") # Ignore implicitly deleted copy constructor
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4626") # Ignore implicitly deleted copy operator=
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4668") # Undefined macro as 0
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4710") # Allow function with the inline mark not be inlined
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4711") # Allow function to be inlined without the inline mark
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4820") # Ignore padding
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5026") # Ignore implicitly deleted move constructor
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5027") # Ignore implicitly deleted move operator=
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5039") # Ignore passing a throwing function to C functions
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5045") # False positive on range check
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5219") # Ignore int to uint
+		if(MSVC_VERSION GREATER_EQUAL 1920)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5204") # Ignore non trivial destructor in COM interfaces and ppl
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5220") # Ignore non trivial constructor in ppl
+		else()
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4472") # Native and managed enum in vcruntime
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4571") # Allow catching SEH in STL
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4582") # std::optional constructor is not implicitly called
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4583") # std::optional destructor is not implicitly called
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4623") # Default constructor was implicitly defined as deleted in STL
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4774") # Ignore wrong parameter types of printf in STL
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5039") # Allow passing throwing function to extern C function
+		endif()
 
 		SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
 	endif()

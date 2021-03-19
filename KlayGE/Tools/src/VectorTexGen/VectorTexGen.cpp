@@ -63,7 +63,9 @@
 #pragma warning(disable : 6386) // Buffer overrun while writing to 'grad->stops'
 #elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" // Ignore deprecated function calls
+#pragma clang diagnostic ignored "-Wshadow"
 #endif
 #define NANOSVG_IMPLEMENTATION
 #include <nanosvg.h>

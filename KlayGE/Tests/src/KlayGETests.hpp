@@ -5,7 +5,14 @@
 #pragma warning(disable : 6326) // Potential comparison of a constant with another constant.
 #endif
 
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshift-sign-overflow"
+#endif
 #include <gtest/gtest.h>
+#if defined(KLAYGE_COMPILER_CLANGCL)
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {

@@ -65,7 +65,10 @@ namespace KlayGE
 		int numSend = 0;
 		for (;;)
 		{
-			this->Receive(revBuf, sizeof(revBuf), from);
+			if (this->Receive(revBuf, sizeof(revBuf), from) == 0)
+			{
+				break;
+			}
 
 			// 每个消息前面都包含1字节的消息类型
 			char* revPtr(&revBuf[1]);

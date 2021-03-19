@@ -37,7 +37,15 @@
 #define INITGUID
 #include <windows.h>
 #if defined KLAYGE_HAVE_LIBOVR
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 4619) // Ignore retired warning C4345
+#pragma warning(disable : 4710) // Ignore uninlined OVR_sprintf
+#endif
 #include <OVR.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 #include <hidsdi.h>

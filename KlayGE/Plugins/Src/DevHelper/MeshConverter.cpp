@@ -47,10 +47,17 @@
 #include <map>
 #include <vector>
 
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 4619) // Ignore retired warning C4351
+#endif
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #include <assimp/pbrmaterial.h>
 
 #include <KlayGE/DevHelper/MeshConverter.hpp>

@@ -46,7 +46,14 @@
 #include <KlayGE/App3D.hpp>
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4355) // Ignore "this" in member initializer list
+#endif
 #include <future>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <windows.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.ApplicationModel.Core.h>
