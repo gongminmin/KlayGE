@@ -30,6 +30,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <ostream>
+
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 
 namespace KlayGE
@@ -38,34 +40,22 @@ namespace KlayGE
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		// Dynamic loading because these dlls can't be loaded on WinXP
-		mod_dxgi_ = ::LoadLibraryEx(TEXT("dxgi.dll"), nullptr, 0);
-		if (nullptr == mod_dxgi_)
+		if (!mod_dxgi_.Load("dxgi.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load dxgi.dll" << std::endl;
+			Verify(false);
 		}
-		mod_d3d12_ = ::LoadLibraryEx(TEXT("d3d12.dll"), nullptr, 0);
-		if (nullptr == mod_d3d12_)
+		if (!mod_d3d12_.Load("d3d12.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load d3d12.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load d3d12.dll" << std::endl;
+			Verify(false);
 		}
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		if (mod_dxgi_ != nullptr)
-		{
-			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
-		}
-		if (mod_d3d12_ != nullptr)
-		{
-			DynamicD3D12CreateDevice_ = reinterpret_cast<D3D12CreateDeviceFunc>(::GetProcAddress(mod_d3d12_, "D3D12CreateDevice"));
-			DynamicD3D12GetDebugInterface_ = reinterpret_cast<D3D12GetDebugInterfaceFunc>(::GetProcAddress(mod_d3d12_, "D3D12GetDebugInterface"));
-			DynamicD3D12SerializeRootSignature_ = reinterpret_cast<D3D12SerializeRootSignatureFunc>(::GetProcAddress(mod_d3d12_, "D3D12SerializeRootSignature"));
-		}
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+		DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(mod_dxgi_.GetProcAddress("CreateDXGIFactory2"));
+		DynamicD3D12CreateDevice_ = reinterpret_cast<D3D12CreateDeviceFunc>(mod_d3d12_.GetProcAddress("D3D12CreateDevice"));
+		DynamicD3D12GetDebugInterface_ = reinterpret_cast<D3D12GetDebugInterfaceFunc>(mod_d3d12_.GetProcAddress("D3D12GetDebugInterface"));
+		DynamicD3D12SerializeRootSignature_ =
+			reinterpret_cast<D3D12SerializeRootSignatureFunc>(mod_d3d12_.GetProcAddress("D3D12SerializeRootSignature"));
 #else
 		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
 		DynamicD3D12CreateDevice_ = ::D3D12CreateDevice;
@@ -88,16 +78,8 @@ namespace KlayGE
 	void D3D12InterfaceLoader::Destroy()
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		if (mod_d3d12_)
-		{
-			BOOST_ASSERT(mod_dxgi_ != nullptr);
-
-			::FreeLibrary(mod_d3d12_);
-			::FreeLibrary(mod_dxgi_);
-
-			mod_d3d12_ = nullptr;
-			mod_dxgi_ = nullptr;
-		}
+		mod_d3d12_.Free();
+		mod_dxgi_.Free();
 #endif
 
 	}

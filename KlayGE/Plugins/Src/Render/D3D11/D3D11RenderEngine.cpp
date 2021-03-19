@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <ostream>
 
 #include <boost/assert.hpp>
 
@@ -97,33 +98,20 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		// Dynamic loading because these dlls can't be loaded on WinXP
-		mod_dxgi_ = ::LoadLibraryEx(TEXT("dxgi.dll"), nullptr, 0);
-		if (nullptr == mod_dxgi_)
+		if (!mod_dxgi_.Load("dxgi.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load dxgi.dll" << std::endl;
+			Verify(false);
 		}
-		mod_d3d11_ = ::LoadLibraryEx(TEXT("d3d11.dll"), nullptr, 0);
-		if (nullptr == mod_d3d11_)
+		if (!mod_d3d11_.Load("d3d11.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load d3d11.dll" << std::endl;
+			Verify(false);
 		}
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		if (mod_dxgi_ != nullptr)
-		{
-			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
-			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
-		}
-		if (mod_d3d11_ != nullptr)
-		{
-			DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDevice"));
-		}
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+		DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(mod_dxgi_.GetProcAddress("CreateDXGIFactory1"));
+		DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(mod_dxgi_.GetProcAddress("CreateDXGIFactory2"));
+		DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(mod_d3d11_.GetProcAddress("D3D11CreateDevice"));
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
 		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
@@ -832,8 +820,8 @@ namespace KlayGE
 		DynamicD3D11CreateDevice_ = nullptr;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_d3d11_);
-		::FreeLibrary(mod_dxgi_);
+		mod_d3d11_.Free();
+		mod_dxgi_.Free();
 #endif
 	}
 

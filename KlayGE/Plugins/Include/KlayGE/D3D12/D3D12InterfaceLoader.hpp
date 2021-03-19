@@ -71,8 +71,8 @@ namespace KlayGE
 		D3D12SerializeRootSignatureFunc DynamicD3D12SerializeRootSignature_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HMODULE mod_dxgi_;
-		HMODULE mod_d3d12_;
+		DllLoader mod_dxgi_;
+		DllLoader mod_d3d12_;
 #endif
 	};
 }

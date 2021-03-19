@@ -93,16 +93,10 @@ public:
 		mod_d3dcompiler_ = LoadLibraryEx(TEXT("d3dcompiler_47.dll"), NULL, 0);
 		if (mod_d3dcompiler_)
 		{
-#if defined(KLAYGE_COMPILER_GCC) && (__GNUC__ >= 8)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
-			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
-			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
-#if defined(KLAYGE_COMPILER_GCC) && (__GNUC__ >= 8)
-#pragma GCC diagnostic pop
-#endif
+			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(reinterpret_cast<void*>(GetProcAddress(mod_d3dcompiler_, "D3DCompile")));
+			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(reinterpret_cast<void*>(GetProcAddress(mod_d3dcompiler_, "D3DReflect")));
+			DynamicD3DStripShader_ =
+				reinterpret_cast<D3DStripShaderFunc>(reinterpret_cast<void*>(GetProcAddress(mod_d3dcompiler_, "D3DStripShader")));
 		}
 		else
 		{

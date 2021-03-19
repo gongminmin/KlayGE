@@ -144,6 +144,7 @@ struct X3DAUDIO_LISTENER
 #endif
 
 #include <KFL/com_ptr.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
@@ -303,7 +304,9 @@ namespace KlayGE
 		X3DAUDIO_HANDLE x3d_instance_;
 		X3DAUDIO_LISTENER listener_{};
 
-		HMODULE mod_xaudio2_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		DllLoader mod_xaudio2_;
+#endif
 		typedef HRESULT (WINAPI *XAudio2CreateFunc)(IXAudio2** ppXAudio2, UINT32 flags, XAUDIO2_PROCESSOR XAudio2Processor);
 		XAudio2CreateFunc DynamicXAudio2Create_;
 		typedef HRESULT (WINAPI *X3DAudioInitializeFunc)(UINT32 SpeakerChannelMask, float SpeedOfSound, X3DAUDIO_HANDLE Instance);

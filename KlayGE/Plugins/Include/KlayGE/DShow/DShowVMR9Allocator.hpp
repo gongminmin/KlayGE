@@ -93,7 +93,7 @@ namespace KlayGE
 		com_ptr<IDirect3DSurface9> cache_surf_;
 		TexturePtr			present_tex_;
 
-		HMODULE mod_d3d9_;
+		DllLoader mod_d3d9_;
 		typedef IDirect3D9* (WINAPI *Direct3DCreate9Func)(UINT SDKVersion);
 		Direct3DCreate9Func DynamicDirect3DCreate9_;
 

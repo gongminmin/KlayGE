@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KFL/com_ptr.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KFL/Thread.hpp>
 
 #include <windows.h>
@@ -104,9 +105,11 @@ namespace KlayGE
 		MFCreateAttributesFunc DynamicMFCreateAttributes_;
 		MFShutdownFunc DynamicMFShutdown_;
 
-		HMODULE mod_dxgi_ = nullptr;
-		HMODULE mod_d3d11_ = nullptr;
-		HMODULE mod_mfplat_ = nullptr;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		DllLoader mod_dxgi_;
+		DllLoader mod_d3d11_;
+		DllLoader mod_mfplat_;
+#endif
 
 		com_ptr<IDXGIFactory1> dxgi_factory_;
 		com_ptr<ID3D11Device> d3d_device_;

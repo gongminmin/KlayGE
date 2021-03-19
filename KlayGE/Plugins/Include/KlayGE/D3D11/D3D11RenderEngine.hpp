@@ -160,8 +160,10 @@ namespace KlayGE
 		CreateDXGIFactory2Func DynamicCreateDXGIFactory2_;
 		D3D11CreateDeviceFunc DynamicD3D11CreateDevice_;
 
-		HMODULE mod_dxgi_;
-		HMODULE mod_d3d11_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		DllLoader mod_dxgi_;
+		DllLoader mod_d3d11_;
+#endif
 
 		IDXGIFactory2Ptr gi_factory_2_;
 		IDXGIFactory3Ptr gi_factory_3_;

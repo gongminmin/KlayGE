@@ -61,15 +61,9 @@ void DetectOSInfo(std::ostream& os)
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
-	HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-	RtlGetVersionFunc RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+	DllLoader ntdll;
+	ntdll.Load("ntdll.dll");
+	auto* RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(ntdll.GetProcAddress("RtlGetVersion"));
 	OSVERSIONINFOEXW os_ver_info;
 	os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
 	RtlGetVersion(&os_ver_info);
@@ -274,28 +268,21 @@ void DetectGpuInfo(std::ostream& os)
 	typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	HMODULE dxgi = ::LoadLibraryEx(L"dxgi.dll", nullptr, 0);
-	if (!dxgi)
+	DllLoader dxgi;
+	if (!dxgi.Load("dxgi.dll"))
 	{
 		os << "Unknown GPU";
 		return;
 	}
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-	CreateDXGIFactory1Func DynamicCreateDXGIFactory1
-		= reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(dxgi, "CreateDXGIFactory1"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+
+	auto* DynamicCreateDXGIFactory1 = reinterpret_cast<CreateDXGIFactory1Func>(dxgi.GetProcAddress("CreateDXGIFactory1"));
 	if (!DynamicCreateDXGIFactory1)
 	{
 		os << "Unknown GPU";
 		return;
 	}
 #else
-	CreateDXGIFactory1Func DynamicCreateDXGIFactory1 = CreateDXGIFactory1;
+	auto* DynamicCreateDXGIFactory1 = CreateDXGIFactory1;
 #endif
 
 	IDXGIFactory1* factory;
@@ -346,7 +333,7 @@ void DetectGpuInfo(std::ostream& os)
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	::FreeLibrary(dxgi);
+	dxgi.Free();
 #endif
 #else
 	os << "Unknown GPU" << endl;

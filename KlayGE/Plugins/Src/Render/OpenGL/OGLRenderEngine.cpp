@@ -201,19 +201,11 @@ namespace KlayGE
 		clear_clr_.fill(0);
 
 #if defined KLAYGE_PLATFORM_WINDOWS
-		mod_opengl32_ = ::LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
-		KLAYGE_ASSUME(mod_opengl32_ != nullptr);
+		mod_opengl32_.Load("opengl32.dll");
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		DynamicWglCreateContext_ = reinterpret_cast<wglCreateContextFUNC>(::GetProcAddress(mod_opengl32_, "wglCreateContext"));
-		DynamicWglDeleteContext_ = reinterpret_cast<wglDeleteContextFUNC>(::GetProcAddress(mod_opengl32_, "wglDeleteContext"));
-		DynamicWglMakeCurrent_ = reinterpret_cast<wglMakeCurrentFUNC>(::GetProcAddress(mod_opengl32_, "wglMakeCurrent"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+		DynamicWglCreateContext_ = reinterpret_cast<wglCreateContextFUNC>(mod_opengl32_.GetProcAddress("wglCreateContext"));
+		DynamicWglDeleteContext_ = reinterpret_cast<wglDeleteContextFUNC>(mod_opengl32_.GetProcAddress("wglDeleteContext"));
+		DynamicWglMakeCurrent_ = reinterpret_cast<wglMakeCurrentFUNC>(mod_opengl32_.GetProcAddress("wglMakeCurrent"));
 #endif
 	}
 
@@ -1438,7 +1430,7 @@ namespace KlayGE
 		glloader_uninit();
 
 #if defined KLAYGE_PLATFORM_WINDOWS
-		::FreeLibrary(mod_opengl32_);
+		mod_opengl32_.Free();
 #endif
 	}
 

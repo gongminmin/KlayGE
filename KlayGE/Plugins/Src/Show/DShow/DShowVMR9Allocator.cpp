@@ -21,6 +21,8 @@
 #include <KlayGE/RenderEngine.hpp>
 
 #include <cstring>
+#include <ostream>
+
 #include <boost/assert.hpp>
 
 #if defined(KLAYGE_COMPILER_GCC)
@@ -61,23 +63,13 @@ namespace KlayGE
 					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
-		mod_d3d9_ = ::LoadLibraryEx(TEXT("d3d9.dll"), nullptr, 0);
-		if (nullptr == mod_d3d9_)
+		if (!mod_d3d9_.Load("d3d9.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load d3d9.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load d3d9.dll" << std::endl;
+			Verify(false);
 		}
 
-		if (mod_d3d9_ != nullptr)
-		{
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-		}
+		DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(mod_d3d9_.GetProcAddress("Direct3DCreate9"));
 
 		d3d_.reset(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
 
@@ -93,7 +85,7 @@ namespace KlayGE
 		d3d_device_.reset();
 		d3d_.reset();
 
-		::FreeLibrary(mod_d3d9_);
+		mod_d3d9_.Free();
 	}
 
 	void DShowVMR9Allocator::CreateDevice()

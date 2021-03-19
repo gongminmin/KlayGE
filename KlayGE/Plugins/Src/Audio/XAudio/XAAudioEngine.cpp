@@ -36,6 +36,7 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <ostream>
 
 #include <boost/assert.hpp>
 
@@ -92,29 +93,19 @@ namespace KlayGE
 	XAAudioEngine::XAAudioEngine()
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		mod_xaudio2_ = ::LoadLibraryEx(TEXT(XAUDIO2_DLL_A), nullptr, 0);
-		if (nullptr == mod_xaudio2_)
+		if (!mod_xaudio2_.Load(XAUDIO2_DLL_A))
 		{
-			::MessageBoxW(nullptr, L"Can't load " XAUDIO2_DLL_W, L"Error", MB_OK);
+			LogError() << "COULDN'T load " XAUDIO2_DLL_A << std::endl;
+			Verify(false);
 		}
 
-		if (mod_xaudio2_ != nullptr)
-		{
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
 #if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
-			DynamicXAudio2Create_ = reinterpret_cast<XAudio2CreateFunc>(::GetProcAddress(mod_xaudio2_, "XAudio2Create"));
+		DynamicXAudio2Create_ = reinterpret_cast<XAudio2CreateFunc>(mod_xaudio2_.GetProcAddress("XAudio2Create"));
 #else
-			DynamicXAudio2Create_ = ::XAudio2Create;
+		DynamicXAudio2Create_ = ::XAudio2Create;
 #endif
-			DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioInitialize"));
-			DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioCalculate"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-		}
+		DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(mod_xaudio2_.GetProcAddress("X3DAudioInitialize"));
+		DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(mod_xaudio2_.GetProcAddress("X3DAudioCalculate"));
 #else
 		DynamicXAudio2Create_ = ::XAudio2Create;
 		DynamicX3DAudioInitialize_ = ::X3DAudioInitialize;
@@ -165,7 +156,7 @@ namespace KlayGE
 		xaudio_.reset();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_xaudio2_);
+		mod_xaudio2_.Free();
 #endif
 	}
 

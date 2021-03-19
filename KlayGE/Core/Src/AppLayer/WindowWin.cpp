@@ -68,19 +68,11 @@ namespace KlayGE
 		KFL_UNUSED(dc_mon);
 		KFL_UNUSED(rc_mon);
 
-		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
-		if (shcore)
+		DllLoader shcore;
+		if (shcore.Load("SHCore.dll"))
 		{
 			typedef HRESULT (CALLBACK *GetDpiForMonitorFunc)(HMONITOR mon, MONITOR_DPI_TYPE dpi_type, UINT* dpi_x, UINT* dpi_y);
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			GetDpiForMonitorFunc DynamicGetDpiForMonitor
-				= reinterpret_cast<GetDpiForMonitorFunc>(::GetProcAddress(shcore, "GetDpiForMonitor"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+			auto* DynamicGetDpiForMonitor = reinterpret_cast<GetDpiForMonitorFunc>(shcore.GetProcAddress("GetDpiForMonitor"));
 			if (DynamicGetDpiForMonitor)
 			{
 				UINT dpi_x, dpi_y;
@@ -91,7 +83,7 @@ namespace KlayGE
 				}
 			}
 
-			::FreeLibrary(shcore);
+			shcore.Free();
 		}
 
 		return TRUE;
@@ -349,36 +341,22 @@ namespace KlayGE
 	void Window::DetectsDpi()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
-		if (shcore)
+		DllLoader shcore;
+		if (shcore.Load("SHCore.dll"))
 		{
 			typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS value);
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			SetProcessDpiAwarenessFunc DynamicSetProcessDpiAwareness
-				= reinterpret_cast<SetProcessDpiAwarenessFunc>(::GetProcAddress(shcore, "SetProcessDpiAwareness"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+			auto* DynamicSetProcessDpiAwareness =
+				reinterpret_cast<SetProcessDpiAwarenessFunc>(shcore.GetProcAddress("SetProcessDpiAwareness"));
 
 			DynamicSetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
-			::FreeLibrary(shcore);
+			shcore.Free();
 		}
 
 		typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
-		HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
-		KLAYGE_ASSUME(ntdll != nullptr);
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		RtlGetVersionFunc DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+		DllLoader ntdll;
+		ntdll.Load("ntdll.dll");
+		auto* DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(ntdll.GetProcAddress("RtlGetVersion"));
 		if (DynamicRtlGetVersion)
 		{
 			OSVERSIONINFOEXW os_ver_info;

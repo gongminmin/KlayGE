@@ -36,6 +36,7 @@
 
 #include <cstring>
 #include <mutex>
+#include <ostream>
 
 #include <boost/assert.hpp>
 
@@ -145,45 +146,29 @@ namespace KlayGE
 	MFShowEngine::MFShowEngine()
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		mod_dxgi_ = ::LoadLibraryEx(TEXT("dxgi.dll"), nullptr, 0);
-		if (nullptr == mod_dxgi_)
+		if (!mod_dxgi_.Load("dxgi.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load dxgi.dll" << std::endl;
+			Verify(false);
 		}
-		mod_d3d11_ = ::LoadLibraryEx(TEXT("d3d11.dll"), nullptr, 0);
-		if (nullptr == mod_d3d11_)
+		if (!mod_d3d11_.Load("d3d11.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load d3d11.dll" << std::endl;
+			Verify(false);
 		}
-		mod_mfplat_ = ::LoadLibraryEx(TEXT("mfplat.dll"), nullptr, 0);
-		if (nullptr == mod_mfplat_)
+		if (!mod_mfplat_.Load("mfplat.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load mfplat.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load mfplat.dll" << std::endl;
+			Verify(false);
 		}
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		if (mod_dxgi_ != nullptr)
-		{
-			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
-		}
-		if (mod_d3d11_ != nullptr)
-		{
-			DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDevice"));
-		}
-		if (mod_mfplat_ != nullptr)
-		{
-			DynamicMFStartup_ = reinterpret_cast<MFStartupFunc>(::GetProcAddress(mod_mfplat_, "MFStartup"));
-			DynamicMFCreateDXGIDeviceManager_ = reinterpret_cast<MFCreateDXGIDeviceManagerFunc>(::GetProcAddress(mod_mfplat_,
-				"MFCreateDXGIDeviceManager"));
-			DynamicMFCreateAttributes_ = reinterpret_cast<MFCreateAttributesFunc>(::GetProcAddress(mod_mfplat_, "MFCreateAttributes"));
-			DynamicMFShutdown_ = reinterpret_cast<MFShutdownFunc>(::GetProcAddress(mod_mfplat_, "MFShutdown"));
-		}
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+		DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(mod_dxgi_.GetProcAddress("CreateDXGIFactory1"));
+		DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(mod_d3d11_.GetProcAddress("D3D11CreateDevice"));
+		DynamicMFStartup_ = reinterpret_cast<MFStartupFunc>(mod_mfplat_.GetProcAddress("MFStartup"));
+		DynamicMFCreateDXGIDeviceManager_ =
+			reinterpret_cast<MFCreateDXGIDeviceManagerFunc>(mod_mfplat_.GetProcAddress("MFCreateDXGIDeviceManager"));
+		DynamicMFCreateAttributes_ = reinterpret_cast<MFCreateAttributesFunc>(mod_mfplat_.GetProcAddress("MFCreateAttributes"));
+		DynamicMFShutdown_ = reinterpret_cast<MFShutdownFunc>(mod_mfplat_.GetProcAddress("MFShutdown"));
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
 		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;
@@ -215,9 +200,9 @@ namespace KlayGE
 		DynamicMFShutdown_ = nullptr;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_d3d11_);
-		::FreeLibrary(mod_dxgi_);
-		::FreeLibrary(mod_mfplat_);
+		mod_d3d11_.Free();
+		mod_dxgi_.Free();
+		mod_mfplat_.Free();
 #endif
 	}
 

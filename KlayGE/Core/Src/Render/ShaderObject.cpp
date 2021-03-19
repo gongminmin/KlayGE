@@ -101,7 +101,7 @@ namespace
 		~D3DCompilerLoader()
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			::FreeLibrary(mod_d3dcompiler_);
+			mod_d3dcompiler_.Free();
 #endif
 		}
 
@@ -278,19 +278,11 @@ namespace
 		D3DCompilerLoader()
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
-			KLAYGE_ASSUME(mod_d3dcompiler_ != nullptr);
+			mod_d3dcompiler_.Load("d3dcompiler_47.dll");
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
-			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
-			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
+			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(mod_d3dcompiler_.GetProcAddress("D3DCompile"));
+			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(mod_d3dcompiler_.GetProcAddress("D3DReflect"));
+			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(mod_d3dcompiler_.GetProcAddress("D3DStripShader"));
 #endif
 		}
 
@@ -303,7 +295,7 @@ namespace
 		typedef HRESULT (WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags,
 			ID3DBlob** ppStrippedBlob);
 
-		HMODULE mod_d3dcompiler_;
+		DllLoader mod_d3dcompiler_;
 		D3DCompileFunc DynamicD3DCompile_;
 		D3DReflectFunc DynamicD3DReflect_;
 		D3DStripShaderFunc DynamicD3DStripShader_;

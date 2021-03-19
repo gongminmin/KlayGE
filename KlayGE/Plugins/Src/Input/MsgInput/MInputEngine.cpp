@@ -35,6 +35,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
+#include <ostream>
 #include <system_error>
 
 #include <KlayGE/MsgInput/MInput.hpp>
@@ -48,27 +49,17 @@ namespace KlayGE
 	MsgInputEngine::MsgInputEngine()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		mod_hid_ = ::LoadLibraryEx(TEXT("hid.dll"), nullptr, 0);
-		if (nullptr == mod_hid_)
+		if (!mod_hid_.Load("hid.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load hid.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load hid.dll" << std::endl;
+			Verify(false);
 		}
 
-		if (mod_hid_ != nullptr)
-		{
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-			DynamicHidP_GetCaps_ = reinterpret_cast<HidP_GetCapsFunc>(::GetProcAddress(mod_hid_, "HidP_GetCaps"));
-			DynamicHidP_GetButtonCaps_ = reinterpret_cast<HidP_GetButtonCapsFunc>(::GetProcAddress(mod_hid_, "HidP_GetButtonCaps"));
-			DynamicHidP_GetValueCaps_ = reinterpret_cast<HidP_GetValueCapsFunc>(::GetProcAddress(mod_hid_, "HidP_GetValueCaps"));
-			DynamicHidP_GetUsages_ = reinterpret_cast<HidP_GetUsagesFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsages"));
-			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-		}
+		DynamicHidP_GetCaps_ = reinterpret_cast<HidP_GetCapsFunc>(mod_hid_.GetProcAddress("HidP_GetCaps"));
+		DynamicHidP_GetButtonCaps_ = reinterpret_cast<HidP_GetButtonCapsFunc>(mod_hid_.GetProcAddress("HidP_GetButtonCaps"));
+		DynamicHidP_GetValueCaps_ = reinterpret_cast<HidP_GetValueCapsFunc>(mod_hid_.GetProcAddress("HidP_GetValueCaps"));
+		DynamicHidP_GetUsages_ = reinterpret_cast<HidP_GetUsagesFunc>(mod_hid_.GetProcAddress("HidP_GetUsages"));
+		DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(mod_hid_.GetProcAddress("HidP_GetUsageValue"));
 #endif
 	}
 
@@ -99,7 +90,7 @@ namespace KlayGE
 		OVR::System::Destroy();
 #endif
 
-		::FreeLibrary(mod_hid_);
+		mod_hid_.Free();
 #endif
 	}
 

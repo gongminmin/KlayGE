@@ -243,6 +243,7 @@ namespace uwp
 
 #include <KlayGE/Input.hpp>
 #include <KFL/com_ptr.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KFL/Timer.hpp>
 
 #include <array>
@@ -293,7 +294,7 @@ namespace KlayGE
 		Signal::Connection on_pointer_wheel_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HMODULE mod_hid_;
+		DllLoader mod_hid_;
 		typedef NTSTATUS (WINAPI *HidP_GetCapsFunc)(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities);
 		typedef NTSTATUS (WINAPI *HidP_GetButtonCapsFunc)(HIDP_REPORT_TYPE ReportType, PHIDP_BUTTON_CAPS ButtonCaps,
 			PUSHORT ButtonCapsLength, PHIDP_PREPARSED_DATA PreparsedData);

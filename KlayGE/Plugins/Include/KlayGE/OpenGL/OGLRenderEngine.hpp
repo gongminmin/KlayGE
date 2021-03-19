@@ -172,7 +172,7 @@ namespace KlayGE
 		typedef BOOL (WINAPI *wglDeleteContextFUNC)(HGLRC hglrc);
 		typedef BOOL (WINAPI *wglMakeCurrentFUNC)(HDC hdc, HGLRC hglrc);
 
-		HMODULE mod_opengl32_;
+		DllLoader mod_opengl32_;
 		wglCreateContextFUNC DynamicWglCreateContext_;
 		wglDeleteContextFUNC DynamicWglDeleteContext_;
 		wglMakeCurrentFUNC DynamicWglMakeCurrent_;
