@@ -60,10 +60,10 @@ namespace
 {
 	using namespace KlayGE;
 
-	class SetD3D11ShaderParameterTextureSRV final
+	class D3D11ShaderParameterSrvUpdater final
 	{
 	public:
-		SetD3D11ShaderParameterTextureSRV(
+		D3D11ShaderParameterSrvUpdater(
 			std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameter const& param)
 			: srvsrc_(srvsrc), srv_(srv), param_(param)
 		{
@@ -83,8 +83,10 @@ namespace
 				}
 				else
 				{
-					std::get<0>(srvsrc_) = nullptr;
+					BOOST_ASSERT(srv->BufferResource());
+					srvsrc_ = std::make_tuple(srv->BufferResource().get(), 0, 1);
 				}
+
 				srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
 			}
 			else
@@ -100,95 +102,31 @@ namespace
 		RenderEffectParameter const& param_;
 	};
 
-	class SetD3D11ShaderParameterGraphicsBufferSRV final
+	class D3D11ShaderParameterUavUpdater final
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferSRV(
-			std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameter const& param)
-			: srvsrc_(srvsrc), srv_(srv), param_(param)
+		D3D11ShaderParameterUavUpdater(
+			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter const& param)
+			: uavsrc_(uavsrc), uav_(uav), uav_init_count_(uav_init_count), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			ShaderResourceViewPtr srv;
-			param_.Value(srv);
-			if (srv)
+			UnorderedAccessViewPtr uav;
+			param_.Value(uav);
+			if (uav)
 			{
-				if (srv->BufferResource())
+				if (uav->TextureResource())
 				{
-					srvsrc_ = std::make_tuple(srv->BufferResource().get(), 0, 1);
+					uavsrc_ = uav->TextureResource().get();
 				}
 				else
 				{
-					std::get<0>(srvsrc_) = nullptr;
+					BOOST_ASSERT(uav->BufferResource());
+					uavsrc_ = uav->BufferResource().get();
 				}
-				srv_ = checked_cast<D3D11ShaderResourceView&>(*srv).RetrieveD3DShaderResourceView();
-			}
-			else
-			{
-				std::get<0>(srvsrc_) = nullptr;
-				srv_ = nullptr;
-			}
-		}
 
-	private:
-		std::tuple<void*, uint32_t, uint32_t>& srvsrc_;
-		ID3D11ShaderResourceView*& srv_;
-		RenderEffectParameter const& param_;
-	};
-
-	class SetD3D11ShaderParameterTextureUAV final
-	{
-	public:
-		SetD3D11ShaderParameterTextureUAV(
-			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter const& param)
-			: uavsrc_(uavsrc), uav_(uav), uav_init_count_(uav_init_count), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			UnorderedAccessViewPtr uav;
-			param_.Value(uav);
-			if (uav)
-			{
-				uavsrc_ = uav->TextureResource().get();
-				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
-				uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
-				uav_init_count_ = d3d11_uav.InitCount();
-			}
-			else
-			{
-				uavsrc_ = nullptr;
-				uav_ = nullptr;
-				uav_init_count_ = 0;
-			}
-		}
-
-	private:
-		void*& uavsrc_;
-		ID3D11UnorderedAccessView*& uav_;
-		uint32_t& uav_init_count_;
-		RenderEffectParameter const& param_;
-	};
-
-	class SetD3D11ShaderParameterGraphicsBufferUAV final
-	{
-	public:
-		SetD3D11ShaderParameterGraphicsBufferUAV(
-			void*& uavsrc, ID3D11UnorderedAccessView*& uav, uint32_t& uav_init_count, RenderEffectParameter const& param)
-			: uavsrc_(uavsrc), uav_(uav), uav_init_count_(uav_init_count), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			UnorderedAccessViewPtr uav;
-			param_.Value(uav);
-			if (uav)
-			{
-				uavsrc_ = uav->BufferResource().get();
 				auto& d3d11_uav = checked_cast<D3D11UnorderedAccessView&>(*uav);
 				uav_ = d3d11_uav.RetrieveD3DUnorderedAccessView();
 				uav_init_count_ = d3d11_uav.InitCount();
@@ -1139,15 +1077,12 @@ namespace KlayGE
 		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D11ShaderParameterTextureSRV(srvsrcs_[stage_index][offset], srvs_[stage_index][offset], param);
-			break;
-
 		case REDT_buffer:
 		case REDT_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameterGraphicsBufferSRV(srvsrcs_[stage_index][offset], srvs_[stage_index][offset], param);
+			ret.update = D3D11ShaderParameterSrvUpdater(srvsrcs_[stage_index][offset], srvs_[stage_index][offset], param);
 			break;
 
 		case REDT_rw_texture1D:
@@ -1160,16 +1095,13 @@ namespace KlayGE
 		case REDT_rasterizer_ordered_texture2D:
 		case REDT_rasterizer_ordered_texture2DArray:
 		case REDT_rasterizer_ordered_texture3D:
-			ret.func = SetD3D11ShaderParameterTextureUAV(uavsrcs_[offset], uavs_[offset], uav_init_counts_[offset], param);
-			break;
-
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
 		case REDT_rasterizer_ordered_buffer:
 		case REDT_rasterizer_ordered_structured_buffer:
 		case REDT_rasterizer_ordered_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameterGraphicsBufferUAV(uavsrcs_[offset], uavs_[offset], uav_init_counts_[offset], param);
+			ret.update = D3D11ShaderParameterUavUpdater(uavsrcs_[offset], uavs_[offset], uav_init_counts_[offset], param);
 			break;
 
 		default:
@@ -1227,7 +1159,7 @@ namespace KlayGE
 		{
 			for (auto const & pb : pbs)
 			{
-				pb.func();
+				pb.update();
 			}
 		}
 

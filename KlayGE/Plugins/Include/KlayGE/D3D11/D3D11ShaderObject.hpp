@@ -348,7 +348,7 @@ namespace KlayGE
 		{
 			RenderEffectParameter const* param;
 			uint32_t offset;
-			std::function<void()> func;
+			std::function<void()> update;
 		};
 
 	public:
