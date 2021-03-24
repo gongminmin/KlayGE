@@ -176,7 +176,7 @@ namespace KlayGE
 	protected:
 		DXGI_FORMAT dxgi_fmt_;
 
-		std::unique_ptr<D3D12GpuMemoryBlock> mapped_mem_block_;
+		D3D12GpuMemoryBlock mapped_mem_block_;
 		TextureMapAccess mapped_tma_;
 		uint32_t mapped_x_offset_;
 		uint32_t mapped_y_offset_;

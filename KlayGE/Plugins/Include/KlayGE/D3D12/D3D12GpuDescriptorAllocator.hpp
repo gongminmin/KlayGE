@@ -41,10 +41,16 @@
 
 namespace KlayGE
 {
-	class D3D12GpuDescriptorPage final : boost::noncopyable
+	class D3D12GpuDescriptorPage final
 	{
+		D3D12GpuDescriptorPage(D3D12GpuDescriptorPage const& other) = delete;
+		D3D12GpuDescriptorPage& operator=(D3D12GpuDescriptorPage const& other) = delete;
+
 	public:
-		explicit D3D12GpuDescriptorPage(ID3D12DescriptorHeapPtr heap);
+		D3D12GpuDescriptorPage(uint32_t size, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
+
+		D3D12GpuDescriptorPage(D3D12GpuDescriptorPage&& other) noexcept;
+		D3D12GpuDescriptorPage& operator=(D3D12GpuDescriptorPage&& other) noexcept;
 
 		ID3D12DescriptorHeap* Heap() const noexcept
 		{
@@ -62,16 +68,28 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12DescriptorHeapPtr const heap_;
-		D3D12_CPU_DESCRIPTOR_HANDLE const cpu_handle_;
-		D3D12_GPU_DESCRIPTOR_HANDLE const gpu_handle_;
+		ID3D12DescriptorHeapPtr heap_;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle_;
+		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle_;
 	};
-	using D3D12GpuDescriptorPagePtr = std::shared_ptr<D3D12GpuDescriptorPage>;
 
-	class D3D12GpuDescriptorBlock final : boost::noncopyable
+	class D3D12GpuDescriptorBlock final
 	{
+		D3D12GpuDescriptorBlock(D3D12GpuDescriptorBlock const& other) = delete;
+		D3D12GpuDescriptorBlock& operator=(D3D12GpuDescriptorBlock const& other) = delete;
+
 	public:
+		D3D12GpuDescriptorBlock() noexcept;
+		D3D12GpuDescriptorBlock(D3D12GpuDescriptorBlock&& other) noexcept;
+		D3D12GpuDescriptorBlock& operator=(D3D12GpuDescriptorBlock&& other) noexcept;
+
+		void Reset() noexcept;
 		void Reset(D3D12GpuDescriptorPage const& page, uint32_t offset, uint32_t size) noexcept;
+
+		explicit operator bool() const noexcept
+		{
+			return heap_ != nullptr;
+		}
 
 		ID3D12DescriptorHeap* Heap() const noexcept
 		{
@@ -106,24 +124,29 @@ namespace KlayGE
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle_{};
 	};
 
-	class D3D12GpuDescriptorAllocator final : boost::noncopyable
+	class D3D12GpuDescriptorAllocator final
 	{
+		D3D12GpuDescriptorAllocator(D3D12GpuDescriptorAllocator const& other) = delete;
+		D3D12GpuDescriptorAllocator& operator=(D3D12GpuDescriptorAllocator const& other) = delete;
+
 	public:
-		explicit D3D12GpuDescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags) noexcept;
+		D3D12GpuDescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags) noexcept;
+
+		D3D12GpuDescriptorAllocator(D3D12GpuDescriptorAllocator&& other) noexcept;
+		D3D12GpuDescriptorAllocator& operator=(D3D12GpuDescriptorAllocator&& other) noexcept;
 
 		uint32_t DescriptorSize() const;
 
-		std::unique_ptr<D3D12GpuDescriptorBlock> Allocate(uint32_t size);
-		void Deallocate(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block, uint64_t fence_value);
-		void Renew(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint64_t fence_value, uint32_t size);
+		D3D12GpuDescriptorBlock Allocate(uint32_t size);
+		void Deallocate(D3D12GpuDescriptorBlock&& desc_block, uint64_t fence_value);
+		void Renew(D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value, uint32_t size);
 
 		void ClearStallPages(uint64_t fence_value);
 		void Clear();
 
 	private:
-		void Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
-		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock* desc_block, uint64_t fence_value);
-		D3D12GpuDescriptorPagePtr CreatePage(uint32_t size) const;
+		void Allocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint32_t size);
+		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value);
 
 	private:
 		D3D12_DESCRIPTOR_HEAP_TYPE const type_;
@@ -133,7 +156,7 @@ namespace KlayGE
 
 		struct PageInfo
 		{
-			D3D12GpuDescriptorPagePtr page;
+			D3D12GpuDescriptorPage page;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)

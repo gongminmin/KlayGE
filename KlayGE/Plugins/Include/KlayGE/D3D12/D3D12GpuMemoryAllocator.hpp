@@ -41,11 +41,17 @@
 
 namespace KlayGE
 {
-	class D3D12GpuMemoryPage final : boost::noncopyable
+	class D3D12GpuMemoryPage final
 	{
+		D3D12GpuMemoryPage(D3D12GpuMemoryPage const& other) = delete;
+		D3D12GpuMemoryPage& operator=(D3D12GpuMemoryPage const& other) = delete;
+
 	public:
-		D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource);
+		D3D12GpuMemoryPage(bool is_upload, uint32_t size_in_bytes);
 		~D3D12GpuMemoryPage() noexcept;
+
+		D3D12GpuMemoryPage(D3D12GpuMemoryPage&& other) noexcept;
+		D3D12GpuMemoryPage& operator=(D3D12GpuMemoryPage&& other) noexcept;
 
 		ID3D12Resource* Resource() const noexcept
 		{
@@ -57,6 +63,12 @@ namespace KlayGE
 			return cpu_addr_;
 		}
 
+		template <typename T>
+		T* CpuAddress() const noexcept
+		{
+			return reinterpret_cast<T*>(this->CpuAddress());
+		}
+
 		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const noexcept
 		{
 			return gpu_addr_;
@@ -64,18 +76,29 @@ namespace KlayGE
 
 	private:
 		bool const is_upload_;
-		ID3D12ResourcePtr const resource_;
+		ID3D12ResourcePtr resource_;
 		void* cpu_addr_;
-		D3D12_GPU_VIRTUAL_ADDRESS const gpu_addr_;
+		D3D12_GPU_VIRTUAL_ADDRESS gpu_addr_;
 	};
-	using D3D12GpuMemoryPagePtr = std::shared_ptr<D3D12GpuMemoryPage>;
 
-	class D3D12GpuMemoryBlock final : boost::noncopyable
+	class D3D12GpuMemoryBlock final
 	{
+		D3D12GpuMemoryBlock(D3D12GpuMemoryBlock const& other) = delete;
+		D3D12GpuMemoryBlock& operator=(D3D12GpuMemoryBlock const& other) = delete;
+
 	public:
 		D3D12GpuMemoryBlock() noexcept;
 
+		D3D12GpuMemoryBlock(D3D12GpuMemoryBlock&& other) noexcept;
+		D3D12GpuMemoryBlock& operator=(D3D12GpuMemoryBlock&& other) noexcept;
+
+		void Reset() noexcept;
 		void Reset(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept;
+
+		explicit operator bool() const noexcept
+		{
+			return resource_ != nullptr;
+		}
 
 		ID3D12Resource* Resource() const noexcept
 		{
@@ -97,6 +120,12 @@ namespace KlayGE
 			return cpu_addr_;
 		}
 
+		template <typename T>
+		T* CpuAddress() const noexcept
+		{
+			return reinterpret_cast<T*>(this->CpuAddress());
+		}
+
 		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress() const noexcept
 		{
 			return gpu_addr_;
@@ -110,27 +139,31 @@ namespace KlayGE
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_addr_ = 0;
 	};
 
-	class D3D12GpuMemoryAllocator final : boost::noncopyable
+	class D3D12GpuMemoryAllocator final
 	{
+		D3D12GpuMemoryAllocator(D3D12GpuMemoryAllocator const& other) = delete;
+		D3D12GpuMemoryAllocator& operator=(D3D12GpuMemoryAllocator const& other) = delete;
+
 	public:
 		static constexpr uint32_t DefaultAligment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
 
 	public:
 		explicit D3D12GpuMemoryAllocator(bool is_upload) noexcept;
 
-		std::unique_ptr<D3D12GpuMemoryBlock> Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
-		void Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value);
-		void Renew(std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value, uint32_t size_in_bytes,
-			uint32_t alignment = DefaultAligment);
+		D3D12GpuMemoryAllocator(D3D12GpuMemoryAllocator&& other) noexcept;
+		D3D12GpuMemoryAllocator& operator=(D3D12GpuMemoryAllocator&& other) noexcept;
+
+		D3D12GpuMemoryBlock Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
+		void Deallocate(D3D12GpuMemoryBlock&& mem_block, uint64_t fence_value);
+		void Renew(D3D12GpuMemoryBlock& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
 
 		void ClearStallPages(uint64_t fence_value);
 		void Clear();
 
 	private:
-		void Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes,
-			uint32_t alignment);
-		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock* mem_block, uint64_t fence_value);
-		D3D12GpuMemoryPagePtr CreatePage(uint32_t size_in_bytes) const;
+		void Allocate(
+			std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment);
+		void Deallocate(std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint64_t fence_value);
 
 	private:
 		bool const is_upload_;
@@ -139,7 +172,7 @@ namespace KlayGE
 
 		struct PageInfo
 		{
-			D3D12GpuMemoryPagePtr page;
+			D3D12GpuMemoryPage page;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
@@ -169,7 +202,7 @@ namespace KlayGE
 		};
 		std::vector<PageInfo> pages_;
 
-		std::vector<D3D12GpuMemoryPagePtr> large_pages_;
+		std::vector<D3D12GpuMemoryPage> large_pages_;
 	};
 } // namespace KlayGE
 

@@ -52,7 +52,7 @@ namespace KlayGE
 		ID3D12Device* device = re.D3DDevice();
 
 		desc_ = re.AllocCbvSrvUavDescBlock(1);
-		device->CreateShaderResourceView(res_->D3DResource(), &srv_desc, desc_->CpuHandle());
+		device->CreateShaderResourceView(res_->D3DResource(), &srv_desc, desc_.CpuHandle());
 	}
 
 	D3D12ShaderResourceViewSimulation::~D3D12ShaderResourceViewSimulation()
@@ -73,7 +73,7 @@ namespace KlayGE
 		ID3D12Device* device = re.D3DDevice();
 
 		desc_ = re.AllocRtvDescBlock(1);
-		device->CreateRenderTargetView(res_->D3DResource(), &rtv_desc, desc_->CpuHandle());
+		device->CreateRenderTargetView(res_->D3DResource(), &rtv_desc, desc_.CpuHandle());
 	}
 
 	D3D12RenderTargetViewSimulation::~D3D12RenderTargetViewSimulation()
@@ -94,7 +94,7 @@ namespace KlayGE
 		ID3D12Device* device = re.D3DDevice();
 
 		desc_ = re.AllocDsvDescBlock(1);
-		device->CreateDepthStencilView(res_->D3DResource(), &dsv_desc, desc_->CpuHandle());
+		device->CreateDepthStencilView(res_->D3DResource(), &dsv_desc, desc_.CpuHandle());
 	}
 
 	D3D12DepthStencilViewSimulation::~D3D12DepthStencilViewSimulation()
@@ -125,7 +125,7 @@ namespace KlayGE
 		}
 
 		desc_ = re.AllocCbvSrvUavDescBlock(1);
-		device->CreateUnorderedAccessView(res_->D3DResource(), counter, &uav_desc, desc_->CpuHandle());
+		device->CreateUnorderedAccessView(res_->D3DResource(), counter, &uav_desc, desc_.CpuHandle());
 	}
 
 	D3D12UnorderedAccessViewSimulation::~D3D12UnorderedAccessViewSimulation()
@@ -677,8 +677,8 @@ namespace KlayGE
 		re.FlushResourceBarriers(d3d_cmd_list);
 
 		auto cbv_srv_uav_desc_block = re.AllocDynamicCbvSrvUavDescBlock(1);
-		D3D12_CPU_DESCRIPTOR_HANDLE const cpu_handle = cbv_srv_uav_desc_block->CpuHandle();
-		D3D12_GPU_DESCRIPTOR_HANDLE const gpu_handle = cbv_srv_uav_desc_block->GpuHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE const cpu_handle = cbv_srv_uav_desc_block.CpuHandle();
+		D3D12_GPU_DESCRIPTOR_HANDLE const gpu_handle = cbv_srv_uav_desc_block.GpuHandle();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_f4_val_ = val;
@@ -697,8 +697,8 @@ namespace KlayGE
 		re.FlushResourceBarriers(d3d_cmd_list);
 
 		auto cbv_srv_uav_desc_block = re.AllocDynamicCbvSrvUavDescBlock(1);
-		D3D12_CPU_DESCRIPTOR_HANDLE const cpu_handle = cbv_srv_uav_desc_block->CpuHandle();
-		D3D12_GPU_DESCRIPTOR_HANDLE const gpu_handle = cbv_srv_uav_desc_block->GpuHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE const cpu_handle = cbv_srv_uav_desc_block.CpuHandle();
+		D3D12_GPU_DESCRIPTOR_HANDLE const gpu_handle = cbv_srv_uav_desc_block.GpuHandle();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, d3d_ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		clear_ui4_val_ = val;

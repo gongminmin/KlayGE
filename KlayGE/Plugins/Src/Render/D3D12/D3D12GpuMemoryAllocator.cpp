@@ -45,28 +45,98 @@ namespace
 
 namespace KlayGE
 {
-	D3D12GpuMemoryPage::D3D12GpuMemoryPage(bool is_upload, ID3D12ResourcePtr resource)
-		: is_upload_(is_upload), resource_(std::move(resource)), gpu_addr_(resource_->GetGPUVirtualAddress())
+	D3D12GpuMemoryPage::D3D12GpuMemoryPage(bool is_upload, uint32_t size_in_bytes) : is_upload_(is_upload)
 	{
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* device = d3d12_re.D3DDevice();
+
+		D3D12_RESOURCE_STATES init_state;
+		D3D12_HEAP_PROPERTIES heap_prop;
+		if (is_upload_)
+		{
+			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+		}
+		else
+		{
+			init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+			heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
+		}
+		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		heap_prop.CreationNodeMask = 0;
+		heap_prop.VisibleNodeMask = 0;
+
+		D3D12_RESOURCE_DESC res_desc;
+		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		res_desc.Alignment = 0;
+		res_desc.Width = size_in_bytes;
+		res_desc.Height = 1;
+		res_desc.DepthOrArraySize = 1;
+		res_desc.MipLevels = 1;
+		res_desc.Format = DXGI_FORMAT_UNKNOWN;
+		res_desc.SampleDesc.Count = 1;
+		res_desc.SampleDesc.Quality = 0;
+		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		TIFHR(device->CreateCommittedResource(
+			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, UuidOf<ID3D12Resource>(), resource_.put_void()));
+
 		D3D12_RANGE const read_range{0, 0};
 		TIFHR(resource_->Map(0, &read_range, &cpu_addr_));
+
+		gpu_addr_ = resource_->GetGPUVirtualAddress();
 	}
 
 	D3D12GpuMemoryPage::~D3D12GpuMemoryPage() noexcept
 	{
-		D3D12_RANGE const write_range{0, 0};
-		resource_->Unmap(0, is_upload_ ? nullptr : &write_range);
+		if (resource_)
+		{
+			D3D12_RANGE const write_range{0, 0};
+			resource_->Unmap(0, is_upload_ ? nullptr : &write_range);
+		}
+	}
+
+	D3D12GpuMemoryPage::D3D12GpuMemoryPage(D3D12GpuMemoryPage&& other) noexcept
+		: is_upload_(other.is_upload_), resource_(std::move(other.resource_)), cpu_addr_(std::move(other.cpu_addr_)),
+		  gpu_addr_(std::move(other.gpu_addr_))
+	{
+	}
+
+	D3D12GpuMemoryPage& D3D12GpuMemoryPage::operator=(D3D12GpuMemoryPage&& other) noexcept
+	{
+		if (this != &other)
+		{
+			BOOST_ASSERT(is_upload_ == other.is_upload_);
+
+			resource_ = std::move(other.resource_);
+			cpu_addr_ = std::move(other.cpu_addr_);
+			gpu_addr_ = std::move(other.gpu_addr_);
+		}
+		return *this;
 	}
 
 
 	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock() noexcept = default;
+	D3D12GpuMemoryBlock::D3D12GpuMemoryBlock(D3D12GpuMemoryBlock&& other) noexcept = default;
+	D3D12GpuMemoryBlock& D3D12GpuMemoryBlock::operator=(D3D12GpuMemoryBlock&& other) noexcept = default;
+
+	void D3D12GpuMemoryBlock::Reset() noexcept
+	{
+		resource_ = nullptr;
+		offset_ = 0;
+		size_ = 0;
+		cpu_addr_ = nullptr;
+		gpu_addr_ = {};
+	}
 
 	void D3D12GpuMemoryBlock::Reset(D3D12GpuMemoryPage const& page, uint32_t offset, uint32_t size) noexcept
 	{
 		resource_ = page.Resource();
 		offset_ = offset;
 		size_ = size;
-		cpu_addr_ = reinterpret_cast<uint8_t*>(page.CpuAddress()) + offset;
+		cpu_addr_ = page.CpuAddress<uint8_t>() + offset;
 		gpu_addr_ = page.GpuAddress() + offset;
 	}
 
@@ -75,17 +145,34 @@ namespace KlayGE
 	{
 	}
 
-	std::unique_ptr<D3D12GpuMemoryBlock> D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
+	D3D12GpuMemoryAllocator::D3D12GpuMemoryAllocator(D3D12GpuMemoryAllocator&& other) noexcept
+		: is_upload_(other.is_upload_), pages_(std::move(other.pages_)), large_pages_(std::move(other.large_pages_))
+	{
+	}
+
+	D3D12GpuMemoryAllocator& D3D12GpuMemoryAllocator::operator=(D3D12GpuMemoryAllocator&& other) noexcept
+	{
+		if (this != &other)
+		{
+			BOOST_ASSERT(is_upload_ == other.is_upload_);
+
+			pages_ = std::move(other.pages_);
+			large_pages_ = std::move(other.large_pages_);
+		}
+		return *this;
+	}
+
+	D3D12GpuMemoryBlock D3D12GpuMemoryAllocator::Allocate(uint32_t size_in_bytes, uint32_t alignment)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		std::unique_ptr<D3D12GpuMemoryBlock> mem_block;
+		D3D12GpuMemoryBlock mem_block;
 		this->Allocate(lock, mem_block, size_in_bytes, alignment);
 		return mem_block;
 	}
 
-	void D3D12GpuMemoryAllocator::Allocate(std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block,
-		uint32_t size_in_bytes, uint32_t alignment)
+	void D3D12GpuMemoryAllocator::Allocate(
+		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment)
 	{
 		KFL_UNUSED(proof_of_lock);
 
@@ -94,28 +181,20 @@ namespace KlayGE
 
 		uint32_t const aligned_size = (size_in_bytes + alignment_mask) & ~alignment_mask;
 
-		if (!mem_block)
-		{
-			mem_block = MakeUniquePtr<D3D12GpuMemoryBlock>();
-		}
-
 		if (aligned_size > DefaultPageSize)
 		{
-			auto large_page = this->CreatePage(aligned_size);
-			mem_block->Reset(*large_page, 0, size_in_bytes);
-			large_pages_.emplace_back(std::move(large_page));
+			auto& large_page = large_pages_.emplace_back(D3D12GpuMemoryPage(is_upload_, aligned_size));
+			mem_block.Reset(large_page, 0, size_in_bytes);
 			return;
 		}
 
 		for (auto& page_info : pages_)
 		{
 			auto const iter = std::lower_bound(page_info.free_list.begin(), page_info.free_list.end(), aligned_size,
-				[](PageInfo::FreeRange const& free_range, uint32_t s) {
-					return free_range.first_offset + s > free_range.last_offset;
-				});
+				[](PageInfo::FreeRange const& free_range, uint32_t s) { return free_range.first_offset + s > free_range.last_offset; });
 			if (iter != page_info.free_list.end())
 			{
-				mem_block->Reset(*page_info.page, iter->first_offset, aligned_size);
+				mem_block.Reset(page_info.page, iter->first_offset, aligned_size);
 				iter->first_offset += aligned_size;
 				if (iter->first_offset == iter->last_offset)
 				{
@@ -126,34 +205,33 @@ namespace KlayGE
 			}
 		}
 
-		auto& new_page_info = pages_.emplace_back();
-		new_page_info.page = this->CreatePage(DefaultPageSize);
-		new_page_info.free_list.push_back({aligned_size, DefaultPageSize});
-		mem_block->Reset(*new_page_info.page, 0, aligned_size);
+		D3D12GpuMemoryPage new_page(is_upload_, DefaultPageSize);
+		mem_block.Reset(new_page, 0, aligned_size);
+		pages_.emplace_back(PageInfo{std::move(new_page), {{aligned_size, DefaultPageSize}}, {}});
 	}
 
-	void D3D12GpuMemoryAllocator::Deallocate(std::unique_ptr<D3D12GpuMemoryBlock> mem_block, uint64_t fence_value)
+	void D3D12GpuMemoryAllocator::Deallocate(D3D12GpuMemoryBlock&& mem_block, uint64_t fence_value)
 	{
 		if (mem_block)
 		{
 			std::lock_guard<std::mutex> lock(allocation_mutex_);
-			this->Deallocate(lock, mem_block.get(), fence_value);
+			this->Deallocate(lock, mem_block, fence_value);
 		}
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock* mem_block, uint64_t fence_value)
+		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint64_t fence_value)
 	{
 		KFL_UNUSED(proof_of_lock);
-		BOOST_ASSERT(mem_block != nullptr);
+		BOOST_ASSERT(mem_block);
 
-		if (mem_block->Size() <= DefaultPageSize)
+		if (mem_block.Size() <= DefaultPageSize)
 		{
 			for (auto& page : pages_)
 			{
-				if (page.page->Resource() == mem_block->Resource())
+				if (page.page.Resource() == mem_block.Resource())
 				{
-					page.stall_list.push_back({{mem_block->Offset(), mem_block->Offset() + mem_block->Size()}, fence_value});
+					page.stall_list.push_back({{mem_block.Offset(), mem_block.Offset() + mem_block.Size()}, fence_value});
 					return;
 				}
 			}
@@ -162,14 +240,13 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12GpuMemoryAllocator::Renew(
-		std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment)
+	void D3D12GpuMemoryAllocator::Renew(D3D12GpuMemoryBlock& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
 		if (mem_block)
 		{
-			this->Deallocate(lock, mem_block.get(), fence_value);
+			this->Deallocate(lock, mem_block, fence_value);
 		}
 		this->Allocate(lock, mem_block, size_in_bytes, alignment);
 	}
@@ -249,47 +326,5 @@ namespace KlayGE
 
 		pages_.clear();
 		large_pages_.clear();
-	}
-
-	D3D12GpuMemoryPagePtr D3D12GpuMemoryAllocator::CreatePage(uint32_t size_in_bytes) const
-	{
-		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto* device = d3d12_re.D3DDevice();
-
-		D3D12_RESOURCE_STATES init_state;
-		D3D12_HEAP_PROPERTIES heap_prop;
-		if (is_upload_)
-		{
-			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
-			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-		}
-		else
-		{
-			init_state = D3D12_RESOURCE_STATE_COPY_DEST;
-			heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
-		}
-		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		heap_prop.CreationNodeMask = 0;
-		heap_prop.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC res_desc;
-		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		res_desc.Alignment = 0;
-		res_desc.Width = size_in_bytes;
-		res_desc.Height = 1;
-		res_desc.DepthOrArraySize = 1;
-		res_desc.MipLevels = 1;
-		res_desc.Format = DXGI_FORMAT_UNKNOWN;
-		res_desc.SampleDesc.Count = 1;
-		res_desc.SampleDesc.Quality = 0;
-		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		ID3D12ResourcePtr resource;
-		TIFHR(device->CreateCommittedResource(
-			&heap_prop, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, nullptr, UuidOf<ID3D12Resource>(), resource.put_void()));
-
-		return MakeSharedPtr<D3D12GpuMemoryPage>(is_upload_, std::move(resource));
 	}
 } // namespace KlayGE

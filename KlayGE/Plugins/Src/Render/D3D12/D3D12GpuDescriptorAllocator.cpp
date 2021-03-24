@@ -47,12 +47,39 @@ namespace
 
 namespace KlayGE
 {
-	D3D12GpuDescriptorPage::D3D12GpuDescriptorPage(ID3D12DescriptorHeapPtr heap)
-		: heap_(std::move(heap)), cpu_handle_(heap_->GetCPUDescriptorHandleForHeapStart()),
-		  gpu_handle_(heap_->GetGPUDescriptorHandleForHeapStart())
+	D3D12GpuDescriptorPage::D3D12GpuDescriptorPage(uint32_t size, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 	{
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* device = d3d12_re.D3DDevice();
+
+		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
+		cbv_srv_heap_desc.Type = type;
+		cbv_srv_heap_desc.NumDescriptors = size;
+		cbv_srv_heap_desc.Flags = flags;
+		cbv_srv_heap_desc.NodeMask = 0;
+		TIFHR(device->CreateDescriptorHeap(&cbv_srv_heap_desc, UuidOf<ID3D12DescriptorHeap>(), heap_.put_void()));
+
+		cpu_handle_ = heap_->GetCPUDescriptorHandleForHeapStart();
+		gpu_handle_ = heap_->GetGPUDescriptorHandleForHeapStart();
 	}
 
+	D3D12GpuDescriptorPage::D3D12GpuDescriptorPage(D3D12GpuDescriptorPage&& other) noexcept = default;
+	D3D12GpuDescriptorPage& D3D12GpuDescriptorPage::operator=(D3D12GpuDescriptorPage&& other) noexcept = default;
+
+
+	D3D12GpuDescriptorBlock::D3D12GpuDescriptorBlock() noexcept = default;
+	D3D12GpuDescriptorBlock::D3D12GpuDescriptorBlock(D3D12GpuDescriptorBlock&& other) noexcept = default;
+	D3D12GpuDescriptorBlock& D3D12GpuDescriptorBlock::operator=(D3D12GpuDescriptorBlock&& other) noexcept = default;
+
+	void D3D12GpuDescriptorBlock::Reset() noexcept
+	{
+		heap_ = nullptr;
+		offset_ = 0;
+		size_ = 0;
+
+		cpu_handle_ = {};
+		gpu_handle_ = {};
+	}
 
 	void D3D12GpuDescriptorBlock::Reset(D3D12GpuDescriptorPage const& page, uint32_t offset, uint32_t size) noexcept
 	{
@@ -72,22 +99,39 @@ namespace KlayGE
 	{
 	}
 
+	D3D12GpuDescriptorAllocator::D3D12GpuDescriptorAllocator(D3D12GpuDescriptorAllocator&& other) noexcept
+		: type_(other.type_), flags_(other.flags_), pages_(std::move(other.pages_))
+	{
+	}
+
+	D3D12GpuDescriptorAllocator& D3D12GpuDescriptorAllocator::operator=(D3D12GpuDescriptorAllocator&& other) noexcept
+	{
+		if (this != &other)
+		{
+			BOOST_ASSERT(type_ == other.type_);
+			BOOST_ASSERT(flags_ == other.flags_);
+
+			pages_ = std::move(other.pages_);
+		}
+		return *this;
+	}
+
 	uint32_t D3D12GpuDescriptorAllocator::DescriptorSize() const
 	{
 		return descriptor_size[type_];
 	}
 
-	std::unique_ptr<D3D12GpuDescriptorBlock> D3D12GpuDescriptorAllocator::Allocate(uint32_t size)
+	D3D12GpuDescriptorBlock D3D12GpuDescriptorAllocator::Allocate(uint32_t size)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
-		std::unique_ptr<D3D12GpuDescriptorBlock> desc_block;
+		D3D12GpuDescriptorBlock desc_block;
 		this->Allocate(lock, desc_block, size);
 		return desc_block;
 	}
 
 	void D3D12GpuDescriptorAllocator::Allocate(
-		std::lock_guard<std::mutex>& proof_of_lock, std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size)
+		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint32_t size)
 	{
 		KFL_UNUSED(proof_of_lock);
 
@@ -96,11 +140,6 @@ namespace KlayGE
 			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto* device = d3d12_re.D3DDevice();
 			descriptor_size[type_] = device->GetDescriptorHandleIncrementSize(type_);
-		}
-
-		if (!desc_block)
-		{
-			desc_block = MakeUniquePtr<D3D12GpuDescriptorBlock>();
 		}
 
 		uint16_t const default_page_size = default_descriptor_page_size[type_];
@@ -112,7 +151,7 @@ namespace KlayGE
 				[](PageInfo::FreeRange const& free_range, uint32_t s) { return free_range.first_offset + s > free_range.last_offset; });
 			if (iter != page_info.free_list.end())
 			{
-				desc_block->Reset(*page_info.page, iter->first_offset, size);
+				desc_block.Reset(page_info.page, iter->first_offset, size);
 				iter->first_offset += static_cast<uint16_t>(size);
 				if (iter->first_offset == iter->last_offset)
 				{
@@ -123,37 +162,36 @@ namespace KlayGE
 			}
 		}
 
-		auto& new_page_info = pages_.emplace_back();
-		new_page_info.page = this->CreatePage(default_page_size);
-		new_page_info.free_list.push_back({static_cast<uint16_t>(size), default_page_size});
-		desc_block->Reset(*new_page_info.page, 0, size);
+		D3D12GpuDescriptorPage new_page(default_page_size, type_, flags_);
+		desc_block.Reset(new_page, 0, size);
+		pages_.emplace_back(PageInfo{std::move(new_page), {{static_cast<uint16_t>(size), default_page_size}}, {}});
 	}
 
-	void D3D12GpuDescriptorAllocator::Deallocate(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block, uint64_t fence_value)
+	void D3D12GpuDescriptorAllocator::Deallocate(D3D12GpuDescriptorBlock&& desc_block, uint64_t fence_value)
 	{
 		if (desc_block)
 		{
 			std::lock_guard<std::mutex> lock(allocation_mutex_);
-			this->Deallocate(lock, desc_block.get(), fence_value);
+			this->Deallocate(lock, desc_block, fence_value);
 		}
 	}
 
 	void D3D12GpuDescriptorAllocator::Deallocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock* desc_block, uint64_t fence_value)
+		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value)
 	{
 		KFL_UNUSED(proof_of_lock);
-		BOOST_ASSERT(desc_block != nullptr);
+		BOOST_ASSERT(desc_block);
 
 		uint16_t const default_page_size = default_descriptor_page_size[type_];
 
-		if (desc_block->Size() <= default_page_size)
+		if (desc_block.Size() <= default_page_size)
 		{
 			for (auto& page : pages_)
 			{
-				if (page.page->Heap() == desc_block->Heap())
+				if (page.page.Heap() == desc_block.Heap())
 				{
 					page.stall_list.push_back(
-						{{static_cast<uint16_t>(desc_block->Offset()), static_cast<uint16_t>(desc_block->Offset() + desc_block->Size())},
+						{{static_cast<uint16_t>(desc_block.Offset()), static_cast<uint16_t>(desc_block.Offset() + desc_block.Size())},
 							fence_value});
 					return;
 				}
@@ -163,13 +201,13 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12GpuDescriptorAllocator::Renew(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint64_t fence_value, uint32_t size)
+	void D3D12GpuDescriptorAllocator::Renew(D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value, uint32_t size)
 	{
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
 		if (desc_block)
 		{
-			this->Deallocate(lock, desc_block.get(), fence_value);
+			this->Deallocate(lock, desc_block, fence_value);
 		}
 		this->Allocate(lock, desc_block, size);
 	}
@@ -246,21 +284,5 @@ namespace KlayGE
 		std::lock_guard<std::mutex> lock(allocation_mutex_);
 
 		pages_.clear();
-	}
-
-	D3D12GpuDescriptorPagePtr D3D12GpuDescriptorAllocator::CreatePage(uint32_t size) const
-	{
-		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		auto* device = d3d12_re.D3DDevice();
-
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-		cbv_srv_heap_desc.Type = type_;
-		cbv_srv_heap_desc.NumDescriptors = size;
-		cbv_srv_heap_desc.Flags = flags_;
-		cbv_srv_heap_desc.NodeMask = 0;
-		ID3D12DescriptorHeapPtr heap;
-		TIFHR(device->CreateDescriptorHeap(&cbv_srv_heap_desc, UuidOf<ID3D12DescriptorHeap>(), heap.put_void()));
-
-		return MakeSharedPtr<D3D12GpuDescriptorPage>(std::move(heap));
 	}
 } // namespace KlayGE

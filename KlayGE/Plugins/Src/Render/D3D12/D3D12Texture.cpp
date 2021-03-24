@@ -521,7 +521,7 @@ namespace KlayGE
 		d3d_ua_views_.clear();
 
 		d3d_resource_.reset();
-		mapped_mem_block_.reset();
+		mapped_mem_block_.Reset();
 	}
 
 	bool D3D12Texture::HWResourceReady() const
@@ -715,11 +715,11 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, 0, num_subres, 0, &layouts[0], &num_rows[0], &row_sizes_in_bytes[0], &required_size);
 
-			auto upload_mem_block = re.AllocMemBlock(true, static_cast<uint32_t>(required_size));
-			auto const& upload_buff = upload_mem_block->Resource();
-			uint32_t const upload_buff_offset = upload_mem_block->Offset();
+			auto upload_mem_block = re.AllocUploadMemBlock(static_cast<uint32_t>(required_size));
+			auto const& upload_buff = upload_mem_block.Resource();
+			uint32_t const upload_buff_offset = upload_mem_block.Offset();
 
-			uint8_t* p = reinterpret_cast<uint8_t*>(upload_mem_block->CpuAddress());
+			uint8_t* p = upload_mem_block.CpuAddress<uint8_t>();
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
 				D3D12_SUBRESOURCE_DATA src_data;
@@ -773,7 +773,7 @@ namespace KlayGE
 				re.CommitLoadCmd();
 			}
 
-			re.DeallocMemBlock(true, std::move(upload_mem_block));
+			re.DeallocUploadMemBlock(std::move(upload_mem_block));
 		}
 	}
 
@@ -803,10 +803,10 @@ namespace KlayGE
 		uint32_t required_size = 0;
 		this->GetCopyableFootprints(width, height, depth, layout, num_row, row_size_in_bytes, required_size);
 
-		std::unique_ptr<D3D12GpuMemoryBlock> readback_mem_block;
+		D3D12GpuMemoryBlock readback_mem_block;
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			readback_mem_block = re.AllocMemBlock(false, static_cast<uint32_t>(required_size));
+			readback_mem_block = re.AllocReadbackMemBlock(static_cast<uint32_t>(required_size));
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -818,9 +818,9 @@ namespace KlayGE
 			src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 			src.SubresourceIndex = subres;
 
-			layout.Offset += readback_mem_block->Offset();
+			layout.Offset += readback_mem_block.Offset();
 			D3D12_TEXTURE_COPY_LOCATION dst;
-			dst.pResource = readback_mem_block->Resource();
+			dst.pResource = readback_mem_block.Resource();
 			dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			dst.PlacedFootprint = layout;
 
@@ -841,18 +841,18 @@ namespace KlayGE
 		switch (tma)
 		{
 		case TMA_Read_Only:
-			p = readback_mem_block->CpuAddress();
+			p = readback_mem_block.CpuAddress();
 			mapped_mem_block_ = std::move(readback_mem_block);
 			break;
 
 		case TMA_Read_Write:
 		case TMA_Write_Only:
-			mapped_mem_block_ = re.AllocMemBlock(true, static_cast<uint32_t>(required_size));
-			p = mapped_mem_block_->CpuAddress();
+			mapped_mem_block_ = re.AllocUploadMemBlock(static_cast<uint32_t>(required_size));
+			p = mapped_mem_block_.CpuAddress();
 			if (TMA_Read_Write == tma)
 			{
-				memcpy(p, readback_mem_block->CpuAddress(), required_size);
-				re.DeallocMemBlock(false, std::move(readback_mem_block));
+				memcpy(p, readback_mem_block.CpuAddress(), required_size);
+				re.DeallocReadbackMemBlock(std::move(readback_mem_block));
 			}
 			break;
 
@@ -882,9 +882,9 @@ namespace KlayGE
 			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
-			layout.Offset += mapped_mem_block_->Offset();
+			layout.Offset += mapped_mem_block_.Offset();
 			D3D12_TEXTURE_COPY_LOCATION src;
-			src.pResource = mapped_mem_block_->Resource();
+			src.pResource = mapped_mem_block_.Resource();
 			src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			src.PlacedFootprint = layout;
 
@@ -904,8 +904,14 @@ namespace KlayGE
 			cmd_list->CopyTextureRegion(&dst, mapped_x_offset_, mapped_y_offset_, mapped_z_offset_, &src, &src_box);
 		}
 
-		re.DeallocMemBlock(mapped_tma_ != TMA_Read_Only, std::move(mapped_mem_block_));
-		mapped_mem_block_.reset();
+		if (mapped_tma_ == TMA_Read_Only)
+		{
+			re.DeallocReadbackMemBlock(std::move(mapped_mem_block_));
+		}
+		else
+		{
+			re.DeallocUploadMemBlock(std::move(mapped_mem_block_));
+		}
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(

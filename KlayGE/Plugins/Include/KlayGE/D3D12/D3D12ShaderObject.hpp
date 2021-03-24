@@ -298,13 +298,13 @@ namespace KlayGE
 		{
 			return d3d_immutable_->root_signature_.get();
 		}
-		D3D12GpuDescriptorBlock* SrvUavDescBlock() const noexcept
+		D3D12GpuDescriptorBlock const& SrvUavDescBlock() const noexcept
 		{
-			return srv_uav_desc_block_.get();
+			return srv_uav_desc_block_;
 		}
-		D3D12GpuDescriptorBlock* SamplerDescBlock() const noexcept
+		D3D12GpuDescriptorBlock const& SamplerDescBlock() const noexcept
 		{
-			return d3d_immutable_->sampler_desc_block_.get();
+			return d3d_immutable_->sampler_desc_block_;
 		}
 
 		void* GetD3D12ShaderObjectTemplate() noexcept
@@ -325,7 +325,7 @@ namespace KlayGE
 			~D3D12Immutable();
 
 			ID3D12RootSignaturePtr root_signature_;
-			std::unique_ptr<D3D12GpuDescriptorBlock> sampler_desc_block_;
+			D3D12GpuDescriptorBlock sampler_desc_block_;
 
 			std::array<uint32_t, NumShaderStages> num_srvs_{};
 			std::array<uint32_t, NumShaderStages> num_uavs_{};
@@ -355,7 +355,7 @@ namespace KlayGE
 		std::array<std::vector<ParameterBind>, NumShaderStages> param_binds_;
 		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> srv_uav_srcs_;
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> srv_uav_handles_;
-		std::unique_ptr<D3D12GpuDescriptorBlock> srv_uav_desc_block_;
+		D3D12GpuDescriptorBlock srv_uav_desc_block_;
 	};
 
 	typedef std::shared_ptr<D3D12ShaderObject> D3D12ShaderObjectPtr;

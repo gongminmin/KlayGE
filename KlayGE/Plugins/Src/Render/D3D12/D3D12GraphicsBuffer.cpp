@@ -175,21 +175,21 @@ namespace KlayGE
 
 		if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
-			gpu_mem_block_ = re.AllocMemBlock(true, size_in_byte_);
-			d3d_resource_ = gpu_mem_block_->Resource();
-			d3d_resource_offset_ = gpu_mem_block_->Offset();
-			gpu_vaddr_ = gpu_mem_block_->GpuAddress();
+			gpu_mem_block_ = re.AllocUploadMemBlock(size_in_byte_);
+			d3d_resource_ = gpu_mem_block_.Resource();
+			d3d_resource_offset_ = gpu_mem_block_.Offset();
+			gpu_vaddr_ = gpu_mem_block_.GpuAddress();
 
 			if (subres_init != nullptr)
 			{
-				memcpy(gpu_mem_block_->CpuAddress(), subres_init, size_in_byte_);
+				memcpy(gpu_mem_block_.CpuAddress(), subres_init, size_in_byte_);
 			}
 
 			curr_states_[0] = D3D12_RESOURCE_STATE_GENERIC_READ;
 		}
 		else
 		{
-			gpu_mem_block_.reset();
+			gpu_mem_block_.Reset();
 
 			D3D12_RESOURCE_STATES init_state;
 			D3D12_HEAP_PROPERTIES heap_prop;
@@ -240,8 +240,8 @@ namespace KlayGE
 
 			if (subres_init != nullptr)
 			{
-				auto upload_mem_block = re.AllocMemBlock(true, size_in_byte_);
-				memcpy(upload_mem_block->CpuAddress(), subres_init, size_in_byte_);
+				auto upload_mem_block = re.AllocUploadMemBlock(size_in_byte_);
+				memcpy(upload_mem_block.CpuAddress(), subres_init, size_in_byte_);
 
 				{
 					re.ResetLoadCmd();
@@ -251,14 +251,14 @@ namespace KlayGE
 					re.FlushResourceBarriers(cmd_list);
 
 					cmd_list->CopyBufferRegion(
-						d3d_resource_.get(), d3d_resource_offset_, upload_mem_block->Resource(), upload_mem_block->Offset(), size_in_byte_);
+						d3d_resource_.get(), d3d_resource_offset_, upload_mem_block.Resource(), upload_mem_block.Offset(), size_in_byte_);
 
 					curr_states_[0] = init_state;
 
 					re.CommitLoadCmd();
 				}
 
-				re.DeallocMemBlock(true, std::move(upload_mem_block));
+				re.DeallocUploadMemBlock(std::move(upload_mem_block));
 			}
 		}
 
@@ -290,8 +290,8 @@ namespace KlayGE
 		if (gpu_mem_block_)
 		{
 			auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.DeallocMemBlock(true, std::move(gpu_mem_block_));
-			gpu_mem_block_.reset();
+			re.DeallocUploadMemBlock(std::move(gpu_mem_block_));
+			gpu_mem_block_.Reset();
 		}
 		d3d_resource_.reset();
 		d3d_resource_offset_ = 0;
@@ -319,10 +319,10 @@ namespace KlayGE
 		case BA_Write_Only:
 			if (gpu_mem_block_)
 			{
-				re.RenewMemBlock(true, gpu_mem_block_, size_in_byte_);
-				d3d_resource_ = gpu_mem_block_->Resource();
-				d3d_resource_offset_ = gpu_mem_block_->Offset();
-				gpu_vaddr_ = gpu_mem_block_->GpuAddress();
+				re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_);
+				d3d_resource_ = gpu_mem_block_.Resource();
+				d3d_resource_offset_ = gpu_mem_block_.Offset();
+				gpu_vaddr_ = gpu_mem_block_.GpuAddress();
 			}
 			else
 			{
@@ -340,7 +340,7 @@ namespace KlayGE
 		void* p;
 		if (gpu_mem_block_)
 		{
-			p = gpu_mem_block_->CpuAddress();
+			p = gpu_mem_block_.CpuAddress();
 		}
 		else
 		{
@@ -454,38 +454,38 @@ namespace KlayGE
 			uint8_t* old_mem = nullptr; 
 			if (offset > 0)
 			{
-				old_mem = static_cast<uint8_t*>(gpu_mem_block_->CpuAddress());
+				old_mem = gpu_mem_block_.CpuAddress<uint8_t>();
 			}
 
-			re.RenewMemBlock(true, gpu_mem_block_, size_in_byte_);
+			re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_);
 
-			uint8_t* dst = static_cast<uint8_t*>(gpu_mem_block_->CpuAddress());
+			uint8_t* dst = gpu_mem_block_.CpuAddress<uint8_t>();
 			if (offset > 0)
 			{
 				memcpy(dst, old_mem, offset);
 			}
 			memcpy(dst + offset, data, size);
 
-			d3d_resource_ = gpu_mem_block_->Resource();
-			d3d_resource_offset_ = gpu_mem_block_->Offset();
-			gpu_vaddr_ = gpu_mem_block_->GpuAddress();
+			d3d_resource_ = gpu_mem_block_.Resource();
+			d3d_resource_offset_ = gpu_mem_block_.Offset();
+			gpu_vaddr_ = gpu_mem_block_.GpuAddress();
 		}
 		else
 		{
 			auto* cmd_list = re.D3DRenderCmdList();
 
-			auto upload_mem_block = re.AllocMemBlock(true, size);
-			auto* const upload_buff = upload_mem_block->Resource();
-			uint32_t const upload_buff_offset = upload_mem_block->Offset();
+			auto upload_mem_block = re.AllocUploadMemBlock(size);
+			auto* const upload_buff = upload_mem_block.Resource();
+			uint32_t const upload_buff_offset = upload_mem_block.Offset();
 
-			memcpy(upload_mem_block->CpuAddress(), data, size);
+			memcpy(upload_mem_block.CpuAddress(), data, size);
 
 			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
 			cmd_list->CopyBufferRegion(d3d_resource_.get(), d3d_resource_offset_ + offset, upload_buff, upload_buff_offset, size);
 
-			re.DeallocMemBlock(true, std::move(upload_mem_block));
+			re.DeallocUploadMemBlock(std::move(upload_mem_block));
 		}
 	}
 

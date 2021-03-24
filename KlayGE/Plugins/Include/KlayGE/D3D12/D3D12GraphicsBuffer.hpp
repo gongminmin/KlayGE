@@ -84,7 +84,7 @@ namespace KlayGE
 		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
 
 	private:
-		std::unique_ptr<D3D12GpuMemoryBlock> gpu_mem_block_;
+		D3D12GpuMemoryBlock gpu_mem_block_;
 		uint32_t counter_offset_{0};
 		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 

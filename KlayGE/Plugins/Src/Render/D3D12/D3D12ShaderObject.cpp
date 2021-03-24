@@ -932,7 +932,7 @@ namespace KlayGE
 		if (num_sampler > 0)
 		{
 			d3d_immutable_->sampler_desc_block_ = re.AllocSamplerDescBlock(num_sampler);
-			cpu_sampler_handle = d3d_immutable_->sampler_desc_block_->CpuHandle();
+			cpu_sampler_handle = d3d_immutable_->sampler_desc_block_.CpuHandle();
 		}
 
 		std::vector<uint32_t> all_cbuff_indices;
@@ -1170,7 +1170,7 @@ namespace KlayGE
 		{
 			re.RenewDynamicCbvSrvUavDescBlock(srv_uav_desc_block_, static_cast<uint32_t>(srv_uav_handles_.size()));
 
-			auto const cpu_cbv_srv_uav_handle = srv_uav_desc_block_->CpuHandle();
+			auto const cpu_cbv_srv_uav_handle = srv_uav_desc_block_.CpuHandle();
 			uint32_t num_srvs_uavs = static_cast<uint32_t>(srv_uav_handles_.size());
 			re.D3DDevice()->CopyDescriptors(1, &cpu_cbv_srv_uav_handle, &num_srvs_uavs, num_srvs_uavs, srv_uav_handles_.data(), nullptr,
 				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

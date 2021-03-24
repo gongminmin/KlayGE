@@ -165,25 +165,28 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 
-		std::unique_ptr<D3D12GpuDescriptorBlock> AllocRtvDescBlock(uint32_t size);
-		void DeallocRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
-		void RenewRtvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
-		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDsvDescBlock(uint32_t size);
-		void DeallocDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
-		void RenewDsvDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
-		std::unique_ptr<D3D12GpuDescriptorBlock> AllocCbvSrvUavDescBlock(uint32_t size);
-		void DeallocCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
-		void RenewCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
-		std::unique_ptr<D3D12GpuDescriptorBlock> AllocDynamicCbvSrvUavDescBlock(uint32_t size);
-		void DeallocDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
-		void RenewDynamicCbvSrvUavDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
-		std::unique_ptr<D3D12GpuDescriptorBlock> AllocSamplerDescBlock(uint32_t size);
-		void DeallocSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock> desc_block);
-		void RenewSamplerDescBlock(std::unique_ptr<D3D12GpuDescriptorBlock>& desc_block, uint32_t size);
+		D3D12GpuDescriptorBlock AllocRtvDescBlock(uint32_t size);
+		void DeallocRtvDescBlock(D3D12GpuDescriptorBlock&& desc_block);
+		void RenewRtvDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
+		D3D12GpuDescriptorBlock AllocDsvDescBlock(uint32_t size);
+		void DeallocDsvDescBlock(D3D12GpuDescriptorBlock&& desc_block);
+		void RenewDsvDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
+		D3D12GpuDescriptorBlock AllocCbvSrvUavDescBlock(uint32_t size);
+		void DeallocCbvSrvUavDescBlock(D3D12GpuDescriptorBlock&& desc_block);
+		void RenewCbvSrvUavDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
+		D3D12GpuDescriptorBlock AllocDynamicCbvSrvUavDescBlock(uint32_t size);
+		void DeallocDynamicCbvSrvUavDescBlock(D3D12GpuDescriptorBlock&& desc_block);
+		void RenewDynamicCbvSrvUavDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
+		D3D12GpuDescriptorBlock AllocSamplerDescBlock(uint32_t size);
+		void DeallocSamplerDescBlock(D3D12GpuDescriptorBlock&& desc_block);
+		void RenewSamplerDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
 
-		std::unique_ptr<D3D12GpuMemoryBlock> AllocMemBlock(bool is_upload, uint32_t size_in_bytes);
-		void DeallocMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock> mem_block);
-		void RenewMemBlock(bool is_upload, std::unique_ptr<D3D12GpuMemoryBlock>& mem_block, uint32_t size_in_bytes);
+		D3D12GpuMemoryBlock AllocUploadMemBlock(uint32_t size_in_bytes);
+		void DeallocUploadMemBlock(D3D12GpuMemoryBlock&& mem_block);
+		void RenewUploadMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes);
+		D3D12GpuMemoryBlock AllocReadbackMemBlock(uint32_t size_in_bytes);
+		void DeallocReadbackMemBlock(D3D12GpuMemoryBlock&& mem_block);
+		void RenewReadbackMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes);
 
 		void AddStallResource(ID3D12ResourcePtr const& resource);
 
@@ -328,7 +331,7 @@ namespace KlayGE
 			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE};
 		D3D12GpuDescriptorAllocator sampler_desc_allocator_{D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE};
 
-		std::unique_ptr<D3D12GpuDescriptorBlock> null_srv_uav_desc_block_;
+		D3D12GpuDescriptorBlock null_srv_uav_desc_block_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_uav_handle_;
 
