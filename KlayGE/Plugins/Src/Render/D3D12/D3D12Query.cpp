@@ -49,32 +49,7 @@ namespace KlayGE
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
-			query_heap_.put_void()));
-
-		D3D12_HEAP_PROPERTIES heap_prop;
-		heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
-		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		heap_prop.CreationNodeMask = 0;
-		heap_prop.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC res_desc;
-		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		res_desc.Alignment = 0;
-		res_desc.Width = sizeof(uint64_t);
-		res_desc.Height = 1;
-		res_desc.DepthOrArraySize = 1;
-		res_desc.MipLevels = 1;
-		res_desc.Format = DXGI_FORMAT_UNKNOWN;
-		res_desc.SampleDesc.Count = 1;
-		res_desc.SampleDesc.Quality = 0;
-		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			UuidOf<ID3D12Resource>(), query_result_.put_void()));
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(), query_heap_.put_void()));
 	}
 
 	void D3D12OcclusionQuery::Begin()
@@ -98,16 +73,13 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		cmd_list->ResolveQueryData(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0, 1, query_result_.get(), 0);
+		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t));
+		cmd_list->ResolveQueryData(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0, 1, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
 
-		uint64_t* result;
-		D3D12_RANGE const read_range{0, sizeof(uint64_t)};
-		query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
-		uint64_t ret = *result;
-		D3D12_RANGE const write_range{0, 0};
-		query_result_->Unmap(0, &write_range);
+		uint64_t const ret = *query_result.CpuAddress<uint64_t>();
+		re.DeallocReadbackMemBlock(std::move(query_result));
 		return ret;
 	}
 
@@ -121,9 +93,7 @@ namespace KlayGE
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
-
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
-			predicate_heap_.put_void()));
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(), predicate_heap_.put_void()));
 
 		D3D12_HEAP_PROPERTIES heap_prop;
 		heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
@@ -210,32 +180,7 @@ namespace KlayGE
 		timestamp_query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
 		timestamp_query_heap_desc.Count = 2;
 		timestamp_query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&timestamp_query_heap_desc, UuidOf<ID3D12QueryHeap>(),
-			timestamp_heap_.put_void()));
-
-		D3D12_HEAP_PROPERTIES heap_prop;
-		heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
-		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		heap_prop.CreationNodeMask = 0;
-		heap_prop.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC res_desc;
-		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		res_desc.Alignment = 0;
-		res_desc.Width = sizeof(uint64_t) * 2;
-		res_desc.Height = 1;
-		res_desc.DepthOrArraySize = 1;
-		res_desc.MipLevels = 1;
-		res_desc.Format = DXGI_FORMAT_UNKNOWN;
-		res_desc.SampleDesc.Count = 1;
-		res_desc.SampleDesc.Quality = 0;
-		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			UuidOf<ID3D12Resource>(), timestamp_result_.put_void()));
+		TIFHR(device->CreateQueryHeap(&timestamp_query_heap_desc, UuidOf<ID3D12QueryHeap>(), timestamp_heap_.put_void()));
 	}
 
 	void D3D12TimerQuery::Begin()
@@ -259,20 +204,17 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, timestamp_result_.get(), 0);
+		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t) * 2);
+		cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
 
-		UINT64 freq;
+		uint64_t freq;
 		re.D3DCmdQueue()->GetTimestampFrequency(&freq);
 
-		uint64_t* timestamp;
-		D3D12_RANGE const read_range{0, sizeof(uint64_t) * 2};
-		timestamp_result_->Map(0, &read_range, reinterpret_cast<void**>(&timestamp));
-		double ret = static_cast<double>(timestamp[1] - timestamp[0]) / freq;
-		D3D12_RANGE const write_range{0, 0};
-		timestamp_result_->Unmap(0, &write_range);
-
+		uint64_t const* timestamp = query_result.CpuAddress<uint64_t>();
+		double const ret = static_cast<double>(timestamp[1] - timestamp[0]) / freq;
+		re.DeallocReadbackMemBlock(std::move(query_result));
 		return ret;
 	}
 
@@ -286,31 +228,7 @@ namespace KlayGE
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_SO_STATISTICS;
 		query_heap_desc.Count = 1;
 		query_heap_desc.NodeMask = 0;
-		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(),
-			so_stat_query_heap_.put_void()));
-
-		D3D12_HEAP_PROPERTIES heap_prop;
-		heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
-		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		heap_prop.CreationNodeMask = 0;
-		heap_prop.VisibleNodeMask = 0;
-
-		D3D12_RESOURCE_DESC res_desc;
-		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		res_desc.Alignment = 0;
-		res_desc.Width = sizeof(D3D12_QUERY_DATA_SO_STATISTICS);
-		res_desc.Height = 1;
-		res_desc.DepthOrArraySize = 1;
-		res_desc.MipLevels = 1;
-		res_desc.Format = DXGI_FORMAT_UNKNOWN;
-		res_desc.SampleDesc.Count = 1;
-		res_desc.SampleDesc.Quality = 0;
-		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-			UuidOf<ID3D12Resource>(), so_stat_query_result_.put_void()));
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, UuidOf<ID3D12QueryHeap>(), so_stat_query_heap_.put_void()));
 	}
 
 	void D3D12SOStatisticsQuery::Begin()
@@ -334,16 +252,14 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		cmd_list->ResolveQueryData(so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, so_stat_query_result_.get(), 0);
+		auto query_result = re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS));
+		cmd_list->ResolveQueryData(
+			so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
 
-		D3D12_QUERY_DATA_SO_STATISTICS* result;
-		D3D12_RANGE const read_range{0, sizeof(D3D12_QUERY_DATA_SO_STATISTICS)};
-		so_stat_query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
-		uint64_t ret = result->NumPrimitivesWritten;
-		D3D12_RANGE const write_range{0, 0};
-		so_stat_query_result_->Unmap(0, &write_range);
+		uint64_t const ret = query_result.CpuAddress<D3D12_QUERY_DATA_SO_STATISTICS>()->NumPrimitivesWritten;
+		re.DeallocReadbackMemBlock(std::move(query_result));
 		return ret;
 	}
 
@@ -352,16 +268,14 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		cmd_list->ResolveQueryData(so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, so_stat_query_result_.get(), 0);
+		auto query_result = re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS));
+		cmd_list->ResolveQueryData(
+			so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
 
-		D3D12_QUERY_DATA_SO_STATISTICS* result;
-		D3D12_RANGE const read_range{0, sizeof(D3D12_QUERY_DATA_SO_STATISTICS)};
-		so_stat_query_result_->Map(0, &read_range, reinterpret_cast<void**>(&result));
-		uint64_t ret = result->PrimitivesStorageNeeded;
-		D3D12_RANGE const write_range{0, 0};
-		so_stat_query_result_->Unmap(0, &write_range);
+		uint64_t const ret = query_result.CpuAddress<D3D12_QUERY_DATA_SO_STATISTICS>()->PrimitivesStorageNeeded;
+		re.DeallocReadbackMemBlock(std::move(query_result));
 		return ret;
 	}
 }
