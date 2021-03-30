@@ -540,7 +540,7 @@ namespace KlayGE
 		bool const need_resolve = (this->SampleCount() > 1) && (1 == target.SampleCount());
 
 		this->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_SOURCE : D3D12_RESOURCE_STATE_COPY_SOURCE);
+			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_SOURCE : D3D12_RESOURCE_STATE_GENERIC_READ);
 		other.UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
 			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_COPY_DEST);
 		re.FlushResourceBarriers(cmd_list);
@@ -568,7 +568,7 @@ namespace KlayGE
 
 		D3D12Texture& other = checked_cast<D3D12Texture2D&>(target);
 
-		this->UpdateResourceBarrier(cmd_list, src_subres, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		this->UpdateResourceBarrier(cmd_list, src_subres, D3D12_RESOURCE_STATE_GENERIC_READ);
 		other.UpdateResourceBarrier(cmd_list, dst_subres, D3D12_RESOURCE_STATE_COPY_DEST);
 		re.FlushResourceBarriers(cmd_list);
 
@@ -810,7 +810,7 @@ namespace KlayGE
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_GENERIC_READ);
 			re.FlushResourceBarriers(cmd_list);
 
 			D3D12_TEXTURE_COPY_LOCATION src;

@@ -1134,8 +1134,7 @@ namespace KlayGE
 			}
 		}
 
-		D3D12_RESOURCE_STATES const srv_state_after =
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		D3D12_RESOURCE_STATES const srv_state_after = D3D12_RESOURCE_STATE_GENERIC_READ;
 		D3D12_RESOURCE_STATES const uav_state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		for (uint32_t i = 0; i < srv_uav_srcs_.size(); ++i)
 		{

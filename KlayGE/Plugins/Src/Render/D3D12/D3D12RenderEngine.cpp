@@ -722,7 +722,7 @@ namespace KlayGE
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*rl.GetVertexStream(i));
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				d3dvb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+				d3dvb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 			}
 		}
 		if (rl.InstanceStream())
@@ -730,7 +730,7 @@ namespace KlayGE
 			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*rl.InstanceStream().get());
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				d3dvb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+				d3dvb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 			}
 		}
 
@@ -739,7 +739,7 @@ namespace KlayGE
 			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*rl.GetIndexStream());
 			if (!(ib.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				ib.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+				ib.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 			}
 		}
 
@@ -748,7 +748,7 @@ namespace KlayGE
 			auto& arg_buff = checked_cast<D3D12GraphicsBuffer&>(*rl.GetIndirectArgs());
 			if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				arg_buff.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+				arg_buff.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 			}
 		}
 
@@ -923,7 +923,7 @@ namespace KlayGE
 		auto& arg_buff = checked_cast<D3D12GraphicsBuffer&>(*buff_args);
 		if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 		{
-			arg_buff.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+			arg_buff.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 		}
 
 		this->FlushResourceBarriers(cmd_list);

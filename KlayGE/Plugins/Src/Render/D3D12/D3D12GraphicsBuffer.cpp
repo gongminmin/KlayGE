@@ -49,7 +49,7 @@ namespace KlayGE
 							uint32_t size_in_byte, uint32_t structure_byte_stride)
 						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride)
 	{
-		curr_states_.resize(1, D3D12_RESOURCE_STATE_COMMON);
+		curr_states_.resize(1, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	D3D12ShaderResourceViewSimulationPtr const & D3D12GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
@@ -205,7 +205,7 @@ namespace KlayGE
 			}
 			else
 			{
-				init_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+				init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
 				heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
 			}
 			heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -436,8 +436,7 @@ namespace KlayGE
 		}
 		else
 		{
-			this->UpdateResourceBarrier(cmd_list, 0,
-				src_heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_SOURCE);
+			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_GENERIC_READ);
 			d3d_gb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
 			re.FlushResourceBarriers(cmd_list);
 
