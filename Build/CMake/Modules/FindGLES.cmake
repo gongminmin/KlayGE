@@ -33,10 +33,10 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 				/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/OpenGLES.framework/Headers
 		)
 	ELSEIF(APPLE)
-		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
-			PATHS
-				/Users/Shared/Imagination/PowerVR_Graphics/PowerVR_SDK/SDK_3.4/Builds/Include
-		)
+		#FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
+		#	PATHS
+		#		/Users/Shared/Imagination/PowerVR_Graphics/PowerVR_SDK/SDK_3.4/Builds/Include
+		#)
 	ELSEIF(UNIX)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS
