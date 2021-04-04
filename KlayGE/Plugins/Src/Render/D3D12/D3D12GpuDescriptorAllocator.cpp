@@ -40,9 +40,21 @@
 
 namespace
 {
+	using namespace KlayGE;
+
 	uint32_t descriptor_size[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES]{};
 
-	uint16_t const default_descriptor_page_size[] = {32 * 1024, 1 * 1024, 8 * 1024, 4 * 1024};
+	uint16_t constexpr DescriptorPageSizes[] = {32 * 1024, 1 * 1024, 8 * 1024, 4 * 1024};
+
+	void UpdateDescriptorSize(D3D12_DESCRIPTOR_HEAP_TYPE type)
+	{
+		if (descriptor_size[type] == 0)
+		{
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto* device = d3d12_re.D3DDevice();
+			descriptor_size[type] = device->GetDescriptorHandleIncrementSize(type);
+		}
+	}
 } // namespace
 
 namespace KlayGE
@@ -118,6 +130,7 @@ namespace KlayGE
 
 	uint32_t D3D12GpuDescriptorAllocator::DescriptorSize() const
 	{
+		UpdateDescriptorSize(type_);
 		return descriptor_size[type_];
 	}
 
@@ -135,14 +148,9 @@ namespace KlayGE
 	{
 		KFL_UNUSED(proof_of_lock);
 
-		if (descriptor_size[type_] == 0)
-		{
-			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto* device = d3d12_re.D3DDevice();
-			descriptor_size[type_] = device->GetDescriptorHandleIncrementSize(type_);
-		}
+		UpdateDescriptorSize(type_);
 
-		uint16_t const default_page_size = default_descriptor_page_size[type_];
+		uint16_t const default_page_size = DescriptorPageSizes[type_];
 		BOOST_ASSERT(size <= default_page_size);
 
 		for (auto& page_info : pages_)
@@ -182,7 +190,7 @@ namespace KlayGE
 		KFL_UNUSED(proof_of_lock);
 		BOOST_ASSERT(desc_block);
 
-		uint16_t const default_page_size = default_descriptor_page_size[type_];
+		uint16_t const default_page_size = DescriptorPageSizes[type_];
 
 		if (desc_block.Size() <= default_page_size)
 		{

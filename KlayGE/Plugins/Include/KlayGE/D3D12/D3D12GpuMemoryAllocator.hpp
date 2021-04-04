@@ -145,7 +145,9 @@ namespace KlayGE
 		D3D12GpuMemoryAllocator& operator=(D3D12GpuMemoryAllocator const& other) = delete;
 
 	public:
-		static constexpr uint32_t DefaultAligment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
+		static constexpr uint32_t ConstantDataAligment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+		static constexpr uint32_t StructuredDataAligment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
+		static constexpr uint32_t TextureDataAligment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
 
 	public:
 		explicit D3D12GpuMemoryAllocator(bool is_upload) noexcept;
@@ -153,9 +155,9 @@ namespace KlayGE
 		D3D12GpuMemoryAllocator(D3D12GpuMemoryAllocator&& other) noexcept;
 		D3D12GpuMemoryAllocator& operator=(D3D12GpuMemoryAllocator&& other) noexcept;
 
-		D3D12GpuMemoryBlock Allocate(uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
+		D3D12GpuMemoryBlock Allocate(uint32_t size_in_bytes, uint32_t alignment);
 		void Deallocate(D3D12GpuMemoryBlock&& mem_block, uint64_t fence_value);
-		void Renew(D3D12GpuMemoryBlock& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment = DefaultAligment);
+		void Renew(D3D12GpuMemoryBlock& mem_block, uint64_t fence_value, uint32_t size_in_bytes, uint32_t alignment);
 
 		void ClearStallPages(uint64_t fence_value);
 		void Clear();

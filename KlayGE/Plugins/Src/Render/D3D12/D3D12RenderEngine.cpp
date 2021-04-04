@@ -1896,9 +1896,9 @@ namespace KlayGE
 		sampler_desc_allocator_.Renew(desc_block, frame_fence_value_, size);
 	}
 
-	D3D12GpuMemoryBlock D3D12RenderEngine::AllocUploadMemBlock(uint32_t size_in_bytes)
+	D3D12GpuMemoryBlock D3D12RenderEngine::AllocUploadMemBlock(uint32_t size_in_bytes, uint32_t alignment)
 	{
-		return upload_mem_allocator_.Allocate(size_in_bytes);
+		return upload_mem_allocator_.Allocate(size_in_bytes, alignment);
 	}
 
 	void D3D12RenderEngine::DeallocUploadMemBlock(D3D12GpuMemoryBlock&& mem_block)
@@ -1906,14 +1906,14 @@ namespace KlayGE
 		upload_mem_allocator_.Deallocate(std::move(mem_block), frame_fence_value_);
 	}
 
-	void D3D12RenderEngine::RenewUploadMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes)
+	void D3D12RenderEngine::RenewUploadMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment)
 	{
-		upload_mem_allocator_.Renew(mem_block, frame_fence_value_, size_in_bytes);
+		upload_mem_allocator_.Renew(mem_block, frame_fence_value_, size_in_bytes, alignment);
 	}
 
-	D3D12GpuMemoryBlock D3D12RenderEngine::AllocReadbackMemBlock(uint32_t size_in_bytes)
+	D3D12GpuMemoryBlock D3D12RenderEngine::AllocReadbackMemBlock(uint32_t size_in_bytes, uint32_t alignment)
 	{
-		return readback_mem_allocator_.Allocate(size_in_bytes);
+		return readback_mem_allocator_.Allocate(size_in_bytes, alignment);
 	}
 
 	void D3D12RenderEngine::DeallocReadbackMemBlock(D3D12GpuMemoryBlock&& mem_block)
@@ -1921,9 +1921,9 @@ namespace KlayGE
 		readback_mem_allocator_.Deallocate(std::move(mem_block), frame_fence_value_);
 	}
 
-	void D3D12RenderEngine::RenewReadbackMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes)
+	void D3D12RenderEngine::RenewReadbackMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment)
 	{
-		readback_mem_allocator_.Renew(mem_block, frame_fence_value_, size_in_bytes);
+		readback_mem_allocator_.Renew(mem_block, frame_fence_value_, size_in_bytes, alignment);
 	}
 
 	void D3D12RenderEngine::AddStallResource(ID3D12ResourcePtr const& resource)

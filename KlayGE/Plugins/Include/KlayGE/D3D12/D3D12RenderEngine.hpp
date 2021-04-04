@@ -181,12 +181,12 @@ namespace KlayGE
 		void DeallocSamplerDescBlock(D3D12GpuDescriptorBlock&& desc_block);
 		void RenewSamplerDescBlock(D3D12GpuDescriptorBlock& desc_block, uint32_t size);
 
-		D3D12GpuMemoryBlock AllocUploadMemBlock(uint32_t size_in_bytes);
+		D3D12GpuMemoryBlock AllocUploadMemBlock(uint32_t size_in_bytes, uint32_t alignment);
 		void DeallocUploadMemBlock(D3D12GpuMemoryBlock&& mem_block);
-		void RenewUploadMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes);
-		D3D12GpuMemoryBlock AllocReadbackMemBlock(uint32_t size_in_bytes);
+		void RenewUploadMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment);
+		D3D12GpuMemoryBlock AllocReadbackMemBlock(uint32_t size_in_bytes, uint32_t alignment);
 		void DeallocReadbackMemBlock(D3D12GpuMemoryBlock&& mem_block);
-		void RenewReadbackMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes);
+		void RenewReadbackMemBlock(D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment);
 
 		void AddStallResource(ID3D12ResourcePtr const& resource);
 

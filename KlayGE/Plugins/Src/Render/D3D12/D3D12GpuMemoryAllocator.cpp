@@ -40,7 +40,9 @@
 
 namespace
 {
-	static constexpr uint32_t DefaultPageSize = 2 * 1024 * 1024;
+	uint32_t constexpr PageSize = 2 * 1024 * 1024;
+	uint32_t constexpr SegmentSize = 512;
+	uint32_t constexpr SegmentMask = SegmentSize - 1;
 }
 
 namespace KlayGE
@@ -176,12 +178,10 @@ namespace KlayGE
 	{
 		KFL_UNUSED(proof_of_lock);
 
-		uint32_t const alignment_mask = alignment - 1;
-		BOOST_ASSERT((alignment & alignment_mask) == 0);
+		BOOST_ASSERT(alignment <= SegmentSize);
+		uint32_t const aligned_size = ((size_in_bytes + alignment - 1) / alignment * alignment + SegmentMask) & ~SegmentMask;
 
-		uint32_t const aligned_size = (size_in_bytes + alignment_mask) & ~alignment_mask;
-
-		if (aligned_size > DefaultPageSize)
+		if (aligned_size > PageSize)
 		{
 			auto& large_page = large_pages_.emplace_back(D3D12GpuMemoryPage(is_upload_, aligned_size));
 			mem_block.Reset(large_page, 0, size_in_bytes);
@@ -194,7 +194,8 @@ namespace KlayGE
 				[](PageInfo::FreeRange const& free_range, uint32_t s) { return free_range.first_offset + s > free_range.last_offset; });
 			if (iter != page_info.free_list.end())
 			{
-				mem_block.Reset(page_info.page, iter->first_offset, aligned_size);
+				uint32_t const aligned_offset = (iter->first_offset + alignment - 1) / alignment * alignment;
+				mem_block.Reset(page_info.page, aligned_offset, size_in_bytes);
 				iter->first_offset += aligned_size;
 				if (iter->first_offset == iter->last_offset)
 				{
@@ -205,9 +206,9 @@ namespace KlayGE
 			}
 		}
 
-		D3D12GpuMemoryPage new_page(is_upload_, DefaultPageSize);
-		mem_block.Reset(new_page, 0, aligned_size);
-		pages_.emplace_back(PageInfo{std::move(new_page), {{aligned_size, DefaultPageSize}}, {}});
+		D3D12GpuMemoryPage new_page(is_upload_, PageSize);
+		mem_block.Reset(new_page, 0, size_in_bytes);
+		pages_.emplace_back(PageInfo{std::move(new_page), {{aligned_size, PageSize}}, {}});
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(D3D12GpuMemoryBlock&& mem_block, uint64_t fence_value)
@@ -225,13 +226,15 @@ namespace KlayGE
 		KFL_UNUSED(proof_of_lock);
 		BOOST_ASSERT(mem_block);
 
-		if (mem_block.Size() <= DefaultPageSize)
+		if (mem_block.Size() <= PageSize)
 		{
 			for (auto& page : pages_)
 			{
 				if (page.page.Resource() == mem_block.Resource())
 				{
-					page.stall_list.push_back({{mem_block.Offset(), mem_block.Offset() + mem_block.Size()}, fence_value});
+					uint32_t const offset = mem_block.Offset() & ~SegmentMask;
+					uint32_t const size = (mem_block.Offset() + mem_block.Size() - offset + SegmentMask) & ~SegmentMask;
+					page.stall_list.push_back({{offset, offset + size}, fence_value});
 					return;
 				}
 			}

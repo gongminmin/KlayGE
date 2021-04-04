@@ -73,7 +73,7 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t));
+		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t), D3D12GpuMemoryAllocator::StructuredDataAligment);
 		cmd_list->ResolveQueryData(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0, 1, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
@@ -204,7 +204,7 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t) * 2);
+		auto query_result = re.AllocReadbackMemBlock(sizeof(uint64_t) * 2, D3D12GpuMemoryAllocator::StructuredDataAligment);
 		cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, query_result.Resource(), query_result.Offset());
 
 		re.ForceFinish();
@@ -252,7 +252,8 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		auto query_result = re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS));
+		auto query_result =
+			re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS), D3D12GpuMemoryAllocator::StructuredDataAligment);
 		cmd_list->ResolveQueryData(
 			so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, query_result.Resource(), query_result.Offset());
 
@@ -268,7 +269,8 @@ namespace KlayGE
 		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		auto query_result = re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS));
+		auto query_result =
+			re.AllocReadbackMemBlock(sizeof(D3D12_QUERY_DATA_SO_STATISTICS), D3D12GpuMemoryAllocator::StructuredDataAligment);
 		cmd_list->ResolveQueryData(
 			so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, query_result.Resource(), query_result.Offset());
 

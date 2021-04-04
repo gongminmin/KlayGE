@@ -175,7 +175,7 @@ namespace KlayGE
 
 		if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
-			gpu_mem_block_ = re.AllocUploadMemBlock(size_in_byte_);
+			gpu_mem_block_ = re.AllocUploadMemBlock(size_in_byte_, D3D12GpuMemoryAllocator::ConstantDataAligment);
 			d3d_resource_ = gpu_mem_block_.Resource();
 			d3d_resource_offset_ = gpu_mem_block_.Offset();
 			gpu_vaddr_ = gpu_mem_block_.GpuAddress();
@@ -240,7 +240,7 @@ namespace KlayGE
 
 			if (subres_init != nullptr)
 			{
-				auto upload_mem_block = re.AllocUploadMemBlock(size_in_byte_);
+				auto upload_mem_block = re.AllocUploadMemBlock(size_in_byte_, D3D12GpuMemoryAllocator::StructuredDataAligment);
 				memcpy(upload_mem_block.CpuAddress(), subres_init, size_in_byte_);
 
 				{
@@ -319,7 +319,7 @@ namespace KlayGE
 		case BA_Write_Only:
 			if (gpu_mem_block_)
 			{
-				re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_);
+				re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_, D3D12GpuMemoryAllocator::ConstantDataAligment);
 				d3d_resource_ = gpu_mem_block_.Resource();
 				d3d_resource_offset_ = gpu_mem_block_.Offset();
 				gpu_vaddr_ = gpu_mem_block_.GpuAddress();
@@ -456,7 +456,7 @@ namespace KlayGE
 				old_mem = gpu_mem_block_.CpuAddress<uint8_t>();
 			}
 
-			re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_);
+			re.RenewUploadMemBlock(gpu_mem_block_, size_in_byte_, D3D12GpuMemoryAllocator::ConstantDataAligment);
 
 			uint8_t* dst = gpu_mem_block_.CpuAddress<uint8_t>();
 			if (offset > 0)
@@ -473,7 +473,7 @@ namespace KlayGE
 		{
 			auto* cmd_list = re.D3DRenderCmdList();
 
-			auto upload_mem_block = re.AllocUploadMemBlock(size);
+			auto upload_mem_block = re.AllocUploadMemBlock(size, D3D12GpuMemoryAllocator::ConstantDataAligment);
 			auto* const upload_buff = upload_mem_block.Resource();
 			uint32_t const upload_buff_offset = upload_mem_block.Offset();
 

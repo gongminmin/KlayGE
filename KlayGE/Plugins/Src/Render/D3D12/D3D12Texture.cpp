@@ -715,7 +715,8 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, 0, num_subres, 0, &layouts[0], &num_rows[0], &row_sizes_in_bytes[0], &required_size);
 
-			auto upload_mem_block = re.AllocUploadMemBlock(static_cast<uint32_t>(required_size));
+			auto upload_mem_block =
+				re.AllocUploadMemBlock(static_cast<uint32_t>(required_size), D3D12GpuMemoryAllocator::TextureDataAligment);
 			auto const& upload_buff = upload_mem_block.Resource();
 			uint32_t const upload_buff_offset = upload_mem_block.Offset();
 
@@ -806,7 +807,8 @@ namespace KlayGE
 		D3D12GpuMemoryBlock readback_mem_block;
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			readback_mem_block = re.AllocReadbackMemBlock(static_cast<uint32_t>(required_size));
+			readback_mem_block =
+				re.AllocReadbackMemBlock(static_cast<uint32_t>(required_size), D3D12GpuMemoryAllocator::TextureDataAligment);
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -847,7 +849,7 @@ namespace KlayGE
 
 		case TMA_Read_Write:
 		case TMA_Write_Only:
-			mapped_mem_block_ = re.AllocUploadMemBlock(static_cast<uint32_t>(required_size));
+			mapped_mem_block_ = re.AllocUploadMemBlock(static_cast<uint32_t>(required_size), D3D12GpuMemoryAllocator::TextureDataAligment);
 			p = mapped_mem_block_.CpuAddress();
 			if (TMA_Read_Write == tma)
 			{
