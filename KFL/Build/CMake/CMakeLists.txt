@@ -145,7 +145,6 @@ target_link_libraries(${LIB_NAME}
 		fmt
 		GSL
 		scope-lite
-		bit-lite
 
 	PRIVATE
 		rapidjson

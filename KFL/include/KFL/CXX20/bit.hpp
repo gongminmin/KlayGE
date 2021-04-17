@@ -35,63 +35,58 @@
 
 #include <KFL/Config.hpp>
 
-#if !defined(KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT) || !defined(KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT) || \
-	!defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT) || !defined(KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT)
-	#define bit_CONFIG_SELECT_BIT bit_BIT_NONSTD
-	#define bit_CONFIG_STRICT 1
+#if defined(KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT) || defined(KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT) || \
+	defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT) || defined(KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT)
+#include <bit>
 #endif
 
-#if defined(KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT)
-	#include <bit>
-#else
-	#include <nonstd/bit.hpp>
+#if !(defined(KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT) && defined(KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT) && \
+	  defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT) && defined(KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT))
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4127) // Constant if
+#endif
+#include <boost/core/bit.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#endif
 
+#if !defined(KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT)
 	namespace std
 	{
-		using nonstd::bit_cast;
+		using boost::core::bit_cast;
 	}
 #endif
 
-#if defined(KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT)
-	#include <bit>
-#else
-	#include <nonstd/bit.hpp>
-
+#if !defined(KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT)
 	namespace std
 	{
-		using nonstd::rotl;
-		using nonstd::rotr;
+		using boost::core::rotl;
+		using boost::core::rotr;
 
-		using nonstd::countl_zero;
-		using nonstd::countl_one;
-		using nonstd::countr_zero;
-		using nonstd::countr_one;
-		using nonstd::popcount;
+		using boost::core::countl_zero;
+		using boost::core::countl_one;
+		using boost::core::countr_zero;
+		using boost::core::countr_one;
+		using boost::core::popcount;
 	}
 #endif
 
-#if defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT)
-	#include <bit>
-#else
-	#include <nonstd/bit.hpp>
-
+#if !defined(KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT)
 	namespace std
 	{
-		using nonstd::endian;
+		using boost::core::endian;
 	}
 #endif
 
-#if defined(KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT)
-	#include <bit>
-#else
-	#include <nonstd/bit.hpp>
-
+#if !defined(KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT)
 	namespace std
 	{
-		using nonstd::has_single_bit;
-		using nonstd::bit_ceil;
-		using nonstd::bit_floor;
-		using nonstd::bit_width;;
+		using boost::core::has_single_bit;
+		using boost::core::bit_ceil;
+		using boost::core::bit_floor;
+		using boost::core::bit_width;;
 	}
 #endif
 

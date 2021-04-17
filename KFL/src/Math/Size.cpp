@@ -68,7 +68,6 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
 	}
 
 	template <typename T>
