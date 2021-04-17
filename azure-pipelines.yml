@@ -53,7 +53,7 @@ stages:
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
             sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win32
+            export WINEARCH=win64
             winetricks
           id: 'gcc9_linux_$(platform)_$(configuration)'
           CC: gcc-9
@@ -69,7 +69,7 @@ stages:
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
             sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win32
+            export WINEARCH=win64
             winetricks
           id: 'gcc10_linux_$(platform)_$(configuration)'
           CC: gcc-10
@@ -87,7 +87,7 @@ stages:
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
             sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win32
+            export WINEARCH=win64
             winetricks
           id: 'clang10_linux_$(platform)_$(configuration)'
           CC: clang-10
@@ -105,7 +105,7 @@ stages:
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
             sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win32
+            export WINEARCH=win64
             winetricks
           id: 'clang11_linux_$(platform)_$(configuration)'
           CC: clang-11
