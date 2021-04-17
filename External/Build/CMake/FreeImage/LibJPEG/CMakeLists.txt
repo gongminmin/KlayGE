@@ -10,7 +10,7 @@ SET(LIBJPEG_SOURCE_FILES
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcdctmgr.c
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jchuff.c
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcinit.c
-	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcmainct
+	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcmainct.c
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcmarker.c
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcmaster.c
 	${FREEIMAGE_PROJECT_DIR}/Source/LibJPEG/jcomapi.c
