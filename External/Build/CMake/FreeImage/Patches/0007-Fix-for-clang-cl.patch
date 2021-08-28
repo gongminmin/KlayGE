@@ -1,7 +1,7 @@
-From 91928de48163c7fd89d90bda20ccb73cb5394bb0 Mon Sep 17 00:00:00 2001
+From 28f1dd6d1e196d61ca1d7b0c94191a954085dbc6 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 22:01:29 -0800
-Subject: [PATCH 7/7] Fix for clang-cl
+Subject: [PATCH 7/8] Fix for clang-cl
 
 ---
  Source/FreeImage/PluginG3.cpp | 4 ++--
@@ -10,7 +10,7 @@ Subject: [PATCH 7/7] Fix for clang-cl
  3 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/Source/FreeImage/PluginG3.cpp b/Source/FreeImage/PluginG3.cpp
-index 0a083b45..6c04cb8c 100644
+index 0a083b4..6c04cb8 100644
 --- a/Source/FreeImage/PluginG3.cpp
 +++ b/Source/FreeImage/PluginG3.cpp
 @@ -20,11 +20,11 @@
@@ -28,7 +28,7 @@ index 0a083b45..6c04cb8c 100644
  // Plugin Interface
  // ==========================================================
 diff --git a/Source/LibWebP/src/dsp/dsp.h b/Source/LibWebP/src/dsp/dsp.h
-index adf75554..6491950f 100644
+index adf7555..feb1357 100644
 --- a/Source/LibWebP/src/dsp/dsp.h
 +++ b/Source/LibWebP/src/dsp/dsp.h
 @@ -60,7 +60,7 @@ extern "C" {
@@ -41,7 +41,7 @@ index adf75554..6491950f 100644
  #endif
  
 diff --git a/Source/Metadata/XTIFF.cpp b/Source/Metadata/XTIFF.cpp
-index d5be902a..4eb5d0b6 100644
+index d5be902..4eb5d0b 100644
 --- a/Source/Metadata/XTIFF.cpp
 +++ b/Source/Metadata/XTIFF.cpp
 @@ -29,13 +29,13 @@

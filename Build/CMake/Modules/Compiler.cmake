@@ -3,8 +3,6 @@ ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 if(MSVC)
 	set(CMAKE_CXX_FLAGS "/std:c++17 /Wall /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
 
-	set(CMAKE_CXX_STANDARD 17)
-
 	if(CMAKE_C_COMPILER_ID MATCHES Clang)
 		set(KLAYGE_COMPILER_NAME "clangcl")
 		set(KLAYGE_COMPILER_CLANGCL TRUE)
@@ -19,6 +17,9 @@ if(MSVC)
 		if(KLAYGE_COMPILER_VERSION LESS "90")
 			message(FATAL_ERROR "Unsupported compiler version. Please install clang-cl 9.0 or up.")
 		endif()
+
+		set(CMAKE_CXX_STANDARD 17)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat") # No need to compatible to C++98
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat-pedantic")
@@ -85,6 +86,14 @@ if(MSVC)
 		else()
 			message(FATAL_ERROR "Unsupported compiler version. Please install VS2017 15.3 or up.")
 		ENDIF()
+
+		if(MSVC_VERSION GREATER_EQUAL 1929)
+			set(CMAKE_CXX_STANDARD 20)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
+		else()
+			set(CMAKE_CXX_STANDARD 17)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+		endif()
 
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive-")
 		IF(KLAYGE_PLATFORM_WINDOWS_STORE OR (KLAYGE_ARCH_NAME STREQUAL "arm64"))

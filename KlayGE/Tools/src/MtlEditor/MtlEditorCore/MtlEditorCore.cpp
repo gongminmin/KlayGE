@@ -218,7 +218,7 @@ namespace KlayGE
 
 		auto main_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 		main_light_node->AddComponent(main_light_);
-		main_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
+		main_light_node->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time) {
 			KFL_UNUSED(app_time);
 			KFL_UNUSED(elapsed_time);
 

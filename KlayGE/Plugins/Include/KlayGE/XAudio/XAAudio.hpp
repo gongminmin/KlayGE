@@ -135,7 +135,14 @@ struct X3DAUDIO_LISTENER
 	X3DAUDIO_CONE* pCone;
 };
 #else
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(push)
+#pragma warning(disable : 5246) // Turn of warnings of initializing X3DAudioDefault_LinearCurvePoints
+#endif
 #include <x3daudio.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(pop)
+#endif
 #endif
 
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)

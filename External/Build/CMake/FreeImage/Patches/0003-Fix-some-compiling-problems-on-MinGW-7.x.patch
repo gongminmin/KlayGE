@@ -1,7 +1,7 @@
-From e11cdf1c2f2e3b4d6fbaee0fe0f371120a4337cc Mon Sep 17 00:00:00 2001
+From 168f566137ec8bfa08fb22e824f2187e2e514186 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 10 Sep 2018 21:23:12 -0700
-Subject: [PATCH 3/7] Fix some compiling problems on MinGW 7.x
+Subject: [PATCH 3/8] Fix some compiling problems on MinGW 7.x
 
 ---
  Source/LibJXR/common/include/guiddef.h        |  8 +++-
@@ -16,7 +16,7 @@ Subject: [PATCH 3/7] Fix some compiling problems on MinGW 7.x
  9 files changed, 67 insertions(+), 65 deletions(-)
 
 diff --git a/Source/LibJXR/common/include/guiddef.h b/Source/LibJXR/common/include/guiddef.h
-index 81ef9bae..d769c5cc 100644
+index 81ef9ba..d769c5c 100644
 --- a/Source/LibJXR/common/include/guiddef.h
 +++ b/Source/LibJXR/common/include/guiddef.h
 @@ -53,6 +53,12 @@ typedef struct _GUID {
@@ -42,7 +42,7 @@ index 81ef9bae..d769c5cc 100644
  #else
  #define DECLSPEC_SELECTANY
 diff --git a/Source/LibJXR/image/sys/strcodec.c b/Source/LibJXR/image/sys/strcodec.c
-index 972f2d5e..66dcc15d 100644
+index 972f2d5..66dcc15 100644
 --- a/Source/LibJXR/image/sys/strcodec.c
 +++ b/Source/LibJXR/image/sys/strcodec.c
 @@ -664,7 +664,7 @@ ERR detach_SB(SimpleBitIO* pSB)
@@ -55,7 +55,7 @@ index 972f2d5e..66dcc15d 100644
  #else
  // other platform
 diff --git a/Source/LibRawLite/internal/dcraw_common.cpp b/Source/LibRawLite/internal/dcraw_common.cpp
-index 29cc72fa..8222bcdd 100644
+index 29cc72f..8222bcd 100644
 --- a/Source/LibRawLite/internal/dcraw_common.cpp
 +++ b/Source/LibRawLite/internal/dcraw_common.cpp
 @@ -5573,7 +5573,7 @@ void CLASS lin_interpolate()
@@ -68,7 +68,7 @@ index 29cc72fa..8222bcdd 100644
                   -2, -1, +0, +0, 0, 0x03, -2, -1, +0, +1, 1, 0x01, -2, +0, +0, -1, 0, 0x06, -2, +0, +0, +0, 1, 0x02,
                   -2, +0, +0, +1, 0, 0x03, -2, +1, -1, +0, 0, 0x04, -2, +1, +0, -1, 1, 0x04, -2, +1, +0, +0, 0, 0x06,
 diff --git a/Source/LibTIFF4/tif_config.h b/Source/LibTIFF4/tif_config.h
-index 8969f093..6d5c0458 100644
+index 8969f09..6d5c045 100644
 --- a/Source/LibTIFF4/tif_config.h
 +++ b/Source/LibTIFF4/tif_config.h
 @@ -85,7 +85,7 @@ If your big endian system isn't being detected, add an OS specific check
@@ -81,7 +81,7 @@ index 8969f093..6d5c0458 100644
  #endif // _MSC_VER
  #define lfind _lfind
 diff --git a/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h b/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
-index 1c83497a..b291fd7f 100644
+index 1c83497..b291fd7 100644
 --- a/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
 +++ b/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h
 @@ -70,7 +70,7 @@ EXR_FORCEINLINE
@@ -94,7 +94,7 @@ index 1c83497a..b291fd7f 100644
  }
  
 diff --git a/Source/OpenEXR/IlmImf/ImfSystemSpecific.h b/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
-index c0261a7c..0c8f6753 100644
+index c0261a7..0c8f675 100644
 --- a/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
 +++ b/Source/OpenEXR/IlmImf/ImfSystemSpecific.h
 @@ -63,7 +63,11 @@ static bool GLOBAL_SYSTEM_LITTLE_ENDIAN =
@@ -110,7 +110,7 @@ index c0261a7c..0c8f6753 100644
  }
  
 diff --git a/Source/OpenEXR/Imath/ImathMatrix.h b/Source/OpenEXR/Imath/ImathMatrix.h
-index 3e96c2fd..00fbfbb6 100644
+index 3e96c2f..00fbfbb 100644
 --- a/Source/OpenEXR/Imath/ImathMatrix.h
 +++ b/Source/OpenEXR/Imath/ImathMatrix.h
 @@ -262,17 +262,13 @@ template <class T> class Matrix33
@@ -230,7 +230,7 @@ index 3e96c2fd..00fbfbb6 100644
      if (x[0][3] != 0 || x[1][3] != 0 || x[2][3] != 0 || x[3][3] != 1)
          return gjInverse(singExc);
 diff --git a/Source/OpenEXR/Imath/ImathVec.cpp b/Source/OpenEXR/Imath/ImathVec.cpp
-index 5e5b2107..37edc970 100644
+index 5e5b210..37edc97 100644
 --- a/Source/OpenEXR/Imath/ImathVec.cpp
 +++ b/Source/OpenEXR/Imath/ImathVec.cpp
 @@ -149,7 +149,7 @@ Vec2<short>::normalize ()
@@ -342,7 +342,7 @@ index 5e5b2107..37edc970 100644
      if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
          throw NullVecExc ("Cannot normalize null vector.");
 diff --git a/Source/OpenEXR/Imath/ImathVec.h b/Source/OpenEXR/Imath/ImathVec.h
-index fb859ebd..6f4e82a3 100644
+index fb859eb..6f4e82a 100644
 --- a/Source/OpenEXR/Imath/ImathVec.h
 +++ b/Source/OpenEXR/Imath/ImathVec.h
 @@ -225,11 +225,11 @@ template <class T> class Vec2
