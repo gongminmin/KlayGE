@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 enum ShaderOperandType
 {
 	SOT_TEMP = 0,
@@ -387,7 +389,7 @@ enum ShaderExtendedOperand
 	SEO_MODIFIER
 };
 
-enum ShaderResourceReturnType
+enum ShaderResourceReturnType : uint8_t
 {
 	SRRT_UNKNOWN = 0,
 	SRRT_UNORM = 1,
@@ -601,7 +603,7 @@ enum ShaderTessellatorDomain
 	SDT_Quad = 3
 };
 
-enum ShaderTessellatorPartitioning
+enum ShaderTessellatorPartitioning : uint8_t
 {
 	STP_Undefined = 0,
 	STP_Integer = 1,
@@ -610,7 +612,7 @@ enum ShaderTessellatorPartitioning
 	STP_Fractional_Even = 4
 };
 
-enum ShaderTessellatorOutputPrimitive
+enum ShaderTessellatorOutputPrimitive : uint8_t
 {
 	STOP_Undefined = 0,
 	STOP_Point = 1,

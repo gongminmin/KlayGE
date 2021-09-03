@@ -12,6 +12,14 @@ stages:
   - job: Build
     strategy:
       matrix:
+        Windows_vc143:
+          vmImage: windows-2022
+          project: vs2022
+          compiler: vc143
+          installCommand: ''
+          id: 'vc143_win_$(platform)_$(configuration)'
+          BUILD_DIR: vc143
+
         Windows_vc142:
           vmImage: windows-2019
           project: vs2019

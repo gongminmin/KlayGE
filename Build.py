@@ -13,7 +13,7 @@ class CfgBuildDefault:
 		self.cmake_path = "auto"
 
 		# Project type.
-		#   On Windows desktop, could be "vs2019", "vs2017", "make", "ninja", "auto".
+		#   On Windows desktop, could be "vs2022", "vs2019", "vs2017", "make", "ninja", "auto".
 		#   On Windows store, could be "vs2019", "vs2017", "auto".
 		#   On Android, could be "make", "auto".
 		#   On Linux, could be "make", "ninja", "auto".
@@ -22,7 +22,7 @@ class CfgBuildDefault:
 		self.project = "auto"
 
 		# Compiler name.
-		#   On Windows desktop, could be "vc142", "vc141", "mingw", "clangcl", "auto".
+		#   On Windows desktop, could be "vc143", "vc142", "vc141", "mingw", "clangcl", "auto".
 		#   On Windows store, could be "vc142", "vc141", "auto".
 		#   On Android, could be "clang", "auto".
 		#   On Linux, could be "gcc", "auto".
@@ -307,7 +307,10 @@ class BuildInfo:
 				if self.is_windows:
 					program_files_folder = self.FindProgramFilesFolder()
 
-					if self.FindVS2019Folder(program_files_folder) is not None:
+					if self.FindVS2022Folder(program_files_folder) is not None:
+						project_type = "vs2022"
+						compiler = "vc143"
+					elif self.FindVS2019Folder(program_files_folder) is not None:
 						project_type = "vs2019"
 						compiler = "vc142"
 					elif self.FindVS2017Folder(program_files_folder) is not None:
@@ -337,7 +340,9 @@ class BuildInfo:
 					compiler = cfg_build.compiler
 
 		if (project_type is not None) and (compiler is None):
-			if project_type == "vs2019":
+			if project_type == "vs2022":
+				compiler = "vc143"
+			elif project_type == "vs2019":
 				compiler = "vc142"
 			elif project_type == "vs2017":
 				compiler = "vc141"
@@ -347,8 +352,27 @@ class BuildInfo:
 		if self.is_windows:
 			program_files_folder = self.FindProgramFilesFolder()
 
-			if "vc142" == compiler:
-				if project_type == "vs2019":
+			if "vc143" == compiler:
+				if project_type == "vs2022":
+					try_folder = self.FindVS2022Folder(program_files_folder)
+					if try_folder is not None:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = ""
+					else:
+						LogError("Could NOT find vc143 compiler toolset for VS2022.\n")
+				else:
+					LogError("Could NOT find vc143 compiler.\n")
+			elif "vc142" == compiler:
+				if project_type == "vs2022":
+					try_folder = self.FindVS2022Folder(program_files_folder)
+					if try_folder is not None:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = "-vcvars_ver=14.2"
+					else:
+						LogError("Could NOT find vc142 compiler toolset for VS2022.\n")
+				elif project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
 					if try_folder is not None:
 						compiler_root = try_folder
@@ -359,7 +383,15 @@ class BuildInfo:
 				else:
 					LogError("Could NOT find vc142 compiler.\n")
 			elif "vc141" == compiler:
-				if project_type == "vs2019":
+				if project_type == "vs2022":
+					try_folder = self.FindVS2022Folder(program_files_folder)
+					if try_folder is not None:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = "-vcvars_ver=14.1"
+					else:
+						LogError("Could NOT find vc141 compiler toolset for VS2022.\n")
+				elif project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
 					if try_folder is not None:
 						compiler_root = try_folder
@@ -376,7 +408,15 @@ class BuildInfo:
 						LogError("Could NOT find vc141 compiler.\n")
 					vcvarsall_options = ""
 			elif "clangcl" == compiler:
-				if project_type == "vs2019":
+				if project_type == "vs2022":
+					try_folder = self.FindVS2022Folder(program_files_folder)
+					if try_folder is not None:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = ""
+					else:
+						LogError("Could NOT find clang-cl compiler toolset for VS2022.\n")
+				elif project_type == "vs2019":
 					try_folder = self.FindVS2019Folder(program_files_folder)
 					if try_folder is not None:
 						compiler_root = try_folder
@@ -396,7 +436,9 @@ class BuildInfo:
 			compiler_root = ""
 
 		if project_type is None:
-			if "vc142" == compiler:
+			if "vc143" == compiler:
+				project_type = "vs2022"
+			elif "vc142" == compiler:
 				project_type = "vs2019"
 			elif "vc141" == compiler:
 				project_type = "vs2017"
@@ -417,7 +459,26 @@ class BuildInfo:
 
 		multi_config = False
 		compilers = []
-		if "vs2019" == project_type:
+		if "vs2022" == project_type:
+			self.vs_version = 17
+			if "vc143" == compiler:
+				compiler_name = "vc"
+				compiler_version = 143
+			elif "vc142" == compiler:
+				compiler_name = "vc"
+				compiler_version = 142
+			elif "vc141" == compiler:
+				compiler_name = "vc"
+				compiler_version = 141
+			elif "clangcl" == compiler:
+				compiler_name = "clangcl"
+				compiler_version = self.RetrieveClangVersion(compiler_root + "../../Tools/Llvm/bin/")
+			else:
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
+			multi_config = True
+			for arch in archs:
+				compilers.append(CompilerInfo(self, arch, "Visual Studio 17", compiler_root, vcvarsall_path, vcvarsall_options))
+		elif "vs2019" == project_type:
 			self.vs_version = 16
 			if "vc142" == compiler:
 				compiler_name = "vc"
@@ -476,6 +537,11 @@ class BuildInfo:
 				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root))
+			elif "vc143" == compiler:
+				compiler_name = "vc"
+				compiler_version = 143
+				for arch in archs:
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_path, vcvarsall_options))
 			elif "vc142" == compiler:
 				compiler_name = "vc"
 				compiler_version = 142
@@ -608,6 +674,9 @@ class BuildInfo:
 			else:
 				program_files_folder = "C:\Program Files"
 		return program_files_folder
+
+	def FindVS2022Folder(self, program_files_folder):
+		return self.FindVS2017PlusFolder(program_files_folder, 17, "2022")
 
 	def FindVS2019Folder(self, program_files_folder):
 		return self.FindVS2017PlusFolder(program_files_folder, 16, "2019")
