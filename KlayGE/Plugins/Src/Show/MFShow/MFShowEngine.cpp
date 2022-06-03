@@ -42,7 +42,14 @@
 
 #include <mfapi.h>
 #if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1920)
+#pragma warning(push)
+#pragma warning(disable : 5246) // Ignore "'Data4': the initialization of a subobject should be wrapped in braces" warning from mfidl.h
+#endif
 #include <mfmediaengine.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1920)
+#pragma warning(pop)
+#endif
 #else
 #include "TinyMFMediaEngine.hpp"
 #endif

@@ -28,13 +28,11 @@
 
 namespace KlayGE
 {
-	KLAYGE_CORE_API JudaTexturePtr LoadJudaTexture(std::string const & file_name);
-	KLAYGE_CORE_API void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name);
-
 	class KLAYGE_CORE_API JudaTexture final : boost::noncopyable
 	{
-		friend KLAYGE_CORE_API JudaTexturePtr LoadJudaTexture(std::string const & file_name);
-		friend KLAYGE_CORE_API void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name);
+	public:
+		static JudaTexturePtr Load(std::string const & file_name);
+		static void Save(JudaTexturePtr const& juda_tex, std::string const& file_name);
 
 	private:
 		static uint32_t const EMPTY_DATA_INDEX = static_cast<uint32_t>(-1);

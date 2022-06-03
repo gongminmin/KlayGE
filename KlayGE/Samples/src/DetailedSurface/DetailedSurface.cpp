@@ -253,7 +253,7 @@ void DetailedSurfaceApp::OnCreate()
 	this->Proj(0.01f, 100);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");
+	juda_tex_ = JudaTexture::Load("DetailedSurface.jdt");
 
 	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);

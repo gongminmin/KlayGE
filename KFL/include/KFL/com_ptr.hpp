@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Uuid.hpp>
 

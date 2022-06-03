@@ -290,7 +290,7 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	juda_tex_ = LoadJudaTexture(name);
+	juda_tex_ = JudaTexture::Load(name);
 
 	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
 	BOOST_ASSERT(fmt != EF_Unknown);

@@ -294,7 +294,7 @@ void PackJTML(std::string const & jtml_name)
 
 	cout << "Saving... ";
 	timer.restart();
-	SaveJudaTexture(juda_tex, base_name + ".jdt");
+	JudaTexture::Save(juda_tex, base_name + ".jdt");
 	cout << "Takes " << timer.elapsed() << "s" << endl << endl;
 
 	ResLoader::Instance().DelPath(jtml_folder);

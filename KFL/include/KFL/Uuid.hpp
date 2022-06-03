@@ -60,8 +60,8 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		constexpr Uuid(GUID const& value) noexcept
 			: Uuid(value.Data1, value.Data2, value.Data3,
-				  {value.Data4[0], value.Data4[1], value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6],
-					  value.Data4[7]})
+				  {{value.Data4[0], value.Data4[1], value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6],
+					  value.Data4[7]}})
 		{
 		}
 

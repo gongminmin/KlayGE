@@ -39,6 +39,12 @@
 #include <KlayGE/SALWrapper.hpp>
 #include <windows.h>
 #include <dxgi1_2.h>
+
+#if defined(KLAYGE_COMPILER_GCC)
+#ifdef __in
+#undef __in
+#endif
+#endif
 #endif
 
 #include <string>

@@ -229,6 +229,9 @@
 			#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
 			#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
 		#endif
+		#if _MSC_VER >= 1929
+			#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
+		#endif
 	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.

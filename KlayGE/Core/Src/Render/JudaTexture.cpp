@@ -875,7 +875,7 @@ namespace KlayGE
 	}
 
 
-	JudaTexturePtr LoadJudaTexture(std::string const & file_name)
+	JudaTexturePtr JudaTexture::Load(std::string const& file_name)
 	{
 		uint32_t num_tiles;
 		uint32_t tile_size;
@@ -1001,7 +1001,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name)
+	void JudaTexture::Save(JudaTexturePtr const& juda_tex, std::string const& file_name)
 	{
 		LZMACodec lzma_enc;
 

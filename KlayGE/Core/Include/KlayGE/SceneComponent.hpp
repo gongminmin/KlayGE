@@ -35,7 +35,14 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // std::unary_function is deprecated
+#endif
 #include <boost/type_index.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 #include <boost/type_index/runtime_cast.hpp>
 
 #include <KlayGE/Signal.hpp>
