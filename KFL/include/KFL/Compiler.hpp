@@ -125,7 +125,6 @@
 		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
 
-	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(__GNUC__)
 	// GNU C++
@@ -181,7 +180,6 @@
 		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
 
-	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(_MSC_VER)
 	// MSVC
@@ -238,7 +236,6 @@
 	#pragma warning(disable: 4275) // boost::noncopyable is a non dll-interface class.
 	#pragma warning(disable: 4819) // Allow non-ANSI characters.
 
-	#define KLAYGE_ATTRIBUTE_NORETURN __declspec(noreturn)
 	#define KLAYGE_BUILTIN_UNREACHABLE __assume(false)
 #else
 	#error "Unknown compiler. Please install vc, g++, or clang."

@@ -43,7 +43,7 @@ namespace KlayGE
 	void Verify(bool x);
 
 #if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
-	KLAYGE_ATTRIBUTE_NORETURN void KFLUnreachableInternal(std::string_view msg = {}, std::string_view file = {}, uint32_t line = 0);
+	[[noreturn]] void KFLUnreachableInternal(std::string_view msg = {}, std::string_view file = {}, uint32_t line = 0);
 #endif
 } // namespace KlayGE
 
