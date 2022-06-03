@@ -48,7 +48,14 @@
 #endif
 #endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 4191) // Ignore type cast on PFN_HidP_GetVersionInternal
+#endif
 #include <hidsdi.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #else
 #ifndef _NTDEF_
 typedef LONG NTSTATUS;
