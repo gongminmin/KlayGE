@@ -1223,11 +1223,14 @@ namespace KlayGE
 			std::string shader_names;
 			for (uint32_t stage = 0; stage < NumShaderStages; ++stage)
 			{
-				std::string const& func_name =
-					checked_cast<OGLESShaderStageObject&>(*this->Stage(static_cast<ShaderStage>(stage))).ShaderFuncName();
-				if (!func_name.empty())
+				ShaderStageObjectPtr const& shader_stage = this->Stage(static_cast<ShaderStage>(stage));
+				if (shader_stage)
 				{
-					shader_names += func_name + '/';
+					std::string const& func_name = checked_cast<OGLESShaderStageObject&>(*shader_stage).ShaderFuncName();
+					if (!func_name.empty())
+					{
+						shader_names += func_name + '/';
+					}
 				}
 			}
 			if (!shader_names.empty())

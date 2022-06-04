@@ -3823,7 +3823,7 @@ namespace KlayGE
 			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 			if (LightSource::LT_Spot == type)
 			{
-				float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
+				float4x4 light_to_view = light.BoundSceneNode()->TransformToWorld() * pvp.view;
 				float const scale = light.CosOuterInner().w();
 				float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 				float4x4 light_mv = light_model * light_to_view;

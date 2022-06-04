@@ -528,8 +528,44 @@ void GLSLGen::ToStructs(std::ostream& out)
 					out << "{\n";
 					for (auto const& member : var.type_desc.member_desc)
 					{
+						uint32_t element_count = var.type_desc.elements;
 						this->ToType(out, member.type);
-						out << ' ' << member.name << ";\n";
+						if (!(glsl_rules_ & GSR_MatrixType))
+						{
+							switch (var.type_desc.var_class)
+							{
+							case SVC_MATRIX_COLUMNS:
+								if (element_count != 0)
+								{
+									element_count *= var.type_desc.rows;
+								}
+								else
+								{
+									element_count = var.type_desc.rows;
+								}
+								break;
+
+							case SVC_MATRIX_ROWS:
+								if (element_count != 0)
+								{
+									element_count *= var.type_desc.columns;
+								}
+								else
+								{
+									element_count = var.type_desc.columns;
+								}
+								break;
+
+							default:
+								break;
+							}
+						}
+						out << ' ' << member.name;
+						if (element_count != 0)
+						{
+							out << "[" << element_count << "]";
+						}
+						out << ";\n";
 					}
 					out << "};\n\n";
 				}
@@ -1534,7 +1570,14 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								}
 								else
 								{
-									element_count *= var.type_desc.rows;
+									if (element_count != 0)
+									{
+										element_count *= var.type_desc.rows;
+									}
+									else
+									{
+										element_count = var.type_desc.rows;
+									}
 									out << uniform;
 									this->ToType(out, var.type_desc);
 								}
@@ -1549,7 +1592,14 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								}
 								else
 								{
-									element_count *= var.type_desc.columns;
+									if (element_count != 0)
+									{
+										element_count *= var.type_desc.columns;
+									}
+									else
+									{
+										element_count = var.type_desc.columns;
+									}
 									out << uniform;
 									this->ToType(out, var.type_desc);
 								}

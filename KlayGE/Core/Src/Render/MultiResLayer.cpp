@@ -131,6 +131,9 @@ namespace KlayGE
 			}
 			else
 			{
+				depth_derivative_mip_rtvs_.resize(1);
+				depth_derivative_mip_rtvs_[0] = rf.Make2DRtv(depth_derivative_tex_, 0, 1, 0);
+
 				depth_derivative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
 					multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write);
 				depth_derivative_small_mip_rtvs_.resize(depth_derivative_small_tex_->NumMipMaps());
@@ -138,6 +141,9 @@ namespace KlayGE
 				{
 					depth_derivative_small_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_small_tex_, 0, 1, i);
 				}
+
+				normal_cone_mip_rtvs_.resize(1);
+				normal_cone_mip_rtvs_[0] = rf.Make2DRtv(normal_cone_tex_, 0, 1, 0);
 
 				normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
 					multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write);
