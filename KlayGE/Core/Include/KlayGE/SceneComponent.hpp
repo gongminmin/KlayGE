@@ -35,14 +35,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // std::unary_function is deprecated
-#endif
+#define BOOST_NO_CXX98_FUNCTION_BASE // Remove the usage of std::unary_function in container_hash/hash.hpp
 #include <boost/type_index.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
 #include <boost/type_index/runtime_cast.hpp>
 
 #include <KlayGE/Signal.hpp>
