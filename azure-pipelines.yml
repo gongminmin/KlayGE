@@ -148,8 +148,8 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'Build | External/Build/**/CMakeLists.txt | $(id)'
-          restoreKeys: 'Build | $(id)'
+          key: 'Build | External/Build/**/CMakeLists.txt | $(id) | $(project)'
+          restoreKeys: 'Build | $(id) | $(project)'
           path: Build/$(BUILD_DIR)
         displayName: Cache Build
 
