@@ -1,12 +1,12 @@
 SET(PY_VERSION_MAJOR 3)
 SET(PY_VERSION_MINOR 8)
-SET(PY_VERSION_PATCH 6)
+SET(PY_VERSION_PATCH 13)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/Python")
 SET(PYTHON_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/Python/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("Python" "https://github.com/python/cpython.git" "db455296be5f792b8c12b7cd7f3962b52e4f44ee" "v${PY_VERSION}" "v${PY_VERSION}rc1" need_patch)
+UpdateExternalLib("Python" "https://github.com/python/cpython.git" "ea673213dd30afd8cacb53927e7d86f6125e86c8" "v${PY_VERSION}" "v3.8.12" need_patch)
 if(need_patch)
 	foreach(patch "0001-Fix-for-clang-cl" "0002-Fix-for-MinGW" "0003-Fix-for-UWP")
 		ApplyPatch("Python" "${CMAKE_CURRENT_SOURCE_DIR}/PythonPatches/${patch}.patch")

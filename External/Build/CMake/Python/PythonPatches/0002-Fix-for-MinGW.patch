@@ -1,4 +1,4 @@
-From 127a264d4118d80eeac4e858cd8fdad0bc1b361f Mon Sep 17 00:00:00 2001
+From d0bce6a944f5ebefce31fb58e7991be0f78328c4 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
 Subject: [PATCH 2/3] Fix for MinGW
@@ -8,10 +8,10 @@ Subject: [PATCH 2/3] Fix for MinGW
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 726e3723f9..e67782aa74 100644
+index d7edabe5da..3b099a0ad1 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
-@@ -181,7 +181,7 @@ corresponding Unix manual entries for more information on calls.");
+@@ -182,7 +182,7 @@ corresponding Unix manual entries for more information on calls.");
  #define HAVE_SYSTEM     1
  #include <process.h>
  #else
@@ -20,7 +20,7 @@ index 726e3723f9..e67782aa74 100644
  #define HAVE_GETPPID    1
  #define HAVE_GETLOGIN   1
  #define HAVE_SPAWNV     1
-@@ -213,7 +213,7 @@ corresponding Unix manual entries for more information on calls.");
+@@ -214,7 +214,7 @@ corresponding Unix manual entries for more information on calls.");
  #define HAVE_SYSTEM     1
  #define HAVE_WAIT       1
  #define HAVE_TTYNAME    1
@@ -29,7 +29,7 @@ index 726e3723f9..e67782aa74 100644
  #endif  /* ! __WATCOMC__ || __QNX__ */
  
  
-@@ -292,7 +292,7 @@ extern char        *ctermid_r(char *);
+@@ -293,7 +293,7 @@ extern char        *ctermid_r(char *);
  #endif
  #endif
  
@@ -38,7 +38,7 @@ index 726e3723f9..e67782aa74 100644
  #ifdef HAVE_DIRECT_H
  #include <direct.h>
  #endif
-@@ -314,7 +314,7 @@ extern char        *ctermid_r(char *);
+@@ -315,7 +315,7 @@ extern char        *ctermid_r(char *);
  #include <shellapi.h>   /* for ShellExecute() */
  #include <lmcons.h>     /* for UNLEN */
  #define HAVE_SYMLINK
