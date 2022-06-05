@@ -17,6 +17,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <algorithm>
+#include <cstring>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESUtil.hpp>
@@ -220,7 +221,7 @@ namespace KlayGE
 		GraphicsBuffer::Mapper dst_mapper(target, BA_Write_Only);
 		uint8_t const * src = src_mapper.Pointer<uint8_t>() + src_offset;
 		uint8_t* dst = dst_mapper.Pointer<uint8_t>() + dst_offset;
-		memcpy(dst, src, size);
+		std::memcpy(dst, src, size);
 	}
 
 	void OGLESGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)

@@ -1163,12 +1163,6 @@ namespace
 				tex_data.init_data.resize(1);
 			}
 
-			uint32_t array_size = tex_data.array_size;
-			if (Texture::TT_Cube == tex_data.type)
-			{
-				array_size *= 6;
-			}
-
 			if (((EF_BC5 == tex_data.format) && !caps.TextureFormatSupport(EF_BC5))
 				|| ((EF_BC5_SRGB == tex_data.format) && !caps.TextureFormatSupport(EF_BC5_SRGB)))
 			{

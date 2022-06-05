@@ -29,44 +29,28 @@ stages:
           BUILD_DIR: vc142
 
         Windows_vc141:
-          vmImage: VS2017-Win2016
-          project: vs2017
+          vmImage: windows-2019
+          project: vs2019
           compiler: vc141
           installCommand: ''
           id: 'vc141_win_$(platform)_$(configuration)'
           BUILD_DIR: vc141
 
-        Windows_clangcl10:
+        Windows_clangcl12:
           vmImage: windows-2019
           project: vs2019
           compiler: clangcl
           installCommand: ''
-          id: 'clangcl10_win_$(platform)_$(configuration)'
-          BUILD_DIR: clangcl10
+          id: 'clangcl12_win_$(platform)_$(configuration)'
+          BUILD_DIR: clangcl12
 
-        Windows_gcc10:
+        Windows_gcc12:
           vmImage: windows-2019
           project: ninja
           compiler: mingw
           installCommand: 'choco install ninja'
-          id: 'gcc10_win_$(platform)_$(configuration)'
+          id: 'gcc12_win_$(platform)_$(configuration)'
           BUILD_DIR: mingw
-
-        Linux_gcc9:
-          vmImage: Ubuntu-18.04
-          project: ninja
-          compiler: gcc
-          installCommand: |
-            sudo dpkg --add-architecture i386
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-            sudo apt-get update
-            sudo apt-get install g++-9 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win64
-            winetricks
-          id: 'gcc9_linux_$(platform)_$(configuration)'
-          CC: gcc-9
-          CXX: g++-9
-          BUILD_DIR: gcc9
 
         Linux_gcc10:
           vmImage: Ubuntu-18.04
@@ -84,23 +68,21 @@ stages:
           CXX: g++-10
           BUILD_DIR: gcc10
 
-        Linux_clang10:
-          vmImage: Ubuntu-18.04
+        Linux_gcc11:
+          vmImage: Ubuntu-20.04
           project: ninja
-          compiler: clang
+          compiler: gcc
           installCommand: |
             sudo dpkg --add-architecture i386
-            wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-            sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install clang-10 libc++-10-dev libc++abi-10-dev lld-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
+            sudo apt-get install g++-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win64
             winetricks
-          id: 'clang10_linux_$(platform)_$(configuration)'
-          CC: clang-10
-          CXX: clang++-10
-          BUILD_DIR: clang10
+          id: 'gcc11_linux_$(platform)_$(configuration)'
+          CC: gcc-11
+          CXX: g++-11
+          BUILD_DIR: gcc11
 
         Linux_clang11:
           vmImage: Ubuntu-18.04
@@ -120,17 +102,23 @@ stages:
           CXX: clang++-11
           BUILD_DIR: clang11
 
-        #macOS_clang11:
-        #  vmImage: macOS-10.14
-        #  project: ninja
-        #  compiler: clang
-        #  installCommand: |
-        #    export HOMEBREW_NO_INSTALL_CLEANUP=1
-        #    brew install --cask xquartz wine-stable
-        #    brew install ninja mingw-w64
-        #  id: 'clang11_darwin_$(platform)_$(configuration)'
-        #  BUILD_DIR: clang11
-        #  MACOSX_DEPLOYMENT_TARGET: 10.14
+        Linux_clang13:
+          vmImage: Ubuntu-20.04
+          project: ninja
+          compiler: clang
+          installCommand: |
+            sudo dpkg --add-architecture i386
+            wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+            sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main"
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt-get update
+            sudo apt-get install clang-13 libc++-13-dev libc++abi-13-dev lld-13 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
+            export WINEARCH=win64
+            winetricks
+          id: 'clang13_linux_$(platform)_$(configuration)'
+          CC: clang-13
+          CXX: clang++-13
+          BUILD_DIR: clang13
 
         macOS_clang12:
           vmImage: macOS-10.15

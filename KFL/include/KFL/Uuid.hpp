@@ -37,6 +37,7 @@
 #include <KFL/Util.hpp>
 
 #include <array>
+#include <cstring>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <guiddef.h>
@@ -74,7 +75,7 @@ namespace KlayGE
 
 	inline bool operator==(Uuid const& lhs, Uuid const& rhs) noexcept
 	{
-		return !memcmp(&lhs, &rhs, sizeof(Uuid));
+		return !std::memcmp(&lhs, &rhs, sizeof(Uuid));
 	}
 
 	inline bool operator!=(Uuid const& lhs, Uuid const& rhs) noexcept
