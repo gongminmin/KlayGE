@@ -5,12 +5,17 @@
 #pragma warning(disable : 6326) // Potential comparison of a constant with another constant.
 #endif
 
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER < 1920)
+#pragma warning(push)
+#pragma warning(disable : 4244) // Ignore the enum type conversion in gtest-printers.h
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshift-sign-overflow"
 #endif
 #include <gtest/gtest.h>
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER < 1920)
+#pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma warning(pop)
 #endif
 

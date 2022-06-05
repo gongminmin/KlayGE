@@ -1,7 +1,7 @@
 SET(GOOGLETEST_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/googletest")
 SET(GOOGLETEST_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/googletest/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("googletest" "https://github.com/google/googletest.git" "703bd9caab50b139428cea1aaff9974ebee5742e")
+UpdateExternalLib("googletest" "https://github.com/google/googletest.git" "e649993a402d96afe25fbf3413749adf0f2947f6")
 
 set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
@@ -9,7 +9,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-ADD_SUBDIRECTORY("${GOOGLETEST_PROJECT_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
+ADD_SUBDIRECTORY("${GOOGLETEST_PROJECT_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
 
 SET_TARGET_PROPERTIES(gtest PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${GOOGLETEST_OUTPUT_DIR}
