@@ -1,32 +1,41 @@
-From 7a4ea2d8852c483f1e0914b523dec9db43d2c5de Mon Sep 17 00:00:00 2001
+From f254a402ed250999ef88782a053328abfb9fd748 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 10 Jan 2018 22:01:45 -0800
-Subject: [PATCH 08/13] Fix some problems with Android and iOS.
+Subject: [PATCH 07/10] Fix some problems with Android and iOS.
 
 ---
- CMakeLists.txt              | 2 +-
+ CMakeLists.txt              | 4 ++--
  cmake/ConfigureChecks.cmake | 4 ++--
  cmake/PlatformTest.cmake    | 4 ++--
- 3 files changed, 5 insertions(+), 5 deletions(-)
+ 3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ac9fb7c..7179fbe 100644
+index c0601e7..9941ee2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -136,7 +136,7 @@ option(WITH_DOC_STRINGS "Enable if you want documentation strings in extension m
+@@ -134,7 +134,7 @@ option(ENABLE_IPV6 "Enable IP v6" ON)
+ option(WITH_DOC_STRINGS "Enable if you want documentation strings in extension modules" ON)
  set(Py_DEBUG OFF) # TODO - Build debugging interpreter
  option(WITH_PYMALLOC "Define if you want to compile in Python-specific mallocs" ON)
- option(WITH_THREAD "Compile in rudimentary thread support" ON)
 -if(UNIX)
 +if(UNIX OR ANDROID OR IOS)
      option(WITH_STATIC_DEPENDENCIES "Restrict extensions and external dependencies to static libraries" OFF)
      if(WITH_STATIC_DEPENDENCIES)
-         if(NOT POLICY CMP0065)
+             set(_reason " because of WITH_STATIC_DEPENDENCIES=ON")
+@@ -491,7 +491,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
+     "A colon (:) separated list of extra paths to add to the PYTHONPATH")
+ 
+ # Configure 'pyconfig.h'
+-if(UNIX)
++if(UNIX OR ANDROID OR IOS)
+     set(PYCONFIG_BUILD_DIR ${BIN_BUILD_DIR})
+     configure_file(cmake/config-unix/pyconfig.h.in
+                    ${PYCONFIG_BUILD_DIR}/pyconfig.h)
 diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
-index 7c2ad80..9c0034f 100644
+index 1c57372..05832aa 100644
 --- a/cmake/ConfigureChecks.cmake
 +++ b/cmake/ConfigureChecks.cmake
-@@ -159,7 +159,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
+@@ -205,7 +205,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
  
  set(_msg "Checking SOABI")
  try_run(PLATFORM_RUN PLATFORM_COMPILE
@@ -35,7 +44,7 @@ index 7c2ad80..9c0034f 100644
          RUN_OUTPUT_VARIABLE PLATFORM_TRIPLET)
  if(NOT PLATFORM_COMPILE)
    message(FATAL_ERROR "We could not determine the platform. Please clean the ${CMAKE_PROJECT_NAME} environment and try again...")
-@@ -359,7 +359,7 @@ find_library(HAVE_LIBTERMCAP termcap)
+@@ -432,7 +432,7 @@ find_library(HAVE_LIBTERMCAP termcap)
  set(LIBUTIL_LIBRARIES )
  set(LIBUTIL_EXPECTED 1)
  
@@ -45,10 +54,10 @@ index 7c2ad80..9c0034f 100644
    set(HAVE_LIBUTIL 0)
  endif()
 diff --git a/cmake/PlatformTest.cmake b/cmake/PlatformTest.cmake
-index 9dbc361..84623b9 100644
+index 7c4b44f..772d5d7 100644
 --- a/cmake/PlatformTest.cmake
 +++ b/cmake/PlatformTest.cmake
-@@ -28,7 +28,7 @@ macro(python_platform_test var description srcfile invert)
+@@ -22,7 +22,7 @@ macro(python_platform_test var description srcfile invert)
      endif()
  
      try_compile(${var}_COMPILED
@@ -57,7 +66,7 @@ index 9dbc361..84623b9 100644
        ${srcfile}
        COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-@@ -87,7 +87,7 @@ macro(python_platform_test_run var description srcfile invert)
+@@ -81,7 +81,7 @@ macro(python_platform_test_run var description srcfile invert)
      endif()
  
      try_run(${var} ${var}_COMPILED

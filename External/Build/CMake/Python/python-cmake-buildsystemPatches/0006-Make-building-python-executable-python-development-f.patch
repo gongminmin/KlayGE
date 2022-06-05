@@ -1,16 +1,16 @@
-From f239ef2f9fc74dfe3a8fef6520e4159ab6423dbc Mon Sep 17 00:00:00 2001
+From f7e5b7b45f51f561614fda61e43dd201127138db Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 23 Jan 2018 23:38:33 -0800
-Subject: [PATCH 07/13] Make building python executable, python development,
+Subject: [PATCH 06/10] Make building python executable, python development,
  freeze importlib and pgen optional.
 
 ---
- CMakeLists.txt                 | 147 ++++++++++++++++++---------------
- cmake/libpython/CMakeLists.txt | 114 +++++++++++++------------
- 2 files changed, 141 insertions(+), 120 deletions(-)
+ CMakeLists.txt                 | 153 ++++++++++++++++++---------------
+ cmake/libpython/CMakeLists.txt | 150 ++++++++++++++++----------------
+ 2 files changed, 162 insertions(+), 141 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index fe969d2..ac9fb7c 100644
+index 2680d3d..c0601e7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,6 +23,11 @@ if(APPLE)
@@ -24,8 +24,8 @@ index fe969d2..ac9fb7c 100644
 +
  project(Python C)
  
- if(POLICY CMP0042)
-@@ -38,7 +43,9 @@ include(cmake/CMakeChecks.cmake)
+ if(NOT DEFINED CMAKE_MACOSX_RPATH)
+@@ -36,7 +41,9 @@ endif()
  include(cmake/Extensions.cmake)
  include(CMakeDependentOption)
  include(CMakeParseArguments)
@@ -36,7 +36,7 @@ index fe969d2..ac9fb7c 100644
  
  # Options
  option(DOWNLOAD_SOURCES "Automatically download the Python sources" ON)
-@@ -465,77 +472,87 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
+@@ -565,48 +572,56 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
  
  # Add the other subdirectories
  add_subdirectory(cmake/libpython CMakeBuild/libpython)
@@ -50,6 +50,7 @@ index fe969d2..ac9fb7c 100644
 +    add_subdirectory(cmake/include CMakeBuild/include)
 +    add_subdirectory(cmake/lib CMakeBuild/lib)
 +endif()
+ add_subdirectory(cmake/tools CMakeBuild/tools)
  if(BUILD_WININST)
      add_subdirectory(cmake/PC/bdist_wininst CMakeBuild/bdist_wininst)
  endif()
@@ -77,9 +78,15 @@ index fe969d2..ac9fb7c 100644
  endif()
  
 -# Add target to generate 'Include/graminit.h' and 'Python/graminit.c'
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+-    set(generate_graminit_command $<TARGET_FILE:python> -m Parser.pgen)
+-else()
+-    set(generate_graminit_command $<TARGET_FILE:pgen>)
+-endif()
 -add_custom_target(generate_graminit
--    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:pgen>
+-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${generate_graminit_command}
 -        ${SRC_DIR}/Grammar/Grammar
+-        $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:${SRC_DIR}/Grammar/Tokens>
 -        ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.h
 -        ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
 -    COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -88,12 +95,43 @@ index fe969d2..ac9fb7c 100644
 -    COMMAND ${CMAKE_COMMAND} -E copy_if_different
 -        ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
 -        ${SRC_DIR}/Python/graminit.c
--    DEPENDS pgen
+-    DEPENDS $<IF:$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>,python,pgen>
 -    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 -    COMMENT "Generating '${SRC_DIR}/Include/graminit.h' and '${SRC_DIR}/Python/graminit.c'."
 -    VERBATIM
 -)
--
++if(BUILD_PGEN)
++    # Add target to generate 'Include/graminit.h' and 'Python/graminit.c'
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
++        set(generate_graminit_command $<TARGET_FILE:python> -m Parser.pgen)
++    else()
++        set(generate_graminit_command $<TARGET_FILE:pgen>)
++    endif()
++    add_custom_target(generate_graminit
++        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${generate_graminit_command}
++            ${SRC_DIR}/Grammar/Grammar
++            $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:${SRC_DIR}/Grammar/Tokens>
++            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.h
++            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
++        COMMAND ${CMAKE_COMMAND} -E copy_if_different
++            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.h
++            ${SRC_DIR}/Include/graminit.h
++        COMMAND ${CMAKE_COMMAND} -E copy_if_different
++            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
++            ${SRC_DIR}/Python/graminit.c
++        DEPENDS $<IF:$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>,python,pgen>
++        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
++        COMMENT "Generating '${SRC_DIR}/Include/graminit.h' and '${SRC_DIR}/Python/graminit.c'."
++        VERBATIM
++    )
++endif()
+ 
+ if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
+ # Add target to generate `Tools/peg_generator/pegen/grammar_parser.py`
+@@ -643,41 +658,43 @@ add_custom_target(generate_pegen_parse
+ )
+ endif()
+ 
 -# Add target to generate 'opcode.h' header file
 -add_custom_target(generate_opcode_h
 -    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Tools/scripts/generate_opcode_h.py
@@ -105,47 +143,6 @@ index fe969d2..ac9fb7c 100644
 -    DEPENDS python
 -    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 -    COMMENT "Generating '${SRC_DIR}/Include/opcode.h'."
--    VERBATIM
--)
--
--# Add target to generate 'Include/Python-ast.h' from 'Python.asdl'
--add_custom_target(generate_python_ast_h
--    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
--        -h ${SRC_DIR}/Include
--        ${SRC_DIR}/Parser/Python.asdl
--    DEPENDS python
--    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
--    COMMENT "Generating '${SRC_DIR}/Include/Python-ast.h'"
--    VERBATIM
--)
-+if(BUILD_PGEN)
-+    # Add target to generate 'Include/graminit.h' and 'Python/graminit.c'
-+    add_custom_target(generate_graminit
-+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:pgen>
-+            ${SRC_DIR}/Grammar/Grammar
-+            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.h
-+            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
-+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-+            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.h
-+            ${SRC_DIR}/Include/graminit.h
-+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-+            ${PROJECT_BINARY_DIR}/CMakeFiles/graminit.c
-+            ${SRC_DIR}/Python/graminit.c
-+        DEPENDS pgen
-+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-+        COMMENT "Generating '${SRC_DIR}/Include/graminit.h' and '${SRC_DIR}/Python/graminit.c'."
-+        VERBATIM
-+    )
-+endif()
- 
--# Add target to generate 'Python/Python-ast.c' from 'Python.asdl'
--add_custom_target(generate_python_ast_c
--    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
--        -c ${SRC_DIR}/Python
--        ${SRC_DIR}/Parser/Python.asdl
--    DEPENDS python
--    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
--    COMMENT "Generating '${SRC_DIR}/Python/Python-ast.c'"
 -    VERBATIM
 -)
 +if(BUILD_PYTHON_EXECUTABLE)
@@ -162,7 +159,17 @@ index fe969d2..ac9fb7c 100644
 +        COMMENT "Generating '${SRC_DIR}/Include/opcode.h'."
 +        VERBATIM
 +    )
-+    
+ 
+-# Add target to generate 'Include/Python-ast.h' from 'Python.asdl'
+-add_custom_target(generate_python_ast_h
+-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
+-        -h ${SRC_DIR}/Include
+-        ${SRC_DIR}/Parser/Python.asdl
+-    DEPENDS python
+-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+-    COMMENT "Generating '${SRC_DIR}/Include/Python-ast.h'"
+-    VERBATIM
+-)
 +    # Add target to generate 'Include/Python-ast.h' from 'Python.asdl'
 +    add_custom_target(generate_python_ast_h
 +        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
@@ -173,7 +180,16 @@ index fe969d2..ac9fb7c 100644
 +        COMMENT "Generating '${SRC_DIR}/Include/Python-ast.h'"
 +        VERBATIM
 +    )
-+    
+ 
+-# Add target to generate 'Python/Python-ast.c' from 'Python.asdl'
+-add_custom_target(generate_python_ast_c
+-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
+-        -c ${SRC_DIR}/Python
+-        ${SRC_DIR}/Parser/Python.asdl
+-    DEPENDS python
+-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+-    COMMENT "Generating '${SRC_DIR}/Python/Python-ast.c'"
+-    VERBATIM
 +    # Add target to generate 'Python/Python-ast.c' from 'Python.asdl'
 +    add_custom_target(generate_python_ast_c
 +        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:python> ${SRC_DIR}/Parser/asdl_c.py
@@ -183,22 +199,25 @@ index fe969d2..ac9fb7c 100644
 +        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 +        COMMENT "Generating '${SRC_DIR}/Python/Python-ast.c'"
 +        VERBATIM
-+    )
+ )
 +endif()
  
  # If needed, copy 'asdl.py' and 'Python.asdl' into build directory so that 'test_asdl_parser' passes.
  set(_asdl_subdir ${LIBDIR})
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index 56970b1..e1ee1b5 100644
+index aaacc84..2a1cb2e 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
-@@ -394,66 +394,70 @@ if(WIN32 AND IS_PY3)
+@@ -457,88 +457,92 @@ if(WIN32 AND IS_PY3)
      endif()
  endif()
  
 -set(LIBPYTHON_FROZEN_SOURCES )
 -if(IS_PY3)
--
++if(BUILD_FREEZE_IMPORTLIB)
++    set(LIBPYTHON_FROZEN_SOURCES )
++    if(IS_PY3)
+ 
 -# Build _freeze_importlib executable
 -add_executable(_freeze_importlib
 -  ${SRC_DIR}/Programs/_freeze_importlib.c
@@ -208,21 +227,6 @@ index 56970b1..e1ee1b5 100644
 -if(builtin_compile_definitions_without_py_limited_api)
 -  target_compile_definitions(_freeze_importlib PUBLIC ${builtin_compile_definitions_without_py_limited_api})
 -endif()
--
--# Freeze modules
--set(LIBPYTHON_FROZEN_SOURCES
--  ${SRC_DIR}/Python/importlib_external.h
--  ${SRC_DIR}/Python/importlib.h
--)
--add_custom_command(
--  OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
--  COMMAND
--    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
--      ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
-+if(BUILD_FREEZE_IMPORTLIB)
-+    set(LIBPYTHON_FROZEN_SOURCES )
-+    if(IS_PY3)
-+    
 +    # Build _freeze_importlib executable
 +    add_executable(_freeze_importlib
 +      ${SRC_DIR}/Programs/_freeze_importlib.c
@@ -232,12 +236,29 @@ index 56970b1..e1ee1b5 100644
 +    if(builtin_compile_definitions_without_py_limited_api)
 +      target_compile_definitions(_freeze_importlib PUBLIC ${builtin_compile_definitions_without_py_limited_api})
 +    endif()
-+    
+ 
+-# Freeze modules
+-set(LIBPYTHON_FROZEN_SOURCES
+-  ${SRC_DIR}/Python/importlib_external.h
+-  ${SRC_DIR}/Python/importlib.h
+-)
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+-  list(APPEND LIBPYTHON_FROZEN_SOURCES
+-    ${SRC_DIR}/Python/importlib_zipimport.h
+-  )
+-endif()
+-add_custom_command(
+-  OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
+-  COMMAND
+-    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
+-      $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:importlib._bootstrap_external>
+-      ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
 +    # Freeze modules
 +    set(LIBPYTHON_FROZEN_SOURCES
        ${SRC_DIR}/Python/importlib_external.h
 -  COMMAND
 -    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
+-      $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:importlib._bootstrap>
 -      ${SRC_DIR}/Lib/importlib/_bootstrap.py
        ${SRC_DIR}/Python/importlib.h
 -  DEPENDS
@@ -245,19 +266,34 @@ index 56970b1..e1ee1b5 100644
 -    ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
 -    ${SRC_DIR}/Lib/importlib/_bootstrap.py
 -)
--
--# This is a convenience target allowing to regenerate
--# the frozen sources.
--add_custom_target(freeze_modules DEPENDS ${LIBPYTHON_FROZEN_SOURCES})
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+-  add_custom_command(
+-    OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
+-    COMMAND
+-      ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
+-        zipimport
+-        ${SRC_DIR}/Lib/zipimport.py
 +    )
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
++      list(APPEND LIBPYTHON_FROZEN_SOURCES
+         ${SRC_DIR}/Python/importlib_zipimport.h
+-    DEPENDS
+-      ${SRC_DIR}/Lib/zipimport.py
+-    APPEND
+-  )
+-endif()
++      )
++    endif()
 +    add_custom_command(
 +      OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
 +      COMMAND
 +        ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
++          $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:importlib._bootstrap_external>
 +          ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
 +          ${SRC_DIR}/Python/importlib_external.h
 +      COMMAND
 +        ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
++          $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:importlib._bootstrap>
 +          ${SRC_DIR}/Lib/importlib/_bootstrap.py
 +          ${SRC_DIR}/Python/importlib.h
 +      DEPENDS
@@ -265,7 +301,23 @@ index 56970b1..e1ee1b5 100644
 +        ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
 +        ${SRC_DIR}/Lib/importlib/_bootstrap.py
 +    )
-+    
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
++      add_custom_command(
++        OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
++        COMMAND
++          ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
++            zipimport
++            ${SRC_DIR}/Lib/zipimport.py
++            ${SRC_DIR}/Python/importlib_zipimport.h
++        DEPENDS
++          ${SRC_DIR}/Lib/zipimport.py
++        APPEND
++      )
++    endif()
+ 
+-# This is a convenience target allowing to regenerate
+-# the frozen sources.
+-add_custom_target(freeze_modules DEPENDS ${LIBPYTHON_FROZEN_SOURCES})
 +    # This is a convenience target allowing to regenerate
 +    # the frozen sources.
 +    add_custom_target(freeze_modules DEPENDS ${LIBPYTHON_FROZEN_SOURCES})
@@ -273,6 +325,7 @@ index 56970b1..e1ee1b5 100644
 +    endif()
  endif()
  
+-if(PY_VERSION VERSION_LESS "3.8")
 -# Build pgen executable
 -set(PGEN2_SOURCES
 -    ${SRC_DIR}/Parser/parsetok.c
@@ -293,7 +346,9 @@ index 56970b1..e1ee1b5 100644
 -)
 -if(builtin_compile_definitions_without_py_limited_api)
 -  target_compile_definitions(pgen PUBLIC ${builtin_compile_definitions_without_py_limited_api})
+-endif()
 +if(BUILD_PGEN)
++    if(PY_VERSION VERSION_LESS "3.8")
 +    # Build pgen executable
 +    set(PGEN2_SOURCES
 +        ${SRC_DIR}/Parser/parsetok.c
@@ -314,6 +369,7 @@ index 56970b1..e1ee1b5 100644
 +    )
 +    if(builtin_compile_definitions_without_py_limited_api)
 +      target_compile_definitions(pgen PUBLIC ${builtin_compile_definitions_without_py_limited_api})
++    endif()
 +    endif()
  endif()
  

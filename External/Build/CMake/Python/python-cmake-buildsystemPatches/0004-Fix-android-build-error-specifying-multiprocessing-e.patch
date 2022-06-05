@@ -1,7 +1,7 @@
-From 5c17a86e0764d30fdccb0372f8f274740e4bde27 Mon Sep 17 00:00:00 2001
+From 52be69e54bc05254172ba7949b8fed9ed9a3855a Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 02:57:58 -0500
-Subject: [PATCH 04/13] Fix android build error specifying multiprocessing
+Subject: [PATCH 04/10] Fix android build error specifying multiprocessing
  extension requirements.
 
 This commit will fix the following build error:
@@ -17,17 +17,17 @@ Building C object CMakeBuild/extensions/CMakeFiles/extension_multiprocessing.dir
  1 file changed, 1 insertion(+)
 
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index ed61086..fae9ef3 100644
+index 46d0dc0..82403c7 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
-@@ -229,6 +229,7 @@ if(UNIX)
-         )
+@@ -264,6 +264,7 @@ if(UNIX)
+       list(APPEND _multiprocessing_REQUIRES WITH_THREAD)
      endif()
      add_python_extension(_multiprocessing
 +        REQUIRES HAVE_SEM_OPEN "NOT POSIX_SEMAPHORES_NOT_ENABLED"
          SOURCES _multiprocessing/multiprocessing.c
                  ${_multiprocessing${PY_VERSION_MAJOR}_SOURCES}
-         REQUIRES WITH_THREAD
+         REQUIRES ${_multiprocessing_REQUIRES}
 -- 
 2.17.1.windows.2
 

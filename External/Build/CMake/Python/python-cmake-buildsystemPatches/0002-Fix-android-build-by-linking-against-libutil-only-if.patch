@@ -1,7 +1,7 @@
-From 4dba53dd24ac57823044bf82588fabd8621ac784 Mon Sep 17 00:00:00 2001
+From 1173ae3759df33385e869286f51d4ad9494a5759 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:20:12 -0500
-Subject: [PATCH 02/13] Fix android build by linking against libutil only if
+Subject: [PATCH 02/10] Fix android build by linking against libutil only if
  found
 
 This commit fixes the following configure error:
@@ -17,10 +17,10 @@ HAVE_LIBUTIL
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index 6b183b2..56970b1 100644
+index 40d32f8..aaacc84 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
-@@ -379,7 +379,10 @@ if(WITH_THREAD)
+@@ -439,7 +439,10 @@ if(WITH_THREAD OR PY_VERSION VERSION_GREATER_EQUAL "3.7")
      list(APPEND LIBPYTHON_TARGET_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
  endif()
  if(UNIX)

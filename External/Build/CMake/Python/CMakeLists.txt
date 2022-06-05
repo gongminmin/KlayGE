@@ -13,14 +13,13 @@ if(need_patch)
 	endforeach()
 endif()
 
-UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "a1ce7c2cf346ce62648d8c3e9e5cae7f655d4309" "" "" need_patch)
+UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "bb45aa7a4cfc7a5a93bc490c6158f702d1a2226f" "" "" need_patch)
 if(need_patch)
 	foreach(patch "0001-Enable-ASM-langage-only-if-required" "0002-Fix-android-build-by-linking-against-libutil-only-if"
 		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
-		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Don-t-set_target_properties-on-an-extension-when-it-"
-		"0007-Make-building-python-executable-python-development-f" "0008-Fix-some-problems-with-Android-and-iOS"
-		"0009-Update-pyconfig.h-for-mingw" "0010-Adapt-to-python-3.7" "0011-Adapt-to-python-3.8" "0012-Skip-CMP0045-on-CMake-3.0.1"
-		"0013-No-need-to-dereference-system-variables-in-if")
+		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Make-building-python-executable-python-development-f"
+		"0007-Fix-some-problems-with-Android-and-iOS" "0008-Update-pyconfig.h-for-mingw"
+		"0009-No-need-to-dereference-system-variables-in-if" "0010-Fix-redefined-_POSIX_THREADS-and-_POSIX_SOURCE-on-Li")
 		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/python-cmake-buildsystemPatches/${patch}.patch")
 	endforeach()
 endif()
@@ -96,7 +95,7 @@ set(PYTHON_APPLY_PATCHES OFF CACHE BOOL "" FORCE)
 set(USE_SYSTEM_BZip2 OFF CACHE BOOL "" FORCE)
 set(USE_SYSTEM_Curses OFF CACHE BOOL "" FORCE)
 set(USE_SYSTEM_EXPAT OFF CACHE BOOL "" FORCE)
-set(USE_SYSTEM_DB OFF CACHE BOOL "" FORCE)
+set(USE_SYSTEM_FFI ON CACHE BOOL "" FORCE)
 set(USE_SYSTEM_GDBM OFF CACHE BOOL "" FORCE)
 set(USE_SYSTEM_OpenSSL OFF CACHE BOOL "" FORCE)
 set(USE_SYSTEM_READLINE OFF CACHE BOOL "" FORCE)
@@ -107,7 +106,7 @@ set(WITH_DOC_STRINGS OFF CACHE BOOL "" FORCE)
 set(WITH_TSC OFF CACHE BOOL "" FORCE)
 set(USE_BUILTIN_ZLIB OFF CACHE BOOL "" FORCE)
 
-set(_download_${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}_md5 "")
+set(_download_${PY_VERSION}_md5 "")
 
 IF(CMAKE_CROSSCOMPILING)
 	STRING(TOLOWER ${CMAKE_SYSTEM_NAME} lc_system_name)

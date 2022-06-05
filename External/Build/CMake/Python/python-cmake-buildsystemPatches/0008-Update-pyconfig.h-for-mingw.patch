@@ -1,28 +1,14 @@
-From d259151dcc3092d343da73294a8a038b431bf57d Mon Sep 17 00:00:00 2001
+From bfebb5c91e713c07a207d1f860a47b29f6c592d7 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 9 Jan 2019 23:00:01 -0800
-Subject: [PATCH 09/13] Update pyconfig.h for mingw
+Subject: [PATCH 08/10] Update pyconfig.h for mingw
 
 ---
- CMakeLists.txt                |  2 +-
- cmake/config-mingw/pyconfig.h | 41 ++++++++++++++++++++++++++---------
- 2 files changed, 32 insertions(+), 11 deletions(-)
+ cmake/config-mingw/pyconfig.h | 58 +++++++++++++++++++++++++++++------
+ 1 file changed, 48 insertions(+), 10 deletions(-)
 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7179fbe..5549e7f 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -388,7 +388,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
-     "A colon (:) separated list of extra paths to add to the PYTHONPATH")
- 
- # Configure 'pyconfig.h'
--if(UNIX)
-+if(UNIX OR ANDROID OR IOS)
-     set(PYCONFIG_BUILD_DIR ${BIN_BUILD_DIR})
-     configure_file(cmake/config-unix/pyconfig.h.in
-                    ${PYCONFIG_BUILD_DIR}/pyconfig.h)
 diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
-index 5af0378..988c74c 100644
+index 5af0378..137dc9d 100644
 --- a/cmake/config-mingw/pyconfig.h
 +++ b/cmake/config-mingw/pyconfig.h
 @@ -84,18 +84,24 @@ WIN32 is still required for the locale module.
@@ -118,6 +104,28 @@ index 5af0378..988c74c 100644
  /* Define if you have the dl library (-ldl).  */
  /* #undef HAVE_LIBDL */
  
+@@ -563,4 +584,21 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+    least significant byte first */
+ #define DOUBLE_IS_LITTLE_ENDIAN_IEEE754 1
+ 
++#if PY_VERSION_HEX >= 0x03070000
++/* Define to 1 if you have the `erf' function. */
++#define HAVE_ERF 1
++
++/* Define to 1 if you have the `erfc' function. */
++#define HAVE_ERFC 1
++
++/* Define if you have the 'inet_pton' function. */
++#define HAVE_INET_PTON 1
++
++/* framework name */
++#define _PYTHONFRAMEWORK ""
++
++/* Define if libssl has X509_VERIFY_PARAM_set1_host and related function */
++#define HAVE_X509_VERIFY_PARAM_SET1_HOST 1
++#endif
++
+ #endif /* !Py_CONFIG_H */
 -- 
 2.17.1.windows.2
 

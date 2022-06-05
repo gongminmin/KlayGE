@@ -1,7 +1,7 @@
-From 1ea116f6893e5541bcb30559f9359a95530a7125 Mon Sep 17 00:00:00 2001
+From 4ef4fa0b3beb333b6cdf548fa28bf163f1683326 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:21:34 -0500
-Subject: [PATCH 03/13] Fix build error when curses is enabled but curses
+Subject: [PATCH 03/10] Fix build error when curses is enabled but curses
  header are not installer.
 
 This commit fixes the following build error:
@@ -19,10 +19,10 @@ compilation terminated.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 9d20afb..ed61086 100644
+index 13ea266..46d0dc0 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
-@@ -617,7 +617,7 @@ add_python_extension(_curses_panel
+@@ -682,7 +682,7 @@ add_python_extension(_curses_panel
      LIBRARIES ${curses_common_LIBRARIES} ${PANEL_LIBRARIES}
  )
  add_python_extension(_curses

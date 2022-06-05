@@ -1,7 +1,7 @@
-From 546682ee723cb0dc9941987bf5436fd8abecaff0 Mon Sep 17 00:00:00 2001
+From 687fa9e33797f6cfdc7e78b27e2ee1a4a3b5f622 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Thu, 21 Jan 2016 06:41:37 -0500
-Subject: [PATCH 01/13] Enable ASM langage only if required.
+Subject: [PATCH 01/10] Enable ASM langage only if required.
 
 ---
  CMakeLists.txt                  | 2 +-
@@ -9,7 +9,7 @@ Subject: [PATCH 01/13] Enable ASM langage only if required.
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4118010..fe969d2 100644
+index be183d7..2680d3d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,7 +23,7 @@ if(APPLE)
@@ -19,13 +19,13 @@ index 4118010..fe969d2 100644
 -project(Python C ASM)
 +project(Python C)
  
- if(POLICY CMP0042)
-     cmake_policy(SET CMP0042 OLD)
+ if(NOT DEFINED CMAKE_MACOSX_RPATH)
+   set(CMAKE_MACOSX_RPATH "")
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 7737d4e..9d20afb 100644
+index a66b833..13ea266 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
-@@ -340,6 +340,7 @@ else()
+@@ -396,6 +396,7 @@ else()
              DEFINITIONS MACOSX
          )
      else()
