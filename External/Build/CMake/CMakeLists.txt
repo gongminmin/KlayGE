@@ -2,6 +2,10 @@ set(EXTERNAL_PROJECT_DIR "${KLAYGE_ROOT_DIR}/External")
 
 set(EXTERNAL_VS_FOLDER_PREFIX "External")
 
+if(NOT EXISTS ${git_executable})
+	unset(git_executable CACHE)
+endif()
+
 find_program(git_executable NAMES git git.exe git.cmd)
 if(NOT git_executable)
 	message(FATAL_ERROR "Failed to find git.")
