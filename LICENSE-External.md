@@ -14,10 +14,6 @@ Android native app glue from The Android Open Source Project, under the [Apache 
 
 Assimp from assimp team, under the [BSD 3-Clause License](https://www.assimp.org/index.php/license).
 
-## bit-lite
-
-Bit-lite from Martin Moene, under the [Boost Software License 1.0](https://github.com/martinmoene/bit-lite/blob/master/LICENSE.txt).
-
 ## Boost
 
 Boost from Boost.org, under the [Boost Software License 1.0](https://www.boost.org/LICENSE_1_0.txt).
