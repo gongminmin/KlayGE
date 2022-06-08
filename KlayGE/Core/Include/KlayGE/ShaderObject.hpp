@@ -150,12 +150,9 @@ namespace KlayGE
 		}
 
 	protected:
-		static std::vector<uint8_t> CompileToDXBC(ShaderStage stage, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass,
-			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-			char const * func_name, char const * shader_profile, uint32_t flags);
-		static void ReflectDXBC(std::vector<uint8_t> const & code, void** reflector);
-		static std::vector<uint8_t> StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags);
+		static std::vector<uint8_t> CompileToDXBC(ShaderStage stage, RenderEffect const& effect, RenderTechnique const& tech,
+			RenderPass const& pass, std::vector<std::pair<char const*, char const*>> const& api_special_macros, char const* func_name,
+			char const* shader_profile, uint32_t flags, void** reflector, bool strip);
 
 		virtual std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const = 0;
 

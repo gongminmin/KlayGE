@@ -289,13 +289,12 @@ namespace KlayGE
 #if !defined(KLAYGE_DEBUG)
 			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-			shader_code_ =
-				ShaderStageObject::CompileToDXBC(stage_, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile_.c_str(), flags);
+			com_ptr<ID3D11ShaderReflection> reflection;
+			shader_code_ = ShaderStageObject::CompileToDXBC(
+				stage_, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile_.c_str(), flags, reflection.put_void(), true);
 
 			if (!shader_code_.empty())
 			{
-				com_ptr<ID3D11ShaderReflection> reflection;
-				ShaderStageObject::ReflectDXBC(shader_code_, reflection.put_void());
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -408,10 +407,6 @@ namespace KlayGE
 
 					this->StageSpecificReflection(reflection.get());
 				}
-
-				shader_code_ =
-					ShaderStageObject::StripDXBC(shader_code_, D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO |
-																   D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA);
 			}
 		}
 
@@ -835,7 +830,7 @@ namespace KlayGE
 
 				uint32_t const flags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 				std::vector<uint8_t> code = ShaderStageObject::CompileToDXBC(
-					stage_, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile.data(), flags);
+					stage_, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile.data(), flags, nullptr, false);
 				if (code.empty())
 				{
 					is_validate_ = false;

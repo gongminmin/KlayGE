@@ -314,10 +314,9 @@ namespace KlayGE
 	ShaderStageObject::~ShaderStageObject() noexcept = default;
 
 #if KLAYGE_IS_DEV_PLATFORM
-	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const & effect,
-		RenderTechnique const & tech, RenderPass const & pass,
-		std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-		char const * func_name, char const * shader_profile, uint32_t flags)
+	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const& effect, RenderTechnique const& tech,
+		RenderPass const& pass, std::vector<std::pair<char const*, char const*>> const& api_special_macros, char const* func_name,
+		char const* shader_profile, uint32_t flags, void** reflector, bool strip)
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -514,19 +513,30 @@ namespace KlayGE
 			}
 		}
 
+		if (reflector != nullptr)
+		{
+			D3DCompilerLoader::Instance().D3DReflect(code, reflector);
+		}
+
+		if (strip)
+		{
+#ifndef KLAYGE_PLATFORM_WINDOWS
+			enum D3DCOMPILER_STRIP_FLAGS
+			{
+				D3DCOMPILER_STRIP_REFLECTION_DATA = 1,
+				D3DCOMPILER_STRIP_DEBUG_INFO = 2,
+				D3DCOMPILER_STRIP_TEST_BLOBS = 4,
+				D3DCOMPILER_STRIP_PRIVATE_DATA = 8,
+				D3DCOMPILER_STRIP_ROOT_SIGNATURE = 16,
+			};
+#endif
+
+			const uint32_t strip_flags = D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS |
+										 D3DCOMPILER_STRIP_PRIVATE_DATA | D3DCOMPILER_STRIP_ROOT_SIGNATURE;
+			D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, code);
+		}
+
 		return code;
-	}
-
-	void ShaderStageObject::ReflectDXBC(std::vector<uint8_t> const & code, void** reflector)
-	{
-		D3DCompilerLoader::Instance().D3DReflect(code, reflector);
-	}
-
-	std::vector<uint8_t> ShaderStageObject::StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags)
-	{
-		std::vector<uint8_t> ret;
-		D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, ret);
-		return ret;
 	}
 #endif
 
