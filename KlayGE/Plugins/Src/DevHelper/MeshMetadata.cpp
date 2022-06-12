@@ -303,6 +303,11 @@ namespace KlayGE
 
 	void MeshMetadata::LodFileName(uint32_t lod, std::string_view lod_name)
 	{
+		if (lod_file_names_.size() <= lod)
+		{
+			lod_file_names_.resize(lod + 1);
+		}
+
 		lod_file_names_[lod] = std::string(std::move(lod_name));
 	}
 

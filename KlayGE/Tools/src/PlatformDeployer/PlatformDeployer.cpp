@@ -119,7 +119,9 @@ MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const &
 	std::string metadata_name = res_name + ".kmeta";
 	if (ResLoader::Instance().Locate(metadata_name).empty())
 	{
-		return default_metadata;
+		MeshMetadata ret = default_metadata;
+		ret.LodFileName(0, res_name);
+		return ret;
 	}
 	else
 	{
@@ -282,6 +284,8 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 int main(int argc, char* argv[])
 {
+	Context::Instance().LoadCfg("KlayGE.cfg");
+
 	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
 
 	std::vector<std::string> res_names;
