@@ -814,9 +814,9 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if (build_info.compiler_name != "vc") or (build_info.project_type == "ninja"):
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if build_info.is_android:
-		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
-		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
-		additional_options += " -DANDROID_STL=c++_static"
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/build/cmake/android.toolchain.cmake\"" % android_ndk_path
+		additional_options += " -DANDROID_PLATFORM=android-%d" % build_info.target_api_level
+		additional_options += " -DANDROID_STL=c++_static -DANDROID_TOOLCHAIN=clang"
 	elif build_info.is_darwin:
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -962,7 +962,11 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 						toolchain_arch = "aarch64-linux-android"
 					else:
 						LogError("Unsupported Android architecture.\n")
-					additional_options += " -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
+					additional_options += " -DANDROID_ABI=\"%s\"" % abi_arch
+					cpp_feature = "exceptions"
+					if config == "Debug":
+						cpp_feature += " rtti"
+					additional_options += " -DANDROID_CPP_FEATURES=\"%s\"" % cpp_feature
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
 				new_path = sys.exec_prefix
