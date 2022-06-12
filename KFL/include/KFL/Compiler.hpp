@@ -96,10 +96,10 @@
 				#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
 			#endif
 		#elif defined(__ANDROID__)
-			#if CLANG_VERSION >= 50
+			#if CLANG_VERSION >= 60
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 			#else
-				#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
+				#error "Unsupported compiler version. Please install clang++ 6.0 (NDK 17) or up."
 			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
 			#if CLANG_VERSION >= 100

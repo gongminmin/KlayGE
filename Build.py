@@ -644,10 +644,10 @@ class BuildInfo:
 	def RetrieveClangVersion(self, path = None):
 		if self.is_android:
 			android_ndk_path = os.environ["ANDROID_NDK"]
-			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
-			prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows\\bin"
+			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm\\prebuilt"
+			prebuilt_clang_path = prebuilt_llvm_path + "\\windows\\bin"
 			if not os.path.isdir(prebuilt_clang_path):
-				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
+				prebuilt_clang_path = prebuilt_llvm_path + "\\windows-x86_64\\bin"
 			clang_path = prebuilt_clang_path + "\\clang"
 		elif path is not None:
 			clang_path = path + "clang"
@@ -809,7 +809,6 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 			toolset_name += "host=x64"
 	elif build_info.is_android:
 		android_ndk_path = os.environ["ANDROID_NDK"]
-		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
 		toolset_name = "clang"
 
 	if (build_info.compiler_name != "vc") or (build_info.project_type == "ninja"):
@@ -817,6 +816,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if build_info.is_android:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/Build/CMake/Modules/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
+		additional_options += " -DANDROID_STL=c++_static"
 	elif build_info.is_darwin:
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -962,7 +962,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 						toolchain_arch = "aarch64-linux-android"
 					else:
 						LogError("Unsupported Android architecture.\n")
-					additional_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
+					additional_options += " -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
 				new_path = sys.exec_prefix

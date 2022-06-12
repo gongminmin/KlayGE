@@ -51,10 +51,16 @@
 
 namespace KlayGE
 {
+#if defined(KLAYGE_COMPILER_CLANG) && defined(KLAYGE_PLATFORM_ANDROID)
+#define INVOKE_RESULT(x) typename std::result_of<x()>::type
+#else
+#define INVOKE_RESULT(x) typename std::invoke_result<x>::type
+#endif
+
 	template <typename Threadable>
-	inline std::future<typename std::invoke_result<Threadable>::type> CreateThread(Threadable func)
+	inline std::future<INVOKE_RESULT(Threadable)> CreateThread(Threadable func)
 	{
-		using result_t = typename std::invoke_result<Threadable>::type;
+		using result_t = INVOKE_RESULT(Threadable);
 
 		auto task = std::packaged_task<result_t()>(std::move(func));
 		auto ret = task.get_future();
@@ -112,9 +118,9 @@ namespace KlayGE
 			}
 
 			template <typename Threadable>
-			std::future<typename std::invoke_result<Threadable>::type> QueueThread(Threadable func)
+			std::future<INVOKE_RESULT(Threadable)> QueueThread(Threadable func)
 			{
-				using result_t = typename std::invoke_result<Threadable>::type;
+				using result_t = INVOKE_RESULT(Threadable);
 
 				auto task = MakeSharedPtr<std::packaged_task<result_t()>>(std::move(func));
 				auto ret = task->get_future();
@@ -156,7 +162,7 @@ namespace KlayGE
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
-		std::future<typename std::invoke_result<Threadable>::type> QueueThread(Threadable func)
+		std::future<INVOKE_RESULT(Threadable)> QueueThread(Threadable func)
 		{
 			return data_->QueueThread(func);
 		}
