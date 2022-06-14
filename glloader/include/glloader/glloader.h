@@ -210,27 +210,28 @@ typedef EGLNativeWindowType  NativeWindowType;
 #endif
 
 #if defined(_MSC_VER)
-	#pragma warning(disable: 4055) // Allow casting from a void* to a function pointer.
-	#define GLLOADER_HAS_DECLSPEC
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-	#if !defined(__GNUC__) && !defined(GLLOADER_HAS_DECLSPEC)
-		#define GLLOADER_HAS_DECLSPEC
-	#endif
-
-	#if defined(__MINGW32__)
-		#define GLLOADER_HAS_DECLSPEC
-	#endif
-#endif
-
-#ifdef GLLOADER_HAS_DECLSPEC
-	#ifdef GLLOADER_SOURCE				// Build dll
-		#define GLLOADER_API __declspec(dllexport)
-	#else								// Use dll
-		#define GLLOADER_API __declspec(dllimport)
+	#define GLLOADER_SYMBOL_EXPORT __declspec(dllexport)
+	#define GLLOADER_SYMBOL_IMPORT __declspec(dllimport)
+#elif defined(__clang__)
+	#define GLLOADER_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+	#define GLLOADER_SYMBOL_IMPORT __attribute__((__visibility__("default")))
+#elif defined(__GNUC__)
+	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+		#define GLLOADER_SYMBOL_EXPORT __attribute__((__dllexport__))
+		#define GLLOADER_SYMBOL_IMPORT __attribute__((__dllimport__))
+	#else
+		#define GLLOADER_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define GLLOADER_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
 #else
-	#define GLLOADER_API
-#endif // GLLOADER_HAS_DECLSPEC
+	#error "Unknown compiler. Please install vc, g++, or clang."
+#endif
+
+#ifdef GLLOADER_SOURCE				// Build dll
+	#define GLLOADER_API GLLOADER_SYMBOL_EXPORT
+#else								// Use dll
+	#define GLLOADER_API GLLOADER_SYMBOL_IMPORT
+#endif
 
 #if defined(GLLOADER_GL) || defined(GLLOADER_GLES)
 #define __gl_h_
