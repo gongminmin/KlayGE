@@ -58,11 +58,15 @@
 	#define FILESYSTEM_NS std::filesystem
 #else
 	#include <ghc/filesystem.hpp>
-	namespace std
-	{
-		namespace filesystem = ghc::filesystem;
-	}
-	#define FILESYSTEM_NS std::filesystem
+	#if defined(KLAYGE_COMPILER_CLANG)
+		#define FILESYSTEM_NS ghc::filesystem
+	#else
+		namespace std
+		{
+			namespace filesystem = ghc::filesystem;
+		}
+		#define FILESYSTEM_NS std::filesystem
+	#endif
 #endif
 
 #endif		// KFL_CXX17_FILESYSTEM_HPP

@@ -101,6 +101,18 @@
 			#else
 				#error "Unsupported compiler version. Please install clang++ 6.0 (NDK 17) or up."
 			#endif
+
+			#if CLANG_VERSION >= 110
+				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+				#if __cplusplus > 201703L
+					#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
+					#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+					#if CLANG_VERSION >= 120
+						#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
+					#endif
+					#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+				#endif
+			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
 			#if CLANG_VERSION >= 100
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION

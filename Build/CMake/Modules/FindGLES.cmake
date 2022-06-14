@@ -24,8 +24,8 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 	ELSEIF(ANDROID)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS
-				"$ENV{ANDROID_NDK}/platforms/android-${ANDROID_NATIVE_API_LEVEL}/arch-${ANDROID_ARCH_NAME}/usr/include"
-				"$ENV{ANDROID_NDK}/sysroot/usr/include"
+				"${CMAKE_SYSROOT}/usr/include"
+				"${ANDROID_NDK}/platforms/${ANDROID_PLATFORM}/arch-${ANDROID_ARCH_NAME}/usr/include"
 		)
 	ELSEIF(IOS)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR EAGL.h
