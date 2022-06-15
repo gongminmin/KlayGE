@@ -334,9 +334,15 @@ MACRO(SETUP_TUTORIAL EXE_NAME)
 			ENDIF()
 		ENDFOREACH()
 
-		ADD_CUSTOM_COMMAND(TARGET ${EXE_NAME} PRE_BUILD COMMAND android update project -p . -s -t android-${ANDROID_NATIVE_API_LEVEL} -n KlayGE_${PROJ_NAME})
+		if(KLAYGE_HOST_PLATFORM_WINDOWS)
+			set(call_batch "CALL")
+		else()
+			set(call_batch "")
+		endif()
 
-		ADD_CUSTOM_COMMAND(TARGET ${EXE_NAME} POST_BUILD COMMAND ant debug)
+		ADD_CUSTOM_COMMAND(TARGET ${EXE_NAME} PRE_BUILD COMMAND ${call_batch} android update project -p . -s -t android-${ANDROID_NATIVE_API_LEVEL} -n KlayGE_${PROJ_NAME})
+
+		ADD_CUSTOM_COMMAND(TARGET ${EXE_NAME} POST_BUILD COMMAND ${call_batch} ant debug)
 		ADD_CUSTOM_COMMAND(TARGET ${EXE_NAME}
 			POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy bin\\KlayGE_${PROJ_NAME}-debug.apk ${KLAYGE_BIN_DIR})
