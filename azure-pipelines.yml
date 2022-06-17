@@ -52,24 +52,8 @@ stages:
           id: 'gcc12_win_$(platform)_$(configuration)'
           BUILD_DIR: mingw
 
-        Linux_gcc10:
-          vmImage: Ubuntu-18.04
-          project: ninja
-          compiler: gcc
-          installCommand: |
-            sudo dpkg --add-architecture i386
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-            sudo apt-get update
-            sudo apt-get install g++-10 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
-            export WINEARCH=win64
-            winetricks
-          id: 'gcc10_linux_$(platform)_$(configuration)'
-          CC: gcc-10
-          CXX: g++-10
-          BUILD_DIR: gcc10
-
         Linux_gcc11:
-          vmImage: Ubuntu-20.04
+          vmImage: ubuntu-20.04
           project: ninja
           compiler: gcc
           installCommand: |
@@ -84,26 +68,23 @@ stages:
           CXX: g++-11
           BUILD_DIR: gcc11
 
-        Linux_clang11:
-          vmImage: Ubuntu-18.04
+        Linux_gcc12:
+          vmImage: ubuntu-22.04
           project: ninja
-          compiler: clang
+          compiler: gcc
           installCommand: |
             sudo dpkg --add-architecture i386
-            wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-            sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main"
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install clang-11 libc++-11-dev libc++abi-11-dev lld-11 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
+            sudo apt-get install g++-12 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win64
             winetricks
-          id: 'clang11_linux_$(platform)_$(configuration)'
-          CC: clang-11
-          CXX: clang++-11
-          BUILD_DIR: clang11
+          id: 'gcc12_linux_$(platform)_$(configuration)'
+          CC: gcc-12
+          CXX: g++-12
+          BUILD_DIR: gcc12
 
         Linux_clang13:
-          vmImage: Ubuntu-20.04
+          vmImage: ubuntu-20.04
           project: ninja
           compiler: clang
           installCommand: |
@@ -119,6 +100,24 @@ stages:
           CC: clang-13
           CXX: clang++-13
           BUILD_DIR: clang13
+
+        Linux_clang14:
+          vmImage: ubuntu-20.04
+          project: ninja
+          compiler: clang
+          installCommand: |
+            sudo dpkg --add-architecture i386
+            wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+            sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main"
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt-get update
+            sudo apt-get install clang-14 libc++-14-dev libc++abi-14-dev lld-14 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
+            export WINEARCH=win64
+            winetricks
+          id: 'clang14_linux_$(platform)_$(configuration)'
+          CC: clang-14
+          CXX: clang++-14
+          BUILD_DIR: clang14
 
         macOS_clang12:
           vmImage: macOS-10.15

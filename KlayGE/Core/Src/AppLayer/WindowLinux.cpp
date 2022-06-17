@@ -66,6 +66,10 @@ namespace KlayGE
 			break;
 
 		default:
+			r_size = 0;
+			g_size = 0;
+			b_size = 0;
+			a_size = 0;
 			BOOST_ASSERT(false);
 			break;
 		}
