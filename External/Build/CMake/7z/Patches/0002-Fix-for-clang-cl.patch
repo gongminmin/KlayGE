@@ -1,7 +1,7 @@
 From 0ded20850ece7f477686b94ad68336663f79606c Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 4 Jun 2022 14:53:22 -0700
-Subject: [PATCH 2/2] Fix for clang-cl
+Subject: [PATCH 2/3] Fix for clang-cl
 
 ---
  C/LzFind.c | 4 +++-
