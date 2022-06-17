@@ -209,22 +209,12 @@ typedef EGLNativeWindowType  NativeWindowType;
 #endif
 #endif
 
-#if defined(_MSC_VER)
-	#define GLLOADER_SYMBOL_EXPORT __declspec(dllexport)
-	#define GLLOADER_SYMBOL_IMPORT __declspec(dllimport)
-#elif defined(__clang__)
-	#define GLLOADER_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-	#define GLLOADER_SYMBOL_IMPORT __attribute__((__visibility__("default")))
-#elif defined(__GNUC__)
-	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-		#define GLLOADER_SYMBOL_EXPORT __attribute__((__dllexport__))
-		#define GLLOADER_SYMBOL_IMPORT __attribute__((__dllimport__))
-	#else
-		#define GLLOADER_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define GLLOADER_SYMBOL_IMPORT __attribute__((__visibility__("default")))
-	#endif
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#define GLLOADER_SYMBOL_EXPORT __declspec(dllexport)
+#define GLLOADER_SYMBOL_IMPORT __declspec(dllimport)
 #else
-	#error "Unknown compiler. Please install vc, g++, or clang."
+#define GLLOADER_SYMBOL_EXPORT __attribute__((visibility("default")))
+#define GLLOADER_SYMBOL_IMPORT
 #endif
 
 #ifdef GLLOADER_SOURCE				// Build dll

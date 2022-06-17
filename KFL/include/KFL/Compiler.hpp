@@ -73,10 +73,6 @@
 			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 		#endif
 		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-
-		#define KLAYGE_HAS_DECLSPEC
-		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
-		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 	#else
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang
@@ -132,9 +128,6 @@
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
 		#endif
-
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
 	#endif
 
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
@@ -184,24 +177,12 @@
 		#endif
 	#endif
 
-	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__dllexport__))
-		#define KLAYGE_SYMBOL_IMPORT __attribute__((__dllimport__))
-	#else
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT __attribute__((__visibility__("default")))
-	#endif
-
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(_MSC_VER)
 	// MSVC
 
 	#define KLAYGE_COMPILER_MSVC
 	#define KLAYGE_COMPILER_NAME vc
-
-	#define KLAYGE_HAS_DECLSPEC
-	#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
-	#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 
 	#if _MSC_VER >= 1930
 		#define KLAYGE_COMPILER_VERSION 143
