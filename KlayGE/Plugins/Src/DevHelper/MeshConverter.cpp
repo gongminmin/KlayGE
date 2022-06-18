@@ -58,7 +58,8 @@
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
 #endif
-#include <assimp/pbrmaterial.h>
+#include <assimp/material.h>
+#include <assimp/GltfMaterial.h>
 
 #include <KlayGE/DevHelper/MeshConverter.hpp>
 
@@ -403,7 +404,7 @@ namespace
 				name = ai_name.C_Str();
 			}
 
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, &ai_albedo))
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_BASE_COLOR, &ai_albedo))
 			{
 				albedo = Color4ToFloat3(ai_albedo);
 				opacity = ai_albedo.a;
@@ -425,7 +426,7 @@ namespace
 				emissive = Color4ToFloat3(ai_emissive);
 			}
 
-			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &ai_metallic))
+			if (AI_SUCCESS == aiGetMaterialFloat(mtl, AI_MATKEY_METALLIC_FACTOR, &ai_metallic))
 			{
 				metalness = ai_metallic;
 			}
@@ -848,8 +849,7 @@ namespace
 		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ ianim)
 		{
 			aiAnimation const * cur_anim = scene->mAnimations[ianim];
-			// For some reason mDuration is in milliseconds, not ticks. Assimp issue #3462.
-			float duration = static_cast<float>(cur_anim->mDuration / 1000);
+			float duration = static_cast<float>(cur_anim->mDuration / cur_anim->mTicksPerSecond);
 			auto& anim = assimp_animations.emplace_back();
 			anim.name = cur_anim->mName.C_Str();
 			anim.frame_num = static_cast<int>(ceilf(duration * resample_fps));
@@ -1205,10 +1205,10 @@ namespace
 					if (is_gltf)
 					{
 						aiColor4D const ai_albedo(mtl.Albedo().x(), mtl.Albedo().y(), mtl.Albedo().z(), mtl.Albedo().w());
-						ai_mtl.AddProperty(&ai_albedo, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
+						ai_mtl.AddProperty(&ai_albedo, 1, AI_MATKEY_BASE_COLOR);
 
 						float ai_metallic = mtl.Metalness();
-						ai_mtl.AddProperty(&ai_metallic, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
+						ai_mtl.AddProperty(&ai_metallic, 1, AI_MATKEY_METALLIC_FACTOR);
 					}
 					else
 					{
@@ -1278,7 +1278,7 @@ namespace
 					name.Set(mtl.TextureName(RenderMaterial::TS_Albedo));
 					if (is_gltf)
 					{
-						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+						ai_mtl.AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_BASE_COLOR);
 					}
 					else
 					{
@@ -1760,9 +1760,7 @@ namespace
 
 					auto& animations = *skinned_model.GetAnimations();
 					ai_scene.mAnimations[ai]->mName.Set(animations[ai].name);
-					// For some reason mDuration is in milliseconds, not ticks. Assimp issue #3462.
-					ai_scene.mAnimations[ai]->mDuration =
-						static_cast<float>(animations[ai].end_frame - animations[ai].start_frame) / skinned_model.FrameRate() * 1000;
+					ai_scene.mAnimations[ai]->mDuration = static_cast<float>(animations[ai].end_frame - animations[ai].start_frame);
 					ai_scene.mAnimations[ai]->mTicksPerSecond = skinned_model.FrameRate();
 
 					ai_scene.mAnimations[ai]->mNumChannels = 0;
@@ -1825,7 +1823,6 @@ namespace
 						node_anim.mScalingKeys = new aiVectorKey[node_anim.mNumPositionKeys];
 						for (uint32_t pi = 0; pi < node_anim.mNumPositionKeys; ++pi)
 						{
-							// For some reason mTime is in ticks, not seconds. Assimp issue #3462.
 							node_anim.mPositionKeys[pi].mTime = node_anim.mRotationKeys[pi].mTime = node_anim.mScalingKeys[pi].mTime =
 								key_frame_set.frame_id[pi] - animations[ai].start_frame;
 

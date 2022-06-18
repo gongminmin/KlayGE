@@ -1,9 +1,9 @@
 SET(ASSIMP_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/assimp")
 SET(ASSIMP_OUTPUT_DIR "${EXTERNAL_PROJECT_DIR}/lib/assimp/${KLAYGE_PLATFORM_NAME}")
 
-UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "315362862aec6dbaa272fb690a548bb55d8b5618" "master" "v5.0.0" need_patch)
+UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "c8dafe0d2887242285c0080c6cbbea8c1f1c8094" "master" "v5.0.0" need_patch)
 if(need_patch)
-	foreach(patch "0001-Fix-compiling-issues-in-clang-cl")
+	foreach(patch "0001-Fix-the-vec3-comparing")
 		ApplyPatch("assimp" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
 	endforeach()
 endif()
