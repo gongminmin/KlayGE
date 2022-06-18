@@ -613,23 +613,45 @@ public:
 							auto const * sanity_indices_buff_16 = sanity_indices_mapper.Pointer<uint16_t>();
 							auto const * sanity_indices_buff_32 = sanity_indices_mapper.Pointer<uint32_t>();
 
-							for (uint32_t iid = 0; iid < sanity_mesh.NumIndices(lod); ++ iid)
+							for (uint32_t iid = 0; iid < sanity_mesh.NumIndices(lod); iid += 3)
 							{
-								uint32_t const index = iid + sanity_mesh.StartIndexLocation(lod);
-								uint32_t tri_index;
-								uint32_t sanity_tri_index;
+								uint32_t const start_index = iid + sanity_mesh.StartIndexLocation(lod);
+
+								uint32_t tri_indices[3];
+								uint32_t sanity_tri_indices[3];
 								if (sanity_rl.IndexStreamFormat() == EF_R16UI)
 								{
-									tri_index = indices_buff_16[index];
-									sanity_tri_index = sanity_indices_buff_16[index];
+									for (uint32_t ti = 0; ti < 3; ++ti)
+									{
+										tri_indices[ti] = indices_buff_16[start_index + ti];
+										sanity_tri_indices[ti] = sanity_indices_buff_16[start_index + ti];
+									}
 								}
 								else
 								{
-									tri_index = indices_buff_32[index];
-									sanity_tri_index = sanity_indices_buff_32[index];
+									for (uint32_t ti = 0; ti < 3; ++ti)
+									{
+										tri_indices[ti] = indices_buff_32[start_index + ti];
+										sanity_tri_indices[ti] = sanity_indices_buff_32[start_index + ti];
+									}
 								}
 
-								EXPECT_EQ(tri_index, sanity_tri_index);
+								bool found = false;
+								for (uint32_t ti = 0; ti < 3; ++ti)
+								{
+									if (sanity_tri_indices[ti] == tri_indices[0])
+									{
+										for (uint32_t tti = 0; tti < 3; ++tti)
+										{
+											EXPECT_EQ(tri_indices[tti], sanity_tri_indices[(ti + tti) % 3]);
+										}
+
+										found = true;
+										break;
+									}
+								}
+
+								EXPECT_TRUE(found);
 							}
 						}
 					});
