@@ -849,8 +849,6 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 	if build_info.multi_config:
 		if build_info.project_type.startswith("vs"):
 			additional_options += " -A %s" % vc_arch
-			if build_info.compiler_name == "clangcl":
-				additional_options += " -DClangCL_Path=\"" + compiler_info.compiler_root + "../../Tools/Llvm/bin/\""
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
@@ -953,13 +951,10 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 				if build_info.is_android:
 					if "x86" == compiler_info.arch:
 						abi_arch = "x86"
-						toolchain_arch = "x86"
 					elif "x86_64" == compiler_info.arch:
 						abi_arch = "x86_64"
-						toolchain_arch = "x86_64"
 					elif "arm64-v8a" == compiler_info.arch:
 						abi_arch = "arm64-v8a"
-						toolchain_arch = "aarch64-linux-android"
 					else:
 						LogError("Unsupported Android architecture.\n")
 					additional_options += " -DANDROID_ABI=\"%s\"" % abi_arch

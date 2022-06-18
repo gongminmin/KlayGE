@@ -233,12 +233,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API JointComponent : public SceneComponent
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 

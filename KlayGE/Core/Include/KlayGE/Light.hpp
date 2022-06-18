@@ -25,12 +25,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API LightSource : public SceneComponent, public std::enable_shared_from_this<LightSource>
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -117,12 +117,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API AmbientLightSource final : public LightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -147,12 +147,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API PointLightSource : public LightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -184,12 +184,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API SpotLightSource final : public LightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -230,12 +230,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API DirectionalLightSource final : public LightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -262,12 +262,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API SphereAreaLightSource final : public PointLightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -285,12 +285,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API TubeAreaLightSource final : public PointLightSource
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((LightSource))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 

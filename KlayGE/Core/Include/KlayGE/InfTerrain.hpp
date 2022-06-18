@@ -51,12 +51,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API InfTerrainRenderableComponent : public RenderableComponent
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((RenderableComponent))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
@@ -258,12 +258,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API HQTerrainRenderableComponent : public RenderableComponent
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((RenderableComponent))
-#if defined(KLAYGE_COMPILER_CLANGCL)
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
 #endif
 
