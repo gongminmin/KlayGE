@@ -66,6 +66,10 @@ namespace KlayGE
 			{
 				metadata.Load(metadata_name);
 			}
+			else
+			{
+				metadata.LodFileName(0, input_name);
+			}
 
 			MeshConverter mc;
 			auto model = mc.Load(metadata);
