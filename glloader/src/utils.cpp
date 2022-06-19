@@ -27,10 +27,11 @@
 	#define GLLOADER_APPLE_PLATFORM
 #endif
 
-#if defined(GLLOADER_AGL)
-	#include <Carbon/Carbon.h>
-#elif defined(GLLOADER_EAGL)
+#if defined(GLLOADER_APPLE_PLATFORM)
 	#include <CoreFoundation/CoreFoundation.h>
+	#if defined(GLLOADER_AGL)
+		#include <Carbon/Carbon.h>
+	#endif
 #endif
 
 #if defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
