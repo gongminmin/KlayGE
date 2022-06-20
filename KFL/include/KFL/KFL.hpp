@@ -45,9 +45,4 @@
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 
-#ifndef KFL_SOURCE
-	#define KLAYGE_LIB_NAME KFL
-	#include <KFL/Detail/AutoLink.hpp>
-#endif	// KFL_SOURCE
-
 #endif		// _KFL_KFL_HPP

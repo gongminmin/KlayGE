@@ -37,11 +37,6 @@
 #include <istream>
 #include <unordered_map>
 
-#ifndef KFONT_SOURCE
-	#define KLAYGE_LIB_NAME kfont
-	#include <KFL/Detail/AutoLink.hpp>
-#endif	// KFONT_SOURCE
-
 #ifdef KFONT_SOURCE		// Build dll
 	#define KFONT_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll

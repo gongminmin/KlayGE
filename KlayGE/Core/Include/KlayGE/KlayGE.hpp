@@ -43,11 +43,6 @@
 
 #define KLAYGE_COMPILER_TOOLSET KFL_STRINGIZE(KFL_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION))
 
-#ifndef KLAYGE_CORE_SOURCE
-	#define KLAYGE_LIB_NAME KlayGE_Core
-	#include <KFL/Detail/AutoLink.hpp>
-#endif
-
 #ifdef KLAYGE_CORE_SOURCE		// Build dll
 	#define KLAYGE_CORE_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll

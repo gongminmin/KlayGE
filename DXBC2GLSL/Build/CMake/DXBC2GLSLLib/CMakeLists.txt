@@ -52,5 +52,3 @@ target_link_libraries(${LIB_NAME}
 	PUBLIC
 		KFL
 )
-
-add_dependencies(${LIB_NAME} KFL)

@@ -35,11 +35,6 @@
 
 #include <KFL/KFL.hpp>
 
-#ifndef DXBC2GLSL_SOURCE
-	#define KLAYGE_LIB_NAME DXBC2GLSLLib
-	#include <KFL/Detail/AutoLink.hpp>
-#endif	// DXBC2GLSL_SOURCE
-
 #include <DXBC2GLSL/DXBC.hpp>
 #include <DXBC2GLSL/Shader.hpp>
 #include <DXBC2GLSL/GLSLGen.hpp>

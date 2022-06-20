@@ -121,10 +121,7 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	FOLDER "KlayGE/Tests"
 )
 
-ADD_DEPENDENCIES(${EXE_NAME} AllInEngine gtest)
-if(KLAYGE_PLATFORM_ANDROID OR KLAYGE_PLATFORM_IOS)
-	add_dependencies(${EXE_NAME} glloader kfont 7zxa LZMA)
-endif()
+ADD_DEPENDENCIES(${EXE_NAME} AllInEngine)
 
 target_link_libraries(${EXE_NAME}
 	PRIVATE

@@ -9,5 +9,3 @@ target_link_libraries(KFontGen
 		freetype
 		kfont
 )
-
-add_dependencies(KFontGen freetype)

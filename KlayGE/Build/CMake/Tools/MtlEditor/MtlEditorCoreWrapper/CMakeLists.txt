@@ -62,7 +62,6 @@ IF(ADD_COMMON_LANGUAGE_RUNTIME)
 	SET_TARGET_PROPERTIES(MtlEditorCoreWrapper PROPERTIES
 		COMMON_LANGUAGE_RUNTIME "")
 ENDIF()
-ADD_DEPENDENCIES(MtlEditorCoreWrapper MtlEditorCore)
 
 target_link_libraries(MtlEditorCoreWrapper
 	PRIVATE

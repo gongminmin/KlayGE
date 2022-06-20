@@ -6,9 +6,6 @@
 #include <nonstd/scope.hpp>
 
 #ifndef SAMPLE_COMMON_SOURCE
-#define KLAYGE_LIB_NAME SampleCommon
-#include <KFL/Detail/AutoLink.hpp>
-
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
 {

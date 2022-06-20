@@ -60,5 +60,3 @@ target_link_libraries(${LIB_NAME}
 		KFL
 		LZMA
 )
-
-add_dependencies(${LIB_NAME} KFL)
