@@ -1,0 +1,107 @@
+From 9f3aa117589d5796e69c94ac2532f5936eaae0cd Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Wed, 22 Jun 2022 21:29:12 -0700
+Subject: [PATCH 2/2] Change the dotnet frame version
+
+---
+ .../Xceed.Wpf.AvalonDock.Themes.Aero.csproj                   | 4 ++--
+ .../Xceed.Wpf.AvalonDock.Themes.Metro.csproj                  | 4 ++--
+ .../Xceed.Wpf.AvalonDock.Themes.VS2010.csproj                 | 4 ++--
+ .../Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj      | 4 ++--
+ .../Xceed.Wpf.Toolkit.LiveExplorer.csproj                     | 4 ++--
+ .../Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj            | 4 ++--
+ 6 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
+index fde20caf..b4fa5af8 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.AvalonDock.Themes</RootNamespace>
+     <AssemblyName>Xceed.Wpf.AvalonDock.Themes.Aero</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
+index f631826e..ff165a89 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.AvalonDock.Themes.Metro</RootNamespace>
+     <AssemblyName>Xceed.Wpf.AvalonDock.Themes.Metro</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
+index cb55b493..c33c982a 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.AvalonDock.Themes</RootNamespace>
+     <AssemblyName>Xceed.Wpf.AvalonDock.Themes.VS2010</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
+index 6bf2d9f6..2ce9c05a 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.AvalonDock</RootNamespace>
+     <AssemblyName>Xceed.Wpf.AvalonDock</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit.LiveExplorer/Xceed.Wpf.Toolkit.LiveExplorer.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit.LiveExplorer/Xceed.Wpf.Toolkit.LiveExplorer.csproj
+index 13d9118f..3806e4f5 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit.LiveExplorer/Xceed.Wpf.Toolkit.LiveExplorer.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit.LiveExplorer/Xceed.Wpf.Toolkit.LiveExplorer.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.Toolkit.LiveExplorer</RootNamespace>
+     <AssemblyName>Xceed.Wpf.Toolkit.LiveExplorer</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
+index 3e06201c..6800ef30 100644
+--- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
++++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
+@@ -10,8 +10,8 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Xceed.Wpf.Toolkit</RootNamespace>
+     <AssemblyName>Xceed.Wpf.Toolkit</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
++    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
++    <TargetFrameworkProfile></TargetFrameworkProfile>
+     <FileAlignment>512</FileAlignment>
+     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+     <WarningLevel>4</WarningLevel>
+-- 
+2.17.1.windows.2
+

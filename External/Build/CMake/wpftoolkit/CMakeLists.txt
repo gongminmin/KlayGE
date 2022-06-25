@@ -2,7 +2,7 @@ SET(WPFTOOLKIT_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/wpftoolkit")
 
 UpdateExternalLib("wpftoolkit" "https://github.com/xceedsoftware/wpftoolkit" "95104c6105c793f23e85274c24b37dcb744f94db" "" "" need_patch)
 if(need_patch)
-	foreach(patch "0001-Adjust-the-path-of-output-directory-and-sn.snk")
+	foreach(patch "0001-Adjust-the-path-of-output-directory-and-sn.snk" "0002-Change-the-dotnet-frame-version")
 		ApplyPatch("wpftoolkit" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
 	endforeach()
 endif()

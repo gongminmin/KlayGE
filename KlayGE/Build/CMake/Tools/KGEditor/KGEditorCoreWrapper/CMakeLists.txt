@@ -48,7 +48,8 @@ endif()
 SET_TARGET_PROPERTIES(KGEditorCoreWrapper PROPERTIES
 	PROJECT_LABEL KGEditorCoreWrapper
 	OUTPUT_NAME KGEditorCoreWrapper
-	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
+	VS_GLOBAL_ManagedAssembly "true"
+	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.8"
 	VS_DOTNET_REFERENCES "System;System.Windows;PresentationCore"
 	FOLDER "KlayGE/Tools/KGEditor"
 )

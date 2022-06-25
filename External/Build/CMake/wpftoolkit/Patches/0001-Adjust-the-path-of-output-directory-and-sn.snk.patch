@@ -1,7 +1,7 @@
-From c511bf618b32d73c2f61f018f5997e5110eeb71f Mon Sep 17 00:00:00 2001
+From 0e0f0b0e0cdcc09dd269313d78a962a2bcbb074e Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 13 Jan 2019 12:22:34 -0800
-Subject: [PATCH] Adjust the path of output directory and sn.snk
+Subject: [PATCH 1/2] Adjust the path of output directory and sn.snk
 
 ---
  .../Properties/AssemblyInfo.cs                |  2 +-
@@ -17,10 +17,10 @@ Subject: [PATCH] Adjust the path of output directory and sn.snk
  10 files changed, 124 insertions(+), 30 deletions(-)
 
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Properties/AssemblyInfo.cs b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Properties/AssemblyInfo.cs
-index 46576551..276649f8 100644
+index fe54a3f7..acc1ce75 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Properties/AssemblyInfo.cs
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Properties/AssemblyInfo.cs
-@@ -64,7 +64,7 @@ using System;
+@@ -65,7 +65,7 @@ using System;
  
  #pragma warning disable 1699
  [assembly: AssemblyDelaySign( false )]
@@ -30,7 +30,7 @@ index 46576551..276649f8 100644
  #pragma warning restore 1699
  
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
-index 9d14d5b5..5e23927e 100644
+index 91ca1ce9..fde20caf 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
 @@ -2,7 +2,7 @@
@@ -91,10 +91,10 @@ index 9d14d5b5..5e23927e 100644
      <Reference Include="System" />
      <Reference Include="System.Data" />
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Properties/AssemblyInfo.cs b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Properties/AssemblyInfo.cs
-index 8491c6ba..ff3123d8 100644
+index 29758af7..c14c1137 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Properties/AssemblyInfo.cs
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Properties/AssemblyInfo.cs
-@@ -64,6 +64,6 @@ using System;
+@@ -65,6 +65,6 @@ using System;
  
  #pragma warning disable 1699
  [assembly: AssemblyDelaySign( false )]
@@ -103,7 +103,7 @@ index 8491c6ba..ff3123d8 100644
  [assembly: AssemblyKeyName( "" )]
  #pragma warning restore 1699
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
-index 4b473bc5..0319b0eb 100644
+index b78e1233..f631826e 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
 @@ -2,7 +2,7 @@
@@ -164,10 +164,10 @@ index 4b473bc5..0319b0eb 100644
      <Reference Include="System" />
      <Reference Include="System.Data" />
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Properties/AssemblyInfo.cs b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Properties/AssemblyInfo.cs
-index 096508e0..1fe7552b 100644
+index f9ca3978..7c380f28 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Properties/AssemblyInfo.cs
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Properties/AssemblyInfo.cs
-@@ -63,6 +63,6 @@ using System;
+@@ -64,6 +64,6 @@ using System;
  
  #pragma warning disable 1699
  [assembly: AssemblyDelaySign( false )]
@@ -176,7 +176,7 @@ index 096508e0..1fe7552b 100644
  [assembly: AssemblyKeyName( "" )]
  #pragma warning restore 1699
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
-index 9cacc0d0..c1d66ac5 100644
+index 83ad5036..cb55b493 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
 @@ -2,7 +2,7 @@
@@ -230,10 +230,10 @@ index 9cacc0d0..c1d66ac5 100644
      <ErrorReport>prompt</ErrorReport>
      <WarningLevel>4</WarningLevel>
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Properties/AssemblyInfo.cs b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Properties/AssemblyInfo.cs
-index 3800cc83..545ee416 100644
+index f5490e7d..4c199416 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Properties/AssemblyInfo.cs
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Properties/AssemblyInfo.cs
-@@ -69,7 +69,7 @@ using System;
+@@ -72,7 +72,7 @@ using System;
  
  #pragma warning disable 1699
  [assembly: AssemblyDelaySign( false )]
@@ -243,7 +243,7 @@ index 3800cc83..545ee416 100644
  #pragma warning restore 1699
  
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
-index 3e1a745a..b17dfd10 100644
+index fb7edb64..6bf2d9f6 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
 @@ -2,7 +2,7 @@
@@ -300,10 +300,10 @@ index 3e1a745a..b17dfd10 100644
      <ErrorReport>prompt</ErrorReport>
      <WarningLevel>4</WarningLevel>
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Properties/AssemblyInfo.cs b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Properties/AssemblyInfo.cs
-index e2c7d4b1..b59fd182 100644
+index 650ef702..4bbf5af3 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Properties/AssemblyInfo.cs
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Properties/AssemblyInfo.cs
-@@ -113,7 +113,7 @@ using System.Windows.Markup;
+@@ -97,7 +97,7 @@ using System.Windows.Markup;
  
  #pragma warning disable 1699
  [assembly: AssemblyDelaySign( false )]
@@ -313,7 +313,7 @@ index e2c7d4b1..b59fd182 100644
  #pragma warning restore 1699
  
 diff --git a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
-index 80392333..f1722723 100644
+index fbb5bf84..3e06201c 100644
 --- a/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
 +++ b/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
 @@ -2,7 +2,7 @@
