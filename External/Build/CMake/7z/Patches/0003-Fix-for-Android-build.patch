@@ -1,4 +1,4 @@
-From 57b1addd5d8d348d8b4a01d5b3c3f9c3a1bfd9f5 Mon Sep 17 00:00:00 2001
+From de222edb0ccab300e66a721ced6ddf233f790d13 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 16 Jun 2022 22:15:06 -0700
 Subject: [PATCH 3/3] Fix for Android build
