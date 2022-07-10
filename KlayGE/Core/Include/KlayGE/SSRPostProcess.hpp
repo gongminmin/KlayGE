@@ -38,15 +38,16 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SSRPostProcess : public PostProcess
+	class KLAYGE_CORE_API SSRPostProcess final : public PostProcess
 	{
 	public:
 		explicit SSRPostProcess(bool multi_sample);
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		RenderEffectParameter* proj_param_;
+		RenderEffectParameter* inv_view_param_;
 		RenderEffectParameter* inv_proj_param_;
 		RenderEffectParameter* near_q_far_param_;
 		RenderEffectParameter* ray_length_param_;

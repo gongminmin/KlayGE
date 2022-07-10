@@ -21,7 +21,7 @@ namespace KlayGE
 	class DShowFactory : public ShowFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"DirectShow Show Factory");
 			return name;

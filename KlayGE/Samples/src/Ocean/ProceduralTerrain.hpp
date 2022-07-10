@@ -5,8 +5,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/InfTerrain.hpp>
 
 #include <vector>
@@ -30,6 +29,8 @@ namespace KlayGE
 		PostProcessPtr gradient_pp_;
 		PostProcessPtr mask_pp_;
 		Plane reflection_plane_;
+
+		RenderEffectParameter* mvp_wo_oblique_param_;
 	};
 }
 

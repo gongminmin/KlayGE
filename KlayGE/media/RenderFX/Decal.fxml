@@ -10,7 +10,8 @@
 
 	<shader>
 		<![CDATA[
-void DecalGBufferVS(float4 pos : POSITION,
+void DecalGBufferVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -18,6 +19,10 @@ void DecalGBufferVS(float4 pos : POSITION,
 			out float3 oViewDir : TEXCOORD4,
 			out float4 oPos : SV_Position)
 {
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = float2(pos.x * 0.5f + 0.5f, KLAYGE_FLIPPING * pos.y * 0.5f + 0.5f);
 
@@ -38,10 +43,10 @@ void DecalGBufferVS(float4 pos : POSITION,
 	oViewDir = mul(pos, model_view).xyz;
 }
 
-void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+void DecalGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					float3 view_dir : TEXCOORD4,
-					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1, out float4 rt1 : SV_Target2)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
@@ -66,17 +71,17 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
+	ConstructGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, 0, rt0, rt1, rt2);
 }
 		]]>
 	</shader>
 
-	<technique name="DecalGBufferAlphaTestMRTTech">
+	<technique name="DecalGBufferAlphaTestTech">
 		<pass name="p0">
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="DecalGBufferVS()"/>
-			<state name="pixel_shader" value="DecalGBufferAlphaTestMRTPS()"/>
+			<state name="pixel_shader" value="DecalGBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
 </effect>

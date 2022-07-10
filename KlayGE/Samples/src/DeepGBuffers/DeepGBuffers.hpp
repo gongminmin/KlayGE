@@ -26,11 +26,8 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr spot_light_src_[2];
-	KlayGE::SpotLightSourcePtr spot_light_[2];
 
-	KlayGE::SceneObjectPtr scene_obj_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::RenderModelPtr scene_model_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

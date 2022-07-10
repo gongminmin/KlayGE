@@ -6,7 +6,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/InfTerrain.hpp>
 
 #include <vector>
@@ -15,14 +14,19 @@ namespace KlayGE
 {
 	class ProceduralTerrain : public HQTerrainRenderable
 	{
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
+#endif
 		struct PlantInstanceData
 		{
 			float3 pos;
 			float scale;
 			float2 rotation;
 		};
+		static_assert(sizeof(PlantInstanceData) == 24);
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
+#endif
 
 	public:
 		ProceduralTerrain();
@@ -51,7 +55,7 @@ namespace KlayGE
 		PostProcessPtr gradient_pp_;
 		PostProcessPtr mask_pp_;
 
-		std::vector<RenderablePtr> plant_meshes_;
+		std::vector<RenderModelPtr> plant_meshes_;
 		std::vector<RenderablePtr> plant_impostor_meshes_;
 		std::vector<ImposterPtr> plant_imposters_;
 

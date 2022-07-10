@@ -40,9 +40,9 @@ namespace KlayGE
 {
 	SSGIPostProcess::SSGIPostProcess()
 			: PostProcess(L"SSGI", false,
-				{},
-				{ "g_buffer_rt0_tex", "depth_tex", "shading_tex" },
-				{ "out_tex" },
+				MakeSpan<std::string>(),
+				MakeSpan<std::string>({"g_buffer_rt0_tex", "depth_tex", "shading_tex"}),
+				MakeSpan<std::string>({"out_tex"}),
 				RenderEffectPtr(), nullptr)
 	{
 		auto effect = SyncLoadRenderEffect("SSGI.fxml");

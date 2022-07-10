@@ -30,13 +30,13 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <functional>
+#include <limits>
 #include <random>
 
 #include <boost/assert.hpp>
@@ -45,7 +45,7 @@
 
 namespace
 {
-	class SoundVoiceContext : public IXAudio2VoiceCallback
+	class SoundVoiceContext final : public IXAudio2VoiceCallback
 	{
 	public:
 		explicit SoundVoiceContext(bool* is_playing_holder)
@@ -100,7 +100,7 @@ namespace KlayGE
 		audio_data_.resize(data_source_->Size());
 		data_source_->Read(audio_data_.data(), audio_data_.size());
 
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		auto xaudio = ae.XAudio();
 
@@ -164,13 +164,13 @@ namespace KlayGE
 		{
 			X3DAUDIO_EMITTER emitter{};
 			emitter.ChannelCount = 1;
-			emitter.CurveDistanceScaler = FLT_MIN;
+			emitter.CurveDistanceScaler = std::numeric_limits<float>::min();
 			emitter.OrientFront = { dir_.x(), dir_.y(), dir_.z() };
 			emitter.OrientTop = { 0, 1, 0 };
 			emitter.Position = { pos_.x(), pos_.y(), pos_.z() };
 			emitter.Velocity = { vel_.x(), vel_.y(), vel_.z() };
 
-			auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+			auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 			ae.X3DAudioCalculate(&emitter, X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER, &source.dsp_settings);
 
@@ -218,14 +218,7 @@ namespace KlayGE
 
 	bool XASoundBuffer::IsPlaying() const
 	{
-		for (auto const & src : sources_)
-		{
-			if (src.is_playing)
-			{
-				return true;
-			}
-		}
-		return false;
+		return std::any_of(sources_.begin(), sources_.end(), [](SourceVoice const& src) { return src.is_playing; });
 	}
 
 	void XASoundBuffer::Volume(float vol)

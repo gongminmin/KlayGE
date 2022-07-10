@@ -1,0 +1,27 @@
+From 62c609c44604241d5255180ac7e197d9e4ea735f Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 4 Jun 2022 14:53:22 -0700
+Subject: [PATCH 2/3] Fix for clang-cl
+
+---
+ C/LzFind.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/C/LzFind.c b/C/LzFind.c
+index 1b73c284..91ba4548 100644
+--- a/C/LzFind.c
++++ b/C/LzFind.c
+@@ -511,7 +511,9 @@ void MatchFinder_Init(CMatchFinder *p)
+     || defined(__GNUC__) && (__GNUC__ >= 8) \
+     || defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 1900)
+       #define USE_SATUR_SUB_128
+-      #define USE_AVX2
++      #if !defined(_MSC_VER)
++        #define USE_AVX2
++      #endif
+       #define ATTRIB_SSE41 __attribute__((__target__("sse4.1")))
+       #define ATTRIB_AVX2 __attribute__((__target__("avx2")))
+   #elif defined(_MSC_VER)
+-- 
+2.17.1.windows.2
+

@@ -126,6 +126,9 @@ namespace KlayGE
 		virtual uint32_t DoUpdate(uint32_t pass) override;
 
 		void UpdateSelectedMesh();
+		void UpdateEffectAttrib(uint32_t mtl_id);
+		void UpdateMaterial(uint32_t mtl_id);
+		void UpdateTechniques(uint32_t mtl_id);
 
 	private:
 		FontPtr font_;
@@ -133,12 +136,14 @@ namespace KlayGE
 		LightSourcePtr ambient_light_;
 		LightSourcePtr main_light_;
 
-		SceneObjectPtr model_;
-		SceneObjectPtr skeleton_model_;
-		SceneObjectPtr imposter_;
-		SceneObjectPtr axis_;
-		SceneObjectPtr grid_;
-		SceneObjectPtr sky_box_;
+		SceneNodePtr object_;
+		RenderModelPtr model_;
+		SceneNodePtr skeleton_object_;
+		SkinnedMeshPtr skeleton_model_;
+		SceneNodePtr imposter_;
+		SceneNodePtr axis_;
+		SceneNodePtr grid_;
+		SceneNodePtr skybox_;
 
 		FirstPersonCameraController fps_controller_;
 		TrackballCameraController tb_controller_;
@@ -165,7 +170,7 @@ namespace KlayGE
 		TexturePtr selective_cpu_tex_;
 		bool update_selective_buffer_;
 		uint32_t selected_obj_;
-		SceneObjectPtr selected_bb_;
+		SceneNodePtr selected_bb_;
 
 		UpdateSelectEntityEvent update_select_entity_event_;
 	};

@@ -18,6 +18,8 @@
 
 #include <boost/assert.hpp>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -234,6 +236,8 @@ public:
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	int width = 256, height = 256, depth = 16;
 
 	std::string src_name("height.dds");
@@ -276,7 +280,7 @@ int main(int argc, char* argv[])
 	if (Texture::TT_2D == src_texture->Type())
 	{
 		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
-		src_texture->CopyToTexture(*height_map_texture);
+		src_texture->CopyToTexture(*height_map_texture, TextureFilter::Point);
 
 		uint32_t texel_size = NumFormatBytes(height_map_texture->Format());
 
@@ -314,7 +318,7 @@ int main(int argc, char* argv[])
 		BOOST_ASSERT(Texture::TT_3D == src_texture->Type());
 
 		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
-		src_texture->CopyToTexture(*vol_map_texture);
+		src_texture->CopyToTexture(*vol_map_texture, TextureFilter::Point);
 
 		uint32_t texel_size = NumFormatBytes(vol_map_texture->Format());
 
@@ -360,5 +364,5 @@ int main(int argc, char* argv[])
 
 	cout << "Distance map is saved to " << distance_name << endl;
 
-	Context::Destroy();
+	return 0;
 }

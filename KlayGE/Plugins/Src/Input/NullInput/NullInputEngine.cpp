@@ -35,11 +35,9 @@
 
 namespace KlayGE
 {
-	NullInputEngine::NullInputEngine()
-	{
-	}
+	NullInputEngine::NullInputEngine() = default;
 
-	NullInputEngine::~NullInputEngine()
+	NullInputEngine::~NullInputEngine() noexcept
 	{
 		devices_.clear();
 	}

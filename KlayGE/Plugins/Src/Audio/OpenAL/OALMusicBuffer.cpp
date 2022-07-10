@@ -123,7 +123,7 @@ namespace KlayGE
 		alGetSourcei(source_, AL_BUFFERS_QUEUED, &queued_);
 		if (queued_ > 0)
 		{
-			std::vector<ALuint> cur_queue(queued_);
+			auto cur_queue = MakeUniquePtr<ALuint[]>(queued_);
 			alSourceUnqueueBuffers(source_, queued_, &cur_queue[0]);
 		}
 
@@ -156,7 +156,7 @@ namespace KlayGE
 
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = Context::Instance().ThreadPool()([this] { this->LoopUpdateBuffer(); });
+		play_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoopUpdateBuffer(); });
 
 		loop_ = loop;
 
@@ -176,7 +176,7 @@ namespace KlayGE
 		if (!stopped_)
 		{
 			stopped_ = true;
-			play_thread_();
+			play_thread_.wait();
 		}
 
 		alSourceStopv(1, &source_);

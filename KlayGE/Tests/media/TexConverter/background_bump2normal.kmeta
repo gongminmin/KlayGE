@@ -10,5 +10,7 @@
 	"bump":
 	{
 		"to_normal": true
-	}
+	},
+
+	"source": "background.jpg"
 }

@@ -62,7 +62,7 @@ namespace KlayGE
 
 		void SetControlMode(ControlMode mode);
 
-		uint32_t AddModel(System::String^ meshml_name);
+		uint32_t AddModel(System::String^ model_name);
 		void ClearModels();
 
 		uint32_t AddLight(LightType type, System::String^ name);

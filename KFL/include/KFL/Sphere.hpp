@@ -50,16 +50,18 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		constexpr Sphere_T() noexcept
-			: radius_()
+		constexpr Sphere_T() noexcept : radius_()
 		{
 		}
-		constexpr Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept
-			: center_(center), radius_(radius)
+		constexpr Sphere_T(Vector_T<T, 3> center, T radius) noexcept : center_(std::move(center)), radius_(std::move(radius))
 		{
 		}
-		Sphere_T(Sphere_T const & rhs) noexcept;
-		Sphere_T(Sphere_T&& rhs) noexcept;
+		constexpr Sphere_T(Sphere_T const& rhs) noexcept : center_(rhs.center_), radius_(rhs.radius_)
+		{
+		}
+		constexpr Sphere_T(Sphere_T&& rhs) noexcept : center_(std::move(rhs.center_)), radius_(std::move(rhs.radius_))
+		{
+		}
 
 		// 赋值操作符
 		Sphere_T& operator+=(Vector_T<T, 3> const & rhs) noexcept;
@@ -70,12 +72,8 @@ namespace KlayGE
 		Sphere_T& operator=(Sphere_T const & rhs) noexcept;
 		Sphere_T& operator=(Sphere_T&& rhs) noexcept;
 
-		// 一元操作符
-		Sphere_T const & operator+() const noexcept;
-		Sphere_T const & operator-() const noexcept;
-
 		// 属性
-		Vector_T<T, 3>& Center() noexcept
+		constexpr Vector_T<T, 3>& Center() noexcept
 		{
 			return center_;
 		}
@@ -83,7 +81,7 @@ namespace KlayGE
 		{
 			return center_;
 		}
-		T& Radius() noexcept
+		constexpr T& Radius() noexcept
 		{
 			return radius_;
 		}

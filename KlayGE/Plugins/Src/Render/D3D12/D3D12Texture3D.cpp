@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -40,9 +39,8 @@
 
 #include <cstring>
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 
 namespace KlayGE
@@ -103,7 +101,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, depth_ >> level);
 	}
 
-	void D3D12Texture3D::CopyToTexture(Texture& target)
+	void D3D12Texture3D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -122,15 +120,16 @@ namespace KlayGE
 				for (uint32_t level = 0; level < num_mips; ++ level)
 				{
 					this->ResizeTexture3D(target, index, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level),
-						index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), true);
+						index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), filter);
 				}
 			}
 		}
 	}
 
-	void D3D12Texture3D::CopyToSubTexture3D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void D3D12Texture3D::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
+		uint32_t src_depth, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -147,21 +146,21 @@ namespace KlayGE
 		}
 		else
 		{
-			this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
-				src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
+			this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height,
+				dst_depth, src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, filter);
 		}
 	}
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture3D::FillSRVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t first_level,
-		uint32_t num_levels) const
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture3D::FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t first_level, uint32_t num_levels) const
 	{
 		BOOST_ASSERT(0 == first_array_index);
-		BOOST_ASSERT(1 == num_items);
+		BOOST_ASSERT(1 == array_size);
 		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(num_items);
+		KFL_UNUSED(array_size);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-		switch (format_)
+		switch (pf)
 		{
 		case EF_D16:
 			desc.Format = DXGI_FORMAT_R16_UNORM;
@@ -176,7 +175,7 @@ namespace KlayGE
 			break;
 
 		default:
-			desc.Format = dxgi_fmt_;
+			desc.Format = D3D12Mapping::MappingFormat(pf);
 			break;
 		}
 		desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -189,39 +188,14 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture3D::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
-	{
-		BOOST_ASSERT(0 == first_array_index);
-		BOOST_ASSERT(1 == num_items);
-		KFL_UNUSED(num_items);
-
-		return this->FillUAVDesc(first_array_index, 0, depth_, level);
-	}
-
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture3D::FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
-	{
-		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
-
-		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = dxgi_fmt_;
-		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
-		desc.Texture3D.MipSlice = level;
-		desc.Texture3D.FirstWSlice = first_slice;
-		desc.Texture3D.WSize = num_slices;
-
-		return desc;
-	}
-
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture3D::FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture3D::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
 		BOOST_ASSERT(0 == array_index);
 		KFL_UNUSED(array_index);
 
 		D3D12_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(this->Format());
+		desc.Format = D3D12Mapping::MappingFormat(pf);
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
 		desc.Texture3D.FirstWSlice = first_slice;
@@ -230,15 +204,15 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture3D::FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture3D::FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 		KFL_UNUSED(array_index);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = D3D12Mapping::MappingFormat(this->Format());
+		desc.Format = D3D12Mapping::MappingFormat(pf);
 		desc.Flags = D3D12_DSV_FLAG_NONE;
 		if (this->SampleCount() > 1)
 		{
@@ -251,6 +225,32 @@ namespace KlayGE
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.ArraySize = num_slices;
 		desc.Texture2DArray.FirstArraySlice = first_slice;
+
+		return desc;
+	}
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture3D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		BOOST_ASSERT(0 == first_array_index);
+		BOOST_ASSERT(1 == array_size);
+		KFL_UNUSED(array_size);
+
+		return this->FillUAVDesc(pf, first_array_index, 0, depth_, level);
+	}
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture3D::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
+	{
+		BOOST_ASSERT(0 == array_index);
+		KFL_UNUSED(array_index);
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+		desc.Format = D3D12Mapping::MappingFormat(pf);
+		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MipSlice = level;
+		desc.Texture3D.FirstWSlice = first_slice;
+		desc.Texture3D.WSize = num_slices;
 
 		return desc;
 	}
@@ -270,21 +270,7 @@ namespace KlayGE
 		this->DoUnmap(subres);
 	}
 
-	void D3D12Texture3D::BuildMipSubLevels()
-	{		
-		// TODO
-		// GPU mipmapper
-		for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-		{
-			for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-			{
-				this->ResizeTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
-					index, level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), true);
-			}
-		}
-	}
-
-	void D3D12Texture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void D3D12Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE3D,
 			width_, height_, depth_, array_size_, init_data, clear_value_hint);

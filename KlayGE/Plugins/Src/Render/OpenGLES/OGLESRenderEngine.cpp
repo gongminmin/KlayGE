@@ -31,11 +31,12 @@
 
 #include <algorithm>
 #include <cstring>
+#include <ostream>
 #include <string>
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderWindow.hpp>
 #include <KlayGE/OpenGLES/OGLESFrameBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderView.hpp>
@@ -48,7 +49,6 @@
 
 namespace
 {
-#ifndef KLAYGE_SHIP
 	char const * DebugSourceString(GLenum value)
 	{
 		char const * ret;
@@ -158,7 +158,6 @@ namespace
 			<< "severity: " << DebugSeverityString(severity) << "; "
 			<< "message: " << message << std::endl;
 	}
-#endif
 }
 
 namespace KlayGE
@@ -169,8 +168,7 @@ namespace KlayGE
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0), cur_program_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
-			cur_fbo_(0),
-			gpu_disjoint_occurred_(false)
+			cur_fbo_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'E', 'S', 'S', 'L'>::value;
 		native_shader_version_ = 3;
@@ -191,13 +189,6 @@ namespace KlayGE
 	{
 		static const std::wstring name(L"OpenGL ES Render Engine");
 		return name;
-	}
-
-	void OGLESRenderEngine::UpdateGPUTimestampsFrequency()
-	{
-		GLint disjoint_occurred = 0;
-		glGetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint_occurred);
-		gpu_disjoint_occurred_ = disjoint_occurred ? true : false;
 	}
 
 	// ½¨Á¢äÖÈ¾´°¿Ú
@@ -227,28 +218,34 @@ namespace KlayGE
 		Context::Instance().AppInstance().MainWnd()->BindListeners();
 #endif
 
-#ifndef KLAYGE_SHIP
-		if (glloader_GLES_VERSION_3_2())
-		{
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(&DebugOutputProc, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-		}
-		else if (glloader_GLES_KHR_debug())
-		{
-			glEnable(GL_DEBUG_OUTPUT_KHR);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
-			glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
-		}
+#ifdef KLAYGE_DEBUG
+		bool const debug_context = true;
+#else
+		bool const debug_context = settings.debug_context;
 #endif
+		if (debug_context)
+		{
+			if (glloader_GLES_VERSION_3_2())
+			{
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback(&DebugOutputProc, nullptr);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+			}
+			else if (glloader_GLES_KHR_debug())
+			{
+				glEnable(GL_DEBUG_OUTPUT_KHR);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+				glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
+				glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
+			}
+		}
 
 #if defined(KLAYGE_PLATFORM_IOS)
 		win->Attach(FrameBuffer::ATT_Color0,
@@ -257,15 +254,14 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			win->Attach(FrameBuffer::ATT_DepthStencil,
-				rf.Make2DDepthStencilRenderView(win->Width(), win->Height(), settings.depth_stencil_fmt, 1, 0));
+				rf.Make2DDsv(win->Width(), win->Height(), settings.depth_stencil_fmt, 1, 0));
 		}
 #else
-		win->Attach(FrameBuffer::ATT_Color0,
-			MakeSharedPtr<OGLESScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
+		win->Attach(FrameBuffer::Attachment::Color0,
+			MakeSharedPtr<OGLESScreenRenderTargetView>(win->Width(), win->Height(), settings.color_fmt));
 		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
 		{
-			win->Attach(FrameBuffer::ATT_DepthStencil,
-				MakeSharedPtr<OGLESScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
+			win->Attach(MakeSharedPtr<OGLESScreenDepthStencilView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
 		}
 #endif
 
@@ -997,15 +993,15 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(fb);
 
-		Viewport const & vp = *fb->GetViewport();
-		if ((vp_x_ != vp.left) || (vp_y_ != vp.top) || (vp_width_ != vp.width) || (vp_height_ != vp.height))
+		Viewport const & vp = *fb->Viewport();
+		if ((vp_x_ != vp.Left()) || (vp_y_ != vp.Top()) || (vp_width_ != vp.Width()) || (vp_height_ != vp.Height()))
 		{
-			glViewport(vp.left, vp.top, vp.width, vp.height);
+			glViewport(vp.Left(), vp.Top(), vp.Width(), vp.Height());
 
-			vp_x_ = vp.left;
-			vp_y_ = vp.top;
-			vp_width_ = vp.width;
-			vp_height_ = vp.height;
+			vp_x_ = vp.Left();
+			vp_y_ = vp.Top();
+			vp_width_ = vp.Width();
+			vp_height_ = vp.Height();
 		}
 	}
 
@@ -1051,11 +1047,11 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instances = rl.NumInstances();
+		uint32_t const num_instances = rl.NumInstances() * this->NumRealizedCameraInstances();
 		BOOST_ASSERT(num_instances != 0);
 
 		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0).GetShaderObject(effect));
-		checked_cast<OGLESRenderLayout const *>(&rl)->Active(cur_shader);
+		checked_cast<OGLESRenderLayout const&>(rl).Active(cur_shader);
 
 		uint32_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;
@@ -1256,7 +1252,7 @@ namespace KlayGE
 
 	void OGLESRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("VENDOR") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_VENDOR));
@@ -1468,10 +1464,6 @@ namespace KlayGE
 
 		caps_.is_tbdr = false;
 
-		caps_.hw_instancing_support = true;
-		caps_.instance_id_support = true;
-		caps_.stream_output_support = true;
-		caps_.alpha_to_coverage_support = true;
 		if (!this->HackForAdreno())
 		{
 			caps_.primitive_restart_support = true;
@@ -1524,6 +1516,8 @@ namespace KlayGE
 		}
 		caps_.uavs_at_every_stage_support = false;	// TODO
 		caps_.rovs_support = false;	// TODO
+		caps_.flexible_srvs_support = false; // TODO
+		caps_.vp_rt_index_at_every_stage_support = false; // TODO
 
 		caps_.gs_support = glloader_GLES_VERSION_3_2() || glloader_GLES_OES_geometry_shader()
 			|| glloader_GLES_EXT_geometry_shader() || glloader_GLES_ANDROID_extension_pack_es31a();
@@ -1709,7 +1703,7 @@ namespace KlayGE
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
 
 			std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
-			auto add_render_target_format = [&render_target_formats, &max_samples](ArrayRef<ElementFormat> fmts)
+			auto add_render_target_format = [&render_target_formats, &max_samples](std::span<ElementFormat const> fmts)
 			{
 				for (auto fmt : fmts)
 				{
@@ -1721,7 +1715,7 @@ namespace KlayGE
 			};
 
 			add_render_target_format(
-				{
+				MakeSpan({
 					EF_R8,
 					EF_GR8,
 					EF_ABGR8,
@@ -1743,36 +1737,36 @@ namespace KlayGE
 					EF_D24S8,
 					EF_D32F,
 					EF_ABGR8_SRGB
-				});
+				}));
 			if (glloader_GLES_EXT_texture_format_BGRA8888())
 			{
-				add_render_target_format(EF_ARGB8);
+				add_render_target_format(MakeSpan<1>(EF_ARGB8));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
 			{
 				add_render_target_format(
-					{
+					MakeSpan({
 						EF_R16F,
 						EF_GR16F
-					});
+					}));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float()
 				|| this->HackForTegra())
 			{
-				add_render_target_format(EF_ABGR16F);
+				add_render_target_format(MakeSpan<1>(EF_ABGR16F));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_APPLE_color_buffer_packed_float() || glloader_GLES_NV_packed_float())
 			{
-				add_render_target_format(EF_B10G11R11F);
+				add_render_target_format(MakeSpan<1>(EF_B10G11R11F));
 			}
 			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_float())
 			{
 				add_render_target_format(
-					{
+					MakeSpan({
 						EF_R32F,
 						EF_GR32F,
 						EF_ABGR32F
-					});
+					}));
 			}
 
 			caps_.AssignRenderTargetFormats(std::move(render_target_formats));

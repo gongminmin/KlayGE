@@ -8,7 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -27,17 +27,16 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderQuad : public RenderableHelper
+	class RenderQuad : public Renderable
 	{
 	public:
 		RenderQuad()
-			: RenderableHelper(L"Quad")
+			: Renderable(L"Quad")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = SyncLoadRenderEffect("TexViewer.fxml");
 			technique_ = effect_->TechniqueByName("TexViewerTech");
-			mvp_param_ = effect_->ParameterByName("mvp");
 			texture_2d_param_ = effect_->ParameterByName("texture_2d");
 			zoom_param_ = effect_->ParameterByName("zoom");
 			rgb_scale_param_ = effect_->ParameterByName("rgb_scale");
@@ -52,12 +51,12 @@ namespace
 				float2(1, 1),
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
@@ -65,7 +64,11 @@ namespace
 
 		void OnRenderBegin()
 		{
-			*mvp_param_ = model_mat_;
+			Renderable::OnRenderBegin();
+
+			auto const& pccb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().PredefinedCameraCBufferInstance();
+			pccb.Camera(*camera_cbuffer_, 0).mvp = MathLib::transpose(model_mat_);
+			camera_cbuffer_->Dirty(true);
 		}
 
 		void Texture(TexturePtr const & tex)
@@ -122,10 +125,10 @@ namespace KlayGE
 		font_ = SyncLoadFont("gkai00mp.kfont");
 
 		quad_ = MakeSharedPtr<RenderQuad>();
-		quad_so_ = MakeSharedPtr<SceneObject>(quad_,
-			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		quad_so_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(quad_),
+			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		quad_so_->Visible(false);
-		quad_so_->AddToSceneManager();
+		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(quad_so_);
 
 		this->LookAt(float3(-5, 5, -5), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 		this->Proj(0.1f, 100);
@@ -308,8 +311,8 @@ namespace KlayGE
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				TexturePtr texture_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read);
-				texture_display_->CopyToSubTexture2D(*texture_cpu, 0, 0, 0, 0, width, height,
-					0, 0, 0, 0, width, height);
+				texture_display_->CopyToSubTexture2D(
+					*texture_cpu, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height, TextureFilter::Point);
 
 				texels_.resize(width * height);
 
@@ -341,31 +344,30 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 		case Texture::TT_2D:
-			texture_original_->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height,
-				active_array_index_, active_mipmap_level_, 0, 0, width, height);
+			texture_original_->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height, active_array_index_, active_mipmap_level_,
+				0, 0, width, height, TextureFilter::Point);
 			break;
 
 		case Texture::TT_3D:
 			{
-				TexturePtr texture_3d_cpu = rf.MakeTexture3D(width, height, 1, 1, 1, texture_original_->Format(),
-					1, 0, EAH_CPU_Read);
-				texture_original_->CopyToSubTexture3D(*texture_3d_cpu, 0, 0, 0, 0, 0, width, height, 1,
-					active_array_index_, active_mipmap_level_, 0, 0, active_depth_index_, width, height, 1);
+				TexturePtr texture_3d_cpu = rf.MakeTexture3D(width, height, 1, 1, 1, texture_original_->Format(), 1, 0, EAH_CPU_Read);
+				texture_original_->CopyToSubTexture3D(*texture_3d_cpu, 0, 0, 0, 0, 0, width, height, 1, active_array_index_,
+					active_mipmap_level_, 0, 0, active_depth_index_, width, height, 1, TextureFilter::Point);
 				Texture::Mapper mapper_3d(*texture_3d_cpu, 0, 0, TMA_Read_Only, 0, 0, 0, width, height, 1);
 				ElementInitData init_data;
 				init_data.data = mapper_3d.Pointer<uint8_t>();
 				init_data.row_pitch = mapper_3d.RowPitch();
 				init_data.slice_pitch = mapper_3d.SlicePitch();
 				TexturePtr texture_2d_cpu = rf.MakeTexture2D(width, height, 1, 1, texture_original_->Format(),
-					1, 0, EAH_CPU_Write, init_data);
-				texture_2d_cpu->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height,
-					0, 0, 0, 0, width, height);
+					1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
+				texture_2d_cpu->CopyToSubTexture2D(
+					*texture_display_, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height, TextureFilter::Point);
 			}
 			break;
 
 		case Texture::TT_Cube:
-			texture_original_->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height,
-				active_array_index_ * 6 + active_face_, active_mipmap_level_, 0, 0, width, height);
+				texture_original_->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height, active_array_index_ * 6 + active_face_,
+					active_mipmap_level_, 0, 0, width, height, TextureFilter::Point);
 			break;
 
 		default:
@@ -389,7 +391,7 @@ namespace KlayGE
 
 			float4x4 mat = MathLib::scaling(width * zoom_ / vp_width * 2.0f, height * zoom_ / vp_height * 2.0f, 1.0f)
 				* MathLib::translation((offset_x_ * 2 - width) * zoom_ / vp_width, (offset_y_ * 2 - height) * zoom_ / vp_height, 0.0f);
-			quad_so_->ModelMatrix(mat);
+			quad_so_->TransformToParent(mat);
 		}
 	}
 }

@@ -42,17 +42,13 @@ namespace KlayGE
 	class DllLoader;
 
 	class XMLDocument;
-	typedef std::shared_ptr<XMLDocument> XMLDocumentPtr;
 	class XMLNode;
-	typedef std::shared_ptr<XMLNode> XMLNodePtr;
 	class XMLAttribute;
-	typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
 
-	class bad_join;
-	template <typename ResultType>
-	class joiner;
-	class threader;
-	class thread_pool;
+	class JsonDocument;
+	class JsonValue;
+
+	class ThreadPool;
 
 	class half;
 	template <typename T, int N>

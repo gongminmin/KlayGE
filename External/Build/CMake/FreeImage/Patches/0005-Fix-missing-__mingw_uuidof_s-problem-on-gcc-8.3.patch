@@ -1,0 +1,29 @@
+From ae1c308b591873bd74f11b6fa608619f973d1332 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 11 May 2019 16:10:22 -0700
+Subject: [PATCH 5/8] Fix missing __mingw_uuidof_s problem on gcc 8.3
+
+---
+ Source/LibJXR/common/include/guiddef.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/Source/LibJXR/common/include/guiddef.h b/Source/LibJXR/common/include/guiddef.h
+index d769c5c..e75a018 100644
+--- a/Source/LibJXR/common/include/guiddef.h
++++ b/Source/LibJXR/common/include/guiddef.h
+@@ -55,7 +55,12 @@ typedef struct _GUID {
+ 
+ #if defined(__MINGW32__) && defined(__cplusplus) && (USE___UUIDOF == 0)
+ extern "C++" {
++#if __cpp_constexpr >= 200704l && __cpp_inline_variables >= 201606L
++__extension__ template<typename T> struct __mingw_uuidof_s;
++__extension__ template<typename T> constexpr const GUID &__mingw_uuidof();
++#else
+ __extension__ template<typename T> const GUID &__mingw_uuidof();
++#endif
+ }
+ #endif
+ 
+-- 
+2.17.1.windows.2
+

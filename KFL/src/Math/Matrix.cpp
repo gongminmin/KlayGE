@@ -45,27 +45,15 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Matrix4_T<T>::Matrix4_T(Matrix4_T const & rhs) noexcept
-		: m_(rhs.m_)
-	{
-	}
-
-	template <typename T>
-	Matrix4_T<T>::Matrix4_T(Matrix4_T&& rhs) noexcept
-		: m_(std::move(rhs.m_))
-	{
-	}
-
-	template <typename T>
 	Matrix4_T<T>::Matrix4_T(T f11, T f12, T f13, T f14,
 		T f21, T f22, T f23, T f24,
 		T f31, T f32, T f33, T f34,
 		T f41, T f42, T f43, T f44) noexcept
 	{
-		m_[0][0] = f11;	m_[0][1] = f12;	m_[0][2] = f13;	m_[0][3] = f14;
-		m_[1][0] = f21;	m_[1][1] = f22;	m_[1][2] = f23;	m_[1][3] = f24;
-		m_[2][0] = f31;	m_[2][1] = f32;	m_[2][2] = f33;	m_[2][3] = f34;
-		m_[3][0] = f41;	m_[3][1] = f42;	m_[3][2] = f43;	m_[3][3] = f44;
+		m_[0] = {std::move(f11), std::move(f12), std::move(f13), std::move(f14)};
+		m_[1] = {std::move(f21), std::move(f22), std::move(f23), std::move(f24)};
+		m_[2] = {std::move(f31), std::move(f32), std::move(f33), std::move(f34)};
+		m_[3] = {std::move(f41), std::move(f42), std::move(f43), std::move(f44)};
 	}
 
 	template <typename T>
@@ -173,12 +161,6 @@ namespace KlayGE
 	Matrix4_T<T>& Matrix4_T<T>::operator=(Matrix4_T<T>&& rhs) noexcept
 	{
 		m_ = std::move(rhs.m_);
-		return *this;
-	}
-
-	template <typename T>
-	Matrix4_T<T> const Matrix4_T<T>::operator+() const noexcept
-	{
 		return *this;
 	}
 

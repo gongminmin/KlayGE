@@ -30,11 +30,15 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/COMPtr.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <unknwnbase.h>
+#endif
 #include <CPP/Common/MyWindows.h>
 
 #include <KFL/DllLoader.hpp>
@@ -44,14 +48,6 @@
 #include <string>
 
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/algorithm/string/predicate.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <CPP/7zip/Archive/IArchive.h>
 
@@ -62,12 +58,20 @@
 #include <KlayGE/Package.hpp>
 
 #ifndef WINAPI
-#ifdef _MSC_VER
+#ifdef KLAYGE_COMPILER_MSVC
 #define WINAPI __stdcall
 #else
 #define WINAPI
 #endif
 #endif
+
+DEFINE_UUID_OF(IArchiveExtractCallback);
+DEFINE_UUID_OF(IArchiveOpenCallback);
+DEFINE_UUID_OF(ICryptoGetTextPassword);
+DEFINE_UUID_OF(IInArchive);
+DEFINE_UUID_OF(IInStream);
+DEFINE_UUID_OF(IStreamGetSize);
+DEFINE_UUID_OF(IOutStream);
 
 namespace
 {
@@ -79,7 +83,7 @@ namespace
 
 	typedef KlayGE::uint32_t (WINAPI *CreateObjectFunc)(const GUID* clsID, const GUID* interfaceID, void** outObject);
 
-	HRESULT GetArchiveItemPath(std::shared_ptr<IInArchive> const & archive, uint32_t index, std::string& result)
+	HRESULT GetArchiveItemPath(IInArchive* archive, uint32_t index, std::string& result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -99,7 +103,7 @@ namespace
 		}
 	}
 
-	HRESULT IsArchiveItemFolder(std::shared_ptr<IInArchive> const & archive, uint32_t index, bool &result)
+	HRESULT IsArchiveItemFolder(IInArchive* archive, uint32_t index, bool &result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -128,9 +132,9 @@ namespace
 			return ret;
 		}
 
-		HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
+		HRESULT CreateObject(GUID const& cls_id, GUID const& interface_id, void** out_object)
 		{
-			return createObjectFunc_(clsID, interfaceID, outObject);
+			return create_object_(&cls_id, &interface_id, out_object);
 		}
 
 	private:
@@ -138,14 +142,13 @@ namespace
 		{
 			dll_loader_.Load(DLL_PREFIX "7zxa" DLL_SUFFIX);
 
-			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
-
-			BOOST_ASSERT(createObjectFunc_);
+			create_object_ = reinterpret_cast<CreateObjectFunc>(dll_loader_.GetProcAddress("CreateObject"));
+			BOOST_ASSERT(create_object_);
 		}
 
 	private:
 		DllLoader dll_loader_;
-		CreateObjectFunc createObjectFunc_;
+		CreateObjectFunc create_object_;
 	};
 }
 
@@ -161,17 +164,17 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(archive_is);
 
-		{
-			IInArchive* tmp;
-			TIFHR(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
-			archive_ = MakeCOMPtr(tmp);
-		}
+		com_ptr<IInArchive> archive;
+		TIFHR(SevenZipLoader::Instance().CreateObject(
+			CLSID_CFormat7z, reinterpret_cast<GUID const&>(UuidOf<IInArchive>()), archive.put_void()));
 
-		auto file = MakeCOMPtr(new InStream(archive_is));
-		auto ocb = MakeCOMPtr(new ArchiveOpenCallback(password));
-		TIFHR(archive_->Open(file.get(), 0, ocb.get()));
+		com_ptr<IInStream> file(new InStream(archive_is), false);
+		com_ptr<IArchiveOpenCallback> ocb(new ArchiveOpenCallback(password), false);
+		TIFHR(archive->Open(file.get(), nullptr, ocb.get()));
 
-		TIFHR(archive_->GetNumberOfItems(&num_items_));
+		TIFHR(archive->GetNumberOfItems(&num_items_));
+
+		archive_ = std::shared_ptr<IInArchive>(archive.detach(), std::mem_fn(&IInArchive::Release));
 	}
 
 	bool Package::Locate(std::string_view extract_file_path)
@@ -186,8 +189,8 @@ namespace KlayGE
 		if (real_index != 0xFFFFFFFF)
 		{
 			auto decoded_file = MakeSharedPtr<std::stringstream>();
-			auto out_stream = MakeCOMPtr(new OutStream(decoded_file));
-			auto ecb = MakeCOMPtr(new ArchiveExtractCallback(password_, out_stream));
+			com_ptr<IOutStream> out_stream(new OutStream(decoded_file), false);
+			com_ptr<IArchiveExtractCallback> ecb(new ArchiveExtractCallback(password_, out_stream.get()), false);
 			TIFHR(archive_->Extract(&real_index, 1, false, ecb.get()));
 
 			PROPVARIANT prop;
@@ -217,14 +220,14 @@ namespace KlayGE
 		for (uint32_t i = 0; i < num_items_; ++ i)
 		{
 			bool is_folder = true;
-			TIFHR(IsArchiveItemFolder(archive_, i, is_folder));
+			TIFHR(IsArchiveItemFolder(archive_.get(), i, is_folder));
 			if (!is_folder)
 			{
 				std::string file_path;
-				TIFHR(GetArchiveItemPath(archive_, i, file_path));
+				TIFHR(GetArchiveItemPath(archive_.get(), i, file_path));
 				std::replace(file_path.begin(), file_path.end(), '\\', '/');
-				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
-					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))
+				if (!StringUtil::CaseInsensitiveLexicographicalCompare(extract_file_path, file_path) &&
+					!StringUtil::CaseInsensitiveLexicographicalCompare(file_path, extract_file_path))
 				{
 					real_index = i;
 					break;

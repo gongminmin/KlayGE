@@ -19,33 +19,24 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Signal.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
-
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'sp'
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/signals2.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 namespace KlayGE
 {
 	struct RenderSettings;
 
-	class OGLRenderWindow : public OGLFrameBuffer
+	class OGLRenderWindow final : public OGLFrameBuffer
 	{
 	public:
 		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
-		~OGLRenderWindow();
+		~OGLRenderWindow() override;
 
 		void Destroy();
 
-		void SwapBuffers();
+		void SwapBuffers() override;
 
-		std::wstring const & Description() const;
+		std::wstring const & Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);
@@ -54,11 +45,11 @@ namespace KlayGE
 		void FullScreen(bool fs);
 
 		// Method for dealing with resize / move & 3d library
-		void WindowMovedOrResized();
+		void WindowMovedOrResized(Window const& win);
 
 	private:
-		void OnExitSizeMove(Window const & win);
-		void OnSize(Window const & win, bool active);
+		void OnExitSizeMove(Window const& win);
+		void OnSize(Window const& win, bool active);
 
 	private:
 		std::string	name_;
@@ -79,8 +70,8 @@ namespace KlayGE
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_exit_size_move_connect_;
-		boost::signals2::connection on_size_connect_;
+		Signal::Connection on_exit_size_move_connect_;
+		Signal::Connection on_size_connect_;
 	};
 }
 

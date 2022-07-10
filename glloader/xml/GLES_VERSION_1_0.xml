@@ -2,7 +2,7 @@
 
 <gl_extension name="GLES_VERSION_1_0">
 	<typedefs>
-		<typedef type="void" synonym="(*_GLfuncptr)()"/>
+		<typedef type="void" synonym="(*_GLfuncptr)(void)"/>
 	</typedefs>
 
 	<tokens>

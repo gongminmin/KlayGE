@@ -29,20 +29,18 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KFL/Hash.hpp>
 
+#include <iterator>
 #include <limits>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
@@ -54,10 +52,10 @@ namespace KlayGE
 			BlendStateDesc const & bs_desc)
 		: RenderStateObject(rs_desc, dss_desc, bs_desc)
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphics_ps_desc = ps_desc_.graphics_ps_desc;
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphics_ps_desc = std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_);
 
 		graphics_ps_desc.RasterizerState.FillMode = D3D12Mapping::Mapping(rs_desc.polygon_mode);
 		graphics_ps_desc.RasterizerState.CullMode = D3D12Mapping::Mapping(rs_desc.cull_mode);
@@ -115,39 +113,40 @@ namespace KlayGE
 
 	void D3D12RenderStateObject::Active()
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.OMSetStencilRef(dss_desc_.front_stencil_ref);
-		re.OMSetBlendFactor(bs_desc_.blend_factor);
+		auto& re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* cmd_list = re.D3DRenderCmdList();
+		re.OMSetStencilRef(cmd_list, dss_desc_.front_stencil_ref);
+		re.OMSetBlendFactor(cmd_list, bs_desc_.blend_factor);
 	}
 
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObject const & so,
 		FrameBuffer const & fb, bool has_tessellation) const
 	{
-		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
-		auto& d3d12_rl = *checked_cast<D3D12RenderLayout*>(const_cast<RenderLayout*>(&rl));
-		auto& d3d12_fb = *checked_cast<D3D12FrameBuffer*>(const_cast<FrameBuffer*>(&fb));
+		auto& d3d12_so = checked_cast<D3D12ShaderObject&>(const_cast<ShaderObject&>(so));
+		auto& d3d12_rl = checked_cast<D3D12RenderLayout&>(const_cast<RenderLayout&>(rl));
+		auto& d3d12_fb = checked_cast<D3D12FrameBuffer&>(const_cast<FrameBuffer&>(fb));
 
 		size_t hash_val = 0;
 		HashCombine(hash_val, d3d12_rl.PsoHashValue());
-		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_so.GetD3D12ShaderObjectTemplate());
 		HashCombine(hash_val, d3d12_fb.PsoHashValue());
 		HashCombine(hash_val, has_tessellation);
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
 		{
-			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = ps_desc_.graphics_ps_desc;
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = std::get<D3D12_GRAPHICS_PIPELINE_STATE_DESC>(ps_desc_);
 
 			d3d12_rl.UpdatePsoDesc(pso_desc, has_tessellation);
 			d3d12_so.UpdatePsoDesc(pso_desc);
 			d3d12_fb.UpdatePsoDesc(pso_desc);
 		
-			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();
@@ -155,10 +154,10 @@ namespace KlayGE
 
 	ID3D12PipelineState* D3D12RenderStateObject::RetrieveComputePSO(ShaderObject const & so) const
 	{
-		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
+		auto& d3d12_so = checked_cast<D3D12ShaderObject&>(const_cast<ShaderObject&>(so));
 
 		size_t hash_val = 0;
-		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_so.GetD3D12ShaderObjectTemplate());
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
@@ -170,12 +169,12 @@ namespace KlayGE
 			pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		
-			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto d3d_device = d3d12_re.D3DDevice();
 
-			ID3D12PipelineState* d3d_pso;
-			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
+			com_ptr<ID3D12PipelineState> d3d_pso;
+			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, UuidOf<ID3D12PipelineState>(), d3d_pso.put_void()));
+			iter = psos_.emplace(hash_val, std::move(d3d_pso)).first;
 		}
 
 		return iter->second.get();

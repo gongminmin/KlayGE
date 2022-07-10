@@ -4,32 +4,15 @@
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float" name="alpha"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
-		<parameter type="float2" name="tc_center"/>
-		<parameter type="float2" name="tc_extent"/>
-		
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-
-		<parameter type="float4" name="albedo_clr"/>
-		<parameter type="float2" name="metalness_clr"/>
-		<parameter type="float2" name="glossiness_clr"/>
-		<parameter type="float4" name="emissive_clr"/>
-		<parameter type="int" name="albedo_map_enabled"/>
-		<parameter type="int" name="normal_map_enabled"/>
 	</cbuffer>
-
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="metalness_tex"/>
-	<parameter type="texture2D" name="glossiness_tex"/>
-	<parameter type="texture2D" name="emissive_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -73,15 +56,13 @@ float4 Shading(float4 L, float4 H)
 	{
 		albedo *= albedo_tex.Sample(linear_sampler, uv).xyz;
 	}
-	float metalness = metalness_clr.x;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	float glossiness = metalness_glossiness_factor.y;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(linear_sampler, uv).x;
-	}
-	float glossiness = glossiness_clr.x;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(linear_sampler, uv).x;
+		float2 mg_tex = get_xy_channel(metalness_glossiness_tex.Sample(linear_sampler, uv));
+		metalness *= mg_tex.x;
+		glossiness *= mg_tex.y;
 	}
 	float3 emissive = emissive_clr.xyz;
 	if (emissive_clr.w > 0.5f)
@@ -105,7 +86,7 @@ float4 Shading(float4 L, float4 H)
 	float3 c_spec = SpecularColor(albedo, metalness);
 
 	return float4(0.1f * albedo + emissive
-		+ CalcBRDFShading(c_diff, c_spec, Glossiness2Shininess(glossiness), light_vec, halfway, normal), alpha);
+		+ CalcBRDFShading(c_diff, c_spec, Glossiness2Shininess(glossiness), light_vec, halfway, normal), albedo_clr.w);
 }
 
 void NoOITVS(float4 pos				: POSITION,

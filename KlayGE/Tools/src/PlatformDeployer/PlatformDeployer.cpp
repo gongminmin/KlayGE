@@ -1,10 +1,41 @@
+/**
+ * @file PlatformDeployer.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
@@ -12,39 +43,19 @@
 #include <vector>
 #include <regex>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/algorithm/string/case_conv.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <nonstd/scope.hpp>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/algorithm/string/split.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-#include <boost/algorithm/string/trim.hpp>
+#include <cxxopts.hpp>
 
 #include <KlayGE/ToolCommon.hpp>
-#include <KlayGE/PlatformDefinition.hpp>
-#include <KlayGE/MeshConverter.hpp>
-#include <KlayGE/MeshMetadata.hpp>
-#include <KlayGE/TexConverter.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/PlatformDefinition.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -60,9 +71,8 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 		default_metadata.ForceSRGB(true);
 		break;
 
-	case CT_HASH("glossiness"):
-	case CT_HASH("metalness"):
-		default_metadata.Slot((res_type_hash == CT_HASH("glossiness")) ? RenderMaterial::TS_Glossiness : RenderMaterial::TS_Metalness);
+	case CT_HASH("metalness_glossiness"):
+		default_metadata.Slot(RenderMaterial::TS_MetalnessGlossiness);
 		default_metadata.ForceSRGB(false);
 		break;
 
@@ -109,7 +119,9 @@ MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const &
 	std::string metadata_name = res_name + ".kmeta";
 	if (ResLoader::Instance().Locate(metadata_name).empty())
 	{
-		return default_metadata;
+		MeshMetadata ret = default_metadata;
+		ret.LodFileName(0, res_name);
+		return ret;
 	}
 	else
 	{
@@ -117,10 +129,10 @@ MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const &
 	}
 }
 
-void Deploy(std::vector<std::string> const & res_names, std::string_view res_type,
-	RenderDeviceCaps const & caps, std::string_view platform)
+void Deploy(std::vector<std::string> const& res_names, std::string_view res_type, RenderDeviceCaps const& caps, std::string_view platform,
+	std::string_view dest_folder)
 {
-	size_t const res_type_hash = HashRange(res_type.begin(), res_type.end());
+	size_t const res_type_hash = HashValue(std::move(res_type));
 
 	if ((CT_HASH("albedo") == res_type_hash)
 		|| (CT_HASH("emissive") == res_type_hash)
@@ -135,13 +147,43 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 		TexConverter tc;
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
-
+			std::string_view real_res_type;
 			auto metadata = LoadTextureMetadata(res_names[i], default_metadata);
-			auto output_tex = tc.Convert(res_names[i], metadata);
+			switch (metadata.Slot())
+			{
+			case RenderMaterial::TS_Albedo:
+				real_res_type = "albedo";
+				break;
+			case RenderMaterial::TS_MetalnessGlossiness:
+				real_res_type = "metalness & glossiness";
+				break;
+			case RenderMaterial::TS_Emissive:
+				real_res_type = "emissive";
+				break;
+			case RenderMaterial::TS_Normal:
+				real_res_type = "normal";
+				break;
+			case RenderMaterial::TS_Height:
+				real_res_type = "height";
+				break;
+			case RenderMaterial::TS_Occlusion:
+				real_res_type = "occlusion";
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid texture slot");
+			}
+
+			std::cout << "Converting " << res_names[i] << " to " << real_res_type << std::endl;
+
+			auto output_tex = tc.Load(metadata);
 			if (output_tex)
 			{
-				filesystem::path res_path(res_names[i]);
+				FILESYSTEM_NS::path res_path(res_names[i]);
+				if (!dest_folder.empty())
+				{
+					res_path = FILESYSTEM_NS::path(dest_folder.begin(), dest_folder.end()) / res_path.filename();
+				}
 				SaveTexture(output_tex, res_path.string() + ".dds");
 			}
 		}
@@ -156,11 +198,15 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
 
 			auto metadata = LoadMeshMetadata(res_names[i], default_metadata);
-			auto output_model = mc.Convert(res_names[i], metadata);
+			auto output_model = mc.Load(metadata);
 			if (output_model)
 			{
-				filesystem::path res_path(res_names[i]);
-				SaveModel(output_model, res_path.string() + ".model_bin");
+				FILESYSTEM_NS::path res_path(res_names[i]);
+				if (!dest_folder.empty())
+				{
+					res_path = FILESYSTEM_NS::path(dest_folder.begin(), dest_folder.end()) / res_path.filename();
+				}
+				SaveModel(*output_model, res_path.string() + ".model_bin");
 			}
 		}
 	}
@@ -172,7 +218,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 		{
 			std::string y_fmt;
 			std::string c_fmt;
-			if (caps.BestMatchTextureFormat({ EF_R16, EF_R16F }) == EF_R16)
+			if (caps.BestMatchTextureFormat(MakeSpan({EF_R16, EF_R16F})) == EF_R16)
 			{
 				y_fmt = "R16";
 			}
@@ -180,7 +226,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 			{
 				y_fmt = "R16F";
 			}
-			if (caps.BestMatchTextureFormat({ EF_BC5, EF_BC3 }) == EF_BC5)
+			if (caps.BestMatchTextureFormat(MakeSpan({EF_BC5, EF_BC3})) == EF_BC5)
 			{
 				c_fmt = "BC5";
 			}
@@ -196,7 +242,12 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
 				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
+				ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt;
+				if (!dest_folder.empty())
+				{
+					ofs << " \"" << dest_folder << "\"";
+				}
+				ofs << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}
@@ -209,7 +260,12 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
 				ofs << "@echo off" << std::endl << std::endl;
-				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "FxmlJit -P " << platform << " -I \"" << res_names[i] << "\"";
+				if (!dest_folder.empty())
+				{
+					ofs << " -D \"" << dest_folder << "\"";
+				}
+				ofs << std::endl;
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}
@@ -220,76 +276,81 @@ void Deploy(std::vector<std::string> const & res_names, std::string_view res_typ
 
 		ofs.close();
 
-		if ((res_type_hash != CT_HASH("cubemap")) && (res_type_hash != CT_HASH("model")) && (res_type_hash != CT_HASH("effect")))
-		{
-			int err = system("convert.bat");
-			KFL_UNUSED(err);
-		}
-
-		int err = system("del convert.bat");
+		int err = system("convert.bat");
+		err = system("del convert.bat");
 		KFL_UNUSED(err);
 	}
 }
 
 int main(int argc, char* argv[])
 {
-	ResLoader::Instance().AddPath("../../Tools/media/Common");
+	Context::Instance().LoadCfg("KlayGE.cfg");
+
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
 
 	std::vector<std::string> res_names;
 	std::string res_type;
 	std::string platform;
+	std::string dest_folder;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input resource name.")
-		("type,T", boost::program_options::value<std::string>(), "Resource type.")
-		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
-		("version,v", "Version.");
+	cxxopts::Options options("PlatformDeployer", "KlayGE PlatformDeployer");
+	// clang-format off
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-path", "Input resource path.", cxxopts::value<std::string>())
+		("T,type", "Resource type (auto by default).", cxxopts::value<std::string>())
+		("P,platform", "Platform name.", cxxopts::value<std::string>())
+		("D,dest-folder", "Destination folder.", cxxopts::value<std::string>())
+		("v,version", "Version.");
+	// clang-format on
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
-		Context::Destroy();
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
 	{
 		cout << "KlayGE PlatformDeployer, Version 2.0.0" << endl;
-		Context::Destroy();
 		return 1;
 	}
-	if (vm.count("input-name") > 0)
+	if (vm.count("dest-folder") > 0)
 	{
-		std::string input_name_str = vm["input-name"].as<std::string>();
+		dest_folder = vm["dest-folder"].as<std::string>();
+	}
+	if (vm.count("input-path") > 0)
+	{
+		std::string input_name_str = vm["input-path"].as<std::string>();
 
-		std::vector<std::string> tokens;
-		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
+		std::vector<std::string_view> tokens = StringUtil::Split(input_name_str, StringUtil::IsAnyOf(",;"));
 		for (auto& arg : tokens)
 		{
-			boost::algorithm::trim(arg);
+			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				res_names.push_back(arg);
+				res_names.emplace_back(arg);
 			}
 			else
 			{
-				std::regex const filter(DosWildcardToRegex(arg));
+				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
+				auto const parent = arg_path.parent_path();
+				auto const file_name = arg_path.filename();
 
-				filesystem::directory_iterator end_itr;
-				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
+				std::regex const filter(DosWildcardToRegex(file_name.string()));
+
+				FILESYSTEM_NS::directory_iterator end_itr;
+				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (filesystem::is_regular_file(i->status()))
+					if (FILESYSTEM_NS::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();
 						if (std::regex_match(name, what, filter))
 						{
-							res_names.push_back(name);
+							res_names.push_back((parent / name).string());
 						}
 					}
 				}
@@ -299,28 +360,83 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input resources names." << endl;
-		Context::Destroy();
+		cout << options.help() << endl;
 		return 1;
 	}
+
+	for (auto iter = res_names.begin(); iter != res_names.end();)
+	{
+		std::string const res_name = *iter;
+
+		bool need_convert = true;
+		std::string possible_asset_name;
+		std::string const full_res_name = ResLoader::Instance().Locate(res_name);
+		if (full_res_name.empty())
+		{
+			cout << "Could NOT find " << res_name << '.';
+
+			std::string const possible_dds_name = ResLoader::Instance().Locate(res_name + ".dds");
+			if (FILESYSTEM_NS::exists(possible_dds_name))
+			{
+				possible_asset_name = possible_dds_name;
+			}
+			else
+			{
+				std::string const possible_model_bin_name = ResLoader::Instance().Locate(res_name + ".model_bin");
+				if (FILESYSTEM_NS::exists(possible_model_bin_name))
+				{
+					possible_asset_name = possible_model_bin_name;
+				}
+			}
+
+			if (!possible_asset_name.empty())
+			{
+				cout << " But " << possible_asset_name << " does exist." << endl;
+				need_convert = false;
+			}
+			else
+			{
+				return 1;
+			}
+		}
+
+		if (need_convert)
+		{
+			++iter;
+		}
+		else
+		{
+			iter = res_names.erase(iter);
+
+			FILESYSTEM_NS::path res_path(possible_asset_name);
+			if (dest_folder != res_path.parent_path())
+			{
+				FILESYSTEM_NS::copy_file(res_path, dest_folder / res_path.filename(), FILESYSTEM_NS::copy_options::overwrite_existing);
+			}
+		}
+	}
+	if (res_names.empty())
+	{
+		return 0;
+	}
+
 	if (vm.count("type") > 0)
 	{
 		res_type = vm["type"].as<std::string>();
 	}
 	else
 	{
-		std::string ext_name = filesystem::path(res_names[0]).extension().string();
-		if (".dds" == ext_name)
+		if (TexConverter::IsSupported(res_names[0]))
 		{
 			res_type = "albedo";
 		}
-		else if (".meshml" == ext_name)
+		else if (MeshConverter::IsSupported(res_names[0]))
 		{
 			res_type = "model";
 		}
 		else
 		{
 			cout << "Need resource type name." << endl;
-			Context::Destroy();
 			return 1;
 		}
 	}
@@ -333,8 +449,8 @@ int main(int argc, char* argv[])
 		platform = "d3d_11_0";
 	}
 
-	boost::algorithm::to_lower(res_type);
-	boost::algorithm::to_lower(platform);
+	StringUtil::ToLower(res_type);
+	StringUtil::ToLower(platform);
 
 	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform)
 		|| ("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform)
@@ -378,10 +494,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	PlatformDefinition platform_def("PlatConf/" + platform + ".plat");
-	Deploy(res_names, res_type, platform_def.device_caps, platform);
-
-	Context::Destroy();
+	PlatformDefinition platform_def(platform + ".plat");
+	Deploy(res_names, res_type, platform_def.device_caps, platform, dest_folder);
 
 	return 0;
 }

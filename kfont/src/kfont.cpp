@@ -30,13 +30,13 @@
 
 #include <KFL/KFL.hpp>
 #include <KFL/DllLoader.hpp>
-#include <KFL/Thread.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <mutex>
 
 #include <boost/assert.hpp>
 
@@ -70,7 +70,7 @@ namespace KlayGE
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<LZMALoader>();
+					instance_ = MakeUniquePtr<LZMALoader>();
 				}
 			}
 			return *instance_;
@@ -94,8 +94,8 @@ namespace KlayGE
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 			dll_loader_.Load(DLL_PREFIX "LZMA" DLL_SUFFIX);
 
-			lzma_compress_func_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
-			lzma_uncompress_func_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
+			lzma_compress_func_ = reinterpret_cast<LzmaCompressFunc>(dll_loader_.GetProcAddress("LzmaCompress"));
+			lzma_uncompress_func_ = reinterpret_cast<LzmaUncompressFunc>(dll_loader_.GetProcAddress("LzmaUncompress"));
 #else
 			lzma_compress_func_ = ::LzmaCompress;
 			lzma_uncompress_func_ = ::LzmaUncompress;
@@ -112,9 +112,11 @@ namespace KlayGE
 		LzmaCompressFunc lzma_compress_func_;
 		LzmaUncompressFunc lzma_uncompress_func_;
 
-		static std::shared_ptr<LZMALoader> instance_;
+		static std::unique_ptr<LZMALoader> instance_;
 	};
-	std::shared_ptr<LZMALoader> LZMALoader::instance_;
+	std::unique_ptr<LZMALoader> LZMALoader::instance_;
+
+	KFont::KFont() = default;
 
 	bool KFont::Load(std::string const & file_name)
 	{
@@ -265,24 +267,26 @@ namespace KlayGE
 
 			for (auto const & ci : temp_char_index)
 			{
-				int const index = ci.second;
+				uint32_t const index = static_cast<uint32_t>(ci.second);
 
-				int16_t tmp;
-				tmp = Native2LE(char_info_[index].top);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].left);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].width);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = Native2LE(char_info_[index].height);
-				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				int16_t itmp;
+				itmp = Native2LE(char_info_[index].top);
+				kfont_output.write(reinterpret_cast<char*>(&itmp), sizeof(itmp));
+				itmp = Native2LE(char_info_[index].left);
+				kfont_output.write(reinterpret_cast<char*>(&itmp), sizeof(itmp));
+				uint16_t utmp;
+				utmp = Native2LE(char_info_[index].width);
+				kfont_output.write(reinterpret_cast<char*>(&utmp), sizeof(utmp));
+				utmp = Native2LE(char_info_[index].height);
+				kfont_output.write(reinterpret_cast<char*>(&utmp), sizeof(utmp));
 			}
 
 			for (auto const & ci : temp_char_index)
 			{
-				uint32_t index = ci.second;
-				size_t addr = distances_addr_[index];
-				uint64_t len = distances_addr_[index + 1] - addr;
+				uint32_t const index = static_cast<uint32_t>(ci.second);
+
+				size_t const addr = distances_addr_[index];
+				uint64_t const len = distances_addr_[index + 1] - addr;
 				uint64_t len_le = Native2LE(len);
 				kfont_output.write(reinterpret_cast<char*>(&len_le), sizeof(len_le));
 				kfont_output.write(reinterpret_cast<char*>(&distances_lzma_[addr]),
@@ -341,17 +345,18 @@ namespace KlayGE
 
 	void KFont::GetDistanceData(uint8_t* p, uint32_t pitch, int32_t index) const
 	{
-		std::vector<uint8_t> decoded(char_size_ * char_size_);
+		size_t const decoded_size = char_size_ * char_size_;
+		auto decoded = MakeUniquePtr<uint8_t[]>(decoded_size);
 
 		uint32_t size;
 		this->GetLZMADistanceData(nullptr, size, index);
 
-		std::vector<uint8_t> in_data(size);
+		auto in_data = MakeUniquePtr<uint8_t[]>(size);
 		this->GetLZMADistanceData(&in_data[0], size, index);
 
-		SizeT s_out_len = static_cast<SizeT>(decoded.size());
+		SizeT s_out_len = decoded_size;
 
-		SizeT s_src_len = static_cast<SizeT>(in_data.size() - LZMA_PROPS_SIZE);
+		SizeT s_src_len = static_cast<SizeT>(size - LZMA_PROPS_SIZE);
 		LZMALoader::Instance().LzmaUncompress(static_cast<Byte*>(&decoded[0]), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
 			&in_data[0], LZMA_PROPS_SIZE);
 
@@ -416,7 +421,7 @@ namespace KlayGE
 		int32_t ci;
 		if (size > 0)
 		{
-			ci = static_cast<uint32_t>(distances_addr_.size() - 1);
+			ci = static_cast<int32_t>(distances_addr_.size() - 1);
 			uint32_t offset = static_cast<uint32_t>(distances_lzma_.size());
 			distances_addr_.back() = offset;
 			distances_addr_.push_back(offset + size);

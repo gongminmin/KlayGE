@@ -37,20 +37,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Sphere_T<T>::Sphere_T(Sphere_T<T> const & rhs) noexcept
-		: center_(rhs.center_),
-			radius_(rhs.radius_)
-	{
-	}
-
-	template <typename T>
-	Sphere_T<T>::Sphere_T(Sphere_T<T>&& rhs) noexcept
-		: center_(std::move(rhs.center_)),
-			radius_(std::move(rhs.radius_))
-	{
-	}
-
-	template <typename T>
 	Sphere_T<T>& Sphere_T<T>::operator+=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		this->Center() += rhs;
@@ -97,18 +83,6 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Sphere_T<T> const & Sphere_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
-	Sphere_T<T> const & Sphere_T<T>::operator-() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
 	bool Sphere_T<T>::IsEmpty() const noexcept
 	{
 		return MathLib::equal(radius_, 0.0f);
@@ -147,7 +121,7 @@ namespace KlayGE
 	template <typename T>
 	bool Sphere_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
-		return MathLib::intersect_sphere_frustum(*this, frustum) != BO_No;
+		return MathLib::intersect_sphere_frustum(*this, frustum) != BoundOverlap::No;
 	}
 
 	template <typename T>
@@ -155,7 +129,6 @@ namespace KlayGE
 	{
 		return (center_ == rhs.center_) && (radius_ == rhs.radius_);
 	}
-
 
 	template class Sphere_T<float>;
 }

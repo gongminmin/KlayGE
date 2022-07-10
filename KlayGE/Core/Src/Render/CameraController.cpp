@@ -24,7 +24,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <KFL/CXX20/format.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
@@ -34,11 +35,13 @@
 #include <KFL/Color.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KFL/Hash.hpp>
 
 #include <istream>
+#include <iterator>
 #include <string>
 
 #include <KlayGE/CameraController.hpp>
@@ -51,9 +54,7 @@ namespace KlayGE
 	{
 	}
 
-	CameraController::~CameraController()
-	{
-	}
+	CameraController::~CameraController() noexcept = default;
 
 	void CameraController::Scalers(float rotationScaler, float moveScaler)
 	{
@@ -100,7 +101,7 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(
+			input_handler->Connect(
 				[this](InputEngine const & ie, InputAction const & action)
 				{
 					this->InputHandler(ie, action);
@@ -217,10 +218,10 @@ namespace KlayGE
 			float3 movement(x, y, z);
 			movement *= moveScaler_;
 
-			float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(MathLib::translation(movement) * camera_node.TransformToParent());
 
-			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ForwardVec() * camera_->LookAtDist(),
-				camera_->UpVec());
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -249,7 +250,11 @@ namespace KlayGE
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec)));
+
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -268,7 +273,11 @@ namespace KlayGE
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
+			auto& camera_node = *camera_->BoundSceneNode();
+			camera_node.TransformToWorld(
+				MathLib::inverse(MathLib::look_at_lh(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec)));
+
+			camera_->DirtyTransforms();
 		}
 	}
 
@@ -293,7 +302,7 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(
+			input_handler->Connect(
 				[this](InputEngine const & ie, InputAction const & action)
 				{
 					this->InputHandler(ie, action);
@@ -386,7 +395,11 @@ namespace KlayGE
 		pos += offset;
 		target_ += offset;
 
-		camera_->ViewParams(pos, target_, camera_->UpVec());
+		camera_->LookAtDist(MathLib::length(target_ - pos));
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, target_, camera_->UpVec())));
+
+		camera_->DirtyTransforms();
 	}
 
 	void TrackballCameraController::Rotate(float offset_x, float offset_y)
@@ -414,7 +427,11 @@ namespace KlayGE
 		dir /= dist;
 		float3 up = MathLib::cross(dir, right_);
 
-		camera_->ViewParams(pos, pos + dir * dist, up);
+		camera_->LookAtDist(dist);
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(pos, pos + dir * dist, up)));
+
+		camera_->DirtyTransforms();
 	}
 
 	void TrackballCameraController::Zoom(float offset_x, float offset_y)
@@ -431,7 +448,11 @@ namespace KlayGE
 			reverse_target_ = false;
 		}
 
-		camera_->ViewParams(pos, pos + camera_->ForwardVec() * camera_->LookAtDist(), camera_->UpVec());
+		auto& camera_node = *camera_->BoundSceneNode();
+		camera_node.TransformToWorld(
+			MathLib::inverse(MathLib::look_at_lh(pos, pos + camera_->ForwardVec() * camera_->LookAtDist(), camera_->UpVec())));
+
+		camera_->DirtyTransforms();
 	}
 
 
@@ -448,10 +469,9 @@ namespace KlayGE
 	uint32_t CameraPathController::AddCurve(CameraPathController::InterpolateType type, uint32_t num_frames)
 	{
 		uint32_t curve_id = static_cast<uint32_t>(curves_.size());
-		CameraCurve curve;
+		auto& curve = curves_.emplace_back();
 		curve.type = type;
 		curve.num_frames = num_frames;
-		curves_.push_back(curve);
 		return curve_id;
 	}
 
@@ -616,16 +636,16 @@ namespace KlayGE
 		CameraController::AttachCamera(camera);
 
 		start_time_ = Context::Instance().AppInstance().AppTime();
-		camera.BindUpdateFunc(
-			[this](Camera& camera, float app_time, float elapsed_time)
+		connection_ = camera.OnMainThreadUpdate().Connect(
+			[this](SceneComponent& component, float app_time, float elapsed_time)
 			{
-				this->UpdateCameraFunc(camera, app_time, elapsed_time);
+				this->UpdateCameraFunc(checked_cast<Camera&>(component), app_time, elapsed_time);
 			});
 	}
 
 	void CameraPathController::DetachCamera()
 	{
-		camera_->BindUpdateFunc(std::function<void(Camera&, float, float)>());
+		camera_->OnMainThreadUpdate().Disconnect(connection_);
 
 		CameraController::DetachCamera();
 	}
@@ -667,7 +687,9 @@ namespace KlayGE
 							float3 up = MathLib::lerp(curve.up_ctrl_pts[j + 0],
 								curve.up_ctrl_pts[j + 1], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -692,7 +714,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -717,7 +741,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -742,7 +768,9 @@ namespace KlayGE
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
-							camera_->ViewParams(eye, target, up);
+							camera_->LookAtDist(MathLib::length(target - eye));
+							auto& camera_node = *camera_->BoundSceneNode();
+							camera_node.TransformToWorld(MathLib::inverse(MathLib::look_at_lh(eye, target, up)));
 
 							break;
 						}
@@ -760,25 +788,25 @@ namespace KlayGE
 				frame -= curve.num_frames;
 			}
 		}
+
+		camera_->DirtyTransforms();
 	}
 
-	CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res)
+	CameraPathControllerPtr LoadCameraPath(ResIdentifier& res)
 	{
 		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
 
-		XMLDocument doc;
-		XMLNodePtr root = doc.Parse(res);
+		std::unique_ptr<XMLDocument> doc = LoadXml(res);
+		XMLNode const* root = doc->RootNode();
 
-		XMLAttributePtr attr = root->Attrib("frame_rate");
-		if (attr)
+		if (XMLAttribute const* attr = root->Attrib("frame_rate"))
 		{
 			ret->FrameRate(attr->ValueUInt());
 		}
 
-		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
+		for (XMLNode const* curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
-			std::string_view const type_str = curve_node->Attrib("type")->ValueString();
-			size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
+			size_t const type_str_hash = HashValue(curve_node->Attrib("type")->ValueString());
 			CameraPathController::InterpolateType type;
 			if (CT_HASH("linear") == type_str_hash)
 			{
@@ -802,7 +830,7 @@ namespace KlayGE
 			}
 			uint32_t num_frames = curve_node->Attrib("num_frames")->ValueUInt();
 			uint32_t curve_id = ret->AddCurve(type, num_frames);
-			for (XMLNodePtr key_node = curve_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+			for (XMLNode const* key_node = curve_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 			{
 				float frame_id = key_node->Attrib("frame")->ValueFloat();
 
@@ -826,8 +854,7 @@ namespace KlayGE
 				}
 
 				bool corner;
-				attr = key_node->Attrib("corner");
-				if (attr)
+				if (XMLAttribute const* attr = key_node->Attrib("corner"))
 				{
 					corner = (attr->ValueInt() != 0);
 				}
@@ -846,14 +873,13 @@ namespace KlayGE
 	void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path)
 	{
 		XMLDocument doc;
-		XMLNodePtr root = doc.AllocNode(XNT_Element, "camera_path");
-		doc.RootNode(root);
+		auto root = doc.AllocNode(XMLNodeType::Element, "camera_path");
 
 		root->AppendAttrib(doc.AllocAttribUInt("frame_rate", path->FrameRate()));
 
 		for (uint32_t curve_id = 0; curve_id < path->NumCurves(); ++ curve_id)
 		{
-			XMLNodePtr curve_node = doc.AllocNode(XNT_Element, "curve");
+			auto curve_node = doc.AllocNode(XMLNodeType::Element, "curve");
 			std::string type_str;
 			CameraPathController::InterpolateType type = path->CurveType(curve_id);
 			switch (type)
@@ -882,38 +908,35 @@ namespace KlayGE
 
 			for (uint32_t key_id = 0; key_id < path->NumControlPoints(curve_id); ++ key_id)
 			{
-				XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
+				auto key_node = doc.AllocNode(XMLNodeType::Element, "key");
 
 				key_node->AppendAttrib(doc.AllocAttribFloat("frame", path->FrameID(curve_id, key_id)));
 
 				{
 					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string eye_str = std::to_string(eye_ctrl_pt.x())
-						+ ' ' + std::to_string(eye_ctrl_pt.y())
-						+ ' ' + std::to_string(eye_ctrl_pt.z());
+					std::string const eye_str = std::format("{} {} {}", eye_ctrl_pt.x(), eye_ctrl_pt.y(), eye_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("eye", eye_str));
 				}
 				{
 					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
-					std::string target_str = std::to_string(target_ctrl_pt.x())
-						+ ' ' + std::to_string(target_ctrl_pt.y())
-						+ ' ' + std::to_string(target_ctrl_pt.z());
+					std::string const target_str = std::format("{} {} {}", target_ctrl_pt.x(), target_ctrl_pt.y(), target_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("target", target_str));
 				}
 				{
 					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string up_str = std::to_string(up_ctrl_pt.x())
-						+ ' ' + std::to_string(up_ctrl_pt.y())
-						+ ' ' + std::to_string(up_ctrl_pt.z());
+					std::string const up_str = std::format("{} {} {}", up_ctrl_pt.x(), up_ctrl_pt.y(), up_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("up", up_str));
 				}
 
 				key_node->AppendAttrib(doc.AllocAttribUInt("corner", path->Corner(curve_id, key_id)));
 
-				curve_node->AppendNode(key_node);
+				curve_node->AppendNode(std::move(key_node));
 			}
-		}
 
-		doc.Print(os);
+			root->AppendNode(std::move(curve_node));
+		}
+		doc.RootNode(std::move(root));
+
+		SaveXml(doc, os);
 	}
 }

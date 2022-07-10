@@ -36,16 +36,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Thread.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#include <al.h>
-#include <alc.h>
-#elif (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#else
 #include <AL/al.h>
 #include <AL/alc.h>
-#endif
 
 #include <vector>
 
@@ -57,7 +49,7 @@ namespace KlayGE
 	float3 VecToALVec(float3 const & v);
 	float3 ALVecToVec(float3 const & v);
 
-	class OALSoundBuffer : public SoundBuffer
+	class OALSoundBuffer final : public SoundBuffer
 	{
 	public:
 		OALSoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
@@ -90,7 +82,7 @@ namespace KlayGE
 		float3 dir_;
 	};
 
-	class OALMusicBuffer : public MusicBuffer
+	class OALMusicBuffer final : public MusicBuffer
 	{
 	public:
 		OALMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
@@ -124,10 +116,10 @@ namespace KlayGE
 		bool stopped_;
 		std::condition_variable play_cond_;
 		std::mutex play_mutex_;
-		joiner<void> play_thread_;
+		std::future<void> play_thread_;
 	};
 
-	class OALAudioEngine : public AudioEngine
+	class OALAudioEngine final : public AudioEngine
 	{
 	public:
 		OALAudioEngine();

@@ -27,18 +27,18 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr sky_box_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::LightSourcePtr point_light_;
-	KlayGE::SceneObjectPtr point_light_src_;
+	KlayGE::SceneNodePtr point_light_node_;
 	KlayGE::LightSourcePtr sphere_area_light_;
-	KlayGE::SceneObjectPtr sphere_area_light_src_;
+	KlayGE::SceneNodePtr sphere_area_light_node_;
+	KlayGE::SceneNodePtr sphere_area_light_proxy_node_;
 	KlayGE::LightSourcePtr tube_area_light_;
-	KlayGE::SceneObjectPtr tube_area_light_src_;
+	KlayGE::SceneNodePtr tube_area_light_node_;
+	KlayGE::SceneNodePtr tube_area_light_proxy_node_;
 
 	KlayGE::UIDialogPtr dialog_;
 

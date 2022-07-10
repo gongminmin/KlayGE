@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 
@@ -47,9 +48,7 @@
 
 namespace KlayGE
 {
-	D3D12RenderFactory::D3D12RenderFactory()
-	{
-	}
+	D3D12RenderFactory::D3D12RenderFactory() = default;
 
 	std::wstring const & D3D12RenderFactory::Name() const
 	{
@@ -89,24 +88,21 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
-		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, fmt);
+		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint, size_in_byte, structure_byte_stride);
 	}
 
 	QueryPtr D3D12RenderFactory::MakeOcclusionQuery()
@@ -134,119 +130,189 @@ namespace KlayGE
 		return MakeSharedPtr<D3D12Fence>();
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	ShaderResourceViewPtr D3D12RenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
 	{
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12TextureShaderResourceView>(texture, pf, first_array_index, array_size, first_level, num_levels);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	ShaderResourceViewPtr D3D12RenderFactory::MakeTexture2DSrv(
+		TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
 	{
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12TextureShaderResourceView>(texture, pf, array_index, face, first_level, num_levels);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	ShaderResourceViewPtr D3D12RenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
 	{
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(texture, array_index, face, level);
+		return MakeSharedPtr<D3D12BufferShaderResourceView>(gbuffer, pf, first_elem, num_elems);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make2DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	RenderTargetViewPtr D3D12RenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return this->Make3DRenderView(texture, array_index, slice, 1, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeRenderTargetView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D12RenderFactory::MakeCubeRenderView(Texture& texture, int array_index, int level)
+	RenderTargetViewPtr D3D12RenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
+	{
+		return MakeSharedPtr<D3D12Texture1D2DCubeRenderTargetView>(texture, pf, first_array_index, array_size, level);
+	}
+
+	RenderTargetViewPtr D3D12RenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+	{
+		return MakeSharedPtr<D3D12TextureCubeFaceRenderTargetView>(texture, pf, array_index, face, level);
+	}
+
+	RenderTargetViewPtr D3D12RenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
+	{
+		return this->Make3DRtv(texture, pf, array_index, slice, 1, level);
+	}
+
+	RenderTargetViewPtr D3D12RenderFactory::Make3DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level)
+	{
+		return MakeSharedPtr<D3D12Texture3DRenderTargetView>(texture, pf, array_index, first_slice, num_slices, level);
+	}
+
+	RenderTargetViewPtr D3D12RenderFactory::MakeCubeRtv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
 	{
 		int array_size = 1;
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(texture, array_index, array_size, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeRenderTargetView>(texture, pf, array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make3DRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	RenderTargetViewPtr D3D12RenderFactory::MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
 	{
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(texture, array_index, first_slice, num_slices, level);
+		return MakeSharedPtr<D3D12BufferRenderTargetView>(gbuffer, pf, first_elem, num_elems);
 	}
 
-	RenderViewPtr D3D12RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer,
-		uint32_t width, uint32_t height, ElementFormat pf)
-	{
-		return MakeSharedPtr<D3D12RenderTargetRenderView>(gbuffer, width, height, pf);
-	}
-
-	RenderViewPtr D3D12RenderFactory::Make2DDepthStencilRenderView(uint32_t width, uint32_t height,
+	DepthStencilViewPtr D3D12RenderFactory::Make2DDsv(uint32_t width, uint32_t height,
 		ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 	{
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
+		return MakeSharedPtr<D3D12Texture1D2DCubeDepthStencilView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr D3D12RenderFactory::Make1DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeDepthStencilView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr D3D12RenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, first_array_index, array_size, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeDepthStencilView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D12RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	DepthStencilViewPtr D3D12RenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
 	{
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, array_index, face, level);
+		return MakeSharedPtr<D3D12TextureCubeFaceDepthStencilView>(texture, pf, array_index, face, level);
 	}
 	
-	RenderViewPtr D3D12RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	DepthStencilViewPtr D3D12RenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
 	{
-		return this->Make3DDepthStencilRenderView(texture, array_index, slice, 1, level);
-	}
-
-	RenderViewPtr D3D12RenderFactory::MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level)
-	{
-		int array_size = 1;
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, array_index, array_size, level);
+		return this->Make3DDsv(texture, pf, array_index, slice, 1, level);
 	}
 	
-	RenderViewPtr D3D12RenderFactory::Make3DDepthStencilRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	DepthStencilViewPtr D3D12RenderFactory::Make3DDsv(TexturePtr const & texture, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
 	{
-		return MakeSharedPtr<D3D12DepthStencilRenderView>(texture, array_index, first_slice, num_slices, level);
+		return MakeSharedPtr<D3D12Texture3DDepthStencilView>(texture, pf, array_index, first_slice, num_slices, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
-	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, first_array_index, array_size, level);
-	}
-
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
-	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, first_array_index, array_size, level);
-	}
-
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
-	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, face, level);
-	}
-
-	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level)
-	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, slice, level);
-	}
-
-	UnorderedAccessViewPtr D3D12RenderFactory::MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level)
+	DepthStencilViewPtr D3D12RenderFactory::MakeCubeDsv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
 	{
 		int array_size = 1;
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, array_size, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeDepthStencilView>(texture, pf, array_index, array_size, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make1DUav(TexturePtr const & texture, ElementFormat pf,
+		int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(texture, array_index, first_slice, num_slices, level);
+		return MakeSharedPtr<D3D12Texture1D2DCubeUnorderedAccessView>(texture, pf, first_array_index, array_size, level);
 	}
 
-	UnorderedAccessViewPtr D3D12RenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf)
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf,
+		int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D12UnorderedAccessView>(gbuffer, pf);
+		return MakeSharedPtr<D3D12Texture1D2DCubeUnorderedAccessView>(texture, pf, first_array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
+	{
+		return MakeSharedPtr<D3D12TextureCubeFaceUnorderedAccessView>(texture, pf, array_index, face, level);
+	}
+
+	UnorderedAccessViewPtr D3D12RenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf, int array_index,
+		uint32_t slice, int level)
+	{
+		return this->Make3DUav(texture, pf, array_index, slice, 1, level);
+	}
+
+	UnorderedAccessViewPtr D3D12RenderFactory::Make3DUav(TexturePtr const & texture, ElementFormat pf, int array_index,
+		uint32_t first_slice, uint32_t num_slices, int level)
+	{
+		return MakeSharedPtr<D3D12Texture3DUnorderedAccessView>(texture, pf, array_index, first_slice, num_slices, level);
+	}
+
+	UnorderedAccessViewPtr D3D12RenderFactory::MakeCubeUav(TexturePtr const & texture, ElementFormat pf, int array_index,
+		int level)
+	{
+		int array_size = 1;
+		return MakeSharedPtr<D3D12Texture1D2DCubeUnorderedAccessView>(texture, pf, array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr D3D12RenderFactory::MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
+	{
+		return MakeSharedPtr<D3D12BufferUnorderedAccessView>(gbuffer, pf, first_elem, num_elems);
 	}
 
 	ShaderObjectPtr D3D12RenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<D3D12ShaderObject>();
+	}
+
+	ShaderStageObjectPtr D3D12RenderFactory::MakeShaderStageObject(ShaderStage stage)
+	{
+		ShaderStageObjectPtr ret;
+		switch (stage)
+		{
+		case ShaderStage::Vertex:
+			ret = MakeSharedPtr<D3D12VertexShaderStageObject>();
+			break;
+
+		case ShaderStage::Pixel:
+			ret = MakeSharedPtr<D3D12PixelShaderStageObject>();
+			break;
+
+		case ShaderStage::Geometry:
+			ret = MakeSharedPtr<D3D12GeometryShaderStageObject>();
+			break;
+
+		case ShaderStage::Compute:
+			ret = MakeSharedPtr<D3D12ComputeShaderStageObject>();
+			break;
+
+		case ShaderStage::Hull:
+			ret = MakeSharedPtr<D3D12HullShaderStageObject>();
+			break;
+
+		case ShaderStage::Domain:
+			ret = MakeSharedPtr<D3D12DomainShaderStageObject>();
+			break;
+
+		default:
+			KFL_UNREACHABLE("Invalid shader stage");
+		}
+		return ret;
 	}
 
 	std::unique_ptr<RenderEngine> D3D12RenderFactory::DoMakeRenderEngine()

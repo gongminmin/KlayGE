@@ -97,46 +97,9 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
-	<shader>
-		<![CDATA[
-void ClusteredDRLightingMaskVS(float4 pos : POSITION,
-			out float4 oPos : SV_Position)
-{
-	oPos = pos;
-}
-
-float4 ClusteredDRLightingMaskPS(uint sample_index : SV_SampleIndex) : SV_Target
-{
-	return 1;
-}
-		]]>
-	</shader>
-
-	<technique name="ClusteredDRLightingMask">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="keep"/>
-			<state name="front_stencil_read_mask" value="144"/> <!--128 is no lighting, 16 is transparent-->
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="equal"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="keep"/>
-			<state name="back_stencil_read_mask" value="144"/>
-
-			<state name="vertex_shader" value="ClusteredDRLightingMaskVS()"/>
-			<state name="pixel_shader" value="ClusteredDRLightingMaskPS()"/>
-		</pass>
-	</technique>
-
 	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_rt2_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_ds_tex_ms"/>
 	<parameter type="texture2DMS" name="g_buffer_depth_tex_ms"/>
 
@@ -145,8 +108,9 @@ float4 ClusteredDRLightingMaskPS(uint sample_index : SV_SampleIndex) : SV_Target
 void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 		out float4 out_rt0 : SV_Target0,
 		out float4 out_rt1 : SV_Target1,
-		out float out_depth : SV_Target2,
-		out float out_multi_sample_mark : SV_Target3)
+		out float4 out_rt2 : SV_Target2,
+		out float out_depth : SV_Target3,
+		out float out_multi_sample_mark : SV_Target4)
 {
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
@@ -184,11 +148,13 @@ void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 	
 	out_rt0 = g_buffer_rt0_tex_ms.Load(coord, min_index);
 	out_rt1 = g_buffer_rt1_tex_ms.Load(coord, min_index);
+	out_rt2 = g_buffer_rt2_tex_ms.Load(coord, min_index);
 	out_depth = non_linear_depth_to_linear(g_buffer_ds_tex_ms.Load(coord, min_index).x, near_q_far.x, near_q_far.y);
 	out_multi_sample_mark = is_multi_sample;
 #else
 	out_rt0 = 0;
 	out_rt1 = 0,
+	out_rt2 = 0,
 	out_depth = 0;
 	out_multi_sample_mark = 0;
 #endif
@@ -266,8 +232,8 @@ float ResolveMergedDepthPS(float2 texcoord : TEXCOORD0) : SV_Target
 		<parameter type="float4" name="lights_radius_extend" array_size="LIGHT_BATCH"/>
 		<parameter type="uint" name="lights_type" array_size="12"/>
 	</cbuffer>
-	<parameter type="texture2D" name="lighting_mask_tex"/>
-	<parameter type="texture2DMS" name="lighting_mask_tex_ms"/>
+	<parameter type="texture2D" elem_type="uint2" name="g_buffer_stencil_tex"/>
+	<parameter type="texture2DMS" elem_type="uint2" name="g_buffer_stencil_tex_ms"/>
 	<parameter type="texture2D" name="shading_in_tex"/>
 	<parameter type="texture2DMS" name="shading_in_tex_ms"/>
 	<parameter type="texture2D" name="multi_sample_mask_tex"/>
@@ -526,7 +492,7 @@ void ScanIntersectedLight(uint GI)
 		intersected_lights_sh[index] |= num;
 
 		sum = num_intersected_lights_sh;
-		AllMemoryBarrierWithGroupSync();
+		GroupMemoryBarrierWithGroupSync();
 	}
 }
 
@@ -540,11 +506,11 @@ void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
 		num_intersected_lights_sh = 0;
 
 		float2 tile_min_max = min_max_depth_tex.Load(uint3(gid.xy, 0)).xy;
-		float2 min_max = float2(max(depth_slices[gid.z], tile_min_max.x), min(depth_slices[gid.z + 1], tile_min_max.y));
-		empty_frustum_sh = (min_max.x >= min_max.y);
+		empty_frustum_sh = (tile_min_max.x > depth_slices[gid.z + 1]) || (tile_min_max.y <= depth_slices[gid.z]);
 		[branch]
 		if (!empty_frustum_sh)
 		{
+			float2 min_max = float2(max(depth_slices[gid.z], tile_min_max.x), min(depth_slices[gid.z + 1], tile_min_max.y));
 			CalcTileViewFrustum(gid.xy, min_max, planes_sh);
 		}
 	}
@@ -615,6 +581,20 @@ uint CalcDepthSlice(float depth)
 		max(1, uint((log(depth) - depth_slices_shading.y) / depth_slices_shading.z * NUM_DEPTH_SLICES));
 }
 
+bool LightingMask(uint2 coord, uint sample_index)
+{
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT	
+	uint stecnil = g_buffer_stencil_tex_ms.Load(coord, sample_index).y;
+#else
+	uint stecnil = g_buffer_stencil_tex.Load(int3(coord, 0)).y;
+#endif
+
+	const uint TRANSPARENT_FLAG = 16;
+	const uint NO_LIGHT_FLAG = 128;
+
+	return ((stecnil & (TRANSPARENT_FLAG | NO_LIGHT_FLAG)) == 0);
+}
+
 groupshared uint intersected_light_indices_sh[NUM_DEPTH_SLICES][LIGHT_BATCH / 2];
 groupshared	uint light_start_sh[NUM_DEPTH_SLICES][8];
 
@@ -622,21 +602,19 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 {
 	float4 shading;
 	[branch]
-#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
-	if (lighting_mask_tex_ms.Load(coord.xy, sample_index).x > 0)
-#else
-	if (lighting_mask_tex.Load(coord).x > 0)
-#endif
+	if (LightingMask(coord.xy, sample_index))
 	{
 		float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		float4 rt0 = g_buffer_rt0_tex_ms.Load(coord.xy, sample_index);
 		float4 rt1 = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
+		float4 rt2 = g_buffer_rt2_tex_ms.Load(coord.xy, sample_index);
 		float depth = g_buffer_depth_tex_ms.Load(coord.xy, sample_index).x;
 #else
 		float4 rt0 = g_buffer_rt0_tex.Load(coord);
 		float4 rt1 = g_buffer_rt1_tex.Load(coord);
+		float4 rt2 = g_buffer_rt2_tex.Load(coord);
 		float depth = depth_tex.Load(coord).x;
 #endif
 		float3 view_dir = -normalize(texcoord_to_view(tc));
@@ -646,6 +624,7 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 		float3 pos_es = view_dir * (depth / view_dir.z);
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
+		float occlusion = GetOcclusion(rt2);
 
 		tile_id.z = CalcDepthSlice(pos_es.z);
 
@@ -745,6 +724,8 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 		{
 			shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
 		}
+		
+		shading *= float4(occlusion.xxx, 1);
 	}
 	else
 	{
@@ -847,7 +828,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	<parameter type="rw_texture2D" elem_type="unorm float4" name="shadowing_rw_tex"/>
 	<cbuffer name="light_batch3">
 		<parameter type="float4x4" name="lights_view_proj" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
-		<parameter type="int" name="filtered_sms_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
+		<parameter type="int" name="filtered_shadow_maps_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 		<parameter type="float" name="esms_scale_factor" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 	</cbuffer>
 
@@ -866,11 +847,11 @@ static const uint LT_TubeArea = 5;
 bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_index,
 	out bool write_projective, out float4 projective_shadowing, out float4 shadowing)
 {
+	bool lighting_mask = LightingMask(coord.xy * 2, sample_index);
+
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
-	float lighting_mask = lighting_mask_tex_ms.Load(coord.xy * 2, sample_index).x;
 	float depth = g_buffer_depth_tex_ms.Load(coord.xy * 2, sample_index).x;
 #else
-	float lighting_mask = lighting_mask_tex.Load(coord * 2).x;
 	float depth = depth_tex.Load(coord * 2).x;
 #endif
 
@@ -927,7 +908,7 @@ bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_inde
 	shadowing = 1;
 
 	[branch]
-	if (all(coord.xy < width_height) && (lighting_mask > 0))
+	if (all(coord.xy < width_height) && lighting_mask)
 	{
 		for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
 		{
@@ -949,7 +930,7 @@ bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_inde
 					light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
 					float len = length(lights_pos_es[i].xyz - pos_es);
 					new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-						filtered_sms_2d_light_index[i], esms_scale_factor[i]);
+						filtered_shadow_maps_2d_light_index[i], esms_scale_factor[i]);
 				}
 				else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
 				{

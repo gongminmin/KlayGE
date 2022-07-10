@@ -28,42 +28,37 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KLAYGE_BLITTER_HPP
-#define _KLAYGE_BLITTER_HPP
+#ifndef KLAYGE_CORE_BLITTER_HPP
+#define KLAYGE_CORE_BLITTER_HPP
 
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Blitter : boost::noncopyable
+	class KLAYGE_CORE_API Blitter final : boost::noncopyable
 	{
 	public:
 		Blitter();
 
-		void Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
-			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-			bool linear);
-		void Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
-			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			bool linear);
-		void Blit(TexturePtr const & dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level,
-			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			TexturePtr const & src, uint32_t src_array_index, Texture::CubeFaces src_face, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-			bool linear);
+		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level,
+			float src_x_offset, float src_y_offset, float src_width, float src_height, TextureFilter filter);
+		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, TexturePtr const& src,
+			uint32_t src_array_index, uint32_t src_level, float src_x_offset, float src_y_offset, float src_z_offset, float src_width,
+			float src_height, float src_depth, TextureFilter filter);
+		void Blit(TexturePtr const& dst, uint32_t dst_array_index, Texture::CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset,
+			uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, TexturePtr const& src, uint32_t src_array_index,
+			Texture::CubeFaces src_face, uint32_t src_level, float src_x_offset, float src_y_offset, float src_width, float src_height,
+			TextureFilter filter);
 
-		void Blit(GraphicsBufferPtr const & dst, uint32_t dst_x_offset,
-			TexturePtr const & src, uint32_t src_array_index, uint32_t src_level,
-			uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
-		void Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
-			uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			GraphicsBufferPtr const & src, uint32_t src_x_offset, ElementFormat src_fmt);
+		void Blit(GraphicsBufferPtr const& dst, uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index, uint32_t src_level,
+			float src_x_offset, float src_y_offset, uint32_t src_width, uint32_t src_height);
+		void Blit(TexturePtr const& dst, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height, GraphicsBufferPtr const& src, uint32_t src_x_offset, ElementFormat src_fmt);
 
 	private:
 		RenderLayoutPtr quad_rl_;
@@ -92,6 +87,6 @@ namespace KlayGE
 		RenderEffectParameter* dst_scale_param_;
 		RenderEffectParameter* dst_width_height_param_;
 	};
-}
+} // namespace KlayGE
 
-#endif		// _KLAYGE_BLITTER_HPP
+#endif // KLAYGE_CORE_BLITTER_HPP

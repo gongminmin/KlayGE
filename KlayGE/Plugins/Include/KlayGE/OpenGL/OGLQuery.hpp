@@ -19,62 +19,62 @@
 
 namespace KlayGE
 {
-	class OGLOcclusionQuery : public OcclusionQuery
+	class OGLOcclusionQuery final : public OcclusionQuery
 	{
 	public:
 		OGLOcclusionQuery();
-		~OGLOcclusionQuery();
+		~OGLOcclusionQuery() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		uint64_t SamplesPassed();
+		uint64_t SamplesPassed() override;
 
 	private:
 		GLuint query_;
 	};
 
-	class OGLConditionalRender : public ConditionalRender
+	class OGLConditionalRender final : public ConditionalRender
 	{
 	public:
 		OGLConditionalRender();
-		~OGLConditionalRender();
+		~OGLConditionalRender() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		void BeginConditionalRender();
-		void EndConditionalRender();
+		void BeginConditionalRender() override;
+		void EndConditionalRender() override;
 
-		bool AnySamplesPassed();
+		bool AnySamplesPassed() override;
 
 	private:
 		GLuint query_;
 	};
 
-	class OGLTimerQuery : public TimerQuery
+	class OGLTimerQuery final : public TimerQuery
 	{
 	public:
 		OGLTimerQuery();
-		~OGLTimerQuery();
+		~OGLTimerQuery() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
-		double TimeElapsed();
+		double TimeElapsed() override;
 
 	private:
 		GLuint query_;
 	};
 
-	class OGLSOStatisticsQuery : public SOStatisticsQuery
+	class OGLSOStatisticsQuery final : public SOStatisticsQuery
 	{
 	public:
 		OGLSOStatisticsQuery();
-		~OGLSOStatisticsQuery();
+		~OGLSOStatisticsQuery() override;
 
-		void Begin();
-		void End();
+		void Begin() override;
+		void End() override;
 
 		uint64_t NumPrimitivesWritten() override;
 		uint64_t PrimitivesGenerated() override;

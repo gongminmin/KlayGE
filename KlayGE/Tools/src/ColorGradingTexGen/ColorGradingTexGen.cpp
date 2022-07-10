@@ -7,6 +7,8 @@
 #include <fstream>
 #include <vector>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 
 namespace
@@ -102,6 +104,8 @@ int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
 
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	if (argc < 3)
 	{
 		cout << "Usage: ColorGradingTexGen options xxx.dds yyy.dds" << endl;
@@ -119,8 +123,6 @@ int main(int argc, char* argv[])
 		convert_flatten_to_vol(argv[2], argv[3]);
 		cout << "Color grading 3D texture is saved to " << argv[2] << endl;
 	}
-
-	Context::Destroy();
 
 	return 0;
 }

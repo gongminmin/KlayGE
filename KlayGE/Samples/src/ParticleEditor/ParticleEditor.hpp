@@ -49,7 +49,7 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr terrain_;
+	KlayGE::SceneNodePtr terrain_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
 

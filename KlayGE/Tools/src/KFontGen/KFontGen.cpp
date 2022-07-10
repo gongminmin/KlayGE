@@ -1,4 +1,35 @@
+/**
+ * @file KFontGen.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KFL/Math.hpp>
@@ -16,14 +47,10 @@
 #include <cstring>
 #include <atomic>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <cxxopts.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -117,11 +144,11 @@ public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t internal_char_size, uint32_t char_size,
 		uint32_t const * validate_chars, font_info* char_info, float* char_dist_data,
 		int32_t& cur_num_char, std::atomic<int32_t>& cur_package, uint32_t num_chars,
-		float& min_value, float& max_value, uint32_t thread_id, uint32_t num_threads, uint32_t num_chars_per_package)
+		float& min_value, float& max_value, uint32_t num_chars_per_package)
 		: ft_lib_(ft_lib), ft_face_(ft_face), internal_char_size_(internal_char_size), char_size_(char_size),
 			validate_chars_(validate_chars), char_info_(char_info), char_dist_data_(char_dist_data),
 			cur_num_char_(&cur_num_char), cur_package_(&cur_package), num_chars_(num_chars),
-			thread_id_(thread_id), num_threads_(num_threads), num_chars_per_package_(num_chars_per_package),
+			num_chars_per_package_(num_chars_per_package),
 			min_value_(&min_value), max_value_(&max_value)
 	{
 	}
@@ -257,8 +284,6 @@ private:
 	int32_t* cur_num_char_;
 	std::atomic<int32_t>* cur_package_;
 	uint32_t num_chars_;
-	uint32_t thread_id_;
-	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
 	float* min_value_;
@@ -270,13 +295,13 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 						int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code,
 						uint32_t internal_char_size, uint32_t char_size)
 {
-	thread_pool tp(1, num_threads);
+	ThreadPool tp(1, num_threads);
 
 	std::vector<int32_t> cur_num_char(num_threads, 0);
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
-	std::vector<joiner<void>> joiners(num_threads);
+	std::vector<std::future<void>> joiners(num_threads);
 
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -308,11 +333,10 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		std::atomic<int32_t> cur_package(0);
 		for (int i = 0; i < num_threads; ++ i)
 		{
-			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
+			joiners[i] = tp.QueueThread(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
 				&validate_chars[0], &char_info[0], &char_dist_data[0], cur_num_char[i],
 				cur_package, static_cast<uint32_t>(validate_chars.size()),
-				std::ref(min_values[i]), std::ref(max_values[i]),
-				i, num_threads, 64));
+				std::ref(min_values[i]), std::ref(max_values[i]), 64));
 		}
 	
 		Timer timer;
@@ -353,7 +377,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		min_value = 1;
 		for (int i = 0; i < num_threads; ++ i)
 		{
-			joiners[i]();
+			joiners[i].wait();
 
 			min_value = std::min(min_value, min_values[i]);
 			max_value = std::max(max_value, max_values[i]);
@@ -411,7 +435,7 @@ void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, quantizer_char
 			mse += d * d;
 		}
 
-		lzma_enc.Encode(char_lzma_dist, &uint8_dist[0], uint8_dist.size());
+		lzma_enc.Encode(char_lzma_dist, uint8_dist);
 		uint64_t len = static_cast<uint64_t>(char_lzma_dist.size());
 
 		lzma_dist.insert(lzma_dist.end(), reinterpret_cast<uint8_t*>(&len), reinterpret_cast<uint8_t*>(&len + 1));
@@ -425,9 +449,9 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 				uint32_t char_size_sq, float min_value, float max_value,
 				int16_t& base, int16_t& scale)
 {
-	thread_pool tp(1, num_threads);
+	ThreadPool tp(1, num_threads);
 
-	std::vector<joiner<void>> joiners(num_threads);
+	std::vector<std::future<void>> joiners(num_threads);
 
 	float fscale = max_value - min_value;
 	base = static_cast<int16_t>(min_value * 32768 + 0.5f);
@@ -456,13 +480,13 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		param.char_size_sq = char_size_sq;
 		param.s = s;
 		param.e = e;
-		joiners[i] = tp([&lzma_dists, &mses, param, i] { quantizer_chars(lzma_dists[i], mses[i], param); });
+		joiners[i] = tp.QueueThread([&lzma_dists, &mses, param, i] { quantizer_chars(lzma_dists[i], mses[i], param); });
 	}
 
 	float mse = 0;
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i]();
+		joiners[i].wait();
 
 		mse += mses[i];
 		lzma_dist.insert(lzma_dist.end(), lzma_dists[i].begin(), lzma_dists[i].end());
@@ -480,32 +504,33 @@ int main(int argc, char* argv[])
 	header.non_empty_chars = 0;
 	header.char_size = 32;
 
-	std::string ttf_name;
-	std::string kfont_name;
+	FILESYSTEM_NS::path ttf_name;
+	FILESYSTEM_NS::path kfont_name;
 	int start_code;
 	int end_code;
 	int num_threads;
 
-	CPUInfo cpu;
+	CpuInfo cpu;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
-		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Default is input-name.kfont.")
-		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code. Default is 0.")
-		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65535), "End code. Default is 65535.")
-		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size. Default is 32.")
-		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads. Default is the number of CPU threads.")
-		("version,v", "Version.");
+	cxxopts::Options options("KFontGen", "KlayGE Font Generator");
+	// clang-format off
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-name", "Input font name.", cxxopts::value<std::string>())
+		("O,output-name", "Output file name. (default: input-name.kfont)", cxxopts::value<std::string>())
+		("S,start-code", "Start code. Default is 0.", cxxopts::value<int>(start_code)->default_value("0"))
+		("E,end-code", "End code.", cxxopts::value<int>(end_code)->default_value("65535"))
+		("C,char-size", "Character size.", cxxopts::value<uint32_t>(header.char_size)->default_value("32"))
+		("T,threads", "Number of Threads. (default: The number of CPU threads)", cxxopts::value<int>(num_threads))
+		("V,version", "Version.");
+	// clang-format on
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -520,6 +545,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Input font name was not set." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("output-name") > 0)
@@ -528,7 +554,25 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
+		kfont_name = ttf_name;
+		kfont_name.replace_extension(".kfont");
+	}
+
+	if (vm.count("start-code") == 0)
+	{
+		start_code = 0;
+	}
+	if (vm.count("end-code") == 0)
+	{
+		end_code = 65535;
+	}
+	if (vm.count("char-size") == 0)
+	{
+		header.char_size = 32;
+	}
+	if (vm.count("threads") == 0)
+	{
+		num_threads = cpu.NumHWThreads();
 	}
 
 	std::vector<std::pair<int32_t, int32_t>> char_index;
@@ -542,7 +586,7 @@ int main(int argc, char* argv[])
 		}
 
 		KFont kfont_input;
-		if (kfont_input.Load(kfont_name))
+		if (kfont_input.Load(kfont_name.string()))
 		{
 			if (kfont_input.CharSize() == header.char_size)
 			{
@@ -598,7 +642,7 @@ int main(int argc, char* argv[])
 
 	std::vector<uint8_t> ttf;
 	{
-		std::ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
+		std::ifstream ttf_input(ttf_name.string(), ios_base::binary);
 		if (ttf_input)
 		{
 			ttf_input.seekg(0, ios_base::end);
@@ -742,6 +786,6 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		kfont_output.Save(kfont_name);
+		kfont_output.Save(kfont_name.string());
 	}
 }

@@ -32,46 +32,43 @@
 
 namespace KlayGE
 {
-	class OGLGraphicsBuffer : public GraphicsBuffer
+	class OGLGraphicsBuffer final : public GraphicsBuffer
 	{
 	public:
 		explicit OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
-			uint32_t size_in_byte, ElementFormat fmt);
-		~OGLGraphicsBuffer();
+			uint32_t size_in_byte, uint32_t structure_byte_stride);
+		~OGLGraphicsBuffer() override;
 
 		void CopyToBuffer(GraphicsBuffer& target) override;
 		void CopyToSubBuffer(GraphicsBuffer& target,
 			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
 
-		virtual void CreateHWResource(void const * init_data) override;
-		virtual void DeleteHWResource() override;
+		void CreateHWResource(void const * init_data) override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
 
 		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
 
 		void Active(bool force);
 
-		GLuint GLvbo() const
+		GLuint GLvbo() const noexcept
 		{
 			return vb_;
 		}
-		GLuint GLtex() const
-		{
-			return tex_;
-		}
-		GLenum GLType() const
+		GLuint RetrieveGLTexture(ElementFormat fmt);
+		GLenum GLType() const noexcept
 		{
 			return target_;
 		}
 
 	private:
-		void* Map(BufferAccess ba);
-		void Unmap();
+		void* Map(BufferAccess ba) override;
+		void Unmap() override;
 
 	private:
 		GLuint vb_;
-		GLuint tex_;
+		GLuint tex_{0};
 		GLenum target_;
-		ElementFormat fmt_as_shader_res_;
 	};
 }
 

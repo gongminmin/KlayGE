@@ -92,8 +92,8 @@ namespace
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 			dll_loader_.Load(DLL_PREFIX "LZMA" DLL_SUFFIX);
 
-			lzma_compress_func_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
-			lzma_uncompress_func_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
+			lzma_compress_func_ = reinterpret_cast<LzmaCompressFunc>(dll_loader_.GetProcAddress("LzmaCompress"));
+			lzma_uncompress_func_ = reinterpret_cast<LzmaUncompressFunc>(dll_loader_.GetProcAddress("LzmaUncompress"));
 #else
 			lzma_compress_func_ = ::LzmaCompress;
 			lzma_uncompress_func_ = ::LzmaUncompress;
@@ -117,70 +117,66 @@ namespace
 
 namespace KlayGE
 {
-	LZMACodec::LZMACodec()
-	{
-	}
-
-	LZMACodec::~LZMACodec()
-	{
-	}
+	LZMACodec::LZMACodec() noexcept = default;
+	LZMACodec::~LZMACodec() noexcept = default;
 
 	uint64_t LZMACodec::Encode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len)
 	{
-		std::vector<uint8_t> input(static_cast<size_t>(len));
-		is->read(&input[0], static_cast<size_t>(len));
+		auto input = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
+		is->read(input.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Encode(output, &input[0], len);
+		this->Encode(output, MakeSpan(input.get(), static_cast<size_t>(len)));
 		os.write(reinterpret_cast<char*>(&output[0]), output.size() * sizeof(output[0]));
 
 		return output.size();
 	}
 
-	uint64_t LZMACodec::Encode(std::ostream& os, void const * input, uint64_t len)
+	uint64_t LZMACodec::Encode(std::ostream& os, std::span<uint8_t const> input)
 	{
 		std::vector<uint8_t> output;
-		this->Encode(output, input, len);
+		this->Encode(output, input);
 		os.write(reinterpret_cast<char*>(&output[0]), output.size() * sizeof(output[0]));
 		return output.size();
 	}
 
 	void LZMACodec::Encode(std::vector<uint8_t>& output, ResIdentifierPtr const & is, uint64_t len)
 	{
-		std::vector<uint8_t> input(static_cast<size_t>(len));
-		is->read(&input[0], static_cast<size_t>(len));
+		auto input = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
+		is->read(input.get(), static_cast<size_t>(len));
 
-		this->Encode(output, &input[0], len);
+		this->Encode(output, MakeSpan(input.get(), static_cast<size_t>(len)));
 	}
 
-	void LZMACodec::Encode(std::vector<uint8_t>& output, void const * input, uint64_t len)
+	void LZMACodec::Encode(std::vector<uint8_t>& output, std::span<uint8_t const> input)
 	{
-		SizeT out_len = static_cast<SizeT>(std::max(len * 11 / 10, static_cast<uint64_t>(32)));
+		SizeT out_len = static_cast<SizeT>(std::max(input.size() * 11 / 10, static_cast<typename std::span<uint8_t const>::size_type>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
-		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(input), static_cast<SizeT>(len),
-			&output[0], &out_props_size, 5, std::min<uint32_t>(static_cast<uint32_t>(len), 1UL << 24), 3, 0, 2, 32, 1);
+		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len,
+			static_cast<Byte const *>(input.data()), static_cast<SizeT>(input.size()),
+			&output[0], &out_props_size, 5, std::min<uint32_t>(static_cast<uint32_t>(input.size()), 1UL << 24), 3, 0, 2, 32, 1);
 
 		output.resize(LZMA_PROPS_SIZE + out_len);
 	}
 
 	uint64_t LZMACodec::Decode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
 	{
-		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		is->read(&in_data[0], static_cast<size_t>(len));
+		auto in_data = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
+		is->read(in_data.get(), static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
-		this->Decode(output, &in_data[0], len, original_len);
+		this->Decode(output, MakeSpan(in_data.get(), static_cast<size_t>(len)), original_len);
 
 		os.write(reinterpret_cast<char*>(&output[0]), static_cast<std::streamsize>(output.size()));
 
 		return output.size();
 	}
 
-	uint64_t LZMACodec::Decode(std::ostream& os, void const * input, uint64_t len, uint64_t original_len)
+	uint64_t LZMACodec::Decode(std::ostream& os, std::span<uint8_t const> input, uint64_t original_len)
 	{
 		std::vector<uint8_t> output;
-		this->Decode(output, input, len, original_len);
+		this->Decode(output, input, original_len);
 
 		os.write(reinterpret_cast<char*>(&output[0]), static_cast<std::streamsize>(output.size()));
 
@@ -189,28 +185,28 @@ namespace KlayGE
 
 	void LZMACodec::Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
 	{
-		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		is->read(&in_data[0], static_cast<size_t>(len));
+		auto in_data = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(len));
+		is->read(in_data.get(), static_cast<size_t>(len));
 
-		this->Decode(output, &in_data[0], len, original_len);
+		this->Decode(output, MakeSpan(in_data.get(), static_cast<size_t>(len)), original_len);
 	}
 
-	void LZMACodec::Decode(std::vector<uint8_t>& output, void const * input, uint64_t len, uint64_t original_len)
+	void LZMACodec::Decode(std::vector<uint8_t>& output, std::span<uint8_t const> input, uint64_t original_len)
 	{
 		output.resize(static_cast<uint32_t>(original_len));
-		this->Decode(&output[0], input, len, original_len);
+		this->Decode(&output[0], input, original_len);
 	}
 
-	void LZMACodec::Decode(void* output, void const * input, uint64_t len, uint64_t original_len)
+	void LZMACodec::Decode(void* output, std::span<uint8_t const> input, uint64_t original_len)
 	{
-		uint8_t const * p = static_cast<uint8_t const *>(input);
+		uint8_t const * p = static_cast<uint8_t const *>(input.data());
 
-		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		std::memcpy(&in_data[0], p, static_cast<std::streamsize>(in_data.size()));
+		auto in_data = MakeUniquePtr<uint8_t[]>(static_cast<size_t>(input.size()));
+		std::memcpy(in_data.get(), p, static_cast<std::streamsize>(input.size()));
 
 		SizeT s_out_len = static_cast<SizeT>(original_len);
 
-		SizeT s_src_len = static_cast<SizeT>(len - LZMA_PROPS_SIZE);
+		SizeT s_src_len = static_cast<SizeT>(input.size() - LZMA_PROPS_SIZE);
 		int res = LZMALoader::Instance().LzmaUncompress(static_cast<Byte*>(output), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
 			&in_data[0], LZMA_PROPS_SIZE);
 		Verify(0 == res);

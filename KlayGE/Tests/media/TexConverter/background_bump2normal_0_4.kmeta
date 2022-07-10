@@ -11,5 +11,7 @@
 	{
 		"to_normal": true,
 		"scale": 0.4
-	}
+	},
+
+	"source": "background.jpg"
 }

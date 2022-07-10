@@ -30,17 +30,20 @@
 
 #include <KFL/KFL.hpp>
 
+#include <KFL/CXX20/format.hpp>
+
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <system_error>
 
 #include <KFL/ErrorHandling.hpp>
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string_view file, int line)
+	std::string CombineFileLine(std::string_view file, uint32_t line)
 	{
-		return std::string(file) + ": " + std::to_string(line);
+		return std::format("{}: {}", std::move(file), line);
 	}
 
 	void Verify(bool x)
@@ -52,20 +55,18 @@ namespace KlayGE
 	}
 
 #if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
-	void KFLUnreachableInternal(char const * msg, char const * file, uint32_t line)
+	void KFLUnreachableInternal(std::string_view msg, std::string_view file, uint32_t line)
 	{
-		if (msg)
+		if (!msg.empty())
 		{
 			LogError() << msg << std::endl;
 		}
-		if (file)
+		LogError() << "UNREACHABLE executed";
+		if (!file.empty())
 		{
-			LogError() << "UNREACHABLE executed at " << file << ": " << line << "." << std::endl;
+			LogError() << " at " << file << ": " << line;
 		}
-		else
-		{
-			LogError() << "UNREACHABLE executed." << std::endl;
-		}
+		LogError() << "." << std::endl;
 
 		TMSG("Unreachable.");
 	}

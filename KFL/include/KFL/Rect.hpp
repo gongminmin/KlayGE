@@ -66,34 +66,33 @@ namespace KlayGE
 		typedef value_type*			iterator;
 		typedef value_type const *	const_iterator;
 
-		enum { elem_num = 4 };
+		static constexpr size_t elem_num = 4;
 
 	public:
 		constexpr Rect_T() noexcept
 		{
 		}
-		explicit constexpr Rect_T(T const * rhs) noexcept
-			: rect_(rhs)
+		explicit constexpr Rect_T(T const* rhs) noexcept : rect_(rhs)
 		{
 		}
 		// Leave them in header due to a compiling issue under GCC
-		Rect_T(Rect_T const & rhs) noexcept
-			: rect_(rhs.rect_)
+		constexpr Rect_T(Rect_T const& rhs) noexcept : rect_(rhs.rect_)
 		{
 		}
 		template <typename U>
-		constexpr Rect_T(Rect_T<U> const & rhs) noexcept
-			: rect_(rhs.rect_)
+		constexpr Rect_T(Rect_T<U> const& rhs) noexcept : rect_(rhs.rect_)
 		{
 		}
-		Rect_T(Rect_T&& rhs) noexcept;
+		constexpr Rect_T(Rect_T&& rhs) noexcept : rect_(std::move(rhs.rect_))
+		{
+		}
 		constexpr Rect_T(T left, T top, T right, T bottom) noexcept
-			: rect_(left, top, right, bottom)
+			: rect_(std::move(left), std::move(top), std::move(right), std::move(bottom))
 		{
 		}
 
 		// 取向量
-		reference left() noexcept
+		constexpr reference left() noexcept
 		{
 			return rect_[0];
 		}
@@ -101,7 +100,7 @@ namespace KlayGE
 		{
 			return rect_[0];
 		}
-		reference top() noexcept
+		constexpr reference top() noexcept
 		{
 			return rect_[1];
 		}
@@ -109,7 +108,7 @@ namespace KlayGE
 		{
 			return rect_[1];
 		}
-		reference right() noexcept
+		constexpr reference right() noexcept
 		{
 			return rect_[2];
 		}
@@ -117,7 +116,7 @@ namespace KlayGE
 		{
 			return rect_[2];
 		}
-		reference bottom() noexcept
+		constexpr reference bottom() noexcept
 		{
 			return rect_[3];
 		}
@@ -147,7 +146,7 @@ namespace KlayGE
 			{
 				rect_ = rhs.rect_;
 			}
-		return *this;
+			return *this;
 		}
 		template <typename U>
 		Rect_T& operator=(Rect_T<U> const & rhs) noexcept
@@ -158,7 +157,10 @@ namespace KlayGE
 		Rect_T& operator=(Rect_T&& rhs) noexcept;
 
 		// 一元操作符
-		Rect_T const operator+() const noexcept;
+		constexpr Rect_T const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Rect_T const operator-() const noexcept;
 
 		// 属性
@@ -166,6 +168,11 @@ namespace KlayGE
 		T Height() const noexcept;
 		Size_T<T> const Size() const noexcept;
 		bool IsEmpty() const noexcept;
+
+		constexpr Vector_T<T, elem_num> const& AsVector()
+		{
+			return rect_;
+		}
 
 		bool operator==(Rect_T<T> const & rhs) const noexcept;
 

@@ -35,12 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Size_T<T>::Size_T(Size_T<T>&& rhs) noexcept
-		: size_(std::move(rhs.size_))
-	{
-	}
-
-	template <typename T>
 	template <typename U>
 	Size_T<T> const & Size_T<T>::operator+=(Size_T<U> const & rhs) noexcept
 	{
@@ -64,12 +58,6 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Size_T<T> const Size_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
 	Size_T<T> const Size_T<T>::operator-() const noexcept
 	{
 #ifdef KLAYGE_COMPILER_MSVC
@@ -80,7 +68,6 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
 	}
 
 	template <typename T>

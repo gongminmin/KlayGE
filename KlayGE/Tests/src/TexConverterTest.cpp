@@ -34,8 +34,8 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/CXX17/filesystem.hpp>
-#include <KlayGE/TexConverter.hpp>
-#include <KlayGE/TexMetadata.hpp>
+#include <KlayGE/DevHelper/TexConverter.hpp>
+#include <KlayGE/DevHelper/TexMetadata.hpp>
 
 #include "KlayGETests.hpp"
 
@@ -52,10 +52,16 @@ public:
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name, float tolerance)
 	{
-		TexMetadata metadata(metadata_name);
+		std::string metadata_name_ptr(metadata_name);
+		if (metadata_name.empty())
+		{
+			metadata_name_ptr = std::string(input_name) + ".kmeta";
+		}
+
+		TexMetadata metadata(metadata_name_ptr, false);
 
 		TexConverter tc;
-		auto target = tc.Convert(input_name, metadata);
+		auto target = tc.Load(metadata);
 		EXPECT_TRUE(target);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
@@ -64,15 +70,18 @@ public:
 		EXPECT_EQ(target->ArraySize(), target_sanity->ArraySize());
 		EXPECT_EQ(target->Type(), target_sanity->Type());
 		EXPECT_EQ(target->Format(), target_sanity->Format());
-		for (uint32_t m = 0; m < target->NumMipMaps(); ++ m)
+		for (uint32_t i = 0; i < target->ArraySize(); ++i)
 		{
-			EXPECT_EQ(target->Width(m), target_sanity->Width(m));
-			EXPECT_EQ(target->Height(m), target_sanity->Height(m));
-			EXPECT_EQ(target->Depth(m), target_sanity->Depth(m));
+			for (uint32_t m = 0; m < target->NumMipMaps(); ++m)
+			{
+				EXPECT_EQ(target->Width(m), target_sanity->Width(m));
+				EXPECT_EQ(target->Height(m), target_sanity->Height(m));
+				EXPECT_EQ(target->Depth(m), target_sanity->Depth(m));
 
-			EXPECT_TRUE(Compare2D(*target_sanity, 0, m, 0, 0,
-				*target, 0, m, 0, 0,
-				target->Width(m), target->Height(m), tolerance));
+				EXPECT_TRUE(Compare2D(*target_sanity, i, m, 0, 0,
+					*target, i, m, 0, 0,
+					target->Width(m), target->Height(m), tolerance));
+			}
 		}
 	}
 };
@@ -148,7 +157,7 @@ TEST_F(TexConverterTest, DDSSRGB)
 
 TEST_F(TexConverterTest, DDSChannel)
 {
-	RunTest("lion_bc1.dds", "lion_channel.kmeta", "lion_bc1_channel.dds", 1.0f / 255);
+	RunTest("lion_bc1.dds", "lion_bc1_channel.kmeta", "lion_bc1_channel.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, NormalCompressionBC5)
@@ -174,6 +183,16 @@ TEST_F(TexConverterTest, Bump2Normal)
 TEST_F(TexConverterTest, Bump2Normal_0_4)
 {
 	RunTest("background.jpg", "background_bump2normal_0_4.kmeta", "background_normal_0_4.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, Bump2Occlusion)
+{
+	RunTest("background.jpg", "background_bump2occlusion.kmeta", "background_occlusion.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, Bump2Occlusion_0_6)
+{
+	RunTest("background.jpg", "background_bump2occlusion_0_6.kmeta", "background_occlusion_0_6.dds", 1.0f / 255);
 }
 
 TEST_F(TexConverterTest, Rgb2Lum)

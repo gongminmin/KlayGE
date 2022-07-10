@@ -22,14 +22,6 @@
 
 #include <KlayGE/Socket.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
-
-#ifdef KLAYGE_COMPILER_MSVC
-#ifndef KLAYGE_CPU_ARM
-#pragma comment(lib, "wsock32.lib")
-#endif
-#endif
-
 #if defined KLAYGE_PLATFORM_WINDOWS
 	// ≥ı ºªØWinsock
 	/////////////////////////////////////////////////////////////////////////////////
@@ -39,8 +31,8 @@
 		WSAIniter()
 		{
 			WSADATA wsaData;
-
-			WSAStartup(MAKEWORD(2, 0), &wsaData);
+			const int err = WSAStartup(MAKEWORD(2, 0), &wsaData);
+			KlayGE::Verify(err == 0);
 		}
 
 		~WSAIniter()
@@ -328,5 +320,3 @@ namespace KlayGE
 		return timeOut.tv_sec * 1000 + timeOut.tv_usec;
 	}
 }
-
-#endif

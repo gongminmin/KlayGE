@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -21,16 +20,14 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderLayout.hpp>
 
 namespace KlayGE
 {
-	OGLESRenderLayout::OGLESRenderLayout()
-	{
-	}
+	OGLESRenderLayout::OGLESRenderLayout() = default;
 
 	OGLESRenderLayout::~OGLESRenderLayout()
 	{
@@ -50,7 +47,7 @@ namespace KlayGE
 		std::vector<char> used_streams(max_vertex_streams, 0);
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(i)));
+			auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->GetVertexStream(i));
 			uint32_t const size = this->VertexSize(i);
 			auto const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
@@ -81,7 +78,7 @@ namespace KlayGE
 
 		if (this->InstanceStream())
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
+			auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->InstanceStream());
 
 			uint32_t const instance_size = this->InstanceSize();
 			BOOST_ASSERT(this->NumInstances() * instance_size <= stream.Size());
@@ -123,10 +120,10 @@ namespace KlayGE
 			}
 		}
 
-		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
+		auto& ogl_re = checked_cast<OGLESRenderEngine&>(re);
 		if (!(ogl_re.HackForMali() || ogl_re.HackForAdreno()) && this->UseIndices())
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+			auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->GetIndexStream());
 			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 			stream.Active(true);
 		}
@@ -189,15 +186,15 @@ namespace KlayGE
 			}
 		}
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (this->NumVertexStreams() > 0)
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
+			auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->GetVertexStream(this->NumVertexStreams() - 1));
 			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
 		}
 		if (this->InstanceStream())
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
+			auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->InstanceStream());
 			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
 		}
 
@@ -205,13 +202,13 @@ namespace KlayGE
 		{
 			if (re.HackForMali() || re.HackForAdreno())
 			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->GetIndexStream());
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 				stream.Active(true);
 			}
 			else
 			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				auto& stream = checked_cast<OGLESGraphicsBuffer&>(*this->GetIndexStream());
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
 			}

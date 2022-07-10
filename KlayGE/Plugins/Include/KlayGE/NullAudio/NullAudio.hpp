@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class NullSoundBuffer : public SoundBuffer
+	class NullSoundBuffer final : public SoundBuffer
 	{
 	public:
 		NullSoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
@@ -68,7 +68,7 @@ namespace KlayGE
 		float3 dir_;
 	};
 
-	class NullMusicBuffer : public MusicBuffer
+	class NullMusicBuffer final : public MusicBuffer
 	{
 	public:
 		NullMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
@@ -96,11 +96,10 @@ namespace KlayGE
 		float3 dir_;
 	};
 
-	class NullAudioEngine : public AudioEngine
+	class NullAudioEngine final : public AudioEngine
 	{
 	public:
 		NullAudioEngine();
-		~NullAudioEngine() override;
 
 		std::wstring const & Name() const override;
 

@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using KlayGE;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Controls.Ribbon;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.ComponentModel;
-using System.Windows.Controls.Ribbon;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
-using KlayGE;
 
 namespace KGEditor
 {
@@ -515,10 +509,10 @@ namespace KGEditor
 		{
 			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
-			dlg.DefaultExt = ".meshml";
+			dlg.DefaultExt = ".glb";
 			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.dae;*.dxf;*.csm;"
 				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5mesh;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
-				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x|All Files|*.*";
+				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x;*.gltf;*.glb|All Files|*.*";
 			dlg.CheckPathExists = true;
 			dlg.CheckFileExists = true;
 			if (true == dlg.ShowDialog())

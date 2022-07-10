@@ -1,0 +1,264 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="PostProcess.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="inv_view"/>
+		<parameter type="float4x4" name="inv_proj"/>
+		<parameter type="float4x4" name="view_to_reflected_proj"/>
+		<parameter type="float4" name="reflection_width_height"/>
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float2" name="xy_dir"/>
+		<parameter type="float" name="far_plane"/>
+	</cbuffer>
+	
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
+	<parameter type="texture2D" name="shading_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2DMS" name="depth_tex_ms"/>
+
+	<parameter type="sampler" name="ppr_linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="ppr_point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="rw_texture2D" elem_type="uint" name="rw_coord_tex"/>
+
+	<shader>
+		<![CDATA[
+float3 Texcoord2View(float2 tex)
+{
+	return upper_left + float3(xy_dir * tex, 0);
+}
+
+uint PackCoord(float2 offset)
+{
+	uint coord_sys;
+	if (abs(offset.y) < abs(offset.x))
+	{
+		coord_sys = 1;
+		offset = offset.yx;
+	}
+	else
+	{
+		coord_sys = 0;
+	}
+	coord_sys += offset.y < 0 ? 2 : 0;
+
+	int2 ioffset = int2(offset * 8);
+	ioffset.y = abs(ioffset.y);
+	ioffset &= 0x7FFF;
+
+	return (ioffset.y << 17) | (ioffset.x << 2) | coord_sys;
+}
+		]]>
+	</shader>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(16, 16, 1)]
+void PixelProjectedReflectionCoordCS(uint3 dtid : SV_DispatchThreadID)
+{
+	[branch]
+	if (any(dtid.xy >= uint2(reflection_width_height.xy)))
+	{
+		return;
+	}
+
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	depth_tex_ms.GetDimensions(width, height, samples);
+
+	float depth = 1;
+	for (uint i = 0; i < samples; ++ i)
+	{
+		depth = min(depth, depth_tex_ms.Load(dtid.xy, i).x);
+	}
+#else
+	float depth = depth_tex.Load(dtid).x;
+#endif
+
+	float2 tc = (dtid.xy + 0.5f) * reflection_width_height.zw;
+	tc.y = KLAYGE_FLIPPING < 0 ? tc.y : 1 - tc.y;
+	float3 view_dir = Texcoord2View(tc);
+	float3 pos_es = view_dir * (depth / view_dir.z);
+	float4 pos_reflected = mul(float4(pos_es, 1), view_to_reflected_proj);
+	pos_reflected /= pos_reflected.w;
+	float2 tc_reflected = TexCoordFromPos(pos_reflected);
+	float2 offset = (tc - tc_reflected) * reflection_width_height.xy;
+
+	[branch]
+	if (length(offset) < 1)
+	{
+		return;
+	}
+
+	[branch]
+	if (all(bool4(tc_reflected >= 0, tc_reflected < 1)))
+	{
+		uint2 target_coord = uint2(tc_reflected * reflection_width_height.xy);
+		uint coord_packed = PackCoord(offset);
+		InterlockedMin(rw_coord_tex[target_coord], coord_packed);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="PixelProjectedReflectionCoord">
+		<pass name="p0">
+			<state name="compute_shader" value="PixelProjectedReflectionCoordCS()"/>
+		</pass>
+	</technique>
+	<technique name="PixelProjectedReflectionCoordMS" inherit="PixelProjectedReflectionCoord">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+
+	<parameter type="texture2D" elem_type="uint" name="coord_tex"/>
+
+	<parameter type="textureCUBE" name="ppr_skybox_tex"/>
+	<parameter type="textureCUBE" name="ppr_skybox_C_tex"/>
+
+	<shader>
+		<![CDATA[
+float2 UnpackCoord(uint packed_coord)
+{
+	int2 ioffset = (packed_coord >> uint2(2, 17)) & 0x7FFF;
+	if ((packed_coord & 0x00010000) != 0)
+	{
+		ioffset.x |= 0xFFFFF000;
+	}
+
+	float2 offset = ioffset / 8.0f;
+
+	uint coord_sys = packed_coord & 0x0003;	
+	if (coord_sys & 0x2)
+	{
+		offset.y = -offset.y;
+	}
+	if (coord_sys & 0x1)
+	{
+		offset = offset.yx;
+	}
+
+	return offset * reflection_width_height.zw;
+}
+
+void PixelProjectedReflectionPostProcessVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	oViewDir = mul(oPos, inv_proj).xyz;
+}
+
+float4 PixelProjectedReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1,
+	uint sample_index : SV_SampleIndex) : SV_Target
+{
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc * int2(width, height);
+
+	float4 rt0 = g_buffer_rt0_tex_ms.Load(coord, sample_index);
+	float4 rt1 = g_buffer_rt1_tex_ms.Load(coord, sample_index);
+	float depth = depth_tex_ms.Load(coord, sample_index).x;
+#else
+	float4 rt0 = g_buffer_rt0_tex.Sample(ppr_point_sampler, tc);
+	float4 rt1 = g_buffer_rt1_tex.Sample(ppr_point_sampler, tc);
+	float depth = depth_tex.Sample(ppr_point_sampler, tc).x;
+#endif
+
+	float3 pos_es = view_dir * (depth / view_dir.z);
+	float3 normal_es = GetNormal(rt0);
+
+	float3 reflect_vec = reflect(pos_es, normal_es);
+		
+	float2 tex_ddx = ddx(tc);
+	float2 tex_ddy = ddy(tc);
+
+	uint2 reflected_coord = uint2(tc * reflection_width_height.xy);
+
+	float4 ret;
+	uint coord_packed = 0xFFFFFFFFU;
+	for (int y = 0; y <= 1; ++y)
+	{
+		for (int x = 0; x <= 1; ++x)
+		{
+			coord_packed = min(coord_packed, coord_tex.Load(int3(reflected_coord + int2(x, y), 0)));
+		}
+	}
+	if (coord_packed != 0xFFFFFFFFU)
+	{
+		float2 offset = UnpackCoord(coord_packed);
+		float2 tc_from = tc + offset;
+
+		ret.xyz = shading_tex.SampleGrad(ppr_linear_sampler, tc_from, tex_ddx, tex_ddx).xyz;
+		ret.w = length(offset);
+	}
+	else
+	{
+		float3 reflect_vec_ws = mul(reflect_vec, (float3x3)inv_view);
+		float4 sky = decode_hdr_yc(ppr_skybox_tex.SampleLevel(ppr_linear_sampler, reflect_vec_ws, 0).r,
+			ppr_skybox_C_tex.SampleLevel(ppr_linear_sampler, reflect_vec_ws, 0));
+
+		ret = sky;
+	}
+	
+	float fresnel = FresnelTerm(-view_dir, normal_es, GetSpecular(rt1)).x;
+	ret.w = saturate(ret.w * fresnel);
+
+	return ret;
+}
+		]]>
+	</shader>
+
+	<technique name="PixelProjectedReflectionPostProcess">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="64"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="192"/>
+			<state name="front_stencil_write_mask" value="0"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="64"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="192"/>
+			<state name="back_stencil_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="zero"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PixelProjectedReflectionPostProcessVS()"/>
+			<state name="pixel_shader" value="PixelProjectedReflectionPostProcessPS()"/>
+		</pass>
+	</technique>
+	<technique name="PixelProjectedReflectionPostProcessMS" inherit="PixelProjectedReflectionPostProcess">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+</effect>

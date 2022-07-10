@@ -20,11 +20,11 @@
 
 #include <string>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 #if defined KLAYGE_PLATFORM_WINDOWS
-	#ifndef _WINSOCKAPI_
-	#include <winsock.h>
+	#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+		#define _WINSOCK_DEPRECATED_NO_WARNINGS
 	#endif
+	#include <winsock2.h>
 	typedef int socklen_t;
 #else
 	#include <sys/types.h>
@@ -46,7 +46,7 @@ namespace KlayGE
 
 	// Í¬²½Ì×½Ó×Ö
 	///////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Socket : boost::noncopyable
+	class KLAYGE_CORE_API Socket final : boost::noncopyable
 	{
 	public:
 		Socket();
@@ -99,6 +99,5 @@ namespace KlayGE
 		SOCKET		socket_;
 	};
 }
-#endif
 
 #endif			// _SOCKET_HPP

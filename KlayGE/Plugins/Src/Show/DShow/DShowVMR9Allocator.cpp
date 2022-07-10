@@ -11,8 +11,8 @@
 /////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
@@ -21,21 +21,22 @@
 #include <KlayGE/RenderEngine.hpp>
 
 #include <cstring>
+#include <ostream>
+
 #include <boost/assert.hpp>
 
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
-#elif defined(KLAYGE_COMPILER_CLANGC2)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore D3DBUSIMPL_MODIFIER_NON_STANDARD definition
 #endif
 #include <d3d9.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
-#elif defined(KLAYGE_COMPILER_CLANGC2)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic pop
 #endif
 #ifdef KLAYGE_COMPILER_GCC
@@ -52,24 +53,25 @@
 
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
+DEFINE_UUID_OF(IUnknown);
+DEFINE_UUID_OF(IVMRImagePresenter9);
+DEFINE_UUID_OF(IVMRSurfaceAllocator9);
+
 namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
 					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
-		mod_d3d9_ = ::LoadLibraryEx(TEXT("d3d9.dll"), nullptr, 0);
-		if (nullptr == mod_d3d9_)
+		if (!mod_d3d9_.Load("d3d9.dll"))
 		{
-			::MessageBoxW(nullptr, L"Can't load d3d9.dll", L"Error", MB_OK);
+			LogError() << "COULDN'T load d3d9.dll" << std::endl;
+			Verify(false);
 		}
 
-		if (mod_d3d9_ != nullptr)
-		{
-			DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
-		}
+		DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(mod_d3d9_.GetProcAddress("Direct3DCreate9"));
 
-		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
+		d3d_.reset(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
 
 		this->CreateDevice();
 	}
@@ -83,7 +85,7 @@ namespace KlayGE
 		d3d_device_.reset();
 		d3d_.reset();
 
-		::FreeLibrary(mod_d3d9_);
+		mod_d3d9_.Free();
 	}
 
 	void DShowVMR9Allocator::CreateDevice()
@@ -110,11 +112,9 @@ namespace KlayGE
 			vp_mode = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 		}
 
-		IDirect3DDevice9* d3d_device;
 		TIFHR(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
 			wnd_, vp_mode | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED,
-			&d3dpp_, &d3d_device));
-		d3d_device_ = MakeCOMPtr(d3d_device);
+			&d3dpp_, d3d_device_.put()));
 	}
 
 	void DShowVMR9Allocator::DeleteSurfaces()
@@ -182,19 +182,17 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 		static ElementFormat constexpr backup_fmts[] = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
-		ArrayRef<ElementFormat> fmt_options = backup_fmts;
+		std::span<ElementFormat const> fmt_options = backup_fmts;
 		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt_options = fmt_options.Slice(2);
+			fmt_options = fmt_options.subspan(2);
 		}
 		auto const fmt = caps.BestMatchTextureFormat(fmt_options);
 		BOOST_ASSERT(fmt != EF_Unknown);
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
-		IDirect3DSurface9* surf;
 		TIFHR(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, nullptr));
-		cache_surf_ = MakeCOMPtr(surf);
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, cache_surf_.put(), nullptr));
 
 		return S_OK;
 	}
@@ -240,8 +238,7 @@ namespace KlayGE
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		vmr_surf_alloc_notify_ = MakeCOMPtr(lpIVMRSurfAllocNotify);
-		vmr_surf_alloc_notify_->AddRef();
+		vmr_surf_alloc_notify_.reset(lpIVMRSurfAllocNotify);
 
 		HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
 		TIFHR(vmr_surf_alloc_notify_->SetD3DDevice(d3d_device_.get(), hMonitor));
@@ -341,7 +338,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (IID_IVMRSurfaceAllocator9 == riid)
+			if (UuidOf<IVMRSurfaceAllocator9>() == reinterpret_cast<Uuid const&>(riid))
 			{
 				*ppvObject = static_cast<IVMRSurfaceAllocator9*>(this);
 				this->AddRef();
@@ -349,7 +346,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (IID_IVMRImagePresenter9 == riid)
+				if (UuidOf<IVMRImagePresenter9>() == reinterpret_cast<Uuid const&>(riid))
 				{
 					*ppvObject = static_cast<IVMRImagePresenter9*>(this);
 					this->AddRef();
@@ -357,7 +354,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (IID_IUnknown == riid)
+					if (UuidOf<IUnknown>() == reinterpret_cast<Uuid const&>(riid))
 					{
 						*ppvObject = static_cast<IUnknown*>(static_cast<IVMRSurfaceAllocator9*>(this));
 						this->AddRef();

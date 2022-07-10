@@ -10,5 +10,7 @@
 	"bump":
 	{
 		"from_normal": true
-	}
+	},
+
+	"source": "lion_ddn.jpg"
 }

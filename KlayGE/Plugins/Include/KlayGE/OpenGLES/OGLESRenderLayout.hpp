@@ -21,11 +21,11 @@
 
 namespace KlayGE
 {
-	class OGLESRenderLayout : public RenderLayout
+	class OGLESRenderLayout final : public RenderLayout
 	{
 	public:
 		OGLESRenderLayout();
-		~OGLESRenderLayout();
+		~OGLESRenderLayout() override;
 
 		void Active(ShaderObjectPtr const & so) const;
 

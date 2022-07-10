@@ -13,11 +13,11 @@ namespace KlayGE
 		enum class TextureSlot
 		{
 			TS_Albedo = RenderMaterial::TS_Albedo,
-			TS_Metalness = RenderMaterial::TS_Metalness,
-			TS_Glossiness = RenderMaterial::TS_Glossiness,
+			TS_MetalnessGlossiness = RenderMaterial::TS_MetalnessGlossiness,
 			TS_Emissive = RenderMaterial::TS_Emissive,
 			TS_Normal = RenderMaterial::TS_Normal,
-			TS_Height = RenderMaterial::TS_Height
+			TS_Height = RenderMaterial::TS_Height,
+			TS_Occlusion = RenderMaterial::TS_Occlusion
 		};
 
 	public:

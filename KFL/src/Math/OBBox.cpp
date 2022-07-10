@@ -46,20 +46,6 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	OBBox_T<T>::OBBox_T(OBBox_T<T> const & rhs) noexcept
-		: Bound_T<T>(rhs),
-			center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
-	{
-	}
-
-	template <typename T>
-	OBBox_T<T>::OBBox_T(OBBox_T<T>&& rhs) noexcept
-		: Bound_T<T>(rhs),
-			center_(std::move(rhs.center_)), rotation_(std::move(rhs.rotation_)), extent_(std::move(rhs.extent_))
-	{
-	}
-
-	template <typename T>
 	OBBox_T<T>& OBBox_T<T>::operator+=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		center_ += rhs;
@@ -105,22 +91,6 @@ namespace KlayGE
 		rotation_ = std::move(rhs.rotation_);
 		extent_ = std::move(rhs.extent_);
 		return *this;
-	}
-
-	template <typename T>
-	OBBox_T<T> const OBBox_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
-	OBBox_T<T> const OBBox_T<T>::operator-() const noexcept
-	{
-		OBBox_T<T> ret;
-		ret.center_ = -center_;
-		ret.rotation_ = -rotation_;
-		ret.extent_ = extent_;
-		return ret;
 	}
 
 	template <typename T>
@@ -170,7 +140,7 @@ namespace KlayGE
 	template <typename T>
 	bool OBBox_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
-		return MathLib::intersect_obb_frustum(*this, frustum) != BO_No;
+		return MathLib::intersect_obb_frustum(*this, frustum) != BoundOverlap::No;
 	}
 
 	template <typename T>

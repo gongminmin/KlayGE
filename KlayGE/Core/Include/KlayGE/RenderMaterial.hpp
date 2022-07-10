@@ -39,44 +39,139 @@
 
 namespace KlayGE
 {
-	struct KLAYGE_CORE_API RenderMaterial
+	class KLAYGE_CORE_API RenderMaterial final : boost::noncopyable
 	{
+	public:
 		enum TextureSlot
 		{
 			TS_Albedo,
-			TS_Metalness,
-			TS_Glossiness,
+			TS_MetalnessGlossiness,
 			TS_Emissive,
 			TS_Normal,
 			TS_Height,
+			TS_Occlusion,
 
 			TS_NumTextureSlots
 		};
 
-		enum SurfaceDetailMode
+		enum class SurfaceDetailMode : uint32_t
 		{
-			SDM_Parallax = 0,
-			SDM_FlatTessellation,
-			SDM_SmoothTessellation
+			ParallaxMapping = 0,
+			ParallaxOcclusionMapping,
+			FlatTessellation,
+			SmoothTessellation
 		};
 
-		std::string name;
+	public:
+		RenderMaterial();
 
-		float4 albedo;
-		float metalness;
-		float glossiness;
-		float3 emissive;
+		RenderMaterialPtr Clone() const;
 
-		bool transparent;
-		float alpha_test;
-		bool sss;
-		bool two_sided;
+		void Name(std::string_view name)
+		{
+			name_ = std::string(name);
+		}
+		std::string const& Name() const
+		{
+			return name_;
+		}
 
-		std::array<std::string, TS_NumTextureSlots> tex_names;
+		void Albedo(float4 const& value);
+		float4 const& Albedo() const;
 
-		SurfaceDetailMode detail_mode;
-		float2 height_offset_scale;
-		float4 tess_factors;
+		void Metalness(float value);
+		float Metalness() const;
+		void Glossiness(float value);
+		float Glossiness() const;
+		void Emissive(float3 const& value);
+		float3 const& Emissive() const;
+
+		void Transparent(bool value)
+		{
+			transparent_ = value;
+		}
+		bool Transparent() const
+		{
+			return transparent_;
+		}
+		void AlphaTestThreshold(float value);
+		float AlphaTestThreshold() const;
+		void Sss(bool value)
+		{
+			sss_ = value;
+		}
+		bool Sss() const
+		{
+			return sss_;
+		}
+		void TwoSided(bool value)
+		{
+			two_sided_ = value;
+		}
+		bool TwoSided() const
+		{
+			return two_sided_;
+		}
+
+		void NormalScale(float value);
+		float NormalScale() const;
+		void OcclusionStrength(float value);
+		float OcclusionStrength() const;
+
+		void TextureName(TextureSlot slot, std::string_view name);
+		std::string const& TextureName(TextureSlot slot) const
+		{
+			return textures_[slot].first;
+		}
+		void Texture(TextureSlot slot, ShaderResourceViewPtr srv);
+		ShaderResourceViewPtr const& Texture(TextureSlot slot) const
+		{
+			return textures_[slot].second;
+		}
+
+		void DetailMode(SurfaceDetailMode value)
+		{
+			detail_mode_ = value;
+		}
+		SurfaceDetailMode DetailMode() const
+		{
+			return detail_mode_;
+		}
+		void HeightOffset(float value);
+		float HeightOffset() const;
+		void HeightScale(float value);
+		float HeightScale() const;
+		void EdgeTessHint(float value);
+		float EdgeTessHint() const;
+		void InsideTessHint(float value);
+		float InsideTessHint() const;
+		void MinTessFactor(float value);
+		float MinTessFactor() const;
+		void MaxTessFactor(float value);
+		float MaxTessFactor() const;
+
+		void Active(RenderEffect& effect);
+
+		void LoadTextureSlots();
+
+	private:
+		std::string name_;
+
+		bool is_sw_mode_ = false;
+		RenderEffectConstantBufferPtr cbuffer_;
+		std::vector<uint32_t> sw_cbuffer_;
+		RenderEffectParameter* albedo_tex_param_ = nullptr;
+		RenderEffectParameter* metalness_glossiness_tex_param_ = nullptr;
+		RenderEffectParameter* emissive_tex_param_ = nullptr;
+		RenderEffectParameter* normal_tex_param_ = nullptr;
+		RenderEffectParameter* height_tex_param_ = nullptr;
+		RenderEffectParameter* occlusion_tex_param_ = nullptr;
+
+		bool transparent_ = false;
+		bool sss_ = false;
+		bool two_sided_ = false;
+		SurfaceDetailMode detail_mode_ = SurfaceDetailMode::ParallaxMapping;
+		std::array<std::pair<std::string, ShaderResourceViewPtr>, TS_NumTextureSlots> textures_;
 	};
 
 	float const MAX_SHININESS = 8192;

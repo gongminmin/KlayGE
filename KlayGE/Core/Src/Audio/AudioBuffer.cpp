@@ -38,14 +38,11 @@ namespace KlayGE
 	AudioBuffer::AudioBuffer(AudioDataSourcePtr const & data_source)
 		: data_source_(data_source),
 			format_(data_source_->Format()),
-			freq_(data_source_->Freq()),
-			resume_playing_(false)
+			freq_(data_source_->Freq())
 	{
 	}
 
-	AudioBuffer::~AudioBuffer()
-	{
-	}
+	AudioBuffer::~AudioBuffer() noexcept = default;
 
 	void AudioBuffer::Suspend()
 	{

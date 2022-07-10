@@ -67,14 +67,14 @@ namespace KlayGE
 		return 0;
 	}
 
-	void NullTexture::CopyToTexture(Texture& target)
+	void NullTexture::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
+		KFL_UNUSED(filter);
 	}
 
-	void NullTexture::CopyToSubTexture1D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	void NullTexture::CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -85,13 +85,12 @@ namespace KlayGE
 		KFL_UNUSED(src_level);
 		KFL_UNUSED(src_x_offset);
 		KFL_UNUSED(src_width);
+		KFL_UNUSED(filter);
 	}
 
-	void NullTexture::CopyToSubTexture2D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void NullTexture::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -106,13 +105,13 @@ namespace KlayGE
 		KFL_UNUSED(src_y_offset);
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
+		KFL_UNUSED(filter);
 	}
 
-	void NullTexture::CopyToSubTexture3D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
-		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void NullTexture::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
+		uint32_t src_depth, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -131,13 +130,12 @@ namespace KlayGE
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
 		KFL_UNUSED(src_depth);
+		KFL_UNUSED(filter);
 	}
 
-	void NullTexture::CopyToSubTextureCube(Texture& target,
-		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void NullTexture::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(target);
 		KFL_UNUSED(dst_array_index);
@@ -154,10 +152,7 @@ namespace KlayGE
 		KFL_UNUSED(src_y_offset);
 		KFL_UNUSED(src_width);
 		KFL_UNUSED(src_height);
-	}
-
-	void NullTexture::BuildMipSubLevels()
-	{
+		KFL_UNUSED(filter);
 	}
 
 	void NullTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -251,7 +246,7 @@ namespace KlayGE
 		KFL_UNUSED(level);
 	}
 
-	void NullTexture::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void NullTexture::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(init_data);
 		KFL_UNUSED(clear_value_hint);

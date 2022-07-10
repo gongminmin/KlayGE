@@ -61,34 +61,32 @@ namespace KlayGE
 		typedef value_type*			iterator;
 		typedef value_type const *	const_iterator;
 
-		enum { elem_num = 2 };
+		static constexpr size_t elem_num = 2;
 
 	public:
 		constexpr Size_T() noexcept
 		{
 		}
-		explicit constexpr Size_T(T const * rhs) noexcept
-			: size_(rhs)
+		explicit constexpr Size_T(T const* rhs) noexcept : size_(rhs)
 		{
 		}
 		// Leave them in header due to a compiling issue under GCC
-		Size_T(Size_T const & rhs) noexcept
-			: size_(rhs.size_)
+		constexpr Size_T(Size_T const& rhs) noexcept : size_(rhs.size_)
 		{
 		}
 		template <typename U>
-		constexpr Size_T(Size_T<U> const & rhs) noexcept
-			: size_(rhs.size_)
+		constexpr Size_T(Size_T<U> const& rhs) noexcept : size_(rhs.size_)
 		{
 		}
-		Size_T(Size_T&& rhs) noexcept;
-		constexpr Size_T(T cx, T cy) noexcept
-			: size_(cx, cy)
+		constexpr Size_T(Size_T&& rhs) noexcept : size_(std::move(rhs.size_))
+		{
+		}
+		constexpr Size_T(T cx, T cy) noexcept : size_(std::move(cx), std::move(cy))
 		{
 		}
 
 		// 取向量
-		reference cx() noexcept
+		constexpr reference cx() noexcept
 		{
 			return size_[0];
 		}
@@ -96,7 +94,7 @@ namespace KlayGE
 		{
 			return size_[0];
 		}
-		reference cy() noexcept
+		constexpr reference cy() noexcept
 		{
 			return size_[1];
 		}
@@ -129,8 +127,16 @@ namespace KlayGE
 		Size_T& operator=(Size_T&& rhs) noexcept;
 
 		// 一元操作符
-		Size_T<T> const operator+() const noexcept;
+		constexpr Size_T<T> const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Size_T<T> const operator-() const noexcept;
+
+		constexpr Vector_T<T, elem_num> const& AsVector()
+		{
+			return size_;
+		}
 
 		bool operator==(Size_T<T> const & rhs) const noexcept;
 

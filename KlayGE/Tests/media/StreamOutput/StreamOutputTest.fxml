@@ -95,7 +95,7 @@ void ConditionalCopyBufferGS(point float4 in_pos[1] : SV_Position,
 
 	<parameter type="rw_byte_address_buffer" name="rw_output_primitives_buff"/>
 
-	<shader type="geometry_shader" major_version="5" minor_version="1">
+	<shader type="geometry_shader">
 		<![CDATA[
 #if KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT
 [maxvertexcount(1)]
@@ -120,6 +120,33 @@ void ConditionalCopyBufferRwGS(point float4 in_pos[1] : SV_Position,
 			<state name="geometry_shader" value="ConditionalCopyBufferRwGS()">
 				<stream_output>
 					<entry usage="SV_Position" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void MultipleBuffersVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			out float4 oPos : SV_Position,
+			out float2 oTexcoord : TEXCOORD0)
+{
+	oPos = pos;
+	oTexcoord = texcoord;
+}
+		]]>
+	</shader>
+
+	<technique name="MultipleBuffers">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="MultipleBuffersVS()">
+				<stream_output>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+					<entry usage="TEXCOORD" index="0" component="xy" slot="1"/>
 				</stream_output>
 			</state>
 		</pass>

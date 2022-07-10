@@ -44,9 +44,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API AudioFactory : boost::noncopyable
 	{
 	public:
-		virtual ~AudioFactory()
-		{
-		}
+		virtual ~AudioFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 

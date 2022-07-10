@@ -19,19 +19,23 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LightShaftPostProcess : public PostProcess
+	class KLAYGE_CORE_API LightShaftPostProcess final : public PostProcess
 	{
 	public:
 		LightShaftPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
+		void InputPin(uint32_t index, ShaderResourceViewPtr const& srv) override;
 		using PostProcess::InputPin;
 
-		void Apply();
+		void Apply() override;
 
 	private:
 		std::vector<PostProcessPtr> radial_blur_pps_;
 		PostProcessPtr apply_pp_;
+
+		TexturePtr blur_tex_[2];
+		ShaderResourceViewPtr blur_srv_[2];
+		RenderTargetViewPtr blur_rtv_[2];
 	};
 }
 

@@ -1,0 +1,144 @@
+<?xml version='1.0'?>
+
+<effect>
+	<macro name="BLOCK_X" value="16"/>
+	<macro name="BLOCK_Y" value="16"/>
+	<macro name="BLOCK_SIZE" value="(BLOCK_X * BLOCK_Y)"/>
+
+	<parameter type="uint2" name="src_level_width_height"/>
+	<parameter type="uint" name="num_levels"/>
+
+	<parameter type="texture2D" name="src_2d_tex"/>
+
+	<parameter type="rw_texture2D" name="output_2d_tex_1"/>
+	<parameter type="rw_texture2D" name="output_2d_tex_2"/>
+	<parameter type="rw_texture2D" name="output_2d_tex_3"/>
+	<parameter type="rw_texture2D" name="output_2d_tex_4"/>
+	<parameter type="rw_texture2D" name="output_2d_tex_5"/>
+	<parameter type="rw_texture2DArray" name="output_2d_tex_array_1"/>
+	<parameter type="rw_texture2DArray" name="output_2d_tex_array_2"/>
+	<parameter type="rw_texture2DArray" name="output_2d_tex_array_3"/>
+	<parameter type="rw_texture2DArray" name="output_2d_tex_array_4"/>
+	<parameter type="rw_texture2DArray" name="output_2d_tex_array_5"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+float4 LinearToSrgb(float4 color)
+{
+	const float ALPHA = 0.055f;
+	return (color < 0.0031308f) ? 12.92f * color : (1 + ALPHA) * pow(saturate(color), 1 / 2.4f) - ALPHA;
+}
+
+groupshared float4 block_sh[BLOCK_Y][BLOCK_X];
+
+[numthreads(BLOCK_X, BLOCK_Y, 1)]
+void MipmapCS(uint3 gid : SV_GroupID, uint3 thread_id : SV_DispatchThreadID, uint3 gtid : SV_GroupThreadID, uint GI : SV_GroupIndex)
+{
+	uint2 tile_start = gid.xy * BLOCK_X;
+	uint3 coord = uint3(min(thread_id.xy, src_level_width_height), 0);
+	float4 value;
+#if LINEAR_MIP
+	value = (src_2d_tex.Load(uint3(coord.xy * 2 + uint2(0, 0), 0))
+		+ src_2d_tex.Load(uint3(coord.xy * 2 + uint2(1, 0), 0))
+		+ src_2d_tex.Load(uint3(coord.xy * 2 + uint2(0, 1), 0))
+		+ src_2d_tex.Load(uint3(coord.xy * 2 + uint2(1, 1), 0))) / 4;
+#else
+	value = src_2d_tex.Load(uint3(coord.xy * 2 + 1, 0));
+#endif
+
+	block_sh[gtid.y][gtid.x] = value;
+#if ARRAY_OUTPUT
+	output_2d_tex_array_1[coord] = value;
+#else
+	output_2d_tex_1[coord.xy] = value;
+#endif
+
+	uint level_size = BLOCK_X / 2;
+	tile_start /= 2;
+	[unroll]
+	for (uint level = 2; (level < num_levels) && (level < 6); ++level)
+	{
+		GroupMemoryBarrierWithGroupSync();
+
+		uint x = 0;
+		uint y = 0;
+		if (GI < level_size * level_size)
+		{
+			y = GI / level_size;
+			x = GI - y * level_size;
+#if LINEAR_MIP
+			value = (block_sh[y * 2 + 0][x * 2 + 0] + block_sh[y * 2 + 0][x * 2 + 1]
+				+ block_sh[y * 2 + 1][x * 2 + 0] + block_sh[y * 2 + 1][x * 2 + 1]) / 4;
+#else
+			value = block_sh[y * 2 + 1][x * 2 + 1];
+#endif
+
+			coord.xy = tile_start + uint2(x, y);
+			if (level == 2)
+			{
+#if ARRAY_OUTPUT
+				output_2d_tex_array_2[coord] = value;
+#else
+				output_2d_tex_2[coord.xy] = value;
+#endif
+			}
+			else if (level == 3)
+			{
+#if ARRAY_OUTPUT
+				output_2d_tex_array_3[coord] = value;
+#else
+				output_2d_tex_3[coord.xy] = value;
+#endif
+			}
+			else if (level == 4)
+			{
+#if ARRAY_OUTPUT
+				output_2d_tex_array_4[coord] = value;
+#else
+				output_2d_tex_4[coord.xy] = value;
+#endif
+			}
+			else if (level == 5)
+			{
+#if ARRAY_OUTPUT
+				output_2d_tex_array_5[coord] = value;
+#else
+				output_2d_tex_5[coord.xy] = value;
+#endif
+			}
+		}
+		GroupMemoryBarrierWithGroupSync();
+		
+		if (GI < level_size * level_size)
+		{
+			block_sh[y][x] = value;
+		}
+
+		level_size /= 2;
+		tile_start /= 2;
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="Mipmap2DPoint">
+		<macro name="ARRAY_OUTPUT" value="0"/>
+		<macro name="LINEAR_MIP" value="0"/>
+		<pass name="p0">
+			<state name="compute_shader" value="MipmapCS()"/>
+		</pass>
+	</technique>
+	<technique name="Mipmap2DLinear" inherit="Mipmap2DPoint">
+		<macro name="ARRAY_OUTPUT" value="0"/>
+		<macro name="LINEAR_MIP" value="1"/>
+	</technique>
+
+	<technique name="Mipmap2DArrayPoint" inherit="Mipmap2DPoint">
+		<macro name="ARRAY_OUTPUT" value="1"/>
+		<macro name="LINEAR_MIP" value="0"/>
+	</technique>
+	<technique name="Mipmap2DArrayLinear" inherit="Mipmap2DPoint">
+		<macro name="ARRAY_OUTPUT" value="1"/>
+		<macro name="LINEAR_MIP" value="1"/>
+	</technique>
+</effect>

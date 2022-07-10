@@ -1,0 +1,31 @@
+From c0d7f8be514e3d8c4f9e5ddf7639dd9857a11f81 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Thu, 4 Feb 2021 22:02:40 -0800
+Subject: [PATCH 09/10] No need to dereference system variables in if(...)
+
+---
+ cmake/extensions/CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index f0463b5..6d31061 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -314,11 +314,11 @@ else()
+ endif()
+ 
+ set(_libffi_system_dir ${CMAKE_SYSTEM_PROCESSOR})
+-if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "i686")
++if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i686")
+   set(_libffi_system_dir "x86")
+-elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "amd64")
++elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
+   set(_libffi_system_dir "x86")
+-elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm")
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+   set(_libffi_system_dir "arm")
+ endif()
+ # Common ctypes sources
+-- 
+2.17.1.windows.2
+

@@ -61,9 +61,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API TexCompression : boost::noncopyable
 	{
 	public:
-		virtual ~TexCompression()
-		{
-		}
+		virtual ~TexCompression() noexcept;
 
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) = 0;
 		virtual void DecodeBlock(void* output, void const * input) = 0;
@@ -83,7 +81,7 @@ namespace KlayGE
 		ElementFormat compression_format_;
 	};
 
-	class ARGBColor32 : boost::equality_comparable<ARGBColor32>
+	class ARGBColor32 final : boost::equality_comparable<ARGBColor32>
 	{
 	public:
 		enum
@@ -179,7 +177,7 @@ namespace KlayGE
 		} clr32_;
 	};
 
-	class RGBACluster
+	class RGBACluster final
 	{
 		static int const MAX_NUM_DATA_POINTS = 16;
 

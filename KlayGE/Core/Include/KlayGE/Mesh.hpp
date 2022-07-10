@@ -31,26 +31,38 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/SceneObject.hpp>
+#include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SceneComponent.hpp>
 
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
 namespace KlayGE
 {
+	template <typename T>
+	inline StaticMeshPtr CreateMeshFactory(std::wstring_view name)
+	{
+		return MakeSharedPtr<T>(name);
+	}
+
+	template <typename T>
+	inline RenderModelPtr CreateModelFactory(std::wstring_view name, uint32_t node_attrib)
+	{
+		return MakeSharedPtr<T>(name, node_attrib);
+	}
+
+	KLAYGE_CORE_API void AddToSceneHelper(SceneNode& node, RenderModel& model);
+	KLAYGE_CORE_API void AddToSceneRootHelper(RenderModel& model);
+
+
 	class KLAYGE_CORE_API StaticMesh : public Renderable
 	{
 	public:
-		StaticMesh(RenderModelPtr const & model, std::wstring const & name);
-		virtual ~StaticMesh();
+		explicit StaticMesh(std::wstring_view name);
 
-		void BuildMeshInfo()
-		{
-			this->DoBuildMeshInfo();
-
-			hw_res_ready_ = true;
-		}
+		void BuildMeshInfo(RenderModel const & model);
 
 		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 		{
@@ -59,25 +71,12 @@ namespace KlayGE
 		}
 
 		void NumLods(uint32_t lods) override;
-		uint32_t NumLods() const override
-		{
-			return static_cast<uint32_t>(rls_.size());
-		}
-		RenderLayout& GetRenderLayout() const override
-		{
-			return this->GetRenderLayout(active_lod_);
-		}
-		RenderLayout& GetRenderLayout(uint32_t lod) const override
-		{
-			return *rls_[lod];
-		}
+		using Renderable::NumLods;
 
-		virtual AABBox const & PosBound() const;
 		virtual void PosBound(AABBox const & aabb);
-		virtual AABBox const & TexcoordBound() const;
+		using Renderable::PosBound;
 		virtual void TexcoordBound(AABBox const & aabb);
-
-		virtual std::wstring const & Name() const;
+		using Renderable::TexcoordBound;
 
 		void NumVertices(uint32_t lod, uint32_t n)
 		{
@@ -138,72 +137,42 @@ namespace KlayGE
 			mtl_id_ = mid;
 		}
 
-		virtual bool HWResourceReady() const override
+		bool HWResourceReady() const override
 		{
 			return hw_res_ready_;
 		}
 
 	protected:
-		virtual void DoBuildMeshInfo();
+		virtual void DoBuildMeshInfo(RenderModel const & model);
 
 	protected:
-		std::wstring name_;
-
-		std::vector<RenderLayoutPtr> rls_;
-
-		AABBox pos_aabb_;
-		AABBox tc_aabb_;
-
 		int32_t mtl_id_;
-
-		std::weak_ptr<RenderModel> model_;
 
 		bool hw_res_ready_;
 	};
 
-	class KLAYGE_CORE_API RenderModel : public Renderable
+	class KLAYGE_CORE_API RenderModel : boost::noncopyable
 	{
 	public:
-		explicit RenderModel(std::wstring const & name);
-		virtual ~RenderModel()
+		explicit RenderModel(SceneNodePtr const & root_node);
+		RenderModel(std::wstring_view name, uint32_t node_attrib);
+		virtual ~RenderModel() noexcept;
+
+		SceneNodePtr const & RootNode() const
 		{
+			return root_node_;
 		}
 
-		void BuildModelInfo()
-		{
-			this->DoBuildModelInfo();
-
-			hw_res_ready_ = true;
-		}
+		void BuildModelInfo();
 
 		virtual bool IsSkinned() const
 		{
 			return false;
 		}
 
-		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
-		{
-			effect_ = effect;
-			technique_ = tech;
-		}
+		uint32_t NumLods() const;
 
-		void NumLods(uint32_t lods) override;
-		uint32_t NumLods() const override;
-		RenderLayout& GetRenderLayout() const override
-		{
-			return *rl_;
-		}
-
-		void OnRenderBegin();
-		void OnRenderEnd();
-
-		AABBox const & PosBound() const;
-		AABBox const & TexcoordBound() const;
-
-		std::wstring const & Name() const
-		{
-			return name_;
-		}
+		void ActiveLod(int32_t lod);
 
 		size_t NumMaterials() const
 		{
@@ -222,31 +191,38 @@ namespace KlayGE
 			return materials_[i];
 		}
 
-		void AddToRenderQueue();
+		template <typename ForwardIterator>
+		void AssignMeshes(ForwardIterator first, ForwardIterator last)
+		{
+			meshes_.assign(first, last);
+		}
+		RenderablePtr const & Mesh(size_t id) const
+		{
+			return meshes_[id];
+		}
+		uint32_t NumMeshes() const
+		{
+			return static_cast<uint32_t>(meshes_.size());
+		}
 
-		virtual void Pass(PassType type);
+		void ForEachMesh(std::function<void(Renderable&)> const & callback) const;
 
-		virtual bool SpecialShading() const;
-		virtual bool TransparencyBackFace() const;
-		virtual bool TransparencyFrontFace() const;
-		virtual bool Reflection() const;
-		virtual bool SimpleForward() const;
+		bool HWResourceReady() const;
 
-		virtual bool HWResourceReady() const override;
+		RenderModelPtr Clone(
+			std::function<RenderModelPtr(std::wstring_view, uint32_t)> const & CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
+		virtual void CloneDataFrom(RenderModel const & source,
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 
 	protected:
-		virtual void UpdateBoundBox() override;
 		virtual void DoBuildModelInfo()
 		{
 		}
 
 	protected:
-		std::wstring name_;
-
-		RenderLayoutPtr rl_;
-
-		AABBox pos_aabb_;
-		AABBox tc_aabb_;
+		SceneNodePtr root_node_;
+		std::vector<RenderablePtr> meshes_;
 
 		std::vector<RenderMaterialPtr> materials_;
 
@@ -254,19 +230,60 @@ namespace KlayGE
 	};
 
 
-	struct KLAYGE_CORE_API Joint
+	class KLAYGE_CORE_API JointComponent : public SceneComponent
 	{
-		std::string name;
+	public:
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
+		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS((SceneComponent))
+#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 
-		Quaternion bind_real;
-		Quaternion bind_dual;
-		float bind_scale;
+		SceneComponentPtr Clone() const override;
 
-		Quaternion inverse_origin_real;
-		Quaternion inverse_origin_dual;
-		float inverse_origin_scale;
+		void BindParams(Quaternion const& real, Quaternion const& dual, float scale);
 
-		int16_t parent;
+		Quaternion const& BindReal() const
+		{
+			return bind_real_;
+		}
+		Quaternion const& BindDual() const
+		{
+			return bind_dual_;
+		}
+		float BindScale() const
+		{
+			return bind_scale_;
+		}
+
+		void InverseOriginParams(Quaternion const& real, Quaternion const& dual, float scale);
+
+		Quaternion const& InverseOriginReal() const
+		{
+			return inverse_origin_real_;
+		}
+		Quaternion const& InverseOriginDual() const
+		{
+			return inverse_origin_dual_;
+		}
+		float InverseOriginScale() const
+		{
+			return inverse_origin_scale_;
+		}
+
+		void InitInverseOriginParams();
+
+	private:
+		Quaternion bind_real_;
+		Quaternion bind_dual_;
+		float bind_scale_;
+
+		Quaternion inverse_origin_real_;
+		Quaternion inverse_origin_dual_;
+		float inverse_origin_scale_;
 	};
 
 	struct KLAYGE_CORE_API KeyFrameSet
@@ -287,7 +304,7 @@ namespace KlayGE
 		AABBox Frame(float frame) const;
 	};
 
-	struct KLAYGE_CORE_API AnimationAction
+	struct KLAYGE_CORE_API Animation
 	{
 		std::string name;
 		uint32_t start_frame;
@@ -297,21 +314,22 @@ namespace KlayGE
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{
 	public:
-		explicit SkinnedModel(std::wstring const & name);
-		virtual ~SkinnedModel()
-		{
-		}
+		explicit SkinnedModel(SceneNodePtr const & root_node);
+		SkinnedModel(std::wstring_view name, uint32_t node_attrib);
 
-		virtual bool IsSkinned() const
+		bool IsSkinned() const override
 		{
 			return true;
 		}
 
-		Joint& GetJoint(uint32_t index)
+		void CloneDataFrom(RenderModel const & source,
+			std::function<StaticMeshPtr(std::wstring_view)> const & CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>) override;
+
+		JointComponentPtr& GetJoint(uint32_t index)
 		{
 			return joints_[index];
 		}
-		Joint const & GetJoint(uint32_t index) const
+		JointComponentPtr const& GetJoint(uint32_t index) const
 		{
 			return joints_[index];
 		}
@@ -325,14 +343,6 @@ namespace KlayGE
 		{
 			joints_.assign(first, last);
 			this->UpdateBinds();
-		}
-		std::vector<float4> const & GetBindRealParts() const
-		{
-			return bind_reals_;
-		}
-		std::vector<float4> const & GetBindDualParts() const
-		{
-			return bind_duals_;
 		}
 		void AttachKeyFrameSets(std::shared_ptr<std::vector<KeyFrameSet>> const & kf)
 		{
@@ -365,22 +375,23 @@ namespace KlayGE
 		void RebindJoints();
 		void UnbindJoints();
 
-		virtual AABBox FramePosBound(uint32_t frame) const;
+		AABBox FramePosBound(uint32_t frame) const;
 
-		void AttachActions(std::shared_ptr<std::vector<AnimationAction>> const & actions);
-		std::shared_ptr<std::vector<AnimationAction>> const & GetActions() const
+		void AttachAnimations(std::shared_ptr<std::vector<Animation>> const & animations);
+		std::shared_ptr<std::vector<Animation>> const & GetAnimations() const
 		{
-			return actions_;
+			return animations_;
 		}
-		uint32_t NumActions() const;
-		void GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
+		uint32_t NumAnimations() const;
+		void GetAnimation(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
 
 	protected:
 		void BuildBones(float frame);
 		void UpdateBinds();
+		void SetToEffect();
 
 	protected:
-		std::vector<Joint> joints_;
+		std::vector<JointComponentPtr> joints_;
 		std::vector<float4> bind_reals_;
 		std::vector<float4> bind_duals_;
 
@@ -390,18 +401,15 @@ namespace KlayGE
 		uint32_t num_frames_;
 		uint32_t frame_rate_;
 
-		std::shared_ptr<std::vector<AnimationAction>> actions_;
+		std::shared_ptr<std::vector<Animation>> animations_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
 	{
 	public:
-		SkinnedMesh(RenderModelPtr const & model, std::wstring const & name);
-		virtual ~SkinnedMesh()
-		{
-		}
+		explicit SkinnedMesh(std::wstring_view name);
 
-		virtual AABBox FramePosBound(uint32_t frame) const;
+		AABBox FramePosBound(uint32_t frame) const;
 		void AttachFramePosBounds(std::shared_ptr<AABBKeyFrameSet> const & frame_pos_aabbs);
 		std::shared_ptr<AABBKeyFrameSet> const & GetFramePosBounds() const
 		{
@@ -413,66 +421,41 @@ namespace KlayGE
 	};
 
 
-	template <typename T>
-	struct CreateMeshFactory
-	{
-		StaticMeshPtr operator()(RenderModelPtr const & model, std::wstring const & name)
-		{
-			return MakeSharedPtr<T>(model, name);
-		}
-	};
-
-	template <typename T>
-	struct CreateModelFactory
-	{
-		RenderModelPtr operator()(std::wstring const & name)
-		{
-			return MakeSharedPtr<T>(name);
-		}
-	};
-
-	template <typename T>
-	struct CreateSceneObjectFactory
-	{
-		SceneObjectPtr operator()(RenderModelPtr const & model)
-		{
-			return MakeSharedPtr<T>(model, SceneObject::SOA_Cullable);
-		}
-	};
-
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+		uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading = nullptr,
+		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr ASyncLoadModel(std::string_view model_name, uint32_t access_hint,
-		std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+		uint32_t node_attrib,
+		std::function<void(RenderModel&)> OnFinishLoading = nullptr,
+		std::function<RenderModelPtr(std::wstring_view, uint32_t)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>,
+		std::function<StaticMeshPtr(std::wstring_view)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>);
 	KLAYGE_CORE_API RenderModelPtr LoadSoftwareModel(std::string_view model_name);
 
-	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & model_name);
+	KLAYGE_CORE_API void SaveModel(RenderModel const & model, std::string_view model_name);
 
 
 	class KLAYGE_CORE_API RenderableLightSourceProxy : public StaticMesh
 	{
 	public:
-		RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name);
+		explicit RenderableLightSourceProxy(std::wstring_view name);
+
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
-		virtual void Update();
+		void AttachLightSrc(LightSourcePtr const & light);
 
-		virtual void OnRenderBegin();
-
-		virtual void AttachLightSrc(LightSourcePtr const & light);
+		void OnRenderBegin() override;
 
 	protected:
-		void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
 		}
 
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameter* model_param_;
-		RenderEffectParameter* light_color_param_;
 		RenderEffectParameter* light_is_projective_param_;
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
@@ -481,19 +464,24 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableCameraProxy : public StaticMesh
 	{
 	public:
-		RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name);
+		explicit RenderableCameraProxy(std::wstring_view name);
+
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
-		virtual void AttachCamera(CameraPtr const & camera);
+		void AttachCamera(CameraPtr const & camera);
 
 	protected:
-		void DoBuildMeshInfo() override
+		void DoBuildMeshInfo(RenderModel const & model) override
 		{
+			KFL_UNUSED(model);
 		}
 
 	private:
 		CameraPtr camera_;
 	};
+
+	KLAYGE_CORE_API RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light);
+	KLAYGE_CORE_API RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera);
 }
 
 #endif			// _MESH_HPP

@@ -35,18 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Quaternion_T<T>::Quaternion_T(Quaternion_T const & rhs) noexcept
-		: quat_(rhs.quat_)
-	{
-	}
-
-	template <typename T>
-	Quaternion_T<T>::Quaternion_T(Quaternion_T&& rhs) noexcept
-		: quat_(std::move(rhs.quat_))
-	{
-	}
-
-	template <typename T>
 	Quaternion_T<T> const & Quaternion_T<T>::Identity() noexcept
 	{
 		static Quaternion_T const out(0, 0, 0, 1);
@@ -106,21 +94,9 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Quaternion_T<T> const Quaternion_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
 	Quaternion_T<T> const Quaternion_T<T>::operator-() const noexcept
 	{
 		return Quaternion_T(-this->x(), -this->y(), -this->z(), -this->w());
-	}
-
-	template <typename T>
-	Vector_T<T, 3> const Quaternion_T<T>::v() const noexcept
-	{
-		return Vector_T<T, 3>(this->x(), this->y(), this->z());
 	}
 
 	template <typename T>

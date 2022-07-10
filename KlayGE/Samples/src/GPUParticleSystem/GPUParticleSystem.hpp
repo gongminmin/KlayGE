@@ -22,8 +22,9 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr particles_;
-	KlayGE::SceneObjectPtr terrain_;
+	KlayGE::SceneNodePtr particles_;
+	KlayGE::RenderablePtr particles_renderable_;
+	KlayGE::SceneNodePtr terrain_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 
@@ -31,6 +32,7 @@ private:
 	KlayGE::FrameBufferPtr scene_buffer_;
 
 	KlayGE::TexturePtr fog_tex_;
+	KlayGE::ShaderResourceViewPtr fog_srv_;
 	KlayGE::FrameBufferPtr fog_buffer_;
 
 	KlayGE::PostProcessPtr blend_pp_;

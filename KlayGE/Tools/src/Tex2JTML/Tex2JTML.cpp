@@ -1,10 +1,40 @@
+/**
+ * @file Tex2JTML.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/StringUtil.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -15,23 +45,12 @@
 #include <vector>
 #include <regex>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
+#include <nonstd/scope.hpp>
+
+#ifndef KLAYGE_DEBUG
+#define CXXOPTS_NO_RTTI
 #endif
-#include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/algorithm/string/split.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-#include <boost/algorithm/string/trim.hpp>
+#include <cxxopts.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/ToolCommon.hpp>
@@ -204,7 +223,7 @@ void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, std::vector<JT
 {
 	if (node->TextureDesc())
 	{
-		JTMLImageRecord jir;
+		auto& jir = jirs.emplace_back();
 		jir.u = TAM_Wrap;
 		jir.v = TAM_Wrap;
 		jir.x = node->Rect().left() / tile_size;
@@ -212,7 +231,6 @@ void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, std::vector<JT
 		jir.w = node->Rect().Width() / tile_size;
 		jir.h = node->Rect().Height() / tile_size;
 		jir.name = node->TextureDesc()->name;
-		jirs.push_back(jir);
 	}
 	if (!node->IsLeaf())
 	{
@@ -287,27 +305,30 @@ void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t 
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	int num_tiles;
 	int tile_size;
 	std::vector<std::string> tex_names;
 	std::string jtml_name;
 
-	boost::program_options::options_description desc("Allowed options");
-	desc.add_options()
-		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input textures names.")
-		("output-name,O", boost::program_options::value<std::string>(), "Output jtml name.")
-		("num-tiles,N", boost::program_options::value<int>(&num_tiles)->default_value(2048), "Number of tiles. Default is 2048.")
-		("tile-size,T", boost::program_options::value<int>(&tile_size)->default_value(128), "Tile size. Default is 128.")
-		("version,v", "Version.");
+	cxxopts::Options options("Tex2JTML", "KlayGE Tex2JTML Generator");
+	// clang-format off
+	options.add_options()
+		("H,help", "Produce help message.")
+		("I,input-name", "Input textures names.", cxxopts::value<std::string>())
+		("O,output-name", "Output jtml name.", cxxopts::value<std::string>())
+		("N,num-tiles", "Number of tiles.", cxxopts::value<int>(num_tiles)->default_value("2048"))
+		("T,tile-size", "Tile size.", cxxopts::value<int>(tile_size)->default_value("128"))
+		("v,version", "Version.");
+	// clang-format on
 
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+	int const argc_backup = argc;
+	auto vm = options.parse(argc, argv);
 
-	if ((argc <= 1) || (vm.count("help") > 0))
+	if ((argc_backup <= 1) || (vm.count("help") > 0))
 	{
-		cout << desc << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("version") > 0)
@@ -319,29 +340,32 @@ int main(int argc, char* argv[])
 	{
 		std::string input_name_str = vm["input-name"].as<std::string>();
 
-		std::vector<std::string> tokens;
-		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
+		std::vector<std::string_view> tokens = StringUtil::Split(input_name_str, StringUtil::IsAnyOf(",;"));
 		for (auto& arg : tokens)
 		{
-			boost::algorithm::trim(arg);
+			arg = StringUtil::Trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
-				tex_names.push_back(arg);
+				tex_names.emplace_back(arg);
 			}
 			else
 			{
-				std::regex const filter(DosWildcardToRegex(arg));
+				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
+				auto const parent = arg_path.parent_path();
+				auto const file_name = arg_path.filename();
 
-				filesystem::directory_iterator end_itr;
-				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
+				std::regex const filter(DosWildcardToRegex(file_name.string()));
+
+				FILESYSTEM_NS::directory_iterator end_itr;
+				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (filesystem::is_regular_file(i->status()))
+					if (FILESYSTEM_NS::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();
 						if (std::regex_match(name, what, filter))
 						{
-							tex_names.push_back(name);
+							tex_names.push_back((parent / name).string());
 						}
 					}
 				}
@@ -351,6 +375,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input textures names." << endl;
+		cout << options.help() << endl;
 		return 1;
 	}
 	if (vm.count("output-name") > 0)
@@ -364,8 +389,6 @@ int main(int argc, char* argv[])
 	}
 
 	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
-
-	Context::Destroy();
 
 	return 0;
 }

@@ -19,13 +19,11 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr refractor_;
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::RenderModelPtr refractor_model_;
+	KlayGE::SceneNodePtr refractor_;
+	KlayGE::SceneNodePtr skybox_;
 
 	KlayGE::TrackballCameraController tb_controller_;
-
-	KlayGE::TexturePtr y_cube_map_;
-	KlayGE::TexturePtr c_cube_map_;
 
 	bool depth_texture_support_;
 	KlayGE::FrameBufferPtr backface_buffer_;

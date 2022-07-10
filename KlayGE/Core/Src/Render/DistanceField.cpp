@@ -31,8 +31,10 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/DistanceField.hpp>
 
-namespace KlayGE
+namespace
 {
+	using namespace KlayGE;
+
 	float EdgeDistance(float2 const & grad, float val)
 	{
 		float df;
@@ -188,6 +190,31 @@ namespace KlayGE
 		} while (changed);
 	}
 
+	void ComputeGradient(std::vector<float> const& img, int w, int h, std::vector<float2>& grad)
+	{
+		BOOST_ASSERT(img.size() == static_cast<size_t>(w * h));
+		BOOST_ASSERT(grad.size() == static_cast<size_t>(w * h));
+
+		grad.assign(w * h, float2(0, 0));
+		for (int y = 1; y < h - 1; ++y)
+		{
+			for (int x = 1; x < w - 1; ++x)
+			{
+				int addr = y * w + x;
+				if ((img[addr] > 0) && (img[addr] < 1))
+				{
+					float s0 = -img[addr - w - 1] + img[addr + w + 1];
+					float s1 = -img[addr + w - 1] + img[addr - w + 1];
+					grad[addr] = MathLib::normalize(
+						float2(s0 + s1 - SQRT2 * (img[addr - 1] - img[addr + 1]), s0 - s1 - SQRT2 * (img[addr - w] - img[addr + w])));
+				}
+			}
+		}
+	}
+} // namespace
+
+namespace KlayGE
+{
 	template KLAYGE_CORE_API void Downsample2x(std::vector<float> const & input_data, uint32_t input_width, uint32_t input_height,
 		std::vector<float>& output_data);
 	template KLAYGE_CORE_API void Downsample2x(std::vector<float2> const & input_data, uint32_t input_width, uint32_t input_height,
@@ -210,28 +237,6 @@ namespace KlayGE
 					+ input_data[(y * 2 + 0) * input_width + (x * 2 + 1)]
 					+ input_data[(y * 2 + 1) * input_width + (x * 2 + 0)]
 					+ input_data[(y * 2 + 1) * input_width + (x * 2 + 1)]) * 0.25f;
-			}
-		}
-	}
-
-	void ComputeGradient(std::vector<float> const & img, int w, int h, std::vector<float2>& grad)
-	{
-		BOOST_ASSERT(img.size() == static_cast<size_t>(w * h));
-		BOOST_ASSERT(grad.size() == static_cast<size_t>(w * h));
-
-		grad.assign(w * h, float2(0, 0));
-		for (int y = 1; y < h - 1; ++ y)
-		{
-			for (int x = 1; x < w - 1; ++ x)
-			{
-				int addr = y * w + x;
-				if ((img[addr] > 0) && (img[addr] < 1))
-				{
-					float s0 = -img[addr - w - 1] + img[addr + w + 1];
-					float s1 = -img[addr + w - 1] + img[addr - w + 1];
-					grad[addr] = MathLib::normalize(float2(s0 + s1 - SQRT2 * (img[addr - 1] - img[addr + 1]),
-						s0 - s1 - SQRT2 * (img[addr - w] - img[addr + w])));
-				}
 			}
 		}
 	}

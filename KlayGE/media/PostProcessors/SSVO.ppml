@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="SSVOUpsample">
+		<input>
+			<pin name="ssvo_tex"/>
+		</input>
+		<output>
+			<pin name="out_tex"/>
+		</output>
+		<shader effect="SSVO.fxml" tech="SSVOUpsample"/>
+	</post_processor>
+</post_processors>

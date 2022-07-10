@@ -10,5 +10,13 @@ params = sys.argv[3:]
 
 my_env = os.environ.copy()
 my_env["PATH"] = "/usr/local/bin:opt/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" + my_env["PATH"]
-ret = subprocess.call(["wineg++", input, "-o", output] + params, stderr = subprocess.STDOUT, env = my_env)
+
+if sys.platform.startswith("darwin"):
+	winegcc_cmd = "x86_64-w64-mingw32-gcc"
+	lib = "-lstdc++"
+elif sys.platform.startswith("linux"):
+	winegcc_cmd = "wineg++"
+	lib = ""
+
+ret = subprocess.call([winegcc_cmd, input, "-o", output, lib] + params, stderr = subprocess.STDOUT, env = my_env)
 sys.exit(ret)

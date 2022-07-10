@@ -1,18 +1,37 @@
-// ShaderObject.cpp
-// KlayGE shader对象类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
-// Homepage: http://www.klayge.org
-//
-// 3.5.0
-// 初次建立 (2006.11.2)
-//
-// 修改记录
-//////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file ShaderObject.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
@@ -82,7 +101,7 @@ namespace
 		~D3DCompilerLoader()
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			::FreeLibrary(mod_d3dcompiler_);
+			mod_d3dcompiler_.Free();
 #endif
 		}
 
@@ -98,16 +117,15 @@ namespace
 			std::vector<uint8_t>& code, std::string& error_msgs) const
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			ID3DBlob* code_blob = nullptr;
-			ID3DBlob* error_msgs_blob = nullptr;
+			com_ptr<ID3DBlob> code_blob;
+			com_ptr<ID3DBlob> error_msgs_blob;
 			HRESULT hr = DynamicD3DCompile_(src_data.c_str(), static_cast<UINT>(src_data.size()),
 				nullptr, defines, nullptr, entry_point,
-				target, flags1, flags2, &code_blob, &error_msgs_blob);
+				target, flags1, flags2, code_blob.put(), error_msgs_blob.put());
 			if (code_blob)
 			{
 				uint8_t const * p = static_cast<uint8_t const *>(code_blob->GetBufferPointer());
 				code.assign(p, p + code_blob->GetBufferSize());
-				code_blob->Release();
 			}
 			else
 			{
@@ -117,7 +135,6 @@ namespace
 			{
 				char const * p = static_cast<char const *>(error_msgs_blob->GetBufferPointer());
 				error_msgs.assign(p, p + error_msgs_blob->GetBufferSize());
-				error_msgs_blob->Release();
 			}
 			else
 			{
@@ -241,12 +258,11 @@ namespace
 		HRESULT D3DStripShader(std::vector<uint8_t> const & shader_code, uint32_t strip_flags, std::vector<uint8_t>& stripped_code)
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			ID3DBlob* stripped_blob = nullptr;
-			HRESULT hr = DynamicD3DStripShader_(&shader_code[0], static_cast<UINT>(shader_code.size()), strip_flags, &stripped_blob);
+			com_ptr<ID3DBlob> stripped_blob;
+			HRESULT hr = DynamicD3DStripShader_(&shader_code[0], static_cast<UINT>(shader_code.size()), strip_flags, stripped_blob.put());
 
 			uint8_t const * p = static_cast<uint8_t const *>(stripped_blob->GetBufferPointer());
 			stripped_code.assign(p, p + stripped_blob->GetBufferSize());
-			stripped_blob->Release();
 
 			return hr;
 #else
@@ -262,12 +278,11 @@ namespace
 		D3DCompilerLoader()
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
-			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
-			KLAYGE_ASSUME(mod_d3dcompiler_ != nullptr);
+			mod_d3dcompiler_.Load("d3dcompiler_47.dll");
 
-			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
-			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
-			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
+			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(mod_d3dcompiler_.GetProcAddress("D3DCompile"));
+			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(mod_d3dcompiler_.GetProcAddress("D3DReflect"));
+			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(mod_d3dcompiler_.GetProcAddress("D3DStripShader"));
 #endif
 		}
 
@@ -280,7 +295,7 @@ namespace
 		typedef HRESULT (WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags,
 			ID3DBlob** ppStrippedBlob);
 
-		HMODULE mod_d3dcompiler_;
+		DllLoader mod_d3dcompiler_;
 		D3DCompileFunc DynamicD3DCompile_;
 		D3DReflectFunc DynamicD3DReflect_;
 		D3DStripShaderFunc DynamicD3DStripShader_;
@@ -292,17 +307,16 @@ namespace
 
 namespace KlayGE
 {
-	ShaderObject::ShaderObject()
-		: has_discard_(false), has_tessellation_(false),
-			cs_block_size_x_(0), cs_block_size_y_(0), cs_block_size_z_(0)
+	ShaderStageObject::ShaderStageObject(ShaderStage stage) noexcept : stage_(stage)
 	{
 	}
 
+	ShaderStageObject::~ShaderStageObject() noexcept = default;
+
 #if KLAYGE_IS_DEV_PLATFORM
-	std::vector<uint8_t> ShaderObject::CompileToDXBC(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass,
-			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-			char const * func_name, char const * shader_profile, uint32_t flags)
+	std::vector<uint8_t> ShaderStageObject::CompileToDXBC(ShaderStage stage, RenderEffect const& effect, RenderTechnique const& tech,
+		RenderPass const& pass, std::vector<std::pair<char const*, char const*>> const& api_special_macros, char const* func_name,
+		char const* shader_profile, uint32_t flags, void** reflector, bool strip)
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -321,113 +335,88 @@ namespace KlayGE
 		std::string err_msg;
 		std::vector<D3D_SHADER_MACRO> macros;
 
-		for (uint32_t i = 0; i < api_special_macros.size(); ++ i)
+		for (uint32_t i = 0; i < api_special_macros.size(); ++i)
 		{
-			D3D_SHADER_MACRO macro = { api_special_macros[i].first, api_special_macros[i].second };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{api_special_macros[i].first, api_special_macros[i].second});
 		}
 
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_FLIPPING", flipping_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_RENDER_TO_TEX_ARRAY", render_to_tex_array_str.c_str() };
-			macros.push_back(macro);
-		}
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_SHADER_MODEL", max_sm_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_FLIPPING", flipping_str.c_str()});
+		macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_RENDER_TO_TEX_ARRAY", render_to_tex_array_str.c_str()});
 		if (!caps.fp_color_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_NO_FP_COLOR", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_NO_FP_COLOR", "1"});
 		}
 		if (caps.pack_to_rgba_required)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_PACK_TO_RGBA", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_PACK_TO_RGBA", "1"});
 		}
 		if (caps.UavFormatSupport(EF_ABGR16F))
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_TYPED_UAV_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_TYPED_UAV_SUPPORT", "1"});
 		}
 		if (caps.uavs_at_every_stage_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT", "1"});
 		}
 		if (caps.explicit_multi_sample_support)
 		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1" };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1"});
+		}
+		if (caps.vp_rt_index_at_every_stage_support)
+		{
+			macros.emplace_back(D3D_SHADER_MACRO{"KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT", "1"});
 		}
 		{
-			D3D_SHADER_MACRO macro_shader_type = { "", "1" };
-			switch (type)
+			char const* type_name;
+			switch (stage)
 			{
-			case ST_VertexShader:
-				macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
+			case ShaderStage::Vertex:
+				type_name = "KLAYGE_VERTEX_SHADER";
 				break;
 
-			case ST_PixelShader:
-				macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
+			case ShaderStage::Pixel:
+				type_name = "KLAYGE_PIXEL_SHADER";
 				break;
 
-			case ST_GeometryShader:
-				macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
+			case ShaderStage::Geometry:
+				type_name = "KLAYGE_GEOMETRY_SHADER";
 				break;
 
-			case ST_ComputeShader:
-				macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
+			case ShaderStage::Compute:
+				type_name = "KLAYGE_COMPUTE_SHADER";
 				break;
 
-			case ST_HullShader:
-				macro_shader_type.Name = "KLAYGE_HULL_SHADER";
+			case ShaderStage::Hull:
+				type_name = "KLAYGE_HULL_SHADER";
 				break;
 
-			case ST_DomainShader:
-				macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
+			case ShaderStage::Domain:
+				type_name = "KLAYGE_DOMAIN_SHADER";
 				break;
 
 			default:
-				KFL_UNREACHABLE("Invalid shader type");
+				KFL_UNREACHABLE("Invalid shader stage");
 			}
-			macros.push_back(macro_shader_type);
+			macros.emplace_back(D3D_SHADER_MACRO{type_name, "1"});
 		}
 
-		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		for (uint32_t i = 0; i < tech.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
-			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{name_value.first.c_str(), name_value.second.c_str()});
 		}
 
-		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		for (uint32_t i = 0; i < pass.NumMacros(); ++i)
 		{
 			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
-			D3D_SHADER_MACRO macro = { name_value.first.c_str(), name_value.second.c_str() };
-			macros.push_back(macro);
+			macros.emplace_back(D3D_SHADER_MACRO{name_value.first.c_str(), name_value.second.c_str()});
 		}
 
-		{
-			D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
-			macros.push_back(macro_end);
-		}
+		macros.emplace_back(D3D_SHADER_MACRO{nullptr, nullptr});
 
 		D3DCompilerLoader::Instance().D3DCompile(hlsl_shader_text, &macros[0],
 			func_name, shader_profile,
@@ -480,12 +469,12 @@ namespace KlayGE
 							err_str = "(0): " + err_str;
 						}
 
-						msgs.push_back(err_str);
+						msgs.emplace_back(std::move(err_str));
 					}
 				}
 			}
 
-			for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
+			for (auto iter = err_lines.begin(); iter != err_lines.end(); ++iter)
 			{
 				if (iter->first >= 0)
 				{
@@ -499,7 +488,7 @@ namespace KlayGE
 					while (iss && ((iter->first - line) >= 3))
 					{
 						std::getline(iss, s);
-						++ line;
+						++line;
 					}
 					while (iss && (abs(line - iter->first) < 3))
 					{
@@ -512,7 +501,7 @@ namespace KlayGE
 
 						LogInfo() << line << ' ' << s << std::endl;
 
-						++ line;
+						++line;
 					}
 					LogInfo() << "..." << std::endl;
 				}
@@ -524,19 +513,79 @@ namespace KlayGE
 			}
 		}
 
+		if (reflector != nullptr)
+		{
+			D3DCompilerLoader::Instance().D3DReflect(code, reflector);
+		}
+
+		if (strip)
+		{
+#ifndef KLAYGE_PLATFORM_WINDOWS
+			enum D3DCOMPILER_STRIP_FLAGS
+			{
+				D3DCOMPILER_STRIP_REFLECTION_DATA = 1,
+				D3DCOMPILER_STRIP_DEBUG_INFO = 2,
+				D3DCOMPILER_STRIP_TEST_BLOBS = 4,
+				D3DCOMPILER_STRIP_PRIVATE_DATA = 8,
+				D3DCOMPILER_STRIP_ROOT_SIGNATURE = 16,
+			};
+#endif
+
+			const uint32_t strip_flags = D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS |
+										 D3DCOMPILER_STRIP_PRIVATE_DATA | D3DCOMPILER_STRIP_ROOT_SIGNATURE;
+			D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, code);
+		}
+
 		return code;
 	}
-
-	void ShaderObject::ReflectDXBC(std::vector<uint8_t> const & code, void** reflector)
-	{
-		D3DCompilerLoader::Instance().D3DReflect(code, reflector);
-	}
-
-	std::vector<uint8_t> ShaderObject::StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags)
-	{
-		std::vector<uint8_t> ret;
-		D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, ret);
-		return ret;
-	}
 #endif
+
+
+	ShaderObject::ShaderObject() : ShaderObject(MakeSharedPtr<ShaderObject::Immutable>())
+	{
+	}
+
+	ShaderObject::ShaderObject(std::shared_ptr<ShaderObject::Immutable> immutable) noexcept : immutable_(std::move(immutable))
+	{
+	}
+
+	ShaderObject::~ShaderObject() noexcept = default;
+
+	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage)
+	{
+		auto& curr_shader_stage = immutable_->shader_stages_[static_cast<uint32_t>(stage)];
+		if (curr_shader_stage != shader_stage)
+		{
+			curr_shader_stage = shader_stage;
+			shader_stages_dirty_ = true;
+			hw_res_ready_ = false;
+		}
+	}
+	
+	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const noexcept
+	{
+		return immutable_->shader_stages_[static_cast<uint32_t>(stage)];
+	}
+
+	void ShaderObject::LinkShaders(RenderEffect& effect)
+	{
+		if (shader_stages_dirty_)
+		{
+			immutable_->is_validate_ = true;
+			for (uint32_t stage_index = 0; stage_index < NumShaderStages; ++stage_index)
+			{
+				ShaderStage const stage = static_cast<ShaderStage>(stage_index);
+				auto const& shader_stage = this->Stage(stage);
+				if (shader_stage)
+				{
+					immutable_->is_validate_ &= shader_stage->Validate();
+				}
+			}
+
+			this->DoLinkShaders(effect);
+
+			shader_stages_dirty_ = false;
+			hw_res_ready_ = true;
+		}
+	}
 }

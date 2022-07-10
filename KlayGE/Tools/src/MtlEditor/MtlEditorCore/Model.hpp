@@ -12,7 +12,7 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 	friend class DetailedSkinnedMesh;
 
 public:
-	explicit DetailedSkinnedModel(std::wstring const & name);
+	explicit DetailedSkinnedModel(std::wstring_view name, uint32_t node_attrib);
 
 	void DoBuildModelInfo() override;
 
@@ -22,14 +22,6 @@ public:
 	}
 
 	void SetTime(float time);
-
-	void VisualizeLighting();
-	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
-	void VisualizeTexture(int slot);
-
-	void UpdateEffectAttrib(KlayGE::uint32_t mtl_index);
-	void UpdateMaterial(KlayGE::uint32_t mtl_index);
-	void UpdateTechniques(KlayGE::uint32_t mtl_index);
 
 	KlayGE::uint32_t CopyMaterial(KlayGE::uint32_t mtl_index);
 	KlayGE::uint32_t ImportMaterial(std::string const & name);
@@ -42,7 +34,7 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechnique* visualize_gbuffer_mrt_techs_[2];
+	KlayGE::RenderTechnique* visualize_gbuffer_techs_[2];
 
 	bool is_skinned_;
 };
@@ -50,11 +42,7 @@ private:
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
-
-	void DoBuildMeshInfo() override;
-
-	void OnRenderBegin();
+	explicit DetailedSkinnedMesh(std::wstring_view name);
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -64,16 +52,22 @@ public:
 	void UpdateMaterial();
 	virtual void UpdateTechniques() override;
 
+protected:
+	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
+
 private:
 	int visualize_;
+
+	DetailedSkinnedModel const * model_;
 };
 
 class SkeletonMesh : public KlayGE::SkinnedMesh
 {
 public:
-	explicit SkeletonMesh(KlayGE::RenderModelPtr const & model);
+	explicit SkeletonMesh(KlayGE::RenderModel const & model);
 
-	void OnRenderBegin() override;
+private:
+	DetailedSkinnedModel const * model_;
 };
 
 #endif		// _MTL_EDITOR_CORE_MODEL_HPP

@@ -24,7 +24,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 
 namespace KlayGE
@@ -72,7 +72,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
-	void OGLESTexture1D::CopyToTexture(Texture& target)
+	void OGLESTexture1D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -80,22 +80,21 @@ namespace KlayGE
 		{
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				this->CopyToSubTexture1D(target,
-					array_index, level, 0, target.Width(level),
-					array_index, level, 0, this->Width(level));
+				this->CopyToSubTexture1D(
+					target, array_index, level, 0, target.Width(level), array_index, level, 0, this->Width(level), filter);
 			}
 		}
 	}
 
-	void OGLESTexture1D::CopyToSubTexture1D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	void OGLESTexture1D::CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
 
@@ -120,7 +119,7 @@ namespace KlayGE
 				}
 			}
 
-			OGLESTexture& ogl_target = *checked_cast<OGLESTexture*>(&target);
+			auto& ogl_target = checked_cast<OGLESTexture&>(target);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 			if (array_size_ > 1)
 			{
@@ -182,8 +181,8 @@ namespace KlayGE
 				}
 				else
 				{
-					this->ResizeTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width,
-							src_array_index, src_level, src_x_offset, src_width, true);
+					this->ResizeTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width, src_array_index, src_level,
+						src_x_offset, src_width, filter);
 				}
 			}
 		}
@@ -224,7 +223,7 @@ namespace KlayGE
 
 				uint32_t const w = this->Width(level);
 
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
@@ -264,7 +263,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture1D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLESTexture1D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 
@@ -275,7 +274,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 
 		if (!re.HackForAdreno())
@@ -448,7 +447,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t width,
 		void const * data)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

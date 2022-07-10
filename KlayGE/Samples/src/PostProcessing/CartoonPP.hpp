@@ -9,7 +9,8 @@ class CartoonPostProcess : public KlayGE::PostProcess
 public:
 	CartoonPostProcess();
 
-	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex);
+	void InputPin(KlayGE::uint32_t index, KlayGE::ShaderResourceViewPtr const& srv) override;
+	using PostProcess::InputPin;
 };
 
 #endif		// _CARTOONPP_HPP

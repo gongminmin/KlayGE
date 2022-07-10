@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<platform name="d3d_11_0" major_version="11" minor_version="0">
+	<requires_flipping value="1"/>
+	<native_shader_fourcc value="DXBC"/>
+	<native_shader_version value="6"/>
+
+	<max_shader_model major="5" minor="0"/>
+
+	<max_texture_depth value="2048"/>
+	<max_texture_array_length value="2048"/>
+	<max_pixel_texture_units value="16"/>
+	<max_simultaneous_rts value="8"/>
+
+	<fp_color_support value="1"/>
+	<pack_to_rgba_required value="0"/>
+	<render_to_texture_array_support value="1"/>
+	<uavs_at_every_stage_support value="0"/>
+	<explicit_multi_sample_support value="1"/>
+
+	<gs_support value="1"/>
+	<cs_support value="1"/>
+	<hs_support value="1"/>
+	<ds_support value="1"/>
+
+	<bc1_support value="1"/>
+	<bc2_support value="1"/>
+	<bc3_support value="1"/>
+	<bc4_support value="1"/>
+	<bc5_support value="1"/>
+	<bc6_support value="1"/>
+	<bc7_support value="1"/>
+	<etc1_support value="0"/>
+	<r16_support value="1"/>
+	<r16f_support value="1"/>
+	<srgb_support value="1"/>
+
+	<frag_depth_support value="1"/>
+</platform>

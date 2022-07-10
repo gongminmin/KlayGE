@@ -49,7 +49,7 @@
 
 namespace KlayGE
 {
-	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 	{
 		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		if (win != nullptr)
@@ -63,17 +63,16 @@ namespace KlayGE
 	}
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam)
+	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam) noexcept
 	{
 		KFL_UNUSED(dc_mon);
 		KFL_UNUSED(rc_mon);
 
-		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
-		if (shcore)
+		DllLoader shcore;
+		if (shcore.Load("SHCore.dll"))
 		{
 			typedef HRESULT (CALLBACK *GetDpiForMonitorFunc)(HMONITOR mon, MONITOR_DPI_TYPE dpi_type, UINT* dpi_x, UINT* dpi_y);
-			GetDpiForMonitorFunc DynamicGetDpiForMonitor
-				= reinterpret_cast<GetDpiForMonitorFunc>(::GetProcAddress(shcore, "GetDpiForMonitor"));
+			auto* DynamicGetDpiForMonitor = reinterpret_cast<GetDpiForMonitorFunc>(shcore.GetProcAddress("GetDpiForMonitor"));
 			if (DynamicGetDpiForMonitor)
 			{
 				UINT dpi_x, dpi_y;
@@ -84,7 +83,7 @@ namespace KlayGE
 				}
 			}
 
-			::FreeLibrary(shcore);
+			shcore.Free();
 		}
 
 		return TRUE;
@@ -104,6 +103,7 @@ namespace KlayGE
 		{
 			wnd_ = static_cast<HWND>(native_wnd);
 			default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
+			win_style_ = static_cast<uint32_t>(GetWindowLongPtrW(wnd_, GWL_STYLE));
 			::SetWindowLongPtrW(wnd_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc));
 			external_wnd_ = true;
 		}
@@ -142,7 +142,7 @@ namespace KlayGE
 			// Create our main window
 			// Pass pointer to self
 			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(), win_style_, settings.left, settings.top,
-				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+				rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInst, nullptr);
 
 			default_wnd_proc_ = ::DefWindowProc;
 			external_wnd_ = false;
@@ -341,22 +341,22 @@ namespace KlayGE
 	void Window::DetectsDpi()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
-		if (shcore)
+		DllLoader shcore;
+		if (shcore.Load("SHCore.dll"))
 		{
 			typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS value);
-			SetProcessDpiAwarenessFunc DynamicSetProcessDpiAwareness
-				= reinterpret_cast<SetProcessDpiAwarenessFunc>(::GetProcAddress(shcore, "SetProcessDpiAwareness"));
+			auto* DynamicSetProcessDpiAwareness =
+				reinterpret_cast<SetProcessDpiAwarenessFunc>(shcore.GetProcAddress("SetProcessDpiAwareness"));
 
 			DynamicSetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
-			::FreeLibrary(shcore);
+			shcore.Free();
 		}
 
 		typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
-		HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
-		KLAYGE_ASSUME(ntdll != nullptr);
-		RtlGetVersionFunc DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
+		DllLoader ntdll;
+		ntdll.Load("ntdll.dll");
+		auto* DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(ntdll.GetProcAddress("RtlGetVersion"));
 		if (DynamicRtlGetVersion)
 		{
 			OSVERSIONINFOEXW os_ver_info;

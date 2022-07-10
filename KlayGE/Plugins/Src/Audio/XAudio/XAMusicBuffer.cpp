@@ -30,13 +30,14 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/COMPtr.hpp>
+#include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <functional>
+#include <limits>
 
 #include <boost/assert.hpp>
 
@@ -44,21 +45,19 @@
 
 namespace KlayGE
 {
-	class MusicVoiceContext : public IXAudio2VoiceCallback
+	class MusicVoiceContext final : public IXAudio2VoiceCallback
 	{
 	public:
 		MusicVoiceContext()
 			: buffer_end_event_(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS))
 		{
 		}
-		virtual ~MusicVoiceContext()
-		{
-			::CloseHandle(buffer_end_event_);
-		}
+
+		virtual ~MusicVoiceContext() noexcept = default;
 
 		HANDLE GetBufferEndEvent() const
 		{
-			return buffer_end_event_;
+			return buffer_end_event_.get();
 		}
 
 		STDMETHOD_(void, OnVoiceProcessingPassStart)(UINT32)
@@ -75,7 +74,7 @@ namespace KlayGE
 		}
 		STDMETHOD_(void, OnBufferEnd)(void*)
 		{
-			::SetEvent(buffer_end_event_);
+			::SetEvent(buffer_end_event_.get());
 		}
 		STDMETHOD_(void, OnLoopEnd)(void*)
 		{
@@ -85,7 +84,7 @@ namespace KlayGE
 		}
 
 	private:
-		HANDLE buffer_end_event_;
+		Win32UniqueHandle buffer_end_event_;
 	};
 
 	XAMusicBuffer::XAMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume)
@@ -99,7 +98,7 @@ namespace KlayGE
 		audio_data_.resize(wfx.nAvgBytesPerSec * buffer_seconds);
 		buffer_size_ = wfx.nAvgBytesPerSec / BUFFERS_PER_SECOND;
 
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		auto xaudio = ae.XAudio();
 
@@ -108,7 +107,7 @@ namespace KlayGE
 		source_voice_ = std::shared_ptr<IXAudio2SourceVoice>(source_voice, std::mem_fn(&IXAudio2SourceVoice::DestroyVoice));
 
 		emitter_.ChannelCount = 1;
-		emitter_.CurveDistanceScaler = FLT_MIN;
+		emitter_.CurveDistanceScaler = std::numeric_limits<float>::min();
 		emitter_.OrientTop = { 0, 1, 0 };
 
 		output_matrix_.resize(ae.MasteringVoiceChannels());
@@ -150,8 +149,7 @@ namespace KlayGE
 					break;
 				}
 
-				::WaitForSingleObjectEx(checked_cast<MusicVoiceContext*>(voice_call_back_.get())->GetBufferEndEvent(),
-					INFINITE, FALSE);
+				::WaitForSingleObjectEx(checked_cast<MusicVoiceContext&>(*voice_call_back_).GetBufferEndEvent(), INFINITE, FALSE);
 			}
 
 			if (this->FillData(buffer_size_))
@@ -182,7 +180,7 @@ namespace KlayGE
 
 	void XAMusicBuffer::DoPlay(bool loop)
 	{
-		auto const & ae = *checked_cast<XAAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance());
+		auto const& ae = checked_cast<XAAudioEngine const&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance());
 
 		ae.X3DAudioCalculate(&emitter_, X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER, &dsp_settings_);
 
@@ -192,7 +190,7 @@ namespace KlayGE
 		curr_buffer_index_ = 0;
 		loop_ = loop;
 
-		play_thread_ = Context::Instance().ThreadPool()([this] { this->LoopUpdateBuffer(); });
+		play_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoopUpdateBuffer(); });
 
 		stopped_ = false;
 		{
@@ -209,8 +207,8 @@ namespace KlayGE
 		if (!stopped_)
 		{
 			stopped_ = true;
-			::SetEvent(checked_cast<MusicVoiceContext*>(voice_call_back_.get())->GetBufferEndEvent());
-			play_thread_();
+			::SetEvent(checked_cast<MusicVoiceContext&>(*voice_call_back_).GetBufferEndEvent());
+			play_thread_.wait();
 		}
 
 		HRESULT hr = source_voice_->Stop();

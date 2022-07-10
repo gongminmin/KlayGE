@@ -24,7 +24,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 
 namespace KlayGE
@@ -82,7 +82,7 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
-	void OGLESTexture2D::CopyToTexture(Texture& target)
+	void OGLESTexture2D::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -90,22 +90,22 @@ namespace KlayGE
 		{
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				this->CopyToSubTexture2D(target,
-					array_index, level, 0, 0, target.Width(level), target.Height(level),
-					array_index, level, 0, 0, this->Width(level), this->Height(level));
+				this->CopyToSubTexture2D(target, array_index, level, 0, 0, target.Width(level), target.Height(level), array_index, level, 0,
+					0, this->Width(level), this->Height(level), filter);
 			}
 		}
 	}
 
-	void OGLESTexture2D::CopyToSubTexture2D(Texture& target,
-			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void OGLESTexture2D::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
 
@@ -130,7 +130,7 @@ namespace KlayGE
 				}
 			}
 
-			OGLESTexture& ogl_target = *checked_cast<OGLESTexture*>(&target);
+			auto& ogl_target = checked_cast<OGLESTexture&>(target);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 			if (array_size_ > 1)
 			{
@@ -191,20 +191,21 @@ namespace KlayGE
 		else
 		{
 			this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 		}
 	}
 	
-	void OGLESTexture2D::CopyToSubTextureCube(Texture& target,
-			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	void OGLESTexture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
 		{
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
 
@@ -232,11 +233,13 @@ namespace KlayGE
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 			if (target.ArraySize() > 1)
 			{
-				glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
+				glFramebufferTextureLayer(
+					GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
 			}
 			else
 			{
-				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + dst_face, checked_cast<OGLESTexture*>(&target)->GLTexture(), dst_level);
+				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + dst_face,
+					checked_cast<OGLESTexture&>(target).GLTexture(), dst_level);
 			}
 
 			glBlitFramebuffer(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
@@ -290,7 +293,7 @@ namespace KlayGE
 			else
 			{
 				this->ResizeTextureCube(target, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-							src_array_index, CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+							src_array_index, CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 			}
 		}
 	}
@@ -336,7 +339,7 @@ namespace KlayGE
 				uint32_t const w = this->Width(level);
 				uint32_t const h = this->Height(level);
 
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
@@ -376,7 +379,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void OGLESTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 
@@ -387,7 +390,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
 
 		if (!re.HackForAdreno())
@@ -563,7 +566,7 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;

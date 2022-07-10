@@ -1,0 +1,17 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "normal",
+
+	"prefered_format": "BC5",
+
+	"rgb_to_lum": true,
+
+	"bump":
+	{
+		"to_normal": true,
+		"scale": 0.2
+	}
+}

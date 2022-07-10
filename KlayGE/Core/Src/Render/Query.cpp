@@ -16,23 +16,5 @@
 
 namespace KlayGE
 {
-	Query::~Query()
-	{
-	}
-
-	OcclusionQuery::~OcclusionQuery()
-	{
-	}
-
-	ConditionalRender::~ConditionalRender()
-	{
-	}
-
-	TimerQuery::~TimerQuery()
-	{
-	}
-
-	SOStatisticsQuery::~SOStatisticsQuery()
-	{
-	}
+	Query::~Query() noexcept = default;
 }

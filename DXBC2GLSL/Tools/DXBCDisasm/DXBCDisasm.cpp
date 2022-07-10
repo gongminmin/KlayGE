@@ -33,16 +33,19 @@
 #include <iostream>
 #include <fstream>
 
-void usage()
+namespace
 {
-	std::cerr << "DirectX Bytecode Disassembler.\n";
-	std::cerr << "This program is free software, released under a GPL license\n";
-	std::cerr << "Not affiliated with or endorsed by Microsoft in any way\n";
-	std::cerr << "Latest version available from http://www.klayge.org/\n";
-	std::cerr << "\n";
-	std::cerr << "Usage: DXBCDisasm FILE [OUTPUT]\n";
-	std::cerr << std::endl;
-}
+	void usage()
+	{
+		std::cerr << "DirectX Bytecode Disassembler.\n";
+		std::cerr << "This program is free software, released under a GPL license\n";
+		std::cerr << "Not affiliated with or endorsed by Microsoft in any way\n";
+		std::cerr << "Latest version available from http://www.klayge.org/\n";
+		std::cerr << "\n";
+		std::cerr << "Usage: DXBCDisasm FILE [OUTPUT]\n";
+		std::cerr << std::endl;
+	}
+} // namespace
 
 int main(int argc, char** argv)
 {

@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
+#include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -23,42 +23,137 @@
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
-#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11GraphicsBuffer.hpp>
 
 namespace KlayGE
 {
 	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
-											uint32_t size_in_byte, ElementFormat fmt)
-						: GraphicsBuffer(usage, access_hint, size_in_byte),
-							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
+											uint32_t size_in_byte, uint32_t structure_byte_stride)
+						: GraphicsBuffer(usage, access_hint, size_in_byte, structure_byte_stride),
+							bind_flags_(bind_flags)
 	{
-		if ((access_hint_ & EAH_GPU_Structured) && (fmt_as_shader_res_ != EF_Unknown))
+		if ((access_hint_ & EAH_GPU_Structured) && (structure_byte_stride != 0))
 		{
 			// Structured buffer can't be vb or ib at the same time.
 			bind_flags_ = 0;
 		}
 
-		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11GraphicsBuffer::D3DRenderTargetView() const
+	ID3D11ShaderResourceViewPtr const & D3D11GraphicsBuffer::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
 	{
-		if (buffer_ && !d3d_rt_view_)
+		BOOST_ASSERT(pf != EF_Unknown);
+		BOOST_ASSERT(first_elem + num_elems <= size_in_byte_ / NumFormatBytes(pf));
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_elem);
+		HashCombine(hash_val, num_elems);
+
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+			desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(pf);
+			desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+			desc.Buffer.ElementOffset = first_elem;
+			desc.Buffer.ElementWidth = num_elems;
+
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			TIFHR(d3d_device_->CreateShaderResourceView(d3d_buffer_.get(), &desc, d3d_sr_view.put()));
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
+		}
+	}
+
+	ID3D11RenderTargetViewPtr const & D3D11GraphicsBuffer::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		BOOST_ASSERT(pf != EF_Unknown);
+		BOOST_ASSERT(first_elem + num_elems <= size_in_byte_ / NumFormatBytes(pf));
+		BOOST_ASSERT(access_hint_ & EAH_GPU_Write);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_elem);
+		HashCombine(hash_val, num_elems);
+
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
+		}
+		else
 		{
 			D3D11_RENDER_TARGET_VIEW_DESC desc;
-			desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			desc.Format = D3D11Mapping::MappingFormat(pf);
 			desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
-			desc.Buffer.ElementOffset = 0;
-			desc.Buffer.ElementWidth = this->Size() / NumFormatBytes(fmt_as_shader_res_);
+			desc.Buffer.ElementOffset = first_elem;
+			desc.Buffer.ElementWidth = num_elems;
 
-			ID3D11RenderTargetView* rt_view;
-			TIFHR(d3d_device_->CreateRenderTargetView(buffer_.get(), &desc, &rt_view));
-			d3d_rt_view_ = MakeCOMPtr(rt_view);
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			TIFHR(d3d_device_->CreateRenderTargetView(d3d_buffer_.get(), &desc, d3d_rt_view.put()));
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
-		return d3d_rt_view_;
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11GraphicsBuffer::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		BOOST_ASSERT(pf != EF_Unknown);
+		BOOST_ASSERT(first_elem + num_elems <= size_in_byte_ / NumFormatBytes(pf));
+		BOOST_ASSERT(access_hint_ & EAH_GPU_Unordered);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_elem);
+		HashCombine(hash_val, num_elems);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+			if (access_hint_ & EAH_Raw)
+			{
+				uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			}
+			else if (access_hint_ & EAH_GPU_Structured)
+			{
+				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+			}
+			else
+			{
+				uav_desc.Format = D3D11Mapping::MappingFormat(pf);
+			}
+			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			uav_desc.Buffer.FirstElement = first_elem;
+			uav_desc.Buffer.NumElements = num_elems;
+			uav_desc.Buffer.Flags = 0;
+			if (access_hint_ & EAH_Raw)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_RAW;
+			}
+			if (access_hint_ & EAH_Append)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
+			}
+			if (access_hint_ & EAH_Counter)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
+			}
+
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			TIFHR(d3d_device_->CreateUnorderedAccessView(d3d_buffer_.get(), &uav_desc, d3d_ua_view.put()));
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
+		}
 	}
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
@@ -151,73 +246,27 @@ namespace KlayGE
 		D3D11_BUFFER_DESC desc = {};
 		this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
 		desc.ByteWidth = size_in_byte_;
-		desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
+		desc.StructureByteStride = structure_byte_stride_;
 
-		ID3D11Buffer* buffer;
-		TIFHR(d3d_device_->CreateBuffer(&desc, p_subres, &buffer));
-		buffer_ = MakeCOMPtr(buffer);
-
-		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
-		{
-			D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-			sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
-			sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-			sr_desc.Buffer.ElementOffset = 0;
-			sr_desc.Buffer.ElementWidth = size_in_byte_ / desc.StructureByteStride;
-
-			ID3D11ShaderResourceView* d3d_sr_view;
-			TIFHR(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
-			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-		}
-
-		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
-		{
-			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-			if (access_hint_ & EAH_Raw)
-			{
-				uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
-			}
-			else if (access_hint_ & EAH_GPU_Structured)
-			{
-				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
-			}
-			else
-			{
-				uav_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
-			}
-			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-			uav_desc.Buffer.FirstElement = 0;
-			uav_desc.Buffer.NumElements = size_in_byte_ / desc.StructureByteStride;
-			uav_desc.Buffer.Flags = 0;
-			if (access_hint_ & EAH_Raw)
-			{
-				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_RAW;
-			}
-			if (access_hint_ & EAH_Append)
-			{
-				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
-			}
-			if (access_hint_ & EAH_Counter)
-			{
-				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
-			}
-
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			TIFHR(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
-			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
-		}
+		TIFHR(d3d_device_->CreateBuffer(&desc, p_subres, d3d_buffer_.put()));
 	}
 
 	void D3D11GraphicsBuffer::DeleteHWResource()
 	{
-		d3d_sr_view_.reset();
-		d3d_ua_view_.reset();
-		buffer_.reset();
+		d3d_sr_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_buffer_.reset();
+	}
+
+	bool D3D11GraphicsBuffer::HWResourceReady() const
+	{
+		return d3d_buffer_.get() ? true : false;
 	}
 
 	void* D3D11GraphicsBuffer::Map(BufferAccess ba)
 	{
-		BOOST_ASSERT(buffer_);
+		BOOST_ASSERT(d3d_buffer_);
 
 		D3D11_MAP type;
 		switch (ba)
@@ -250,15 +299,15 @@ namespace KlayGE
 		}
 
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIFHR(d3d_imm_ctx_->Map(buffer_.get(), 0, type, 0, &mapped));
+		TIFHR(d3d_imm_ctx_->Map(d3d_buffer_.get(), 0, type, 0, &mapped));
 		return mapped.pData;
 	}
 
 	void D3D11GraphicsBuffer::Unmap()
 	{
-		BOOST_ASSERT(buffer_);
+		BOOST_ASSERT(d3d_buffer_);
 
-		d3d_imm_ctx_->Unmap(buffer_.get(), 0);
+		d3d_imm_ctx_->Unmap(d3d_buffer_.get(), 0);
 	}
 
 	void D3D11GraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
@@ -272,10 +321,10 @@ namespace KlayGE
 		BOOST_ASSERT(src_offset + size <= this->Size());
 		BOOST_ASSERT(dst_offset + size <= target.Size());
 
-		auto& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&target);
+		auto& d3d_gb = checked_cast<D3D11GraphicsBuffer&>(target);
 		if ((src_offset == 0) && (dst_offset == 0) && (size == this->Size()) && (size == target.Size()))
 		{
-			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer(), buffer_.get());
+			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer(), d3d_buffer_.get());
 		}
 		else
 		{
@@ -286,7 +335,7 @@ namespace KlayGE
 			box.top = 0;
 			box.bottom = 1;
 			box.back = 1;
-			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, dst_offset, 0, 0, buffer_.get(), 0, &box);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, dst_offset, 0, 0, d3d_buffer_.get(), 0, &box);
 		}
 	}
 
@@ -304,6 +353,6 @@ namespace KlayGE
 			box.bottom = 1;
 			box.back = 1;
 		}
-		d3d_imm_ctx_->UpdateSubresource(buffer_.get(), 0, p, data, size, size);
+		d3d_imm_ctx_->UpdateSubresource(d3d_buffer_.get(), 0, p, data, size, size);
 	}
 }

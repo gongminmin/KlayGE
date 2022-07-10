@@ -40,7 +40,7 @@ namespace KlayGE
 	class NullScriptFactory : public ScriptFactory
 	{
 	public:
-		std::wstring const & Name() const
+		std::wstring const & Name() const override
 		{
 			static std::wstring const name(L"Null Script Factory");
 			return name;

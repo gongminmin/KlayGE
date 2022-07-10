@@ -28,30 +28,20 @@
 
 namespace KlayGE
 {
-	KLAYGE_CORE_API JudaTexturePtr LoadJudaTexture(std::string const & file_name);
-	KLAYGE_CORE_API void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name);
-
-	class KLAYGE_CORE_API JudaTexture : boost::noncopyable
+	class KLAYGE_CORE_API JudaTexture final : boost::noncopyable
 	{
-		friend KLAYGE_CORE_API JudaTexturePtr LoadJudaTexture(std::string const & file_name);
-		friend KLAYGE_CORE_API void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name);
+	public:
+		static JudaTexturePtr Load(std::string const & file_name);
+		static void Save(JudaTexturePtr const& juda_tex, std::string const& file_name);
 
 	private:
 		static uint32_t const EMPTY_DATA_INDEX = static_cast<uint32_t>(-1);
 
-		struct quadtree_node;
-		typedef std::shared_ptr<quadtree_node> quadtree_node_ptr;
-
-		struct quadtree_node
+		struct QuadTreeNode
 		{
-			quadtree_node_ptr children[4];
-			uint32_t data_index;
-			uint32_t attr;
-
-			quadtree_node()
-				: data_index(EMPTY_DATA_INDEX)
-			{
-			}
+			std::shared_ptr<QuadTreeNode> children[4];
+			uint32_t data_index{EMPTY_DATA_INDEX};
+			uint32_t attr{};
 		};
 
 		static uint32_t const MAX_TREE_LEVEL = 12;
@@ -86,18 +76,18 @@ namespace KlayGE
 		std::vector<TexturePtr> const & CacheTexArray() const;
 		TexturePtr const & IndirectTex() const;
 
-		void SetParams(RenderEffect const & effect);
+		void SetParams(RenderEffect& effect);
 
 		void UpdateCache(std::vector<uint32_t> const & tile_ids);
 
 	private:
 		void DecodeATile(std::vector<uint8_t>* data, uint32_t shuff, uint32_t mipmaps);
 		uint32_t DecodeAAttr(uint32_t shuff);
-		uint8_t* RetriveATile(uint32_t data_index);
+		uint8_t* RetrieveATile(uint32_t data_index);
 
-		uint32_t NumNonEmptySubNodes(quadtree_node_ptr const & node) const;
-		quadtree_node_ptr const & GetNode(uint32_t shuff);
-		quadtree_node_ptr const & AddNode(uint32_t shuff);
+		uint32_t NumNonEmptySubNodes(QuadTreeNode const& node) const;
+		QuadTreeNode& GetNode(uint32_t shuff);
+		QuadTreeNode& AddNode(uint32_t shuff);
 		void CompactNode(uint32_t shuff);
 
 		uint32_t ShuffLevel(uint32_t shuff) const;
@@ -118,7 +108,7 @@ namespace KlayGE
 		void DeallocateDataBlock(uint32_t index);
 
 	private:
-		quadtree_node_ptr root_;
+		std::shared_ptr<QuadTreeNode> root_;
 
 		uint32_t num_tiles_;
 		uint32_t tree_levels_;
@@ -172,13 +162,8 @@ namespace KlayGE
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			std::shared_ptr<std::vector<uint8_t>> data;
+			std::unique_ptr<uint8_t[]> data;
 			uint64_t tick;
-
-			DecodedBlockInfo(std::shared_ptr<std::vector<uint8_t>> const & d, uint64_t t)
-				: data(d), tick(t)
-			{
-			}
 		};
 		std::unordered_map<uint32_t, DecodedBlockInfo> decoded_block_cache_;
 		uint64_t decode_tick_;

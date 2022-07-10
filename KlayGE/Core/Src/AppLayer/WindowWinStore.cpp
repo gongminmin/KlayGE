@@ -32,32 +32,26 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
 
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
-#endif
-#include <windows.graphics.display.h>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#endif
-#include <wrl/client.h>
-#include <wrl/wrappers/corewrappers.h>
+#include <winrt/Windows.Graphics.Display.Core.h>
+#include <winrt/Windows.UI.Input.Core.h>
+#include <winrt/Windows.UI.ViewManagement.Core.h>
 
 #include <KlayGE/Window.hpp>
 
-using namespace ABI::Windows::Foundation;
-using namespace ABI::Windows::Graphics::Display;
-using namespace ABI::Windows::System::Display;
-using namespace ABI::Windows::UI::Core;
-using namespace ABI::Windows::UI::Input;
-using namespace ABI::Windows::UI::ViewManagement;
-using namespace Microsoft::WRL;
-using namespace Microsoft::WRL::Wrappers;
+namespace uwp
+{
+	using winrt::hstring;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::Graphics::Display;
+	using namespace winrt::Windows::System::Display;
+	using namespace winrt::Windows::UI::Core;
+	using namespace winrt::Windows::UI::ViewManagement;
+}
 
 namespace KlayGE
 {
@@ -82,12 +76,12 @@ namespace KlayGE
 		{
 			if (disp_request_)
 			{
-				disp_request_->RequestRelease();
+				disp_request_.RequestRelease();
 			}
 		}
 	}
 
-	void Window::SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window)
+	void Window::SetWindow(uwp::CoreWindow const & window)
 	{
 		wnd_ = window;
 
@@ -97,25 +91,17 @@ namespace KlayGE
 		this->DetectsDpi();
 		this->DetectsOrientation();
 
-		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
+		auto app_view = uwp::ApplicationView::GetForCurrentView();
 
-		ComPtr<IApplicationView> app_view;
-		app_view_stat2->GetForCurrentView(&app_view);
+		app_view.Title(uwp::hstring(wname_));
 
-		app_view->put_Title(HStringReference(wname_.c_str()).Get());
-
-		ComPtr<IApplicationViewStatics3> app_view_stat3;
-		app_view_stat2.As(&app_view_stat3);
-
-		ABI::Windows::Foundation::Size size;
+		uwp::Size size;
 		size.Width = static_cast<float>(width_);
 		size.Height = static_cast<float>(height_);
-		app_view_stat3->put_PreferredLaunchViewSize(size);
-		app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
+		app_view.PreferredLaunchViewSize(size);
+		app_view.PreferredLaunchWindowingMode(uwp::ApplicationViewWindowingMode::PreferredLaunchViewSize);
 
-		ABI::Windows::Foundation::Rect rc;
-		wnd_->get_Bounds(&rc);
+		auto const rc = wnd_.Bounds();
 		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_ + 0.5f);
 		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_ + 0.5f);
 
@@ -124,54 +110,37 @@ namespace KlayGE
 
 	void Window::DetectsDpi()
 	{
-		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
-			&disp_info_stat));
-
-		ComPtr<IDisplayInformation> disp_info;
-		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
-
-		float dpi;
-		TIFHR(disp_info->get_LogicalDpi(&dpi));
-
+		auto disp_info = uwp::DisplayInformation::GetForCurrentView();
+		float dpi = disp_info.LogicalDpi();
 		this->UpdateDpiScale(dpi / 96);
 	}
 
 	void Window::DetectsOrientation()
 	{
-		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
-			&disp_info_stat));
-
-		ComPtr<IDisplayInformation> disp_info;
-		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
-
-		DisplayOrientations native_orientation;
-		TIFHR(disp_info->get_NativeOrientation(&native_orientation));
-
-		DisplayOrientations curr_orientation;
-		TIFHR(disp_info->get_CurrentOrientation(&curr_orientation));
+		auto disp_info = uwp::DisplayInformation::GetForCurrentView();
+		auto native_orientation = disp_info.NativeOrientation();
+		auto curr_orientation = disp_info.CurrentOrientation();
 
 		win_rotation_ = WR_Unspecified;
 
 		switch (native_orientation)
 		{
-		case DisplayOrientations_Landscape:
+		case uwp::DisplayOrientations::Landscape:
 			switch (curr_orientation)
 			{
-			case DisplayOrientations_Landscape:
+			case uwp::DisplayOrientations::Landscape:
 				win_rotation_ = WR_Identity;
 				break;
 
-			case DisplayOrientations_Portrait:
+			case uwp::DisplayOrientations::Portrait:
 				win_rotation_ = WR_Rotate270;
 				break;
 
-			case DisplayOrientations_LandscapeFlipped:
+			case uwp::DisplayOrientations::LandscapeFlipped:
 				win_rotation_ = WR_Rotate180;
 				break;
 
-			case DisplayOrientations_PortraitFlipped:
+			case uwp::DisplayOrientations::PortraitFlipped:
 				win_rotation_ = WR_Rotate90;
 				break;
 
@@ -181,22 +150,22 @@ namespace KlayGE
 			}
 			break;
 
-		case DisplayOrientations_Portrait:
+		case uwp::DisplayOrientations::Portrait:
 			switch (curr_orientation)
 			{
-			case DisplayOrientations_Landscape:
+			case uwp::DisplayOrientations::Landscape:
 				win_rotation_ = WR_Rotate90;
 				break;
 
-			case DisplayOrientations_Portrait:
+			case uwp::DisplayOrientations::Portrait:
 				win_rotation_ = WR_Identity;
 				break;
 
-			case DisplayOrientations_LandscapeFlipped:
+			case uwp::DisplayOrientations::LandscapeFlipped:
 				win_rotation_ = WR_Rotate270;
 				break;
 
-			case DisplayOrientations_PortraitFlipped:
+			case uwp::DisplayOrientations::PortraitFlipped:
 				win_rotation_ = WR_Rotate180;
 				break;
 
@@ -214,35 +183,25 @@ namespace KlayGE
 
 	bool Window::FullScreen(bool fs)
 	{
-		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
+		auto app_view = uwp::ApplicationView::GetForCurrentView();
 
-		ComPtr<IApplicationView> app_view;
-		app_view_stat2->GetForCurrentView(&app_view);
-
-		ComPtr<IApplicationViewStatics3> app_view_stat3;
-		app_view_stat2.As(&app_view_stat3);
-
-		ComPtr<IApplicationView3> app_view3;
-		app_view.As(&app_view3);
-
-		boolean success;
+		bool success;
 		if (fs)
 		{
-			app_view3->TryEnterFullScreenMode(&success);
+			success = app_view.TryEnterFullScreenMode();
 			if (success)
 			{
-				app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_FullScreen);
+				app_view.PreferredLaunchWindowingMode(uwp::ApplicationViewWindowingMode::FullScreen);
 			}
 		}
 		else
 		{
 			success = true;
-			app_view3->ExitFullScreenMode();
-			app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
+			app_view.ExitFullScreenMode();
+			app_view.PreferredLaunchWindowingMode(uwp::ApplicationViewWindowingMode::PreferredLaunchViewSize);
 		}
 
-		return success ? true : false;
+		return success;
 	}
 
 	void Window::OnActivated()
@@ -251,14 +210,11 @@ namespace KlayGE
 		{
 			if (!disp_request_)
 			{
-				IDisplayRequest* disp_request;
-				TIFHR(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_System_Display_DisplayRequest).Get(),
-					&disp_request));
-				disp_request_ = MakeCOMPtr(disp_request);
+				disp_request_ = uwp::DisplayRequest();
 			}
 			if (disp_request_)
 			{
-				disp_request_->RequestActive();
+				disp_request_.RequestActive();
 			}
 		}
 
@@ -268,10 +224,9 @@ namespace KlayGE
 		}
 	}
 
-	void Window::OnSizeChanged(IWindowSizeChangedEventArgs* args)
+	void Window::OnSizeChanged(uwp::WindowSizeChangedEventArgs const& args)
 	{
-		ABI::Windows::Foundation::Size size;
-		args->get_Size(&size);
+		auto size = args.Size();
 
 		active_ = true;
 
@@ -281,12 +236,9 @@ namespace KlayGE
 		this->OnSize()(*this, true);
 	}
 
-	void Window::OnVisibilityChanged(IVisibilityChangedEventArgs* args)
+	void Window::OnVisibilityChanged(uwp::VisibilityChangedEventArgs const& args)
 	{
-		boolean vis;
-		TIFHR(args->get_Visible(&vis));
-
-		active_ = vis ? true : false;
+		active_ = args.Visible();
 		this->OnActive()(*this, active_);
 	}
 
@@ -299,33 +251,28 @@ namespace KlayGE
 		closed_ = true;
 	}
 
-	void Window::OnKeyDown(IKeyEventArgs* args)
+	void Window::OnKeyDown(uwp::KeyEventArgs const& args)
 	{
-		ABI::Windows::System::VirtualKey vk;
-		TIFHR(args->get_VirtualKey(&vk));
+		uint32_t const vk = static_cast<uint32_t>(args.VirtualKey());
 		if (vk < 256)
 		{
 			this->OnKeyDown()(*this, vk);
 		}
 	}
 
-	void Window::OnKeyUp(IKeyEventArgs* args)
+	void Window::OnKeyUp(uwp::KeyEventArgs const& args)
 	{
-		ABI::Windows::System::VirtualKey vk;
-		TIFHR(args->get_VirtualKey(&vk));
+		uint32_t const vk = static_cast<uint32_t>(args.VirtualKey());
 		if (vk < 256)
 		{
 			this->OnKeyUp()(*this, vk);
 		}
 	}
 
-	void Window::OnPointerPressed(IPointerEventArgs* args)
+	void Window::OnPointerPressed(uwp::PointerEventArgs const& args)
 	{
-		ComPtr<IPointerPoint> point;
-		TIFHR(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIFHR(point->get_PointerId(&pid));
+		auto const point = args.CurrentPoint();
+		uint32_t const pid = point.PointerId();
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -338,19 +285,14 @@ namespace KlayGE
 			}
 		}
 
-		Point position;
-		TIFHR(point->get_Position(&position));
-
+		auto const position = point.Position();
 		this->OnPointerDown()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
 	}
 
-	void Window::OnPointerReleased(IPointerEventArgs* args)
+	void Window::OnPointerReleased(uwp::PointerEventArgs const& args)
 	{
-		ComPtr<IPointerPoint> point;
-		TIFHR(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIFHR(point->get_PointerId(&pid));
+		auto const point = args.CurrentPoint();
+		uint32_t const pid = point.PointerId();
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -363,19 +305,14 @@ namespace KlayGE
 			}
 		}
 
-		Point position;
-		TIFHR(point->get_Position(&position));
-
+		auto const position = point.Position();
 		this->OnPointerUp()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
 	}
 
-	void Window::OnPointerMoved(IPointerEventArgs* args)
+	void Window::OnPointerMoved(uwp::PointerEventArgs const& args)
 	{
-		ComPtr<IPointerPoint> point;
-		TIFHR(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIFHR(point->get_PointerId(&pid));
+		auto const point = args.CurrentPoint();
+		uint32_t const pid = point.PointerId();
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -387,22 +324,17 @@ namespace KlayGE
 			}
 		}
 
-		Point position;
-		TIFHR(point->get_Position(&position));
-		boolean contact;
-		TIFHR(point->get_IsInContact(&contact));
+		auto const position = point.Position();
+		bool const contact = point.IsInContact();
 
 		this->OnPointerUpdate()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
-			conv_id, contact ? true : false);
+			conv_id, contact);
 	}
 
-	void Window::OnPointerWheelChanged(IPointerEventArgs* args)
+	void Window::OnPointerWheelChanged(uwp::PointerEventArgs const& args)
 	{
-		ComPtr<IPointerPoint> point;
-		TIFHR(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIFHR(point->get_PointerId(&pid));
+		auto const point = args.CurrentPoint();
+		uint32_t const pid = point.PointerId();
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -414,38 +346,27 @@ namespace KlayGE
 			}
 		}
 
-		Point position;
-		TIFHR(point->get_Position(&position));
-		ComPtr<IPointerPointProperties> properties;
-		TIFHR(point->get_Properties(&properties));
-		INT32 wheel;
-		TIFHR(properties->get_MouseWheelDelta(&wheel));
-
+		auto const position = point.Position();
+		auto const properties = point.Properties();
+		int32_t const wheel = properties.MouseWheelDelta();
 		this->OnPointerWheel()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
 			conv_id, wheel);
 	}
 
 	void Window::OnDpiChanged()
 	{
-		ABI::Windows::Foundation::Size size;
+		uwp::Size size;
 		size.Width = static_cast<float>(width_ / dpi_scale_);
 		size.Height = static_cast<float>(height_ / dpi_scale_);
 
 		this->DetectsDpi();
 
-		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
+		auto app_view = uwp::ApplicationView::GetForCurrentView();
 
-		ComPtr<IApplicationView> app_view;
-		app_view_stat2->GetForCurrentView(&app_view);
-
-		ComPtr<IApplicationView3> app_view3;
-		app_view.As(&app_view3);
-
-		boolean success;
+		bool success;
 		do
 		{
-			app_view3->TryResizeView(size, &success);
+			success = app_view.TryResizeView(size);
 		} while (!success);
 	}
 

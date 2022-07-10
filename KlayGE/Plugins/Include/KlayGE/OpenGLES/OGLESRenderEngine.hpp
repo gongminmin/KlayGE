@@ -31,33 +31,31 @@
 
 namespace KlayGE
 {
-	class OGLESRenderEngine : public RenderEngine
+	class OGLESRenderEngine final : public RenderEngine
 	{
 	public:
 		OGLESRenderEngine();
-		~OGLESRenderEngine();
+		~OGLESRenderEngine() override;
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		bool RequiresFlipping() const
+		bool RequiresFlipping() const override
 		{
 			return false;
 		}
 
-		void UpdateGPUTimestampsFrequency() override;
+		void ForceFlush() override;
 
-		void ForceFlush();
+		TexturePtr const & ScreenDepthStencilTexture() const override;
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
-
-		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
 		void GetCustomAttrib(std::string_view name, void* value) const override;
 
-		bool FullScreen() const;
-		void FullScreen(bool fs);
+		bool FullScreen() const override;
+		void FullScreen(bool fs) override;
 
-		void AdjustProjectionMatrix(float4x4& proj_mat);
+		void AdjustProjectionMatrix(float4x4& proj_mat) override;
 
 		void ActiveTexture(GLenum tex_unit);
 		void BindTexture(GLuint index, GLuint target, GLuint texture, bool force = false);
@@ -132,11 +130,6 @@ namespace KlayGE
 			return hack_for_angle_;
 		}
 
-		bool GPUDisjointOccurred() const
-		{
-			return gpu_disjoint_occurred_;
-		}
-
 	private:
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
@@ -190,8 +183,6 @@ namespace KlayGE
 		bool hack_for_adreno_;
 		bool hack_for_android_emulator_;
 		bool hack_for_angle_;
-
-		bool gpu_disjoint_occurred_;
 	};
 }
 

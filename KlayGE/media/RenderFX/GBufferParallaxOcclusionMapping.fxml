@@ -1,0 +1,86 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+float2 ParallaxOcclusionMappingCorrection(float2 uv, float3 view)
+{
+	const int lod_threshold = 3;
+	const int min_samples = 8;
+	const int max_samples = 50;
+
+	float2 parallax_offset = normalize(view).xy * height_offset_scale.y;
+
+	uint width, height;
+	albedo_tex.GetDimensions(width, height);
+	float level = mipmap_level(uv, uint2(width, height));
+
+	float2 original_uv = uv;
+	[branch]
+	if (level <= lod_threshold)
+	{
+		int num_steps = (int)lerp(max_samples, min_samples, view.z);
+
+		float step_size = 1.0f / num_steps;
+		float prev_height = 1;
+		float next_height = 0;
+
+		int step_index = 0;
+
+		float2 tex_offset_per_step = step_size * parallax_offset;
+		float2 tex_curr_offset = uv;
+		float curr_bound = 1;
+
+		float2 pt1 = 0;
+		float2 pt2 = 0;
+
+		[loop]
+		while (step_index < num_steps)
+		{
+			tex_curr_offset -= tex_offset_per_step;
+			float curr_height = HeightForParallaxOcclusionNode(tex_curr_offset, level);
+			curr_bound -= step_size;
+
+			if (curr_height > curr_bound)
+			{
+				pt1 = float2(curr_bound, curr_height);
+				pt2 = float2(curr_bound + step_size, prev_height);
+				step_index = num_steps;
+			}
+			else
+			{
+				++step_index;
+			}
+			prev_height = curr_height;
+		}
+
+		float delta1 = pt1.x - pt1.y;
+		float delta2 = pt2.x - pt2.y;
+		float parallax_amount = (delta1 == delta2) ? 0 : (pt1.x * delta2 - pt2.x * delta1) / (delta2 - delta1);
+
+		float2 offset_uv = uv - parallax_offset * (1 - parallax_amount);
+		if (level > lod_threshold - 1)
+		{
+			// Lerp the texture coordinate from parallax occlusion mapped coordinate to bump mapping smoothly based on the current mip level
+			uv = lerp(offset_uv, original_uv, frac(level));
+		}
+		else
+		{
+			uv = offset_uv;
+		}
+	}
+
+	return uv;
+}
+
+float2 ParallaxOcclusionMappingTexcoordAdjustmentNode(float2 texcoord, float3 view_ray)
+{
+	return ParallaxOcclusionMappingCorrection(texcoord, view_ray);
+}
+		]]>
+	</shader>
+
+	<shader_graph_nodes>
+		<node name="TexcoordAdjustmentNode" impl="ParallaxOcclusionMappingTexcoordAdjustmentNode"/>
+	</shader_graph_nodes>
+</effect>

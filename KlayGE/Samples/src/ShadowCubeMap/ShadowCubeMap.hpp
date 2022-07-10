@@ -9,10 +9,10 @@
 enum SM_TYPE
 {
 	SMT_Cube,
-	SMT_DP,
 	SMT_CubeOne,
 	SMT_CubeOneInstance,
-	SMT_CubeOneInstanceGS
+	SMT_CubeOneInstanceGS,
+	SMT_CubeOneInstanceVpRt,
 };
 	
 class ShadowCubeMap : public KlayGE::App3DFramework
@@ -36,31 +36,29 @@ private:
 	
 	KlayGE::RenderModelPtr scene_model_;
 	KlayGE::RenderModelPtr teapot_model_;
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
+	std::vector<KlayGE::RenderablePtr> scene_meshes_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::FrameBufferPtr shadow_cube_buffer_;
 	KlayGE::TexturePtr shadow_tex_;
+	KlayGE::ShaderResourceViewPtr shadow_srv_;
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
 	KlayGE::FrameBufferPtr shadow_cube_one_buffer_;
 	KlayGE::TexturePtr shadow_cube_one_tex_;
+	KlayGE::ShaderResourceViewPtr shadow_cube_one_srvs_[6];
 
-	KlayGE::FrameBufferPtr shadow_dual_buffers_[2];
-	KlayGE::TexturePtr shadow_dual_texs_[2];
-	KlayGE::RenderViewPtr shadow_dual_view_[2];
-	KlayGE::TexturePtr shadow_dual_tex_;
+	bool flexible_srvs_support_ = false;
 
 	KlayGE::TexturePtr lamp_tex_;
 
-	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
 	KlayGE::uint32_t loading_percentage_;
 
-	SM_TYPE sm_type_;
+	SM_TYPE sm_type_ = SMT_Cube;
 
 	float esm_scale_factor_;
 

@@ -4,13 +4,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Quaternion.fxml"/>
-
-	<cbuffer name="per_object">
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
-		<parameter type="float2" name="tc_center"/>
-		<parameter type="float2" name="tc_extent"/>
-	</cbuffer>
+	<include name="Mesh.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model"/>

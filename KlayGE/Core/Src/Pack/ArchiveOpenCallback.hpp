@@ -41,27 +41,27 @@
 
 namespace KlayGE
 {
-	class ArchiveOpenCallback : boost::noncopyable, public IArchiveOpenCallback, public ICryptoGetTextPassword
+	class ArchiveOpenCallback final : boost::noncopyable, public IArchiveOpenCallback, public ICryptoGetTextPassword
 	{
 	public:
 		// IUnknown
-		STDMETHOD_(ULONG, AddRef)();
-		STDMETHOD_(ULONG, Release)();
-		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object);
+		STDMETHOD_(ULONG, AddRef)() noexcept;
+		STDMETHOD_(ULONG, Release)() noexcept;
+		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object) noexcept;
 
 		// IArchiveOpenCallback
-		STDMETHOD(SetTotal)(UInt64 const * files, UInt64 const * bytes);
-		STDMETHOD(SetCompleted)(UInt64 const * files, UInt64 const * bytes);
+		STDMETHOD(SetTotal)(UInt64 const * files, UInt64 const * bytes) noexcept;
+		STDMETHOD(SetCompleted)(UInt64 const * files, UInt64 const * bytes) noexcept;
 
 		// ICryptoGetTextPassword
-		STDMETHOD(CryptoGetTextPassword)(BSTR *password);
+		STDMETHOD(CryptoGetTextPassword)(BSTR *password) noexcept;
 
 	public:
-		explicit ArchiveOpenCallback(std::string_view pw);
-		virtual ~ArchiveOpenCallback() = default;
+		explicit ArchiveOpenCallback(std::string_view pw) noexcept;
+		virtual ~ArchiveOpenCallback() noexcept;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		bool password_is_defined_ = false;
 		std::wstring password_;

@@ -15,17 +15,11 @@
 
 namespace KlayGE
 {
-	RenderView::~RenderView()
-	{
-	}
+	ShaderResourceView::~ShaderResourceView() noexcept = default;
 
+	RenderTargetView::~RenderTargetView() noexcept = default;
 
-	UnorderedAccessView::UnorderedAccessView()
-		: init_count_(0)
-	{
-	}
+	DepthStencilView::~DepthStencilView() noexcept = default;
 
-	UnorderedAccessView::~UnorderedAccessView()
-	{
-	}
+	UnorderedAccessView::~UnorderedAccessView() noexcept = default;
 }

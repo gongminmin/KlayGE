@@ -84,6 +84,8 @@ class Function:
 			ret += str(param)
 			if i != len(self.params) - 1:
 				ret += ', '
+		if len(ret) == 0:
+			ret = "void"
 		return ret
 
 	def param_names_str(self):
@@ -244,7 +246,7 @@ def create_header(prefix, extensions, base_dir, quite_mode):
 			header_str.write("#endif\n\n")
 
 	for extension in extensions:
-		header_str.write("typedef char (GLLOADER_APIENTRY *glloader_%sFUNC)();\n" % extension.name)
+		header_str.write("typedef char (GLLOADER_APIENTRY *glloader_%sFUNC)(void);\n" % extension.name)
 	header_str.write("\n")
 
 	for extension in extensions:
@@ -295,7 +297,7 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n" % extension.predefined)
 
-		source_str.write("char _%s = 0;\n" % extension.name)
+		source_str.write("static char _%s = 0;\n" % extension.name)
 
 		if extension.predefined != None:
 			source_str.write("#endif\n")
@@ -305,13 +307,13 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n\n" % extension.predefined)
 
-		source_str.write("static char GLLOADER_APIENTRY _glloader_%s()\n" % extension.name)
+		source_str.write("static char GLLOADER_APIENTRY _glloader_%s(void)\n" % extension.name)
 		source_str.write("{\n")
 		source_str.write("\treturn _%s;\n" % extension.name)
 		source_str.write("}\n")
 		source_str.write("\n")
 
-		source_str.write("static char GLLOADER_APIENTRY self_init_glloader_%s()\n" % extension.name)
+		source_str.write("static char GLLOADER_APIENTRY self_init_glloader_%s(void)\n" % extension.name)
 		source_str.write("{\n")
 		source_str.write("\tglloader_init();\n")
 		source_str.write("\treturn glloader_%s();\n" % extension.name)
@@ -356,7 +358,7 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n" % extension.predefined)
 
-		source_str.write("void init_%s()\n" % extension.name)
+		source_str.write("static void init_%s(void)\n" % extension.name)
 		source_str.write("{\n")
 
 		source_str.write("\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
@@ -479,7 +481,7 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 
 	source_str.write("\n");
 
-	source_str.write("void %s_init()\n" % prefix.lower())
+	source_str.write("void %s_init(void)\n" % prefix.lower())
 	source_str.write("{\n")
 
 	for extension in extensions:

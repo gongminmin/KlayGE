@@ -29,14 +29,14 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Color.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <vector>
 #include <cstring>
+#include <iterator>
+#include <vector>
 #include <boost/assert.hpp>
 
 #include <KlayGE/TexCompressionETC.hpp>
@@ -319,10 +319,10 @@ namespace
 	};
 
 	// Returns pointer to sorted array.
-	template<typename T, typename Q>
+	template <typename T, typename Q>
 	T* IndirectRadixSort(uint32_t num_indices, T* indices0, T* indices1, Q const * keys, uint32_t key_ofs, uint32_t key_size, bool init_indices)
 	{
-		BOOST_ASSERT((key_ofs >= 0) && (key_ofs < sizeof(T)));
+		BOOST_ASSERT(key_ofs < sizeof(T));
 		BOOST_ASSERT((key_size >= 1) && (key_size <= 4));
 
 		if (init_indices)
@@ -509,7 +509,7 @@ namespace KlayGE
 
 	TexCompressionETC1::Params::Params()
 		: quality_(TCM_Quality),
-			num_src_pixels_(0), src_pixels_(0),
+			num_src_pixels_(0), src_pixels_(nullptr),
 			use_color4_(false),
 			scan_delta_size_(1),
 			base_color5_(0),
@@ -1085,9 +1085,6 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		uint32_t const limit = diff ? 32 : 16;
 		BOOST_ASSERT((diff < 2) && (inten < 8) && (selector < 4) && (packed_c < limit));
-#if defined(KLAYGE_COMPILER_CLANGC2)
-		KFL_UNUSED(limit);
-#endif
 #endif
 		int c;
 		if (diff)
@@ -1152,12 +1149,6 @@ namespace KlayGE
 						uint32_t selector = (x >> 4) & 3;
 						uint32_t p0 = (x >> 8) & 255;
 						BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
-#if defined(KLAYGE_COMPILER_CLANGC2)
-						KFL_UNUSED(diff);
-						KFL_UNUSED(inten);
-						KFL_UNUSED(selector);
-						KFL_UNUSED(p0);
-#endif
 					}
 #endif
 
@@ -1282,11 +1273,6 @@ namespace KlayGE
 						uint32_t const selector = (x >> 4) & 3;
 						uint32_t const p0 = (x >> 8) & 0xFF;
 						BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
-#if defined(KLAYGE_COMPILER_CLANGC2)
-						KFL_UNUSED(inten);
-						KFL_UNUSED(selector);
-						KFL_UNUSED(p0);
-#endif
 					}
 #endif
 
@@ -1833,7 +1819,7 @@ namespace KlayGE
 	{
 		compression_format_ = EF_ETC2_BGR8;
 
-		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
+		etc1_codec_ = MakeUniquePtr<TexCompressionETC1>();
 	}
 
 	void TexCompressionETC2RGB8::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2053,8 +2039,8 @@ namespace KlayGE
 	{
 		compression_format_ = EF_ETC2_A1BGR8;
 
-		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
-		etc2_rgb8_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();
+		etc1_codec_ = MakeUniquePtr<TexCompressionETC1>();
+		etc2_rgb8_codec_ = MakeUniquePtr<TexCompressionETC2RGB8>();
 	}
 
 	void TexCompressionETC2RGB8A1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)

@@ -43,51 +43,51 @@
 
 namespace KlayGE
 {
-	class InStream : boost::noncopyable, public IInStream, public IStreamGetSize
+	class InStream final : boost::noncopyable, public IInStream, public IStreamGetSize
 	{
 	public:
 		// IUnknown
-		STDMETHOD_(ULONG, AddRef)();
-		STDMETHOD_(ULONG, Release)();
-		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object);
+		STDMETHOD_(ULONG, AddRef)() noexcept;
+		STDMETHOD_(ULONG, Release)() noexcept;
+		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object) noexcept;
 
 		// IInStream
-		STDMETHOD(Read)(void* data, UInt32 size, UInt32* processed_size);
-		STDMETHOD(Seek)(Int64 offset, UInt32 seek_origin, UInt64* new_position);
+		STDMETHOD(Read)(void* data, UInt32 size, UInt32* processed_size) noexcept;
+		STDMETHOD(Seek)(Int64 offset, UInt32 seek_origin, UInt64* new_position) noexcept;
 
 		// IStreamGetSize
-		STDMETHOD(GetSize)(UInt64* size);
+		STDMETHOD(GetSize)(UInt64* size) noexcept;
 
 	public:
 		explicit InStream(ResIdentifierPtr const & is);
-		virtual ~InStream() = default;
+		virtual ~InStream() noexcept;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		ResIdentifierPtr is_;
 		uint64_t stream_size_ = 0;
 	};
 
-	class OutStream : boost::noncopyable, public IOutStream
+	class OutStream final : boost::noncopyable, public IOutStream
 	{
 	public:
 		// IUnknown
-		STDMETHOD_(ULONG, AddRef)();
-		STDMETHOD_(ULONG, Release)();
-		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object);
+		STDMETHOD_(ULONG, AddRef)() noexcept;
+		STDMETHOD_(ULONG, Release)() noexcept;
+		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object) noexcept;
 
 		// IOutStream
-		STDMETHOD(Write)(void const * data, UInt32 size, UInt32* processed_size);
-		STDMETHOD(Seek)(Int64 offset, UInt32 seek_origin, UInt64* new_position);
-		STDMETHOD(SetSize)(UInt64 new_size);
+		STDMETHOD(Write)(void const * data, UInt32 size, UInt32* processed_size) noexcept;
+		STDMETHOD(Seek)(Int64 offset, UInt32 seek_origin, UInt64* new_position) noexcept;
+		STDMETHOD(SetSize)(UInt64 new_size) noexcept;
 
 	public:
-		explicit OutStream(std::shared_ptr<std::ostream> const & os);
-		virtual ~OutStream() = default;
+		explicit OutStream(std::shared_ptr<std::ostream> const & os) noexcept;
+		virtual ~OutStream() noexcept;
 
 	private:
-		std::atomic<int32_t> ref_count_ = 1;
+		std::atomic<int32_t> ref_count_{1};
 
 		std::shared_ptr<std::ostream> os_;
 	};

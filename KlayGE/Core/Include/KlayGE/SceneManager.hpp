@@ -23,10 +23,12 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KFL/Frustum.hpp>
 #include <KFL/Thread.hpp>
 
+#include <optional>
 #include <vector>
 #include <unordered_map>
 
@@ -45,37 +47,44 @@ namespace KlayGE
 		void SceneUpdateElapse(float elapse);
 		virtual void ClipScene();
 
-		void AddCamera(CameraPtr const & camera);
-		void DelCamera(CameraPtr const & camera);
+		uint32_t NumFrameCameras() const;
+		Camera* GetFrameCamera(uint32_t index);
+		Camera const* GetFrameCamera(uint32_t index) const;
 
-		uint32_t NumCameras() const;
-		CameraPtr& GetCamera(uint32_t index);
-		CameraPtr const & GetCamera(uint32_t index) const;
+		uint32_t NumFrameLights() const;
+		LightSource* GetFrameLight(uint32_t index);
+		LightSource const* GetFrameLight(uint32_t index) const;
 
-		void AddLight(LightSourcePtr const & light);
-		void DelLight(LightSourcePtr const & light);
+		SceneNode& SceneRootNode()
+		{
+			return scene_root_;
+		}
+		SceneNode const & SceneRootNode() const
+		{
+			return scene_root_;
+		}
 
-		uint32_t NumLights() const;
-		LightSourcePtr& GetLight(uint32_t index);
-		LightSourcePtr const & GetLight(uint32_t index) const;
+		SceneNode& OverlayRootNode()
+		{
+			return overlay_root_;
+		}
+		SceneNode const & OverlayRootNode() const
+		{
+			return overlay_root_;
+		}
 
-		void AddSceneObject(SceneObjectPtr const & obj);
-		void AddSceneObjectLocked(SceneObjectPtr const & obj);
-		void DelSceneObject(SceneObjectPtr const & obj);
-		void DelSceneObjectLocked(SceneObjectPtr const & obj);
-		void AddRenderable(Renderable* obj);
+		std::mutex& MutexForUpdate()
+		{
+			return update_mutex_;
+		}
 
-		uint32_t NumSceneObjects() const;
-		SceneObjectPtr& GetSceneObject(uint32_t index);
-		SceneObjectPtr const & GetSceneObject(uint32_t index) const;
+		void AddRenderable(Renderable* node);
 
 		virtual BoundOverlap AABBVisible(AABBox const & aabb) const;
 		virtual BoundOverlap OBBVisible(OBBox const & obb) const;
 		virtual BoundOverlap SphereVisible(Sphere const & sphere) const;
 		virtual BoundOverlap FrustumVisible(Frustum const & frustum) const;
 
-		virtual void ClearCamera();
-		virtual void ClearLight();
 		virtual void ClearObject();
 
 		void Update();
@@ -87,34 +96,39 @@ namespace KlayGE
 		uint32_t NumDrawCalls() const;
 		uint32_t NumDispatchCalls() const;
 
+		virtual void OnSceneChanged() = 0;
+
+		bool NodesUpdated() const
+		{
+			return nodes_updated_;
+		}
+
 	protected:
 		void Flush(uint32_t urt);
 
-		std::vector<CameraPtr>::iterator DelCamera(std::vector<CameraPtr>::iterator iter);
-		std::vector<LightSourcePtr>::iterator DelLight(std::vector<LightSourcePtr>::iterator iter);
-		std::vector<SceneObjectPtr>::iterator DelSceneObject(std::vector<SceneObjectPtr>::iterator iter);
-		std::vector<SceneObjectPtr>::iterator DelSceneObjectLocked(std::vector<SceneObjectPtr>::iterator iter);
-		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
-		virtual void OnDelSceneObject(std::vector<SceneObjectPtr>::iterator iter) = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 		void UpdateThreadFunc();
 
-		BoundOverlap VisibleTestFromParent(SceneObject* obj, float3 const & view_dir, float3 const & eye_pos,
-			float4x4 const & view_proj);
+		BoundOverlap VisibleTestFromParent(SceneNode const & node, uint32_t camera_index);
 
 	protected:
-		std::vector<CameraPtr> cameras_;
-		Frustum const * frustum_;
-		std::vector<LightSourcePtr> lights_;
-		std::vector<SceneObjectPtr> scene_objs_;
-		std::vector<SceneObjectPtr> overlay_scene_objs_;
+		std::vector<CameraPtr> frame_cameras_;
+		std::vector<Frustum const*> camera_frustums_;
+		std::vector<float4x4> camera_view_projs_;
+		std::vector<LightSourcePtr> frame_lights_;
+		SceneNode scene_root_;
+		SceneNode overlay_root_;
 
-		std::unordered_map<size_t, std::shared_ptr<std::vector<BoundOverlap>>> visible_marks_map_;
+		std::unordered_map<size_t, std::unique_ptr<std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras>[]>>
+			visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;
+
+		std::vector<SceneNode*> all_scene_nodes_;
+		std::vector<SceneNode*> all_overlay_nodes_;
 
 	private:
 		void FlushScene();
@@ -132,10 +146,12 @@ namespace KlayGE
 		uint32_t num_dispatch_calls_;
 
 		std::mutex update_mutex_;
-		std::unique_ptr<joiner<void>> update_thread_;
+		std::optional<std::future<void>> update_thread_;
 		volatile bool quit_;
 
 		bool deferred_mode_;
+
+		bool nodes_updated_ = false;
 	};
 }
 

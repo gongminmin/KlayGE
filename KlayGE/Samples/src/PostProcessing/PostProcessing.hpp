@@ -33,7 +33,6 @@ private:
 	void BlackHoleHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -65,8 +64,6 @@ private:
 	int id_cross_stitching_;
 	int id_frosted_glass_;
 	int id_black_hole_;
-
-	KlayGE::PointLightSourcePtr point_light_;
 };
 
 #endif		// _POSTPROCESSING_HPP

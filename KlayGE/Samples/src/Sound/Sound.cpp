@@ -1,10 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -14,7 +12,6 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -24,9 +21,10 @@
 #include <KlayGE/Audio.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <vector>
-#include <sstream>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Sound.hpp"
@@ -75,7 +73,7 @@ void SoundApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
@@ -96,7 +94,7 @@ void SoundApp::OnCreate()
 	ae.AddBuffer(2, af.MakeMusicBuffer(music_2_, 3));
 	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Sound.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Sound.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");
@@ -105,27 +103,27 @@ void SoundApp::OnCreate()
 	id_volume_static_ = dialog_->IDFromName("VolumeStatic");
 	id_volume_slider_ = dialog_->IDFromName("VolumeSlider");
 
-	dialog_->Control<UICheckBox>(id_music_1_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_music_1_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->Music1Handler(sender);
 		});
 	this->Music1Handler(*dialog_->Control<UICheckBox>(id_music_1_));
 
-	dialog_->Control<UICheckBox>(id_music_2_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_music_2_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->Music2Handler(sender);
 		});
 	this->Music2Handler(*dialog_->Control<UICheckBox>(id_music_2_));
 
-	dialog_->Control<UIButton>(id_sound_)->OnClickedEvent().connect(
+	dialog_->Control<UIButton>(id_sound_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
 		{
 			this->SoundHandler(sender);
 		});
 
-	dialog_->Control<UISlider>(id_volume_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_volume_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->VolumeChangedHandler(sender);

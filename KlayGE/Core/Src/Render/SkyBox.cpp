@@ -45,19 +45,19 @@
 namespace KlayGE
 {
 	RenderableSkyBox::RenderableSkyBox()
-		: RenderableHelper(L"SkyBox")
+		: Renderable(L"SkyBox")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
-		if (deferred_effect_)
+		if (Context::Instance().DeferredRenderingLayerInstance())
 		{
 			effect_attrs_ |= EA_SpecialShading;
 
 			this->BindDeferredEffect(effect);
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
+			gbuffer_tech_ = effect->TechniqueByName("GBufferSkyBoxTech");
 			special_shading_tech_ = effect->TechniqueByName("SkyBoxTech");
-			this->Technique(effect, gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_tech_);
 		}
 		else
 		{
@@ -72,11 +72,11 @@ namespace KlayGE
 			float3(-1.0f, -1.0f, 1.0f),
 		};
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+		rls_[0] = rf.MakeRenderLayout();
+		rls_[0]->TopologyType(RenderLayout::TT_TriangleStrip);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+		rls_[0]->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -111,8 +111,8 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_OpaqueGBufferMRT:
-			technique_ = gbuffer_mrt_tech_;
+		case PT_OpaqueGBuffer:
+			technique_ = gbuffer_tech_;
 			break;
 
 		case PT_OpaqueSpecialShading:

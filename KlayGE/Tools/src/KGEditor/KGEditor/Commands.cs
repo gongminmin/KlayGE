@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using KlayGE;
+﻿using KlayGE;
 
 namespace KGEditor
 {
@@ -148,13 +146,13 @@ namespace KGEditor
 
 	class KGEditorCommandAddModel : KGEditorCommand
 	{
-		public KGEditorCommandAddModel(KGEditorCoreWrapper core, MainWindow wnd, Scene scene, string meshml_name)
+		public KGEditorCommandAddModel(KGEditorCoreWrapper core, MainWindow wnd, Scene scene, string model_name)
 			: base(KGEditorCommandCode.ECC_AddModel, "Add model")
 		{
 			core_ = core;
 			wnd_ = wnd;
 			scene_ = scene;
-			model_name_ = meshml_name;
+			model_name_ = model_name;
 		}
 
 		public override object Execute()

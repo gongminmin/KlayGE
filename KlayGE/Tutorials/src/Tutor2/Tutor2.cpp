@@ -4,11 +4,13 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneManager.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -34,19 +36,17 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr renderableBox_;
-	KlayGE::SceneObjectPtr renderableFile_;
-	KlayGE::SceneObjectPtr renderableMesh_;
+	KlayGE::SceneNodePtr renderableBox_;
+	KlayGE::SceneNodePtr renderableFile_;
+	KlayGE::SceneNodePtr renderableMesh_;
 };
 
 class RenderPolygon : public KlayGE::StaticMesh
 {
 public:
-	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
+	explicit RenderPolygon(std::wstring_view name);
 
-	virtual void DoBuildMeshInfo() override;
-
-	virtual void OnRenderBegin();
+	void DoBuildMeshInfo(KlayGE::RenderModel const & model) override;
 };
 
 int SampleMain()
@@ -67,31 +67,35 @@ void TutorFramework::OnCreate()
 {
 	font_ = KlayGE::SyncLoadFont("gkai00mp.kfont");
 
-	KlayGE::OBBox boxRange(KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
+	auto& root_node = KlayGE::Context::Instance().SceneManagerInstance().SceneRootNode();
+
+	KlayGE::OBBox boxRange(
+		KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(
-		KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor), KlayGE::SceneObject::SOA_Cullable);
-	renderableBox_->AddToSceneManager();
+	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneNode>(
+		KlayGE::MakeSharedPtr<KlayGE::RenderableComponent>(KlayGE::MakeSharedPtr<KlayGE::RenderableTriBox>(boxRange, boxColor)),
+		KlayGE::SceneNode::SOA_Cullable);
+	root_node.AddChild(renderableBox_);
 
-	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.meshml", KlayGE::EAH_GPU_Read,
-		KlayGE::CreateModelFactory<KlayGE::RenderModel>(), KlayGE::CreateMeshFactory<RenderPolygon>());
+	KlayGE::RenderModelPtr loadedModel = KlayGE::SyncLoadModel("teapot.glb", KlayGE::EAH_GPU_Read,
+		KlayGE::SceneNode::SOA_Cullable, KlayGE::AddToSceneRootHelper,
+		KlayGE::CreateModelFactory<KlayGE::RenderModel>, KlayGE::CreateMeshFactory<RenderPolygon>);
 
-	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(loadedModel, KlayGE::SceneObject::SOA_Cullable);
-	renderableFile_->ModelMatrix(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
-	renderableFile_->AddToSceneManager();
+	renderableFile_ = loadedModel->RootNode();
+	renderableFile_->TransformToParent(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
 
 	std::vector<KlayGE::float3> vertices;
-	vertices.push_back(KlayGE::float3(0.5f,-0.25f, 0.25f));
-	vertices.push_back(KlayGE::float3(1.0f,-0.25f, 0.25f));
-	vertices.push_back(KlayGE::float3(1.0f,-0.25f,-0.25f));
-	vertices.push_back(KlayGE::float3(0.5f,-0.25f,-0.25f));
-	vertices.push_back(KlayGE::float3(0.5f, 0.25f, 0.25f));
-	vertices.push_back(KlayGE::float3(1.0f, 0.25f, 0.25f));
-	vertices.push_back(KlayGE::float3(1.0f, 0.25f,-0.25f));
-	vertices.push_back(KlayGE::float3(0.5f, 0.25f,-0.25f));
+	vertices.emplace_back(0.5f, -0.25f,  0.25f);
+	vertices.emplace_back(1.0f, -0.25f,  0.25f);
+	vertices.emplace_back(1.0f, -0.25f, -0.25f);
+	vertices.emplace_back(0.5f, -0.25f, -0.25f);
+	vertices.emplace_back(0.5f,  0.25f,  0.25f);
+	vertices.emplace_back(1.0f,  0.25f,  0.25f);
+	vertices.emplace_back(1.0f,  0.25f, -0.25f);
+	vertices.emplace_back(0.5f,  0.25f, -0.25f);
 
-	KlayGE::RenderModelPtr model = KlayGE::MakeSharedPtr<KlayGE::RenderModel>(L"model");
+	KlayGE::RenderModelPtr model = KlayGE::MakeSharedPtr<KlayGE::RenderModel>(L"model", KlayGE::SceneNode::SOA_Cullable);
 
 	std::vector<KlayGE::StaticMeshPtr> meshes(2);
 
@@ -100,18 +104,13 @@ void TutorFramework::OnCreate()
 	indices1.push_back(2); indices1.push_back(6); indices1.push_back(3); indices1.push_back(7);
 	indices1.push_back(0); indices1.push_back(4);
 
-	meshes[0] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"side_mesh");
-
+	meshes[0] = KlayGE::MakeSharedPtr<RenderPolygon>(L"side_mesh");
 	meshes[0]->NumLods(1);
-
 	meshes[0]->AddVertexStream(0, &vertices[0], static_cast<KlayGE::uint32_t>(sizeof(vertices[0]) * vertices.size()),
 		KlayGE::VertexElement(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
-
 	meshes[0]->AddIndexStream(0, &indices1[0], static_cast<KlayGE::uint32_t>(sizeof(indices1[0]) * indices1.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
-
 	meshes[0]->GetRenderLayout().TopologyType(KlayGE::RenderLayout::TT_TriangleStrip);
-
 	meshes[0]->PosBound(KlayGE::AABBox(KlayGE::float3(-1, -1, -1), KlayGE::float3(1, 1, 1)));
 
 	std::vector<KlayGE::uint16_t> indices2;
@@ -120,7 +119,7 @@ void TutorFramework::OnCreate()
 	indices2.push_back(7); indices2.push_back(6); indices2.push_back(5);
 	indices2.push_back(7); indices2.push_back(5); indices2.push_back(4);
 
-	meshes[1] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"cap_mesh");
+	meshes[1] = KlayGE::MakeSharedPtr<RenderPolygon>(L"cap_mesh");
 	meshes[1]->NumLods(1);
 	meshes[1]->AddVertexStream(0, &vertices[0], static_cast<KlayGE::uint32_t>(sizeof(vertices[0]) * vertices.size()),
 		KlayGE::VertexElement(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
@@ -131,14 +130,19 @@ void TutorFramework::OnCreate()
 
 	for (size_t i = 0; i < meshes.size(); ++ i)
 	{
-		meshes[i]->BuildMeshInfo();
+		meshes[i]->BuildMeshInfo(*model);
 	}
-	model->AssignSubrenderables(meshes.begin(), meshes.end());
+	model->AssignMeshes(meshes.begin(), meshes.end());
+	model->BuildModelInfo();
 
-	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObject>(model, KlayGE::SceneObject::SOA_Cullable);
-	renderableMesh_->AddToSceneManager();
+	renderableMesh_ = model->RootNode();
+	for (size_t i = 0; i < meshes.size(); ++ i)
+	{
+		renderableMesh_->AddComponent(KlayGE::MakeSharedPtr<KlayGE::RenderableComponent>(meshes[i]));
+	}
+	root_node.AddChild(renderableMesh_);
 
-	this->LookAt(KlayGE::float3(0, 0,-4.0f), KlayGE::float3(0, 0, 0));
+	this->LookAt(KlayGE::float3(0, 0, -4.0f), KlayGE::float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
 	tbController_.AttachCamera(this->ActiveCamera());
@@ -173,8 +177,8 @@ KlayGE::uint32_t TutorFramework::DoUpdate(KlayGE::uint32_t /*pass*/)
 }
 
 
-RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name)
-	: KlayGE::StaticMesh(model, name)
+RenderPolygon::RenderPolygon(std::wstring_view name)
+	: KlayGE::StaticMesh(name)
 {
 	KlayGE::RenderEffectPtr effect = KlayGE::SyncLoadRenderEffect("RenderableHelper.fxml");
 
@@ -183,17 +187,11 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void RenderPolygon::DoBuildMeshInfo()
+void RenderPolygon::DoBuildMeshInfo(KlayGE::RenderModel const & model)
 {
+	KFL_UNUSED(model);
+
 	KlayGE::AABBox const & pos_bb = this->PosBound();
 	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-}
-
-void RenderPolygon::OnRenderBegin()
-{
-	KlayGE::App3DFramework const & app = KlayGE::Context::Instance().AppInstance();
-
-	KlayGE::float4x4 view_proj = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-	*(effect_->ParameterByName("mvp")) = view_proj;
 }

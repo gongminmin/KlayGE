@@ -33,11 +33,6 @@
 
 namespace KlayGE
 {
-	SIMDVectorF4::SIMDVectorF4(SIMDVectorF4 const & rhs)
-		: vec_(rhs.vec_)
-	{
-	}
-
 	SIMDVectorF4 const & SIMDVectorF4::Zero()
 	{
 		static SIMDVectorF4 const zero = SIMDMathLib::SetVector(0.0f);
@@ -100,10 +95,6 @@ namespace KlayGE
 		return *this;
 	}
 
-	SIMDVectorF4 const SIMDVectorF4::operator+() const
-	{
-		return *this;
-	}
 	SIMDVectorF4 const SIMDVectorF4::operator-() const
 	{
 		return SIMDMathLib::Negative(*this);

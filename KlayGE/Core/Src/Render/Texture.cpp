@@ -28,7 +28,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/filesystem.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -39,12 +38,13 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
-#include <KlayGE/ToolCommonLoader.hpp>
+#include <KlayGE/DevHelper.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Hash.hpp>
 
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <system_error>
 
 #include <KlayGE/Texture.hpp>
@@ -91,6 +91,7 @@ namespace
 		uint32_t	b_bit_mask;			// mask for blue bits
 		uint32_t	rgb_alpha_bit_mask;	// mask for alpha channels
 	};
+	static_assert(sizeof(DDSPIXELFORMAT) == 32);
 
 	enum
 	{
@@ -142,6 +143,7 @@ namespace
 		uint32_t	caps2;
 		uint32_t	reserved[2];
 	};
+	static_assert(sizeof(DDSCAPS2) == 16);
 
 	enum
 	{
@@ -173,6 +175,7 @@ namespace
 		DDSCAPS2		dds_caps;			// direct draw surface capabilities
 		uint32_t		reserved2;
 	};
+	static_assert(sizeof(DDSSURFACEDESC2) == 124);
 
 	enum D3D_RESOURCE_DIMENSION
 	{
@@ -200,6 +203,7 @@ namespace
 		uint32_t array_size;
 		uint32_t reserved;
 	};
+	static_assert(sizeof(DDS_HEADER_DXT10) == 20);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
@@ -884,19 +888,16 @@ namespace
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		default:
 			KFL_UNREACHABLE("Invalid compression format");
@@ -1043,19 +1044,16 @@ namespace
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
 			KFL_UNREACHABLE("Not implemented");
-			break;
 
 		default:
 			KFL_UNREACHABLE("Invalid source format");
@@ -1084,6 +1082,8 @@ namespace
 		struct TexDesc
 		{
 			std::string res_name;
+			std::string metadata_name;
+			std::string runtime_name;
 			uint32_t access_hint;
 
 			struct TexData
@@ -1109,45 +1109,15 @@ namespace
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
 
-			std::filesystem::path res_path(tex_desc_.res_name);
+			FILESYSTEM_NS::path res_path(tex_desc_.res_name);
 			bool const dds_ext = (res_path.extension().string() == ".dds");
-			std::string const metadata_name = tex_desc_.res_name + ".kmeta";
-			std::string runtime_name = tex_desc_.res_name;
-			if (!dds_ext || !ResLoader::Instance().Locate(metadata_name).empty())
+			tex_desc_.metadata_name = tex_desc_.res_name + ".kmeta";
+			tex_desc_.runtime_name = tex_desc_.res_name;
+			if (!dds_ext || !ResLoader::Instance().Locate(tex_desc_.metadata_name).empty())
 			{
 				// Texture's runtime format is dds, for now
-				runtime_name += ".dds";
+				tex_desc_.runtime_name += ".dds";
 			}
-
-			bool jit = false;
-			if (ResLoader::Instance().Locate(runtime_name).empty())
-			{
-				jit = true;
-			}
-			else
-			{
-				uint64_t const runtime_file_timestamp = ResLoader::Instance().Timestamp(runtime_name);
-				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.res_name);
-				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
-				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
-					|| (((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp))))
-				{
-					jit = true;
-				}
-			}
-			if (jit)
-			{
-#if KLAYGE_IS_DEV_PLATFORM
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
-				ToolCommonLoader::Instance().ConvertTexture(tex_desc_.res_name, metadata_name, runtime_name, &caps);
-#else
-				LogError() << "Could NOT locate " << runtime_name << std::endl;
-#endif
-			}
-
-			tex_desc_.res_name = runtime_name;
 		}
 
 		uint64_t Type() const override
@@ -1167,7 +1137,16 @@ namespace
 
 			{
 				uint32_t row_pitch, slice_pitch;
-				GetImageInfo(tex_desc_.res_name, tex_data.type, tex_data.width, tex_data.height, tex_data.depth,
+				std::string_view image_info_name;
+				if (ResLoader::Instance().Locate(tex_desc_.runtime_name).empty())
+				{
+					image_info_name = tex_desc_.res_name;
+				}
+				else
+				{
+					image_info_name = tex_desc_.runtime_name;
+				}
+				GetImageInfo(image_info_name, tex_data.type, tex_data.width, tex_data.height, tex_data.depth,
 					tex_data.num_mipmaps, tex_data.array_size, tex_data.format,
 					row_pitch, slice_pitch);
 			}
@@ -1182,12 +1161,6 @@ namespace
 				tex_data.depth = 1;
 				tex_data.num_mipmaps = 1;
 				tex_data.init_data.resize(1);
-			}
-
-			uint32_t array_size = tex_data.array_size;
-			if (Texture::TT_Cube == tex_data.type)
-			{
-				array_size *= 6;
 			}
 
 			if (((EF_BC5 == tex_data.format) && !caps.TextureFormatSupport(EF_BC5))
@@ -1284,6 +1257,35 @@ namespace
 				return;
 			}
 
+			bool jit = false;
+			if (ResLoader::Instance().Locate(tex_desc_.runtime_name).empty())
+			{
+				jit = true;
+			}
+			else
+			{
+				uint64_t const runtime_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.runtime_name);
+				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.res_name);
+				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(tex_desc_.metadata_name);
+				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
+					|| (((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp))))
+				{
+					jit = true;
+				}
+			}
+			if (jit)
+			{
+#if KLAYGE_IS_DEV_PLATFORM
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+				Context::Instance().DevHelperInstance().ConvertTexture(tex_desc_.res_name, tex_desc_.metadata_name,
+					tex_desc_.runtime_name, &caps);
+#else
+				LogError() << "Could NOT locate " << tex_desc_.runtime_name << std::endl;
+#endif
+			}
+
 			this->LoadDDS();
 		}
 
@@ -1336,7 +1338,7 @@ namespace
 			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
 
 			{
-				TexturePtr tex = LoadSoftwareTexture(tex_desc_.res_name);
+				TexturePtr tex = LoadSoftwareTexture(tex_desc_.runtime_name);
 				tex_data.type = tex->Type();
 				tex_data.width = tex->Width(0);
 				tex_data.height = tex->Height(0);
@@ -1345,13 +1347,13 @@ namespace
 				tex_data.array_size = tex->ArraySize();
 				tex_data.format = tex->Format();
 
-				auto* sw_tex = checked_cast<SoftwareTexture*>(tex.get());
-				tex_data.init_data = sw_tex->SubresourceData();
-				tex_data.data_block = sw_tex->DataBlock();
+				auto& sw_tex = checked_cast<SoftwareTexture&>(*tex);
+				tex_data.init_data = sw_tex.SubresourceData();
+				tex_data.data_block = sw_tex.DataBlock();
 
 				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					size_t const offset = static_cast<uint8_t const *>(tex_data.init_data[i].data) - sw_tex->DataBlock().data();
+					size_t const offset = static_cast<uint8_t const *>(tex_data.init_data[i].data) - sw_tex.DataBlock().data();
 					tex_data.init_data[i].data = tex_data.data_block.data() + offset;
 				}
 			}
@@ -1534,12 +1536,10 @@ namespace
 									sub_data_block = static_cast<uint8_t*>(
 										const_cast<void*>(tex_data.init_data[sub_res].data));
 								}
-								ResizeTexture(sub_data_block, row_pitch, slice_pitch,
-									convert_fmts[i][1], width, height, depth,
-									tex_data.init_data[sub_res].data,
-									tex_data.init_data[sub_res].row_pitch,
-									tex_data.init_data[sub_res].slice_pitch,
-									convert_fmts[i][0], width, height, depth, false);
+								ResizeTexture(sub_data_block, row_pitch, slice_pitch, convert_fmts[i][1], width, height, depth,
+									tex_data.init_data[sub_res].data, tex_data.init_data[sub_res].row_pitch,
+									tex_data.init_data[sub_res].slice_pitch, convert_fmts[i][0], width, height, depth,
+									TextureFilter::Point);
 
 								width = std::max<uint32_t>(1U, width / 2);
 								height = std::max<uint32_t>(1U, height / 2);
@@ -1627,22 +1627,16 @@ namespace
 
 namespace KlayGE
 {
-	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t width)
-		: tex_(tex),
-			mapped_array_index_(array_index),
-			mapped_level_(level)
+	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width)
+		: tex_(tex), mapped_array_index_(array_index), mapped_level_(level)
 	{
 		tex_.Map1D(array_index, level, tma, x_offset, width, data_);
 		row_pitch_ = slice_pitch_ = width * NumFormatBytes(tex.Format());
 	}
 
-	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset,
+	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset,
 		uint32_t width, uint32_t height)
-		: tex_(tex),
-			mapped_array_index_(array_index),
-			mapped_level_(level)
+		: tex_(tex), mapped_array_index_(array_index), mapped_level_(level)
 	{
 		tex_.Map2D(array_index, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
 
@@ -1650,23 +1644,16 @@ namespace KlayGE
 		slice_pitch_ = (height + block_height - 1) / block_height * row_pitch_;
 	}
 
-	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-		uint32_t width, uint32_t height, uint32_t depth)
-		: tex_(tex),
-			mapped_array_index_(array_index),
-			mapped_level_(level)
+	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t y_offset,
+		uint32_t z_offset, uint32_t width, uint32_t height, uint32_t depth)
+		: tex_(tex), mapped_array_index_(array_index), mapped_level_(level)
 	{
 		tex_.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
 	}
 
-	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset,
-		uint32_t width, uint32_t height)
-		: tex_(tex),
-			mapped_array_index_(array_index),
-			mapped_face_(face),
-			mapped_level_(level)
+	Texture::Mapper::Mapper(Texture& tex, uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma, uint32_t x_offset,
+		uint32_t y_offset, uint32_t width, uint32_t height)
+		: tex_(tex), mapped_array_index_(array_index), mapped_face_(face), mapped_level_(level)
 	{
 		tex_.MapCube(array_index, face, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
 
@@ -1695,19 +1682,11 @@ namespace KlayGE
 			break;
 		}
 	}
+} // namespace KlayGE
 
-
-	void GetImageInfo(std::string_view tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
-	{
-		ResIdentifierPtr file = ResLoader::Instance().Open(tex_name);
-
-		GetImageInfo(file, type, width, height, depth, num_mipmaps, array_size, format,
-			row_pitch, slice_pitch);
-	}
-
-	void GetImageInfo(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
+namespace
+{
+	void ReadDdsFileHeader(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
@@ -2006,7 +1985,6 @@ namespace KlayGE
 
 						default:
 							KFL_UNREACHABLE("Invalid rgb bit count");
-							break;
 						}
 					}
 					else
@@ -2110,20 +2088,45 @@ namespace KlayGE
 			}
 		}
 	}
+} // namespace
+
+namespace KlayGE
+{
+	void GetImageInfo(std::string_view tex_name, Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	{
+		FILESYSTEM_NS::path res_path(tex_name.begin(), tex_name.end());
+		if (res_path.extension().string() != ".dds")
+		{
+#if KLAYGE_IS_DEV_PLATFORM
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			std::string const metadata_name = std::string(tex_name) + ".kmeta";
+			Context::Instance().DevHelperInstance().GetImageInfo(ResLoader::Instance().Locate(tex_name), metadata_name, &caps,
+				type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+#else
+			LogError() << "The file type is not supported: " << tex_name << std::endl;
+#endif
+		}
+		else
+		{
+			ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
+			ReadDdsFileHeader(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
+				row_pitch, slice_pitch);
+		}
+	}
 
 	TexturePtr LoadSoftwareTexture(std::string_view tex_name)
 	{
-		TexturePtr ret;
-		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
-		if (tex_res)
+		if (ResLoader::Instance().Locate(tex_name).empty())
 		{
-			ret = LoadSoftwareTexture(tex_res);
+			return TexturePtr();
 		}
-		return ret;
-	}
 
-	TexturePtr LoadSoftwareTexture(ResIdentifierPtr const & tex_res)
-	{
+		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
+
 		Texture::TextureType type;
 		uint32_t width, height, depth;
 		uint32_t num_mipmaps;
@@ -2133,7 +2136,7 @@ namespace KlayGE
 		std::vector<uint8_t> data_block;
 
 		uint32_t row_pitch, slice_pitch;
-		GetImageInfo(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
+		ReadDdsFileHeader(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
 			row_pitch, slice_pitch);
 
 		uint32_t const fmt_size = NumFormatBytes(format);
@@ -2337,10 +2340,13 @@ namespace KlayGE
 	{
 		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
+} // namespace KlayGE
 
+namespace
+{
 	void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
-		ElementFormat format, ArrayRef<ElementInitData> init_data)
+		ElementFormat format, std::span<ElementInitData const> init_data)
 	{
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
 		if (!file)
@@ -2861,7 +2867,10 @@ namespace KlayGE
 			break;
 		}
 	}
+} // namespace
 
+namespace KlayGE
+{
 	// 把纹理保存入DDS文件
 	void SaveTexture(TexturePtr const & texture, std::string const & tex_name)
 	{
@@ -2903,7 +2912,7 @@ namespace KlayGE
 			default:
 				KFL_UNREACHABLE("Invalid texture type");
 			}
-			texture->CopyToTexture(*texture_sys_mem);
+			texture->CopyToTexture(*texture_sys_mem, TextureFilter::Point);
 		}
 
 		uint32_t const format_size = NumFormatBytes(format);
@@ -3106,20 +3115,18 @@ namespace KlayGE
 			init_data[i].data = &data_block[base[i]];
 		}
 
-		SaveTexture(tex_name, texture_sys_mem->Type(),
+		::SaveTexture(tex_name, texture_sys_mem->Type(),
 			texture_sys_mem->Width(0), texture_sys_mem->Height(0), texture_sys_mem->Depth(0),
 			numMipMaps, array_size, format, init_data);
 	}
 
 
 	Texture::Texture(Texture::TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-			: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
+		: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
 	{
 	}
 
-	Texture::~Texture()
-	{
-	}
+	Texture::~Texture() noexcept = default;
 
 	uint32_t Texture::NumMipMaps() const
 	{
@@ -3156,10 +3163,76 @@ namespace KlayGE
 		return access_hint_;
 	}
 
+	void Texture::BuildMipSubLevels(TextureFilter filter)
+	{
+		if (!this->HwBuildMipSubLevels(filter))
+		{
+			if ((access_hint_ & EAH_GPU_Unordered) || ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write)))
+			{
+				auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				auto const& mipmapper = re.MipmapperInstance();
+				mipmapper.BuildSubLevels(this->shared_from_this(), filter);
+			}
+			else
+			{
+				switch (type_)
+				{
+				case TextureType::TT_1D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture1D(*this, index, level, 0, this->Width(level),
+								index, level - 1, 0, this->Width(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_2D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level), index, level - 1, 0,
+								0, this->Width(level - 1), this->Height(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_3D:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+						{
+							this->ResizeTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), index,
+								level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), filter);
+						}
+					}
+					break;
+
+				case TextureType::TT_Cube:
+					for (uint32_t index = 0; index < this->ArraySize(); ++index)
+					{
+						for (int f = 0; f < 6; ++f)
+						{
+							CubeFaces const face = static_cast<CubeFaces>(f);
+							for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+							{
+								this->ResizeTextureCube(*this, index, face, level, 0, 0, this->Width(level), this->Height(level),
+									index, face, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1), filter);
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
 	void Texture::ResizeTexture1D(Texture& target,
 		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width,
-		bool linear)
+		TextureFilter filter)
 	{
 		BOOST_ASSERT(TT_1D == this->Type());
 		BOOST_ASSERT(TT_1D == target.Type());
@@ -3184,7 +3257,8 @@ namespace KlayGE
 				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read);
 			src_cpu_ptr = src_cpu.get();
 
-			this->CopyToSubTexture1D(*src_cpu, 0, 0, 0, src_width, src_array_index, src_level, src_x_offset, src_width);
+			this->CopyToSubTexture1D(
+				*src_cpu, 0, 0, 0, src_width, src_array_index, src_level, src_x_offset, src_width, TextureFilter::Point);
 
 			src_cpu_array_index = 0;
 			src_cpu_level = 0;
@@ -3221,19 +3295,20 @@ namespace KlayGE
 				dst_width, 1, 1,
 				src_cpu_mapper.Pointer<uint8_t>(), src_cpu_mapper.RowPitch(), src_cpu_mapper.SlicePitch(), this->Format(),
 				src_width, 1, 1,
-				linear);
+				filter);
 		}
 
 		if (dst_cpu_ptr != &target)
 		{
-			dst_cpu_ptr->CopyToSubTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width, 0, 0, 0, dst_width);
+			dst_cpu_ptr->CopyToSubTexture1D(
+				target, dst_array_index, dst_level, dst_x_offset, dst_width, 0, 0, 0, dst_width, TextureFilter::Point);
 		}
 	}
 
 	void Texture::ResizeTexture2D(Texture& target,
 		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-		bool linear)
+		TextureFilter filter)
 	{
 		BOOST_ASSERT((TT_2D == this->Type()) || (TT_Cube == this->Type()));
 		BOOST_ASSERT((TT_2D == target.Type()) || (TT_Cube == target.Type()));
@@ -3260,8 +3335,8 @@ namespace KlayGE
 				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read | EAH_CPU_Write);
 			src_cpu_ptr = src_cpu.get();
 
-			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, src_array_index, src_level, src_x_offset, src_y_offset,
+				src_width, src_height, TextureFilter::Point);
 
 			src_cpu_array_index = 0;
 			src_cpu_level = 0;
@@ -3302,20 +3377,20 @@ namespace KlayGE
 				dst_width, dst_height, 1,
 				src_cpu_mapper.Pointer<uint8_t>(), src_cpu_mapper.RowPitch(), src_cpu_mapper.SlicePitch(), this->Format(),
 				src_width, src_height, 1,
-				linear);
+				filter);
 		}
 
 		if (dst_cpu_ptr != &target)
 		{
-			dst_cpu_ptr->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset,
-				dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+			dst_cpu_ptr->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height, 0, 0, 0,
+				0, dst_width, dst_height, TextureFilter::Point);
 		}
 	}
 
 	void Texture::ResizeTexture3D(Texture& target,
 		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-		bool linear)
+		TextureFilter filter)
 	{
 		BOOST_ASSERT(TT_3D == this->Type());
 		BOOST_ASSERT(TT_3D == target.Type());
@@ -3344,8 +3419,8 @@ namespace KlayGE
 				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read);
 			src_cpu_ptr = src_cpu.get();
 
-			this->CopyToSubTexture3D(*src_cpu, 0, 0, 0, 0, 0, src_width, src_height, src_depth, 
-				src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth);
+			this->CopyToSubTexture3D(*src_cpu, 0, 0, 0, 0, 0, src_width, src_height, src_depth, src_array_index, src_level, src_x_offset,
+				src_y_offset, src_z_offset, src_width, src_height, src_depth, TextureFilter::Point);
 
 			src_cpu_array_index = 0;
 			src_cpu_level = 0;
@@ -3390,20 +3465,20 @@ namespace KlayGE
 				dst_width, dst_height, dst_depth,
 				src_cpu_mapper.Pointer<uint8_t>(), src_cpu_mapper.RowPitch(), src_cpu_mapper.SlicePitch(), this->Format(),
 				src_width, src_height, src_depth,
-				linear);
+				filter);
 		}
 
 		if (dst_cpu_ptr != &target)
 		{
-			dst_cpu_ptr->CopyToSubTexture3D(target, dst_array_index, dst_level,
-				dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth, 0, 0, 0, 0, 0, dst_width, dst_height, dst_height);
+			dst_cpu_ptr->CopyToSubTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width,
+				dst_height, dst_depth, 0, 0, 0, 0, 0, dst_width, dst_height, dst_height, TextureFilter::Point);
 		}
 	}
 
 	void Texture::ResizeTextureCube(Texture& target,
 		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
-		bool linear)
+		TextureFilter filter)
 	{
 		BOOST_ASSERT((TT_2D == this->Type()) || (TT_Cube == this->Type()));
 		BOOST_ASSERT((TT_2D == target.Type()) || (TT_Cube == target.Type()));
@@ -3421,8 +3496,8 @@ namespace KlayGE
 				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read);
 			src_cpu_ptr = src_cpu.get();
 
-			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
-				src_array_index * 6 + src_face - CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height);
+			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, src_array_index * 6 + src_face - CF_Positive_X, src_level,
+				src_x_offset, src_y_offset, src_width, src_height, TextureFilter::Point);
 
 			src_cpu_array_index = 0;
 			src_cpu_level = 0;
@@ -3454,21 +3529,19 @@ namespace KlayGE
 				dst_width, dst_height, 1,
 				src_cpu_mapper.Pointer<uint8_t>(), src_cpu_mapper.RowPitch(), src_cpu_mapper.SlicePitch(), this->Format(),
 				src_width, src_height, 1,
-				linear);
+				filter);
 		}
 
 		{
 			dst_cpu_ptr->CopyToSubTextureCube(target, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-				0, CF_Positive_X, 0, 0, 0, dst_width, dst_height);
+				0, CF_Positive_X, 0, 0, 0, dst_width, dst_height, TextureFilter::Point);
 		}
 	}
 
 
-	void ResizeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format,
-		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, ElementFormat src_format,
-		uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-		bool linear)
+	void ResizeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format, uint32_t dst_width,
+		uint32_t dst_height, uint32_t dst_depth, void const* src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch,
+		ElementFormat src_format, uint32_t src_width, uint32_t src_height, uint32_t src_depth, TextureFilter filter)
 	{
 		std::vector<uint8_t> src_cpu_data_block;
 		void* src_cpu_data;
@@ -3573,8 +3646,8 @@ namespace KlayGE
 		uint32_t const src_elem_size = NumFormatBytes(src_cpu_format);
 		uint32_t const dst_elem_size = NumFormatBytes(dst_cpu_format);
 
-		if ((!linear || ((src_width == dst_width) && (src_height == dst_height) && (src_height == dst_height)))
-			&& (src_cpu_format == dst_cpu_format))
+		if (((filter == TextureFilter::Point) || ((src_width == dst_width) && (src_height == dst_height) && (src_depth == dst_depth))) &&
+			(src_cpu_format == dst_cpu_format))
 		{
 			for (uint32_t z = 0; z < dst_depth; ++ z)
 			{
@@ -3620,7 +3693,7 @@ namespace KlayGE
 			}
 
 			std::vector<Color> dst_32f(dst_width * dst_height * dst_depth);
-			if (linear)
+			if (filter == TextureFilter::Linear)
 			{
 				for (uint32_t z = 0; z < dst_depth; ++ z)
 				{
@@ -3814,43 +3887,40 @@ namespace KlayGE
 		return std::max<uint32_t>(1U, depth_ >> level);
 	}
 
-	void SoftwareTexture::CopyToTexture(Texture& target)
+	void SoftwareTexture::CopyToTexture(Texture& target, TextureFilter filter)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
 		uint32_t const num_faces = (type_ == TT_Cube) ? 6 : 1;
 		uint32_t const array_size = std::min(array_size_, target.ArraySize());
 		uint32_t const num_mip_maps = std::min(num_mip_maps_, target.NumMipMaps());
-		for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+		for (uint32_t array_index = 0; array_index < array_size; ++array_index)
 		{
-			for (uint32_t face = 0; face < num_faces; ++ face)
+			for (uint32_t face = 0; face < num_faces; ++face)
 			{
-				for (uint32_t mip = 0; mip < num_mip_maps; ++ mip)
+				for (uint32_t mip = 0; mip < num_mip_maps; ++mip)
 				{
 					switch (type_)
 					{
 					case TT_1D:
-						this->CopyToSubTexture1D(target, array_index, mip, 0, target.Width(mip),
-							array_index, mip, 0, this->Width(mip));
+						this->CopyToSubTexture1D(
+							target, array_index, mip, 0, target.Width(mip), array_index, mip, 0, this->Width(mip), filter);
 						break;
 
 					case TT_2D:
-						this->CopyToSubTexture2D(target, array_index, mip, 0, 0, target.Width(mip), target.Height(mip),
-							array_index, mip, 0, 0, this->Width(mip), this->Height(mip));
+						this->CopyToSubTexture2D(target, array_index, mip, 0, 0, target.Width(mip), target.Height(mip), array_index, mip, 0,
+							0, this->Width(mip), this->Height(mip), filter);
 						break;
 
 					case TT_3D:
-						this->CopyToSubTexture3D(target, array_index, mip,
-							0, 0, 0, target.Width(mip), target.Height(mip), target.Depth(mip),
-							array_index, mip,
-							0, 0, 0, this->Width(mip), this->Height(mip), this->Depth(mip));
+						this->CopyToSubTexture3D(target, array_index, mip, 0, 0, 0, target.Width(mip), target.Height(mip),
+							target.Depth(mip), array_index, mip, 0, 0, 0, this->Width(mip), this->Height(mip), this->Depth(mip), filter);
 						break;
 
 					case TT_Cube:
-						this->CopyToSubTextureCube(target, array_index, static_cast<CubeFaces>(face), mip,
-							0, 0, target.Width(mip), target.Height(mip),
-							array_index, static_cast<CubeFaces>(face), mip,
-							0, 0, this->Width(mip), this->Height(mip));
+						this->CopyToSubTextureCube(target, array_index, static_cast<CubeFaces>(face), mip, 0, 0, target.Width(mip),
+							target.Height(mip), array_index, static_cast<CubeFaces>(face), mip, 0, 0, this->Width(mip), this->Height(mip),
+							filter);
 						break;
 					}
 				}
@@ -3858,9 +3928,8 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::CopyToSubTexture1D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	void SoftwareTexture::CopyToSubTexture1D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_width, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width, TextureFilter filter)
 	{
 		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
 		void const * src_ptr = static_cast<uint8_t const *>(src_data.data)
@@ -3891,17 +3960,15 @@ namespace KlayGE
 				dst_width, 1, 1,
 				src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
 				src_width, 1, 1,
-				true);
+				filter);
 		}
 
 		target.UpdateSubresource1D(dst_array_index, dst_level, dst_x_offset, dst_width, resized_ptr);
 	}
 
-	void SoftwareTexture::CopyToSubTexture2D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void SoftwareTexture::CopyToSubTexture2D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset,
+		uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
 		void const * src_ptr = static_cast<uint8_t const *>(src_data.data)
@@ -3934,18 +4001,17 @@ namespace KlayGE
 				dst_width, dst_height, 1,
 				src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
 				src_width, src_height, 1,
-				true);
+				filter);
 		}
 
 		target.UpdateSubresource2D(dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
 			resized_ptr, resized_row_pitch);
 	}
 
-	void SoftwareTexture::CopyToSubTexture3D(Texture& target,
-		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
-		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
-		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void SoftwareTexture::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
+		uint32_t src_depth, TextureFilter filter)
 	{
 		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
 		void const * src_ptr = static_cast<uint8_t const *>(src_data.data)
@@ -3977,18 +4043,16 @@ namespace KlayGE
 				dst_width, dst_height, dst_depth,
 				src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
 				src_width, src_height, src_depth,
-				true);
+				filter);
 		}
 
 		target.UpdateSubresource3D(dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
 			resized_ptr, resized_row_pitch, resized_slice_pitch);
 	}
 
-	void SoftwareTexture::CopyToSubTextureCube(Texture& target,
-		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
-		uint32_t dst_width, uint32_t dst_height,
-		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
-		uint32_t src_width, uint32_t src_height)
+	void SoftwareTexture::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
 		auto const & src_data = subres_data_[(src_array_index * 6 + src_face) * num_mip_maps_ + src_level];
 		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data.data)
@@ -4020,48 +4084,11 @@ namespace KlayGE
 				dst_width, dst_height, 1,
 				src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
 				src_width, src_height, 1,
-				true);
+				filter);
 		}
 
 		target.UpdateSubresourceCube(dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
 			resized_ptr, resized_row_pitch);
-	}
-
-	void SoftwareTexture::BuildMipSubLevels()
-	{
-		for (uint32_t index = 0; index < this->ArraySize(); ++ index)
-		{
-			for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
-			{
-				switch (type_)
-				{
-				case TT_1D:
-					this->CopyToSubTexture1D(*this, index, level, 0, this->Width(level),
-						index, level - 1, 0, this->Width(level - 1));
-					break;
-
-				case TT_2D:
-					this->CopyToSubTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level),
-						index, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1));
-					break;
-
-				case TT_3D:
-					this->CopyToSubTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
-						index, level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1));
-					break;
-
-				case TT_Cube:
-					for (uint32_t face = 0; face < 6; ++ face)
-					{
-						this->CopyToSubTextureCube(*this, index, static_cast<CubeFaces>(face), level, 0, 0,
-							this->Width(level), this->Height(level),
-							index, static_cast<CubeFaces>(face), level - 1, 0, 0,
-							this->Width(level - 1), this->Height(level - 1));
-					}
-					break;
-				}
-			}
-		}
 	}
 
 	void SoftwareTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -4213,7 +4240,7 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	void SoftwareTexture::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
 	{
 		KFL_UNUSED(clear_value_hint);
 

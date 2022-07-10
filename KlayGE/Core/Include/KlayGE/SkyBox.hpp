@@ -38,13 +38,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderableSkyBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableSkyBox : public Renderable
 	{
 	public:
 		RenderableSkyBox();
-		virtual ~RenderableSkyBox()
-		{
-		}
 
 		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech);
 		void CubeMap(TexturePtr const & cube);

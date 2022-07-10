@@ -3,6 +3,7 @@
 <effect>
 	<include name="Quaternion.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="mv"/>
@@ -10,11 +11,6 @@
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
-
-	<parameter type="float3" name="pos_center"/>
-	<parameter type="float3" name="pos_extent"/>
-	<parameter type="float2" name="tc_center"/>
-	<parameter type="float2" name="tc_extent"/>
 
 	<parameter type="texture2D" name="video_tex"/>
 	<parameter type="sampler" name="video_sampler">

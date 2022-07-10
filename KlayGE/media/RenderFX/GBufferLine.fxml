@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<technique name="GBufferLineMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="GBufferLineTech" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>

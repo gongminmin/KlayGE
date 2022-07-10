@@ -29,6 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/CXX20/bit.hpp>
 #include <KFL/Detail/MathHelper.hpp>
 
 #include <KFL/Math.hpp>
@@ -119,14 +120,7 @@ namespace KlayGE
 
 		float abs(float x) noexcept
 		{
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = x;
-			fni.i &= 0x7FFFFFFF;
-			return fni.f;
+			return std::abs(x);
 		}
 		
 		float sqrt(float x) noexcept
@@ -140,17 +134,13 @@ namespace KlayGE
 			float const threehalfs = 1.5f;
 
 			float const x2 = number * 0.5f;
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = number;											// evil floating point bit level hacking
-			fni.i = 0x5f375a86 - (fni.i >> 1);						// what the fuck?
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));	// 1st iteration
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
+			int32_t i = std::bit_cast<int32_t>(number);	// evil floating point bit level hacking
+			i = 0x5f375a86 - (i >> 1);					// what the fuck?
+			float f = std::bit_cast<float>(i);
+			f = f * (threehalfs - (x2 * f * f));		// 1st iteration
+			f = f * (threehalfs - (x2 * f * f));		// 2nd iteration, this can be removed
 
-			return fni.f;
+			return f;
 		}
 
 		float pow(float x, float y) noexcept
@@ -231,13 +221,7 @@ namespace KlayGE
 
 		float SignBit(float x) noexcept
 		{
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = x;
-			return static_cast<float>(SignBit(fni.i));
+			return static_cast<float>(SignBit(std::bit_cast<int32_t>(x)));
 		}
 
 
@@ -777,28 +761,29 @@ namespace KlayGE
 		template <typename T>
 		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs) noexcept
 		{
-			Matrix4_T<T> const tmp(transpose(rhs));
+			T const * lhs_data = lhs.data();
+			T const * rhs_data = rhs.data();
 
 			return Matrix4_T<T>(
-				lhs(0, 0) * tmp(0, 0) + lhs(0, 1) * tmp(0, 1) + lhs(0, 2) * tmp(0, 2) + lhs(0, 3) * tmp(0, 3),
-				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
-				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
-				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
+				lhs_data[0] * rhs_data[0] + lhs_data[1] * rhs_data[4] + lhs_data[2] * rhs_data[8]  + lhs_data[3] * rhs_data[12],
+				lhs_data[0] * rhs_data[1] + lhs_data[1] * rhs_data[5] + lhs_data[2] * rhs_data[9]  + lhs_data[3] * rhs_data[13],
+				lhs_data[0] * rhs_data[2] + lhs_data[1] * rhs_data[6] + lhs_data[2] * rhs_data[10] + lhs_data[3] * rhs_data[14],
+				lhs_data[0] * rhs_data[3] + lhs_data[1] * rhs_data[7] + lhs_data[2] * rhs_data[11] + lhs_data[3] * rhs_data[15],
 
-				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
-				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
-				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
-				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
+				lhs_data[4] * rhs_data[0] + lhs_data[5] * rhs_data[4] + lhs_data[6] * rhs_data[8]  + lhs_data[7] * rhs_data[12],
+				lhs_data[4] * rhs_data[1] + lhs_data[5] * rhs_data[5] + lhs_data[6] * rhs_data[9]  + lhs_data[7] * rhs_data[13],
+				lhs_data[4] * rhs_data[2] + lhs_data[5] * rhs_data[6] + lhs_data[6] * rhs_data[10] + lhs_data[7] * rhs_data[14],
+				lhs_data[4] * rhs_data[3] + lhs_data[5] * rhs_data[7] + lhs_data[6] * rhs_data[11] + lhs_data[7] * rhs_data[15],
 
-				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
-				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
-				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
-				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
+				lhs_data[8] * rhs_data[0] + lhs_data[9] * rhs_data[4] + lhs_data[10] * rhs_data[8]  + lhs_data[11] * rhs_data[12],
+				lhs_data[8] * rhs_data[1] + lhs_data[9] * rhs_data[5] + lhs_data[10] * rhs_data[9]  + lhs_data[11] * rhs_data[13],
+				lhs_data[8] * rhs_data[2] + lhs_data[9] * rhs_data[6] + lhs_data[10] * rhs_data[10] + lhs_data[11] * rhs_data[14],
+				lhs_data[8] * rhs_data[3] + lhs_data[9] * rhs_data[7] + lhs_data[10] * rhs_data[11] + lhs_data[11] * rhs_data[15],
 
-				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
-				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
-				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
-				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
+				lhs_data[12] * rhs_data[0] + lhs_data[13] * rhs_data[4] + lhs_data[14] * rhs_data[8]  + lhs_data[15] * rhs_data[12],
+				lhs_data[12] * rhs_data[1] + lhs_data[13] * rhs_data[5] + lhs_data[14] * rhs_data[9]  + lhs_data[15] * rhs_data[13],
+				lhs_data[12] * rhs_data[2] + lhs_data[13] * rhs_data[6] + lhs_data[14] * rhs_data[10] + lhs_data[15] * rhs_data[14],
+				lhs_data[12] * rhs_data[3] + lhs_data[13] * rhs_data[7] + lhs_data[14] * rhs_data[11] + lhs_data[15] * rhs_data[15]);
 		}
 
 		template float determinant(float4x4 const & rhs) noexcept;
@@ -806,17 +791,19 @@ namespace KlayGE
 		template <typename T>
 		T determinant(Matrix4_T<T> const & rhs) noexcept
 		{
-			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+			T const * rhs_data = rhs.data();
 
-			return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
-				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
-				+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
-				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
+			T const _3142_3241(rhs_data[8]  * rhs_data[13] - rhs_data[9]  * rhs_data[12]);
+			T const _3143_3341(rhs_data[8]  * rhs_data[14] - rhs_data[10] * rhs_data[12]);
+			T const _3144_3441(rhs_data[8]  * rhs_data[15] - rhs_data[11] * rhs_data[12]);
+			T const _3243_3342(rhs_data[9]  * rhs_data[14] - rhs_data[10] * rhs_data[13]);
+			T const _3244_3442(rhs_data[9]  * rhs_data[15] - rhs_data[11] * rhs_data[13]);
+			T const _3344_3443(rhs_data[10] * rhs_data[15] - rhs_data[11] * rhs_data[14]);
+
+			return rhs_data[0] * (rhs_data[5] * _3344_3443 - rhs_data[6] * _3244_3442 + rhs_data[7] * _3243_3342)
+				- rhs_data[1] * (rhs_data[4] * _3344_3443 - rhs_data[6] * _3144_3441 + rhs_data[7] * _3143_3341)
+				+ rhs_data[2] * (rhs_data[4] * _3244_3442 - rhs_data[5] * _3144_3441 + rhs_data[7] * _3142_3241)
+				- rhs_data[3] * (rhs_data[4] * _3243_3342 - rhs_data[5] * _3143_3341 + rhs_data[6] * _3142_3241);
 		}
 
 		template float4x4 inverse(float4x4 const & rhs) noexcept;
@@ -824,24 +811,26 @@ namespace KlayGE
 		template <typename T>
 		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs) noexcept
 		{
-			T const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
-			T const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
-			T const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
-			T const _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
-			T const _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
-			T const _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
-			T const _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
-			T const _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
-			T const _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
-			T const _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
-			T const _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
-			T const _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
-			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+			T const * rhs_data = rhs.data();
+
+			T const _2132_2231(rhs_data[4]  * rhs_data[9]  - rhs_data[5]  * rhs_data[8]);
+			T const _2133_2331(rhs_data[4]  * rhs_data[10] - rhs_data[6]  * rhs_data[8]);
+			T const _2134_2431(rhs_data[4]  * rhs_data[11] - rhs_data[7]  * rhs_data[8]);
+			T const _2142_2241(rhs_data[4]  * rhs_data[13] - rhs_data[5]  * rhs_data[12]);
+			T const _2143_2341(rhs_data[4]  * rhs_data[14] - rhs_data[6]  * rhs_data[12]);
+			T const _2144_2441(rhs_data[4]  * rhs_data[15] - rhs_data[7]  * rhs_data[12]);
+			T const _2233_2332(rhs_data[5]  * rhs_data[10] - rhs_data[6]  * rhs_data[9]);
+			T const _2234_2432(rhs_data[5]  * rhs_data[11] - rhs_data[7]  * rhs_data[9]);
+			T const _2243_2342(rhs_data[5]  * rhs_data[14] - rhs_data[6]  * rhs_data[13]);
+			T const _2244_2442(rhs_data[5]  * rhs_data[15] - rhs_data[7]  * rhs_data[13]);
+			T const _2334_2433(rhs_data[6]  * rhs_data[11] - rhs_data[7]  * rhs_data[10]);
+			T const _2344_2443(rhs_data[6]  * rhs_data[15] - rhs_data[7]  * rhs_data[14]);
+			T const _3142_3241(rhs_data[8]  * rhs_data[13] - rhs_data[9]  * rhs_data[12]);
+			T const _3143_3341(rhs_data[8]  * rhs_data[14] - rhs_data[10] * rhs_data[12]);
+			T const _3144_3441(rhs_data[8]  * rhs_data[15] - rhs_data[11] * rhs_data[12]);
+			T const _3243_3342(rhs_data[9]  * rhs_data[14] - rhs_data[10] * rhs_data[13]);
+			T const _3244_3442(rhs_data[9]  * rhs_data[15] - rhs_data[11] * rhs_data[13]);
+			T const _3344_3443(rhs_data[10] * rhs_data[15] - rhs_data[11] * rhs_data[14]);
 
 			// 行列式的值
 			T const det(determinant(rhs));
@@ -854,25 +843,25 @@ namespace KlayGE
 				T invDet(T(1) / det);
 
 				return Matrix4_T<T>(
-					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
-					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
-					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
-					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
+					+invDet * (rhs_data[5] * _3344_3443 - rhs_data[6] * _3244_3442 + rhs_data[7] * _3243_3342),
+					-invDet * (rhs_data[1] * _3344_3443 - rhs_data[2] * _3244_3442 + rhs_data[3] * _3243_3342),
+					+invDet * (rhs_data[1] * _2344_2443 - rhs_data[2] * _2244_2442 + rhs_data[3] * _2243_2342),
+					-invDet * (rhs_data[1] * _2334_2433 - rhs_data[2] * _2234_2432 + rhs_data[3] * _2233_2332),
 
-					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
-					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
-					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
-					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
+					-invDet * (rhs_data[4] * _3344_3443 - rhs_data[6] * _3144_3441 + rhs_data[7] * _3143_3341),
+					+invDet * (rhs_data[0] * _3344_3443 - rhs_data[2] * _3144_3441 + rhs_data[3] * _3143_3341),
+					-invDet * (rhs_data[0] * _2344_2443 - rhs_data[2] * _2144_2441 + rhs_data[3] * _2143_2341),
+					+invDet * (rhs_data[0] * _2334_2433 - rhs_data[2] * _2134_2431 + rhs_data[3] * _2133_2331),
 
-					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
-					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
-					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
-					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
+					+invDet * (rhs_data[4] * _3244_3442 - rhs_data[5] * _3144_3441 + rhs_data[7] * _3142_3241),
+					-invDet * (rhs_data[0] * _3244_3442 - rhs_data[1] * _3144_3441 + rhs_data[3] * _3142_3241),
+					+invDet * (rhs_data[0] * _2244_2442 - rhs_data[1] * _2144_2441 + rhs_data[3] * _2142_2241),
+					-invDet * (rhs_data[0] * _2234_2432 - rhs_data[1] * _2134_2431 + rhs_data[3] * _2132_2231),
 
-					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
-					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
-					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
-					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
+					-invDet * (rhs_data[4] * _3243_3342 - rhs_data[5] * _3143_3341 + rhs_data[6] * _3142_3241),
+					+invDet * (rhs_data[0] * _3243_3342 - rhs_data[1] * _3143_3341 + rhs_data[2] * _3142_3241),
+					-invDet * (rhs_data[0] * _2243_2342 - rhs_data[1] * _2143_2341 + rhs_data[2] * _2142_2241),
+					+invDet * (rhs_data[0] * _2233_2332 - rhs_data[1] * _2133_2331 + rhs_data[2] * _2132_2231));
 			}
 		}
 
@@ -2825,7 +2814,7 @@ namespace KlayGE
 
 				if (dot_coord(plane, v0) < 0)
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (dot_coord(plane, v1) < 0)
 				{
@@ -2833,7 +2822,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_obb_frustum(OBBox const & obb, Frustum const & frustum) noexcept;
@@ -2862,7 +2851,7 @@ namespace KlayGE
 
 				if (dot_coord(plane, v0) < 0)
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (dot_coord(plane, v1) < 0)
 				{
@@ -2870,7 +2859,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_sphere_frustum(Sphere const & sphere, Frustum const & frustum) noexcept;
@@ -2886,7 +2875,7 @@ namespace KlayGE
 				float const d = dot_coord(plane, sphere.Center());
 				if (d <= -sphere.Radius())
 				{
-					return BO_No;
+					return BoundOverlap::No;
 				}
 				if (d > sphere.Radius())
 				{
@@ -2894,7 +2883,7 @@ namespace KlayGE
 				}
 			}
 
-			return intersect ? BO_Partial : BO_Yes;
+			return intersect ? BoundOverlap::Partial : BoundOverlap::Yes;
 		}
 
 		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & rhs) noexcept;
@@ -2922,11 +2911,11 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 			if (inside_all)
 			{
-				return BO_Yes;
+				return BoundOverlap::Yes;
 			}
 
 			for (int i = 0; i < 6; ++ i)
@@ -2944,7 +2933,7 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 
 			Vector_T<T, 3> edge_axis_l[6];
@@ -2989,10 +2978,10 @@ namespace KlayGE
 			}
 			if (outside)
 			{
-				return BO_No;
+				return BoundOverlap::No;
 			}
 
-			return BO_Partial;
+			return BoundOverlap::Partial;
 		}
 
 

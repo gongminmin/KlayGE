@@ -1,12 +1,10 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -17,7 +15,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -25,8 +23,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "ShadowCubeMap.hpp"
@@ -46,10 +45,7 @@ namespace
 		{
 		}
 
-		float4x4 LightViewProj() const
-		{
-			return light_views_[pass_index_] * light_proj_;
-		}
+		virtual ~ShadowMapped() = default;
 
 		virtual void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
@@ -58,26 +54,28 @@ namespace
 			pass_index_ = pass_index;
 		}
 
-		void LightSrc(LightSourcePtr const & light_src)
+		void LightSrc(LightSourcePtr const& light_src)
 		{
 			light_pos_ = light_src->Position();
 
-			float4x4 light_model = MathLib::to_matrix(light_src->Rotation()) * MathLib::translation(light_src->Position());
+			float4x4 const light_model = light_src->BoundSceneNode()->TransformToParent();
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			if ((SMT_CubeOne == sm_type_) || (SMT_CubeOneInstance == sm_type_) || (SMT_CubeOneInstanceGS == sm_type_))
+			switch (sm_type_)
 			{
-				for (int i = 0; i < 6; ++ i)
-				{
-					light_views_[i] = light_src->SMCamera(i)->ViewMatrix();
-				}
+			case SMT_CubeOne:
+			case SMT_CubeOneInstance:
+			case SMT_CubeOneInstanceGS:
+			case SMT_CubeOneInstanceVpRt:
+				light_view_ = light_src->SMCamera(0)->ViewMatrix();
+				break;
+
+			case SMT_Cube:
+			default:
+				light_view_ = app.ActiveCamera().ViewMatrix();
+				break;
 			}
-			else
-			{
-				light_views_[pass_index_] = app.ActiveCamera().ViewMatrix();
-			}
-			light_proj_ = app.ActiveCamera().ProjMatrix();
 
 			light_color_ = light_src->Color();
 			light_falloff_ = light_src->Falloff();
@@ -88,11 +86,6 @@ namespace
 		void CubeSMTexture(TexturePtr const & cube_tex)
 		{
 			sm_cube_tex_ = cube_tex;
-		}
-
-		void DPSMTexture(TexturePtr const & dual_tex)
-		{
-			sm_dual_tex_ = dual_tex;
 		}
 
 		void LampTexture(TexturePtr const & tex)
@@ -106,60 +99,19 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(effect->ParameterByName("model")) = model;
 			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
 			*(effect->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 			*(effect->ParameterByName("esm_scale_factor")) = esm_scale_factor_ * light_inv_range_;
 
-			if (gen_sm_pass_)
+			if (!gen_sm_pass_)
 			{
-				switch (sm_type_)
-				{
-				case SMT_DP:
-					{
-						*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
-
-						float4x4 mv = model * light_views_[pass_index_];
-						*(effect->ParameterByName("mv")) = mv;
-						*(effect->ParameterByName("far")) = camera.FarPlane();
-
-						FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-						*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
-					}
-					break;
-
-				case SMT_Cube:
-					*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
-					break;
-
-				default:
-					{
-						std::vector<float4x4> mvps(6);
-						for (int i = 0; i < 6; ++ i)
-						{
-							mvps[i] = model * light_views_[i] * light_proj_;
-						}
-						*(effect->ParameterByName("mvps")) = mvps;
-					}
-					break;
-				}
-			}
-			else
-			{
-				*(effect->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
 				*(effect->ParameterByName("light_projective_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
-				*(effect->ParameterByName("shadow_dual_tex")) = sm_dual_tex_;
 
 				*(effect->ParameterByName("light_color")) = light_color_;
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
-
-				if (SMT_DP == sm_type_)
-				{
-					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
-				}
 			}
 		}
 
@@ -170,12 +122,10 @@ namespace
 		SM_TYPE sm_type_;
 		int pass_index_;
 		TexturePtr sm_cube_tex_;
-		TexturePtr sm_dual_tex_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
-		float4x4 light_views_[6];
-		float4x4 light_proj_;
+		float4x4 light_view_;
 		float3 light_color_;
 		float3 light_falloff_;
 
@@ -188,37 +138,11 @@ namespace
 	class OccluderMesh : public StaticMesh, public ShadowMapped
 	{
 	public:
-		OccluderMesh(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name),
-				ShadowMapped(SHADOW_MAP_SIZE),
-				smooth_mesh_(false), tess_factor_(5)
+		explicit OccluderMesh(std::wstring_view name)
+			: StaticMesh(name),
+				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = SyncLoadRenderEffect("ShadowCubeMap.fxml");
-		}
-
-		virtual void DoBuildMeshInfo() override
-		{
-			StaticMesh::DoBuildMeshInfo();
-
-			*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
-			*(effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
-			*(effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
-			*(effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
-
-			*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-			*(effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness, !!textures_[RenderMaterial::TS_Metalness]);
-			*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!textures_[RenderMaterial::TS_Glossiness]);
-			*(effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
-				!!textures_[RenderMaterial::TS_Emissive]);
-			*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
-
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void ScaleFactor(float esm_scale_factor)
@@ -230,137 +154,61 @@ namespace
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
-			for (auto const & rl : rls_)
-			{
-				rl->TopologyType(RenderLayout::TT_TriangleList);
-			}
 
 			if (gen_sm)
 			{
 				switch (sm_type_)
 				{
-				case SMT_DP:
-					{
-						RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-						if (TM_Hardware == caps.tess_method)
-						{
-							technique_ = effect_->TechniqueByName("GenDPShadowMapTessTech");
-							for (auto const & rl : rls_)
-							{
-								rl->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-							}
-							smooth_mesh_ = true;
-						}
-						else
-						{
-							technique_ = effect_->TechniqueByName("GenDPShadowMap");
-							smooth_mesh_ = false;
-						}
-					}
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
-					break;
-				
 				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
-					smooth_mesh_ = false;
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
 					break;
 
 				case SMT_CubeOne:
 					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
-					smooth_mesh_ = false;
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(1);
-					}
 					break;
 
 				case SMT_CubeOneInstance:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
-					smooth_mesh_ = false;
-					for (auto const & rl : rls_)
-					{
-						rl->NumInstances(6);
-					}
 					break;
 
-				default:
+				case SMT_CubeOneInstanceGS:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
-					smooth_mesh_ = false;
-					for (auto const & rl : rls_)
+					break;
+
+				case SMT_CubeOneInstanceVpRt:
+				default:
 					{
-						rl->NumInstances(1);
+						RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+						BOOST_ASSERT(caps.vp_rt_index_at_every_stage_support);
+						KFL_UNUSED(caps);
 					}
+					technique_ = effect_->TechniqueByName("GenCubeOneInstanceVpRtShadowMap");
 					break;
 				}
 			}
 			else
 			{
-				if (SMT_DP == sm_type_)
-				{
-					technique_ = effect_->TechniqueByName("RenderSceneDPSM");
-				}
-				else
-				{
-					technique_ = effect_->TechniqueByName("RenderScene");
-				}
-				smooth_mesh_ = false;
-				for (auto const & rl : rls_)
-				{
-					rl->NumInstances(1);
-				}
+				technique_ = effect_->TechniqueByName("RenderScene");
 			}
 		}
 
 		void OnRenderBegin()
 		{
 			ShadowMapped::OnRenderBegin(model_mat_, effect_);
-
-			if (smooth_mesh_)
-			{
-				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				if (caps.tess_method != TM_No)
-				{
-					*(effect_->ParameterByName("adaptive_tess")) = true;
-					*(effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 32.0f);
-				}
-			}
-		}
-		
-		void SetTessFactor(int32_t tess_factor)
-		{
-			tess_factor_ = static_cast<float>(tess_factor);
-		}
-
-	private:	
-		bool smooth_mesh_;
-		float tess_factor_;
-	};
-
-	class OccluderObjectUpdate
-	{
-	public:
-		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
-		{
-			obj.ModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-app_time / 1.5f));
+			StaticMesh::OnRenderBegin();
 		}
 	};
 
 
-	class PointLightSourceUpdate
+	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			light.ModelMatrix(MathLib::rotation_z(0.4f)
-				* MathLib::rotation_y(app_time / 1.4f)
-				* MathLib::translation(2.0f, 12.0f, 4.0f));
+			KFL_UNUSED(elapsed_time);
+
+			node.TransformToParent(
+				MathLib::rotation_z(0.4f) * MathLib::rotation_y(app_time / 1.4f) * MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 	};
 
@@ -387,8 +235,7 @@ int SampleMain()
 }
 
 ShadowCubeMap::ShadowCubeMap()
-				: App3DFramework("ShadowCubeMap"),
-					sm_type_(SMT_DP)
+				: App3DFramework("ShadowCubeMap")
 {
 	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 }
@@ -398,9 +245,11 @@ void ShadowCubeMap::OnCreate()
 	loading_percentage_ = 0;
 	lamp_tex_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 	scene_model_ = ASyncLoadModel("ScifiRoom/Scifi.3DS", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+		SceneNode::SOA_Cullable, AddToSceneRootHelper,
+		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
+	teapot_model_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
+		CreateModelFactory<RenderModel>, CreateMeshFactory<OccluderMesh>);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -411,12 +260,12 @@ void ShadowCubeMap::OnCreate()
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.1f, 200);
 
-	auto fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	auto fmt = caps.BestMatchRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
-	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
+	DepthStencilViewPtr depth_view = rf.Make2DDsv(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
 	if (caps.pack_to_rgba_required)
 	{
-		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_ABGR8, EF_ARGB8}), 1, 0);
 		BOOST_ASSERT(fmt != EF_Unknown);
 	}
 	else
@@ -424,51 +273,59 @@ void ShadowCubeMap::OnCreate()
 		fmt = EF_R16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	shadow_srv_ = rf.MakeTextureSrv(shadow_tex_);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
-	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
-	shadow_cube_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
+	shadow_cube_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(shadow_tex_, 0, 1, 0));
+	shadow_cube_buffer_->Attach(depth_view);
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	if (caps.render_to_texture_array_support)
-	{
-		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-		shadow_cube_one_buffer_->GetViewport()->camera->OmniDirectionalMode(true);
-		shadow_cube_one_buffer_->GetViewport()->camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
-		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_one_tex_, 0, 0));
-		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
-		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
-	}
-
-	for (int i = 0; i < 2; ++ i)
-	{
-		shadow_dual_texs_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-		shadow_dual_view_[i] = rf.Make2DRenderView(*shadow_dual_texs_[i], 0, 1, 0);
-
-		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_dual_buffers_[i]->GetViewport()->camera->ProjParams(PI, 1, 0.1f, 500.0f);
-		shadow_dual_buffers_[i]->Attach(FrameBuffer::ATT_Color0, shadow_dual_view_[i]);
-		shadow_dual_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
-	}
-	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read);
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(20, 20, 20));
 	light_->Falloff(float3(1, 1, 0));
-	light_->BindUpdateFunc(PointLightSourceUpdate());
-	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.5f, 0.5f, 0.5f);
-	light_proxy_->AddToSceneManager();
+	auto light_proxy = LoadLightSourceProxyModel(light_);
+	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.5f, 0.5f, 0.5f) * light_proxy->RootNode()->TransformToParent());
+
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	light_node->AddComponent(light_);
+	light_node->AddChild(light_proxy->RootNode());
+	light_node->OnMainThreadUpdate().Connect(PointLightNodeUpdate());
+	root_node.AddChild(light_node);
+
+	if (caps.render_to_texture_array_support)
+	{
+		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
+		if (caps.flexible_srvs_support)
+		{
+			flexible_srvs_support_ = true;
+			for (uint32_t i = 0; i < 6; ++i)
+			{
+				shadow_cube_one_srvs_[i] = rf.MakeTexture2DSrv(shadow_cube_one_tex_, 0, static_cast<Texture::CubeFaces>(i), 0, 1);
+			}
+		}
+
+		auto& viewport = *shadow_cube_one_buffer_->Viewport();
+
+		viewport.NumCameras(6);
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			viewport.Camera(i, light_->SMCamera(i));
+		}
+
+		shadow_cube_one_buffer_->Attach(FrameBuffer::Attachment::Color0, rf.MakeCubeRtv(shadow_cube_one_tex_, 0, 0));
+		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write);
+		shadow_cube_one_buffer_->Attach(rf.MakeCubeDsv(shadow_one_depth_tex, 0, 0));
+	}
 
 	for (int i = 0; i < 6; ++ i)
 	{
 		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
-		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
-		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
+		sm_filter_pps_[i]->OutputPin(0, rf.Make2DRtv(shadow_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0));
 	}
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -478,14 +335,14 @@ void ShadowCubeMap::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubeMap.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("ShadowCubeMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");
@@ -494,17 +351,26 @@ void ShadowCubeMap::OnCreate()
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().connect(
+	if (!caps.vp_rt_index_at_every_stage_support)
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(4);
+	}
+	if (caps.max_shader_model < ShaderModel(5, 0))
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(3);
+	}
+
+	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->ScaleFactorChangedHandler(sender);
 		});
-	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->SMTypeChangedHandler(sender);
 		});
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);
@@ -515,7 +381,7 @@ void ShadowCubeMap::OnCreate()
 
 	if (caps.max_shader_model < ShaderModel(5, 0))
 	{
-		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(4);
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(3);
 	}
 }
 
@@ -539,9 +405,9 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 void ShadowCubeMap::ScaleFactorChangedHandler(KlayGE::UISlider const & sender)
 {
 	esm_scale_factor_ = static_cast<float>(sender.GetValue());
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	for (auto const & mesh : scene_meshes_)
 	{
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ScaleFactor(esm_scale_factor_);
+		checked_pointer_cast<OccluderMesh>(mesh)->ScaleFactor(esm_scale_factor_);
 	}
 
 	std::wostringstream stream;
@@ -596,16 +462,12 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				if (scene_model_->HWResourceReady())
 				{
-					auto so = MakeSharedPtr<SceneObject>(scene_model_, SceneObject::SOA_Cullable);
-					so->AddToSceneManager();
-
-					for (uint32_t i = 0; i < so->NumChildren(); ++ i)
+					for (uint32_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 					{
-						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->LampTexture(lamp_tex_);
-						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->DPSMTexture(shadow_dual_tex_);
-						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->ScaleFactor(esm_scale_factor_);
-						scene_objs_.push_back(so->Child(i));
+						checked_pointer_cast<OccluderMesh>(scene_model_->Mesh(i))->LampTexture(lamp_tex_);
+						checked_pointer_cast<OccluderMesh>(scene_model_->Mesh(i))->CubeSMTexture(shadow_cube_tex_);
+						checked_pointer_cast<OccluderMesh>(scene_model_->Mesh(i))->ScaleFactor(esm_scale_factor_);
+						scene_meshes_.push_back(scene_model_->Mesh(i));
 					}
 
 					loading_percentage_ = 90;
@@ -620,73 +482,41 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else
 			{
-				auto so = MakeSharedPtr<SceneObject>(teapot_model_->Subrenderable(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
-				so->AddToSceneManager();
-				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);
-				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->DPSMTexture(shadow_dual_tex_);
-				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->ScaleFactor(esm_scale_factor_);
-				scene_objs_.push_back(so);
+				auto const & teapot = teapot_model_->Mesh(0);
+				auto so =
+					MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(teapot), SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+				so->OnSubThreadUpdate().Connect(
+					[](SceneNode& node, float app_time, float elapsed_time)
+					{
+						KFL_UNUSED(elapsed_time);
+
+						node.TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
+							* MathLib::rotation_y(-app_time / 1.5f));
+					});
+				{
+					auto& scene_mgr = Context::Instance().SceneManagerInstance();
+					std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
+					scene_mgr.SceneRootNode().AddChild(so);
+				}
+				checked_pointer_cast<OccluderMesh>(teapot)->LampTexture(lamp_tex_);
+				checked_pointer_cast<OccluderMesh>(teapot)->CubeSMTexture(shadow_cube_tex_);
+				checked_pointer_cast<OccluderMesh>(teapot)->ScaleFactor(esm_scale_factor_);
+				scene_meshes_.push_back(teapot);
 
 				loading_percentage_ = 100;
 			}
 		}
 	}
 
-	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	re.NumCameraInstances(0);
 
 	switch (sm_type_)
 	{
-	case SMT_DP:
-		switch (pass)
-		{
-		case 0:
-		case 1:
-			{
-				float3 pos = light_->Position();
-				float3 lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
-				shadow_dual_buffers_[pass]->GetViewport()->camera->ViewParams(pos, lookat);
-
-				renderEngine.BindFrameBuffer(shadow_dual_buffers_[pass]);
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
-
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
-				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
-				}
-			}
-			return App3DFramework::URV_NeedFlush;
-
-		default:
-			{
-				renderEngine.BindFrameBuffer(FrameBufferPtr());
-				
-				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-				if (Context::Instance().Config().graphics_cfg.gamma)
-				{
-					clear_clr.r() = 0.029f;
-					clear_clr.g() = 0.133f;
-					clear_clr.b() = 0.325f;
-				}
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
-
-				shadow_dual_texs_[0]->CopyToSubTexture2D(*shadow_dual_tex_, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-				shadow_dual_texs_[1]->CopyToSubTexture2D(*shadow_dual_tex_, 0, 0, SHADOW_MAP_SIZE, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
-				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
-				}
-			}
-			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
-		}
-		break;
-	
 	case SMT_Cube:
 		if (pass > 0)
 		{
+			sm_filter_pps_[pass - 1]->InputPin(0, shadow_srv_);
 			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_,
 				*light_->SMCamera(pass - 1));
 			sm_filter_pps_[pass - 1]->Apply();
@@ -701,22 +531,22 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		case 4:
 		case 5:
 			{
-				renderEngine.BindFrameBuffer(shadow_cube_buffer_);
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+				re.BindFrameBuffer(shadow_cube_buffer_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
-				shadow_cube_buffer_->GetViewport()->camera = light_->SMCamera(pass);
+				shadow_cube_buffer_->Viewport()->Camera(light_->SMCamera(pass));
 
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				for (auto const & mesh : scene_meshes_)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+					checked_pointer_cast<OccluderMesh>(mesh)->GenShadowMapPass(true, sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(mesh)->LightSrc(light_);
 				}
 			}
 			return App3DFramework::URV_NeedFlush;
 
 		default:
 			{
-				renderEngine.BindFrameBuffer(FrameBufferPtr());
+				re.BindFrameBuffer(FrameBufferPtr());
 
 				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 				if (Context::Instance().Config().graphics_cfg.gamma)
@@ -725,33 +555,35 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					clear_clr.g() = 0.133f;
 					clear_clr.b() = 0.325f;
 				}
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				for (auto const & mesh : scene_meshes_)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(mesh)->GenShadowMapPass(false, sm_type_, pass);
 				}
 			}
 			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
-		break;
 
 	default:
-		if (renderEngine.DeviceCaps().render_to_texture_array_support)
+		if (re.DeviceCaps().render_to_texture_array_support)
 		{
 			switch (pass)
 			{
 			case 0:
 				{
-					shadow_cube_one_buffer_->GetViewport()->camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
-
-					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
-					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
-
-					for (size_t i = 0; i < scene_objs_.size(); ++ i)
+					if ((sm_type_ == SMT_CubeOne) || (sm_type_ == SMT_CubeOneInstanceGS))
 					{
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+						re.NumCameraInstances(1);
+					}
+
+					re.BindFrameBuffer(shadow_cube_one_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+
+					for (auto const & mesh : scene_meshes_)
+					{
+						checked_pointer_cast<OccluderMesh>(mesh)->GenShadowMapPass(true, sm_type_, pass);
+						checked_pointer_cast<OccluderMesh>(mesh)->LightSrc(light_);
 					}
 				}
 				return App3DFramework::URV_NeedFlush;
@@ -760,14 +592,23 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				{
 					for (int p = 0; p < 6; ++ p)
 					{
-						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
-							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+						if (flexible_srvs_support_)
+						{
+							sm_filter_pps_[p]->InputPin(0, shadow_cube_one_srvs_[p]);
+						}
+						else
+						{
+							shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0),
+								shadow_tex_->Height(0), p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0),
+								TextureFilter::Point);
+							sm_filter_pps_[p]->InputPin(0, shadow_srv_);
+						}
 						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_,
 							*light_->SMCamera(p));
 						sm_filter_pps_[p]->Apply();
 					}
 
-					renderEngine.BindFrameBuffer(FrameBufferPtr());
+					re.BindFrameBuffer(FrameBufferPtr());
 
 					Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 					if (Context::Instance().Config().graphics_cfg.gamma)
@@ -776,11 +617,11 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						clear_clr.g() = 0.133f;
 						clear_clr.b() = 0.325f;
 					}
-					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-					for (size_t i = 0; i < scene_objs_.size(); ++ i)
+					for (auto const & mesh : scene_meshes_)
 					{
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
+						checked_pointer_cast<OccluderMesh>(mesh)->GenShadowMapPass(false, sm_type_, pass);
 					}
 				}
 				return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
@@ -790,6 +631,5 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			return App3DFramework::URV_Finished;
 		}
-		break;
 	}
 }

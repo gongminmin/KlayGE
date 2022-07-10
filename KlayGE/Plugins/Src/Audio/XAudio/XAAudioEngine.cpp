@@ -30,17 +30,21 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <ostream>
 
 #include <boost/assert.hpp>
 
 #include <KlayGE/XAudio/XAAudio.hpp>
+
+#if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) && defined(KLAYGE_COMPILER_GCC)
+DEFINE_UUID_OF(IXAudio27);
+#endif
 
 namespace KlayGE
 {
@@ -87,25 +91,21 @@ namespace KlayGE
 	}
 
 	XAAudioEngine::XAAudioEngine()
-		: listener_{}
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		mod_xaudio2_ = ::LoadLibraryEx(TEXT(XAUDIO2_DLL_A), nullptr, 0);
-		if (nullptr == mod_xaudio2_)
+		if (!mod_xaudio2_.Load(XAUDIO2_DLL_A))
 		{
-			::MessageBoxW(nullptr, L"Can't load " XAUDIO2_DLL_W, L"Error", MB_OK);
+			LogError() << "COULDN'T load " XAUDIO2_DLL_A << std::endl;
+			Verify(false);
 		}
 
-		if (mod_xaudio2_ != nullptr)
-		{
 #if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
-			DynamicXAudio2Create_ = reinterpret_cast<XAudio2CreateFunc>(::GetProcAddress(mod_xaudio2_, "XAudio2Create"));
+		DynamicXAudio2Create_ = reinterpret_cast<XAudio2CreateFunc>(mod_xaudio2_.GetProcAddress("XAudio2Create"));
 #else
-			DynamicXAudio2Create_ = ::XAudio2Create;
+		DynamicXAudio2Create_ = ::XAudio2Create;
 #endif
-			DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioInitialize"));
-			DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioCalculate"));
-		}
+		DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(mod_xaudio2_.GetProcAddress("X3DAudioInitialize"));
+		DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(mod_xaudio2_.GetProcAddress("X3DAudioCalculate"));
 #else
 		DynamicXAudio2Create_ = ::XAudio2Create;
 		DynamicX3DAudioInitialize_ = ::X3DAudioInitialize;
@@ -116,9 +116,7 @@ namespace KlayGE
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) && defined(KLAYGE_DEBUG)
 		flags |= XAUDIO2_DEBUG_ENGINE;
 #endif
-		IXAudio2* xaudio = nullptr;
-		TIFHR(DynamicXAudio2Create_(&xaudio, flags, Processor1));
-		xaudio_ = MakeCOMPtr(xaudio);
+		TIFHR(DynamicXAudio2Create_(xaudio_.put(), flags, Processor1));
 
 		IXAudio2MasteringVoice*	mastering_voice;
 		TIFHR(xaudio_->CreateMasteringVoice(&mastering_voice, XAUDIO2_DEFAULT_CHANNELS, XAUDIO2_DEFAULT_SAMPLERATE));
@@ -126,7 +124,12 @@ namespace KlayGE
 
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)
 		XAUDIO2_DEVICE_DETAILS details;
+#ifdef KLAYGE_COMPILER_GCC
+		com_ptr<IXAudio27> xaudio27 = xaudio_.as<IXAudio27>();
+		TIFHR(xaudio27->GetDeviceDetails(0, &details));
+#else
 		TIFHR(xaudio_->GetDeviceDetails(0, &details));
+#endif
 
 		DWORD channel_mask = details.OutputFormat.dwChannelMask;
 		mastering_channels_ = details.OutputFormat.Format.nChannels;
@@ -153,7 +156,7 @@ namespace KlayGE
 		xaudio_.reset();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_xaudio2_);
+		mod_xaudio2_.Free();
 #endif
 	}
 

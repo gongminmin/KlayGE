@@ -63,7 +63,7 @@
 	#include <TargetConditionals.h>
 #endif
 
-#if defined(GLLOADER_GLES_SUPPORT) && !TARGET_OS_IPHONE
+#if defined(GLLOADER_GLES_SUPPORT) && (!defined(__APPLE__) || (defined(__APPLE__) && !TARGET_OS_IPHONE))
 #include <KHR/khrplatform.h>
 #endif
 
@@ -86,7 +86,7 @@
 
 #else
 #define GLLOADER_GLES
-#if TARGET_OS_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE
 	#define GLLOADER_EAGL
 #else
 	#define GLLOADER_EGL
@@ -96,7 +96,7 @@
 #ifndef GLLOADER_GLES
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__)
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
+#define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #elif (defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__))
@@ -111,7 +111,7 @@ typedef XID GLXContextID;
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
+#define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 typedef HDC     EGLNativeDisplayType;
@@ -209,28 +209,19 @@ typedef EGLNativeWindowType  NativeWindowType;
 #endif
 #endif
 
-#if defined(_MSC_VER)
-	#pragma warning(disable: 4055) // Allow casting from a void* to a function pointer.
-	#define GLLOADER_HAS_DECLSPEC
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-	#if !defined(__GNUC__) && !defined(GLLOADER_HAS_DECLSPEC)
-		#define GLLOADER_HAS_DECLSPEC
-	#endif
-
-	#if defined(__MINGW32__)
-		#define GLLOADER_HAS_DECLSPEC
-	#endif
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#define GLLOADER_SYMBOL_EXPORT __declspec(dllexport)
+#define GLLOADER_SYMBOL_IMPORT __declspec(dllimport)
+#else
+#define GLLOADER_SYMBOL_EXPORT __attribute__((visibility("default")))
+#define GLLOADER_SYMBOL_IMPORT
 #endif
 
-#ifdef GLLOADER_HAS_DECLSPEC
-	#ifdef GLLOADER_SOURCE				// Build dll
-		#define GLLOADER_API __declspec(dllexport)
-	#else								// Use dll
-		#define GLLOADER_API __declspec(dllimport)
-	#endif
-#else
-	#define GLLOADER_API
-#endif // GLLOADER_HAS_DECLSPEC
+#ifdef GLLOADER_SOURCE				// Build dll
+	#define GLLOADER_API GLLOADER_SYMBOL_EXPORT
+#else								// Use dll
+	#define GLLOADER_API GLLOADER_SYMBOL_IMPORT
+#endif
 
 #if defined(GLLOADER_GL) || defined(GLLOADER_GLES)
 #define __gl_h_
@@ -339,12 +330,12 @@ extern "C"
 /**
  * Initiate GLLoader
  */
-GLLOADER_API void glloader_init();
+GLLOADER_API void glloader_init(void);
 
 /**
  * Uninitiate GLLoader
  */
-GLLOADER_API void glloader_uninit();
+GLLOADER_API void glloader_uninit(void);
 
 /**
  * Find out if a particular feature is available on your platform, including the core and the extensions.
@@ -370,7 +361,7 @@ GLLOADER_API void* glloader_get_gl_proc_address(const char* name);
  *
  * @return The number of supported features, including the core and the extensions.
  */
-GLLOADER_API int glloader_num_features();
+GLLOADER_API int glloader_num_features(void);
 
 /**
  * Get the name of a feature.

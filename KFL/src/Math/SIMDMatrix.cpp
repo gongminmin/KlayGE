@@ -33,21 +33,12 @@
 
 namespace KlayGE
 {
-	SIMDMatrixF4::SIMDMatrixF4()
-	{
-	}
-	
 	SIMDMatrixF4::SIMDMatrixF4(float const * rhs)
 	{
 		m_[0] = SIMDMathLib::LoadVector4(rhs + 0);
 		m_[1] = SIMDMathLib::LoadVector4(rhs + 4);
 		m_[2] = SIMDMathLib::LoadVector4(rhs + 8);
 		m_[3] = SIMDMathLib::LoadVector4(rhs + 12);
-	}
-
-	SIMDMatrixF4::SIMDMatrixF4(SIMDMatrixF4 const & rhs)
-		: m_(rhs.m_)
-	{
 	}
 
 	SIMDMatrixF4::SIMDMatrixF4(SIMDVectorF4 const & v1, SIMDVectorF4 const & v2,
@@ -162,11 +153,6 @@ namespace KlayGE
 		{
 			m_ = rhs.m_;
 		}
-		return *this;
-	}
-
-	SIMDMatrixF4 const SIMDMatrixF4::operator+() const
-	{
 		return *this;
 	}
 

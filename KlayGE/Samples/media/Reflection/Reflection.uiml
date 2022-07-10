@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ui>
-	<dialog id="Reflection" caption="Parameter" x="-200" y="200" align_x="right" width="200" height="190">
+	<dialog id="Reflection" caption="Parameter" x="-200" y="200" align_x="right" width="200" height="270">
 		<control type="static" id="min_sample_num_static" caption="Min Samples" x="20" y="20" width="170" height="24" is_default="0" />
 		<control type="slider" id="min_sample_num_slider" x="20" y="40" width="170" height="24" min="1" max="30" value="20" is_default="0" />
 
@@ -9,6 +9,9 @@
 		<control type="slider" id="max_sample_num_slider" x="20" y="90" width="170" height="24" min="30" max="50" value="30" is_default="0" />
 
 		<control type="check_box" id="enable_reflection" caption="Enable Reflection" x="20" y="140" width="170" height="24" checked="1" is_default="0" />
+		<control type="check_box" id="enable_ppr" caption="Pixel Projected Reflection" x="20" y="170" width="170" height="24" checked="1" is_default="0" />
+
+		<control type="check_box" id="enable_camera_path" caption="Enable Camera Path" x="20" y="220" width="170" height="24" checked="1" is_default="0" />
 	</dialog>
 
 	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">

@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="Spreading">
+		<params>
+			<param name="in_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="spread_tex"/>
+		</output>
+		<shader effect="DepthOfField.fxml" tech="DepthOfFieldSpreading"/>
+	</post_processor>
+
+	<post_processor name="SpreadingCS">
+		<params>
+			<param name="in_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="spread_tex"/>
+		</output>
+		<shader effect="DepthOfField.fxml" tech="DepthOfFieldSpreadingCS"/>
+	</post_processor>
+
+
+	<post_processor name="MergeBokeh">
+		<params>
+			<param name="in_width_height"/>
+			<param name="bokeh_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+			<param name="background_offset"/>
+		</params>
+		<input>
+			<pin name="bokeh_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="out_tex"/>
+		</output>
+		<shader effect="DepthOfField.fxml" tech="MergeBokeh"/>
+	</post_processor>
+</post_processors>

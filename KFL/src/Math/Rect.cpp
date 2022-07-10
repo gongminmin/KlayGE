@@ -35,12 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Rect_T<T>::Rect_T(Rect_T&& rhs) noexcept
-		: rect_(std::move(rhs.rect_))
-	{
-	}
-
-	template <typename T>
 	template <typename U>
 	Rect_T<T> const & Rect_T<T>::operator+=(Vector_T<U, 2> const & rhs) noexcept
 	{
@@ -104,12 +98,6 @@ namespace KlayGE
 	Rect_T<T>& Rect_T<T>::operator=(Rect_T<T>&& rhs) noexcept
 	{
 		rect_ = std::move(rhs.rect_);
-		return *this;
-	}
-
-	template <typename T>
-	Rect_T<T> const Rect_T<T>::operator+() const noexcept
-	{
 		return *this;
 	}
 

@@ -1,0 +1,9 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "emissive",
+
+	"prefered_format": "BC1_SRGB"
+}

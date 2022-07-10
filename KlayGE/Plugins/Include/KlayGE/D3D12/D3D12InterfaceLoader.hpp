@@ -33,11 +33,11 @@
 
 #pragma once
 
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 
 namespace KlayGE
 {
-	class D3D12InterfaceLoader
+	class D3D12InterfaceLoader final
 	{
 	public:
 		static D3D12InterfaceLoader& Instance();
@@ -71,8 +71,8 @@ namespace KlayGE
 		D3D12SerializeRootSignatureFunc DynamicD3D12SerializeRootSignature_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HMODULE mod_dxgi_;
-		HMODULE mod_d3d12_;
+		DllLoader mod_dxgi_;
+		DllLoader mod_d3d12_;
 #endif
 	};
 }

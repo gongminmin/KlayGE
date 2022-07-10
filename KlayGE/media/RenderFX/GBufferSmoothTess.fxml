@@ -14,6 +14,8 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oTsToView0_2z : TEXCOORD1,
 							out float4 oTsToView1_Depth : TEXCOORD2,
 							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+							out float4 oCurrPosSS : TEXCOORD4,
+							out float4 oPrevPosSS : TEXCOORD5,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -27,13 +29,13 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				pos, texcoord,
 				tangent_quat);
 
-	PostTessellation(bc_coords, pos, texcoord, tangent_quat,
-				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
+	PostTessellation(bc_coords, pos, texcoord, tangent_quat, patch[0].instance_id,
+				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oCurrPosSS, oPrevPosSS, oPos);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferSmoothTessMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="GBufferSmoothTessTech" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>

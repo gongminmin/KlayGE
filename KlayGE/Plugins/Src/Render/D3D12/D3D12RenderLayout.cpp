@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -41,15 +40,12 @@
 #include <cstring>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
-#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 
 namespace KlayGE
 {
-	D3D12RenderLayout::D3D12RenderLayout()
-	{
-	}
+	D3D12RenderLayout::D3D12RenderLayout() = default;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> const & D3D12RenderLayout::InputElementDesc() const
 	{
@@ -77,7 +73,7 @@ namespace KlayGE
 		return vertex_elems_;
 	}
 
-	void D3D12RenderLayout::Active() const
+	void D3D12RenderLayout::Active(ID3D12GraphicsCommandList* cmd_list) const
 	{
 		if (streams_dirty_)
 		{
@@ -89,14 +85,34 @@ namespace KlayGE
 		uint32_t const num_vertex_streams = this->NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (this->InstanceStream() ? 1 : 0);
 
-		auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
+		{
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
+			vbvs_[i].BufferLocation = d3dvb.GpuVirtualAddress();
+		}
+
+		if (this->InstanceStream())
+		{
+			uint32_t const number = num_vertex_streams;
+
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
+			vbvs_[number].BufferLocation = d3dvb.GpuVirtualAddress();
+		}
+
+		if (this->UseIndices())
+		{
+			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
+			ibv_.BufferLocation = ib.GpuVirtualAddress();
+		}
+
+		auto& d3d12_re = checked_cast<D3D12RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (all_num_vertex_stream != 0)
 		{
-			d3d12_re.IASetVertexBuffers(0, MakeArrayRef(&vbvs_[0], all_num_vertex_stream));
+			d3d12_re.IASetVertexBuffers(cmd_list, 0, MakeSpan(&vbvs_[0], all_num_vertex_stream));
 		}
 		if (this->UseIndices())
 		{
-			d3d12_re.IASetIndexBuffer(ibv_);
+			d3d12_re.IASetIndexBuffer(cmd_list, ibv_);
 		}
 	}
 
@@ -108,8 +124,8 @@ namespace KlayGE
 		vbvs_.resize(all_num_vertex_stream);
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->GetVertexStream(i).get());
-			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->GetVertexStream(i));
+			vbvs_[i].BufferLocation = d3dvb.GpuVirtualAddress();
 			vbvs_[i].SizeInBytes = d3dvb.Size();
 			vbvs_[i].StrideInBytes = this->VertexSize(i);
 		}
@@ -118,16 +134,16 @@ namespace KlayGE
 		{
 			uint32_t const number = num_vertex_streams;
 
-			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->InstanceStream().get());
-			vbvs_[number].BufferLocation = d3dvb.GPUVirtualAddress();
+			auto& d3dvb = checked_cast<D3D12GraphicsBuffer&>(*this->InstanceStream());
+			vbvs_[number].BufferLocation = d3dvb.GpuVirtualAddress();
 			vbvs_[number].SizeInBytes = d3dvb.Size();
 			vbvs_[number].StrideInBytes = this->InstanceSize();
 		}
 
 		if (this->UseIndices())
 		{
-			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(this->GetIndexStream().get());
-			ibv_.BufferLocation = ib.GPUVirtualAddress();
+			auto& ib = checked_cast<D3D12GraphicsBuffer&>(*this->GetIndexStream());
+			ibv_.BufferLocation = ib.GpuVirtualAddress();
 			ibv_.SizeInBytes = ib.Size();
 			ibv_.Format = D3D12Mapping::MappingFormat(index_format_);
 		}

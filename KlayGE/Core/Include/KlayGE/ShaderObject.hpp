@@ -1,23 +1,35 @@
-// ShaderObject.hpp
-// KlayGE shader对象类 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://www.klayge.org
-//
-// 3.8.0
-// 支持Gemoetry Shader (2009.2.5)
-//
-// 3.7.0
-// 改为直接传入RenderEffect (2008.7.4)
-//
-// 3.5.0
-// 初次建立 (2006.11.2)
-//
-// 修改记录
-//////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file ShaderObject.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
-#ifndef _SHADEROBJECT_HPP
-#define _SHADEROBJECT_HPP
+#ifndef KLAYGE_CORE_SHADER_OBJECT_HPP
+#define KLAYGE_CORE_SHADER_OBJECT_HPP
 
 #pragma once
 
@@ -52,117 +64,164 @@ namespace KlayGE
 			uint8_t component_count;
 			uint8_t slot;
 
-			friend bool operator==(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
+			friend bool operator==(StreamOutputDecl const& lhs, StreamOutputDecl const& rhs) noexcept
 			{
 				return (lhs.usage == rhs.usage) && (lhs.usage_index == rhs.usage_index)
 					&& (lhs.start_component == rhs.start_component) && (lhs.component_count == rhs.component_count)
 					&& (lhs.slot == rhs.slot);
 			}
-			friend bool operator!=(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
+			friend bool operator!=(StreamOutputDecl const& lhs, StreamOutputDecl const& rhs) noexcept
 			{
 				return !(lhs == rhs);
 			}
 		};
+		static_assert(sizeof(StreamOutputDecl) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(pop)
 #endif
 		std::vector<StreamOutputDecl> so_decl;
 
-		friend bool operator==(ShaderDesc const & lhs, ShaderDesc const & rhs)
+		friend bool operator==(ShaderDesc const& lhs, ShaderDesc const& rhs) noexcept
 		{
 			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name)
 				&& (lhs.macros_hash == rhs.macros_hash) && (lhs.so_decl == rhs.so_decl);
 		}
-		friend bool operator!=(ShaderDesc const & lhs, ShaderDesc const & rhs)
+		friend bool operator!=(ShaderDesc const& lhs, ShaderDesc const& rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
 	};
 
-	class KLAYGE_CORE_API ShaderObject : boost::noncopyable
+	enum class ShaderStage
+	{
+		Vertex,
+		Pixel,
+		Geometry,
+		Compute,
+		Hull,
+		Domain,
+
+		NumStages,
+	};
+	uint32_t constexpr NumShaderStages = static_cast<uint32_t>(ShaderStage::NumStages);
+
+	class KLAYGE_CORE_API ShaderStageObject : boost::noncopyable
 	{
 	public:
-		enum ShaderType
-		{
-			ST_VertexShader,
-			ST_PixelShader,
-			ST_GeometryShader,
-			ST_ComputeShader,
-			ST_HullShader,
-			ST_DomainShader,
+		explicit ShaderStageObject(ShaderStage stage) noexcept;
+		virtual ~ShaderStageObject() noexcept;
 
-			ST_NumShaderTypes
-		};
+		virtual void StreamIn(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids, ResIdentifier& res) = 0;
+		virtual void StreamOut(std::ostream& os) = 0;
+		virtual void CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
+			std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
+		virtual void CreateHwShader(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) = 0;
 
-	public:
-		ShaderObject();
-		virtual ~ShaderObject()
-		{
-		}
-
-		virtual bool AttachNativeShader(ShaderType type, RenderEffect const & effect,
-			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::vector<uint8_t> const & native_shader_block) = 0;
-
-		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids) = 0;
-		virtual void StreamOut(std::ostream& os, ShaderType type) = 0;
-
-		virtual void AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids) = 0;
-		virtual void AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so) = 0;
-		virtual void LinkShaders(RenderEffect const & effect) = 0;
-		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
-
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
-
-		bool ShaderValidate(ShaderType type) const
-		{
-			return is_shader_validate_[type];
-		}
-		bool Validate() const
+		bool Validate() const noexcept
 		{
 			return is_validate_;
 		}
 
-		bool HasDiscard() const
+		// Pixel shader only
+		virtual bool HasDiscard() const noexcept
 		{
-			return has_discard_;
+			return false;
 		}
-		bool HasTessellation() const
+
+		// Compute shader only
+		virtual uint32_t BlockSizeX() const noexcept
 		{
-			return has_tessellation_;
+			return 0;
 		}
-		uint32_t CSBlockSizeX() const
+		virtual uint32_t BlockSizeY() const noexcept
 		{
-			return cs_block_size_x_;
+			return 0;
 		}
-		uint32_t CSBlockSizeY() const
+		virtual uint32_t BlockSizeZ() const noexcept
 		{
-			return cs_block_size_y_;
+			return 0;
 		}
-		uint32_t CSBlockSizeZ() const
+
+		bool HWResourceReady() const noexcept
 		{
-			return cs_block_size_z_;
+			return hw_res_ready_;
 		}
 
 	protected:
-		std::vector<uint8_t> CompileToDXBC(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass,
-			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-			char const * func_name, char const * shader_profile, uint32_t flags);
-		void ReflectDXBC(std::vector<uint8_t> const & code, void** reflector);
-		std::vector<uint8_t> StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags);
+		static std::vector<uint8_t> CompileToDXBC(ShaderStage stage, RenderEffect const& effect, RenderTechnique const& tech,
+			RenderPass const& pass, std::vector<std::pair<char const*, char const*>> const& api_special_macros, char const* func_name,
+			char const* shader_profile, uint32_t flags, void** reflector, bool strip);
+
+		virtual std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const = 0;
+
+		virtual void StageSpecificStreamIn(ResIdentifier& res)
+		{
+			KFL_UNUSED(res);
+		}
+		virtual void StageSpecificStreamOut(std::ostream& os)
+		{
+			KFL_UNUSED(os);
+		}
+		virtual void StageSpecificCreateHwShader(
+			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		{
+			KFL_UNUSED(effect);
+			KFL_UNUSED(shader_desc_ids);
+		}
 
 	protected:
-		std::array<bool, ST_NumShaderTypes> is_shader_validate_;
-		
-		bool is_validate_;
-		bool has_discard_;
-		bool has_tessellation_;
-		uint32_t cs_block_size_x_, cs_block_size_y_, cs_block_size_z_;
+		const ShaderStage stage_;
+
+		bool is_validate_ = false;
+		bool hw_res_ready_ = false;
+	};
+
+	class KLAYGE_CORE_API ShaderObject : boost::noncopyable
+	{
+	public:
+		ShaderObject();
+		virtual ~ShaderObject() noexcept;
+
+		void AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage);
+		ShaderStageObjectPtr const& Stage(ShaderStage stage) const noexcept;
+
+		void LinkShaders(RenderEffect& effect);
+		virtual ShaderObjectPtr Clone(RenderEffect& dst_effect) = 0;
+
+		virtual void Bind(RenderEffect const& effect) = 0;
+		virtual void Unbind() = 0;
+
+		bool Validate() const noexcept
+		{
+			return immutable_->is_validate_;
+		}
+
+		bool HWResourceReady() const noexcept
+		{
+			return hw_res_ready_;
+		}
+
+	protected:
+		struct Immutable
+		{
+			std::array<ShaderStageObjectPtr, NumShaderStages> shader_stages_;
+			bool is_validate_;
+		};
+
+		explicit ShaderObject(std::shared_ptr<Immutable> immutable) noexcept;
+
+	private:
+		virtual void DoLinkShaders(RenderEffect& effect) = 0;
+
+	protected:
+		std::shared_ptr<Immutable> const immutable_;
+
+		bool shader_stages_dirty_ = true;
+
+		bool hw_res_ready_ = false;
 	};
 }
 
-#endif			// _SHADEROBJECT_HPP
+#endif			// KLAYGE_CORE_SHADER_OBJECT_HPP

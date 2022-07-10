@@ -36,18 +36,18 @@
 #include <vector>
 
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Util.hpp>
 
 namespace KlayGE
 {
-	class D3D12RenderLayout : public RenderLayout
+	class D3D12RenderLayout final : public RenderLayout
 	{
 	public:
 		D3D12RenderLayout();
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> const & InputElementDesc() const;
 
-		void Active() const;
+		void Active(ID3D12GraphicsCommandList* cmd_list) const;
 
 		size_t PsoHashValue();
 		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc, bool has_tessellation);
@@ -58,8 +58,8 @@ namespace KlayGE
 	private:
 		mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems_;
 
-		std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
-		D3D12_INDEX_BUFFER_VIEW ibv_;
+		mutable std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
+		mutable D3D12_INDEX_BUFFER_VIEW ibv_;
 
 		// For PSOs
 		size_t pso_hash_value_;

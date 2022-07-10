@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -21,8 +20,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "Tessellation.hpp"
@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTriangle : public RenderableHelper
+	class RenderTriangle : public Renderable
 	{
 	public:
 		RenderTriangle()
-			: RenderableHelper(L"Triangle")
+			: Renderable(L"Triangle")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -52,10 +52,10 @@ namespace
 				float3(-0.7f, -0.8f, 0)
 			};
 
-			rl_ = rf.MakeRenderLayout();
+			rls_[0] = rf.MakeRenderLayout();
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -65,12 +65,12 @@ namespace
 		{
 			if (enabled)
 			{
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				rls_[0]->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 				technique_ = effect_->TechniqueByName("Tessellation");
 			}
 			else
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
+				rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 				technique_ = effect_->TechniqueByName("NoTessellation");
 			}
 		}
@@ -82,25 +82,6 @@ namespace
 
 	private:
 		RenderEffectParameter* tess_factors_param_;
-	};
-
-	class TriangleObject : public SceneObject
-	{
-	public:
-		TriangleObject()
-			: SceneObject(MakeSharedPtr<RenderTriangle>(), SOA_Cullable)
-		{
-		}
-
-		void TessEnabled(bool enabled)
-		{
-			checked_pointer_cast<RenderTriangle>(renderables_[0])->TessEnabled(enabled);
-		}
-
-		void TessFactors(float4 const & factor)
-		{
-			checked_pointer_cast<RenderTriangle>(renderables_[0])->TessFactors(factor);
-		}
 	};
 
 
@@ -142,9 +123,9 @@ void TessellationApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	polygon_ = MakeSharedPtr<TriangleObject>();
-	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
-	polygon_->AddToSceneManager();
+	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderTriangle>()), SceneNode::SOA_Cullable);
+	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -154,14 +135,14 @@ void TessellationApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("Tessellation.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("Tessellation.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_tess_enabled_ = dialog_->IDFromName("Tessellation");
@@ -174,31 +155,31 @@ void TessellationApp::OnCreate()
 	id_inside_static_ = dialog_->IDFromName("InsideStatic");
 	id_inside_slider_ = dialog_->IDFromName("InsideSlider");
 
-	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->TessellationOnHandler(sender);
 		});
 	this->TessellationOnHandler(*dialog_->Control<UICheckBox>(id_tess_enabled_));
-	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge0ChangedHandler(sender);
 		});
 	this->Edge0ChangedHandler(*dialog_->Control<UISlider>(id_edge0_slider_));
-	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge1ChangedHandler(sender);
 		});
 	this->Edge1ChangedHandler(*dialog_->Control<UISlider>(id_edge1_slider_));
-	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->Edge2ChangedHandler(sender);
 		});
 	this->Edge2ChangedHandler(*dialog_->Control<UISlider>(id_edge2_slider_));
-	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->InsideChangedHandler(sender);
@@ -244,7 +225,7 @@ void TessellationApp::TessellationOnHandler(UICheckBox const & sender)
 {
 	bool enabled = sender.GetChecked();
 
-	checked_pointer_cast<TriangleObject>(polygon_)->TessEnabled(enabled);
+	polygon_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTriangle>().TessEnabled(enabled);
 
 	dialog_->Control<UIStatic>(id_edge0_static_)->SetEnabled(enabled);
 	dialog_->Control<UISlider>(id_edge0_slider_)->SetEnabled(enabled);
@@ -259,7 +240,7 @@ void TessellationApp::TessellationOnHandler(UICheckBox const & sender)
 void TessellationApp::Edge0ChangedHandler(KlayGE::UISlider const & sender)
 {
 	tess_factor_.x() = sender.GetValue() / 10.0f;
-	checked_pointer_cast<TriangleObject>(polygon_)->TessFactors(tess_factor_);
+	polygon_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTriangle>().TessFactors(tess_factor_);
 
 	std::wostringstream stream;
 	stream << L"Edge 0: " << tess_factor_.x();
@@ -269,7 +250,7 @@ void TessellationApp::Edge0ChangedHandler(KlayGE::UISlider const & sender)
 void TessellationApp::Edge1ChangedHandler(KlayGE::UISlider const & sender)
 {
 	tess_factor_.y() = sender.GetValue() / 10.0f;
-	checked_pointer_cast<TriangleObject>(polygon_)->TessFactors(tess_factor_);
+	polygon_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTriangle>().TessFactors(tess_factor_);
 
 	std::wostringstream stream;
 	stream << L"Edge 1: " << tess_factor_.y();
@@ -279,7 +260,7 @@ void TessellationApp::Edge1ChangedHandler(KlayGE::UISlider const & sender)
 void TessellationApp::Edge2ChangedHandler(KlayGE::UISlider const & sender)
 {
 	tess_factor_.z() = sender.GetValue() / 10.0f;
-	checked_pointer_cast<TriangleObject>(polygon_)->TessFactors(tess_factor_);
+	polygon_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTriangle>().TessFactors(tess_factor_);
 
 	std::wostringstream stream;
 	stream << L"Edge 2: " << tess_factor_.z();
@@ -289,7 +270,7 @@ void TessellationApp::Edge2ChangedHandler(KlayGE::UISlider const & sender)
 void TessellationApp::InsideChangedHandler(KlayGE::UISlider const & sender)
 {
 	tess_factor_.w() = sender.GetValue() / 10.0f;
-	checked_pointer_cast<TriangleObject>(polygon_)->TessFactors(tess_factor_);
+	polygon_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RenderTriangle>().TessFactors(tess_factor_);
 
 	std::wostringstream stream;
 	stream << L"Inside: " << tess_factor_.w();

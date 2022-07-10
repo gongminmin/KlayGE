@@ -48,7 +48,7 @@ namespace KlayGE
 								boost::equality_comparable<Quaternion_T<T>>>>>>>
 	{
 	public:
-		enum { elem_num = 4 };
+		static constexpr size_t elem_num = 4;
 
 		typedef T value_type;
 
@@ -65,22 +65,23 @@ namespace KlayGE
 		constexpr Quaternion_T() noexcept
 		{
 		}
-		explicit constexpr Quaternion_T(T const * rhs) noexcept
-			: quat_(rhs)
+		explicit constexpr Quaternion_T(T const* rhs) noexcept : quat_(rhs)
 		{
 		}
-		constexpr Quaternion_T(Vector_T<T, 3> const & vec, T s) noexcept
-			: quat_(vec.x(), vec.y(), vec.z(), s)
+		constexpr Quaternion_T(Vector_T<T, 3> const& vec, T s) noexcept : quat_(vec.x(), vec.y(), vec.z(), s)
 		{
 		}
-		Quaternion_T(Quaternion_T const & rhs) noexcept;
-		Quaternion_T(Quaternion_T&& rhs) noexcept;
-		constexpr Quaternion_T(T x, T y, T z, T w) noexcept
-			: quat_(x, y, z, w)
+		constexpr Quaternion_T(Quaternion_T const& rhs) noexcept : quat_(rhs.quat_)
+		{
+		}
+		constexpr Quaternion_T(Quaternion_T&& rhs) noexcept : quat_(std::move(rhs.quat_))
+		{
+		}
+		constexpr Quaternion_T(T x, T y, T z, T w) noexcept : quat_(std::move(x), std::move(y), std::move(z), std::move(w))
 		{
 		}
 
-		static size_t size() noexcept
+		static constexpr size_t size() noexcept
 		{
 			return elem_num;
 		}
@@ -88,7 +89,7 @@ namespace KlayGE
 		static Quaternion_T const & Identity() noexcept;
 
 		// 取向量
-		iterator begin() noexcept
+		constexpr iterator begin() noexcept
 		{
 			return quat_.begin();
 		}
@@ -96,7 +97,7 @@ namespace KlayGE
 		{
 			return quat_.begin();
 		}
-		iterator end() noexcept
+		constexpr iterator end() noexcept
 		{
 			return quat_.end();
 		}
@@ -113,7 +114,7 @@ namespace KlayGE
 			return quat_[index];
 		}
 
-		reference x() noexcept
+		constexpr reference x() noexcept
 		{
 			return quat_[0];
 		}
@@ -121,7 +122,7 @@ namespace KlayGE
 		{
 			return quat_[0];
 		}
-		reference y() noexcept
+		constexpr reference y() noexcept
 		{
 			return quat_[1];
 		}
@@ -129,7 +130,7 @@ namespace KlayGE
 		{
 			return quat_[1];
 		}
-		reference z() noexcept
+		constexpr reference z() noexcept
 		{
 			return quat_[2];
 		}
@@ -137,7 +138,7 @@ namespace KlayGE
 		{
 			return quat_[2];
 		}
-		reference w() noexcept
+		constexpr reference w() noexcept
 		{
 			return quat_[3];
 		}
@@ -158,12 +159,23 @@ namespace KlayGE
 		Quaternion_T& operator=(Quaternion_T&& rhs) noexcept;
 
 		// 一元操作符
-		Quaternion_T const operator+() const noexcept;
+		constexpr Quaternion_T const& operator+() const noexcept
+		{
+			return *this;
+		}
 		Quaternion_T const operator-() const noexcept;
 
 		// 取方向向量
-		Vector_T<T, 3> const v() const noexcept;
+		constexpr Vector_T<T, 3> const& v() const noexcept
+		{
+			return quat_.template AsVector<3>();
+		}
 		void v(Vector_T<T, 3> const & rhs) noexcept;
+
+		constexpr Vector_T<T, 4> const& AsVector4() const noexcept
+		{
+			return quat_;
+		}
 
 		bool operator==(Quaternion_T<T> const & rhs) const noexcept;
 

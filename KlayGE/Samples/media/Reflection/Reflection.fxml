@@ -10,7 +10,8 @@
 
 	<parameter type="float4x4" name="back_mvp"/>
 	<parameter type="float4x4" name="back_model_view"/>
-	<parameter type="float4x4" name="inv_view"/>
+	<parameter type="float4x4" name="back_proj"/>
+	<parameter type="float3" name="back_near_q_far"/>
 	<parameter type="float3" name="eye_in_back_camera"/>
 
 	<parameter type="textureCUBE" name="skybox_tex"/>
@@ -32,7 +33,8 @@
 
 	<shader>
 		<![CDATA[
-void ReflectReflectionVS(float4 pos : POSITION,
+void DualSideSSRReflectionVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 			out SS_TEXCOORD_TYPE oTcFront : TEXCOORD0,
@@ -42,11 +44,23 @@ void ReflectReflectionVS(float4 pos : POSITION,
 			out float3 oNormalOS : TEXCOORD4,
 			out float3 oPosOS : TEXCOORD5,
 			out float2 oTexcoord : TEXCOORD6,
-			out float4 oPos : SV_Position)
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+			out uint oRtIndex : SV_RenderTargetArrayIndex,
+			out float4 oPos : SV_Position
+#else
+			out float oRtIndex : TEXCOORD7,
+			out float4 oPos : POSITION
+#endif
+			)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
-	
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
 	oPos = mul(pos, mvp);
 	float4 pos_back = mul(pos, back_mvp);
 	
@@ -59,19 +73,29 @@ void ReflectReflectionVS(float4 pos : POSITION,
 	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
 	oPosOS = pos.xyz * 200;
 
-	oTcFront = EncodeSSTexcoord(oPos);	
+	oTcFront = EncodeSSTexcoord(oPos);
 	oTcBack = EncodeSSTexcoord(pos_back);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
 }
 
-float4 ReflectReflectionPS(
+float4 DualSideSSRReflectionPS(
 			SS_TEXCOORD_TYPE ss_tc_front : TEXCOORD0,
 			SS_TEXCOORD_TYPE ss_tc_back : TEXCOORD1,
 			float3 pos_es_front : TEXCOORD2,
 			float3 pos_es_back : TEXCOORD3,
 			float3 normal_os : TEXCOORD4,
 			float3 pos_os : TEXCOORD5,
-			float2 texcoord : TEXCOORD6) : SV_Target
+			float2 texcoord : TEXCOORD6,
+			uint rt_index : SV_RenderTargetArrayIndex) : SV_Target
 {
+	KlayGECameraInfo camera = cameras[rt_index];
+	float4x4 model_view = camera.model_view;
+
 	float2 tc_front = DecodeSSTexcoord(ss_tc_front);
 	float2 tc_back = DecodeSSTexcoord(ss_tc_back);
 
@@ -93,11 +117,11 @@ float4 ReflectReflectionPS(
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
 	{
-		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 0.1f);
+		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, proj, near_q_far, 1, 0.1f);
 	}
 	else if (reflect_vec_back.z < 0)
 	{
-		ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0, 0.1f);
+		ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, back_proj, back_near_q_far, 0, 0.1f);
 	}
 	else
 	{
@@ -108,7 +132,8 @@ float4 ReflectReflectionPS(
 	return ssr;
 }
 
-void ReflectSpecialShadingVS(float4 pos : POSITION,
+void SSRSpecialShadingVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 			out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
@@ -116,10 +141,22 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 			out float3 oNormalOS : TEXCOORD2,
 			out float3 oPosOS : TEXCOORD3,
 			out float2 oTexcoord : TEXCOORD4,
-			out float4 oPos : SV_Position)
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+			out uint oRtIndex : SV_RenderTargetArrayIndex,
+			out float4 oPos : SV_Position
+#else
+			out float oRtIndex : TEXCOORD5,
+			out float4 oPos : POSITION
+#endif
+			)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	oPos = mul(pos, mvp);
 	oPosES = mul(pos, model_view).xyz;
@@ -131,16 +168,26 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 	oPosOS = pos.xyz * 200;
 
 	oTc = EncodeSSTexcoord(oPos);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
 }
 
-float4 ReflectSpecialShadingPS(
+float4 SSRSpecialShadingPS(
 			SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 			float3 pos_es : TEXCOORD1,
 			float3 normal_os : TEXCOORD2,
 			float3 pos_os : TEXCOORD3,
-			float2 texcoord : TEXCOORD4) : SV_Target
+			float2 texcoord : TEXCOORD4,
+			uint rt_index : SV_RenderTargetArrayIndex) : SV_Target
 {
 	float2 tc = DecodeSSTexcoord(ss_tc);
+
+	KlayGECameraInfo camera = cameras[rt_index];
+	float4x4 model_view = camera.model_view;
 
 	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
 	float3 normal = normal_os + bump * 0.01f;
@@ -151,10 +198,10 @@ float4 ReflectSpecialShadingPS(
 	{
 		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
+	float metalness = metalness_glossiness_factor.x;
+	if (metalness_glossiness_factor.z > 0.5f)
 	{
-		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
+		metalness *= get_xy_channel(metalness_glossiness_tex.Sample(aniso_sampler, texcoord)).x;
 	}
 	
 	float3 specular = SpecularColor(albedo, metalness);
@@ -165,16 +212,96 @@ float4 ReflectSpecialShadingPS(
 		]]>
 	</shader>
 
-	<technique name="ReflectReflectionTech">
+	<shader version="4">
+		<![CDATA[
+struct DualSideSSRReflectionPS_In
+{
+	SS_TEXCOORD_TYPE ss_tc_front : TEXCOORD0;
+	SS_TEXCOORD_TYPE ss_tc_back : TEXCOORD1;
+	float3 pos_es_front : TEXCOORD2;
+	float3 pos_es_back : TEXCOORD3;
+	float3 normal_os : TEXCOORD4;
+	float3 pos_os : TEXCOORD5;
+	float2 texcoord : TEXCOORD6;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void DualSideSSRReflectionNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc_front[3] : TEXCOORD0,
+	triangle SS_TEXCOORD_TYPE in_ss_tc_back[3] : TEXCOORD1, triangle float3 in_pos_es_front[3] : TEXCOORD2,
+	triangle float3 in_pos_es_back[3] : TEXCOORD3, triangle float3 in_normal_os[3] : TEXCOORD4, triangle float3 in_pos_os[3] : TEXCOORD5,
+	triangle float2 in_texcoord[3] : TEXCOORD6, triangle float in_rt_index[3] : TEXCOORD7, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<DualSideSSRReflectionPS_In> out_stream)
+{
+	DualSideSSRReflectionPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.ss_tc_front = in_ss_tc_front[v];
+		output.ss_tc_back = in_ss_tc_back[v];
+		output.pos_es_front = in_pos_es_front[v];
+		output.pos_es_back = in_pos_es_back[v];
+		output.normal_os = in_normal_os[v];
+		output.pos_os = in_pos_os[v];
+		output.texcoord = in_texcoord[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+
+struct SSRSpecialShadingPS_In
+{
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0;
+	float3 pos_es : TEXCOORD1;
+	float3 normal_os : TEXCOORD2;
+	float3 pos_os : TEXCOORD3;
+	float2 texcoord : TEXCOORD4;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void SSRSpecialShadingNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD0, triangle float3 in_pos_es[3] : TEXCOORD1,
+	triangle float3 in_normal_os[3] : TEXCOORD2, triangle float3 in_pos_os[3] : TEXCOORD3, triangle float2 in_texcoord[3] : TEXCOORD4,
+	triangle float in_rt_index[3] : TEXCOORD5, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<SSRSpecialShadingPS_In> out_stream)
+{
+	SSRSpecialShadingPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.ss_tc = in_ss_tc[v];
+		output.pos_es = in_pos_es[v];
+		output.normal_os = in_normal_os[v];
+		output.pos_os = in_pos_os[v];
+		output.texcoord = in_texcoord[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="DualSideSSRReflectionTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
-			<state name="vertex_shader" value="ReflectReflectionVS()"/>
-			<state name="pixel_shader" value="ReflectReflectionPS()"/>
+			<state name="vertex_shader" value="DualSideSSRReflectionVS()"/>
+			<state name="pixel_shader" value="DualSideSSRReflectionPS()"/>
+		</pass>
+	</technique>
+	<technique name="DualSideSSRReflectionNoVpRtTech" inherit="DualSideSSRReflectionTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="DualSideSSRReflectionNoVpRtGS()"/>
 		</pass>
 	</technique>
 
-	<technique name="ReflectSpecialShadingTech" inherit="SpecialShadingTech">
+	<technique name="SSRSpecialShadingTech" inherit="SpecialShadingTech">
 		<pass name="p0">
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -184,8 +311,156 @@ float4 ReflectSpecialShadingPS(
 			<state name="src_blend_alpha" value="zero"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="ReflectSpecialShadingVS()"/>
-			<state name="pixel_shader" value="ReflectSpecialShadingPS()"/>
+			<state name="vertex_shader" value="SSRSpecialShadingVS()"/>
+			<state name="pixel_shader" value="SSRSpecialShadingPS()"/>
+		</pass>
+	</technique>
+	<technique name="SSRSpecialShadingNoVpRtTech" inherit="SSRSpecialShadingTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="SSRSpecialShadingNoVpRtGS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void SingleSideSSRReflectionVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float4 tangent_quat : TANGENT,
+			out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
+			out float3 oPosES : TEXCOORD1,
+			out float3 oNormalOS : TEXCOORD2,
+			out float3 oPosOS : TEXCOORD3,
+			out float2 oTexcoord : TEXCOORD4,
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+			out uint oRtIndex : SV_RenderTargetArrayIndex,
+			out float4 oPos : SV_Position
+#else
+			out float oRtIndex : TEXCOORD5,
+			out float4 oPos : POSITION
+#endif
+			)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+
+	uint camera_index = CameraIndex(instance_id);
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
+	oPos = mul(pos, mvp);
+	float4 pos_back = mul(pos, back_mvp);
+	
+	oTexcoord = texcoord;
+	
+	oPosES = mul(pos, model_view).xyz;
+	
+	tangent_quat = tangent_quat * 2 - 1;
+	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
+	oPosOS = pos.xyz * 200;
+
+	oTc = EncodeSSTexcoord(oPos);
+
+#if KLAYGE_VP_RT_INDEX_AT_EVERY_STAGE_SUPPORT
+	oRtIndex = camera_index;
+#else
+	oRtIndex = camera_index + 0.5f;
+#endif
+}
+
+float4 SingleSideSSRReflectionPS(
+			SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
+			float3 pos_es : TEXCOORD1,
+			float3 normal_os : TEXCOORD2,
+			float3 pos_os : TEXCOORD3,
+			float2 texcoord : TEXCOORD4,
+			uint rt_index : SV_RenderTargetArrayIndex) : SV_Target
+{
+	KlayGECameraInfo camera = cameras[rt_index];
+	float4x4 model_view = camera.model_view;
+
+	float2 tc = DecodeSSTexcoord(ss_tc);
+
+	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
+	float3 normal = normalize(normal_os + bump * 0.001f);
+	float3 normal_es = mul(normal, (float3x3)model_view);
+
+	normal_es = normalize(normal_es);
+
+	float3 reflect_vec = reflect(pos_es, normal_es);
+
+	float3 reflect_vec_ws = mul(reflect_vec, (float3x3)inv_view);
+	float3 sky = decode_hdr_yc(skybox_tex.SampleLevel(skybox_sampler, reflect_vec_ws, 0).r,
+			skybox_C_tex.SampleLevel(skybox_sampler, reflect_vec_ws, 0)).xyz;
+
+	float2 tex_ddx = ddx(tc.xy);
+	float2 tex_ddy = ddy(tc.xy);
+	
+	float4 ssr;
+	if (reflect_vec.z > 0)
+	{
+		ssr = CalcSSR(tc, normal_es, pos_es, pos_es, proj, near_q_far, 1, 0.05f);
+	}
+	else
+	{
+		ssr = 0;
+	}
+	ssr.xyz = lerp(sky, ssr.xyz, ssr.w);
+
+	return ssr;
+}
+		]]>
+	</shader>
+
+	<shader version="4">
+		<![CDATA[
+struct SingleSideSSRReflectionPS_In
+{
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0;
+	float3 pos_es : TEXCOORD1;
+	float3 normal_os : TEXCOORD2;
+	float3 pos_os : TEXCOORD3;
+	float2 texcoord : TEXCOORD4;
+	uint rt_index : SV_RenderTargetArrayIndex;
+	float4 position : SV_Position;
+};
+
+[maxvertexcount(3)]
+void SingleSideSSRReflectionNoVpRtGS(triangle SS_TEXCOORD_TYPE in_ss_tc[3] : TEXCOORD0,
+	triangle float3 in_pos_es[3] : TEXCOORD1, triangle float3 in_normal_os[3] : TEXCOORD4, triangle float3 in_pos_os[3] : TEXCOORD5,
+	triangle float2 in_texcoord[3] : TEXCOORD6, triangle float in_rt_index[3] : TEXCOORD7, triangle float4 in_position[3] : POSITION,
+	inout TriangleStream<SingleSideSSRReflectionPS_In> out_stream)
+{
+	SingleSideSSRReflectionPS_In output;
+	output.rt_index = (uint)in_rt_index[0];
+
+	[unroll]
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.ss_tc = in_ss_tc[v];
+		output.pos_es = in_pos_es[v];
+		output.normal_os = in_normal_os[v];
+		output.pos_os = in_pos_os[v];
+		output.texcoord = in_texcoord[v];
+		output.position = in_position[v];
+		out_stream.Append(output);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="SingleSideSSRReflectionTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="SingleSideSSRReflectionVS()"/>
+			<state name="pixel_shader" value="SingleSideSSRReflectionPS()"/>
+		</pass>
+	</technique>
+	<technique name="SingleSideSSRReflectionNoVpRtTech" inherit="SingleSideSSRReflectionTech">
+		<pass name="p0">
+			<state name="geometry_shader" value="SingleSideSSRReflectionNoVpRtGS()"/>
 		</pass>
 	</technique>
 </effect>

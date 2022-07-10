@@ -3,10 +3,9 @@
 
 #pragma once
 
-#ifndef SAMPLE_COMMON_SOURCE
-#define KLAYGE_LIB_NAME SampleCommon
-#include <KFL/Detail/AutoLink.hpp>
+#include <nonstd/scope.hpp>
 
+#ifndef SAMPLE_COMMON_SOURCE
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
 {
@@ -19,6 +18,8 @@ int SampleMain();
 
 inline int EntryFunc()
 {
+	auto on_exit = nonstd::make_scope_exit([] { KlayGE::Context::Destroy(); });
+
 	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");

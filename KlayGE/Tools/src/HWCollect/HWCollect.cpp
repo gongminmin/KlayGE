@@ -32,19 +32,19 @@
 #define INITGUID
 #include <KFL/Util.hpp>
 #include <KFL/CpuInfo.hpp>
+#include <KFL/com_ptr.hpp>
 #include <KlayGE/HWDetect.hpp>
 
+#if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <KlayGE/SALWrapper.hpp>
-#if defined KLAYGE_PLATFORM_WINDOWS
-	#include <windows.h>
-	#if defined(KLAYGE_COMPILER_CLANGC2)
-		#pragma clang diagnostic push
-		#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore int enum
-	#endif
-	#include <dxgi1_2.h>
-	#if defined(KLAYGE_COMPILER_CLANGC2)
-		#pragma clang diagnostic pop
-	#endif
+#include <windows.h>
+#include <dxgi1_2.h>
+
+#if defined(KLAYGE_COMPILER_GCC)
+#ifdef __in
+#undef __in
+#endif
+#endif
 #endif
 
 #include <string>
@@ -55,6 +55,11 @@
 using namespace std;
 using namespace KlayGE;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+DEFINE_UUID_OF(IDXGIAdapter2);
+DEFINE_UUID_OF(IDXGIFactory1);
+#endif
+
 void DetectOSInfo(std::ostream& os)
 {
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -62,8 +67,9 @@ void DetectOSInfo(std::ostream& os)
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
-	HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-	RtlGetVersionFunc RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
+	DllLoader ntdll;
+	ntdll.Load("ntdll.dll");
+	auto* RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(ntdll.GetProcAddress("RtlGetVersion"));
 	OSVERSIONINFOEXW os_ver_info;
 	os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
 	RtlGetVersion(&os_ver_info);
@@ -243,7 +249,7 @@ void DetectOSInfo(std::ostream& os)
 
 void DetectCpuInfo(std::ostream& os)
 {
-	CPUInfo cpu_info;
+	CpuInfo cpu_info;
 	if ("GenuineIntel" == cpu_info.CPUString())
 	{
 		os << "Intel CPU";
@@ -268,37 +274,36 @@ void DetectGpuInfo(std::ostream& os)
 	typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	HMODULE dxgi = ::LoadLibraryEx(L"dxgi.dll", nullptr, 0);
-	if (!dxgi)
+	DllLoader dxgi;
+	if (!dxgi.Load("dxgi.dll"))
 	{
 		os << "Unknown GPU";
 		return;
 	}
-	CreateDXGIFactory1Func DynamicCreateDXGIFactory1 = (CreateDXGIFactory1Func)::GetProcAddress(dxgi, "CreateDXGIFactory1");
+
+	auto* DynamicCreateDXGIFactory1 = reinterpret_cast<CreateDXGIFactory1Func>(dxgi.GetProcAddress("CreateDXGIFactory1"));
 	if (!DynamicCreateDXGIFactory1)
 	{
 		os << "Unknown GPU";
 		return;
 	}
 #else
-	CreateDXGIFactory1Func DynamicCreateDXGIFactory1 = CreateDXGIFactory1;
+	auto* DynamicCreateDXGIFactory1 = CreateDXGIFactory1;
 #endif
 
 	IDXGIFactory1* factory;
-	if (SUCCEEDED((*DynamicCreateDXGIFactory1)(IID_IDXGIFactory1, reinterpret_cast<void**>(&factory))))
+	if (SUCCEEDED((*DynamicCreateDXGIFactory1)(UuidOf<IDXGIFactory1>(), reinterpret_cast<void**>(&factory))))
 	{
 		UINT adapter_no = 0;
-		IDXGIAdapter1* adapter = nullptr;
-		while (factory->EnumAdapters1(adapter_no, &adapter) != DXGI_ERROR_NOT_FOUND)
+		com_ptr<IDXGIAdapter1> adapter;
+		while (factory->EnumAdapters1(adapter_no, adapter.release_and_put()) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (adapter != nullptr)
 			{
 				DXGI_ADAPTER_DESC1 adapter_desc;
 				adapter->GetDesc1(&adapter_desc);
 
-				IDXGIAdapter2* adapter2;
-				adapter->QueryInterface(IID_IDXGIAdapter2, reinterpret_cast<void**>(&adapter2));
-				if (adapter2 != nullptr)
+				if (auto adapter2 = adapter.try_as<IDXGIAdapter2>())
 				{
 					DXGI_ADAPTER_DESC2 desc2;
 					adapter2->GetDesc2(&desc2);
@@ -312,10 +317,7 @@ void DetectGpuInfo(std::ostream& os)
 					adapter_desc.SharedSystemMemory = desc2.SharedSystemMemory;
 					adapter_desc.AdapterLuid = desc2.AdapterLuid;
 					adapter_desc.Flags = desc2.Flags;
-					adapter2->Release();
 				}
-
-				adapter->Release();
 
 				if (adapter_desc.Flags != DXGI_ADAPTER_FLAG_SOFTWARE)
 				{
@@ -337,7 +339,7 @@ void DetectGpuInfo(std::ostream& os)
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	::FreeLibrary(dxgi);
+	dxgi.Free();
 #endif
 #else
 	os << "Unknown GPU" << endl;

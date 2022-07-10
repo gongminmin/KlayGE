@@ -33,29 +33,34 @@
 
 #pragma once
 
+#include <KFL/SmartPtrHelper.hpp>
+
+#include <KlayGE/Signal.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
+#include <winrt/Windows.Graphics.Display.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#if KLAYGE_COMPILER_VERSION >= 142
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
 #endif
-#include <windows.ui.core.h>
-#include <windows.graphics.display.h>
-#if defined(KLAYGE_COMPILER_MSVC)
+#endif
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#endif
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'sp'
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/signals2.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
+namespace uwp
+{
+	using winrt::get_abi;
+
+	using namespace winrt::Windows::Foundation;
+	using namespace winrt::Windows::Graphics::Display;
+	using namespace winrt::Windows::UI::Core;
+}
 #endif
 
 namespace KlayGE
@@ -63,10 +68,10 @@ namespace KlayGE
 	struct RenderSettings;
 	class D3D12Adapter;
 
-	class D3D12RenderWindow : public D3D12FrameBuffer
+	class D3D12RenderWindow final : public D3D12FrameBuffer
 	{
 	public:
-		D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings);
+		D3D12RenderWindow(D3D12Adapter* adapter, std::string const& name, RenderSettings const& settings);
 		~D3D12RenderWindow();
 
 		void Destroy();
@@ -74,7 +79,7 @@ namespace KlayGE
 		void SwapBuffers() override;
 		void WaitOnSwapBuffers() override;
 
-		std::wstring const & Description() const;
+		std::wstring const& Description() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 		void Reposition(uint32_t left, uint32_t top);
@@ -82,20 +87,20 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		D3D12Adapter const & Adapter() const
+		D3D12Adapter const& Adapter() const
 		{
 			return *adapter_;
 		}
 
-		TexturePtr const & D3DDepthStencilBuffer() const
+		TexturePtr const& D3DDepthStencilBuffer() const
 		{
 			return depth_stencil_;
 		}
-		RenderViewPtr const & D3DBackBufferRTV() const
+		RenderTargetViewPtr const& D3DBackBufferRtv() const
 		{
 			return render_target_render_views_[curr_back_buffer_];
 		}
-		RenderViewPtr const & D3DBackBufferRightEyeRTV() const
+		RenderTargetViewPtr const& D3DBackBufferRightEyeRtv() const
 		{
 			return render_target_render_views_right_eye_[curr_back_buffer_];
 		}
@@ -109,12 +114,11 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		void OnExitSizeMove(Window const & win);
-		void OnSize(Window const & win, bool active);
+		void OnExitSizeMove(Window const& win);
+		void OnSize(Window const& win, bool active);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
-		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
-			IInspectable* args);
+		HRESULT OnStereoEnabledChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args);
 #endif
 
 	private:
@@ -122,49 +126,49 @@ namespace KlayGE
 		void CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue, bool try_hdr_display);
 
 	private:
-		std::string	name_;
+		std::string name_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HWND	hWnd_;				// Win32 Window handle
+		HWND hWnd_; // Win32 Window handle
 #else
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		EventRegistrationToken stereo_enabled_changed_token_;
+		uwp::CoreWindow wnd_{nullptr};
+		uwp::DisplayInformation::StereoEnabledChanged_revoker stereo_enabled_changed_token_;
 #endif
-		bool	isFullScreen_;
+		bool isFullScreen_;
 		uint32_t sync_interval_;
 
 		D3D12Adapter* adapter_;
 
 		bool dxgi_stereo_support_;
-		bool dxgi_allow_tearing_;
+		bool dxgi_allow_tearing_{false};
 
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
 #endif
-		IDXGISwapChain3Ptr		swap_chain_;
-		bool					main_wnd_;
-		HANDLE frame_latency_waitable_obj_;
+		IDXGISwapChain3Ptr swap_chain_;
+		bool main_wnd_;
+		Win32UniqueHandle frame_latency_waitable_obj_;
 
 		std::array<TexturePtr, NUM_BACK_BUFFERS> render_targets_;
-		std::array<RenderViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;
-		std::array<RenderViewPtr, NUM_BACK_BUFFERS> render_target_render_views_right_eye_;
+		std::array<RenderTargetViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;
+		std::array<RenderTargetViewPtr, NUM_BACK_BUFFERS> render_target_render_views_right_eye_;
 
 		TexturePtr depth_stencil_;
 
 		uint32_t curr_back_buffer_;
 
-		DXGI_FORMAT					back_buffer_format_;
-		ElementFormat				depth_stencil_fmt_;
+		DXGI_FORMAT back_buffer_format_;
+		ElementFormat depth_stencil_fmt_;
 
-		std::wstring			description_;
+		std::wstring description_;
 
-		boost::signals2::connection on_exit_size_move_connect_;
-		boost::signals2::connection on_size_connect_;
+		Signal::Connection on_exit_size_move_connect_;
+		Signal::Connection on_size_connect_;
 	};
 
 	typedef std::shared_ptr<D3D12RenderWindow> D3D12RenderWindowPtr;
-}
+} // namespace KlayGE
 
-#endif			// _D3D12RENDERWINDOW_HPP
+#endif // _D3D12RENDERWINDOW_HPP

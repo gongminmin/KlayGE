@@ -1,0 +1,30 @@
+From dee2c8ed021aa87d5d7b5dce63179c2e3bb45f0b Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 5 Jun 2022 15:04:58 -0700
+Subject: [PATCH 10/10] Fix redefined _POSIX_THREADS and _POSIX_SOURCE on Linux
+ gcc
+
+---
+ cmake/ConfigureChecks.cmake | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
+index 05832aa..1d01e1a 100644
+--- a/cmake/ConfigureChecks.cmake
++++ b/cmake/ConfigureChecks.cmake
+@@ -491,8 +491,10 @@ python_platform_test(
+ cmake_pop_check_state()
+ endif()
+ 
+-set_required_def(_POSIX_THREADS 1)    # Define on Linux as it is required for threading
+-set_required_def(_POSIX_SOURCE 1)     # Define on Linux in order for 'stat' and other things to work.
++if(NOT (UNIX AND (CMAKE_C_COMPILER_ID MATCHES GNU)))
++  set_required_def(_POSIX_THREADS 1)    # Define on Linux as it is required for threading
++  set_required_def(_POSIX_SOURCE 1)     # Define on Linux in order for 'stat' and other things to work.
++endif()
+ set_required_def(_GNU_SOURCE 1)       # Define on Linux to activate all library features
+ set_required_def(_NETBSD_SOURCE 1)    # Define on NetBSD to activate all library features
+ set_required_def(__BSD_VISIBLE 1)     # Define on FreeBSD to activate all library features
+-- 
+2.17.1.windows.2
+

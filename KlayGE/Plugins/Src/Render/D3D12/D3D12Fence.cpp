@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -41,33 +40,23 @@
 namespace KlayGE
 {
 	D3D12Fence::D3D12Fence()
-			: last_completed_val_(0), fence_val_(1)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
-		ID3D12Fence* fence;
-		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		fence_ = MakeCOMPtr(fence);
+		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, UuidOf<ID3D12Fence>(), fence_.put_void()));
 
-		fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-	}
-
-	D3D12Fence::~D3D12Fence()
-	{
-		::CloseHandle(fence_event_);
+		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}
 
 	uint64_t D3D12Fence::Signal(FenceType ft)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12CommandQueue* cmd_queue;
 		switch (ft)
 		{
 		case FT_Render:
-			cmd_queue = re.D3DRenderCmdQueue();
+			cmd_queue = re.D3DCmdQueue();
 			break;
 
 		default:
@@ -89,8 +78,8 @@ namespace KlayGE
 	{
 		if (!this->Completed(id))
 		{
-			TIFHR(fence_->SetEventOnCompletion(id, fence_event_));
-			::WaitForSingleObjectEx(fence_event_, INFINITE, FALSE);
+			TIFHR(fence_->SetEventOnCompletion(id, fence_event_.get()));
+			::WaitForSingleObjectEx(fence_event_.get(), INFINITE, FALSE);
 		}
 	}
 

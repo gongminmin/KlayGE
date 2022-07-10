@@ -3,7 +3,6 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="texture2D" name="curr_tex"/>
 	<parameter type="texture2D" name="prev_tex"/>
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -15,7 +14,7 @@
 		<![CDATA[    
 float4 TemporalAAPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return (curr_tex.Sample(point_sampler, tc0) + prev_tex.Sample(point_sampler, tc0)) * 0.5f;
+	return prev_tex.Sample(point_sampler, tc0);
 }
 		]]>
 	</shader>
@@ -24,6 +23,15 @@ float4 TemporalAAPS(float2 tc0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="blend_factor"/>
+			<state name="dest_blend" value="blend_factor"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="blend_factor"/>
+			<state name="dest_blend_alpha" value="blend_factor"/>
+			<state name="blend_factor" r="0.5" g="0.5" b="0.5" a="0.5"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="TemporalAAPS()"/>

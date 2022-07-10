@@ -7,5 +7,7 @@
 
 	"prefered_format": "BC4",
 
-	"rgb_to_lum": true
+	"rgb_to_lum": true,
+
+	"source": "background.jpg"
 }

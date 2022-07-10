@@ -36,14 +36,8 @@
 
 namespace KlayGE
 {
-	AudioEngine::AudioEngine()
-		: sound_vol_(1), music_vol_(1)
-	{
-	}
-
-	AudioEngine::~AudioEngine()
-	{
-	}
+	AudioEngine::AudioEngine() = default;
+	AudioEngine::~AudioEngine() noexcept = default;
 
 	void AudioEngine::Suspend()
 	{

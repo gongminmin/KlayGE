@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+
+#include <KFL/CXX20/format.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -71,7 +73,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -94,7 +96,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -125,7 +127,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + std::to_string(sample_count);
+			sanity_name += std::format("MS{}", sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -145,8 +147,8 @@ private:
 		auto target = rf.MakeTexture2D(width, height, 1, 1, format, sample_count, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto target_ds = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, 0, EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
-		fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*target_ds, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
+		fb->Attach(rf.Make2DDsv(target_ds, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 		auto tech = effect->TechniqueByName("RenderToTexture");
@@ -178,7 +180,7 @@ private:
 
 		auto target_resolved = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(), 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
-		source->CopyToTexture(*target_resolved);
+		source->CopyToTexture(*target_resolved, TextureFilter::Point);
 
 		return target_resolved;
 	}
@@ -192,7 +194,7 @@ private:
 		auto target = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(),
 			1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 
@@ -229,7 +231,7 @@ private:
 		auto target = rf.MakeTexture2D(source->Width(0), source->Height(0), 1, 1, source->Format(),
 			source->SampleCount(), source->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write);
 		auto fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*target, 0, 1, 0));
+		fb->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(target, 0, 1, 0));
 
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 

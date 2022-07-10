@@ -33,7 +33,9 @@
 	<functions>
 		<function name="eglLockSurfaceKHR" return="EGLBoolean">
 			<params>
-				<param type="const GLEGLint*" name="attrib_list"/>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglUnlockSurfaceKHR" return="EGLBoolean">

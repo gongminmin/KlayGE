@@ -36,9 +36,7 @@
 
 namespace KlayGE
 {
-	NullRenderEngine::NullRenderEngine()
-	{
-	}
+	NullRenderEngine::NullRenderEngine() = default;
 
 	NullRenderEngine::~NullRenderEngine()
 	{
@@ -77,7 +75,7 @@ namespace KlayGE
 
 	void NullRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("MAJOR_VERSION") == name_hash)
 		{
 			*static_cast<uint32_t*>(value) = major_version_;
@@ -94,32 +92,28 @@ namespace KlayGE
 
 	void NullRenderEngine::SetCustomAttrib(std::string_view name, void* value)
 	{
-		size_t const name_hash = HashRange(name.begin(), name.end());
+		size_t const name_hash = HashValue(std::move(name));
 		if (CT_HASH("PLATFORM") == name_hash)
 		{
 			native_shader_platform_name_ = *static_cast<std::string*>(value);
 
-			if (native_shader_platform_name_.find("d3d_11") == 0)
+			if (native_shader_platform_name_.find("d3d_12") == 0)
 			{
-				vs_profile_ = "vs_5_0";
-				ps_profile_ = "ps_5_0";
-				gs_profile_ = "gs_5_0";
-				cs_profile_ = "cs_5_0";
-				hs_profile_ = "hs_5_0";
-				ds_profile_ = "ds_5_0";
-			}
-			else if (native_shader_platform_name_.find("d3d_12") == 0)
-			{
-				vs_profile_ = "vs_5_1";
-				ps_profile_ = "ps_5_1";
-				gs_profile_ = "gs_5_1";
-				cs_profile_ = "cs_5_1";
-				hs_profile_ = "hs_5_1";
-				ds_profile_ = "ds_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Vertex)] = "vs_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Pixel)] = "ps_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Geometry)] = "gs_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Compute)] = "cs_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Hull)] = "hs_5_1";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Domain)] = "ds_5_1";
 			}
 			else
 			{
-				KFL_UNREACHABLE("Invalid feature level");
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Vertex)] = "vs_5_0";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Pixel)] = "ps_5_0";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Geometry)] = "gs_5_0";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Compute)] = "cs_5_0";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Hull)] = "hs_5_0";
+				shader_profiles_[static_cast<uint32_t>(ShaderStage::Domain)] = "ds_5_0";
 			}
 		}
 		else if (CT_HASH("MAJOR_VERSION") == name_hash)

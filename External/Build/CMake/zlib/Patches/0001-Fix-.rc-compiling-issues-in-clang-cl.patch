@@ -1,0 +1,25 @@
+From 8ee015953bbf98596721f25b541fc5f832c07f8b Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 6 Mar 2021 00:11:20 -0800
+Subject: [PATCH] Fix .rc compiling issues in clang-cl
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0fe939d..1d170c3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -123,7 +123,7 @@ set(ZLIB_SRCS
+     zutil.c
+ )
+ 
+-if(NOT MINGW)
++if((NOT MINGW) AND NOT(MSVC AND (CMAKE_C_COMPILER_ID MATCHES Clang)))
+     set(ZLIB_DLL_SRCS
+         win32/zlib1.rc # If present will override custom build rule below.
+     )
+-- 
+2.17.1.windows.2
+

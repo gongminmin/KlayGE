@@ -8,9 +8,12 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/SceneNode.hpp>
 
 #include "PreDeclare.hpp"
 #include "Common.hpp"
+
+#include <map>
 
 namespace KlayGE
 {
@@ -36,8 +39,8 @@ namespace KlayGE
 		{
 			std::string name;
 			EntityType type;
-			RenderablePtr model;
-			std::string meshml_name;
+			RenderModelPtr model;
+			std::string model_name;
 			LightSourcePtr light;
 			std::string projective_tex_name;
 			CameraPtr camera;
@@ -46,7 +49,7 @@ namespace KlayGE
 			float3 trf_pos;
 			float3 trf_scale;
 			Quaternion trf_rotate;
-			SceneObjectPtr scene_obj;
+			SceneNodePtr scene_node;
 		};
 
 	private:
@@ -85,7 +88,7 @@ namespace KlayGE
 
 		void SetControlMode(ControlMode mode);
 
-		uint32_t AddModel(std::string const & meshml_name);
+		uint32_t AddModel(std::string const& model_name);
 		void ClearModels();
 
 		uint32_t AddLight(LightSource::LightType type, std::string const & name);
@@ -163,7 +166,7 @@ namespace KlayGE
 		void UpdateSceneAABB();
 		void UpdateProxyScaling();
 		float4x4 CalcAdaptiveScaling(EntityInfo const & ei, uint32_t pixels, float3& scaling);
-		void LoadTransformNodes(XMLNodePtr const & node, EntityInfo& ei);
+		void LoadTransformNodes(XMLNode const& node, EntityInfo& ei);
 		void SaveTransformNodes(std::ostream& os, EntityInfo const & ei);
 
 		EntityInfo& GetEntityInfo(uint32_t id);
@@ -184,13 +187,13 @@ namespace KlayGE
 		std::map<uint32_t, EntityInfo> entities_;
 		std::map<uint32_t, EntityInfo> backup_entities_;
 		uint32_t selected_entity_;
-		SceneObjectPtr axis_;
-		SceneObjectPtr grid_;
-		SceneObjectPtr sky_box_;
-		SceneObjectPtr selected_bb_;
-		SceneObjectPtr translation_axis_;
-		SceneObjectPtr rotation_axis_;
-		SceneObjectPtr scaling_axis_;
+		SceneNodePtr axis_;
+		SceneNodePtr grid_;
+		SceneNodePtr skybox_;
+		SceneNodePtr selected_bb_;
+		SceneNodePtr translation_axis_;
+		SceneNodePtr rotation_axis_;
+		SceneNodePtr scaling_axis_;
 		float3 display_scaling_for_axis_;
 		CameraPtr system_camera_;
 		uint32_t active_camera_id_;

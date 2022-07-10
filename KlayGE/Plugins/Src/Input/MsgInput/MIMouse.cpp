@@ -52,13 +52,13 @@ namespace KlayGE
 		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, buf.get(), &size);
 
-			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
-			device_id_ = info->mouse.dwId;
-			num_buttons_ = std::min(static_cast<uint32_t>(buttons_[0].size()),
-				static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
+			const RID_DEVICE_INFO& info = *reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
+			device_id_ = info.mouse.dwId;
+			num_buttons_ =
+				std::min(std::min(5U, static_cast<uint32_t>(buttons_[0].size())), static_cast<uint32_t>(info.mouse.dwNumberOfButtons));
 		}
 #elif defined KLAYGE_PLATFORM_ANDROID
 		num_buttons_ = 5;
@@ -79,10 +79,10 @@ namespace KlayGE
 		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, nullptr, &size))
 		{
-			std::vector<uint8_t> buf(size);
-			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, &buf[0], &size);
+			auto buf = MakeUniquePtr<uint8_t[]>(size);
+			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, buf.get(), &size);
 
-			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(buf.get());
 			if (device_id_ != info->mouse.dwId)
 			{
 				return;

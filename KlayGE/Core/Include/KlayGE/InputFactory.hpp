@@ -29,9 +29,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API InputFactory : boost::noncopyable
 	{
 	public:
-		virtual ~InputFactory()
-		{
-		}
+		virtual ~InputFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 		InputEngine& InputEngineInstance();

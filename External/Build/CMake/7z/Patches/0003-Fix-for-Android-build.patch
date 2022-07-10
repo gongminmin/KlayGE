@@ -1,0 +1,67 @@
+From de222edb0ccab300e66a721ced6ddf233f790d13 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Thu, 16 Jun 2022 22:15:06 -0700
+Subject: [PATCH 3/3] Fix for Android build
+
+---
+ C/7zCrc.c     | 2 +-
+ C/AesOpt.c    | 2 +-
+ C/Sha256.c    | 2 +-
+ C/Sha256Opt.c | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/C/7zCrc.c b/C/7zCrc.c
+index f186324d..4a7e55f8 100644
+--- a/C/7zCrc.c
++++ b/C/7zCrc.c
+@@ -83,7 +83,7 @@ UInt32 MY_FAST_CALL CrcUpdateT1(UInt32 v, const void *data, size_t size, const U
+     #endif
+   #elif (defined(__clang__) && (__clang_major__ >= 3)) \
+      || (defined(__GNUC__) && (__GNUC__ > 4))
+-      #if !defined(__ARM_FEATURE_CRC32)
++      #if !defined(__ARM_FEATURE_CRC32) && !defined(__ANDROID__)
+         #define __ARM_FEATURE_CRC32 1
+           #if (!defined(__clang__) || (__clang_major__ > 3)) // fix these numbers
+             #define ATTRIB_CRC __attribute__((__target__("arch=armv8-a+crc")))
+diff --git a/C/AesOpt.c b/C/AesOpt.c
+index 8be8ff69..279210e3 100644
+--- a/C/AesOpt.c
++++ b/C/AesOpt.c
+@@ -509,7 +509,7 @@ VAES_COMPAT_STUB (AesCtr_Code_HW)
+ #elif defined(MY_CPU_ARM_OR_ARM64) && defined(MY_CPU_LE)
+ 
+   #if defined(__clang__)
+-    #if (__clang_major__ >= 8) // fix that check
++    #if (__clang_major__ >= 8) && !defined(__ANDROID__) // fix that check
+       #define USE_HW_AES
+     #endif
+   #elif defined(__GNUC__)
+diff --git a/C/Sha256.c b/C/Sha256.c
+index 8b3983ea..698f1b1b 100644
+--- a/C/Sha256.c
++++ b/C/Sha256.c
+@@ -38,7 +38,7 @@ This code is based on public domain code from Wei Dai's Crypto++ library. */
+       #define _SHA_SUPPORTED
+     #endif
+   #elif defined(__clang__)
+-    #if (__clang_major__ >= 8) // fix that check
++    #if (__clang_major__ >= 8) && !defined(__ANDROID__) // fix that check
+       #define _SHA_SUPPORTED
+     #endif
+   #elif defined(__GNUC__)
+diff --git a/C/Sha256Opt.c b/C/Sha256Opt.c
+index decc1382..d2214b4e 100644
+--- a/C/Sha256Opt.c
++++ b/C/Sha256Opt.c
+@@ -215,7 +215,7 @@ void MY_FAST_CALL Sha256_UpdateBlocks_HW(UInt32 state[8], const Byte *data, size
+ #elif defined(MY_CPU_ARM_OR_ARM64)
+ 
+   #if defined(__clang__)
+-    #if (__clang_major__ >= 8) // fix that check
++    #if (__clang_major__ >= 8) && !defined(__ANDROID__) // fix that check
+       #define USE_HW_SHA
+     #endif
+   #elif defined(__GNUC__)
+-- 
+2.17.1.windows.2
+

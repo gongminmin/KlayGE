@@ -26,9 +26,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ShowFactory : boost::noncopyable
 	{
 	public:
-		virtual ~ShowFactory()
-		{
-		}
+		virtual ~ShowFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 		ShowEngine& ShowEngineInstance();

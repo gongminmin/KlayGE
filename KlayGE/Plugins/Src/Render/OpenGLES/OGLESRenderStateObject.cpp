@@ -17,7 +17,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
-#include <KlayGE/OpenGLES/OGLESMapping.hpp>
+#include <KlayGE/OpenGLES/OGLESUtil.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
 
@@ -48,7 +48,7 @@ namespace KlayGE
 
 	void OGLESRenderStateObject::Active()
 	{
-		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		RasterizerStateDesc const & cur_rs_desc = re.CurRenderStateObject()->GetRasterizerStateDesc();
 		DepthStencilStateDesc const & cur_dss_desc = re.CurRenderStateObject()->GetDepthStencilStateDesc();
@@ -378,7 +378,7 @@ namespace KlayGE
 	{
 		if (Context::Instance().RenderFactoryValid())
 		{
-			auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteSamplers(1, &sampler_);
 		}
 		else
@@ -389,10 +389,10 @@ namespace KlayGE
 
 	void OGLESSamplerStateObject::Active(TexturePtr const & texture)
 	{
-		auto tex = checked_cast<OGLESTexture*>(texture.get());
+		auto& tex = checked_cast<OGLESTexture&>(*texture);
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
-			tex->TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
+			tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
 		}
 	}
 }

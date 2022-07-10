@@ -40,7 +40,6 @@
 
 #include <KFL/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 
 #include <list>
 #include <vector>
@@ -51,7 +50,7 @@ namespace KlayGE
 
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Font : boost::noncopyable
+	class KLAYGE_CORE_API Font final : boost::noncopyable
 	{
 	public:
 		// 字体建立标志
@@ -87,7 +86,7 @@ namespace KlayGE
 
 	private:
 		std::shared_ptr<FontRenderable> font_renderable_;
-		uint32_t		fso_attrib_;
+		uint32_t fsn_attrib_;
 	};
 
 	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags = 0);

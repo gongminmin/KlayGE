@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,11 +12,13 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
+#include <iterator>
 #include <sstream>
 
 #include "SampleCommon.hpp"
@@ -65,14 +66,30 @@ void CascadedShadowMapApp::OnCreate()
 	this->LookAt(float3(-25.72f, 29.65f, 24.57f), float3(-24.93f, 29.09f, 24.32f));
 	this->Proj(0.05f, 300.0f);
 
-	light_ctrl_camera_.ViewParams(float3(-50, 50, -50), float3(0, 0, 0), float3(0, 1, 0));
-	light_controller_.AttachCamera(light_ctrl_camera_);
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
+	auto light_ctrl_camera_node =
+		MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
+	light_ctrl_camera_ = MakeSharedPtr<Camera>();
+	light_ctrl_camera_node->AddComponent(light_ctrl_camera_);
+	float3 const light_pos = float3(-50, 50, -50);
+	light_ctrl_camera_->LookAtDist(MathLib::length(light_pos));
+	light_ctrl_camera_node->TransformToParent(MathLib::inverse(MathLib::look_at_lh(light_pos, float3(0, 0, 0), float3(0, 1, 0))));
+	root_node.AddChild(light_ctrl_camera_node);
+	light_controller_.AttachCamera(*light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
 	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable);
-	RenderablePtr katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
+	auto plane_model = ASyncLoadModel("plane.glb", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable,
+		[](RenderModel& model)
+		{
+			model.RootNode()->TransformToParent(MathLib::scaling(200.0f, 1.0f, 200.0f));
+			AddToSceneRootHelper(model);
+		});
+	auto katapult_model = ASyncLoadModel("katapult.glb", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, AddToSceneRootHelper);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -82,20 +99,20 @@ void CascadedShadowMapApp::OnCreate()
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-	ambient_light->AddToSceneManager();
-	
-	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(0);
-	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
-	sun_light_->Color(float3(1, 1, 1));
-	sun_light_->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
-	auto plane_so = MakeSharedPtr<SceneObject>(plane_model, SceneObject::SOA_Cullable);
-	plane_so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
-	plane_so->AddToSceneManager();
+	auto sun_light = MakeSharedPtr<DirectionalLightSource>();
+	sun_light->Attrib(0);
+	sun_light->Color(float3(1, 1, 1));
+	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	sun_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
 
-	auto katapult_so = MakeSharedPtr<SceneObject>(katapult_model, SceneObject::SOA_Cullable);
-	katapult_so->AddToSceneManager();
+		node.TransformToParent(light_ctrl_camera_->InverseViewMatrix());
+	});
+	sun_light_node->AddComponent(sun_light);
+	root_node.AddChild(sun_light_node);
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
@@ -104,14 +121,14 @@ void CascadedShadowMapApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("CascadedShadowMap.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");
@@ -120,37 +137,37 @@ void CascadedShadowMapApp::OnCreate()
 	id_pssm_factor_slider_ = dialog_->IDFromName("PSSMFactorSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_csm_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_csm_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->CSMTypeChangedHandler(sender);
 		});
 	this->CSMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_csm_type_combo_));
 
-	dialog_->Control<UIComboBox>(id_cascades_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_cascades_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->CascadesChangedHandler(sender);
 		});
 	this->CascadesChangedHandler(*dialog_->Control<UIComboBox>(id_cascades_combo_));
 
-	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().connect(
+	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().Connect(
 		[this](UISlider const & sender)
 		{
 			this->PSSMFactorChangedHandler(sender);
 		});
 	this->PSSMFactorChangedHandler(*dialog_->Control<UISlider>(id_pssm_factor_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().Connect(
 		[this](UICheckBox const & sender)
 		{
 			this->CtrlCameraHandler(sender);
 		});
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
-	sky_box_->AddToSceneManager();
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube, c_cube);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < ShaderModel(5, 0))
@@ -237,14 +254,17 @@ void CascadedShadowMapApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+
+	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	if (num_loading_res > 0)
+	{
+		stream.str(L"");
+		stream << "Loading " << num_loading_res << " resources...";
+		font_->RenderText(100, 300, Color(1, 0, 0, 1), stream.str(), 48);
+	}
 }
 
 uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		sun_light_->Direction(light_ctrl_camera_.ForwardVec());
-	}
-
 	return deferred_rendering_->Update(pass);
 }

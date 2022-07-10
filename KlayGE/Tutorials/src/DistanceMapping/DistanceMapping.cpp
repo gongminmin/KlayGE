@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -13,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -21,8 +20,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 
 #include "SampleCommon.hpp"
 #include "DistanceMapping.hpp"
@@ -32,11 +32,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderPolygon : public RenderableHelper
+	class RenderPolygon : public Renderable
 	{
 	public:
 		RenderPolygon()
-			: RenderableHelper(L"Polygon")
+			: Renderable(L"Polygon")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -73,35 +73,33 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rls_[0] = rf.MakeRenderLayout();
+			rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
 
-			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
-			rl_->BindVertexStream(tex0_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
+			rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
+			rls_[0]->BindVertexStream(tex0_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
 
 			float3 normal_float3[std::size(xyzs)];
 			MathLib::compute_normal(normal_float3,
 				indices, indices + std::size(indices),
 				xyzs, xyzs + std::size(xyzs));
 
-			float4 tangent_float4[std::size(xyzs)];
+			float3 tangent_float3[std::size(xyzs)];
 			float3 binormal_float3[std::size(xyzs)];
-			MathLib::compute_tangent(tangent_float4, binormal_float3,
+			MathLib::compute_tangent(tangent_float3, binormal_float3,
 				indices, indices + std::size(indices),
 				xyzs, xyzs + std::size(xyzs), texs, normal_float3);
 
 			Quaternion tangent_quat[std::size(xyzs)];
 			for (uint32_t j = 0; j < std::size(xyzs); ++ j)
 			{
-				float3 n = MathLib::normalize(normal_float3[j]);
-				float3 b = MathLib::normalize(binormal_float3[j]);
+				float3 const t = MathLib::normalize(tangent_float3[j]);
+				float3 const b = MathLib::normalize(binormal_float3[j]);
+				float3 const n = MathLib::normalize(normal_float3[j]);
 
-				float3 t(tangent_float4[j].x(), tangent_float4[j].y(), tangent_float4[j].z());
-				t = MathLib::normalize(t);
-				
 				tangent_quat[j] = MathLib::to_quaternion(t, b, n, 8);
 			}
 
@@ -135,19 +133,13 @@ namespace
 			}
 			
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(tangent), tangent);
-			rl_->BindVertexStream(tan_vb, VertexElement(VEU_Tangent, 0, fmt));
+			rls_[0]->BindVertexStream(tan_vb, VertexElement(VEU_Tangent, 0, fmt));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
-			rl_->BindIndexStream(ib, EF_R16UI);
+			rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		}
-
-		void ModelMatrix(float4x4 const & mat)
-		{
-			RenderableHelper::ModelMatrix(mat);
-			inv_model_mat_ = MathLib::inverse(model_mat_);
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -172,45 +164,18 @@ namespace
 			*(effect_->ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
 			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
-
-	private:
-		float4x4 inv_model_mat_;
-	};
-
-	class PolygonObject : public SceneObject
-	{
-	public:
-		PolygonObject()
-			: SceneObject(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
-		{
-		}
-
-		void LightPos(float3 const & light_pos)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightPos(light_pos);
-		}
-
-		void LightColor(float3 const & light_color)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightColor(light_color);
-		}
-
-		void LightFalloff(float3 const & light_falloff)
-		{
-			checked_pointer_cast<RenderPolygon>(renderables_[0])->LightFalloff(light_falloff);
-		}
 	};
 
 
-	class PointLightSourceUpdate
+	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
+		void operator()(SceneNode& node, float app_time, float elapsed_time)
 		{
-			float4x4 matRot = MathLib::rotation_z(app_time);
+			KFL_UNUSED(elapsed_time);
 
-			float3 light_pos(1, 0, -1);
-			light.Position(MathLib::transform_coord(light_pos, matRot));
+			float4x4 const mat_rot = MathLib::rotation_z(app_time);
+			node.TransformToParent(MathLib::translation(MathLib::transform_coord(float3(1, 0, -1), mat_rot)));
 		}
 	};
 
@@ -247,9 +212,10 @@ void DistanceMapping::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	polygon_ = MakeSharedPtr<PolygonObject>();
-	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
-	polygon_->AddToSceneManager();
+	polygon_renderable_ = MakeSharedPtr<RenderPolygon>();
+	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(polygon_renderable_), SceneNode::SOA_Cullable);
+	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
+	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -258,33 +224,38 @@ void DistanceMapping::OnCreate()
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(2, 2, 2));
 	light_->Falloff(float3(1, 0, 1.0f));
-	light_->Position(float3(1, 0, -1));
-	light_->BindUpdateFunc(PointLightSourceUpdate());
-	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
-	light_proxy_->AddToSceneManager();
+	auto light_proxy = LoadLightSourceProxyModel(light_);
+	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.05f, 0.05f, 0.05f) * light_proxy->RootNode()->TransformToParent());
 
-	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
+	light_node->TransformToParent(MathLib::translation(1.0f, 0.0f, -1.0f));
+	light_node->AddComponent(light_);
+	light_node->AddChild(light_proxy->RootNode());
+	light_node->OnMainThreadUpdate().Connect(PointLightNodeUpdate());
+	root_node.AddChild(light_node);
+
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DistanceMapping.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("DistanceMapping.uiml"));
 }
 
 void DistanceMapping::OnResize(uint32_t width, uint32_t height)
@@ -343,9 +314,9 @@ uint32_t DistanceMapping::DoUpdate(uint32_t /*pass*/)
 	}
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightPos(light_->Position());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightColor(light_->Color());
+	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

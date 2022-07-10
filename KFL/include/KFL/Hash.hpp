@@ -34,7 +34,10 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
+#include <KFL/CXX20/span.hpp>
+
+#include <string>
+#include <string_view>
 
 namespace KlayGE
 {
@@ -44,7 +47,7 @@ namespace KlayGE
 #pragma warning(disable: 4307) // The hash here could cause integral constant overflow
 #endif
 
-	size_t constexpr CTHashImpl(char const * str, size_t seed)
+	size_t constexpr CTHashImpl(char const* str, size_t seed) noexcept
 	{
 		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (static_cast<size_t>(*str) + PRIME_NUM + (seed << 6) + (seed >> 2)));
 	}
@@ -62,12 +65,12 @@ namespace KlayGE
 #endif
 
 	template <typename SizeT>
-	inline void HashCombineImpl(SizeT& seed, SizeT value)
+	inline void HashCombineImpl(SizeT& seed, SizeT value) noexcept
 	{
 		seed ^= value + PRIME_NUM + (seed << 6) + (seed >> 2);
 	}
 
-	inline size_t RT_HASH(char const * str)
+	inline size_t RT_HASH(char const* str) noexcept
 	{
 		size_t seed = 0;
 		while (*str != 0)
@@ -81,25 +84,25 @@ namespace KlayGE
 #undef PRIME_NUM
 
 	template <typename T>
-	inline size_t HashValue(T v)
+	inline size_t HashValue(T v) noexcept
 	{
 		return static_cast<size_t>(v);
 	}
 
 	template <typename T>
-	inline size_t HashValue(T* v)
+	inline size_t HashValue(T* v) noexcept
 	{
 		return static_cast<size_t>(reinterpret_cast<ptrdiff_t>(v));
 	}
 
 	template <typename T>
-	inline void HashCombine(size_t& seed, T const & v)
+	inline void HashCombine(size_t& seed, T const& v) noexcept
 	{
 		return HashCombineImpl(seed, HashValue(v));
 	}
 
 	template <typename T>
-	inline void HashRange(size_t& seed, T first, T last)
+	inline void HashRange(size_t& seed, T first, T last) noexcept
 	{
 		for (; first != last; ++ first)
 		{
@@ -108,11 +111,29 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	inline size_t HashRange(T first, T last)
+	inline size_t HashRange(T first, T last) noexcept
 	{
 		size_t seed = 0;
 		HashRange(seed, first, last);
 		return seed;
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::span<T const> s) noexcept
+	{
+		return HashRange(s.begin(), s.end());
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::basic_string_view<T> sv) noexcept
+	{
+		return HashRange(sv.begin(), sv.end());
+	}
+
+	template <typename T>
+	inline size_t HashValue(std::basic_string<T> const& str) noexcept
+	{
+		return HashRange(str.begin(), str.end());
 	}
 }
 

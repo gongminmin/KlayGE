@@ -75,6 +75,8 @@ namespace KlayGE
 	}
 
 
+	CascadedShadowLayer::~CascadedShadowLayer() noexcept = default;
+
 	uint32_t CascadedShadowLayer::NumCascades() const
 	{
 		return static_cast<uint32_t>(intervals_.size());
@@ -179,7 +181,6 @@ namespace KlayGE
 
 
 	SDSMCascadedShadowLayer::SDSMCascadedShadowLayer()
-		: frame_index_(0)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -189,27 +190,34 @@ namespace KlayGE
 		{
 			interval_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
-				MAX_NUM_CASCADES * sizeof(float2), nullptr, EF_GR32F);
+				MAX_NUM_CASCADES * sizeof(float2), nullptr, sizeof(float2));
+			interval_buff_float_uav_ = rf.MakeBufferUav(interval_buff_, EF_GR32F);
+			interval_buff_uint_uav_ = rf.MakeBufferUav(interval_buff_, EF_GR32UI);
+			interval_buff_srv_ = rf.MakeBufferSrv(interval_buff_, EF_GR32F);
+
 			scale_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
-				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, sizeof(float3));
+			scale_buff_uav_ = rf.MakeBufferUav(scale_buff_, EF_BGR32F);
+
 			bias_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
-				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, sizeof(float3));
+			bias_buff_uav_ = rf.MakeBufferUav(bias_buff_, EF_BGR32F);
+
 			cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
-				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, sizeof(float3));
+			cascade_min_buff_uint_uav_ = rf.MakeBufferUav(cascade_min_buff_, EF_BGR32UI);
+			cascade_min_buff_srv_ = rf.MakeBufferSrv(cascade_min_buff_, EF_BGR32F);
+
 			cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
-				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, sizeof(float3));
+			cascade_max_buff_uint_uav_ = rf.MakeBufferUav(cascade_max_buff_, EF_BGR32UI);
+			cascade_max_buff_srv_ = rf.MakeBufferSrv(cascade_max_buff_, EF_BGR32F);
 
-			for (uint32_t i = 0; i < 2; ++ i)
-			{
-				interval_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
-					interval_buff_->Size(), nullptr);
-				scale_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
-					scale_buff_->Size(), nullptr);
-				bias_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
-					bias_buff_->Size(), nullptr);
-			}
+			interval_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, interval_buff_->Size(), nullptr);
+			scale_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, scale_buff_->Size(), nullptr);
+			bias_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, bias_buff_->Size(), nullptr);
 
 			effect_ = SyncLoadRenderEffect("CascadedShadow.fxml");
 
@@ -246,36 +254,55 @@ namespace KlayGE
 			compute_log_cascades_from_z_bounds_pp_ = SyncLoadPostProcess("CascadedShadow.ppml", "compute_log_cascades_from_z_bounds");
 
 			interval_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			for (uint32_t i = 0; i < 2; ++ i)
-			{
-				interval_cpu_texs_[i] = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read);
-			}
+			interval_rtv_ = rf.Make2DRtv(interval_tex_, 0, 1, 0);
+			interval_cpu_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read);
 		}
 	}
 
 	void SDSMCascadedShadowLayer::DepthTexture(TexturePtr const & depth_tex)
 	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
 		depth_tex_ = depth_tex;
+		depth_srv_ = rf.MakeTextureSrv(depth_tex_, 0, 1, 0, 1);
 
 		if (!cs_support_)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 			uint32_t const width = depth_tex->Width(0);
 			uint32_t const height = depth_tex->Height(0);
 
-			depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Write);
+			depth_derivative_tex_ = rf.MakeTexture2D(width / 2, height / 2, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			auto depth_derivative_srv = rf.MakeTextureSrv(depth_derivative_tex_);
+			auto depth_derivative_rtv = rf.Make2DRtv(depth_derivative_tex_, 0, 1, 0);
+			if (rf.RenderEngineInstance().DeviceCaps().flexible_srvs_support)
+			{
+				depth_derivative_mip_srvs_.resize(depth_derivative_tex_->NumMipMaps());
+				depth_derivative_mip_rtvs_.resize(depth_derivative_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < depth_derivative_tex_->NumMipMaps(); ++ i)
+				{
+					depth_derivative_mip_srvs_[i] = rf.MakeTextureSrv(depth_derivative_tex_, 0, 1, i, 1);
+					depth_derivative_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_tex_, 0, 1, i);
+				}
+			}
+			else
+			{
+				depth_derivative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Write);
+				depth_derivative_small_mip_rtvs_.resize(depth_derivative_small_tex_->NumMipMaps());
+				for (uint32_t i = 0; i < depth_derivative_small_tex_->NumMipMaps(); ++i)
+				{
+					depth_derivative_small_mip_rtvs_[i] = rf.Make2DRtv(depth_derivative_small_tex_, 0, 1, i);
+				}
+				reduce_z_bounds_from_depth_mip_map_pp_->InputPin(0, depth_derivative_srv);
+			}
 
 			float delta_x = 1.0f / depth_tex_->Width(0);
 			float delta_y = 1.0f / depth_tex_->Height(0);
 			reduce_z_bounds_from_depth_pp_->SetParam(0, float4(delta_x, delta_y, -delta_x / 2, -delta_y / 2));
-			reduce_z_bounds_from_depth_pp_->InputPin(0, depth_tex_);
-			reduce_z_bounds_from_depth_pp_->OutputPin(0, depth_deriative_tex_);
-			reduce_z_bounds_from_depth_mip_map_pp_->InputPin(0, depth_deriative_tex_);
-			compute_log_cascades_from_z_bounds_pp_->SetParam(0, static_cast<float>(depth_deriative_tex_->NumMipMaps() - 1));
-			compute_log_cascades_from_z_bounds_pp_->InputPin(0, depth_deriative_tex_);
-			compute_log_cascades_from_z_bounds_pp_->OutputPin(0, interval_tex_);
+			reduce_z_bounds_from_depth_pp_->InputPin(0, depth_srv_);
+			reduce_z_bounds_from_depth_pp_->OutputPin(0, depth_derivative_rtv);
+			compute_log_cascades_from_z_bounds_pp_->SetParam(0, static_cast<float>(depth_derivative_tex_->NumMipMaps() - 1));
+			compute_log_cascades_from_z_bounds_pp_->InputPin(0, depth_derivative_srv);
+			compute_log_cascades_from_z_bounds_pp_->OutputPin(0, interval_rtv_);
 		}
 	}
 
@@ -286,8 +313,6 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		uint32_t const num_cascades = static_cast<uint32_t>(intervals_.size());
-		uint32_t const copy_index = frame_index_ & 1;
-		uint32_t const read_back_index = (0 == frame_index_) ? copy_index : !copy_index;
 
 		if (cs_support_)
 		{
@@ -303,23 +328,24 @@ namespace KlayGE
 			int dispatch_x = (depth_tex_->Width(0) + TILE_DIM - 1) / TILE_DIM;
 			int dispatch_y = (depth_tex_->Height(0) + TILE_DIM - 1) / TILE_DIM;
 
-			*interval_buff_param_ = interval_buff_;
-			*interval_buff_uint_param_ = interval_buff_;
-			*interval_buff_read_param_ = interval_buff_;
-			*cascade_min_buff_uint_param_ = cascade_min_buff_;
-			*cascade_max_buff_uint_param_ = cascade_max_buff_;
-			*cascade_min_buff_read_param_ = cascade_min_buff_;
-			*cascade_max_buff_read_param_ = cascade_max_buff_;
-			*scale_buff_param_ = scale_buff_;
-			*bias_buff_param_ = bias_buff_;
-			*depth_tex_param_ = depth_tex_;
+			*interval_buff_param_ = interval_buff_float_uav_;
+			*interval_buff_uint_param_ = interval_buff_uint_uav_;
+			*interval_buff_read_param_ = interval_buff_srv_;
+			*cascade_min_buff_uint_param_ = cascade_min_buff_uint_uav_;
+			*cascade_max_buff_uint_param_ = cascade_max_buff_uint_uav_;
+			*cascade_min_buff_read_param_ = cascade_min_buff_srv_;
+			*cascade_max_buff_read_param_ = cascade_max_buff_srv_;
+			*scale_buff_param_ = scale_buff_uav_;
+			*bias_buff_param_ = bias_buff_uav_;
+			*depth_tex_param_ = depth_srv_;
 			*num_cascades_param_ = static_cast<int32_t>(num_cascades);
 			*inv_depth_width_height_param_ = float2(1.0f / depth_tex_->Width(0), 1.0f / depth_tex_->Height(0));
 			*near_far_param_ = float2(camera.NearPlane(), camera.FarPlane());
 			float4x4 const & inv_proj = camera.InverseProjMatrix();
-			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
-			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
-			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+			float3 const upper_left = MathLib::transform_coord(float3(-1, -flipping, 1), inv_proj);
+			float3 const upper_right = MathLib::transform_coord(float3(+1, -flipping, 1), inv_proj);
+			float3 const lower_left = MathLib::transform_coord(float3(-1, flipping, 1), inv_proj);
 			*upper_left_param_ = upper_left;
 			*xy_dir_param_ = float2(upper_right.x() - upper_left.x(), lower_left.y() - upper_left.y());
 			*view_to_light_view_proj_param_ = camera.InverseViewMatrix() * light_view_proj;
@@ -333,25 +359,22 @@ namespace KlayGE
 			re.Dispatch(*effect_, *reduce_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
 			re.Dispatch(*effect_, *compute_custom_cascades_tech_, 1, 1, 1);
 
-			interval_buff_->CopyToBuffer(*interval_cpu_buffs_[copy_index]);
-			scale_buff_->CopyToBuffer(*scale_cpu_buffs_[copy_index]);
-			bias_buff_->CopyToBuffer(*bias_cpu_buffs_[copy_index]);
+			interval_buff_->CopyToBuffer(*interval_cpu_buff_);
+			scale_buff_->CopyToBuffer(*scale_cpu_buff_);
+			bias_buff_->CopyToBuffer(*bias_cpu_buff_);
 
-			GraphicsBuffer::Mapper interval_mapper(*interval_cpu_buffs_[read_back_index], BA_Read_Only);
-			GraphicsBuffer::Mapper scale_mapper(*scale_cpu_buffs_[read_back_index], BA_Read_Only);
-			GraphicsBuffer::Mapper bias_mapper(*bias_cpu_buffs_[read_back_index], BA_Read_Only);
+			GraphicsBuffer::Mapper interval_mapper(*interval_cpu_buff_, BA_Read_Only);
+			GraphicsBuffer::Mapper scale_mapper(*scale_cpu_buff_, BA_Read_Only);
+			GraphicsBuffer::Mapper bias_mapper(*bias_cpu_buff_, BA_Read_Only);
 			float2* interval_ptr = interval_mapper.Pointer<float2>();
 			float3* scale_ptr = scale_mapper.Pointer<float3>();
 			float3* bias_ptr = bias_mapper.Pointer<float3>();
 
 			for (size_t i = 0; i < intervals_.size(); ++ i)
 			{
-				float3 const & scale = scale_ptr[i];
-				float3 const & bias = bias_ptr[i];
-
 				intervals_[i] = interval_ptr[i];
-				scales_[i] = scale;
-				biases_[i] = bias;
+				scales_[i] = scale_ptr[i];
+				biases_[i] = bias_ptr[i];
 			}
 		}
 		else
@@ -361,33 +384,42 @@ namespace KlayGE
 			reduce_z_bounds_from_depth_pp_->SetParam(1, near_far);
 			reduce_z_bounds_from_depth_pp_->Apply();
 
-			for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
+			for (uint32_t i = 1; i < depth_derivative_tex_->NumMipMaps(); ++ i)
 			{
-				uint32_t const width = depth_deriative_tex_->Width(i - 1);
-				uint32_t const height = depth_deriative_tex_->Height(i - 1);
-				uint32_t const lower_width = depth_deriative_tex_->Width(i);
-				uint32_t const lower_height = depth_deriative_tex_->Height(i);
+				uint32_t const width = depth_derivative_tex_->Width(i - 1);
+				uint32_t const height = depth_derivative_tex_->Height(i - 1);
+				uint32_t const lower_width = depth_derivative_tex_->Width(i);
+				uint32_t const lower_height = depth_derivative_tex_->Height(i);
 
 				float const delta_x = 1.0f / width;
 				float const delta_y = 1.0f / height;
-				float4 const delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);			
+				float4 const delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);
 				reduce_z_bounds_from_depth_mip_map_pp_->SetParam(0, delta_offset);
 
-				reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
-				reduce_z_bounds_from_depth_mip_map_pp_->Apply();
+				if (re.DeviceCaps().flexible_srvs_support)
+				{
+					reduce_z_bounds_from_depth_mip_map_pp_->InputPin(0, depth_derivative_mip_srvs_[i - 1]);
+					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_mip_rtvs_[i]);
+					reduce_z_bounds_from_depth_mip_map_pp_->Apply();
+				}
+				else
+				{
+					reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_derivative_small_mip_rtvs_[i - 1]);
+					reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 
-				depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0,
-					lower_width, lower_height, 0, i - 1, 0, 0, lower_width, lower_height);
+					depth_derivative_small_tex_->CopyToSubTexture2D(*depth_derivative_tex_, 0, i, 0, 0, lower_width, lower_height, 0, i - 1,
+						0, 0, lower_width, lower_height, TextureFilter::Point);
+				}
 			}
 
 			compute_log_cascades_from_z_bounds_pp_->SetParam(1, static_cast<int32_t>(num_cascades));
 			compute_log_cascades_from_z_bounds_pp_->SetParam(2, near_far);
 			compute_log_cascades_from_z_bounds_pp_->Apply();
 
-			interval_tex_->CopyToSubTexture2D(*interval_cpu_texs_[copy_index], 0, 0, 0, 0, num_cascades, 1,
-				0, 0, 0, 0, num_cascades, 1);
+			interval_tex_->CopyToSubTexture2D(
+				*interval_cpu_tex_, 0, 0, 0, 0, num_cascades, 1, 0, 0, 0, 0, num_cascades, 1, TextureFilter::Point);
 
-			Texture::Mapper interval_mapper(*interval_cpu_texs_[read_back_index], 0, 0,
+			Texture::Mapper interval_mapper(*interval_cpu_tex_, 0, 0,
 				TMA_Read_Only, 0, 0, num_cascades, 1);
 			Vector_T<half, 2>* interval_ptr = interval_mapper.Pointer<Vector_T<half, 2>>();
 
@@ -420,7 +452,5 @@ namespace KlayGE
 		}
 
 		this->UpdateCropMats();
-
-		++ frame_index_;
 	}
 }

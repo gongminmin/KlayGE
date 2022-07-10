@@ -14,13 +14,13 @@
 #define _WIN32_DCOM
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
 #include <boost/assert.hpp>
 #include <windows.h>
+#include <combaseapi.h>
 #include <uuids.h>
 #include <control.h>
 #if defined(KLAYGE_COMPILER_GCC)
@@ -28,15 +28,14 @@
 // Those GCC diagnostic ignored lines don't work, because those warnings are emitted by preprocessor
 #pragma GCC diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
-#elif defined(KLAYGE_COMPILER_CLANGC2)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
-#pragma clang diagnostic ignored "-Wmicrosoft-enum-value" // Ignore D3DBUSIMPL_MODIFIER_NON_STANDARD definition
 #endif
 #include <d3d9.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
-#elif defined(KLAYGE_COMPILER_CLANGC2)
+#elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic pop
 #endif
 #ifdef KLAYGE_COMPILER_GCC
@@ -54,6 +53,13 @@
 
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 #include <KlayGE/DShow/DShow.hpp>
+
+DEFINE_UUID_OF(IBaseFilter);
+DEFINE_UUID_OF(IGraphBuilder);
+DEFINE_UUID_OF(IMediaControl);
+DEFINE_UUID_OF(IMediaEvent);
+DEFINE_UUID_OF(IVMRFilterConfig9);
+DEFINE_UUID_OF(IVMRSurfaceAllocatorNotify9);
 
 namespace KlayGE
 {
@@ -134,35 +140,21 @@ namespace KlayGE
 		this->Free();
 		this->Init();
 
-		IGraphBuilder* graph;
 		TIFHR(::CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_ALL,
-			IID_IGraphBuilder, reinterpret_cast<void**>(&graph)));
-		graph_ = MakeCOMPtr(graph);
+			UuidOf<IGraphBuilder>(), graph_.put_void()));
 
-		IBaseFilter* filter;
 		TIFHR(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
-			IID_IBaseFilter, reinterpret_cast<void**>(&filter)));
-		filter_ = MakeCOMPtr(filter);
+			UuidOf<IBaseFilter>(), filter_.put_void()));
 
-		std::shared_ptr<IVMRFilterConfig9> filter_config;
-		{
-			IVMRFilterConfig9* tmp;
-			TIFHR(filter_->QueryInterface(IID_IVMRFilterConfig9, reinterpret_cast<void**>(&tmp)));
-			filter_config = MakeCOMPtr(tmp);
-		}
+		auto filter_config = filter_.as<IVMRFilterConfig9>();
 
 		TIFHR(filter_config->SetRenderingMode(VMR9Mode_Renderless));
 		TIFHR(filter_config->SetNumberOfStreams(1));
 
-		std::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify;
-		{
-			IVMRSurfaceAllocatorNotify9* tmp;
-			TIFHR(filter_->QueryInterface(IID_IVMRSurfaceAllocatorNotify9, reinterpret_cast<void**>(&tmp)));
-			vmr_surf_alloc_notify = MakeCOMPtr(tmp);
-		}
+		auto vmr_surf_alloc_notify = filter_.as<IVMRSurfaceAllocatorNotify9>();
 
 		// create our surface allocator
-		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(Context::Instance().AppInstance().MainWnd()->HWnd()));
+		vmr_allocator_.reset(new DShowVMR9Allocator(Context::Instance().AppInstance().MainWnd()->HWnd()), false);
 
 		// let the allocator and the notify know about each other
 		TIFHR(vmr_surf_alloc_notify->AdviseSurfaceAllocator(static_cast<DWORD_PTR>(DShowVMR9Allocator::USER_ID),
@@ -171,16 +163,8 @@ namespace KlayGE
 
 		TIFHR(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
 
-		{
-			IMediaControl* tmp;
-			TIFHR(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&tmp)));
-			media_control_ = MakeCOMPtr(tmp);
-		}
-		{
-			IMediaEvent* tmp;
-			TIFHR(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&tmp)));
-			media_event_ = MakeCOMPtr(tmp);
-		}
+		graph_.as(media_control_);
+		graph_.as(media_event_);
 
 		std::wstring fn;
 		Convert(fn, fileName);
@@ -246,6 +230,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	TexturePtr DShowEngine::PresentTexture()
 	{
-		return checked_pointer_cast<DShowVMR9Allocator>(vmr_allocator_)->PresentTexture();
+		return checked_cast<DShowVMR9Allocator*>(vmr_allocator_.get())->PresentTexture();
 	}
 }

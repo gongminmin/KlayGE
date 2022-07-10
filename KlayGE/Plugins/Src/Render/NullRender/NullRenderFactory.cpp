@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 #include <KlayGE/NullRender/NullRenderStateObject.hpp>
@@ -39,9 +40,7 @@
 
 namespace KlayGE
 {
-	NullRenderFactory::NullRenderFactory()
-	{
-	}
+	NullRenderFactory::NullRenderFactory() = default;
 
 	std::wstring const & NullRenderFactory::Name() const
 	{
@@ -100,32 +99,32 @@ namespace KlayGE
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
 	GraphicsBufferPtr NullRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt)
+			uint32_t size_in_byte, uint32_t structure_byte_stride)
 	{
 		KFL_UNUSED(usage);
 		KFL_UNUSED(access_hint);
 		KFL_UNUSED(size_in_byte);
-		KFL_UNUSED(fmt);
+		KFL_UNUSED(structure_byte_stride);
 		return GraphicsBufferPtr();
 	}
 
@@ -153,183 +152,250 @@ namespace KlayGE
 	{
 		return FencePtr();
 	}
-
-	RenderViewPtr NullRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	
+	ShaderResourceViewPtr NullRenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+		return ShaderResourceViewPtr();
+	}
+
+	ShaderResourceViewPtr NullRenderFactory::MakeTexture2DSrv(
+		TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	{
+		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+		return ShaderResourceViewPtr();
+	}
+
+	ShaderResourceViewPtr NullRenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
+	{
+		KFL_UNUSED(gbuffer);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
+		return ShaderResourceViewPtr();
+	}
+
+	RenderTargetViewPtr NullRenderFactory::Make1DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
+	{
+		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	RenderTargetViewPtr NullRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	RenderTargetViewPtr NullRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, Texture::CubeFaces face,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	RenderTargetViewPtr NullRenderFactory::Make2DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(slice);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::MakeCubeRenderView(Texture& texture, int array_index, int level)
+	RenderTargetViewPtr NullRenderFactory::Make3DRtv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level)
 	{
 		KFL_UNUSED(texture);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-		return RenderViewPtr();
-	}
-
-	RenderViewPtr NullRenderFactory::Make3DRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-	{
-		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer,
-		uint32_t width, uint32_t height, ElementFormat pf)
+	RenderTargetViewPtr NullRenderFactory::MakeCubeRtv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
+	{
+		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		return RenderTargetViewPtr();
+	}
+
+	RenderTargetViewPtr NullRenderFactory::MakeBufferRtv(GraphicsBufferPtr const & gbuffer, ElementFormat pf, uint32_t first_elem,
+		uint32_t num_elems)
 	{
 		KFL_UNUSED(gbuffer);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
 		KFL_UNUSED(pf);
-		return RenderViewPtr();
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
+		return RenderTargetViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DDepthStencilRenderView(uint32_t width, uint32_t height,
-		ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
+	DepthStencilViewPtr NullRenderFactory::Make2DDsv(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count,
+		uint32_t sample_quality)
 	{
 		KFL_UNUSED(width);
 		KFL_UNUSED(height);
 		KFL_UNUSED(pf);
 		KFL_UNUSED(sample_count);
 		KFL_UNUSED(sample_quality);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr NullRenderFactory::Make1DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr NullRenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int first_array_index, int array_size,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 
-	RenderViewPtr NullRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	DepthStencilViewPtr NullRenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int array_index, Texture::CubeFaces face,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 	
-	RenderViewPtr NullRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	DepthStencilViewPtr NullRenderFactory::Make2DDsv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(slice);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
-	}
-
-	RenderViewPtr NullRenderFactory::MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level)
-	{
-		KFL_UNUSED(texture);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 	
-	RenderViewPtr NullRenderFactory::Make3DDepthStencilRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	DepthStencilViewPtr NullRenderFactory::Make3DDsv(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
 		KFL_UNUSED(level);
-		return RenderViewPtr();
+		return DepthStencilViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	DepthStencilViewPtr NullRenderFactory::MakeCubeDsv(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		return DepthStencilViewPtr();
+	}
+
+	UnorderedAccessViewPtr NullRenderFactory::Make1DUav(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
+	{
+		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf, int first_array_index,
+		int array_size, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf, int array_index,
+		Texture::CubeFaces face, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(face);
 		KFL_UNUSED(level);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make2DUav(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t slice,
+		int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(slice);
 		KFL_UNUSED(level);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level)
+	UnorderedAccessViewPtr NullRenderFactory::MakeCubeUav(TexturePtr const & texture, ElementFormat pf, int array_index, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(level);
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	UnorderedAccessViewPtr NullRenderFactory::Make3DUav(TexturePtr const & texture, ElementFormat pf, int array_index, uint32_t first_slice,
+		uint32_t num_slices, int level)
 	{
 		KFL_UNUSED(texture);
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
@@ -337,16 +403,132 @@ namespace KlayGE
 		return UnorderedAccessViewPtr();
 	}
 
-	UnorderedAccessViewPtr NullRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf)
+	UnorderedAccessViewPtr NullRenderFactory::MakeBufferUav(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
+		uint32_t first_elem, uint32_t num_elems)
 	{
 		KFL_UNUSED(gbuffer);
 		KFL_UNUSED(pf);
+		KFL_UNUSED(first_elem);
+		KFL_UNUSED(num_elems);
 		return UnorderedAccessViewPtr();
 	}
 
 	ShaderObjectPtr NullRenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<NullShaderObject>();
+	}
+
+	ShaderStageObjectPtr NullRenderFactory::MakeShaderStageObject(ShaderStage stage)
+	{
+		bool as_d3d11 = false;
+		bool as_d3d12 = false;
+		bool as_gl = false;
+		bool as_gles = false;
+
+		auto const& re = checked_cast<NullRenderEngine const&>(this->RenderEngineInstance());
+		std::string_view const platform_name = re.NativeShaderPlatformName();
+		if (platform_name.find("d3d_11_") == 0)
+		{
+			as_d3d11 = true;
+		}
+		else if (platform_name.find("d3d_12_") == 0)
+		{
+			as_d3d12 = true;
+		}
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
+		else if (platform_name.find("gl_") == 0)
+		{
+			as_gl = true;
+		}
+		else if (platform_name.find("gles_") == 0)
+		{
+			as_gles = true;
+		}
+#endif
+
+		std::shared_ptr<ShaderStageObject> ret;
+		if (as_d3d11 || as_d3d12)
+		{
+			switch (stage)
+			{
+			case ShaderStage::Vertex:
+				if (as_d3d11)
+				{
+					ret = MakeSharedPtr<D3D11VertexShaderStageObject>();
+				}
+				else
+				{
+					BOOST_ASSERT(as_d3d12);
+					ret = MakeSharedPtr<D3D12VertexShaderStageObject>();
+				}
+				break;
+
+			case ShaderStage::Pixel:
+				ret = MakeSharedPtr<D3DPixelShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Geometry:
+				ret = MakeSharedPtr<D3DGeometryShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Compute:
+				ret = MakeSharedPtr<D3DComputeShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Hull:
+				ret = MakeSharedPtr<D3DHullShaderStageObject>(as_d3d12);
+				break;
+
+			case ShaderStage::Domain:
+				ret = MakeSharedPtr<D3DDomainShaderStageObject>(as_d3d12);
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid shader stage");
+			}
+		}
+		else
+		{
+			switch (stage)
+			{
+			case ShaderStage::Vertex:
+				ret = MakeSharedPtr<OGLVertexShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Pixel:
+				ret = MakeSharedPtr<OGLPixelShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Geometry:
+				if (as_gl)
+				{
+					ret = MakeSharedPtr<OGLGeometryShaderStageObject>();
+				}
+				else
+				{
+					BOOST_ASSERT(as_gles);
+					ret = MakeSharedPtr<OGLESGeometryShaderStageObject>();
+				}
+				break;
+
+			case ShaderStage::Compute:
+				ret = MakeSharedPtr<OGLComputeShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Hull:
+				ret = MakeSharedPtr<OGLHullShaderStageObject>(as_gles);
+				break;
+
+			case ShaderStage::Domain:
+				ret = MakeSharedPtr<OGLDomainShaderStageObject>(as_gles);
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid shader stage");
+			}
+		}
+
+		return ret;
 	}
 
 	std::unique_ptr<RenderEngine> NullRenderFactory::DoMakeRenderEngine()

@@ -28,10 +28,10 @@
  * from http://www.klayge.org/licensing/.
  */
 
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace KGEditor

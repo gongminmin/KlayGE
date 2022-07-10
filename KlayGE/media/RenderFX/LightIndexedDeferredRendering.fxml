@@ -154,18 +154,20 @@ float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 {
 	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 normal = GetNormal(rt0);
 	float glossiness = GetGlossiness(rt0);
 	float shininess = Glossiness2Shininess(glossiness);
 	float3 c_diff = GetDiffuse(rt1);
 	float3 c_spec = GetSpecular(rt1);
+	float occlusion = GetOcclusion(rt2);
 
 	float n_dot_l = 0.5f + 0.5f * dot(light_dir_es.xyz, normal);
 	float3 halfway = normalize(light_dir_es.xyz - view_dir);
 	float4 shading = float4(max(c_diff * light_attrib.x * n_dot_l, 0) * light_color.rgb, 1);
 	shading += SkylightShading(glossiness, c_diff, c_spec, normal, -view_dir);
-	return shading;
+	return shading * float4(occlusion.xxx, 1);
 }
 
 float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -177,12 +179,14 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 
 	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	float4 rt2 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 	float3 normal = GetNormal(rt0);
 	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 	float3 c_diff = GetDiffuse(rt1);
 	float3 c_spec = GetSpecular(rt1);
+	float occlusion = GetOcclusion(rt2);
 	
 	int num_lights = int(lights_attrib[0].w);
 
@@ -203,7 +207,7 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 		}
 	}
 	
-	return float4(shading, 1);
+	return float4(shading * occlusion, 1);
 }
 
 float3 CalcLIDRShading(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
@@ -298,6 +302,7 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -305,6 +310,7 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
+		float occlusion = GetOcclusion(rt2);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 		uint nl = countbits(light_index_all);
@@ -315,6 +321,8 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 				tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
+
+		shading *= float4(occlusion.xxx, 1);
 	}
 
 	return shading;
@@ -334,6 +342,7 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -341,6 +350,7 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
+		float occlusion = GetOcclusion(rt2);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 		uint nl = countbits(light_index_all);
@@ -351,6 +361,8 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 				tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
+
+		shading *= float4(occlusion.xxx, 1);
 	}
 
 	return shading;
@@ -370,6 +382,7 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -377,6 +390,7 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
+		float occlusion = GetOcclusion(rt2);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 		uint nl = countbits(light_index_all);
@@ -387,6 +401,8 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 				tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
+
+		shading *= float4(occlusion.xxx, 1);
 	}
 
 	return shading;
@@ -407,6 +423,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	{
 		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+		float4 rt2 = g_buffer_rt2_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
 		float3 normal = GetNormal(rt0);
@@ -414,6 +431,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 		float3 c_diff = GetDiffuse(rt1);
 		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
+		float occlusion = GetOcclusion(rt2);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 		uint nl = countbits(light_index_all);
@@ -424,6 +442,8 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 				tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
+
+		shading *= float4(occlusion.xxx, 1);
 	}
 
 	return shading;

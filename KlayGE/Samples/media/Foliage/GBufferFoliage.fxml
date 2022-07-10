@@ -7,7 +7,8 @@
 
 	<shader>
 		<![CDATA[
-void FoliageGBufferVS(float4 pos : POSITION,
+void FoliageGBufferVS(uint instance_id : SV_InstanceID,
+			float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 #if NUM_JOINTS > 0
@@ -24,6 +25,8 @@ void FoliageGBufferVS(float4 pos : POSITION,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oCurrPosSS : TEXCOORD4,
+			out float4 oPrevPosSS : TEXCOORD5,
 			out float4 oPos : SV_Position)
 {
 #if NUM_JOINTS > 0
@@ -52,6 +55,15 @@ void FoliageGBufferVS(float4 pos : POSITION,
 	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
 	oTexCoord_2xy.xy = TexcoordNode(texcoord);
 
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
+
 	oPos = mul(float4(result_pos, 1), mvp);
 
 	float3x3 obj_to_ts;
@@ -67,11 +79,14 @@ void FoliageGBufferVS(float4 pos : POSITION,
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(float4(result_pos, 1), prev_mvps[camera_index]);
 }
 		]]>
 	</shader>
 
-	<technique name="FoliageGBufferMRT" inherit="GBufferMRTTech" override="GBufferMRTTech">
+	<technique name="FoliageGBuffer" inherit="GBufferTech" override="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="FoliageGBufferVS()"/>
 		</pass>

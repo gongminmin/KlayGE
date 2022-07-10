@@ -31,25 +31,30 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <unknwnbase.h>
+#endif
 #include <CPP/Common/MyWindows.h>
 
 #include "ArchiveExtractCallback.hpp"
 
 namespace KlayGE
 {
-	ArchiveExtractCallback::ArchiveExtractCallback(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & out_file_stream)
+	ArchiveExtractCallback::ArchiveExtractCallback(std::string_view pw, ISequentialOutStream* out_file_stream) noexcept
 		: password_is_defined_(!pw.empty()), out_file_stream_(out_file_stream)
 	{
 		Convert(password_, pw);
 	}
+	
+	ArchiveExtractCallback::~ArchiveExtractCallback() noexcept = default;
 
-	STDMETHODIMP_(ULONG) ArchiveExtractCallback::AddRef()
+	STDMETHODIMP_(ULONG) ArchiveExtractCallback::AddRef() noexcept
 	{
 		++ ref_count_;
 		return ref_count_;
 	}
 
-	STDMETHODIMP_(ULONG) ArchiveExtractCallback::Release()
+	STDMETHODIMP_(ULONG) ArchiveExtractCallback::Release() noexcept
 	{
 		-- ref_count_;
 		if (0 == ref_count_)
@@ -60,15 +65,15 @@ namespace KlayGE
 		return ref_count_;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::QueryInterface(REFGUID iid, void** out_object)
+	STDMETHODIMP ArchiveExtractCallback::QueryInterface(REFGUID iid, void** out_object) noexcept
 	{
-		if (IID_ICryptoGetTextPassword == iid)
+		if (UuidOf<ICryptoGetTextPassword>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<ICryptoGetTextPassword*>(this);
 			this->AddRef();
 			return S_OK;
 		}
-		else if (IID_IArchiveExtractCallback == iid)
+		else if (UuidOf<IArchiveExtractCallback>() == reinterpret_cast<Uuid const&>(iid))
 		{
 			*out_object = static_cast<IArchiveExtractCallback*>(this);
 			this->AddRef();
@@ -80,19 +85,19 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetTotal(UInt64 size)
+	STDMETHODIMP ArchiveExtractCallback::SetTotal(UInt64 size) noexcept
 	{
 		KFL_UNUSED(size);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetCompleted(UInt64 const * complete_value)
+	STDMETHODIMP ArchiveExtractCallback::SetCompleted(UInt64 const * complete_value) noexcept
 	{
 		KFL_UNUSED(complete_value);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode)
+	STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode) noexcept
 	{
 		KFL_UNUSED(index);
 
@@ -115,19 +120,19 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::PrepareOperation(Int32 ask_extract_mode)
+	STDMETHODIMP ArchiveExtractCallback::PrepareOperation(Int32 ask_extract_mode) noexcept
 	{
 		KFL_UNUSED(ask_extract_mode);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetOperationResult(Int32 operation_result)
+	STDMETHODIMP ArchiveExtractCallback::SetOperationResult(Int32 operation_result) noexcept
 	{
 		KFL_UNUSED(operation_result);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::CryptoGetTextPassword(BSTR* password)
+	STDMETHODIMP ArchiveExtractCallback::CryptoGetTextPassword(BSTR* password) noexcept
 	{
 		if (password_is_defined_)
 		{

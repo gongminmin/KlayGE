@@ -74,11 +74,11 @@ float4 VisualizeTexture(float2 tex0)
 	}
 	else if (TS_Metalness == texture_slot)
 	{
-		ret = float4(MetalnessNode(tex0).xxx, 0);
+		ret = float4(MetalnessGlossinessNode(tex0).xxx, 0);
 	}
 	else if (TS_Glossiness == texture_slot)
 	{
-		ret = float4(GlossinessNode(tex0).xxx, 0);
+		ret = float4(MetalnessGlossinessNode(tex0).yyy, 0);
 	}
 	else if (TS_Emissive == texture_slot)
 	{
@@ -100,7 +100,8 @@ float4 VisualizeTexture(float2 tex0)
 	return ret;
 }
 
-void VisualizeVertexVS(float4 pos : POSITION,
+void VisualizeVertexVS(uint instance_id : SV_InstanceID,
+				float4 pos : POSITION,
 				float2 texcoord : TEXCOORD0,
 				float4 tangent_quat	: TANGENT,	// in object space
 #if NUM_JOINTS > 0
@@ -126,7 +127,10 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	float3 result_pos;
 	float4 result_tangent_quat;
 	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
@@ -141,14 +145,14 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	oClr = VisualizeVertex(result_pos, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2], blend_weights, blend_indices, oTex);
 }
 
-void VisualizeVertexMRTPS(float4 clr : COLOR,
+void VisualizeVertexPS(float4 clr : COLOR,
 				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = 0;
 	rt1 = clr;
 }
 
-void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
+void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = 0;
@@ -157,7 +161,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="VisualizeVertexMRTTech">
+	<technique name="VisualizeVertexTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
@@ -171,11 +175,11 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexMRTPS()"/>
+			<state name="pixel_shader" value="VisualizeVertexPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureMRTTech">
+	<technique name="VisualizeTextureTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
@@ -189,7 +193,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureMRTPS()"/>
+			<state name="pixel_shader" value="VisualizeTexturePS()"/>
 		</pass>
 	</technique>
 
@@ -202,7 +206,8 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 
 	<shader>
 		<![CDATA[
-void SkeletonVS(float4 pos : POSITION,
+void SkeletonVS(uint instance_id : SV_InstanceID,
+				float4 pos : POSITION,
 #if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 				float4 blend_indices_f : BLENDINDICES,
@@ -225,6 +230,9 @@ void SkeletonVS(float4 pos : POSITION,
 	float4 result_tangent_quat;
 	PositionNode(pos.xyz, 0, float4(1, 0, 0, 0), blend_indices, result_pos, result_tangent_quat);
 	float2 oTex = TexcoordNode(0);
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
 
 	oColor = pos.w;
 	oPos = mul(float4(result_pos, 1), mvp);

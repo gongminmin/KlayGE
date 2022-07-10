@@ -39,9 +39,8 @@
 	#define KLAYGE_TOOL_API KLAYGE_SYMBOL_IMPORT
 #endif
 
-#include <KFL/CXX17/string_view.hpp>
-
 #include <string>
+#include <string_view>
 
 KLAYGE_TOOL_API std::string DosWildcardToRegex(std::string_view wildcard);
 

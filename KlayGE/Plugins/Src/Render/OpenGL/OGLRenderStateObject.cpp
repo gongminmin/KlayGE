@@ -20,7 +20,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLUtil.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 
@@ -54,7 +54,7 @@ namespace KlayGE
 
 	void OGLRenderStateObject::Active()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		auto const & rs_obj = re.CurRenderStateObject();
 		RasterizerStateDesc const & cur_rs_desc = rs_obj->GetRasterizerStateDesc();
@@ -502,7 +502,7 @@ namespace KlayGE
 	{
 		if (Context::Instance().RenderFactoryValid())
 		{
-			auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteSamplers(1, &sampler_);
 		}
 		else

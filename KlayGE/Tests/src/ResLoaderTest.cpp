@@ -11,7 +11,7 @@ std::string ReadWholeFile(ResIdentifierPtr const & res)
 {
 	res->seekg(0, std::ios_base::end);
 	std::string str;
-	str.resize(res->tellg());
+	str.resize(static_cast<size_t>(res->tellg()));
 	res->seekg(0, std::ios_base::beg);
 	res->read(&str[0], str.size());
 	return str;

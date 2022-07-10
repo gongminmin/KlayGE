@@ -5,11 +5,16 @@
 
 	<shader>
 		<![CDATA[
-void CameraProxyVS(float4 pos : POSITION,
+void CameraProxyVS(uint instance_id : SV_InstanceID,
+						float4 pos : POSITION,
 						float4 tangent_quat : TANGENT,
 			out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
+	KlayGECameraInfo camera = CameraFromInstance(instance_id);
+	float4x4 mvp = camera.mvp;
+
 	oPos = mul(pos, mvp);
 }
 

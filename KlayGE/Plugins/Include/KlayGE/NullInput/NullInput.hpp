@@ -37,11 +37,11 @@
 
 namespace KlayGE
 {
-	class NullInputEngine : public InputEngine
+	class NullInputEngine final : public InputEngine
 	{
 	public:
 		NullInputEngine();
-		~NullInputEngine() override;
+		~NullInputEngine() noexcept override;
 
 		std::wstring const & Name() const override;
 		void EnumDevices() override;

@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -40,13 +39,9 @@ namespace KlayGE
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Write));
 		}
 
-		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
-	}
-
-	D3D11Texture::~D3D11Texture()
-	{
+		auto const& re = checked_cast<D3D11RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		d3d_device_ = re.D3DDevice1();
+		d3d_imm_ctx_ = re.D3DDeviceImmContext1();
 	}
 
 	std::wstring const & D3D11Texture::Name() const
@@ -55,7 +50,14 @@ namespace KlayGE
 		return name;
 	}
 
-	uint32_t D3D11Texture::Width(uint32_t level) const
+#ifndef KLAYGE_SHIP
+	void D3D11Texture::DebugName(std::wstring_view name)
+	{
+		d3d_texture_->SetPrivateData(WKPDID_D3DDebugObjectNameW, static_cast<uint32_t>(name.size() * sizeof(wchar_t)), name.data());
+	}
+#endif
+
+	uint32_t D3D11Texture::Width(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -63,7 +65,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Height(uint32_t level) const
+	uint32_t D3D11Texture::Height(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -71,7 +73,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	uint32_t D3D11Texture::Depth(uint32_t level) const
+	uint32_t D3D11Texture::Depth(uint32_t level) const noexcept
 	{
 		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
@@ -79,365 +81,325 @@ namespace KlayGE
 		return 1;
 	}
 
-	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
+	void D3D11Texture::CopyToSubTexture1D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/,
+		uint32_t /*src_width*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTexture2D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*src_array_index*/,
+		uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/,
+		TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
+	void D3D11Texture::CopyToSubTexture3D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
+		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*dst_depth*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void D3D11Texture::CopyToSubTextureCube(Texture& /*target*/, uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/,
+		uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+		uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
+		uint32_t /*src_width*/, uint32_t /*src_height*/, TextureFilter /*filter*/)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
-		uint32_t first_level, uint32_t num_levels)
+	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetrieveD3DShaderResourceView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, num_items);
-			HashCombine(hash_val, first_level);
-			HashCombine(hash_val, num_levels);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
 
-			auto iter = d3d_sr_views_.find(hash_val);
-			if (iter != d3d_sr_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillSRVDesc(first_array_index, num_items, first_level, num_levels);
-				ID3D11ShaderResourceView* d3d_sr_view;
-				d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
-				return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
-			}
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11ShaderResourceViewPtr const view;
-			return view;
+			auto desc = this->FillSRVDesc(pf, first_array_index, array_size, first_level, num_levels);
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, d3d_sr_view.put());
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
 		}
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
-		uint32_t level)
+	ID3D11ShaderResourceViewPtr const& D3D11Texture::RetrieveD3DShaderResourceView(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels)
 	{
-		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
-		if (this->HWResourceReady())
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, face);
+		HashCombine(hash_val, first_level);
+		HashCombine(hash_val, num_levels);
+
+		auto iter = d3d_sr_views_.find(hash_val);
+		if (iter != d3d_sr_views_.end())
 		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, num_items);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
-
-			auto iter = d3d_ua_views_.find(hash_val);
-			if (iter != d3d_ua_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillUAVDesc(first_array_index, num_items, level);
-				ID3D11UnorderedAccessView* d3d_ua_view;
-				d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-				return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
-			}
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11UnorderedAccessViewPtr const view;
-			return view;
+			auto desc = this->FillSRVDesc(pf, array_index, face, first_level, num_levels);
+			ID3D11ShaderResourceViewPtr d3d_sr_view;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, d3d_sr_view.put());
+			return d3d_sr_views_.emplace(hash_val, std::move(d3d_sr_view)).first->second;
 		}
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level)
-	{
-		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
-
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(array_index);
-			HashCombine(hash_val, 1);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, first_slice);
-			HashCombine(hash_val, num_slices);
-
-			auto iter = d3d_ua_views_.find(hash_val);
-			if (iter != d3d_ua_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillUAVDesc(array_index, first_slice, num_slices, level);
-				ID3D11UnorderedAccessView* d3d_ua_view;
-				d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-				return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
-			}
-		}
-		else
-		{
-			static ID3D11UnorderedAccessViewPtr const view;
-			return view;
-		}
-	}
-
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
-		CubeFaces first_face, uint32_t num_faces, uint32_t level)
-	{
-		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
-
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(first_array_index * 6 + first_face);
-			HashCombine(hash_val, num_items * 6 + num_faces);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
-
-			auto iter = d3d_ua_views_.find(hash_val);
-			if (iter != d3d_ua_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillUAVDesc(first_array_index, num_items, first_face, num_faces, level);
-				ID3D11UnorderedAccessView* d3d_ua_view;
-				d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
-				return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
-			}
-		}
-		else
-		{
-			static ID3D11UnorderedAccessViewPtr const view;
-			return view;
-		}
-	}
-
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
-		uint32_t level)
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, array_size);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
 
-			auto iter = d3d_rt_views_.find(hash_val);
-			if (iter != d3d_rt_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillRTVDesc(first_array_index, array_size, level);
-				ID3D11RenderTargetView* rt_view;
-				d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &rt_view);
-				return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view)).first->second;
-			}
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11RenderTargetViewPtr const view;
-			return view;
+			auto desc = this->FillRTVDesc(pf, first_array_index, array_size, level);
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level)
+	ID3D11RenderTargetViewPtr const &  D3D11Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(array_index);
-			HashCombine(hash_val, 1);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, first_slice);
-			HashCombine(hash_val, num_slices);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
 
-			auto iter = d3d_rt_views_.find(hash_val);
-			if (iter != d3d_rt_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillRTVDesc(array_index, first_slice, num_slices, level);
-				ID3D11RenderTargetView* rt_view;
-				d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &rt_view);
-				return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view)).first->second;
-			}
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11RenderTargetViewPtr const view;
-			return view;
+			auto desc = this->FillRTVDesc(pf, array_index, first_slice, num_slices, level);
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face,
-		uint32_t level)
+	ID3D11RenderTargetViewPtr const &  D3D11Texture::RetrieveD3DRenderTargetView(ElementFormat pf, uint32_t array_index,
+		Texture::CubeFaces face, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(array_index * 6 + face);
-			HashCombine(hash_val, 1);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index * 6 + face);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
 
-			auto iter = d3d_rt_views_.find(hash_val);
-			if (iter != d3d_rt_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillRTVDesc(array_index, face, level);
-				ID3D11RenderTargetView* rt_view;
-				d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &rt_view);
-				return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view)).first->second;
-			}
+		auto iter = d3d_rt_views_.find(hash_val);
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11RenderTargetViewPtr const view;
-			return view;
+			auto desc = this->FillRTVDesc(pf, array_index, face, level);
+			ID3D11RenderTargetViewPtr d3d_rt_view;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, d3d_rt_view.put());
+			return d3d_rt_views_.emplace(hash_val, std::move(d3d_rt_view)).first->second;
 		}
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
-		uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(first_array_index);
-			HashCombine(hash_val, array_size);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
 
-			auto iter = d3d_ds_views_.find(hash_val);
-			if (iter != d3d_ds_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillDSVDesc(first_array_index, array_size, level);
-				ID3D11DepthStencilView* ds_view;
-				d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &ds_view);
-				return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view)).first->second;
-			}
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11DepthStencilViewPtr const view;
-			return view;
+			auto desc = this->FillDSVDesc(pf, first_array_index, array_size, level);
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(array_index);
-			HashCombine(hash_val, 1);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, first_slice);
-			HashCombine(hash_val, num_slices);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
 
-			auto iter = d3d_ds_views_.find(hash_val);
-			if (iter != d3d_ds_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillDSVDesc(array_index, first_slice, num_slices, level);
-				ID3D11DepthStencilView* ds_view;
-				d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &ds_view);
-				return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view)).first->second;
-			}
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11DepthStencilViewPtr const view;
-			return view;
+			auto desc = this->FillDSVDesc(pf, array_index, first_slice, num_slices, level);
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
 		}
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetrieveD3DDepthStencilView(ElementFormat pf, uint32_t array_index, CubeFaces face,
+		uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 
-		if (this->HWResourceReady())
-		{
-			size_t hash_val = HashValue(array_index * 6 + face);
-			HashCombine(hash_val, 1);
-			HashCombine(hash_val, level);
-			HashCombine(hash_val, 0);
-			HashCombine(hash_val, 0);
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index * 6 + face);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
 
-			auto iter = d3d_ds_views_.find(hash_val);
-			if (iter != d3d_ds_views_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				auto desc = this->FillDSVDesc(array_index, face, level);
-				ID3D11DepthStencilView* ds_view;
-				d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &ds_view);
-				return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view)).first->second;
-			}
+		auto iter = d3d_ds_views_.find(hash_val);
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
 		}
 		else
 		{
-			static ID3D11DepthStencilViewPtr const view;
-			return view;
+			auto desc = this->FillDSVDesc(pf, array_index, face, level);
+			ID3D11DepthStencilViewPtr d3d_ds_view;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, d3d_ds_view.put());
+			return d3d_ds_views_.emplace(hash_val, std::move(d3d_ds_view)).first->second;
+		}
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, uint32_t level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index);
+		HashCombine(hash_val, array_size);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, level);
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
+		}
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t array_index,
+		uint32_t first_slice, uint32_t num_slices, uint32_t level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, array_index);
+		HashCombine(hash_val, 1);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, first_slice);
+		HashCombine(hash_val, num_slices);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, array_index, first_slice, num_slices, level);
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
+		}
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetrieveD3DUnorderedAccessView(ElementFormat pf, uint32_t first_array_index,
+		uint32_t array_size, CubeFaces first_face, uint32_t num_faces, uint32_t level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		size_t hash_val = HashValue(pf);
+		HashCombine(hash_val, first_array_index * 6 + first_face);
+		HashCombine(hash_val, array_size * 6 + num_faces);
+		HashCombine(hash_val, level);
+		HashCombine(hash_val, 0);
+		HashCombine(hash_val, 0);
+
+		auto iter = d3d_ua_views_.find(hash_val);
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			auto desc = this->FillUAVDesc(pf, first_array_index, array_size, first_face, num_faces, level);
+			ID3D11UnorderedAccessViewPtr d3d_ua_view;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, d3d_ua_view.put());
+			return d3d_ua_views_.emplace(hash_val, std::move(d3d_ua_view)).first->second;
 		}
 	}
 
@@ -514,8 +476,38 @@ namespace KlayGE
 		misc_flags = 0;
 		if (access_hint_ & EAH_Generate_Mips)
 		{
+			bind_flags |= D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		}
+	}
+	
+	bool D3D11Texture::HwBuildMipSubLevels(TextureFilter filter)
+	{
+		if (access_hint_ & EAH_Generate_Mips)
+		{
+			if (IsDepthFormat(format_) || (ChannelType<0>(format_) == ECT_UInt) || (ChannelType<0>(format_) == ECT_SInt))
+			{
+				if (filter != TextureFilter::Point)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (filter != TextureFilter::Linear)
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		auto srv = this->RetrieveD3DShaderResourceView(format_, 0, array_size_, 0, num_mip_maps_);
+		d3d_imm_ctx_->GenerateMips(srv.get());
+		return true;
 	}
 
 	void D3D11Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
@@ -567,18 +559,45 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(num_items);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture::FillSRVDesc(
+		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(first_level);
+		KFL_UNUSED(num_levels);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
 		KFL_UNUSED(level);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
+	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(array_index);
 		KFL_UNUSED(first_slice);
 		KFL_UNUSED(num_slices);
@@ -587,11 +606,78 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(first_slice);
+		KFL_UNUSED(num_slices);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
+		uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level) const
+	{
+		KFL_UNUSED(pf);
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(first_slice);
+		KFL_UNUSED(num_slices);
+		KFL_UNUSED(level);
+
+		KFL_UNREACHABLE("Can't be called");
+	}
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
 		CubeFaces first_face, uint32_t num_faces, uint32_t level) const
 	{
+		KFL_UNUSED(pf);
 		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(num_items);
+		KFL_UNUSED(array_size);
 		KFL_UNUSED(first_face);
 		KFL_UNUSED(num_faces);
 		KFL_UNUSED(level);
@@ -599,70 +685,11 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
-	{
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
-	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(first_slice);
-		KFL_UNUSED(num_slices);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture::FillRTVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
-	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
-	{
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
-		uint32_t level) const
-	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(first_slice);
-		KFL_UNUSED(num_slices);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture::FillDSVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
-	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
-
-		KFL_UNREACHABLE("Can't be called");
-	}
-
 	void D3D11Texture::DeleteHWResource()
 	{
-		d3d_sr_views_.clear();
-		d3d_ua_views_.clear();
 		d3d_rt_views_.clear();
 		d3d_ds_views_.clear();
+		d3d_ua_views_.clear();
 		d3d_texture_.reset();
 	}
 
@@ -705,9 +732,9 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = width * NumFormatBytes(format_);
 			init_data.slice_pitch = init_data.row_pitch;
-			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
-				x_offset, 0, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				x_offset, 0, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
 		}
 	}
@@ -754,9 +781,9 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
-				x_offset, y_offset, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
 		}
 	}
@@ -815,9 +842,9 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
-				x_offset, y_offset, z_offset, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(),
+				x_offset, y_offset, z_offset, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(),
 				D3D11CalcSubresource(0, 0, 1),
 				nullptr);
 		}
@@ -865,9 +892,9 @@ namespace KlayGE
 			init_data.data = data;
 			init_data.row_pitch = row_pitch;
 			init_data.slice_pitch = row_pitch * height;
-			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, MakeSpan<1>(init_data));
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face, num_mip_maps_),
-				x_offset, y_offset, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				x_offset, y_offset, 0, checked_cast<D3D11Texture&>(*temp_tex).d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
 				nullptr);
 		}
 	}

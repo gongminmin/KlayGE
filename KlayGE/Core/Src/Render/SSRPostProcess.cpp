@@ -40,15 +40,11 @@ namespace KlayGE
 {
 	SSRPostProcess::SSRPostProcess(bool multi_sample)
 			: PostProcess(L"ScreenSpaceReflection", false,
-				{ "min_samples", "max_samples" },
-				{
-					multi_sample ? "g_buffer_rt0_tex_ms" : "g_buffer_rt0_tex",
-					multi_sample ? "g_buffer_rt1_tex_ms" : "g_buffer_rt1_tex",
-					"front_side_depth_tex",
-					"front_side_tex",
-					multi_sample ? "foreground_depth_tex_ms" : "foreground_depth_tex"
-				},
-				{ "output" },
+				MakeSpan<std::string>({"min_samples", "max_samples"}),
+			  MakeSpan<std::string>({multi_sample ? "g_buffer_rt0_tex_ms" : "g_buffer_rt0_tex",
+				  multi_sample ? "g_buffer_rt1_tex_ms" : "g_buffer_rt1_tex", "front_side_depth_tex", "front_side_tex",
+				  multi_sample ? "foreground_depth_tex_ms" : "foreground_depth_tex", "ssr_skybox_tex", "ssr_skybox_C_tex"}),
+				MakeSpan<std::string>({"output"}),
 				RenderEffectPtr(), nullptr)
 	{
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
@@ -58,6 +54,7 @@ namespace KlayGE
 		if (technique_ && technique_->Validate())
 		{
 			proj_param_ = effect->ParameterByName("proj");
+			inv_view_param_ = effect->ParameterByName("inv_view");
 			inv_proj_param_ = effect->ParameterByName("inv_proj");
 			near_q_far_param_ = effect->ParameterByName("near_q_far");
 			ray_length_param_ = effect->ParameterByName("ray_length");
@@ -70,11 +67,12 @@ namespace KlayGE
 	void SSRPostProcess::Apply()
 	{
 		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
-		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+		float4 const near_q_far = camera.NearQFarParam();
 
 		*proj_param_ = camera.ProjMatrix();
+		*inv_view_param_ = camera.InverseViewMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
-		*near_q_far_param_ = float3(camera.NearPlane() * q, q, camera.FarPlane());
+		*near_q_far_param_ = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
 		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
 
 		this->Render();

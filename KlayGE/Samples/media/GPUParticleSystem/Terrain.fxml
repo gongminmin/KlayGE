@@ -3,6 +3,7 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="PostProcess.fxml"/>
+	<include name="Mesh.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -32,8 +33,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float" name="inv_far"/>
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
 	</cbuffer>
 
 	<shader>

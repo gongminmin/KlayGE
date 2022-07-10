@@ -9,13 +9,16 @@
 
 	<shader>
 		<![CDATA[
-void FoliageImpostorGBufferVS(float2 pos2 : POSITION,
+void FoliageImpostorGBufferVS(uint instance_id : SV_InstanceID,
+			float2 pos2 : POSITION,
 			float4 instance_pos_scale : TEXCOORD1,
 			float2 instance_rotation : TEXCOORD2,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oCurrPosSS : TEXCOORD4,
+			out float4 oPrevPosSS : TEXCOORD5,
 			out float4 oPos : SV_Position)
 {
 	float4 pos = float4(pos2 * pos_extent.xy + pos_center.xy, 0, 1);
@@ -24,6 +27,15 @@ void FoliageImpostorGBufferVS(float2 pos2 : POSITION,
 	pos.xyz *= instance_pos_scale.w;
 	pos.xyz = mul(pos.xyz, (float3x3)billboard_mat);
 	pos.xyz += instance_pos_scale.xyz;
+
+#if MULTI_VIEW_MODE
+	uint camera_index = CameraIndex(instance_id);
+#else
+	uint camera_index = 0;
+#endif
+	KlayGECameraInfo camera = cameras[camera_index];
+	float4x4 mvp = camera.mvp;
+	float4x4 model_view = camera.model_view;
 
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;
@@ -41,9 +53,12 @@ void FoliageImpostorGBufferVS(float2 pos2 : POSITION,
 	oTsToView1_Depth.w = oPos.w;
 
 	oScreenTc = EncodeSSTexcoord(oPos);
+
+	oCurrPosSS = oPos;
+	oPrevPosSS = mul(pos, prev_mvps[camera_index]);
 }
 
-void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+void FoliageImpostorGBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	rt0 = normal_tex.Sample(bilinear_sampler, texcoord_2xy.xy);
@@ -53,10 +68,10 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 		]]>
 	</shader>
 
-	<technique name="FoliageImpostorGBufferAlphaTestMRT" inherit="GBufferAlphaTestMRTTech" override="GBufferAlphaTestMRTTech">
+	<technique name="FoliageImpostorGBufferAlphaTest" inherit="GBufferAlphaTestTech" override="GBufferAlphaTestTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="FoliageImpostorGBufferVS()"/>
-			<state name="pixel_shader" value="FoliageImpostorGBufferAlphaTestMRTPS()"/>
+			<state name="pixel_shader" value="FoliageImpostorGBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
 </effect>

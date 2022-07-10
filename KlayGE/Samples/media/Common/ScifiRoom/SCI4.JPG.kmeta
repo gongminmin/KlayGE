@@ -5,14 +5,5 @@
 
 	"slot": "albedo",
 
-	"prefered_format": "BC1_SRGB",
-	"force_srgb": true,
-
-	"mipmap":
-	{
-		"enabled": true,
-		"auto_gen": true,
-		"num_levels": 0,
-		"linear": true
-	}
+	"prefered_format": "BC1_SRGB"
 }

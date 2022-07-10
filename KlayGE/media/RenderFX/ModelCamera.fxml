@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<effect>
+	<cbuffer name="klayge_model">
+		<parameter type="float4x4" name="model"/>
+		<parameter type="float4x4" name="inv_model"/>
+	</cbuffer>
+
+	<struct name="KlayGECameraInfo">
+		<member type="float4x4" name="model_view"/>
+		<member type="float4x4" name="mvp"/>
+		<member type="float4x4" name="inv_mv"/>
+		<member type="float4x4" name="inv_mvp"/>
+		<member type="float3" name="eye_pos"/>
+		<member type="float3" name="forward_vec"/>
+		<member type="float3" name="up_vec"/>
+	</struct>
+
+	<cbuffer name="klayge_camera">
+		<parameter type="uint" name="num_cameras"/>
+		<parameter type="uint4" name="camera_indices" array_size="2"/>
+		<parameter type="KlayGECameraInfo" name="cameras" array_size="8"/>
+		<parameter type="float4x4" name="prev_mvps" array_size="8"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+uint InstanceIndex(uint instance_id)
+{
+	return instance_id / num_cameras;
+}
+
+uint CameraIndex(uint instance_id)
+{
+	return instance_id % num_cameras;
+}
+
+KlayGECameraInfo CameraFromInstance(uint instance_id)
+{
+	return cameras[CameraIndex(instance_id)];
+}
+
+uint RenderTargetIndex(uint camera_id)
+{
+	return camera_indices[camera_id / 4][camera_id % 4];
+}
+		]]>
+	</shader>
+
+</effect>

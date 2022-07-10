@@ -35,28 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Color_T<T>::Color_T(Color_T const & rhs) noexcept
-		: col_(rhs.col_)
-	{
-	}
-
-	template <typename T>
-	Color_T<T>::Color_T(Color_T&& rhs) noexcept
-		: col_(std::move(rhs.col_))
-	{
-	}
-
-	template <typename T>
-	Color_T<T>::Color_T(uint32_t dw) noexcept
-	{
-		static T const f(1 / T(255));
-		this->a() = f * (static_cast<T>(static_cast<uint8_t>(dw >> 24)));
-		this->r() = f * (static_cast<T>(static_cast<uint8_t>(dw >> 16)));
-		this->g() = f * (static_cast<T>(static_cast<uint8_t>(dw >>  8)));
-		this->b() = f * (static_cast<T>(static_cast<uint8_t>(dw >>  0)));
-	}
-
-	template <typename T>
 	void Color_T<T>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const noexcept
 	{
 		R = static_cast<uint8_t>(MathLib::clamp(this->r(), T(0), T(1)) * 255 + 0.5f);
@@ -130,12 +108,6 @@ namespace KlayGE
 	Color_T<T>& Color_T<T>::operator=(Color_T<T>&& rhs) noexcept
 	{
 		col_ = std::move(rhs.col_);
-		return *this;
-	}
-
-	template <typename T>
-	Color_T<T> const Color_T<T>::operator+() const noexcept
-	{
 		return *this;
 	}
 	

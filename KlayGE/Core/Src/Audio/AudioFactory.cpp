@@ -34,6 +34,8 @@
 
 namespace KlayGE
 {
+	AudioFactory::~AudioFactory() noexcept = default;
+
 	AudioEngine& AudioFactory::AudioEngineInstance()
 	{
 		if (!ae_)

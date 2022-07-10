@@ -34,26 +34,13 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/ArrayRef.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
 #include <map>
 #include <vector>
 
 #include <boost/operators.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing" // Ignore aliasing in flat_tree.hpp
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
-#endif
-#include <boost/container/flat_map.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#elif defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 namespace KlayGE
 {
@@ -112,10 +99,6 @@ namespace KlayGE
 
 		bool is_tbdr : 1;
 
-		bool hw_instancing_support : 1;
-		bool instance_id_support : 1;
-		bool stream_output_support : 1;
-		bool alpha_to_coverage_support : 1;
 		bool primitive_restart_support : 1;
 		bool multithread_rendering_support : 1;
 		bool multithread_res_creating_support : 1;
@@ -134,6 +117,8 @@ namespace KlayGE
 		bool load_from_buffer_support : 1;
 		bool uavs_at_every_stage_support : 1;
 		bool rovs_support : 1;
+		bool flexible_srvs_support : 1;
+		bool vp_rt_index_at_every_stage_support : 1;
 
 		bool gs_support : 1;
 		bool cs_support : 1;
@@ -148,13 +133,13 @@ namespace KlayGE
 		bool TextureRenderTargetFormatSupport(ElementFormat format, uint32_t sample_count, uint32_t sample_quality) const;
 		bool UavFormatSupport(ElementFormat format) const;
 
-		ElementFormat BestMatchVertexFormat(ArrayRef<ElementFormat> formats) const;
-		ElementFormat BestMatchTextureFormat(ArrayRef<ElementFormat> formats) const;
-		ElementFormat BestMatchRenderTargetFormat(ArrayRef<ElementFormat> formats,
+		ElementFormat BestMatchVertexFormat(std::span<ElementFormat const> formats) const;
+		ElementFormat BestMatchTextureFormat(std::span<ElementFormat const> formats) const;
+		ElementFormat BestMatchRenderTargetFormat(std::span<ElementFormat const> formats,
 			uint32_t sample_count, uint32_t sample_quality) const;
-		ElementFormat BestMatchTextureRenderTargetFormat(ArrayRef<ElementFormat> formats,
+		ElementFormat BestMatchTextureRenderTargetFormat(std::span<ElementFormat const> formats,
 			uint32_t sample_count, uint32_t sample_quality) const;
-		ElementFormat BestMatchUavFormat(ArrayRef<ElementFormat> formats) const;
+		ElementFormat BestMatchUavFormat(std::span<ElementFormat const> formats) const;
 
 		static constexpr uint32_t EncodeSampleCountQuality(uint32_t sample_count, uint32_t sample_quality) noexcept
 		{
@@ -169,10 +154,10 @@ namespace KlayGE
 			return encoded >> 16;
 		}
 
-		void AssignVertexFormats(std::vector<ElementFormat>&& vertex_formats);
-		void AssignTextureFormats(std::vector<ElementFormat>&& texture_formats);
-		void AssignRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>>&& render_target_formats);
-		void AssignUavFormats(std::vector<ElementFormat>&& uav_formats);
+		void AssignVertexFormats(std::vector<ElementFormat> vertex_formats);
+		void AssignTextureFormats(std::vector<ElementFormat> texture_formats);
+		void AssignRenderTargetFormats(std::map<ElementFormat, std::vector<uint32_t>> render_target_formats);
+		void AssignUavFormats(std::vector<ElementFormat> uav_formats);
 
 	private:
 		void UpdateSupportBits();
@@ -180,7 +165,7 @@ namespace KlayGE
 	private:
 		std::vector<ElementFormat> vertex_formats_;
 		std::vector<ElementFormat> texture_formats_;
-		boost::container::flat_map<ElementFormat, std::vector<uint32_t>> render_target_formats_;
+		std::map<ElementFormat, std::vector<uint32_t>> render_target_formats_;
 		std::vector<ElementFormat> uav_formats_;
 	};
 }

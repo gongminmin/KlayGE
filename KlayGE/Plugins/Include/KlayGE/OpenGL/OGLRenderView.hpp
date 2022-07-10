@@ -25,235 +25,229 @@
 
 namespace KlayGE
 {
-	class OGLRenderView : public RenderView
+	class OGLShaderResourceView : public ShaderResourceView
 	{
 	public:
-		OGLRenderView();
-		virtual ~OGLRenderView();
-
-		void ClearDepth(float depth);
-		void ClearStencil(int32_t stencil);
-		void ClearDepthStencil(float depth, int32_t stencil);
-
-		GLuint GLTexture() const
-		{
-			return tex_;
-		}
+		virtual void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const = 0;
 
 	protected:
-		void DoClear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+		mutable GLuint gl_target_;
+		mutable GLuint gl_tex_;
+	};
+	
+	class OGLTextureShaderResourceView final : public OGLShaderResourceView
+	{
+	public:
+		explicit OGLTextureShaderResourceView(TexturePtr const & texture);
+
+		void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const override;
+	};
+	
+	class OGLBufferShaderResourceView final : public OGLShaderResourceView
+	{
+	public:
+		OGLBufferShaderResourceView(GraphicsBufferPtr const & gbuffer, ElementFormat pf);
+
+		void RetrieveGLTargetTexture(GLuint& target, GLuint& tex) const override;
+	};
+
+	class OGLRenderTargetView : public RenderTargetView
+	{
+	public:
+		virtual GLuint RetrieveGLTexture() const;
+
+	protected:
+		void DoClearColor(Color const & clr);
 		void DoDiscardColor();
+
+	protected:
+		mutable GLuint gl_tex_ = 0;
+		GLuint gl_fbo_ = 0;
+		GLuint index_ = 0;
+	};
+	typedef std::shared_ptr<OGLRenderTargetView> OGLRenderTargetViewPtr;
+
+	class OGLDepthStencilView : public DepthStencilView
+	{
+	public:
+		void ClearDepth(float depth) override;
+		void ClearStencil(int32_t stencil) override;
+		void ClearDepthStencil(float depth, int32_t stencil) override;
+
+		virtual GLuint RetrieveGLTexture() const;
+
+	protected:
+		void DoClearDepthStencil(uint32_t flags, float depth, int32_t stencil);
 		void DoDiscardDepthStencil();
 
 	protected:
-		GLuint tex_;
-		GLuint fbo_;
-		GLuint index_;
+		mutable GLuint gl_tex_ = 0;
+		GLuint gl_fbo_ = 0;
 	};
+	typedef std::shared_ptr<OGLDepthStencilView> OGLDepthStencilViewPtr;
 
-	typedef std::shared_ptr<OGLRenderView> OGLRenderViewPtr;
-
-
-	class OGLScreenColorRenderView : public OGLRenderView
+	class OGLScreenRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLScreenColorRenderView(uint32_t width, uint32_t height, ElementFormat pf);
+		OGLScreenRenderTargetView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void ClearColor(Color const & clr);
-		void ClearDepth(float depth);
-		void ClearStencil(int32_t stencil);
-		void ClearDepthStencil(float depth, int32_t stencil);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+
+		GLuint RetrieveGLTexture() const override;
 	};
 
-	typedef std::shared_ptr<OGLScreenColorRenderView> OGLScreenColorRenderViewPtr;
 
-
-	class OGLScreenDepthStencilRenderView : public OGLRenderView
+	class OGLScreenDepthStencilView final : public OGLDepthStencilView
 	{
 	public:
-		OGLScreenDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf);
+		OGLScreenDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void ClearColor(Color const & clr);
+		void Discard() override;
 
-		virtual void Discard() override;
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		GLuint RetrieveGLTexture() const override;
 	};
 
-	typedef std::shared_ptr<OGLScreenDepthStencilRenderView> OGLScreenDepthStencilRenderViewPtr;
 
-
-	class OGLTexture1DRenderView : public OGLRenderView
+	class OGLTexture1DRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLTexture1DRenderView(Texture& texture_1d, int array_index, int array_size, int level);
+		OGLTexture1DRenderTargetView(TexturePtr const & texture_1d, ElementFormat pf, int array_index, int array_size, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
-		OGLTexture1D& texture_1d_;
 		int array_index_;
-		int array_size_;
-		int level_;
 	};
 
-	typedef std::shared_ptr<OGLTexture1DRenderView> OGLTexture1DRenderViewPtr;
 
-
-	class OGLTexture2DRenderView : public OGLRenderView
+	class OGLTexture2DRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLTexture2DRenderView(Texture& texture_2d, int array_index, int array_size, int level);
+		OGLTexture2DRenderTargetView(TexturePtr const & texture_2d, ElementFormat pf, int array_index, int array_size, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
-		OGLTexture2D& texture_2d_;
 		int array_index_;
-		int array_size_;
-		int level_;
 	};
 
-	typedef std::shared_ptr<OGLTexture2DRenderView> OGLTexture2DRenderViewPtr;
 
-
-	class OGLTexture3DRenderView : public OGLRenderView
+	class OGLTexture3DRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLTexture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
-		~OGLTexture3DRenderView();
+		OGLTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index, uint32_t slice, int level);
+		~OGLTexture3DRenderTargetView();
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
-		void OnUnbind(FrameBuffer& fb, uint32_t att);
-
-	private:
-		void CopyToSlice(uint32_t att);
+		void OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att);
 
 	private:
-		OGLTexture3D& texture_3d_;
+		void CopyToSlice(FrameBuffer::Attachment att);
+
+	private:
 		uint32_t slice_;
-		int level_;
 		int copy_to_tex_;
-		GLuint tex_2d_;
+		GLuint gl_tex_2d_;
 	};
 
-	typedef std::shared_ptr<OGLTexture3DRenderView> OGLTexture3DRenderViewPtr;
 
-
-	class OGLTextureCubeRenderView : public OGLRenderView
+	class OGLTextureCubeRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
-		OGLTextureCubeRenderView(Texture& texture_cube, int array_index, int level);
+		OGLTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
+		OGLTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, int level);
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
 	private:
-		OGLTextureCube& texture_cube_;
 		Texture::CubeFaces face_;
-		int level_;
 	};
 
-	typedef std::shared_ptr<OGLTextureCubeRenderView> OGLTextureCubeRenderViewPtr;
 
-
-	class OGLGraphicsBufferRenderView : public OGLRenderView
+	class OGLGraphicsBufferRenderTargetView final : public OGLRenderTargetView
 	{
 	public:
-		OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
-							uint32_t width, uint32_t height, ElementFormat pf);
-		~OGLGraphicsBufferRenderView();
+		OGLGraphicsBufferRenderTargetView(GraphicsBufferPtr const & gb, ElementFormat pf, uint32_t forst_elem, uint32_t num_elems);
+		~OGLGraphicsBufferRenderTargetView();
 
-		void ClearColor(Color const & clr);
+		void ClearColor(Color const & clr) override;
 
-		virtual void Discard() override;
+		void Discard() override;
 
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
+		void OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att) override;
 
-		void OnUnbind(FrameBuffer& fb, uint32_t att);
+		void OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att);
 
-	private:
-		void CopyToGB(uint32_t att);
+		GLuint RetrieveGLTexture() const override;
 
 	private:
-		GraphicsBuffer& gbuffer_;
+		void CopyToGB(FrameBuffer::Attachment att);
 	};
 
-	typedef std::shared_ptr<OGLGraphicsBufferRenderView> OGLGraphicsBufferRenderViewPtr;
 
-
-	class OGLDepthStencilRenderView : public OGLRenderView
+	class OGLTextureDepthStencilView final : public OGLDepthStencilView
 	{
 	public:
-		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		OGLDepthStencilRenderView(Texture& texture, int array_index, int array_size, int level);
-		~OGLDepthStencilRenderView();
+		OGLTextureDepthStencilView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		OGLTextureDepthStencilView(TexturePtr const & texture, ElementFormat pf, int array_index, int array_size, int level);
+		~OGLTextureDepthStencilView();
 
-		void ClearColor(Color const & clr);
+		void Discard() override;
 
-		virtual void Discard() override;
-
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
 	private:
 		GLenum target_type_;
 		int array_index_;
-		int array_size_;
-		int level_;
-		uint32_t sample_count_, sample_quality_;
-		GLuint rbo_;
+		GLuint gl_rbo_;
 	};
 
-	typedef std::shared_ptr<OGLDepthStencilRenderView> OGLDepthStencilRenderViewPtr;
-
-	class OGLTextureCubeDepthStencilRenderView : public OGLRenderView
+	class OGLTextureCubeFaceDepthStencilView final : public OGLDepthStencilView
 	{
 	public:
-		OGLTextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
+		OGLTextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf, int array_index, Texture::CubeFaces face,
+			int level);
 
-		void ClearColor(Color const & clr);
+		void Discard() override;
 
-		virtual void Discard() override;
-
-		void OnAttached(FrameBuffer& fb, uint32_t att);
-		void OnDetached(FrameBuffer& fb, uint32_t att);
+		void OnAttached(FrameBuffer& fb) override;
+		void OnDetached(FrameBuffer& fb) override;
 
 	private:
-		OGLTextureCube& texture_cube_;
 		Texture::CubeFaces face_;
-		int level_;
 	};
-
-	typedef std::shared_ptr<OGLTextureCubeDepthStencilRenderView> OGLTextureCubeDepthStencilRenderViewPtr;
 }
 
 #endif			// _OGLRENDERVIEW_HPP

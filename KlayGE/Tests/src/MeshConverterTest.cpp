@@ -35,8 +35,8 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/MeshConverter.hpp>
-#include <KlayGE/MeshMetadata.hpp>
+#include <KlayGE/DevHelper/MeshConverter.hpp>
+#include <KlayGE/DevHelper/MeshMetadata.hpp>
 
 #include "KlayGETests.hpp"
 
@@ -53,10 +53,16 @@ public:
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name)
 	{
-		MeshMetadata metadata(metadata_name);
+		std::string metadata_name_ptr(metadata_name);
+		if (metadata_name.empty())
+		{
+			metadata_name_ptr = std::string(input_name) + ".kmeta";
+		}
+
+		MeshMetadata metadata(metadata_name_ptr);
 
 		MeshConverter mc;
-		auto target = mc.Convert(input_name, metadata);
+		auto target = mc.Load(metadata);
 		EXPECT_TRUE(target);
 
 		auto sanity_model = LoadSoftwareModel(sanity_name);
@@ -67,43 +73,47 @@ public:
 			auto mtl = target->GetMaterial(i);
 			auto sanity_mtl = sanity_model->GetMaterial(i);
 
-			EXPECT_EQ(mtl->name, sanity_mtl->name);
-			EXPECT_FLOAT_EQ(mtl->albedo.x(), sanity_mtl->albedo.x());
-			EXPECT_FLOAT_EQ(mtl->albedo.y(), sanity_mtl->albedo.y());
-			EXPECT_FLOAT_EQ(mtl->albedo.z(), sanity_mtl->albedo.z());
-			EXPECT_FLOAT_EQ(mtl->albedo.w(), sanity_mtl->albedo.w());
-			EXPECT_FLOAT_EQ(mtl->metalness, sanity_mtl->metalness);
-			EXPECT_FLOAT_EQ(mtl->glossiness, sanity_mtl->glossiness);
-			EXPECT_FLOAT_EQ(mtl->emissive.x(), sanity_mtl->emissive.x());
-			EXPECT_FLOAT_EQ(mtl->emissive.y(), sanity_mtl->emissive.y());
-			EXPECT_FLOAT_EQ(mtl->emissive.z(), sanity_mtl->emissive.z());
-			EXPECT_EQ(mtl->transparent, sanity_mtl->transparent);
-			EXPECT_FLOAT_EQ(mtl->alpha_test, sanity_mtl->alpha_test);
-			EXPECT_EQ(mtl->sss, sanity_mtl->sss);
-			EXPECT_EQ(mtl->two_sided, sanity_mtl->two_sided);
+			EXPECT_EQ(mtl->Name(), sanity_mtl->Name());
+			EXPECT_FLOAT_EQ(mtl->Albedo().x(), sanity_mtl->Albedo().x());
+			EXPECT_FLOAT_EQ(mtl->Albedo().y(), sanity_mtl->Albedo().y());
+			EXPECT_FLOAT_EQ(mtl->Albedo().z(), sanity_mtl->Albedo().z());
+			EXPECT_FLOAT_EQ(mtl->Albedo().w(), sanity_mtl->Albedo().w());
+			EXPECT_FLOAT_EQ(mtl->Metalness(), sanity_mtl->Metalness());
+			EXPECT_FLOAT_EQ(mtl->Glossiness(), sanity_mtl->Glossiness());
+			EXPECT_FLOAT_EQ(mtl->Emissive().x(), sanity_mtl->Emissive().x());
+			EXPECT_FLOAT_EQ(mtl->Emissive().y(), sanity_mtl->Emissive().y());
+			EXPECT_FLOAT_EQ(mtl->Emissive().z(), sanity_mtl->Emissive().z());
+			EXPECT_EQ(mtl->Transparent(), sanity_mtl->Transparent());
+			EXPECT_FLOAT_EQ(mtl->AlphaTestThreshold(), sanity_mtl->AlphaTestThreshold());
+			EXPECT_EQ(mtl->Sss(), sanity_mtl->Sss());
+			EXPECT_EQ(mtl->TwoSided(), sanity_mtl->TwoSided());
+			EXPECT_EQ(mtl->NormalScale(), sanity_mtl->NormalScale());
+			EXPECT_EQ(mtl->OcclusionStrength(), sanity_mtl->OcclusionStrength());
 
-			for (uint32_t slot = RenderMaterial::TS_Albedo; slot != RenderMaterial::TS_Height; ++ slot)
+			for (uint32_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++j)
 			{
-				EXPECT_EQ(mtl->tex_names[slot], sanity_mtl->tex_names[slot]);
+				auto slot = static_cast<RenderMaterial::TextureSlot>(j);
+				EXPECT_EQ(mtl->TextureName(slot), sanity_mtl->TextureName(slot));
 			}
 
-			EXPECT_EQ(mtl->detail_mode, sanity_mtl->detail_mode);
-			if (!mtl->tex_names[RenderMaterial::TS_Height].empty())
+			EXPECT_EQ(mtl->DetailMode(), sanity_mtl->DetailMode());
+			if (!mtl->TextureName(RenderMaterial::TS_Height).empty())
 			{
-				EXPECT_FLOAT_EQ(mtl->height_offset_scale.x(), sanity_mtl->height_offset_scale.x());
-				EXPECT_FLOAT_EQ(mtl->height_offset_scale.y(), sanity_mtl->height_offset_scale.y());
+				EXPECT_FLOAT_EQ(mtl->HeightOffset(), sanity_mtl->HeightOffset());
+				EXPECT_FLOAT_EQ(mtl->HeightScale(), sanity_mtl->HeightScale());
 			}
-			if (mtl->detail_mode != RenderMaterial::SDM_Parallax)
+			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
+				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
-				EXPECT_FLOAT_EQ(mtl->tess_factors.x(), sanity_mtl->tess_factors.x());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.y(), sanity_mtl->tess_factors.y());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.z(), sanity_mtl->tess_factors.z());
-				EXPECT_FLOAT_EQ(mtl->tess_factors.w(), sanity_mtl->tess_factors.w());
+				EXPECT_FLOAT_EQ(mtl->EdgeTessHint(), sanity_mtl->EdgeTessHint());
+				EXPECT_FLOAT_EQ(mtl->InsideTessHint(), sanity_mtl->InsideTessHint());
+				EXPECT_FLOAT_EQ(mtl->MinTessFactor(), sanity_mtl->MinTessFactor());
+				EXPECT_FLOAT_EQ(mtl->MaxTessFactor(), sanity_mtl->MaxTessFactor());
 			}
 		}
 
-		auto const & rl = checked_cast<StaticMesh*>(target->Subrenderable(0).get())->GetRenderLayout();
-		auto const & sanity_rl = checked_cast<StaticMesh*>(sanity_model->Subrenderable(0).get())->GetRenderLayout();
+		auto const& rl = checked_cast<StaticMesh&>(*target->Mesh(0)).GetRenderLayout();
+		auto const& sanity_rl = checked_cast<StaticMesh&>(*sanity_model->Mesh(0)).GetRenderLayout();
 
 		EXPECT_EQ(rl.NumVertexStreams(), sanity_rl.NumVertexStreams());
 
@@ -308,333 +318,396 @@ public:
 		}
 		EXPECT_EQ(rl.IndexStreamFormat(), sanity_rl.IndexStreamFormat());
 
-		EXPECT_EQ(target->NumSubrenderables(), sanity_model->NumSubrenderables());
-		for (uint32_t i = 0; i < target->NumSubrenderables(); ++ i)
-		{
-			auto const & mesh = *checked_cast<StaticMesh*>(target->Subrenderable(i).get());
-			auto const & sanity_mesh = *checked_cast<StaticMesh*>(sanity_model->Subrenderable(i).get());
-
-			EXPECT_EQ(mesh.MaterialID(), sanity_mesh.MaterialID());
-			EXPECT_EQ(mesh.Name(), sanity_mesh.Name());
-			EXPECT_EQ(mesh.NumLods(), sanity_mesh.NumLods());
-
-			for (uint32_t lod = 0; lod < mesh.NumLods(); ++ lod)
+		target->RootNode()->Traverse([&](SceneNode& node)
 			{
-				EXPECT_EQ(mesh.NumVertices(lod), sanity_mesh.NumVertices(lod));
-				EXPECT_EQ(mesh.NumIndices(lod), sanity_mesh.NumIndices(lod));
+				node.UpdateTransforms();
 
-				auto const pos_center = mesh.PosBound().Center();
-				auto const pos_extent = mesh.PosBound().HalfSize();
-				auto const tc_center = mesh.TexcoordBound().Center();
-				auto const tc_extent = mesh.TexcoordBound().HalfSize();
+				float4x4 const & mat = node.TransformToWorld();
+				float4x4 const mat_it = MathLib::transpose(MathLib::inverse(mat));
 
-				auto const sanity_pos_center = sanity_mesh.PosBound().Center();
-				auto const sanity_pos_extent = sanity_mesh.PosBound().HalfSize();
-				auto const sanity_tc_center = sanity_mesh.TexcoordBound().Center();
-				auto const sanity_tc_extent = sanity_mesh.TexcoordBound().HalfSize();
-
-				GraphicsBuffer::Mapper position_mapper(*rl.GetVertexStream(position_stream), BA_Read_Only);
-				auto const * position_buff = position_mapper.Pointer<int16_t>();
-				
-				GraphicsBuffer::Mapper sanity_position_mapper(*sanity_rl.GetVertexStream(sanity_position_stream), BA_Read_Only);
-				auto const * sanity_position_buff = sanity_position_mapper.Pointer<int16_t>();
-
-				uint8_t const * normal_buff = nullptr;
-				uint8_t const * sanity_normal_buff = nullptr;
-				if (normal_stream != -1)
-				{
-					GraphicsBuffer::Mapper normal_mapper(*rl.GetVertexStream(normal_stream), BA_Read_Only);
-					normal_buff = normal_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_normal_mapper(*sanity_rl.GetVertexStream(sanity_normal_stream), BA_Read_Only);
-					sanity_normal_buff = sanity_normal_mapper.Pointer<uint8_t>();
-				}
-
-				uint8_t const * tangent_buff = nullptr;
-				uint8_t const * sanity_tangent_buff = nullptr;
-				if (tangent_quat_stream != -1)
-				{
-					GraphicsBuffer::Mapper tangent_quat_mapper(*rl.GetVertexStream(tangent_quat_stream), BA_Read_Only);
-					tangent_buff = tangent_quat_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_tangent_quat_mapper(
-						*sanity_rl.GetVertexStream(sanity_tangent_quat_stream), BA_Read_Only);
-					sanity_tangent_buff = sanity_tangent_quat_mapper.Pointer<uint8_t>();
-				}
-
-				int16_t const * texcoord_buff = nullptr;
-				int16_t const * sanity_texcoord_buff = nullptr;
-				if (texcoord_stream != -1)
-				{
-					GraphicsBuffer::Mapper texcoord_mapper(*rl.GetVertexStream(texcoord_stream), BA_Read_Only);
-					texcoord_buff = texcoord_mapper.Pointer<int16_t>();
-
-					GraphicsBuffer::Mapper sanity_texcoord_mapper(*sanity_rl.GetVertexStream(sanity_texcoord_stream), BA_Read_Only);
-					sanity_texcoord_buff = sanity_texcoord_mapper.Pointer<int16_t>();
-				}
-
-				uint8_t const * diffuse_buff = nullptr;
-				uint8_t const * sanity_diffuse_buff = nullptr;
-				if (diffuse_stream != -1)
-				{
-					GraphicsBuffer::Mapper diffuse_mapper(*rl.GetVertexStream(diffuse_stream), BA_Read_Only);
-					diffuse_buff = diffuse_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_diffuse_mapper(*sanity_rl.GetVertexStream(sanity_diffuse_stream), BA_Read_Only);
-					sanity_diffuse_buff = sanity_diffuse_mapper.Pointer<uint8_t>();
-				}
-
-				uint8_t const * specular_buff = nullptr;
-				uint8_t const * sanity_specular_buff = nullptr;
-				if (specular_stream != -1)
-				{
-					GraphicsBuffer::Mapper specular_mapper(*rl.GetVertexStream(specular_stream), BA_Read_Only);
-					specular_buff = specular_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_specular_mapper(*sanity_rl.GetVertexStream(sanity_specular_stream), BA_Read_Only);
-					sanity_specular_buff = sanity_specular_mapper.Pointer<uint8_t>();
-				}
-
-				uint8_t const * blend_weights_buff = nullptr;
-				uint8_t const * sanity_blend_weights_buff = nullptr;
-				if (blend_weights_stream != -1)
-				{
-					GraphicsBuffer::Mapper blend_weights_mapper(*rl.GetVertexStream(blend_weights_stream), BA_Read_Only);
-					blend_weights_buff = blend_weights_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_blend_weights_mapper(*sanity_rl.GetVertexStream(sanity_blend_weights_stream),
-						BA_Read_Only);
-					sanity_blend_weights_buff = sanity_blend_weights_mapper.Pointer<uint8_t>();
-				}
-				
-				uint8_t const * blend_indices_buff = nullptr;
-				uint8_t const * sanity_blend_indices_buff = nullptr;
-				if (blend_weights_stream != -1)
-				{
-					GraphicsBuffer::Mapper blend_indices_mapper(*rl.GetVertexStream(blend_indices_stream), BA_Read_Only);
-					blend_indices_buff = blend_indices_mapper.Pointer<uint8_t>();
-
-					GraphicsBuffer::Mapper sanity_blend_indices_mapper(*sanity_rl.GetVertexStream(sanity_blend_indices_stream),
-						BA_Read_Only);
-					sanity_blend_indices_buff = sanity_blend_indices_mapper.Pointer<uint8_t>();
-				}
-
-				EXPECT_EQ(mesh.NumVertices(lod), sanity_mesh.NumVertices(lod));
-				EXPECT_EQ(mesh.StartVertexLocation(lod), sanity_mesh.StartVertexLocation(lod));
-				EXPECT_EQ(mesh.NumIndices(lod), sanity_mesh.NumIndices(lod));
-				EXPECT_EQ(mesh.StartIndexLocation(lod), sanity_mesh.StartIndexLocation(lod));
-
-				for (uint32_t vid = 0; vid < sanity_mesh.NumVertices(lod); ++ vid)
-				{
-					uint32_t const index = vid + sanity_mesh.StartVertexLocation(lod);
-
+				node.ForEachComponentOfType<RenderableComponent>([&](RenderableComponent& renderable_comp)
 					{
-						float3 pos;
-						pos.x() = ((position_buff[index * 4 + 0] + 32768) / 65535.0f * 2 - 1)
-							* pos_extent.x() + pos_center.x();
-						pos.y() = ((position_buff[index * 4 + 1] + 32768) / 65535.0f * 2 - 1)
-							* pos_extent.y() + pos_center.y();
-						pos.z() = ((position_buff[index * 4 + 2] + 32768) / 65535.0f * 2 - 1)
-							* pos_extent.z() + pos_center.z();
+						auto const& mesh = renderable_comp.BoundRenderableOfType<StaticMesh>();
 
-						float3 sanity_pos;
-						sanity_pos.x() = ((sanity_position_buff[index * 4 + 0] + 32768) / 65535.0f * 2 - 1)
-							* sanity_pos_extent.x() + sanity_pos_center.x();
-						sanity_pos.y() = ((sanity_position_buff[index * 4 + 1] + 32768) / 65535.0f * 2 - 1)
-							* sanity_pos_extent.y() + sanity_pos_center.y();
-						sanity_pos.z() = ((sanity_position_buff[index * 4 + 2] + 32768) / 65535.0f * 2 - 1)
-							* sanity_pos_extent.z() + sanity_pos_center.z();
-
-						EXPECT_TRUE(std::abs(pos.x() - sanity_pos.x()) < 1e-3f);
-						EXPECT_TRUE(std::abs(pos.y() - sanity_pos.y()) < 1e-3f);
-						EXPECT_TRUE(std::abs(pos.z() - sanity_pos.z()) < 1e-3f);
-					}
-
-					if (normal_stream != -1)
-					{
-						float3 normal;
-						normal.x() = (normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
-						normal.y() = (normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
-						normal.z() = (normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
-						normal = MathLib::normalize(normal);
-
-						float3 sanity_normal;
-						sanity_normal.x() = (sanity_normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
-						sanity_normal.y() = (sanity_normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
-						sanity_normal.z() = (sanity_normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
-						sanity_normal = MathLib::normalize(sanity_normal);
-
-						EXPECT_TRUE(std::abs(normal.x() - sanity_normal.x()) < 2e-2f);
-						EXPECT_TRUE(std::abs(normal.y() - sanity_normal.y()) < 2e-2f);
-						EXPECT_TRUE(std::abs(normal.z() - sanity_normal.z()) < 2e-2f);
-					}
-
-					if (tangent_quat_stream != -1)
-					{
-						float4 tangent;
-						tangent.x() = (tangent_buff[index * 4 + 0] / 255.0f) * 2 - 1;
-						tangent.y() = (tangent_buff[index * 4 + 1] / 255.0f) * 2 - 1;
-						tangent.z() = (tangent_buff[index * 4 + 2] / 255.0f) * 2 - 1;
-						tangent.w() = (tangent_buff[index * 4 + 3] / 255.0f) * 2 - 1;
-						tangent = MathLib::normalize(tangent);
-
-						float4 sanity_tangent;
-						sanity_tangent.x() = (sanity_tangent_buff[index * 4 + 0] / 255.0f) * 2 - 1;
-						sanity_tangent.y() = (sanity_tangent_buff[index * 4 + 1] / 255.0f) * 2 - 1;
-						sanity_tangent.z() = (sanity_tangent_buff[index * 4 + 2] / 255.0f) * 2 - 1;
-						sanity_tangent.w() = (sanity_tangent_buff[index * 4 + 3] / 255.0f) * 2 - 1;
-						sanity_tangent = MathLib::normalize(sanity_tangent);
-
-						EXPECT_TRUE(std::abs(tangent.x() - sanity_tangent.x()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.y() - sanity_tangent.y()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.z() - sanity_tangent.z()) < 2e-2f);
-						EXPECT_TRUE(std::abs(tangent.w() - sanity_tangent.w()) < 2e-2f);
-					}
-
-					if (texcoord_stream != -1)
-					{
-						float3 tc;
-						tc.x() = ((texcoord_buff[index * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
-						tc.y() = ((texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
-
-						float3 sanity_tc;
-						sanity_tc.x() = ((sanity_texcoord_buff[index * 2 + 0] + 32768) / 65535.0f * 2 - 1)
-							* sanity_tc_extent.x() + sanity_tc_center.x();
-						sanity_tc.y() = ((sanity_texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1)
-							* sanity_tc_extent.y() + sanity_tc_center.y();
-
-						EXPECT_TRUE(std::abs(tc.x() - sanity_tc.x()) < 2e-3f);
-						EXPECT_TRUE(std::abs(tc.y() - sanity_tc.y()) < 2e-3f);
-					}
-
-					if (diffuse_stream != -1)
-					{
-						Color diffuse;
-						diffuse.r() = diffuse_buff[index * 4 + 0] / 255.0f;
-						diffuse.g() = diffuse_buff[index * 4 + 1] / 255.0f;
-						diffuse.b() = diffuse_buff[index * 4 + 2] / 255.0f;
-						diffuse.a() = diffuse_buff[index * 4 + 3] / 255.0f;
-
-						Color sanity_diffuse;
-						sanity_diffuse.r() = sanity_diffuse_buff[index * 4 + 0] / 255.0f;
-						sanity_diffuse.g() = sanity_diffuse_buff[index * 4 + 1] / 255.0f;
-						sanity_diffuse.b() = sanity_diffuse_buff[index * 4 + 2] / 255.0f;
-						sanity_diffuse.a() = sanity_diffuse_buff[index * 4 + 3] / 255.0f;
-
-						EXPECT_TRUE(std::abs(diffuse.r() - sanity_diffuse.r()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.g() - sanity_diffuse.g()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.b() - sanity_diffuse.b()) < 2e-3f);
-						EXPECT_TRUE(std::abs(diffuse.a() - sanity_diffuse.a()) < 2e-3f);
-					}
-
-					if (specular_stream != -1)
-					{
-						Color specular;
-						specular.r() = specular_buff[index * 4 + 0] / 255.0f;
-						specular.g() = specular_buff[index * 4 + 1] / 255.0f;
-						specular.b() = specular_buff[index * 4 + 2] / 255.0f;
-						specular.a() = specular_buff[index * 4 + 3] / 255.0f;
-
-						Color sanity_specular;
-						sanity_specular.r() = sanity_specular_buff[index * 4 + 0] / 255.0f;
-						sanity_specular.g() = sanity_specular_buff[index * 4 + 1] / 255.0f;
-						sanity_specular.b() = sanity_specular_buff[index * 4 + 2] / 255.0f;
-						sanity_specular.a() = sanity_specular_buff[index * 4 + 3] / 255.0f;
-
-						EXPECT_TRUE(std::abs(specular.r() - sanity_specular.r()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.g() - sanity_specular.g()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.b() - sanity_specular.b()) < 2e-3f);
-						EXPECT_TRUE(std::abs(specular.a() - sanity_specular.a()) < 2e-3f);
-					}
-
-					if (blend_weights_stream != -1)
-					{
-						EXPECT_NE(sanity_blend_weights_stream, -1);
-						EXPECT_NE(blend_indices_stream, -1);
-						EXPECT_NE(sanity_blend_indices_stream, -1);
-
-						for (uint32_t wi = 0; wi < 4; ++ wi)
+						uint32_t mesh_index = 0;
+						for (uint32_t i = 0; i < target->NumMeshes(); ++ i)
 						{
-							EXPECT_EQ(blend_weights_buff[index * 4 + wi], sanity_blend_weights_buff[index * 4 + wi]);
-							if (blend_weights_buff[index * 4 + wi] > 0)
+							if (target->Mesh(i).get() == &mesh)
 							{
-								EXPECT_EQ(blend_indices_buff[index * 4 + wi], sanity_blend_indices_buff[index * 4 + wi]);
+								mesh_index = i;
+								break;
 							}
 						}
-					}
-				}
 
-				GraphicsBuffer::Mapper indices_mapper(*rl.GetIndexStream(), BA_Read_Only);
-				auto const * indices_buff_16 = indices_mapper.Pointer<uint16_t>();
-				auto const * indices_buff_32 = indices_mapper.Pointer<uint32_t>();
+						auto const& sanity_mesh = checked_cast<StaticMesh&>(*sanity_model->Mesh(mesh_index));
 
-				GraphicsBuffer::Mapper sanity_indices_mapper(*sanity_rl.GetIndexStream(), BA_Read_Only);
-				auto const * sanity_indices_buff_16 = sanity_indices_mapper.Pointer<uint16_t>();
-				auto const * sanity_indices_buff_32 = sanity_indices_mapper.Pointer<uint32_t>();
+						EXPECT_EQ(mesh.MaterialID(), sanity_mesh.MaterialID());
+						EXPECT_TRUE((mesh.Name() == sanity_mesh.Name()) || (node.Name() == sanity_mesh.Name()));
+						EXPECT_EQ(mesh.NumLods(), sanity_mesh.NumLods());
 
-				for (uint32_t iid = 0; iid < sanity_mesh.NumIndices(lod); ++ iid)
-				{
-					uint32_t const index = iid + sanity_mesh.StartIndexLocation(lod);
-					uint32_t tri_index;
-					uint32_t sanity_tri_index;
-					if (sanity_rl.IndexStreamFormat() == EF_R16UI)
-					{
-						tri_index = indices_buff_16[index];
-						sanity_tri_index = sanity_indices_buff_16[index];
-					}
-					else
-					{
-						tri_index = indices_buff_32[index];
-						sanity_tri_index = sanity_indices_buff_32[index];
-					}
+						for (uint32_t lod = 0; lod < mesh.NumLods(); ++ lod)
+						{
+							EXPECT_EQ(mesh.NumVertices(lod), sanity_mesh.NumVertices(lod));
+							EXPECT_EQ(mesh.NumIndices(lod), sanity_mesh.NumIndices(lod));
 
-					EXPECT_EQ(tri_index, sanity_tri_index);
-				}
-			}
-		}
+							auto const pos_center = mesh.PosBound().Center();
+							auto const pos_extent = mesh.PosBound().HalfSize();
+							auto const tc_center = mesh.TexcoordBound().Center();
+							auto const tc_extent = mesh.TexcoordBound().HalfSize();
+
+							auto const sanity_pos_center = sanity_mesh.PosBound().Center();
+							auto const sanity_pos_extent = sanity_mesh.PosBound().HalfSize();
+							auto const sanity_tc_center = sanity_mesh.TexcoordBound().Center();
+							auto const sanity_tc_extent = sanity_mesh.TexcoordBound().HalfSize();
+
+							GraphicsBuffer::Mapper position_mapper(*rl.GetVertexStream(position_stream), BA_Read_Only);
+							auto const * position_buff = position_mapper.Pointer<int16_t>();
+				
+							GraphicsBuffer::Mapper sanity_position_mapper(*sanity_rl.GetVertexStream(sanity_position_stream), BA_Read_Only);
+							auto const * sanity_position_buff = sanity_position_mapper.Pointer<int16_t>();
+
+							uint8_t const * normal_buff = nullptr;
+							uint8_t const * sanity_normal_buff = nullptr;
+							if (normal_stream != -1)
+							{
+								GraphicsBuffer::Mapper normal_mapper(*rl.GetVertexStream(normal_stream), BA_Read_Only);
+								normal_buff = normal_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_normal_mapper(*sanity_rl.GetVertexStream(sanity_normal_stream), BA_Read_Only);
+								sanity_normal_buff = sanity_normal_mapper.Pointer<uint8_t>();
+							}
+
+							uint8_t const * tangent_buff = nullptr;
+							uint8_t const * sanity_tangent_buff = nullptr;
+							if (tangent_quat_stream != -1)
+							{
+								GraphicsBuffer::Mapper tangent_quat_mapper(*rl.GetVertexStream(tangent_quat_stream), BA_Read_Only);
+								tangent_buff = tangent_quat_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_tangent_quat_mapper(
+									*sanity_rl.GetVertexStream(sanity_tangent_quat_stream), BA_Read_Only);
+								sanity_tangent_buff = sanity_tangent_quat_mapper.Pointer<uint8_t>();
+							}
+
+							int16_t const * texcoord_buff = nullptr;
+							int16_t const * sanity_texcoord_buff = nullptr;
+							if (texcoord_stream != -1)
+							{
+								GraphicsBuffer::Mapper texcoord_mapper(*rl.GetVertexStream(texcoord_stream), BA_Read_Only);
+								texcoord_buff = texcoord_mapper.Pointer<int16_t>();
+
+								GraphicsBuffer::Mapper sanity_texcoord_mapper(*sanity_rl.GetVertexStream(sanity_texcoord_stream), BA_Read_Only);
+								sanity_texcoord_buff = sanity_texcoord_mapper.Pointer<int16_t>();
+							}
+
+							uint8_t const * diffuse_buff = nullptr;
+							uint8_t const * sanity_diffuse_buff = nullptr;
+							if (diffuse_stream != -1)
+							{
+								GraphicsBuffer::Mapper diffuse_mapper(*rl.GetVertexStream(diffuse_stream), BA_Read_Only);
+								diffuse_buff = diffuse_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_diffuse_mapper(*sanity_rl.GetVertexStream(sanity_diffuse_stream), BA_Read_Only);
+								sanity_diffuse_buff = sanity_diffuse_mapper.Pointer<uint8_t>();
+							}
+
+							uint8_t const * specular_buff = nullptr;
+							uint8_t const * sanity_specular_buff = nullptr;
+							if (specular_stream != -1)
+							{
+								GraphicsBuffer::Mapper specular_mapper(*rl.GetVertexStream(specular_stream), BA_Read_Only);
+								specular_buff = specular_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_specular_mapper(*sanity_rl.GetVertexStream(sanity_specular_stream), BA_Read_Only);
+								sanity_specular_buff = sanity_specular_mapper.Pointer<uint8_t>();
+							}
+
+							uint8_t const * blend_weights_buff = nullptr;
+							uint8_t const * sanity_blend_weights_buff = nullptr;
+							if (blend_weights_stream != -1)
+							{
+								GraphicsBuffer::Mapper blend_weights_mapper(*rl.GetVertexStream(blend_weights_stream), BA_Read_Only);
+								blend_weights_buff = blend_weights_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_blend_weights_mapper(*sanity_rl.GetVertexStream(sanity_blend_weights_stream),
+									BA_Read_Only);
+								sanity_blend_weights_buff = sanity_blend_weights_mapper.Pointer<uint8_t>();
+							}
+				
+							uint8_t const * blend_indices_buff = nullptr;
+							uint8_t const * sanity_blend_indices_buff = nullptr;
+							if (blend_weights_stream != -1)
+							{
+								GraphicsBuffer::Mapper blend_indices_mapper(*rl.GetVertexStream(blend_indices_stream), BA_Read_Only);
+								blend_indices_buff = blend_indices_mapper.Pointer<uint8_t>();
+
+								GraphicsBuffer::Mapper sanity_blend_indices_mapper(*sanity_rl.GetVertexStream(sanity_blend_indices_stream),
+									BA_Read_Only);
+								sanity_blend_indices_buff = sanity_blend_indices_mapper.Pointer<uint8_t>();
+							}
+
+							EXPECT_EQ(mesh.NumVertices(lod), sanity_mesh.NumVertices(lod));
+							EXPECT_EQ(mesh.StartVertexLocation(lod), sanity_mesh.StartVertexLocation(lod));
+							EXPECT_EQ(mesh.NumIndices(lod), sanity_mesh.NumIndices(lod));
+							EXPECT_EQ(mesh.StartIndexLocation(lod), sanity_mesh.StartIndexLocation(lod));
+
+							for (uint32_t vid = 0; vid < sanity_mesh.NumVertices(lod); ++ vid)
+							{
+								uint32_t const index = vid + sanity_mesh.StartVertexLocation(lod);
+
+								{
+									float3 pos;
+									pos.x() = ((position_buff[index * 4 + 0] + 32768) / 65535.0f * 2 - 1)
+										* pos_extent.x() + pos_center.x();
+									pos.y() = ((position_buff[index * 4 + 1] + 32768) / 65535.0f * 2 - 1)
+										* pos_extent.y() + pos_center.y();
+									pos.z() = ((position_buff[index * 4 + 2] + 32768) / 65535.0f * 2 - 1)
+										* pos_extent.z() + pos_center.z();
+									pos = MathLib::transform_coord(pos, mat);
+
+									float3 sanity_pos;
+									sanity_pos.x() = ((sanity_position_buff[index * 4 + 0] + 32768) / 65535.0f * 2 - 1)
+										* sanity_pos_extent.x() + sanity_pos_center.x();
+									sanity_pos.y() = ((sanity_position_buff[index * 4 + 1] + 32768) / 65535.0f * 2 - 1)
+										* sanity_pos_extent.y() + sanity_pos_center.y();
+									sanity_pos.z() = ((sanity_position_buff[index * 4 + 2] + 32768) / 65535.0f * 2 - 1)
+										* sanity_pos_extent.z() + sanity_pos_center.z();
+
+									EXPECT_LT(std::abs(pos.x() - sanity_pos.x()), 0.00065f);
+									EXPECT_LT(std::abs(pos.y() - sanity_pos.y()), 0.00065f);
+									EXPECT_LT(std::abs(pos.z() - sanity_pos.z()), 0.00065f);
+								}
+
+								if (normal_stream != -1)
+								{
+									float3 normal;
+									normal.x() = (normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
+									normal.y() = (normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
+									normal.z() = (normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
+									normal = MathLib::normalize(MathLib::transform_normal(normal, mat_it));
+
+									float3 sanity_normal;
+									sanity_normal.x() = (sanity_normal_buff[index * 4 + 0] / 255.0f) * 2 - 1;
+									sanity_normal.y() = (sanity_normal_buff[index * 4 + 1] / 255.0f) * 2 - 1;
+									sanity_normal.z() = (sanity_normal_buff[index * 4 + 2] / 255.0f) * 2 - 1;
+									sanity_normal = MathLib::normalize(sanity_normal);
+
+									EXPECT_LT(std::abs(MathLib::dot(normal, sanity_normal) - 1), 0.0011f);
+								}
+
+								if (tangent_quat_stream != -1)
+								{
+									Quaternion tangent_quat;
+									tangent_quat.x() = (tangent_buff[index * 4 + 0] / 255.0f) * 2 - 1;
+									tangent_quat.y() = (tangent_buff[index * 4 + 1] / 255.0f) * 2 - 1;
+									tangent_quat.z() = (tangent_buff[index * 4 + 2] / 255.0f) * 2 - 1;
+									tangent_quat.w() = (tangent_buff[index * 4 + 3] / 255.0f) * 2 - 1;
+									tangent_quat = MathLib::normalize(tangent_quat);
+
+									auto tangent = MathLib::transform_quat(float3(1, 0, 0), tangent_quat);
+									auto binormal = MathLib::transform_quat(float3(0, 1, 0), tangent_quat)
+										* MathLib::sgn(tangent_quat.w());
+									auto normal = MathLib::transform_quat(float3(0, 0, 1), tangent_quat);
+									tangent = MathLib::normalize(MathLib::transform_normal(tangent, mat));
+									binormal = MathLib::normalize(MathLib::transform_normal(binormal, mat));
+									normal = MathLib::normalize(MathLib::transform_normal(normal, mat_it));
+
+									Quaternion sanity_tangent_quat;
+									sanity_tangent_quat.x() = (sanity_tangent_buff[index * 4 + 0] / 255.0f) * 2 - 1;
+									sanity_tangent_quat.y() = (sanity_tangent_buff[index * 4 + 1] / 255.0f) * 2 - 1;
+									sanity_tangent_quat.z() = (sanity_tangent_buff[index * 4 + 2] / 255.0f) * 2 - 1;
+									sanity_tangent_quat.w() = (sanity_tangent_buff[index * 4 + 3] / 255.0f) * 2 - 1;
+									sanity_tangent_quat = MathLib::normalize(sanity_tangent_quat);
+
+									auto sanity_tangent = MathLib::transform_quat(float3(1, 0, 0), sanity_tangent_quat);
+									auto sanity_binormal = MathLib::transform_quat(float3(0, 1, 0), sanity_tangent_quat)
+										* MathLib::sgn(sanity_tangent_quat.w());
+									auto sanity_normal = MathLib::transform_quat(float3(0, 0, 1), sanity_tangent_quat);
+									sanity_tangent = MathLib::normalize(sanity_tangent);
+									sanity_binormal = MathLib::normalize(sanity_binormal);
+									sanity_normal = MathLib::normalize(sanity_normal);
+
+									EXPECT_LT(std::abs(MathLib::dot(tangent, sanity_tangent) - 1), 0.0011f);
+									EXPECT_LT(std::abs(MathLib::dot(binormal, sanity_binormal) - 1), 0.0011f);
+									EXPECT_LT(std::abs(MathLib::dot(normal, sanity_normal) - 1), 0.001f);
+								}
+
+								if (texcoord_stream != -1)
+								{
+									float3 tc;
+									tc.x() = ((texcoord_buff[index * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+									tc.y() = ((texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+
+									float3 sanity_tc;
+									sanity_tc.x() = ((sanity_texcoord_buff[index * 2 + 0] + 32768) / 65535.0f * 2 - 1)
+										* sanity_tc_extent.x() + sanity_tc_center.x();
+									sanity_tc.y() = ((sanity_texcoord_buff[index * 2 + 1] + 32768) / 65535.0f * 2 - 1)
+										* sanity_tc_extent.y() + sanity_tc_center.y();
+
+									EXPECT_LT(std::abs(tc.x() - sanity_tc.x()), 0.0018f);
+									EXPECT_LT(std::abs(tc.y() - sanity_tc.y()), 0.0018f);
+								}
+
+								if (diffuse_stream != -1)
+								{
+									Color diffuse;
+									diffuse.r() = diffuse_buff[index * 4 + 0] / 255.0f;
+									diffuse.g() = diffuse_buff[index * 4 + 1] / 255.0f;
+									diffuse.b() = diffuse_buff[index * 4 + 2] / 255.0f;
+									diffuse.a() = diffuse_buff[index * 4 + 3] / 255.0f;
+
+									Color sanity_diffuse;
+									sanity_diffuse.r() = sanity_diffuse_buff[index * 4 + 0] / 255.0f;
+									sanity_diffuse.g() = sanity_diffuse_buff[index * 4 + 1] / 255.0f;
+									sanity_diffuse.b() = sanity_diffuse_buff[index * 4 + 2] / 255.0f;
+									sanity_diffuse.a() = sanity_diffuse_buff[index * 4 + 3] / 255.0f;
+
+									EXPECT_LT(std::abs(diffuse.r() - sanity_diffuse.r()), 0.002f);
+									EXPECT_LT(std::abs(diffuse.g() - sanity_diffuse.g()), 0.002f);
+									EXPECT_LT(std::abs(diffuse.b() - sanity_diffuse.b()), 0.002f);
+									EXPECT_LT(std::abs(diffuse.a() - sanity_diffuse.a()), 0.002f);
+								}
+
+								if (specular_stream != -1)
+								{
+									Color specular;
+									specular.r() = specular_buff[index * 4 + 0] / 255.0f;
+									specular.g() = specular_buff[index * 4 + 1] / 255.0f;
+									specular.b() = specular_buff[index * 4 + 2] / 255.0f;
+									specular.a() = specular_buff[index * 4 + 3] / 255.0f;
+
+									Color sanity_specular;
+									sanity_specular.r() = sanity_specular_buff[index * 4 + 0] / 255.0f;
+									sanity_specular.g() = sanity_specular_buff[index * 4 + 1] / 255.0f;
+									sanity_specular.b() = sanity_specular_buff[index * 4 + 2] / 255.0f;
+									sanity_specular.a() = sanity_specular_buff[index * 4 + 3] / 255.0f;
+
+									EXPECT_LT(std::abs(specular.r() - sanity_specular.r()), 0.002f);
+									EXPECT_LT(std::abs(specular.g() - sanity_specular.g()), 0.002f);
+									EXPECT_LT(std::abs(specular.b() - sanity_specular.b()), 0.002f);
+									EXPECT_LT(std::abs(specular.a() - sanity_specular.a()), 0.002f);
+								}
+
+								if (blend_weights_stream != -1)
+								{
+									EXPECT_NE(sanity_blend_weights_stream, -1);
+									EXPECT_NE(blend_indices_stream, -1);
+									EXPECT_NE(sanity_blend_indices_stream, -1);
+
+									for (uint32_t wi = 0; wi < 4; ++ wi)
+									{
+										EXPECT_EQ(blend_weights_buff[index * 4 + wi], sanity_blend_weights_buff[index * 4 + wi]);
+										if (blend_weights_buff[index * 4 + wi] > 0)
+										{
+											EXPECT_EQ(blend_indices_buff[index * 4 + wi], sanity_blend_indices_buff[index * 4 + wi]);
+										}
+									}
+								}
+							}
+
+							GraphicsBuffer::Mapper indices_mapper(*rl.GetIndexStream(), BA_Read_Only);
+							auto const * indices_buff_16 = indices_mapper.Pointer<uint16_t>();
+							auto const * indices_buff_32 = indices_mapper.Pointer<uint32_t>();
+
+							GraphicsBuffer::Mapper sanity_indices_mapper(*sanity_rl.GetIndexStream(), BA_Read_Only);
+							auto const * sanity_indices_buff_16 = sanity_indices_mapper.Pointer<uint16_t>();
+							auto const * sanity_indices_buff_32 = sanity_indices_mapper.Pointer<uint32_t>();
+
+							for (uint32_t iid = 0; iid < sanity_mesh.NumIndices(lod); iid += 3)
+							{
+								uint32_t const start_index = iid + sanity_mesh.StartIndexLocation(lod);
+
+								uint32_t tri_indices[3];
+								uint32_t sanity_tri_indices[3];
+								if (sanity_rl.IndexStreamFormat() == EF_R16UI)
+								{
+									for (uint32_t ti = 0; ti < 3; ++ti)
+									{
+										tri_indices[ti] = indices_buff_16[start_index + ti];
+										sanity_tri_indices[ti] = sanity_indices_buff_16[start_index + ti];
+									}
+								}
+								else
+								{
+									for (uint32_t ti = 0; ti < 3; ++ti)
+									{
+										tri_indices[ti] = indices_buff_32[start_index + ti];
+										sanity_tri_indices[ti] = sanity_indices_buff_32[start_index + ti];
+									}
+								}
+
+								bool found = false;
+								for (uint32_t ti = 0; ti < 3; ++ti)
+								{
+									if (sanity_tri_indices[ti] == tri_indices[0])
+									{
+										for (uint32_t tti = 0; tti < 3; ++tti)
+										{
+											EXPECT_EQ(tri_indices[tti], sanity_tri_indices[(ti + tti) % 3]);
+										}
+
+										found = true;
+										break;
+									}
+								}
+
+								EXPECT_TRUE(found);
+							}
+						}
+					});
+
+				return true;
+			});
 
 		EXPECT_EQ(target->IsSkinned(), sanity_model->IsSkinned());
 		if (sanity_model->IsSkinned())
 		{
-			auto& skinned_model = *checked_cast<SkinnedModel*>(target.get());
-			auto& sanity_skinned_model = *checked_cast<SkinnedModel*>(sanity_model.get());
+			auto& skinned_model = checked_cast<SkinnedModel&>(*target);
+			auto& sanity_skinned_model = checked_cast<SkinnedModel&>(*sanity_model);
 
 			EXPECT_EQ(skinned_model.NumJoints(), sanity_skinned_model.NumJoints());
 			for (uint32_t i = 0; i < sanity_skinned_model.NumJoints(); ++ i)
 			{
-				auto& joint = skinned_model.GetJoint(i);
-				auto& sanity_joint = sanity_skinned_model.GetJoint(i);
+				auto& joint = *skinned_model.GetJoint(i);
+				auto& sanity_joint = *sanity_skinned_model.GetJoint(i);
 
-				EXPECT_EQ(joint.name, sanity_joint.name);
-				EXPECT_EQ(joint.parent, sanity_joint.parent);
+				EXPECT_EQ(joint.BoundSceneNode()->Name(), sanity_joint.BoundSceneNode()->Name());
+				if (joint.BoundSceneNode()->Parent())
+				{
+					EXPECT_EQ(joint.BoundSceneNode()->Parent()->Name(), sanity_joint.BoundSceneNode()->Parent()->Name());
+				}
+				else
+				{
+					EXPECT_EQ(sanity_joint.BoundSceneNode()->Parent(), nullptr);
+				}
 
-				EXPECT_TRUE(std::abs(joint.bind_real.x() - sanity_joint.bind_real.x()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.y() - sanity_joint.bind_real.y()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.z() - sanity_joint.bind_real.z()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_real.w() - sanity_joint.bind_real.w()) < 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().x() - sanity_joint.BindReal().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().y() - sanity_joint.BindReal().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().z() - sanity_joint.BindReal().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindReal().w() - sanity_joint.BindReal().w()), 1e-4f);
 
-				EXPECT_TRUE(std::abs(joint.bind_dual.x() - sanity_joint.bind_dual.x()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.y() - sanity_joint.bind_dual.y()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.z() - sanity_joint.bind_dual.z()) < 1e-4f);
-				EXPECT_TRUE(std::abs(joint.bind_dual.w() - sanity_joint.bind_dual.w()) < 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().x() - sanity_joint.BindDual().x()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().y() - sanity_joint.BindDual().y()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().z() - sanity_joint.BindDual().z()), 1e-4f);
+				EXPECT_LT(std::abs(joint.BindDual().w() - sanity_joint.BindDual().w()), 1e-4f);
 
-				EXPECT_TRUE(std::abs(joint.bind_scale - sanity_joint.bind_scale) < 1e-5f);
+				EXPECT_LT(std::abs(joint.BindScale() - sanity_joint.BindScale()), 1e-5f);
 			}
 
-			EXPECT_EQ(skinned_model.NumActions(), sanity_skinned_model.NumActions());
-			for (uint32_t i = 0; i < sanity_skinned_model.NumActions(); ++ i)
+			EXPECT_EQ(skinned_model.NumAnimations(), sanity_skinned_model.NumAnimations());
+			for (uint32_t i = 0; i < sanity_skinned_model.NumAnimations(); ++ i)
 			{
-				std::string action_name;
+				std::string animation_name;
 				uint32_t start_frame;
 				uint32_t end_frame;
-				skinned_model.GetAction(i, action_name, start_frame, end_frame);
+				skinned_model.GetAnimation(i, animation_name, start_frame, end_frame);
 
-				std::string sanity_action_name;
+				std::string sanity_animation_name;
 				uint32_t sanity_start_frame;
 				uint32_t sanity_end_frame;
-				sanity_skinned_model.GetAction(i, sanity_action_name, sanity_start_frame, sanity_end_frame);
+				sanity_skinned_model.GetAnimation(i, sanity_animation_name, sanity_start_frame, sanity_end_frame);
 
-				EXPECT_EQ(action_name, sanity_action_name);
+				EXPECT_EQ(animation_name, sanity_animation_name);
 				EXPECT_EQ(start_frame, sanity_start_frame);
 				EXPECT_EQ(end_frame, sanity_end_frame);
 			}
@@ -661,17 +734,17 @@ public:
 						auto const & sanity_bind_dual = sanity_key_frames.bind_dual[j];
 						float sanity_bind_scale = sanity_key_frames.bind_scale[j];
 
-						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-5f);
+						EXPECT_LT(std::abs(bind_real.x() - sanity_bind_real.x()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.y() - sanity_bind_real.y()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.z() - sanity_bind_real.z()), 1e-5f);
+						EXPECT_LT(std::abs(bind_real.w() - sanity_bind_real.w()), 1e-5f);
 
-						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-5f);
-						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.x() - sanity_bind_dual.x()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.y() - sanity_bind_dual.y()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.z() - sanity_bind_dual.z()), 1e-5f);
+						EXPECT_LT(std::abs(bind_dual.w() - sanity_bind_dual.w()), 1e-5f);
 
-						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+						EXPECT_LT(std::abs(bind_scale - sanity_bind_scale), 1e-4f);
 					}
 				}
 				else
@@ -691,17 +764,17 @@ public:
 						std::tie(sanity_bind_real, sanity_bind_dual, sanity_bind_scale)
 							= sanity_key_frames.Frame(static_cast<float>(frame_id));
 
-						EXPECT_TRUE(std::abs(bind_real.x() - sanity_bind_real.x()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.y() - sanity_bind_real.y()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.z() - sanity_bind_real.z()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_real.w() - sanity_bind_real.w()) < 1e-4f);
+						EXPECT_LT(std::abs(bind_real.x() - sanity_bind_real.x()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.y() - sanity_bind_real.y()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.z() - sanity_bind_real.z()), 1e-4f);
+						EXPECT_LT(std::abs(bind_real.w() - sanity_bind_real.w()), 1e-4f);
 
-						EXPECT_TRUE(std::abs(bind_dual.x() - sanity_bind_dual.x()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.y() - sanity_bind_dual.y()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.z() - sanity_bind_dual.z()) < 1e-4f);
-						EXPECT_TRUE(std::abs(bind_dual.w() - sanity_bind_dual.w()) < 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.x() - sanity_bind_dual.x()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.y() - sanity_bind_dual.y()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.z() - sanity_bind_dual.z()), 1e-4f);
+						EXPECT_LT(std::abs(bind_dual.w() - sanity_bind_dual.w()), 1e-4f);
 
-						EXPECT_TRUE(std::abs(bind_scale - sanity_bind_scale) < 1e-4f);
+						EXPECT_LT(std::abs(bind_scale - sanity_bind_scale), 1e-4f);
 					}
 				}
 			}
@@ -739,15 +812,10 @@ TEST_F(MeshConverterTest, StaticLodTransforms)
 
 TEST_F(MeshConverterTest, AnimationPassThrough)
 {
-	RunTest("anim.fbx", "", "anim.meshml");
+	RunTest("anim.fbx", "", "anim.glb");
 }
 
 TEST_F(MeshConverterTest, StaticMeshML)
 {
 	RunTest("tree2a.lod.meshml", "", "tree2a.lod.meshml");
-}
-
-TEST_F(MeshConverterTest, AnimationMeshML)
-{
-	RunTest("anim.meshml", "", "anim.meshml");
 }

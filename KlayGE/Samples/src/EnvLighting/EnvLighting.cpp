@@ -1,20 +1,20 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneNode.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -27,8 +27,9 @@
 
 //#define CALC_FITTING_TABLE
 
-#include <vector>
+#include <iterator>
 #include <sstream>
+#include <vector>
 #ifdef CALC_FITTING_TABLE
 #include <iostream>
 #include <iomanip>
@@ -46,9 +47,8 @@ namespace
 	class SphereRenderable : public StaticMesh
 	{
 	public:
-		SphereRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Sphere"),
-				distance_(0.8f)
+		explicit SphereRenderable(std::wstring_view name)
+			: StaticMesh(name)
 		{
 			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
@@ -59,19 +59,14 @@ namespace
 			techs_[5] = effect_->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 
-			SceneManager& sm = Context::Instance().SceneManagerInstance();
-			for (uint32_t i = 0; i < sm.NumLights(); ++ i)
 			{
-				LightSourcePtr const & light = sm.GetLight(i);
-				if (LightSource::LT_Ambient == light->Type())
-				{
-					*(effect_->ParameterByName("skybox_Ycube_tex")) = light->SkylightTexY();
-					*(effect_->ParameterByName("skybox_Ccube_tex")) = light->SkylightTexC();
+				auto* ambient_light = Context::Instance().SceneManagerInstance().SceneRootNode().FirstComponentOfType<AmbientLightSource>();
 
-					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
-					*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
-					break;
-				}
+				*(effect_->ParameterByName("skybox_Ycube_tex")) = ambient_light->SkylightTexY();
+				*(effect_->ParameterByName("skybox_Ccube_tex")) = ambient_light->SkylightTexC();
+
+				uint32_t const mip = ambient_light->SkylightTexY()->NumMipMaps();
+				*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
 			}
 
 			// From https://github.com/BIDS/colormap/blob/master/parula.py
@@ -149,31 +144,17 @@ namespace
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			auto& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, MakeSpan<1>(init_data));
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
-		virtual void DoBuildMeshInfo() override
-		{
-			AABBox const & pos_bb = this->PosBound();
-			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
-			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
-			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
+		using StaticMesh::Material;
 
 		void Material(float4 const & diffuse, float4 const & specular, float glossiness)
 		{
 			*(effect_->ParameterByName("diffuse")) = float3(diffuse.x(), diffuse.y(), diffuse.z());
 			*(effect_->ParameterByName("specular")) = float3(specular.x(), specular.y(), specular.z());
 			*(effect_->ParameterByName("glossiness")) = glossiness;
-		}
-
-		void Id(uint32_t id)
-		{
-			id_ = id;
 		}
 
 		void RenderingType(int type)
@@ -188,17 +169,10 @@ namespace
 
 		void OnRenderBegin()
 		{
+			StaticMesh::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
-
-			uint32_t const spheres_row = 10;
-			uint32_t const spheres_column = 10;
-			uint32_t const j = id_ / spheres_column;
-			uint32_t const i = id_ - j * spheres_column;
-			float3 const pos((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.06f,
-				(-static_cast<float>(spheres_row / 2) + i + 0.5f) * 0.06f,
-				distance_);
-			model_mat_ = MathLib::translation(MathLib::transform_coord(pos, camera.InverseViewMatrix()));
 
 			float4x4 const mvp = model_mat_ * camera.ViewProjMatrix();
 
@@ -207,53 +181,8 @@ namespace
 			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
-		void Distance(float distance)
-		{
-			distance_ = distance;
-		}
-		float Distance() const
-		{
-			return distance_;
-		}
-
 	private:
 		array<RenderTechnique*, 6> techs_;
-
-		uint32_t id_;
-		float distance_;
-	};
-
-	class SphereObject : public SceneObject
-	{
-	public:
-		SphereObject(float4 const & diff, float4 const & spec, float glossiness, uint32_t id)
-			: SceneObject(SOA_Cullable)
-		{
-			auto renderable = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
-				CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
-			checked_pointer_cast<SphereRenderable>(renderable)->Material(diff, spec, glossiness);
-			checked_pointer_cast<SphereRenderable>(renderable)->Id(id);
-			this->AddRenderable(renderable);
-		}
-
-		void RenderingType(int type)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->RenderingType(type);
-		}
-
-		void IntegratedBRDFTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->IntegratedBRDFTex(tex);
-		}
-
-		void Distance(float distance)
-		{
-			checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance(distance);
-		}
-		float Distance() const
-		{
-			return checked_pointer_cast<SphereRenderable>(renderables_[0])->Distance();
-		}
 	};
 
 	float4 const diff_parametes[] =
@@ -634,7 +563,7 @@ namespace
 			{
 				float g = GImplicit(n_dot_v, n_dot_l);
 				float g_vis = g * v_dot_h / std::max(1e-6f, n_dot_h * n_dot_v);
-				float fc = pow(1 - v_dot_h, 5);
+				float fc = std::pow(1 - v_dot_h, 5.0f);
 				rg += float2(1 - fc, fc) * g_vis;
 			}
 		}
@@ -681,14 +610,14 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan<1>(init_data), nullptr);
 
 		return ret;
 	}
 
 #ifdef CALC_FITTING_TABLE
 	void GenFittedBRDF(uint32_t width, uint32_t height, std::vector<float2>& fitted_brdf_f32,
-		ArrayRef<float4> r_factors, ArrayRef<float4> g_factors)
+		std::span<float4 const> r_factors, std::span<float4 const> g_factors)
 	{
 		fitted_brdf_f32.resize(width * height);
 		for (uint32_t y = 0; y < height; ++ y)
@@ -727,8 +656,8 @@ namespace
 		};
 
 		GenFittedBRDF(width, height, fitted_brdf_f32,
-			ArrayRef<float4>(r_min_factors_base.data(), r_min_factors_base.size()),
-			ArrayRef<float4>(g_min_factors_base.data(), g_min_factors_base.size()));
+			MakeSpan(r_min_factors_base.data(), r_min_factors_base.size()),
+			MakeSpan(g_min_factors_base.data(), g_min_factors_base.size()));
 	}
 
 	TexturePtr GenFittedBRDF(uint32_t width, uint32_t height)
@@ -756,7 +685,7 @@ namespace
 		init_data.slice_pitch = init_data.row_pitch * height;
 
 		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(init_data, nullptr);
+		ret->CreateHWResource(MakeSpan(init_data), nullptr);
 
 		return ret;
 	}
@@ -941,7 +870,7 @@ void EnvLightingApp::OnCreate()
 
 	auto& rf = Context::Instance().RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
-	ElementFormat const fmt = caps.BestMatchTextureFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 });
+	ElementFormat const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}));
 	if (fmt == EF_GR8)
 	{
 		integrated_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
@@ -951,25 +880,61 @@ void EnvLightingApp::OnCreate()
 		auto integrated_brdf_sw_tex = LoadSoftwareTexture("IntegratedBRDF.dds");
 
 		integrated_brdf_tex_ = rf.MakeTexture2D(integrated_brdf_sw_tex->Width(0), integrated_brdf_sw_tex->Height(0), 1, 1, fmt, 1, 0, EAH_GPU_Read);
-		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_);
+		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_, TextureFilter::Point);
 	}
+
+	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
-	ambient_light->AddToSceneManager();
+	root_node.AddComponent(ambient_light);
 
-	spheres_.resize(std::size(diff_parametes));
-	for (size_t i = 0; i < spheres_.size(); ++ i)
+	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
+	root_node.AddChild(sphere_group_);
+
+	sphere_group_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+		{
+			KFL_UNUSED(app_time);
+			KFL_UNUSED(elapsed_time);
+
+			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
+
+			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
+		});
+
+	auto sphere_model_unique = SyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable,
+		SceneNode::SOA_Cullable, nullptr,
+		CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
+
+	sphere_models_.resize(std::size(diff_parametes));
+	for (size_t i = 0; i < sphere_models_.size(); ++ i)
 	{
-		spheres_[i] = MakeSharedPtr<SphereObject>(diff_parametes[i], spec_parameters[i], glossiness_parametes[i],
-			static_cast<uint32_t>(i));
-		checked_pointer_cast<SphereObject>(spheres_[i])->IntegratedBRDFTex(integrated_brdf_tex_);
-		spheres_[i]->AddToSceneManager();
+		sphere_models_[i] = sphere_model_unique->Clone(CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
+
+		uint32_t const spheres_row = 10;
+		uint32_t const spheres_column = 10;
+		size_t const y = i / spheres_column;
+		size_t const x = i - y * spheres_column;
+
+		sphere_models_[i]->RootNode()->TransformToParent(MathLib::translation(
+			(-static_cast<float>(spheres_column / 2) + x + 0.5f) * 0.06f,
+			-(-static_cast<float>(spheres_row / 2) + y + 0.5f) * 0.06f,
+			0.0f));
+
+		sphere_models_[i]->ForEachMesh([i, this](Renderable& mesh)
+			{
+				auto& sphere_mesh = checked_cast<SphereRenderable&>(mesh);
+				sphere_mesh.Material(diff_parametes[i], spec_parameters[i], glossiness_parametes[i]);
+				sphere_mesh.IntegratedBRDFTex(integrated_brdf_tex_);
+			});
+
+		sphere_group_->AddChild(sphere_models_[i]->RootNode());
 	}
 
-	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
+	auto skybox = MakeSharedPtr<RenderableSkyBox>();
+	skybox->CompressedCubeMap(y_cube_map, c_cube_map);
+	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
@@ -982,19 +947,19 @@ void EnvLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(
+	input_handler->Connect(
 		[this](InputEngine const & sender, InputAction const & action)
 		{
 			this->InputHandler(sender, action);
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
+	UIManager::Instance().Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
 
-	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(
+	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().Connect(
 		[this](UIComboBox const & sender)
 		{
 			this->TypeChangedHandler(sender);
@@ -1017,11 +982,7 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 		{
 			auto const param = checked_pointer_cast<InputMouseActionParam>(action.second);
 			float const delta = -param->wheel_delta / 120.0f * 0.05f;
-			for (size_t i = 0; i < spheres_.size(); ++ i)
-			{
-				auto& sphere = *checked_pointer_cast<SphereObject>(spheres_[i]);
-				sphere.Distance(sphere.Distance() + delta);
-			}
+			distance_ += delta;
 		}
 		break;
 
@@ -1034,9 +995,12 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	rendering_type_ = sender.GetSelectedIndex();
-	for (size_t i = 0; i < spheres_.size(); ++ i)
+	for (size_t i = 0; i < sphere_models_.size(); ++ i)
 	{
-		checked_pointer_cast<SphereObject>(spheres_[i])->RenderingType(rendering_type_);
+		sphere_models_[i]->ForEachMesh([this](Renderable& mesh)
+			{
+				checked_cast<SphereRenderable&>(mesh).RenderingType(rendering_type_);
+			});
 	}
 }
 
@@ -1055,7 +1019,7 @@ void EnvLightingApp::DoUpdateOverlay()
 uint32_t EnvLightingApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
+	re.CurFrameBuffer()->AttachedDsv()->ClearDepthStencil(1.0f, 0);
 
 	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

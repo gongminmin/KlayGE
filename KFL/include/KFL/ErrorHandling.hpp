@@ -33,49 +33,56 @@
 
 #pragma once
 
-#include <KFL/CXX17/string_view.hpp>
-#include <string>
 #include <stdexcept>
-
-#ifndef _HRESULT_DEFINED
-#define _HRESULT_DEFINED
-typedef long HRESULT;
-#endif
+#include <string>
+#include <string_view>
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string_view file, int line);
+	std::string CombineFileLine(std::string_view file, uint32_t line);
 	void Verify(bool x);
 
 #if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
-	KLAYGE_ATTRIBUTE_NORETURN void KFLUnreachableInternal(char const * msg = nullptr, char const * file = nullptr, uint32_t line = 0);
+	[[noreturn]] void KFLUnreachableInternal(std::string_view msg = {}, std::string_view file = {}, uint32_t line = 0);
 #endif
-}
+} // namespace KlayGE
 
 // Throw error code
-#define TEC(x)			{ throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__)); }
+#define TEC(x) throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__))
 
 // Throw error message
-#define TMSG(msg)		{ throw std::runtime_error(msg); }
+#define TMSG(msg) throw std::runtime_error(msg)
 
 // Throw if failed (error code)
-#define TIFEC(x)		{ if (x) TEC(x) }
+#define TIFEC(x)   \
+	{              \
+		if (x)     \
+		{          \
+			TEC(x) \
+		}          \
+	}
 
 // Throw if failed (errc)
-#define TERRC(x)		TEC(std::make_error_code(x))
+#define TERRC(x) TEC(std::make_error_code(x))
 
 // Throw if failed (errc)
-#define TIFERRC(x)		TIFEC(std::make_error_code(x))
+#define TIFERRC(x) TIFEC(std::make_error_code(x))
 
 // Throw if failed (HRESULT)
-#define TIFHR(x)		{ if (static_cast<HRESULT>(x) < 0) { TMSG(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
+#define TIFHR(hr)                                              \
+	{                                                          \
+		if ((hr) < 0)                                          \
+		{                                                      \
+			TMSG(KlayGE::CombineFileLine(__FILE__, __LINE__)); \
+		}                                                      \
+	}
 
 #ifdef KLAYGE_DEBUG
-	#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal(msg, __FILE__, __LINE__)
+#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal(msg, __FILE__, __LINE__)
 #elif defined(KLAYGE_BUILTIN_UNREACHABLE)
-	#define KFL_UNREACHABLE(msg) KLAYGE_BUILTIN_UNREACHABLE
+#define KFL_UNREACHABLE(msg) KLAYGE_BUILTIN_UNREACHABLE
 #else
-	#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal()
+#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal()
 #endif
 
-#endif		// _KFL_ERRORHANDLING_HPP
+#endif // _KFL_ERRORHANDLING_HPP

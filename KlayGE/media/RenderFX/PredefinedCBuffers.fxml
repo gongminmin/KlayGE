@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Material.fxml"/>
+	<include name="Mesh.fxml"/>
+	<include name="ModelCamera.fxml"/>
+
+	<shader>
+		<![CDATA[
+// Just dummy shaders
+
+void PredefinedCBuffersNoopVS(out float4 oPositionOS : PositionOS, out float4 oPosition : SV_Position)
+{
+	oPositionOS = mul(float4(pos_center, 1), model);
+
+	KlayGECameraInfo camera = CameraFromInstance(0);
+	float4x4 mvp = camera.mvp;
+	oPosition = mul(float4(pos_center, 1), mvp);
+}
+
+float4 PredefinedCBuffersNoopPS() : SV_Target0
+{
+	return albedo_clr;
+}
+		]]>
+	</shader>
+
+	<technique name="PredefinedCBuffersNoopTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="PredefinedCBuffersNoopVS()"/>
+			<state name="pixel_shader" value="PredefinedCBuffersNoopPS()"/>
+		</pass>
+	</technique>
+</effect>

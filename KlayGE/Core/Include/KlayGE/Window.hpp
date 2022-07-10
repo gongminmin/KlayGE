@@ -24,27 +24,20 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/RenderSettings.hpp>
-
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'sp'
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/signals2.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <KlayGE/Signal.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-#if defined(KLAYGE_COMPILER_MSVC)
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#if KLAYGE_COMPILER_VERSION >= 142
+#pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
 #endif
-#include <windows.system.display.h>
-#include <windows.ui.core.h>
-#if defined(KLAYGE_COMPILER_MSVC)
+#endif
+#include <winrt/Windows.System.Display.h>
+#include <winrt/Windows.UI.Core.h>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -71,7 +64,7 @@ OBJC_CLASS(NSView);
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Window : boost::noncopyable
+	class KLAYGE_CORE_API Window final : boost::noncopyable
 	{
 	public:
 		enum WindowRotation
@@ -84,7 +77,7 @@ namespace KlayGE
 		};
 
 	public:
-		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
+		Window(std::string const& name, RenderSettings const& settings, void* native_wnd);
 		~Window();
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -93,23 +86,23 @@ namespace KlayGE
 			return wnd_;
 		}
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
-		void SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window);
+		void SetWindow(winrt::Windows::UI::Core::CoreWindow const& window);
 
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> GetWindow() const
+		winrt::Windows::UI::Core::CoreWindow GetWindow() const
 		{
 			return wnd_;
 		}
 
 		void OnActivated();
-		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
-		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
+		void OnSizeChanged(winrt::Windows::UI::Core::WindowSizeChangedEventArgs const& args);
+		void OnVisibilityChanged(winrt::Windows::UI::Core::VisibilityChangedEventArgs const& args);
 		void OnClosed();
-		void OnKeyDown(ABI::Windows::UI::Core::IKeyEventArgs* args);
-		void OnKeyUp(ABI::Windows::UI::Core::IKeyEventArgs* args);
-		void OnPointerPressed(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerReleased(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerMoved(ABI::Windows::UI::Core::IPointerEventArgs* args);
-		void OnPointerWheelChanged(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnKeyDown(winrt::Windows::UI::Core::KeyEventArgs const& args);
+		void OnKeyUp(winrt::Windows::UI::Core::KeyEventArgs const& args);
+		void OnPointerPressed(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerReleased(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerMoved(winrt::Windows::UI::Core::PointerEventArgs const& args);
+		void OnPointerWheelChanged(winrt::Windows::UI::Core::PointerEventArgs const& args);
 		void OnDpiChanged();
 		void OnOrientationChanged();
 		void OnDisplayContentsInvalidated();
@@ -137,11 +130,11 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
 		void BindListeners();
-		void CreateGLView(RenderSettings const & settings);
+		void CreateGLView(RenderSettings const& settings);
 		void CreateGLESView();
 		static void PumpEvents();
 		void FlushBuffer();
-		uint2 GetNSViewSize();
+		uint2 GetNSViewSize() const;
 		void* NSView()
 		{
 			return ns_view_;
@@ -150,7 +143,7 @@ namespace KlayGE
 		static void PumpEvents();
 		void CreateColorRenderBuffer(ElementFormat pf);
 		void FlushBuffer();
-		uint2 GetGLKViewSize();
+		uint2 GetGLKViewSize() const;
 #endif
 
 		int32_t Left() const
@@ -211,34 +204,34 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signals2::signal<void(Window const & wnd, bool active)> ActiveEvent;
-		typedef boost::signals2::signal<void(Window const & wnd)> PaintEvent;
-		typedef boost::signals2::signal<void(Window const & wnd)> EnterSizeMoveEvent;
-		typedef boost::signals2::signal<void(Window const & wnd)> ExitSizeMoveEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, bool active)> SizeEvent;
-		typedef boost::signals2::signal<void(Window const & wnd)> SetCursorEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
+		typedef Signal::Signal<void(Window const& wnd, bool active)> ActiveEvent;
+		typedef Signal::Signal<void(Window const& wnd)> PaintEvent;
+		typedef Signal::Signal<void(Window const& wnd)> EnterSizeMoveEvent;
+		typedef Signal::Signal<void(Window const& wnd)> ExitSizeMoveEvent;
+		typedef Signal::Signal<void(Window const& wnd, bool active)> SizeEvent;
+		typedef Signal::Signal<void(Window const& wnd)> SetCursorEvent;
+		typedef Signal::Signal<void(Window const& wnd, wchar_t ch)> CharEvent;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
-#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
-	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
+		typedef Signal::Signal<void(Window const& wnd, HRAWINPUT ri)> RawInputEvent;
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_LINUX) || \
+	defined(KLAYGE_PLATFORM_DARWIN)
+		typedef Signal::Signal<void(Window const& wnd, uint32_t key)> KeyDownEvent;
+		typedef Signal::Signal<void(Window const& wnd, uint32_t key)> KeyUpEvent;
 #if defined KLAYGE_PLATFORM_ANDROID
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseUpEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt)> MouseMoveEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t buttons)> JoystickButtonsEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t buttons)> MouseDownEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t buttons)> MouseUpEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt)> MouseMoveEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, int32_t wheel_delta)> MouseWheelEvent;
+		typedef Signal::Signal<void(Window const& wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
+		typedef Signal::Signal<void(Window const& wnd, uint32_t buttons)> JoystickButtonsEvent;
 #endif
 #endif
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t id)> PointerDownEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t id)> PointerUpEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t id, bool down)> PointerUpdateEvent;
+		typedef Signal::Signal<void(Window const& wnd, int2 const& pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
 
-		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
+		typedef Signal::Signal<void(Window const& wnd)> CloseEvent;
 
 		ActiveEvent& OnActive()
 		{
@@ -273,8 +266,8 @@ namespace KlayGE
 		{
 			return raw_input_event_;
 		}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
-	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_LINUX) || \
+	defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent& OnKeyDown()
 		{
 			return key_down_event_;
@@ -341,8 +334,8 @@ namespace KlayGE
 		CharEvent char_event_;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
-#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
-	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_LINUX) || \
+	defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;
 #if defined KLAYGE_PLATFORM_ANDROID
@@ -366,9 +359,9 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		static BOOL CALLBACK EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam);
+		static BOOL CALLBACK EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam) noexcept;
 #endif
 		void KeepScreenOn();
 
@@ -380,7 +373,7 @@ namespace KlayGE
 		void DetectsDpi();
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
-		void MsgProc(XEvent const & event);
+		void MsgProc(XEvent const& event);
 #elif defined KLAYGE_PLATFORM_ANDROID
 	public:
 		static void HandleCMD(android_app* app, int32_t cmd);
@@ -412,8 +405,8 @@ namespace KlayGE
 		HWND wnd_;
 		WNDPROC default_wnd_proc_;
 #else
-		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		std::shared_ptr<ABI::Windows::System::Display::IDisplayRequest> disp_request_;
+		winrt::Windows::UI::Core::CoreWindow wnd_{nullptr};
+		winrt::Windows::System::Display::DisplayRequest disp_request_{ nullptr };
 		std::array<uint32_t, 16> pointer_id_map_;
 		bool full_screen_;
 #endif
@@ -432,6 +425,6 @@ namespace KlayGE
 		KlayGEView* eagl_view_;
 #endif
 	};
-}
+} // namespace KlayGE
 
-#endif		// _WINDOW_HPP
+#endif // _WINDOW_HPP

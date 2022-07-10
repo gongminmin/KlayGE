@@ -17,21 +17,30 @@
 
 	<shader>
 		<![CDATA[
-float4 GuassBlur(float2 texcoord, uint sample_index)
+float4 SeparableSssBlurPS(float2 texcoord, uint sample_index, float2 dir)
 {
+	const int SSSS_N_SAMPLES = 11;
+	float4 kernel[] =
+	{
+		float4(0.560479, 0.669086, 0.784728, 0),
+		float4(0.00471691, 0.000184771, 5.07566e-005, -2),
+		float4(0.0192831, 0.00282018, 0.00084214, -1.28),
+		float4(0.03639, 0.0130999, 0.00643685, -0.72),
+		float4(0.0821904, 0.0358608, 0.0209261, -0.32),
+		float4(0.0771802, 0.113491, 0.0793803, -0.08),
+		float4(0.0771802, 0.113491, 0.0793803, 0.08),
+		float4(0.0821904, 0.0358608, 0.0209261, 0.32),
+		float4(0.03639, 0.0130999, 0.00643685, 0.72),
+		float4(0.0192831, 0.00282018, 0.00084214, 1.28),
+		float4(0.00471691, 0.000184771, 5.07565e-005, 2),
+	};
+
+	// Fetch color and linear depth for current pixel:
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	src_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = texcoord * int2(width, height);
-#endif
-	
-	// Gaussian weights for the six samples around the current pixel:
-	//   -3 -2 -1 +1 +2 +3
-	float w[6] = { 0.006f,   0.061f,   0.242f,  0.242f,  0.061f, 0.006f };
-	float o[6] = {  -1.0f, -0.6667f, -0.3333f, 0.3333f, 0.6667f,   1.0f };
 
-	// Fetch color and linear depth for current pixel:
-#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	float4 color_m = src_tex_ms.Load(coord, sample_index);
 	float depth_m = ReadAFloat(depth_tex_ms.Load(coord, sample_index), far_plane);
 #else
@@ -40,7 +49,8 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 #endif
 
 	// Accumulate center sample, multiplying it with its gaussian weight:
-	float4 color_blurred = color_m * 0.382f;
+	float4 color_blurred = color_m;
+	color_blurred.rgb *= kernel[0].rgb;
 	
 	// Calculate the step that we will use to fetch the surrounding pixels,
 	// where "step" is:
@@ -48,10 +58,10 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 	// The closer the pixel, the stronger the effect needs to be, hence
 	// the factor 1.0 / depth_m.
 	float2 final_step = color_m.a * step / depth_m;
-	for (int i = 0; i < 6; ++ i)
+	for (int i = 1; i < SSSS_N_SAMPLES; ++ i)
 	{
 		// Fetch color and depth for current sample:
-		float2 offset = texcoord + o[i] * final_step;
+		float2 offset = texcoord + kernel[i].a * final_step;
 #if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		int2 offset_coord = offset * int2(width, height);
 		float3 color = src_tex_ms.Load(offset_coord, sample_index).rgb;
@@ -66,7 +76,7 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 		color = lerp(color, color_m.rgb, s);
 
 		// Accumulate:
-		color_blurred.rgb += w[i] * color;
+		color_blurred.rgb += kernel[i].rgb * color;
 	}
 
 	// The result will be alpha blended with current buffer by using specific
@@ -74,54 +84,19 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 	return color_blurred;
 }
 
-float4 BlurRT0PS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
+float4 SeparableSssBlurXPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-	return GuassBlur(texcoord, sample_index);
+	return SeparableSssBlurPS(texcoord, sample_index, float2(1, 0));
 }
 
-void BlurMRTPS(float2 texcoord : TEXCOORD0,
-			uint sample_index : SV_SampleIndex,
-			out float4 oRT0 : SV_Target0,
-			out float4 oRT1 : SV_Target1)
+float4 SeparableSssBlurYPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-	oRT0 = oRT1 = GuassBlur(texcoord, sample_index);
+	return SeparableSssBlurPS(texcoord, sample_index, float2(0, 1));
 }
 		]]>
 	</shader>
 
-	<technique name="SSSCopy" inherit="Copy">
-		<pass name="p1">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_read_mask" value="32"/>
-			<state name="front_stencil_write_mask" value="0"/>
-		</pass>
-	</technique>
-	<technique name="SSSCopyMS" inherit="SSSCopy">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-	
-	<technique name="BlurX">
-		<pass name="p1">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_read_mask" value="32"/>
-			<state name="front_stencil_write_mask" value="0"/>
-			
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurRT0PS()"/>
-		</pass>
-	</technique>
-	<technique name="BlurXMS" inherit="BlurX">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-
-	<technique name="BlurY1">
+	<technique name="SeparableSssBlurX">
 		<pass name="p1">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -132,86 +107,20 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="front_stencil_read_mask" value="32"/>
 			<state name="front_stencil_write_mask" value="0"/>
 
-			<state name="independent_blend_enable" value="true"/>
-			<state name="blend_enable" index="0" value="true"/>
-			<state name="blend_enable" index="1" value="false"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="blend_factor"/>
-			<state name="dest_blend" value="inv_blend_factor"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="one"/>
-			<state name="dest_blend_alpha" value="one"/>
-			<state name="blend_factor" r="0.3251" g="0.45" b="0.3583" a="1"/>
-
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurMRTPS()"/>
+			<state name="pixel_shader" value="SeparableSssBlurXPS()"/>
 		</pass>
 	</technique>
-	<technique name="BlurY1MS" inherit="BlurY1">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-	
-	<technique name="BlurY2" inherit="BlurY1">
-		<pass name="p1">
-			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="BlurY2MS" inherit="BlurY2">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-	
-	<technique name="BlurY3" inherit="BlurY1">
-		<pass name="p1">
-			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
-		</pass>
-	</technique>
-	<technique name="BlurY3MS" inherit="BlurY3">
+	<technique name="SeparableSssBlurXMS" inherit="SeparableSssBlurX">
 		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
-	<technique name="Accum1">
+	<technique name="SeparableSssBlurY" inherit="SeparableSssBlurX">
 		<pass name="p1">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_read_mask" value="32"/>
-			<state name="front_stencil_write_mask" value="0"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="blend_factor"/>
-			<state name="dest_blend" value="inv_blend_factor"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="one"/>
-			<state name="dest_blend_alpha" value="one"/>
-			<state name="blend_factor" r="0.3251" g="0.45" b="0.3583" a="1"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="CopyPS()"/>
+			<state name="pixel_shader" value="SeparableSssBlurYPS()"/>
 		</pass>
 	</technique>
-	<technique name="Accum1MS" inherit="Accum1">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-	
-	<technique name="Accum2" inherit="Accum1">
-		<pass name="p1">
-			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="Accum2MS" inherit="Accum2">
-		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
-	</technique>
-	
-	<technique name="Accum3" inherit="Accum1">
-		<pass name="p1">
-			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
-		</pass>
-	</technique>
-	<technique name="Accum3MS" inherit="Accum3">
+	<technique name="SeparableSssBlurYMS" inherit="SeparableSssBlurY">
 		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
@@ -284,7 +193,7 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, uint s
 
 	float3 color = light_color * AttenuationTerm(light_pos_es, pos_es, light_falloff);
 	float3 light_vec = normalize(pos_es - light_pos_es);
-	float irradiance = max(0.3f + dot(normal, light_vec), 0);
+	float irradiance = saturate(0.3f + dot(normal, light_vec));
 	float3 transmittance = CalcTransmit(s * strength) * color * irradiance * GetDiffuse(rt1).rgb;
 	return float4(transmittance, 1);
 }

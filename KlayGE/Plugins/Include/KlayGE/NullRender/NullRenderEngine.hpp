@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	class NullRenderEngine : public RenderEngine
+	class NullRenderEngine final : public RenderEngine
 	{
 	public:
 		NullRenderEngine();
@@ -69,29 +69,9 @@ namespace KlayGE
 		bool FullScreen() const override;
 		void FullScreen(bool fs) override;
 
-		char const * VertexShaderProfile() const
+		char const* DefaultShaderProfile(ShaderStage stage) const
 		{
-			return vs_profile_.c_str();
-		}
-		char const * PixelShaderProfile() const
-		{
-			return ps_profile_.c_str();
-		}
-		char const * GeometryShaderProfile() const
-		{
-			return gs_profile_.c_str();
-		}
-		char const * ComputeShaderProfile() const
-		{
-			return cs_profile_.c_str();
-		}
-		char const * HullShaderProfile() const
-		{
-			return hs_profile_.c_str();
-		}
-		char const * DomainShaderProfile() const
-		{
-			return ds_profile_.c_str();
+			return shader_profiles_[static_cast<uint32_t>(stage)];
 		}
 
 	private:
@@ -114,12 +94,7 @@ namespace KlayGE
 		bool requires_flipping_;
 		bool frag_depth_support_;
 
-		std::string vs_profile_;
-		std::string ps_profile_;
-		std::string gs_profile_;
-		std::string cs_profile_;
-		std::string hs_profile_;
-		std::string ds_profile_;
+		char const* shader_profiles_[NumShaderStages];
 	};
 }
 

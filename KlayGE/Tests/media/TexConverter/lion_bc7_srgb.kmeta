@@ -6,5 +6,7 @@
 	"slot": "albedo",
 
 	"prefered_format": "BC7_SRGB",
-	"force_srgb": true
+	"force_srgb": true,
+
+	"source": "lion.jpg"
 }

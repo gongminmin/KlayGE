@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="DetailedSurface" caption="Detailed Surface" x="-140" y="200" align_x="right" width="140" height="234">
+	<dialog id="DetailedSurface" caption="Detailed Surface" x="-140" y="200" align_x="right" width="140" height="264">
 		<control type="static" id="ScaleStatic" caption="Scale:" x="20" y="20" width="100" height="24" is_default="0"/>
 		<control type="slider" id="ScaleSlider" x="20" y="40" width="100" height="24" min="0" max="20" value="6" is_default="0"/>
 
@@ -15,8 +15,9 @@
 			<item name="Smooth Tessellation"/>
 		</control>
 
-		<control type="check_box" id="NaLength" caption="Na Length" x="20" y="154" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
-		<control type="check_box" id="Wireframe" caption="Wireframe" x="20" y="184" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="Occlusion" caption="Occlusion Map" x="20" y="154" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="NaLength" caption="Na Length" x="20" y="184" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="Wireframe" caption="Wireframe" x="20" y="214" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
 	<dialog id="Loading" capture="Loading" x="-250" y="-60" align_x="center" align_y="middle" width="500" height="120" show_caption="false" opacity="true" bg_color_a="0">

@@ -129,5 +129,5 @@ DXBCChunkSignatureHeader const * DXBCFindSignature(void const * data, uint32_t k
 		return nullptr;
 	}
 
-	return reinterpret_cast<DXBCChunkSignatureHeader const *>(DXBCFindChunk(data, fourcc));
+	return static_cast<DXBCChunkSignatureHeader const*>(DXBCFindChunk(data, fourcc));
 }

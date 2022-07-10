@@ -40,22 +40,19 @@ namespace KlayGE
 	class ResLoadingDesc;
 	typedef std::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
 	class ResLoader;
-	class PerfRange;
-	typedef std::shared_ptr<PerfRange> PerfRangePtr;
+	class PerfRegion;
 	class PerfProfiler;
 	typedef std::shared_ptr<PerfProfiler> PerfProfilerPtr;
 
 	class SceneManager;
+	class SceneComponent;
+	using SceneComponentPtr = std::shared_ptr<SceneComponent>;
 	class SceneNode;
-	typedef std::shared_ptr<SceneNode> SceneNodePtr;
-	class SceneObject;
-	typedef std::shared_ptr<SceneObject> SceneObjectPtr;
-	class SceneObjectSkyBox;
-	typedef std::shared_ptr<SceneObjectSkyBox> SceneObjectSkyBoxPtr;
+	using SceneNodePtr = std::shared_ptr<SceneNode>;
 	class SceneObjectLightSourceProxy;
-	typedef std::shared_ptr<SceneObjectLightSourceProxy> SceneObjectLightSourceProxyPtr;
+	using SceneObjectLightSourceProxyPtr = std::shared_ptr<SceneObjectLightSourceProxy>;
 	class SceneObjectCameraProxy;
-	typedef std::shared_ptr<SceneObjectCameraProxy> SceneObjectCameraProxyPtr;
+	using SceneObjectCameraProxyPtr = std::shared_ptr<SceneObjectCameraProxy>;
 
 	class Blitter;
 	typedef std::shared_ptr<Blitter> BlitterPtr;
@@ -74,12 +71,12 @@ namespace KlayGE
 	typedef std::shared_ptr<Font> FontPtr;
 	class RenderEngine;
 	struct RenderSettings;
-	struct RenderMaterial;
+	class RenderMaterial;
 	typedef std::shared_ptr<RenderMaterial> RenderMaterialPtr;
 	class Renderable;
 	typedef std::shared_ptr<Renderable> RenderablePtr;
-	class RenderableHelper;
-	typedef std::shared_ptr<RenderableHelper> RenderableHelperPtr;
+	class RenderableComponent;
+	typedef std::shared_ptr<RenderableComponent> RenderableComponentPtr;
 	class RenderablePoint;
 	typedef std::shared_ptr<RenderablePoint> RenderablePointPtr;
 	class RenderableLine;
@@ -98,14 +95,14 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderDecal> RenderDecalPtr;
 	class RenderEffect;
 	typedef std::shared_ptr<RenderEffect> RenderEffectPtr;
-	class RenderEffectTemplate;
-	typedef std::shared_ptr<RenderEffectTemplate> RenderEffectTemplatePtr;
 	class RenderTechnique;
 	class RenderPass;
 	typedef std::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectConstantBuffer;
+	typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 	class RenderEffectParameter;
 	class RenderVariable;
+	class RenderEffectStructType;
 	class RenderEffectAnnotation;
 	typedef std::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 	struct RasterizerStateDesc;
@@ -116,6 +113,8 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderStateObject> RenderStateObjectPtr;
 	class SamplerStateObject;
 	typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectPtr;
+	class ShaderStageObject;
+	typedef std::shared_ptr<ShaderStageObject> ShaderStageObjectPtr;
 	class ShaderObject;
 	typedef std::shared_ptr<ShaderObject> ShaderObjectPtr;
 	class Texture;
@@ -152,8 +151,12 @@ namespace KlayGE
 	typedef std::shared_ptr<JudaTexture> JudaTexturePtr;
 	class FrameBuffer;
 	typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
-	class RenderView;
-	typedef std::shared_ptr<RenderView> RenderViewPtr;
+	class ShaderResourceView;
+	typedef std::shared_ptr<ShaderResourceView> ShaderResourceViewPtr;
+	class RenderTargetView;
+	typedef std::shared_ptr<RenderTargetView> RenderTargetViewPtr;
+	class DepthStencilView;
+	typedef std::shared_ptr<DepthStencilView> DepthStencilViewPtr;
 	class UnorderedAccessView;
 	typedef std::shared_ptr<UnorderedAccessView> UnorderedAccessViewPtr;
 	class GraphicsBuffer;
@@ -162,13 +165,15 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderLayout> RenderLayoutPtr;
 	class RenderGraphicsBuffer;
 	typedef std::shared_ptr<RenderGraphicsBuffer> RenderGraphicsBufferPtr;
-	struct Viewport;
+	class Viewport;
 	typedef std::shared_ptr<Viewport> ViewportPtr;
 	class RenderFactory;
 	class RenderModel;
 	typedef std::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
 	typedef std::shared_ptr<StaticMesh> StaticMeshPtr;
+	class JointComponent;
+	typedef std::shared_ptr<JointComponent> JointComponentPtr;
 	class SkinnedModel;
 	typedef std::shared_ptr<SkinnedModel> SkinnedModelPtr;
 	class SkinnedMesh;
@@ -252,16 +257,16 @@ namespace KlayGE
 	typedef std::shared_ptr<ParticleSystem> ParticleSystemPtr;
 	class InfTerrainRenderable;
 	typedef std::shared_ptr<InfTerrainRenderable> InfTerrainRenderablePtr;
-	class InfTerrainSceneObject;
-	typedef std::shared_ptr<InfTerrainSceneObject> InfTerrainSceneObjectPtr;
+	class InfTerrainRenderableComponent;
+	typedef std::shared_ptr<InfTerrainRenderableComponent> InfTerrainRenderableComponentPtr;
 	class HQTerrainRenderable;
 	typedef std::shared_ptr<HQTerrainRenderable> HQTerrainRenderablePtr;
-	class HQTerrainSceneObject;
-	typedef std::shared_ptr<HQTerrainSceneObject> HQTerrainSceneObjectPtr;
+	class HQTerrainRenderableComponent;
+	typedef std::shared_ptr<HQTerrainRenderableComponent> HQTerrainRenderableComponentPtr;
 	class LensFlareRenderable;
 	typedef std::shared_ptr<LensFlareRenderable> LensFlareRenderablePtr;
-	class LensFlareSceneObject;
-	typedef std::shared_ptr<LensFlareSceneObject> LensFlareSceneObjectPtr;
+	class LensFlareRenderableComponent;
+	typedef std::shared_ptr<LensFlareRenderableComponent> LensFlareRenderableComponentPtr;
 	class DeferredRenderingLayer;
 	class MultiResLayer;
 	typedef std::shared_ptr<MultiResLayer> MultiResLayerPtr;
@@ -378,11 +383,16 @@ namespace KlayGE
 	class ShowEngine;
 	class ShowFactory;
 
+	class ScriptVariable;
+	using ScriptVariablePtr = std::shared_ptr<ScriptVariable>;
+	class ScriptModule;
 	class ScriptEngine;
 	class ScriptFactory;
 
 	class Package;
 	typedef std::shared_ptr<Package> PackagePtr;
+
+	class DevHelper;
 }
 
 #endif			// _KLAYGE_PREDECLARE_HPP

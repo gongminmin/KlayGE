@@ -53,9 +53,7 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_CASCADES = 4UL;
 
 	public:
-		virtual ~CascadedShadowLayer()
-		{
-		}
+		virtual ~CascadedShadowLayer() noexcept;
 
 		virtual CascadedShadowLayerType Type() const = 0;
 
@@ -80,12 +78,12 @@ namespace KlayGE
 		std::vector<float4x4> crop_mats_;
 	};
 
-	class KLAYGE_CORE_API PSSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API PSSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		PSSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_PSSM;
 		}
@@ -99,12 +97,12 @@ namespace KlayGE
 		float lambda_;
 	};
 
-	class KLAYGE_CORE_API SDSMCascadedShadowLayer : public CascadedShadowLayer
+	class KLAYGE_CORE_API SDSMCascadedShadowLayer final : public CascadedShadowLayer
 	{
 	public:
 		SDSMCascadedShadowLayer();
 
-		CascadedShadowLayerType Type() const
+		CascadedShadowLayerType Type() const override
 		{
 			return CSLT_SDSM;
 		}
@@ -116,6 +114,7 @@ namespace KlayGE
 
 	private:
 		TexturePtr depth_tex_;
+		ShaderResourceViewPtr depth_srv_;
 		bool cs_support_;
 
 		// For CS implement
@@ -146,25 +145,37 @@ namespace KlayGE
 		RenderEffectParameter* max_cascade_scale_param_;
 
 		GraphicsBufferPtr interval_buff_;
+		UnorderedAccessViewPtr interval_buff_float_uav_;
+		UnorderedAccessViewPtr interval_buff_uint_uav_;
+		ShaderResourceViewPtr interval_buff_srv_;
 		GraphicsBufferPtr scale_buff_;
+		UnorderedAccessViewPtr scale_buff_uav_;
 		GraphicsBufferPtr bias_buff_;
+		UnorderedAccessViewPtr bias_buff_uav_;
 		GraphicsBufferPtr cascade_min_buff_;
+		UnorderedAccessViewPtr cascade_min_buff_uint_uav_;
+		ShaderResourceViewPtr cascade_min_buff_srv_;
 		GraphicsBufferPtr cascade_max_buff_;
+		UnorderedAccessViewPtr cascade_max_buff_uint_uav_;
+		ShaderResourceViewPtr cascade_max_buff_srv_;
 
-		GraphicsBufferPtr interval_cpu_buffs_[2];
-		GraphicsBufferPtr scale_cpu_buffs_[2];
-		GraphicsBufferPtr bias_cpu_buffs_[2];
-		uint32_t frame_index_;
+		GraphicsBufferPtr interval_cpu_buff_;
+		GraphicsBufferPtr scale_cpu_buff_;
+		GraphicsBufferPtr bias_cpu_buff_;
 
 		// For PS implement
-		TexturePtr depth_deriative_tex_;
-		TexturePtr depth_deriative_small_tex_;
+		TexturePtr depth_derivative_tex_;
+		std::vector<ShaderResourceViewPtr> depth_derivative_mip_srvs_;
+		std::vector<RenderTargetViewPtr> depth_derivative_mip_rtvs_;
+		TexturePtr depth_derivative_small_tex_;
+		std::vector<RenderTargetViewPtr> depth_derivative_small_mip_rtvs_;
 		PostProcessPtr reduce_z_bounds_from_depth_pp_;
 		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;
 		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;
 
 		TexturePtr interval_tex_;
-		TexturePtr interval_cpu_texs_[2];
+		RenderTargetViewPtr interval_rtv_;
+		TexturePtr interval_cpu_tex_;
 	};
 }
 

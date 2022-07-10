@@ -106,16 +106,17 @@ namespace KlayGE
 			{
 				++ iter;
 			}
-			index = static_cast<int>(iter + 1 - ctrl_points_.begin());
-			if ((iter + 1 == ctrl_points_.end()) || (MathLib::abs((iter + 1)->x() - pos) > 0.05f))
+			++iter;
+			index = static_cast<int>(iter - ctrl_points_.begin());
+			if ((iter == ctrl_points_.end()) || (MathLib::abs(iter->x() - pos) > 0.05f))
 			{
-				ctrl_points_.insert(iter + 1, float2(pos, value));
+				ctrl_points_.emplace(iter, pos, value);
 			}
 		}
 		else
 		{
 			index = 0;
-			ctrl_points_.push_back(float2(pos, value));
+			ctrl_points_.emplace_back(pos, value);
 		}
 		this->ActivePoint(index);
 

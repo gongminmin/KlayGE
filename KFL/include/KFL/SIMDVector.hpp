@@ -53,23 +53,28 @@ namespace KlayGE
 								boost::subtractable2<SIMDVectorF4, float>>>>>>>>
 	{
 	public:
-		SIMDVectorF4()
+		constexpr SIMDVectorF4() noexcept
 		{
 		}
-		SIMDVectorF4(SIMDVectorF4 const & rhs);
+		constexpr SIMDVectorF4(SIMDVectorF4 const& rhs) : vec_(rhs.vec_)
+		{
+		}
+		constexpr SIMDVectorF4(SIMDVectorF4&& rhs) noexcept : vec_(std::move(rhs.vec_))
+		{
+		}
 
-		static size_t size()
+		static constexpr size_t size()
 		{
 			return 4;
 		}
 
 		static SIMDVectorF4 const & Zero();
 
-		V4TYPE& Vec()
+		constexpr V4TYPE& Vec() noexcept
 		{
 			return vec_;
 		}
-		V4TYPE const & Vec() const
+		constexpr V4TYPE const& Vec() const noexcept
 		{
 			return vec_;
 		}
@@ -85,13 +90,16 @@ namespace KlayGE
 
 		SIMDVectorF4& operator=(SIMDVectorF4 const & rhs);
 
-		SIMDVectorF4 const operator+() const;
+		constexpr SIMDVectorF4 const& operator+() const
+		{
+			return *this;
+		}
 		SIMDVectorF4 const operator-() const;
 
 		void swap(SIMDVectorF4& rhs);
 
 	private:
-		V4TYPE vec_;
+		V4TYPE vec_{};
 	};
 
 	inline void swap(SIMDVectorF4& lhs, SIMDVectorF4& rhs)

@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/MultiResLayer.hpp>
 
 #include <array>
 
@@ -42,16 +43,18 @@ namespace KlayGE
 	class KLAYGE_CORE_API IndirectLightingLayer : boost::noncopyable
 	{
 	public:
-		virtual ~IndirectLightingLayer()
-		{
-		}
+		virtual ~IndirectLightingLayer() noexcept;
 
 		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
 		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
 
-		TexturePtr IndirectLightingTex() const
+		TexturePtr const& IndirectLightingTex() const
 		{
 			return indirect_lighting_tex_;
+		}
+		ShaderResourceViewPtr const& IndirectLightingSrv() const
+		{
+			return indirect_lighting_srv_;
 		}
 
 		virtual void UpdateGBuffer(Camera const & vp_camera) = 0;
@@ -60,9 +63,10 @@ namespace KlayGE
 
 	protected:
 		TexturePtr indirect_lighting_tex_;
+		ShaderResourceViewPtr indirect_lighting_srv_;
 	};
 
-	class KLAYGE_CORE_API MultiResSILLayer : public IndirectLightingLayer
+	class KLAYGE_CORE_API MultiResSILLayer final : public IndirectLightingLayer
 	{
 	public:
 		MultiResSILLayer();
@@ -79,7 +83,7 @@ namespace KlayGE
 		void VPLsLighting(LightSource const & light);
 
 	private:
-		MultiResLayerPtr multi_res_layer_;
+		std::unique_ptr<MultiResLayer> multi_res_layer_;
 
 		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
@@ -90,6 +94,7 @@ namespace KlayGE
 
 		std::array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
+		RenderTargetViewPtr vpl_rtv_;
 
 		RenderEffectPtr vpls_lighting_effect_;
 		RenderTechnique* vpls_lighting_instance_id_tech_;
@@ -109,7 +114,7 @@ namespace KlayGE
 		PostProcessPtr rsm_to_depth_derivate_pp_;
 	};
 
-	class KLAYGE_CORE_API SSGILayer : public IndirectLightingLayer
+	class KLAYGE_CORE_API SSGILayer final : public IndirectLightingLayer
 	{
 	public:
 		SSGILayer();
@@ -122,15 +127,20 @@ namespace KlayGE
 		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) override;
 
 	private:
-		MultiResLayerPtr multi_res_layer_;
+		std::unique_ptr<MultiResLayer> multi_res_layer_;
 
 		TexturePtr g_buffer_rt0_tex_;
+		ShaderResourceViewPtr g_buffer_rt0_srv_;
 		TexturePtr g_buffer_depth_tex_;
+		ShaderResourceViewPtr g_buffer_depth_srv_;
 
 		PostProcessPtr ssgi_pp_;
 		PostProcessPtr ssgi_blur_pp_;
 
 		TexturePtr small_ssgi_tex_;
+		ShaderResourceViewPtr small_ssgi_srv_;
+
+		RenderTargetViewPtr indirect_lighting_rtv_;
 	};
 }
 

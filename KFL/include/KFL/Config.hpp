@@ -50,7 +50,7 @@
 #include <KFL/Platform.hpp>
 #include <KFL/Architecture.hpp>
 
-#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
 	#define KLAYGE_HAS_STRUCT_PACK
 #endif
 

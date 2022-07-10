@@ -1,13 +1,12 @@
 # KlayGE
 
-[![GitHub release](https://img.shields.io/badge/release-v4.13.0-blue.svg)](https://github.com/gongminmin/KlayGE/releases/latest)
-[![Build status](https://ci.appveyor.com/api/projects/status/uddr0wulxuferji4/branch/develop?svg=true)](https://ci.appveyor.com/project/gongminmin/KlayGE/branch/develop)
-[![Build Status](https://travis-ci.org/gongminmin/KlayGE.svg?branch=develop)](https://travis-ci.org/gongminmin/KlayGE)
+[![GitHub release](https://img.shields.io/badge/release-v4.17.0-blue.svg)](https://github.com/gongminmin/KlayGE/releases/latest)
+[![Build Status](https://gongminmin.visualstudio.com/KlayGE/_apis/build/status/CI?branchName=develop)](https://gongminmin.visualstudio.com/KlayGE/_build/latest?definitionId=3&branchName=develop)
 
 KlayGE is a cross-platform open source game engine with plugin-based architecture. It's started since 2003. The explicit goal of KlayGE is: to arm your engine with cutting-edge technology. It provides a framework to make game development, testing, porting as simple as possible. 
 
 # Getting started
-Before compiling KlayGE, Python 2.7+ and CMake 3.4+ must be installed first. Then you can run build_all.py to build KlayGE, its Samples, Tools, etc. For details, please see http://www.klayge.org/wiki/index.php/Installation.
+Before compiling KlayGE, Python 3.x+ and CMake 3.13+ must be installed first. Then you can run Build.py to build the whole code base. For details, please see [Installation](http://www.klayge.org/wiki/index.php/Installation).
 
 # Platforms
 KlayGE can be developed on those platforms, with no limitation.
@@ -15,7 +14,7 @@ KlayGE can be developed on those platforms, with no limitation.
 * macOS
 * Linux
 
-KlayGE can be deployed and run on those runtime platforms. Some of them doesn't supports all plugins. Details in http://www.klayge.org/wiki/index.php/Platforms
+KlayGE can be deployed and run on those runtime platforms. Some of them doesn't supports all plugins. Details in [Platforms](http://www.klayge.org/wiki/index.php/Platforms)
 * Windows desktop
 * Windows store
 * Android
@@ -27,11 +26,17 @@ KlayGE can be deployed and run on those runtime platforms. Some of them doesn't 
 As an open source project, KlayGE benefits greatly from both the volunteer work of helpful developers and good bug reports made by users. 
 
 ## Bug Reports & Feature Requests
-If you've noticed a bug or have an idea that you'd like to see come real, why not work on it? Bug reports and feature requests are typically submitted to the issue tracker https://github.com/gongminmin/KlayGE/issues.
+If you've noticed a bug or have an idea that you'd like to see come real, why not work on it? Bug reports and feature requests are typically submitted to the [issue tracker](https://github.com/gongminmin/KlayGE/issues).
 
 ## Engineering Workflow
-If you want contribute some code, please check http://www.klayge.org/wiki/index.php/Workflow_of_contributing_code before submitting a patch or pull request.
+If you want contribute some code, please check [Workflow of Contributing Code](http://www.klayge.org/wiki/index.php/Workflow_of_contributing_code) before submitting a patch or pull request.
 
 # Links
 * Website: http://www.klayge.org
 * Wiki: http://www.klayge.org/wiki
+
+# License
+
+KlayGE's default license is the GNU General Public License 2.0 (See [LICENSE](./LICENSE)). In other words, anyone can use it and access to its source code, as long as the project which uses KlayGE must be released under GPL 2.0 license.
+
+KlayGE dependents on several external libraries. They are distributed under their own terms. See [LICENSE-External](./LICENSE-External.md).

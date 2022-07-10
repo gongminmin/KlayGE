@@ -102,49 +102,25 @@ namespace KlayGE
 
 	int UIListBox::AddItem(std::wstring const & strText)
 	{
-		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
-		pNewItem->strText = strText;
-		pNewItem->rcActive = IRect(0, 0, 0, 0);
-		pNewItem->bSelected = false;
-
 		int ret = static_cast<int>(items_.size());
 
-		items_.push_back(pNewItem);
+		auto& new_item = *items_.emplace_back(MakeSharedPtr<UIListBoxItem>());
+		new_item.strText = strText;
+		new_item.rcActive = IRect(0, 0, 0, 0);
+		new_item.bSelected = false;
+
 		scroll_bar_.SetTrackRange(0, items_.size());
 
 		return ret;
 	}
 
-	void UIListBox::SetItemData(int nIndex, std::any const & data)
+	void UIListBox::InsertItem(int nIndex, std::wstring const & strText)
 	{
-		items_[nIndex]->data = data;
-	}
+		auto& new_item = **items_.emplace(items_.begin() + nIndex, MakeSharedPtr<UIListBoxItem>());
+		new_item.strText = strText;
+		new_item.rcActive = IRect(0, 0, 0, 0);
+		new_item.bSelected = false;
 
-	int UIListBox::AddItem(std::wstring const & strText, std::any const & data)
-	{
-		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
-		pNewItem->strText = strText;
-		pNewItem->data = data;
-		pNewItem->rcActive = IRect(0, 0, 0, 0);
-		pNewItem->bSelected = false;
-
-		int ret = static_cast<int>(items_.size());
-
-		items_.push_back(pNewItem);
-		scroll_bar_.SetTrackRange(0, items_.size());
-
-		return ret;
-	}
-
-	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, std::any const & data)
-	{
-		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
-		pNewItem->strText = strText;
-		pNewItem->data = data;
-		pNewItem->rcActive = IRect(0, 0, 0, 0);
-		pNewItem->bSelected = false;
-
-		items_.insert(items_.begin() + nIndex, pNewItem);
 		scroll_bar_.SetTrackRange(0, items_.size());
 	}
 

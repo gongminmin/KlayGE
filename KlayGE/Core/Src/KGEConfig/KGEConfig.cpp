@@ -11,7 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/iterator.hpp>
+
+#include <KFL/CXX20/format.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
@@ -20,8 +21,11 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <commctrl.h>
+#include <iterator>
 #include <sstream>
 #include <string>
+
+#include <nonstd/scope.hpp>
 
 #include "resource.h"
 
@@ -45,7 +49,7 @@ enum nTabDialogs
 };
 
 HWND hTab = nullptr; // Handle to tab control.
-HWND hTabDlg[NTABS] = {0}; // Array of handle to tab dialogs.
+HWND hTabDlg[NTABS] = {nullptr}; // Array of handle to tab dialogs.
 int iCurSelTab = 0;
 
 HWND hOKButton;
@@ -175,8 +179,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			{
 				SendMessage(hResCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(buf));
 
-				std::string const res = std::to_string(cfg.graphics_cfg.width) + 'x'
-					+ std::to_string(cfg.graphics_cfg.height) + ' ';
+				std::string const res = std::format("{}x{} ", cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 
 				std::string str;
 				Convert(str, buf);
@@ -427,7 +430,7 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				FreeLibrary(mod_xaudio);
 			}
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -461,7 +464,7 @@ INT_PTR CALLBACK Input_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("MsgInput")));
 			}
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -493,7 +496,7 @@ INT_PTR CALLBACK Show_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPARA
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
 			SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DShow")));
 
-			TCHAR buf[256];
+			TCHAR buf[256] = {};
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
@@ -537,7 +540,7 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 
 	ShowWindow(hTab, SW_SHOWNORMAL);
 
-	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	HFONT hFont = reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
 	::SendMessage(hTab, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 
 	TCITEM tci;
@@ -598,7 +601,7 @@ INT_PTR CreateButtons(HWND hWnd, HINSTANCE hInstance)
 				hInstance,
 				nullptr);
 
-	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	HFONT hFont = reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
 	::SendMessage(hOKButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 	::SendMessage(hCancelButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 
@@ -616,14 +619,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					HWND hFactoryCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_FACTORY_COMBO);
 					int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-					TCHAR buf[256];
+					TCHAR buf[256] = {};
 					SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					Convert(cfg.render_factory_name, buf);
 				}
 				{
 					HWND hResCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_RES_COMBO);
 					int n = static_cast<int>(SendMessage(hResCombo, CB_GETCURSEL, 0, 0));
-					TCHAR buf[256];
+					TCHAR buf[256] = {};
 					SendMessage(hResCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					std::string str;
 					Convert(str, buf);
@@ -772,21 +775,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[AUDIO_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.audio_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[INPUT_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.input_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[SHOW_TAB], IDC_FACTORY_COMBO);
 				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
-				TCHAR buf[256];
+				TCHAR buf[256] = {};
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.show_factory_name, buf);
 			}
@@ -851,7 +854,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,
-		width, height, 0, 0, hInstance, nullptr);
+		width, height, nullptr, nullptr, hInstance, nullptr);
 
 	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
@@ -875,6 +878,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE /*hPrevInstance*
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpszCmdLine*/, int /*nCmdShow*/)
 #endif
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	std::string cfg_path = ResLoader::Instance().Locate("KlayGE.cfg");
 	Context::Instance().LoadCfg(cfg_path);
 	cfg = Context::Instance().Config();
@@ -884,8 +889,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lps
 		Context::Instance().Config(cfg);
 		Context::Instance().SaveCfg(cfg_path);
 	}
-
-	Context::Destroy();
 
 	return 0;
 }

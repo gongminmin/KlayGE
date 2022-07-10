@@ -74,8 +74,6 @@ namespace KlayGE
 		{
 			char_width_.resize(buffer_.size() + 1);
 
-			UISize size;
-
 			for (size_t i = 0; i < char_width_.size(); ++ i)
 			{
 				std::wstring str = buffer_.substr(0, i);
@@ -269,7 +267,7 @@ namespace KlayGE
 		}
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_char_connect_ = main_wnd->OnChar().connect(
+		on_char_connect_ = main_wnd->OnChar().Connect(
 			[this](Window const & win, wchar_t ch)
 			{
 				this->CharHandler(win, ch);
@@ -290,7 +288,7 @@ namespace KlayGE
 
 	UIEditBox::~UIEditBox()
 	{
-		on_char_connect_.disconnect();
+		on_char_connect_.Disconnect();
 	}
 
 	// PlaceCaret: Set the caret to a character position, and adjust the scrolling if
@@ -571,6 +569,16 @@ namespace KlayGE
 	void UIEditBox::CharHandler(Window const & /*win*/, wchar_t ch)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifndef VK_CANCEL
+#define VK_CANCEL 0x03
+#endif
+#ifndef VK_BACK
+#define VK_BACK 0x08
+#endif
+#ifndef VK_RETURN
+#define VK_RETURN 0x0D
+#endif
+
 		if (has_focus_)
 		{
 			switch (ch)

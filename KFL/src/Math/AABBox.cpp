@@ -37,35 +37,12 @@
 namespace KlayGE
 {
 	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) noexcept
-				: min_(vMin), max_(vMax)
-	{
-		BOOST_ASSERT(vMin.x() <= vMax.x());
-		BOOST_ASSERT(vMin.y() <= vMax.y());
-		BOOST_ASSERT(vMin.z() <= vMax.z());
-	}
-
-	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax) noexcept
+	AABBox_T<T>::AABBox_T(Vector_T<T, 3> vMin, Vector_T<T, 3> vMax) noexcept
 		: min_(std::move(vMin)), max_(std::move(vMax))
 	{
-		BOOST_ASSERT(vMin.x() <= vMax.x());
-		BOOST_ASSERT(vMin.y() <= vMax.y());
-		BOOST_ASSERT(vMin.z() <= vMax.z());
-	}
-
-	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T> const & rhs) noexcept
-			: Bound_T<T>(rhs),
-				min_(rhs.min_), max_(rhs.max_)
-	{
-	}
-
-	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T>&& rhs) noexcept
-		: Bound_T<T>(rhs),
-			min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
-	{
+		BOOST_ASSERT(min_.x() <= max_.x());
+		BOOST_ASSERT(min_.y() <= max_.y());
+		BOOST_ASSERT(min_.z() <= max_.z());
 	}
 
 	template <typename T>
@@ -131,18 +108,6 @@ namespace KlayGE
 		min_ = std::move(rhs.min_);
 		max_ = std::move(rhs.max_);
 		return *this;
-	}
-
-	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator+() const noexcept
-	{
-		return *this;
-	}
-
-	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator-() const noexcept
-	{
-		return AABBox_T<T>(-this->Max(), -this->Min());
 	}
 
 	template <typename T>
@@ -262,7 +227,7 @@ namespace KlayGE
 	template <typename T>
 	bool AABBox_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
-		return MathLib::intersect_aabb_frustum(*this, frustum) != BO_No;
+		return MathLib::intersect_aabb_frustum(*this, frustum) != BoundOverlap::No;
 	}
 
 	template <typename T>
@@ -280,7 +245,6 @@ namespace KlayGE
 	{
 		return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 	}
-
 
 	template class AABBox_T<float>;
 }

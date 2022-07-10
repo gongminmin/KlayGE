@@ -45,9 +45,13 @@ namespace KlayGE
 								boost::multipliable<SIMDMatrixF4>>>>>
 	{
 	public:
-		SIMDMatrixF4();
+		constexpr SIMDMatrixF4() noexcept
+		{
+		}
 		explicit SIMDMatrixF4(float const * rhs);
-		SIMDMatrixF4(SIMDMatrixF4 const & rhs);
+		constexpr SIMDMatrixF4(SIMDMatrixF4 const& rhs) : m_(rhs.m_)
+		{
+		}
 		SIMDMatrixF4(SIMDVectorF4 const & v1, SIMDVectorF4 const & v2,
 			SIMDVectorF4 const & v3, SIMDVectorF4 const & v4);
 		SIMDMatrixF4(float f11, float f12, float f13, float f14,
@@ -55,7 +59,7 @@ namespace KlayGE
 			float f31, float f32, float f33, float f34,
 			float f41, float f42, float f43, float f44);
 
-		static size_t size()
+		static constexpr size_t size()
 		{
 			return 16;
 		}
@@ -79,7 +83,10 @@ namespace KlayGE
 
 		SIMDMatrixF4& operator=(SIMDMatrixF4 const & rhs);
 
-		SIMDMatrixF4 const operator+() const;
+		constexpr SIMDMatrixF4 const& operator+() const
+		{
+			return *this;
+		}
 		SIMDMatrixF4 const operator-() const;
 
 	private:

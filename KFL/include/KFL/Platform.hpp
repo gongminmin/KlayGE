@@ -35,8 +35,6 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
 
-	#define KLAYGE_HAS_DECLSPEC
-
 	#if defined(_WIN64)
 		#define KLAYGE_PLATFORM_WIN64
 	#else
@@ -47,12 +45,11 @@
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
-	#ifndef WINDOWS_LEAN_AND_MEAN
-		#define WINDOWS_LEAN_AND_MEAN
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
 	#endif
 
 	#if defined(__MINGW32__)
-		#define KLAYGE_COMPILER_NAME mgw
 		#include <_mingw.h>
 	#else
 		#include <sdkddkver.h>
@@ -70,22 +67,24 @@
 
 	#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		#include <winapifamily.h>
-		#if defined(WINAPI_FAMILY)
-			#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
-				#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			#else
-				#define KLAYGE_PLATFORM_WINDOWS_STORE
+		#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP)
+			#ifndef NTDDI_WIN10_RS4
+				#error "You need to install Windows SDK 10.0.17133.0 or up to build UWP."
 			#endif
+			#define KLAYGE_PLATFORM_WINDOWS_STORE
 		#else
 			#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		#endif
 	#else
 		#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	#endif
+
+	#include <windows.h>
+	#ifndef _NTDEF_
+		using NTSTATUS = LONG;
+	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID
-#elif defined(__CYGWIN__)
-	#define KLAYGE_PLATFORM_CYGWIN
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
 #elif defined(__APPLE__)
@@ -97,6 +96,14 @@
 	#endif
 #else
 	#error "Unknown platform. The supported target platforms are Windows, Android, Linux, macOS, and iOS."
+#endif
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
+#else
+#define KLAYGE_SYMBOL_EXPORT __attribute__((visibility("default")))
+#define KLAYGE_SYMBOL_IMPORT
 #endif
 
 #endif		// KFL_PLATFORM_HPP

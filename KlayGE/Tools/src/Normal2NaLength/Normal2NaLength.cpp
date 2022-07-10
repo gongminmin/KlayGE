@@ -11,6 +11,8 @@
 #include <vector>
 #include <cstring>
 
+#include <nonstd/scope.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -130,8 +132,8 @@ namespace
 		if (restored_format != EF_ARGB8)
 		{
 			std::vector<uint8_t> argb8_normals(width * height * 4);
-			ResizeTexture(&argb8_normals[0], width * 4, width * height * 4, EF_ARGB8, width, height, 1,
-				&normals[0], width * 4, width * height * 4, restored_format, width, height, 1, false);
+			ResizeTexture(&argb8_normals[0], width * 4, width * height * 4, EF_ARGB8, width, height, 1, &normals[0], width * 4,
+				width * height * 4, restored_format, width, height, 1, TextureFilter::Point);
 			normals.swap(argb8_normals);
 		}
 
@@ -152,7 +154,7 @@ namespace
 		auto const in_num_mipmaps = in_tex->NumMipMaps();
 		auto const in_array_size = in_tex->ArraySize();
 		auto const in_format = in_tex->Format();
-		auto const & in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto const & in_data = checked_cast<SoftwareTexture&>(*in_tex).SubresourceData();
 
 		TexCompressionBC4 bc4_codec;
 
@@ -172,10 +174,9 @@ namespace
 			}
 
 			std::vector<float3> the_normals(in_width * in_height);
-			ResizeTexture(&the_normals[0], in_width * sizeof(float3), in_width * in_height * sizeof(float3),
-				EF_BGR32F, in_width, in_height, 1,
-				restored_data.data, restored_data.row_pitch,
-				restored_data.slice_pitch, EF_ARGB8, in_width, in_height, 1, false);
+			ResizeTexture(&the_normals[0], in_width * sizeof(float3), in_width * in_height * sizeof(float3), EF_BGR32F, in_width, in_height,
+				1, restored_data.data, restored_data.row_pitch, restored_data.slice_pitch, EF_ARGB8, in_width, in_height, 1,
+				TextureFilter::Point);
 
 			{
 				if (IsCompressedFormat(new_format))
@@ -323,6 +324,8 @@ namespace
 
 int main(int argc, char* argv[])
 {
+	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
+
 	if (argc < 3)
 	{
 		cout << "Usage: Normal2NaLength xxx.dds yyy.dds [BC4 | BC1 | R]" << endl;
@@ -333,7 +336,6 @@ int main(int argc, char* argv[])
 	if (in_file.empty())
 	{
 		cout << "Couldn't locate " << in_file << endl;
-		Context::Destroy();
 		return 1;
 	}
 
@@ -358,8 +360,6 @@ int main(int argc, char* argv[])
 	Normal2NaLength(in_file, argv[2], new_format);
 
 	cout << "Na Length map is saved to " << argv[2] << endl;
-
-	Context::Destroy();
 
 	return 0;
 }

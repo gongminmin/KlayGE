@@ -34,25 +34,26 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX20/span.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LZMACodec : boost::noncopyable
+	class KLAYGE_CORE_API LZMACodec final : boost::noncopyable
 	{
 	public:
-		LZMACodec();
-		~LZMACodec();
+		LZMACodec() noexcept;
+		~LZMACodec() noexcept;
 
 		uint64_t Encode(std::ostream& os, ResIdentifierPtr const & res, uint64_t len);
-		uint64_t Encode(std::ostream& os, void const * input, uint64_t len);
+		uint64_t Encode(std::ostream& os, std::span<uint8_t const> input);
 		void Encode(std::vector<uint8_t>& output, ResIdentifierPtr const & res, uint64_t len);
-		void Encode(std::vector<uint8_t>& output, void const * input, uint64_t len);
+		void Encode(std::vector<uint8_t>& output, std::span<uint8_t const> input);
 
 		uint64_t Decode(std::ostream& os, ResIdentifierPtr const & res, uint64_t len, uint64_t original_len);
-		uint64_t Decode(std::ostream& os, void const * input, uint64_t len, uint64_t original_len);
+		uint64_t Decode(std::ostream& os, std::span<uint8_t const> input, uint64_t original_len);
 		void Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & res, uint64_t len, uint64_t original_len);
-		void Decode(std::vector<uint8_t>& output, void const * input, uint64_t len, uint64_t original_len);
-		void Decode(void* output, void const * input, uint64_t len, uint64_t original_len);
+		void Decode(std::vector<uint8_t>& output, std::span<uint8_t const> input, uint64_t original_len);
+		void Decode(void* output, std::span<uint8_t const> input, uint64_t original_len);
 	};
 }
 

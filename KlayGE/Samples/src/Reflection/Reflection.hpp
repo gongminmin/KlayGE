@@ -21,18 +21,16 @@ private:
 
 	void MinSampleNumHandler(KlayGE::UISlider const & sender);
 	void MaxSampleNumHandler(KlayGE::UISlider const & sender);
-	void EnbleReflectionHandler(KlayGE::UICheckBox const & sender);
+	void EnableReflectionHandler(KlayGE::UICheckBox const& sender);
+	void EnablePprHandler(KlayGE::UICheckBox const& sender);
+	void EnableCameraPathHandler(KlayGE::UICheckBox const& sender);
 
 private:
 	KlayGE::TrackballCameraController tb_controller_;
 
-	KlayGE::SceneObjectPtr teapot_;
-
-	KlayGE::LightSourcePtr point_light_;
-
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr sky_box_;
+	KlayGE::RenderablePtr skybox_;
 
 	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
@@ -44,9 +42,11 @@ private:
 	KlayGE::CameraPathControllerPtr screen_camera_path_;
 
 	KlayGE::RenderModelPtr teapot_model_;
+	KlayGE::SceneNodePtr teapot_node_;
+	KlayGE::RenderablePtr plane_renderable_;
+	KlayGE::SceneNodePtr plane_node_;
 	KlayGE::TexturePtr y_cube_;
 	KlayGE::TexturePtr c_cube_;
-	KlayGE::uint32_t loading_percentage_;
 
 	KlayGE::UIDialogPtr parameter_dialog_;
 	int id_min_sample_num_static_;
@@ -54,6 +54,8 @@ private:
 	int id_max_sample_num_static_;
 	int id_max_sample_num_slider_;
 	int id_enable_reflection_;
+	int id_enable_ppr_;
+	int id_enable_camera_path_;
 };
 
 #endif
