@@ -7,12 +7,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${ASSIMP_OUTPUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${ASSIMP_OUTPUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${ASSIMP_OUTPUT_DIR})
 
-UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "c8dafe0d2887242285c0080c6cbbea8c1f1c8094" "master" "v5.0.0" need_patch)
-if(need_patch)
-	foreach(patch "0001-Fix-the-vec3-comparing")
-		ApplyPatch("assimp" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
-	endforeach()
-endif()
+UpdateExternalLib("assimp" "https://github.com/assimp/assimp.git" "9519a62dd20799c5493c638d1ef5a6f484e5faf1" "master" "v5.0.0")
 
 FOREACH(flag_var
 		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL)
@@ -39,6 +34,13 @@ set(ASSIMP_NO_EXPORT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR ON CACHE BOOL "" FORCE)
 
 ADD_SUBDIRECTORY(${ASSIMP_PROJECT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/assimp")
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(assimp
+		PRIVATE
+			-Wno-unused-function
+	)
+endif()
 
 SET_TARGET_PROPERTIES(assimp PROPERTIES
 	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
