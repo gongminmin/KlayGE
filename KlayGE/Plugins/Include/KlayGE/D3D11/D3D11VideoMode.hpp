@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <dxgiformat.h>
+#include <directx/dxgiformat.h>
 
 namespace KlayGE
 {

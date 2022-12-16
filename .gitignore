@@ -84,6 +84,7 @@ External/bit-lite
 External/boost
 External/cxxopts
 External/d3dcompiler
+External/DirectX-Headers
 External/dxsdk
 External/Downloads
 External/filesystem

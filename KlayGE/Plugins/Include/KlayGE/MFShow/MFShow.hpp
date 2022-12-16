@@ -38,8 +38,8 @@
 #include <KFL/Thread.hpp>
 
 #include <windows.h>
-#include <dxgiformat.h>
-#include <d3dcommon.h>
+#include <directx/dxgiformat.h>
+#include <directx/d3dcommon.h>
 #include <string>
 
 #include <KlayGE/Show.hpp>

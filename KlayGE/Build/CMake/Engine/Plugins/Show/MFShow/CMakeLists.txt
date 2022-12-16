@@ -51,6 +51,7 @@ KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/Kl
 target_link_libraries(${LIB_NAME}
 	PRIVATE
 		${KLAYGE_CORELIB_NAME}
+		DirectX-Headers
 		dxsdk
 )
 

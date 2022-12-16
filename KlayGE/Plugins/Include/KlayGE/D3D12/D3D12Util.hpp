@@ -35,7 +35,7 @@
 
 #include <KFL/com_ptr.hpp>
 #include <KlayGE/SALWrapper.hpp>
-#include <d3d12.h>
+#include <directx/d3d12.h>
 #include <dxgi1_6.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #undef __out

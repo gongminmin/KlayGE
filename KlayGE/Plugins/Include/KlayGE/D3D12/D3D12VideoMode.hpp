@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KlayGE/D3D12/D3D12Util.hpp>
+#include <directx/dxgiformat.h>
 
 namespace KlayGE
 {
