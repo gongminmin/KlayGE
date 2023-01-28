@@ -1,5 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.9 FATAL_ERROR)
-
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/DependenciesCommitId.cmake)
 
 SET(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Add a postfix, usually _d on windows")
