@@ -127,7 +127,7 @@ namespace KlayGE
 			case TurnLeftRight:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
+					if (!left_button_down_ || (param->buttons_state & MB_Left))
 					{
 						this->RotateRel(param->move_vec.x() * scaler, 0, 0);
 					}
@@ -137,7 +137,7 @@ namespace KlayGE
 			case TurnUpDown:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
+					if (!left_button_down_ || (param->buttons_state & MB_Left))
 					{
 						this->RotateRel(0, param->move_vec.y() * scaler, 0);
 					}
