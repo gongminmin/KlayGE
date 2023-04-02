@@ -7400,8 +7400,8 @@ void GLSLGen::FindDclIndexRange()
 		if (SO_DCL_INDEX_RANGE == dcl->opcode)
 		{
 			DclIndexRangeInfo mInfo;
-			mInfo.op_type = dcl->op->type;
 			mInfo.start = dcl->op->indices[0].disp;
+			mInfo.op_type = dcl->op->type;
 			mInfo.num = dcl->num;
 			idx_range_info_.push_back(mInfo);
 		}
