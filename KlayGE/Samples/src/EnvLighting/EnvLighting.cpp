@@ -25,19 +25,29 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
+#define ANALYSE_DOWNSAMPLE_ERRORS
+
 //#define CALC_FITTING_TABLE
+#define ANALYSE_FITTING_ERRORS
 
 #include <iterator>
 #include <sstream>
 #include <vector>
-#ifdef CALC_FITTING_TABLE
+
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
 #include <iostream>
-#include <iomanip>
+#endif
+
+#ifdef CALC_FITTING_TABLE
+#include <iomanip> // For std::setprecision
 #include <fstream>
 #endif
 
 #include "SampleCommon.hpp"
 #include "EnvLighting.hpp"
+
+float const LUT_X_SCALE_FACTOR = 1.0079f;
+float const LUT_Y_SCALE_FACTOR = 66.023f;
 
 using namespace std;
 using namespace KlayGE;
@@ -571,41 +581,49 @@ namespace
 		return rg / static_cast<float>(NUM_SAMPLES);
 	}
 
-	void GenIntegratedBRDF(uint32_t width, uint32_t height, std::vector<float2>& integrate_brdf_f32)
+	std::vector<float2> GenIntegratedBRDF(uint32_t width, uint32_t height)
 	{
-		integrate_brdf_f32.resize(width * height);
+		std::vector<float2> integrate_brdf_f32(width * height);
 		for (uint32_t y = 0; y < height; ++ y)
 		{
-			float shininess = Glossiness2Shininess((y + 0.5f) / height);
+			float const shininess = Glossiness2Shininess((y + 0.5f) / height);
 			for (uint32_t x = 0; x < width; ++ x)
 			{
-				float cos_theta = (x + 0.5f) / width;
+				float const cos_theta = (x + 0.5f) / width;
 
 				integrate_brdf_f32[y * width + x] = IntegrateBRDFBP(shininess, cos_theta);
 			}
 		}
+
+		return integrate_brdf_f32;
 	}
 
-	TexturePtr GenIntegratedBRDF(uint32_t width, uint32_t height)
+	std::vector<uint8_t> Quantize(uint32_t width, uint32_t height, std::vector<float2> const& brdf_f32)
 	{
-		std::vector<float2> integrate_brdf_f32(width * height);
-		GenIntegratedBRDF(width, height, integrate_brdf_f32);
+		assert(brdf_f32.size() == width * height);
 
-		std::vector<uint8_t> integrate_brdf_gr(width * height * 2);
-		for (uint32_t y = 0; y < height; ++ y)
+		std::vector<uint8_t> brdf_gr(width * height * 2);
+		for (uint32_t y = 0; y < height; ++y)
 		{
-			for (uint32_t x = 0; x < width; ++ x)
+			for (uint32_t x = 0; x < width; ++x)
 			{
-				float2 const lut = integrate_brdf_f32[y * width + x];
-				integrate_brdf_gr[(y * width + x) * 2 + 0]
-					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
-				integrate_brdf_gr[(y * width + x) * 2 + 1]
-					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 100 * 255 + 0.5f), 0, 255));
+				float2 const lut = brdf_f32[y * width + x];
+				brdf_gr[(y * width + x) * 2 + 0] =
+					static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * LUT_X_SCALE_FACTOR * 255 + 0.5f), 0, 255));
+				brdf_gr[(y * width + x) * 2 + 1] =
+					static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * LUT_Y_SCALE_FACTOR * 255 + 0.5f), 0, 255));
 			}
 		}
 
+		return brdf_gr;
+	}
+
+	TexturePtr QuantizeToTexture(uint32_t width, uint32_t height, std::vector<float2> const& brdf_f32)
+	{
+		const std::vector<uint8_t> brdf_gr = Quantize(width, height, brdf_f32);
+
 		ElementInitData init_data;
-		init_data.data = &integrate_brdf_gr[0];
+		init_data.data = brdf_gr.data();
 		init_data.row_pitch = width * 2;
 		init_data.slice_pitch = init_data.row_pitch * height;
 
@@ -615,90 +633,32 @@ namespace
 		return ret;
 	}
 
-#ifdef CALC_FITTING_TABLE
-	void GenFittedBRDF(uint32_t width, uint32_t height, std::vector<float2>& fitted_brdf_f32,
-		std::span<float4 const> r_factors, std::span<float4 const> g_factors)
+	std::vector<float2> Unquantize(uint32_t width, uint32_t height, std::vector<uint8_t> const& brdf_gr)
 	{
-		fitted_brdf_f32.resize(width * height);
-		for (uint32_t y = 0; y < height; ++ y)
+		assert(brdf_gr.size() == width * height * 2);
+
+		std::vector<float2> brdf_f32(width * height);
+		for (uint32_t y = 0; y < height; ++y)
 		{
-			float glossiness = (y + 0.5f) / height;
-			for (uint32_t x = 0; x < width; ++ x)
+			for (uint32_t x = 0; x < width; ++x)
 			{
-				float n_dot_v = (x + 0.5f) / width;
-
-				float2 env_brdf;
-				float4 tmp = ((r_factors[0] * glossiness + r_factors[1]) * glossiness + r_factors[2]) * glossiness + r_factors[3];
-				env_brdf.x() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
-				tmp = ((g_factors[0] * glossiness + g_factors[1]) * glossiness + g_factors[2]) * glossiness + g_factors[3];
-				env_brdf.y() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
-
-				fitted_brdf_f32[y * width + x] = env_brdf;
-			}
-		}
-	}
-
-	void GenFittedBRDF(uint32_t width, uint32_t height, std::vector<float2>& fitted_brdf_f32)
-	{
-		std::array<float4, 4> const r_min_factors_base =
-		{
-			float4(3.221071959f, -4.037492752f, 2.019851685f, -0.3509000242f),
-			float4(-5.483835697f, 4.748570442f, -2.599167109f, 0.8398050666f),
-			float4(2.386495829f, 0.3970752358f, 0.1965616345f, -0.6608897448f),
-			float4(-0.2426506728f, 0.05738930777f, 0.318114996f, 0.1741847545f),
-		};
-		std::array<float4, 4> const g_min_factors_base =
-		{
-			float4(-0.645807467f, 1.143745551f, -0.578012509f, 0.069540519f),
-			float4(0.895991894f, -1.581523545f, 0.81029122f, -0.108531864f),
-			float4(-0.088478638f, 0.154233504f, -0.098784305f, 0.029798974f),
-			float4(0.001030646f, 0.008038982f, -0.016316089f, 0.007532373f),
-		};
-
-		GenFittedBRDF(width, height, fitted_brdf_f32,
-			MakeSpan(r_min_factors_base.data(), r_min_factors_base.size()),
-			MakeSpan(g_min_factors_base.data(), g_min_factors_base.size()));
-	}
-
-	TexturePtr GenFittedBRDF(uint32_t width, uint32_t height)
-	{
-		std::vector<float2> fitted_brdf_f32(width * height);
-		GenFittedBRDF(width, height, fitted_brdf_f32);
-
-		std::vector<uint8_t> fitted_brdf_gr(width * height * 2);
-		for (uint32_t y = 0; y < height; ++ y)
-		{
-			for (uint32_t x = 0; x < width; ++ x)
-			{
-				float2 const & env_brdf = fitted_brdf_f32[y * width + x];
-
-				fitted_brdf_gr[(y * width + x) * 2 + 0]
-					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(env_brdf.x() * 255 + 0.5f), 0, 255));
-				fitted_brdf_gr[(y * width + x) * 2 + 1]
-					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(env_brdf.y() * 100 * 255 + 0.5f), 0, 255));
+				brdf_f32[y * width + x] = float2(brdf_gr[(y * width + x) * 2 + 0] / LUT_X_SCALE_FACTOR / 255.0f,
+					brdf_gr[(y * width + x) * 2 + 1] / LUT_Y_SCALE_FACTOR / 255.0f);
 			}
 		}
 
-		ElementInitData init_data;
-		init_data.data = &fitted_brdf_gr[0];
-		init_data.row_pitch = width * 2;
-		init_data.slice_pitch = init_data.row_pitch * height;
-
-		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, EF_GR8, false);
-		ret->CreateHWResource(MakeSpan(init_data), nullptr);
-
-		return ret;
+		return brdf_f32;
 	}
 
-	void CalcMse(std::vector<float2> const & ground_truth_table, std::vector<float2> const & test_table,
-		uint32_t width, uint32_t height, float2& mse, float2& min_diff, float2& max_diff)
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
+	void AnalyseError(std::vector<float2> const& ground_truth_table, std::vector<float2> const& test_table, uint32_t width, uint32_t height)
 	{
-		mse = float2(0, 0);
-		min_diff = float2(1, 1);
-		max_diff = float2(-1, -1);
-		for (uint32_t y = 0; y < height; ++ y)
+		float2 mse(0, 0);
+		float2 min_diff(1, 1);
+		float2 max_diff(-1, -1);
+		for (uint32_t y = 0; y < height; ++y)
 		{
-			for (uint32_t x = 0; x < width; ++ x)
+			for (uint32_t x = 0; x < width; ++x)
 			{
 				float2 const diff = ground_truth_table[y * width + x] - test_table[y * width + x];
 
@@ -712,38 +672,53 @@ namespace
 				mse.y() += diff.y() * diff.y();
 			}
 		}
-
 		mse /= (width * height);
+
+		float2 const psnr = -10 * float2(log10(mse.x()), log10(mse.y()));
+
+		std::cout << "Min: (" << min_diff.x() << ", " << min_diff.y() << ")" << std::endl;
+		std::cout << "Max: (" << max_diff.x() << ", " << max_diff.y() << ")" << std::endl;
+		std::cout << "MSE: (" << mse.x() << ", " << mse.y() << ")" << std::endl;
+		std::cout << "PSNR: (" << psnr.x() << ", " << psnr.y() << ")" << std::endl << std::endl;
 	}
 
-	void CalcMse(Texture& ground_truth_tex, Texture& test_tex, float2& mse, float2& min_diff, float2& max_diff)
+#ifdef ANALYSE_FITTING_ERRORS
+	std::vector<float2> GenFittedBRDF(uint32_t width, uint32_t height)
 	{
-		uint32_t const width = ground_truth_tex.Width(0);
-		uint32_t const height = ground_truth_tex.Height(0);
-
-		Texture::Mapper ground_truth_mapper(ground_truth_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper test_mapper(test_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-
-		uint8_t* ground_truth_ptr = ground_truth_mapper.Pointer<uint8_t>();
-		uint8_t* test_ptr = test_mapper.Pointer<uint8_t>();
-
-		std::vector<float2> ground_truth_table(width * height);
-		std::vector<float2> test_table(ground_truth_table.size());
-		for (uint32_t y = 0; y < height; ++ y)
+		float4 const x_factors[] =
 		{
-			for (uint32_t x = 0; x < width; ++ x)
-			{
-				ground_truth_table[y * width + x] = float2(ground_truth_ptr[y * ground_truth_mapper.RowPitch() + x * 2 + 0] / 255.0f,
-					ground_truth_ptr[y * ground_truth_mapper.RowPitch() + x * 2 + 1] / 100.0f / 255.0f);
+			float4(3.221071959f, -4.037492752f, 2.019851685f, -0.3509000242f),
+			float4(-5.483835697f, 4.748570442f, -2.599167109f, 0.8398050666f),
+			float4(2.386495829f, 0.3970752358f, 0.1965616345f, -0.6608897448f),
+			float4(-0.2426506728f, 0.05738930777f, 0.318114996f, 0.1741847545f),
+		};
+		float4 const y_factors[] =
+		{
+			float4(-0.645807467f, 1.143745551f, -0.578012509f, 0.069540519f),
+			float4(0.895991894f, -1.581523545f, 0.81029122f, -0.108531864f),
+			float4(-0.088478638f, 0.154233504f, -0.098784305f, 0.029798974f),
+			float4(0.001030646f, 0.008038982f, -0.016316089f, 0.007532373f),
+		};
 
-				test_table[y * width + x] = float2(test_ptr[y * test_mapper.RowPitch() + x * 2 + 0] / 255.0f,
-					test_ptr[y * test_mapper.RowPitch() + x * 2 + 1] / 100.0f / 255.0f);
+		std::vector<float2> fitted_brdf_f32(width * height);
+		for (uint32_t y = 0; y < height; ++y)
+		{
+			float const glossiness = (y + 0.5f) / height;
+			for (uint32_t x = 0; x < width; ++x)
+			{
+				float const n_dot_v = (x + 0.5f) / width;
+
+				float2& env_brdf = fitted_brdf_f32[y * width + x];
+				float4 tmp = ((x_factors[0] * glossiness + x_factors[1]) * glossiness + x_factors[2]) * glossiness + x_factors[3];
+				env_brdf.x() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
+				tmp = ((y_factors[0] * glossiness + y_factors[1]) * glossiness + y_factors[2]) * glossiness + y_factors[3];
+				env_brdf.y() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
 			}
 		}
 
-		CalcMse(ground_truth_table, test_table, width, height,
-			mse, min_diff, max_diff);
+		return fitted_brdf_f32;
 	}
+#endif
 #endif
 }
 
@@ -775,19 +750,91 @@ void EnvLightingApp::OnCreate()
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
 	{
-		SaveTexture(GenIntegratedBRDF(WIDTH, HEIGHT), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
+		SaveTexture(
+			QuantizeToTexture(WIDTH, HEIGHT, GenIntegratedBRDF(WIDTH, HEIGHT)), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
 	}
+
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
+	std::vector<float2> gt_integrate_brdf = GenIntegratedBRDF(WIDTH, HEIGHT);
+	{
+		float2 min_val(1, 1);
+		float2 max_val(-1, -1);
+		for (uint32_t y = 0; y < HEIGHT; ++y)
+		{
+			for (uint32_t x = 0; x < WIDTH; ++x)
+			{
+				float2 const val = gt_integrate_brdf[y * WIDTH + x];
+
+				min_val.x() = std::min(min_val.x(), val.x());
+				max_val.x() = std::max(max_val.x(), val.x());
+
+				min_val.y() = std::min(min_val.y(), val.y());
+				max_val.y() = std::max(max_val.y(), val.y());
+			}
+		}
+
+		std::cout << "Ground truth:" << std::endl;
+		std::cout << "Min: (" << min_val.x() << ", " << min_val.y() << ")" << std::endl;
+		std::cout << "Max: (" << max_val.x() << ", " << max_val.y() << ")" << std::endl;
+		std::cout << std::endl;
+	}
+#endif
+
+#ifdef ANALYSE_DOWNSAMPLE_ERRORS
+	{
+		std::vector<uint8_t> const quantized_integrate_brdf = Quantize(WIDTH, HEIGHT, gt_integrate_brdf);
+		std::vector<float2> const restored_brdf = Unquantize(WIDTH, HEIGHT, quantized_integrate_brdf);
+
+		std::cout << "Quantized table (" << WIDTH << ", " << HEIGHT << "):" << std::endl;
+		AnalyseError(gt_integrate_brdf, restored_brdf, WIDTH, HEIGHT);
+	}
+	{
+		uint2 const size_combinations[] = {
+			uint2(WIDTH, HEIGHT / 4),
+			uint2(WIDTH / 4, HEIGHT),
+			uint2(WIDTH / 4, HEIGHT / 4),
+			uint2(WIDTH, HEIGHT / 32),
+			uint2(WIDTH / 32, HEIGHT),
+			uint2(WIDTH / 32, HEIGHT / 32),
+		};
+		for (size_t i = 0; i < std::size(size_combinations); ++i)
+		{
+			std::vector<float2> const integrate_brdf = GenIntegratedBRDF(size_combinations[i].x(), size_combinations[i].y());
+			auto downsampled_tex = QuantizeToTexture(size_combinations[i].x(), size_combinations[i].y(), integrate_brdf);
+
+			auto restored_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, WIDTH, HEIGHT, 1, 1, 1, EF_GR8, false);
+			restored_tex->CreateHWResource({}, nullptr);
+			downsampled_tex->CopyToTexture(*restored_tex, TextureFilter::Linear);
+
+			std::vector<uint8_t> restored_quantized_gr(WIDTH * HEIGHT * 2);
+			{
+				Texture::Mapper test_mapper(*restored_tex, 0, 0, TMA_Read_Only, 0, 0, WIDTH, HEIGHT);
+				uint8_t* restored_data = test_mapper.Pointer<uint8_t>();
+
+				for (uint32_t y = 0; y < HEIGHT; ++y)
+				{
+					for (uint32_t x = 0; x < WIDTH; ++x)
+					{
+						restored_quantized_gr[(y * WIDTH + x) * 2 + 0] = restored_data[y * test_mapper.RowPitch() + x * 2 + 0];
+						restored_quantized_gr[(y * WIDTH + x) * 2 + 1] = restored_data[y * test_mapper.RowPitch() + x * 2 + 1];
+					}
+				}
+			}
+
+			std::vector<float2> const restored_brdf = Unquantize(WIDTH, HEIGHT, restored_quantized_gr);
+
+			std::cout << "Downsampled to (" << downsampled_tex->Width(0) << ", " << downsampled_tex->Height(0) << "):" << std::endl;
+			AnalyseError(gt_integrate_brdf, restored_brdf, WIDTH, HEIGHT);
+		}
+	}
+#endif
 
 #ifdef CALC_FITTING_TABLE
 	{
 		uint32_t const width = 128;
 		uint32_t const height = 32;
 
-		std::vector<float2> integrated_brdf;
-		GenIntegratedBRDF(width, height, integrated_brdf);
-
-		std::vector<float2> fitted_brdf;
-		GenFittedBRDF(width, height, fitted_brdf);
+		std::vector<float2> const integrated_brdf = GenIntegratedBRDF(width, height);
 
 		std::ofstream ofs_x("IntegratedBRDF_128_32_x.csv");
 		std::ofstream ofs_y("IntegratedBRDF_128_32_y.csv");
@@ -804,67 +851,18 @@ void EnvLightingApp::OnCreate()
 				ofs_x << lut.x() << ',';
 				ofs_y << lut.y() << ',';
 			}
-			ofs_x << endl;
-			ofs_y << endl;
+			ofs_x << std::endl;
+			ofs_y << std::endl;
 		}
 	}
+#endif
 
+#ifdef ANALYSE_FITTING_ERRORS
 	{
-		auto ground_truth_tex = GenIntegratedBRDF(WIDTH, HEIGHT);
+		std::vector<float2> const fitted_brdf = GenFittedBRDF(WIDTH, HEIGHT);
 
-		{
-			auto test_tex = GenFittedBRDF(WIDTH, HEIGHT);
-
-			float2 mse;
-			float2 min_diff;
-			float2 max_diff;
-			CalcMse(*ground_truth_tex, *test_tex, mse, min_diff, max_diff);
-
-			float2 psnr;
-			psnr.x() = 10 * -log10(mse.x());
-			psnr.y() = 10 * -log10(mse.y());
-
-			std::cout << "Fitted table" << std::endl;
-
-			std::cout << "Min: (" << min_diff.x() << ", " << min_diff.y() << ")" << std::endl;
-			std::cout << "Max: (" << max_diff.x() << ", " << max_diff.y() << ")" << std::endl;
-			std::cout << "MSE: (" << mse.x() << ", " << mse.y() << ")" << std::endl;
-			std::cout << "PSNR: (" << psnr.x() << ", " << psnr.y() << ")" << std::endl << std::endl;
-		}
-
-		uint2 const size_combinations[] = 
-		{
-			uint2(WIDTH, HEIGHT / 4),
-			uint2(WIDTH / 4, HEIGHT),
-			uint2(WIDTH / 4, HEIGHT / 4),
-			uint2(WIDTH, HEIGHT / 32),
-			uint2(WIDTH / 32, HEIGHT),
-			uint2(WIDTH / 32, HEIGHT / 32),
-		};
-		for (size_t i = 0; i < std::size(size_combinations); ++ i)
-		{
-			auto downsampled_tex = GenIntegratedBRDF(size_combinations[i].x(), size_combinations[i].y());
-
-			auto test_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, WIDTH, HEIGHT, 1, 1, 1, EF_GR8, false);
-			test_tex->CreateHWResource({}, nullptr);
-			downsampled_tex->CopyToTexture(*test_tex);
-
-			float2 mse;
-			float2 min_diff;
-			float2 max_diff;
-			CalcMse(*ground_truth_tex, *test_tex, mse, min_diff, max_diff);
-
-			float2 psnr;
-			psnr.x() = 10 * -log10(mse.x());
-			psnr.y() = 10 * -log10(mse.y());
-
-			std::cout << "Downsampled (" << downsampled_tex->Width(0) << ", " << downsampled_tex->Height(0) << ") table" << std::endl;
-
-			std::cout << "Min: (" << min_diff.x() << ", " << min_diff.y() << ")" << std::endl;
-			std::cout << "Max: (" << max_diff.x() << ", " << max_diff.y() << ")" << std::endl;
-			std::cout << "MSE: (" << mse.x() << ", " << mse.y() << ")" << std::endl;
-			std::cout << "PSNR: (" << psnr.x() << ", " << psnr.y() << ")" << std::endl << std::endl;
-		}
+		std::cout << "Fitted 3-order table" << std::endl;
+		AnalyseError(gt_integrate_brdf, fitted_brdf, WIDTH, HEIGHT);
 	}
 #endif
 
@@ -904,7 +902,7 @@ void EnvLightingApp::OnCreate()
 		});
 
 	auto sphere_model_unique = SyncLoadModel("sphere_high.glb", EAH_GPU_Read | EAH_Immutable,
-		SceneNode::SOA_Cullable, nullptr,
+		SceneNode::SOA_Moveable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<SphereRenderable>);
 
 	sphere_models_.resize(std::size(diff_parametes));

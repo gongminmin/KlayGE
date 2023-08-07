@@ -55,13 +55,18 @@ float3 PrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, fl
 
 float3 PBPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
+	// Must match the ones in .cpp
+	const float LUT_X_SCALE_FACTOR = 1.0079f;
+	const float LUT_Y_SCALE_FACTOR = 66.023f;
+
 	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = CalcPrefilteredEnvVec(normal, view);	
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
-	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, glossiness)).xy;
-	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y / 100);
+	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, glossiness)).xy
+		/ float2(LUT_X_SCALE_FACTOR, LUT_Y_SCALE_FACTOR);
+	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
 }
 
 float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
@@ -116,12 +121,12 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 
 float4 PBFittingErrorPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
 {
-	float4 error = PBFittingPrefilteredPS(normal, incident) - PBPrefilteredPS(normal, incident);
+	float3 error = abs(PBFittingPrefilteredPS(normal, incident) - PBPrefilteredPS(normal, incident)).xyz;
 
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
-	float lum = saturate(dot(error.rgb * 100, RGB_TO_LUM));
+	float lum = saturate(dot(error * 20, RGB_TO_LUM));
 
-	return color_map.SampleLevel(bilinear_sampler, float2(lum, 0.5f), 0);
+	return pow(color_map.SampleLevel(bilinear_sampler, float2(lum, 0.5f), 0), 2.2f);
 }
 		]]>
 	</shader>
