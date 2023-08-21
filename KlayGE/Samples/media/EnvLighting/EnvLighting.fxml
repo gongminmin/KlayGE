@@ -78,6 +78,96 @@ float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 n
 	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 
+float SELU(float x)
+{
+	const float alpha = 1.6732632423543772848170429916717f;
+	const float scale = 1.0507009873554804934193349852946f;
+	return scale * (max(0.0f, x) + min(0.0f, alpha * (exp(x) - 1)));
+}
+
+float EvalL4NN(float2 layer_0,
+	const float2 nn_layer_1_weight[3], const float nn_layer_1_bias[3],
+	const float3 nn_layer_2_weight[3], const float nn_layer_2_bias[3],
+	const float3 nn_layer_3_weight[1], const float nn_layer_3_bias[1])
+{
+	float3 layer_1;
+	for (uint i = 0; i < 3; ++i)
+	{
+		layer_1[i] = SELU(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+	}
+	float3 layer_2;
+	for (i = 0; i < 3; ++i)
+	{
+		layer_2[i] = SELU(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+	}
+	return SELU(dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0]);
+}
+
+float3 CalcEnvSpecularNN(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
+{
+	const float2 x_nn_layer_1_weight[] = {
+		{0.409267664f, -1.440723181f},
+		{-2.345970869f, -0.601665437f},
+		{0.395679414f, -0.199564710f},
+	};
+	const float x_nn_layer_1_bias[] = {-0.120875597f, 0.998332977f, 0.073990360f};
+
+	const float3 x_nn_layer_2_weight[] = {
+		{0.231850088f, -2.187137842f, 1.437948346f},
+		{1.125432134f, -2.341978312f, 0.133485571f},
+		{-0.957182765f, 0.393676430f, 1.231910348f},
+	};
+	const float x_nn_layer_2_bias[] = {-3.584949493f, -3.390736580f, -1.015827656f};
+
+	const float3 x_nn_layer_3_weight[] = {
+		{0.868354917f, -0.844368279f, -0.236143410f},
+	};
+	const float x_nn_layer_3_bias[] = {0.088547498f};
+
+	const float2 y_nn_layer_1_weight[] = {
+		{0.939367354f, -0.312905341f},
+		{-1.810193896f, 0.086769596f},
+		{-0.055529792f, -0.731327176f},
+	};
+	const float y_nn_layer_1_bias[] = {0.061909534f, 0.568713844f, 0.553783178f};
+
+	const float3 y_nn_layer_2_weight[] = {
+		{-0.565969229f, -0.178391784f, 0.091236770f},
+		{0.652058780f, 0.006113635f, -0.708583057f},
+		{-0.538837254f, -0.302337319f, -0.062093701f},
+	};
+	const float y_nn_layer_2_bias[] = {0.090637960f, -0.089722224f, -0.039644413f};
+
+	const float3 y_nn_layer_3_weight[] = {
+		{0.143691242f, 0.058127884f, -0.138958752f},
+	};
+	const float y_nn_layer_3_bias[] = {-0.016338494f};
+
+	float n_dot_v = saturate(dot(normal, view));
+	float2 xy = float2(n_dot_v, glossiness);
+	float2 env_brdf;
+	env_brdf.x = EvalL4NN(xy,
+		x_nn_layer_1_weight, x_nn_layer_1_bias,
+		x_nn_layer_2_weight, x_nn_layer_2_bias,
+		x_nn_layer_3_weight, x_nn_layer_3_bias);
+	env_brdf.y = EvalL4NN(xy,
+		y_nn_layer_1_weight, y_nn_layer_1_bias,
+		y_nn_layer_2_weight, y_nn_layer_2_bias,
+		y_nn_layer_3_weight, y_nn_layer_3_bias);
+
+	env_brdf = saturate(env_brdf);
+	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
+}
+
+float3 PBNNPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
+{
+	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
+	float3 r = CalcPrefilteredEnvVec(normal, view);
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+	return CalcEnvSpecularNN(prefiltered_clr, c_spec, glossiness, normal, view);
+}
+
 void GroundTruthVS(float4 pos		: POSITION,
 				float4 tangent_quat	: TANGENT,
 				out float3 oNormal	: TEXCOORD0,
@@ -119,9 +209,24 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 		+ PBFittingPrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
 }
 
-float4 PBFittingErrorPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+float4 PBNNPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
 {
-	float3 error = abs(PBFittingPrefilteredPS(normal, incident) - PBPrefilteredPS(normal, incident)).xyz;
+	normal = normalize(normal);
+	incident = normalize(incident);
+
+	return float4(PrefilteredDiffuseIBL(diffuse, normal)
+		+ PBNNPrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
+}
+
+float4 ShowErrorPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+{
+#if FITTING
+	float4 prefiltered = PBFittingPrefilteredPS(normal, incident);
+#else
+	float4 prefiltered = PBNNPrefilteredPS(normal, incident);
+#endif
+	
+	float3 error = abs(prefiltered - PBPrefilteredPS(normal, incident)).xyz;
 
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	float lum = saturate(dot(error * 20, RGB_TO_LUM));
@@ -358,8 +463,24 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	</technique>
 	<technique name="PBFittingError">
 		<pass name="p0">
+			<macro name="FITTING" value="1"/>
+
 			<state name="vertex_shader" value="GroundTruthVS()"/>
-			<state name="pixel_shader" value="PBFittingErrorPS()"/>
+			<state name="pixel_shader" value="ShowErrorPS()"/>
+		</pass>
+	</technique>
+	<technique name="PBNNPrefiltered">
+		<pass name="p0">
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="PBNNPrefilteredPS()"/>
+		</pass>
+	</technique>
+	<technique name="PBNNError">
+		<pass name="p0">
+			<macro name="FITTING" value="0"/>
+
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="ShowErrorPS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -7,9 +7,11 @@
 			<item name="PB Fitting Prefiltered"/>
 			<item name="PB Prefiltered"/>
 			<item name="PB Fitting Error"/>
+			<item name="PB NN Prefiltered"/>
+			<item name="PB NN Error"/>
 			<item name="Prefiltered"/>
 			<item name="Approximate"/>
-			<item name="GroundTruth"/>
+			<item name="Ground Truth"/>
 		</control>
 	</dialog>
 	

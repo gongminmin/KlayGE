@@ -30,17 +30,27 @@
 //#define CALC_FITTING_TABLE
 #define ANALYSE_FITTING_ERRORS
 
+//#define CALC_NN_TABLE
+#define ANALYSE_NN_ERRORS
+
 #include <iterator>
 #include <sstream>
 #include <vector>
 
-#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS) || defined(ANALYSE_NN_ERRORS)
 #include <iostream>
 #endif
 
 #ifdef CALC_FITTING_TABLE
 #include <iomanip> // For std::setprecision
 #include <fstream>
+#endif
+
+#ifdef CALC_NN_TABLE
+#include <KFL/CXX20/format.hpp>
+
+#include <fstream>
+#include <random>
 #endif
 
 #include "SampleCommon.hpp"
@@ -64,9 +74,11 @@ namespace
 			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
 			techs_[1] = effect_->TechniqueByName("PBPrefiltered");
 			techs_[2] = effect_->TechniqueByName("PBFittingError");
-			techs_[3] = effect_->TechniqueByName("Prefiltered");
-			techs_[4] = effect_->TechniqueByName("Approximate");
-			techs_[5] = effect_->TechniqueByName("GroundTruth");
+			techs_[3] = effect_->TechniqueByName("PBNNPrefiltered");
+			techs_[4] = effect_->TechniqueByName("PBNNError");
+			techs_[5] = effect_->TechniqueByName("Prefiltered");
+			techs_[6] = effect_->TechniqueByName("Approximate");
+			techs_[7] = effect_->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 
 			{
@@ -192,7 +204,7 @@ namespace
 		}
 
 	private:
-		array<RenderTechnique*, 6> techs_;
+		array<RenderTechnique*, 8> techs_;
 	};
 
 	float4 const diff_parametes[] =
@@ -633,6 +645,7 @@ namespace
 		return ret;
 	}
 
+#ifdef ANALYSE_DOWNSAMPLE_ERRORS
 	std::vector<float2> Unquantize(uint32_t width, uint32_t height, std::vector<uint8_t> const& brdf_gr)
 	{
 		assert(brdf_gr.size() == width * height * 2);
@@ -649,8 +662,9 @@ namespace
 
 		return brdf_f32;
 	}
+#endif
 
-#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS) || defined(ANALYSE_NN_ERRORS)
 	void AnalyseError(std::vector<float2> const& ground_truth_table, std::vector<float2> const& test_table, uint32_t width, uint32_t height)
 	{
 		float2 mse(0, 0);
@@ -683,21 +697,53 @@ namespace
 	}
 
 #ifdef ANALYSE_FITTING_ERRORS
+	template <bool DirectFitter>
 	std::vector<float2> GenFittedBRDF(uint32_t width, uint32_t height)
 	{
-		float4 const x_factors[] =
+		float4 const* r_factors;
+		float4 const* g_factors;
+
+		if constexpr (DirectFitter)
 		{
-			float4(3.221071959f, -4.037492752f, 2.019851685f, -0.3509000242f),
-			float4(-5.483835697f, 4.748570442f, -2.599167109f, 0.8398050666f),
-			float4(2.386495829f, 0.3970752358f, 0.1965616345f, -0.6608897448f),
-			float4(-0.2426506728f, 0.05738930777f, 0.318114996f, 0.1741847545f),
-		};
-		float4 const y_factors[] =
+			float4 const x_factors[] = {
+				{3.221071959f, -4.037492752f, 2.019851685f, -0.3509000242f},
+				{-5.483835697f, 4.748570442f, -2.599167109f, 0.8398050666f},
+				{2.386495829f, 0.3970752358f, 0.1965616345f, -0.6608897448f},
+				{-0.2426506728f, 0.05738930777f, 0.318114996f, 0.1741847545f},
+			};
+			float4 const y_factors[] = {
+				{-0.645807467f, 1.143745551f, -0.578012509f, 0.069540519f},
+				{0.895991894f, -1.581523545f, 0.81029122f, -0.108531864f},
+				{-0.088478638f, 0.154233504f, -0.098784305f, 0.029798974f},
+				{0.001030646f, 0.008038982f, -0.016316089f, 0.007532373f},
+			};
+
+			r_factors = x_factors;
+			g_factors = y_factors;
+		}
+		else
 		{
-			float4(-0.645807467f, 1.143745551f, -0.578012509f, 0.069540519f),
-			float4(0.895991894f, -1.581523545f, 0.81029122f, -0.108531864f),
-			float4(-0.088478638f, 0.154233504f, -0.098784305f, 0.029798974f),
-			float4(0.001030646f, 0.008038982f, -0.016316089f, 0.007532373f),
+			float4 const x_factors[] = {
+				{0.799909055f, -0.251794726f, 0.400207818f, -0.198004052f},
+				{-2.040522814f, -0.638421953f, -0.292664707f, 0.621811748f},
+				{1.137139678f, 2.354880810f, -0.643609762f, -0.581213772f},
+				{-0.160624698f, -0.072660625f, 0.374760240f, 0.168717429f},
+			};
+			float4 const y_factors[] = {
+				{-0.379176706f, 0.706069350f, -0.378398061f, 0.048970543f},
+				{0.500609934f, -0.931061745f, 0.512741387f, -0.077722691f},
+				{0.066490568f, -0.101666614f, 0.018871155f, 0.017506568f},
+				{-0.011322442f, 0.028600987f, -0.025875216f, 0.008548501f},
+			};
+
+			r_factors = x_factors;
+			g_factors = y_factors;
+		}
+
+		auto eval = [](float4 const factors[4], float n_dot_v, float glossiness)
+		{
+			const float4 tmp = ((factors[0] * glossiness + factors[1]) * glossiness + factors[2]) * glossiness + factors[3];
+			return (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
 		};
 
 		std::vector<float2> fitted_brdf_f32(width * height);
@@ -709,14 +755,124 @@ namespace
 				float const n_dot_v = (x + 0.5f) / width;
 
 				float2& env_brdf = fitted_brdf_f32[y * width + x];
-				float4 tmp = ((x_factors[0] * glossiness + x_factors[1]) * glossiness + x_factors[2]) * glossiness + x_factors[3];
-				env_brdf.x() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
-				tmp = ((y_factors[0] * glossiness + y_factors[1]) * glossiness + y_factors[2]) * glossiness + y_factors[3];
-				env_brdf.y() = (((tmp.x() * n_dot_v + tmp.y()) * n_dot_v + tmp.z()) * n_dot_v) + tmp.w();
+				env_brdf.x() = eval(r_factors, n_dot_v, glossiness);
+				env_brdf.y() = eval(g_factors, n_dot_v, glossiness);
 			}
 		}
 
 		return fitted_brdf_f32;
+	}
+#endif
+
+#ifdef ANALYSE_NN_ERRORS
+	template <typename T>
+	T ReLU(T const& x)
+	{
+		return std::max(static_cast<T>(0), x);
+	}
+
+	template <typename T>
+	T SELU(T const& x)
+	{
+		constexpr T alpha = static_cast<T>(1.6732632423543772848170429916717);
+		constexpr T scale = static_cast<T>(1.0507009873554804934193349852946);
+		return scale * (std::max(static_cast<T>(0), x) + std::min(static_cast<T>(0), alpha * (std::exp(x) - 1)));
+	}
+
+	template <typename T, size_t N>
+	T Dot(T const (&lhs)[N], T const (&rhs)[N]) noexcept
+	{
+		T ret = 0;
+		for (size_t i = 0; i < N; ++i)
+		{
+			ret += lhs[i] * rhs[i];
+		}
+		return ret;
+	}
+
+	template <size_t L0, size_t L1, size_t L2, size_t L3>
+	float EvalL4NN(float const (&layer_0)[L0],
+		float const (&nn_layer_1_weight)[L1][L0], float const (&nn_layer_1_bias)[L1],
+		float const (&nn_layer_2_weight)[L2][L1], float const (&nn_layer_2_bias)[L2],
+		float const (&nn_layer_3_weight)[L3][L2], float const (&nn_layer_3_bias)[L3])
+	{
+		float layer_1[L1];
+		for (uint32_t i = 0; i < L1; ++i)
+		{
+			layer_1[i] = SELU(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+		}
+		float layer_2[L2];
+		for (uint32_t i = 0; i < L2; ++i)
+		{
+			layer_2[i] = SELU(Dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+		}
+		return SELU(Dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0]);
+	}
+
+	std::vector<float2> GenL4NeuralNetworkBRDF(uint32_t width, uint32_t height)
+	{
+		float const x_nn_layer_1_weight[][2] = {
+			{0.409267664f, -1.440723181f},
+			{-2.345970869f, -0.601665437f},
+			{0.395679414f, -0.199564710f},
+		};
+		float const x_nn_layer_1_bias[]{-0.120875597f, 0.998332977f, 0.073990360f};
+
+		float const x_nn_layer_2_weight[][3] = {
+			{0.231850088f, -2.187137842f, 1.437948346f},
+			{1.125432134f, -2.341978312f, 0.133485571f},
+			{-0.957182765f, 0.393676430f, 1.231910348f},
+		};
+		float const x_nn_layer_2_bias[]{-3.584949493f, -3.390736580f, -1.015827656f};
+
+		float const x_nn_layer_3_weight[][3] = {
+			{0.868354917f, -0.844368279f, -0.236143410f},
+		};
+		float const x_nn_layer_3_bias[]{0.088547498f};
+
+		float const y_nn_layer_1_weight[][2] = {
+			{0.939367354f, -0.312905341f},
+			{-1.810193896f, 0.086769596f},
+			{-0.055529792f, -0.731327176f},
+		};
+		float const y_nn_layer_1_bias[]{0.061909534f, 0.568713844f, 0.553783178f};
+
+		float const y_nn_layer_2_weight[][3] = {
+			{-0.565969229f, -0.178391784f, 0.091236770f},
+			{0.652058780f, 0.006113635f, -0.708583057f},
+			{-0.538837254f, -0.302337319f, -0.062093701f},
+		};
+		float const y_nn_layer_2_bias[]{0.090637960f, -0.089722224f, -0.039644413f};
+
+		float const y_nn_layer_3_weight[][3] = {
+			{0.143691242f, 0.058127884f, -0.138958752f},
+		};
+		float const y_nn_layer_3_bias[]{-0.016338494f};
+
+		std::vector<float2> nn_brdf_f32(width * height);
+		for (uint32_t y = 0; y < height; ++y)
+		{
+			float const glossiness = (y + 0.5f) / height;
+			for (uint32_t x = 0; x < width; ++x)
+			{
+				float const n_dot_v = (x + 0.5f) / width;
+
+				float const xy[] = {n_dot_v, glossiness};
+
+				float const x_layer_3 = EvalL4NN(xy,
+					x_nn_layer_1_weight, x_nn_layer_1_bias,
+					x_nn_layer_2_weight, x_nn_layer_2_bias,
+					x_nn_layer_3_weight, x_nn_layer_3_bias);
+				float const y_layer_3 = EvalL4NN(xy,
+					y_nn_layer_1_weight, y_nn_layer_1_bias,
+					y_nn_layer_2_weight, y_nn_layer_2_bias,
+					y_nn_layer_3_weight, y_nn_layer_3_bias);
+
+				nn_brdf_f32[y * width + x] = {x_layer_3, y_layer_3};
+			}
+		}
+
+		return nn_brdf_f32;
 	}
 #endif
 #endif
@@ -754,7 +910,7 @@ void EnvLightingApp::OnCreate()
 			QuantizeToTexture(WIDTH, HEIGHT, GenIntegratedBRDF(WIDTH, HEIGHT)), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
 	}
 
-#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS)
+#if defined(ANALYSE_DOWNSAMPLE_ERRORS) || defined(ANALYSE_FITTING_ERRORS) || defined(ANALYSE_NN_ERRORS)
 	std::vector<float2> gt_integrate_brdf = GenIntegratedBRDF(WIDTH, HEIGHT);
 	{
 		float2 min_val(1, 1);
@@ -859,10 +1015,59 @@ void EnvLightingApp::OnCreate()
 
 #ifdef ANALYSE_FITTING_ERRORS
 	{
-		std::vector<float2> const fitted_brdf = GenFittedBRDF(WIDTH, HEIGHT);
+		std::vector<float2> const fitted_brdf = GenFittedBRDF<true>(WIDTH, HEIGHT);
 
-		std::cout << "Fitted 3-order table" << std::endl;
+		std::cout << "Direct fitted 3-order table" << std::endl;
 		AnalyseError(gt_integrate_brdf, fitted_brdf, WIDTH, HEIGHT);
+	}
+	{
+		std::vector<float2> const fitted_brdf = GenFittedBRDF<false>(WIDTH, HEIGHT);
+
+		std::cout << "Iterative fitted 3-order table" << std::endl;
+		AnalyseError(gt_integrate_brdf, fitted_brdf, WIDTH, HEIGHT);
+	}
+#endif
+
+#ifdef CALC_NN_TABLE
+	{
+		uint32_t const training_data_size = 1024 * 1024;
+		uint32_t const testing_data_size = 64 * 64;
+
+		std::mt19937 gen;
+		std::uniform_real_distribution<float> dis_x(0.0f, 1.0f);
+		std::uniform_real_distribution<float> dis_y(0.0f, 1.0f);
+
+		auto gen_data = [&gen, &dis_x, &dis_y](uint32_t data_size)
+		{
+			std::ofstream ofs(std::format("../../Samples/src/EnvLighting/IntegratedBRDF_{}.dat", data_size), std::ios_base::binary);
+			ofs.write(reinterpret_cast<char const*>(&data_size), sizeof(data_size));
+			for (uint32_t i = 0; i < data_size; ++i)
+			{
+				float const x = dis_x(gen);
+				float const y = dis_y(gen);
+
+				float const shininess = Glossiness2Shininess(y);
+				float const cos_theta = x;
+
+				float2 const brdf = IntegrateBRDFBP(shininess, cos_theta);
+
+				ofs.write(reinterpret_cast<char const*>(&x), sizeof(x));
+				ofs.write(reinterpret_cast<char const*>(&y), sizeof(y));
+				ofs.write(reinterpret_cast<char const*>(&brdf), sizeof(brdf));
+			}
+		};
+
+		gen_data(training_data_size);
+		gen_data(testing_data_size);
+	}
+#endif
+
+#ifdef ANALYSE_NN_ERRORS
+	{
+		std::vector<float2> nn_brdf = GenL4NeuralNetworkBRDF(WIDTH, HEIGHT);
+
+		std::cout << "4-layer neural network" << std::endl;
+		AnalyseError(gt_integrate_brdf, nn_brdf, WIDTH, HEIGHT);
 	}
 #endif
 
