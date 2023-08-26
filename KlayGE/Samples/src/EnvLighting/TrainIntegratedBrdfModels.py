@@ -8,8 +8,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-class IntegratedBrdfDataset(torch.utils.data.Dataset):
-	def __init__(self, file_name):
+class IntegratedBrdfDataset:
+	def __init__(self, device, file_name):
 		with open(file_name, "rb") as file:
 			sample_count = struct.unpack("<I", file.read(4))[0]
 			self.coord_data = torch.empty(sample_count, 2)
@@ -20,6 +20,10 @@ class IntegratedBrdfDataset(torch.utils.data.Dataset):
 				self.x_data[i] = struct.unpack("<f", file.read(4))[0]
 				self.y_data[i] = struct.unpack("<f", file.read(4))[0]
 
+			self.coord_data = self.coord_data.to(device)
+			self.x_data = self.x_data.to(device)
+			self.y_data = self.y_data.to(device)
+
 			self.output_data = self.x_data
 
 	def XChannelMode(self, x_mode):
@@ -27,9 +31,6 @@ class IntegratedBrdfDataset(torch.utils.data.Dataset):
 
 	def __len__(self):
 		return len(self.coord_data)
-
-	def __getitem__(self, index):
-		return self.coord_data[index], self.output_data[index]
 
 class IntegratedBrdfNetwork(nn.Module):
 	def __init__(self, num_features):
@@ -51,7 +52,7 @@ class IntegratedBrdfNetwork(nn.Module):
 		for i in range((len(self.net) + 1) // 2):
 			weight = self.net[i * 2].weight.data
 			dim = weight.size()[1]
-			file.write(f"float const {var_name}_layer_{i + 1}_weight[][{dim}] = \n{{\n")
+			file.write(f"float const {var_name}_layer_{i + 1}_weight[][{dim}] = {{\n")
 			for row_count, row in enumerate(weight):
 				file.write("\t{")
 				for col_count, col in enumerate(row):
@@ -122,33 +123,30 @@ class ModelDesc:
 		self.x_channel_mode = x_channel_mode
 		self.output_file_name = output_file_name
 
-def TrainModel(data_set, model, batch_size, learning_rate, epochs, output_file_name, var_name):
-	train_loader = torch.utils.data.DataLoader(data_set, batch_size = batch_size, shuffle = True)
-
-	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def TrainModel(device, data_set, model, batch_size, learning_rate, epochs, output_file_name, var_name):
 	model.to(device)
+	model.train()
 
-	criterion = nn.MSELoss()
+	criterion = nn.MSELoss(reduction = "sum")
 	optimizer = optim.Adam(model.parameters(), lr = learning_rate)
 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min", factor = 0.5, verbose = True)
 
 	start = time.time()
 	min_loss = 1e10
 	for epoch in range(epochs):
-		running_loss = 0.0
-		for data in train_loader:
-			inputs = data[0].to(device)
-			targets = data[1].to(device)
-
-			optimizer.zero_grad()
+		running_loss = torch.tensor(0.0, device = device)
+		for batch_start in range(0, len(data_set), batch_size):
+			inputs = data_set.coord_data[batch_start : batch_start + batch_size]
+			targets = data_set.output_data[batch_start : batch_start + batch_size]
 
 			outputs = model(inputs)
 			loss = criterion(outputs, targets)
+			running_loss += loss
+
+			optimizer.zero_grad(set_to_none = True)
 			loss.backward()
 			optimizer.step()
-
-			running_loss += loss.item()
-		loss = running_loss / len(train_loader)
+		loss = running_loss.item() / len(data_set)
 		scheduler.step(loss)
 		if loss < min_loss:
 			with open(output_file_name, "w") as file:
@@ -162,38 +160,34 @@ def TrainModel(data_set, model, batch_size, learning_rate, epochs, output_file_n
 
 	print(f"Finished training in {(timespan / 60):.2f} mins.")
 
-def TestModel(testing_set, model, batch_size):
-	test_loader = torch.utils.data.DataLoader(testing_set, batch_size = batch_size, shuffle = False)
-
-	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def TestModel(device, data_set, model, batch_size):
 	model.to(device)
+	model.eval()
 
-	total_mse = 0.0
-	total_count = 0
+	total_mse = torch.tensor(0.0, device = device)
 	with torch.no_grad():
-		for data in test_loader:
-			inputs = data[0].to(device)
-			targets = data[1].to(device)
+		for batch_start in range(0, len(data_set), batch_size):
+			inputs = data_set.coord_data[batch_start : batch_start + batch_size]
+			targets = data_set.output_data[batch_start : batch_start + batch_size]
 
 			outputs = model(inputs)
 			diff = outputs - targets
-			total_mse += torch.sum(diff * diff).item()
-			total_count += targets.size(0)
+			total_mse += torch.sum(diff * diff)
 
-	return total_mse / total_count
+	return total_mse.item() / len(data_set)
 
-def TrainModels(training_set, testing_set, batch_size, learning_rate, epochs, model_descs):
+def TrainModels(device, training_set, testing_set, batch_size, learning_rate, epochs, model_descs):
 	models = []
 	for model_desc in model_descs:
 		training_set.XChannelMode(model_desc.x_channel_mode)
 		model = model_desc.model_class(model_desc.model_param)
-		TrainModel(training_set, model, batch_size, learning_rate, epochs, model_desc.output_file_name, model_desc.name)
+		TrainModel(device, training_set, model, batch_size, learning_rate, epochs, model_desc.output_file_name, model_desc.name)
 		models.append(model)
 
 	for model, model_desc in zip(models, model_descs):
 		testing_set.XChannelMode(model_desc.x_channel_mode)
 		model.eval()
-		mse = TestModel(testing_set, model, batch_size)
+		mse = TestModel(device, testing_set, model, batch_size)
 		print(f"MSE of the {model_desc.name} on the {len(testing_set)} test samples: {mse}")
 
 def ParseCommandLine():
@@ -208,28 +202,35 @@ def ParseCommandLine():
 if __name__ == "__main__":
 	args = ParseCommandLine()
 
+	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 	print("Loading training set...")
-	training_set = IntegratedBrdfDataset("IntegratedBRDF_1048576.dat")
+	training_set = IntegratedBrdfDataset(device, "IntegratedBRDF_1048576.dat")
+
+	idx = torch.randperm(training_set.coord_data.shape[0])
+	training_set.coord_data = training_set.coord_data[idx].view(training_set.coord_data.size())
+	training_set.x_data = training_set.x_data[idx]
+	training_set.y_data = training_set.y_data[idx]
 
 	print("Loading testing set...")
-	testing_set = IntegratedBrdfDataset("IntegratedBRDF_4096.dat")
+	testing_set = IntegratedBrdfDataset(device, "IntegratedBRDF_4096.dat")
 
 	model_descs = (
 		(
 			"4-Layer NN",
 			(
 				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 3, 3, 1), True, "FittedBrdfNNs4LayerX.hpp"),
-				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 3, 1), False, "FittedBrdfNNs4LayerY.hpp")
+				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 3, 1), False, "FittedBrdfNNs4LayerY.hpp"),
 			),
 		),
 		(
 			"3-Order expression",
 			(
 				ModelDesc("x_factors", IntegratedBrdfExpression, 3, True, "FittedBrdfFactorsX.hpp"),
-				ModelDesc("y_factors", IntegratedBrdfExpression, 3, False, "FittedBrdfFactorsY.hpp")
+				ModelDesc("y_factors", IntegratedBrdfExpression, 3, False, "FittedBrdfFactorsY.hpp"),
 			),
 		),
 	)
 	for model in model_descs:
 		print(f"Training {model[0]} ...")
-		TrainModels(training_set, testing_set, args.batch_size, args.learning_rate, args.epochs, model[1])
+		TrainModels(device, training_set, testing_set, args.batch_size, args.learning_rate, args.epochs, model[1])
