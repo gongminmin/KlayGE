@@ -78,70 +78,64 @@ float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 n
 	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 
-float SELU(float x)
+float ELU(float x)
 {
-	const float alpha = 1.6732632423543772848170429916717f;
-	const float scale = 1.0507009873554804934193349852946f;
-	return scale * (max(0.0f, x) + min(0.0f, alpha * (exp(x) - 1)));
+	return x > 0 ? x : exp(x) - 1;
 }
 
 float EvalL4NN(float2 layer_0,
-	const float2 nn_layer_1_weight[3], const float nn_layer_1_bias[3],
-	const float3 nn_layer_2_weight[3], const float nn_layer_2_bias[3],
-	const float3 nn_layer_3_weight[1], const float nn_layer_3_bias[1])
+	const float2 nn_layer_1_weight[2], const float nn_layer_1_bias[2],
+	const float2 nn_layer_2_weight[2], const float nn_layer_2_bias[2],
+	const float2 nn_layer_3_weight[1], const float nn_layer_3_bias[1])
 {
-	float3 layer_1;
-	for (uint i = 0; i < 3; ++i)
+	float2 layer_1;
+	for (uint i = 0; i < 2; ++i)
 	{
-		layer_1[i] = SELU(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+		layer_1[i] = ELU(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
 	}
-	float3 layer_2;
-	for (i = 0; i < 3; ++i)
+	float2 layer_2;
+	for (i = 0; i < 2; ++i)
 	{
-		layer_2[i] = SELU(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+		layer_2[i] = ELU(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
 	}
-	return SELU(dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0]);
+	return dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0];
 }
 
 float3 CalcEnvSpecularNN(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
 {
 	const float2 x_nn_layer_1_weight[] = {
-		{-1.211678147f, -0.085554644f},
-		{3.755282879f, 0.130163789f},
-		{-0.089037426f, -4.871636391f},
+		{1.361475229f, 0.114280693f},
+		{1.839377522f, -3.022598743f},
 	};
-	const float x_nn_layer_1_bias[] = {1.296738148f, -3.892668962f, 1.077974200f};
+	const float x_nn_layer_1_bias[] = {-1.362602353f, -1.270107627f};
 
-	const float3 x_nn_layer_2_weight[] = {
-		{0.053118810f, -0.716794968f, -0.044706523f},
-		{0.046024829f, -0.201801717f, 0.142952874f},
-		{-3.347775698f, -0.373522669f, 0.225604177f},
+	const float2 x_nn_layer_2_weight[] = {
+		{5.805669785f, -2.684458733f},
+		{-0.122154050f, -3.083854914f},
 	};
-	const float x_nn_layer_2_bias[] = {-1.313303113f, -0.145755783f, 0.020353734f};
+	const float x_nn_layer_2_bias[] = {0.322901696f, -2.636789560f};
 
-	const float3 x_nn_layer_3_weight[] = {
-		{-1.436112523f, -0.118548520f, -0.831146538f},
+	const float2 x_nn_layer_3_weight[] = {
+		{0.227993324f, -0.289528042f},
 	};
-	const float x_nn_layer_3_bias[] = {-1.348872900f};
+	const float x_nn_layer_3_bias[] = {0.273143411f};
 
 	const float2 y_nn_layer_1_weight[] = {
-		{-3.321223259f, -0.127546296f},
-		{-1.003819108f, 0.361338705f},
-		{0.971514344f, -0.411502719f},
+		{1.681329727f, 1.339661717f},
+		{0.629440844f, -2.459083319f},
 	};
-	const float y_nn_layer_1_bias[] = {0.228082374f, 0.065170504f, 0.092815928f};
+	const float y_nn_layer_1_bias[] = {-1.932784796f, 2.378569841f};
 
-	const float3 y_nn_layer_2_weight[] = {
-		{-0.422195077f, -0.454904228f, -0.851188421f},
-		{0.477648884f, -0.780704498f, -0.455212682f},
-		{0.053152274f, -1.754751921f, -1.737720013f},
+	const float2 y_nn_layer_2_weight[] = {
+		{-3.985711098f, -2.003117800f},
+		{-7.566539288f, -2.692027330f},
 	};
-	const float y_nn_layer_2_bias[] = {-0.403342962f, 0.532369673f, -0.017129032f};
+	const float y_nn_layer_2_bias[] = {1.602266788f, -1.869802952f};
 
-	const float3 y_nn_layer_3_weight[] = {
-		{0.063786052f, 0.064103790f, -0.060237456f},
+	const float2 y_nn_layer_3_weight[] = {
+		{0.007079928f, -0.011957817f},
 	};
-	const float y_nn_layer_3_bias[] = {-0.003140349f};
+	const float y_nn_layer_3_bias[] = {-0.005231135f};
 
 	float n_dot_v = saturate(dot(normal, view));
 	float2 xy = float2(n_dot_v, glossiness);

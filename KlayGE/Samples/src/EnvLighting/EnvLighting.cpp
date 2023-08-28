@@ -766,17 +766,9 @@ namespace
 
 #ifdef ANALYSE_NN_ERRORS
 	template <typename T>
-	T ReLU(T const& x)
+	T ELU(T const& x)
 	{
-		return std::max(static_cast<T>(0), x);
-	}
-
-	template <typename T>
-	T SELU(T const& x)
-	{
-		constexpr T alpha = static_cast<T>(1.6732632423543772848170429916717);
-		constexpr T scale = static_cast<T>(1.0507009873554804934193349852946);
-		return scale * (std::max(static_cast<T>(0), x) + std::min(static_cast<T>(0), alpha * (std::exp(x) - 1)));
+		return x > 0 ? x : std::exp(x) - 1;
 	}
 
 	template <typename T, size_t N>
@@ -799,55 +791,51 @@ namespace
 		float layer_1[L1];
 		for (uint32_t i = 0; i < L1; ++i)
 		{
-			layer_1[i] = SELU(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+			layer_1[i] = ELU(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
 		}
 		float layer_2[L2];
 		for (uint32_t i = 0; i < L2; ++i)
 		{
-			layer_2[i] = SELU(Dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+			layer_2[i] = ELU(Dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
 		}
-		return SELU(Dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0]);
+		return Dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0];
 	}
 
 	std::vector<float2> GenL4NeuralNetworkBRDF(uint32_t width, uint32_t height)
 	{
 		float const x_nn_layer_1_weight[][2] = {
-			{-1.211678147f, -0.085554644f},
-			{3.755282879f, 0.130163789f},
-			{-0.089037426f, -4.871636391f},
+			{1.361475229f, 0.114280693f},
+			{1.839377522f, -3.022598743f},
 		};
-		float const x_nn_layer_1_bias[]{1.296738148f, -3.892668962f, 1.077974200f};
+		float const x_nn_layer_1_bias[]{-1.362602353f, -1.270107627f};
 
-		float const x_nn_layer_2_weight[][3] = {
-			{0.053118810f, -0.716794968f, -0.044706523f},
-			{0.046024829f, -0.201801717f, 0.142952874f},
-			{-3.347775698f, -0.373522669f, 0.225604177f},
+		float const x_nn_layer_2_weight[][2] = {
+			{5.805669785f, -2.684458733f},
+			{-0.122154050f, -3.083854914f},
 		};
-		float const x_nn_layer_2_bias[]{-1.313303113f, -0.145755783f, 0.020353734f};
+		float const x_nn_layer_2_bias[]{0.322901696f, -2.636789560f};
 
-		float const x_nn_layer_3_weight[][3] = {
-			{-1.436112523f, -0.118548520f, -0.831146538f},
+		float const x_nn_layer_3_weight[][2] = {
+			{0.227993324f, -0.289528042f},
 		};
-		float const x_nn_layer_3_bias[]{-1.348872900f};
+		float const x_nn_layer_3_bias[]{0.273143411f};
 
 		float const y_nn_layer_1_weight[][2] = {
-			{-3.321223259f, -0.127546296f},
-			{-1.003819108f, 0.361338705f},
-			{0.971514344f, -0.411502719f},
+			{1.681329727f, 1.339661717f},
+			{0.629440844f, -2.459083319f},
 		};
-		float const y_nn_layer_1_bias[]{0.228082374f, 0.065170504f, 0.092815928f};
+		float const y_nn_layer_1_bias[]{-1.932784796f, 2.378569841f};
 
-		float const y_nn_layer_2_weight[][3] = {
-			{-0.422195077f, -0.454904228f, -0.851188421f},
-			{0.477648884f, -0.780704498f, -0.455212682f},
-			{0.053152274f, -1.754751921f, -1.737720013f},
+		float const y_nn_layer_2_weight[][2] = {
+			{-3.985711098f, -2.003117800f},
+			{-7.566539288f, -2.692027330f},
 		};
-		float const y_nn_layer_2_bias[]{-0.403342962f, 0.532369673f, -0.017129032f};
+		float const y_nn_layer_2_bias[]{1.602266788f, -1.869802952f};
 
-		float const y_nn_layer_3_weight[][3] = {
-			{0.063786052f, 0.064103790f, -0.060237456f},
+		float const y_nn_layer_3_weight[][2] = {
+			{0.007079928f, -0.011957817f},
 		};
-		float const y_nn_layer_3_bias[]{-0.003140349f};
+		float const y_nn_layer_3_bias[]{-0.005231135f};
 
 		std::vector<float2> nn_brdf_f32(width * height);
 		for (uint32_t y = 0; y < height; ++y)

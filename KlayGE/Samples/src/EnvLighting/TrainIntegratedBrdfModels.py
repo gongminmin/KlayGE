@@ -15,10 +15,13 @@ class IntegratedBrdfDataset:
 			self.coord_data = torch.empty(sample_count, 2)
 			self.x_data = torch.empty(sample_count)
 			self.y_data = torch.empty(sample_count)
-			for i in range(sample_count):
-				self.coord_data[i] = torch.tensor(struct.unpack("<ff", file.read(8)))
-				self.x_data[i] = struct.unpack("<f", file.read(4))[0]
-				self.y_data[i] = struct.unpack("<f", file.read(4))[0]
+			sample_format = "<ffff"
+			buffer = file.read(sample_count * struct.calcsize(sample_format))
+			unpack_iter = struct.iter_unpack(sample_format, buffer)
+			for i, sample in enumerate(unpack_iter):
+				self.coord_data[i] = torch.tensor(sample[0:2])
+				self.x_data[i] = sample[2]
+				self.y_data[i] = sample[3]
 
 			self.coord_data = self.coord_data.to(device)
 			self.x_data = self.x_data.to(device)
@@ -39,8 +42,9 @@ class IntegratedBrdfNetwork(nn.Module):
 		layers = []
 		for i in range(len(num_features) - 1):
 			layers.append(nn.Linear(num_features[i], num_features[i + 1]))
-			layers.append(nn.SELU())
-		
+			if i != len(num_features) - 2:
+				layers.append(nn.ELU())
+
 		self.net = nn.Sequential(*layers)
 
 	def forward(self, x):
@@ -123,7 +127,9 @@ class ModelDesc:
 		self.x_channel_mode = x_channel_mode
 		self.output_file_name = output_file_name
 
-def TrainModel(device, data_set, model, batch_size, learning_rate, epochs, output_file_name, var_name):
+def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs):
+	model = model_desc.model_class(model_desc.model_param)
+
 	model.to(device)
 	model.train()
 
@@ -149,8 +155,8 @@ def TrainModel(device, data_set, model, batch_size, learning_rate, epochs, outpu
 		loss = running_loss.item() / len(data_set)
 		scheduler.step(loss)
 		if loss < min_loss:
-			with open(output_file_name, "w") as file:
-				model.Write(file, var_name)
+			with open(model_desc.output_file_name, "w") as file:
+				model.Write(file, model_desc.name)
 				file.write(f"// [{epoch + 1}] Loss: {loss}\n")
 			min_loss = loss
 		print(f"[{epoch + 1}] Loss: {loss}")
@@ -159,6 +165,8 @@ def TrainModel(device, data_set, model, batch_size, learning_rate, epochs, outpu
 	timespan = time.time() - start
 
 	print(f"Finished training in {(timespan / 60):.2f} mins.")
+
+	return model
 
 def TestModel(device, data_set, model, batch_size):
 	model.to(device)
@@ -180,13 +188,11 @@ def TrainModels(device, training_set, testing_set, batch_size, learning_rate, ep
 	models = []
 	for model_desc in model_descs:
 		training_set.XChannelMode(model_desc.x_channel_mode)
-		model = model_desc.model_class(model_desc.model_param)
-		TrainModel(device, training_set, model, batch_size, learning_rate, epochs, model_desc.output_file_name, model_desc.name)
+		model = TrainModel(device, training_set, model_desc, batch_size, learning_rate, epochs)
 		models.append(model)
 
 	for model, model_desc in zip(models, model_descs):
 		testing_set.XChannelMode(model_desc.x_channel_mode)
-		model.eval()
 		mse = TestModel(device, testing_set, model, batch_size)
 		print(f"MSE of the {model_desc.name} on the {len(testing_set)} test samples: {mse}")
 
@@ -219,8 +225,8 @@ if __name__ == "__main__":
 		(
 			"4-Layer NN",
 			(
-				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 3, 3, 1), True, "FittedBrdfNNs4LayerX.hpp"),
-				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 3, 1), False, "FittedBrdfNNs4LayerY.hpp"),
+				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), True, "FittedBrdfNNs4LayerX.hpp"),
+				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), False, "FittedBrdfNNs4LayerY.hpp"),
 			),
 		),
 		(
