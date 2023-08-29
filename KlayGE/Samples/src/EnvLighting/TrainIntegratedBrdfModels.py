@@ -98,12 +98,12 @@ class IntegratedBrdfExpression(nn.Module):
 		dim_x = []
 		for y in range(n):
 			tmp = weights[y * n]
-			for x in range(n - 1):
-				tmp = tmp * glossiness + weights[y * n + x + 1]
+			for x in range(1, n):
+				tmp = tmp * glossiness + weights[y * n + x]
 			dim_x.append(tmp)
 		dim_y = dim_x[0]
-		for x in range(n - 1):
-			dim_y = dim_y * n_dot_v + dim_x[x + 1]
+		for x in range(1, n):
+			dim_y = dim_y * n_dot_v + dim_x[x]
 		return dim_y.squeeze(1)
 
 	def Write(self, file, var_name):

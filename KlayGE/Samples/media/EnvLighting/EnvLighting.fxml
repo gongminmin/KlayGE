@@ -89,11 +89,13 @@ float EvalL4NN(float2 layer_0,
 	const float2 nn_layer_3_weight[1], const float nn_layer_3_bias[1])
 {
 	float2 layer_1;
+	[unroll]
 	for (uint i = 0; i < 2; ++i)
 	{
 		layer_1[i] = ELU(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
 	}
 	float2 layer_2;
+	[unroll]
 	for (i = 0; i < 2; ++i)
 	{
 		layer_2[i] = ELU(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
@@ -104,21 +106,21 @@ float EvalL4NN(float2 layer_0,
 float3 CalcEnvSpecularNN(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
 {
 	const float2 x_nn_layer_1_weight[] = {
-		{1.361475229f, 0.114280693f},
-		{1.839377522f, -3.022598743f},
+		{4.399214745f, -0.055635855f},
+		{1.110542059f, -5.182593822f},
 	};
-	const float x_nn_layer_1_bias[] = {-1.362602353f, -1.270107627f};
+	const float x_nn_layer_1_bias[] = {-1.359892607f, -0.377716959f};
 
 	const float2 x_nn_layer_2_weight[] = {
-		{5.805669785f, -2.684458733f},
-		{-0.122154050f, -3.083854914f},
+		{0.492594600f, -1.295937061f},
+		{-0.030019455f, -1.621358991f},
 	};
-	const float x_nn_layer_2_bias[] = {0.322901696f, -2.636789560f};
+	const float x_nn_layer_2_bias[] = {-2.233822823f, -1.402077079f};
 
 	const float2 x_nn_layer_3_weight[] = {
-		{0.227993324f, -0.289528042f},
+		{0.761994183f, -0.401618242f},
 	};
-	const float x_nn_layer_3_bias[] = {0.273143411f};
+	const float x_nn_layer_3_bias[] = {0.637818933f};
 
 	const float2 y_nn_layer_1_weight[] = {
 		{1.681329727f, 1.339661717f},

@@ -804,21 +804,21 @@ namespace
 	std::vector<float2> GenL4NeuralNetworkBRDF(uint32_t width, uint32_t height)
 	{
 		float const x_nn_layer_1_weight[][2] = {
-			{1.361475229f, 0.114280693f},
-			{1.839377522f, -3.022598743f},
+			{4.399214745f, -0.055635855f},
+			{1.110542059f, -5.182593822f},
 		};
-		float const x_nn_layer_1_bias[]{-1.362602353f, -1.270107627f};
+		float const x_nn_layer_1_bias[]{-1.359892607f, -0.377716959f};
 
 		float const x_nn_layer_2_weight[][2] = {
-			{5.805669785f, -2.684458733f},
-			{-0.122154050f, -3.083854914f},
+			{0.492594600f, -1.295937061f},
+			{-0.030019455f, -1.621358991f},
 		};
-		float const x_nn_layer_2_bias[]{0.322901696f, -2.636789560f};
+		float const x_nn_layer_2_bias[]{-2.233822823f, -1.402077079f};
 
 		float const x_nn_layer_3_weight[][2] = {
-			{0.227993324f, -0.289528042f},
+			{0.761994183f, -0.401618242f},
 		};
-		float const x_nn_layer_3_bias[]{0.273143411f};
+		float const x_nn_layer_3_bias[]{0.637818933f};
 
 		float const y_nn_layer_1_weight[][2] = {
 			{1.681329727f, 1.339661717f},
