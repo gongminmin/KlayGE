@@ -43,7 +43,7 @@ class IntegratedBrdfNetwork(nn.Module):
 		for i in range(len(num_features) - 1):
 			layers.append(nn.Linear(num_features[i], num_features[i + 1]))
 			if i != len(num_features) - 2:
-				layers.append(nn.ELU())
+				layers.append(nn.Sigmoid())
 
 		self.net = nn.Sequential(*layers)
 
@@ -199,7 +199,7 @@ def TrainModels(device, training_set, testing_set, batch_size, learning_rate, ep
 def ParseCommandLine():
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument("--batch-size", dest = "batch_size", default = 1024, type = int, help = "batch size in training")
+	parser.add_argument("--batch-size", dest = "batch_size", default = 256, type = int, help = "batch size in training")
 	parser.add_argument("--learning-rate", dest = "learning_rate", default = 0.01, type = float, help = "epochs in training")
 	parser.add_argument("--epochs", dest = "epochs", default = 500, type = int, help = "epochs in training")
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 	training_set = IntegratedBrdfDataset(device, "IntegratedBRDF_1048576.dat")
 
 	idx = torch.randperm(training_set.coord_data.shape[0])
-	training_set.coord_data = training_set.coord_data[idx].view(training_set.coord_data.size())
+	training_set.coord_data = training_set.coord_data[idx]
 	training_set.x_data = training_set.x_data[idx]
 	training_set.y_data = training_set.y_data[idx]
 
@@ -223,10 +223,10 @@ if __name__ == "__main__":
 
 	model_descs = (
 		(
-			"4-Layer NN",
+			"neural network",
 			(
 				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), True, "FittedBrdfNNs4LayerX.hpp"),
-				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), False, "FittedBrdfNNs4LayerY.hpp"),
+				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 1), False, "FittedBrdfNNs3LayerY.hpp"),
 			),
 		),
 		(

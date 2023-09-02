@@ -766,9 +766,9 @@ namespace
 
 #ifdef ANALYSE_NN_ERRORS
 	template <typename T>
-	T ELU(T const& x)
+	T Sigmoid(T const& x)
 	{
-		return x > 0 ? x : std::exp(x) - 1;
+		return 1 / (1 + std::exp(-x));
 	}
 
 	template <typename T, size_t N>
@@ -782,6 +782,19 @@ namespace
 		return ret;
 	}
 
+	template <size_t L0, size_t L1, size_t L2>
+	float EvalL3NN(float const (&layer_0)[L0],
+		float const (&nn_layer_1_weight)[L1][L0], float const (&nn_layer_1_bias)[L1],
+		float const (&nn_layer_2_weight)[L2][L1], float const (&nn_layer_2_bias)[L2])
+	{
+		float layer_1[L1];
+		for (uint32_t i = 0; i < L1; ++i)
+		{
+			layer_1[i] = Sigmoid(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+		}
+		return Dot(nn_layer_2_weight[0], layer_1) + nn_layer_2_bias[0];
+	}
+
 	template <size_t L0, size_t L1, size_t L2, size_t L3>
 	float EvalL4NN(float const (&layer_0)[L0],
 		float const (&nn_layer_1_weight)[L1][L0], float const (&nn_layer_1_bias)[L1],
@@ -791,12 +804,12 @@ namespace
 		float layer_1[L1];
 		for (uint32_t i = 0; i < L1; ++i)
 		{
-			layer_1[i] = ELU(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+			layer_1[i] = Sigmoid(Dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
 		}
 		float layer_2[L2];
 		for (uint32_t i = 0; i < L2; ++i)
 		{
-			layer_2[i] = ELU(Dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+			layer_2[i] = Sigmoid(Dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
 		}
 		return Dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0];
 	}
@@ -804,38 +817,33 @@ namespace
 	std::vector<float2> GenL4NeuralNetworkBRDF(uint32_t width, uint32_t height)
 	{
 		float const x_nn_layer_1_weight[][2] = {
-			{4.399214745f, -0.055635855f},
-			{1.110542059f, -5.182593822f},
+			{1.698710799f, -6.031820297f},
+			{5.511096954f, -0.085557237f},
 		};
-		float const x_nn_layer_1_bias[]{-1.359892607f, -0.377716959f};
+		float const x_nn_layer_1_bias[]{-2.331894636f, -4.930409431f};
 
 		float const x_nn_layer_2_weight[][2] = {
-			{0.492594600f, -1.295937061f},
-			{-0.030019455f, -1.621358991f},
+			{8.675825119f, -4.054215908f},
+			{-10.582502365f, -7.232619286f},
 		};
-		float const x_nn_layer_2_bias[]{-2.233822823f, -1.402077079f};
+		float const x_nn_layer_2_bias[]{2.326496601f, -4.222003937f};
 
 		float const x_nn_layer_3_weight[][2] = {
-			{0.761994183f, -0.401618242f},
+			{-1.277372718f, -31.655321121f},
 		};
-		float const x_nn_layer_3_bias[]{0.637818933f};
+		float const x_nn_layer_3_bias[]{1.582883477f};
 
 		float const y_nn_layer_1_weight[][2] = {
-			{1.681329727f, 1.339661717f},
-			{0.629440844f, -2.459083319f},
+			{8.235061646f, 0.733294487f},
+			{-8.698042870f, -1.482306123f},
+			{-10.972737312f, 6.122618675f},
 		};
-		float const y_nn_layer_1_bias[]{-1.932784796f, 2.378569841f};
+		float const y_nn_layer_1_bias[]{-2.975159407f, 3.277709723f, -3.407575369f};
 
-		float const y_nn_layer_2_weight[][2] = {
-			{-3.985711098f, -2.003117800f},
-			{-7.566539288f, -2.692027330f},
+		float const y_nn_layer_2_weight[][3] = {
+			{-0.128051877f, -0.115933217f, -0.016487861f},
 		};
-		float const y_nn_layer_2_bias[]{1.602266788f, -1.869802952f};
-
-		float const y_nn_layer_3_weight[][2] = {
-			{0.007079928f, -0.011957817f},
-		};
-		float const y_nn_layer_3_bias[]{-0.005231135f};
+		float const y_nn_layer_2_bias[]{0.127637625f};
 
 		std::vector<float2> nn_brdf_f32(width * height);
 		for (uint32_t y = 0; y < height; ++y)
@@ -851,12 +859,11 @@ namespace
 					x_nn_layer_1_weight, x_nn_layer_1_bias,
 					x_nn_layer_2_weight, x_nn_layer_2_bias,
 					x_nn_layer_3_weight, x_nn_layer_3_bias);
-				float const y_layer_3 = EvalL4NN(xy,
+				float const y_layer_2 = EvalL3NN(xy,
 					y_nn_layer_1_weight, y_nn_layer_1_bias,
-					y_nn_layer_2_weight, y_nn_layer_2_bias,
-					y_nn_layer_3_weight, y_nn_layer_3_bias);
+					y_nn_layer_2_weight, y_nn_layer_2_bias);
 
-				nn_brdf_f32[y * width + x] = {x_layer_3, y_layer_3};
+				nn_brdf_f32[y * width + x] = {x_layer_3, y_layer_2};
 			}
 		}
 

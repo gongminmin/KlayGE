@@ -78,9 +78,22 @@ float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 n
 	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 
-float ELU(float x)
+float Sigmoid(float x)
 {
-	return x > 0 ? x : exp(x) - 1;
+	return 1 / (1 + exp(-x));
+}
+
+float EvalL3NN(float2 layer_0,
+	const float2 nn_layer_1_weight[3], const float nn_layer_1_bias[3],
+	const float3 nn_layer_2_weight[1], const float nn_layer_2_bias[1])
+{
+	float3 layer_1;
+	[unroll]
+	for (uint i = 0; i < 3; ++i)
+	{
+		layer_1[i] = Sigmoid(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+	}
+	return dot(nn_layer_2_weight[0], layer_1) + nn_layer_2_bias[0];
 }
 
 float EvalL4NN(float2 layer_0,
@@ -92,13 +105,13 @@ float EvalL4NN(float2 layer_0,
 	[unroll]
 	for (uint i = 0; i < 2; ++i)
 	{
-		layer_1[i] = ELU(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
+		layer_1[i] = Sigmoid(dot(nn_layer_1_weight[i], layer_0) + nn_layer_1_bias[i]);
 	}
 	float2 layer_2;
 	[unroll]
 	for (i = 0; i < 2; ++i)
 	{
-		layer_2[i] = ELU(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
+		layer_2[i] = Sigmoid(dot(nn_layer_2_weight[i], layer_1) + nn_layer_2_bias[i]);
 	}
 	return dot(nn_layer_3_weight[0], layer_2) + nn_layer_3_bias[0];
 }
@@ -106,38 +119,33 @@ float EvalL4NN(float2 layer_0,
 float3 CalcEnvSpecularNN(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
 {
 	const float2 x_nn_layer_1_weight[] = {
-		{4.399214745f, -0.055635855f},
-		{1.110542059f, -5.182593822f},
+		{1.698710799f, -6.031820297f},
+		{5.511096954f, -0.085557237f},
 	};
-	const float x_nn_layer_1_bias[] = {-1.359892607f, -0.377716959f};
+	const float x_nn_layer_1_bias[] = {-2.331894636f, -4.930409431f};
 
 	const float2 x_nn_layer_2_weight[] = {
-		{0.492594600f, -1.295937061f},
-		{-0.030019455f, -1.621358991f},
+		{8.675825119f, -4.054215908f},
+		{-10.582502365f, -7.232619286f},
 	};
-	const float x_nn_layer_2_bias[] = {-2.233822823f, -1.402077079f};
+	const float x_nn_layer_2_bias[] = {2.326496601f, -4.222003937f};
 
 	const float2 x_nn_layer_3_weight[] = {
-		{0.761994183f, -0.401618242f},
+		{-1.277372718f, -31.655321121f},
 	};
-	const float x_nn_layer_3_bias[] = {0.637818933f};
+	const float x_nn_layer_3_bias[] = {1.582883477f};
 
 	const float2 y_nn_layer_1_weight[] = {
-		{1.681329727f, 1.339661717f},
-		{0.629440844f, -2.459083319f},
+		{8.235061646f, 0.733294487f},
+		{-8.698042870f, -1.482306123f},
+		{-10.972737312f, 6.122618675f},
 	};
-	const float y_nn_layer_1_bias[] = {-1.932784796f, 2.378569841f};
+	const float y_nn_layer_1_bias[] = {-2.975159407f, 3.277709723f, -3.407575369f};
 
-	const float2 y_nn_layer_2_weight[] = {
-		{-3.985711098f, -2.003117800f},
-		{-7.566539288f, -2.692027330f},
+	const float3 y_nn_layer_2_weight[] = {
+		{-0.128051877f, -0.115933217f, -0.016487861f},
 	};
-	const float y_nn_layer_2_bias[] = {1.602266788f, -1.869802952f};
-
-	const float2 y_nn_layer_3_weight[] = {
-		{0.007079928f, -0.011957817f},
-	};
-	const float y_nn_layer_3_bias[] = {-0.005231135f};
+	const float y_nn_layer_2_bias[] = {0.127637625f};
 
 	float n_dot_v = saturate(dot(normal, view));
 	float2 xy = float2(n_dot_v, glossiness);
@@ -146,10 +154,9 @@ float3 CalcEnvSpecularNN(float3 prefiltered_env, float3 c_spec, float glossiness
 		x_nn_layer_1_weight, x_nn_layer_1_bias,
 		x_nn_layer_2_weight, x_nn_layer_2_bias,
 		x_nn_layer_3_weight, x_nn_layer_3_bias);
-	env_brdf.y = EvalL4NN(xy,
+	env_brdf.y = EvalL3NN(xy,
 		y_nn_layer_1_weight, y_nn_layer_1_bias,
-		y_nn_layer_2_weight, y_nn_layer_2_bias,
-		y_nn_layer_3_weight, y_nn_layer_3_bias);
+		y_nn_layer_2_weight, y_nn_layer_2_bias);
 
 	env_brdf = saturate(env_brdf);
 	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
