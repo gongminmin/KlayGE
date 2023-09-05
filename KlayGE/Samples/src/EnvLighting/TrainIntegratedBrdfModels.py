@@ -99,11 +99,11 @@ class IntegratedBrdfExpression(nn.Module):
 		for y in range(n):
 			tmp = weights[y * n]
 			for x in range(1, n):
-				tmp = tmp * glossiness + weights[y * n + x]
+				tmp = torch.addcmul(weights[y * n + x], tmp, glossiness)
 			dim_x.append(tmp)
 		dim_y = dim_x[0]
 		for x in range(1, n):
-			dim_y = dim_y * n_dot_v + dim_x[x]
+			dim_y = torch.addcmul(dim_x[x], dim_y, n_dot_v)
 		return dim_y.squeeze(1)
 
 	def Write(self, file, var_name):
@@ -140,7 +140,7 @@ def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs):
 	start = time.time()
 	min_loss = 1e10
 	for epoch in range(epochs):
-		running_loss = torch.tensor(0.0, device = device)
+		running_loss = torch.zeros(1, device = device)
 		for batch_start in range(0, len(data_set), batch_size):
 			inputs = data_set.coord_data[batch_start : batch_start + batch_size]
 			targets = data_set.output_data[batch_start : batch_start + batch_size]
