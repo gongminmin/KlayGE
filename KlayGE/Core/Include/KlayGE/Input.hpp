@@ -643,7 +643,13 @@ namespace KlayGE
 
 	struct KLAYGE_CORE_API InputActionParam
 	{
-		virtual ~InputActionParam() = default;
+		InputActionParam();
+		InputActionParam(const InputActionParam& rhs);
+		InputActionParam(InputActionParam&& rhs);
+		virtual ~InputActionParam();
+
+		InputActionParam& operator=(const InputActionParam& rhs);
+		InputActionParam& operator=(InputActionParam&& rhs);
 
 		InputEngine::InputDeviceType type;
 	};

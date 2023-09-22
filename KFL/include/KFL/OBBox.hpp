@@ -60,11 +60,11 @@ namespace KlayGE
 		{
 		}
 		constexpr OBBox_T(OBBox_T<T> const& rhs) noexcept
-			: Bound_T<T>(rhs), center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
+			: center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
 		{
 		}
 		constexpr OBBox_T(OBBox_T<T>&& rhs) noexcept
-			: Bound_T<T>(rhs), center_(std::move(rhs.center_)), rotation_(std::move(rhs.rotation_)), extent_(std::move(rhs.extent_))
+			: center_(std::move(rhs.center_)), rotation_(std::move(rhs.rotation_)), extent_(std::move(rhs.extent_))
 		{
 		}
 

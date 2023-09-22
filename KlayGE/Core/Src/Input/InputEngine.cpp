@@ -126,4 +126,12 @@ namespace KlayGE
 	{
 		this->DoResume();
 	}
+
+	InputActionParam::InputActionParam() = default;
+	InputActionParam::InputActionParam(const InputActionParam& rhs) = default;
+	InputActionParam::InputActionParam(InputActionParam&& rhs) = default;
+	InputActionParam::~InputActionParam() = default;
+
+	InputActionParam& InputActionParam::operator=(const InputActionParam& rhs) = default;
+	InputActionParam& InputActionParam::operator=(InputActionParam&& rhs) = default;
 }

@@ -48,7 +48,14 @@
 #ifndef KLAYGE_DEBUG
 #define CXXOPTS_NO_RTTI
 #endif
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable : 5267) // Ignore implicit copy constructor definition
+#endif
 #include <cxxopts.hpp>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/ToolCommon.hpp>
 #include <KlayGE/DevHelper/PlatformDefinition.hpp>

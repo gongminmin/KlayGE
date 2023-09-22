@@ -56,10 +56,10 @@ namespace KlayGE
 		{
 		}
 		AABBox_T(Vector_T<T, 3> vMin, Vector_T<T, 3> vMax) noexcept;
-		constexpr AABBox_T(AABBox_T<T> const& rhs) noexcept : Bound_T<T>(rhs), min_(rhs.min_), max_(rhs.max_)
+		constexpr AABBox_T(AABBox_T<T> const& rhs) noexcept : min_(rhs.min_), max_(rhs.max_)
 		{
 		}
-		constexpr AABBox_T(AABBox_T<T>&& rhs) noexcept : Bound_T<T>(rhs), min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
+		constexpr AABBox_T(AABBox_T<T>&& rhs) noexcept : min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
 		{
 		}
 
