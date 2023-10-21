@@ -1,3 +1,0 @@
-ADD_SUBDIRECTORY(MtlEditor)
-ADD_SUBDIRECTORY(MtlEditorCore)
-ADD_SUBDIRECTORY(MtlEditorCoreWrapper)

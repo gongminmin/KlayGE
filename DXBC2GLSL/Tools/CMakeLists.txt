@@ -1,0 +1,2 @@
+add_subdirectory(DXBC2GLSLCmd)
+add_subdirectory(DXBCDisasm)

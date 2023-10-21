@@ -667,12 +667,12 @@ class BuildInfo:
 			if "ProgramFiles(x86)" in env:
 				program_files_folder = env["ProgramFiles(x86)"]
 			else:
-				program_files_folder = "C:\Program Files (x86)"
+				program_files_folder = "C:\\Program Files (x86)"
 		else:
 			if "ProgramFiles" in env:
 				program_files_folder = env["ProgramFiles"]
 			else:
-				program_files_folder = "C:\Program Files"
+				program_files_folder = "C:\\Program Files"
 		return program_files_folder
 
 	def FindVS2022Folder(self, program_files_folder):
@@ -881,7 +881,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			else:
 				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
-			cmake_cmd.AddCommand('"%s" -G "%s" %s %s ../CMake' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options))
+			cmake_cmd.AddCommand('"%s" -G "%s" %s %s ../../' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options))
 			if cmake_cmd.Execute() != 0:
 				LogWarning("Config %s failed, retry 1...\n" % name)
 				if cmake_cmd.Execute() != 0:
@@ -972,7 +972,7 @@ def BuildProjects(name, build_path, build_info, compiler_info, project_list, add
 					cmake_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 					additional_options += " -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe"
-				cmake_cmd.AddCommand('"%s" -G "%s" %s ../CMake' % (build_info.cmake_path, compiler_info.generator, additional_options))
+				cmake_cmd.AddCommand('"%s" -G "%s" %s ../../' % (build_info.cmake_path, compiler_info.generator, additional_options))
 				if cmake_cmd.Execute() != 0:
 					LogWarning("Config %s failed, retry 1...\n" % name)
 					if cmake_cmd.Execute() != 0:
