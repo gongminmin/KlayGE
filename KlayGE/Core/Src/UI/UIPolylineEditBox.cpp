@@ -96,7 +96,7 @@ namespace KlayGE
 	int UIPolylineEditBox::AddCtrlPoint(float pos, float value)
 	{
 		pos = MathLib::clamp(pos, 0.0f, 1.0f);
-		value = MathLib::clamp(pos, 0.0f, 1.0f);
+		value = MathLib::clamp(value, 0.0f, 1.0f);
 
 		int index;
 		if (ctrl_points_.size() >= 1)

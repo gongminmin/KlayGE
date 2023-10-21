@@ -108,9 +108,10 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(wbem_services_);
 
-			wchar_t query_lang[] = L"WQL";
+			BSTR query_lang = SysAllocString(L"WQL");
 			HRESULT hr = wbem_services_->ExecQuery(query_lang, wql,
 				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, wbem_enum_result_.release_and_put());
+			SysFreeString(query_lang);
 			if (FAILED(hr))
 			{
 				return false;
@@ -224,14 +225,18 @@ namespace KlayGE
 			return false;
 		}
 
-		wchar_t network_resource[] = L"root\\WMI";
-		if (!wmi.ConnectServer(network_resource))
+		BSTR network_resource = SysAllocString(L"root\\WMI");
+		bool ok = wmi.ConnectServer(network_resource);
+		SysFreeString(network_resource);
+		if (!ok)
 		{
 			return false;
 		}
 
-		wchar_t wql[] = L"SELECT * FROM MSSMBios_RawSMBiosTables";
-		if (!wmi.ExecuteQuery(wql))
+		BSTR wql = SysAllocString(L"SELECT * FROM MSSMBios_RawSMBiosTables");
+		ok = wmi.ExecuteQuery(wql);
+		SysFreeString(wql);
+		if (!ok)
 		{
 			return false;
 		}

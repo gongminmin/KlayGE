@@ -286,7 +286,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 				out << " enableDoubleExtensions";
 				first_flag = false;
 			}
-			if (dcl.dcl_global_flags.enable_raw_and_structured_in_non_cs)
+			if (dcl.dcl_global_flags.enable_shader_extensions)
 			{
 				if (!first_flag)
 				{

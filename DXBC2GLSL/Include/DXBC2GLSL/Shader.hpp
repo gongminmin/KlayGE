@@ -55,8 +55,8 @@ struct TextureSamplerInfo
 
 struct DclIndexRangeInfo
 {
-	ShaderOperandType op_type; 
 	int64_t start;
+	ShaderOperandType op_type; 
 	uint32_t num;
 };
 

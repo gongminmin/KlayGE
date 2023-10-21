@@ -67,11 +67,13 @@ namespace KlayGE
 				EqualToT& operator=(EqualToT const& rhs) noexcept
 				{
 					ch_ = rhs.ch_;
+					return *this;
 				}
 
 				EqualToT& operator=(EqualToT&& rhs) noexcept
 				{
 					ch_ = std::move(rhs.ch_);
+					return *this;
 				}
 
 				bool operator()(CharType ch) const noexcept
@@ -108,11 +110,13 @@ namespace KlayGE
 				IsAnyOfT& operator=(IsAnyOfT const& rhs)
 				{
 					set_ = rhs.set_;
+					return *this;
 				}
 
 				IsAnyOfT& operator=(IsAnyOfT&& rhs) noexcept
 				{
 					set_ = std::move(rhs.set_);
+					return *this;
 				}
 
 				bool operator()(CharType ch) const
