@@ -142,7 +142,6 @@ target_link_libraries(${LIB_NAME}
 	PUBLIC
 		Boost::assert
 		Boost::core
-		fmt
 		GSL
 		scope-lite
 
@@ -150,6 +149,13 @@ target_link_libraries(${LIB_NAME}
 		rapidjson
 		rapidxml
 )
+
+if ((NOT KLAYGE_COMPILER_MSVC) OR (MSVC_VERSION LESS 1929))
+	target_link_libraries(${LIB_NAME}
+		PUBLIC
+			fmt
+	)
+endif()
 
 if(KLAYGE_WITH_GHC_FILESYSTEM)
 	target_link_libraries(${LIB_NAME}
