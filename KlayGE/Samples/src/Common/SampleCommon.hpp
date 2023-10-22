@@ -5,7 +5,7 @@
 
 #include <nonstd/scope.hpp>
 
-#ifndef SAMPLE_COMMON_SOURCE
+#ifndef NO_NvOptimus
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
 {

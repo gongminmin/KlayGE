@@ -14,11 +14,6 @@ SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
 ADD_LIBRARY(${LIB_NAME} SHARED
 	${SOURCE_FILES} ${HEADER_FILES} ${PLAT_CONF_FILES})
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DKLAYGE_TOOL_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${KLAYGE_PROJECT_DIR}/Tools/Include

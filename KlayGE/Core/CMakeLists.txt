@@ -523,10 +523,6 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${APP_SOURCE_FILES} ${APP_HEADER_FILES}
 )
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DKLAYGE_CORE_SOURCE
-)
 IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
 	FIND_PATH(WINE_PATH "wineserver" #searching for 'wine' may result in include path
 		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin /usr/lib/wine)

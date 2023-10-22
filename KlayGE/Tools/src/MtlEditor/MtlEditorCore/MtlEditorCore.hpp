@@ -9,7 +9,7 @@
 #include <KlayGE/CameraController.hpp>
 #include "Model.hpp"
 
-#ifdef KLAYGE_MTL_EDITOR_CORE_SOURCE		// Build dll
+#ifdef MtlEditorCore_EXPORTS	// Build dll
 #define KLAYGE_MTL_EDITOR_CORE_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll
 #define KLAYGE_MTL_EDITOR_CORE_API KLAYGE_SYMBOL_IMPORT

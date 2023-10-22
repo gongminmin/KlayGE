@@ -217,7 +217,7 @@ typedef EGLNativeWindowType  NativeWindowType;
 #define GLLOADER_SYMBOL_IMPORT
 #endif
 
-#ifdef GLLOADER_SOURCE				// Build dll
+#if defined(glloader_EXPORTS) || defined(glloader_es_EXPORTS)	// Build dll
 	#define GLLOADER_API GLLOADER_SYMBOL_EXPORT
 #else								// Use dll
 	#define GLLOADER_API GLLOADER_SYMBOL_IMPORT

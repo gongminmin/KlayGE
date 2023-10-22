@@ -101,11 +101,6 @@ SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
 ADD_LIBRARY(${LIB_NAME} STATIC
 	${SOURCE_FILES} ${HEADER_FILES})
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DSAMPLE_COMMON_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${KLAYGE_PROJECT_DIR}/Samples/src/Common

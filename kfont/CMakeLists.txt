@@ -23,11 +23,6 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 	${KFONT_SOURCE_FILES} ${KFONT_HEADER_FILES}
 )
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DKFONT_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${KFONT_PROJECT_DIR}/include

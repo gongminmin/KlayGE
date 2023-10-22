@@ -110,11 +110,6 @@ ADD_LIBRARY(${LIB_NAME} STATIC
 	${MATH_SOURCE_FILES} ${MATH_HEADER_FILES}
 )
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DKFL_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		# Not using target_link_libraries to prevent depending on Boost::io

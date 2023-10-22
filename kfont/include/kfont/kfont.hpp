@@ -37,7 +37,7 @@
 #include <istream>
 #include <unordered_map>
 
-#ifdef KFONT_SOURCE		// Build dll
+#ifdef kfont_EXPORTS			// Build dll
 	#define KFONT_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll
 	#define KFONT_API KLAYGE_SYMBOL_IMPORT

@@ -33,7 +33,7 @@
 
 #pragma once
 
-#ifdef KLAYGE_TOOL_SOURCE
+#ifdef ToolCommon_EXPORTS
 	#define KLAYGE_TOOL_API KLAYGE_SYMBOL_EXPORT
 #else
 	#define KLAYGE_TOOL_API KLAYGE_SYMBOL_IMPORT

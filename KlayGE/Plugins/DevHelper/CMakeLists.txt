@@ -45,11 +45,6 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${PLAT_CONF_FILES}
 )
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DKLAYGE_PLUGIN_DEV_HELPER_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${KLAYGE_PROJECT_DIR}/Plugins/DevHelper/Include

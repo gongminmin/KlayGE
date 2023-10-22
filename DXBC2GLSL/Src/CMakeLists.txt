@@ -24,11 +24,6 @@ ADD_LIBRARY(${LIB_NAME} STATIC
 	${SOURCE_FILES} ${HEADER_FILES}
 )
 
-target_compile_definitions(${LIB_NAME}
-	PRIVATE
-		-DDXBC2GLSL_SOURCE
-)
-
 target_include_directories(${LIB_NAME}
 	PUBLIC
 		${DXBC2GLSL_PROJECT_DIR}/Include

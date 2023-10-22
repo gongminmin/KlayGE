@@ -8,7 +8,7 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Texture.hpp>
 
-#ifdef KLAYGE_TEX_VIEWER_CORE_SOURCE		// Build dll
+#ifdef TexViewerCore_EXPORTS	// Build dll
 #define KLAYGE_TEX_VIEWER_CORE_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll
 #define KLAYGE_TEX_VIEWER_CORE_API KLAYGE_SYMBOL_IMPORT

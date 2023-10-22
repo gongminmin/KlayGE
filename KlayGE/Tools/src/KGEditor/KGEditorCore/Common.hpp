@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef KLAYGE_KGEDITOR_CORE_SOURCE		// Build dll
+#ifdef KGEditorCore_EXPORTS		// Build dll
 	#define KLAYGE_KGEDITOR_CORE_API KLAYGE_SYMBOL_EXPORT
 #else							// Use dll
 	#define KLAYGE_KGEDITOR_CORE_API KLAYGE_SYMBOL_IMPORT

@@ -5,6 +5,7 @@
 #include <android_native_app_glue.h>
 #endif
 
+#define NO_NvOptimus
 #include "SampleCommon.hpp"
 
 #ifdef KLAYGE_PLATFORM_ANDROID

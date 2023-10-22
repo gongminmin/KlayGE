@@ -54,11 +54,6 @@ MACRO(SETUP_GLLOADER LIB_NAME)
 		${GLLOADER_SOURCE_FILES} ${GLLOADER_HEADER_FILES} ${GLLOADER_INCLUDE_FILES}
 	)
 
-	target_compile_definitions(${LIB_NAME}
-		PRIVATE
-			-DGLLOADER_SOURCE
-	)
-
 	target_include_directories(${LIB_NAME}
 		PUBLIC
 			${GLLOADER_PROJECT_DIR}/include
