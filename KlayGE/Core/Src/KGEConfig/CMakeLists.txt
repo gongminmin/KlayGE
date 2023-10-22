@@ -38,7 +38,7 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 
 target_link_libraries(${EXE_NAME}
 	PRIVATE
-		${KLAYGE_CORELIB_NAME}
+		KlayGE_Core
 )
 
 IF(MSVC)

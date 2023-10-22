@@ -269,8 +269,8 @@ class BuildInfo:
 		if self.cmake_path == "auto":
 			self.cmake_path = self.FindCMake()
 		self.cmake_ver = self.RetrieveCMakeVersion()
-		if self.cmake_ver < 39:
-			LogError("CMake 3.9+ is required.")
+		if self.cmake_ver < 316:
+			LogError("CMake 3.16+ is required.")
 
 		self.is_windows_desktop = False
 		self.is_windows_store = False
@@ -712,13 +712,13 @@ class BuildInfo:
 	def FindCMake(self):
 		cmake_loc = shutil.which("cmake")
 		if cmake_loc is None:
-			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
+			LogError("Could NOT find CMake. Please install CMake 3.16+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split(self.sep)[0]
 
 	def RetrieveCMakeVersion(self):
 		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
 		if len(cmake_ver) == 0:
-			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
+			LogError("Could NOT find CMake. Please install CMake 3.16+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		cmake_ver = cmake_ver.split()[2]
 		cmake_ver_components = cmake_ver.split('.')
 		return int(cmake_ver_components[0] + cmake_ver_components[1])

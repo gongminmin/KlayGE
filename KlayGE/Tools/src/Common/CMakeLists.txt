@@ -32,11 +32,14 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	FOLDER "KlayGE/Tools"
 )
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
+target_precompile_headers(${LIB_NAME}
+	PRIVATE
+		"${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp"
+)
 
 target_link_libraries(${LIB_NAME}
 	PUBLIC
-		${KLAYGE_CORELIB_NAME}
+		KlayGE_Core
 )
 if(KLAYGE_PLATFORM_LINUX)
 	target_link_libraries(${LIB_NAME}

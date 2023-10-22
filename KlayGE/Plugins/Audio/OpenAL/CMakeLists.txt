@@ -24,12 +24,15 @@ if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
 	)
 endif()
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
+target_precompile_headers(${LIB_NAME}
+	PRIVATE
+		"${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp"
+)
 
 target_link_libraries(${LIB_NAME}
 	PRIVATE
 		OpenAL
-		${KLAYGE_CORELIB_NAME}
+		KlayGE_Core
 )
 
 ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})

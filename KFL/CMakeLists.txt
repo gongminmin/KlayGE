@@ -136,7 +136,10 @@ if(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
 	)
 endif()
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KFL_PROJECT_DIR}/include/KFL/KFL.hpp")
+target_precompile_headers(${LIB_NAME}
+	PRIVATE
+		include/KFL/KFL.hpp
+)
 
 target_link_libraries(${LIB_NAME}
 	PUBLIC

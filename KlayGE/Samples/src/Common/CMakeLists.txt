@@ -121,7 +121,7 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 
 target_link_libraries(${LIB_NAME}
 	PUBLIC
-		${KLAYGE_CORELIB_NAME}
+		KlayGE_Core
 )
 
 add_dependencies(${LIB_NAME} AllInEngine)

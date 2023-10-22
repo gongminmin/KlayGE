@@ -43,7 +43,7 @@ ADD_CUSTOM_TARGET(TableGen DEPENDS ${TableGenOutput})
 
 SET_TARGET_PROPERTIES(TableGen PROPERTIES FOLDER "KlayGE/Engine/Core")
 
-SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
+SET(LIB_NAME KlayGE_Core)
 
 SET(BASE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/Context.cpp
@@ -495,6 +495,16 @@ SET(APP_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Window.hpp
 )
 
+foreach(file_name ${APP_SOURCE_FILES})
+	get_filename_component(ext_name "${file_name}" LAST_EXT)
+	if(ext_name STREQUAL ".mm")
+		# To avoid the error "Objective-C was disabled in PCH file but is currently enabled" on macOS
+		set_source_files_properties(${file_name} PROPERTIES
+			SKIP_PRECOMPILE_HEADERS ON
+		)
+	endif()
+endforeach()
+
 SOURCE_GROUP("App Layer\\Source Files" FILES ${APP_SOURCE_FILES})
 SOURCE_GROUP("App Layer\\Header Files" FILES ${APP_HEADER_FILES})
 
@@ -555,7 +565,10 @@ if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
 	)
 endif()
 
-KLAYGE_ADD_PRECOMPILED_HEADER(${LIB_NAME} "${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp")
+target_precompile_headers(${LIB_NAME}
+	PRIVATE
+		Include/KlayGE/KlayGE.hpp
+)
 
 target_link_libraries(${LIB_NAME}
 	PUBLIC

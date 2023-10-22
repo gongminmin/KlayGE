@@ -120,8 +120,8 @@ ADD_DEPENDENCIES(${EXE_NAME} AllInEngine)
 target_link_libraries(${EXE_NAME}
 	PRIVATE
 		KlayGE_DevHelper
+		KlayGE_Core
 		gtest
-		${KLAYGE_CORELIB_NAME}
 )
 
 CREATE_PROJECT_USERFILE(KlayGE ${EXE_NAME})
