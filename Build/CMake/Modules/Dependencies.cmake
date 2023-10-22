@@ -1,18 +1,4 @@
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/DependenciesCommitId.cmake)
-
-SET(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Add a postfix, usually _d on windows")
-SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
-SET(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
-SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
-
-FIND_PACKAGE(Python3)
-IF(Python3_Interpreter_FOUND)
-	IF(${Python3_VERSION} VERSION_LESS "3.0.0")
-		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 3.0.0 or up.")
-	ENDIF()
-ELSE()
-	MESSAGE(FATAL_ERROR "Could NOT find Python. Please install Python 3.0.0 or up first.")
-ENDIF()
+SET(DEPENDENCIES_COMMIT_ID "ee9ac44e9548ccd72d2cac6d655a7252f61a99ab")
 
 FUNCTION(DOWNLOAD_DEPENDENCY RELATIVE_PATH FILE_ID)
 	SET(DEST ${KLAYGE_ROOT_DIR}/${RELATIVE_PATH})

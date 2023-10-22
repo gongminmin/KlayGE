@@ -32,8 +32,6 @@ DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/Cube/uffizi_cross_filtered_c.dds" "0d
 DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/Cube/uffizi_cross_filtered_y.dds" "c515b8aed52a6eafee96ea4d32b60eaf746ea985")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/Juda/klayge_logo.jdt" "4fed908fd641b6c536fee9f733dba37d4531079a")
 
-FIND_PACKAGE(Python3)
-
 SET(TableGenOutput "${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/Tables.hpp" "${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/Tables.cpp")
 ADD_CUSTOM_COMMAND(OUTPUT ${TableGenOutput}
 	COMMAND "${Python3_EXECUTABLE}" "TableGen.py"

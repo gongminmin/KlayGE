@@ -11,8 +11,6 @@ IF(KLAYGE_PLATFORM_WINDOWS)
 			dxsdk
 	)
 ELSE()
-	FIND_PACKAGE(Python3)
-
 	if(KLAYGE_PLATFORM_DARWIN)
 		set(winegcc "x86_64-w64-mingw32-gcc") # Use MinGW-w64 as a workaround
 	elseif(KLAYGE_PLATFORM_LINUX)

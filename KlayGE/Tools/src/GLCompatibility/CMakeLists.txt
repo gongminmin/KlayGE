@@ -1,5 +1,3 @@
-FIND_PACKAGE(Python3)
-
 SET(EXE_NAME "GLCompatibility")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
 SET(MEDIA_DIR "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/")
