@@ -61,9 +61,6 @@ namespace
 
 		virtual ~PyScriptUpdate() = default;
 
-		PyScriptUpdate& operator=(const PyScriptUpdate& rhs) = default;
-		PyScriptUpdate& operator=(PyScriptUpdate&& rhs) = default;
-
 		ScriptVariablePtr Run(float app_time, float elapsed_time)
 		{
 			module_->RunString(*script_);
