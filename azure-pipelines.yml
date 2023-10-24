@@ -120,7 +120,7 @@ stages:
           BUILD_DIR: clang14
 
         macOS_clang12:
-          vmImage: macOS-10.15
+          vmImage: macOS-11
           project: ninja
           compiler: clang
           installCommand: |
@@ -128,8 +128,8 @@ stages:
             brew install --cask xquartz wine-stable
             brew install ninja mingw-w64
           id: 'clang12_darwin_$(platform)_$(configuration)'
-          BUILD_DIR: clang12
-          MACOSX_DEPLOYMENT_TARGET: 10.15
+          BUILD_DIR: clang13
+          MACOSX_DEPLOYMENT_TARGET: 11
 
     pool:
       vmImage: $(vmImage)
@@ -161,35 +161,35 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_media | KlayGE/Build/CMake/Engine/Core/CMakeLists.txt'
+          key: 'KlayGE_media | KlayGE/Core/CMakeLists.txt'
           restoreKeys: 'KlayGE_media'
           path: KlayGE/media
         displayName: Cache KlayGE/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Samples_media | KlayGE/Build/CMake/Samples/**/CMakeLists.txt'
+          key: 'KlayGE_Samples_media | KlayGE/Samples/**/CMakeLists.txt'
           restoreKeys: 'KlayGE_Samples_media'
           path: KlayGE/Samples/media
         displayName: Cache KlayGE/Samples/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tests_media | KlayGE/Build/CMake/Tests/CMakeLists.txt'
+          key: 'KlayGE_Tests_media | KlayGE/Tests/CMakeLists.txt'
           restoreKeys: 'KlayGE_Tests_media'
           path: KlayGE/Tests/media
         displayName: Cache KlayGE/Tests/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tools_media | KlayGE/Build/CMake/Tools/**/CMakeLists.txt'
+          key: 'KlayGE_Tools_media | KlayGE/Tools/**/CMakeLists.txt'
           restoreKeys: 'KlayGE_Tools_media'
           path: KlayGE/Tools/media
         displayName: Cache KlayGE/Tools/media
 
       - task: Cache@2
         inputs:
-          key: 'KlayGE_Tutorials_media | KlayGE/Build/CMake/Tutorials/**/CMakeLists.txt'
+          key: 'KlayGE_Tutorials_media | KlayGE/Tutorials/**/CMakeLists.txt'
           restoreKeys: 'KlayGE_Tutorials_media'
           path: KlayGE/Tutorials/media
         displayName: Cache KlayGE/Tutorials/media
