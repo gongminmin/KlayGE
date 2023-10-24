@@ -50,7 +50,9 @@
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable : 4619) // Ignore retired warning C4351
+#if (_MSC_VER >= 1937)
 #pragma warning(disable : 5267) // Ignore implicit assignment operator definition
+#endif
 #endif
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>

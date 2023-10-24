@@ -53,7 +53,9 @@
 #endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
+#if (_MSC_VER >= 1937)
 #pragma warning(disable : 5267) // Ignore implicit copy constructor definition
+#endif
 #endif
 #include <cxxopts.hpp>
 #if defined(KLAYGE_COMPILER_MSVC)
