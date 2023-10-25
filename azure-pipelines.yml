@@ -44,12 +44,12 @@ stages:
           id: 'clangcl12_win_$(platform)_$(configuration)'
           BUILD_DIR: clangcl12
 
-        Windows_gcc12:
+        Windows_gcc13:
           vmImage: windows-2019
           project: ninja
           compiler: mingw
           installCommand: 'choco install ninja'
-          id: 'gcc12_win_$(platform)_$(configuration)'
+          id: 'gcc13_win_$(platform)_$(configuration)'
           BUILD_DIR: mingw
 
         Linux_gcc11:

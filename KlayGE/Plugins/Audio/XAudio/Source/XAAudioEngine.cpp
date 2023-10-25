@@ -43,6 +43,54 @@
 #include "XAAudio.hpp"
 
 #if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) && defined(KLAYGE_COMPILER_GCC)
+#ifndef __IXAudio27_INTERFACE_DEFINED__
+
+struct XAUDIO2_DEVICE_DETAILS
+{
+	WCHAR DeviceID[256];
+	WCHAR DisplayName[256];
+	XAUDIO2_DEVICE_ROLE Role;
+	WAVEFORMATEXTENSIBLE OutputFormat;
+};
+
+DEFINE_GUID(IID_IXAudio27, 0x8bcf1f58, 0x9fe7, 0x4583, 0x8a, 0xc6, 0xe2, 0xad, 0xc4, 0x65, 0xc8, 0xbb);
+struct IXAudio27 : public IUnknown
+{
+	virtual HRESULT STDMETHODCALLTYPE GetDeviceCount(uint32_t* pCount) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE GetDeviceDetails(uint32_t Index, XAUDIO2_DEVICE_DETAILS* pDeviceDetails) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE Initialize(uint32_t Flags = 0, XAUDIO2_PROCESSOR XAudio2Processor = XAUDIO2_DEFAULT_PROCESSOR) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE RegisterForCallbacks(IXAudio2EngineCallback* pCallback) = 0;
+
+	virtual void STDMETHODCALLTYPE UnregisterForCallbacks(IXAudio2EngineCallback* pCallback) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE CreateSourceVoice(IXAudio2SourceVoice** ppSourceVoice, const WAVEFORMATEX* pSourceFormat,
+		uint32_t Flags = 0, float MaxFrequencyRatio = XAUDIO2_DEFAULT_FREQ_RATIO, IXAudio2VoiceCallback* pCallback = 0,
+		const XAUDIO2_VOICE_SENDS* pSendList = 0, const XAUDIO2_EFFECT_CHAIN* pEffectChain = 0) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE CreateSubmixVoice(IXAudio2SubmixVoice** ppSubmixVoice, uint32_t InputChannels,
+		uint32_t InputSampleRate, uint32_t Flags = 0, uint32_t ProcessingStage = 0, const XAUDIO2_VOICE_SENDS* pSendList = 0,
+		const XAUDIO2_EFFECT_CHAIN* pEffectChain = 0) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE CreateMasteringVoice(IXAudio2MasteringVoice** ppMasteringVoice,
+		uint32_t InputChannels = XAUDIO2_DEFAULT_CHANNELS, uint32_t InputSampleRate = XAUDIO2_DEFAULT_SAMPLERATE, uint32_t Flags = 0,
+		uint32_t DeviceIndex = 0, const XAUDIO2_EFFECT_CHAIN* pEffectChain = 0) = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE StartEngine() = 0;
+
+	virtual void STDMETHODCALLTYPE StopEngine() = 0;
+
+	virtual HRESULT STDMETHODCALLTYPE CommitChanges(uint32_t OperationSet) = 0;
+
+	virtual void STDMETHODCALLTYPE GetPerformanceData(XAUDIO2_PERFORMANCE_DATA* pPerfData) = 0;
+
+	virtual void STDMETHODCALLTYPE SetDebugConfiguration(const XAUDIO2_DEBUG_CONFIGURATION* pDebugConfiguration, void* pReserved = 0) = 0;
+};
+
+#endif
+
 DEFINE_UUID_OF(IXAudio27);
 #endif
 

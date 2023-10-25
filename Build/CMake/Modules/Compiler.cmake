@@ -324,6 +324,11 @@ ELSE()
 			CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 			SET(${flag_var} "${${flag_var}} -Wa,-mbig-obj")
 		ENDFOREACH()
+
+		if(KLAYGE_COMPILER_VERSION GREATER_EQUAL "130")
+			# It's a compiler bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578.
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-array-bounds -Wno-stringop-overread")
+		endif()
 	ENDIF()
 	SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -O0")
 	SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -DKLAYGE_SHIP")
