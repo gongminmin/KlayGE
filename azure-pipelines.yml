@@ -2,10 +2,6 @@ variables:
   configuration: Release
   platform: x64
 
-resources:
-- repo: self
-  fetchDepth: 1
-
 stages:
 - stage: Build
   jobs:
@@ -135,6 +131,9 @@ stages:
       vmImage: $(vmImage)
 
     steps:
+      - checkout: self
+        fetchDepth: 1
+
       - bash: eval '$(installCommand)'
         displayName: 'Install'
         condition: ne(variables.installCommand, '')
