@@ -269,8 +269,6 @@ class BuildInfo:
 		if self.cmake_path == "auto":
 			self.cmake_path = self.FindCMake()
 		self.cmake_ver = self.RetrieveCMakeVersion()
-		if self.cmake_ver < 316:
-			LogError("CMake 3.16+ is required.")
 
 		self.is_windows_desktop = False
 		self.is_windows_store = False
