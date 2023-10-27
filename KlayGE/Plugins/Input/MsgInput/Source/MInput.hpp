@@ -233,9 +233,7 @@ typedef struct _HIDP_VALUE_CAPS
 #include <windows.h>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#if KLAYGE_COMPILER_VERSION >= 142
 #pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
-#endif
 #endif
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Devices.Geolocation.h>

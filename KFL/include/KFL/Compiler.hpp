@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.1+, g++ 9.0+, clang 9.0+, with C++17 option on.
+// KlayGE requires vc 14.2+, g++ 9.0+, clang 9.0+, with C++17 option on.
 // All C++17 core feature used in KlayGE should be available in all supported compilers.
 
 // Macros for optional C++17 library features:
@@ -45,9 +45,6 @@
 // KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
 // KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 // KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-
-// Macros for TS library features:
-// KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 // Detects supported compilers
 #if defined(__clang__)
@@ -191,24 +188,16 @@
 		#define KLAYGE_COMPILER_VERSION 143
 	#elif _MSC_VER >= 1920
 		#define KLAYGE_COMPILER_VERSION 142
-	#elif _MSC_VER >= 1911
-		#define KLAYGE_COMPILER_VERSION 141
 	#else
-		#error "Unsupported compiler version. Please install VS2017 15.3 or up."
+		#error "Unsupported compiler version. Please install VS2019 or up."
 	#endif
 
 	#if _MSVC_LANG < 201703L
 		#error "/std:c++17 must be turned on."
 	#endif
 
-	#if _MSC_VER >= 1914
-		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-	#else
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
-	#endif
-	#if _MSC_VER >= 1915
-		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-	#endif
+	#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 	#if _MSVC_LANG > 201703L
 		#if _MSC_VER >= 1922
 			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT

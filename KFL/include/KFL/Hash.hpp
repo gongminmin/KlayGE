@@ -52,17 +52,7 @@ namespace KlayGE
 		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (static_cast<size_t>(*str) + PRIME_NUM + (seed << 6) + (seed >> 2)));
 	}
 
-#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER < 1914)
-	template <size_t N>
-	struct EnsureConst
-	{
-		static size_t constexpr value = N;
-	};
-
-	#define CT_HASH(x) (EnsureConst<CTHashImpl(x, 0)>::value)
-#else
 	#define CT_HASH(x) (CTHashImpl(x, 0))
-#endif
 
 	template <typename SizeT>
 	inline void HashCombineImpl(SizeT& seed, SizeT value) noexcept

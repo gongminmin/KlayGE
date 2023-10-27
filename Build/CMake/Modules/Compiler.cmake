@@ -81,10 +81,8 @@ if(MSVC)
 			set(KLAYGE_COMPILER_VERSION "143")
 		elseif(MSVC_VERSION GREATER_EQUAL 1920)
 			SET(KLAYGE_COMPILER_VERSION "142")
-		elseif(MSVC_VERSION GREATER_EQUAL 1911)
-			SET(KLAYGE_COMPILER_VERSION "141")
 		else()
-			message(FATAL_ERROR "Unsupported compiler version. Please install VS2017 15.3 or up.")
+			message(FATAL_ERROR "Unsupported compiler version. Please install VS2019 or up.")
 		ENDIF()
 
 		if(MSVC_VERSION GREATER_EQUAL 1929)
@@ -95,28 +93,18 @@ if(MSVC)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 		endif()
 
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive-")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive- /Zc:externConstexpr /Zc:__cplusplus /JMC")
 		IF(KLAYGE_PLATFORM_WINDOWS_STORE OR (KLAYGE_ARCH_NAME STREQUAL "arm64"))
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
 		ENDIF()
-		if(MSVC_VERSION GREATER_EQUAL 1913)
-			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:externConstexpr")
-		endif()
-		if(MSVC_VERSION GREATER_EQUAL 1914)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
-		endif()
 		if(MSVC_VERSION GREATER_EQUAL 1930)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
 		endif()
 		if(MSVC_VERSION GREATER_EQUAL 1935)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:templateScope")
 		endif()
-
-		if((MSVC_VERSION GREATER_EQUAL 1913) AND (KLAYGE_ARCH_NAME STREQUAL "x64"))
+		if(KLAYGE_ARCH_NAME STREQUAL "x64")
 			#SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qspectre")
-		endif()
-		if(MSVC_VERSION GREATER_EQUAL 1916)
-			set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /JMC")
 		endif()
 
 		if(NOT KLAYGE_PLATFORM_WINDOWS_STORE)
@@ -191,22 +179,12 @@ if(MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5027") # Ignore implicitly deleted move operator=
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5039") # Ignore passing a throwing function to C functions
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5045") # False positive on range check
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5204") # Ignore non trivial destructor in COM interfaces and ppl
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5219") # Ignore int to uint
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5220") # Ignore non trivial constructor in ppl
 		if(MSVC_VERSION GREATER_EQUAL 1934)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5262") # Ignore implicit fall-through
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5264") # Ignore unused const variable
-		endif()
-		if(MSVC_VERSION GREATER_EQUAL 1920)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5204") # Ignore non trivial destructor in COM interfaces and ppl
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5220") # Ignore non trivial constructor in ppl
-		else()
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4472") # Native and managed enum in vcruntime
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4571") # Allow catching SEH in STL
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4582") # std::optional constructor is not implicitly called
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4583") # std::optional destructor is not implicitly called
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4623") # Default constructor was implicitly defined as deleted in STL
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4774") # Ignore wrong parameter types of printf in STL
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5039") # Allow passing throwing function to extern C function
 		endif()
 
 		SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})

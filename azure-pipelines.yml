@@ -24,14 +24,6 @@ stages:
           id: 'vc142_win_$(platform)_$(configuration)'
           BUILD_DIR: vc142
 
-        Windows_vc141:
-          vmImage: windows-2019
-          project: vs2019
-          compiler: vc141
-          installCommand: ''
-          id: 'vc141_win_$(platform)_$(configuration)'
-          BUILD_DIR: vc141
-
         Windows_clangcl12:
           vmImage: windows-2019
           project: vs2019

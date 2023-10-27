@@ -49,13 +49,6 @@
 		#include <filesystem>
 		#define FILESYSTEM_NS std::filesystem
 	#endif
-#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
-	#include <experimental/filesystem>
-	namespace std
-	{
-		namespace filesystem = experimental::filesystem;
-	}
-	#define FILESYSTEM_NS std::filesystem
 #else
 	#include <ghc/filesystem.hpp>
 	#if defined(KLAYGE_COMPILER_CLANG)

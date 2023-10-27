@@ -186,9 +186,7 @@ namespace KlayGE
 			IXAudio2SourceVoicePtr voice;
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#if KLAYGE_COMPILER_VERSION >= 142
 #pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
-#endif
 #endif
 			std::unique_ptr<IXAudio2VoiceCallback> voice_call_back;
 #ifdef KLAYGE_COMPILER_MSVC
@@ -242,9 +240,7 @@ namespace KlayGE
 		IXAudio2SourceVoicePtr source_voice_;
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#if KLAYGE_COMPILER_VERSION >= 142
 #pragma warning(disable: 5205) // IXAudio2VoiceCallback doesn't have virtual destructor
-#endif
 #endif
 		std::unique_ptr<IXAudio2VoiceCallback> voice_call_back_;
 #ifdef KLAYGE_COMPILER_MSVC
