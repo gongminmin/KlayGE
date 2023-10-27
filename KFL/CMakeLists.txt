@@ -139,7 +139,6 @@ target_link_libraries(${LIB_NAME}
 	PUBLIC
 		Boost::assert
 		Boost::core
-		GSL
 		scope-lite
 
 	PRIVATE

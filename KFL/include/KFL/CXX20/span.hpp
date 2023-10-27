@@ -38,19 +38,13 @@
 #if defined(KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT)
 	#include <span>
 #else
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wstrict-overflow" // Ignore the strict overflow
-	#endif
-	#include <gsl/span>
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic pop
-	#endif
+	#include <boost/core/span.hpp>
+
 	namespace std
 	{
-		using gsl::span;
-		using gsl::as_bytes;
-		using gsl::as_writable_bytes;
+		using boost::span;
+		using boost::as_bytes;
+		using boost::as_writable_bytes;
 	}
 #endif
 
