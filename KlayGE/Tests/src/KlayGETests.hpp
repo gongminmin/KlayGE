@@ -8,6 +8,9 @@
 #if defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshift-sign-overflow"
+#if (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic ignored "-Wdeprecated" // Ignore out-of-line definition of constexpr
+#endif
 #endif
 #include <gtest/gtest.h>
 #if defined(KLAYGE_COMPILER_CLANGCL)

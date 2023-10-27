@@ -376,6 +376,13 @@ GLLOADER_API const char* glloader_get_feature_name(int index);
 }
 #endif
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#if (__clang_major__ >= 16)
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
+#endif
+
 #ifdef GLLOADER_GL
 #include <glloader/glloader_gl.h>
 #endif
@@ -394,6 +401,10 @@ GLLOADER_API const char* glloader_get_feature_name(int index);
 
 #ifdef GLLOADER_EGL
 #include <glloader/glloader_egl.h>
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif
 
 #endif		/* _GLLOADER_H */

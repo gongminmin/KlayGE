@@ -66,6 +66,12 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-Wno-unused-function
 			-Wno-unused-value
 	)
+	if (KLAYGE_COMPILER_VERSION GREATER_EQUAL 160)
+		target_compile_options(OpenAL
+			PRIVATE
+				-Wno-deprecated-copy
+		)
+	endif()
 endif()
 if(KLAYGE_PLATFORM_WINDOWS)
 	target_compile_definitions(common

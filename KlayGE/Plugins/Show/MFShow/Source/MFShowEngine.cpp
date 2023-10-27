@@ -54,14 +54,28 @@
 #include "TinyMFMediaEngine.hpp"
 #endif
 #include <KlayGE/SALWrapper.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <dxgi1_6.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 #ifndef D3D10_NO_HELPERS
 #define D3D10_NO_HELPERS
 #endif
 #ifndef D3D11_NO_HELPERS
 #define D3D11_NO_HELPERS
 #endif
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <d3d11_4.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 #if defined(KLAYGE_COMPILER_GCC)
 #undef __out
 #endif

@@ -31,6 +31,9 @@
 #elif defined(KLAYGE_COMPILER_CLANGCL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcomment" // Ignore "/*" within block comment
+#if (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #endif
 #include <d3d9.h>
 #if defined(KLAYGE_COMPILER_GCC)

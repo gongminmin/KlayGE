@@ -53,6 +53,10 @@
 #if (_MSC_VER >= 1937)
 #pragma warning(disable : 5267) // Ignore implicit assignment operator definition
 #endif
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#pragma clang diagnostic ignored "-Wdeprecated-copy" // Ignore implicit operator= in aiVector3t
 #endif
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
@@ -60,6 +64,8 @@
 #include <assimp/scene.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
 #endif
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>

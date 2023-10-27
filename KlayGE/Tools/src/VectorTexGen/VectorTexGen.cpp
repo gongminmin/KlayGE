@@ -53,10 +53,15 @@
 #if (_MSC_VER >= 1937)
 #pragma warning(disable : 5267) // Ignore implicit copy constructor definition
 #endif
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-copy-with-dtor" // Ignore deprecated destructor
 #endif
 #include <cxxopts.hpp>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
 #endif
 
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -75,6 +80,9 @@
 #pragma clang diagnostic ignored "-Wcast-qual"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" // Ignore deprecated function calls
 #pragma clang diagnostic ignored "-Wshadow"
+#if (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #endif
 #define NANOSVG_IMPLEMENTATION
 #include <nanosvg.h>
@@ -86,11 +94,16 @@
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable : 6308) // 'realloc' might return null pointer
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
 #endif
 #define NANOSVGRAST_IMPLEMENTATION
 #include <nanosvgrast.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
 #endif
 
 using namespace std;

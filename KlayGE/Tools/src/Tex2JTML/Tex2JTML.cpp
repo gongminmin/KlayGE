@@ -55,10 +55,15 @@
 #if (_MSC_VER >= 1937)
 #pragma warning(disable : 5267) // Ignore implicit copy constructor definition
 #endif
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-copy-with-dtor" // Ignore deprecated destructor
 #endif
 #include <cxxopts.hpp>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
 #endif
 
 #include <KlayGE/JudaTexture.hpp>

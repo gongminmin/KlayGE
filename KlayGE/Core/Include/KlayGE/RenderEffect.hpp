@@ -446,6 +446,232 @@ namespace KlayGE
 		std::vector<StrcutMemberType> members_;
 	};
 
+	class KLAYGE_CORE_API RenderEffectConstantBuffer final : boost::noncopyable
+	{
+	public:
+		explicit RenderEffectConstantBuffer(RenderEffect& effect);
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(std::string const & name);
+#endif
+
+		void StreamIn(ResIdentifier& res);
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const;
+#endif
+
+		RenderEffectConstantBufferPtr Clone(RenderEffect& dst_effect);
+		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
+		RenderEffect& OwnerEffect() noexcept
+		{
+			return effect_;
+		}
+
+		std::string const& Name() const noexcept
+		{
+			return immutable_->name;
+		}
+		size_t NameHash() const noexcept
+		{
+			return immutable_->name_hash;
+		}
+
+		void AddParameter(uint32_t index);
+
+		uint32_t NumParameters() const noexcept
+		{
+			return param_indices_ ? static_cast<uint32_t>(param_indices_->size()) : 0;
+		}
+		uint32_t ParameterIndex(uint32_t index) const noexcept;
+
+		void Resize(uint32_t size);
+		uint32_t Size() const noexcept
+		{
+			return static_cast<uint32_t>(buff_.size());
+		}
+
+		template <typename T>
+		T const* VariableInBuff(uint32_t offset) const noexcept
+		{
+			union Raw2T
+			{
+				uint8_t const * raw;
+				T const * t;
+			} r2t;
+			r2t.raw = &buff_[offset];
+			return r2t.t;
+		}
+		template <typename T>
+		T* VariableInBuff(uint32_t offset) noexcept
+		{
+			union Raw2T
+			{
+				uint8_t* raw;
+				T* t;
+			} r2t;
+			r2t.raw = &buff_[offset];
+			return r2t.t;
+		}
+
+		void Dirty(bool dirty) noexcept
+		{
+			dirty_ = dirty;
+		}
+		bool Dirty() const noexcept
+		{
+			return dirty_;
+		}
+
+		void Update();
+		GraphicsBufferPtr const& HWBuff() const noexcept
+		{
+			return hw_buff_;
+		}
+		void BindHWBuff(GraphicsBufferPtr const & buff);
+
+	private:
+		void RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
+
+	private:
+		RenderEffect& effect_;
+
+		struct Immutable final : boost::noncopyable
+		{
+			std::string name;
+			size_t name_hash;
+		};
+
+		std::shared_ptr<Immutable> immutable_;
+		std::shared_ptr<std::vector<uint32_t>> param_indices_;
+
+		GraphicsBufferPtr hw_buff_;
+		std::vector<uint8_t> buff_;
+		bool dirty_ = true;
+	};
+
+	class KLAYGE_CORE_API RenderEffectParameter final
+	{
+	public:
+		RenderEffectParameter();
+		RenderEffectParameter(RenderEffectParameter&& rhs) noexcept;
+		RenderEffectParameter& operator=(RenderEffectParameter && rhs) noexcept;
+
+		RenderEffectParameter(RenderEffectParameter const& rhs) = delete;
+		RenderEffectParameter& operator=(RenderEffectParameter const& rhs) = delete;
+
+#if KLAYGE_IS_DEV_PLATFORM
+		void Load(RenderEffect const& effect, XMLNode const& node);
+#endif
+
+		void StreamIn(RenderEffect const& effect, ResIdentifier& res);
+#if KLAYGE_IS_DEV_PLATFORM
+		void StreamOut(std::ostream& os) const;
+#endif
+
+		RenderEffectParameter Clone();
+
+		RenderEffectDataType Type() const noexcept
+		{
+			return immutable_->type;
+		}
+
+		RenderEffectStructType* StructType() const noexcept
+		{
+			return var_->StructType();
+		}
+
+		RenderVariable const& Var() const noexcept;
+
+		std::string const* ArraySize() const noexcept
+		{
+			return immutable_->array_size.get();
+		}
+
+		std::string const& Name() const noexcept
+		{
+			return immutable_->name;
+		}
+		size_t NameHash() const noexcept
+		{
+			return immutable_->name_hash;
+		}
+		bool HasSemantic() const noexcept
+		{
+			return !immutable_->semantic.empty();
+		}
+		std::string const & Semantic() const;
+		size_t SemanticHash() const noexcept;
+
+		uint32_t NumAnnotations() const noexcept
+		{
+			return immutable_->annotations ? static_cast<uint32_t>(immutable_->annotations->size()) : 0;
+		}
+		RenderEffectAnnotation const& Annotation(uint32_t n) const noexcept;
+
+		template <typename T>
+		RenderEffectParameter& operator=(T const & value)
+		{
+			*var_ = value;
+			return *this;
+		}
+
+		template <typename T>
+		void Value(T& val) const
+		{
+			var_->Value(val);
+		}
+
+		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
+		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
+		RenderEffectConstantBuffer& CBuffer() const;
+		bool InCBuffer() const noexcept
+		{
+			return var_->InCBuffer();
+		}
+		uint32_t CBufferIndex() const
+		{
+			return var_->CBufferIndex();
+		}
+		uint32_t CBufferOffset() const
+		{
+			return var_->CBufferOffset();
+		}
+		uint32_t Stride() const
+		{
+			return var_->Stride();
+		}
+		template <typename T>
+		T const* MemoryInCBuff() const
+		{
+			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
+		}
+		template <typename T>
+		T* MemoryInCBuff()
+		{
+			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
+		}
+
+	private:
+		void ProcessAnnotation(RenderEffectAnnotation& anno);
+
+	private:
+		struct Immutable final : boost::noncopyable
+		{
+			std::string name;
+			size_t name_hash;
+			std::string semantic;
+			size_t semantic_hash;
+
+			RenderEffectDataType type;
+			std::unique_ptr<std::string> array_size;
+
+			std::unique_ptr<std::vector<RenderEffectAnnotation>> annotations;
+		};
+
+		std::shared_ptr<Immutable> immutable_;
+		std::unique_ptr<RenderVariable> var_;
+	};
+
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API RenderEffect final : boost::noncopyable
@@ -501,10 +727,7 @@ namespace KlayGE
 		RenderEffectStructType* StructTypeByName(std::string_view name) const noexcept;
 		RenderEffectStructType* StructTypeByIndex(uint32_t index) const noexcept;
 
-		uint32_t NumTechniques() const noexcept
-		{
-			return static_cast<uint32_t>(immutable_->techniques.size());
-		}
+		uint32_t NumTechniques() const noexcept;
 		RenderTechnique* TechniqueByName(std::string_view name) const noexcept;
 		RenderTechnique* TechniqueByIndex(uint32_t n) const noexcept;
 
@@ -741,232 +964,6 @@ namespace KlayGE
 		uint32_t shader_obj_index_;
 
 		bool is_validate_;
-	};
-
-	class KLAYGE_CORE_API RenderEffectConstantBuffer final : boost::noncopyable
-	{
-	public:
-		explicit RenderEffectConstantBuffer(RenderEffect& effect);
-
-#if KLAYGE_IS_DEV_PLATFORM
-		void Load(std::string const & name);
-#endif
-
-		void StreamIn(ResIdentifier& res);
-#if KLAYGE_IS_DEV_PLATFORM
-		void StreamOut(std::ostream& os) const;
-#endif
-
-		RenderEffectConstantBufferPtr Clone(RenderEffect& dst_effect);
-		void Reclone(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
-		RenderEffect& OwnerEffect() noexcept
-		{
-			return effect_;
-		}
-
-		std::string const& Name() const noexcept
-		{
-			return immutable_->name;
-		}
-		size_t NameHash() const noexcept
-		{
-			return immutable_->name_hash;
-		}
-
-		void AddParameter(uint32_t index);
-
-		uint32_t NumParameters() const noexcept
-		{
-			return param_indices_ ? static_cast<uint32_t>(param_indices_->size()) : 0;
-		}
-		uint32_t ParameterIndex(uint32_t index) const noexcept;
-
-		void Resize(uint32_t size);
-		uint32_t Size() const noexcept
-		{
-			return static_cast<uint32_t>(buff_.size());
-		}
-
-		template <typename T>
-		T const* VariableInBuff(uint32_t offset) const noexcept
-		{
-			union Raw2T
-			{
-				uint8_t const * raw;
-				T const * t;
-			} r2t;
-			r2t.raw = &buff_[offset];
-			return r2t.t;
-		}
-		template <typename T>
-		T* VariableInBuff(uint32_t offset) noexcept
-		{
-			union Raw2T
-			{
-				uint8_t* raw;
-				T* t;
-			} r2t;
-			r2t.raw = &buff_[offset];
-			return r2t.t;
-		}
-
-		void Dirty(bool dirty) noexcept
-		{
-			dirty_ = dirty;
-		}
-		bool Dirty() const noexcept
-		{
-			return dirty_;
-		}
-
-		void Update();
-		GraphicsBufferPtr const& HWBuff() const noexcept
-		{
-			return hw_buff_;
-		}
-		void BindHWBuff(GraphicsBufferPtr const & buff);
-
-	private:
-		void RebindParameters(RenderEffectConstantBuffer& dst_cbuffer, RenderEffect& dst_effect);
-
-	private:
-		RenderEffect& effect_;
-
-		struct Immutable final : boost::noncopyable
-		{
-			std::string name;
-			size_t name_hash;
-		};
-
-		std::shared_ptr<Immutable> immutable_;
-		std::shared_ptr<std::vector<uint32_t>> param_indices_;
-
-		GraphicsBufferPtr hw_buff_;
-		std::vector<uint8_t> buff_;
-		bool dirty_ = true;
-	};
-
-	class KLAYGE_CORE_API RenderEffectParameter final
-	{
-	public:
-		RenderEffectParameter();
-		RenderEffectParameter(RenderEffectParameter&& rhs) noexcept;
-		RenderEffectParameter& operator=(RenderEffectParameter && rhs) noexcept;
-
-		RenderEffectParameter(RenderEffectParameter const& rhs) = delete;
-		RenderEffectParameter& operator=(RenderEffectParameter const& rhs) = delete;
-
-#if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node);
-#endif
-
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res);
-#if KLAYGE_IS_DEV_PLATFORM
-		void StreamOut(std::ostream& os) const;
-#endif
-
-		RenderEffectParameter Clone();
-
-		RenderEffectDataType Type() const noexcept
-		{
-			return immutable_->type;
-		}
-
-		RenderEffectStructType* StructType() const noexcept
-		{
-			return var_->StructType();
-		}
-
-		RenderVariable const& Var() const noexcept;
-
-		std::string const* ArraySize() const noexcept
-		{
-			return immutable_->array_size.get();
-		}
-
-		std::string const& Name() const noexcept
-		{
-			return immutable_->name;
-		}
-		size_t NameHash() const noexcept
-		{
-			return immutable_->name_hash;
-		}
-		bool HasSemantic() const noexcept
-		{
-			return !immutable_->semantic.empty();
-		}
-		std::string const & Semantic() const;
-		size_t SemanticHash() const noexcept;
-
-		uint32_t NumAnnotations() const noexcept
-		{
-			return immutable_->annotations ? static_cast<uint32_t>(immutable_->annotations->size()) : 0;
-		}
-		RenderEffectAnnotation const& Annotation(uint32_t n) const noexcept;
-
-		template <typename T>
-		RenderEffectParameter& operator=(T const & value)
-		{
-			*var_ = value;
-			return *this;
-		}
-
-		template <typename T>
-		void Value(T& val) const
-		{
-			var_->Value(val);
-		}
-
-		void BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride);
-		void RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index);
-		RenderEffectConstantBuffer& CBuffer() const;
-		bool InCBuffer() const noexcept
-		{
-			return var_->InCBuffer();
-		}
-		uint32_t CBufferIndex() const
-		{
-			return var_->CBufferIndex();
-		}
-		uint32_t CBufferOffset() const
-		{
-			return var_->CBufferOffset();
-		}
-		uint32_t Stride() const
-		{
-			return var_->Stride();
-		}
-		template <typename T>
-		T const* MemoryInCBuff() const
-		{
-			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
-		}
-		template <typename T>
-		T* MemoryInCBuff()
-		{
-			return this->CBuffer().template VariableInBuff<T>(var_->CBufferOffset());
-		}
-
-	private:
-		void ProcessAnnotation(RenderEffectAnnotation& anno);
-
-	private:
-		struct Immutable final : boost::noncopyable
-		{
-			std::string name;
-			size_t name_hash;
-			std::string semantic;
-			size_t semantic_hash;
-
-			RenderEffectDataType type;
-			std::unique_ptr<std::string> array_size;
-
-			std::unique_ptr<std::vector<RenderEffectAnnotation>> annotations;
-		};
-
-		std::shared_ptr<Immutable> immutable_;
-		std::unique_ptr<RenderVariable> var_;
 	};
 
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_names);

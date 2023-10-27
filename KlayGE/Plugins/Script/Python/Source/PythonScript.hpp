@@ -45,11 +45,16 @@
 #elif defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmacro-redefined" // 'Py_USING_UNICODE' redefined
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
 #endif
 #include <Python.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
 #pragma clang diagnostic pop
 #endif
 #include <vector>

@@ -48,7 +48,14 @@
 
 #if KLAYGE_IS_DEV_PLATFORM
 #include <KlayGE/SALWrapper.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <d3dcompiler.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 #endif
 
 #include "D3D11RenderEngine.hpp"

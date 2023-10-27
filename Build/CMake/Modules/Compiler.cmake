@@ -12,12 +12,12 @@ if(MSVC)
 		list(GET CLANG_VERSION_COMPONENTS 0 CLANG_MAJOR)
 		list(GET CLANG_VERSION_COMPONENTS 1 CLANG_MINOR)
 		set(KLAYGE_COMPILER_VERSION ${CLANG_MAJOR}${CLANG_MINOR})
-		if(KLAYGE_COMPILER_VERSION LESS "90")
-			message(FATAL_ERROR "Unsupported compiler version. Please install clang-cl 9.0 or up.")
+		if(KLAYGE_COMPILER_VERSION LESS "120")
+			message(FATAL_ERROR "Unsupported compiler version. Please install clang-cl 12.0 or up.")
 		endif()
 
-		set(CMAKE_CXX_STANDARD 17)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+		set(CMAKE_CXX_STANDARD 20)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
 
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat") # No need to compatible to C++98
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat-pedantic")
@@ -49,16 +49,19 @@ if(MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-system-include-path") # Allow windows.h
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-virtual-dtor")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-old-style-cast")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-std-move-in-c++11")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-conversion")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-signed-enum-bitfield")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-destructor-override")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-switch-enum") # NEVER turn it on. A bad designed warning.
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undef") # Ignore undefined macros
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-func-template") # clang-cl couldn't understand explicit specialization from other compile units
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-zero-as-null-pointer-constant")
-		if(KLAYGE_COMPILER_VERSION GREATER_EQUAL "110")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-destructor-override")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
+		if(KLAYGE_COMPILER_VERSION GREATER_EQUAL "160")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-utf8")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unsafe-buffer-usage")
+		else()
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-std-move-in-c++11")
 		endif()
 
 		set(CMAKE_C_FLAGS "/Wall /WX /bigobj /Gw")

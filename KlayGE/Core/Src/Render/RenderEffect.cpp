@@ -4770,6 +4770,11 @@ namespace KlayGE
 		return &immutable_->struct_types[index];
 	}
 
+	uint32_t RenderEffect::NumTechniques() const noexcept
+	{
+		return static_cast<uint32_t>(immutable_->techniques.size());
+	}
+
 	RenderTechnique* RenderEffect::TechniqueByName(std::string_view name) const noexcept
 	{
 		size_t const name_hash = HashValue(std::move(name));

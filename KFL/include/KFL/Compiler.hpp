@@ -52,24 +52,28 @@
 
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#if __cplusplus < 201703L
-		#error "-std=c++17 must be turned on."
+	#if __cplusplus < 200202L
+		#error "-std=c++20 must be turned on."
 	#endif
 
 	#if defined(_MSC_VER)
 		#define KLAYGE_COMPILER_CLANGCL
 		#define KLAYGE_COMPILER_NAME clangcl
 
-		#if CLANG_VERSION >= 90
+		#if CLANG_VERSION >= 120
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install clang-cl 9.0 or up."
+			#error "Unsupported compiler version. Please install clang-cl 12.0 or up."
 		#endif
 
-		#if CLANG_VERSION < 100
-			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		#endif
+		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
+		#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 	#else
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang

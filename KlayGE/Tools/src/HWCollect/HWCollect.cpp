@@ -38,7 +38,14 @@
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <KlayGE/SALWrapper.hpp>
 #include <windows.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <dxgi1_2.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 
 #if defined(KLAYGE_COMPILER_GCC)
 #ifdef __in

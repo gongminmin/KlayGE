@@ -56,7 +56,14 @@
 
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 #include <KlayGE/SALWrapper.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <d3dcompiler.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 #else
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
 typedef char const * LPCSTR;

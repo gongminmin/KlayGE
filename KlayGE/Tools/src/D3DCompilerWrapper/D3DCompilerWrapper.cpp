@@ -34,7 +34,11 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
+#if defined(__clang__)
+#define KLAYGE_COMPILER_CLANGCL
+#else
 #define KLAYGE_COMPILER_MSVC
+#endif
 #elif defined(__GNUC__)
 #define KLAYGE_COMPILER_GCC
 #elif defined(__clang__)
@@ -47,7 +51,14 @@
 #endif
 #include <windows.h>
 #include <KlayGE/SALWrapper.hpp>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (__clang_major__ >= 16)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <d3d11shader.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (__clang_major__ >= 16)
+#pragma clang diagnostic pop
+#endif
 
 #ifndef D3D11_SHVER_GET_TYPE
 enum D3D11_SHADER_VERSION_TYPE

@@ -39,7 +39,14 @@
 
 #include <windows.h>
 #include <directx/dxgiformat.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#endif
 #include <directx/d3dcommon.h>
+#if defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
+#endif
 #include <string>
 
 #include <KlayGE/Show.hpp>

@@ -40,6 +40,12 @@ if(KLAYGE_COMPILER_CLANGCL)
 		PRIVATE
 			-Wno-unused-function
 	)
+	if (KLAYGE_COMPILER_VERSION GREATER_EQUAL 160)
+		target_compile_options(assimp
+			PRIVATE
+				-Wno-deprecated-copy
+		)
+	endif()
 endif()
 
 SET_TARGET_PROPERTIES(assimp PROPERTIES

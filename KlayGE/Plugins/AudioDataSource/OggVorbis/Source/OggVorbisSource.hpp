@@ -27,10 +27,16 @@
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable" // Ignore OV_CALLBACKS_DEFAULT
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
+#pragma clang diagnostic ignored "-Wcast-function-type-strict" // Ignore casting incompatible function type
 #endif
 #include <vorbis/vorbisfile.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
+#elif defined(KLAYGE_COMPILER_CLANGCL) && (KLAYGE_COMPILER_VERSION >= 160)
+#pragma clang diagnostic pop
 #endif
 
 namespace KlayGE
