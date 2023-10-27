@@ -35,8 +35,7 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
+#include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
 namespace KlayGE
@@ -44,12 +43,7 @@ namespace KlayGE
 	// 4D æÿ’Û
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Matrix4_T final : boost::addable<Matrix4_T<T>,
-							boost::subtractable<Matrix4_T<T>,
-							boost::dividable2<Matrix4_T<T>, T,
-							boost::multipliable2<Matrix4_T<T>, T,
-							boost::multipliable<Matrix4_T<T>,
-							boost::equality_comparable<Matrix4_T<T>>>>>>>
+	class Matrix4_T final
 	{
 	public:
 		typedef T					value_type;
@@ -142,8 +136,8 @@ namespace KlayGE
 		Matrix4_T& operator+=(Matrix4_T const & rhs) noexcept;
 		Matrix4_T& operator-=(Matrix4_T const & rhs) noexcept;
 		Matrix4_T& operator*=(Matrix4_T const & rhs) noexcept;
-		Matrix4_T& operator*=(T rhs) noexcept;
-		Matrix4_T& operator/=(T rhs) noexcept;
+		Matrix4_T& operator*=(T const& rhs) noexcept;
+		Matrix4_T& operator/=(T const& rhs) noexcept;
 
 		Matrix4_T& operator=(Matrix4_T const & rhs) noexcept;
 		Matrix4_T& operator=(Matrix4_T&& rhs) noexcept;
@@ -156,6 +150,15 @@ namespace KlayGE
 		Matrix4_T const operator-() const noexcept;
 
 		bool operator==(Matrix4_T const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR1(Matrix4_T<T>);
+		DEFAULT_SUB_OPERATOR1(Matrix4_T<T>);
+		DEFAULT_MUL_OPERATOR1(Matrix4_T<T>);
+		DEFAULT_MUL_OPERATOR2(Matrix4_T<T>, T);
+		DEFAULT_MUL_OPERATOR3(T, Matrix4_T<T>);
+		DEFAULT_DIV_OPERATOR2(Matrix4_T<T>, T);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Matrix4_T<T>);
 
 	private:
 		Vector_T<Vector_T<T, col_num>, row_num> m_;

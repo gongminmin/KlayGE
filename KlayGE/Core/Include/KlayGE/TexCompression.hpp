@@ -37,6 +37,8 @@
 
 #include <array>
 
+#include <KFL/Operators.hpp>
+
 namespace KlayGE
 {
 	enum TexCompressionMethod
@@ -81,7 +83,7 @@ namespace KlayGE
 		ElementFormat compression_format_;
 	};
 
-	class ARGBColor32 final : boost::equality_comparable<ARGBColor32>
+	class ARGBColor32 final
 	{
 	public:
 		enum
@@ -168,6 +170,8 @@ namespace KlayGE
 		{
 			return clr32_.dw == rhs.clr32_.dw;
 		}
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(ARGBColor32);
 
 	private:
 		union Clr32

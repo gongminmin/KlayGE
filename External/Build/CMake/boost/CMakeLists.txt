@@ -3,9 +3,8 @@ SET(BOOST_PROJECT_DIR "${EXTERNAL_PROJECT_DIR}/boost")
 UpdateExternalLib("boost/assert" "https://github.com/boostorg/assert.git" "02256c84fd0cd58a139d9dc1b25b5019ca976ada")
 UpdateExternalLib("boost/core" "https://github.com/boostorg/core.git" "c7134904e27237dbbb81ba28f0f23fc365b079dd")
 UpdateExternalLib("boost/type_index" "https://github.com/boostorg/type_index.git" "7bde4f36af001dd8533e2a4f580d279f0c8468df")
-UpdateExternalLib("boost/utility" "https://github.com/boostorg/utility.git" "eb721609af5ba8eea53e405ae6d901718866605f")
 
-# Depended by assert, container_hash, core, static_assert, throw_exception, type_index, type_traits, utility
+# Depended by assert, container_hash, core, static_assert, throw_exception, type_index, type_traits
 UpdateExternalLib("boost/config" "https://github.com/boostorg/config.git" "a1cf5d531405e62927b0257b5cbecc66a545b508")
 # Depended by type_index
 UpdateExternalLib("boost/container_hash" "https://github.com/boostorg/container_hash.git" "226eb066e949adbf37b220e993d64ecefeeaae99")
@@ -13,19 +12,18 @@ UpdateExternalLib("boost/container_hash" "https://github.com/boostorg/container_
 UpdateExternalLib("boost/describe" "https://github.com/boostorg/describe.git" "a0eafb08100eb15a57b6dae6d270c0012a56aa21")
 # Depended by container_hash, describe
 UpdateExternalLib("boost/mp11" "https://github.com/boostorg/mp11.git" "ef7608b463298b881bc82eae4f45a4385ed74fca")
-# Depended by type_index, utility
+# Depended by type_index
 UpdateExternalLib("boost/preprocessor" "https://github.com/boostorg/preprocessor.git" "667e87b3392db338a919cbe0213979713aca52e3")
-# Depended by core, type_index, type_traits, utility
+# Depended by core, type_index, type_traits
 UpdateExternalLib("boost/static_assert" "https://github.com/boostorg/static_assert.git" "ba72d3340f3dc6e773868107f35902292f84b07e")
-# Depended by core, type_index, utility
+# Depended by core, type_index
 UpdateExternalLib("boost/throw_exception" "https://github.com/boostorg/throw_exception.git" "23dd41e920ecd91237500ac6428f7d392a7a875c")
-# Depended by container_hash, type_index, utility
+# Depended by container_hash, type_index
 UpdateExternalLib("boost/type_traits" "https://github.com/boostorg/type_traits.git" "89f5011b4a79d91e42735670e39f72cb25c86c72")
 
 add_subdirectory(${BOOST_PROJECT_DIR}/assert "${CMAKE_CURRENT_BINARY_DIR}/boost/assert" EXCLUDE_FROM_ALL)
 add_subdirectory(${BOOST_PROJECT_DIR}/core "${CMAKE_CURRENT_BINARY_DIR}/boost/core" EXCLUDE_FROM_ALL)
 add_subdirectory(${BOOST_PROJECT_DIR}/type_index "${CMAKE_CURRENT_BINARY_DIR}/boost/type_index" EXCLUDE_FROM_ALL)
-add_subdirectory(${BOOST_PROJECT_DIR}/utility "${CMAKE_CURRENT_BINARY_DIR}/boost/utility" EXCLUDE_FROM_ALL)
 
 add_subdirectory(${BOOST_PROJECT_DIR}/config "${CMAKE_CURRENT_BINARY_DIR}/boost/config" EXCLUDE_FROM_ALL)
 add_subdirectory(${BOOST_PROJECT_DIR}/container_hash "${CMAKE_CURRENT_BINARY_DIR}/boost/container_hash" EXCLUDE_FROM_ALL)

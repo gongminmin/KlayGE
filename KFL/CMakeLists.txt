@@ -32,6 +32,7 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/JsonDom.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Operators.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
@@ -112,8 +113,6 @@ ADD_LIBRARY(${LIB_NAME} STATIC
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
-		# Not using target_link_libraries to prevent depending on Boost::io
-		$<TARGET_PROPERTY:Boost::utility,INTERFACE_INCLUDE_DIRECTORIES>
 		${KFL_PROJECT_DIR}/include
 )
 

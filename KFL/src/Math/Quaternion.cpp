@@ -63,16 +63,16 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Quaternion_T<T> const & Quaternion_T<T>::operator*=(T rhs) noexcept
+	Quaternion_T<T> const & Quaternion_T<T>::operator*=(T const& rhs) noexcept
 	{
-		quat_ *= static_cast<T>(rhs);
+		quat_ *= rhs;
 		return *this;
 	}
 
 	template <typename T>
-	Quaternion_T<T> const & Quaternion_T<T>::operator/=(T rhs) noexcept
+	Quaternion_T<T> const & Quaternion_T<T>::operator/=(T const& rhs) noexcept
 	{
-		quat_ /= static_cast<T>(rhs);
+		quat_ /= rhs;
 		return *this;
 	}
 

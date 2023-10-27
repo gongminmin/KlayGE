@@ -43,6 +43,7 @@
 #endif
 #elif defined(KLAYGE_PLATFORM_LINUX)
 #include <sched.h>
+#include <unistd.h>
 #endif
 #include <cstring>
 #include <vector>

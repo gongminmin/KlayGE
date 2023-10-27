@@ -34,15 +34,12 @@
 #pragma once
 
 #include <array>
-#include <boost/operators.hpp>
+
+#include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
-	class SIMDMatrixF4 final : boost::addable<SIMDMatrixF4,
-								boost::subtractable<SIMDMatrixF4,
-								boost::dividable2<SIMDMatrixF4, float,
-								boost::multipliable2<SIMDMatrixF4, float,
-								boost::multipliable<SIMDMatrixF4>>>>>
+	class SIMDMatrixF4 final
 	{
 	public:
 		constexpr SIMDMatrixF4() noexcept
@@ -88,6 +85,15 @@ namespace KlayGE
 			return *this;
 		}
 		SIMDMatrixF4 const operator-() const;
+
+		DEFAULT_ADD_OPERATOR1(SIMDMatrixF4);
+		DEFAULT_SUB_OPERATOR1(SIMDMatrixF4);
+
+		DEFAULT_MUL_OPERATOR1(SIMDMatrixF4);
+		DEFAULT_MUL_OPERATOR2(SIMDMatrixF4, float);
+		DEFAULT_MUL_OPERATOR3(float, SIMDMatrixF4);
+
+		DEFAULT_DIV_OPERATOR2(SIMDMatrixF4, float);
 
 	private:
 		std::array<SIMDVectorF4, 4> m_;

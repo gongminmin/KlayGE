@@ -60,14 +60,14 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	OBBox_T<T>& OBBox_T<T>::operator*=(T rhs) noexcept
+	OBBox_T<T>& OBBox_T<T>::operator*=(T const& rhs) noexcept
 	{
 		extent_ *= rhs;
 		return *this;
 	}
 
 	template <typename T>
-	OBBox_T<T>& OBBox_T<T>::operator/=(T rhs) noexcept
+	OBBox_T<T>& OBBox_T<T>::operator/=(T const& rhs) noexcept
 	{
 		return this->operator*=(1.0f / rhs);
 	}
@@ -166,7 +166,6 @@ namespace KlayGE
 			&& (rotation_ == rhs.rotation_)
 			&& (extent_ == rhs.extent_);
 	}
-
 
 	template class OBBox_T<float>;
 }

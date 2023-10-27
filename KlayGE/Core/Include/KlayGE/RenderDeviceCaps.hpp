@@ -40,7 +40,7 @@
 #include <map>
 #include <vector>
 
-#include <boost/operators.hpp>
+#include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
@@ -50,8 +50,7 @@ namespace KlayGE
 		TM_No
 	};
 
-	struct ShaderModel : boost::less_than_comparable<ShaderModel,
-							boost::equality_comparable<ShaderModel>>
+	struct ShaderModel
 	{
 		uint8_t major_ver : 6;
 		uint8_t minor_ver : 2;
@@ -78,6 +77,9 @@ namespace KlayGE
 		{
 			return this->FullVersion() == rhs.FullVersion();
 		}
+
+		DEFAULT_LESS_COMPARE_OPERATOR(ShaderModel);
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(ShaderModel);
 	};
 
 	struct KLAYGE_CORE_API RenderDeviceCaps

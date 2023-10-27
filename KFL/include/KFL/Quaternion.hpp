@@ -33,19 +33,13 @@
 
 #pragma once
 
-#include <boost/operators.hpp>
-
+#include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
 namespace KlayGE
 {
 	template <typename T>
-	class Quaternion_T final : boost::addable<Quaternion_T<T>,
-								boost::subtractable<Quaternion_T<T>,
-								boost::dividable2<Quaternion_T<T>, T,
-								boost::multipliable<Quaternion_T<T>,
-								boost::multipliable2<Quaternion_T<T>, T,
-								boost::equality_comparable<Quaternion_T<T>>>>>>>
+	class Quaternion_T final
 	{
 	public:
 		static constexpr size_t elem_num = 4;
@@ -152,8 +146,8 @@ namespace KlayGE
 		Quaternion_T const & operator-=(Quaternion_T const & rhs) noexcept;
 
 		Quaternion_T const & operator*=(Quaternion_T const & rhs) noexcept;
-		Quaternion_T const & operator*=(T rhs) noexcept;
-		Quaternion_T const & operator/=(T rhs) noexcept;
+		Quaternion_T const & operator*=(T const& rhs) noexcept;
+		Quaternion_T const & operator/=(T const& rhs) noexcept;
 
 		Quaternion_T& operator=(Quaternion_T const & rhs) noexcept;
 		Quaternion_T& operator=(Quaternion_T&& rhs) noexcept;
@@ -178,6 +172,17 @@ namespace KlayGE
 		}
 
 		bool operator==(Quaternion_T<T> const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR1(Quaternion_T<T>);
+		DEFAULT_SUB_OPERATOR1(Quaternion_T<T>);
+
+		DEFAULT_MUL_OPERATOR1(Quaternion_T<T>);
+		DEFAULT_MUL_OPERATOR2(Quaternion_T<T>, T);
+		DEFAULT_MUL_OPERATOR3(T, Quaternion_T<T>);
+
+		DEFAULT_DIV_OPERATOR2(Quaternion_T<T>, T);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Quaternion_T<T>);
 
 	private:
 		Vector_T<T, elem_num> quat_;

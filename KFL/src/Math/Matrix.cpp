@@ -132,7 +132,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Matrix4_T<T>& Matrix4_T<T>::operator*=(T rhs) noexcept
+	Matrix4_T<T>& Matrix4_T<T>::operator*=(T const& rhs) noexcept
 	{
 		for (size_t i = 0; i < row_num; ++ i)
 		{
@@ -142,7 +142,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Matrix4_T<T>& Matrix4_T<T>::operator/=(T rhs) noexcept
+	Matrix4_T<T>& Matrix4_T<T>::operator/=(T const& rhs) noexcept
 	{
 		return this->operator*=(1 / rhs);
 	}
@@ -177,7 +177,6 @@ namespace KlayGE
 	{
 		return m_ == rhs.m_;
 	}
-
 
 	template class Matrix4_T<float>;
 }

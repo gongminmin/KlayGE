@@ -85,6 +85,5 @@ namespace KlayGE
 		return plane_ == rhs.plane_;
 	}
 
-
 	template class Plane_T<float>;
 }

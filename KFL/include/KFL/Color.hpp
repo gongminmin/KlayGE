@@ -35,8 +35,7 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
+#include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
 namespace KlayGE
@@ -44,12 +43,7 @@ namespace KlayGE
 	// RGBA，用4个浮点数表示r, g, b, a
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Color_T final : boost::addable<Color_T<T>,
-							boost::subtractable<Color_T<T>,
-							boost::dividable2<Color_T<T>, T,
-							boost::multipliable<Color_T<T>,
-							boost::multipliable2<Color_T<T>, T,
-							boost::equality_comparable<Color_T<T>>>>>>>
+	class Color_T final
 	{
 	public:
 		static constexpr size_t elem_num = 4;
@@ -158,9 +152,9 @@ namespace KlayGE
 		// 赋值操作符
 		Color_T& operator+=(Color_T<T> const & rhs) noexcept;
 		Color_T& operator-=(Color_T<T> const & rhs) noexcept;
-		Color_T& operator*=(T rhs) noexcept;
+		Color_T& operator*=(T const& rhs) noexcept;
 		Color_T& operator*=(Color_T<T> const & rhs) noexcept;
-		Color_T& operator/=(T rhs) noexcept;
+		Color_T& operator/=(T const& rhs) noexcept;
 
 		Color_T& operator=(Color_T const & rhs) noexcept;
 		Color_T& operator=(Color_T&& rhs) noexcept;
@@ -178,6 +172,15 @@ namespace KlayGE
 		}
 
 		bool operator==(Color_T<T> const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR1(Color_T<T>);
+		DEFAULT_SUB_OPERATOR1(Color_T<T>);
+		DEFAULT_MUL_OPERATOR1(Color_T<T>);
+		DEFAULT_MUL_OPERATOR2(Color_T<T>, T);
+		DEFAULT_MUL_OPERATOR3(T, Color_T<T>);
+		DEFAULT_DIV_OPERATOR2(Color_T<T>, T);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Color_T<T>);
 
 	private:
 		Vector_T<T, elem_num> col_;

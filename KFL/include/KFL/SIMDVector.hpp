@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <boost/operators.hpp>
+#include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
@@ -43,14 +43,7 @@ namespace KlayGE
 	typedef std::array<float, 4> V4TYPE;
 #endif
 
-	class SIMDVectorF4 final : boost::addable<SIMDVectorF4,
-								boost::subtractable<SIMDVectorF4,
-								boost::multipliable<SIMDVectorF4,
-								boost::dividable<SIMDVectorF4,
-								boost::dividable2<SIMDVectorF4, float,
-								boost::multipliable2<SIMDVectorF4, float,
-								boost::addable2<SIMDVectorF4, float,
-								boost::subtractable2<SIMDVectorF4, float>>>>>>>>
+	class SIMDVectorF4 final
 	{
 	public:
 		constexpr SIMDVectorF4() noexcept
@@ -97,6 +90,20 @@ namespace KlayGE
 		SIMDVectorF4 const operator-() const;
 
 		void swap(SIMDVectorF4& rhs);
+
+		DEFAULT_ADD_OPERATOR1(SIMDVectorF4);
+		DEFAULT_ADD_OPERATOR2(SIMDVectorF4, float);
+		DEFAULT_ADD_OPERATOR3(float, SIMDVectorF4);
+
+		DEFAULT_SUB_OPERATOR1(SIMDVectorF4);
+		DEFAULT_SUB_OPERATOR2(SIMDVectorF4, float);
+
+		DEFAULT_MUL_OPERATOR1(SIMDVectorF4);
+		DEFAULT_MUL_OPERATOR2(SIMDVectorF4, float);
+		DEFAULT_MUL_OPERATOR3(float, SIMDVectorF4);
+
+		DEFAULT_DIV_OPERATOR1(SIMDVectorF4);
+		DEFAULT_DIV_OPERATOR2(SIMDVectorF4, float);
 
 	private:
 		V4TYPE vec_{};

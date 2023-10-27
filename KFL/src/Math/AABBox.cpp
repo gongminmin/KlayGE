@@ -62,7 +62,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator*=(T rhs) noexcept
+	AABBox_T<T>& AABBox_T<T>::operator*=(T const& rhs) noexcept
 	{
 		this->Min() *= rhs;
 		this->Max() *= rhs;
@@ -70,7 +70,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator/=(T rhs) noexcept
+	AABBox_T<T>& AABBox_T<T>::operator/=(T const& rhs) noexcept
 	{
 		return this->operator*=(1.0f / rhs);
 	}

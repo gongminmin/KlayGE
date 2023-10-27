@@ -74,7 +74,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator*=(T rhs) noexcept
+	Color_T<T>& Color_T<T>::operator*=(T const& rhs) noexcept
 	{
 		col_ *= rhs;
 		return *this;
@@ -88,7 +88,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator/=(T rhs) noexcept
+	Color_T<T>& Color_T<T>::operator/=(T const& rhs) noexcept
 	{
 		col_ /= rhs;
 		return *this;
@@ -122,7 +122,6 @@ namespace KlayGE
 	{
 		return col_ == rhs.col_;
 	}
-
 
 	template class Color_T<float>;
 }

@@ -35,21 +35,14 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
-#include <KFL/Vector.hpp>
+#include <KFL/Operators.hpp>
 #include <KFL/Size.hpp>
+#include <KFL/Vector.hpp>
 
 namespace KlayGE
 {
 	template <typename T>
-	class Rect_T final : boost::addable<Rect_T<T>,
-							boost::addable2<Rect_T<T>, Vector_T<T, 2>,
-							boost::subtractable<Rect_T<T>,
-							boost::subtractable2<Rect_T<T>, Vector_T<T, 2>,
-							boost::andable<Rect_T<T>,
-							boost::orable<Rect_T<T>,
-							boost::equality_comparable<Rect_T<T>>>>>>>>
+	class Rect_T final
 	{
 		template <typename U>
 		friend class Rect_T;
@@ -177,6 +170,18 @@ namespace KlayGE
 		bool operator==(Rect_T<T> const & rhs) const noexcept;
 
 		bool PtInRect(Vector_T<T, 2> const & pt) const noexcept;
+
+		DEFAULT_ADD_OPERATOR1(Rect_T<T>);
+		DEFAULT_ADD_OPERATOR2(Rect_T<T>, KLAYGE_ESC(Vector_T<T, 2>));
+
+		DEFAULT_SUB_OPERATOR1(Rect_T<T>);
+		DEFAULT_SUB_OPERATOR2(Rect_T<T>, KLAYGE_ESC(Vector_T<T, 2>));
+
+		DEFAULT_AND_OPERATOR1(Rect_T<T>);
+
+		DEFAULT_OR_OPERATOR1(Rect_T<T>);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Rect_T<T>);
 
 	private:
 		Vector_T<T, elem_num> rect_;

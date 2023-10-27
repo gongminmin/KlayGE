@@ -35,16 +35,13 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
+#include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
 namespace KlayGE
 {
 	template <typename T>
-	class Size_T final : boost::addable<Size_T<T>,
-							boost::subtractable<Size_T<T>,
-							boost::equality_comparable<Size_T<T>>>>
+	class Size_T final
 	{
 		template <typename U>
 		friend class Size_T;
@@ -139,6 +136,11 @@ namespace KlayGE
 		}
 
 		bool operator==(Size_T<T> const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR1(Size_T<T>);
+		DEFAULT_SUB_OPERATOR1(Size_T<T>);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Size_T<T>);
 
 	private:
 		Vector_T<T, elem_num> size_;

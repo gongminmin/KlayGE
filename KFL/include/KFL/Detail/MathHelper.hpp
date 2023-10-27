@@ -163,49 +163,56 @@ namespace KlayGE
 				vector_helper<T, N - 1>::DoCopy(out + 1, rhs + 1);
 			}
 
-			static void DoAssign(T out[N], T const & rhs) noexcept
+			static void DoSplat(T out[N], T const& rhs) noexcept
 			{
 				out[0] = rhs;
-				vector_helper<T, N - 1>::DoAssign(out + 1, rhs);
+				vector_helper<T, N - 1>::DoSplat(out + 1, rhs);
 			}
 
-			static void DoAdd(T out[N], T const lhs[N], T const rhs[N]) noexcept
+			template <typename U>
+			static void DoAdd(T out[N], T const lhs[N], U const rhs[N]) noexcept
 			{
 				out[0] = lhs[0] + rhs[0];
 				vector_helper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoAdd(T out[N], T const lhs[N], T const & rhs) noexcept
+			template <typename U>
+			static void DoAdd(T out[N], T const lhs[N], U const & rhs) noexcept
 			{
 				out[0] = lhs[0] + rhs;
 				vector_helper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs);
 			}
 
-			static void DoSub(T out[N], T const lhs[N], T const rhs[N]) noexcept
+			template <typename U>
+			static void DoSub(T out[N], T const lhs[N], U const rhs[N]) noexcept
 			{
 				out[0] = lhs[0] - rhs[0];
 				vector_helper<T, N - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoSub(T out[N], T const lhs[N], T const & rhs) noexcept
+			template <typename U>
+			static void DoSub(T out[N], T const lhs[N], U const & rhs) noexcept
 			{
 				out[0] = lhs[0] - rhs;
 				vector_helper<T, N - 1>::DoSub(out + 1, lhs + 1, rhs);
 			}
 
-			static void DoMul(T out[N], T const lhs[N], T const rhs[N]) noexcept
+			template <typename U>
+			static void DoMul(T out[N], T const lhs[N], U const rhs[N]) noexcept
 			{
 				out[0] = lhs[0] * rhs[0];
 				vector_helper<T, N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoScale(T out[N], T const lhs[N], T const & rhs) noexcept
+			template <typename U>
+			static void DoScale(T out[N], T const lhs[N], U const & rhs) noexcept
 			{
 				out[0] = lhs[0] * rhs;
 				vector_helper<T, N - 1>::DoScale(out + 1, lhs + 1, rhs);
 			}
 
-			static void DoDiv(T out[N], T const lhs[N], T const rhs[N]) noexcept
+			template <typename U>
+			static void DoDiv(T out[N], T const lhs[N], U const rhs[N]) noexcept
 			{
 				out[0] = lhs[0] / rhs[0];
 				vector_helper<T, N - 1>::DoDiv(out + 1, lhs + 1, rhs + 1);
@@ -237,42 +244,49 @@ namespace KlayGE
 				out[0] = static_cast<T>(rhs[0]);
 			}
 
-			static void DoAssign(T out[1], T const & rhs) noexcept
+			static void DoSplat(T out[1], T const& rhs) noexcept
 			{
 				out[0] = rhs;
 			}
 
-			static void DoAdd(T out[1], T const lhs[1], T const rhs[1]) noexcept
+			template <typename U>
+			static void DoAdd(T out[1], T const lhs[1], U const rhs[1]) noexcept
 			{
 				out[0] = lhs[0] + rhs[0];
 			}
 
-			static void DoAdd(T out[1], T const lhs[1], T const rhs) noexcept
+			template <typename U>
+			static void DoAdd(T out[1], T const lhs[1], U const rhs) noexcept
 			{
 				out[0] = lhs[0] + rhs;
 			}
 
-			static void DoSub(T out[1], T const lhs[1], T const rhs[1]) noexcept
+			template <typename U>
+			static void DoSub(T out[1], T const lhs[1], U const rhs[1]) noexcept
 			{
 				out[0] = lhs[0] - rhs[0];
 			}
 
-			static void DoSub(T out[1], T const lhs[1], T const & rhs) noexcept
+			template <typename U>
+			static void DoSub(T out[1], T const lhs[1], U const & rhs) noexcept
 			{
 				out[0] = lhs[0] - rhs;
 			}
 
-			static void DoMul(T out[1], T const lhs[1], T const rhs[1]) noexcept
+			template <typename U>
+			static void DoMul(T out[1], T const lhs[1], U const rhs[1]) noexcept
 			{
 				out[0] = lhs[0] * rhs[0];
 			}
 
-			static void DoScale(T out[1], T const lhs[1], T const & rhs) noexcept
+			template <typename U>
+			static void DoScale(T out[1], T const lhs[1], U const & rhs) noexcept
 			{
 				out[0] = lhs[0] * rhs;
 			}
 
-			static void DoDiv(T out[1], T const lhs[1], T const rhs[1]) noexcept
+			template <typename U>
+			static void DoDiv(T out[1], T const lhs[1], U const rhs[1]) noexcept
 			{
 				out[0] = lhs[0] / rhs[0];
 			}

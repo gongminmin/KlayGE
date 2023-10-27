@@ -33,8 +33,9 @@
 
 #pragma once
 
-#include <boost/operators.hpp>
 #include <limits>
+
+#include <KFL/Operators.hpp>
 
 #define HALF_MIN	5.96046448e-08f	// Smallest positive half
 
@@ -74,11 +75,7 @@
 namespace KlayGE
 {
 	// 1s5e10m
-	class half final : boost::addable<half,
-						boost::subtractable<half,
-						boost::multipliable<half,
-						boost::dividable<half,
-						boost::equality_comparable<half>>>>>
+	class half final
 	{
 	public:
 		constexpr half() noexcept
@@ -123,6 +120,13 @@ namespace KlayGE
 		half const operator-() const noexcept;
 
 		bool operator==(half const & rhs) noexcept;
+
+		DEFAULT_ADD_OPERATOR1(half);
+		DEFAULT_SUB_OPERATOR1(half);
+		DEFAULT_MUL_OPERATOR1(half);
+		DEFAULT_DIV_OPERATOR1(half);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(half);
 
 	private:
 		uint16_t value_{};

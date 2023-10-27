@@ -43,6 +43,7 @@
 #include <boost/assert.hpp>
 
 #define KFL_UNUSED(x) (void)(x)
+#define KLAYGE_ESC(...) __VA_ARGS__
 
 // The opposite side of "explicit", for tracking purpose
 #define KFL_IMPLICIT

@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <boost/operators.hpp>
-
 #include <KFL/Vector.hpp>
 
 namespace KlayGE
@@ -42,7 +40,7 @@ namespace KlayGE
 	// 描述一个平面 ax + by + cz + d = 0
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Plane_T final : boost::equality_comparable<Plane_T<T>>
+	class Plane_T final
 	{
 	public:
 		static constexpr size_t elem_num = 4;
@@ -168,6 +166,8 @@ namespace KlayGE
 		}
 
 		bool operator==(Plane_T<T> const & rhs) const noexcept;
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Plane_T<T>);
 
 	private:
 		Vector_T<T, elem_num> plane_;

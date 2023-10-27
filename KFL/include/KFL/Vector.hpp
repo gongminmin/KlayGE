@@ -35,22 +35,13 @@
 
 #include <array>
 
-#include <boost/operators.hpp>
-
 #include <KFL/Detail/MathHelper.hpp>
+#include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
 	template <typename T, int N>
-	class Vector_T final : boost::addable<Vector_T<T, N>,
-							boost::subtractable<Vector_T<T, N>,
-							boost::multipliable<Vector_T<T, N>,
-							boost::dividable<Vector_T<T, N>,
-							boost::dividable2<Vector_T<T, N>, T,
-							boost::multipliable2<Vector_T<T, N>, T,
-							boost::addable2<Vector_T<T, N>, T,
-							boost::subtractable2<Vector_T<T, N>, T,
-							boost::equality_comparable<Vector_T<T, N>>>>>>>>>>
+	class Vector_T final
 	{
 		template <typename U, int M>
 		friend class Vector_T;
@@ -84,7 +75,7 @@ namespace KlayGE
 		}
 		constexpr Vector_T(T const & rhs) noexcept
 		{
-			detail::vector_helper<T, N>::DoAssign(vec_.data(), rhs);
+			detail::vector_helper<T, N>::DoSplat(vec_.data(), rhs);
 		}
 		Vector_T(Vector_T const & rhs) noexcept
 		{
@@ -304,6 +295,28 @@ namespace KlayGE
 			static_assert(M <= N, "Could not get a larger vector.");
 			return reinterpret_cast<Vector_T<T, M> const&>(*this);
 		}
+
+		DEFAULT_ADD_OPERATOR1(KLAYGE_ESC(Vector_T<T, N>));
+		template <typename U>
+		DEFAULT_ADD_OPERATOR2(KLAYGE_ESC(Vector_T<T, N>), U);
+		template <typename U>
+		DEFAULT_ADD_OPERATOR3(U, KLAYGE_ESC(Vector_T<T, N>));
+
+		DEFAULT_SUB_OPERATOR1(KLAYGE_ESC(Vector_T<T, N>));
+		template <typename U>
+		DEFAULT_SUB_OPERATOR2(KLAYGE_ESC(Vector_T<T, N>), U);
+
+		DEFAULT_MUL_OPERATOR1(KLAYGE_ESC(Vector_T<T, N>));
+		template <typename U>
+		DEFAULT_MUL_OPERATOR2(KLAYGE_ESC(Vector_T<T, N>), U);
+		template <typename U>
+		DEFAULT_MUL_OPERATOR3(U, KLAYGE_ESC(Vector_T<T, N>));
+
+		DEFAULT_DIV_OPERATOR1(KLAYGE_ESC(Vector_T<T, N>));
+		template <typename U>
+		DEFAULT_DIV_OPERATOR2(KLAYGE_ESC(Vector_T<T, N>), U);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(KLAYGE_ESC(Vector_T<T, N>));
 
 	private:
 		DetailType vec_{};

@@ -35,21 +35,13 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
 #include <KFL/Bound.hpp>
+#include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
 	template <typename T>
-	class AABBox_T final : boost::addable2<AABBox_T<T>, Vector_T<T, 3>,
-						boost::subtractable2<AABBox_T<T>, Vector_T<T, 3>,
-						boost::multipliable2<AABBox_T<T>, T,
-						boost::dividable2<AABBox_T<T>, T,
-						boost::andable<AABBox_T<T>,
-						boost::orable<AABBox_T<T>,
-						boost::equality_comparable<AABBox_T<T>>>>>>>>,
-				public Bound_T<T>
+	class AABBox_T final : public Bound_T<T>
 	{
 	public:
 		constexpr AABBox_T() noexcept
@@ -66,8 +58,8 @@ namespace KlayGE
 		// ¸³Öµ²Ù×÷·û
 		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) noexcept;
 		AABBox_T<T>& operator-=(Vector_T<T, 3> const & rhs) noexcept;
-		AABBox_T<T>& operator*=(T rhs) noexcept;
-		AABBox_T<T>& operator/=(T rhs) noexcept;
+		AABBox_T<T>& operator*=(T const& rhs) noexcept;
+		AABBox_T<T>& operator/=(T const& rhs) noexcept;
 		AABBox_T<T>& operator&=(AABBox_T<T> const & rhs) noexcept;
 		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs) noexcept;
 
@@ -119,6 +111,16 @@ namespace KlayGE
 		Vector_T<T, 3> Corner(size_t index) const noexcept;
 
 		bool operator==(AABBox_T<T> const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR2(AABBox_T<T>, KLAYGE_ESC(Vector_T<T, 3>));
+		DEFAULT_SUB_OPERATOR2(AABBox_T<T>, KLAYGE_ESC(Vector_T<T, 3>));
+		DEFAULT_MUL_OPERATOR2(AABBox_T<T>, T);
+		DEFAULT_MUL_OPERATOR3(T, AABBox_T<T>);
+		DEFAULT_DIV_OPERATOR2(AABBox_T<T>, T);
+		DEFAULT_AND_OPERATOR1(AABBox_T<T>);
+		DEFAULT_OR_OPERATOR1(AABBox_T<T>);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(AABBox_T<T>);
 
 	private:
 		Vector_T<T, 3> min_, max_;

@@ -35,19 +35,13 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/operators.hpp>
-
+#include <KFL/Operators.hpp>
 #include <KFL/Bound.hpp>
 
 namespace KlayGE
 {
 	template <typename T>
-	class Sphere_T final : boost::addable2<Sphere_T<T>, Vector_T<T, 3>,
-							boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
-							boost::multipliable2<Sphere_T<T>, T,
-							boost::dividable2<Sphere_T<T>, T,
-							boost::equality_comparable<Sphere_T<T>>>>>>,
-				public Bound_T<T>
+	class Sphere_T final : public Bound_T<T>
 	{
 	public:
 		constexpr Sphere_T() noexcept : radius_()
@@ -100,6 +94,14 @@ namespace KlayGE
 		bool Intersect(Frustum_T<T> const & frustum) const noexcept;
 
 		bool operator==(Sphere_T<T> const & rhs) const noexcept;
+
+		DEFAULT_ADD_OPERATOR2(Sphere_T<T>, KLAYGE_ESC(Vector_T<T, 3>));
+		DEFAULT_SUB_OPERATOR2(Sphere_T<T>, KLAYGE_ESC(Vector_T<T, 3>));
+		DEFAULT_MUL_OPERATOR2(Sphere_T<T>, T);
+		DEFAULT_MUL_OPERATOR3(T, Sphere_T<T>);
+		DEFAULT_DIV_OPERATOR2(Sphere_T<T>, T);
+
+		DEFAULT_EQUALITY_COMPARE_OPERATOR(Sphere_T<T>);
 
 	private:
 		Vector_T<T, 3> center_;
