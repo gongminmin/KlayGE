@@ -153,8 +153,10 @@ namespace std
 		static bool constexpr has_infinity = true;
 		static bool constexpr has_quiet_NaN = true;
 		static bool constexpr has_signaling_NaN = true;
+#if (__cplusplus <= 202002L)
 		static float_denorm_style constexpr has_denorm = denorm_present;
 		static bool constexpr has_denorm_loss = false;
+#endif
 		static bool constexpr is_iec559 = false;
 		static bool constexpr is_bounded = false;
 		static bool constexpr is_modulo = false;

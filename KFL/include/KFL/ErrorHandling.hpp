@@ -37,12 +37,14 @@
 #include <string>
 #include <string_view>
 
+#include <KFL/CXX23/utility.hpp>
+
 namespace KlayGE
 {
 	std::string CombineFileLine(std::string_view file, uint32_t line);
 	void Verify(bool x);
 
-#if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
+#if defined(KLAYGE_DEBUG)
 	[[noreturn]] void KFLUnreachableInternal(std::string_view msg = {}, std::string_view file = {}, uint32_t line = 0);
 #endif
 } // namespace KlayGE
@@ -79,10 +81,8 @@ namespace KlayGE
 
 #ifdef KLAYGE_DEBUG
 #define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal(msg, __FILE__, __LINE__)
-#elif defined(KLAYGE_BUILTIN_UNREACHABLE)
-#define KFL_UNREACHABLE(msg) KLAYGE_BUILTIN_UNREACHABLE
 #else
-#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal()
+#define KFL_UNREACHABLE(msg) std::unreachable()
 #endif
 
 #endif // _KFL_ERRORHANDLING_HPP

@@ -47,6 +47,9 @@
 // KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 // KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 
+// Macros for C++23 library features:
+// KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
+
 // Detects supported compilers
 #if defined(__clang__)
 	// Clang++
@@ -76,6 +79,11 @@
 		#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 		#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+		#if __cplusplus > 202002L
+			#if CLANG_VERSION >= 150
+				#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
+			#endif
+		#endif
 	#else
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang
@@ -131,12 +139,15 @@
 			#if CLANG_VERSION >= 170
 				#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 			#endif
+			#if __cplusplus > 202002L
+				#if CLANG_VERSION >= 150
+					#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
+				#endif
+			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
 		#endif
 	#endif
-
-	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(__GNUC__)
 	// GNU C++
 
@@ -170,8 +181,11 @@
 	#if GCC_VERSION >= 130
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 	#endif
-
-	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
+	#if __cplusplus > 202002L
+		#if GCC_VERSION >= 120
+			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
+		#endif
+	#endif
 #elif defined(_MSC_VER)
 	// MSVC
 
@@ -213,12 +227,15 @@
 			#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 		#endif
 	#endif
+	#if _MSVC_LANG > 202002L
+		#if _MSC_VER >= 1932
+			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
+		#endif
+	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.
 	#pragma warning(disable: 4275) // boost::noncopyable is a non dll-interface class.
 	#pragma warning(disable: 4819) // Allow non-ANSI characters.
-
-	#define KLAYGE_BUILTIN_UNREACHABLE __assume(false)
 #else
 	#error "Unknown compiler. Please install vc, g++, or clang."
 #endif

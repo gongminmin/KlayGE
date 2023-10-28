@@ -54,7 +54,7 @@ namespace KlayGE
 		}
 	}
 
-#if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
+#if defined(KLAYGE_DEBUG)
 	void KFLUnreachableInternal(std::string_view msg, std::string_view file, uint32_t line)
 	{
 		if (!msg.empty())
@@ -68,7 +68,7 @@ namespace KlayGE
 		}
 		LogError() << "." << std::endl;
 
-		TMSG("Unreachable.");
+		std::unreachable();
 	}
 #endif
 
