@@ -1,7 +1,7 @@
-From 5cbea1b51004adb78e93debd93f8535ac0138f06 Mon Sep 17 00:00:00 2001
+From 280aba91f577eaef5066bd1fec908a062fdb3470 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Mon, 10 Sep 2018 21:06:48 -0700
-Subject: [PATCH 1/8] Fix compiling problems on VS2017 15.3+ with /std:c++17
+Subject: [PATCH 1/9] Fix compiling problems on VS2017 15.3+ with /std:c++17
 
 1. auto_ptr has been deprecated, change it to unique_ptr or shared_ptr.
 2. Fix LoadLibrary on unicode configuration.
@@ -172,5 +172,5 @@ index cb4ac36..757c51e 100644
      operator () (const char *x, const char *y) const
      {
 -- 
-2.17.1.windows.2
+2.42.0.windows.2
 

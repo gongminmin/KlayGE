@@ -1,7 +1,7 @@
-From 99550fce27e816afa86e6bec727ff0adae0b4318 Mon Sep 17 00:00:00 2001
+From 753c4709f9412990ed6ea83bfebfdc603972426d Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 26 Aug 2021 23:18:06 -0700
-Subject: [PATCH 8/8] Remove 'register' to fix errors in C++17 or up
+Subject: [PATCH 8/9] Remove 'register' to fix errors in C++17 or up
 
 ---
  Source/LibRawLite/src/libraw_cxx.cpp | 6 +++---
@@ -101,5 +101,5 @@ index 00fbfbb..c5d7e24 100644
      a0 = ap[0];
      a1 = ap[1];
 -- 
-2.17.1.windows.2
+2.42.0.windows.2
 

@@ -117,10 +117,10 @@
 				#endif
 			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
-			#if CLANG_VERSION >= 100
+			#if CLANG_VERSION >= 140
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 			#else
-				#error "Unsupported compiler version. Please install clang++ 10.0 or up."
+				#error "Unsupported compiler version. Please install clang++ 14.0 or up."
 			#endif
 
 			#if __cplusplus < 202002L
@@ -128,14 +128,13 @@
 			#endif
 
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
 			#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
 			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
 			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-			#if CLANG_VERSION >= 120
-				#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-			#endif
-			#if CLANG_VERSION >= 140
-				#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
+			#if CLANG_VERSION >= 170
+				#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."

@@ -1,0 +1,42 @@
+From a36a6a03935931d9bd68159ec73409f62a3f59a7 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Fri, 27 Oct 2023 20:07:48 -0700
+Subject: [PATCH 9/9] Fix compilation problems on clang 16
+
+---
+ Source/LibJXR/image/decode/segdec.c   | 6 ++++++
+ Source/LibJXR/jxrgluelib/JXRGlueJxr.c | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/Source/LibJXR/image/decode/segdec.c b/Source/LibJXR/image/decode/segdec.c
+index 1299458..bc332bd 100644
+--- a/Source/LibJXR/image/decode/segdec.c
++++ b/Source/LibJXR/image/decode/segdec.c
+@@ -49,6 +49,12 @@ static Int DecodeSignificantAbsLevel (struct CAdaptiveHuffman *pAHexpt, BitIOInf
+ #define _FORCEINLINE
+ #endif // X86OPT_INLINE
+ 
++#if !((defined(WIN32) && !defined(UNDER_CE)) || (defined(UNDER_CE) && defined(_ARM_)))
++#ifndef _BIG__ENDIAN_
++U32 _byteswap_ulong(U32 bits);
++#endif
++#endif
++
+ //================================================================
+ // Memory access functions
+ //================================================================
+diff --git a/Source/LibJXR/jxrgluelib/JXRGlueJxr.c b/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+index 2bf085a..1e136d7 100644
+--- a/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
++++ b/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+@@ -28,6 +28,7 @@
+ //*@@@---@@@@******************************************************************
+ #include <limits.h>
+ #include <JXRGlue.h>
++#include <wchar.h> /* wcslen */
+ 
+ 
+ static const char szHDPhotoFormat[] = "<dc:format>image/vnd.ms-photo</dc:format>";
+-- 
+2.42.0.windows.2
+

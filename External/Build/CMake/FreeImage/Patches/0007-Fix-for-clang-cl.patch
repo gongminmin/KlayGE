@@ -1,7 +1,7 @@
-From 28f1dd6d1e196d61ca1d7b0c94191a954085dbc6 Mon Sep 17 00:00:00 2001
+From 04feb2a5f5d7c63f7aa02fafd9061e8b948df625 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 22:01:29 -0800
-Subject: [PATCH 7/8] Fix for clang-cl
+Subject: [PATCH 7/9] Fix for clang-cl
 
 ---
  Source/FreeImage/PluginG3.cpp | 4 ++--
@@ -61,5 +61,5 @@ index d5be902..4eb5d0b 100644
  //   Extended TIFF Directory GEO Tag Support
  // ----------------------------------------------------------
 -- 
-2.17.1.windows.2
+2.42.0.windows.2
 

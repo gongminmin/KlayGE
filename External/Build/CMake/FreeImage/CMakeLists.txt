@@ -11,7 +11,8 @@ UpdateExternalLib("FreeImage" "https://github.com/gongminmin/FreeImage.git" "7c4
 if(need_patch)
 	foreach(patch "0001-Fix-compiling-problems-on-VS2017-15.3-with-std-c-17" "0002-Turn-off-SSE2-for-arm-and-arm64-on-msvc"
 		"0003-Fix-some-compiling-problems-on-MinGW-7.x" "0004-Fix-beta-for-GCC8" "0005-Fix-missing-__mingw_uuidof_s-problem-on-gcc-8.3"
-		"0006-Fix-compiling-problems-on-VS2019-Update-4" "0007-Fix-for-clang-cl" "0008-Remove-register-to-fix-errors-in-C-17-or-up")
+		"0006-Fix-compiling-problems-on-VS2019-Update-4" "0007-Fix-for-clang-cl" "0008-Remove-register-to-fix-errors-in-C-17-or-up"
+		"0009-Fix-compilation-problems-on-clang-16")
 		ApplyPatch("FreeImage" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
 	endforeach()
 endif()
