@@ -56,20 +56,21 @@ stages:
           CXX: g++-11
           BUILD_DIR: gcc11
 
-        Linux_gcc12:
+        Linux_gcc13:
           vmImage: ubuntu-22.04
           project: ninja
           compiler: gcc
           installCommand: |
             sudo dpkg --add-architecture i386
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
-            sudo apt-get install g++-12 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
+            sudo apt-get install g++-13 ninja-build wine64 wine64-tools libwine-dev winetricks libx11-dev libgl1-mesa-dev
             export WINEARCH=win64
             winetricks
-          id: 'gcc12_linux_$(platform)_$(configuration)'
-          CC: gcc-12
-          CXX: g++-12
-          BUILD_DIR: gcc12
+          id: 'gcc13_linux_$(platform)_$(configuration)'
+          CC: gcc-13
+          CXX: g++-13
+          BUILD_DIR: gcc13
 
         Linux_clang14:
           vmImage: ubuntu-20.04

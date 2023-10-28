@@ -62,6 +62,7 @@
 #include <KFL/Hash.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
+#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <string>

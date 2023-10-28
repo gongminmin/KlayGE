@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.2+, g++ 9.0+, clang 9.0+, with C++17 option on.
+// KlayGE requires vc 14.2+, g++ 11.0+, clang 9.0+, with C++17 option on.
 // All C++17 core feature used in KlayGE should be available in all supported compilers.
 
 // Macros for optional C++17 library features:
@@ -162,30 +162,24 @@
 
 	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 
-	#if GCC_VERSION >= 90
+	#if GCC_VERSION >= 110
 		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
-		#error "Unsupported compiler version. Please install g++ 9.0 or up."
+		#error "Unsupported compiler version. Please install g++ 11.0 or up."
 	#endif
 
-	#if __cplusplus < 201703L
-		#error "-std=c++17 must be turned on."
-	#endif
-	#if !defined(_GLIBCXX_HAS_GTHREADS)
-		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
+	#if __cplusplus < 202002L
+		#error "-std=c++20 must be turned on."
 	#endif
 
 	#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-	#if __cplusplus > 201703L
-		#if GCC_VERSION >= 110
-			#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-		#endif
-		#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-		#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-		#if GCC_VERSION >= 100
-			#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-		#endif
+	#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
+	#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
+	#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+	#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
+	#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+	#if GCC_VERSION >= 130
+		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 	#endif
 
 	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
