@@ -243,7 +243,7 @@ namespace
 
 	bool TryConvertStringToValue(std::string const& value_str, float& val)
 	{
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_FP_SUPPORT
 		char const* str = value_str.data();
 		std::from_chars_result result = std::from_chars(str, str + value_str.size(), val);
 		return (result.ec == std::errc());
