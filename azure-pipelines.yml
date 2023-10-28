@@ -107,7 +107,7 @@ stages:
           CXX: clang++-14
           BUILD_DIR: clang14
 
-        macOS_clang12:
+        macOS_clang13:
           vmImage: macOS-11
           project: ninja
           compiler: clang
@@ -115,7 +115,7 @@ stages:
             export HOMEBREW_NO_INSTALL_CLEANUP=1
             brew install --cask xquartz wine-stable
             brew install ninja mingw-w64
-          id: 'clang12_darwin_$(platform)_$(configuration)'
+          id: 'clang13_darwin_$(platform)_$(configuration)'
           BUILD_DIR: clang13
           MACOSX_DEPLOYMENT_TARGET: 11
 

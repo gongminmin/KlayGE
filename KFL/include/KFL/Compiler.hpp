@@ -52,10 +52,6 @@
 
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#if __cplusplus < 200202L
-		#error "-std=c++20 must be turned on."
-	#endif
-
 	#if defined(_MSC_VER)
 		#define KLAYGE_COMPILER_CLANGCL
 		#define KLAYGE_COMPILER_NAME clangcl
@@ -64,6 +60,10 @@
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
 			#error "Unsupported compiler version. Please install clang-cl 12.0 or up."
+		#endif
+
+		#if __cplusplus < 202002L
+			#error "-std=c++20 must be turned on."
 		#endif
 
 		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
@@ -79,19 +79,21 @@
 		#define KLAYGE_COMPILER_NAME clang
 
 		#if defined(__APPLE__)
-			#if CLANG_VERSION >= 110
+			#if CLANG_VERSION >= 130
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 			#else
-				#error "Unsupported compiler version. Please install Apple clang++ 11 or up."
+				#error "Unsupported compiler version. Please install Apple clang++ 13 or up."
+			#endif
+
+			#if __cplusplus < 202002L
+				#error "-std=c++20 must be turned on."
 			#endif
 
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-			#if __cplusplus > 201703L
-				#if CLANG_VERSION >= 120
-					#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-				#endif
-				#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-			#endif
+			#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 		#elif defined(__ANDROID__)
 			#if CLANG_VERSION >= 60
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -99,15 +101,19 @@
 				#error "Unsupported compiler version. Please install clang++ 6.0 (NDK 17) or up."
 			#endif
 
+			#if __cplusplus < 201703L
+				#error "-std=c++17 must be turned on."
+			#endif
+
 			#if CLANG_VERSION >= 110
 				#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
 				#if __cplusplus > 201703L
 					#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
 					#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+					#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 					#if CLANG_VERSION >= 120
 						#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
 					#endif
-					#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 				#endif
 			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
@@ -117,17 +123,19 @@
 				#error "Unsupported compiler version. Please install clang++ 10.0 or up."
 			#endif
 
+			#if __cplusplus < 202002L
+				#error "-std=c++20 must be turned on."
+			#endif
+
 			#define KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
-			#if __cplusplus > 201703L
-				#if CLANG_VERSION >= 140
-					#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-				#endif
-				#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-				#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-				#if CLANG_VERSION >= 120
-					#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-				#endif
-				#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
+			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
+			#if CLANG_VERSION >= 120
+				#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
+			#endif
+			#if CLANG_VERSION >= 140
+				#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
 			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
