@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/StringUtil.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -39,6 +38,7 @@
 #include <KlayGE/RenderEffect.hpp>
 
 #include <iostream>
+#include <filesystem>
 
 #include <nonstd/scope.hpp>
 
@@ -118,16 +118,16 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
+				std::filesystem::path arg_path(arg);
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 
 				std::regex const filter(DosWildcardToRegex(file_name.string()));
 
-				FILESYSTEM_NS::directory_iterator end_itr;
-				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
+				std::filesystem::directory_iterator end_itr;
+				for (std::filesystem::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (FILESYSTEM_NS::is_regular_file(i->status()))
+					if (std::filesystem::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();
@@ -183,15 +183,15 @@ int main(int argc, char* argv[])
 
 	for (auto const& fxml_name : input_names)
 	{
-		FILESYSTEM_NS::path const fxml_path(fxml_name);
+		std::filesystem::path const fxml_path(fxml_name);
 		std::string const base_name = fxml_path.stem().string();
-		FILESYSTEM_NS::path const fxml_directory = fxml_path.parent_path();
+		std::filesystem::path const fxml_directory = fxml_path.parent_path();
 		ResLoader::Instance().AddPath(fxml_directory.string());
 
-		FILESYSTEM_NS::path const kfx_name = fxml_path.filename().replace_extension("kfx");
-		FILESYSTEM_NS::path kfx_path = fxml_directory / kfx_name;
+		std::filesystem::path const kfx_name = fxml_path.filename().replace_extension("kfx");
+		std::filesystem::path kfx_path = fxml_directory / kfx_name;
 		bool skip_jit = false;
-		if (FILESYSTEM_NS::exists(fxml_path) && FILESYSTEM_NS::exists(kfx_path))
+		if (std::filesystem::exists(fxml_path) && std::filesystem::exists(kfx_path))
 		{
 			ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 			ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
@@ -257,11 +257,11 @@ int main(int argc, char* argv[])
 		}
 		if (!dest_folder.empty())
 		{
-			FILESYSTEM_NS::copy_file(kfx_path, dest_folder / kfx_name, FILESYSTEM_NS::copy_options::overwrite_existing);
+			std::filesystem::copy_file(kfx_path, dest_folder / kfx_name, std::filesystem::copy_options::overwrite_existing);
 			kfx_path = dest_folder / kfx_name;
 		}
 
-		if (FILESYSTEM_NS::exists(kfx_path))
+		if (std::filesystem::exists(kfx_path))
 		{
 			cout << "Compiled kfx has been saved to " << kfx_path << "." << endl;
 		}

@@ -30,7 +30,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/CXX20/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
@@ -44,6 +43,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <filesystem>
 #include <map>
 #include <vector>
 
@@ -1169,7 +1169,7 @@ namespace
 
 	void MeshSaver::Save(RenderModel const & model, std::string_view output_name)
 	{
-		FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
+		std::filesystem::path output_path(output_name);
 
 		auto const output_ext = output_path.extension().string();
 		if (output_ext == ".model_bin")
@@ -1184,7 +1184,7 @@ namespace
 
 	void MeshSaver::SaveByAssimp(RenderModel const & model, std::string_view output_name)
 	{
-		FILESYSTEM_NS::path const output_path(output_name.begin(), output_name.end());
+		std::filesystem::path const output_path(output_name);
 		auto const output_ext = output_path.extension();
 
 		bool const is_gltf = (output_ext == ".gltf") || (output_ext == ".glb");
@@ -3401,7 +3401,7 @@ namespace
 			return RenderModelPtr();
 		}
 
-		FILESYSTEM_NS::path input_path(input_name_str);
+		std::filesystem::path input_path(input_name_str);
 		auto const in_folder = input_path.parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)
@@ -3853,7 +3853,7 @@ namespace
 			return false;
 		}
 
-		FILESYSTEM_NS::path input_path(input_name_str);
+		std::filesystem::path input_path(input_name_str);
 		auto input_ext = input_path.extension().string();
 		StringUtil::ToLower(input_ext);
 		if ((input_ext == ".model_bin") || (input_ext == ".meshml"))

@@ -39,8 +39,8 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KFL/Hash.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -142,7 +142,7 @@ namespace
 			}
 			else
 			{
-				FILESYSTEM_NS::path res_path(mtl_desc_.res_name);
+				std::filesystem::path res_path(mtl_desc_.res_name);
 				mtl_desc_.mtl_data->name = res_path.stem().string();
 			}
 

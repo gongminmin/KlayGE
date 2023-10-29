@@ -33,7 +33,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/DevHelper/MeshConverter.hpp>
 #include <KlayGE/DevHelper/MeshMetadata.hpp>

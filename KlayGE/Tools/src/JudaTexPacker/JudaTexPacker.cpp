@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 
-#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Context.hpp>
@@ -12,6 +11,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <vector>
 #include <list>
 #include <map>
@@ -94,7 +94,7 @@ void PackJTML(std::string const & jtml_name)
 {
 	Timer timer;
 
-	FILESYSTEM_NS::path jtml_path = ResLoader::Instance().Locate(jtml_name);
+	std::filesystem::path jtml_path = ResLoader::Instance().Locate(jtml_name);
 	std::string const jtml_folder = jtml_path.parent_path().string() + '/';
 	ResLoader::Instance().AddPath(jtml_folder);
 

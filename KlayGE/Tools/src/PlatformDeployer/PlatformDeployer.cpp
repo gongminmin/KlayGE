@@ -36,9 +36,9 @@
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 #include <regex>
@@ -193,10 +193,10 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 			auto output_tex = tc.Load(metadata);
 			if (output_tex)
 			{
-				FILESYSTEM_NS::path res_path(res_names[i]);
+				std::filesystem::path res_path(res_names[i]);
 				if (!dest_folder.empty())
 				{
-					res_path = FILESYSTEM_NS::path(dest_folder.begin(), dest_folder.end()) / res_path.filename();
+					res_path = std::filesystem::path(dest_folder) / res_path.filename();
 				}
 				SaveTexture(output_tex, res_path.string() + ".dds");
 			}
@@ -215,10 +215,10 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 			auto output_model = mc.Load(metadata);
 			if (output_model)
 			{
-				FILESYSTEM_NS::path res_path(res_names[i]);
+				std::filesystem::path res_path(res_names[i]);
 				if (!dest_folder.empty())
 				{
-					res_path = FILESYSTEM_NS::path(dest_folder.begin(), dest_folder.end()) / res_path.filename();
+					res_path = std::filesystem::path(dest_folder) / res_path.filename();
 				}
 				SaveModel(*output_model, res_path.string() + ".model_bin");
 			}
@@ -349,16 +349,16 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				FILESYSTEM_NS::path arg_path(arg.begin(), arg.end());
+				std::filesystem::path arg_path(arg);
 				auto const parent = arg_path.parent_path();
 				auto const file_name = arg_path.filename();
 
 				std::regex const filter(DosWildcardToRegex(file_name.string()));
 
-				FILESYSTEM_NS::directory_iterator end_itr;
-				for (FILESYSTEM_NS::directory_iterator i(parent); i != end_itr; ++i)
+				std::filesystem::directory_iterator end_itr;
+				for (std::filesystem::directory_iterator i(parent); i != end_itr; ++i)
 				{
-					if (FILESYSTEM_NS::is_regular_file(i->status()))
+					if (std::filesystem::is_regular_file(i->status()))
 					{
 						std::smatch what;
 						std::string const name = i->path().filename().string();
@@ -390,14 +390,14 @@ int main(int argc, char* argv[])
 			cout << "Could NOT find " << res_name << '.';
 
 			std::string const possible_dds_name = ResLoader::Instance().Locate(res_name + ".dds");
-			if (FILESYSTEM_NS::exists(possible_dds_name))
+			if (std::filesystem::exists(possible_dds_name))
 			{
 				possible_asset_name = possible_dds_name;
 			}
 			else
 			{
 				std::string const possible_model_bin_name = ResLoader::Instance().Locate(res_name + ".model_bin");
-				if (FILESYSTEM_NS::exists(possible_model_bin_name))
+				if (std::filesystem::exists(possible_model_bin_name))
 				{
 					possible_asset_name = possible_model_bin_name;
 				}
@@ -422,10 +422,10 @@ int main(int argc, char* argv[])
 		{
 			iter = res_names.erase(iter);
 
-			FILESYSTEM_NS::path res_path(possible_asset_name);
+			std::filesystem::path res_path(possible_asset_name);
 			if (dest_folder != res_path.parent_path())
 			{
-				FILESYSTEM_NS::copy_file(res_path, dest_folder / res_path.filename(), FILESYSTEM_NS::copy_options::overwrite_existing);
+				std::filesystem::copy_file(res_path, dest_folder / res_path.filename(), std::filesystem::copy_options::overwrite_existing);
 			}
 		}
 	}

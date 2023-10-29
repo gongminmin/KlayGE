@@ -29,9 +29,9 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/ResLoader.hpp>
 
+#include <filesystem>
 #include <regex>
 #include <string>
 
@@ -74,11 +74,11 @@ namespace KlayGE
 			MeshConverter mc;
 			auto model = mc.Load(metadata);
 
-			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
-			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
+			std::filesystem::path input_path(input_name);
+			std::filesystem::path output_path(output_name);
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
 			}
 
 			mc.Save(*model, output_path.string());
@@ -100,11 +100,11 @@ namespace KlayGE
 			TexConverter tc;
 			auto texture = tc.Load(metadata);
 
-			FILESYSTEM_NS::path input_path(input_name.begin(), input_name.end());
-			FILESYSTEM_NS::path output_path(output_name.begin(), output_name.end());
+			std::filesystem::path input_path(input_name);
+			std::filesystem::path output_path(output_name);
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = FILESYSTEM_NS::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
 			}
 
 			SaveTexture(texture, output_path.string());

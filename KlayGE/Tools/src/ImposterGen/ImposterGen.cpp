@@ -39,12 +39,12 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 
 #include <vector>
 #include <sstream>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 	app.Create();
 
 	std::string input_name;
-	FILESYSTEM_NS::path target_folder;
+	std::filesystem::path target_folder;
 	uint32_t azimuth;
 	uint32_t elevation;
 	uint32_t size;
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 	std::string model_name = ResLoader::Instance().Locate(input_name);
 
 	std::string file_name;
-	FILESYSTEM_NS::path model_path(model_name);
+	std::filesystem::path model_path(model_name);
 	if (target_folder.empty())
 	{
 		target_folder = model_path.parent_path();

@@ -9,9 +9,9 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderMaterial.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		FILESYSTEM_NS::path output_path(argv[1]);
+		std::filesystem::path output_path(argv[1]);
 		output = output_path.stem().string() + "_filtered.dds";
 	}
 

@@ -5,9 +5,9 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 #include <cstring>
@@ -463,8 +463,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	FILESYSTEM_NS::path output_path(argv[1]);
-	FILESYSTEM_NS::path dest_folder;
+	std::filesystem::path output_path(argv[1]);
+	std::filesystem::path dest_folder;
 	if (argc >= 5)
 	{
 		dest_folder = argv[4];

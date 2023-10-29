@@ -29,7 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KFL/Math.hpp>
@@ -41,6 +40,7 @@
 #include <kfont/kfont.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -518,8 +518,8 @@ int main(int argc, char* argv[])
 	header.non_empty_chars = 0;
 	header.char_size = 32;
 
-	FILESYSTEM_NS::path ttf_name;
-	FILESYSTEM_NS::path kfont_name;
+	std::filesystem::path ttf_name;
+	std::filesystem::path kfont_name;
 	int start_code;
 	int end_code;
 	int num_threads;

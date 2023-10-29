@@ -60,9 +60,9 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/Hash.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -4442,13 +4442,13 @@ namespace KlayGE
 			immutable_ = MakeSharedPtr<Immutable>();
 		}
 
-		FILESYSTEM_NS::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
-		FILESYSTEM_NS::path first_fxml_directory = first_fxml_path.parent_path();
+		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
+		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
 		for (size_t i = 0; i < names.size(); ++i)
 		{
-			connected_name += FILESYSTEM_NS::path(names[i]).stem().string();
+			connected_name += std::filesystem::path(names[i]).stem().string();
 			if (i != names.size() - 1)
 			{
 				connected_name += '+';

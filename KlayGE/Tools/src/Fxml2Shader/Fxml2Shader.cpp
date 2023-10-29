@@ -6,9 +6,9 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 
 	fxml_name = ResLoader::Instance().Locate(fxml_name);
 	std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
-	FILESYSTEM_NS::remove(kfx_name);
+	std::filesystem::remove(kfx_name);
 
 	RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
 

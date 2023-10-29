@@ -29,12 +29,12 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/CXX17/filesystem.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
 
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <vector>
 
 #include <FreeImage.h>
@@ -78,7 +78,7 @@ namespace
 
 		metadata_ = metadata;
 
-		auto in_folder = FILESYSTEM_NS::path(ResLoader::Instance().Locate(metadata_.PlaneFileName(0, 0))).parent_path().string();
+		auto in_folder = std::filesystem::path(ResLoader::Instance().Locate(metadata_.PlaneFileName(0, 0))).parent_path().string();
 		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
 		if (!in_path)
 		{
@@ -192,7 +192,7 @@ namespace
 			return false;
 		}
 
-		std::string const ext_name = FILESYSTEM_NS::path(input_name_str).extension().string();
+		std::string const ext_name = std::filesystem::path(input_name_str).extension().string();
 		if (ext_name == ".dds")
 		{
 			return true;
