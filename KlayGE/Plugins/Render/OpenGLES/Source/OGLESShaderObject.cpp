@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX20/format.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -413,12 +414,12 @@ namespace KlayGE
 	void OGLESShaderStageObject::CompileShader(RenderEffect const& effect, RenderTechnique const& tech, RenderPass const& pass,
 		std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 
 		shader_func_name_ = sd.func_name;
 
 		bool has_ps = false;
-		if (!effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(ShaderStage::Pixel)]).func_name.empty())
+		if (!effect.GetShaderDesc(shader_desc_ids[std::to_underlying(ShaderStage::Pixel)]).func_name.empty())
 		{
 			has_ps = true;
 		}

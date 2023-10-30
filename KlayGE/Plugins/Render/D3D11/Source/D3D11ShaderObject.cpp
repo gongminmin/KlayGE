@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -582,7 +583,7 @@ namespace KlayGE
 
 		UINT rasterized_stream = 0;
 		if ((caps.max_shader_model >= ShaderModel(5, 0)) &&
-			(effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(ShaderStage::Pixel)]).func_name.empty()))
+			(effect.GetShaderDesc(shader_desc_ids[std::to_underlying(ShaderStage::Pixel)]).func_name.empty()))
 		{
 			rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
 		}

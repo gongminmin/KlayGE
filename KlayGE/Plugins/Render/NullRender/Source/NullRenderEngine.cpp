@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 
@@ -99,21 +100,21 @@ namespace KlayGE
 
 			if (native_shader_platform_name_.find("d3d_12") == 0)
 			{
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Vertex)] = "vs_5_1";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Pixel)] = "ps_5_1";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Geometry)] = "gs_5_1";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Compute)] = "cs_5_1";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Hull)] = "hs_5_1";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Domain)] = "ds_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Vertex)] = "vs_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Pixel)] = "ps_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Geometry)] = "gs_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Compute)] = "cs_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Hull)] = "hs_5_1";
+				shader_profiles_[std::to_underlying(ShaderStage::Domain)] = "ds_5_1";
 			}
 			else
 			{
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Vertex)] = "vs_5_0";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Pixel)] = "ps_5_0";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Geometry)] = "gs_5_0";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Compute)] = "cs_5_0";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Hull)] = "hs_5_0";
-				shader_profiles_[static_cast<uint32_t>(ShaderStage::Domain)] = "ds_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Vertex)] = "vs_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Pixel)] = "ps_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Geometry)] = "gs_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Compute)] = "cs_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Hull)] = "hs_5_0";
+				shader_profiles_[std::to_underlying(ShaderStage::Domain)] = "ds_5_0";
 			}
 		}
 		else if (CT_HASH("MAJOR_VERSION") == name_hash)

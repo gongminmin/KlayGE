@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
 #include <array>
@@ -92,7 +93,7 @@ namespace KlayGE
 		}
 	};
 
-	enum class ShaderStage
+	enum class ShaderStage : uint32_t
 	{
 		Vertex,
 		Pixel,
@@ -103,7 +104,7 @@ namespace KlayGE
 
 		NumStages,
 	};
-	uint32_t constexpr NumShaderStages = static_cast<uint32_t>(ShaderStage::NumStages);
+	uint32_t constexpr NumShaderStages = std::to_underlying(ShaderStage::NumStages);
 
 	class KLAYGE_CORE_API ShaderStageObject : boost::noncopyable
 	{

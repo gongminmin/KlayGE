@@ -1,6 +1,7 @@
 #ifndef KLAYGE_SAMPLES_DETAILED_SURFACE_DR_HPP
 #define KLAYGE_SAMPLES_DETAILED_SURFACE_DR_HPP
 
+#include <KFL/CXX23/utility.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Font.hpp>
@@ -52,7 +53,7 @@ private:
 	KlayGE::UIDialogPtr dialog_;
 	float height_scale_;
 	bool use_occlusion_map_ = false;
-	uint32_t material_index_ = static_cast<uint32_t>(DetailTypes::ParallaxOcclusion);
+	uint32_t material_index_ = std::to_underlying(DetailTypes::ParallaxOcclusion);
 
 	int id_scale_static_;
 	int id_scale_slider_;
@@ -62,7 +63,7 @@ private:
 	int id_na_length_;
 	int id_wireframe_;
 
-	KlayGE::RenderMaterialPtr mtls_[2][static_cast<uint32_t>(DetailTypes::Count)];
+	KlayGE::RenderMaterialPtr mtls_[2][std::to_underlying(DetailTypes::Count)];
 };
 
 #endif // KLAYGE_SAMPLES_DETAILED_SURFACE_DR_HPP

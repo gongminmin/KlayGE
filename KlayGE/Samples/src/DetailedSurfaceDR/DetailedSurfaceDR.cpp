@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Camera.hpp>
@@ -70,13 +71,13 @@ void DetailedSurfaceApp::OnCreate()
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
 
-	mtls_[0][static_cast<uint32_t>(DetailTypes::None)] = ASyncLoadRenderMaterial("None.mtlml");
-	mtls_[0][static_cast<uint32_t>(DetailTypes::Bump)] = ASyncLoadRenderMaterial("Bump.mtlml");
-	mtls_[0][static_cast<uint32_t>(DetailTypes::Parallax)] = ASyncLoadRenderMaterial("Parallax.mtlml");
-	mtls_[0][static_cast<uint32_t>(DetailTypes::ParallaxOcclusion)] = ASyncLoadRenderMaterial("ParallaxOcclusion.mtlml");
-	mtls_[0][static_cast<uint32_t>(DetailTypes::FlatTessellation)] = ASyncLoadRenderMaterial("FlatTessellation.mtlml");
-	mtls_[0][static_cast<uint32_t>(DetailTypes::SmoothTessellation)] = ASyncLoadRenderMaterial("SmoothTessellation.mtlml");
-	for (uint32_t i = 0; i < static_cast<uint32_t>(DetailTypes::Count); ++i)
+	mtls_[0][std::to_underlying(DetailTypes::None)] = ASyncLoadRenderMaterial("None.mtlml");
+	mtls_[0][std::to_underlying(DetailTypes::Bump)] = ASyncLoadRenderMaterial("Bump.mtlml");
+	mtls_[0][std::to_underlying(DetailTypes::Parallax)] = ASyncLoadRenderMaterial("Parallax.mtlml");
+	mtls_[0][std::to_underlying(DetailTypes::ParallaxOcclusion)] = ASyncLoadRenderMaterial("ParallaxOcclusion.mtlml");
+	mtls_[0][std::to_underlying(DetailTypes::FlatTessellation)] = ASyncLoadRenderMaterial("FlatTessellation.mtlml");
+	mtls_[0][std::to_underlying(DetailTypes::SmoothTessellation)] = ASyncLoadRenderMaterial("SmoothTessellation.mtlml");
+	for (uint32_t i = 0; i < std::to_underlying(DetailTypes::Count); ++i)
 	{
 		mtls_[1][i] = mtls_[0][i]->Clone();
 		mtls_[1][i]->TextureName(RenderMaterial::TS_Occlusion, "occlusion.dds");

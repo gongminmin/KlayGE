@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/SmartPtrHelper.hpp>
@@ -310,12 +311,12 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Vertex)] = "vs_5_0";
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Pixel)] = "ps_5_0";
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Geometry)] = "gs_5_0";
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Compute)] = "cs_5_0";
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Hull)] = "hs_5_0";
-			shader_profiles_[static_cast<uint32_t>(ShaderStage::Domain)] = "ds_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Vertex)] = "vs_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Pixel)] = "ps_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Geometry)] = "gs_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Compute)] = "cs_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Hull)] = "hs_5_0";
+			shader_profiles_[std::to_underlying(ShaderStage::Domain)] = "ds_5_0";
 			break;
 
 		default:

@@ -621,7 +621,7 @@ namespace KlayGE
 	{
 		auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		auto const& caps = re.DeviceCaps();
-		auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		auto const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 		if (caps.gs_support && !sd.so_decl.empty())
 		{
 			so_decl_.resize(sd.so_decl.size());
@@ -631,7 +631,7 @@ namespace KlayGE
 			}
 
 			rasterized_stream_ = 0;
-			if (effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(ShaderStage::Pixel)]).func_name.empty())
+			if (effect.GetShaderDesc(shader_desc_ids[std::to_underlying(ShaderStage::Pixel)]).func_name.empty())
 			{
 				rasterized_stream_ = D3D12_SO_NO_RASTERIZED_STREAM;
 			}
@@ -678,7 +678,7 @@ namespace KlayGE
 	{
 		if (is_available_)
 		{
-			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 			so_decl_.resize(sd.so_decl.size());
 			for (size_t i = 0; i < sd.so_decl.size(); ++i)
 			{
@@ -686,7 +686,7 @@ namespace KlayGE
 			}
 
 			rasterized_stream_ = 0;
-			if (effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(ShaderStage::Pixel)]).func_name.empty())
+			if (effect.GetShaderDesc(shader_desc_ids[std::to_underlying(ShaderStage::Pixel)]).func_name.empty())
 			{
 				rasterized_stream_ = D3D12_SO_NO_RASTERIZED_STREAM;
 			}
@@ -808,7 +808,7 @@ namespace KlayGE
 	{
 		if (is_available_)
 		{
-			auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			auto const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 			if (!sd.so_decl.empty())
 			{
 				auto const& re = checked_cast<D3D12RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -822,7 +822,7 @@ namespace KlayGE
 					}
 
 					rasterized_stream_ = 0;
-					if (effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(ShaderStage::Pixel)]).func_name.empty())
+					if (effect.GetShaderDesc(shader_desc_ids[std::to_underlying(ShaderStage::Pixel)]).func_name.empty())
 					{
 						rasterized_stream_ = D3D12_SO_NO_RASTERIZED_STREAM;
 					}

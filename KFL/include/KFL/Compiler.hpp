@@ -47,6 +47,7 @@
 // KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 
 // Macros for C++23 library features:
+// KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
 // KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 
 // Detects supported compilers
@@ -79,6 +80,9 @@
 		#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 		#if __cplusplus > 202002L
+			#if CLANG_VERSION >= 130
+				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+			#endif
 			#if CLANG_VERSION >= 150
 				#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 			#endif
@@ -104,6 +108,12 @@
 			#else
 				#error "Unsupported compiler version. Please install clang++ 12.0 (NDK 23c) or up."
 			#endif
+
+			#if __cplusplus > 202002L
+				#if CLANG_VERSION >= 130
+					#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+				#endif
+			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
 			#if CLANG_VERSION >= 140
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -115,6 +125,7 @@
 				#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 			#endif
 			#if __cplusplus > 202002L
+				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
 				#if CLANG_VERSION >= 150
 					#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 				#endif
@@ -156,6 +167,7 @@
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 	#endif
 	#if __cplusplus > 202002L
+		#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
 		#if GCC_VERSION >= 120
 			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 		#endif
@@ -201,6 +213,9 @@
 		#endif
 	#endif
 	#if _MSVC_LANG > 202002L
+		#if _MSC_VER >= 1930
+			#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+		#endif
 		#if _MSC_VER >= 1932
 			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 		#endif
