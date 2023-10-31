@@ -169,15 +169,13 @@ namespace KlayGE
 	{
 	}
 
-	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
+	void D3D12ShaderStageObject::UpdatePsoDesc([[maybe_unused]] D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
-		KFL_UNUSED(pso_desc);
 		KFL_UNREACHABLE("Couldn't update graphics pipeline state for this shader stage.");
 	}
 
-	void D3D12ShaderStageObject::UpdatePsoDesc(D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept
+	void D3D12ShaderStageObject::UpdatePsoDesc([[maybe_unused]] D3D12_COMPUTE_PIPELINE_STATE_DESC& pso_desc) const noexcept
 	{
-		KFL_UNUSED(pso_desc);
 		KFL_UNREACHABLE("Couldn't update compute pipeline state for this shader stage.");
 	}
 
@@ -712,11 +710,8 @@ namespace KlayGE
 	}
 
 	void D3D12ComputeShaderStageObject::StageSpecificCreateHwShader(
-		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		if (!is_available_)
 		{
 			is_validate_ = false;
@@ -769,11 +764,8 @@ namespace KlayGE
 	}
 
 	void D3D12HullShaderStageObject::StageSpecificCreateHwShader(
-		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		if (!is_available_)
 		{
 			is_validate_ = false;

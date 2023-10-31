@@ -135,9 +135,8 @@ namespace
 			return true;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const override
+		bool Match([[maybe_unused]] ResLoadingDesc const & rhs) const override
 		{
-			KFL_UNUSED(rhs);
 			return false;
 		}
 
@@ -2485,12 +2484,9 @@ namespace KlayGE
 			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
 		}
 
-		camera_model->RootNode()->OnMainThreadUpdate().Connect([&camera](SceneNode& node, float app_time, float elapsed_time) {
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
-			node.TransformToParent(camera->InverseViewMatrix());
-		});
+		camera_model->RootNode()->OnMainThreadUpdate().Connect(
+			[&camera](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+			{ node.TransformToParent(camera->InverseViewMatrix()); });
 
 		return camera_model;
 	}

@@ -359,11 +359,8 @@ namespace
 				}
 			}
 
-			this->OnMainThreadUpdate().Connect([this](SceneComponent& component, float app_time, float elapsed_time)
+			this->OnMainThreadUpdate().Connect([this]([[maybe_unused]] SceneComponent& component, float app_time, [[maybe_unused]] float elapsed_time)
 				{
-					KFL_UNUSED(component);
-					KFL_UNUSED(elapsed_time);
-
 					if (dirty_)
 					{
 						this->GenWaveTextures();

@@ -28,11 +28,7 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_COMPILER_HPP
-#define KFL_COMPILER_HPP
-
-// KlayGE requires vc 14.2+, g++ 11.0+, clang 9.0+, with C++17 option on.
-// All C++17 core feature used in KlayGE should be available in all supported compilers.
+#pragma once
 
 // Macros for C++17 library features:
 // KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
@@ -227,5 +223,3 @@
 #else
 	#error "Unknown compiler. Please install vc, g++, or clang."
 #endif
-
-#endif		// KFL_COMPILER_HPP

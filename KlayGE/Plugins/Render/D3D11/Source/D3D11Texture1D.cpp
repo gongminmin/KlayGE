@@ -228,10 +228,8 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
-	void D3D11Texture1D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void D3D11Texture1D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		D3D11_TEXTURE1D_DESC desc;
 		desc.Width = width_;
 		desc.MipLevels = num_mip_maps_;

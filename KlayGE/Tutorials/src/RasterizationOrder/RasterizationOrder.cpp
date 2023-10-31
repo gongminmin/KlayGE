@@ -278,10 +278,8 @@ void RasterizationOrderApp::ColorMapHandler(UICheckBox const & sender)
 	checked_pointer_cast<RenderQuad>(render_quad_)->ColorMapOn(sender.GetChecked());
 }
 
-void RasterizationOrderApp::CaptureHandler(KlayGE::UIButton const & sender)
+void RasterizationOrderApp::CaptureHandler([[maybe_unused]] KlayGE::UIButton const & sender)
 {
-	KFL_UNUSED(sender);
-
 	CaptureFrame();
 }
 

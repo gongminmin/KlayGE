@@ -448,9 +448,8 @@ namespace KlayGE
 		void OnRenderBegin() override;
 
 	protected:
-		void DoBuildMeshInfo(RenderModel const & model) override
+		void DoBuildMeshInfo([[maybe_unused]] RenderModel const & model) override
 		{
-			KFL_UNUSED(model);
 		}
 
 	private:
@@ -471,9 +470,8 @@ namespace KlayGE
 		void AttachCamera(CameraPtr const & camera);
 
 	protected:
-		void DoBuildMeshInfo(RenderModel const & model) override
+		void DoBuildMeshInfo([[maybe_unused]] RenderModel const & model) override
 		{
-			KFL_UNUSED(model);
 		}
 
 	private:

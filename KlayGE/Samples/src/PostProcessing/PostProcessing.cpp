@@ -40,11 +40,8 @@ namespace
 	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
 			float4x4 const inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
 			node.TransformToParent(MathLib::translation(MathLib::transform_coord(float3(2, 2, -3), inv_view)));
 		}
@@ -91,9 +88,8 @@ void PostProcessingApp::OnCreate()
 		SceneNode::SOA_Cullable | SceneNode::SOA_Moveable,
 		[](RenderModel& model)
 		{
-			model.RootNode()->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time)
+			model.RootNode()->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 				{
-					KFL_UNUSED(elapsed_time);
 					node.TransformToParent(MathLib::rotation_y(-app_time / 1.5f));
 				});
 

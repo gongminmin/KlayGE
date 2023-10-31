@@ -42,136 +42,113 @@ namespace KlayGE
 	{
 	}
 
-	ScriptVariablePtr NullScriptModule::Value(std::string const & name)
+	ScriptVariablePtr NullScriptModule::Value([[maybe_unused]] std::string const & name)
 	{
-		KFL_UNUSED(name);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::Call(std::string const & func_name, std::span<ScriptVariablePtr const> args)
+	ScriptVariablePtr NullScriptModule::Call([[maybe_unused]] std::string const & func_name, [[maybe_unused]] std::span<ScriptVariablePtr const> args)
 	{
-		KFL_UNUSED(func_name);
-		KFL_UNUSED(args);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::RunString(std::string const & script)
+	ScriptVariablePtr NullScriptModule::RunString([[maybe_unused]] std::string const & script)
 	{
-		KFL_UNUSED(script);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(std::string const& value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] std::string const& value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(std::string_view value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] std::string_view value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(char const* value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] char const* value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(char* value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] char* value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(std::wstring const& value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] std::wstring const& value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(std::wstring_view value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] std::wstring_view value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(wchar_t const* value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] wchar_t const* value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(wchar_t* value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] wchar_t* value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(int8_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] int8_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(int16_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] int16_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(int32_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] int32_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(int64_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] int64_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(uint8_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] uint8_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(uint16_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] uint16_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(uint32_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] uint32_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(uint64_t value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] uint64_t value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(float value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] float value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(double value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] double value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
-	ScriptVariablePtr NullScriptModule::MakeVariable(std::span<ScriptVariablePtr const> value) const
+	ScriptVariablePtr NullScriptModule::MakeVariable([[maybe_unused]] std::span<ScriptVariablePtr const> value) const
 	{
-		KFL_UNUSED(value);
 		return ScriptVariablePtr();
 	}
 
@@ -184,9 +161,8 @@ namespace KlayGE
 	{
 	}
 
-	ScriptModulePtr NullScriptEngine::CreateModule(std::string const & name)
+	ScriptModulePtr NullScriptEngine::CreateModule([[maybe_unused]] std::string const & name)
 	{
-		KFL_UNUSED(name);
 		return MakeSharedPtr<NullScriptModule>();
 	}
 

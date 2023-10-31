@@ -219,9 +219,8 @@ namespace KlayGE
 		app_->MetroCreate();
 	}
 
-	void MetroFramework::Load(uwp::hstring const& entry_point)
+	void MetroFramework::Load([[maybe_unused]] uwp::hstring const& entry_point)
 	{
-		KFL_UNUSED(entry_point);
 	}
 
 	void MetroFramework::Run()
@@ -251,11 +250,9 @@ namespace KlayGE
 		app_activated_token_.revoke();
 	}
 
-	HRESULT MetroFramework::OnActivated(uwp::CoreApplicationView const& application_view, uwp::IActivatedEventArgs const& args)
+	HRESULT MetroFramework::OnActivated(
+		[[maybe_unused]] uwp::CoreApplicationView const& application_view, [[maybe_unused]] uwp::IActivatedEventArgs const& args)
 	{
-		KFL_UNUSED(application_view);
-		KFL_UNUSED(args);
-
 		auto core_win = uwp::CoreWindow::GetForCurrentThread();
 		core_win.Activate();
 
@@ -265,10 +262,8 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnSuspending(uwp::IInspectable const& sender, uwp::SuspendingEventArgs const& args)
+	HRESULT MetroFramework::OnSuspending([[maybe_unused]] uwp::IInspectable const& sender, uwp::SuspendingEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto deferral = args.SuspendingOperation().GetDeferral();
 		suspend_result_ = std::async(std::launch::async, [this, deferral]() {
 			app_->Suspend();
@@ -279,123 +274,98 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnResuming(uwp::IInspectable const& sender, uwp::IInspectable const& args)
+	HRESULT MetroFramework::OnResuming([[maybe_unused]] uwp::IInspectable const& sender, [[maybe_unused]] uwp::IInspectable const& args)
 	{
-		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
-
 		app_->Resume();
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnWindowSizeChanged(uwp::CoreWindow const& sender, uwp::WindowSizeChangedEventArgs const& args)
+	HRESULT MetroFramework::OnWindowSizeChanged([[maybe_unused]] uwp::CoreWindow const& sender, uwp::WindowSizeChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnSizeChanged(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnVisibilityChanged(uwp::CoreWindow const& sender, uwp::VisibilityChangedEventArgs const& args)
+	HRESULT MetroFramework::OnVisibilityChanged([[maybe_unused]] uwp::CoreWindow const& sender, uwp::VisibilityChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnVisibilityChanged(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnWindowClosed(uwp::CoreWindow const& sender, uwp::CoreWindowEventArgs const& args)
+	HRESULT MetroFramework::OnWindowClosed(
+		[[maybe_unused]] uwp::CoreWindow const& sender, [[maybe_unused]] uwp::CoreWindowEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnClosed();
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnKeyDown(uwp::CoreWindow const& sender, uwp::KeyEventArgs const& args)
+	HRESULT MetroFramework::OnKeyDown([[maybe_unused]] uwp::CoreWindow const& sender, uwp::KeyEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnKeyDown(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnKeyUp(uwp::CoreWindow const& sender, uwp::KeyEventArgs const& args)
+	HRESULT MetroFramework::OnKeyUp([[maybe_unused]] uwp::CoreWindow const& sender, uwp::KeyEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnKeyUp(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnPointerPressed(uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
+	HRESULT MetroFramework::OnPointerPressed([[maybe_unused]] uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnPointerPressed(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnPointerReleased(uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
+	HRESULT MetroFramework::OnPointerReleased([[maybe_unused]] uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnPointerReleased(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnPointerMoved(uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
+	HRESULT MetroFramework::OnPointerMoved([[maybe_unused]] uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnPointerMoved(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnPointerWheelChanged(uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
+	HRESULT MetroFramework::OnPointerWheelChanged([[maybe_unused]] uwp::CoreWindow const& sender, uwp::PointerEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnPointerWheelChanged(args);
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnDpiChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args)
+	HRESULT MetroFramework::OnDpiChanged(
+		[[maybe_unused]] uwp::DisplayInformation const& sender, [[maybe_unused]] uwp::IInspectable const& args)
 	{
-		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnDpiChanged();
 
 		return S_OK;
 	}
 
-	HRESULT MetroFramework::OnOrientationChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args)
+	HRESULT MetroFramework::OnOrientationChanged(
+		[[maybe_unused]] uwp::DisplayInformation const& sender, [[maybe_unused]] uwp::IInspectable const& args)
 	{
-		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
-
 		WindowPtr const & win = app_->MainWnd();
 		win->OnOrientationChanged();
 

@@ -97,10 +97,8 @@ namespace KlayGE
 		std::memcpy(subres_data_ + offset, data, size);
 	}
 
-	void* SoftwareGraphicsBuffer::Map(BufferAccess ba)
+	void* SoftwareGraphicsBuffer::Map([[maybe_unused]] BufferAccess ba)
 	{
-		KFL_UNUSED(ba);
-
 		void* ret;
 		bool already_mapped = false;
 		if (mapped_.compare_exchange_strong(already_mapped, true))

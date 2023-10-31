@@ -87,10 +87,8 @@ namespace KlayGE
 		return num_vibration_motors_;
 	}
 
-	void InputJoystick::VibrationMotorSpeed(uint32_t n, float motor_speed)
+	void InputJoystick::VibrationMotorSpeed([[maybe_unused]] uint32_t n, [[maybe_unused]] float motor_speed)
 	{
-		KFL_UNUSED(n);
-		KFL_UNUSED(motor_speed);
 	}
 
 	// 实现动作映射

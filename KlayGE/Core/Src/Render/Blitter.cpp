@@ -159,12 +159,11 @@ namespace KlayGE
 			src_array_index * 6 + src_face, src_level, src_x_offset, src_y_offset, src_width, src_height, filter);
 	}
 
-	void Blitter::Blit(GraphicsBufferPtr const& dst, uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index,
+	void Blitter::Blit(GraphicsBufferPtr const& dst, [[maybe_unused]] uint32_t dst_x_offset, TexturePtr const& src, uint32_t src_array_index,
 		uint32_t src_level, float src_x_offset, float src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
 		// TODO: Relax this limitation
 		BOOST_ASSERT(0 == dst_x_offset);
-		KFL_UNUSED(dst_x_offset);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -216,11 +215,10 @@ namespace KlayGE
 
 	void Blitter::Blit(TexturePtr const & dst, uint32_t dst_array_index, uint32_t dst_level,
 		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
-		GraphicsBufferPtr const & src, uint32_t src_x_offset, ElementFormat src_fmt)
+		GraphicsBufferPtr const & src, [[maybe_unused]] uint32_t src_x_offset, ElementFormat src_fmt)
 	{
 		// TODO: Relax this limitation
 		BOOST_ASSERT(0 == src_x_offset);
-		KFL_UNUSED(src_x_offset);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();

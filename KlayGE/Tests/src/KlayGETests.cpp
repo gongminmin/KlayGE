@@ -23,9 +23,8 @@ namespace KlayGE
 		{
 		}
 
-		virtual uint32_t DoUpdate(uint32_t pass) override
+		virtual uint32_t DoUpdate([[maybe_unused]] uint32_t pass) override
 		{
-			KFL_UNUSED(pass);
 			return URV_Finished;
 		}
 	};
@@ -228,8 +227,7 @@ int main(int argc, char** argv)
 	int ret_val = RUN_ALL_TESTS();
 	if (ret_val != 0)
 	{
-		int ch = getchar();
-		KFL_UNUSED(ch);
+		[[maybe_unused]] int ch = getchar();
 	}
 
 	return ret_val;

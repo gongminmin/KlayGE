@@ -218,12 +218,9 @@ namespace KlayGE
 
 		auto main_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 		main_light_node->AddComponent(main_light_);
-		main_light_node->OnMainThreadUpdate().Connect([](SceneNode& node, float app_time, float elapsed_time) {
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
-			node.TransformToParent(Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix());
-		});
+		main_light_node->OnMainThreadUpdate().Connect(
+			[](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+			{ node.TransformToParent(Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix()); });
 		root_node.AddChild(main_light_node);
 
 		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderAxis>()),
@@ -1108,10 +1105,8 @@ namespace KlayGE
 		}
 	}
 
-	void MtlEditorCore::MouseDown(int x, int y, uint32_t button)
+	void MtlEditorCore::MouseDown(int x, int y, [[maybe_unused]] uint32_t button)
 	{
-		KFL_UNUSED(button);
-
 		mouse_down_in_wnd_ = true;
 		last_mouse_pt_ = int2(x, y);
 	}

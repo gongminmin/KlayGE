@@ -144,16 +144,12 @@ namespace KlayGE
 		d3d_imm_ctx_->DiscardView(d3d_rt_view_.get());
 	}
 
-	void D3D11RenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void D3D11RenderTargetView::OnAttached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
 	}
 
-	void D3D11RenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void D3D11RenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
 	}
 
 
@@ -335,14 +331,12 @@ namespace KlayGE
 		d3d_imm_ctx_->DiscardView(d3d_ds_view_.get());
 	}
 
-	void D3D11DepthStencilView::OnAttached(FrameBuffer& fb)
+	void D3D11DepthStencilView::OnAttached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
 	}
 
-	void D3D11DepthStencilView::OnDetached(FrameBuffer& fb)
+	void D3D11DepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
 	}
 
 
@@ -501,16 +495,12 @@ namespace KlayGE
 		d3d_imm_ctx_->DiscardView(d3d_ua_view_.get());
 	}
 
-	void D3D11UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t index)
+	void D3D11UnorderedAccessView::OnAttached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] uint32_t index)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(index);
 	}
 
-	void D3D11UnorderedAccessView::OnDetached(FrameBuffer& fb, uint32_t index)
+	void D3D11UnorderedAccessView::OnDetached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] uint32_t index)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(index);
 	}
 
 

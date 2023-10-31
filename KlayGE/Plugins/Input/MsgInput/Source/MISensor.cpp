@@ -160,11 +160,8 @@ namespace KlayGE
 			return hr;
 		}
 
-		STDMETHODIMP OnStatusChanged(REFIID report_type, LOCATION_REPORT_STATUS new_status)
+		STDMETHODIMP OnStatusChanged([[maybe_unused]] REFIID report_type, [[maybe_unused]] LOCATION_REPORT_STATUS new_status)
 		{
-			KFL_UNUSED(report_type);
-			KFL_UNUSED(new_status);
-
 			return S_OK;
 		}
 
@@ -227,26 +224,19 @@ namespace KlayGE
 			return count;
 		}
 
-		STDMETHODIMP OnEvent(ISensor* sensor, REFGUID event_id, IPortableDeviceValues* event_data)
+		STDMETHODIMP OnEvent(
+			[[maybe_unused]] ISensor* sensor, [[maybe_unused]] REFGUID event_id, [[maybe_unused]] IPortableDeviceValues* event_data)
 		{
-			KFL_UNUSED(sensor);
-			KFL_UNUSED(event_id);
-			KFL_UNUSED(event_data);
-
 			return S_OK;
 		}
 
-		STDMETHODIMP OnLeave(REFSENSOR_ID sensor_id)
+		STDMETHODIMP OnLeave([[maybe_unused]] REFSENSOR_ID sensor_id)
 		{
-			KFL_UNUSED(sensor_id);
-
 			return S_OK;
 		}
 
-		STDMETHODIMP OnStateChanged(ISensor* sensor, SensorState state)
+		STDMETHODIMP OnStateChanged(ISensor* sensor, [[maybe_unused]] SensorState state)
 		{
-			KFL_UNUSED(state);
-
 			HRESULT hr = S_OK;
 
 			if (nullptr == sensor)
@@ -794,10 +784,8 @@ namespace KlayGE
 		}
 	}
 
-	HRESULT MsgInputSensor::OnPositionChanged(uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args)
+	HRESULT MsgInputSensor::OnPositionChanged([[maybe_unused]] uwp::Geolocator const& sender, uwp::PositionChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const position = args.Position();
 		auto const coordinate = position.Coordinate();
 		
@@ -826,10 +814,8 @@ namespace KlayGE
 	}
 
 	HRESULT MsgInputSensor::OnAccelerometeReadingChanged(
-		uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args)
+		[[maybe_unused]] uwp::Accelerometer const& sender, uwp::AccelerometerReadingChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const reading = args.Reading();
 
 		accel_.x() = static_cast<float>(reading.AccelerationX());
@@ -839,10 +825,9 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnGyrometerReadingChanged(uwp::Gyrometer const& sender, uwp::GyrometerReadingChangedEventArgs const& args)
+	HRESULT MsgInputSensor::OnGyrometerReadingChanged(
+		[[maybe_unused]] uwp::Gyrometer const& sender, uwp::GyrometerReadingChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const reading = args.Reading();
 
 		angular_velocity_.x() = static_cast<float>(reading.AngularVelocityX());
@@ -852,10 +837,9 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnInclinometerReadingChanged(uwp::Inclinometer const& sender, uwp::InclinometerReadingChangedEventArgs const& args)
+	HRESULT MsgInputSensor::OnInclinometerReadingChanged(
+		[[maybe_unused]] uwp::Inclinometer const& sender, uwp::InclinometerReadingChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const reading = args.Reading();
 
 		tilt_.x() = reading.PitchDegrees();
@@ -865,10 +849,9 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT MsgInputSensor::OnCompassReadingChanged(uwp::Compass const& sender, uwp::CompassReadingChangedEventArgs const& args)
+	HRESULT MsgInputSensor::OnCompassReadingChanged(
+		[[maybe_unused]] uwp::Compass const& sender, uwp::CompassReadingChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const reading = args.Reading();
 
 		magnetic_heading_north_ = static_cast<float>(reading.HeadingMagneticNorth());
@@ -888,10 +871,8 @@ namespace KlayGE
 	}
 
 	HRESULT MsgInputSensor::OnOrientationSensorReadingChanged(
-		uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args)
+		[[maybe_unused]] uwp::OrientationSensor const& sender, uwp::OrientationSensorReadingChangedEventArgs const& args)
 	{
-		KFL_UNUSED(sender);
-
 		auto const reading = args.Reading();
 
 		auto const quat = reading.Quaternion();
@@ -954,11 +935,8 @@ namespace KlayGE
 		ASensorManager_destroyEventQueue(sensor_mgr_, sensor_event_queue_);
 	}
 
-	int MsgInputSensor::SensorCallback(int fd, int events, void* data)
+	int MsgInputSensor::SensorCallback([[maybe_unused]] int fd, [[maybe_unused]] int events, void* data)
 	{
-		KFL_UNUSED(fd);
-		KFL_UNUSED(events);
-
 		MsgInputSensor* input_sensor = static_cast<MsgInputSensor*>(data);
 
 		float3 accel;

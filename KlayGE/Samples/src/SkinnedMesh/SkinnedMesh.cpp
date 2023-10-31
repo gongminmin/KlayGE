@@ -122,10 +122,8 @@ void SkinnedMeshApp::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls();
 }
 
-void SkinnedMeshApp::InputHandler(InputEngine const& sender, InputAction const& action)
+void SkinnedMeshApp::InputHandler([[maybe_unused]] InputEngine const& sender, InputAction const& action)
 {
-	KFL_UNUSED(sender);
-
 	switch (action.first)
 	{
 	case Exit:

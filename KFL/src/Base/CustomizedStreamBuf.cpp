@@ -101,10 +101,9 @@ namespace KlayGE
 	}
 
 	MemInputStreamBuf::pos_type MemInputStreamBuf::seekoff(off_type off, std::ios_base::seekdir way,
-			std::ios_base::openmode which)
+		[[maybe_unused]] std::ios_base::openmode which)
 	{
 		BOOST_ASSERT(which == std::ios_base::in);
-		KFL_UNUSED(which);
 
 		switch (way)
 		{
@@ -148,10 +147,9 @@ namespace KlayGE
 		return off;
 	}
 
-	MemInputStreamBuf::pos_type MemInputStreamBuf::seekpos(pos_type sp, std::ios_base::openmode which)
+	MemInputStreamBuf::pos_type MemInputStreamBuf::seekpos(pos_type sp, [[maybe_unused]] std::ios_base::openmode which)
 	{
 		BOOST_ASSERT(which == std::ios_base::in);
-		KFL_UNUSED(which);
 
 		if (sp < end_ - begin_)
 		{

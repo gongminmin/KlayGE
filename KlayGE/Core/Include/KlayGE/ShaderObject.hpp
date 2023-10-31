@@ -157,19 +157,15 @@ namespace KlayGE
 
 		virtual std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const = 0;
 
-		virtual void StageSpecificStreamIn(ResIdentifier& res)
+		virtual void StageSpecificStreamIn([[maybe_unused]] ResIdentifier& res)
 		{
-			KFL_UNUSED(res);
 		}
-		virtual void StageSpecificStreamOut(std::ostream& os)
+		virtual void StageSpecificStreamOut([[maybe_unused]] std::ostream& os)
 		{
-			KFL_UNUSED(os);
 		}
 		virtual void StageSpecificCreateHwShader(
-			RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+			[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(shader_desc_ids);
 		}
 
 	protected:

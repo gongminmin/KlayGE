@@ -50,10 +50,8 @@ namespace KlayGE
 		return name;
 	}
 
-	void NullRenderEngine::DoCreateRenderWindow(std::string const & name, RenderSettings const & settings)
+	void NullRenderEngine::DoCreateRenderWindow([[maybe_unused]] std::string const & name, [[maybe_unused]] RenderSettings const & settings)
 	{
-		KFL_UNUSED(name);
-		KFL_UNUSED(settings);
 	}
 
 	void NullRenderEngine::ForceFlush()
@@ -66,12 +64,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	void NullRenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	void NullRenderEngine::ScissorRect(
+		[[maybe_unused]] uint32_t x, [[maybe_unused]] uint32_t y, [[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height)
 	{
-		KFL_UNUSED(x);
-		KFL_UNUSED(y);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
 	}
 
 	void NullRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
@@ -147,45 +142,31 @@ namespace KlayGE
 		}
 	}
 
-	void NullRenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
+	void NullRenderEngine::DoBindFrameBuffer([[maybe_unused]] FrameBufferPtr const & fb)
 	{
-		KFL_UNUSED(fb);
 	}
 
-	void NullRenderEngine::DoBindSOBuffers(RenderLayoutPtr const & rl)
+	void NullRenderEngine::DoBindSOBuffers([[maybe_unused]] RenderLayoutPtr const & rl)
 	{
-		KFL_UNUSED(rl);
 	}
 
-	void NullRenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
+	void NullRenderEngine::DoRender(
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] RenderTechnique const& tech, [[maybe_unused]] RenderLayout const& rl)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(tech);
-		KFL_UNUSED(rl);
 	}
 
-	void NullRenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void NullRenderEngine::DoDispatch([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] RenderTechnique const& tech,
+		[[maybe_unused]] uint32_t tgx, [[maybe_unused]] uint32_t tgy, [[maybe_unused]] uint32_t tgz)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(tech);
-		KFL_UNUSED(tgx);
-		KFL_UNUSED(tgy);
-		KFL_UNUSED(tgz);
 	}
 
-	void NullRenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
-		GraphicsBufferPtr const & buff_args, uint32_t offset)
+	void NullRenderEngine::DoDispatchIndirect([[maybe_unused]] RenderEffect const & effect, [[maybe_unused]] RenderTechnique const & tech,
+		[[maybe_unused]] GraphicsBufferPtr const & buff_args, [[maybe_unused]] uint32_t offset)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(tech);
-		KFL_UNUSED(buff_args);
-		KFL_UNUSED(offset);
 	}
 
-	void NullRenderEngine::DoResize(uint32_t width, uint32_t height)
+	void NullRenderEngine::DoResize([[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height)
 	{
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
 	}
 
 	void NullRenderEngine::DoDestroy()
@@ -205,8 +186,7 @@ namespace KlayGE
 		return false;
 	}
 
-	void NullRenderEngine::FullScreen(bool fs)
+	void NullRenderEngine::FullScreen([[maybe_unused]] bool fs)
 	{
-		KFL_UNUSED(fs);
 	}
 }

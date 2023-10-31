@@ -38,195 +38,163 @@ namespace KlayGE
 {
 	ScriptVariable::~ScriptVariable() noexcept = default;
 
-	ScriptVariable& ScriptVariable::operator=(std::string const& value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::string const& value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(std::string_view value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::string_view value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(char const* value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] char const* value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(char* value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] char* value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(std::wstring const& value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::wstring const& value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(std::wstring_view value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::wstring_view value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(wchar_t const* value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] wchar_t const* value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(wchar_t* value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] wchar_t* value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(int8_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] int8_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(int16_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] int16_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(int32_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] int32_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(int64_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] int64_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(uint8_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] uint8_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(uint16_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] uint16_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(uint32_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] uint32_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(uint64_t value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] uint64_t value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(float value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] float value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(double value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] double value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	ScriptVariable& ScriptVariable::operator=(std::span<ScriptVariablePtr const> value)
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::span<ScriptVariablePtr const> value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	bool ScriptVariable::TryValue(std::string& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] std::string& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(std::wstring& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] std::wstring& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(int8_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] int8_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(int16_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] int16_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(int32_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] int32_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(int64_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] int64_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(uint8_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] uint8_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(uint16_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] uint16_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(uint32_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] uint32_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(uint64_t& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] uint64_t& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(float& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] float& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(double& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] double& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 
-	bool ScriptVariable::TryValue(std::vector<ScriptVariablePtr>& value) const
+	bool ScriptVariable::TryValue([[maybe_unused]] std::vector<ScriptVariablePtr>& value) const
 	{
-		KFL_UNUSED(value);
 		return false;
 	}
 

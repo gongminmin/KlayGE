@@ -297,10 +297,8 @@ namespace KlayGE
 		this->DoDiscardColor();
 	}
 
-	void OGLESScreenRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESScreenRenderTargetView::OnAttached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		index_ = static_cast<uint32_t>(att);
@@ -309,11 +307,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESScreenRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESScreenRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
-
 		BOOST_ASSERT(0 == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -342,20 +337,16 @@ namespace KlayGE
 		this->DoDiscardDepthStencil();
 	}
 
-	void OGLESScreenDepthStencilView::OnAttached(FrameBuffer& fb)
+	void OGLESScreenDepthStencilView::OnAttached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESScreenDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLESScreenDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -447,10 +438,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESTexture1DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESTexture1DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		uint32_t const index = static_cast<uint32_t>(att);
@@ -560,10 +549,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESTexture2DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESTexture2DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		uint32_t const index = static_cast<uint32_t>(att);
@@ -594,12 +581,10 @@ namespace KlayGE
 	}
 
 
-	OGLESTexture3DRenderTargetView::OGLESTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
-		uint32_t slice, int level)
+	OGLESTexture3DRenderTargetView::OGLESTexture3DRenderTargetView(
+		TexturePtr const& texture_3d, ElementFormat pf, [[maybe_unused]] int array_index, uint32_t slice, int level)
 		: slice_(slice), copy_to_tex_(0)
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_3D == texture_3d->Type());
 		BOOST_ASSERT(texture_3d->Depth(level) > slice);
 		BOOST_ASSERT(0 == array_index);
@@ -692,10 +677,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESTexture3DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESTexture3DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		uint32_t const index = static_cast<uint32_t>(att);
@@ -733,22 +716,18 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture3DRenderTargetView::CopyToSlice(FrameBuffer::Attachment att)
+	void OGLESTexture3DRenderTargetView::CopyToSlice([[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(att);
-
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, GL_TEXTURE_3D, gl_tex_);
 		glCopyTexSubImage3D(GL_TEXTURE_3D, level_, 0, 0, slice_, 0, 0, width_, height_);
 	}
 
 
-	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
-		Texture::CubeFaces face, int level)
+	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(
+		TexturePtr const& texture_cube, ElementFormat pf, [[maybe_unused]] int array_index, Texture::CubeFaces face, int level)
 		: face_(face)
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(0 == array_index);
 
@@ -765,12 +744,10 @@ namespace KlayGE
 		this->RetrieveGLTexture();
 	}
 
-	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
-		int level)
+	OGLESTextureCubeRenderTargetView::OGLESTextureCubeRenderTargetView(
+		TexturePtr const& texture_cube, ElementFormat pf, [[maybe_unused]] int array_index, int level)
 		: face_(static_cast<Texture::CubeFaces>(-1))
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(0 == array_index);
 
@@ -832,10 +809,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESTextureCubeRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESTextureCubeRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
 		uint32_t const index = static_cast<uint32_t>(att);
@@ -865,10 +840,6 @@ namespace KlayGE
 									ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 		: target_type_(0), array_index_(0)
 	{
-		KFL_UNUSED(array_index_);
-		KFL_UNUSED(level_);
-		KFL_UNUSED(sample_count_);
-		KFL_UNUSED(sample_quality_);
 		BOOST_ASSERT(IsDepthFormat(pf));
 
 		width_ = width;
@@ -1033,10 +1004,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTextureDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLESTextureDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 		if (array_size_ == 0)
 		{
@@ -1176,10 +1145,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESTextureCubeFaceDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLESTextureCubeFaceDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(gl_fbo_);
@@ -1242,11 +1209,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLESEAGLRenderView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLESEAGLRenderView::OnDetached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
-
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 		
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

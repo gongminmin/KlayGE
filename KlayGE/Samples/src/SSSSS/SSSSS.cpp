@@ -118,10 +118,7 @@ void SSSSSApp::OnCreate()
 	root_node.AddChild(light_camera_node);
 
 	light_node->AddChild(light_proxy->RootNode());
-	light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapse_time) {
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapse_time);
-
+	light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapse_time) {
 		float3 const light_pos = float3(0, 5, 0) - light_camera_->ForwardVec() * 2.0f;
 		node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(light_pos, light_pos + light_camera_->ForwardVec())));
 	});

@@ -178,9 +178,9 @@ namespace
 				case SMT_CubeOneInstanceVpRt:
 				default:
 					{
-						RenderDeviceCaps const& caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+						[[maybe_unused]] RenderDeviceCaps const& caps =
+							Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 						BOOST_ASSERT(caps.vp_rt_index_at_every_stage_support);
-						KFL_UNUSED(caps);
 					}
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceVpRtShadowMap");
 					break;
@@ -203,10 +203,8 @@ namespace
 	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			node.TransformToParent(
 				MathLib::rotation_z(0.4f) * MathLib::rotation_y(app_time / 1.4f) * MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
@@ -486,10 +484,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				auto so =
 					MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(teapot), SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 				so->OnSubThreadUpdate().Connect(
-					[](SceneNode& node, float app_time, float elapsed_time)
+					[](SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 					{
-						KFL_UNUSED(elapsed_time);
-
 						node.TransformToParent(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f)
 							* MathLib::rotation_y(-app_time / 1.5f));
 					});

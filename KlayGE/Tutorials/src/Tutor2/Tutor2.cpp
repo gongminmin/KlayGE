@@ -187,10 +187,8 @@ RenderPolygon::RenderPolygon(std::wstring_view name)
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void RenderPolygon::DoBuildMeshInfo(KlayGE::RenderModel const & model)
+void RenderPolygon::DoBuildMeshInfo([[maybe_unused]] KlayGE::RenderModel const & model)
 {
-	KFL_UNUSED(model);
-
 	KlayGE::AABBox const & pos_bb = this->PosBound();
 	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
 	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();

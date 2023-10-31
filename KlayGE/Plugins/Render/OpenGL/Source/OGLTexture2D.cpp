@@ -238,10 +238,9 @@ namespace KlayGE
 	}
 
 	void OGLTexture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, [[maybe_unused]] CubeFaces src_face,
 		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
-		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -354,12 +353,9 @@ namespace KlayGE
 	}
 
 	void OGLTexture2D::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-					uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+					uint32_t x_offset, uint32_t y_offset, [[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height,
 					void*& data, uint32_t& row_pitch)
 	{
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
@@ -490,10 +486,8 @@ namespace KlayGE
 		}
 	}
 	
-	void OGLTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void OGLTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;

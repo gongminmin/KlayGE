@@ -430,11 +430,9 @@ namespace KlayGE
 #endif
 	}
 
-	void D3DShaderStageObject::CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+	void D3DShaderStageObject::CreateHwShader(
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		hw_res_ready_ = true;
 	}
 
@@ -1001,11 +999,9 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderStageObject::CreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+	void OGLShaderStageObject::CreateHwShader(
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		hw_res_ready_ = true;
 	}
 
@@ -1336,15 +1332,13 @@ namespace KlayGE
 	{
 	}
 
-	ShaderObjectPtr NullShaderObject::Clone(RenderEffect& dst_effect)
+	ShaderObjectPtr NullShaderObject::Clone([[maybe_unused]] RenderEffect& dst_effect)
 	{
-		KFL_UNUSED(dst_effect);
 		return MakeSharedPtr<NullShaderObject>();
 	}
 
-	void NullShaderObject::Bind(RenderEffect const& effect)
+	void NullShaderObject::Bind([[maybe_unused]] RenderEffect const& effect)
 	{
-		KFL_UNUSED(effect);
 	}
 
 	void NullShaderObject::Unbind()

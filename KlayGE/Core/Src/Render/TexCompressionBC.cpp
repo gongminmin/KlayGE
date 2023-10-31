@@ -1439,12 +1439,10 @@ namespace KlayGE
 	}
 
 	// Alpha block compression (this is easy for a change)
-	void TexCompressionBC4::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	void TexCompressionBC4::EncodeBlock(void* output, void const * input, [[maybe_unused]] TexCompressionMethod method)
 	{
 		BOOST_ASSERT(output);
 		BOOST_ASSERT(input);
-
-		KFL_UNUSED(method);
 
 		BC4Block& bc4 = *static_cast<BC4Block*>(output);
 		uint8_t const * r = static_cast<uint8_t const *>(input);
@@ -1844,12 +1842,9 @@ namespace KlayGE
 		compression_format_ = EF_BC6;
 	}
 
-	void TexCompressionBC6U::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	void TexCompressionBC6U::EncodeBlock(
+		[[maybe_unused]] void* output, [[maybe_unused]] void const* input, [[maybe_unused]] TexCompressionMethod method)
 	{
-		KFL_UNUSED(output);
-		KFL_UNUSED(input);
-		KFL_UNUSED(method);
-
 		// TODO
 	}
 
@@ -2095,12 +2090,9 @@ namespace KlayGE
 		compression_format_ = EF_SIGNED_BC6;
 	}
 
-	void TexCompressionBC6S::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	void TexCompressionBC6S::EncodeBlock(
+		[[maybe_unused]] void* output, [[maybe_unused]] void const* input, [[maybe_unused]] TexCompressionMethod method)
 	{
-		KFL_UNUSED(output);
-		KFL_UNUSED(input);
-		KFL_UNUSED(method);
-
 		// TODO
 	}
 

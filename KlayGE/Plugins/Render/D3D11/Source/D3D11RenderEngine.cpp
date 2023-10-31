@@ -327,9 +327,8 @@ namespace KlayGE
 		this->BindFrameBuffer(win);
 	}
 
-	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
+	void D3D11RenderEngine::CheckConfig([[maybe_unused]] RenderSettings& settings)
 	{
-		KFL_UNUSED(settings);
 	}
 
 	void D3D11RenderEngine::D3DDevice(ID3D11Device1* device, ID3D11DeviceContext1* imm_ctx, D3D_FEATURE_LEVEL feature_level)
@@ -431,10 +430,8 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
+	void D3D11RenderEngine::DoBindFrameBuffer([[maybe_unused]] FrameBufferPtr const & fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(d3d_device_1_);
 		BOOST_ASSERT(fb);
 	}
@@ -1478,13 +1475,9 @@ namespace KlayGE
 			ppDevice, pFeatureLevel, ppImmediateContext);
 	}
 
-	void D3D11RenderEngine::OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result) noexcept
+	void D3D11RenderEngine::OnDeviceLost([[maybe_unused]] PTP_CALLBACK_INSTANCE instance, [[maybe_unused]] PVOID context,
+		[[maybe_unused]] PTP_WAIT wait, [[maybe_unused]] TP_WAIT_RESULT wait_result) noexcept
 	{
-		KFL_UNUSED(instance);
-		KFL_UNUSED(context);
-		KFL_UNUSED(wait);
-		KFL_UNUSED(wait_result);
-
 		// TODO
 	}
 }

@@ -1822,12 +1822,9 @@ namespace KlayGE
 		etc1_codec_ = MakeUniquePtr<TexCompressionETC1>();
 	}
 
-	void TexCompressionETC2RGB8::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	void TexCompressionETC2RGB8::EncodeBlock(
+		[[maybe_unused]] void* output, [[maybe_unused]] void const* input, [[maybe_unused]] TexCompressionMethod method)
 	{
-		KFL_UNUSED(output);
-		KFL_UNUSED(input);
-		KFL_UNUSED(method);
-
 		// TODO
 	}
 
@@ -2043,12 +2040,9 @@ namespace KlayGE
 		etc2_rgb8_codec_ = MakeUniquePtr<TexCompressionETC2RGB8>();
 	}
 
-	void TexCompressionETC2RGB8A1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	void TexCompressionETC2RGB8A1::EncodeBlock(
+		[[maybe_unused]] void* output, [[maybe_unused]] void const* input, [[maybe_unused]] TexCompressionMethod method)
 	{
-		KFL_UNUSED(output);
-		KFL_UNUSED(input);
-		KFL_UNUSED(method);
-
 		// TODO
 	}
 

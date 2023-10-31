@@ -138,11 +138,9 @@ namespace KlayGE
 
 	InfTerrainRenderableComponent::InfTerrainRenderableComponent(RenderablePtr const& renderable) : RenderableComponent(renderable)
 	{
-		this->OnMainThreadUpdate().Connect([](SceneComponent& component, float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect(
+			[](SceneComponent& component, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 			{
-				KFL_UNUSED(app_time);
-				KFL_UNUSED(elapsed_time);
-
 				auto& inf_terrain = checked_cast<InfTerrainRenderableComponent&>(component);
 				auto& inf_terrain_renderable = inf_terrain.BoundRenderableOfType<InfTerrainRenderable>();
 
@@ -212,7 +210,7 @@ namespace KlayGE
 	uint32_t const PATCHES_PER_TILE_EDGE = VERTEX_PER_TILE_EDGE - 1;
 	uint32_t const NON_TESS_INDEX_COUNT = (VERTEX_PER_TILE_EDGE - 1) * (2 * VERTEX_PER_TILE_EDGE + 2);
 	uint32_t const TESS_INDEX_COUNT = (VERTEX_PER_TILE_EDGE - 1) * (VERTEX_PER_TILE_EDGE - 1) * 4;
-	uint32_t const MAX_RINGS = 10;
+	[[maybe_unused]] uint32_t const MAX_RINGS = 10;
 
 	HQTerrainRenderable::TileRing::TileRing(int hole_width, int outer_width, float tile_size,
 		GraphicsBufferPtr const & tile_non_tess_ib, GraphicsBufferPtr const & tile_non_tess_vid_vb,
@@ -359,7 +357,6 @@ namespace KlayGE
 
 		int widths[] = { 0, 16, 16, 16, 16 };
 		uint32_t const rings = static_cast<uint32_t>(std::size(widths)) - 1;
-		KFL_UNUSED(MAX_RINGS);
 		BOOST_ASSERT(rings <= MAX_RINGS);
 
 		tile_rings_.resize(rings);
@@ -418,9 +415,8 @@ namespace KlayGE
 		this->OnRenderEnd();
 	}
 
-	void HQTerrainRenderable::ModelMatrix(float4x4 const & mat)
+	void HQTerrainRenderable::ModelMatrix([[maybe_unused]] float4x4 const & mat)
 	{
-		KFL_UNUSED(mat);
 		// Calculate matrix in SetMatrices.
 	}
 
@@ -732,11 +728,9 @@ namespace KlayGE
 
 		BOOST_ASSERT(dynamic_cast<HQTerrainRenderable*>(renderable.get()) != nullptr);
 
-		this->OnMainThreadUpdate().Connect([](SceneComponent& component, float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect(
+			[](SceneComponent& component, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 			{
-				KFL_UNUSED(app_time);
-				KFL_UNUSED(elapsed_time);
-
 				auto& hq_inf_terrain = checked_cast<HQTerrainRenderableComponent&>(component);
 				auto& hq_inf_terrain_renderable = hq_inf_terrain.BoundRenderableOfType<HQTerrainRenderable>();
 

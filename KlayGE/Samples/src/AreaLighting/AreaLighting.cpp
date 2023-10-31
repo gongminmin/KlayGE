@@ -40,10 +40,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			node.TransformToParent(MathLib::translation(sin(app_time * 1000 * move_speed_) + pos_.x(), pos_.y(), pos_.z()));
 		}
 

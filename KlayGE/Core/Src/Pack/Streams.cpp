@@ -220,9 +220,8 @@ namespace KlayGE
 		return *os_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP OutStream::SetSize(UInt64 new_size) noexcept
+	STDMETHODIMP OutStream::SetSize([[maybe_unused]] UInt64 new_size) noexcept
 	{
-		KFL_UNUSED(new_size);
 		return E_NOTIMPL;
 	}
 }

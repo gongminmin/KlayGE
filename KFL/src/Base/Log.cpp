@@ -134,14 +134,12 @@ namespace
 		EmptyOStreamsCallback()
 		{
 		}
-		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs) noexcept
+		EmptyOStreamsCallback([[maybe_unused]] EmptyOStreamsCallback&& rhs) noexcept
 		{
-			KFL_UNUSED(rhs);
 		}
 
-		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
+		std::streambuf::int_type operator()([[maybe_unused]] void const * buff, std::streamsize count)
 		{
-			KFL_UNUSED(buff);
 			return static_cast<std::streambuf::int_type>(count);
 		}
 	};

@@ -287,9 +287,8 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::CheckConfig(RenderSettings& settings)
+	void D3D12RenderEngine::CheckConfig([[maybe_unused]] RenderSettings& settings)
 	{
-		KFL_UNUSED(settings);
 	}
 
 	void D3D12RenderEngine::D3DDevice(ID3D12Device* device, D3D_FEATURE_LEVEL feature_level)
@@ -499,10 +498,8 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D12RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
+	void D3D12RenderEngine::DoBindFrameBuffer([[maybe_unused]] FrameBufferPtr const & fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(d3d_device_);
 		BOOST_ASSERT(fb);
 	}

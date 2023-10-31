@@ -62,10 +62,8 @@ namespace KlayGE
 	{
 	}
 
-	void NullShowEngine::Load(std::string const & file_name)
+	void NullShowEngine::Load([[maybe_unused]] std::string const & file_name)
 	{
-		KFL_UNUSED(file_name);
-
 		state_ = SS_Stopped;
 	}
 
@@ -74,10 +72,8 @@ namespace KlayGE
 		return true;
 	}
 
-	ShowState NullShowEngine::State(long ms_timeout)
+	ShowState NullShowEngine::State([[maybe_unused]] long ms_timeout)
 	{
-		KFL_UNUSED(ms_timeout);
-
 		return state_;
 	}
 

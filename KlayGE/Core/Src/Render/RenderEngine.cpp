@@ -666,16 +666,12 @@ namespace KlayGE
 		return caps_;
 	}
 
-	void RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
+	void RenderEngine::GetCustomAttrib([[maybe_unused]] std::string_view name, [[maybe_unused]] void* value) const
 	{
-		KFL_UNUSED(name);
-		KFL_UNUSED(value);
 	}
 
-	void RenderEngine::SetCustomAttrib(std::string_view name, void* value)
+	void RenderEngine::SetCustomAttrib([[maybe_unused]] std::string_view name, [[maybe_unused]] void* value)
 	{
-		KFL_UNUSED(name);
-		KFL_UNUSED(value);
 	}
 
 	void RenderEngine::Resize(uint32_t width, uint32_t height)

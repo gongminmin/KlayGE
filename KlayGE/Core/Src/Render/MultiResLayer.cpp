@@ -82,11 +82,9 @@ namespace KlayGE
 		upsampling_pp_ = SyncLoadPostProcess("MultiRes.ppml", "Upsampling");
 	}
 
-	void MultiResLayer::BindBuffers(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex,
-			TexturePtr const & multi_res_tex)
+	void MultiResLayer::BindBuffers(
+		TexturePtr const& rt0_tex, [[maybe_unused]] TexturePtr const& rt1_tex, TexturePtr const& depth_tex, TexturePtr const& multi_res_tex)
 	{
-		KFL_UNUSED(rt1_tex);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();

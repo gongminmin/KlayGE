@@ -170,10 +170,8 @@ namespace
 	class PointLightNodeUpdate
 	{
 	public:
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			float4x4 const mat_rot = MathLib::rotation_z(app_time);
 			node.TransformToParent(MathLib::translation(MathLib::transform_coord(float3(1, 0, -1), mat_rot)));
 		}

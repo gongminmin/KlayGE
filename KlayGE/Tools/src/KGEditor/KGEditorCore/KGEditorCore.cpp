@@ -1762,10 +1762,8 @@ namespace KlayGE
 		}
 	}
 
-	void KGEditorCore::MouseDown(int x, int y, uint32_t button)
+	void KGEditorCore::MouseDown(int x, int y, [[maybe_unused]] uint32_t button)
 	{
-		KFL_UNUSED(button);
-
 		mouse_down_in_wnd_ = true;
 		last_mouse_pt_ = int2(x, y);
 	}

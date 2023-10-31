@@ -113,15 +113,13 @@ namespace KlayGE
 		std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const override;
 
 #if KLAYGE_IS_DEV_PLATFORM
-		virtual void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl)
+		virtual void StageSpecificAttachShader([[maybe_unused]] DXBC2GLSL::DXBC2GLSL const& dxbc2glsl)
 		{
-			KFL_UNUSED(dxbc2glsl);
 		}
 #endif
-		void StageSpecificCreateHwShader(RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
+		void StageSpecificCreateHwShader([[maybe_unused]] RenderEffect const& effect,
+			[[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(shader_desc_ids);
 		}
 
 	protected:

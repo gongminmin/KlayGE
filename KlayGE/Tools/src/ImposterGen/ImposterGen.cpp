@@ -92,9 +92,8 @@ private:
 	{
 	}
 
-	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass) override
+	KlayGE::uint32_t DoUpdate([[maybe_unused]] KlayGE::uint32_t pass) override
 	{
-		KFL_UNUSED(pass);
 		return App3DFramework::URV_Finished;
 	}
 };

@@ -151,10 +151,8 @@ namespace KlayGE
 		this->AddWaitingThreadsLocked(lock, number);
 	}
 
-	void ThreadPool::CommonData::AddWaitingThreadsLocked(std::lock_guard<std::mutex> const& lock, size_t number)
+	void ThreadPool::CommonData::AddWaitingThreadsLocked([[maybe_unused]] std::lock_guard<std::mutex> const& lock, size_t number)
 	{
-		KFL_UNUSED(lock);
-
 		for (size_t i = 0; i < number; ++ i)
 		{
 			auto& th_info = threads_.emplace_back(MakeSharedPtr<ThreadInfo>(*this));

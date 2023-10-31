@@ -145,12 +145,9 @@ namespace
 		return ret;
 	}
 
-	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-			GLchar const * message, void const * user_param)
+	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, [[maybe_unused]] GLsizei length,
+		GLchar const* message, [[maybe_unused]] void const* user_param)
 	{
-		KFL_UNUSED(length);
-		KFL_UNUSED(user_param);
-
 		auto& os = (GL_DEBUG_TYPE_ERROR == type) ? KlayGE::LogError() : KlayGE::LogInfo();
 		os << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
 			<< "type: " << DebugTypeString(type) << "; "
@@ -1209,26 +1206,15 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESRenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech,
-		uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void OGLESRenderEngine::DoDispatch([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] RenderTechnique const& tech,
+		[[maybe_unused]] uint32_t tgx, [[maybe_unused]] uint32_t tgy, [[maybe_unused]] uint32_t tgz)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(tech);
-		KFL_UNUSED(tgx);
-		KFL_UNUSED(tgy);
-		KFL_UNUSED(tgz);
-
 		KFL_UNREACHABLE("Not implemented");
 	}
 
-	void OGLESRenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
-		GraphicsBufferPtr const & buff_args, uint32_t offset)
+	void OGLESRenderEngine::DoDispatchIndirect([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] RenderTechnique const& tech,
+		[[maybe_unused]] GraphicsBufferPtr const& buff_args, [[maybe_unused]] uint32_t offset)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(tech);
-		KFL_UNUSED(buff_args);
-		KFL_UNUSED(offset);
-
 		KFL_UNREACHABLE("Not implemented");
 	}
 

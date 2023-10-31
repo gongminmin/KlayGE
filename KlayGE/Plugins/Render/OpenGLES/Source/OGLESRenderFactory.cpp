@@ -122,33 +122,23 @@ namespace KlayGE
 		return MakeSharedPtr<OGLESFence>();
 	}
 
-	ShaderResourceViewPtr OGLESRenderFactory::MakeTextureSrv(TexturePtr const & texture, ElementFormat pf, uint32_t first_array_index,
-		uint32_t array_size, uint32_t first_level, uint32_t num_levels)
+	ShaderResourceViewPtr OGLESRenderFactory::MakeTextureSrv(TexturePtr const& texture, [[maybe_unused]] ElementFormat pf,
+		[[maybe_unused]] uint32_t first_array_index, [[maybe_unused]] uint32_t array_size, [[maybe_unused]] uint32_t first_level,
+		[[maybe_unused]] uint32_t num_levels)
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(first_level);
-		KFL_UNUSED(num_levels);
 		return MakeSharedPtr<OGLESTextureShaderResourceView>(texture);
 	}
 
-	ShaderResourceViewPtr OGLESRenderFactory::MakeTexture2DSrv(
-		TexturePtr const& texture, ElementFormat pf, int array_index, Texture::CubeFaces face, uint32_t first_level, uint32_t num_levels)
+	ShaderResourceViewPtr OGLESRenderFactory::MakeTexture2DSrv(TexturePtr const& texture, [[maybe_unused]] ElementFormat pf,
+		[[maybe_unused]] int array_index, [[maybe_unused]] Texture::CubeFaces face, [[maybe_unused]] uint32_t first_level,
+		[[maybe_unused]] uint32_t num_levels)
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(first_level);
-		KFL_UNUSED(num_levels);
 		return MakeSharedPtr<OGLESTextureShaderResourceView>(texture);
 	}
 
-	ShaderResourceViewPtr OGLESRenderFactory::MakeBufferSrv(GraphicsBufferPtr const & gbuffer, ElementFormat pf,
-		uint32_t first_elem, uint32_t num_elems)
+	ShaderResourceViewPtr OGLESRenderFactory::MakeBufferSrv(
+		GraphicsBufferPtr const& gbuffer, ElementFormat pf, [[maybe_unused]] uint32_t first_elem, [[maybe_unused]] uint32_t num_elems)
 	{
-		KFL_UNUSED(first_elem);
-		KFL_UNUSED(num_elems);
 		return MakeSharedPtr<OGLESBufferShaderResourceView>(gbuffer, pf);
 	}
 

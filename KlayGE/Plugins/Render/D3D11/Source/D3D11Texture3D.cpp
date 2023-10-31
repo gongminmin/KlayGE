@@ -136,13 +136,11 @@ namespace KlayGE
 		}
 	}
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture3D::FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-			uint32_t first_level, uint32_t num_levels) const
+	D3D11_SHADER_RESOURCE_VIEW_DESC D3D11Texture3D::FillSRVDesc(ElementFormat pf, [[maybe_unused]] uint32_t first_array_index,
+		[[maybe_unused]] uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
 	{
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == array_size);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 		switch (pf)
@@ -171,11 +169,10 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture3D::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
+	D3D11_RENDER_TARGET_VIEW_DESC D3D11Texture3D::FillRTVDesc(ElementFormat pf, [[maybe_unused]] uint32_t array_index, uint32_t first_slice,
 		uint32_t num_slices, uint32_t level) const
 	{
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(pf);
@@ -187,12 +184,11 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture3D::FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D11_DEPTH_STENCIL_VIEW_DESC D3D11Texture3D::FillDSVDesc(
+		ElementFormat pf, [[maybe_unused]] uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level) const
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(pf);
@@ -212,21 +208,19 @@ namespace KlayGE
 		return desc;
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(
+		ElementFormat pf, uint32_t first_array_index, [[maybe_unused]] uint32_t array_size, uint32_t level) const
 	{
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == array_size);
-		KFL_UNUSED(array_size);
 
 		return this->FillUAVDesc(pf, first_array_index, 0, this->Depth(level), level);
 	}
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D11_UNORDERED_ACCESS_VIEW_DESC D3D11Texture3D::FillUAVDesc(
+		ElementFormat pf, [[maybe_unused]] uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level) const
 	{
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(pf);
@@ -268,10 +262,8 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
-	void D3D11Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void D3D11Texture3D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		D3D11_TEXTURE3D_DESC desc;
 		desc.Width = width_;
 		desc.Height = height_;

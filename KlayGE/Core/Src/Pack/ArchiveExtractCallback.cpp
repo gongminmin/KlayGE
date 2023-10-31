@@ -85,22 +85,18 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetTotal(UInt64 size) noexcept
+	STDMETHODIMP ArchiveExtractCallback::SetTotal([[maybe_unused]] UInt64 size) noexcept
 	{
-		KFL_UNUSED(size);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetCompleted(UInt64 const * complete_value) noexcept
+	STDMETHODIMP ArchiveExtractCallback::SetCompleted([[maybe_unused]] UInt64 const * complete_value) noexcept
 	{
-		KFL_UNUSED(complete_value);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode) noexcept
+	STDMETHODIMP ArchiveExtractCallback::GetStream([[maybe_unused]] UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode) noexcept
 	{
-		KFL_UNUSED(index);
-
 		enum
 		{
 			kExtract = 0,
@@ -120,15 +116,13 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::PrepareOperation(Int32 ask_extract_mode) noexcept
+	STDMETHODIMP ArchiveExtractCallback::PrepareOperation([[maybe_unused]] Int32 ask_extract_mode) noexcept
 	{
-		KFL_UNUSED(ask_extract_mode);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveExtractCallback::SetOperationResult(Int32 operation_result) noexcept
+	STDMETHODIMP ArchiveExtractCallback::SetOperationResult([[maybe_unused]] Int32 operation_result) noexcept
 	{
-		KFL_UNUSED(operation_result);
 		return S_OK;
 	}
 

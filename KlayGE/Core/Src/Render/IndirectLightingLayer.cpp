@@ -150,11 +150,9 @@ namespace KlayGE
 		this->VPLsLighting(light);
 	}
 
-	void MultiResSILLayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev)
+	void MultiResSILLayer::CalcIndirectLighting(
+		[[maybe_unused]] TexturePtr const& prev_shading_tex, [[maybe_unused]] float4x4 const& proj_to_prev)
 	{
-		KFL_UNUSED(prev_shading_tex);
-		KFL_UNUSED(proj_to_prev);
-
 		if (g_buffer_rt0_tex_->NumMipMaps() > 1)
 		{
 			multi_res_layer_->UpsampleMultiRes();
@@ -235,10 +233,8 @@ namespace KlayGE
 			effect_y, effect_y->TechniqueByName("SSGIBlurY"));
 	}
 
-	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
+	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, [[maybe_unused]] TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-		KFL_UNUSED(rt1_tex);
-
 		BOOST_ASSERT(rt0_tex->NumMipMaps() >= 3);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -265,11 +261,9 @@ namespace KlayGE
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, small_ssgi_tex_);
 	}
 
-	void SSGILayer::RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
+	void SSGILayer::RSM([[maybe_unused]] TexturePtr const& rt0_tex, [[maybe_unused]] TexturePtr const& rt1_tex,
+		[[maybe_unused]] TexturePtr const& depth_tex)
 	{
-		KFL_UNUSED(rt0_tex);
-		KFL_UNUSED(rt1_tex);
-		KFL_UNUSED(depth_tex);
 	}
 
 	void SSGILayer::UpdateGBuffer(Camera const & vp_camera)
@@ -277,16 +271,12 @@ namespace KlayGE
 		multi_res_layer_->UpdateGBuffer(vp_camera);
 	}
 
-	void SSGILayer::UpdateRSM(Camera const & rsm_camera, LightSource const & light)
+	void SSGILayer::UpdateRSM([[maybe_unused]] Camera const& rsm_camera, [[maybe_unused]] LightSource const& light)
 	{
-		KFL_UNUSED(rsm_camera);
-		KFL_UNUSED(light);
 	}
 
-	void SSGILayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev)
+	void SSGILayer::CalcIndirectLighting(TexturePtr const& prev_shading_tex, [[maybe_unused]] float4x4 const& proj_to_prev)
 	{
-		KFL_UNUSED(proj_to_prev);
-
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 

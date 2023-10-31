@@ -39,11 +39,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
 			float3 dir(MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f), 1, MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f));
 			node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(init_pos_, init_pos_ + dir, float3(0, 0, 1))));
 		}
@@ -64,11 +61,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneComponent& component, float app_time, float elapsed_time)
+		void operator()(SceneComponent& component, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
 			checked_cast<LightSource&>(component).Color(color_ * (0.85f + random_dis_(gen_) * 0.0003f));
 		}
 
@@ -86,10 +80,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			float3 dir(sin(app_time) * 0.3f, -1, 0.1f);
 			node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(init_pos_, init_pos_ + dir)));
 		}
@@ -106,10 +98,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneNode& node, float app_time, float elapsed_time)
+		void operator()(SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			float const factor = (50.0f + app_time * 0.6f) / num_particle_lights_;
 			node.TransformToParent(MathLib::translation(
 				6.0f * sin(factor * index_), 5.0f + 10.0f / num_particle_lights_ * index_, 6.0f * cos(factor * index_) + 1));
@@ -128,10 +118,8 @@ namespace
 		{
 		}
 
-		void operator()(SceneComponent& component, float app_time, float elapsed_time)
+		void operator()(SceneComponent& component, float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(elapsed_time);
-
 			float3 const clr = MathLib::normalize(float3(sin(app_time * 0.3f + index_ * 10.0f),
 				cos(app_time * 0.2f + 0.5f + index_ * 20.0f), sin(app_time * 0.1f + 1.0f + index_ * 30.0f))) * 0.3f + 0.1f;
 			checked_cast<LightSource&>(component).Color(clr);

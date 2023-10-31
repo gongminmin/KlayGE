@@ -116,9 +116,8 @@ namespace KlayGE
 		void FillCBufferIndices(RenderEffect const& effect);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		virtual void StageSpecificReflection(ID3D11ShaderReflection* reflection)
+		virtual void StageSpecificReflection([[maybe_unused]] ID3D11ShaderReflection* reflection)
 		{
-			KFL_UNUSED(reflection);
 		}
 #endif
 
@@ -263,9 +262,8 @@ namespace KlayGE
 	private:
 		std::string_view GetShaderProfile(RenderEffect const& effect, uint32_t shader_desc_id) const override;
 
-		virtual void StageSpecificAttachShader(DXBC2GLSL::DXBC2GLSL const& dxbc2glsl)
+		virtual void StageSpecificAttachShader([[maybe_unused]] DXBC2GLSL::DXBC2GLSL const& dxbc2glsl)
 		{
-			KFL_UNUSED(dxbc2glsl);
 		}
 
 	protected:

@@ -654,11 +654,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			bool tmp = false;
 			if (auto attr = node.Attrib("value"))
 			{
@@ -668,10 +665,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			bool tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = tmp;
@@ -704,11 +699,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			uint32_t tmp = 0;
 			if (auto attr = node.Attrib("value"))
 			{
@@ -718,10 +710,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -755,11 +745,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			int32_t tmp = 0;
 			if (auto attr = node.Attrib("value"))
 			{
@@ -769,10 +756,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			int32_t tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -806,11 +791,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			float tmp = 0;
 			if (auto attr = node.Attrib("value"))
 			{
@@ -820,10 +802,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			float tmp;
 			res.read(&tmp, sizeof(tmp));
 			*this = LE2Native(tmp);
@@ -857,11 +837,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			uint2 tmp(0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -875,10 +852,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -919,11 +894,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			uint3 tmp(0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -941,10 +913,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -985,11 +955,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			uint4 tmp(0, 0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1011,10 +978,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1055,11 +1020,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			int2 tmp(0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1073,10 +1035,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			int2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1117,11 +1077,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			int3 tmp(0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1139,10 +1096,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			int3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1183,11 +1138,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			int4 tmp(0, 0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1209,10 +1161,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			int4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1253,11 +1203,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			float2 tmp(0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1271,10 +1218,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			float2 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1315,11 +1260,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			float3 tmp(0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1337,10 +1279,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			float3 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1381,11 +1321,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			float4 tmp(0, 0, 0, 0);
 			if (auto attr = node.Attrib("x"))
 			{
@@ -1407,10 +1344,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			float4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1469,11 +1404,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			float4x4 tmp(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			for (int y = 0; y < 4; ++y)
 			{
@@ -1490,10 +1422,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			float4x4 tmp;
 			res.read(&tmp, sizeof(tmp));
 			for (size_t i = 0; i < tmp.size(); ++i)
@@ -1542,11 +1472,8 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			SamplerStateDesc desc;
 			for (XMLNode const* state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 			{
@@ -1624,10 +1551,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			SamplerStateDesc desc;
 			res.read(&desc, sizeof(desc));
 			desc.border_clr[0] = LE2Native(desc.border_clr[0]);
@@ -1671,9 +1596,8 @@ namespace
 		using RenderVariableConcrete<SamplerStateObjectPtr>::operator=;
 
 	protected:
-		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		std::unique_ptr<RenderVariable> MakeInstance([[maybe_unused]] bool in_cbuff) override
 		{
-			KFL_UNUSED(in_cbuff);
 			return MakeUniquePtr<RenderVariableSampler>();
 		}
 	};
@@ -1682,11 +1606,8 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			std::string tmp;
 			if (auto attr = node.Attrib("value"))
 			{
@@ -1696,10 +1617,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			*this = ReadShortString(res);
 		}
 
@@ -1715,9 +1634,8 @@ namespace
 		using RenderVariableConcrete<std::string>::operator=;
 
 	protected:
-		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		std::unique_ptr<RenderVariable> MakeInstance([[maybe_unused]] bool in_cbuff) override
 		{
-			KFL_UNUSED(in_cbuff);
 			return MakeUniquePtr<RenderVariableString>();
 		}
 	};
@@ -1726,11 +1644,8 @@ namespace
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			ShaderDesc desc;
 			desc.profile = RetrieveProfile(node);
 			desc.func_name = RetrieveFuncName(node);
@@ -1738,10 +1653,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			ShaderDesc desc;
 			desc.profile = ReadShortString(res);
 			desc.func_name = ReadShortString(res);
@@ -1761,9 +1674,8 @@ namespace
 		using RenderVariableConcrete<ShaderDesc>::operator=;
 
 	protected:
-		std::unique_ptr<RenderVariable> MakeInstance(bool in_cbuff) override
+		std::unique_ptr<RenderVariable> MakeInstance([[maybe_unused]] bool in_cbuff) override
 		{
-			KFL_UNUSED(in_cbuff);
 			return MakeUniquePtr<RenderVariableShader>();
 		}
 	};
@@ -1877,10 +1789,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -1903,10 +1813,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2018,10 +1926,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2044,10 +1950,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2101,10 +2005,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2127,10 +2029,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2184,10 +2084,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2210,10 +2108,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2267,10 +2163,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2297,10 +2191,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2362,10 +2254,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2392,10 +2282,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2457,10 +2345,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2487,10 +2373,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2552,10 +2436,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2582,10 +2464,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2647,10 +2527,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2677,10 +2555,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2742,10 +2618,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2772,10 +2646,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2837,10 +2709,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2867,10 +2737,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -2932,10 +2800,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -2962,10 +2828,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -3027,10 +2891,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -3057,10 +2919,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -3147,10 +3007,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-
 			if (XMLNode const* value_node = node.FirstNode("value"))
 			{
 				value_node = value_node->FirstNode();
@@ -3178,10 +3036,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			uint32_t len;
 			res.read(&len, sizeof(len));
 			len = LE2Native(len);
@@ -3309,11 +3165,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			*this = TexturePtr();
 
 			std::string elem_type;
@@ -3339,10 +3192,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			*this = TexturePtr();
 			*this = ReadShortString(res);
 		}
@@ -3443,11 +3294,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			*this = UnorderedAccessViewPtr();
 
 			if (auto attr = node.Attrib("elem_type"))
@@ -3461,10 +3309,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			*this = UnorderedAccessViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3565,11 +3411,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			*this = ShaderResourceViewPtr();
 
 			if (auto attr = node.Attrib("elem_type"))
@@ -3583,10 +3426,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			*this = ShaderResourceViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3658,11 +3499,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(array_size);
-
 			*this = UnorderedAccessViewPtr();
 
 			if (auto attr = node.Attrib("elem_type"))
@@ -3676,10 +3514,8 @@ namespace
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-
 			*this = UnorderedAccessViewPtr();
 			*this = ReadShortString(res);
 		}
@@ -3748,26 +3584,21 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] XMLNode const& node,
+			[[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(node);
-			KFL_UNUSED(array_size);
 			*this = ShaderResourceViewPtr();
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(res);
 			*this = ShaderResourceViewPtr();
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void StreamOut(std::ostream& os) const override
+		void StreamOut([[maybe_unused]] std::ostream& os) const override
 		{
-			KFL_UNUSED(os);
 		}
 #endif
 
@@ -3803,26 +3634,21 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] XMLNode const& node,
+			[[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(node);
-			KFL_UNUSED(array_size);
 			*this = UnorderedAccessViewPtr();
 		}
 #endif
 
-		void StreamIn(RenderEffect const& effect, ResIdentifier& res) override
+		void StreamIn([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] ResIdentifier& res) override
 		{
-			KFL_UNUSED(effect);
-			KFL_UNUSED(res);
 			*this = UnorderedAccessViewPtr();
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void StreamOut(std::ostream& os) const override
+		void StreamOut([[maybe_unused]] std::ostream& os) const override
 		{
-			KFL_UNUSED(os);
 		}
 #endif
 
@@ -3869,10 +3695,8 @@ namespace
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void Load(RenderEffect const& effect, XMLNode const& node, uint32_t array_size) override
+		void Load(RenderEffect const& effect, XMLNode const& node, [[maybe_unused]] uint32_t array_size) override
 		{
-			KFL_UNUSED(array_size);
-
 			struct_type_ = effect.StructTypeByName(node.Attrib("type")->ValueString());
 			BOOST_ASSERT(struct_type_);
 		}
@@ -7713,461 +7537,449 @@ namespace KlayGE
 	{
 	}
 
-	RenderVariable& RenderVariable::operator=(bool const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] bool const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(uint32_t const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] uint32_t const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(int32_t const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] int32_t const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(float const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] float const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(uint2 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] uint2 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(uint3 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] uint3 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(uint4 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] uint4 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(int2 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] int2 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(int3 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] int3 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(int4 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] int4 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(float2 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] float2 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(float3 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] float3 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(float4 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] float4 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(float4x4 const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] float4x4 const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(TexturePtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] TexturePtr const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(ShaderResourceViewPtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] ShaderResourceViewPtr const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(UnorderedAccessViewPtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] UnorderedAccessViewPtr const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] SamplerStateObjectPtr const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::string const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::string const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::string_view value)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::string_view value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(ShaderDesc const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] ShaderDesc const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<bool> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<bool> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<uint32_t> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<uint32_t> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<int32_t> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<int32_t> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<float> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<float> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<uint2> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<uint2> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<uint3> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<uint3> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<uint4> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<uint4> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<int2> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<int2> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<int3> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<int3> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<int4> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<int4> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<float2> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<float2> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<float3> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<float3> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<float4> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<float4> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<float4x4> const & /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<float4x4> const & value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<bool const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<bool const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<uint32_t const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<uint32_t const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<int32_t const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<int32_t const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<float const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<float const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<uint2 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<uint2 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<uint3 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<uint3 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<uint4 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<uint4 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<int2 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<int2 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<int3 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<int3 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<int4 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<int4 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<float2 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<float2 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<float3 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<float3 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<float4 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<float4 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<float4x4 const> /*value*/)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<float4x4 const> value)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<uint8_t> const& value)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::vector<uint8_t> const& value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	RenderVariable& RenderVariable::operator=(std::span<uint8_t const> value)
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] std::span<uint8_t const> value)
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(bool& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] bool& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(uint32_t& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] uint32_t& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(int32_t& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] int32_t& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(float& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] float& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(uint2& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] uint2& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(uint3& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] uint3& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(uint4& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] uint4& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(int2& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] int2& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(int3& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] int3& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(int4& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] int4& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(float2& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] float2& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(float3& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] float3& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(float4& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] float4& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(float4x4& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] float4x4& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(TexturePtr& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] TexturePtr& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(ShaderResourceViewPtr& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] ShaderResourceViewPtr& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(UnorderedAccessViewPtr& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] UnorderedAccessViewPtr& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] SamplerStateObjectPtr& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::string& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::string& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::string_view& value) const
+	void RenderVariable::Value([[maybe_unused]] std::string_view& value) const
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(ShaderDesc& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] ShaderDesc& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<bool>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<bool>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<uint32_t>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<uint32_t>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<int32_t>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<int32_t>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<float>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<float>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<uint2>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<uint2>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<uint3>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<uint3>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<uint4>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<uint4>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<int2>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<int2>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<int3>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<int3>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<int4>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<int4>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<float2>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<float2>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<float3>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<float3>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<float4>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<float4>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<float4x4>& /*value*/) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<float4x4>& value) const
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::Value(std::vector<uint8_t>& value) const
+	void RenderVariable::Value([[maybe_unused]] std::vector<uint8_t>& value) const
 	{
-		KFL_UNUSED(value);
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::BindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index, uint32_t offset, uint32_t stride)
+	void RenderVariable::BindToCBuffer([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] uint32_t cbuff_index,
+		[[maybe_unused]] uint32_t offset, [[maybe_unused]] uint32_t stride)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(cbuff_index);
-		KFL_UNUSED(offset);
-		KFL_UNUSED(stride);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void RenderVariable::RebindToCBuffer(RenderEffect const& effect, uint32_t cbuff_index)
-	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(cbuff_index);
-		
+	void RenderVariable::RebindToCBuffer([[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] uint32_t cbuff_index)
+	{		
 		KFL_UNREACHABLE("Can't be called");
 	}
 

@@ -279,13 +279,10 @@ namespace KlayGE
 	TexCompression::~TexCompression() noexcept = default;
 
 	void TexCompression::EncodeMem(uint32_t width, uint32_t height,
-		void* output, uint32_t out_row_pitch, uint32_t out_slice_pitch,
-		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch,
+		void* output, uint32_t out_row_pitch, [[maybe_unused]] uint32_t out_slice_pitch,
+		void const * input, uint32_t in_row_pitch, [[maybe_unused]] uint32_t in_slice_pitch,
 		TexCompressionMethod method)
 	{
-		KFL_UNUSED(out_slice_pitch);
-		KFL_UNUSED(in_slice_pitch);
-
 		uint32_t const elem_size = NumFormatBytes(DecodedFormat(compression_format_));
 		uint32_t const block_width = BlockWidth(compression_format_);
 		uint32_t const block_height = BlockHeight(compression_format_);
@@ -325,12 +322,9 @@ namespace KlayGE
 	}
 
 	void TexCompression::DecodeMem(uint32_t width, uint32_t height,
-		void* output, uint32_t out_row_pitch, uint32_t out_slice_pitch,
-		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch)
+		void* output, uint32_t out_row_pitch, [[maybe_unused]] uint32_t out_slice_pitch,
+		void const * input, uint32_t in_row_pitch, [[maybe_unused]] uint32_t in_slice_pitch)
 	{
-		KFL_UNUSED(out_slice_pitch);
-		KFL_UNUSED(in_slice_pitch);
-
 		uint32_t const elem_size = NumFormatBytes(DecodedFormat(compression_format_));
 		uint32_t const block_width = BlockWidth(compression_format_);
 		uint32_t const block_height = BlockHeight(compression_format_);

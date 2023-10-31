@@ -173,11 +173,9 @@ namespace KlayGE
 		return mem_block;
 	}
 
-	void D3D12GpuMemoryAllocator::Allocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint32_t size_in_bytes, uint32_t alignment)
+	void D3D12GpuMemoryAllocator::Allocate([[maybe_unused]] std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block,
+		uint32_t size_in_bytes, uint32_t alignment)
 	{
-		KFL_UNUSED(proof_of_lock);
-
 		BOOST_ASSERT(alignment <= SegmentSize);
 		uint32_t const aligned_size = ((size_in_bytes + alignment - 1) / alignment * alignment + SegmentMask) & ~SegmentMask;
 
@@ -221,9 +219,8 @@ namespace KlayGE
 	}
 
 	void D3D12GpuMemoryAllocator::Deallocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint64_t fence_value)
+		[[maybe_unused]] std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuMemoryBlock& mem_block, uint64_t fence_value)
 	{
-		KFL_UNUSED(proof_of_lock);
 		BOOST_ASSERT(mem_block);
 
 		if (mem_block.Size() <= PageSize)

@@ -51,10 +51,8 @@ namespace KlayGE
 		}
 	}
 
-	uint64_t OGLESFence::Signal(FenceType ft)
+	uint64_t OGLESFence::Signal([[maybe_unused]] FenceType ft)
 	{
-		KFL_UNUSED(ft);
-
 		uint64_t id = fence_val_;
 		fences_[id] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		++ fence_val_;

@@ -566,12 +566,9 @@ void CausticsMapApp::OnCreate()
 	auto dummy_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	dummy_light_env_ = MakeSharedPtr<PointLightSource>();
 	dummy_light_node->AddComponent(dummy_light_env_);
-	dummy_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapsed_time);
-
-		node.TransformToParent(MathLib::translation(refract_model_->RootNode()->PosBoundWS().Center()));
-	});
+	dummy_light_node->OnMainThreadUpdate().Connect(
+		[this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+		{ node.TransformToParent(MathLib::translation(refract_model_->RootNode()->PosBoundWS().Center())); });
 	root_node.AddChild(dummy_light_node);
 
 	//Input Bind

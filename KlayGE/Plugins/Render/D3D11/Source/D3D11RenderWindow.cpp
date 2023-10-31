@@ -835,11 +835,9 @@ namespace KlayGE
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(uwp::DisplayInformation const& sender, uwp::IInspectable const& args)
+	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(
+		[[maybe_unused]] uwp::DisplayInformation const& sender, [[maybe_unused]] uwp::IInspectable const& args)
 	{
-		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
-
 		auto const& d3d11_re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if ((d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)
 		{

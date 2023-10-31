@@ -210,11 +210,9 @@ namespace
 
 			node_->InstanceData(&inst_);
 
-			node_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+			node_->OnMainThreadUpdate().Connect(
+				[this]([[maybe_unused]] SceneNode& node, [[maybe_unused]] float app_time, float elapsed_time)
 				{
-					KFL_UNUSED(node);
-					KFL_UNUSED(app_time);
-
 					float4x4 mat_t = MathLib::transpose(node.PrevTransformToWorld());
 					inst_.last_mat[0] = mat_t.Row(0);
 					inst_.last_mat[1] = mat_t.Row(1);

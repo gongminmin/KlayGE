@@ -171,9 +171,8 @@ namespace KlayGE
 
 		virtual std::wstring const& Name() const = 0;
 #ifndef KLAYGE_SHIP
-		virtual void DebugName(std::wstring_view name)
+		virtual void DebugName([[maybe_unused]] std::wstring_view name)
 		{
-			KFL_UNUSED(name);
 		}
 #endif
 
@@ -274,9 +273,8 @@ namespace KlayGE
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
 			TextureFilter filter);
 
-		virtual bool HwBuildMipSubLevels(TextureFilter filter)
+		virtual bool HwBuildMipSubLevels([[maybe_unused]] TextureFilter filter)
 		{
-			KFL_UNUSED(filter);
 			return false;
 		}
 

@@ -557,10 +557,8 @@ namespace KlayGE
 		return input_srv_;
 	}
 
-	void FFTLensEffectsPostProcess::OutputPin(uint32_t index, RenderTargetViewPtr const& rtv)
+	void FFTLensEffectsPostProcess::OutputPin([[maybe_unused]] uint32_t index, [[maybe_unused]] RenderTargetViewPtr const& rtv)
 	{
-		KFL_UNUSED(index);
-		KFL_UNUSED(rtv);
 	}
 
 	RenderTargetViewPtr const & FFTLensEffectsPostProcess::RtvOutputPin(uint32_t /*index*/) const

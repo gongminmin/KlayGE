@@ -105,12 +105,9 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light->Attrib(0);
 	sun_light->Color(float3(1, 1, 1));
 	auto sun_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-	sun_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapsed_time);
-
-		node.TransformToParent(light_ctrl_camera_->InverseViewMatrix());
-	});
+	sun_light_node->OnMainThreadUpdate().Connect(
+		[this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+		{ node.TransformToParent(light_ctrl_camera_->InverseViewMatrix()); });
 	sun_light_node->AddComponent(sun_light);
 	root_node.AddChild(sun_light_node);
 

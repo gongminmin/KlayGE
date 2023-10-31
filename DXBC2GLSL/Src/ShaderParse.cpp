@@ -719,12 +719,10 @@ struct ShaderParser
 				uint16_t const* parent_type_token =
 					reinterpret_cast<uint16_t const*>(reinterpret_cast<char const*>(first_token) + parent_type_offset);
 
-				ShaderVariableClass parent_type_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*parent_type_token));
+				[[maybe_unused]] ShaderVariableClass parent_type_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*parent_type_token));
 				++parent_type_token;
-				KFL_UNUSED(parent_type_class);
-				uint16_t unknown1 = KlayGE::LE2Native(*parent_type_token);
+				[[maybe_unused]] uint16_t unknown1 = KlayGE::LE2Native(*parent_type_token);
 				++parent_type_token;
-				KFL_UNUSED(unknown1);
 			}
 
 			uint32_t unknown2;
@@ -734,21 +732,18 @@ struct ShaderParser
 			if (unknown2 != 0)
 			{
 				uint32_t const* unknown_token = reinterpret_cast<uint32_t const*>(reinterpret_cast<char const*>(first_token) + unknown2);
-				uint32_t unknown3 = KlayGE::LE2Native(*unknown_token);
+				[[maybe_unused]] uint32_t unknown3 = KlayGE::LE2Native(*unknown_token);
 				++unknown_token;
-				KFL_UNUSED(unknown3);
 			}
 
 			uint32_t unknown4;
 			memcpy(&unknown4, type_token, sizeof(uint16_t) * 2);
 			unknown4 = KlayGE::LE2Native(unknown4);
 			type_token += 2;
-			KFL_UNUSED(unknown4);
 			uint32_t unknown5;
 			memcpy(&unknown5, type_token, sizeof(uint16_t) * 2);
 			unknown5 = KlayGE::LE2Native(unknown5);
 			type_token += 2;
-			KFL_UNUSED(unknown5);
 
 			uint32_t name_offset;
 			memcpy(&name_offset, type_token, sizeof(uint16_t) * 2);
@@ -803,18 +798,15 @@ struct ShaderParser
 		++ res_token;
 		uint32_t resource_binding_offset = KlayGE::LE2Native(*res_token);
 		++ res_token;
-		uint32_t shader_model = KlayGE::LE2Native(*res_token);
-		++ res_token;
 		// TODO: check here, shader_model is unused.
-		KFL_UNUSED(shader_model);
-		uint32_t compile_flags = KlayGE::LE2Native(*res_token);
+		[[maybe_unused]] uint32_t shader_model = KlayGE::LE2Native(*res_token);
 		++ res_token;
 		// TODO: check here, compile_flags is unused.
-		KFL_UNUSED(compile_flags);
+		[[maybe_unused]] uint32_t compile_flags = KlayGE::LE2Native(*res_token);
+		++ res_token;
 
 		// TODO: check here, creator_offset is unused.
-		uint32_t creator_offset = KlayGE::LE2Native(*res_token);
-		KFL_UNUSED(creator_offset);
+		[[maybe_unused]] uint32_t creator_offset = KlayGE::LE2Native(*res_token);
 
 		uint32_t const * resource_binding_tokens = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + resource_binding_offset);
 		program->resource_bindings.resize(num_resource_bindings);

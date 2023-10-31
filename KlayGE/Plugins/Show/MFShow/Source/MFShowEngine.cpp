@@ -138,10 +138,8 @@ namespace KlayGE
 			return ref;
 		}
 
-		STDMETHODIMP EventNotify(DWORD me_event, DWORD_PTR param1, DWORD param2)
+		STDMETHODIMP EventNotify(DWORD me_event, DWORD_PTR param1, [[maybe_unused]] DWORD param2)
 		{
-			KFL_UNUSED(param2);
-
 			if (me_event == MF_MEDIA_ENGINE_EVENT_NOTIFYSTABLESTATE)
 			{
 				::SetEvent(reinterpret_cast<HANDLE>(param1));
@@ -607,10 +605,8 @@ namespace KlayGE
 		return complete;
 	}
 
-	ShowState MFShowEngine::State(long msTimeout)
+	ShowState MFShowEngine::State([[maybe_unused]] long msTimeout)
 	{
-		KFL_UNUSED(msTimeout);
-
 		state_ = SS_Unkown;
 		if (media_engine_)
 		{

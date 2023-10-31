@@ -41,10 +41,8 @@ namespace KlayGE
 {
 	D3D11Fence::D3D11Fence() = default;
 
-	uint64_t D3D11Fence::Signal(FenceType ft)
+	uint64_t D3D11Fence::Signal([[maybe_unused]] FenceType ft)
 	{
-		KFL_UNUSED(ft);
-
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11Device1* d3d_device = re.D3DDevice1();
 		ID3D11DeviceContext1* d3d_imm_ctx = re.D3DDeviceImmContext1();
@@ -110,10 +108,8 @@ namespace KlayGE
 		fence_event_ = MakeWin32UniqueHandle(::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 	}
 
-	uint64_t D3D11_4Fence::Signal(FenceType ft)
+	uint64_t D3D11_4Fence::Signal([[maybe_unused]] FenceType ft)
 	{
-		KFL_UNUSED(ft);
-
 		auto const& re = checked_cast<D3D11RenderEngine const&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto* d3d_imm_ctx = re.D3DDeviceImmContext4();
 		BOOST_ASSERT(d3d_imm_ctx != nullptr);

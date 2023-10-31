@@ -760,49 +760,34 @@ namespace KlayGE
 
 	JsonValue::~JsonValue() noexcept = default;
 
-	JsonValue* JsonValue::Member(std::string_view name) const
+	JsonValue* JsonValue::Member([[maybe_unused]] std::string_view name) const
 	{
-		KFL_UNUSED(name);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::InsertAfterValue(JsonValue const& location, std::string_view name, std::unique_ptr<JsonValue> new_value)
+	void JsonValue::InsertAfterValue([[maybe_unused]] JsonValue const& location, [[maybe_unused]] std::string_view name,
+		[[maybe_unused]] std::unique_ptr<JsonValue> new_value)
 	{
-		KFL_UNUSED(location);
-		KFL_UNUSED(name);
-		KFL_UNUSED(new_value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::AppendValue(std::string_view name, std::unique_ptr<JsonValue> new_value)
+	void JsonValue::AppendValue([[maybe_unused]] std::string_view name, [[maybe_unused]] std::unique_ptr<JsonValue> new_value)
 	{
-		KFL_UNUSED(name);
-		KFL_UNUSED(new_value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::InsertAfterValue(JsonValue const& location, std::unique_ptr<JsonValue> new_value)
+	void JsonValue::InsertAfterValue([[maybe_unused]] JsonValue const& location, [[maybe_unused]] std::unique_ptr<JsonValue> new_value)
 	{
-		KFL_UNUSED(location);
-		KFL_UNUSED(new_value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::AppendValue(std::unique_ptr<JsonValue> new_value)
+	void JsonValue::AppendValue([[maybe_unused]] std::unique_ptr<JsonValue> new_value)
 	{
-		KFL_UNUSED(new_value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::RemoveValue(JsonValue const& value)
+	void JsonValue::RemoveValue([[maybe_unused]] JsonValue const& value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
@@ -845,69 +830,49 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(bool value)
+	void JsonValue::Value([[maybe_unused]] bool value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(int32_t value)
+	void JsonValue::Value([[maybe_unused]] int32_t value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(uint32_t value)
+	void JsonValue::Value([[maybe_unused]] uint32_t value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(float value)
+	void JsonValue::Value([[maybe_unused]] float value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(std::string_view value)
+	void JsonValue::Value([[maybe_unused]] std::string_view value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(std::vector<std::unique_ptr<JsonValue>> value)
+	void JsonValue::Value([[maybe_unused]] std::vector<std::unique_ptr<JsonValue>> value)
 	{
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::Value(std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values)
+	void JsonValue::Value([[maybe_unused]] std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values)
 	{
-		KFL_UNUSED(values);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::ValueIndex(uint32_t index, std::unique_ptr<JsonValue> value)
+	void JsonValue::ValueIndex([[maybe_unused]] uint32_t index, [[maybe_unused]] std::unique_ptr<JsonValue> value)
 	{
-		KFL_UNUSED(index);
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void JsonValue::ValueIndex(uint32_t index, std::string_view name, std::unique_ptr<JsonValue> value)
+	void JsonValue::ValueIndex(
+		[[maybe_unused]] uint32_t index, [[maybe_unused]] std::string_view name, [[maybe_unused]] std::unique_ptr<JsonValue> value)
 	{
-		KFL_UNUSED(index);
-		KFL_UNUSED(name);
-		KFL_UNUSED(value);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 

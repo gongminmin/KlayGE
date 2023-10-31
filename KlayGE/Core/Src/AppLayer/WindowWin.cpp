@@ -63,11 +63,8 @@ namespace KlayGE
 	}
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam) noexcept
+	BOOL Window::EnumMonProc(HMONITOR mon, [[maybe_unused]] HDC dc_mon, [[maybe_unused]] RECT* rc_mon, LPARAM lparam) noexcept
 	{
-		KFL_UNUSED(dc_mon);
-		KFL_UNUSED(rc_mon);
-
 		DllLoader shcore;
 		if (shcore.Load("SHCore.dll"))
 		{

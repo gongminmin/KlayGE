@@ -290,9 +290,8 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 		ofs.close();
 
-		int err = system("convert.bat");
+		[[maybe_unused]] int err = system("convert.bat");
 		err = system("del convert.bat");
-		KFL_UNUSED(err);
 	}
 }
 

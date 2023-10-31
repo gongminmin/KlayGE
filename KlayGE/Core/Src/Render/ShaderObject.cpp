@@ -191,8 +191,7 @@ namespace
 			if (first)
 			{
 				ss << KFL_STRINGIZE(WINE_PATH) << "wineserver -p";
-				int err = system(ss.str().c_str());
-				KFL_UNUSED(err);
+				[[maybe_unused]] int err = system(ss.str().c_str());
 				// We should hold on a persistant wineserver, or XCode will lost connection after wineserver instance close and wine may not be able to find '.exe.so' file
 				first = false;
 				ss.str(std::string());

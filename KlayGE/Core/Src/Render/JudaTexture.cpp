@@ -1143,10 +1143,9 @@ namespace KlayGE
 			cache_tile_border_size_ = border_size;
 			cache_tile_size_ = (0 == cache_tile_size) ? tile_size_ : cache_tile_size;
 
-			uint32_t const scale = tile_size_ / cache_tile_size_;
+			[[maybe_unused]] uint32_t const scale = tile_size_ / cache_tile_size_;
 			BOOST_ASSERT(scale * cache_tile_size_ == tile_size_);
 			BOOST_ASSERT(0 == (scale & (scale - 1)));
-			KFL_UNUSED(scale);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

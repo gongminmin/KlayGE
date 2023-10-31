@@ -75,57 +75,61 @@ namespace KlayGE
 	}
 #endif
 
-	uint32_t D3D12Texture::Width(uint32_t level) const
+	uint32_t D3D12Texture::Width([[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
 	}
 
-	uint32_t D3D12Texture::Height(uint32_t level) const
+	uint32_t D3D12Texture::Height([[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
 	}
 
-	uint32_t D3D12Texture::Depth(uint32_t level) const
+	uint32_t D3D12Texture::Depth([[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
 	}
 
-	void D3D12Texture::CopyToSubTexture1D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
-		uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/,
-		uint32_t /*src_width*/, TextureFilter /*filter*/)
+	void D3D12Texture::CopyToSubTexture1D([[maybe_unused]] Texture& target, [[maybe_unused]] uint32_t dst_array_index,
+		[[maybe_unused]] uint32_t dst_level, [[maybe_unused]] uint32_t dst_x_offset, [[maybe_unused]] uint32_t dst_width,
+		[[maybe_unused]] uint32_t src_array_index, [[maybe_unused]] uint32_t src_level, [[maybe_unused]] uint32_t src_x_offset,
+		[[maybe_unused]] uint32_t src_width, [[maybe_unused]] TextureFilter filter)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::CopyToSubTexture2D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
-		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*src_array_index*/,
-		uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/,
-		TextureFilter /*filter*/)
+	void D3D12Texture::CopyToSubTexture2D([[maybe_unused]] Texture& target, [[maybe_unused]] uint32_t dst_array_index,
+		[[maybe_unused]] uint32_t dst_level, [[maybe_unused]] uint32_t dst_x_offset, [[maybe_unused]] uint32_t dst_y_offset,
+		[[maybe_unused]] uint32_t dst_width, [[maybe_unused]] uint32_t dst_height, [[maybe_unused]] uint32_t src_array_index,
+		[[maybe_unused]] uint32_t src_level, [[maybe_unused]] uint32_t src_x_offset, [[maybe_unused]] uint32_t src_y_offset,
+		[[maybe_unused]] uint32_t src_width, [[maybe_unused]] uint32_t src_height, [[maybe_unused]] TextureFilter filter)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::CopyToSubTexture3D(Texture& /*target*/, uint32_t /*dst_array_index*/, uint32_t /*dst_level*/,
-		uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-		uint32_t /*dst_depth*/, uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
-		uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/, TextureFilter /*filter*/)
+	void D3D12Texture::CopyToSubTexture3D([[maybe_unused]] Texture& target, [[maybe_unused]] uint32_t dst_array_index,
+		[[maybe_unused]] uint32_t dst_level, [[maybe_unused]] uint32_t dst_x_offset, [[maybe_unused]] uint32_t dst_y_offset,
+		[[maybe_unused]] uint32_t dst_z_offset, [[maybe_unused]] uint32_t dst_width, [[maybe_unused]] uint32_t dst_height,
+		[[maybe_unused]] uint32_t dst_depth, [[maybe_unused]] uint32_t src_array_index, [[maybe_unused]] uint32_t src_level,
+		[[maybe_unused]] uint32_t src_x_offset, [[maybe_unused]] uint32_t src_y_offset, [[maybe_unused]] uint32_t src_z_offset,
+		[[maybe_unused]] uint32_t src_width, [[maybe_unused]] uint32_t src_height, [[maybe_unused]] uint32_t src_depth,
+		[[maybe_unused]] TextureFilter filter)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::CopyToSubTextureCube(Texture& /*target*/, uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/,
-		uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-		uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/,
-		uint32_t /*src_width*/, uint32_t /*src_height*/, TextureFilter /*filter*/)
+	void D3D12Texture::CopyToSubTextureCube([[maybe_unused]] Texture& target, [[maybe_unused]] uint32_t dst_array_index,
+		[[maybe_unused]] CubeFaces dst_face, [[maybe_unused]] uint32_t dst_level, [[maybe_unused]] uint32_t dst_x_offset,
+		[[maybe_unused]] uint32_t dst_y_offset, [[maybe_unused]] uint32_t dst_width, [[maybe_unused]] uint32_t dst_height,
+		[[maybe_unused]] uint32_t src_array_index, [[maybe_unused]] CubeFaces src_face, [[maybe_unused]] uint32_t src_level,
+		[[maybe_unused]] uint32_t src_x_offset, [[maybe_unused]] uint32_t src_y_offset, [[maybe_unused]] uint32_t src_width,
+		[[maybe_unused]] uint32_t src_height, [[maybe_unused]] TextureFilter filter)
 	{
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -410,105 +414,52 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Texture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t width,
-		void*& data)
+	void D3D12Texture::Map1D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		[[maybe_unused]] uint32_t x_offset, [[maybe_unused]] uint32_t width, [[maybe_unused]] void*& data)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-		KFL_UNUSED(tma);
-		KFL_UNUSED(x_offset);
-		KFL_UNUSED(width);
-		KFL_UNUSED(data);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-		void*& data, uint32_t& row_pitch)
+	void D3D12Texture::Map2D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		[[maybe_unused]] uint32_t x_offset, [[maybe_unused]] uint32_t y_offset, [[maybe_unused]] uint32_t width,
+		[[maybe_unused]] uint32_t height, [[maybe_unused]] void*& data, [[maybe_unused]] uint32_t& row_pitch)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-		KFL_UNUSED(tma);
-		KFL_UNUSED(x_offset);
-		KFL_UNUSED(y_offset);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-		KFL_UNUSED(data);
-		KFL_UNUSED(row_pitch);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-		uint32_t width, uint32_t height, uint32_t depth,
-		void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
+	void D3D12Texture::Map3D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		[[maybe_unused]] uint32_t x_offset, [[maybe_unused]] uint32_t y_offset, [[maybe_unused]] uint32_t z_offset,
+		[[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height, [[maybe_unused]] uint32_t depth, [[maybe_unused]] void*& data,
+		[[maybe_unused]] uint32_t& row_pitch, [[maybe_unused]] uint32_t& slice_pitch)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-		KFL_UNUSED(tma);
-		KFL_UNUSED(x_offset);
-		KFL_UNUSED(y_offset);
-		KFL_UNUSED(z_offset);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-		KFL_UNUSED(depth);
-		KFL_UNUSED(data);
-		KFL_UNUSED(row_pitch);
-		KFL_UNUSED(slice_pitch);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-		void*& data, uint32_t& row_pitch)
+	void D3D12Texture::MapCube([[maybe_unused]] uint32_t array_index, [[maybe_unused]] CubeFaces face, [[maybe_unused]] uint32_t level,
+		[[maybe_unused]] TextureMapAccess tma, [[maybe_unused]] uint32_t x_offset, [[maybe_unused]] uint32_t y_offset,
+		[[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height, [[maybe_unused]] void*& data,
+		[[maybe_unused]] uint32_t& row_pitch)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
-		KFL_UNUSED(tma);
-		KFL_UNUSED(x_offset);
-		KFL_UNUSED(y_offset);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-		KFL_UNUSED(data);
-		KFL_UNUSED(row_pitch);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::Unmap1D(uint32_t array_index, uint32_t level)
+	void D3D12Texture::Unmap1D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::Unmap2D(uint32_t array_index, uint32_t level)
+	void D3D12Texture::Unmap2D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::Unmap3D(uint32_t array_index, uint32_t level)
+	void D3D12Texture::Unmap3D([[maybe_unused]] uint32_t array_index, [[maybe_unused]] uint32_t level)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void D3D12Texture::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
+	void D3D12Texture::UnmapCube([[maybe_unused]] uint32_t array_index, [[maybe_unused]] CubeFaces face, [[maybe_unused]] uint32_t level)
 	{
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
 
 		KFL_UNREACHABLE("Can't be called");
 	}
@@ -916,129 +867,71 @@ namespace KlayGE
 		}
 	}
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(
-		ElementFormat pf, uint32_t first_array_index, uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc([[maybe_unused]] ElementFormat pf,
+		[[maybe_unused]] uint32_t first_array_index, [[maybe_unused]] uint32_t array_size, [[maybe_unused]] uint32_t first_level,
+		[[maybe_unused]] uint32_t num_levels) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(first_level);
-		KFL_UNUSED(num_levels);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc(
-		ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t first_level, uint32_t num_levels) const
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12Texture::FillSRVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] CubeFaces face, [[maybe_unused]] uint32_t first_level, [[maybe_unused]] uint32_t num_levels) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(first_level);
-		KFL_UNUSED(num_levels);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t first_array_index,
+		[[maybe_unused]] uint32_t array_size, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] uint32_t first_slice, [[maybe_unused]] uint32_t num_slices, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(first_slice);
-		KFL_UNUSED(num_slices);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] CubeFaces face, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t first_array_index,
+		[[maybe_unused]] uint32_t array_size, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] uint32_t first_slice, [[maybe_unused]] uint32_t num_slices, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(first_slice);
-		KFL_UNUSED(num_slices);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(ElementFormat pf, uint32_t array_index, CubeFaces face, uint32_t level) const
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] CubeFaces face, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(face);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc([[maybe_unused]] ElementFormat pf,
+		[[maybe_unused]] uint32_t first_array_index, [[maybe_unused]] uint32_t array_size, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t array_index, uint32_t first_slice,
-		uint32_t num_slices, uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc([[maybe_unused]] ElementFormat pf, [[maybe_unused]] uint32_t array_index,
+		[[maybe_unused]] uint32_t first_slice, [[maybe_unused]] uint32_t num_slices, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(array_index);
-		KFL_UNUSED(first_slice);
-		KFL_UNUSED(num_slices);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		CubeFaces first_face, uint32_t num_faces, uint32_t level) const
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc([[maybe_unused]] ElementFormat pf,
+		[[maybe_unused]] uint32_t first_array_index, [[maybe_unused]] uint32_t array_size, [[maybe_unused]] CubeFaces first_face,
+		[[maybe_unused]] uint32_t num_faces, [[maybe_unused]] uint32_t level) const
 	{
-		KFL_UNUSED(pf);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
-		KFL_UNUSED(first_face);
-		KFL_UNUSED(num_faces);
-		KFL_UNUSED(level);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 	

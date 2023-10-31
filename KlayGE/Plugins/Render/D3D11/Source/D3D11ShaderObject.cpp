@@ -711,11 +711,8 @@ namespace KlayGE
 	}
 
 	void D3D11PixelShaderStageObject::StageSpecificCreateHwShader(
-		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		auto const& re = checked_cast<D3D11RenderEngine const&>(rf.RenderEngineInstance());
 		ID3D11Device1* d3d_device = re.D3DDevice1();
@@ -781,11 +778,8 @@ namespace KlayGE
 	}
 
 	void D3D11ComputeShaderStageObject::StageSpecificCreateHwShader(
-		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		if (is_available_)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -848,11 +842,8 @@ namespace KlayGE
 	}
 
 	void D3D11HullShaderStageObject::StageSpecificCreateHwShader(
-		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
+		[[maybe_unused]] RenderEffect const& effect, [[maybe_unused]] std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
-		KFL_UNUSED(effect);
-		KFL_UNUSED(shader_desc_ids);
-
 		if (is_available_)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();

@@ -146,9 +146,8 @@ namespace KlayGE
 		virtual void ClearHwShader() = 0;
 
 #if KLAYGE_IS_DEV_PLATFORM
-		virtual void StageSpecificReflection(ID3D11ShaderReflection* reflection)
+		virtual void StageSpecificReflection([[maybe_unused]] ID3D11ShaderReflection* reflection)
 		{
-			KFL_UNUSED(reflection);
 		}
 #endif
 

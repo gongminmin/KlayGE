@@ -239,10 +239,9 @@ void DetailedSurfaceApp::OcclusionHandler(KlayGE::UICheckBox const& sender)
 	this->UpdateMaterial();
 }
 
-void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const& sender)
+void DetailedSurfaceApp::NaLengthHandler([[maybe_unused]] KlayGE::UICheckBox const& sender)
 {
 	// Na Length textures are not supported by deferred rendering layer, yet
-	KFL_UNUSED(sender);
 }
 
 void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const& sender)

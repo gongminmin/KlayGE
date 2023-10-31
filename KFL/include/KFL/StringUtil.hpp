@@ -147,33 +147,28 @@ namespace KlayGE
 			};
 
 			template <typename T>
-			inline bool IsRawChar(T const& str) noexcept
+			inline bool IsRawChar([[maybe_unused]] T const& str) noexcept
 			{
-				KFL_UNUSED(str);
 				return false;
 			}
 
-			inline bool IsRawChar(char* str) noexcept
+			inline bool IsRawChar([[maybe_unused]] char* str) noexcept
 			{
-				KFL_UNUSED(str);
 				return true;
 			}
 
-			inline bool IsRawChar(char const* str) noexcept
+			inline bool IsRawChar([[maybe_unused]] char const* str) noexcept
 			{
-				KFL_UNUSED(str);
 				return true;
 			}
 
-			inline bool IsRawChar(wchar_t* str) noexcept
+			inline bool IsRawChar([[maybe_unused]] wchar_t* str) noexcept
 			{
-				KFL_UNUSED(str);
 				return true;
 			}
 
-			inline bool IsRawChar(wchar_t const* str) noexcept
+			inline bool IsRawChar([[maybe_unused]] wchar_t const* str) noexcept
 			{
-				KFL_UNUSED(str);
 				return true;
 			}
 

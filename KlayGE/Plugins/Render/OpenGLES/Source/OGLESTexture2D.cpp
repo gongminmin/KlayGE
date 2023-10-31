@@ -196,10 +196,9 @@ namespace KlayGE
 	}
 	
 	void OGLESTexture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, [[maybe_unused]] CubeFaces src_face,
 		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
-		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
 		if ((sample_count_ > 1) && !IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_))))
@@ -379,10 +378,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void OGLESTexture2D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;

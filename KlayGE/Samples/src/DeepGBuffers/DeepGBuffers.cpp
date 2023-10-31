@@ -172,14 +172,13 @@ void DeepGBuffersApp::OnCreate()
 		spot_light->InnerAngle(PI / 4);
 		float3 const light_pos = light_positions[i];
 		auto spot_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
-		spot_light_node->OnMainThreadUpdate().Connect([light_pos](SceneNode& node, float app_time, float elapsed_time)
-		{
-			KFL_UNUSED(elapsed_time);
-
-			float3 new_pos = MathLib::transform_coord(float3(light_pos.x(), 0, light_pos.z()), MathLib::rotation_y(app_time));
-			new_pos.y() = light_pos.y();
-			node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(new_pos, float3(0, 0, 0))));
-		});
+		spot_light_node->OnMainThreadUpdate().Connect(
+			[light_pos](SceneNode& node, float app_time, [[maybe_unused]] float elapsed_time)
+			{
+				float3 new_pos = MathLib::transform_coord(float3(light_pos.x(), 0, light_pos.z()), MathLib::rotation_y(app_time));
+				new_pos.y() = light_pos.y();
+				node.TransformToParent(MathLib::inverse(MathLib::look_at_lh(new_pos, float3(0, 0, 0))));
+			});
 		spot_light_node->AddComponent(spot_light);
 		root_node.AddChild(spot_light_node);
 

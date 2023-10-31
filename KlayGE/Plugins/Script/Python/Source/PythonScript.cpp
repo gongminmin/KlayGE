@@ -47,11 +47,8 @@ namespace KlayGE
 {
 	// http://stackoverflow.com/questions/4307187/how-to-catch-python-stdout-in-c-code
 
-	PyObject* StdoutWrite(PyObject* self, PyObject* args)
+	PyObject* StdoutWrite([[maybe_unused]] PyObject* self, PyObject* args)
 	{
-		KFL_UNUSED(self);
-		KFL_UNUSED(args);
-
 		char* data = nullptr;
 		if (!PyArg_ParseTuple(args, "s", &data))
 		{
@@ -71,11 +68,8 @@ namespace KlayGE
 		return PyLong_FromSize_t(len);
 	}
 	
-	PyObject* StdoutFlush(PyObject* self, PyObject* args)
+	PyObject* StdoutFlush([[maybe_unused]] PyObject* self, [[maybe_unused]] PyObject* args)
 	{
-		KFL_UNUSED(self);
-		KFL_UNUSED(args);
-
 		// no-op
 		return Py_BuildValue("");
 	}

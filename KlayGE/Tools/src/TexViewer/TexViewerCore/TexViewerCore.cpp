@@ -192,10 +192,8 @@ namespace KlayGE
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 	}
 
-	uint32_t TexViewerCore::DoUpdate(uint32_t pass)
+	uint32_t TexViewerCore::DoUpdate([[maybe_unused]] uint32_t pass)
 	{
-		KFL_UNUSED(pass);
-
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 		if (Context::Instance().Config().graphics_cfg.gamma)
 		{

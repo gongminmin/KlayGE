@@ -144,10 +144,8 @@ namespace KlayGE
 	}
 
 	void D3D12GpuDescriptorAllocator::Allocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint32_t size)
+		[[maybe_unused]] std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint32_t size)
 	{
-		KFL_UNUSED(proof_of_lock);
-
 		UpdateDescriptorSize(type_);
 
 		uint16_t const default_page_size = DescriptorPageSizes[type_];
@@ -185,9 +183,8 @@ namespace KlayGE
 	}
 
 	void D3D12GpuDescriptorAllocator::Deallocate(
-		std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value)
+		[[maybe_unused]] std::lock_guard<std::mutex>& proof_of_lock, D3D12GpuDescriptorBlock& desc_block, uint64_t fence_value)
 	{
-		KFL_UNUSED(proof_of_lock);
 		BOOST_ASSERT(desc_block);
 
 		uint16_t const default_page_size = DescriptorPageSizes[type_];

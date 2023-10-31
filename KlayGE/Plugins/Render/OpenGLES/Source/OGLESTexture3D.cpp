@@ -107,12 +107,10 @@ namespace KlayGE
 	}
 
 	void OGLESTexture3D::CopyToSubTexture3D(Texture& target, uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset,
-		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth, uint32_t src_array_index,
+		uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, [[maybe_unused]] uint32_t dst_depth, uint32_t src_array_index,
 		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height,
 		uint32_t src_depth, TextureFilter filter)
 	{
-		KFL_UNUSED(dst_depth);
-
 		BOOST_ASSERT(type_ == target.Type());
 		BOOST_ASSERT(0 == src_array_index);
 		BOOST_ASSERT(0 == dst_array_index);
@@ -174,13 +172,12 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture3D::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+	void OGLESTexture3D::Map3D([[maybe_unused]] uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		last_tma_ = tma;
 
@@ -195,10 +192,9 @@ namespace KlayGE
 		data = p + ((z_offset * h + y_offset) * w + x_offset) * texel_size;
 	}
 
-	void OGLESTexture3D::Unmap3D(uint32_t array_index, uint32_t level)
+	void OGLESTexture3D::Unmap3D([[maybe_unused]] uint32_t array_index, uint32_t level)
 	{
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		switch (last_tma_)
 		{
@@ -240,10 +236,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture3D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void OGLESTexture3D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;
@@ -358,13 +352,12 @@ namespace KlayGE
 		hw_res_ready_ = true;
 	}
 
-	void OGLESTexture3D::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+	void OGLESTexture3D::UpdateSubresource3D([[maybe_unused]] uint32_t array_index, uint32_t level,
 		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
 	{
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

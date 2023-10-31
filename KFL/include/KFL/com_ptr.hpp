@@ -263,9 +263,8 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	bool operator==(com_ptr<T> const& lhs, std::nullptr_t rhs) noexcept
+	bool operator==(com_ptr<T> const& lhs, [[maybe_unused]] std::nullptr_t rhs) noexcept
 	{
-		KFL_UNUSED(rhs);
 		return lhs.get() == nullptr;
 	}
 
@@ -300,9 +299,8 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	bool operator<(com_ptr<T> const& lhs, std::nullptr_t rhs) noexcept
+	bool operator<(com_ptr<T> const& lhs, [[maybe_unused]] std::nullptr_t rhs) noexcept
 	{
-		KFL_UNUSED(rhs);
 		return lhs.get() < nullptr;
 	}
 

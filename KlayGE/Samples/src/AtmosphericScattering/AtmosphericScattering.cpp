@@ -43,9 +43,8 @@ namespace
 			technique_ = effect_->TechniqueByName("PlanetTech");
 		}
 
-		void DoBuildMeshInfo(RenderModel const & model) override
+		void DoBuildMeshInfo([[maybe_unused]] RenderModel const & model) override
 		{
-			KFL_UNUSED(model);
 		}
 
 		void LightDir(float3 const & dir)
@@ -79,10 +78,8 @@ namespace
 			technique_ = effect_->TechniqueByName("AtmosphereTech");
 		}
 
-		virtual void DoBuildMeshInfo(RenderModel const & model) override
+		virtual void DoBuildMeshInfo([[maybe_unused]] RenderModel const & model) override
 		{
-			KFL_UNUSED(model);
-
 			pos_aabb_.Min() *= 1.2f;
 			pos_aabb_.Max() *= 1.2f;
 		}
@@ -215,12 +212,9 @@ void AtmosphericScatteringApp::OnCreate()
 	auto sun_light_proxy = LoadLightSourceProxyModel(sun_light);
 	sun_light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.1f, 0.1f, 0.1f) * sun_light_proxy->RootNode()->TransformToParent());
 	sun_light_node->AddChild(sun_light_proxy->RootNode());
-	sun_light_node->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time) {
-		KFL_UNUSED(app_time);
-		KFL_UNUSED(elapsed_time);
-
-		node.TransformToParent(light_ctrl_camera_->InverseViewMatrix());
-	});
+	sun_light_node->OnMainThreadUpdate().Connect(
+		[this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+		{ node.TransformToParent(light_ctrl_camera_->InverseViewMatrix()); });
 	sun_light_node->AddComponent(sun_light);
 	root_node.AddChild(sun_light_node);
 

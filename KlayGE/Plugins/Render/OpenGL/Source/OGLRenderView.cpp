@@ -331,10 +331,8 @@ namespace KlayGE
 		this->DoDiscardColor();
 	}
 
-	void OGLScreenRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLScreenRenderTargetView::OnAttached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer&>(fb).OGLFbo());
 
 		index_ = static_cast<uint32_t>(att);
@@ -343,11 +341,8 @@ namespace KlayGE
 		re.BindFramebuffer(0);
 	}
 
-	void OGLScreenRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLScreenRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, [[maybe_unused]] FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-		KFL_UNUSED(att);
-
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -376,20 +371,16 @@ namespace KlayGE
 		this->DoDiscardDepthStencil();
 	}
 
-	void OGLScreenDepthStencilView::OnAttached(FrameBuffer& fb)
+	void OGLScreenDepthStencilView::OnAttached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
 
-	void OGLScreenDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLScreenDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer&>(fb).OGLFbo());
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -548,10 +539,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture1DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLTexture1DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		uint32_t const index = static_cast<uint32_t>(att);
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
@@ -798,10 +787,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture2DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLTexture2DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		uint32_t const index = static_cast<uint32_t>(att);
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
@@ -902,12 +889,10 @@ namespace KlayGE
 	}
 
 
-	OGLTexture3DRenderTargetView::OGLTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, int array_index,
+	OGLTexture3DRenderTargetView::OGLTexture3DRenderTargetView(TexturePtr const & texture_3d, ElementFormat pf, [[maybe_unused]] int array_index,
 		uint32_t slice, int level)
 		: slice_(slice), copy_to_tex_(0)
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_3D == texture_3d->Type());
 		BOOST_ASSERT(texture_3d->Depth(level) > slice);
 		BOOST_ASSERT(0 == array_index);
@@ -1044,10 +1029,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3DRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLTexture3DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		uint32_t const index = static_cast<uint32_t>(att);
 
 		if (glloader_GL_EXT_direct_state_access())
@@ -1097,10 +1080,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3DRenderTargetView::OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLTexture3DRenderTargetView::OnUnbind([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		BOOST_ASSERT(copy_to_tex_ != 0);
 		if (2 == copy_to_tex_)
 		{
@@ -1120,12 +1101,10 @@ namespace KlayGE
 	}
 
 
-	OGLTextureCubeRenderTargetView::OGLTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
-		Texture::CubeFaces face, int level)
+	OGLTextureCubeRenderTargetView::OGLTextureCubeRenderTargetView(
+		TexturePtr const& texture_cube, ElementFormat pf, [[maybe_unused]] int array_index, Texture::CubeFaces face, int level)
 		: face_(face)
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(0 == array_index);
 
@@ -1142,12 +1121,10 @@ namespace KlayGE
 		this->RetrieveGLTexture();
 	}
 
-	OGLTextureCubeRenderTargetView::OGLTextureCubeRenderTargetView(TexturePtr const & texture_cube, ElementFormat pf, int array_index,
-		int level)
+	OGLTextureCubeRenderTargetView::OGLTextureCubeRenderTargetView(
+		TexturePtr const& texture_cube, ElementFormat pf, [[maybe_unused]] int array_index, int level)
 		: face_(static_cast<Texture::CubeFaces>(-1))
 	{
-		KFL_UNUSED(array_index);
-
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(0 == array_index);
 
@@ -1246,10 +1223,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCubeRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLTextureCubeRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		uint32_t const index = static_cast<uint32_t>(att);
 
 		if (static_cast<int>(face_) >= 0)
@@ -1385,10 +1360,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLGraphicsBufferRenderTargetView::OnDetached(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLGraphicsBufferRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		uint32_t const index = static_cast<uint32_t>(att);
 
 		if (glloader_GL_EXT_direct_state_access())
@@ -1414,10 +1387,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLGraphicsBufferRenderTargetView::OnUnbind(FrameBuffer& fb, FrameBuffer::Attachment att)
+	void OGLGraphicsBufferRenderTargetView::OnUnbind([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		KFL_UNUSED(fb);
-
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(gl_fbo_);
 
@@ -1452,8 +1423,6 @@ namespace KlayGE
 		: target_type_(0), array_index_(0)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
-		KFL_UNUSED(sample_count_);
-		KFL_UNUSED(sample_quality_);
 
 		width_ = width;
 		height_ = height;
@@ -1753,10 +1722,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLTextureDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		if (array_size_ == 0)
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
@@ -1969,13 +1936,12 @@ namespace KlayGE
 
 
 	OGLTextureCubeFaceDepthStencilView::OGLTextureCubeFaceDepthStencilView(TexturePtr const & texture_cube, ElementFormat pf,
-		int array_index, Texture::CubeFaces face, int level)
+		[[maybe_unused]] int array_index, Texture::CubeFaces face, int level)
 		: face_(face)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube->Type());
 		BOOST_ASSERT(IsDepthFormat(texture_cube->Format()));
 		BOOST_ASSERT(0 == array_index);
-		KFL_UNUSED(array_index);
 
 		tex_ = texture_cube;
 
@@ -2041,10 +2007,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCubeFaceDepthStencilView::OnDetached(FrameBuffer& fb)
+	void OGLTextureCubeFaceDepthStencilView::OnDetached([[maybe_unused]] FrameBuffer& fb)
 	{
-		KFL_UNUSED(fb);
-
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 		{

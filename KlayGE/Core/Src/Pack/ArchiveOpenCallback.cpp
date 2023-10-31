@@ -86,17 +86,13 @@ namespace KlayGE
 		}
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::SetTotal(UInt64 const * files, UInt64 const * bytes) noexcept
+	STDMETHODIMP ArchiveOpenCallback::SetTotal([[maybe_unused]] UInt64 const* files, [[maybe_unused]] UInt64 const* bytes) noexcept
 	{
-		KFL_UNUSED(files);
-		KFL_UNUSED(bytes);
 		return S_OK;
 	}
 
-	STDMETHODIMP ArchiveOpenCallback::SetCompleted(UInt64 const * files, UInt64 const * bytes) noexcept
+	STDMETHODIMP ArchiveOpenCallback::SetCompleted([[maybe_unused]] UInt64 const* files, [[maybe_unused]] UInt64 const* bytes) noexcept
 	{
-		KFL_UNUSED(files);
-		KFL_UNUSED(bytes);
 		return S_OK;
 	}
 

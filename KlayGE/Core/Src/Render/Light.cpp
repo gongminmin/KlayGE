@@ -75,18 +75,13 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void LightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
+	void LightSource::SkylightTex([[maybe_unused]] TexturePtr const & tex_y, [[maybe_unused]] TexturePtr const & tex_c)
 	{
-		KFL_UNUSED(tex_y);
-		KFL_UNUSED(tex_c);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void LightSource::SkylightTex(TexturePtr const & tex)
+	void LightSource::SkylightTex([[maybe_unused]] TexturePtr const & tex)
 	{
-		KFL_UNUSED(tex);
-
 		KFL_UNREACHABLE("Can't be called");
 	}
 
@@ -208,9 +203,8 @@ namespace KlayGE
 		return 0;
 	}
 
-	void LightSource::Radius(float radius)
+	void LightSource::Radius([[maybe_unused]] float radius)
 	{
-		KFL_UNUSED(radius);
 	}
 
 	float3 const & LightSource::Extend() const
@@ -219,9 +213,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	void LightSource::Extend(float3 const & extend)
+	void LightSource::Extend([[maybe_unused]] float3 const & extend)
 	{
-		KFL_UNUSED(extend);
 	}
 
 	void LightSource::CloneTo(LightSource& light) const
@@ -669,9 +662,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	void TubeAreaLightSource::Falloff(float3 const & fall_off)
+	void TubeAreaLightSource::Falloff([[maybe_unused]] float3 const & fall_off)
 	{
-		KFL_UNUSED(fall_off);
 		LightSource::Falloff(float3(1, 0, 0));
 	}
 

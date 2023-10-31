@@ -85,8 +85,7 @@ namespace KlayGE
 		uint32_t NumComponentsOfType() const
 		{
 			uint32_t ret = 0;
-			this->ForEachComponentOfType<T>([&ret](T& component) {
-				KFL_UNUSED(component);
+			this->ForEachComponentOfType<T>([&ret]([[maybe_unused]] T& component) {
 				++ret;
 			});
 			return ret;

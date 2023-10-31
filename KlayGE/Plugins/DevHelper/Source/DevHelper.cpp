@@ -51,10 +51,8 @@ namespace KlayGE
 		}
 
 		RenderModelPtr ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,
-			RenderDeviceCaps const * caps) override
+			[[maybe_unused]] RenderDeviceCaps const * caps) override
 		{
-			KFL_UNUSED(caps);
-
 			std::string metadata_name_ptr(metadata_name);
 			if (metadata_name.empty())
 			{

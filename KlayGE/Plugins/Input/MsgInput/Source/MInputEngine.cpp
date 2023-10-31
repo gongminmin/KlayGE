@@ -193,55 +193,47 @@ namespace KlayGE
 		}
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_ = main_wnd->OnKeyDown().Connect(
-			[this](Window const & wnd, uint32_t key)
+			[this]([[maybe_unused]] Window const & wnd, uint32_t key)
 			{
-				KFL_UNUSED(wnd);
 				this->OnKeyDown(key);
 			});
 		on_key_up_ = main_wnd->OnKeyUp().Connect(
-			[this](Window const & wnd, uint32_t key)
+			[this]([[maybe_unused]] Window const & wnd, uint32_t key)
 			{
-				KFL_UNUSED(wnd);
 				this->OnKeyUp(key);
 			});
 		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
 #if defined KLAYGE_PLATFORM_ANDROID
 		on_mouse_down_ = main_wnd->OnMouseDown().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t buttons)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t buttons)
 			{
-				KFL_UNUSED(wnd);
 				this->OnMouseDown(pt, buttons);
 			});
 		on_mouse_up_ = main_wnd->OnMouseUp().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t buttons)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t buttons)
 			{
-				KFL_UNUSED(wnd);
 				this->OnMouseUp(pt, buttons);
 			});
 		on_mouse_move_ = main_wnd->OnMouseMove().Connect(
-			[this](Window const & wnd, int2 const & pt)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt)
 			{
-				KFL_UNUSED(wnd);
 				this->OnMouseMove(pt);
 			});
 		on_mouse_wheel_ = main_wnd->OnMouseWheel().Connect(
-			[this](Window const & wnd, int2 const & pt, int32_t wheel_delta)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, int32_t wheel_delta)
 			{
-				KFL_UNUSED(wnd);
 				this->OnMouseWheel(pt, wheel_delta);
 			});
 		devices_.push_back(MakeSharedPtr<MsgInputMouse>());
 
 		on_joystick_axis_ = main_wnd->OnJoystickAxis().Connect(
-			[this](Window const & wnd, uint32_t axis, int32_t value)
+			[this]([[maybe_unused]] Window const & wnd, uint32_t axis, int32_t value)
 			{
-				KFL_UNUSED(wnd);
 				this->OnJoystickAxis(axis, value);
 			});
 		on_joystick_buttons_ = main_wnd->OnJoystickButtons().Connect(
-			[this](Window const & wnd, uint32_t buttons)
+			[this]([[maybe_unused]] Window const & wnd, uint32_t buttons)
 			{
-				KFL_UNUSED(wnd);
 				this->OnJoystickButtons(buttons);
 			});
 		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
@@ -254,27 +246,23 @@ namespace KlayGE
 #if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)) \
 			|| defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_pointer_down_ = main_wnd->OnPointerDown().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t id)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t id)
 			{
-				KFL_UNUSED(wnd);
 				this->OnPointerDown(pt, id);
 			});
 		on_pointer_up_ = main_wnd->OnPointerUp().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t id)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t id)
 			{
-				KFL_UNUSED(wnd);
 				this->OnPointerUp(pt, id);
 			});
 		on_pointer_update_ = main_wnd->OnPointerUpdate().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t id, bool down)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t id, bool down)
 			{
-				KFL_UNUSED(wnd);
 				this->OnPointerUpdate(pt, id, down);
 			});
 		on_pointer_wheel_ = main_wnd->OnPointerWheel().Connect(
-			[this](Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)
+			[this]([[maybe_unused]] Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)
 			{
-				KFL_UNUSED(wnd);
 				this->OnPointerWheel(pt, id, wheel_delta);
 			});
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());

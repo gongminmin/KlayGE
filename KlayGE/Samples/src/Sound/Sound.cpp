@@ -176,10 +176,8 @@ void SoundApp::Music2Handler(UICheckBox const & sender)
 	}
 }
 
-void SoundApp::SoundHandler(UIButton const & sender)
+void SoundApp::SoundHandler([[maybe_unused]] UIButton const & sender)
 {
-	KFL_UNUSED(sender);
-
 	AudioFactory& af = Context::Instance().AudioFactoryInstance();
 	AudioEngine& ae = af.AudioEngineInstance();
 	ae.Play(3, false);

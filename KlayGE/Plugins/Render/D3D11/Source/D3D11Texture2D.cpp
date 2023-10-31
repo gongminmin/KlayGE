@@ -209,10 +209,9 @@ namespace KlayGE
 	}
 
 	void D3D11Texture2D::CopyToSubTextureCube(Texture& target, uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level,
-		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, CubeFaces src_face,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height, uint32_t src_array_index, [[maybe_unused]] CubeFaces src_face,
 		uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height, TextureFilter filter)
 	{
-		KFL_UNUSED(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
@@ -433,10 +432,8 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
-	void D3D11Texture2D::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void D3D11Texture2D::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		D3D11_TEXTURE2D_DESC desc;
 		desc.Width = width_;
 		desc.Height = height_;

@@ -3104,10 +3104,8 @@ namespace
 		skinned_model.AttachAnimations(animations);
 	}
 
-	void MeshLoader::LoadFromMeshML(std::string_view input_name, MeshMetadata const & metadata)
+	void MeshLoader::LoadFromMeshML(std::string_view input_name, [[maybe_unused]] MeshMetadata const & metadata)
 	{
-		KFL_UNUSED(metadata);
-
 		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
 		std::unique_ptr<XMLDocument> doc = LoadXml(*file);
 		XMLNode const* root = doc->RootNode();

@@ -122,9 +122,8 @@ namespace KlayGE
 		void FillCBufferIndices(RenderEffect const& effect);
 
 #if KLAYGE_IS_DEV_PLATFORM
-		virtual void StageSpecificReflection(ID3D12ShaderReflection* reflection)
+		virtual void StageSpecificReflection([[maybe_unused]] ID3D12ShaderReflection* reflection)
 		{
-			KFL_UNUSED(reflection);
 		}
 #endif
 

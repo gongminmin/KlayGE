@@ -34,11 +34,9 @@
 
 namespace KlayGE
 {
-	NullSoundBuffer::NullSoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume)
+	NullSoundBuffer::NullSoundBuffer(AudioDataSourcePtr const & data_source, [[maybe_unused]] uint32_t num_sources, float volume)
 					: SoundBuffer(data_source)
 	{
-		KFL_UNUSED(num_sources);
-
 		this->Position(float3(0, 0, 0));
 		this->Velocity(float3(0, 0, 0));
 		this->Direction(float3(0, 0, 0));
@@ -53,9 +51,8 @@ namespace KlayGE
 		this->Stop();
 	}
 
-	void NullSoundBuffer::Play(bool loop)
+	void NullSoundBuffer::Play([[maybe_unused]] bool loop)
 	{
-		KFL_UNUSED(loop);
 	}
 
 	void NullSoundBuffer::Stop()
@@ -71,9 +68,8 @@ namespace KlayGE
 		return false;
 	}
 
-	void NullSoundBuffer::Volume(float vol)
+	void NullSoundBuffer::Volume([[maybe_unused]] float vol)
 	{
-		KFL_UNUSED(vol);
 	}
 
 	float3 NullSoundBuffer::Position() const

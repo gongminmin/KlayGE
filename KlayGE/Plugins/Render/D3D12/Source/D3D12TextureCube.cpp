@@ -182,13 +182,11 @@ namespace KlayGE
 		}
 	}
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12TextureCube::FillSRVDesc(ElementFormat pf, uint32_t first_array_index, uint32_t array_size,
-		uint32_t first_level, uint32_t num_levels) const
+	D3D12_SHADER_RESOURCE_VIEW_DESC D3D12TextureCube::FillSRVDesc(ElementFormat pf, [[maybe_unused]] uint32_t first_array_index,
+		[[maybe_unused]] uint32_t array_size, uint32_t first_level, uint32_t num_levels) const
 	{
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == array_size);
-		KFL_UNUSED(first_array_index);
-		KFL_UNUSED(array_size);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 		switch (pf)

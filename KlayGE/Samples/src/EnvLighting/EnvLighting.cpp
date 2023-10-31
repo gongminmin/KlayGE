@@ -1090,11 +1090,9 @@ void EnvLightingApp::OnCreate()
 	sphere_group_ = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	root_node.AddChild(sphere_group_);
 
-	sphere_group_->OnMainThreadUpdate().Connect([this](SceneNode& node, float app_time, float elapsed_time)
+	sphere_group_->OnMainThreadUpdate().Connect(
+		[this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
 			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 

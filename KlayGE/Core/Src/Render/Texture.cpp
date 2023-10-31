@@ -818,11 +818,10 @@ namespace
 
 
 	void EncodeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format,
-		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, ElementFormat src_format,
+		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, [[maybe_unused]] ElementFormat src_format,
 		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
 		BOOST_ASSERT(IsCompressedFormat(dst_format) && !IsCompressedFormat(src_format));
-		KFL_UNUSED(src_format);
 
 		std::unique_ptr<TexCompression> codec;
 		switch (dst_format)
@@ -4091,13 +4090,10 @@ namespace KlayGE
 			resized_ptr, resized_row_pitch);
 	}
 
-	void SoftwareTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t width,
+	void SoftwareTexture::Map1D(uint32_t array_index, uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		uint32_t x_offset, [[maybe_unused]] uint32_t width,
 		void*& data)
 	{
-		KFL_UNUSED(tma);
-		KFL_UNUSED(width);
-
 		size_t const subres = array_index * num_mip_maps_ + level;
 
 		bool already_mapped = false;
@@ -4114,14 +4110,10 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+	void SoftwareTexture::Map2D(uint32_t array_index, uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, [[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height,
 		void*& data, uint32_t& row_pitch)
 	{
-		KFL_UNUSED(tma);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-
 		size_t const subres = array_index * num_mip_maps_ + level;
 
 		bool already_mapped = false;
@@ -4140,16 +4132,11 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+	void SoftwareTexture::Map3D(uint32_t array_index, uint32_t level, [[maybe_unused]] TextureMapAccess tma,
 		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-		uint32_t width, uint32_t height, uint32_t depth,
+		[[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height, [[maybe_unused]] uint32_t depth,
 		void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
-		KFL_UNUSED(tma);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-		KFL_UNUSED(depth);
-
 		size_t const subres = array_index * num_mip_maps_ + level;
 
 		bool already_mapped = false;
@@ -4170,14 +4157,10 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+	void SoftwareTexture::MapCube(uint32_t array_index, CubeFaces face, uint32_t level, [[maybe_unused]] TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, [[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height,
 		void*& data, uint32_t& row_pitch)
 	{
-		KFL_UNUSED(tma);
-		KFL_UNUSED(width);
-		KFL_UNUSED(height);
-
 		size_t const subres = (array_index * 6 + face) * num_mip_maps_ + level;
 
 		bool already_mapped = false;
@@ -4240,10 +4223,8 @@ namespace KlayGE
 		}
 	}
 
-	void SoftwareTexture::CreateHWResource(std::span<ElementInitData const> init_data, float4 const * clear_value_hint)
+	void SoftwareTexture::CreateHWResource(std::span<ElementInitData const> init_data, [[maybe_unused]] float4 const * clear_value_hint)
 	{
-		KFL_UNUSED(clear_value_hint);
-
 		uint32_t const num_faces = (type_ == TT_Cube) ? 6 : 1;
 		uint32_t const num_subres = num_mip_maps_ * array_size_ * num_faces;
 

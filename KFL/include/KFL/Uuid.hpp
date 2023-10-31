@@ -87,30 +87,26 @@ namespace KlayGE
 	Uuid const& UuidOf();
 
 	template <typename T>
-	inline Uuid const& UuidOf(T* p)
+	inline Uuid const& UuidOf([[maybe_unused]] T* p)
 	{
-		KFL_UNUSED(p);
 		return UuidOf<T>();
 	}
 
 	template <typename T>
-	inline Uuid const& UuidOf(T const* p)
+	inline Uuid const& UuidOf([[maybe_unused]] T const* p)
 	{
-		KFL_UNUSED(p);
 		return UuidOf<T>();
 	}
 
 	template <typename T>
-	inline Uuid const& UuidOf(T& p)
+	inline Uuid const& UuidOf([[maybe_unused]] T& p)
 	{
-		KFL_UNUSED(p);
 		return UuidOf<T>();
 	}
 
 	template <typename T>
-	inline Uuid const& UuidOf(T const& p)
+	inline Uuid const& UuidOf([[maybe_unused]] T const& p)
 	{
-		KFL_UNUSED(p);
 		return UuidOf<T>();
 	}
 } // namespace KlayGE

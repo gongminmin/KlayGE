@@ -42,10 +42,8 @@ namespace KlayGE
 	{
 	}
 
-	void NullSource::Open(ResIdentifierPtr const & file)
+	void NullSource::Open([[maybe_unused]] ResIdentifierPtr const & file)
 	{
-		KFL_UNUSED(file);
-
 		format_ = AF_Mono16;
 		freq_ = 22050;
 
@@ -57,11 +55,8 @@ namespace KlayGE
 		this->Reset();
 	}
 
-	size_t NullSource::Read(void* data, size_t size)
+	size_t NullSource::Read([[maybe_unused]] void* data, [[maybe_unused]] size_t size)
 	{
-		KFL_UNUSED(data);
-		KFL_UNUSED(size);
-
 		return 0;
 	}
 

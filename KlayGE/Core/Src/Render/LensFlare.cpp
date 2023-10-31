@@ -89,12 +89,9 @@ namespace KlayGE
 	LensFlareRenderableComponent::LensFlareRenderableComponent()
 		: RenderableComponent(MakeSharedPtr<LensFlareRenderable>())
 	{
-		this->OnMainThreadUpdate().Connect([this](SceneComponent& component, float app_time, float elapsed_time)
+		this->OnMainThreadUpdate().Connect(
+			[this]([[maybe_unused]] SceneComponent& component, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			KFL_UNUSED(component);
-			KFL_UNUSED(app_time);
-			KFL_UNUSED(elapsed_time);
-
 			float const FLARE_RENDERANGLE = 0.9f;
 			float const FLARE_SCALEAMOUNT = 0.2f;
 
