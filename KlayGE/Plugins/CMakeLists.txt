@@ -1,5 +1,4 @@
 add_subdirectory(Audio)
-add_subdirectory(AudioDataSource)
 add_subdirectory(DevHelper)
 add_subdirectory(Input)
 add_subdirectory(Render)

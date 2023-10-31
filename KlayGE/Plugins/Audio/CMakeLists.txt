@@ -12,3 +12,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_LIBRARY_OUTPUT_DIRECTORY_M
 add_subdirectory(NullAudio)
 add_subdirectory(OpenAL)
 add_subdirectory(XAudio)
+
+add_subdirectory(NullAudioDataSource)
+add_subdirectory(OggVorbis)
