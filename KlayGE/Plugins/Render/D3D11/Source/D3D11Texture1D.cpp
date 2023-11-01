@@ -40,7 +40,7 @@ namespace KlayGE
 			{
 				++ numMipMaps;
 
-				w = std::max<uint32_t>(1U, w / 2);
+				w = std::max(1U, w / 2);
 			}
 		}
 		num_mip_maps_ = numMipMaps;
@@ -55,7 +55,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, width_ >> level);
+		return std::max(1U, width_ >> level);
 	}
 
 	void D3D11Texture1D::CopyToTexture(Texture& target, TextureFilter filter)

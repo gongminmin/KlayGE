@@ -74,7 +74,7 @@ namespace KlayGE
 		TMA_Read_Write
 	};
 
-	enum class TextureFilter
+	enum class TextureFilter : uint32_t
 	{
 		Point,
 		Linear,

@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
 #include "D3D12Util.hpp"
@@ -279,15 +280,15 @@ namespace KlayGE
 
 		uint32_t NumSrvs(ShaderStage stage) const noexcept
 		{
-			return d3d_immutable_->num_srvs_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_srvs_[std::to_underlying(stage)];
 		}
 		uint32_t NumUavs(ShaderStage stage) const noexcept
 		{
-			return d3d_immutable_->num_uavs_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_uavs_[std::to_underlying(stage)];
 		}
 		uint32_t NumSamplers(ShaderStage stage) const noexcept
 		{
-			return d3d_immutable_->num_samplers_[static_cast<uint32_t>(stage)];
+			return d3d_immutable_->num_samplers_[std::to_underlying(stage)];
 		}
 
 		uint32_t NumCBuffers(ShaderStage stage) const noexcept;

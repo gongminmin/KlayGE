@@ -1137,7 +1137,7 @@ namespace KlayGE
 	{
 		if (!tex_cache_ && tex_cache_array_.empty())
 		{
-			pages = std::min<uint32_t>(pages, 1024U);
+			pages = std::min(pages, 1024U);
 			uint32_t sqrt_pages = static_cast<uint32_t>(sqrt(static_cast<float>(pages)) + 0.5f);
 
 			cache_tile_border_size_ = border_size;

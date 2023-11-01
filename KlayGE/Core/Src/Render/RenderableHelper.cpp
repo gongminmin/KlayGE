@@ -380,9 +380,9 @@ namespace KlayGE
 				float3 pos(static_cast<float>(x) / length_segs, 1 - (static_cast<float>(y) / width_segs), 0.5f);
 				int16_t s_pos[4] = 
 				{
-					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
-					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
-					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+					static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+					static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+					static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
 					32767
 				};
 
@@ -408,8 +408,8 @@ namespace KlayGE
 						static_cast<float>(y) / width_segs * 0.5f + 0.5f, 0.5f);
 					int16_t s_tc[2] = 
 					{
-						static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768), -32768, 32767)),
-						static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768), -32768, 32767)),
+						static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tex_coord.x() * 65535 - 32768), -32768, 32767)),
+						static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tex_coord.y() * 65535 - 32768), -32768, 32767)),
 					};
 
 					tex_coords.push_back(s_tc[0]);

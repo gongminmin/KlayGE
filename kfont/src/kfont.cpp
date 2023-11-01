@@ -409,7 +409,7 @@ namespace KlayGE
 		std::vector<uint8_t> output(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
 		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(p), static_cast<SizeT>(len),
-			&output[0], &out_props_size, 5, std::min<uint32_t>(static_cast<uint32_t>(len), 1UL << 24), 3, 0, 2, 32, 1);
+			&output[0], &out_props_size, 5, std::min(static_cast<uint32_t>(len), 1U << 24), 3, 0, 2, 32, 1);
 
 		output.resize(LZMA_PROPS_SIZE + out_len);
 

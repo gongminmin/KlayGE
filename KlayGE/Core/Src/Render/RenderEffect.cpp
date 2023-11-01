@@ -47,6 +47,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX20/format.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
@@ -6463,7 +6464,7 @@ namespace KlayGE
 					}
 				}
 
-				shader_desc_ids_[static_cast<uint32_t>(stage)] = effect.AddShaderDesc(sd);
+				shader_desc_ids_[std::to_underlying(stage)] = effect.AddShaderDesc(sd);
 			}
 			else
 			{
@@ -7352,7 +7353,7 @@ namespace KlayGE
 	void RenderShaderFragment::StreamOut(std::ostream& os) const
 	{
 		uint32_t tmp;
-		tmp = Native2LE(static_cast<uint32_t>(stage_));
+		tmp = Native2LE(std::to_underlying(stage_));
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		os.write(reinterpret_cast<char const *>(&ver_), sizeof(ver_));
 

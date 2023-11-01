@@ -105,7 +105,7 @@ namespace KlayGE
 
 	void OCTree::MaxTreeDepth(uint32_t max_tree_depth)
 	{
-		max_tree_depth_ = std::min<uint32_t>(max_tree_depth, 16UL);
+		max_tree_depth_ = std::min(max_tree_depth, 16U);
 	}
 
 	uint32_t OCTree::MaxTreeDepth() const

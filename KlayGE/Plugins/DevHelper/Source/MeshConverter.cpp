@@ -3550,11 +3550,11 @@ namespace
 						int16_t const s_pos[] =
 						{
 							static_cast<int16_t>(
-								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+								MathLib::clamp(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
 							static_cast<int16_t>(
-								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+								MathLib::clamp(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
 							static_cast<int16_t>(
-								MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+								MathLib::clamp(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
 							32767
 						};
 
@@ -3629,9 +3629,9 @@ namespace
 							tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
 							int16_t const s_tc[2] =
 							{
-								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
+								static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tex_coord.x() * 65535 - 32768),
 									-32768, 32767)),
-								static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
+								static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tex_coord.y() * 65535 - 32768),
 									-32768, 32767)),
 							};
 

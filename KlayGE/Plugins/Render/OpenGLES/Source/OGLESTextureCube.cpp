@@ -48,7 +48,7 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				s = std::max<uint32_t>(1U, s / 2);
+				s = std::max(1U, s / 2);
 			}
 		}
 		else
@@ -69,7 +69,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, width_ >> level);
+		return std::max(1U, width_ >> level);
 	}
 
 	uint32_t OGLESTextureCube::Height(uint32_t level) const

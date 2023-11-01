@@ -519,7 +519,7 @@ namespace KlayGE
 			uint32_t ori_h = tex->Height(0);
 			uint32_t ori_s = std::max(ori_w, ori_h);
 
-			while (ori_s > static_cast<uint32_t>(WIDTH))
+			while (ori_s > WIDTH)
 			{
 				ori_w >>= 1;
 				ori_h >>= 1;

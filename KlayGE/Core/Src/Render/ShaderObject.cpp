@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/com_ptr.hpp>
@@ -559,7 +560,7 @@ namespace KlayGE
 
 	void ShaderObject::AttachStage(ShaderStage stage, ShaderStageObjectPtr const& shader_stage)
 	{
-		auto& curr_shader_stage = immutable_->shader_stages_[static_cast<uint32_t>(stage)];
+		auto& curr_shader_stage = immutable_->shader_stages_[std::to_underlying(stage)];
 		if (curr_shader_stage != shader_stage)
 		{
 			curr_shader_stage = shader_stage;
@@ -570,7 +571,7 @@ namespace KlayGE
 	
 	ShaderStageObjectPtr const& ShaderObject::Stage(ShaderStage stage) const noexcept
 	{
-		return immutable_->shader_stages_[static_cast<uint32_t>(stage)];
+		return immutable_->shader_stages_[std::to_underlying(stage)];
 	}
 
 	void ShaderObject::LinkShaders(RenderEffect& effect)

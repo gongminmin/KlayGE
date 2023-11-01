@@ -1497,8 +1497,8 @@ namespace
 									new_sub_res_start[sub_res] = new_data_block_size;
 									new_data_block_size += slice_pitch;
 
-									width = std::max<uint32_t>(1U, width / 2);
-									height = std::max<uint32_t>(1U, height / 2);
+									width = std::max(1U, width / 2);
+									height = std::max(1U, height / 2);
 								}
 							}
 
@@ -1540,9 +1540,9 @@ namespace
 									tex_data.init_data[sub_res].slice_pitch, convert_fmts[i][0], width, height, depth,
 									TextureFilter::Point);
 
-								width = std::max<uint32_t>(1U, width / 2);
-								height = std::max<uint32_t>(1U, height / 2);
-								depth = std::max<uint32_t>(1U, depth / 2);
+								width = std::max(1U, width / 2);
+								height = std::max(1U, height / 2);
+								depth = std::max(1U, depth / 2);
 
 								tex_data.init_data[sub_res].row_pitch = row_pitch;
 								tex_data.init_data[sub_res].slice_pitch = slice_pitch;
@@ -2181,7 +2181,7 @@ namespace KlayGE
 						tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
 						BOOST_ASSERT(tex_res->gcount() == static_cast<int>(image_size));
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
 					}
 				}
 			}
@@ -2222,8 +2222,8 @@ namespace KlayGE
 							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
-						the_height = std::max<uint32_t>(the_height / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
+						the_height = std::max(the_height / 2, 1U);
 					}
 				}
 			}
@@ -2265,9 +2265,9 @@ namespace KlayGE
 							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch * the_depth));
 						}
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
-						the_height = std::max<uint32_t>(the_height / 2, 1);
-						the_depth = std::max<uint32_t>(the_depth / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
+						the_height = std::max(the_height / 2, 1U);
+						the_depth = std::max(the_depth / 2, 1U);
 					}
 				}
 			}
@@ -2310,8 +2310,8 @@ namespace KlayGE
 								BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch));
 							}
 
-							the_width = std::max<uint32_t>(the_width / 2, 1);
-							the_height = std::max<uint32_t>(the_height / 2, 1);
+							the_width = std::max(the_width / 2, 1U);
+							the_height = std::max(the_height / 2, 1U);
 						}
 					}
 				}
@@ -2769,7 +2769,7 @@ namespace
 
 						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
 					}
 				}
 			}
@@ -2797,8 +2797,8 @@ namespace
 
 						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
-						the_height = std::max<uint32_t>(the_height / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
+						the_height = std::max(the_height / 2, 1U);
 					}
 				}
 			}
@@ -2827,9 +2827,9 @@ namespace
 
 						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
-						the_width = std::max<uint32_t>(the_width / 2, 1);
-						the_height = std::max<uint32_t>(the_height / 2, 1);
-						the_depth = std::max<uint32_t>(the_depth / 2, 1);
+						the_width = std::max(the_width / 2, 1U);
+						the_height = std::max(the_height / 2, 1U);
+						the_depth = std::max(the_depth / 2, 1U);
 					}
 				}
 			}
@@ -2858,7 +2858,7 @@ namespace
 
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
-							the_width = std::max<uint32_t>(the_width / 2, 1);
+							the_width = std::max(the_width / 2, 1U);
 						}
 					}
 				}
@@ -3698,21 +3698,21 @@ namespace KlayGE
 				{
 					float fz = static_cast<float>(z + 0.5f) / dst_depth * src_depth;
 					uint32_t sz0 = static_cast<uint32_t>(fz - 0.5f);
-					uint32_t sz1 = MathLib::clamp<uint32_t>(sz0 + 1, 0, src_depth - 1);
+					uint32_t sz1 = MathLib::clamp(sz0 + 1, 0U, src_depth - 1);
 					float weight_z = fz - sz0 - 0.5f;
 							
 					for (uint32_t y = 0; y < dst_height; ++ y)
 					{
 						float fy = static_cast<float>(y + 0.5f) / dst_height * src_height;
 						uint32_t sy0 = static_cast<uint32_t>(fy - 0.5f);
-						uint32_t sy1 = MathLib::clamp<uint32_t>(sy0 + 1, 0, src_height - 1);
+						uint32_t sy1 = MathLib::clamp(sy0 + 1, 0U, src_height - 1);
 						float weight_y = fy - sy0 - 0.5f;
 							
 						for (uint32_t x = 0; x < dst_width; ++ x)
 						{
 							float fx = static_cast<float>(x + 0.5f) / dst_width * src_width;
 							uint32_t sx0 = static_cast<uint32_t>(fx - 0.5f);
-							uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
+							uint32_t sx1 = MathLib::clamp(sx0 + 1, 0U, src_width - 1);
 							float weight_x = fx - sx0 - 0.5f;
 							Color clr_x00 = MathLib::lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
 								src_32f[(sz0 * src_height + sy0) * src_width + sx1], weight_x);
@@ -3849,8 +3849,8 @@ namespace KlayGE
 			{
 				++ num_mipmaps;
 
-				w = std::max<uint32_t>(1U, w / 2);
-				h = std::max<uint32_t>(1U, h / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
 			}
 		}
 		num_mip_maps_ = num_mipmaps;
@@ -3869,21 +3869,21 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, width_ >> level);
+		return std::max(1U, width_ >> level);
 	}
 
 	uint32_t SoftwareTexture::Height(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, height_ >> level);
+		return std::max(1U, height_ >> level);
 	}
 
 	uint32_t SoftwareTexture::Depth(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, depth_ >> level);
+		return std::max(1U, depth_ >> level);
 	}
 
 	void SoftwareTexture::CopyToTexture(Texture& target, TextureFilter filter)

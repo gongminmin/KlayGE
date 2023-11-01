@@ -266,10 +266,10 @@ namespace
 									float z = ((src[j] >> 20) & 0x3FF) / 1023.0f;
 									float w = ((src[j] >> 30) & 0x3) / 3.0f;
 
-									dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 0)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+									dst[j] = (MathLib::clamp(static_cast<uint32_t>(x * 255), 0U, 255U) << 16)
+										| (MathLib::clamp(static_cast<uint32_t>(y * 255), 0U, 255U) << 8)
+										| (MathLib::clamp(static_cast<uint32_t>(z * 255), 0U, 255U) << 0)
+										| (MathLib::clamp(static_cast<uint32_t>(w * 255), 0U, 255U) << 24);
 								}
 							}
 							else
@@ -281,10 +281,10 @@ namespace
 									float z = ((src[j] >> 20) & 0x3FF) / 1023.0f;
 									float w = ((src[j] >> 30) & 0x3) / 3.0f;
 
-									dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+									dst[j] = (MathLib::clamp(static_cast<uint32_t>(x * 255), 0U, 255U) << 0)
+										| (MathLib::clamp(static_cast<uint32_t>(y * 255), 0U, 255U) << 8)
+										| (MathLib::clamp(static_cast<uint32_t>(z * 255), 0U, 255U) << 16)
+										| (MathLib::clamp(static_cast<uint32_t>(w * 255), 0U, 255U) << 24);
 								}
 							}
 						}
@@ -301,10 +301,10 @@ namespace
 								float z = ((src[j] >> 0) & 0xFF) / 255.0f;
 								float w = ((src[j] >> 24) & 0xFF) / 255.0f;
 
-								dst[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
-									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
-									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
-									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+								dst[j] = (MathLib::clamp(static_cast<uint32_t>(x * 255), 0U, 255U) << 0)
+									| (MathLib::clamp(static_cast<uint32_t>(y * 255), 0U, 255U) << 8)
+									| (MathLib::clamp(static_cast<uint32_t>(z * 255), 0U, 255U) << 16)
+									| (MathLib::clamp(static_cast<uint32_t>(w * 255), 0U, 255U) << 24);
 							}
 						}
 						else

@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KFL/CXX20/format.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -115,7 +116,7 @@ namespace KlayGE
 			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 			bool const is_array = texture->ArraySize() > 1;
-			auto& tech = *mipmap_tech_[is_array ? 1 : 0][static_cast<uint32_t>(filter)];
+			auto& tech = *mipmap_tech_[is_array ? 1 : 0][std::to_underlying(filter)];
 
 			auto const& cs_stage = tech.Pass(0).GetShaderObject(*effect_)->Stage(ShaderStage::Compute);
 			uint32_t const bx = cs_stage->BlockSizeX();

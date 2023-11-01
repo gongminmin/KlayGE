@@ -169,7 +169,7 @@ namespace KlayGE
 		native_shader_block_len = LE2Native(native_shader_block_len);
 
 		is_validate_ = false;
-		std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[std::to_underlying(stage_)]);
 		if (native_shader_block_len >= 25 + shader_profile.size())
 		{
 			uint8_t len;
@@ -357,7 +357,7 @@ namespace KlayGE
 		shader_code_.clear();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		uint32_t const shader_desc_id = shader_desc_ids[static_cast<uint32_t>(stage_)];
+		uint32_t const shader_desc_id = shader_desc_ids[std::to_underlying(stage_)];
 
 		auto const& sd = effect.GetShaderDesc(shader_desc_id);
 
@@ -515,7 +515,7 @@ namespace KlayGE
 			auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const& caps = re.DeviceCaps();
 
-			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 
 			uint8_t const shader_major_ver = ("auto" == sd.profile) ? 0 : static_cast<uint8_t>(sd.profile[3] - '0');
 			uint8_t const shader_minor_ver = ("auto" == sd.profile) ? 0 : static_cast<uint8_t>(sd.profile[5] - '0');
@@ -643,7 +643,7 @@ namespace KlayGE
 		else
 		{
 			RenderDeviceCaps const& caps = re.DeviceCaps();
-			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 			if (!sd.so_decl.empty())
 			{
 				if (caps.gs_support)
@@ -741,7 +741,7 @@ namespace KlayGE
 	{
 		if (is_available_)
 		{
-			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 			if (sd.so_decl.empty())
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -890,7 +890,7 @@ namespace KlayGE
 			}
 			else
 			{
-				ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+				ShaderDesc const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 				if (!sd.so_decl.empty())
 				{
 					RenderDeviceCaps const& caps = re.DeviceCaps();
@@ -1036,7 +1036,7 @@ namespace KlayGE
 
 	D3D11ShaderObject::ParameterBind D3D11ShaderObject::GetBindFunc(ShaderStage stage, uint32_t offset, RenderEffectParameter const& param)
 	{
-		uint32_t const stage_index = static_cast<uint32_t>(stage);
+		uint32_t const stage_index = std::to_underlying(stage);
 
 		ParameterBind ret;
 		ret.param = &param;

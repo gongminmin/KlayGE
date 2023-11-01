@@ -1208,13 +1208,13 @@ namespace KlayGE
 		uint16_t old_max = this->RGB888To565(max_clr);
 
 		// solve.
-		int max_r = MathLib::clamp<int>(static_cast<int>((At1_r * yy - At2_r * xy) * frb + 0.5f), 0, 31);
-		int max_g = MathLib::clamp<int>(static_cast<int>((At1_g * yy - At2_g * xy) * fg + 0.5f), 0, 63);
-		int max_b = MathLib::clamp<int>(static_cast<int>((At1_b * yy - At2_b * xy) * frb + 0.5f), 0, 31);
+		int max_r = MathLib::clamp(static_cast<int>((At1_r * yy - At2_r * xy) * frb + 0.5f), 0, 31);
+		int max_g = MathLib::clamp(static_cast<int>((At1_g * yy - At2_g * xy) * fg + 0.5f), 0, 63);
+		int max_b = MathLib::clamp(static_cast<int>((At1_b * yy - At2_b * xy) * frb + 0.5f), 0, 31);
 
-		int min_r = MathLib::clamp<int>(static_cast<int>((At2_r * xx - At1_r * xy) * frb + 0.5f), 0, 31);
-		int min_g = MathLib::clamp<int>(static_cast<int>((At2_g * xx - At1_g * xy) * fg + 0.5f), 0, 63);
-		int min_b = MathLib::clamp<int>(static_cast<int>((At2_b * xx - At1_b * xy) * frb + 0.5f), 0, 31);
+		int min_r = MathLib::clamp(static_cast<int>((At2_r * xx - At1_r * xy) * frb + 0.5f), 0, 31);
+		int min_g = MathLib::clamp(static_cast<int>((At2_g * xx - At1_g * xy) * fg + 0.5f), 0, 63);
+		int min_b = MathLib::clamp(static_cast<int>((At2_b * xx - At1_b * xy) * frb + 0.5f), 0, 31);
 
 		uint16_t max16 = static_cast<uint16_t>((max_r << 11) | (max_g << 5) | (max_b << 0));
 		uint16_t min16 = static_cast<uint16_t>((min_r << 11) | (min_g << 5) | (min_b << 0));

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/Color.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/SmartPtrHelper.hpp>
@@ -91,7 +92,7 @@ namespace KlayGE
 
 		char const * DefaultShaderProfile(ShaderStage stage) const
 		{
-			return shader_profiles_[static_cast<uint32_t>(stage)];
+			return shader_profiles_[std::to_underlying(stage)];
 		}
 
 		void RSSetState(ID3D11RasterizerState1* ras);

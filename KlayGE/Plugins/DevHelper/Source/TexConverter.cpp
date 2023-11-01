@@ -120,8 +120,8 @@ namespace
 				{
 					++ num_mipmaps;
 
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
+					w = std::max(1U, w / 2);
+					h = std::max(1U, h / 2);
 				}
 			}
 			else
@@ -252,8 +252,8 @@ namespace
 				{
 					++ num_mipmaps_;
 
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
+					w = std::max(1U, w / 2);
+					h = std::max(1U, h / 2);
 				}
 			}
 			else
@@ -364,8 +364,8 @@ namespace
 				uint32_t h = height_;
 				for (uint32_t m = 0; m < num_mipmaps_ - 1; ++ m)
 				{
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
+					w = std::max(1U, w / 2);
+					h = std::max(1U, h / 2);
 
 					*planes_[arr][m + 1] = planes_[arr][m]->ResizeTo(w, h, metadata_.LinearMipmap());
 				}

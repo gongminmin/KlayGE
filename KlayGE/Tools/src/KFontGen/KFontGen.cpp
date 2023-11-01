@@ -230,8 +230,8 @@ public:
 
 					ci.left = static_cast<int16_t>((bbox.xMin - x_offset) / internal_char_size_ * char_size_ + 0.5f);
 					ci.top = static_cast<int16_t>((3 / 4.0f - (bbox.yMax + y_offset) / internal_char_size_) * char_size_ + 0.5f);
-					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / internal_char_size_) * char_size_ + 0.5f);
-					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / internal_char_size_) * char_size_ + 0.5f);
+					ci.width = static_cast<uint16_t>(std::min(1.0f, (buf_width + x_offset) / internal_char_size_) * char_size_ + 0.5f);
+					ci.height = static_cast<uint16_t>(std::min(1.0f, (buf_height + y_offset) / internal_char_size_) * char_size_ + 0.5f);
 
 					memset(&aa_char_bitmap_2x[0], 0, sizeof(aa_char_bitmap_2x[0]) * aa_char_bitmap_2x.size());
 					memset(&dist_data[0], 0, sizeof(dist_data[0]) * dist_data.size());

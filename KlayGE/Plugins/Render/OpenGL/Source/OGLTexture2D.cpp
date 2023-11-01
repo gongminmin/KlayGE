@@ -53,8 +53,8 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max<uint32_t>(1U, w / 2);
-				h = std::max<uint32_t>(1U, h / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
 			}
 		}
 		else
@@ -101,14 +101,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, width_ >> level);
+		return std::max(1U, width_ >> level);
 	}
 
 	uint32_t OGLTexture2D::Height(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return std::max<uint32_t>(1U, height_ >> level);
+		return std::max(1U, height_ >> level);
 	}
 
 	void OGLTexture2D::CopyToTexture(Texture& target, TextureFilter filter)

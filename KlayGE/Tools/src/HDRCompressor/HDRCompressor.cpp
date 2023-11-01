@@ -71,7 +71,7 @@ namespace
 
 					float log_y = log(Y) / log2 + 16;
 
-					y_dst[y * width + x] = static_cast<uint16_t>(MathLib::clamp<uint32_t>(static_cast<uint32_t>(log_y * 2048), 0, 65535));
+					y_dst[y * width + x] = static_cast<uint16_t>(MathLib::clamp(static_cast<uint32_t>(log_y * 2048), 0U, 65535U));
 				}
 			}
 		}

@@ -38,7 +38,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API FrameBuffer : boost::noncopyable
 	{
 	public:
-		enum class Attachment
+		enum class Attachment : uint32_t
 		{
 			Color0 = 0,
 			Color1,

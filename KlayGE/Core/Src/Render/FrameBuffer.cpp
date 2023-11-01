@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -38,7 +39,7 @@ namespace KlayGE
 
 	FrameBuffer::Attachment FrameBuffer::CalcAttachment(uint32_t index)
 	{
-		return static_cast<Attachment>(static_cast<uint32_t>(Attachment::Color0) + index);
+		return static_cast<Attachment>(index);
 	}
 
 	// 渲染目标的左坐标
@@ -91,12 +92,12 @@ namespace KlayGE
 	void FrameBuffer::Attach(Attachment att, RenderTargetViewPtr const & view)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (static_cast<uint32_t>(att) >= re.DeviceCaps().max_simultaneous_rts)
+		if (std::to_underlying(att) >= re.DeviceCaps().max_simultaneous_rts)
 		{
 			TERRC(std::errc::function_not_supported);
 		}
 
-		uint32_t const rt_index = static_cast<uint32_t>(att);
+		uint32_t const rt_index = std::to_underlying(att);
 		if ((rt_index < rt_views_.size()) && rt_views_[rt_index])
 		{
 			this->Detach(att);
@@ -138,12 +139,12 @@ namespace KlayGE
 	void FrameBuffer::Detach(Attachment att)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (static_cast<uint32_t>(att) >= re.DeviceCaps().max_simultaneous_rts)
+		if (std::to_underlying(att) >= re.DeviceCaps().max_simultaneous_rts)
 		{
 			TERRC(std::errc::function_not_supported);
 		}
 
-		uint32_t const rt_index = static_cast<uint32_t>(att);
+		uint32_t const rt_index = std::to_underlying(att);
 		if ((rt_index < rt_views_.size()) && rt_views_[rt_index])
 		{
 			rt_views_[rt_index]->OnDetached(*this, att);
@@ -155,7 +156,7 @@ namespace KlayGE
 
 	RenderTargetViewPtr const & FrameBuffer::AttachedRtv(Attachment att) const
 	{
-		uint32_t const rt_index = static_cast<uint32_t>(att);
+		uint32_t const rt_index = std::to_underlying(att);
 		if (rt_index < rt_views_.size())
 		{
 			return rt_views_[rt_index];

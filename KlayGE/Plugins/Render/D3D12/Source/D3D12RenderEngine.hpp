@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Color.hpp>
 
@@ -115,7 +116,7 @@ namespace KlayGE
 
 		char const* DefaultShaderProfile(ShaderStage stage) const noexcept
 		{
-			return shader_profiles_[static_cast<uint32_t>(stage)];
+			return shader_profiles_[std::to_underlying(stage)];
 		}
 
 		void OMSetStencilRef(ID3D12GraphicsCommandList* cmd_list, uint16_t stencil_ref);

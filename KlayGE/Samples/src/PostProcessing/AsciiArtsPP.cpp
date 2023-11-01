@@ -57,7 +57,7 @@ namespace
 						float texel = char_data[dy * char_size + dx] / 255.0f;
 						texel = texel * dist_scale + dist_base;
 						char_data[dy * char_size + dx]
-							= static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(texel * 255.0f + 0.5f), 0, 255));
+							= static_cast<uint8_t>(MathLib::clamp(static_cast<uint32_t>(texel * 255.0f + 0.5f), 0U, 255U));
 					}
 				}
 

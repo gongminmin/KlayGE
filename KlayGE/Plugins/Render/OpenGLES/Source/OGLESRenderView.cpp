@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
@@ -301,7 +302,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(0 == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
@@ -410,7 +411,7 @@ namespace KlayGE
 
 	void OGLESTexture1DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		GLenum const gl_target = checked_cast<OGLESTexture&>(*tex_).GLType();
 
@@ -442,7 +443,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 		GLenum const gl_target = checked_cast<OGLESTexture&>(*tex_).GLType();
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -521,7 +522,7 @@ namespace KlayGE
 
 	void OGLESTexture2DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		GLenum const gl_target = checked_cast<OGLESTexture&>(*tex_).GLType();
 
@@ -553,7 +554,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 		GLenum const gl_target = checked_cast<OGLESTexture&>(*tex_).GLType();
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -632,7 +633,7 @@ namespace KlayGE
 
 	void OGLESTexture3DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -681,7 +682,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(gl_fbo_);
@@ -788,7 +789,7 @@ namespace KlayGE
 
 	void OGLESTextureCubeRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -813,7 +814,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gl_fbo_ == checked_cast<OGLESFrameBuffer&>(fb).OGLFbo());
 
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(gl_fbo_);
@@ -1197,7 +1198,7 @@ namespace KlayGE
 	
 	void OGLESEAGLRenderView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 		gl_fbo_ = checked_cast<OGLESFrameBuffer&>(fb).OGLFbo();
 		
 		auto& re = checked_cast<OGLESRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

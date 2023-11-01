@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -335,7 +336,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer&>(fb).OGLFbo());
 
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
@@ -439,7 +440,7 @@ namespace KlayGE
 
 	void OGLTexture1DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 		gl_fbo_ = checked_cast<OGLFrameBuffer&>(fb).OGLFbo();
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
@@ -541,7 +542,7 @@ namespace KlayGE
 
 	void OGLTexture1DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -687,7 +688,7 @@ namespace KlayGE
 
 	void OGLTexture2DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 		gl_fbo_ = checked_cast<OGLFrameBuffer&>(fb).OGLFbo();
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
@@ -789,7 +790,7 @@ namespace KlayGE
 
 	void OGLTexture2DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 		GLenum const gl_target = checked_cast<OGLTexture&>(*tex_).GLType();
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -940,7 +941,7 @@ namespace KlayGE
 
 	void OGLTexture3DRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		gl_fbo_ = checked_cast<OGLFrameBuffer&>(fb).OGLFbo();
@@ -1031,7 +1032,7 @@ namespace KlayGE
 
 	void OGLTexture3DRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		if (glloader_GL_EXT_direct_state_access())
 		{
@@ -1091,7 +1092,7 @@ namespace KlayGE
 
 	void OGLTexture3DRenderTargetView::CopyToSlice(FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
 
@@ -1165,7 +1166,7 @@ namespace KlayGE
 
 	void OGLTextureCubeRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		gl_fbo_ = checked_cast<OGLFrameBuffer&>(fb).OGLFbo();
 		if (static_cast<int>(face_) >= 0)
@@ -1225,7 +1226,7 @@ namespace KlayGE
 
 	void OGLTextureCubeRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		if (static_cast<int>(face_) >= 0)
 		{
@@ -1338,7 +1339,7 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderTargetView::OnAttached(FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		index_ = static_cast<uint32_t>(att);
+		index_ = std::to_underlying(att);
 
 		gl_fbo_ = checked_cast<OGLFrameBuffer&>(fb).OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
@@ -1362,7 +1363,7 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderTargetView::OnDetached([[maybe_unused]] FrameBuffer& fb, FrameBuffer::Attachment att)
 	{
-		uint32_t const index = static_cast<uint32_t>(att);
+		uint32_t const index = std::to_underlying(att);
 
 		if (glloader_GL_EXT_direct_state_access())
 		{
@@ -1404,7 +1405,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
 
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + static_cast<uint32_t>(att));
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + std::to_underlying(att));
 
 		OGLGraphicsBuffer& ogl_gb = checked_cast<OGLGraphicsBuffer&>(*buff_);
 		auto& re = checked_cast<OGLRenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

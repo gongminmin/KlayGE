@@ -94,7 +94,7 @@ namespace KlayGE
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-			uint32_t size = std::min<uint32_t>(2048U, std::min<uint32_t>(caps.max_texture_width, caps.max_texture_height)) / kfont_char_size * kfont_char_size;
+			uint32_t size = std::min(2048U, std::min(caps.max_texture_width, caps.max_texture_height)) / kfont_char_size * kfont_char_size;
 			dist_texture_ = rf.MakeTexture2D(size, size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read);
 			a_char_data_.resize(kfont_char_size * kfont_char_size);
 

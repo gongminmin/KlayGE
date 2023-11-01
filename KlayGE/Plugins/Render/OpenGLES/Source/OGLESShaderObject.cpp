@@ -289,7 +289,7 @@ namespace KlayGE
 		res.read(&native_shader_block_len, sizeof(native_shader_block_len));
 		native_shader_block_len = LE2Native(native_shader_block_len);
 
-		auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		auto const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 
 		shader_func_name_ = sd.func_name;
 
@@ -454,7 +454,7 @@ namespace KlayGE
 			auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const& caps = re.DeviceCaps();
 
-			std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[std::to_underlying(stage_)]);
 			is_validate_ = !shader_profile.empty();
 
 			if (is_validate_)
@@ -663,7 +663,7 @@ namespace KlayGE
 		{
 			if (shader_profile == "auto")
 			{
-				shader_profile = default_shader_profiles[static_cast<uint32_t>(stage_)];
+				shader_profile = default_shader_profiles[std::to_underlying(stage_)];
 			}
 		}
 		else
@@ -680,7 +680,7 @@ namespace KlayGE
 		if (!glsl_src_.empty())
 		{
 			char const* glsl = glsl_src_.c_str();
-			gl_shader_ = glCreateShader(gl_shader_types[static_cast<uint32_t>(stage_)]);
+			gl_shader_ = glCreateShader(gl_shader_types[std::to_underlying(stage_)]);
 			if (0 == gl_shader_)
 			{
 				is_validate_ = false;
@@ -868,7 +868,7 @@ namespace KlayGE
 		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		this->RetrieveTfbVaryings(
-			effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]), glsl_tfb_varyings_, tfb_separate_attribs_);
+			effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]), glsl_tfb_varyings_, tfb_separate_attribs_);
 	}
 
 
@@ -927,7 +927,7 @@ namespace KlayGE
 		RenderEffect const& effect, std::array<uint32_t, NumShaderStages> const& shader_desc_ids)
 	{
 		this->RetrieveTfbVaryings(
-			effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]), glsl_tfb_varyings_, tfb_separate_attribs_);
+			effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]), glsl_tfb_varyings_, tfb_separate_attribs_);
 	}
 
 
@@ -974,7 +974,7 @@ namespace KlayGE
 				auto const* shader_stage = checked_cast<OGLESShaderStageObject*>(this->Stage(static_cast<ShaderStage>(stage)).get());
 				if (shader_stage)
 				{
-					uint32_t const mask = 1UL << static_cast<uint32_t>(stage);
+					uint32_t const mask = 1U << stage;
 					for (auto const& tex_sampler : shader_stage->TexSamplerPairs())
 					{
 						std::string const combined_sampler_name = tex_sampler.first + "_" + tex_sampler.second;

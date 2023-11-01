@@ -758,8 +758,7 @@ namespace KlayGE
 		D3D12GpuMemoryBlock readback_mem_block;
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			readback_mem_block =
-				re.AllocReadbackMemBlock(static_cast<uint32_t>(required_size), D3D12GpuMemoryAllocator::TextureDataAligment);
+			readback_mem_block = re.AllocReadbackMemBlock(required_size, D3D12GpuMemoryAllocator::TextureDataAligment);
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 

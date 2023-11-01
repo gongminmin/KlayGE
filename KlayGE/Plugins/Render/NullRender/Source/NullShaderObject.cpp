@@ -90,7 +90,7 @@ namespace KlayGE
 		native_shader_block_len = LE2Native(native_shader_block_len);
 
 		is_validate_ = false;
-		std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[std::to_underlying(stage_)]);
 		if (native_shader_block_len >= 25 + shader_profile.size())
 		{
 			uint8_t len;
@@ -273,7 +273,7 @@ namespace KlayGE
 		shader_code_.clear();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		uint32_t const shader_desc_id = shader_desc_ids[static_cast<uint32_t>(stage_)];
+		uint32_t const shader_desc_id = shader_desc_ids[std::to_underlying(stage_)];
 
 		auto const& sd = effect.GetShaderDesc(shader_desc_id);
 
@@ -615,7 +615,7 @@ namespace KlayGE
 		res.read(&native_shader_block_len, sizeof(native_shader_block_len));
 		native_shader_block_len = LE2Native(native_shader_block_len);
 
-		auto const& sd = effect.GetShaderDesc(shader_desc_ids[static_cast<uint32_t>(stage_)]);
+		auto const& sd = effect.GetShaderDesc(shader_desc_ids[std::to_underlying(stage_)]);
 
 		shader_func_name_ = sd.func_name;
 
@@ -791,7 +791,7 @@ namespace KlayGE
 			auto const& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			auto const& caps = re.DeviceCaps();
 
-			std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[static_cast<uint32_t>(stage_)]);
+			std::string_view const shader_profile = this->GetShaderProfile(effect, shader_desc_ids[std::to_underlying(stage_)]);
 			is_validate_ = !shader_profile.empty();
 
 			if (is_validate_)
@@ -1365,7 +1365,7 @@ namespace KlayGE
 	void NullShaderObject::OGLAppendTexSamplerBinds(
 		ShaderStage stage, RenderEffect const& effect, std::vector<std::pair<std::string, std::string>> const& tex_sampler_pairs)
 	{
-		uint32_t const mask = 1UL << static_cast<uint32_t>(stage);
+		uint32_t const mask = 1U << std::to_underlying(stage);
 		for (auto const& tex_sampler : tex_sampler_pairs)
 		{
 			std::string const combined_sampler_name = tex_sampler.first + "_" + tex_sampler.second;

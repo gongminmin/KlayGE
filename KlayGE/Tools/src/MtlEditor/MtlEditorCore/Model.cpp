@@ -343,8 +343,8 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 					float3 tc16 = float3(texcoords[i].x(), texcoords[i].y(), 0.0f);
 					tc16 = (tc16 - tc_center) / tc_extent * 0.5f + 0.5f;
-					tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.x() * 65535 - 32768), -32768, 32767));
-					tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
+					tcs16[i] = static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tc16.x() * 65535 - 32768), -32768, 32767));
+					tcs16[i] = static_cast<int16_t>(MathLib::clamp(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
 					++ i;
 				}
 			}
@@ -405,10 +405,10 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			fmt = EF_ABGR8;
 			for (size_t j = 0; j < compacted.size(); ++ j)
 			{
-				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
+				compacted[j] = (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0U, 255U) << 0)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0U, 255U) << 8)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0U, 255U) << 16)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0U, 255U) << 24);
 			}
 		}
 		else
@@ -418,10 +418,10 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			fmt = EF_ARGB8;
 			for (size_t j = 0; j < compacted.size(); ++ j)
 			{
-				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
+				compacted[j] = (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0U, 255U) << 16)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0U, 255U) << 8)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0U, 255U) << 0)
+					| (MathLib::clamp(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0U, 255U) << 24);
 			}
 		}
 
