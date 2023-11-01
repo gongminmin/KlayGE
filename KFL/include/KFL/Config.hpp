@@ -54,31 +54,6 @@
 	#define KLAYGE_HAS_STRUCT_PACK
 #endif
 
-// Forces all boost's libraries to be linked as dll
-#ifndef BOOST_ALL_DYN_LINK
-	#define BOOST_ALL_DYN_LINK
-#endif
-// Skips boost's #pragma lib
-#ifndef BOOST_ALL_NO_LIB
-	#define BOOST_ALL_NO_LIB
-#endif
-
-// Deprecated features in Boost.System are excluded.
-#ifndef BOOST_SYSTEM_NO_DEPRECATED
-	#define BOOST_SYSTEM_NO_DEPRECATED
-#endif
-
-#if defined(KLAYGE_PLATFORM_WINDOWS) && ((defined(KLAYGE_COMPILER_GCC) && defined(KLAYGE_CPU_X64)) || defined(KLAYGE_COMPILER_CLANG))
-	#ifndef BOOST_USE_WINDOWS_H
-		#define BOOST_USE_WINDOWS_H
-	#endif
-#endif
-
-// Prevent Boost to link the Boost.DateTime
-#ifndef BOOST_DATE_TIME_NO_LIB
-	#define BOOST_DATE_TIME_NO_LIB
-#endif
-
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 	#define KLAYGE_IS_DEV_PLATFORM 1
 #else
