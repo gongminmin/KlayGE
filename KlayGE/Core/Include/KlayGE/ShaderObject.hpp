@@ -54,9 +54,6 @@ namespace KlayGE
 
 		uint32_t tech_pass_type;
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-		#pragma pack(push, 1)
-#endif
 		struct StreamOutputDecl
 		{
 			VertexElementUsage usage;
@@ -75,9 +72,7 @@ namespace KlayGE
 			KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(StreamOutputDecl);
 		};
 		static_assert(sizeof(StreamOutputDecl) == 8);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-		#pragma pack(pop)
-#endif
+
 		std::vector<StreamOutputDecl> so_decl;
 
 		friend bool operator==(ShaderDesc const& lhs, ShaderDesc const& rhs) noexcept

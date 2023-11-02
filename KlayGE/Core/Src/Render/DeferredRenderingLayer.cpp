@@ -81,9 +81,6 @@ namespace
 
 	union EffectIndex
 	{
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 		struct Flags
 		{
 			uint8_t line : 1;
@@ -93,9 +90,7 @@ namespace
 			uint8_t detail_mode : 2;
 		} flags;
 		static_assert(sizeof(Flags) == 1);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
+
 		size_t index;
 	};
 

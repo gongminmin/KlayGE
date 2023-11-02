@@ -39,9 +39,6 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 	struct BC1Block
 	{
 		uint16_t clr_0, clr_1;
@@ -76,9 +73,6 @@ namespace KlayGE
 		BC4Block green;
 	};
 	static_assert(sizeof(BC5Block) == 16);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 	class KLAYGE_CORE_API TexCompressionBC1 final : public TexCompression
 	{

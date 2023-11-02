@@ -660,9 +660,6 @@ namespace KlayGE
 			uint64_t tick;
 		};
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
-#endif
 		struct FontVert
 		{
 			float3 pos;
@@ -678,9 +675,6 @@ namespace KlayGE
 			}
 		};
 		static_assert(sizeof(FontVert) == 24);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
-#endif
 
 		bool restart_;
 

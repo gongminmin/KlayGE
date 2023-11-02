@@ -51,9 +51,6 @@
 #define FOURCC_OSG1 (KlayGE::MakeFourCC<'O', 'S', 'G', '1'>::value) // Output signature with Stream and MinPrecision in D3D 11.1
 #define FOURCC_PSG1 (KlayGE::MakeFourCC<'P', 'S', 'G', '1'>::value) // Patch signature in D3D 11.1
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 // this is always little-endian!
 struct DXBCChunkHeader
 {
@@ -69,9 +66,6 @@ struct DXBCChunkSignatureHeader : public DXBCChunkHeader
 	uint32_t offset;
 };
 static_assert(sizeof(DXBCChunkSignatureHeader) == 16);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 // Same layout with D3D11_SHADER_VARIABLE_DESC
 struct DXBCShaderVariableDesc

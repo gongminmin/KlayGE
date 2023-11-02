@@ -546,9 +546,6 @@ namespace KlayGE
 		mutable std::unique_ptr<Mipmapper> mipmapper_;
 	};
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 	struct DrawIndirectArgs
 	{
 		uint32_t num_vertices_per_instance;
@@ -575,9 +572,6 @@ namespace KlayGE
 		uint32_t tgz;
 	};
 	static_assert(sizeof(DispatchIndirectArgs) == 12);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 }
 
 #endif			// _RENDERENGINE_HPP

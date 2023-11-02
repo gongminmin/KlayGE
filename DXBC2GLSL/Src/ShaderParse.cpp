@@ -33,9 +33,6 @@
 
 namespace
 {
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 	struct DXBCSignatureParameterD3D10
 	{
 		uint32_t name_offset;
@@ -77,9 +74,6 @@ namespace
 		uint32_t min_precision;
 	};
 	static_assert(sizeof(DXBCSignatureParameterD3D11_1) == 32);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 	bool SortFuncLess(DXBCShaderVariable const & lh, DXBCShaderVariable const & rh)
 	{

@@ -63,7 +63,7 @@ namespace KlayGE
 	{
 	public:
 		Context();
-		~Context();
+		~Context() noexcept;
 
 		static Context& Instance();
 		static void Destroy();
@@ -115,45 +115,45 @@ namespace KlayGE
 			return *app_;
 		}
 
-		bool SceneManagerValid() const
+		bool SceneManagerValid() const noexcept
 		{
-			return scene_mgr_.get() != nullptr;
+			return scene_mgr_ != nullptr;
 		}
 		SceneManager& SceneManagerInstance();
 
-		bool RenderFactoryValid() const
+		bool RenderFactoryValid() const noexcept
 		{
-			return render_factory_.get() != nullptr;
+			return render_factory_ != nullptr;
 		}
 		RenderFactory& RenderFactoryInstance();
 
-		bool AudioFactoryValid() const
+		bool AudioFactoryValid() const noexcept
 		{
-			return audio_factory_.get() != nullptr;
+			return audio_factory_ != nullptr;
 		}
 		AudioFactory& AudioFactoryInstance();
 
-		bool InputFactoryValid() const
+		bool InputFactoryValid() const noexcept
 		{
-			return input_factory_.get() != nullptr;
+			return input_factory_ != nullptr;
 		}
 		InputFactory& InputFactoryInstance();
 
-		bool ShowFactoryValid() const
+		bool ShowFactoryValid() const noexcept
 		{
-			return show_factory_.get() != nullptr;
+			return show_factory_ != nullptr;
 		}
 		ShowFactory& ShowFactoryInstance();
 
-		bool ScriptFactoryValid() const
+		bool ScriptFactoryValid() const noexcept
 		{
-			return script_factory_.get() != nullptr;
+			return script_factory_ != nullptr;
 		}
 		ScriptFactory& ScriptFactoryInstance();
 
-		bool AudioDataSourceFactoryValid() const
+		bool AudioDataSourceFactoryValid() const noexcept
 		{
-			return audio_data_src_factory_.get() != nullptr;
+			return audio_data_src_factory_ != nullptr;
 		}
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 
@@ -163,9 +163,9 @@ namespace KlayGE
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM
-		bool DevHelperValid() const
+		bool DevHelperValid() const noexcept
 		{
-			return dev_helper_.get() != nullptr;
+			return dev_helper_ != nullptr;
 		}
 		DevHelper& DevHelperInstance();
 #endif
@@ -187,7 +187,7 @@ namespace KlayGE
 		android_app* state_;
 #endif
 
-		App3DFramework*		app_;
+		App3DFramework*		app_ = nullptr;
 
 		std::unique_ptr<SceneManager> scene_mgr_;
 

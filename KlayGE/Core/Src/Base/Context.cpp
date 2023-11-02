@@ -98,7 +98,6 @@ namespace KlayGE
 #endif
 
 	Context::Context()
-		: app_(nullptr)
 	{
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
@@ -109,9 +108,7 @@ namespace KlayGE
 		gtp_instance_ = MakeUniquePtr<ThreadPool>(1, 16);
 	}
 
-	Context::~Context()
-	{
-	}
+	Context::~Context() noexcept = default;
 
 	void Context::DestroyAll()
 	{

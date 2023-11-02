@@ -45,9 +45,6 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
-#endif
 	struct kfont_header
 	{
 		uint32_t fourcc;
@@ -61,16 +58,10 @@ namespace KlayGE
 		int16_t scale;
 	};
 	static_assert(sizeof(kfont_header) == 28);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
-#endif
 
 	class KFONT_API KFont final
 	{
 	public:
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
-#endif
 		struct font_info
 		{
 			int16_t top;
@@ -79,9 +70,6 @@ namespace KlayGE
 			uint16_t height;
 		};
 		static_assert(sizeof(font_info) == 8);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
-#endif
 
 	public:
 		KFont();

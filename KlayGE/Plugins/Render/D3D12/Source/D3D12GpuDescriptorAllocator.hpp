@@ -158,30 +158,18 @@ namespace KlayGE
 		{
 			D3D12GpuDescriptorPage page;
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 			struct FreeRange
 			{
 				uint16_t first_offset;
 				uint16_t last_offset;
 			};
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 			std::vector<FreeRange> free_list;
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 			struct StallRange
 			{
 				FreeRange free_range;
 				uint64_t fence_value;
 			};
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 			std::vector<StallRange> stall_list;
 		};
 		std::vector<PageInfo> pages_;

@@ -396,9 +396,6 @@ namespace
 		std::mutex main_thread_stage_mutex_;
 	};
 	
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 	struct ParticleInstance
 	{
 		float3 pos;
@@ -409,9 +406,6 @@ namespace
 		float alpha;
 	};
 	static_assert(sizeof(ParticleInstance) == 32);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 	class RenderParticles : public Renderable
 	{

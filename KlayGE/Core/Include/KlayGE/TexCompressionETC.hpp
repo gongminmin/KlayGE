@@ -37,9 +37,6 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
-#endif
 	struct ETC1Block
 	{
 		uint8_t r;
@@ -94,9 +91,6 @@ namespace KlayGE
 		ETC2PlanarModeBlock etc2_planar_mode;
 	};
 	static_assert(sizeof(ETC2Block) == 8);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
-#endif
 
 	class KLAYGE_CORE_API TexCompressionETC1 final : public TexCompression
 	{

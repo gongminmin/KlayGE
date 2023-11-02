@@ -53,10 +53,6 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
-
 	enum
 	{
 		// The surface has alpha channel information in the pixel format.
@@ -204,9 +200,6 @@ namespace
 		uint32_t reserved;
 	};
 	static_assert(sizeof(DDS_HEADER_DXT10) == 20);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 #ifndef DXGI_FORMAT_DEFINED
 	enum DXGI_FORMAT : uint32_t

@@ -14,9 +14,6 @@ namespace KlayGE
 {
 	class ProceduralTerrain : public HQTerrainRenderable
 	{
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(push, 1)
-#endif
 		struct PlantInstanceData
 		{
 			float3 pos;
@@ -24,9 +21,6 @@ namespace KlayGE
 			float2 rotation;
 		};
 		static_assert(sizeof(PlantInstanceData) == 24);
-#ifdef KLAYGE_HAS_STRUCT_PACK
-#pragma pack(pop)
-#endif
 
 	public:
 		ProceduralTerrain();

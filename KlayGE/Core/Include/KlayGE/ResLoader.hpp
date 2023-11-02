@@ -87,7 +87,7 @@ namespace KlayGE
 		void AddPath(std::string_view phy_path);
 		void DelPath(std::string_view phy_path);
 		bool IsInPath(std::string_view phy_path);
-		std::string const & LocalFolder() const
+		std::string const & LocalFolder() const noexcept
 		{
 			return local_path_;
 		}
@@ -124,7 +124,7 @@ namespace KlayGE
 
 		void Update();
 
-		uint32_t NumLoadingResources() const
+		uint32_t NumLoadingResources() const noexcept
 		{
 			return static_cast<uint32_t>(loading_res_.size());
 		}
