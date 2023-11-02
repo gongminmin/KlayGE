@@ -167,7 +167,7 @@ namespace KlayGE
 
 		bool operator==(Plane_T<T> const & rhs) const noexcept;
 
-		DEFAULT_EQUALITY_COMPARE_OPERATOR(Plane_T<T>);
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(Plane_T<T>);
 
 	private:
 		Vector_T<T, elem_num> plane_;

@@ -17,6 +17,8 @@
 
 #include <directx/dxgiformat.h>
 
+#include <KFL/Operators.hpp>
+
 namespace KlayGE
 {
 	// 保存显示模式信息
@@ -31,14 +33,17 @@ namespace KlayGE
 		uint32_t Height() const noexcept;
 		DXGI_FORMAT Format() const noexcept;
 
+		bool operator<(D3D11VideoMode const& rhs) const noexcept;
+		bool operator==(D3D11VideoMode const& rhs) const noexcept;
+
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(D3D11VideoMode);
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(D3D11VideoMode);
+
 	private:
 		uint32_t		width_;
 		uint32_t		height_;
 		DXGI_FORMAT		format_;
 	};
-
-	bool operator<(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs) noexcept;
-	bool operator==(D3D11VideoMode const & lhs, D3D11VideoMode const & rhs) noexcept;
 }
 
 #endif			// _D3D11VIDEOMODE_HPP

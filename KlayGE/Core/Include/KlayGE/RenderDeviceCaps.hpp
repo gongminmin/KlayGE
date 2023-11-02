@@ -78,8 +78,8 @@ namespace KlayGE
 			return this->FullVersion() == rhs.FullVersion();
 		}
 
-		DEFAULT_LESS_COMPARE_OPERATOR(ShaderModel);
-		DEFAULT_EQUALITY_COMPARE_OPERATOR(ShaderModel);
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(ShaderModel);
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(ShaderModel);
 	};
 
 	struct KLAYGE_CORE_API RenderDeviceCaps

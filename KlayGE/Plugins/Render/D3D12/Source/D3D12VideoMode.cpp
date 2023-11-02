@@ -61,29 +61,23 @@ namespace KlayGE
 		return format_;
 	}
 
-	bool operator<(D3D12VideoMode const & lhs, D3D12VideoMode const & rhs) noexcept
+	bool D3D12VideoMode::operator<(D3D12VideoMode const& rhs) const noexcept
 	{
-		if (lhs.Width() < rhs.Width())
+		if (width_ < rhs.width_)
 		{
 			return true;
 		}
-		else
+		else if (width_ == rhs.width_)
 		{
-			if (lhs.Width() == rhs.Width())
+			if (height_ < rhs.height_)
 			{
-				if (lhs.Height() < rhs.Height())
+				return true;
+			}
+			else if (height_ == rhs.height_)
+			{
+				if (format_ < rhs.format_)
 				{
 					return true;
-				}
-				else
-				{
-					if (lhs.Height() == rhs.Height())
-					{
-						if (lhs.Format() < rhs.Format())
-						{
-							return true;
-						}
-					}
 				}
 			}
 		}
@@ -91,10 +85,8 @@ namespace KlayGE
 		return false;
 	}
 
-	bool operator==(D3D12VideoMode const & lhs, D3D12VideoMode const & rhs) noexcept
+	bool D3D12VideoMode::operator==(D3D12VideoMode const& rhs) const noexcept
 	{
-		return (lhs.Width() == rhs.Width())
-			&& (lhs.Height() == rhs.Height())
-			&& (lhs.Format() == rhs.Format());
+		return (width_ == rhs.width_) && (height_ == rhs.height_) && (format_ == rhs.format_);
 	}
 }

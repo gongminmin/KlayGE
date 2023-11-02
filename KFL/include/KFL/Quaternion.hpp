@@ -173,16 +173,16 @@ namespace KlayGE
 
 		bool operator==(Quaternion_T<T> const & rhs) const noexcept;
 
-		DEFAULT_ADD_OPERATOR1(Quaternion_T<T>);
-		DEFAULT_SUB_OPERATOR1(Quaternion_T<T>);
+		KLAYGE_DEFAULT_ADD_OPERATOR1(Quaternion_T<T>);
+		KLAYGE_DEFAULT_SUB_OPERATOR1(Quaternion_T<T>);
 
-		DEFAULT_MUL_OPERATOR1(Quaternion_T<T>);
-		DEFAULT_MUL_OPERATOR2(Quaternion_T<T>, T);
-		DEFAULT_MUL_OPERATOR3(T, Quaternion_T<T>);
+		KLAYGE_DEFAULT_MUL_OPERATOR1(Quaternion_T<T>);
+		KLAYGE_DEFAULT_MUL_OPERATOR2(Quaternion_T<T>, T);
+		KLAYGE_DEFAULT_MUL_OPERATOR3(T, Quaternion_T<T>);
 
-		DEFAULT_DIV_OPERATOR2(Quaternion_T<T>, T);
+		KLAYGE_DEFAULT_DIV_OPERATOR2(Quaternion_T<T>, T);
 
-		DEFAULT_EQUALITY_COMPARE_OPERATOR(Quaternion_T<T>);
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(Quaternion_T<T>);
 
 	private:
 		Vector_T<T, elem_num> quat_;

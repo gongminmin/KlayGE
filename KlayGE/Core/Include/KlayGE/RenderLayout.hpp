@@ -70,13 +70,14 @@ namespace KlayGE
 			return NumFormatBytes(format);
 		}
 
-		friend bool
-		operator==(VertexElement const & lhs, VertexElement const & rhs)
+		friend bool operator==(VertexElement const & lhs, VertexElement const & rhs) noexcept
 		{
 			return (lhs.usage == rhs.usage)
 				&& (lhs.usage_index == rhs.usage_index)
 				&& (lhs.format == rhs.format);
 		}
+
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(VertexElement);
 	};
 
 

@@ -71,10 +71,8 @@ namespace KlayGE
 					&& (lhs.start_component == rhs.start_component) && (lhs.component_count == rhs.component_count)
 					&& (lhs.slot == rhs.slot);
 			}
-			friend bool operator!=(StreamOutputDecl const& lhs, StreamOutputDecl const& rhs) noexcept
-			{
-				return !(lhs == rhs);
-			}
+
+			KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(StreamOutputDecl);
 		};
 		static_assert(sizeof(StreamOutputDecl) == 8);
 #ifdef KLAYGE_HAS_STRUCT_PACK

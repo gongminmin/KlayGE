@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Operators.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -68,17 +69,19 @@ namespace KlayGE
 
 			void Swap(Connection& rhs);
 
-			Detail::SignalBase& Signal() const;
-			void* Slot() const;
+			Detail::SignalBase& Signal() const noexcept;
+			void* Slot() const noexcept;
+
+			bool operator==(Connection const& rhs) const;
+			bool operator<(Connection const& rhs) const;
+
+			KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(Connection);
+			KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(Connection);
 
 		private:
 			Detail::SignalBase* signal_ = nullptr;
 			std::weak_ptr<void> slot_;
 		};
-
-		bool operator==(Connection const& lhs, Connection const& rhs);
-		bool operator!=(Connection const& lhs, Connection const& rhs);
-		bool operator<(Connection const& lhs, Connection const& rhs);
 
 		namespace Detail
 		{

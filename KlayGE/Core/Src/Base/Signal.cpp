@@ -107,29 +107,24 @@ namespace KlayGE
 			std::swap(slot_, rhs.slot_);
 		}
 
-		Detail::SignalBase& Connection::Signal() const
+		Detail::SignalBase& Connection::Signal() const noexcept
 		{
 			return *signal_;
 		}
 
-		void* Connection::Slot() const
+		void* Connection::Slot() const noexcept
 		{
 			return slot_.lock().get();
 		}
 
-		bool operator==(Connection const& lhs, Connection const& rhs)
+		bool Connection::operator==(Connection const& rhs) const
 		{
-			return (&lhs.Signal() == &rhs.Signal()) && (lhs.Slot() == rhs.Slot());
+			return (signal_ == rhs.signal_) && (this->Slot() == rhs.Slot());
 		}
 
-		bool operator!=(Connection const& lhs, Connection const& rhs)
+		bool Connection::operator<(Connection const& rhs) const
 		{
-			return !(lhs == rhs);
-		}
-
-		bool operator<(Connection const& lhs, Connection const& rhs)
-		{
-			return (&lhs.Signal() < &rhs.Signal()) || (!(&rhs.Signal() < &lhs.Signal()) && (lhs.Slot() < rhs.Slot()));
+			return (signal_ < rhs.signal_) || (!(rhs.signal_ < signal_) && (this->Slot() < rhs.Slot()));
 		}
 	} // namespace Signal
 } // namespace KlayGE

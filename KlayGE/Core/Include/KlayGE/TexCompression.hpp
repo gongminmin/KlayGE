@@ -171,7 +171,7 @@ namespace KlayGE
 			return clr32_.dw == rhs.clr32_.dw;
 		}
 
-		DEFAULT_EQUALITY_COMPARE_OPERATOR(ARGBColor32);
+		KLAYGE_DEFAULT_EQUALITY_COMPARE_OPERATOR(ARGBColor32);
 
 	private:
 		union Clr32

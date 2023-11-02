@@ -22,6 +22,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Operators.hpp>
 
 #include <array>
 
@@ -206,6 +207,7 @@ namespace KlayGE
 		RasterizerStateDesc();
 
 		friend bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs);
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(RasterizerStateDesc);
 	};
 	static_assert(sizeof(RasterizerStateDesc) == 24);
 
@@ -236,6 +238,7 @@ namespace KlayGE
 		DepthStencilStateDesc();
 
 		friend bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs);
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(DepthStencilStateDesc);
 	};
 	static_assert(sizeof(DepthStencilStateDesc) == 52);
 
@@ -261,6 +264,7 @@ namespace KlayGE
 		BlendStateDesc();
 
 		friend bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs);
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(BlendStateDesc);
 	};
 	static_assert(sizeof(BlendStateDesc) == 270);
 
@@ -284,6 +288,7 @@ namespace KlayGE
 		SamplerStateDesc();
 
 		friend bool operator<(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs);
+		KLAYGE_DEFAULT_LESS_COMPARE_OPERATOR(SamplerStateDesc);
 	};
 	static_assert(sizeof(SamplerStateDesc) == 49);
 #ifdef KLAYGE_HAS_STRUCT_PACK
