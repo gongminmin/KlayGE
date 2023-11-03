@@ -35,6 +35,7 @@
 
 #include <KlayGE/RenderSettings.hpp>
 #include <KFL/DllLoader.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 struct android_app;
@@ -59,8 +60,10 @@ namespace KlayGE
 		bool location_sensor;
 	};
 
-	class KLAYGE_CORE_API Context final : boost::noncopyable
+	class KLAYGE_CORE_API Context final
 	{
+		KLAYGE_NONCOPYABLE(Context);
+
 	public:
 		Context();
 		~Context() noexcept;

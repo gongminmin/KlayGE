@@ -36,7 +36,13 @@
 
 namespace KlayGE
 {
+	ScriptVariable::ScriptVariable() noexcept = default;
 	ScriptVariable::~ScriptVariable() noexcept = default;
+
+	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] ScriptVariable const& rhs)
+	{
+		KFL_UNREACHABLE("Can't be called");
+	}
 
 	ScriptVariable& ScriptVariable::operator=([[maybe_unused]] std::string const& value)
 	{

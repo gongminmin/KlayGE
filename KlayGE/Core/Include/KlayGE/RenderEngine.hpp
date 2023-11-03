@@ -74,6 +74,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mipmapper.hpp>
@@ -84,8 +85,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderEngine : boost::noncopyable
+	class KLAYGE_CORE_API RenderEngine
 	{
+		KLAYGE_NONCOPYABLE(RenderEngine);
+
 	public:
 		RenderEngine();
 		virtual ~RenderEngine() noexcept;

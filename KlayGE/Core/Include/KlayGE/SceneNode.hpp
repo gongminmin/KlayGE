@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
@@ -42,8 +43,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneNode final : boost::noncopyable, public std::enable_shared_from_this<SceneNode>
+	class KLAYGE_CORE_API SceneNode final : public std::enable_shared_from_this<SceneNode>
 	{
+		KLAYGE_NONCOPYABLE(SceneNode);
+
 	public:
 		enum SOAttrib
 		{

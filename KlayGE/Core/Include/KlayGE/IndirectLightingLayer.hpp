@@ -34,15 +34,19 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/MultiResLayer.hpp>
 
 #include <array>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API IndirectLightingLayer : boost::noncopyable
+	class KLAYGE_CORE_API IndirectLightingLayer
 	{
+		KLAYGE_NONCOPYABLE(IndirectLightingLayer);
+
 	public:
+		IndirectLightingLayer();
 		virtual ~IndirectLightingLayer() noexcept;
 
 		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;

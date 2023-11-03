@@ -36,12 +36,15 @@
 #include <string>
 
 #include <KFL/CXX20/span.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ScriptVariable : boost::noncopyable
+	class KLAYGE_CORE_API ScriptVariable
 	{
 	public:
+		ScriptVariable() noexcept;
+		ScriptVariable(ScriptVariable const& rhs) = delete;
 		virtual ~ScriptVariable() noexcept;
 
 		virtual ScriptVariable& operator=(std::string const& value);
@@ -86,10 +89,15 @@ namespace KlayGE
 				throw std::bad_cast();
 			}
 		}
+
+	protected:
+		ScriptVariable& operator=(ScriptVariable const& rhs);
 	};
 
-	class KLAYGE_CORE_API ScriptModule : boost::noncopyable
+	class KLAYGE_CORE_API ScriptModule
 	{
+		KLAYGE_NONCOPYABLE(ScriptModule);
+
 	public:
 		ScriptModule() noexcept;
 		virtual ~ScriptModule() noexcept;
@@ -122,8 +130,10 @@ namespace KlayGE
 	typedef std::shared_ptr<ScriptModule> ScriptModulePtr;
 
 
-	class KLAYGE_CORE_API ScriptEngine : boost::noncopyable
+	class KLAYGE_CORE_API ScriptEngine
 	{
+		KLAYGE_NONCOPYABLE(ScriptEngine);
+
 	public:
 		ScriptEngine() noexcept;
 		virtual ~ScriptEngine() noexcept;

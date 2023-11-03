@@ -36,12 +36,15 @@
 #include <streambuf>
 #include <vector>
 #include <string>
-#include <boost/noncopyable.hpp>
+
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class MemInputStreamBuf : public std::streambuf, boost::noncopyable
+	class MemInputStreamBuf : public std::streambuf
 	{
+		KLAYGE_NONCOPYABLE(MemInputStreamBuf);
+
 	public:
 		MemInputStreamBuf(void const * p, std::streamsize num_bytes);
 		MemInputStreamBuf(void const * begin, void const * end);
@@ -65,8 +68,10 @@ namespace KlayGE
 	};
 
 	template <typename Callback>
-	class CallbackOutputStreamBuf : public std::streambuf, boost::noncopyable
+	class CallbackOutputStreamBuf : public std::streambuf
 	{
+		KLAYGE_NONCOPYABLE(CallbackOutputStreamBuf);
+
 	public:
 		explicit CallbackOutputStreamBuf(Callback cb) noexcept
 			: cb_(std::move(cb))
@@ -89,8 +94,10 @@ namespace KlayGE
 	};
 
 
-	class VectorStreamCallback final : boost::noncopyable
+	class VectorStreamCallback final
 	{
+		KLAYGE_NONCOPYABLE(VectorStreamCallback);
+
 	public:
 		explicit VectorStreamCallback(std::vector<std::streambuf::char_type>& data);
 		VectorStreamCallback(VectorStreamCallback&& rhs) noexcept;
@@ -107,8 +114,10 @@ namespace KlayGE
 		explicit VectorOutputStreamBuf(std::vector<char_type>& data);
 	};
 
-	class StringStreamCallback final : boost::noncopyable
+	class StringStreamCallback final
 	{
+		KLAYGE_NONCOPYABLE(StringStreamCallback);
+
 	public:
 		explicit StringStreamCallback(std::basic_string<std::streambuf::char_type>& data);
 		StringStreamCallback(StringStreamCallback&& rhs) noexcept;

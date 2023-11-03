@@ -1947,6 +1947,8 @@ namespace KlayGE
 	}
 
 
+	D3D12RenderEngine::PerThreadContext::PerThreadPerFrameContext::PerThreadPerFrameContext() = default;
+
 	D3D12RenderEngine::PerThreadContext::PerThreadContext(ID3D12Device* d3d_device, FencePtr const& frame_fence)
 		: thread_id_(std::this_thread::get_id()), frame_fence_(frame_fence)
 	{
@@ -2026,6 +2028,8 @@ namespace KlayGE
 		return per_frame_contexts_[frame_index].fence_value;
 	}
 
+
+	D3D12RenderEngine::PerFrameContext::PerFrameContext() = default;
 
 	D3D12RenderEngine::PerFrameContext::~PerFrameContext()
 	{

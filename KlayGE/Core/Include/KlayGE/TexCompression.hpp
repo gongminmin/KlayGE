@@ -37,6 +37,7 @@
 
 #include <array>
 
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
 
 namespace KlayGE
@@ -60,9 +61,12 @@ namespace KlayGE
 	KLAYGE_CORE_API uint32_t BlockBytes(ElementFormat format);
 	KLAYGE_CORE_API ElementFormat DecodedFormat(ElementFormat format);
 
-	class KLAYGE_CORE_API TexCompression : boost::noncopyable
+	class KLAYGE_CORE_API TexCompression
 	{
+		KLAYGE_NONCOPYABLE(TexCompression);
+
 	public:
+		TexCompression() noexcept;
 		virtual ~TexCompression() noexcept;
 
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) = 0;

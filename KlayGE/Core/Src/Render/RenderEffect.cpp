@@ -4260,6 +4260,9 @@ namespace KlayGE
 	}
 
 
+	RenderEffect::Immutable::Immutable() = default;
+	RenderEffect::RenderEffect() = default;
+
 	void RenderEffect::Load(std::span<std::string const> names)
 	{
 		if (!immutable_)
@@ -6046,6 +6049,8 @@ namespace KlayGE
 	}
 
 
+	RenderPass::RenderPass() = default;
+
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderPass::Load(
 		RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass)
@@ -6860,6 +6865,8 @@ namespace KlayGE
 	}
 
 	
+	RenderEffectConstantBuffer::Immutable::Immutable() = default;
+
 	RenderEffectConstantBuffer::RenderEffectConstantBuffer(RenderEffect& effect) : effect_(effect)
 	{
 	}
@@ -7019,6 +7026,8 @@ namespace KlayGE
 		buff_.resize(buff->Size());
 	}
 
+
+	RenderEffectParameter::Immutable::Immutable() = default;
 
 	RenderEffectParameter::RenderEffectParameter() = default;
 	RenderEffectParameter::RenderEffectParameter(RenderEffectParameter&& rhs) noexcept = default;
@@ -7530,12 +7539,12 @@ namespace KlayGE
 #endif
 
 
-	RenderVariable::RenderVariable()
-	{
-	}
+	RenderVariable::RenderVariable() noexcept = default;
+	RenderVariable::~RenderVariable() noexcept = default;
 
-	RenderVariable::~RenderVariable()
+	RenderVariable& RenderVariable::operator=([[maybe_unused]] RenderVariable const& rhs)
 	{
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=([[maybe_unused]] bool const & value)

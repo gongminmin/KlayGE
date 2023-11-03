@@ -19,13 +19,17 @@
 
 #include <string>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Show.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ShowFactory : boost::noncopyable
+	class KLAYGE_CORE_API ShowFactory
 	{
+		KLAYGE_NONCOPYABLE(ShowFactory);
+
 	public:
+		ShowFactory() noexcept;
 		virtual ~ShowFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;

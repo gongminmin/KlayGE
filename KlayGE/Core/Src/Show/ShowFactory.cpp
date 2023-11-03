@@ -20,6 +20,7 @@
 
 namespace KlayGE
 {
+	ShowFactory::ShowFactory() noexcept = default;
 	ShowFactory::~ShowFactory() noexcept = default;
 
 	ShowEngine& ShowFactory::ShowEngineInstance()

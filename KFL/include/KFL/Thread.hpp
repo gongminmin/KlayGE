@@ -47,7 +47,7 @@
 #include <thread>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -64,15 +64,19 @@ namespace KlayGE
 		return ret;
 	}
 
-	class ThreadPool final : boost::noncopyable
+	class ThreadPool final
 	{
+		KLAYGE_NONCOPYABLE(ThreadPool);
+
 		class CommonData;
 
 		// A class used to storage information of a pooled thread. Each object of this class represents a pooled thread.
 		//  It also has mechanisms to notify the pooled thread that it has a work to do. It also offers notification
 		//  to definitively tell to the thread that it should die.
-		struct ThreadInfo final : boost::noncopyable
+		struct ThreadInfo final
 		{
+			KLAYGE_NONCOPYABLE(ThreadInfo);
+
 			explicit ThreadInfo(CommonData& data) noexcept;
 
 			void WakeUp(std::function<void()> func);
@@ -87,8 +91,10 @@ namespace KlayGE
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class CommonData final : public std::enable_shared_from_this<CommonData>, boost::noncopyable
+		class CommonData final : public std::enable_shared_from_this<CommonData>
 		{
+			KLAYGE_NONCOPYABLE(CommonData);
+
 		public:
 			CommonData(size_t num_min_cached_threads, size_t num_max_cached_threads);
 			~CommonData();
@@ -132,7 +138,7 @@ namespace KlayGE
 					th_info->WakeUp([task]() { (*task)(); });
 				}
 
-				return ret;		
+				return ret;
 			}
 
 		private:

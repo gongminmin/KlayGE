@@ -21,6 +21,7 @@
 #include <list>
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Thread.hpp>
 #include <KlayGE/Socket.hpp>
 
@@ -34,8 +35,10 @@ namespace KlayGE
 		sockaddr_in		addr;
 	};
 
-	class KLAYGE_CORE_API Player final : boost::noncopyable
+	class KLAYGE_CORE_API Player final
 	{
+		KLAYGE_NONCOPYABLE(Player);
+
 	public:
 		Player();
 		~Player();

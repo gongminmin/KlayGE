@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 
 #include <KlayGE/Signal.hpp>
@@ -50,8 +51,10 @@ namespace KlayGE
 	//			DoUpdate()				- 刷新场景
 	//			DoUpdateOverlay()		- 刷新Overlay物体
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API App3DFramework : boost::noncopyable
+	class KLAYGE_CORE_API App3DFramework
 	{
+		KLAYGE_NONCOPYABLE(App3DFramework);
+
 		friend class SceneManager;
 
 	public:

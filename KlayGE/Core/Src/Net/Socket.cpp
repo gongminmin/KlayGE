@@ -20,6 +20,10 @@
 #include <system_error>
 #include <boost/assert.hpp>
 
+#if !defined(KLAYGE_PLATFORM_WINDOWS)
+#include <unistd.h>
+#endif
+
 #include <KlayGE/Socket.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS

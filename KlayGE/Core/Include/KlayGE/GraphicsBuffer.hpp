@@ -46,6 +46,8 @@
 #include <atomic>
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
 	enum BufferUsage
@@ -61,11 +63,15 @@ namespace KlayGE
 		BA_Write_No_Overwrite
 	};
 
-	class KLAYGE_CORE_API GraphicsBuffer : boost::noncopyable
+	class KLAYGE_CORE_API GraphicsBuffer
 	{
+		KLAYGE_NONCOPYABLE(GraphicsBuffer);
+
 	public:
-		class Mapper final : boost::noncopyable
+		class Mapper final
 		{
+			KLAYGE_NONCOPYABLE(Mapper);
+
 			friend class GraphicsBuffer;
 
 		public:

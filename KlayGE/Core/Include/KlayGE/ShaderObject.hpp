@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX23/utility.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
 #include <array>
@@ -99,8 +100,10 @@ namespace KlayGE
 	};
 	uint32_t constexpr NumShaderStages = std::to_underlying(ShaderStage::NumStages);
 
-	class KLAYGE_CORE_API ShaderStageObject : boost::noncopyable
+	class KLAYGE_CORE_API ShaderStageObject
 	{
+		KLAYGE_NONCOPYABLE(ShaderStageObject);
+
 	public:
 		explicit ShaderStageObject(ShaderStage stage) noexcept;
 		virtual ~ShaderStageObject() noexcept;
@@ -168,8 +171,10 @@ namespace KlayGE
 		bool hw_res_ready_ = false;
 	};
 
-	class KLAYGE_CORE_API ShaderObject : boost::noncopyable
+	class KLAYGE_CORE_API ShaderObject
 	{
+		KLAYGE_NONCOPYABLE(ShaderObject);
+
 	public:
 		ShaderObject();
 		virtual ~ShaderObject() noexcept;

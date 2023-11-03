@@ -34,5 +34,6 @@
 
 namespace KlayGE
 {
+	Fence::Fence() noexcept = default;
     Fence::~Fence() noexcept = default;
 }

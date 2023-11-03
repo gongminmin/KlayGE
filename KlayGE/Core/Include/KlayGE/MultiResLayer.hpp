@@ -34,11 +34,14 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API MultiResLayer final : boost::noncopyable
+	class KLAYGE_CORE_API MultiResLayer final
 	{
+		KLAYGE_NONCOPYABLE(MultiResLayer);
+
 	public:
 		MultiResLayer();
 

@@ -36,6 +36,7 @@
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Color.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #include <bitset>
 #include <list>
@@ -245,8 +246,10 @@ namespace KlayGE
 		ID3D12CommandQueuePtr d3d_cmd_queue_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
 
-		class PerThreadContext : boost::noncopyable
+		class PerThreadContext
 		{
+			KLAYGE_NONCOPYABLE(PerThreadContext);
+
 		public:
 			PerThreadContext(ID3D12Device* d3d_device, FencePtr const& frame_fence);
 			~PerThreadContext();
@@ -264,8 +267,12 @@ namespace KlayGE
 			uint64_t FrameFenceValue(uint32_t frame_index) const noexcept;
 
 		private:
-			struct PerThreadPerFrameContext : boost::noncopyable
+			struct PerThreadPerFrameContext
 			{
+				KLAYGE_NONCOPYABLE(PerThreadPerFrameContext);
+
+				PerThreadPerFrameContext();
+
 				ID3D12CommandAllocatorPtr d3d_cmd_allocator;
 				uint64_t fence_value = 0;
 			};
@@ -279,9 +286,12 @@ namespace KlayGE
 		mutable std::vector<std::unique_ptr<PerThreadContext>> render_thread_cmd_contexts_;
 		mutable std::vector<std::unique_ptr<PerThreadContext>> load_thread_cmd_contexts_;
 
-		struct PerFrameContext : boost::noncopyable
+		struct PerFrameContext
 		{
+			KLAYGE_NONCOPYABLE(PerFrameContext);
+
 		public:
+			PerFrameContext();
 			~PerFrameContext();
 
 			void Destroy();

@@ -20,18 +20,21 @@
 
 #include <vector>
 #include <list>
+
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Socket.hpp>
 
 namespace KlayGE
 {
 	uint32_t const Max_Buffer(64);
 
-	class Processor : boost::noncopyable
+	class Processor
 	{
+		KLAYGE_NONCOPYABLE(Processor);
+
 	public:
-		virtual ~Processor()
-		{
-		}
+		Processor() noexcept;
+		virtual ~Processor() noexcept;
 
 		virtual void OnJoin(uint32_t /*ID*/) const
 		{
@@ -56,8 +59,10 @@ namespace KlayGE
 		std::list<std::vector<char>> msgs;
 	};
 
-	class KLAYGE_CORE_API Lobby final : boost::noncopyable
+	class KLAYGE_CORE_API Lobby final
 	{
+		KLAYGE_NONCOPYABLE(Lobby);
+
 		typedef std::vector<std::pair<uint32_t, PlayerDes>>	PlayerAddrs;
 		typedef PlayerAddrs::iterator		PlayerAddrsIter;
 

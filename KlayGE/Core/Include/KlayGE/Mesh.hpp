@@ -31,6 +31,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
@@ -151,8 +152,10 @@ namespace KlayGE
 		bool hw_res_ready_;
 	};
 
-	class KLAYGE_CORE_API RenderModel : boost::noncopyable
+	class KLAYGE_CORE_API RenderModel
 	{
+		KLAYGE_NONCOPYABLE(RenderModel);
+
 	public:
 		explicit RenderModel(SceneNodePtr const & root_node);
 		RenderModel(std::wstring_view name, uint32_t node_attrib);

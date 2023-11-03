@@ -31,12 +31,15 @@
 
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Viewport.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API FrameBuffer : boost::noncopyable
+	class KLAYGE_CORE_API FrameBuffer
 	{
+		KLAYGE_NONCOPYABLE(FrameBuffer);
+
 	public:
 		enum class Attachment : uint32_t
 		{

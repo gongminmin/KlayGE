@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Thread.hpp>
 
 #if defined(KLAYGE_PLATFORM_ANDROID)
@@ -47,9 +48,12 @@ struct AAsset;
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ResLoadingDesc : boost::noncopyable
+	class KLAYGE_CORE_API ResLoadingDesc
 	{
+		KLAYGE_NONCOPYABLE(ResLoadingDesc);
+
 	public:
+		ResLoadingDesc() noexcept;
 		virtual ~ResLoadingDesc() noexcept;
 
 		virtual uint64_t Type() const = 0;
@@ -72,8 +76,10 @@ namespace KlayGE
 		virtual std::shared_ptr<void> Resource() const = 0;
 	};
 
-	class KLAYGE_CORE_API ResLoader final : boost::noncopyable
+	class KLAYGE_CORE_API ResLoader final
 	{
+		KLAYGE_NONCOPYABLE(ResLoader);
+
 	public:
 		ResLoader();
 		~ResLoader();

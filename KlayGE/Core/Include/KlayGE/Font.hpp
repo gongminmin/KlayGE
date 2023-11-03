@@ -38,6 +38,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
 
@@ -50,8 +51,10 @@ namespace KlayGE
 
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Font final : boost::noncopyable
+	class KLAYGE_CORE_API Font final
 	{
+		KLAYGE_NONCOPYABLE(Font);
+
 	public:
 		// 字体建立标志
 		enum FontStyle

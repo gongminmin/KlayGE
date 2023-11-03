@@ -34,11 +34,14 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Fence : boost::noncopyable
+	class KLAYGE_CORE_API Fence
 	{
+		KLAYGE_NONCOPYABLE(Fence);
+
 	public:
 		enum FenceType
 		{
@@ -48,6 +51,7 @@ namespace KlayGE
 		};
 
 	public:
+		Fence() noexcept;
 		virtual ~Fence() noexcept;
 
 		virtual uint64_t Signal(FenceType ft) = 0;

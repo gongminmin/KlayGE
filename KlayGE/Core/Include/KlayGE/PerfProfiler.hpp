@@ -34,7 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 
 #include <map>
@@ -43,8 +43,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API PerfRegion final : boost::noncopyable
+	class KLAYGE_CORE_API PerfRegion final
 	{
+		KLAYGE_NONCOPYABLE(PerfRegion);
+
 	public:
 		PerfRegion();
 
@@ -76,9 +78,13 @@ namespace KlayGE
 		bool dirty_ = false;
 	};
 
-	class KLAYGE_CORE_API PerfProfiler final : boost::noncopyable
+	class KLAYGE_CORE_API PerfProfiler final
 	{
+		KLAYGE_NONCOPYABLE(PerfProfiler);
+
 	public:
+		PerfProfiler();
+
 		static PerfProfiler& Instance();
 		static void Destroy();
 

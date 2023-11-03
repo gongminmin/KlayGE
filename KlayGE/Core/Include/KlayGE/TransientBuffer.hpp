@@ -38,6 +38,8 @@
 #include <vector>
 #include <list>
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
 	// A part of transient buffer that is allocated
@@ -55,8 +57,10 @@ namespace KlayGE
 		}
 	};
 
-	class KLAYGE_CORE_API TransientBuffer final : boost::noncopyable
+	class KLAYGE_CORE_API TransientBuffer final
 	{
+		KLAYGE_NONCOPYABLE(TransientBuffer);
+
 		// Frames that have ended
 		struct RetiredFrame
 		{

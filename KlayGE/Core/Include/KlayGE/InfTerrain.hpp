@@ -19,6 +19,7 @@
 
 #include <array>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
 namespace KlayGE
@@ -112,8 +113,10 @@ namespace KlayGE
 		//    ####################
 		//    ####################
 		//
-		class TileRing : boost::noncopyable
+		class TileRing
 		{
+			KLAYGE_NONCOPYABLE(TileRing);
+
 		public:
 			// hole_width & outer_width are num of tiles
 			// tile_size is a world-space length

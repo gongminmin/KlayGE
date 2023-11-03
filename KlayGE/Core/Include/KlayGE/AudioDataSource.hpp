@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -47,9 +48,12 @@ namespace KlayGE
 		AF_Unknown,
 	};
 
-	class KLAYGE_CORE_API AudioDataSource : boost::noncopyable
+	class KLAYGE_CORE_API AudioDataSource
 	{
+		KLAYGE_NONCOPYABLE(AudioDataSource);
+
 	public:
+		AudioDataSource() noexcept;
 		virtual ~AudioDataSource() noexcept;
 
 		virtual void Open(ResIdentifierPtr const & file) = 0;
@@ -68,9 +72,12 @@ namespace KlayGE
 		uint32_t freq_;
 	};
 
-	class KLAYGE_CORE_API AudioDataSourceFactory : boost::noncopyable
+	class KLAYGE_CORE_API AudioDataSourceFactory
 	{
+		KLAYGE_NONCOPYABLE(AudioDataSourceFactory);
+
 	public:
+		AudioDataSourceFactory() noexcept;
 		virtual ~AudioDataSourceFactory() noexcept;
 
 		void Suspend();

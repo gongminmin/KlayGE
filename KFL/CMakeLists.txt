@@ -32,6 +32,7 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/JsonDom.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Noncopyable.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Operators.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp

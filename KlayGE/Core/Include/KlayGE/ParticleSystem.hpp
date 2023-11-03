@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/SceneNode.hpp>
 
 #include <mutex>
@@ -55,8 +56,10 @@ namespace KlayGE
 		float init_life;
 	};
 
-	class KLAYGE_CORE_API ParticleEmitter : boost::noncopyable
+	class KLAYGE_CORE_API ParticleEmitter
 	{
+		KLAYGE_NONCOPYABLE(ParticleEmitter);
+
 	public:
 		explicit ParticleEmitter(ParticleSystemPtr const& ps);
 		virtual ~ParticleEmitter() noexcept;
@@ -202,8 +205,10 @@ namespace KlayGE
 		float max_size_;
 	};
 
-	class KLAYGE_CORE_API ParticleUpdater : boost::noncopyable
+	class KLAYGE_CORE_API ParticleUpdater
 	{
+		KLAYGE_NONCOPYABLE(ParticleUpdater);
+
 	public:
 		explicit ParticleUpdater(ParticleSystemPtr const& ps);
 		virtual ~ParticleUpdater() noexcept;

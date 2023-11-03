@@ -22,12 +22,16 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Query : boost::noncopyable
+	class KLAYGE_CORE_API Query
 	{
+		KLAYGE_NONCOPYABLE(Query);
+
 	public:
+		Query() noexcept;
 		virtual ~Query() noexcept;
 
 		virtual void Begin() = 0;

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <KFL/Math.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -32,8 +33,10 @@ namespace KlayGE
 {
 	// ÉãÏñ»ú¿ØÖÆÆ÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API CameraController : boost::noncopyable
+	class KLAYGE_CORE_API CameraController
 	{
+		KLAYGE_NONCOPYABLE(CameraController);
+
 	public:
 		CameraController();
 		virtual ~CameraController() noexcept;

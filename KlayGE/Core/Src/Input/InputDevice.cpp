@@ -19,9 +19,6 @@
 
 namespace KlayGE
 {
-	// Îö¹¹º¯Êý
-	/////////////////////////////////////////////////////////////////////////////////
-	InputDevice::~InputDevice()
-	{
-	}
+	InputDevice::InputDevice() = default;
+	InputDevice::~InputDevice() noexcept = default;
 }

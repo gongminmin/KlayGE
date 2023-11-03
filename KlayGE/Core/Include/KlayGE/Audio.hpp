@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Vector.hpp>
 
 #include <map>
@@ -42,8 +43,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API AudioBuffer : boost::noncopyable
+	class KLAYGE_CORE_API AudioBuffer
 	{
+		KLAYGE_NONCOPYABLE(AudioBuffer);
+
 	public:
 		explicit AudioBuffer(AudioDataSourcePtr const & data_source);
 		virtual ~AudioBuffer() noexcept;
@@ -110,8 +113,10 @@ namespace KlayGE
 		static uint32_t constexpr BUFFERS_PER_SECOND = 2;
 	};
 
-	class KLAYGE_CORE_API AudioEngine : boost::noncopyable
+	class KLAYGE_CORE_API AudioEngine
 	{
+		KLAYGE_NONCOPYABLE(AudioEngine);
+
 	public:
 		AudioEngine();
 		virtual ~AudioEngine() noexcept;

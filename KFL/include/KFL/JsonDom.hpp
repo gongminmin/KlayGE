@@ -36,7 +36,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -52,9 +52,13 @@ namespace KlayGE
 		Object,
 	};
 
-	class JsonDocument : boost::noncopyable
+	class JsonDocument
 	{
+		KLAYGE_NONCOPYABLE(JsonDocument);
+
 	public:
+		JsonDocument() noexcept;
+
 		JsonValue* RootValue() const;
 		void RootValue(std::unique_ptr<JsonValue> new_value);
 
@@ -72,9 +76,12 @@ namespace KlayGE
 		std::unique_ptr<JsonValue> root_;
 	};
 
-	class JsonValue : boost::noncopyable
+	class JsonValue
 	{
+		KLAYGE_NONCOPYABLE(JsonValue);
+
 	public:
+		JsonValue() noexcept;
 		virtual ~JsonValue() noexcept;
 
 		virtual JsonValueType Type() const noexcept = 0;

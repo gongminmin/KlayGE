@@ -27,6 +27,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KFL/Frustum.hpp>
 #include <KFL/Thread.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #include <optional>
 #include <vector>
@@ -34,8 +35,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneManager : boost::noncopyable
+	class KLAYGE_CORE_API SceneManager
 	{
+		KLAYGE_NONCOPYABLE(SceneManager);
+
 	public:
 		SceneManager();
 		virtual ~SceneManager();

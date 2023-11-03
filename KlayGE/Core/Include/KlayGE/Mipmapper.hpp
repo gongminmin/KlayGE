@@ -34,12 +34,15 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Blitter.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Mipmapper final : boost::noncopyable
+	class KLAYGE_CORE_API Mipmapper final
 	{
+		KLAYGE_NONCOPYABLE(Mipmapper);
+
 	public:
 		Mipmapper();
 

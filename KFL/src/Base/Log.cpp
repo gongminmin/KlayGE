@@ -31,6 +31,7 @@
 #include <KFL/KFL.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #include <cstdarg>
 #include <cstdio>
@@ -50,8 +51,10 @@ namespace
 	using namespace KlayGE;
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-	class AndroidLogStreamCallback : boost::noncopyable
+	class AndroidLogStreamCallback
 	{
+		KLAYGE_NONCOPYABLE(AndroidLogStreamCallback);
+
 	public:
 		explicit AndroidLogStreamCallback(int prio)
 			: prio_(prio)
@@ -83,8 +86,10 @@ namespace
 		return log_stream;
 	}
 #else
-	class MultiOStreamsCallback : boost::noncopyable
+	class MultiOStreamsCallback
 	{
+		KLAYGE_NONCOPYABLE(MultiOStreamsCallback);
+
 	public:
 		explicit MultiOStreamsCallback(std::span<std::ostream*> oss)
 			: oss_(oss)
@@ -128,8 +133,10 @@ namespace
 #endif
 
 #ifndef KLAYGE_DEBUG
-	class EmptyOStreamsCallback : boost::noncopyable
+	class EmptyOStreamsCallback
 	{
+		KLAYGE_NONCOPYABLE(EmptyOStreamsCallback);
+
 	public:
 		EmptyOStreamsCallback()
 		{

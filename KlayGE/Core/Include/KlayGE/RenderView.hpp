@@ -19,15 +19,19 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ShaderResourceView : boost::noncopyable
+	class KLAYGE_CORE_API ShaderResourceView
 	{
+		KLAYGE_NONCOPYABLE(ShaderResourceView);
+
 	public:
+		ShaderResourceView();
 		virtual ~ShaderResourceView() noexcept;
 
 		ElementFormat Format() const
@@ -85,9 +89,12 @@ namespace KlayGE
 		uint32_t num_elems_;
 	};
 
-	class KLAYGE_CORE_API RenderTargetView : boost::noncopyable
+	class KLAYGE_CORE_API RenderTargetView
 	{
+		KLAYGE_NONCOPYABLE(RenderTargetView);
+
 	public:
+		RenderTargetView();
 		virtual ~RenderTargetView() noexcept;
 
 		uint32_t Width() const
@@ -191,9 +198,12 @@ namespace KlayGE
 		uint32_t num_elems_;
 	};
 
-	class KLAYGE_CORE_API DepthStencilView : boost::noncopyable
+	class KLAYGE_CORE_API DepthStencilView
 	{
+		KLAYGE_NONCOPYABLE(DepthStencilView);
+
 	public:
+		DepthStencilView();
 		virtual ~DepthStencilView() noexcept;
 
 		uint32_t Width() const
@@ -281,9 +291,12 @@ namespace KlayGE
 		uint32_t num_faces_;
 	};
 
-	class KLAYGE_CORE_API UnorderedAccessView : boost::noncopyable
+	class KLAYGE_CORE_API UnorderedAccessView
 	{
+		KLAYGE_NONCOPYABLE(UnorderedAccessView);
+
 	public:
+		UnorderedAccessView();
 		virtual ~UnorderedAccessView() noexcept;
 
 		ElementFormat Format() const

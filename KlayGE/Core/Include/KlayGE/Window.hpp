@@ -60,10 +60,14 @@ OBJC_CLASS(NSView);
 
 #include <string>
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Window final : boost::noncopyable
+	class KLAYGE_CORE_API Window final
 	{
+		KLAYGE_NONCOPYABLE(Window);
+
 	public:
 		enum WindowRotation
 		{

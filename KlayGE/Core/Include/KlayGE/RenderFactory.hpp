@@ -30,6 +30,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
@@ -42,9 +43,10 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderFactory : boost::noncopyable
+	class KLAYGE_CORE_API RenderFactory
 	{
 	public:
+		RenderFactory();
 		virtual ~RenderFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;

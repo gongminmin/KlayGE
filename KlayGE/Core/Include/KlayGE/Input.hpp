@@ -37,6 +37,7 @@
 
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Signal.hpp>
 
 #include <vector>
@@ -358,8 +359,10 @@ namespace KlayGE
 
 	//  ‰»Î“˝«Ê
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API InputEngine : boost::noncopyable
+	class KLAYGE_CORE_API InputEngine
 	{
+		KLAYGE_NONCOPYABLE(InputEngine);
+
 	public:
 		enum InputDeviceType
 		{
@@ -371,7 +374,8 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~InputEngine();
+		InputEngine();
+		virtual ~InputEngine() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -401,10 +405,13 @@ namespace KlayGE
 		float elapsed_time_;
 	};
 
-	class KLAYGE_CORE_API InputDevice : boost::noncopyable
+	class KLAYGE_CORE_API InputDevice
 	{
+		KLAYGE_NONCOPYABLE(InputDevice);
+
 	public:
-		virtual ~InputDevice();
+		InputDevice();
+		virtual ~InputDevice() noexcept;
 
 		virtual std::wstring const & Name() const = 0;
 		virtual InputEngine::InputDeviceType Type() const = 0;

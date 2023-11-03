@@ -38,6 +38,7 @@
 #include <array>
 #include <functional>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
@@ -206,10 +207,14 @@ namespace KlayGE
 #endif
 	};
 
-	class KLAYGE_CORE_API DeferredRenderingLayer final : boost::noncopyable
+	class KLAYGE_CORE_API DeferredRenderingLayer final
 	{
-		class DeferredRenderingJob final : boost::noncopyable
+		KLAYGE_NONCOPYABLE(DeferredRenderingLayer);
+
+		class DeferredRenderingJob final
 		{
+			KLAYGE_NONCOPYABLE(DeferredRenderingJob);
+
 		public:
 			explicit DeferredRenderingJob(std::function<uint32_t()> job_func)
 				: func_(std::move(job_func))

@@ -41,10 +41,14 @@
 
 #include <CPP/7zip/IStream.h>
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
-	class InStream final : boost::noncopyable, public IInStream, public IStreamGetSize
+	class InStream final : public IInStream, public IStreamGetSize
 	{
+		KLAYGE_NONCOPYABLE(InStream);
+
 	public:
 		// IUnknown
 		STDMETHOD_(ULONG, AddRef)() noexcept;
@@ -69,8 +73,10 @@ namespace KlayGE
 		uint64_t stream_size_ = 0;
 	};
 
-	class OutStream final : boost::noncopyable, public IOutStream
+	class OutStream final : public IOutStream
 	{
+		KLAYGE_NONCOPYABLE(OutStream);
+
 	public:
 		// IUnknown
 		STDMETHOD_(ULONG, AddRef)() noexcept;

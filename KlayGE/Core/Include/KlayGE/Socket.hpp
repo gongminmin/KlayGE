@@ -38,6 +38,8 @@
 	#define SOCKET_ERROR (-1)
 #endif
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
 	KLAYGE_CORE_API sockaddr_in TransAddr(std::string const & address, uint16_t port);
@@ -46,8 +48,10 @@ namespace KlayGE
 
 	// Í¬²½Ì×½Ó×Ö
 	///////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Socket final : boost::noncopyable
+	class KLAYGE_CORE_API Socket final
 	{
+		KLAYGE_NONCOPYABLE(Socket);
+
 	public:
 		Socket();
 		~Socket();

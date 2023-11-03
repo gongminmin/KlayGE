@@ -37,10 +37,14 @@
 #include <string>
 #include <array>
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderMaterial final : boost::noncopyable
+	class KLAYGE_CORE_API RenderMaterial final
 	{
+		KLAYGE_NONCOPYABLE(RenderMaterial);
+
 	public:
 		enum TextureSlot
 		{

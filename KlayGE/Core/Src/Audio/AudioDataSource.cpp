@@ -34,8 +34,10 @@
 
 namespace KlayGE
 {
+	AudioDataSourceFactory::AudioDataSourceFactory() noexcept = default;
 	AudioDataSourceFactory::~AudioDataSourceFactory() noexcept = default;
 
+	AudioDataSource::AudioDataSource() noexcept = default;
 	AudioDataSource::~AudioDataSource() noexcept = default;
 
 	AudioFormat AudioDataSource::Format() const

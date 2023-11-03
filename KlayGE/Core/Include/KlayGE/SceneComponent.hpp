@@ -39,12 +39,15 @@
 #include <boost/type_index.hpp>
 #include <boost/type_index/runtime_cast.hpp>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Signal.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneComponent : boost::noncopyable
+	class KLAYGE_CORE_API SceneComponent
 	{
+		KLAYGE_NONCOPYABLE(SceneComponent);
+
 	public:
 #if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
@@ -55,6 +58,7 @@ namespace KlayGE
 #pragma clang diagnostic pop
 #endif
 
+		SceneComponent();
 		virtual ~SceneComponent() noexcept;
 
 		virtual SceneComponentPtr Clone() const = 0;

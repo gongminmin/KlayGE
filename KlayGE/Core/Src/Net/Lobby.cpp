@@ -22,6 +22,9 @@
 
 namespace KlayGE
 {
+	Processor::Processor() noexcept = default;
+	Processor::~Processor() noexcept = default;
+
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	Lobby::Lobby()

@@ -37,14 +37,15 @@
 #include <mutex>
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
+
 #include "D3D12Util.hpp"
 
 namespace KlayGE
 {
 	class D3D12GpuDescriptorPage final
 	{
-		D3D12GpuDescriptorPage(D3D12GpuDescriptorPage const& other) = delete;
-		D3D12GpuDescriptorPage& operator=(D3D12GpuDescriptorPage const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuDescriptorPage);
 
 	public:
 		D3D12GpuDescriptorPage(uint32_t size, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
@@ -75,8 +76,7 @@ namespace KlayGE
 
 	class D3D12GpuDescriptorBlock final
 	{
-		D3D12GpuDescriptorBlock(D3D12GpuDescriptorBlock const& other) = delete;
-		D3D12GpuDescriptorBlock& operator=(D3D12GpuDescriptorBlock const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuDescriptorBlock);
 
 	public:
 		D3D12GpuDescriptorBlock() noexcept;
@@ -126,8 +126,7 @@ namespace KlayGE
 
 	class D3D12GpuDescriptorAllocator final
 	{
-		D3D12GpuDescriptorAllocator(D3D12GpuDescriptorAllocator const& other) = delete;
-		D3D12GpuDescriptorAllocator& operator=(D3D12GpuDescriptorAllocator const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuDescriptorAllocator);
 
 	public:
 		D3D12GpuDescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags) noexcept;

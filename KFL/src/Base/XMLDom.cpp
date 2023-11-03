@@ -283,6 +283,8 @@ namespace
 
 namespace KlayGE
 {
+	XMLDocument::XMLDocument() noexcept = default;
+
 	XMLNode* XMLDocument::RootNode() const
 	{
 		return root_.get();
@@ -827,6 +829,8 @@ namespace KlayGE
 		value_ = std::move(value);
 	}
 
+
+	XMLAttribute::XMLAttribute() = default;
 
 	std::string_view XMLAttribute::Name() const
 	{

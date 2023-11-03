@@ -65,6 +65,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -132,11 +133,12 @@ namespace KlayGE
 	};
 	static_assert(REDT_count < 256);
 
-	class KLAYGE_CORE_API RenderVariable : boost::noncopyable
+	class KLAYGE_CORE_API RenderVariable
 	{
 	public:
-		RenderVariable();
-		virtual ~RenderVariable() = 0;
+		RenderVariable() noexcept;
+		RenderVariable(RenderVariable const& rhs) = delete;
+		virtual ~RenderVariable() noexcept;
 
 		virtual RenderEffectStructType* StructType() const noexcept
 		{
@@ -262,6 +264,9 @@ namespace KlayGE
 		}
 
 	protected:
+		RenderVariable& operator=(RenderVariable const& rhs);
+
+	protected:
 		struct CBufferDesc
 		{
 			RenderEffect const* effect;
@@ -273,13 +278,12 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API RenderEffectAnnotation final
 	{
+		KLAYGE_NONCOPYABLE(RenderEffectAnnotation);
+
 	public:
 		RenderEffectAnnotation();
 		RenderEffectAnnotation(RenderEffectAnnotation&& rhs) noexcept;
 		RenderEffectAnnotation& operator=(RenderEffectAnnotation&& rhs) noexcept;
-
-		RenderEffectAnnotation(RenderEffectAnnotation const& rhs) = delete;
-		RenderEffectAnnotation& operator=(RenderEffectAnnotation const& rhs) = delete;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
@@ -400,13 +404,12 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API RenderEffectStructType final
 	{
+		KLAYGE_NONCOPYABLE(RenderEffectStructType);
+
 	public:
 		RenderEffectStructType();
 		RenderEffectStructType(RenderEffectStructType&& rhs) noexcept;
 		RenderEffectStructType& operator=(RenderEffectStructType&& rhs) noexcept;
-
-		RenderEffectStructType(RenderEffectStructType const& rhs) = delete;
-		RenderEffectStructType& operator=(RenderEffectStructType const& rhs) = delete;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
@@ -446,8 +449,10 @@ namespace KlayGE
 		std::vector<StrcutMemberType> members_;
 	};
 
-	class KLAYGE_CORE_API RenderEffectConstantBuffer final : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectConstantBuffer final
 	{
+		KLAYGE_NONCOPYABLE(RenderEffectConstantBuffer);
+
 	public:
 		explicit RenderEffectConstantBuffer(RenderEffect& effect);
 
@@ -535,8 +540,12 @@ namespace KlayGE
 	private:
 		RenderEffect& effect_;
 
-		struct Immutable final : boost::noncopyable
+		struct Immutable final
 		{
+			KLAYGE_NONCOPYABLE(Immutable);
+
+			Immutable();
+
 			std::string name;
 			size_t name_hash;
 		};
@@ -551,13 +560,12 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API RenderEffectParameter final
 	{
+		KLAYGE_NONCOPYABLE(RenderEffectParameter);
+
 	public:
 		RenderEffectParameter();
 		RenderEffectParameter(RenderEffectParameter&& rhs) noexcept;
 		RenderEffectParameter& operator=(RenderEffectParameter && rhs) noexcept;
-
-		RenderEffectParameter(RenderEffectParameter const& rhs) = delete;
-		RenderEffectParameter& operator=(RenderEffectParameter const& rhs) = delete;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect const& effect, XMLNode const& node);
@@ -655,8 +663,12 @@ namespace KlayGE
 		void ProcessAnnotation(RenderEffectAnnotation& anno);
 
 	private:
-		struct Immutable final : boost::noncopyable
+		struct Immutable final
 		{
+			KLAYGE_NONCOPYABLE(Immutable);
+
+			Immutable();
+
 			std::string name;
 			size_t name_hash;
 			std::string semantic;
@@ -674,9 +686,13 @@ namespace KlayGE
 
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API RenderEffect final : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffect final
 	{
+		KLAYGE_NONCOPYABLE(RenderEffect);
+
 	public:
+		RenderEffect();
+
 		void Load(std::span<std::string const> names);
 #if KLAYGE_IS_DEV_PLATFORM
 		void CompileShaders();
@@ -777,8 +793,12 @@ namespace KlayGE
 #endif
 
 	private:
-		struct Immutable final : boost::noncopyable
+		struct Immutable final
 		{
+			KLAYGE_NONCOPYABLE(Immutable);
+
+			Immutable();
+
 			std::string res_name;
 			size_t res_name_hash;
 #if KLAYGE_IS_DEV_PLATFORM
@@ -814,13 +834,12 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API RenderTechnique final
 	{
+		KLAYGE_NONCOPYABLE(RenderTechnique);
+
 	public:
 		RenderTechnique();
 		RenderTechnique(RenderTechnique&& rhs) noexcept;
 		RenderTechnique& operator=(RenderTechnique&& rhs) noexcept;
-
-		RenderTechnique(RenderTechnique const& rhs) = delete;
-		RenderTechnique& operator=(RenderTechnique const& rhs) = delete;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index);
@@ -900,9 +919,13 @@ namespace KlayGE
 		bool has_tessellation_;
 	};
 
-	class KLAYGE_CORE_API RenderPass final : boost::noncopyable
+	class KLAYGE_CORE_API RenderPass final
 	{
+		KLAYGE_NONCOPYABLE(RenderPass);
+
 	public:
+		RenderPass();
+
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(RenderEffect& effect, XMLNode const& node, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);
 		void Load(RenderEffect& effect, uint32_t tech_index, uint32_t pass_index, RenderPass const* inherit_pass);

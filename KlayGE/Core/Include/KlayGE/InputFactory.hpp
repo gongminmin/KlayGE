@@ -22,13 +22,15 @@
 
 #include <string>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Input.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API InputFactory : boost::noncopyable
+	class KLAYGE_CORE_API InputFactory
 	{
 	public:
+		InputFactory() noexcept;
 		virtual ~InputFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;

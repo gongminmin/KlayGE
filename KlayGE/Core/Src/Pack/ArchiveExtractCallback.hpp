@@ -40,11 +40,14 @@
 #include <CPP/7zip/IPassword.h>
 
 #include <KFL/com_ptr.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class ArchiveExtractCallback final : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
+	class ArchiveExtractCallback final : public IArchiveExtractCallback, public ICryptoGetTextPassword
 	{
+		KLAYGE_NONCOPYABLE(ArchiveExtractCallback);
+
 	public:
 		// IUnknown
 		STDMETHOD_(ULONG, AddRef)() noexcept;

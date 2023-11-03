@@ -23,6 +23,7 @@
 
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
@@ -81,8 +82,10 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API RenderLayout : boost::noncopyable
+	class KLAYGE_CORE_API RenderLayout
 	{
+		KLAYGE_NONCOPYABLE(RenderLayout);
+
 	public:
 		enum topology_type
 		{

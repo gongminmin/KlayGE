@@ -22,6 +22,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
 
 #include <array>
@@ -295,8 +296,10 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API RenderStateObject : boost::noncopyable
+	class KLAYGE_CORE_API RenderStateObject
 	{
+		KLAYGE_NONCOPYABLE(RenderStateObject);
+
 	public:
 		explicit RenderStateObject(
 			RasterizerStateDesc const& rs_desc, DepthStencilStateDesc const& dss_desc, BlendStateDesc const& bs_desc);
@@ -325,8 +328,10 @@ namespace KlayGE
 		BlendStateDesc bs_desc_;
 	};
 
-	class KLAYGE_CORE_API SamplerStateObject : boost::noncopyable
+	class KLAYGE_CORE_API SamplerStateObject
 	{
+		KLAYGE_NONCOPYABLE(SamplerStateObject);
+
 	public:
 		explicit SamplerStateObject(SamplerStateDesc const & desc)
 			: desc_(desc)

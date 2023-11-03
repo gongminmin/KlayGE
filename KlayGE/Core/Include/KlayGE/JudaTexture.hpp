@@ -24,12 +24,15 @@
 #include <deque>
 #include <unordered_map>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/LZMACodec.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API JudaTexture final : boost::noncopyable
+	class KLAYGE_CORE_API JudaTexture final
 	{
+		KLAYGE_NONCOPYABLE(JudaTexture);
+
 	public:
 		static JudaTexturePtr Load(std::string const & file_name);
 		static void Save(JudaTexturePtr const& juda_tex, std::string const& file_name);

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/Signal.hpp>
@@ -132,8 +133,10 @@ namespace KlayGE
 		UIStatesColor font_color_;
 	};
 
-	class KLAYGE_CORE_API UIControl : public std::enable_shared_from_this<UIControl>, boost::noncopyable
+	class KLAYGE_CORE_API UIControl : public std::enable_shared_from_this<UIControl>
 	{
+		KLAYGE_NONCOPYABLE(UIControl);
+
 	public:
 		UIControl(uint32_t type, UIDialogPtr const & dialog)
 			: visible_(true),
@@ -348,8 +351,10 @@ namespace KlayGE
 		IRect bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class KLAYGE_CORE_API UIManager final : boost::noncopyable, public std::enable_shared_from_this<UIManager>
+	class KLAYGE_CORE_API UIManager final : public std::enable_shared_from_this<UIManager>
 	{
+		KLAYGE_NONCOPYABLE(UIManager);
+
 	public:
 		struct VertexFormat
 		{
@@ -457,8 +462,10 @@ namespace KlayGE
 		bool inited_{false};
 	};
 
-	class KLAYGE_CORE_API UIDialog final : boost::noncopyable
+	class KLAYGE_CORE_API UIDialog final
 	{
+		KLAYGE_NONCOPYABLE(UIDialog);
+
 		friend class UIManager;
 
 	public:
@@ -1342,8 +1349,10 @@ namespace KlayGE
 	};
 
 	// UniBuffer class for the edit control
-	class KLAYGE_CORE_API UniBuffer final : boost::noncopyable
+	class KLAYGE_CORE_API UniBuffer final
 	{
+		KLAYGE_NONCOPYABLE(UniBuffer);
+
 	public:
 		explicit UniBuffer(int nInitialSize = 1);
 

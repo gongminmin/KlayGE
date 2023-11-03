@@ -23,6 +23,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
@@ -136,8 +137,10 @@ namespace KlayGE
 	}
 
 	// Abstract class defining the interface all renderable objects must implement.
-	class KLAYGE_CORE_API Renderable : boost::noncopyable
+	class KLAYGE_CORE_API Renderable
 	{
+		KLAYGE_NONCOPYABLE(Renderable);
+
 	public:
 		enum EffectAttribute
 		{

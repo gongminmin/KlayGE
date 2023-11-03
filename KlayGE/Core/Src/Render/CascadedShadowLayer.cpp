@@ -75,6 +75,7 @@ namespace KlayGE
 	}
 
 
+	CascadedShadowLayer::CascadedShadowLayer() = default;
 	CascadedShadowLayer::~CascadedShadowLayer() noexcept = default;
 
 	uint32_t CascadedShadowLayer::NumCascades() const

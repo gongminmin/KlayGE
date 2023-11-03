@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -47,12 +48,15 @@ namespace KlayGE
 	KLAYGE_CORE_API AABBox CalcFrustumExtents(Camera const & camera, float near_z, float far_z,
 		float4x4 const & light_view_proj);
 
-	class KLAYGE_CORE_API CascadedShadowLayer : boost::noncopyable
+	class KLAYGE_CORE_API CascadedShadowLayer
 	{
+		KLAYGE_NONCOPYABLE(CascadedShadowLayer);
+
 	public:
 		static uint32_t const MAX_NUM_CASCADES = 4UL;
 
 	public:
+		CascadedShadowLayer();
 		virtual ~CascadedShadowLayer() noexcept;
 
 		virtual CascadedShadowLayerType Type() const = 0;

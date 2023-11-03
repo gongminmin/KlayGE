@@ -20,6 +20,7 @@
 
 namespace KlayGE
 {
+	InputFactory::InputFactory() noexcept = default;
 	InputFactory::~InputFactory() noexcept = default;
 
 	InputEngine& InputFactory::InputEngineInstance()

@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <KFL/Noncopyable.hpp>
+
 namespace KlayGE
 {
 	enum SMBiosType
@@ -303,8 +305,10 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API SMBios final : boost::noncopyable
+	class KLAYGE_CORE_API SMBios final
 	{
+		KLAYGE_NONCOPYABLE(SMBios);
+
 	public:
 		static SMBios& Instance();
 
@@ -368,8 +372,10 @@ namespace KlayGE
 		std::vector<TableInfo>::iterator smbios_index_iter_;
 	};
 
-	class KLAYGE_CORE_API Mainboard final : boost::noncopyable
+	class KLAYGE_CORE_API Mainboard final
 	{
+		KLAYGE_NONCOPYABLE(Mainboard);
+
 	public:
 		Mainboard();
 
@@ -393,8 +399,10 @@ namespace KlayGE
 		static char const * mainboard_type_name_[MainboardInfo::MT_Num];
 	};
 
-	class KLAYGE_CORE_API MemoryBank final : boost::noncopyable
+	class KLAYGE_CORE_API MemoryBank final
 	{
+		KLAYGE_NONCOPYABLE(MemoryBank);
+
 	public:
 		MemoryBank();
 

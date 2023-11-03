@@ -50,6 +50,7 @@ DEFINE_GUID(CLSID_WbemLocator, 0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xa
 #endif
 #endif
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/HWDetect.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -77,9 +78,13 @@ namespace KlayGE
 	};
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	class WMI final : boost::noncopyable
+	class WMI final
 	{
+		KLAYGE_NONCOPYABLE(WMI);
+
 	public:
+		WMI() = default;
+
 		bool Init()
 		{
 			if (!(this->InitComponent() && this->InitSecurity() && this->CreateInstance()))

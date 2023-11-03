@@ -37,13 +37,17 @@
 
 #include <string>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Script.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ScriptFactory : boost::noncopyable
+	class KLAYGE_CORE_API ScriptFactory
 	{
+		KLAYGE_NONCOPYABLE(ScriptFactory);
+
 	public:
+		ScriptFactory() noexcept;
 		virtual ~ScriptFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;

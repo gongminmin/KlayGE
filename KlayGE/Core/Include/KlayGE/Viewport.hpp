@@ -16,11 +16,14 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Viewport final : boost::noncopyable
+	class KLAYGE_CORE_API Viewport final
 	{
+		KLAYGE_NONCOPYABLE(Viewport);
+
 	public:
 		Viewport();
 		Viewport(int left, int top, int width, int height);

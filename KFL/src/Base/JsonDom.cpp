@@ -667,6 +667,8 @@ namespace
 
 namespace KlayGE
 {
+	JsonDocument::JsonDocument() noexcept = default;
+
 	JsonValue* JsonDocument::RootValue() const
 	{
 		return root_.get();
@@ -758,6 +760,7 @@ namespace KlayGE
 	}
 
 
+	JsonValue::JsonValue() noexcept = default;
 	JsonValue::~JsonValue() noexcept = default;
 
 	JsonValue* JsonValue::Member([[maybe_unused]] std::string_view name) const

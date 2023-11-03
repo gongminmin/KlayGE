@@ -35,6 +35,7 @@
 
 namespace KlayGE
 {
+	SceneComponent::SceneComponent() = default;
 	SceneComponent::~SceneComponent() noexcept = default;
 
 	void SceneComponent::BindSceneNode(SceneNode* node)

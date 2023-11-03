@@ -99,6 +99,7 @@ namespace KlayGE
 {
 	std::unique_ptr<ResLoader> ResLoader::res_loader_instance_;
 
+	ResLoadingDesc::ResLoadingDesc() noexcept = default;
 	ResLoadingDesc::~ResLoadingDesc() noexcept = default;
 
 	ResLoader::ResLoader()

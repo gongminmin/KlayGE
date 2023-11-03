@@ -38,15 +38,19 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KFL/DllLoader.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <string_view>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API DevHelper : boost::noncopyable
+	class KLAYGE_CORE_API DevHelper
 	{
+		KLAYGE_NONCOPYABLE(DevHelper);
+
 	public:
+		DevHelper() noexcept;
 		virtual ~DevHelper() noexcept;
 
 		virtual RenderModelPtr ConvertModel(std::string_view input_name, std::string_view metadata_name, std::string_view output_name,

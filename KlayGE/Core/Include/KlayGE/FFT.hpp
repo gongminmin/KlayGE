@@ -16,12 +16,16 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API GpuFft : boost::noncopyable
+	class KLAYGE_CORE_API GpuFft
 	{
+		KLAYGE_NONCOPYABLE(GpuFft);
+
 	public:
+		GpuFft() noexcept;
 		virtual ~GpuFft() noexcept;
 
 		virtual void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,

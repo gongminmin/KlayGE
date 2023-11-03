@@ -37,14 +37,15 @@
 #include <mutex>
 #include <vector>
 
+#include <KFL/Noncopyable.hpp>
+
 #include "D3D12Util.hpp"
 
 namespace KlayGE
 {
 	class D3D12GpuMemoryPage final
 	{
-		D3D12GpuMemoryPage(D3D12GpuMemoryPage const& other) = delete;
-		D3D12GpuMemoryPage& operator=(D3D12GpuMemoryPage const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuMemoryPage);
 
 	public:
 		D3D12GpuMemoryPage(bool is_upload, uint32_t size_in_bytes);
@@ -83,8 +84,7 @@ namespace KlayGE
 
 	class D3D12GpuMemoryBlock final
 	{
-		D3D12GpuMemoryBlock(D3D12GpuMemoryBlock const& other) = delete;
-		D3D12GpuMemoryBlock& operator=(D3D12GpuMemoryBlock const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuMemoryBlock);
 
 	public:
 		D3D12GpuMemoryBlock() noexcept;
@@ -141,8 +141,7 @@ namespace KlayGE
 
 	class D3D12GpuMemoryAllocator final
 	{
-		D3D12GpuMemoryAllocator(D3D12GpuMemoryAllocator const& other) = delete;
-		D3D12GpuMemoryAllocator& operator=(D3D12GpuMemoryAllocator const& other) = delete;
+		KLAYGE_NONCOPYABLE(D3D12GpuMemoryAllocator);
 
 	public:
 		static constexpr uint32_t ConstantDataAligment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;

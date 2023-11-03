@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
 
 #include <algorithm>
@@ -42,8 +43,6 @@
 #include <vector>
 
 #include <nonstd/scope.hpp>
-
-#include <boost/noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -54,8 +53,10 @@ namespace KlayGE
 			class SignalBase;
 		}
 
-		class KLAYGE_CORE_API Connection final : boost::noncopyable
+		class KLAYGE_CORE_API Connection final
 		{
+			KLAYGE_NONCOPYABLE(Connection);
+
 		public:
 			Connection() noexcept;
 			Connection(Connection&& rhs) noexcept;
@@ -86,9 +87,12 @@ namespace KlayGE
 		namespace Detail
 		{
 			// CLR doesn't support std::mutex. Need a wrapper.
-			class KLAYGE_CORE_API Mutex : boost::noncopyable
+			class KLAYGE_CORE_API Mutex
 			{
+				KLAYGE_NONCOPYABLE(Mutex);
+
 			public:
+				Mutex() noexcept;
 				virtual ~Mutex() noexcept;
 
 				virtual void Lock() = 0;
@@ -97,11 +101,14 @@ namespace KlayGE
 
 			KLAYGE_CORE_API std::unique_ptr<Mutex> CreateMutex();
 
-			class KLAYGE_CORE_API SignalBase : boost::noncopyable
+			class KLAYGE_CORE_API SignalBase
 			{
+				KLAYGE_NONCOPYABLE(SignalBase);
+
 				friend class KlayGE::Signal::Connection;
 
 			public:
+				SignalBase() noexcept;
 				virtual ~SignalBase() noexcept;
 
 			private:

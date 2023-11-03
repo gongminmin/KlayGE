@@ -34,12 +34,15 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Blitter final : boost::noncopyable
+	class KLAYGE_CORE_API Blitter final
 	{
+		KLAYGE_NONCOPYABLE(Blitter);
+
 	public:
 		Blitter();
 

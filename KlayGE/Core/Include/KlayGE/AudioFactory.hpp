@@ -37,13 +37,17 @@
 
 #include <string>
 
+#include <KFL/Noncopyable.hpp>
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API AudioFactory : boost::noncopyable
+	class KLAYGE_CORE_API AudioFactory
 	{
+		KLAYGE_NONCOPYABLE(AudioFactory);
+
 	public:
+		AudioFactory() noexcept;
 		virtual ~AudioFactory() noexcept;
 
 		virtual std::wstring const & Name() const = 0;

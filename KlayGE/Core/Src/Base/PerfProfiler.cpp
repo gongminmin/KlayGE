@@ -95,6 +95,8 @@ namespace KlayGE
 	}
 
 
+	PerfProfiler::PerfProfiler() = default;
+
 	PerfProfiler& PerfProfiler::Instance()
 	{
 		if (!perf_profiler_instance_)

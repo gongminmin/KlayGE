@@ -40,8 +40,10 @@ namespace KlayGE
 	{
 		namespace Detail
 		{
+			SignalBase::SignalBase() noexcept = default;
 			SignalBase::~SignalBase() noexcept = default;
 
+			Mutex::Mutex() noexcept = default;
 			Mutex::~Mutex() noexcept = default;
 
 			class StdMutex : public Mutex

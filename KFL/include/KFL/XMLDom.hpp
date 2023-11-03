@@ -36,7 +36,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -52,9 +52,13 @@ namespace KlayGE
 		PI
 	};
 
-	class XMLDocument : boost::noncopyable
+	class XMLDocument
 	{
+		KLAYGE_NONCOPYABLE(XMLDocument);
+
 	public:
+		XMLDocument() noexcept;
+
 		XMLNode* RootNode() const;
 		void RootNode(std::unique_ptr<XMLNode> new_node);
 
@@ -73,8 +77,10 @@ namespace KlayGE
 		std::unique_ptr<XMLNode> root_;
 	};
 
-	class XMLNode final : boost::noncopyable
+	class XMLNode final
 	{
+		KLAYGE_NONCOPYABLE(XMLNode);
+
 	public:
 		explicit XMLNode(XMLNodeType type);
 
@@ -155,9 +161,13 @@ namespace KlayGE
 		std::vector<std::unique_ptr<XMLAttribute>> attrs_;
 	};
 
-	class XMLAttribute final : boost::noncopyable
+	class XMLAttribute final
 	{
+		KLAYGE_NONCOPYABLE(XMLAttribute);
+
 	public:
+		XMLAttribute();
+
 		std::string_view Name() const;
 		void Name(std::string_view name);
 

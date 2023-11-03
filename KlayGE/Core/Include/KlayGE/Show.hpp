@@ -16,6 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #include <string>
 
@@ -30,8 +31,10 @@ namespace KlayGE
 		SS_Playing,
 	};
 
-	class KLAYGE_CORE_API ShowEngine : boost::noncopyable
+	class KLAYGE_CORE_API ShowEngine
 	{
+		KLAYGE_NONCOPYABLE(ShowEngine);
+
 	public:
 		ShowEngine() noexcept;
 		virtual ~ShowEngine() noexcept;

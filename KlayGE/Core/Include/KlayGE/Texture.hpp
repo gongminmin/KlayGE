@@ -53,6 +53,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KFL/CXX20/span.hpp>
+#include <KFL/Noncopyable.hpp>
 
 #include <atomic>
 #include <string>
@@ -87,8 +88,10 @@ namespace KlayGE
 	// This class represents the commonalities, and is the one 'used'
 	// by programmers even though the real implementation could be
 	// different in reality.
-	class KLAYGE_CORE_API Texture : public std::enable_shared_from_this<Texture>, boost::noncopyable
+	class KLAYGE_CORE_API Texture : public std::enable_shared_from_this<Texture>
 	{
+		KLAYGE_NONCOPYABLE(Texture);
+
 	public:
 		// Enum identifying the texture type
 		enum TextureType
@@ -114,8 +117,10 @@ namespace KlayGE
 		};
 
 	public:
-		class KLAYGE_CORE_API Mapper final : boost::noncopyable
+		class KLAYGE_CORE_API Mapper final
 		{
+			KLAYGE_NONCOPYABLE(Mapper);
+
 			friend class Texture;
 
 		public:

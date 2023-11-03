@@ -35,11 +35,14 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
+#include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LZMACodec final : boost::noncopyable
+	class KLAYGE_CORE_API LZMACodec final
 	{
+		KLAYGE_NONCOPYABLE(LZMACodec);
+
 	public:
 		LZMACodec() noexcept;
 		~LZMACodec() noexcept;

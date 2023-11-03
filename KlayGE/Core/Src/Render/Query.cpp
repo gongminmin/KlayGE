@@ -16,5 +16,6 @@
 
 namespace KlayGE
 {
+	Query::Query() noexcept = default;
 	Query::~Query() noexcept = default;
 }
