@@ -148,7 +148,7 @@ target_link_libraries(${LIB_NAME}
 		rapidxml
 )
 
-if ((NOT KLAYGE_COMPILER_MSVC) OR (MSVC_VERSION LESS 1929))
+if ((NOT KLAYGE_COMPILER_MSVC) OR (CMAKE_CXX_STANDARD LESS 20))
 	target_link_libraries(${LIB_NAME}
 		PUBLIC
 			fmt
