@@ -23,7 +23,6 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Architecture.hpp
 	${KFL_PROJECT_DIR}/include/KFL/com_ptr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Compiler.hpp
-	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp

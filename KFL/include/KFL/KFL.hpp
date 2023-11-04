@@ -33,7 +33,25 @@
 
 #pragma once
 
-#include <KFL/Config.hpp>
+#if !defined(__cplusplus)
+#error C++ compiler required.
+#endif
+
+#if defined(DEBUG) | defined(_DEBUG)
+#define KLAYGE_DEBUG
+#endif
+
+#define KFL_STRINGIZE(X) KFL_DO_STRINGIZE(X)
+#define KFL_DO_STRINGIZE(X) #X
+
+#define KFL_JOIN(X, Y) KFL_DO_JOIN(X, Y)
+#define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
+#define KFL_DO_JOIN2(X, Y) X##Y
+
+#include <KFL/Compiler.hpp>
+#include <KFL/Platform.hpp>
+#include <KFL/Architecture.hpp>
+
 #include <KFL/Types.hpp>
 
 #include <vector>

@@ -98,6 +98,12 @@
 	#error "Unknown platform. The supported target platforms are Windows, Android, Linux, macOS, and iOS."
 #endif
 
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
+#define KLAYGE_IS_DEV_PLATFORM 1
+#else
+#define KLAYGE_IS_DEV_PLATFORM 0
+#endif
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
 #define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)

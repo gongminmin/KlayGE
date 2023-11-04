@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <KFL/Config.hpp>
+#include <KFL/Compiler.hpp>
 
-#if defined(KLAYGE_CXX23_LIBRARY_TO_UNDERLYING)
+#if defined(KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT)
 #include <utility>
 #else
 #include <type_traits>

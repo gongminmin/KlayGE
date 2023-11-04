@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KFL/Config.hpp>
+#include <KFL/Compiler.hpp>
 
 #if defined(KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT)
 	#include <format>

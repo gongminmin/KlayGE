@@ -43,7 +43,7 @@
 // KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
 
 // Macros for C++23 library features:
-// KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+// KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 // KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 
 // Detects supported compilers
@@ -77,7 +77,7 @@
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 		#if __cplusplus > 202002L
 			#if CLANG_VERSION >= 130
-				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 			#endif
 			#if CLANG_VERSION >= 150
 				#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
@@ -107,7 +107,7 @@
 
 			#if __cplusplus > 202002L
 				#if CLANG_VERSION >= 130
-					#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+					#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 				#endif
 			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
@@ -121,7 +121,7 @@
 				#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 			#endif
 			#if __cplusplus > 202002L
-				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 				#if CLANG_VERSION >= 150
 					#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 				#endif
@@ -163,7 +163,7 @@
 		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
 	#endif
 	#if __cplusplus > 202002L
-		#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+		#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 		#if GCC_VERSION >= 120
 			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
 		#endif
@@ -210,7 +210,7 @@
 	#endif
 	#if _MSVC_LANG > 202002L
 		#if _MSC_VER >= 1930
-			#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING
+			#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
 		#endif
 		#if _MSC_VER >= 1932
 			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
@@ -221,4 +221,8 @@
 	#pragma warning(disable: 4819) // Allow non-ANSI characters.
 #else
 	#error "Unknown compiler. Please install vc, g++, or clang."
+#endif
+
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
+#define KLAYGE_HAS_STRUCT_PACK
 #endif
