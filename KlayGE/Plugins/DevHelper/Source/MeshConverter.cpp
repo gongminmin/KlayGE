@@ -594,40 +594,57 @@ namespace
 				}
 
 				auto& indices = meshes_[mi].lods[lod].indices;
+				indices.resize(mesh->mNumFaces * 3);
 				for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 				{
 					BOOST_ASSERT(3 == mesh->mFaces[fi].mNumIndices);
-
-					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					indices.push_back(mesh->mFaces[fi].mIndices[1]);
-					indices.push_back(mesh->mFaces[fi].mIndices[2]);
-				}
-
-				bool has_normal = (mesh->mNormals != nullptr);
-				bool has_tangent = (mesh->mTangents != nullptr);
-				bool has_binormal = (mesh->mBitangents != nullptr);
-				auto& has_texcoord = meshes_[mi].has_texcoord;
-				uint32_t first_texcoord = AI_MAX_NUMBER_OF_TEXTURECOORDS;
-				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
-				{
-					has_texcoord[tci] = (mesh->mTextureCoords[tci] != nullptr);
-					if (has_texcoord[tci] && (AI_MAX_NUMBER_OF_TEXTURECOORDS == first_texcoord))
+					for (uint32_t vi = 0; vi < 3; ++vi)
 					{
-						first_texcoord = tci;
+						indices[fi * 3 + vi] = mesh->mFaces[fi].mIndices[vi];
 					}
 				}
 
 				auto& positions = meshes_[mi].lods[lod].positions;
-				auto& normals = meshes_[mi].lods[lod].normals;
-				std::vector<float3> tangents(mesh->mNumVertices);
-				std::vector<float3> binormals(mesh->mNumVertices);
-				auto& texcoords = meshes_[mi].lods[lod].texcoords;
 				positions.resize(mesh->mNumVertices);
-				normals.resize(mesh->mNumVertices);
+
+				bool has_normal = (mesh->mNormals != nullptr);
+				auto& normals = meshes_[mi].lods[lod].normals;
+				if (has_normal)
+				{
+					normals.resize(mesh->mNumVertices);
+				}
+
+				bool has_tangent = (mesh->mTangents != nullptr);
+				auto& tangents = meshes_[mi].lods[lod].tangents;
+				if (has_tangent)
+				{
+					tangents.resize(mesh->mNumVertices);
+				}
+				
+				bool has_binormal = (mesh->mBitangents != nullptr);
+				auto& binormals = meshes_[mi].lods[lod].binormals;
+				if (has_binormal)
+				{
+					binormals.resize(mesh->mNumVertices);
+				}
+
+				auto& has_texcoord = meshes_[mi].has_texcoord;
+				auto& texcoords = meshes_[mi].lods[lod].texcoords;
+				uint32_t first_texcoord = AI_MAX_NUMBER_OF_TEXTURECOORDS;
 				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
 				{
-					texcoords[tci].resize(mesh->mNumVertices);
+					has_texcoord[tci] = (mesh->mTextureCoords[tci] != nullptr);
+					if (has_texcoord[tci])
+					{
+						texcoords[tci].resize(mesh->mNumVertices);
+
+						if (first_texcoord == AI_MAX_NUMBER_OF_TEXTURECOORDS)
+						{
+							first_texcoord = tci;
+						}
+					}
 				}
+
 				for (unsigned int vi = 0; vi < mesh->mNumVertices; ++ vi)
 				{
 					positions[vi] = float3(&mesh->mVertices[vi].x);
@@ -659,21 +676,21 @@ namespace
 
 				if (!has_normal)
 				{
+					normals.resize(mesh->mNumVertices);
 					MathLib::compute_normal(normals.begin(), indices.begin(), indices.end(), positions.begin(), positions.end());
 
 					has_normal = true;
 				}
 
-				auto& mesh_tangents = meshes_[mi].lods[lod].tangents;
-				auto& mesh_binormals = meshes_[mi].lods[lod].binormals;
-				mesh_tangents.resize(mesh->mNumVertices);
-				mesh_binormals.resize(mesh->mNumVertices);
 				if ((!has_tangent || !has_binormal) && (first_texcoord != AI_MAX_NUMBER_OF_TEXTURECOORDS))
 				{
-					MathLib::compute_tangent(mesh_tangents.begin(), mesh_binormals.begin(), indices.begin(), indices.end(),
+					tangents.resize(mesh->mNumVertices);
+					binormals.resize(mesh->mNumVertices);
+					MathLib::compute_tangent(tangents.begin(), binormals.begin(), indices.begin(), indices.end(),
 						positions.begin(), positions.end(), texcoords[first_texcoord].begin(), normals.begin());
 
 					has_tangent = true;
+					has_binormal = true;
 				}
 
 				meshes_[mi].has_normal = has_normal;
@@ -1065,7 +1082,6 @@ namespace
 
 			scenes[lod] = importer.ReadFile(file_name.c_str(),
 				ppsteps // configurable pp steps
-				| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
 				| aiProcess_Triangulate // triangulate polygons with more than 3 edges
 				| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
 				/*| aiProcess_FixInfacingNormals*/);
