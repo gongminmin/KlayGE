@@ -26,13 +26,13 @@ Cxxopts from Jarryd Beck, under the [MIT License](https://github.com/jarro2783/c
 
 D3dcompiler from Microsoft Corporation, under the [Microsoft Software License Terms](https://github.com/apitrace/dxsdk/blob/master/Documentation/License%20Agreements/DirectX%20SDK%20EULA.txt).
 
+## DirectX-Headers
+
+DirectX-Headers from Microsoft Corporation, under the [MIT License](https://github.com/microsoft/DirectX-Headers/blob/main/LICENSE).
+
 ## dxsdk
 
 Dxsdk from Microsoft Corporation, under the [Microsoft Software License Terms](https://github.com/apitrace/dxsdk/blob/master/Documentation/License%20Agreements/DirectX%20SDK%20EULA.txt).
-
-## filesystem
-
-Filesystem from Steffen Sch¨¹mann, under the [MIT License](https://github.com/gulrak/filesystem/blob/master/LICENSE).
 
 ## fmt
 
@@ -49,10 +49,6 @@ Freetype from David Turner, Robert Wilhelm, and Werner Lemberg, under the [The F
 ## googletest
 
 Googletest from Google Inc., under the [BSD 3-Clause License](https://github.com/google/googletest/blob/master/LICENSE).
-
-## GSL
-
-GSL from Microsoft Corporation, under the [MIT License](https://github.com/microsoft/GSL/blob/main/LICENSE).
 
 ## libogg
 
