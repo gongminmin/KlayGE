@@ -32,6 +32,11 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
+#if (_MSC_VER >= 1929)
+#pragma warning(disable : 4265) // Ignore non-virtual destructor
+#pragma warning(disable : 4946) // Ignore warnings of reinterpret_cast
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #endif
 #include <winrt/Windows.System.Display.h>
 #include <winrt/Windows.UI.Core.h>

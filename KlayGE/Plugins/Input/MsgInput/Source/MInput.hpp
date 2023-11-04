@@ -234,13 +234,25 @@ typedef struct _HIDP_VALUE_CAPS
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 5205) // winrt::impl::implements_delegate doesn't have virtual destructor
+#if (_MSC_VER >= 1929)
+#pragma warning(disable : 4265) // Ignore non-virtual destructor
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #endif
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Devices.Geolocation.h>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(push)
+#pragma warning(disable : 4265) // Ignore non-virtual destructor
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #include <winrt/Windows.Devices.Sensors.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(pop)
+#endif
 
 namespace uwp
 {

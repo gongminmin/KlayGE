@@ -33,6 +33,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mipmapper.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PredefinedCBuffers.kfx

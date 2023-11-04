@@ -196,6 +196,12 @@ void GenCubeOneInstanceVpRtShadowMapVS(float4 Position : POSITION,
 	oDist = CalcDist(Position);
 	oRtIndex = RenderTargetIndex(camera_index);
 }
+#else
+// Dummy
+void GenCubeOneInstanceVpRtShadowMapVS(out float4 oPos : SV_Position)
+{
+	oPos = 0;
+}
 #endif
 		]]>
 	</shader>

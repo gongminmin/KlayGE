@@ -270,6 +270,13 @@ void FoliageDistributionRwGS(point float4 in_pos_scale[1] : TEXCOORD1, point flo
 		rw_primitive_buff.InterlockedAdd(0, 1);
 	}
 }
+#else
+// Dummy
+[maxvertexcount(1)]
+void FoliageDistributionRwGS(point float4 in_pos_scale[1] : TEXCOORD1, point float2 in_rotation[1] : TEXCOORD2,
+		inout PointStream<FoliageDistGSOut> out_stream)
+{
+}
 #endif
 		]]>
 	</shader>

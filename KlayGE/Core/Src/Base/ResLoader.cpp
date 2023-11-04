@@ -43,8 +43,15 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(push)
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.Storage.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(pop)
+#endif
 
 namespace uwp
 {

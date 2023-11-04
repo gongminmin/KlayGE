@@ -40,6 +40,10 @@
 
 #include <boost/assert.hpp>
 
+#if defined(KLAYGE_PLATFORM_WINDOWS_STORE) && defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(disable : 5031) // Ignore warning(push)/(pop) mismatch in Windows SDK
+#pragma warning(disable : 5032) // Ignore warning(push)/(pop) mismatch in Windows SDK
+#endif
 #include <mfapi.h>
 #if (_WIN32_WINNT > _WIN32_WINNT_WIN7)
 #if defined(KLAYGE_COMPILER_MSVC)

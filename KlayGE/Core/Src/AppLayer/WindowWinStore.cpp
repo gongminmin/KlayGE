@@ -36,9 +36,16 @@
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
 
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(push)
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #include <winrt/Windows.Graphics.Display.Core.h>
 #include <winrt/Windows.UI.Input.Core.h>
 #include <winrt/Windows.UI.ViewManagement.Core.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/Window.hpp>
 

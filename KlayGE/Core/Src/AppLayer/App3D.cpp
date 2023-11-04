@@ -55,9 +55,18 @@
 #pragma warning(pop)
 #endif
 #include <windows.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(push)
+#pragma warning(disable : 4265) // Ignore non-virtual destructor
+#pragma warning(disable : 4946) // Ignore warnings of reinterpret_cast
+#pragma warning(disable : 5246) // Turn of warnings of _Elems
+#endif
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.Graphics.Display.Core.h>
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER >= 1929)
+#pragma warning(pop)
+#endif
 
 namespace uwp
 {

@@ -61,6 +61,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mipmapper.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
@@ -98,6 +99,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.cam_path
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/ReflectMesh.mtlml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/ReflectPlane.mtlml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.glb.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.glb.model_bin
 )

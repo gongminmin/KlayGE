@@ -10,8 +10,9 @@
 	<parameter type="structured_buffer" elem_type="float4" name="frags_buffer"/>
 	<parameter type="buffer" elem_type="uint" name="frag_length_buffer"/>
 
-	<shader major_version="5" minor_version="1">
+	<shader>
 		<![CDATA[
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)
 void RenderRovAdaptiveTransparencyVS(uint vertex_id : SV_VertexID,
 					out float2 oTex : TEXCOORD0,
 					out float4 oPos : SV_Position)
@@ -52,6 +53,18 @@ float4 RenderRovAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_P
 
 	return result;
 }
+#else
+// Dummy
+void RenderRovAdaptiveTransparencyVS(out float4 oPos : SV_Position)
+{
+	oPos = 0;
+}
+
+float4 RenderRovAdaptiveTransparencyPS() : SV_Target
+{
+	return 0;
+}
+#endif
 		]]>
 	</shader>
 

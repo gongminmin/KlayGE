@@ -952,7 +952,7 @@ if __name__ == "__main__":
 			if build_info.compiler_name == "vc":
 				host_compiler += str(build_info.compiler_version)
 			host_build_info = BuildInfo(build_info.project_type, host_compiler, (build_info.host_arch, ), build_info.cfg, "auto")
-			BuildProjects("KlayGE", ".", host_build_info, host_build_info.compilers[0], ("KlayGE/Tools/FxmlJit/FxmlJit", "KlayGE/Tools/PlatformDeployer/PlatformDeployer"), additional_options)
+			BuildProjects("KlayGE", ".", host_build_info, host_build_info.compilers[0], ("KlayGE/Tools/src/FxmlJit/FxmlJit", "KlayGE/Tools/src/PlatformDeployer/PlatformDeployer"), additional_options)
 			build_info.host_bin_dir = "%s/KlayGE/bin/%s_%s" % (os.path.abspath(os.curdir), host_build_info.host_platform, build_info.host_arch)
 			break
 

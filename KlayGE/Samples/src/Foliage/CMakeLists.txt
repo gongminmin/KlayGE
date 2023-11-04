@@ -95,6 +95,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Mipmapper.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
