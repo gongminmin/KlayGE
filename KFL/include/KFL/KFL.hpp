@@ -48,6 +48,7 @@
 #define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
 #define KFL_DO_JOIN2(X, Y) X##Y
 
+#include <KFL/Config.hpp>
 #include <KFL/Compiler.hpp>
 #include <KFL/Platform.hpp>
 #include <KFL/Architecture.hpp>

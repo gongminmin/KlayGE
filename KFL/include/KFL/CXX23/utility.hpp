@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <KFL/Compiler.hpp>
+#include <KFL/Config.hpp>
 
 #if defined(KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT)
 #include <utility>

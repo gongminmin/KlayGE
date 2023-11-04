@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KFL/Compiler.hpp>
+#include <KFL/Config.hpp>
 
 #if defined(KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT)
 	#include <span>

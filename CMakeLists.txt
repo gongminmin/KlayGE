@@ -22,6 +22,7 @@ find_package(Python3 COMPONENTS Interpreter REQUIRED)
 include(${KLAYGE_CMAKE_MODULE_DIR}/Dependencies.cmake)
 include(${KLAYGE_CMAKE_MODULE_DIR}/Platform.cmake)
 include(${KLAYGE_CMAKE_MODULE_DIR}/Compiler.cmake)
+include(${KLAYGE_CMAKE_MODULE_DIR}/Config.cmake)
 
 set(KLAYGE_BIN_DIR "${KLAYGE_ROOT_DIR}/KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
 

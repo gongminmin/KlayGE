@@ -23,6 +23,8 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Architecture.hpp
 	${KFL_PROJECT_DIR}/include/KFL/com_ptr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Compiler.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Config.hpp.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
@@ -114,6 +116,7 @@ ADD_LIBRARY(${LIB_NAME} STATIC
 
 target_include_directories(${LIB_NAME}
 	PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}/include
 		${KFL_PROJECT_DIR}/include
 )
 
@@ -146,8 +149,7 @@ target_link_libraries(${LIB_NAME}
 		rapidjson
 		rapidxml
 )
-
-if ((NOT KLAYGE_COMPILER_MSVC) OR (CMAKE_CXX_STANDARD LESS 20))
+if(TARGET fmt)
 	target_link_libraries(${LIB_NAME}
 		PUBLIC
 			fmt

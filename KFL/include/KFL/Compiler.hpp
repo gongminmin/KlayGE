@@ -30,22 +30,6 @@
 
 #pragma once
 
-// Macros for C++17 library features:
-// KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-// KLAYGE_CXX17_LIBRARY_CHARCONV_FP_SUPPORT
-
-// Macros for C++20 library features:
-// KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-// KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-// KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-// KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-// KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
-// KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-
-// Macros for C++23 library features:
-// KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-// KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
-
 // Detects supported compilers
 #if defined(__clang__)
 	// Clang++
@@ -56,11 +40,6 @@
 		#error "-std=c++20 must be turned on."
 	#endif
 
-	#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-
 	#if defined(_MSC_VER)
 		#define KLAYGE_COMPILER_CLANGCL
 		#define KLAYGE_COMPILER_NAME clangcl
@@ -70,27 +49,9 @@
 		#else
 			#error "Unsupported compiler version. Please install clang-cl 12.0 or up."
 		#endif
-
-		#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_CHARCONV_FP_SUPPORT
-		#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
-		#if __cplusplus > 202002L
-			#if CLANG_VERSION >= 130
-				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-			#endif
-			#if CLANG_VERSION >= 150
-				#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
-			#endif
-		#endif
 	#else
 		#define KLAYGE_COMPILER_CLANG
 		#define KLAYGE_COMPILER_NAME clang
-
-		#if CLANG_VERSION >= 140
-			#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-			#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-		#endif
 
 		#if defined(__APPLE__)
 			#if CLANG_VERSION >= 130
@@ -104,27 +65,11 @@
 			#else
 				#error "Unsupported compiler version. Please install clang++ 12.0 (NDK 23c) or up."
 			#endif
-
-			#if __cplusplus > 202002L
-				#if CLANG_VERSION >= 130
-					#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-				#endif
-			#endif
 		#elif defined(linux) || defined(__linux) || defined(__linux__)
 			#if CLANG_VERSION >= 140
 				#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 			#else
 				#error "Unsupported compiler version. Please install clang++ 14.0 or up."
-			#endif
-
-			#if CLANG_VERSION >= 170
-				#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
-			#endif
-			#if __cplusplus > 202002L
-				#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-				#if CLANG_VERSION >= 150
-					#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
-				#endif
 			#endif
 		#else
 			#error "Clang++ on an unknown platform. Only Apple, Android, and Linux are supported."
@@ -151,23 +96,6 @@
 	#if __cplusplus < 202002L
 		#error "-std=c++20 must be turned on."
 	#endif
-
-	#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-	#define KLAYGE_CXX17_LIBRARY_CHARCONV_FP_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-	#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-	#if GCC_VERSION >= 130
-		#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
-	#endif
-	#if __cplusplus > 202002L
-		#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-		#if GCC_VERSION >= 120
-			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
-		#endif
-	#endif
 #elif defined(_MSC_VER)
 	// MSVC
 
@@ -182,39 +110,8 @@
 		#error "Unsupported compiler version. Please install VS2019 or up."
 	#endif
 
-	#if _MSVC_LANG < 201703L
+	#if __cplusplus < 201703L
 		#error "/std:c++17 must be turned on."
-	#endif
-
-	#define KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-	#if _MSC_VER >= 1924
-		#define KLAYGE_CXX17_LIBRARY_CHARCONV_FP_SUPPORT
-	#endif
-	#if _MSVC_LANG > 201703L
-		#if _MSC_VER >= 1922
-			#define KLAYGE_CXX20_LIBRARY_ENDIAN_SUPPORT
-		#endif
-		#if _MSC_VER >= 1926
-			#define KLAYGE_CXX20_LIBRARY_SPAN_SUPPORT
-		#endif
-		#if _MSC_VER >= 1927
-			#define KLAYGE_CXX20_LIBRARY_BIT_CAST_SUPPORT
-		#endif
-		#if _MSC_VER >= 1928
-			#define KLAYGE_CXX20_LIBRARY_BIT_OPERATIONS_SUPPORT
-			#define KLAYGE_CXX20_LIBRARY_INTEGRAL_POWER_OF_2_OPERATIONS_SUPPORT
-		#endif
-		#if _MSC_VER >= 1929
-			#define KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT
-		#endif
-	#endif
-	#if _MSVC_LANG > 202002L
-		#if _MSC_VER >= 1930
-			#define KLAYGE_CXX23_LIBRARY_TO_UNDERLYING_SUPPORT
-		#endif
-		#if _MSC_VER >= 1932
-			#define KLAYGE_CXX23_LIBRARY_UNREACHABLE_SUPPORT
-		#endif
 	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.

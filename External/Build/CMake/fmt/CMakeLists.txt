@@ -1,3 +1,7 @@
+if(HAVE_CXX20_LIBRARY_FORMAT)
+	return()
+endif()
+
 SET(fmt_project_dir "${EXTERNAL_PROJECT_DIR}/fmt")
 SET(fmt_output_dir "${EXTERNAL_PROJECT_DIR}/lib/fmt/${KLAYGE_PLATFORM_NAME}")
 
