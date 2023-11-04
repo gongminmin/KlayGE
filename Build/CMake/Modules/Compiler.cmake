@@ -96,7 +96,7 @@ if(MSVC)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 		endif()
 
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive- /Zc:externConstexpr /Zc:__cplusplus /JMC")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew /permissive- /Zc:externConstexpr /Zc:__cplusplus")
 		IF(KLAYGE_PLATFORM_WINDOWS_STORE OR (KLAYGE_ARCH_NAME STREQUAL "arm64"))
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
 		ENDIF()
@@ -109,6 +109,7 @@ if(MSVC)
 		if(KLAYGE_ARCH_NAME STREQUAL "x64")
 			#SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qspectre")
 		endif()
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /JMC")
 
 		if(NOT KLAYGE_PLATFORM_WINDOWS_STORE)
 			foreach(flag_var
