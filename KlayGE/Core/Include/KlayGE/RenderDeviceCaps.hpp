@@ -52,8 +52,8 @@ namespace KlayGE
 
 	struct ShaderModel
 	{
-		uint8_t major_ver : 6;
-		uint8_t minor_ver : 2;
+		uint8_t major_ver;
+		uint8_t minor_ver;
 
 		constexpr ShaderModel() noexcept
 			: major_ver(0), minor_ver(0)
@@ -66,7 +66,7 @@ namespace KlayGE
 
 		uint32_t FullVersion() const noexcept
 		{
-			return (major_ver << 2) | minor_ver;
+			return (major_ver << 8) | minor_ver;
 		}
 
 		bool operator<(ShaderModel const & rhs) const noexcept

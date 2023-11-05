@@ -15,9 +15,8 @@
 	<parameter type="rw_structured_buffer" elem_type="float4" name="rw_frags_buffer"/>
 	<parameter type="rasterizer_ordered_buffer" elem_type="uint" name="rw_frag_length_buffer"/>
 
-	<shader>
+	<shader version="5.1">
 		<![CDATA[
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)
 void FindFragment(float oit_depth[TEMPORARY_BUFFER_MAX + 1], float oit_trans[TEMPORARY_BUFFER_MAX + 1], float frag_depth,
 		out uint index, out float ret_trans)
 {
@@ -196,22 +195,10 @@ void GenPerPixelArraysPS(float4 L : TEXCOORD0,
 		rw_frags_buffer[index * TEMPORARY_BUFFER_MAX + i] = float4(oit_node_data[i], oit_depth[i], oit_trans[i]);
 	}
 }
-#else
-// Dummy
-void GenPerPixelArraysVS(out float4 oPos : SV_Position)
-{
-	oPos = 0;
-}
-
-float4 GenPerPixelArraysPS() : SV_Target
-{
-	return 0;
-}
-#endif
 		]]>
 	</shader>
 
-	<technique name="GenPerPixelArrays">
+	<technique name="GenPerPixelArrays" version="5.1">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 

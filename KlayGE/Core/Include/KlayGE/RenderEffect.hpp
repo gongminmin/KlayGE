@@ -861,6 +861,11 @@ namespace KlayGE
 			return name_hash_;
 		}
 
+		ShaderModel Version() const noexcept
+		{
+			return ver_;
+		}
+
 		uint32_t NumAnnotations() const noexcept
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
@@ -906,6 +911,8 @@ namespace KlayGE
 	private:
 		std::string name_;
 		size_t name_hash_;
+
+		ShaderModel ver_;
 
 		std::vector<RenderPassPtr> passes_;
 		std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;

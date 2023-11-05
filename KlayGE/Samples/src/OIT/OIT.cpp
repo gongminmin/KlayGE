@@ -523,7 +523,7 @@ void OITApp::OnCreate()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	if ((0 == caps.max_simultaneous_uavs) || !caps.rovs_support)
+	if ((0 == caps.max_simultaneous_uavs) || !caps.rovs_support || (caps.max_shader_model < ShaderModel(5, 1)))
 	{
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(5);
 	}

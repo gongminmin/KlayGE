@@ -80,7 +80,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0150;
+	uint32_t const KFX_VERSION = 0x0151;
 
 #if KLAYGE_IS_DEV_PLATFORM
 	std::unique_ptr<RenderVariable> LoadVariable(
@@ -3983,6 +3983,55 @@ namespace
 	{
 		checked_cast<RenderVariableIOable const&>(var).StreamOut(os);
 	}
+
+	void LoadVersion(XMLNode const& node, ShaderModel& ver)
+	{
+		uint32_t major_ver = 0;
+		uint32_t minor_ver = 0;
+		if (XMLAttribute const* attr = node.Attrib("major_version"))
+		{
+			major_ver = attr->ValueUInt();
+			if (XMLAttribute const* minor_attr = node.Attrib("minor_version"))
+			{
+				minor_ver = minor_attr->ValueUInt();
+			}
+		}
+		else
+		{
+			if (XMLAttribute const* version_attr = node.Attrib("version"))
+			{
+				const std::string_view version_str = version_attr->ValueString();
+				const size_t dot_pos = version_str.find('.');
+				if (dot_pos == std::string_view::npos)
+				{
+					version_attr->TryConvertValue(major_ver);
+				}
+				else
+				{
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+					char const* beg = version_str.data();
+					if ((std::from_chars(beg, beg + dot_pos, major_ver).ec == std::errc()) &&
+						(std::from_chars(beg + dot_pos + 1, beg + version_str.size(), minor_ver).ec == std::errc()))
+					{
+						ver = ShaderModel(static_cast<uint8_t>(major_ver), static_cast<uint8_t>(minor_ver));
+					}
+#else
+					try
+					{
+						major_ver = std::stol(std::string(version_str.substr(0, dot_pos)));
+						minor_ver = std::stol(std::string(version_str.substr(dot_pos + 1)));
+						ver = ShaderModel(static_cast<uint8_t>(major_ver), static_cast<uint8_t>(minor_ver));
+					}
+					catch (...)
+					{
+					}
+#endif
+				}
+			}
+		}
+
+		ver = ShaderModel(static_cast<uint8_t>(major_ver), static_cast<uint8_t>(minor_ver));
+	}
 #endif
 }
 
@@ -5736,6 +5785,17 @@ namespace KlayGE
 			BOOST_ASSERT(parent_tech);
 		}
 
+		ver_ = parent_tech ? parent_tech->Version() : ShaderModel(0, 0);
+		LoadVersion(node, ver_);
+
+		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		const auto& caps = render_eng.DeviceCaps();
+		if (ver_ > caps.max_shader_model)
+		{
+			is_validate_ = false;
+			return;
+		}
+
 		if (XMLNode const* anno_node = node.FirstNode("annotation"))
 		{
 			annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
@@ -5874,6 +5934,14 @@ namespace KlayGE
 
 	void RenderTechnique::CompileShaders(RenderEffect& effect, uint32_t tech_index)
 	{
+		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		const auto& caps = render_eng.DeviceCaps();
+		if (ver_ > caps.max_shader_model)
+		{
+			is_validate_ = false;
+			return;
+		}
+
 		uint32_t pass_index = 0;
 		for (auto& pass : passes_)
 		{
@@ -5885,6 +5953,14 @@ namespace KlayGE
 
 	void RenderTechnique::CreateHwShaders(RenderEffect& effect, uint32_t tech_index)
 	{
+		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		const auto& caps = render_eng.DeviceCaps();
+		if (ver_ > caps.max_shader_model)
+		{
+			is_validate_ = false;
+			return;
+		}
+
 		is_validate_ = true;
 
 		has_discard_ = false;
@@ -5912,6 +5988,8 @@ namespace KlayGE
 	{
 		name_ = ReadShortString(res);
 		name_hash_ = HashValue(name_);
+
+		res.read(&ver_, sizeof(ver_));
 
 		uint8_t num_anno;
 		res.read(&num_anno, sizeof(num_anno));
@@ -5965,6 +6043,8 @@ namespace KlayGE
 	void RenderTechnique::StreamOut(RenderEffect const & effect, std::ostream& os, uint32_t tech_index) const
 	{
 		WriteShortString(os, name_);
+
+		os.write(reinterpret_cast<char const*>(&ver_), sizeof(ver_));
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -7317,22 +7397,7 @@ namespace KlayGE
 		}
 		
 		ver_ = ShaderModel(0, 0);
-		if (XMLAttribute const* attr = node.Attrib("major_version"))
-		{
-			uint8_t minor_ver = 0;
-			if (XMLAttribute const* minor_attr = node.Attrib("minor_version"))
-			{
-				minor_ver = static_cast<uint8_t>(minor_attr->ValueInt());
-			}
-			ver_ = ShaderModel(static_cast<uint8_t>(attr->ValueInt()), minor_ver);
-		}
-		else
-		{
-			if (XMLAttribute const* version_attr = node.Attrib("version"))
-			{
-				ver_ = ShaderModel(static_cast<uint8_t>(version_attr->ValueInt()), 0);
-			}
-		}
+		LoadVersion(node, ver_);
 
 		for (XMLNode const* shader_text_node = node.FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
 		{
