@@ -3,13 +3,6 @@ if(HAVE_CXX20_LIBRARY_FORMAT)
 endif()
 
 SET(fmt_project_dir "${EXTERNAL_PROJECT_DIR}/fmt")
-SET(fmt_output_dir "${EXTERNAL_PROJECT_DIR}/lib/fmt/${KLAYGE_PLATFORM_NAME}")
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${fmt_output_dir})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${fmt_output_dir})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${fmt_output_dir})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${fmt_output_dir})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${fmt_output_dir})
 
 UpdateExternalLib("fmt" "https://github.com/fmtlib/fmt.git" "7bdf0628b1276379886c7f6dda2cef2b3b374f0b")
 
