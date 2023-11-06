@@ -48,6 +48,20 @@
 // The opposite side of "explicit", for tracking purpose
 #define KFL_IMPLICIT
 
+#if defined(KLAYGE_COMPILER_MSVC)
+	#define KLAYGE_RESTRICT __restrict
+#else
+	#define KLAYGE_RESTRICT __restrict__
+#endif
+
+#if defined(KLAYGE_COMPILER_MSVC)
+	#define KLAYGE_ASSUME(expr) __assume(expr)
+#elif defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
+	#define KLAYGE_ASSUME(expr) { const auto b = (expr); __builtin_assume(b); }
+#elif defined(KLAYGE_COMPILER_GCC)
+	#define KLAYGE_ASSUME(expr) if (!(expr)) { __builtin_unreachable(); }
+#endif
+
 #include <KFL/Log.hpp>
 
 #ifdef KLAYGE_DEBUG

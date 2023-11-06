@@ -35,14 +35,6 @@
 
 #include <cstdint>
 
-#ifdef KLAYGE_COMPILER_MSVC
-	#define KLAYGE_RESTRICT __restrict
-	#define KLAYGE_ASSUME(x) (__assume(x))
-#else
-	#define KLAYGE_RESTRICT
-	#define KLAYGE_ASSUME(x) (BOOST_ASSERT(x))
-#endif
-
 namespace KlayGE
 {
 	using std::uint64_t;
@@ -53,13 +45,6 @@ namespace KlayGE
 	using std::int32_t;
 	using std::int16_t;
 	using std::int8_t;
-
-#ifdef KLAYGE_COMPILER_MSVC
-	#ifndef _WCHAR_T_DEFINED
-		typedef unsigned short		wchar_t;
-		#define _WCHAR_T_DEFINED
-	#endif		// _WCHAR_T_DEFINED
-#endif
 
 	typedef uint32_t FourCC;
 }
