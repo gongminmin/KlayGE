@@ -26,11 +26,9 @@ INCLUDE_EXTERNAL_MSPROJECT(
 add_dependencies(Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock
 	Xceed.Wpf.AvalonDock.Themes.Aero Xceed.Wpf.AvalonDock.Themes.Metro Xceed.Wpf.AvalonDock.Themes.VS2010)
 
-foreach(target
-	"Xceed.Wpf.AvalonDock" "Xceed.Wpf.Toolkit")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/wpftoolkit")
-endforeach()
-foreach(target
-	"Xceed.Wpf.AvalonDock.Themes.Aero" "Xceed.Wpf.AvalonDock.Themes.Metro" "Xceed.Wpf.AvalonDock.Themes.VS2010")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/wpftoolkit/Themes")
-endforeach()
+set_target_properties("Xceed.Wpf.AvalonDock" "Xceed.Wpf.Toolkit"
+	PROPERTIES FOLDER "External/wpftoolkit"
+)
+set_target_properties("Xceed.Wpf.AvalonDock.Themes.Aero" "Xceed.Wpf.AvalonDock.Themes.Metro" "Xceed.Wpf.AvalonDock.Themes.VS2010"
+	PROPERTIES FOLDER "External/wpftoolkit/Themes"
+)

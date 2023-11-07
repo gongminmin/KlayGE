@@ -33,7 +33,6 @@ if(KLAYGE_COMPILER_MSVC)
 endif()
 
 SET_TARGET_PROPERTIES(TexViewerCoreWrapper PROPERTIES
-	PROJECT_LABEL TexViewerCoreWrapper
 	OUTPUT_NAME TexViewerCoreWrapper
 	COMMON_LANGUAGE_RUNTIME ""
 	VS_GLOBAL_ManagedAssembly "true"

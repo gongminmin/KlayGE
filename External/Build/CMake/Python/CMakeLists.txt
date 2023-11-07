@@ -197,10 +197,8 @@ target_include_directories(libpython-static
 )
 
 SET_TARGET_PROPERTIES(libpython-static PROPERTIES
-	PROJECT_LABEL libpython-static
-	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 	OUTPUT_NAME python${KLAYGE_OUTPUT_SUFFIX}
-	FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/Python"
+	FOLDER "External/Python"
 )
 
 add_dependencies(libpython-static ${KLAYGE_ZLIB_NAME})

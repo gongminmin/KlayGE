@@ -33,7 +33,6 @@ if(KLAYGE_COMPILER_MSVC)
 endif()
 
 SET_TARGET_PROPERTIES(KGEditorCoreWrapper PROPERTIES
-	PROJECT_LABEL KGEditorCoreWrapper
 	OUTPUT_NAME KGEditorCoreWrapper
 	COMMON_LANGUAGE_RUNTIME ""
 	VS_GLOBAL_ManagedAssembly "true"

@@ -90,7 +90,4 @@ set_target_properties(OpenAL PROPERTIES
 	PREFIX "${prefix}"
 )
 
-foreach(target
-	"build_version" "common" "OpenAL")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/openal-soft")
-endforeach()
+set_target_properties("build_version" "common" "OpenAL" PROPERTIES FOLDER "External/openal-soft")

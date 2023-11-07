@@ -47,5 +47,5 @@ foreach(target
 		)
 	endif()
 
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/FreeImage")
+	set_target_properties(${target} PROPERTIES FOLDER "External/FreeImage")
 endforeach()

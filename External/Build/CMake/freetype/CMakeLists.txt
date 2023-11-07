@@ -26,7 +26,7 @@ endif()
 SET_TARGET_PROPERTIES(freetype PROPERTIES
 	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 	OUTPUT_NAME freetype${KLAYGE_OUTPUT_SUFFIX}
-	FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/freetype"
+	FOLDER "External/freetype"
 )
 
 add_dependencies(freetype ${KLAYGE_ZLIB_NAME})

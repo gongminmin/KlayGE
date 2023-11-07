@@ -33,7 +33,6 @@ if(KLAYGE_COMPILER_MSVC)
 endif()
 
 SET_TARGET_PROPERTIES(MtlEditorCoreWrapper PROPERTIES
-	PROJECT_LABEL MtlEditorCoreWrapper
 	OUTPUT_NAME MtlEditorCoreWrapper
 	COMMON_LANGUAGE_RUNTIME ""
 	VS_GLOBAL_ManagedAssembly "true"

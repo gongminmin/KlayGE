@@ -6,9 +6,7 @@ IF(KLAYGE_COMPILER_MSVC)
 	SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO")
 ENDIF()
 
-SET(LIB_NAME KlayGE_ShowEngine_DShow)
-
-ADD_LIBRARY(${LIB_NAME} SHARED
+ADD_LIBRARY(KlayGE_ShowEngine_DShow SHARED
 	Source/DShow.hpp
 	Source/DShowEngine.cpp
 	Source/DShowFactory.cpp
@@ -18,35 +16,34 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 
 if(KLAYGE_COMPILER_GCC)
 	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	target_compile_options(${LIB_NAME}
+	target_compile_options(KlayGE_ShowEngine_DShow
 		PRIVATE
 			-Wno-unknown-pragmas
 			-Wno-comment
 	)
 endif()
 
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
-	PROJECT_LABEL ${LIB_NAME}
-	OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
+SET_TARGET_PROPERTIES(KlayGE_ShowEngine_DShow PROPERTIES
+	OUTPUT_NAME KlayGE_ShowEngine_DShow${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "KlayGE/Engine/Plugins/Show"
 )
 if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
-	set_target_properties(${LIB_NAME} PROPERTIES
+	set_target_properties(KlayGE_ShowEngine_DShow PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN ON
 	)
 endif()
 
-target_precompile_headers(${LIB_NAME}
+target_precompile_headers(KlayGE_ShowEngine_DShow
 	PRIVATE
 		"${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp"
 )
 
-target_link_libraries(${LIB_NAME}
+target_link_libraries(KlayGE_ShowEngine_DShow
 	PRIVATE
 		KlayGE_Core
 		dxsdk
 		strmiids ole32 uuid
 )
 
-ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
+ADD_DEPENDENCIES(AllInEngine KlayGE_ShowEngine_DShow)

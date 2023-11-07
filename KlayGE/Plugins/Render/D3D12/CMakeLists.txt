@@ -2,9 +2,7 @@ if (NOT KLAYGE_PLATFORM_WINDOWS)
 	return()
 endif()
 
-SET(LIB_NAME KlayGE_RenderEngine_D3D12)
-
-ADD_LIBRARY(${LIB_NAME} SHARED
+ADD_LIBRARY(KlayGE_RenderEngine_D3D12 SHARED
 	Source/D3D12Adapter.cpp
 	Source/D3D12Adapter.hpp
 	Source/D3D12AdapterList.cpp
@@ -53,40 +51,39 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 
 if(KLAYGE_COMPILER_GCC)
 	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	target_compile_options(${LIB_NAME}
+	target_compile_options(KlayGE_RenderEngine_D3D12
 		PRIVATE
 			-Wno-unknown-pragmas
 	)
 endif()
 
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
-	PROJECT_LABEL ${LIB_NAME}
-	OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
+SET_TARGET_PROPERTIES(KlayGE_RenderEngine_D3D12 PROPERTIES
+	OUTPUT_NAME KlayGE_RenderEngine_D3D12${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "KlayGE/Engine/Plugins/Render"
 )
 if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
-	set_target_properties(${LIB_NAME} PROPERTIES
+	set_target_properties(KlayGE_RenderEngine_D3D12 PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN ON
 	)
 endif()
 
-target_precompile_headers(${LIB_NAME}
+target_precompile_headers(KlayGE_RenderEngine_D3D12
 	PRIVATE
 		"${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp"
 )
 
-target_link_libraries(${LIB_NAME}
+target_link_libraries(KlayGE_RenderEngine_D3D12
 	PRIVATE
 		KlayGE_Core
 		DirectX-Headers
 		dxsdk
 )
 IF(KLAYGE_PLATFORM_WINDOWS_STORE)
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_RenderEngine_D3D12
 		PRIVATE
 			d3d12 dxgi dxguid
 	)
 ENDIF()
 
-ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
+ADD_DEPENDENCIES(AllInEngine KlayGE_RenderEngine_D3D12)

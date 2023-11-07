@@ -49,10 +49,7 @@ SET_TARGET_PROPERTIES(assimp PROPERTIES
 
 add_dependencies(assimp ${KLAYGE_ZLIB_NAME})
 
-foreach(target
-	"assimp")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
-endforeach()
+set_target_properties(assimp PROPERTIES FOLDER "External/assimp")
 if(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs)
-	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/assimp")
+	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "External/assimp")
 endif()

@@ -8,8 +8,6 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/SaveAs.png" "43
 
 INCLUDE(CSharpUtilities)
 
-SET(EXE_NAME "TexViewer")
-
 ENABLE_LANGUAGE(CSharp)
 
 SET(SOURCE_FILES
@@ -79,13 +77,12 @@ SET_SOURCE_FILES_PROPERTIES(${IMAGE_FILES} PROPERTIES
 	VS_TOOL_OVERRIDE "Resource"
 )
 
-ADD_EXECUTABLE(${EXE_NAME} WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
-ADD_DEPENDENCIES(${EXE_NAME} Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock)
+ADD_EXECUTABLE(TexViewer WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
+ADD_DEPENDENCIES(TexViewer Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock)
 
-SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
-	PROJECT_LABEL ${EXE_NAME}
-	OUTPUT_NAME ${EXE_NAME}
-	VS_GLOBAL_RootNamespace ${EXE_NAME}
+SET_TARGET_PROPERTIES(TexViewer PROPERTIES
+	OUTPUT_NAME TexViewer
+	VS_GLOBAL_RootNamespace TexViewer
 	VS_GLOBAL_ApplicationIcon "${KLAYGE_PROJECT_DIR}/klayge_logo.ico"
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.8"
 	VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Data.DataSetExtensions;System.Windows.Controls.Ribbon;System.Windows.Forms;System.Xaml;System.Xml;System.Xml.Linq;WindowsBase;WindowsFormsIntegration"
@@ -94,7 +91,7 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	FOLDER "KlayGE/Tools/TexViewer"
 )
 
-TARGET_LINK_LIBRARIES(${EXE_NAME}
+TARGET_LINK_LIBRARIES(TexViewer
 	PRIVATE
 		TexViewerCoreWrapper
 )

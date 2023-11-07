@@ -1,31 +1,28 @@
-SET(LIB_NAME KlayGE_ScriptEngine_NullScript)
-
-ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
+ADD_LIBRARY(KlayGE_ScriptEngine_NullScript ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/NullScript.cpp
 	Source/NullScript.hpp
 	Source/NullScriptFactory.cpp
 )
 
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
-	PROJECT_LABEL ${LIB_NAME}
-	OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
+SET_TARGET_PROPERTIES(KlayGE_ScriptEngine_NullScript PROPERTIES
+	OUTPUT_NAME KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "KlayGE/Engine/Plugins/Script"
 )
 if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
-	set_target_properties(${LIB_NAME} PROPERTIES
+	set_target_properties(KlayGE_ScriptEngine_NullScript PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN ON
 	)
 endif()
 
-target_precompile_headers(${LIB_NAME}
+target_precompile_headers(KlayGE_ScriptEngine_NullScript
 	PRIVATE
 		"${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp"
 )
 
-target_link_libraries(${LIB_NAME}
+target_link_libraries(KlayGE_ScriptEngine_NullScript
 	PRIVATE
 		KlayGE_Core
 )
 
-ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
+ADD_DEPENDENCIES(AllInEngine KlayGE_ScriptEngine_NullScript)

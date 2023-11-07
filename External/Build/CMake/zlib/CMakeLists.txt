@@ -35,7 +35,6 @@ set_target_properties(${KLAYGE_ZLIB_NAME} PROPERTIES
 	OUTPUT_NAME ${KLAYGE_ZLIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
 )
 
-foreach(target
-	"example" "minigzip" "zlib" "zlibstatic")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/zlib")
-endforeach()
+set_target_properties("example" "minigzip" "zlib" "zlibstatic"
+	PROPERTIES FOLDER "External/zlib"
+)

@@ -22,7 +22,4 @@ SET_TARGET_PROPERTIES(vorbisfile PROPERTIES
 	OUTPUT_NAME vorbisfile_static${KLAYGE_OUTPUT_SUFFIX}
 )
 
-foreach(target
-	"vorbis" "vorbisfile" "vorbisenc")
-	set_target_properties(${target} PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/libvorbis")
-endforeach()
+set_target_properties("vorbis" "vorbisfile" "vorbisenc" PROPERTIES FOLDER "External/libvorbis")

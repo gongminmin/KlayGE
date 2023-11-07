@@ -1,7 +1,5 @@
 SET(KFL_PROJECT_DIR "${KLAYGE_ROOT_DIR}/KFL")
 
-SET(LIB_NAME KFL)
-
 SET(BASE_CXX20_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX20/bit.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX20/format.hpp
@@ -100,38 +98,35 @@ SOURCE_GROUP("Base\\Header Files\\CXX23" FILES ${BASE_CXX23_HEADER_FILES})
 SOURCE_GROUP("Math\\Source Files" FILES ${MATH_SOURCE_FILES})
 SOURCE_GROUP("Math\\Header Files" FILES ${MATH_HEADER_FILES})
 
-ADD_LIBRARY(${LIB_NAME} STATIC
+ADD_LIBRARY(KFL STATIC
 	${BASE_SOURCE_FILES} ${BASE_HEADER_FILES}
 	${BASE_CXX20_HEADER_FILES} ${BASE_CXX23_HEADER_FILES}
 	${MATH_SOURCE_FILES} ${MATH_HEADER_FILES}
 )
 
-target_include_directories(${LIB_NAME}
+target_include_directories(KFL
 	PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${KFL_PROJECT_DIR}/include
 )
 
-SET(LIB_OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX})
-
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
-	PROJECT_LABEL ${LIB_NAME}
-	OUTPUT_NAME ${LIB_OUTPUT_NAME}
+SET_TARGET_PROPERTIES(KFL PROPERTIES
+	OUTPUT_NAME KFL${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "KFL"
 )
 if(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
-	set_target_properties(${LIB_NAME} PROPERTIES
+	set_target_properties(KFL PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN ON
 	)
 endif()
 
-target_precompile_headers(${LIB_NAME}
+target_precompile_headers(KFL
 	PRIVATE
 		include/KFL/KFL.hpp
 )
 
-target_link_libraries(${LIB_NAME}
+target_link_libraries(KFL
 	PUBLIC
 		Boost::assert
 		Boost::core
@@ -141,8 +136,8 @@ target_link_libraries(${LIB_NAME}
 		rapidjson
 		rapidxml
 )
-if(TARGET fmt)
-	target_link_libraries(${LIB_NAME}
+if(NOT KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT)
+	target_link_libraries(KFL
 		PUBLIC
 			fmt
 	)
@@ -150,14 +145,14 @@ endif()
 
 if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
 	if(KLAYGE_PLATFORM_WINDOWS_STORE)
-		target_link_libraries(${LIB_NAME}
+		target_link_libraries(KFL
 			PUBLIC
 				kernel32
 		)
 	endif()
 else()
 	if(KLAYGE_COMPILER_GCC)
-		target_link_libraries(${LIB_NAME}
+		target_link_libraries(KFL
 			PUBLIC
 				stdc++fs
 		)

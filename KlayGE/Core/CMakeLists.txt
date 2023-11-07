@@ -41,8 +41,6 @@ ADD_CUSTOM_TARGET(TableGen DEPENDS ${TableGenOutput})
 
 SET_TARGET_PROPERTIES(TableGen PROPERTIES FOLDER "KlayGE/Engine/Core")
 
-SET(LIB_NAME KlayGE_Core)
-
 SET(BASE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/Context.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/HWDetect.cpp
@@ -507,7 +505,7 @@ SOURCE_GROUP("App Layer\\Source Files" FILES ${APP_SOURCE_FILES})
 SOURCE_GROUP("App Layer\\Header Files" FILES ${APP_HEADER_FILES})
 
 
-ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
+ADD_LIBRARY(KlayGE_Core ${KLAYGE_PREFERRED_LIB_TYPE}
 	${BASE_SOURCE_FILES} ${BASE_HEADER_FILES}
 	${RENDERING_SOURCE_FILES} ${RENDERING_HEADER_FILES} ${RENDERING_EFFECT_FILES} ${RENDERING_POSTPROCESSOR_FILES}
 	${AUDIO_SOURCE_FILES} ${AUDIO_HEADER_FILES}
@@ -528,7 +526,7 @@ IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
 	IF(NOT WINE_PATH)
 		MESSAGE(FATAL_ERROR "Cound NOT find wine")
 	ENDIF()
-	target_compile_definitions(${LIB_NAME}
+	target_compile_definitions(KlayGE_Core
 		PRIVATE
 			-DWINE_PATH=${WINE_PATH}/
 	)
@@ -536,35 +534,34 @@ ENDIF()
 
 if(KLAYGE_PLATFORM_WINDOWS AND KLAYGE_COMPILER_GCC)
 	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
-	target_compile_options(${LIB_NAME}
+	target_compile_options(KlayGE_Core
 		PRIVATE
 			-Wno-unknown-pragmas
 	)
 endif()
 
-target_include_directories(${LIB_NAME}
+target_include_directories(KlayGE_Core
 	PUBLIC
 		${KLAYGE_PROJECT_DIR}/Core/Include
 )
 
-SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
-	PROJECT_LABEL ${LIB_NAME}
-	OUTPUT_NAME ${LIB_NAME}${KLAYGE_OUTPUT_SUFFIX}
+SET_TARGET_PROPERTIES(KlayGE_Core PROPERTIES
+	OUTPUT_NAME KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "KlayGE/Engine/Core"
 )
 if(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
-	set_target_properties(${LIB_NAME} PROPERTIES
+	set_target_properties(KlayGE_Core PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		VISIBILITY_INLINES_HIDDEN ON
 	)
 endif()
 
-target_precompile_headers(${LIB_NAME}
+target_precompile_headers(KlayGE_Core
 	PRIVATE
 		Include/KlayGE/KlayGE.hpp
 )
 
-target_link_libraries(${LIB_NAME}
+target_link_libraries(KlayGE_Core
 	PUBLIC
 		Boost::type_index
 		KFL
@@ -574,7 +571,7 @@ target_link_libraries(${LIB_NAME}
 		LZMA
 )
 if(KLAYGE_PLATFORM_WINDOWS)
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_Core
 		PRIVATE
 			dxsdk
 			ws2_32
@@ -583,20 +580,20 @@ elseif(KLAYGE_PLATFORM_DARWIN)
 	FIND_LIBRARY(APPKIT AppKit "/")
 	FIND_LIBRARY(OPENGL OpenGL "/")
 	FIND_LIBRARY(COREVIDEO CoreVideo "/")
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_Core
 		PRIVATE
 			glloader
 			${APPKIT} ${OPENGL} ${COREVIDEO}
 	)
 elseif(KLAYGE_PLATFORM_LINUX)
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_Core
 		PRIVATE
 			glloader
 			X11 GL
 			dl pthread
 	)
 elseif(KLAYGE_PLATFORM_ANDROID)
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_Core
 		PUBLIC
 			android_native_app_glue
 
@@ -605,20 +602,20 @@ elseif(KLAYGE_PLATFORM_ANDROID)
 			log android atomic
 	)
 elseif(KLAYGE_PLATFORM_IOS)
-	target_link_libraries(${LIB_NAME}
+	target_link_libraries(KlayGE_Core
 		PRIVATE
 			glloader_es
 	)
 endif()
 
-add_dependencies(${LIB_NAME} TableGen)
+add_dependencies(KlayGE_Core TableGen)
 if(KLAYGE_IS_DEV_PLATFORM)
 	if(NOT (KLAYGE_ARCH_NAME STREQUAL "arm64"))
-		add_dependencies(${LIB_NAME} D3DCompilerRedist)
+		add_dependencies(KlayGE_Core D3DCompilerRedist)
 	endif()
 endif()
 
-ADD_DEPENDENCIES(AllInEngine ${LIB_NAME})
+ADD_DEPENDENCIES(AllInEngine KlayGE_Core)
 
 if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	set(rc_lib_name "KlayGE_RC")

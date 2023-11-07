@@ -18,8 +18,6 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Undo.png" "23c3
 
 INCLUDE(CSharpUtilities)
 
-SET(EXE_NAME "MtlEditor")
-
 ENABLE_LANGUAGE(CSharp)
 
 SET(SOURCE_FILES
@@ -106,13 +104,12 @@ SET_SOURCE_FILES_PROPERTIES(${IMAGE_FILES} PROPERTIES
 	VS_TOOL_OVERRIDE "Resource"
 )
 
-ADD_EXECUTABLE(${EXE_NAME} WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
-ADD_DEPENDENCIES(${EXE_NAME} Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock)
+ADD_EXECUTABLE(MtlEditor WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
+ADD_DEPENDENCIES(MtlEditor Xceed.Wpf.Toolkit Xceed.Wpf.AvalonDock)
 
-SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
-	PROJECT_LABEL ${EXE_NAME}
-	OUTPUT_NAME ${EXE_NAME}
-	VS_GLOBAL_RootNamespace ${EXE_NAME}
+SET_TARGET_PROPERTIES(MtlEditor PROPERTIES
+	OUTPUT_NAME MtlEditor
+	VS_GLOBAL_RootNamespace MtlEditor
 	VS_GLOBAL_ApplicationIcon "${KLAYGE_PROJECT_DIR}/klayge_logo.ico"
 	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.8"
 	VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Data.DataSetExtensions;System.Windows.Controls.Ribbon;System.Windows.Forms;System.Xaml;System.Xml;System.Xml.Linq;WindowsBase;WindowsFormsIntegration"
@@ -121,7 +118,7 @@ SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
 	FOLDER "KlayGE/Tools/MtlEditor"
 )
 
-TARGET_LINK_LIBRARIES(${EXE_NAME}
+TARGET_LINK_LIBRARIES(MtlEditor
 	PRIVATE
 		MtlEditorCoreWrapper
 )

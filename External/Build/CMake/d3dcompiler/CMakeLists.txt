@@ -47,4 +47,4 @@ add_custom_command(OUTPUT ${REDIST_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${staging_path} ${REDIST_PATH})
 add_custom_target(D3DCompilerRedist ALL DEPENDS ${REDIST_PATH})
 
-set_target_properties(D3DCompilerRedist PROPERTIES FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/D3DCompiler")
+set_target_properties(D3DCompilerRedist PROPERTIES FOLDER "External/D3DCompiler")

@@ -35,5 +35,5 @@ add_subdirectory(${BOOST_PROJECT_DIR}/throw_exception "${CMAKE_CURRENT_BINARY_DI
 add_subdirectory(${BOOST_PROJECT_DIR}/type_traits "${CMAKE_CURRENT_BINARY_DIR}/boost/type_traits" EXCLUDE_FROM_ALL)
 
 set_target_properties(boost_assert boost_core PROPERTIES
-	FOLDER "${EXTERNAL_VS_FOLDER_PREFIX}/boost"
+	FOLDER "External/boost"
 )
