@@ -7,7 +7,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: None
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: Yes
@@ -17,6 +17,7 @@ ColumnLimit: 140
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
+IndentPPDirectives: BeforeHash
 IndentWidth: 4
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All

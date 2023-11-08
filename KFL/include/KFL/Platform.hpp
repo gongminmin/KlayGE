@@ -28,8 +28,7 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_PLATFORM_HPP
-#define KFL_PLATFORM_HPP
+#pragma once
 
 // Detects supported platforms
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -99,17 +98,15 @@
 #endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
-#define KLAYGE_IS_DEV_PLATFORM 1
+	#define KLAYGE_IS_DEV_PLATFORM 1
 #else
-#define KLAYGE_IS_DEV_PLATFORM 0
+	#define KLAYGE_IS_DEV_PLATFORM 0
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
-#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
+	#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+	#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 #else
-#define KLAYGE_SYMBOL_EXPORT __attribute__((visibility("default")))
-#define KLAYGE_SYMBOL_IMPORT
+	#define KLAYGE_SYMBOL_EXPORT __attribute__((visibility("default")))
+	#define KLAYGE_SYMBOL_IMPORT
 #endif
-
-#endif		// KFL_PLATFORM_HPP

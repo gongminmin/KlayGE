@@ -32,8 +32,6 @@
 
 // Detects supported compilers
 #if defined(__clang__)
-	// Clang++
-
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
 	#if __cplusplus < 202002L
@@ -76,8 +74,6 @@
 		#endif
 	#endif
 #elif defined(__GNUC__)
-	// GNU C++
-
 	#define KLAYGE_COMPILER_GCC
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 		#define KLAYGE_COMPILER_NAME mgw
@@ -97,8 +93,6 @@
 		#error "-std=c++20 must be turned on."
 	#endif
 #elif defined(_MSC_VER)
-	// MSVC
-
 	#define KLAYGE_COMPILER_MSVC
 	#define KLAYGE_COMPILER_NAME vc
 
@@ -114,12 +108,12 @@
 		#error "/std:c++17 must be turned on."
 	#endif
 
-	#pragma warning(disable: 4251) // STL classes are not dllexport.
-	#pragma warning(disable: 4819) // Allow non-ANSI characters.
+	#pragma warning(disable : 4251) // STL classes are not dllexport.
+	#pragma warning(disable : 4819) // Allow non-ANSI characters.
 #else
 	#error "Unknown compiler. Please install vc, g++, or clang."
 #endif
 
 #if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || defined(KLAYGE_COMPILER_CLANGCL)
-#define KLAYGE_HAS_STRUCT_PACK
+	#define KLAYGE_HAS_STRUCT_PACK
 #endif

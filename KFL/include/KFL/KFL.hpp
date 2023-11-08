@@ -28,17 +28,14 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_KFL_HPP
-#define _KFL_KFL_HPP
-
 #pragma once
 
 #if !defined(__cplusplus)
-#error C++ compiler required.
+	#error C++ compiler required.
 #endif
 
 #if defined(DEBUG) | defined(_DEBUG)
-#define KLAYGE_DEBUG
+	#define KLAYGE_DEBUG
 #endif
 
 #define KFL_STRINGIZE(X) KFL_DO_STRINGIZE(X)
@@ -63,5 +60,3 @@
 #include <KFL/PreDeclare.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
-
-#endif		// _KFL_KFL_HPP

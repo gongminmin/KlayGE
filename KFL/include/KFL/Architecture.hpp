@@ -28,8 +28,9 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_ARCHITECTURE_HPP
-#define KFL_ARCHITECTURE_HPP
+#pragma once
+
+#include <KFL/Compiler.hpp>
 
 // Detects supported CPU architectures
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -71,7 +72,7 @@
 		#endif
 		#ifdef __AVX2__
 			#define KLAYGE_AVX2_SUPPORT
-		#endif	
+		#endif
 	#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 		#ifdef __SSE3__
 			#define KLAYGE_SSE3_SUPPORT
@@ -131,5 +132,3 @@
 #elif defined KLAYGE_CPU_ARM64
 	#define KLAYGE_NEON_SUPPORT
 #endif
-
-#endif		// KFL_ARCHITECTURE_HPP
