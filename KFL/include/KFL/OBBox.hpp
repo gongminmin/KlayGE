@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Bound.hpp>
 #include <KFL/Operators.hpp>
 
@@ -110,6 +108,8 @@ namespace KlayGE
 		Quaternion_T<T> rotation_;
 		Vector_T<T, 3> extent_;
 	};
+
+	using OBBox = OBBox_T<float>;
 }
 
 #endif		// _KFL_OBBOX_HPP

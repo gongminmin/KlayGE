@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
@@ -145,6 +143,10 @@ namespace KlayGE
 	private:
 		Vector_T<T, elem_num> size_;
 	};
+
+	using Size = Size_T<float>;
+	using ISize = Size_T<int32_t>;
+	using UISize = Size_T<uint32_t>;
 }
 
 #endif			// _KFL_SIZE_HPP

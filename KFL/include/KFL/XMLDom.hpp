@@ -40,6 +40,9 @@
 
 namespace KlayGE
 {
+	class XMLAttribute;
+	class XMLNode;
+
 	enum class XMLNodeType
 	{
 		Document,

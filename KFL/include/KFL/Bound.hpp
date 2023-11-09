@@ -46,6 +46,8 @@ namespace KlayGE
 		virtual bool VecInBound(Vector_T<T, 3> const & v) const noexcept = 0;
 		virtual T MaxRadiusSq() const noexcept = 0;
 	};
+
+	using Bound = Bound_T<float>;
 }
 
 #endif			// _KFL_BOUND_HPP

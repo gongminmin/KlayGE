@@ -33,6 +33,7 @@
 #include <KFL/CXX20/format.hpp>
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>

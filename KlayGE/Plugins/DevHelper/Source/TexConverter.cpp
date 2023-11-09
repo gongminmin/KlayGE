@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/Log.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
 

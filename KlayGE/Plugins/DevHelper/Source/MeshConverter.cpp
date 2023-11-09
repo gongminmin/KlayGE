@@ -33,6 +33,7 @@
 #include <KFL/CXX20/format.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
+#include <KFL/Log.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/StringUtil.hpp>
 #include <KFL/XMLDom.hpp>

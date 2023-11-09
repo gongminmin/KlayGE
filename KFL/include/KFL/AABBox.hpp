@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Bound.hpp>
 #include <KFL/Operators.hpp>
 
@@ -125,6 +123,8 @@ namespace KlayGE
 	private:
 		Vector_T<T, 3> min_, max_;
 	};
+
+	using AABBox = AABBox_T<float>;
 }
 
 #endif			// _KFL_AABBOX_HPP

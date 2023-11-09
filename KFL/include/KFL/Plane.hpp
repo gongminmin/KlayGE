@@ -172,6 +172,8 @@ namespace KlayGE
 	private:
 		Vector_T<T, elem_num> plane_;
 	};
+
+	using Plane = Plane_T<float>;
 }
 
 #endif			// _KFL_PLANE_HPP

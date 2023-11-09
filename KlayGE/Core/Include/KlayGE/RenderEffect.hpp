@@ -66,6 +66,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Noncopyable.hpp>
+#include <KFL/XMLDom.hpp>
 
 namespace KlayGE
 {

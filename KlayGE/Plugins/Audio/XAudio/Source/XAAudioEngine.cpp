@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cmath>

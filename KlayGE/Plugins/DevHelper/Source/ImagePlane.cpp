@@ -33,6 +33,7 @@
 #include <KFL/CXX20/span.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
 #include <KlayGE/TexCompressionBC.hpp>

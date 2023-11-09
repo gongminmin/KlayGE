@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
@@ -185,6 +183,8 @@ namespace KlayGE
 	private:
 		Vector_T<T, elem_num> col_;
 	};
+
+	using Color = Color_T<float>;
 }
 
 #endif			// _KFL_COLOR_HPP

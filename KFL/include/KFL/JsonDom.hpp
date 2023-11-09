@@ -40,6 +40,9 @@
 
 namespace KlayGE
 {
+	class JsonValue;
+	class XMLDocument;
+
 	enum class JsonValueType
 	{
 		Null,

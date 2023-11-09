@@ -37,6 +37,8 @@
 
 #include <string_view>
 
+#include <KFL/ResIdentifier.hpp>
+
 struct IInArchive;
 
 namespace KlayGE

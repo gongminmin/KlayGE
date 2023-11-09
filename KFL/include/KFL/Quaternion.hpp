@@ -187,6 +187,8 @@ namespace KlayGE
 	private:
 		Vector_T<T, elem_num> quat_;
 	};
+
+	using Quaternion = Quaternion_T<float>;
 }
 
 #endif			// _KFL_QUATERNION_HPP

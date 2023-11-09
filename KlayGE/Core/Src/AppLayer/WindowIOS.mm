@@ -2,7 +2,6 @@
 
 #ifdef KLAYGE_PLATFORM_IOS
 
-#include <KFL/PreDeclare.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 

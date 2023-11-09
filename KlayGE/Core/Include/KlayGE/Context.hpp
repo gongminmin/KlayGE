@@ -43,6 +43,8 @@ struct android_app;
 
 namespace KlayGE
 {
+	class ThreadPool;
+
 	struct ContextCfg
 	{
 		std::string render_factory_name;

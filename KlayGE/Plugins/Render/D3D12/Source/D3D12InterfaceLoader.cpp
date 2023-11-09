@@ -32,6 +32,8 @@
 
 #include <ostream>
 
+#include <KFL/Log.hpp>
+
 #include "D3D12InterfaceLoader.hpp"
 
 namespace KlayGE

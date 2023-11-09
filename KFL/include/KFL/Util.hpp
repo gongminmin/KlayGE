@@ -33,14 +33,14 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-#include <KFL/CXX20/bit.hpp>
-
+#include <functional>
+#include <memory>
 #include <string>
 #include <string_view>
-#include <functional>
 
 #include <boost/assert.hpp>
+
+#include <KFL/CXX20/bit.hpp>
 
 #define KFL_UNUSED(x) (void)(x)
 #define KLAYGE_ESC(...) __VA_ARGS__
@@ -62,8 +62,6 @@
 	#define KLAYGE_ASSUME(expr) if (!(expr)) { __builtin_unreachable(); }
 #endif
 
-#include <KFL/Log.hpp>
-
 #ifdef KLAYGE_DEBUG
 #define KLAYGE_DBG_SUFFIX "_d"
 #else
@@ -74,6 +72,8 @@
 
 namespace KlayGE
 {
+	class ResIdentifier;
+
 	// ÉèµÚn bitÎª1
 	constexpr uint32_t SetMask(uint32_t n) noexcept
 	{

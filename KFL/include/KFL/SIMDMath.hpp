@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #if defined(KLAYGE_SSE_SUPPORT)
 	#define SIMD_MATH_SSE
 	#include <xmmintrin.h>

@@ -33,6 +33,7 @@
 #include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/com_ptr.hpp>
+#include <KFL/Log.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>

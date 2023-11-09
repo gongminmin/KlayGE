@@ -322,6 +322,19 @@ namespace KlayGE
 		DetailType vec_{};
 	};
 
+	using int1 = Vector_T<int32_t, 1>;
+	using int2 = Vector_T<int32_t, 2>;
+	using int3 = Vector_T<int32_t, 3>;
+	using int4 = Vector_T<int32_t, 4>;
+	using uint1 = Vector_T<uint32_t, 1>;
+	using uint2 = Vector_T<uint32_t, 2>;
+	using uint3 = Vector_T<uint32_t, 3>;
+	using uint4 = Vector_T<uint32_t, 4>;
+	using float1 = Vector_T<float, 1>;
+	using float2 = Vector_T<float, 2>;
+	using float3 = Vector_T<float, 3>;
+	using float4 = Vector_T<float, 4>;
+
 	template <typename T, int N>
 	inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs) noexcept
 	{

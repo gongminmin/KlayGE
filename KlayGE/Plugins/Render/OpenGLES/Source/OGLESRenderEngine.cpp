@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 #include <KFL/Math.hpp>

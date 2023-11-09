@@ -25,6 +25,7 @@
 #include <unordered_map>
 
 #include <KFL/Noncopyable.hpp>
+#include <KFL/ResIdentifier.hpp>
 #include <KlayGE/LZMACodec.hpp>
 
 namespace KlayGE

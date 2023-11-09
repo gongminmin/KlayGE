@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/SmartPtrHelper.hpp>
 #include <KFL/Util.hpp>

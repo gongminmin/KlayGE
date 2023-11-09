@@ -2,7 +2,6 @@
 
 #ifdef KLAYGE_PLATFORM_DARWIN
 
-#include <KFL/PreDeclare.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 

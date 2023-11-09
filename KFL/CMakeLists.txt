@@ -26,7 +26,6 @@ SET(BASE_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Noncopyable.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Operators.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
-	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
 	${KFL_PROJECT_DIR}/include/KFL/SmartPtrHelper.hpp
 	${KFL_PROJECT_DIR}/include/KFL/StringUtil.hpp

@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
+#include <KFL/ResIdentifier.hpp>
 
 namespace KlayGE
 {

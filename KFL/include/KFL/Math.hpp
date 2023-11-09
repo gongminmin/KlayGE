@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <limits>
 #include <cstdlib>
 #include <cmath>
@@ -43,6 +41,27 @@
 
 namespace KlayGE
 {
+	template <typename T, int N>
+	class Vector_T;
+	template <typename T>
+	class Matrix4_T;
+	template <typename T>
+	class Quaternion_T;
+	template <typename T>
+	class Plane_T;
+	template <typename T>
+	class Color_T;
+	template <typename T>
+	class Size_T;
+	template <typename T>
+	class Sphere_T;
+	template <typename T>
+	class AABBox_T;
+	template <typename T>
+	class Frustum_T;
+	template <typename T>
+	class OBBox_T;
+
 	// 常量定义
 	/////////////////////////////////////////////////////////////////////////////////
 	float constexpr PI		= 3.141592f;			// PI

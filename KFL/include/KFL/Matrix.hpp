@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Operators.hpp>
 #include <KFL/Vector.hpp>
 
@@ -163,6 +161,8 @@ namespace KlayGE
 	private:
 		Vector_T<Vector_T<T, col_num>, row_num> m_;
 	};
+
+	using float4x4 = Matrix4_T<float>;
 }
 
 #endif			// _KFL_MATRIX_HPP

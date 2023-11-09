@@ -33,11 +33,10 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-#include <KFL/CXX20/span.hpp>
-
 #include <string>
 #include <string_view>
+
+#include <KFL/CXX20/span.hpp>
 
 namespace KlayGE
 {

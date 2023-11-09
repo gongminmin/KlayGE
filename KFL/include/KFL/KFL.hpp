@@ -57,6 +57,5 @@
 
 #include <boost/assert.hpp>
 
-#include <KFL/PreDeclare.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>

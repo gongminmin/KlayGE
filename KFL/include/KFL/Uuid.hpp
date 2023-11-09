@@ -33,15 +33,14 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-#include <KFL/Util.hpp>
-
 #include <array>
 #include <cstring>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <guiddef.h>
 #endif
+
+#include <KFL/Util.hpp>
 
 namespace KlayGE
 {

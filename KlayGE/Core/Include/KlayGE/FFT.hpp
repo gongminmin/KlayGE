@@ -16,6 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/Half.hpp>
 #include <KFL/Noncopyable.hpp>
 
 namespace KlayGE

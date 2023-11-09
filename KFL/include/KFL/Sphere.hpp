@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Operators.hpp>
 #include <KFL/Bound.hpp>
 
@@ -107,6 +105,8 @@ namespace KlayGE
 		Vector_T<T, 3> center_;
 		T radius_;
 	};
+
+	using Sphere = Sphere_T<float>;
 }
 
 #endif			// _KFL_SPHERE_HPP

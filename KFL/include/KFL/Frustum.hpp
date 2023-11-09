@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
 #include <array>
 
 namespace KlayGE
@@ -89,6 +88,8 @@ namespace KlayGE
 		std::array<Plane_T<T>, 6> planes_;
 		std::array<Vector_T<T, 3>, 8> corners_;
 	};
+
+	using Frustum = Frustum_T<float>;
 }
 
 #endif			// _KFL_FRUSTUM_HPP

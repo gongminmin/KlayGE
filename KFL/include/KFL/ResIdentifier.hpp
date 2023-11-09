@@ -33,8 +33,8 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
 #include <istream>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -119,6 +119,8 @@ namespace KlayGE
 		std::shared_ptr<std::istream> istream_;
 		std::shared_ptr<std::streambuf> streambuf_;
 	};
+
+	using ResIdentifierPtr = std::shared_ptr<ResIdentifier>;
 }
 
 #endif			// _KFL_RESIDENTIFIER_HPP

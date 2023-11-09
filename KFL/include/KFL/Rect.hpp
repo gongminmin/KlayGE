@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
-
 #include <KFL/Operators.hpp>
 #include <KFL/Size.hpp>
 #include <KFL/Vector.hpp>
@@ -186,6 +184,10 @@ namespace KlayGE
 	private:
 		Vector_T<T, elem_num> rect_;
 	};
+
+	using Rect = Rect_T<float>;
+	using IRect = Rect_T<int32_t>;
+	using UIRect = Rect_T<uint32_t>;
 }
 
 #endif			// _KFL_RECT_HPP

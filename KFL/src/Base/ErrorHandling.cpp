@@ -38,6 +38,7 @@
 #include <system_error>
 
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 
 namespace KlayGE
 {
