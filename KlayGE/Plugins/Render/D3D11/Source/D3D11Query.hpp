@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <KlayGE/Fence.hpp>
 #include <KlayGE/Query.hpp>
 
 namespace KlayGE

@@ -33,11 +33,11 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Vector.hpp>
 
 #include <map>
+#include <memory>
 
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -78,6 +78,8 @@ namespace KlayGE
 
 		bool resume_playing_{false};
 	};
+
+	using AudioBufferPtr = std::shared_ptr<AudioBuffer>;
 
 	class KLAYGE_CORE_API SoundBuffer : public AudioBuffer
 	{

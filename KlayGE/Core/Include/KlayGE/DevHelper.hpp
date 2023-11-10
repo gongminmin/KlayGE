@@ -35,10 +35,9 @@
 
 #if KLAYGE_IS_DEV_PLATFORM
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KFL/DllLoader.hpp>
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <string_view>

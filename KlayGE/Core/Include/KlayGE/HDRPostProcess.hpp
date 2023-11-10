@@ -18,12 +18,11 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <vector>
 #include <array>
 
 #include <KFL/Timer.hpp>
+#include <KlayGE/FFT.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 namespace KlayGE

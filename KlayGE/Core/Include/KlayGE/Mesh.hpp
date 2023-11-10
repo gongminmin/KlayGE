@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
@@ -35,6 +34,7 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -42,6 +42,15 @@
 
 namespace KlayGE
 {
+	class Camera;
+	using CameraPtr = std::shared_ptr<Camera>;
+	class LightSource;
+	using LightSourcePtr = std::shared_ptr<LightSource>;
+	class RenderModel;
+	using RenderModelPtr = std::shared_ptr<RenderModel>;
+	class StaticMesh;
+	using StaticMeshPtr = std::shared_ptr<StaticMesh>;
+
 	template <typename T>
 	inline StaticMeshPtr CreateMeshFactory(std::wstring_view name)
 	{
@@ -289,6 +298,8 @@ namespace KlayGE
 		float inverse_origin_scale_;
 	};
 
+	using JointComponentPtr = std::shared_ptr<JointComponent>;
+
 	struct KLAYGE_CORE_API KeyFrameSet
 	{
 		std::vector<uint32_t> frame_id;
@@ -407,6 +418,8 @@ namespace KlayGE
 		std::shared_ptr<std::vector<Animation>> animations_;
 	};
 
+	using SkinnedModelPtr = std::shared_ptr<SkinnedModel>;
+
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
 	{
 	public:
@@ -422,6 +435,8 @@ namespace KlayGE
 	private:
 		std::shared_ptr<AABBKeyFrameSet> frame_pos_aabbs_;
 	};
+
+	using SkinnedMeshPtr = std::shared_ptr<SkinnedMesh>;
 
 
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string_view model_name, uint32_t access_hint,

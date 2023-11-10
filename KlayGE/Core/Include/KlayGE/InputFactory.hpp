@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <string>
 
 #include <KFL/Noncopyable.hpp>

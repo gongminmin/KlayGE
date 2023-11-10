@@ -176,7 +176,7 @@ namespace KlayGE
 				uint32_t const child_length = inter_tex_x_up[i]->Width(0);
 
 				RenderEffectPtr effect = SyncLoadRenderEffect("SAT.fxml");
-				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
+				auto pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
 					effect->TechniqueByName("SATScanXUpSweep"));
 				pp->Length(child_length);
 				pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
@@ -192,7 +192,7 @@ namespace KlayGE
 				uint32_t const child_length = inter_tex_x_down[i + 1]->Width(0);
 
 				RenderEffectPtr effect = SyncLoadRenderEffect("SAT.fxml");
-				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
+				auto pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
 					effect->TechniqueByName("SATScanXDownSweep"));
 				pp->Length(child_length);
 				pp->InputPin(0, inter_srv_x_down[i]);
@@ -209,7 +209,7 @@ namespace KlayGE
 				uint32_t const child_length = inter_tex_y_up[i]->Height(0);
 
 				RenderEffectPtr effect = SyncLoadRenderEffect("SAT.fxml");
-				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
+				auto pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
 					effect->TechniqueByName("SATScanYUpSweep"));
 				pp->Length(child_length);
 				pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
@@ -225,7 +225,7 @@ namespace KlayGE
 				uint32_t const child_length = inter_tex_y_down[i + 1]->Height(0);
 
 				RenderEffectPtr effect = SyncLoadRenderEffect("SAT.fxml");
-				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
+				auto pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect,
 					effect->TechniqueByName("SATScanYDownSweep"));
 				pp->Length(child_length);
 				pp->InputPin(0, inter_srv_y_down[i]);

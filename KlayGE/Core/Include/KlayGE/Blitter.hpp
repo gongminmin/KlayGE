@@ -33,12 +33,24 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
+	class RenderTechnique;
+	class RenderEffectParameter;
+	class FrameBuffer;
+	using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
+	class GraphicsBuffer;
+	using GraphicsBufferPtr = std::shared_ptr<GraphicsBuffer>;
+	class RenderEffect;
+	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
+	class RenderLayout;
+	using RenderLayoutPtr = std::shared_ptr<RenderLayout>;
+
 	class KLAYGE_CORE_API Blitter final
 	{
 		KLAYGE_NONCOPYABLE(Blitter);

@@ -1,7 +1,6 @@
 #ifndef _ASCIIARTSPP_HPP
 #define _ASCIIARTSPP_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 class AsciiArtsPostProcess : public KlayGE::PostProcess

@@ -1,7 +1,6 @@
 #ifndef _OCEAN_SIMULATOR_HPP
 #define _OCEAN_SIMULATOR_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/FFT.hpp>
 

@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
@@ -27,9 +26,14 @@
 #include <KFL/Noncopyable.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KlayGE/LZMACodec.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Window.hpp>
 
 namespace KlayGE
 {
+	class JudaTexture;
+	using JudaTexturePtr = std::shared_ptr<JudaTexture>;
+
 	class KLAYGE_CORE_API JudaTexture final
 	{
 		KLAYGE_NONCOPYABLE(JudaTexture);

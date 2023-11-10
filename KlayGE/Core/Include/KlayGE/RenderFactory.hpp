@@ -29,14 +29,16 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX20/span.hpp>
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/Fence.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/Query.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KFL/CXX20/span.hpp>
 
 #include <string>
 #include <unordered_map>

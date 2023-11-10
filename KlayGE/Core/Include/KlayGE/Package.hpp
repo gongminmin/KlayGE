@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <string_view>
 
 #include <KFL/ResIdentifier.hpp>
@@ -68,6 +66,8 @@ namespace KlayGE
 
 		uint32_t num_items_;
 	};
+
+	using PackagePtr = std::shared_ptr<Package>;
 }
 
 #endif		// KLAYGE_CORE_PACKAGE_HPP

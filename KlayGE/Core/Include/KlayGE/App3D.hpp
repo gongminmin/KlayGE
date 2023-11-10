@@ -33,7 +33,8 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 
@@ -41,6 +42,10 @@
 
 namespace KlayGE
 {
+	class Camera;
+	class Window;
+	using WindowPtr = std::shared_ptr<Window>;
+
 	// 一个用于创建3D应用程序框架的基类。建立一个3D应用程序需要继承这个类，
 	//			然后重载以下函数:
 	//

@@ -40,6 +40,9 @@
 
 namespace KlayGE
 {
+	class ScriptVariable;
+	using ScriptVariablePtr = std::shared_ptr<ScriptVariable>;
+
 	class KLAYGE_CORE_API ScriptVariable
 	{
 	public:

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/CameraController.hpp>
 

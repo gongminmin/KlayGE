@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
@@ -58,6 +57,8 @@ namespace KlayGE
 		virtual void Wait(uint64_t id) = 0;
 		virtual bool Completed(uint64_t id) = 0;
 	};
+
+	using FencePtr = std::shared_ptr<Fence>;
 }
 
 #endif		// _FENCE_HPP

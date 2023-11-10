@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Signal.hpp>
 
 #include "OGLFrameBuffer.hpp"

@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
 #include <string_view>

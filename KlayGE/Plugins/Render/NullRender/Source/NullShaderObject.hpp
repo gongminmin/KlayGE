@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
 struct ID3D11ShaderReflection;

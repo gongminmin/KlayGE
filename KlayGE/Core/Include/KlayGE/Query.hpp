@@ -21,8 +21,9 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
+
+#include <memory>
 
 namespace KlayGE
 {
@@ -38,11 +39,15 @@ namespace KlayGE
 		virtual void End() = 0;
 	};
 
+	using QueryPtr = std::shared_ptr<Query>;
+
 	class KLAYGE_CORE_API OcclusionQuery : public Query
 	{
 	public:
 		virtual uint64_t SamplesPassed() = 0;
 	};
+
+	using OcclusionQueryPtr = std::shared_ptr<OcclusionQuery>;
 
 	class KLAYGE_CORE_API ConditionalRender : public Query
 	{
@@ -53,11 +58,15 @@ namespace KlayGE
 		virtual bool AnySamplesPassed() = 0;
 	};
 
+	using ConditionalRenderPtr = std::shared_ptr<ConditionalRender>;
+
 	class KLAYGE_CORE_API TimerQuery : public Query
 	{
 	public:
 		virtual double TimeElapsed() = 0; // In second.
 	};
+
+	using TimerQueryPtr = std::shared_ptr<TimerQuery>;
 
 	class KLAYGE_CORE_API SOStatisticsQuery : public Query
 	{
@@ -65,6 +74,8 @@ namespace KlayGE
 		virtual uint64_t NumPrimitivesWritten() = 0;
 		virtual uint64_t PrimitivesGenerated() = 0;
 	};
+
+	using SOStatisticsQueryPtr = std::shared_ptr<SOStatisticsQuery>;
 }
 
 #endif		// _QUERY_HPP

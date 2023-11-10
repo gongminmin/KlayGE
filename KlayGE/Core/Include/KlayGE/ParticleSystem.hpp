@@ -33,17 +33,24 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/SceneNode.hpp>
 
+#include <memory>
 #include <mutex>
 #include <random>
 #include <vector>
 
 namespace KlayGE
 {
+	class ParticleEmitter;
+	using ParticleEmitterPtr = std::shared_ptr<ParticleEmitter>;
+	class ParticleUpdater;
+	using ParticleUpdaterPtr = std::shared_ptr<ParticleUpdater>;
+	class ParticleSystem;
+	using ParticleSystemPtr = std::shared_ptr<ParticleSystem>;
+
 	struct Particle
 	{
 		float3 pos;

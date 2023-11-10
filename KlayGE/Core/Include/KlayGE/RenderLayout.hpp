@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
 
 #include <vector>
@@ -280,6 +279,8 @@ namespace KlayGE
 
 		mutable bool streams_dirty_;
 	};
+
+	using RenderLayoutPtr = std::shared_ptr<RenderLayout>;
 }
 
 #endif		// _RENDERLAYOUT_HPP

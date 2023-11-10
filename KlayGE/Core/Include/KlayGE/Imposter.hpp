@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
@@ -85,6 +84,8 @@ namespace KlayGE
 		TexturePtr rt0_tex_;
 		TexturePtr rt1_tex_;
 	};
+
+	using ImposterPtr = std::shared_ptr<Imposter>;
 
 	KLAYGE_CORE_API ImposterPtr SyncLoadImposter(std::string_view impml_name);
 	KLAYGE_CORE_API ImposterPtr ASyncLoadImposter(std::string_view impml_name);

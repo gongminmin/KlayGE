@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
 #include <KFL/Noncopyable.hpp>
@@ -45,9 +43,26 @@
 #include <bitset>
 #include <array>
 #include <map>
+#include <memory>
 
 namespace KlayGE
 {
+	class InputEngine;
+	struct InputActionParam;
+	using InputActionParamPtr = std::shared_ptr<InputActionParam>;
+	class InputDevice;
+	using InputDevicePtr = std::shared_ptr<InputDevice>;
+	struct InputKeyboardActionParam;
+	using InputKeyboardActionParamPtr = std::shared_ptr<InputKeyboardActionParam>;
+	struct InputMouseActionParam;
+	using InputMouseActionParamPtr = std::shared_ptr<InputMouseActionParam>;
+	struct InputJoystickActionParam;
+	using InputJoystickActionParamPtr = std::shared_ptr<InputJoystickActionParam>;
+	struct InputTouchActionParam;
+	typedef std::shared_ptr<InputTouchActionParam> InputTouchActionParamPtr;
+	struct InputSensorActionParam;
+	typedef std::shared_ptr<InputSensorActionParam> InputSensorActionParamPtr;
+
 	// ¼üÅÌ¶¯×÷
 	enum KeyboardSemantic
 	{
@@ -324,6 +339,7 @@ namespace KlayGE
 		uint16_t semantic;
 	};
 
+
 	typedef std::pair<uint16_t, InputActionParamPtr> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
 
@@ -453,6 +469,8 @@ namespace KlayGE
 		InputKeyboardActionParamPtr action_param_;
 	};
 
+	using InputKeyboardPtr = std::shared_ptr<InputKeyboard>;
+
 	class KLAYGE_CORE_API InputMouse : public InputDevice
 	{
 	public:
@@ -497,6 +515,8 @@ namespace KlayGE
 		InputMouseActionParamPtr action_param_;
 	};
 
+	using InputMousePtr = std::shared_ptr<InputMouse>;
+
 	class KLAYGE_CORE_API InputJoystick : public InputDevice
 	{
 	public:
@@ -538,6 +558,8 @@ namespace KlayGE
 
 		InputJoystickActionParamPtr action_param_;
 	};
+
+	using InputJoystickPtr = std::shared_ptr<InputJoystick>;
 
 	class KLAYGE_CORE_API InputTouch : public InputDevice
 	{
@@ -603,6 +625,8 @@ namespace KlayGE
 		float2 two_finger_vec_;
 	};
 
+	using InputTouchPtr = std::shared_ptr<InputTouch>;
+
 	class KLAYGE_CORE_API InputSensor : public InputDevice
 	{
 	public:
@@ -646,6 +670,8 @@ namespace KlayGE
 
 		InputSensorActionParamPtr action_param_;
 	};
+
+	using InputSensorPtr = std::shared_ptr<InputSensor>;
 
 
 	struct KLAYGE_CORE_API InputActionParam

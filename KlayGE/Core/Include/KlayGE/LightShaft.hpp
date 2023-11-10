@@ -13,7 +13,6 @@
 #ifndef _LIGHTSHAFT_HPP
 #define _LIGHTSHAFT_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <vector>
 

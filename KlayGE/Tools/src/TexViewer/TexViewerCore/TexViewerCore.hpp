@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/SceneNode.hpp>
 #include <KlayGE/Texture.hpp>
 
 #ifdef TexViewerCore_EXPORTS	// Build dll

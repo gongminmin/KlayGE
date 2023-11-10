@@ -15,13 +15,19 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Query.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
 #include <array>
+#include <memory>
 
 namespace KlayGE
 {
+	class Camera;
+	using CameraPtr = std::shared_ptr<Camera>;
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	class KLAYGE_CORE_API LightSource : public SceneComponent, public std::enable_shared_from_this<LightSource>
 	{
 	public:
@@ -114,6 +120,8 @@ namespace KlayGE
 		std::function<void(LightSource&, float, float)> update_func_;
 	};
 
+	using LightSourcePtr = std::shared_ptr<LightSource>;
+
 	class KLAYGE_CORE_API AmbientLightSource final : public LightSource
 	{
 	public:
@@ -143,6 +151,8 @@ namespace KlayGE
 		mutable TexturePtr sky_tex_y_;
 		mutable TexturePtr sky_tex_c_;
 	};
+
+	using AmbientLightSourcePtr = std::shared_ptr<AmbientLightSource>;
 
 	class KLAYGE_CORE_API PointLightSource : public LightSource
 	{
@@ -180,6 +190,8 @@ namespace KlayGE
 		std::array<ConditionalRenderPtr, 7> crs_;
 		std::array<CameraPtr, 6> sm_cameras_;
 	};
+
+	using PointLightSourcePtr = std::shared_ptr<PointLightSource>;
 
 	class KLAYGE_CORE_API SpotLightSource final : public LightSource
 	{
@@ -227,6 +239,8 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
+	using SpotLightSourcePtr = std::shared_ptr<SpotLightSource>;
+
 	class KLAYGE_CORE_API DirectionalLightSource final : public LightSource
 	{
 	public:
@@ -259,6 +273,8 @@ namespace KlayGE
 		CameraPtr sm_camera_;
 	};
 
+	using DirectionalLightSourcePtr = std::shared_ptr<DirectionalLightSource>;
+
 	class KLAYGE_CORE_API SphereAreaLightSource final : public PointLightSource
 	{
 	public:
@@ -281,6 +297,8 @@ namespace KlayGE
 	protected:
 		float radius_;
 	};
+
+	using SphereAreaLightSourcePtr = std::shared_ptr<SphereAreaLightSource>;
 
 	class KLAYGE_CORE_API TubeAreaLightSource final : public PointLightSource
 	{
@@ -306,6 +324,8 @@ namespace KlayGE
 	protected:
 		float3 extend_;
 	};
+
+	using TubeAreaLightSourcePtr = std::shared_ptr<TubeAreaLightSource>;
 }
 
 #endif		// _LIGHT_HPP

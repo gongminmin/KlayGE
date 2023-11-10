@@ -30,12 +30,16 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KlayGE/Renderable.hpp>
 #include <KFL/AABBox.hpp>
 
 namespace KlayGE
 {
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	class KLAYGE_CORE_API RenderablePoint : public Renderable
 	{
 	public:
@@ -141,6 +145,8 @@ namespace KlayGE
 	private:
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
 	};
+
+	using RenderDecalPtr = std::shared_ptr<RenderDecal>;
 }
 
 #endif		// _RENDERABLEHELPER_HPP

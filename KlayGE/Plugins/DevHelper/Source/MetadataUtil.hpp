@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 namespace KlayGE
 {
 	float GetFloat(JsonValue const& value);

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/InfTerrain.hpp>
 

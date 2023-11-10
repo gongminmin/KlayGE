@@ -1,7 +1,6 @@
 #ifndef _TILINGPP_HPP
 #define _TILINGPP_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 class TilingPostProcess : public KlayGE::PostProcess

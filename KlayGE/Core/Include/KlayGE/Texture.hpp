@@ -50,12 +50,12 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KFL/Noncopyable.hpp>
 
 #include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
 #include <boost/assert.hpp>
@@ -292,6 +292,8 @@ namespace KlayGE
 		uint32_t		sample_count_, sample_quality_;
 		uint32_t		access_hint_;
 	};
+
+	using TexturePtr = std::shared_ptr<Texture>;
 
 	class KLAYGE_CORE_API SoftwareTexture : public Texture
 	{

@@ -275,6 +275,10 @@ namespace uwp
 
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+	class Window;
+#endif
+
 	class MsgInputEngine final : public InputEngine
 	{
 	public:

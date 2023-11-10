@@ -15,11 +15,15 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Noncopyable.hpp>
 
 namespace KlayGE
 {
+	class Camera;
+	using CameraPtr = std::shared_ptr<Camera>;
+
 	class KLAYGE_CORE_API Viewport final
 	{
 		KLAYGE_NONCOPYABLE(Viewport);
@@ -76,6 +80,8 @@ namespace KlayGE
 
 		std::vector<CameraPtr> cameras_;
 	};
+
+	using ViewportPtr = std::shared_ptr<Viewport>;
 }
 
 #endif			// _VIEWPORT_HPP

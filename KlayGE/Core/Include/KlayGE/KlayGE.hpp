@@ -54,7 +54,6 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Context.hpp>
 
 #endif		// _KLAYGE_HPP

@@ -55,7 +55,6 @@ SET(BASE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Context.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HWDetect.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PerfProfiler.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SALWrapper.hpp

@@ -46,6 +46,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <KlayGE/Fence.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
 

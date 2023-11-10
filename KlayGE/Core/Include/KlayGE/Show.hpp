@@ -15,13 +15,16 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 
+#include <memory>
 #include <string>
 
 namespace KlayGE
 {
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	enum ShowState
 	{
 		SS_Unkown,

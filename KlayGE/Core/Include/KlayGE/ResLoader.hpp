@@ -33,14 +33,15 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <istream>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Thread.hpp>
+#include <KlayGE/Package.hpp>
 
 #if defined(KLAYGE_PLATFORM_ANDROID)
 struct AAsset;
@@ -75,6 +76,8 @@ namespace KlayGE
 
 		virtual std::shared_ptr<void> Resource() const = 0;
 	};
+
+	using ResLoadingDescPtr = std::shared_ptr<ResLoadingDesc>;
 
 	class KLAYGE_CORE_API ResLoader final
 	{

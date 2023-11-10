@@ -27,8 +27,7 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
+#include <memory>
 #include <vector>
 
 #include <KFL/Noncopyable.hpp>
@@ -36,6 +35,13 @@
 
 namespace KlayGE
 {
+	class DepthStencilView;
+	using DepthStencilViewPtr = std::shared_ptr<DepthStencilView>;
+	class RenderTargetView;
+	using RenderTargetViewPtr = std::shared_ptr<RenderTargetView>;
+	class UnorderedAccessView;
+	using UnorderedAccessViewPtr = std::shared_ptr<UnorderedAccessView>;
+
 	class KLAYGE_CORE_API FrameBuffer
 	{
 		KLAYGE_NONCOPYABLE(FrameBuffer);
@@ -120,6 +126,8 @@ namespace KlayGE
 		std::vector<UnorderedAccessViewPtr> ua_views_;
 		bool views_dirty_;
 	};
+
+	using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
 }
 
 #endif			// _FRAMEBUFFER_HPP

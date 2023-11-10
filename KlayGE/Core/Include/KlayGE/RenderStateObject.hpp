@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
 
 #include <array>
+#include <memory>
 
 #include <KFL/Color.hpp>
 
@@ -328,6 +328,8 @@ namespace KlayGE
 		BlendStateDesc bs_desc_;
 	};
 
+	using RenderStateObjectPtr = std::shared_ptr<RenderStateObject>;
+
 	class KLAYGE_CORE_API SamplerStateObject
 	{
 		KLAYGE_NONCOPYABLE(SamplerStateObject);
@@ -350,6 +352,8 @@ namespace KlayGE
 	protected:
 		SamplerStateDesc desc_;
 	};
+
+	using SamplerStateObjectPtr = std::shared_ptr<SamplerStateObject>;
 }
 
 #endif			// _RENDERSTATEOBJECT_HPP

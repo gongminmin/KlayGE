@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
@@ -27,10 +26,23 @@
 
 #include <array>
 #include <map>
+#include <memory>
 #include <string_view>
 
 namespace KlayGE
 {
+	class Window;
+	class Font;
+	using FontPtr = std::shared_ptr<Font>;
+	class Renderable;
+	using RenderablePtr = std::shared_ptr<Renderable>;
+	class RenderEffect;
+	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+	class UIDialog;
+	using UIDialogPtr = std::shared_ptr<UIDialog>;
+
 	enum UI_Control_State
 	{
 		UICS_Normal = 0,
@@ -350,6 +362,8 @@ namespace KlayGE
 
 		IRect bounding_box_;		// Rectangle defining the active region of the control
 	};
+
+	using UIControlPtr = std::shared_ptr<UIControl>;
 
 	class KLAYGE_CORE_API UIManager final : public std::enable_shared_from_this<UIManager>
 	{
@@ -719,6 +733,8 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
+	using UIStaticPtr = std::shared_ptr<UIStatic>;
+
 	class KLAYGE_CORE_API UIButton final : public UIControl
 	{
 	public:
@@ -769,6 +785,8 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
+	using UIButtonPtr = std::shared_ptr<UIButton>;
+
 	class KLAYGE_CORE_API UITexButton final : public UIControl
 	{
 	public:
@@ -818,6 +836,8 @@ namespace KlayGE
 
 		size_t tex_index_;
 	};
+
+	using UITexButtonPtr = std::shared_ptr<UITexButton>;
 
 	class KLAYGE_CORE_API UICheckBox final : public UIControl
 	{
@@ -884,6 +904,8 @@ namespace KlayGE
 
 		std::wstring text_;      // Window text
 	};
+
+	using UICheckBoxPtr = std::shared_ptr<UICheckBox>;
 
 	class KLAYGE_CORE_API UIRadioButton final : public UIControl
 	{
@@ -962,6 +984,8 @@ namespace KlayGE
 		std::wstring text_;      // Window text
 	};
 
+	using UIRadioButtonPtr = std::shared_ptr<UIRadioButton>;
+
 	class KLAYGE_CORE_API UISlider final : public UIControl
 	{
 	public:
@@ -1039,6 +1063,8 @@ namespace KlayGE
 		IRect button_rc_;
 		IRect slider_rc_;
 	};
+
+	using UISliderPtr = std::shared_ptr<UISlider>;
 
 	class KLAYGE_CORE_API UIScrollBar final : public UIControl
 	{
@@ -1123,6 +1149,8 @@ namespace KlayGE
 
 		static Timer timer_;
 	};
+
+	using UIScrollBarPtr = std::shared_ptr<UIScrollBar>;
 
 	struct KLAYGE_CORE_API UIListBoxItem
 	{
@@ -1242,6 +1270,8 @@ namespace KlayGE
 		std::vector<std::shared_ptr<UIListBoxItem>> items_;
 	};
 
+	using UIListBoxPtr = std::shared_ptr<UIListBox>;
+
 	struct UIComboBoxItem
 	{
 		std::wstring strText;
@@ -1347,6 +1377,8 @@ namespace KlayGE
 
 		bool pressed_;
 	};
+
+	using UIComboBoxPtr = std::shared_ptr<UIComboBox>;
 
 	// UniBuffer class for the edit control
 	class KLAYGE_CORE_API UniBuffer final
@@ -1529,6 +1561,8 @@ namespace KlayGE
 		static Timer timer_;
 	};
 
+	using UIEditBoxPtr = std::shared_ptr<UIEditBox>;
+
 	class KLAYGE_CORE_API UIPolylineEditBox final : public UIControl
 	{
 	public:
@@ -1590,6 +1624,8 @@ namespace KlayGE
 		bool move_point_;
 	};
 
+	using UIPolylineEditBoxPtr = std::shared_ptr<UIPolylineEditBox>;
+
 	class KLAYGE_CORE_API UIProgressBar final : public UIControl
 	{
 	public:
@@ -1620,6 +1656,8 @@ namespace KlayGE
 	protected:
 		int progress_;
 	};
+
+	using UIProgressBarPtr = std::shared_ptr<UIProgressBar>;
 }
 
 #endif		// _UI_HPP

@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/Imposter.hpp>
 #include <KlayGE/InfTerrain.hpp>
 
 #include <vector>

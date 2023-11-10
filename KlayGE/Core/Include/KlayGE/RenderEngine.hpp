@@ -73,18 +73,35 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mipmapper.hpp>
 #include <KFL/Color.hpp>
 
+#include <memory>
 #include <string_view>
 #include <vector>
 
 namespace KlayGE
 {
+	class PerfRegion;
+	class RenderEffectConstantBuffer;
+	class FrameBuffer;
+	using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
+	class PostProcess;
+	using PostProcessPtr = std::shared_ptr<PostProcess>;
+	class RenderMaterial;
+	using RenderMaterialPtr = std::shared_ptr<RenderMaterial>;
+	class RenderStateObject;
+	using RenderStateObjectPtr = std::shared_ptr<RenderStateObject>;
+	class RenderTargetView;
+	using RenderTargetViewPtr = std::shared_ptr<RenderTargetView>;
+	class SceneNode;
+	using SceneNodePtr = std::shared_ptr<SceneNode>;
+	class ShaderResourceView;
+	using ShaderResourceViewPtr = std::shared_ptr<ShaderResourceView>;
+
 	class KLAYGE_CORE_API RenderEngine
 	{
 		KLAYGE_NONCOPYABLE(RenderEngine);

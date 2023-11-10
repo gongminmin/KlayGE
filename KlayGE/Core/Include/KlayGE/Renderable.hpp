@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
 #include <vector>
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderMaterial.hpp>
@@ -29,6 +29,11 @@
 
 namespace KlayGE
 {
+	class RenderEffect;
+	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
+	class RenderLayout;
+	using RenderLayoutPtr = std::shared_ptr<RenderLayout>;
+
 	enum PassCategory
 	{
 		PC_GBuffer = 0,
@@ -374,6 +379,8 @@ namespace KlayGE
 		uint32_t visible_in_cameras_ = 0;
 	};
 
+	using RenderablePtr = std::shared_ptr<Renderable>;
+
 	// TODO: Consider merging this with Renderable
 	class KLAYGE_CORE_API RenderableComponent : public SceneComponent
 	{
@@ -402,6 +409,8 @@ namespace KlayGE
 	private:
 		RenderablePtr renderable_;
 	};
+
+	using RenderableComponentPtr = std::shared_ptr<KlayGE::RenderableComponent>;
 }
 
 #endif		//_RENDERABLE_HPP

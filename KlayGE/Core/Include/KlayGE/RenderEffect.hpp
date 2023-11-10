@@ -54,12 +54,12 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
 
-#include <vector>
-#include <string>
 #include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
@@ -70,6 +70,16 @@
 
 namespace KlayGE
 {
+	class RenderEffectStructType;
+	class RenderEffect;
+	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
+	class RenderPass;
+	using RenderPassPtr = std::shared_ptr<RenderPass>;
+	class SamplerStateObject;
+	using SamplerStateObjectPtr = std::shared_ptr<SamplerStateObject>;
+	class UnorderedAccessView;
+	using UnorderedAccessViewPtr = std::shared_ptr<UnorderedAccessView>;
+
 	enum RenderEffectDataType
 	{
 		REDT_bool = 0,
@@ -317,6 +327,8 @@ namespace KlayGE
 		std::unique_ptr<RenderVariable> var_;
 	};
 
+	using RenderEffectAnnotationPtr = std::shared_ptr<RenderEffectAnnotation>;
+
 	class KLAYGE_CORE_API RenderShaderFragment final
 	{
 	public:
@@ -449,6 +461,9 @@ namespace KlayGE
 		};
 		std::vector<StrcutMemberType> members_;
 	};
+
+	class RenderEffectConstantBuffer;
+	using RenderEffectConstantBufferPtr = std::shared_ptr<RenderEffectConstantBuffer>;
 
 	class KLAYGE_CORE_API RenderEffectConstantBuffer final
 	{

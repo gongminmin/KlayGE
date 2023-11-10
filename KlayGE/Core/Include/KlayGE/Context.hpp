@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <string>
 #include <boost/assert.hpp>
 
@@ -44,6 +42,18 @@ struct android_app;
 namespace KlayGE
 {
 	class ThreadPool;
+	class App3DFramework;
+	class AudioDataSourceFactory;
+	class AudioFactory;
+	class DeferredRenderingLayer;
+	class InputFactory;
+	class RenderFactory;
+	class SceneManager;
+	class ScriptFactory;
+	class ShowFactory;
+#if KLAYGE_IS_DEV_PLATFORM
+	class DevHelper;
+#endif
 
 	struct ContextCfg
 	{

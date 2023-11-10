@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <KFL/Math.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
@@ -192,6 +194,8 @@ namespace KlayGE
 
 		Signal::Connection connection_;
 	};
+
+	using CameraPathControllerPtr = std::shared_ptr<CameraPathController>;
 
 	KLAYGE_CORE_API CameraPathControllerPtr LoadCameraPath(ResIdentifier& res);
 	KLAYGE_CORE_API void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path);

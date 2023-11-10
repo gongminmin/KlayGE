@@ -1,7 +1,6 @@
 #ifndef _MODEL_HPP
 #define _MODEL_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <string>
 #include <KlayGE/Mesh.hpp>
 

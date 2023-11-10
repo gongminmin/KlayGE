@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX23/utility.hpp>
 #include <KlayGE/ShaderObject.hpp>
 

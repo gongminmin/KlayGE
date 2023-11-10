@@ -36,13 +36,12 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
 
 #include <list>
+#include <memory>
 #include <vector>
 
 namespace KlayGE
@@ -91,6 +90,8 @@ namespace KlayGE
 		std::shared_ptr<FontRenderable> font_renderable_;
 		uint32_t fsn_attrib_;
 	};
+
+	using FontPtr = std::shared_ptr<Font>;
 
 	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags = 0);
 	KLAYGE_CORE_API FontPtr ASyncLoadFont(std::string_view font_name, uint32_t flags = 0);

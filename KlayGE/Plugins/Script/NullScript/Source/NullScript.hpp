@@ -35,7 +35,6 @@
 
 #include <string>
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Script.hpp>
 
 namespace KlayGE

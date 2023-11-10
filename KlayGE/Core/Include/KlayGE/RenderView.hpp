@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -26,6 +27,9 @@
 
 namespace KlayGE
 {
+	class GraphicsBuffer;
+	using GraphicsBufferPtr = std::shared_ptr<GraphicsBuffer>;
+
 	class KLAYGE_CORE_API ShaderResourceView
 	{
 		KLAYGE_NONCOPYABLE(ShaderResourceView);
@@ -88,6 +92,8 @@ namespace KlayGE
 		uint32_t first_elem_;
 		uint32_t num_elems_;
 	};
+
+	using ShaderResourceViewPtr = std::shared_ptr<ShaderResourceView>;
 
 	class KLAYGE_CORE_API RenderTargetView
 	{
@@ -198,6 +204,8 @@ namespace KlayGE
 		uint32_t num_elems_;
 	};
 
+	using RenderTargetViewPtr = std::shared_ptr<RenderTargetView>;
+
 	class KLAYGE_CORE_API DepthStencilView
 	{
 		KLAYGE_NONCOPYABLE(DepthStencilView);
@@ -290,6 +298,8 @@ namespace KlayGE
 		Texture::CubeFaces first_face_;
 		uint32_t num_faces_;
 	};
+
+	using DepthStencilViewPtr = std::shared_ptr<DepthStencilView>;
 
 	class KLAYGE_CORE_API UnorderedAccessView
 	{
@@ -390,6 +400,8 @@ namespace KlayGE
 		uint32_t first_elem_;
 		uint32_t num_elems_;
 	};
+
+	using UnorderedAccessViewPtr = std::shared_ptr<UnorderedAccessView>;
 }
 
 #endif			// _RENDERVIEW_HPP

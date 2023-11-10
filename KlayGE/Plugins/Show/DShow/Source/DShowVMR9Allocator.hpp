@@ -15,15 +15,18 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/com_ptr.hpp>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <vector>
 
 namespace KlayGE
 {
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	class DShowVMR9Allocator final : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:

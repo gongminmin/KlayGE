@@ -33,15 +33,19 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
 #include <array>
+#include <memory>
 
 namespace KlayGE
 {
+	class RenderEffect;
+	class RenderPass;
+	class RenderTechnique;
+
 	struct ShaderDesc
 	{
 		ShaderDesc()
@@ -170,6 +174,11 @@ namespace KlayGE
 		bool is_validate_ = false;
 		bool hw_res_ready_ = false;
 	};
+
+	using ShaderStageObjectPtr = std::shared_ptr<ShaderStageObject>;
+
+	class ShaderObject;
+	using ShaderObjectPtr = std::shared_ptr<ShaderObject>;
 
 	class KLAYGE_CORE_API ShaderObject
 	{

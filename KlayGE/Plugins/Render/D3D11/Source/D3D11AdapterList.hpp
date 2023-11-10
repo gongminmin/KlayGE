@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include "D3D11Util.hpp"
 
 namespace KlayGE

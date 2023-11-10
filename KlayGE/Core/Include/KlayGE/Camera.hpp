@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
@@ -120,6 +122,8 @@ namespace KlayGE
 		uint32_t	mode_ = 0;
 		int cur_jitter_index_ = 0;
 	};
+
+	using CameraPtr = std::shared_ptr<Camera>;
 }
 
 #endif		// _CAMERA_HPP

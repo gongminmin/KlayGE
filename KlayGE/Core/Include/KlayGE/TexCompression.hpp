@@ -33,15 +33,17 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <array>
+#include <memory>
 
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
 
 namespace KlayGE
 {
+	class Texture;
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	enum TexCompressionMethod
 	{
 		TCM_Speed,

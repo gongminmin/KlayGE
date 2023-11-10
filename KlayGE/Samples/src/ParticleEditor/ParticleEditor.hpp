@@ -1,7 +1,6 @@
 #ifndef _PARTICLEEDITOR_HPP
 #define _PARTICLEEDITOR_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>

@@ -17,6 +17,9 @@
 #pragma warning(pop)
 #endif
 
+#include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/Texture.hpp>
+
 namespace KlayGE
 {
 	bool CompareBuffer(GraphicsBuffer& buff0, uint32_t buff0_offset,

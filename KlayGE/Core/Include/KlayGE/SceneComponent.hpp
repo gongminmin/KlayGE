@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
 
 #define BOOST_NO_CXX98_FUNCTION_BASE // Remove the usage of std::unary_function in container_hash/hash.hpp
 #include <boost/type_index.hpp>
@@ -44,6 +44,10 @@
 
 namespace KlayGE
 {
+	class SceneNode;
+	class SceneComponent;
+	using SceneComponentPtr = std::shared_ptr<SceneComponent>;
+
 	class KLAYGE_CORE_API SceneComponent
 	{
 		KLAYGE_NONCOPYABLE(SceneComponent);

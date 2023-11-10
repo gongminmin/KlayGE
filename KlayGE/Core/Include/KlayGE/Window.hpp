@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Signal.hpp>
 
@@ -63,6 +61,7 @@ OBJC_CLASS(KlayGEWindowListener);
 OBJC_CLASS(NSView);
 #endif
 
+#include <memory>
 #include <string>
 
 #include <KFL/Noncopyable.hpp>
@@ -432,6 +431,8 @@ namespace KlayGE
 		KlayGEView* eagl_view_;
 #endif
 	};
+
+	using WindowPtr = std::shared_ptr<Window>;
 } // namespace KlayGE
 
 #endif // _WINDOW_HPP

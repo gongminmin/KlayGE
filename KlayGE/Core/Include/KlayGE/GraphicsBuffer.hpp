@@ -42,7 +42,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <atomic>
 #include <vector>
 
@@ -146,6 +145,8 @@ namespace KlayGE
 		uint32_t size_in_byte_;
 		uint32_t structure_byte_stride_;
 	};
+
+	using GraphicsBufferPtr = std::shared_ptr<GraphicsBuffer>;
 
 	class KLAYGE_CORE_API SoftwareGraphicsBuffer : public GraphicsBuffer
 	{

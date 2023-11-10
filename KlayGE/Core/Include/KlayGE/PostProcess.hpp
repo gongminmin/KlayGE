@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -193,6 +193,8 @@ namespace KlayGE
 		RenderEffectParameter* inv_width_height_ep_;
 	};
 
+	using PostProcessPtr = std::shared_ptr<PostProcess>;
+
 	KLAYGE_CORE_API PostProcessPtr SyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name);
 	KLAYGE_CORE_API PostProcessPtr ASyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name);
 
@@ -290,6 +292,8 @@ namespace KlayGE
 	protected:
 		std::vector<PostProcessPtr> pp_chain_;
 	};
+
+	using PostProcessChainPtr = std::shared_ptr<PostProcessChain>;
 	
 
 	class KLAYGE_CORE_API SeparableBoxFilterPostProcess : public PostProcess

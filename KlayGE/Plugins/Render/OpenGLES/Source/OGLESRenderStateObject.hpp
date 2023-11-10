@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 
 namespace KlayGE

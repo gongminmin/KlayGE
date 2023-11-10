@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Texture.hpp>
 

@@ -1,7 +1,6 @@
 #ifndef _MTL_EDITOR_CORE_MODEL_HPP
 #define _MTL_EDITOR_CORE_MODEL_HPP
 
-#include <KlayGE/PreDeclare.hpp>
 #include <string>
 #include <KlayGE/Mesh.hpp>
 

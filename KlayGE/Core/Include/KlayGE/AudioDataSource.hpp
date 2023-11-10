@@ -33,7 +33,8 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Noncopyable.hpp>
 #include <KFL/ResIdentifier.hpp>
 
@@ -72,6 +73,8 @@ namespace KlayGE
 		AudioFormat format_;
 		uint32_t freq_;
 	};
+
+	using AudioDataSourcePtr = std::shared_ptr<AudioDataSource>;
 
 	class KLAYGE_CORE_API AudioDataSourceFactory
 	{

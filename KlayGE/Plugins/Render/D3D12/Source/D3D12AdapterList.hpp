@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include "D3D12Util.hpp"
 #include "D3D12Adapter.hpp"
 

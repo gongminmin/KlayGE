@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <array>
 #include <functional>
 
@@ -50,6 +48,9 @@
 
 namespace KlayGE
 {
+	class RenderDecal;
+	using RenderDecalPtr = std::shared_ptr<RenderDecal>;
+
 	enum VPAttribMask
 	{
 		VPAM_Enabled = 1UL << 0,

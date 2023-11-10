@@ -57,6 +57,7 @@ namespace uwp
 namespace KlayGE
 {
 	struct RenderSettings;
+	class Window;
 	class D3D11Adapter;
 
 	class D3D11RenderWindow final : public D3D11FrameBuffer

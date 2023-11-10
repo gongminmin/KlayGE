@@ -60,7 +60,6 @@
 #include <vector>
 #include <string>
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Script.hpp>
 
 #include <vector>

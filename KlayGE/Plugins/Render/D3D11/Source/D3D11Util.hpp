@@ -59,7 +59,6 @@
 
 #include <KFL/com_ptr.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>

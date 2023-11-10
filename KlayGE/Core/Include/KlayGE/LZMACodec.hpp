@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KFL/Noncopyable.hpp>
 #include <KFL/ResIdentifier.hpp>

@@ -15,7 +15,8 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
+#include <memory>
+
 #include <KFL/Half.hpp>
 #include <KFL/Noncopyable.hpp>
 
@@ -32,6 +33,8 @@ namespace KlayGE
 		virtual void Execute(TexturePtr const& out_real, TexturePtr const& out_imag, ShaderResourceViewPtr const& in_real,
 			ShaderResourceViewPtr const& in_imag) = 0;
 	};
+
+	using GpuFftPtr = std::shared_ptr<GpuFft>;
 
 	class KLAYGE_CORE_API GpuFftPS final : public GpuFft
 	{
