@@ -22,11 +22,10 @@
 #include <mutex>
 #include <vector>
 
+#include <KlayGE/Texture.hpp>
+
 namespace KlayGE
 {
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	class DShowVMR9Allocator final : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:

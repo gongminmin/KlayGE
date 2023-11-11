@@ -32,13 +32,11 @@
 #include <vector>
 #include <unordered_map>
 
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/Light.hpp>
+
 namespace KlayGE
 {
-	class Camera;
-	using CameraPtr = std::shared_ptr<Camera>;
-	class LightSource;
-	using LightSourcePtr = std::shared_ptr<LightSource>;
-
 	class KLAYGE_CORE_API SceneManager
 	{
 		KLAYGE_NONCOPYABLE(SceneManager);

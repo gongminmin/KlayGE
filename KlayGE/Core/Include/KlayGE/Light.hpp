@@ -21,13 +21,11 @@
 #include <array>
 #include <memory>
 
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/Texture.hpp>
+
 namespace KlayGE
 {
-	class Camera;
-	using CameraPtr = std::shared_ptr<Camera>;
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	class KLAYGE_CORE_API LightSource : public SceneComponent, public std::enable_shared_from_this<LightSource>
 	{
 	public:

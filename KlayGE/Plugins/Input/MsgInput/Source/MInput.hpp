@@ -273,12 +273,12 @@ namespace uwp
 
 #include <array>
 
-namespace KlayGE
-{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	class Window;
+	#include <KlayGE/Window.hpp>
 #endif
 
+namespace KlayGE
+{
 	class MsgInputEngine final : public InputEngine
 	{
 	public:

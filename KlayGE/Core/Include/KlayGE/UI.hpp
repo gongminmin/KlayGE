@@ -29,17 +29,14 @@
 #include <memory>
 #include <string_view>
 
+#include <KlayGE/Font.hpp>
+#include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Texture.hpp>
+
 namespace KlayGE
 {
 	class Window;
-	class Font;
-	using FontPtr = std::shared_ptr<Font>;
-	class Renderable;
-	using RenderablePtr = std::shared_ptr<Renderable>;
-	class RenderEffect;
-	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
 	class UIDialog;
 	using UIDialogPtr = std::shared_ptr<UIDialog>;
 

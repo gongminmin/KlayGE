@@ -38,12 +38,10 @@
 
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Operators.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	enum TexCompressionMethod
 	{
 		TCM_Speed,

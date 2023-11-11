@@ -18,12 +18,10 @@
 #include <memory>
 
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/Camera.hpp>
 
 namespace KlayGE
 {
-	class Camera;
-	using CameraPtr = std::shared_ptr<Camera>;
-
 	class KLAYGE_CORE_API Viewport final
 	{
 		KLAYGE_NONCOPYABLE(Viewport);

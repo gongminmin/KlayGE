@@ -61,8 +61,10 @@
 #include <string>
 #include <vector>
 
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderDeviceCaps.hpp>
+#include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Noncopyable.hpp>
@@ -73,12 +75,10 @@ namespace KlayGE
 	class RenderEffectStructType;
 	class RenderEffect;
 	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
+	class RenderEffectConstantBuffer;
+	using RenderEffectConstantBufferPtr = std::shared_ptr<RenderEffectConstantBuffer>;
 	class RenderPass;
 	using RenderPassPtr = std::shared_ptr<RenderPass>;
-	class SamplerStateObject;
-	using SamplerStateObjectPtr = std::shared_ptr<SamplerStateObject>;
-	class UnorderedAccessView;
-	using UnorderedAccessViewPtr = std::shared_ptr<UnorderedAccessView>;
 
 	enum RenderEffectDataType
 	{

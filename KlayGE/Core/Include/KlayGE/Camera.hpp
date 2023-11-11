@@ -24,11 +24,12 @@
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
 namespace KlayGE
 {
+	class RenderEffectConstantBuffer;
+
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API Camera final : public SceneComponent, public std::enable_shared_from_this<Camera>

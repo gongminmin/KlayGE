@@ -39,15 +39,12 @@
 
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {
 	class RenderMaterial;
 	using RenderMaterialPtr = std::shared_ptr<RenderMaterial>;
-	class RenderEffectConstantBuffer;
-	using RenderEffectConstantBufferPtr = std::shared_ptr<RenderEffectConstantBuffer>;
-	class ShaderResourceView;
-	using ShaderResourceViewPtr = std::shared_ptr<ShaderResourceView>;
 
 	class KLAYGE_CORE_API RenderMaterial final
 	{

@@ -24,16 +24,13 @@
 #include <memory>
 #include <vector>
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/SceneComponent.hpp>
 
 namespace KlayGE
 {
-	class RenderEffect;
-	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
-	class RenderLayout;
-	using RenderLayoutPtr = std::shared_ptr<RenderLayout>;
-
 	enum PassCategory
 	{
 		PC_GBuffer = 0,

@@ -34,6 +34,11 @@
 #pragma once
 
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/PostProcess.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {

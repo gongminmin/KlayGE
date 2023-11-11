@@ -38,11 +38,11 @@
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 
+#include <KlayGE/Camera.hpp>
 #include <KlayGE/Signal.hpp>
 
 namespace KlayGE
 {
-	class Camera;
 	class Window;
 	using WindowPtr = std::shared_ptr<Window>;
 

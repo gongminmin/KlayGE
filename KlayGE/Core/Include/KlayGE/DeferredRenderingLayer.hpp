@@ -41,6 +41,7 @@
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 
 #define TRIDITIONAL_DEFERRED 0
 #define LIGHT_INDEXED_DEFERRED 1
@@ -48,9 +49,6 @@
 
 namespace KlayGE
 {
-	class RenderDecal;
-	using RenderDecalPtr = std::shared_ptr<RenderDecal>;
-
 	enum VPAttribMask
 	{
 		VPAM_Enabled = 1UL << 0,

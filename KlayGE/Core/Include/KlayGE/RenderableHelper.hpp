@@ -32,14 +32,12 @@
 
 #include <memory>
 
-#include <KlayGE/Renderable.hpp>
 #include <KFL/AABBox.hpp>
+#include <KlayGE/Renderable.hpp>
+#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	class KLAYGE_CORE_API RenderablePoint : public Renderable
 	{
 	public:

@@ -23,13 +23,11 @@
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class GraphicsBuffer;
-	using GraphicsBufferPtr = std::shared_ptr<GraphicsBuffer>;
-
 	class KLAYGE_CORE_API ShaderResourceView
 	{
 		KLAYGE_NONCOPYABLE(ShaderResourceView);

@@ -28,7 +28,6 @@
 
 #pragma once
 
-#include <vector>
 #include <boost/assert.hpp>
 
 namespace KlayGE

@@ -20,11 +20,10 @@
 #include <memory>
 #include <string>
 
+#include <KlayGE/Texture.hpp>
+
 namespace KlayGE
 {
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	enum ShowState
 	{
 		SS_Unkown,

@@ -40,12 +40,11 @@
 #include <tuple>
 #include <vector>
 
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/Light.hpp>
+
 namespace KlayGE
 {
-	class Camera;
-	using CameraPtr = std::shared_ptr<Camera>;
-	class LightSource;
-	using LightSourcePtr = std::shared_ptr<LightSource>;
 	class RenderModel;
 	using RenderModelPtr = std::shared_ptr<RenderModel>;
 	class StaticMesh;

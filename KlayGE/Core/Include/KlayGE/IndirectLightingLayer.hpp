@@ -37,14 +37,12 @@
 
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/MultiResLayer.hpp>
+#include <KlayGE/Renderable.hpp>
 
 #include <array>
 
 namespace KlayGE
 {
-	class Renderable;
-	using RenderablePtr = std::shared_ptr<Renderable>;
-
 	class KLAYGE_CORE_API IndirectLightingLayer
 	{
 		KLAYGE_NONCOPYABLE(IndirectLightingLayer);

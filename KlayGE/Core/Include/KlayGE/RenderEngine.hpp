@@ -83,24 +83,19 @@
 #include <string_view>
 #include <vector>
 
+#include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/PerfProfiler.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderMaterial.hpp>
+#include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderView.hpp>
+
 namespace KlayGE
 {
-	class PerfRegion;
-	class RenderEffectConstantBuffer;
-	class FrameBuffer;
-	using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
 	class PostProcess;
 	using PostProcessPtr = std::shared_ptr<PostProcess>;
-	class RenderMaterial;
-	using RenderMaterialPtr = std::shared_ptr<RenderMaterial>;
-	class RenderStateObject;
-	using RenderStateObjectPtr = std::shared_ptr<RenderStateObject>;
-	class RenderTargetView;
-	using RenderTargetViewPtr = std::shared_ptr<RenderTargetView>;
 	class SceneNode;
 	using SceneNodePtr = std::shared_ptr<SceneNode>;
-	class ShaderResourceView;
-	using ShaderResourceViewPtr = std::shared_ptr<ShaderResourceView>;
 
 	class KLAYGE_CORE_API RenderEngine
 	{

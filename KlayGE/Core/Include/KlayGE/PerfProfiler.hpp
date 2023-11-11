@@ -40,6 +40,8 @@
 #include <string>
 #include <tuple>
 
+#include <KlayGE/Query.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API PerfRegion final
