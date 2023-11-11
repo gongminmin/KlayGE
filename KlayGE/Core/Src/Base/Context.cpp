@@ -108,9 +108,7 @@ namespace KlayGE
 		gtp_instance_ = MakeUniquePtr<ThreadPool>(1, 16);
 	}
 
-	Context::~Context() noexcept = default;
-
-	void Context::DestroyAll()
+	Context::~Context() noexcept
 	{
 		scene_mgr_.reset();
 
@@ -148,14 +146,10 @@ namespace KlayGE
 		return *context_instance_;
 	}
 
-	void Context::Destroy()
+	void Context::Destroy() noexcept
 	{
 		std::lock_guard<std::mutex> lock(singleton_mutex);
-		if (context_instance_)
-		{
-			context_instance_->DestroyAll();
-			context_instance_.reset();
-		}
+		context_instance_.reset();
 	}
 
 	void Context::Suspend()
@@ -239,6 +233,18 @@ namespace KlayGE
 			audio_data_src_factory_->Resume();
 		}
 	}
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+	android_app* Context::AppState() const
+	{
+		return state_;
+	}
+
+	void Context::AppState(android_app* state)
+	{
+		state_ = state;
+	}
+#endif
 
 	void Context::LoadCfg(std::string const & cfg_file)
 	{
@@ -1152,6 +1158,28 @@ namespace KlayGE
 	}
 #endif
 
+	void Context::AppInstance(App3DFramework& app) noexcept
+	{
+		app_ = &app;
+	}
+
+	bool Context::AppValid() const noexcept
+	{
+		return app_ != nullptr;
+	}
+
+	App3DFramework& Context::AppInstance() noexcept
+	{
+		BOOST_ASSERT(app_);
+		KLAYGE_ASSUME(app_);
+		return *app_;
+	}
+
+	bool Context::SceneManagerValid() const noexcept
+	{
+		return scene_mgr_ != nullptr;
+	}
+
 	SceneManager& Context::SceneManagerInstance()
 	{
 		if (!scene_mgr_)
@@ -1163,6 +1191,11 @@ namespace KlayGE
 			}
 		}
 		return *scene_mgr_;
+	}
+
+	bool Context::RenderFactoryValid() const noexcept
+	{
+		return render_factory_ != nullptr;
 	}
 
 	RenderFactory& Context::RenderFactoryInstance()
@@ -1178,6 +1211,11 @@ namespace KlayGE
 		return *render_factory_;
 	}
 
+	bool Context::AudioFactoryValid() const noexcept
+	{
+		return audio_factory_ != nullptr;
+	}
+
 	AudioFactory& Context::AudioFactoryInstance()
 	{
 		if (!audio_factory_)
@@ -1189,6 +1227,11 @@ namespace KlayGE
 			}
 		}
 		return *audio_factory_;
+	}
+
+	bool Context::InputFactoryValid() const noexcept
+	{
+		return input_factory_ != nullptr;
 	}
 
 	InputFactory& Context::InputFactoryInstance()
@@ -1204,6 +1247,11 @@ namespace KlayGE
 		return *input_factory_;
 	}
 
+	bool Context::ShowFactoryValid() const noexcept
+	{
+		return show_factory_ != nullptr;
+	}
+
 	ShowFactory& Context::ShowFactoryInstance()
 	{
 		if (!show_factory_)
@@ -1215,6 +1263,11 @@ namespace KlayGE
 			}
 		}
 		return *show_factory_;
+	}
+
+	bool Context::ScriptFactoryValid() const noexcept
+	{
+		return script_factory_ != nullptr;
 	}
 
 	ScriptFactory& Context::ScriptFactoryInstance()
@@ -1230,6 +1283,11 @@ namespace KlayGE
 		return *script_factory_;
 	}
 
+	bool Context::AudioDataSourceFactoryValid() const noexcept
+	{
+		return audio_data_src_factory_ != nullptr;
+	}
+
 	AudioDataSourceFactory& Context::AudioDataSourceFactoryInstance()
 	{
 		if (!audio_data_src_factory_)
@@ -1243,7 +1301,22 @@ namespace KlayGE
 		return *audio_data_src_factory_;
 	}
 
+	bool Context::DeferredRenderingLayerValid() const noexcept
+	{
+		return deferred_rendering_layer_ != nullptr;
+	}
+
+	DeferredRenderingLayer& Context::DeferredRenderingLayerInstance()
+	{
+		return *deferred_rendering_layer_;
+	}
+
 #if KLAYGE_IS_DEV_PLATFORM
+	bool Context::DevHelperValid() const noexcept
+	{
+		return dev_helper_ != nullptr;
+	}
+
 	DevHelper& Context::DevHelperInstance()
 	{
 		if (!dev_helper_)
@@ -1257,4 +1330,9 @@ namespace KlayGE
 		return *dev_helper_;
 	}
 #endif
+
+	ThreadPool& Context::ThreadPoolInstance()
+	{
+		return *gtp_instance_;
+	}
 }

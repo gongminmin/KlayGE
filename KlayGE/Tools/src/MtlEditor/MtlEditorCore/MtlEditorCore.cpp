@@ -198,15 +198,17 @@ namespace KlayGE
 
 	void MtlEditorCore::OnCreate()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		Context& context = Context::Instance();
+		RenderFactory& rf = context.RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		font_ = SyncLoadFont("gkai00mp.kfont");
 
-		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+		BOOST_ASSERT(context.DeferredRenderingLayerValid());
+		deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 		deferred_rendering_->SSVOEnabled(0, false);
 
-		SceneNode& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+		SceneNode& root_node = context.SceneManagerInstance().SceneRootNode();
 
 		ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 		ambient_light_->Color(float3(0.1f, 0.1f, 0.1f));
@@ -219,8 +221,10 @@ namespace KlayGE
 		auto main_light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 		main_light_node->AddComponent(main_light_);
 		main_light_node->OnMainThreadUpdate().Connect(
-			[](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
-			{ node.TransformToParent(Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix()); });
+			[&context](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+			{
+				node.TransformToParent(context.AppInstance().ActiveCamera().InverseViewMatrix());
+			});
 		root_node.AddChild(main_light_node);
 
 		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderAxis>()),
@@ -232,7 +236,7 @@ namespace KlayGE
 		root_node.AddChild(grid_);
 
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-		if (Context::Instance().Config().graphics_cfg.gamma)
+		if (context.Config().graphics_cfg.gamma)
 		{
 			clear_clr.r() = 0.029f;
 			clear_clr.g() = 0.133f;

@@ -81,20 +81,13 @@ namespace KlayGE
 		~Context() noexcept;
 
 		static Context& Instance();
-		static void Destroy();
+		static void Destroy() noexcept;
 		void Suspend();
 		void Resume();
 		
 #ifdef KLAYGE_PLATFORM_ANDROID
-		android_app* AppState() const
-		{
-			return state_;
-		}
-
-		void AppState(android_app* state)
-		{
-			state_ = state;
-		}
+		android_app* AppState() const;
+		void AppState(android_app* state);
 #endif
 
 		void LoadCfg(std::string const & cfg_file);
@@ -115,83 +108,40 @@ namespace KlayGE
 		void LoadDevHelper();
 #endif
 
-		void AppInstance(App3DFramework& app)
-		{
-			app_ = &app;
-		}
-		bool AppValid() const
-		{
-			return app_ != nullptr;
-		}
-		App3DFramework& AppInstance()
-		{
-			BOOST_ASSERT(app_);
-			KLAYGE_ASSUME(app_);
-			return *app_;
-		}
+		void AppInstance(App3DFramework& app) noexcept;
+		bool AppValid() const noexcept;
+		App3DFramework& AppInstance() noexcept;
 
-		bool SceneManagerValid() const noexcept
-		{
-			return scene_mgr_ != nullptr;
-		}
+		bool SceneManagerValid() const noexcept;
 		SceneManager& SceneManagerInstance();
 
-		bool RenderFactoryValid() const noexcept
-		{
-			return render_factory_ != nullptr;
-		}
+		bool RenderFactoryValid() const noexcept;
 		RenderFactory& RenderFactoryInstance();
 
-		bool AudioFactoryValid() const noexcept
-		{
-			return audio_factory_ != nullptr;
-		}
+		bool AudioFactoryValid() const noexcept;
 		AudioFactory& AudioFactoryInstance();
 
-		bool InputFactoryValid() const noexcept
-		{
-			return input_factory_ != nullptr;
-		}
+		bool InputFactoryValid() const noexcept;
 		InputFactory& InputFactoryInstance();
 
-		bool ShowFactoryValid() const noexcept
-		{
-			return show_factory_ != nullptr;
-		}
+		bool ShowFactoryValid() const noexcept;
 		ShowFactory& ShowFactoryInstance();
 
-		bool ScriptFactoryValid() const noexcept
-		{
-			return script_factory_ != nullptr;
-		}
+		bool ScriptFactoryValid() const noexcept;
 		ScriptFactory& ScriptFactoryInstance();
 
-		bool AudioDataSourceFactoryValid() const noexcept
-		{
-			return audio_data_src_factory_ != nullptr;
-		}
+		bool AudioDataSourceFactoryValid() const noexcept;
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 
-		DeferredRenderingLayer* DeferredRenderingLayerInstance()
-		{
-			return deferred_rendering_layer_.get();
-		}
+		bool DeferredRenderingLayerValid() const noexcept;
+		DeferredRenderingLayer& DeferredRenderingLayerInstance();
 
 #if KLAYGE_IS_DEV_PLATFORM
-		bool DevHelperValid() const noexcept
-		{
-			return dev_helper_ != nullptr;
-		}
+		bool DevHelperValid() const noexcept;
 		DevHelper& DevHelperInstance();
 #endif
 
-		ThreadPool& ThreadPoolInstance()
-		{
-			return *gtp_instance_;
-		}
-
-	private:
-		void DestroyAll();
+		ThreadPool& ThreadPoolInstance();
 
 	private:
 		static std::unique_ptr<Context> context_instance_;
@@ -202,7 +152,7 @@ namespace KlayGE
 		android_app* state_;
 #endif
 
-		App3DFramework*		app_ = nullptr;
+		App3DFramework* app_ = nullptr;
 
 		std::unique_ptr<SceneManager> scene_mgr_;
 

@@ -302,7 +302,9 @@ void ScreenSpaceReflectionApp::OnCreate()
 	point_light_node->AddComponent(point_light);
 	root_node.AddChild(point_light_node);
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -317,7 +319,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	back_refl_camera_node->AddComponent(back_refl_fb_->Viewport()->Camera());
 	root_node.AddChild(back_refl_camera_node);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

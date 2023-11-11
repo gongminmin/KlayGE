@@ -87,7 +87,7 @@ namespace KlayGE
 		PerfProfiler();
 
 		static PerfProfiler& Instance();
-		static void Destroy();
+		static void Destroy() noexcept;
 
 		void Suspend();
 		void Resume();

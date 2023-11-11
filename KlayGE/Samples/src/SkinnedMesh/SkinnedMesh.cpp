@@ -66,26 +66,28 @@ void SkinnedMeshApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	auto& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 
 	this->LookAt(float3(-2, 2, -3), float3(0, 1.2f, 0));
 	this->Proj(0.1f, 20.0f);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.8f, 0.8f, 0.8f));
 	root_node.AddComponent(ambient_light);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 
 	scene_camera_ = re.DefaultFrameBuffer()->Viewport()->Camera();
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

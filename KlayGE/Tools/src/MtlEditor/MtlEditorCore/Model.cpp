@@ -84,10 +84,11 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 		effect_attrs_ |= EA_SpecialShading;
 	}
 
-	auto drl = Context::Instance().DeferredRenderingLayerInstance();
-	if (drl)
+	auto& context = Context::Instance();
+	if (context.DeferredRenderingLayerValid())
 	{
-		this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model_->IsSkinned()));
+		auto& drl = context.DeferredRenderingLayerInstance();
+		this->BindDeferredEffect(drl.GBufferEffect(mtl_.get(), false, model_->IsSkinned()));
 	}
 }
 

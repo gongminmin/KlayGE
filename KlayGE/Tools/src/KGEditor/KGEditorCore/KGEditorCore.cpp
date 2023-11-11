@@ -511,48 +511,50 @@ namespace KlayGE
 		this->LookAt(float3(5, 5, 5), float3(0, 1, 0));
 		this->Proj(0.01f, 100);
 
-		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+		Context& context = Context::Instance();
+		BOOST_ASSERT(context.DeferredRenderingLayerValid());
+		deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 
 		axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderAxis>()),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(axis_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(axis_);
 
 		grid_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderGrid>()),
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(grid_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(grid_);
 
 		auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
 		skybox_renderable->CompressedCubeMap(SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable),
 			SyncLoadTexture("default_bg_c.dds", EAH_GPU_Read | EAH_Immutable));
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 
 		auto line_box_renderable = MakeSharedPtr<RenderableLineBox>();
 		selected_bb_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(line_box_renderable),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		selected_bb_->Visible(false);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(selected_bb_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(selected_bb_);
 		line_box_renderable->SetColor(Color(1, 1, 1, 1));
 
 		translation_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderableTranslationAxis>()),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		translation_axis_->Visible(false);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(translation_axis_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(translation_axis_);
 
 		rotation_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderableRotationAxis>()),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		rotation_axis_->Visible(false);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(rotation_axis_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(rotation_axis_);
 
 		scaling_axis_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderableScalingAxis>()),
 			SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
 		scaling_axis_->Visible(false);
-		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(scaling_axis_);
+		context.SceneManagerInstance().SceneRootNode().AddChild(scaling_axis_);
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
 		tb_controller_.Scalers(0.01f, 0.05f);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderFactory& rf = context.RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 		system_camera_ = re.CurFrameBuffer()->Viewport()->Camera();
 		selective_fb_ = rf.MakeFrameBuffer();

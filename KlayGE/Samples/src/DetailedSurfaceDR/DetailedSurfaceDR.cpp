@@ -66,7 +66,9 @@ void DetailedSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
@@ -89,14 +91,14 @@ void DetailedSurfaceApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.01f, 0.001f);
 
-	auto& scene_mgr = Context::Instance().SceneManagerInstance();
+	auto& scene_mgr = context.SceneManagerInstance();
 	auto& root_node = scene_mgr.SceneRootNode();
 
-	auto& rf = Context::Instance().RenderFactoryInstance();
+	auto& rf = context.RenderFactoryInstance();
 	auto const& caps = rf.RenderEngineInstance().DeviceCaps();
 
 	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
+	if (context.Config().graphics_cfg.gamma)
 	{
 		clear_clr.r() = 0.029f;
 		clear_clr.g() = 0.133f;
@@ -138,7 +140,7 @@ void DetailedSurfaceApp::OnCreate()
 		root_node.AddChild(light_node);
 	}
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

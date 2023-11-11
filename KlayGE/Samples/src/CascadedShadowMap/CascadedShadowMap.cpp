@@ -93,7 +93,9 @@ void CascadedShadowMapApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
@@ -113,7 +115,7 @@ void CascadedShadowMapApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -166,7 +168,7 @@ void CascadedShadowMapApp::OnCreate()
 	skybox->CompressedCubeMap(y_cube, c_cube);
 	root_node.AddChild(MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	RenderDeviceCaps const & caps = context.RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < ShaderModel(5, 0))
 	{
 		dialog_->Control<UIComboBox>(id_csm_type_combo_)->SetSelectedByIndex(0);

@@ -117,8 +117,9 @@ namespace KlayGE
 
 		*mvp_wo_oblique_param_ = MathLib::transpose(pccb.Camera(*camera_cbuffer_, 0).mvp);
 
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl && (drl->ActiveViewport() == 0))
+		Context& context = Context::Instance();
+		auto& drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (context.DeferredRenderingLayerValid() && (drl.ActiveViewport() == 0))
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
@@ -131,10 +132,10 @@ namespace KlayGE
 
 			float4x4 mvp = model_mat_ * view * proj;
 
-			int32_t cas_index = drl->CurrCascadeIndex();
+			int32_t cas_index = drl.CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
-				mvp *= drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
+				mvp *= drl.GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 			}
 
 			pccb.Camera(*camera_cbuffer_, 0).mvp = MathLib::transpose(mvp);

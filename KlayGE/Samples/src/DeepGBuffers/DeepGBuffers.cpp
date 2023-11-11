@@ -150,10 +150,12 @@ void DeepGBuffersApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
@@ -190,7 +192,7 @@ void DeepGBuffersApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

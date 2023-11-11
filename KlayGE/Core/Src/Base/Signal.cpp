@@ -43,18 +43,17 @@ namespace KlayGE
 			SignalBase::SignalBase() noexcept = default;
 			SignalBase::~SignalBase() noexcept = default;
 
-			Mutex::Mutex() noexcept = default;
-			Mutex::~Mutex() noexcept = default;
-
-			class StdMutex : public Mutex
+			class Mutex::Impl
 			{
 			public:
-				void Lock() override
+				Impl() noexcept = default;
+
+				void Lock()
 				{
 					mutex_.lock();
 				}
 
-				void Unlock() override
+				void Unlock()
 				{
 					mutex_.unlock();
 				}
@@ -63,9 +62,21 @@ namespace KlayGE
 				std::mutex mutex_;
 			};
 
-			std::unique_ptr<Mutex> CreateMutex()
+			Mutex::Mutex() noexcept
+				: pimpl_(MakeUniquePtr<Mutex::Impl>())
 			{
-				return MakeUniquePtr<StdMutex>();
+			}
+
+			Mutex::~Mutex() noexcept = default;
+
+			void Mutex::Lock()
+			{
+				pimpl_->Lock();
+			}
+
+			void Mutex::Unlock()
+			{
+				pimpl_->Unlock();
 			}
 		}
 

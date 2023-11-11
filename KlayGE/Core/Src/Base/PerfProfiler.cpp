@@ -110,7 +110,7 @@ namespace KlayGE
 		return *perf_profiler_instance_;
 	}
 
-	void PerfProfiler::Destroy()
+	void PerfProfiler::Destroy() noexcept
 	{
 		std::lock_guard<std::mutex> lock(singleton_mutex);
 		perf_profiler_instance_.reset();

@@ -38,16 +38,12 @@
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {
-	class RenderTechnique;
-	class RenderEffectParameter;
-	class RenderEffect;
-	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
-
 	class KLAYGE_CORE_API Blitter final
 	{
 		KLAYGE_NONCOPYABLE(Blitter);

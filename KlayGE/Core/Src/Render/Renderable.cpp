@@ -44,10 +44,11 @@ namespace KlayGE
 	Renderable::Renderable(std::wstring_view name)
 		: name_(name), rls_(1)
 	{
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		Context& context = Context::Instance();
+		if (context.DeferredRenderingLayerValid())
 		{
-			this->BindDeferredEffect(drl->GBufferEffect(nullptr, false, false));
+			auto& drl = context.DeferredRenderingLayerInstance();
+			this->BindDeferredEffect(drl.GBufferEffect(nullptr, false, false));
 		}
 
 		if (Context::Instance().RenderFactoryValid())
@@ -113,7 +114,8 @@ namespace KlayGE
 	void Renderable::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto* drl = Context::Instance().DeferredRenderingLayerInstance();
+		const bool drl_valid = Context::Instance().DeferredRenderingLayerValid();
+		auto& drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		{
 			uint32_t const mesh_cbuff_index = effect_->FindCBuffer("klayge_mesh");
@@ -150,12 +152,12 @@ namespace KlayGE
 
 						float4x4 cascade_crop_mat = float4x4::Identity();
 						bool need_cascade_crop_mat = false;
-						if (drl)
+						if (drl_valid)
 						{
-							int32_t const cas_index = drl->CurrCascadeIndex();
+							int32_t const cas_index = drl.CurrCascadeIndex();
 							if (cas_index >= 0)
 							{
-								cascade_crop_mat = drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
+								cascade_crop_mat = drl.GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 								need_cascade_crop_mat = true;
 							}
 						}
@@ -206,13 +208,13 @@ namespace KlayGE
 			auto const& mtl = mtl_ ? mtl_ : re.DefaultMaterial();
 			mtl->Active(*effect_);
 
-			if (drl)
+			if (drl_valid)
 			{
 				FrameBufferPtr const & fb = re.CurFrameBuffer();
 				*frame_size_param_ = int2(fb->Width(), fb->Height());
 
-				*half_exposure_x_framerate_param_ = drl->MotionBlurExposure() / 2 / Context::Instance().AppInstance().FrameTime();
-				*motion_blur_radius_param_ = static_cast<float>(drl->MotionBlurRadius());
+				*half_exposure_x_framerate_param_ = drl.MotionBlurExposure() / 2 / Context::Instance().AppInstance().FrameTime();
+				*motion_blur_radius_param_ = static_cast<float>(drl.MotionBlurRadius());
 
 				switch (type_)
 				{
@@ -220,7 +222,7 @@ namespace KlayGE
 				case PT_TransparencyBackGBuffer:
 				case PT_TransparencyFrontGBuffer:
 				case PT_GenReflectiveShadowMap:
-					*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
+					*opaque_depth_tex_param_ = drl.ResolvedDepthTex(drl.ActiveViewport());
 					break;
 
 				case PT_OpaqueSpecialShading:
@@ -228,7 +230,7 @@ namespace KlayGE
 				case PT_TransparencyFrontSpecialShading:
 					if (reflection_tex_param_)
 					{
-						*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
+						*reflection_tex_param_ = drl.ReflectionTex(drl.ActiveViewport());
 					}
 					break;
 
@@ -498,10 +500,11 @@ namespace KlayGE
 			effect_attrs_ |= EA_SpecialShading;
 		}
 
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
-		if (drl)
+		auto& context = Context::Instance();
+		if (context.DeferredRenderingLayerValid())
 		{
-			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, is_skinned_));
+			auto& drl = context.DeferredRenderingLayerInstance();
+			this->BindDeferredEffect(drl.GBufferEffect(mtl_.get(), false, is_skinned_));
 		}
 	}
 

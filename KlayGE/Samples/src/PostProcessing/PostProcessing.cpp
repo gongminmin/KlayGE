@@ -96,18 +96,20 @@ void PostProcessingApp::OnCreate()
 			AddToSceneRootHelper(model);
 		});
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	Context& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 	re.HDREnabled(false);
 	re.PPAAEnabled(0);
 	re.ColorGradingEnabled(false);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
@@ -126,7 +128,7 @@ void PostProcessingApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 0.1f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

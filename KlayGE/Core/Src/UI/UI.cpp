@@ -303,8 +303,9 @@ namespace KlayGE
 		return *ui_mgr_instance_;
 	}
 
-	void UIManager::Destroy()
+	void UIManager::Destroy() noexcept
 	{
+		std::lock_guard<std::mutex> lock(singleton_mutex);
 		ui_mgr_instance_.reset();
 	}
 

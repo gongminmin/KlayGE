@@ -33,13 +33,12 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/MultiResLayer.hpp>
 #include <KlayGE/Renderable.hpp>
-
-#include <array>
 
 namespace KlayGE
 {

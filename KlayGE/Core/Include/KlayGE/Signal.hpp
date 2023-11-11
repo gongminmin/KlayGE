@@ -92,13 +92,15 @@ namespace KlayGE
 
 			public:
 				Mutex() noexcept;
-				virtual ~Mutex() noexcept;
+				~Mutex() noexcept;
 
-				virtual void Lock() = 0;
-				virtual void Unlock() = 0;
+				void Lock();
+				void Unlock();
+
+			private:
+				class Impl;
+				std::unique_ptr<Impl> pimpl_;
 			};
-
-			KLAYGE_CORE_API std::unique_ptr<Mutex> CreateMutex();
 
 			class KLAYGE_CORE_API SignalBase
 			{
@@ -151,8 +153,8 @@ namespace KlayGE
 			public:
 				Connection Connect(CallbackFunction const& cb)
 				{
-					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
-					mutex_->Lock();
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_.Unlock(); });
+					mutex_.Lock();
 
 					slots_.emplace_back(MakeSharedPtr<CallbackFunction>(cb));
 					return Connection(*this, std::static_pointer_cast<void>(slots_.back()));
@@ -160,8 +162,8 @@ namespace KlayGE
 
 				void Disconnect(Connection const& connection)
 				{
-					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
-					mutex_->Lock();
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_.Unlock(); });
+					mutex_.Lock();
 
 					BOOST_ASSERT(&connection.Signal() == this);
 					this->Disconnect(connection.Slot());
@@ -169,8 +171,8 @@ namespace KlayGE
 
 				CombinerResultType operator()(Args... args) const
 				{
-					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
-					mutex_->Lock();
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_.Unlock(); });
+					mutex_.Lock();
 
 					Combiner combiner;
 					for (auto const& slot : slots_)
@@ -188,16 +190,16 @@ namespace KlayGE
 
 				size_t Size() const
 				{
-					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
-					mutex_->Lock();
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_.Unlock(); });
+					mutex_.Lock();
 
 					return slots_.size();
 				}
 
 				bool Empty() const
 				{
-					auto on_exit = nonstd::make_scope_exit([this] { mutex_->Unlock(); });
-					mutex_->Lock();
+					auto on_exit = nonstd::make_scope_exit([this] { mutex_.Unlock(); });
+					mutex_.Lock();
 
 					return slots_.empty();
 				}
@@ -205,11 +207,11 @@ namespace KlayGE
 				void Swap(SignalTemplateBase& rhs)
 				{
 					auto on_exit = nonstd::make_scope_exit([this, rhs] {
-						rhs.mutex_->Unlock();
-						mutex_->Unlock();
+						rhs.mutex_.Unlock();
+						mutex_.Unlock();
 					});
-					mutex_->Lock();
-					rhs.mutex_->Lock();
+					mutex_.Lock();
+					rhs.mutex_.Lock();
 
 					std::swap(slots_, rhs.slots_);
 				}
@@ -225,7 +227,7 @@ namespace KlayGE
 
 			private:
 				std::vector<std::shared_ptr<CallbackFunction>> slots_;
-				std::unique_ptr<Mutex> mutex_ = CreateMutex();
+				mutable Mutex mutex_;
 			};
 		} // namespace Detail
 

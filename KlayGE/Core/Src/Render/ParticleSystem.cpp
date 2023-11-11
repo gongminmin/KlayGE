@@ -497,7 +497,8 @@ namespace
 
 		void OnRenderBegin()
 		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			Context& context = Context::Instance();
+			Camera const & camera = context.AppInstance().ActiveCamera();
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
@@ -510,10 +511,10 @@ namespace
 			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));
 			*(effect_->ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
 
-			auto drl = Context::Instance().DeferredRenderingLayerInstance();
-			if (drl)
+			if (context.DeferredRenderingLayerValid())
 			{
-				*(effect_->ParameterByName("depth_tex")) = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+				auto& drl = context.DeferredRenderingLayerInstance();
+				*(effect_->ParameterByName("depth_tex")) = drl.CurrFrameResolvedDepthTex(drl.ActiveViewport());
 			}
 		}
 

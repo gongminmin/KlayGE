@@ -47,10 +47,11 @@ namespace KlayGE
 	RenderableSkyBox::RenderableSkyBox()
 		: Renderable(L"SkyBox")
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		RenderFactory& rf = context.RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
-		if (Context::Instance().DeferredRenderingLayerInstance())
+		if (context.DeferredRenderingLayerValid())
 		{
 			effect_attrs_ |= EA_SpecialShading;
 

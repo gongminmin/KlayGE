@@ -240,8 +240,9 @@ namespace KlayGE
 		return *res_loader_instance_;
 	}
 
-	void ResLoader::Destroy()
+	void ResLoader::Destroy() noexcept
 	{
+		std::lock_guard<std::mutex> lock(singleton_mutex);
 		res_loader_instance_.reset();
 	}
 

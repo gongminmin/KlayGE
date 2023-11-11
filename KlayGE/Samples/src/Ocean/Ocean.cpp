@@ -138,22 +138,24 @@ namespace
 		{
 			InfTerrainRenderable::OnRenderBegin();
 
-			auto drl = Context::Instance().DeferredRenderingLayerInstance();
+			Context& context = Context::Instance();
+			BOOST_ASSERT(context.DeferredRenderingLayerValid());
+			auto& drl = Context::Instance().DeferredRenderingLayerInstance();
 
 			switch (type_)
 			{
 			case PT_OpaqueGBuffer:
 			case PT_TransparencyBackGBuffer:
 			case PT_TransparencyFrontGBuffer:
-				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+				*opaque_depth_tex_param_ = drl.CurrFrameResolvedDepthTex(drl.ActiveViewport());
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl.GBufferResolvedRT0Tex(drl.ActiveViewport());
 				{
-					App3DFramework const & app = Context::Instance().AppInstance();
+					App3DFramework const & app = context.AppInstance();
 					Camera const & camera = app.ActiveCamera();
 					*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
 					*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
@@ -165,17 +167,17 @@ namespace
 					*(effect_->ParameterByName("view")) = camera.ViewMatrix();
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
-				*(effect_->ParameterByName("front_side_depth_tex")) = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
-				*(effect_->ParameterByName("front_side_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("front_side_depth_tex")) = drl.CurrFrameResolvedDepthTex(drl.ActiveViewport());
+				*(effect_->ParameterByName("front_side_tex")) = drl.CurrFrameResolvedShadingTex(drl.ActiveViewport());
 				break;
 
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
-				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("opaque_shading_tex")) = drl.CurrFrameResolvedShadingTex(drl.ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl.GBufferResolvedRT0Tex(drl.ActiveViewport());
 				{
-					App3DFramework const & app = Context::Instance().AppInstance();
+					App3DFramework const & app = context.AppInstance();
 					Camera const & camera = app.ActiveCamera();
 					float4 const near_q_far = camera.NearQFarParam();
 					*(effect_->ParameterByName("near_q_far")) = float3(near_q_far.x(), near_q_far.y(), near_q_far.z());
@@ -767,10 +769,12 @@ void OceanApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(1, false);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	auto sun_light_node = MakeSharedPtr<SceneNode>(0);
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
@@ -784,7 +788,7 @@ void OceanApp::OnCreate()
 	root_node.AddChild(sun_light_node);
 	
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
+	if (context.Config().graphics_cfg.gamma)
 	{
 		fog_color.r() = MathLib::srgb_to_linear(fog_color.r());
 		fog_color.g() = MathLib::srgb_to_linear(fog_color.g());
@@ -827,7 +831,7 @@ void OceanApp::OnCreate()
 	light_shaft_pp_->SetParam(1, sun_light_->Color());
 
 	Camera& scene_camera = this->ActiveCamera();
-	reflection_fb_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	reflection_fb_ = context.RenderFactoryInstance().MakeFrameBuffer();
 	reflection_fb_->Viewport()->Camera()->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 		scene_camera.NearPlane(), scene_camera.FarPlane());
 
@@ -838,7 +842,7 @@ void OceanApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

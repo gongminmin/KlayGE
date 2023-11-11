@@ -88,7 +88,7 @@ namespace KlayGE
 		~ResLoader();
 
 		static ResLoader& Instance();
-		static void Destroy();
+		static void Destroy() noexcept;
 
 		void Suspend();
 		void Resume();

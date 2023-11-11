@@ -111,10 +111,11 @@ namespace KlayGE
 
 	void InfTerrainRenderable::OnRenderBegin()
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Context& context = Context::Instance();
+		RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 		Camera const& camera = *re.DefaultFrameBuffer()->Viewport()->Camera();
 
-		if (Context::Instance().DeferredRenderingLayerInstance())
+		if (context.DeferredRenderingLayerValid())
 		{
 			Renderable::OnRenderBegin();
 		}

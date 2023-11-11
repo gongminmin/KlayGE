@@ -529,15 +529,17 @@ namespace KlayGE
 	{
 		Renderable::OnRenderBegin();
 
-		auto drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto& context = Context::Instance();
+		BOOST_ASSERT(context.DeferredRenderingLayerValid());
+		auto& drl = context.DeferredRenderingLayerInstance();
 
 		switch (type_)
 		{
 		case PT_OpaqueGBuffer:
 		case PT_TransparencyBackGBuffer:
 		case PT_TransparencyFrontGBuffer:
-			*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
-			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
+			*opaque_depth_tex_param_ = drl.ResolvedDepthTex(drl.ActiveViewport());
+			*g_buffer_rt0_tex_param_ = drl.GBufferRT0BackupTex(drl.ActiveViewport());
 			break;
 
 		default:

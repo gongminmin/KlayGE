@@ -371,18 +371,19 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
-		deferred_mode_ = !!Context::Instance().DeferredRenderingLayerInstance();
+		auto& context = Context::Instance();
+		deferred_mode_ = context.DeferredRenderingLayerValid();
 
-		App3DFramework& app = Context::Instance().AppInstance();
+		App3DFramework& app = context.AppInstance();
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
 
 		if (!update_thread_ && !quit_)
 		{
-			update_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->UpdateThreadFunc(); });
+			update_thread_ = context.ThreadPoolInstance().QueueThread([this] { this->UpdateThreadFunc(); });
 		}
 
 		{
@@ -417,7 +418,7 @@ namespace KlayGE
 		FrameBuffer& fb = *re.ScreenFrameBuffer();
 		fb.SwapBuffers();
 
-		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
+		InputEngine& ie = context.InputFactoryInstance().InputEngineInstance();
 		ie.Update();
 
 		frame_cameras_.clear();
@@ -517,13 +518,15 @@ namespace KlayGE
 				{
 					camera_view_projs_[i] = viewport.Camera(i)->ViewProjMatrix();
 				}
-				auto drl = Context::Instance().DeferredRenderingLayerInstance();
-				if (drl)
+				
+				auto& context = Context::Instance();
+				if (context.DeferredRenderingLayerValid())
 				{
-					int32_t cas_index = drl->CurrCascadeIndex();
+					auto& drl = context.DeferredRenderingLayerInstance();
+					int32_t cas_index = drl.CurrCascadeIndex();
 					if (cas_index >= 0)
 					{
-						float4x4 const& ccm = drl->GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
+						float4x4 const& ccm = drl.GetCascadedShadowLayer().CascadeCropMatrix(cas_index);
 						for (uint32_t i = 0; i < viewport.NumCameras(); ++i)
 						{
 							camera_view_projs_[i] *= ccm;

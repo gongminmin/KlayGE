@@ -94,10 +94,12 @@ void FoliageApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	Context& context = Context::Instance();
+	BOOST_ASSERT(context.DeferredRenderingLayerValid());
+	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	auto ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
@@ -115,7 +117,7 @@ void FoliageApp::OnCreate()
 	root_node.AddChild(sun_light_node);
 
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
+	if (context.Config().graphics_cfg.gamma)
 	{
 		fog_color.r() = MathLib::srgb_to_linear(fog_color.r());
 		fog_color.g() = MathLib::srgb_to_linear(fog_color.g());
@@ -152,7 +154,7 @@ void FoliageApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 

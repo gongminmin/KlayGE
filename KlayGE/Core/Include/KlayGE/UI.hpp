@@ -386,7 +386,7 @@ namespace KlayGE
 		~UIManager() noexcept;
 
 		static UIManager& Instance();
-		static void Destroy();
+		static void Destroy() noexcept;
 
 		void Suspend();
 		void Resume();
