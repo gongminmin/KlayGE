@@ -373,4 +373,47 @@ namespace KlayGE
 			camera_cbuffer.Dirty(true);
 		}
 	}
+
+
+	PredefinedCameraCBuffer::PredefinedCameraCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_camera");
+
+		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
+		camera_indices_offset_ = effect_->ParameterByName("camera_indices")->CBufferOffset();
+		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
+		prev_mvps_offset_ = effect_->ParameterByName("prev_mvps")->CBufferOffset();
+
+		this->NumCameras(*predefined_cbuffer_) = 1;
+
+		this->CameraIndices(*predefined_cbuffer_, 0) = 0;
+
+		CameraInfo empty = {};
+		this->Camera(*predefined_cbuffer_, 0) = empty;
+
+		this->PrevMvp(*predefined_cbuffer_, 0) = float4x4::Identity();
+	}
+
+	uint32_t& PredefinedCameraCBuffer::NumCameras(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<uint32_t>(num_cameras_offset_);
+	}
+
+	uint32_t& PredefinedCameraCBuffer::CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<uint32_t>(camera_indices_offset_) + index);
+	}
+
+	PredefinedCameraCBuffer::CameraInfo& PredefinedCameraCBuffer::Camera(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<CameraInfo>(cameras_offset_) + index);
+	}
+
+	float4x4& PredefinedCameraCBuffer::PrevMvp(
+		RenderEffectConstantBuffer& cbuff, uint32_t index) const
+	{
+		return *(cbuff.template VariableInBuff<float4x4>(prev_mvps_offset_) + index);
+	}
 }

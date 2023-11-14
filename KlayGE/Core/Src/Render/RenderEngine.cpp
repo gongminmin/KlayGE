@@ -1492,7 +1492,7 @@ namespace KlayGE
 		return default_material_;
 	}
 
-	RenderEngine::PredefinedMaterialCBuffer const& RenderEngine::PredefinedMaterialCBufferInstance() const
+	PredefinedMaterialCBuffer const& RenderEngine::PredefinedMaterialCBufferInstance() const
 	{
 		if (!predefined_material_cb_)
 		{
@@ -1505,7 +1505,7 @@ namespace KlayGE
 		return *predefined_material_cb_;
 	}
 
-	RenderEngine::PredefinedMeshCBuffer const& RenderEngine::PredefinedMeshCBufferInstance() const
+	PredefinedMeshCBuffer const& RenderEngine::PredefinedMeshCBufferInstance() const
 	{
 		if (!predefined_mesh_cb_)
 		{
@@ -1518,7 +1518,7 @@ namespace KlayGE
 		return *predefined_mesh_cb_;
 	}
 
-	RenderEngine::PredefinedModelCBuffer const& RenderEngine::PredefinedModelCBufferInstance() const
+	PredefinedModelCBuffer const& RenderEngine::PredefinedModelCBufferInstance() const
 	{
 		if (!predefined_model_cb_)
 		{
@@ -1531,7 +1531,7 @@ namespace KlayGE
 		return *predefined_model_cb_;
 	}
 
-	RenderEngine::PredefinedCameraCBuffer const& RenderEngine::PredefinedCameraCBufferInstance() const
+	PredefinedCameraCBuffer const& RenderEngine::PredefinedCameraCBufferInstance() const
 	{
 		if (!predefined_camera_cb_)
 		{
@@ -1555,208 +1555,5 @@ namespace KlayGE
 			}
 		}
 		return *mipmapper_;
-	}
-
-
-	RenderEngine::PredefinedMaterialCBuffer::PredefinedMaterialCBuffer()
-	{
-		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
-		predefined_cbuffer_ = effect_->CBufferByName("klayge_material");
-
-		albedo_clr_offset_ = effect_->ParameterByName("albedo_clr")->CBufferOffset();
-		metalness_glossiness_factor_offset_ = effect_->ParameterByName("metalness_glossiness_factor")->CBufferOffset();
-		emissive_clr_offset_ = effect_->ParameterByName("emissive_clr")->CBufferOffset();
-		albedo_map_enabled_offset_ = effect_->ParameterByName("albedo_map_enabled")->CBufferOffset();
-		normal_map_enabled_offset_ = effect_->ParameterByName("normal_map_enabled")->CBufferOffset();
-		height_map_parallax_enabled_offset_ = effect_->ParameterByName("height_map_parallax_enabled")->CBufferOffset();
-		height_map_tess_enabled_offset_ = effect_->ParameterByName("height_map_tess_enabled")->CBufferOffset();
-		occlusion_map_enabled_offset_ = effect_->ParameterByName("occlusion_map_enabled")->CBufferOffset();
-		alpha_test_threshold_offset_ = effect_->ParameterByName("alpha_test_threshold")->CBufferOffset();
-		normal_scale_offset_ = effect_->ParameterByName("normal_scale")->CBufferOffset();
-		occlusion_strength_offset_ = effect_->ParameterByName("occlusion_strength")->CBufferOffset();
-		height_offset_scale_offset_ = effect_->ParameterByName("height_offset_scale")->CBufferOffset();
-		tess_factors_offset_ = effect_->ParameterByName("tess_factors")->CBufferOffset();
-
-		this->AlbedoClr(*predefined_cbuffer_) = float4(0, 0, 0, 1);
-		this->MetalnessGlossinessFactor(*predefined_cbuffer_) = float3(0, 0, 0);
-		this->EmissiveClr(*predefined_cbuffer_) = float4(0, 0, 0, 0);
-		this->AlbedoMapEnabled(*predefined_cbuffer_) = 0;
-		this->NormalMapEnabled(*predefined_cbuffer_) = 0;
-		this->HeightMapParallaxEnabled(*predefined_cbuffer_) = 0;
-		this->HeightMapTessEnabled(*predefined_cbuffer_) = 0;
-		this->OcclusionMapEnabled(*predefined_cbuffer_) = 0;
-		this->AlphaTestThreshold(*predefined_cbuffer_) = 0;
-		this->NormalScale(*predefined_cbuffer_) = 1;
-		this->OcclusionStrength(*predefined_cbuffer_) = 1;
-		this->HeightOffsetScale(*predefined_cbuffer_) = float2(-0.5f, 0.06f);
-		this->TessFactors(*predefined_cbuffer_) = float4(5, 5, 1, 9);
-	}
-
-	float4& RenderEngine::PredefinedMaterialCBuffer::AlbedoClr(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4>(albedo_clr_offset_);
-	}
-
-	float3& RenderEngine::PredefinedMaterialCBuffer::MetalnessGlossinessFactor(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float3>(metalness_glossiness_factor_offset_);
-	}
-	
-	float4& RenderEngine::PredefinedMaterialCBuffer::EmissiveClr(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4>(emissive_clr_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::AlbedoMapEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(albedo_map_enabled_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::NormalMapEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(normal_map_enabled_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapParallaxEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(height_map_parallax_enabled_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::HeightMapTessEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(height_map_tess_enabled_offset_);
-	}
-
-	int32_t& RenderEngine::PredefinedMaterialCBuffer::OcclusionMapEnabled(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<int32_t>(occlusion_map_enabled_offset_);
-	}
-
-	float& RenderEngine::PredefinedMaterialCBuffer::AlphaTestThreshold(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float>(alpha_test_threshold_offset_);
-	}
-
-	float& RenderEngine::PredefinedMaterialCBuffer::NormalScale(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float>(normal_scale_offset_);
-	}
-
-	float& RenderEngine::PredefinedMaterialCBuffer::OcclusionStrength(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float>(occlusion_strength_offset_);
-	}
-
-	float2& RenderEngine::PredefinedMaterialCBuffer::HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float2>(height_offset_scale_offset_);
-	}
-
-	float4& RenderEngine::PredefinedMaterialCBuffer::TessFactors(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4>(tess_factors_offset_);
-	}
-
-
-	RenderEngine::PredefinedMeshCBuffer::PredefinedMeshCBuffer()
-	{
-		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
-		predefined_cbuffer_ = effect_->CBufferByName("klayge_mesh");
-
-		pos_center_offset_ = effect_->ParameterByName("pos_center")->CBufferOffset();
-		pos_extent_offset_ = effect_->ParameterByName("pos_extent")->CBufferOffset();
-		tc_center_offset_ = effect_->ParameterByName("tc_center")->CBufferOffset();
-		tc_extent_offset_ = effect_->ParameterByName("tc_extent")->CBufferOffset();
-
-		this->PosCenter(*predefined_cbuffer_) = float3(0, 0, 0);
-		this->PosExtent(*predefined_cbuffer_) = float3(1, 1, 1);
-		this->TcCenter(*predefined_cbuffer_) = float2(0.5f, 0.5f);
-		this->TcExtent(*predefined_cbuffer_) = float2(0.5f, 0.5f);
-	}
-
-	float3& RenderEngine::PredefinedMeshCBuffer::PosCenter(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float3>(pos_center_offset_);
-	}
-
-	float3& RenderEngine::PredefinedMeshCBuffer::PosExtent(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float3>(pos_extent_offset_);
-	}
-
-	float2& RenderEngine::PredefinedMeshCBuffer::TcCenter(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float2>(tc_center_offset_);
-	}
-
-	float2& RenderEngine::PredefinedMeshCBuffer::TcExtent(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float2>(tc_extent_offset_);
-	}
-
-
-	RenderEngine::PredefinedModelCBuffer::PredefinedModelCBuffer()
-	{
-		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
-		predefined_cbuffer_ = effect_->CBufferByName("klayge_model");
-
-		model_offset_ = effect_->ParameterByName("model")->CBufferOffset();
-		inv_model_offset_ = effect_->ParameterByName("inv_model")->CBufferOffset();
-
-		this->Model(*predefined_cbuffer_) = float4x4::Identity();
-		this->InvModel(*predefined_cbuffer_) = float4x4::Identity();
-	}
-
-	float4x4& RenderEngine::PredefinedModelCBuffer::Model(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4x4>(model_offset_);
-	}
-
-	float4x4& RenderEngine::PredefinedModelCBuffer::InvModel(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<float4x4>(inv_model_offset_);
-	}
-
-
-	RenderEngine::PredefinedCameraCBuffer::PredefinedCameraCBuffer()
-	{
-		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
-		predefined_cbuffer_ = effect_->CBufferByName("klayge_camera");
-
-		num_cameras_offset_ = effect_->ParameterByName("num_cameras")->CBufferOffset();
-		camera_indices_offset_ = effect_->ParameterByName("camera_indices")->CBufferOffset();
-		cameras_offset_ = effect_->ParameterByName("cameras")->CBufferOffset();
-		prev_mvps_offset_ = effect_->ParameterByName("prev_mvps")->CBufferOffset();
-
-		this->NumCameras(*predefined_cbuffer_) = 1;
-
-		this->CameraIndices(*predefined_cbuffer_, 0) = 0;
-
-		CameraInfo empty = {};
-		this->Camera(*predefined_cbuffer_, 0) = empty;
-
-		this->PrevMvp(*predefined_cbuffer_, 0) = float4x4::Identity();
-	}
-
-	uint32_t& RenderEngine::PredefinedCameraCBuffer::NumCameras(RenderEffectConstantBuffer& cbuff) const
-	{
-		return *cbuff.template VariableInBuff<uint32_t>(num_cameras_offset_);
-	}
-
-	uint32_t& RenderEngine::PredefinedCameraCBuffer::CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const
-	{
-		return *(cbuff.template VariableInBuff<uint32_t>(camera_indices_offset_) + index);
-	}
-
-	RenderEngine::PredefinedCameraCBuffer::CameraInfo& RenderEngine::PredefinedCameraCBuffer::Camera(
-		RenderEffectConstantBuffer& cbuff, uint32_t index) const
-	{
-		return *(cbuff.template VariableInBuff<CameraInfo>(cameras_offset_) + index);
-	}
-
-	float4x4& RenderEngine::PredefinedCameraCBuffer::PrevMvp(
-		RenderEffectConstantBuffer& cbuff, uint32_t index) const
-	{
-		return *(cbuff.template VariableInBuff<float4x4>(prev_mvps_offset_) + index);
 	}
 }

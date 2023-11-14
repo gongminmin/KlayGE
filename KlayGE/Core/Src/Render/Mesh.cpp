@@ -2490,4 +2490,64 @@ namespace KlayGE
 
 		return camera_model;
 	}
+
+
+	PredefinedMeshCBuffer::PredefinedMeshCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_mesh");
+
+		pos_center_offset_ = effect_->ParameterByName("pos_center")->CBufferOffset();
+		pos_extent_offset_ = effect_->ParameterByName("pos_extent")->CBufferOffset();
+		tc_center_offset_ = effect_->ParameterByName("tc_center")->CBufferOffset();
+		tc_extent_offset_ = effect_->ParameterByName("tc_extent")->CBufferOffset();
+
+		this->PosCenter(*predefined_cbuffer_) = float3(0, 0, 0);
+		this->PosExtent(*predefined_cbuffer_) = float3(1, 1, 1);
+		this->TcCenter(*predefined_cbuffer_) = float2(0.5f, 0.5f);
+		this->TcExtent(*predefined_cbuffer_) = float2(0.5f, 0.5f);
+	}
+
+	float3& PredefinedMeshCBuffer::PosCenter(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float3>(pos_center_offset_);
+	}
+
+	float3& PredefinedMeshCBuffer::PosExtent(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float3>(pos_extent_offset_);
+	}
+
+	float2& PredefinedMeshCBuffer::TcCenter(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float2>(tc_center_offset_);
+	}
+
+	float2& PredefinedMeshCBuffer::TcExtent(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float2>(tc_extent_offset_);
+	}
+
+
+	PredefinedModelCBuffer::PredefinedModelCBuffer()
+	{
+		effect_ = SyncLoadRenderEffect("PredefinedCBuffers.fxml");
+		predefined_cbuffer_ = effect_->CBufferByName("klayge_model");
+
+		model_offset_ = effect_->ParameterByName("model")->CBufferOffset();
+		inv_model_offset_ = effect_->ParameterByName("inv_model")->CBufferOffset();
+
+		this->Model(*predefined_cbuffer_) = float4x4::Identity();
+		this->InvModel(*predefined_cbuffer_) = float4x4::Identity();
+	}
+
+	float4x4& PredefinedModelCBuffer::Model(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4x4>(model_offset_);
+	}
+
+	float4x4& PredefinedModelCBuffer::InvModel(RenderEffectConstantBuffer& cbuff) const
+	{
+		return *cbuff.template VariableInBuff<float4x4>(inv_model_offset_);
+	}
 } // namespace KlayGE

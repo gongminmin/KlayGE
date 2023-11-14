@@ -126,7 +126,7 @@ namespace KlayGE
 		SceneNode scene_root_;
 		SceneNode overlay_root_;
 
-		std::unordered_map<size_t, std::unique_ptr<std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras>[]>>
+		std::unordered_map<size_t, std::unique_ptr<std::array<BoundOverlap, PredefinedCameraCBuffer::max_num_cameras>[]>>
 			visible_marks_map_;
 
 		float small_obj_threshold_;

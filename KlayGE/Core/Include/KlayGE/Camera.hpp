@@ -29,6 +29,8 @@
 namespace KlayGE
 {
 	class RenderEffectConstantBuffer;
+	class RenderEffect;
+	using RenderEffectPtr = std::shared_ptr<RenderEffect>;
 
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +127,50 @@ namespace KlayGE
 	};
 
 	using CameraPtr = std::shared_ptr<Camera>;
+
+
+	class KLAYGE_CORE_API PredefinedCameraCBuffer
+	{
+	public:
+		static constexpr uint32_t max_num_cameras = 8;
+
+		struct CameraInfo
+		{
+			alignas(16) float4x4 model_view;
+			alignas(16) float4x4 mvp;
+			alignas(16) float4x4 inv_mv;
+			alignas(16) float4x4 inv_mvp;
+			alignas(16) float3 eye_pos;
+			alignas(4) float padding0;
+			alignas(16) float3 forward_vec;
+			alignas(4) float padding1;
+			alignas(16) float3 up_vec;
+			alignas(4) float padding2;
+		};
+		static_assert(sizeof(CameraInfo) == 304);
+
+	public:
+		PredefinedCameraCBuffer();
+
+		RenderEffectConstantBuffer* CBuffer() const
+		{
+			return predefined_cbuffer_;
+		}
+
+		uint32_t& NumCameras(RenderEffectConstantBuffer& cbuff) const;
+		uint32_t& CameraIndices(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+		CameraInfo& Camera(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+		float4x4& PrevMvp(RenderEffectConstantBuffer& cbuff, uint32_t index) const;
+
+	private:
+		RenderEffectPtr effect_;
+		RenderEffectConstantBuffer* predefined_cbuffer_;
+
+		uint32_t num_cameras_offset_;
+		uint32_t camera_indices_offset_;
+		uint32_t cameras_offset_;
+		uint32_t prev_mvps_offset_;
+	};
 }
 
 #endif		// _CAMERA_HPP

@@ -36,8 +36,8 @@
 #include <memory>
 
 #include <KFL/Noncopyable.hpp>
+#include <KlayGE/Camera.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/SceneComponent.hpp>
 #include <KlayGE/Signal.hpp>
@@ -228,7 +228,7 @@ namespace KlayGE
 		std::unique_ptr<AABBox> pos_aabb_os_;
 		std::unique_ptr<AABBox> pos_aabb_ws_;
 		bool pos_aabb_dirty_ = true;
-		std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras> visible_marks_;
+		std::array<BoundOverlap, PredefinedCameraCBuffer::max_num_cameras> visible_marks_;
 
 		UpdateEvent sub_thread_update_event_;
 		UpdateEvent main_thread_update_event_;

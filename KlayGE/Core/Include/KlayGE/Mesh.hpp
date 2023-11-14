@@ -497,6 +497,53 @@ namespace KlayGE
 
 	KLAYGE_CORE_API RenderModelPtr LoadLightSourceProxyModel(LightSourcePtr const& light);
 	KLAYGE_CORE_API RenderModelPtr LoadCameraProxyModel(CameraPtr const& camera);
+
+
+	class KLAYGE_CORE_API PredefinedMeshCBuffer
+	{
+	public:
+		PredefinedMeshCBuffer();
+
+		RenderEffectConstantBuffer* CBuffer() const
+		{
+			return predefined_cbuffer_;
+		}
+
+		float3& PosCenter(RenderEffectConstantBuffer& cbuff) const;
+		float3& PosExtent(RenderEffectConstantBuffer& cbuff) const;
+		float2& TcCenter(RenderEffectConstantBuffer& cbuff) const;
+		float2& TcExtent(RenderEffectConstantBuffer& cbuff) const;
+
+	private:
+		RenderEffectPtr effect_;
+		RenderEffectConstantBuffer* predefined_cbuffer_;
+
+		uint32_t pos_center_offset_;
+		uint32_t pos_extent_offset_;
+		uint32_t tc_center_offset_;
+		uint32_t tc_extent_offset_;
+	};
+
+	class KLAYGE_CORE_API PredefinedModelCBuffer
+	{
+	public:
+		PredefinedModelCBuffer();
+
+		RenderEffectConstantBuffer* CBuffer() const
+		{
+			return predefined_cbuffer_;
+		}
+
+		float4x4& Model(RenderEffectConstantBuffer& cbuff) const;
+		float4x4& InvModel(RenderEffectConstantBuffer& cbuff) const;
+
+	private:
+		RenderEffectPtr effect_;
+		RenderEffectConstantBuffer* predefined_cbuffer_;
+
+		uint32_t model_offset_;
+		uint32_t inv_model_offset_;
+	};
 }
 
 #endif			// _MESH_HPP

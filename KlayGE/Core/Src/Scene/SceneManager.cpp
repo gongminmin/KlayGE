@@ -537,7 +537,7 @@ namespace KlayGE
 				this->ClipScene();
 
 				auto visible_marks =
-					MakeUniquePtr<std::array<BoundOverlap, RenderEngine::PredefinedCameraCBuffer::max_num_cameras>[]>(scene_nodes.size());
+					MakeUniquePtr<std::array<BoundOverlap, PredefinedCameraCBuffer::max_num_cameras>[]>(scene_nodes.size());
 				for (size_t i = 0; i < scene_nodes.size(); ++ i)
 				{
 					for (uint32_t j = 0; j < num_cameras; ++j)

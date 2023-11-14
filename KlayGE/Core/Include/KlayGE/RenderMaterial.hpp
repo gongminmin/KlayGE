@@ -199,6 +199,49 @@ namespace KlayGE
 	KLAYGE_CORE_API RenderMaterialPtr SyncLoadRenderMaterial(std::string_view mtlml_name);
 	KLAYGE_CORE_API RenderMaterialPtr ASyncLoadRenderMaterial(std::string_view mtlml_name);
 	KLAYGE_CORE_API void SaveRenderMaterial(RenderMaterialPtr const & mtl, std::string const & mtlml_name);
+
+	class KLAYGE_CORE_API PredefinedMaterialCBuffer
+	{
+	public:
+		PredefinedMaterialCBuffer();
+
+		RenderEffectConstantBuffer* CBuffer() const
+		{
+			return predefined_cbuffer_;
+		}
+
+		float4& AlbedoClr(RenderEffectConstantBuffer& cbuff) const;
+		float3& MetalnessGlossinessFactor(RenderEffectConstantBuffer& cbuff) const;
+		float4& EmissiveClr(RenderEffectConstantBuffer& cbuff) const;
+		int32_t& AlbedoMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+		int32_t& NormalMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+		int32_t& HeightMapParallaxEnabled(RenderEffectConstantBuffer& cbuff) const;
+		int32_t& HeightMapTessEnabled(RenderEffectConstantBuffer& cbuff) const;
+		int32_t& OcclusionMapEnabled(RenderEffectConstantBuffer& cbuff) const;
+		float& AlphaTestThreshold(RenderEffectConstantBuffer& cbuff) const;
+		float& NormalScale(RenderEffectConstantBuffer& cbuff) const;
+		float& OcclusionStrength(RenderEffectConstantBuffer& cbuff) const;
+		float2& HeightOffsetScale(RenderEffectConstantBuffer& cbuff) const;
+		float4& TessFactors(RenderEffectConstantBuffer& cbuff) const;
+
+	private:
+		RenderEffectPtr effect_;
+		RenderEffectConstantBuffer* predefined_cbuffer_;
+
+		uint32_t albedo_clr_offset_;
+		uint32_t metalness_glossiness_factor_offset_;
+		uint32_t emissive_clr_offset_;
+		uint32_t albedo_map_enabled_offset_;
+		uint32_t normal_map_enabled_offset_;
+		uint32_t height_map_parallax_enabled_offset_;
+		uint32_t height_map_tess_enabled_offset_;
+		uint32_t occlusion_map_enabled_offset_;
+		uint32_t alpha_test_threshold_offset_;
+		uint32_t normal_scale_offset_;
+		uint32_t occlusion_strength_offset_;
+		uint32_t height_offset_scale_offset_;
+		uint32_t tess_factors_offset_;
+	};
 }
 
 #endif		//_RENDERMATERIAL_HPP
