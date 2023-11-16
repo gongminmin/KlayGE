@@ -108,8 +108,12 @@ namespace KlayGE
 		gtp_instance_ = MakeUniquePtr<ThreadPool>(1, 16);
 	}
 
-	Context::~Context() noexcept
+	Context::~Context() noexcept = default;
+
+	void Context::DestroyAll() noexcept
 	{
+		// It must called before destructor to prevent an order issue
+
 		scene_mgr_.reset();
 
 		ResLoader::Destroy();
@@ -149,7 +153,11 @@ namespace KlayGE
 	void Context::Destroy() noexcept
 	{
 		std::lock_guard<std::mutex> lock(singleton_mutex);
-		context_instance_.reset();
+		if (context_instance_)
+		{
+			context_instance_->DestroyAll();
+			context_instance_.reset();
+		}
 	}
 
 	void Context::Suspend()

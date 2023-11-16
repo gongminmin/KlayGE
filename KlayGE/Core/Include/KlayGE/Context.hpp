@@ -144,6 +144,9 @@ namespace KlayGE
 		ThreadPool& ThreadPoolInstance();
 
 	private:
+		void DestroyAll() noexcept;
+
+	private:
 		static std::unique_ptr<Context> context_instance_;
 
 		ContextCfg cfg_;
