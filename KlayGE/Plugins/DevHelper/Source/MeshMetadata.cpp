@@ -60,88 +60,87 @@ namespace KlayGE
 		ResIdentifierPtr metadata_file = ResLoader::Instance().Open(name);
 		if (metadata_file)
 		{
-			auto document = LoadJson(*metadata_file);
-			auto const* root_value = document->RootValue();
+			auto root_value = LoadJson(*metadata_file);
 
-			uint32_t const version = GetInt(*root_value->Member("version"));
+			uint32_t const version = GetInt(*root_value.Member("version"));
 			Verify(version == 1);
 
-			if (auto const* auto_center_val = root_value->Member("auto_center"))
+			if (auto const* auto_center_val = root_value.Member("auto_center"))
 			{
 				new_metadata.auto_center_ = auto_center_val->ValueBool();
 			}
 
-			if (auto const* pivot_val = root_value->Member("pivot"))
+			if (auto const* pivot_val = root_value.Member("pivot"))
 			{
 				auto const& values = pivot_val->ValueArray();
 				BOOST_ASSERT(values.size() >= new_metadata.pivot_.size());
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < new_metadata.pivot_.size()); ++iter, ++index)
 				{
-					new_metadata.pivot_[index] = GetFloat(*(*iter));
+					new_metadata.pivot_[index] = GetFloat(*iter);
 				}
 			}
 
-			if (auto const* translation_val = root_value->Member("translation"))
+			if (auto const* translation_val = root_value.Member("translation"))
 			{
 				auto const& values = translation_val->ValueArray();
 				BOOST_ASSERT(values.size() >= new_metadata.translation_.size());
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < new_metadata.translation_.size()); ++iter, ++index)
 				{
-					new_metadata.translation_[index] = GetFloat(*(*iter));
+					new_metadata.translation_[index] = GetFloat(*iter);
 				}
 			}
 
-			if (auto const* rotation_val = root_value->Member("rotation"))
+			if (auto const* rotation_val = root_value.Member("rotation"))
 			{
 				auto const& values = rotation_val->ValueArray();
 				BOOST_ASSERT(values.size() >= new_metadata.rotation_.size());
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < new_metadata.rotation_.size()); ++iter, ++index)
 				{
-					new_metadata.rotation_[index] = GetFloat(*(*iter));
+					new_metadata.rotation_[index] = GetFloat(*iter);
 				}
 			}
 
-			if (auto const* scale_val = root_value->Member("scale"))
+			if (auto const* scale_val = root_value.Member("scale"))
 			{
 				auto const& values = scale_val->ValueArray();
 				BOOST_ASSERT(values.size() >= new_metadata.scale_.size());
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < new_metadata.scale_.size()); ++iter, ++index)
 				{
-					new_metadata.scale_[index] = GetFloat(*(*iter));
+					new_metadata.scale_[index] = GetFloat(*iter);
 				}
 			}
 
-			if (auto const* axis_mapping_val = root_value->Member("axis_mapping"))
+			if (auto const* axis_mapping_val = root_value.Member("axis_mapping"))
 			{
 				auto const& values = axis_mapping_val->ValueArray();
 				BOOST_ASSERT(values.size() >= std::size(new_metadata.axis_mapping_));
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < 3); ++iter, ++index)
 				{
-					new_metadata.axis_mapping_[index] = static_cast<uint8_t>(GetInt(**iter));
+					new_metadata.axis_mapping_[index] = static_cast<uint8_t>(GetInt(*iter));
 				}
 			}
 
-			if (auto const* flip_winding_order_val = root_value->Member("flip_winding_order"))
+			if (auto const* flip_winding_order_val = root_value.Member("flip_winding_order"))
 			{
 				new_metadata.flip_winding_order_ = flip_winding_order_val->ValueBool();
 			}
 
-			if (auto const* materials_val = root_value->Member("materials"))
+			if (auto const* materials_val = root_value.Member("materials"))
 			{
 				auto const& values = materials_val->ValueArray();
 				new_metadata.material_file_names_.reserve(values.size());
 				for (auto const& value : values)
 				{
-					new_metadata.material_file_names_.emplace_back(value->ValueString());
+					new_metadata.material_file_names_.emplace_back(value.ValueString());
 				}
 			}
 
-			if (auto const* source_val = root_value->Member("source"))
+			if (auto const* source_val = root_value.Member("source"))
 			{
 				if (source_val->Type() == JsonValueType::String)
 				{
@@ -155,7 +154,7 @@ namespace KlayGE
 						new_metadata.lod_file_names_.reserve(values.size());
 						for (auto const& value : values)
 						{
-							new_metadata.lod_file_names_.emplace_back(value->ValueString());
+							new_metadata.lod_file_names_.emplace_back(value.ValueString());
 						}
 					}
 				}
@@ -179,55 +178,54 @@ namespace KlayGE
 
 	void MeshMetadata::Save(std::string const& name) const
 	{
-		JsonDocument doc;
-		auto root_value = doc.AllocValue(JsonValueType::Object);
+		JsonValue root_value(JsonValueType::Object);
 
-		root_value->AppendValue("version", doc.AllocValueUInt(1U));
+		root_value.AppendValue("version", JsonValue(1U));
 
 		if (auto_center_)
 		{
-			root_value->AppendValue("auto_center", doc.AllocValueBool(auto_center_));
+			root_value.AppendValue("auto_center", JsonValue(auto_center_));
 		}
 
 		if (MathLib::length_sq(pivot_) > 1e-6f)
 		{
-			auto pivot_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue pivot_val(JsonValueType::Array);
 			for (size_t i = 0; i < pivot_.size(); ++i)
 			{
-				pivot_val->AppendValue(doc.AllocValueFloat(pivot_[i]));
+				pivot_val.AppendValue(JsonValue(pivot_[i]));
 			}
-			root_value->AppendValue("pivot", std::move(pivot_val));
+			root_value.AppendValue("pivot", std::move(pivot_val));
 		}
 
 		if (MathLib::length_sq(translation_) > 1e-6f)
 		{
-			auto translation_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue translation_val(JsonValueType::Array);
 			for (size_t i = 0; i < translation_.size(); ++i)
 			{
-				translation_val->AppendValue(doc.AllocValueFloat(translation_[i]));
+				translation_val.AppendValue(JsonValue(translation_[i]));
 			}
-			root_value->AppendValue("translation", std::move(translation_val));
+			root_value.AppendValue("translation", std::move(translation_val));
 		}
 
 		if (!MathLib::equal(rotation_.x(), 0.0f) || !MathLib::equal(rotation_.y(), 0.0f) || !MathLib::equal(rotation_.z(), 0.0f) ||
 			!MathLib::equal(rotation_.w(), 1.0f))
 		{
-			auto rotation_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue rotation_val(JsonValueType::Array);
 			for (size_t i = 0; i < rotation_.size(); ++i)
 			{
-				rotation_val->AppendValue(doc.AllocValueFloat(rotation_[i]));
+				rotation_val.AppendValue(JsonValue(rotation_[i]));
 			}
-			root_value->AppendValue("rotation", std::move(rotation_val));
+			root_value.AppendValue("rotation", std::move(rotation_val));
 		}
 
 		if (!MathLib::equal(scale_.x(), 1.0f) || !MathLib::equal(scale_.y(), 1.0f) || !MathLib::equal(scale_.z(), 1.0f))
 		{
-			auto scale_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue scale_val(JsonValueType::Array);
 			for (size_t i = 0; i < scale_.size(); ++i)
 			{
-				scale_val->AppendValue(doc.AllocValueFloat(scale_[i]));
+				scale_val.AppendValue(JsonValue(scale_[i]));
 			}
-			root_value->AppendValue("scale", std::move(scale_val));
+			root_value.AppendValue("scale", std::move(scale_val));
 		}
 
 		bool need_swizzle = false;
@@ -241,50 +239,48 @@ namespace KlayGE
 		}
 		if (need_swizzle)
 		{
-			auto axis_mapping_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue axis_mapping_val(JsonValueType::Array);
 			for (auto item : axis_mapping_)
 			{
-				axis_mapping_val->AppendValue(doc.AllocValueInt(static_cast<int>(item)));
+				axis_mapping_val.AppendValue(JsonValue(static_cast<int32_t>(item)));
 			}
-			root_value->AppendValue("axis_mapping", std::move(axis_mapping_val));
+			root_value.AppendValue("axis_mapping", std::move(axis_mapping_val));
 		}
 
 		if (flip_winding_order_)
 		{
-			root_value->AppendValue("flip_winding_order", doc.AllocValueBool(flip_winding_order_));
+			root_value.AppendValue("flip_winding_order", JsonValue(flip_winding_order_));
 		}
 
 		if (!material_file_names_.empty())
 		{
-			auto material_file_names_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue material_file_names_val(JsonValueType::Array);
 			for (auto const& material_file : material_file_names_)
 			{
-				material_file_names_val->AppendValue(doc.AllocValueString(material_file));
+				material_file_names_val.AppendValue(JsonValue(material_file));
 			}
-			root_value->AppendValue("materials", std::move(material_file_names_val));
+			root_value.AppendValue("materials", std::move(material_file_names_val));
 		}
 
 		if (lod_file_names_.size() == 1)
 		{
-			root_value->AppendValue("source", doc.AllocValueString(lod_file_names_[0]));
+			root_value.AppendValue("source", JsonValue(lod_file_names_[0]));
 		}
 		else
 		{
-			auto lod_array = doc.AllocValue(JsonValueType::Array);
+			JsonValue lod_array(JsonValueType::Array);
 			for (auto const& lod_file : lod_file_names_)
 			{
-				lod_array->AppendValue(doc.AllocValueString(lod_file));
+				lod_array.AppendValue(JsonValue(lod_file));
 			}
 
-			auto lod_val = doc.AllocValue(JsonValueType::Object);
-			lod_val->AppendValue("lod", std::move(lod_array));
-			root_value->AppendValue("source", std::move(lod_val));
+			JsonValue lod_val(JsonValueType::Object);
+			lod_val.AppendValue("lod", std::move(lod_array));
+			root_value.AppendValue("source", std::move(lod_val));
 		}
 
-		doc.RootValue(std::move(root_value));
-
 		std::ofstream ofs(name);
-		SaveJson(doc, ofs);
+		SaveJson(root_value, ofs);
 	}
 
 	uint32_t MeshMetadata::NumLods() const

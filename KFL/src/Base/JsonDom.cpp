@@ -35,7 +35,7 @@
 #include <KFL/StringUtil.hpp>
 #include <KFL/Util.hpp>
 
-#include <string>
+#include <variant>
 
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
@@ -57,432 +57,63 @@ using namespace KlayGE;
 
 namespace
 {
-	class JsonValueNull final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Null;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			return MakeUniquePtr<JsonValueNull>();
-		}
-	};
-
-	class JsonValueBool final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Bool;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueBool>();
-			ret->value_ = value_;
-			return ret;
-		}
-
-		bool ValueBool() const override
-		{
-			return value_;
-		}
-
-		void Value(bool value) override
-		{
-			value_ = value;
-		}
-
-		using JsonValue::Value;
-
-	private:
-		bool value_{};
-	};
-
-	class JsonValueInt final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Int;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueInt>();
-			ret->value_ = value_;
-			return ret;
-		}
-
-		int32_t ValueInt() const override
-		{
-			return value_;
-		}
-
-		void Value(int32_t value) override
-		{
-			value_ = value;
-		}
-
-		using JsonValue::Value;
-
-	private:
-		int32_t value_{};
-	};
-
-	class JsonValueUInt final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::UInt;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueUInt>();
-			ret->value_ = value_;
-			return ret;
-		}
-
-		uint32_t ValueUInt() const override
-		{
-			return value_;
-		}
-
-		void Value(uint32_t value) override
-		{
-			value_ = value;
-		}
-
-		using JsonValue::Value;
-
-	private:
-		uint32_t value_{};
-	};
-
-	class JsonValueFloat final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Float;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueFloat>();
-			ret->value_ = value_;
-			return ret;
-		}
-
-		float ValueFloat() const override
-		{
-			return value_;
-		}
-
-		void Value(float value) override
-		{
-			value_ = value;
-		}
-
-		using JsonValue::Value;
-
-	private:
-		float value_{};
-	};
-
-	class JsonValueString final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::String;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueString>();
-			ret->value_ = value_;
-			return ret;
-		}
-
-		std::string_view ValueString() const override
-		{
-			return value_;
-		}
-
-		void Value(std::string_view value) override
-		{
-			value_ = std::string(std::move(value));
-		}
-
-		using JsonValue::Value;
-
-	private:
-		std::string value_;
-	};
-
-	class JsonValueArray final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Array;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueArray>();
-			ret->values_.reserve(values_.size());
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				ret->values_.emplace_back((*iter)->Clone());
-			}
-			return ret;
-		}
-
-		void InsertAfterValue(JsonValue const& location, std::unique_ptr<JsonValue> new_value) override
-		{
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				if (iter->get() == &location)
-				{
-					values_.emplace(iter, std::move(new_value));
-					break;
-				}
-			}
-		}
-
-		using JsonValue::InsertAfterValue;
-
-		void AppendValue(std::unique_ptr<JsonValue> new_value) override
-		{
-			values_.emplace_back(std::move(new_value));
-		}
-
-		using JsonValue::AppendValue;
-
-		void RemoveValue(JsonValue const& value) override
-		{
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				if (iter->get() == &value)
-				{
-					values_.erase(iter);
-					break;
-				}
-			}
-		}
-
-		void ClearValues() override
-		{
-			values_.clear();
-		}
-
-		std::vector<std::unique_ptr<JsonValue>> const& ValueArray() const override
-		{
-			return values_;
-		}
-
-		void Value(std::vector<std::unique_ptr<JsonValue>> values) override
-		{
-			values_ = std::move(values);
-		}
-
-		using JsonValue::Value;
-
-		void ValueIndex(uint32_t index, std::unique_ptr<JsonValue> value) override
-		{
-			if (values_.size() < index + 1)
-			{
-				values_.resize(index + 1);
-			}
-
-			values_[index] = std::move(value);
-		}
-
-		using JsonValue::ValueIndex;
-
-	private:
-		std::vector<std::unique_ptr<JsonValue>> values_;
-	};
-
-	class JsonValueObject final : public JsonValue
-	{
-	public:
-		JsonValueType Type() const noexcept override
-		{
-			return JsonValueType::Object;
-		}
-
-		std::unique_ptr<JsonValue> Clone() override
-		{
-			auto ret = MakeUniquePtr<JsonValueObject>();
-			ret->values_.reserve(values_.size());
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				ret->values_.emplace_back(iter->first, iter->second->Clone());
-			}
-			return ret;
-		}
-
-		JsonValue* Member(std::string_view name) const override
-		{
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				if (iter->first == name)
-				{
-					return iter->second.get();
-				}
-			}
-			return nullptr;
-		}
-
-		void InsertAfterValue(JsonValue const& location, std::string_view name, std::unique_ptr<JsonValue> new_value) override
-		{
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				if (iter->second.get() == &location)
-				{
-					values_.emplace(iter, std::move(name), std::move(new_value));
-					break;
-				}
-			}
-		}
-
-		using JsonValue::InsertAfterValue;
-
-		void AppendValue(std::string_view name, std::unique_ptr<JsonValue> new_value) override
-		{
-			values_.emplace_back(std::move(name), std::move(new_value));
-		}
-
-		using JsonValue::AppendValue;
-
-		void RemoveValue(JsonValue const& value) override
-		{
-			for (auto iter = values_.begin(); iter != values_.end(); ++iter)
-			{
-				if (iter->second.get() == &value)
-				{
-					values_.erase(iter);
-					break;
-				}
-			}
-		}
-
-		void ClearValues() override
-		{
-			values_.clear();
-		}
-
-		std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> const& ValueObject() const override
-		{
-			return values_;
-		}
-
-		void Value(std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values) override
-		{
-			values_ = std::move(values);
-		}
-
-		using JsonValue::Value;
-
-		void ValueIndex(uint32_t index, std::string_view name, std::unique_ptr<JsonValue> value) override
-		{
-			if (values_.size() < index + 1)
-			{
-				values_.resize(index + 1);
-			}
-
-			values_[index] = {std::string(std::move(name)), std::move(value)};
-		}
-
-		using JsonValue::ValueIndex;
-
-	private:
-		std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values_;
-	};
-
-	std::unique_ptr<JsonValue> CreateJsonValueFromRapidJsonValue(JsonDocument& doc, rapidjson::Value& value)
+	JsonValue CreateJsonValue(rapidjson::Value const& value)
 	{
 		if (value.IsNull())
 		{
-			return MakeUniquePtr<JsonValueNull>();
+			return JsonValue();
 		}
 		else if (value.IsFalse())
 		{
-			auto ret = MakeUniquePtr<JsonValueBool>();
-			ret->Value(false);
-			return ret;
+			return JsonValue(false);
 		}
 		else if (value.IsTrue())
 		{
-			auto ret = MakeUniquePtr<JsonValueBool>();
-			ret->Value(true);
-			return ret;
+			return JsonValue(true);
 		}
 		else if (value.IsBool())
 		{
-			auto ret = MakeUniquePtr<JsonValueBool>();
-			ret->Value(value.GetBool());
-			return ret;
+			return JsonValue(value.GetBool());
 		}
 		else if (value.IsInt())
 		{
-			auto ret = MakeUniquePtr<JsonValueInt>();
-			ret->Value(value.GetInt());
-			return ret;
+			return JsonValue(value.GetInt());
 		}
 		else if (value.IsUint())
 		{
-			auto ret = MakeUniquePtr<JsonValueUInt>();
-			ret->Value(value.GetUint());
-			return ret;
+			return JsonValue(value.GetUint());
 		}
 		else if (value.IsInt64())
 		{
-			auto ret = MakeUniquePtr<JsonValueInt>();
-			ret->Value(static_cast<int32_t>(value.GetInt64()));
-			return ret;
+			return JsonValue(static_cast<int32_t>(value.GetInt64()));
 		}
 		else if (value.IsUint64())
 		{
-			auto ret = MakeUniquePtr<JsonValueInt>();
-			ret->Value(static_cast<uint32_t>(value.GetUint64()));
-			return ret;
+			return JsonValue(static_cast<uint32_t>(value.GetUint64()));
 		}
 		else if (value.IsDouble())
 		{
-			auto ret = MakeUniquePtr<JsonValueFloat>();
-			ret->Value(static_cast<float>(value.GetDouble()));
-			return ret;
+			return JsonValue(static_cast<float>(value.GetDouble()));
 		}
 		else if (value.IsString())
 		{
-			auto ret = MakeUniquePtr<JsonValueString>();
-			ret->Value(std::string(value.GetString()));
-			return ret;
+			return JsonValue(std::string(value.GetString()));
 		}
 		else if (value.IsArray())
 		{
-			auto ret = MakeUniquePtr<JsonValueArray>();
+			JsonValue ret(JsonValueType::Array);
 			for (auto iter = value.Begin(); iter != value.End(); ++iter)
 			{
-				ret->AppendValue(CreateJsonValueFromRapidJsonValue(doc, *iter));
+				ret.AppendValue(CreateJsonValue(*iter));
 			}
 			return ret;
 		}
 		else if (value.IsObject())
 		{
-			auto ret = MakeUniquePtr<JsonValueObject>();
+			JsonValue ret(JsonValueType::Object);
 			for (auto iter = value.MemberBegin(); iter != value.MemberEnd(); ++iter)
 			{
-				ret->AppendValue(iter->name.GetString(), CreateJsonValueFromRapidJsonValue(doc, iter->value));
+				ret.AppendValue(iter->name.GetString(), CreateJsonValue(iter->value));
 			}
 			return ret;
 		}
@@ -492,7 +123,7 @@ namespace
 		}
 	}
 
-	void SetRapidJsonValueFromJsonValue(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, JsonValue const& value)
+	void SetRapidJsonValue(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, JsonValue const& value)
 	{
 		auto& allocator = rapidjson_doc.GetAllocator();
 
@@ -527,7 +158,7 @@ namespace
 			for (auto const& v : value.ValueArray())
 			{
 				rapidjson::Value rapidjson_v;
-				SetRapidJsonValueFromJsonValue(rapidjson_doc, rapidjson_v, *v);
+				SetRapidJsonValue(rapidjson_doc, rapidjson_v, v);
 				rapidjson_value.PushBack(rapidjson_v, allocator);
 			}
 			break;
@@ -537,7 +168,7 @@ namespace
 			for (auto const& v : value.ValueObject())
 			{
 				rapidjson::Value rapidjson_v;
-				SetRapidJsonValueFromJsonValue(rapidjson_doc, rapidjson_v, *v.second);
+				SetRapidJsonValue(rapidjson_doc, rapidjson_v, v.second);
 				rapidjson_value.AddMember(rapidjson::Value(v.first.c_str(), allocator), rapidjson_v, allocator);
 			}
 			break;
@@ -588,7 +219,7 @@ namespace
 		}
 	}
 
-	void AppendJsonValueFromDomNode(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, XMLNode const& node)
+	void AppendJsonValue(rapidjson::Document& rapidjson_doc, rapidjson::Value& rapidjson_value, XMLNode const& node)
 	{
 		auto& allocator = rapidjson_doc.GetAllocator();
 
@@ -620,7 +251,7 @@ namespace
 				if (objects.size() == 1)
 				{
 					rapidjson::Value item_value;
-					AppendJsonValueFromDomNode(rapidjson_doc, item_value, *objects[0]);
+					AppendJsonValue(rapidjson_doc, item_value, *objects[0]);
 					rapidjson_value.AddMember(
 						rapidjson::Value(objects[0]->Name().data(), static_cast<rapidjson::SizeType>(objects[0]->Name().size()), allocator),
 						item_value, allocator);
@@ -632,7 +263,7 @@ namespace
 					for (auto const& item : objects)
 					{
 						rapidjson::Value item_value;
-						AppendJsonValueFromDomNode(rapidjson_doc, item_value, *item);
+						AppendJsonValue(rapidjson_doc, item_value, *item);
 						array_value.PushBack(item_value, allocator);
 					}
 					rapidjson_value.AddMember(
@@ -667,219 +298,560 @@ namespace
 
 namespace KlayGE
 {
-	JsonDocument::JsonDocument() noexcept = default;
-
-	JsonValue* JsonDocument::RootValue() const
+	class JsonValue::Impl
 	{
-		return root_.get();
-	}
-
-	void JsonDocument::RootValue(std::unique_ptr<JsonValue> new_value)
-	{
-		root_ = std::move(new_value);
-	}
-
-	std::unique_ptr<JsonValue> JsonDocument::AllocValue(JsonValueType type)
-	{
-		switch (type)
+	public:
+		explicit Impl(JsonValueType type) : type_(type)
 		{
-		case JsonValueType::Null:
-			return MakeUniquePtr<JsonValueNull>();
-		case JsonValueType::Bool:
-			return MakeUniquePtr<JsonValueBool>();
-		case JsonValueType::Int:
-			return MakeUniquePtr<JsonValueInt>();
-		case JsonValueType::UInt:
-			return MakeUniquePtr<JsonValueUInt>();
-		case JsonValueType::Float:
-			return MakeUniquePtr<JsonValueFloat>();
-		case JsonValueType::String:
-			return MakeUniquePtr<JsonValueString>();
-		case JsonValueType::Array:
-			return MakeUniquePtr<JsonValueArray>();
-		case JsonValueType::Object:
-			return MakeUniquePtr<JsonValueObject>();
+			switch (type)
+			{
+			case JsonValueType::Null:
+				break;
+			case JsonValueType::Bool:
+				value_ = false;
+				break;
+			case JsonValueType::Int:
+				value_ = 0;
+				break;
+			case JsonValueType::UInt:
+				value_ = 0u;
+				break;
+			case JsonValueType::Float:
+				value_ = 0.0f;
+				break;
+			case JsonValueType::String:
+				value_ = std::string();
+				break;
+			case JsonValueType::Array:
+				value_ = std::vector<JsonValue>();
+				break;
+			case JsonValueType::Object:
+				value_ = std::vector<std::pair<std::string, JsonValue>>();
+				break;
 
-		default:
-			KFL_UNREACHABLE("Invalid type");
+			default:
+				KFL_UNREACHABLE("Invalid type");
+			}
 		}
-	}
+		Impl() : type_(JsonValueType::Null)
+		{
+		}
+		explicit Impl(bool value) : type_(JsonValueType::Bool)
+		{
+			value_ = value;
+		}
+		explicit Impl(int32_t value) : type_(JsonValueType::Int)
+		{
+			value_ = value;
+		}
+		explicit Impl(uint32_t value) : type_(JsonValueType::UInt)
+		{
+			value_ = value;
+		}
+		explicit Impl(float value) : type_(JsonValueType::Float)
+		{
+			value_ = value;
+		}
+		explicit Impl(std::string_view value) : type_(JsonValueType::String)
+		{
+			value_ = std::string(std::move(value));
+		}
+		explicit Impl(std::span<JsonValue> values) : type_(JsonValueType::Array)
+		{
+			value_ = std::vector<JsonValue>(values.begin(), values.end());
+		}
+		explicit Impl(std::span<std::pair<std::string, JsonValue>> values) : type_(JsonValueType::Object)
+		{
+			value_ = std::vector<std::pair<std::string, JsonValue>>(values.begin(), values.end());
+		}
+		Impl(Impl const& rhs) = default;
+		Impl(Impl&& rhs) noexcept = default;
+		~Impl() noexcept = default;
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueNull()
+		Impl& operator=(Impl const& rhs) = default;
+		Impl& operator=(Impl&& rhs) noexcept = default;
+
+		JsonValueType Type() const noexcept
+		{
+			return type_;
+		}
+
+		JsonValue const* Member(std::string_view name) const
+		{
+			return const_cast<Impl*>(this)->Member(name);
+		}
+
+		JsonValue* Member(std::string_view name)
+		{
+			if (type_ != JsonValueType::Object)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			for (auto& v : obj_value)
+			{
+				if (v.first == name)
+				{
+					return &v.second;
+				}
+			}
+			return nullptr;
+		}
+
+		void InsertAfterValue(JsonValue const& location, std::string_view name, JsonValue new_value)
+		{
+			if (type_ != JsonValueType::Object)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			for (auto iter = obj_value.begin(); iter != obj_value.end(); ++iter)
+			{
+				if (&iter->second == &location)
+				{
+					obj_value.emplace(iter, std::move(name), std::move(new_value));
+					break;
+				}
+			}
+		}
+
+		void InsertAfterValue(JsonValue const& location, JsonValue new_value)
+		{
+			if (type_ != JsonValueType::Array)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& array_value = std::get<std::vector<JsonValue>>(value_);
+			for (auto iter = array_value.begin(); iter != array_value.end(); ++iter)
+			{
+				if (&(*iter) == &location)
+				{
+					array_value.emplace(iter, std::move(new_value));
+					break;
+				}
+			}
+		}
+
+		void AppendValue(std::string_view name, JsonValue new_value)
+		{
+			if (type_ != JsonValueType::Object)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			obj_value.emplace_back(std::move(name), std::move(new_value));
+		}
+
+		void AppendValue(JsonValue new_value)
+		{
+			if (type_ != JsonValueType::Array)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& array_value = std::get<std::vector<JsonValue>>(value_);
+			array_value.emplace_back(std::move(new_value));
+		}
+
+		void RemoveValue(JsonValue const& value)
+		{
+			if (type_ == JsonValueType::Array)
+			{
+				auto& array_value = std::get<std::vector<JsonValue>>(value_);
+				for (auto iter = array_value.begin(); iter != array_value.end(); ++iter)
+				{
+					if (&(*iter) == &value)
+					{
+						array_value.erase(iter);
+						break;
+					}
+				}
+			}
+			else if (type_ == JsonValueType::Object)
+			{
+				auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+				for (auto iter = obj_value.begin(); iter != obj_value.end(); ++iter)
+				{
+					if (&iter->second == &value)
+					{
+						obj_value.erase(iter);
+						break;
+					}
+				}
+			}
+			else
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+		}
+
+		void ClearValues()
+		{
+			if (type_ == JsonValueType::Array)
+			{
+				auto& array_value = std::get<std::vector<JsonValue>>(value_);
+				array_value.clear();
+			}
+			else if (type_ == JsonValueType::Object)
+			{
+				auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+				obj_value.clear();
+			}
+			else
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+		}
+
+		void Value(bool value)
+		{
+			type_ = JsonValueType::Bool;
+			value_ = value;
+		}
+
+		void Value(int32_t value)
+		{
+			type_ = JsonValueType::Int;
+			value_ = value;
+		}
+
+		void Value(uint32_t value)
+		{
+			type_ = JsonValueType::UInt;
+			value_ = value;
+		}
+
+		void Value(float value)
+		{
+			type_ = JsonValueType::Float;
+			value_ = value;
+		}
+
+		void Value(std::string_view value)
+		{
+			type_ = JsonValueType::String;
+			value_ = std::string(std::move(value));
+		}
+
+		void Value(std::span<JsonValue> values)
+		{
+			type_ = JsonValueType::Array;
+			auto& array_value = std::get<std::vector<JsonValue>>(value_);
+			array_value.assign(values.begin(), values.end());
+		}
+
+		void Value(std::span<std::pair<std::string, JsonValue>> values)
+		{
+			type_ = JsonValueType::Object;
+			auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			obj_value.assign(values.begin(), values.end());
+		}
+
+		bool ValueBool() const
+		{
+			if (type_ != JsonValueType::Bool)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			return std::get<bool>(value_);
+		}
+
+		int32_t ValueInt() const
+		{
+			if (type_ != JsonValueType::Int)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			return std::get<int32_t>(value_);
+		}
+
+		uint32_t ValueUInt() const
+		{
+			if (type_ != JsonValueType::UInt)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			return std::get<uint32_t>(value_);
+		}
+
+		float ValueFloat() const
+		{
+			if (type_ != JsonValueType::Float)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			return std::get<float>(value_);
+		}
+
+		std::string_view ValueString() const
+		{
+			if (type_ != JsonValueType::String)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			return std::get<std::string>(value_);
+		}
+
+		std::span<JsonValue const> ValueArray() const
+		{
+			if (type_ != JsonValueType::Array)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			const auto& array_value = std::get<std::vector<JsonValue>>(value_);
+			return MakeSpan(array_value);
+		}
+
+		std::span<std::pair<std::string, JsonValue> const> ValueObject() const
+		{
+			if (type_ != JsonValueType::Object)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			const auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			return MakeSpan(obj_value);
+		}
+
+		void ValueIndex(uint32_t index, std::string_view name, JsonValue value)
+		{
+			if (type_ != JsonValueType::Object)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& obj_value = std::get<std::vector<std::pair<std::string, JsonValue>>>(value_);
+			if (obj_value.size() < index + 1)
+			{
+				obj_value.resize(index + 1);
+			}
+
+			obj_value[index] = {std::string(std::move(name)), std::move(value)};
+		}
+
+		void ValueIndex(uint32_t index, JsonValue value)
+		{
+			if (type_ != JsonValueType::Array)
+			{
+				KFL_UNREACHABLE("Can't be called");
+			}
+
+			auto& array_value = std::get<std::vector<JsonValue>>(value_);
+			if (array_value.size() < index + 1)
+			{
+				array_value.resize(index + 1);
+			}
+
+			array_value[index] = std::move(value);
+		}
+
+	private:
+		JsonValueType type_;
+		std::variant<bool, int32_t, uint32_t, float, std::string, std::vector<JsonValue>, std::vector<std::pair<std::string, JsonValue>>>
+			value_;
+	};
+
+	JsonValue::JsonValue(JsonValueType type)
+		: pimpl_(MakeUniquePtr<Impl>(type))
 	{
-		return MakeUniquePtr<JsonValueNull>();
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueBool(bool value)
+	JsonValue::JsonValue()
+		: pimpl_(MakeUniquePtr<Impl>())
 	{
-		auto ret = MakeUniquePtr<JsonValueBool>();
-		ret->Value(value);
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueInt(int32_t value)
+	JsonValue::JsonValue(bool value)
+		: pimpl_(MakeUniquePtr<Impl>(value))
 	{
-		auto ret = MakeUniquePtr<JsonValueInt>();
-		ret->Value(value);
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueUInt(uint32_t value)
+	JsonValue::JsonValue(int32_t value)
+		: pimpl_(MakeUniquePtr<Impl>(value))
 	{
-		auto ret = MakeUniquePtr<JsonValueUInt>();
-		ret->Value(value);
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueFloat(float value)
+	JsonValue::JsonValue(uint32_t value)
+		: pimpl_(MakeUniquePtr<Impl>(value))
 	{
-		auto ret = MakeUniquePtr<JsonValueFloat>();
-		ret->Value(value);
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueString(std::string_view value)
+	JsonValue::JsonValue(float value)
+		: pimpl_(MakeUniquePtr<Impl>(value))
 	{
-		auto ret = MakeUniquePtr<JsonValueString>();
-		ret->Value(std::move(value));
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueArray(std::vector<std::unique_ptr<JsonValue>> values)
+	JsonValue::JsonValue(std::string_view value)
+		: pimpl_(MakeUniquePtr<Impl>(std::move(value)))
 	{
-		auto ret = MakeUniquePtr<JsonValueArray>();
-		ret->Value(std::move(values));
-		return ret;
 	}
 
-	std::unique_ptr<JsonValue> JsonDocument::AllocValueObject(std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values)
+	JsonValue::JsonValue(std::span<JsonValue> values)
+		: pimpl_(MakeUniquePtr<Impl>(std::move(values)))
 	{
-		auto ret = MakeUniquePtr<JsonValueObject>();
-		ret->Value(std::move(values));
-		return ret;
 	}
 
+	JsonValue::JsonValue(std::span<std::pair<std::string, JsonValue>> values)
+		: pimpl_(MakeUniquePtr<Impl>(std::move(values)))
+	{
+	}
 
-	JsonValue::JsonValue() noexcept = default;
+	JsonValue::JsonValue(JsonValue const& rhs)
+		: pimpl_(MakeUniquePtr<Impl>(*rhs.pimpl_))
+	{
+	}
+
+	JsonValue::JsonValue(JsonValue&& rhs) noexcept = default;
+
 	JsonValue::~JsonValue() noexcept = default;
 
-	JsonValue* JsonValue::Member([[maybe_unused]] std::string_view name) const
+	JsonValue& JsonValue::operator=(JsonValue const& rhs)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		if (this != &rhs)
+		{
+			pimpl_ = MakeUniquePtr<Impl>(*rhs.pimpl_);
+		}
+
+		return *this;
 	}
 
-	void JsonValue::InsertAfterValue([[maybe_unused]] JsonValue const& location, [[maybe_unused]] std::string_view name,
-		[[maybe_unused]] std::unique_ptr<JsonValue> new_value)
+	JsonValue& JsonValue::operator=(JsonValue&& rhs) noexcept = default;
+
+	JsonValueType JsonValue::Type() const noexcept
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->Type();
 	}
 
-	void JsonValue::AppendValue([[maybe_unused]] std::string_view name, [[maybe_unused]] std::unique_ptr<JsonValue> new_value)
+	const JsonValue* JsonValue::Member(std::string_view name) const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->Member(std::move(name));
+	}
+	JsonValue* JsonValue::Member(std::string_view name)
+	{
+		return pimpl_->Member(std::move(name));
 	}
 
-	void JsonValue::InsertAfterValue([[maybe_unused]] JsonValue const& location, [[maybe_unused]] std::unique_ptr<JsonValue> new_value)
+	void JsonValue::InsertAfterValue(JsonValue const& location, std::string_view name, JsonValue new_value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->InsertAfterValue(location, std::move(name), std::move(new_value));
 	}
 
-	void JsonValue::AppendValue([[maybe_unused]] std::unique_ptr<JsonValue> new_value)
+	void JsonValue::AppendValue(std::string_view name, JsonValue new_value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->AppendValue(std::move(name), std::move(new_value));
 	}
 
-	void JsonValue::RemoveValue([[maybe_unused]] JsonValue const& value)
+	void JsonValue::InsertAfterValue(JsonValue const& location, JsonValue new_value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->InsertAfterValue(location, std::move(new_value));
+	}
+
+	void JsonValue::AppendValue(JsonValue new_value)
+	{
+		pimpl_->AppendValue(std::move(new_value));
+	}
+
+	void JsonValue::RemoveValue(JsonValue const& value)
+	{
+		pimpl_->RemoveValue(value);
 	}
 
 	void JsonValue::ClearValues()
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->ClearValues();
 	}
 
 	bool JsonValue::ValueBool() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueBool();
 	}
 
 	int32_t JsonValue::ValueInt() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueInt();
 	}
+
 	uint32_t JsonValue::ValueUInt() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueUInt();
 	}
 
 	float JsonValue::ValueFloat() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueFloat();
 	}
 
 	std::string_view JsonValue::ValueString() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueString();
 	}
 
-	std::vector<std::unique_ptr<JsonValue>> const& JsonValue::ValueArray() const
+	std::span<JsonValue const> JsonValue::ValueArray() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueArray();
 	}
 
-	std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> const& JsonValue::ValueObject() const
+	std::span<std::pair<std::string, JsonValue> const> JsonValue::ValueObject() const
 	{
-		KFL_UNREACHABLE("Can't be called");
+		return pimpl_->ValueObject();
 	}
 
-	void JsonValue::Value([[maybe_unused]] bool value)
+	void JsonValue::Value(bool value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(value);
 	}
 
-	void JsonValue::Value([[maybe_unused]] int32_t value)
+	void JsonValue::Value(int32_t value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(value);
 	}
 
-	void JsonValue::Value([[maybe_unused]] uint32_t value)
+	void JsonValue::Value(uint32_t value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(value);
 	}
 
-	void JsonValue::Value([[maybe_unused]] float value)
+	void JsonValue::Value(float value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(value);
 	}
 
-	void JsonValue::Value([[maybe_unused]] std::string_view value)
+	void JsonValue::Value(std::string_view value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(std::move(value));
 	}
 
-	void JsonValue::Value([[maybe_unused]] std::vector<std::unique_ptr<JsonValue>> value)
+	void JsonValue::Value(std::span<JsonValue> value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(std::move(value));
 	}
 
-	void JsonValue::Value([[maybe_unused]] std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values)
+	void JsonValue::Value(std::span<std::pair<std::string, JsonValue>> values)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->Value(std::move(values));
 	}
 
-	void JsonValue::ValueIndex([[maybe_unused]] uint32_t index, [[maybe_unused]] std::unique_ptr<JsonValue> value)
+	void JsonValue::ValueIndex(uint32_t index, JsonValue value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->ValueIndex(index, std::move(value));
 	}
 
-	void JsonValue::ValueIndex(
-		[[maybe_unused]] uint32_t index, [[maybe_unused]] std::string_view name, [[maybe_unused]] std::unique_ptr<JsonValue> value)
+	void JsonValue::ValueIndex(uint32_t index, std::string_view name, JsonValue value)
 	{
-		KFL_UNREACHABLE("Can't be called");
+		pimpl_->ValueIndex(index, std::move(name), std::move(value));
 	}
 
-	std::unique_ptr<JsonDocument> LoadJson(ResIdentifier& source)
+	JsonValue LoadJson(ResIdentifier& source)
 	{
 		source.seekg(0, std::ios_base::end);
 		size_t const len = static_cast<size_t>(source.tellg());
@@ -892,16 +864,13 @@ namespace KlayGE
 		doc.Parse(xml_src.get());
 		Verify(!doc.HasParseError());
 
-		auto ret = MakeUniquePtr<JsonDocument>();
-		ret->RootValue(CreateJsonValueFromRapidJsonValue(*ret, doc));
-
-		return ret;
+		return CreateJsonValue(doc);
 	}
 
-	void SaveJson(JsonDocument const& dom, std::ostream& os)
+	void SaveJson(JsonValue const& value, std::ostream& os)
 	{
 		rapidjson::Document doc;
-		SetRapidJsonValueFromJsonValue(doc, doc, *dom.RootValue());
+		SetRapidJsonValue(doc, doc, value);
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
@@ -912,7 +881,7 @@ namespace KlayGE
 	void SaveJson(XMLDocument const& dom, std::ostream& os)
 	{
 		rapidjson::Document doc;
-		AppendJsonValueFromDomNode(doc, doc, *dom.RootNode());
+		AppendJsonValue(doc, doc, *dom.RootNode());
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);

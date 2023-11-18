@@ -70,13 +70,12 @@ namespace KlayGE
 		ResIdentifierPtr metadata_file = ResLoader::Instance().Open(name);
 		if (metadata_file)
 		{
-			auto doc = LoadJson(*metadata_file);
-			auto const* root_value = doc->RootValue();
+			const auto root_value = LoadJson(*metadata_file);
 
-			uint32_t const version = GetInt(*root_value->Member("version"));
+			uint32_t const version = GetInt(*root_value.Member("version"));
 			Verify(version == 1);
 
-			if (auto const* type_val = root_value->Member("type"))
+			if (auto const* type_val = root_value.Member("type"))
 			{
 				size_t const type_hash = HashValue(type_val->ValueString());
 				switch (type_hash)
@@ -92,7 +91,7 @@ namespace KlayGE
 				}
 			}
 
-			if (auto const* slot_val = root_value->Member("slot"))
+			if (auto const* slot_val = root_value.Member("slot"))
 			{
 				size_t const slot_hash = HashValue(slot_val->ValueString());
 				switch (slot_hash)
@@ -126,7 +125,7 @@ namespace KlayGE
 				}
 			}
 
-			if (auto const* prefered_format_val = root_value->Member("prefered_format"))
+			if (auto const* prefered_format_val = root_value.Member("prefered_format"))
 			{
 				size_t const format_hash = HashValue(prefered_format_val->ValueString());
 				switch (format_hash)
@@ -184,7 +183,7 @@ namespace KlayGE
 				}
 			}
 
-			if (auto const* force_srgb_val = root_value->Member("force_srgb"))
+			if (auto const* force_srgb_val = root_value.Member("force_srgb"))
 			{
 				new_metadata.force_srgb_ = force_srgb_val->ValueBool();
 			}
@@ -194,18 +193,18 @@ namespace KlayGE
 					((new_metadata.slot_ == RenderMaterial::TS_Albedo) || (new_metadata.slot_ == RenderMaterial::TS_Emissive));
 			}
 
-			if (auto const* channel_mapping_val = root_value->Member("channel_mapping"))
+			if (auto const* channel_mapping_val = root_value.Member("channel_mapping"))
 			{
 				auto const& values = channel_mapping_val->ValueArray();
 				BOOST_ASSERT(values.size() == 4);
 				uint32_t index = 0;
 				for (auto iter = values.begin(); (iter != values.end()) && (index < 4); ++iter, ++index)
 				{
-					new_metadata.channel_mapping_[index] = static_cast<int8_t>(GetInt(**iter));
+					new_metadata.channel_mapping_[index] = static_cast<int8_t>(GetInt(*iter));
 				}
 			}
 
-			if (auto const* rgb_to_lum_val = root_value->Member("rgb_to_lum"))
+			if (auto const* rgb_to_lum_val = root_value.Member("rgb_to_lum"))
 			{
 				new_metadata.rgb_to_lum_ = rgb_to_lum_val->ValueBool();
 			}
@@ -214,7 +213,7 @@ namespace KlayGE
 				new_metadata.rgb_to_lum_ = (new_metadata.slot_ == RenderMaterial::TS_Height);
 			}
 
-			if (auto const* mipmap_val = root_value->Member("mipmap"))
+			if (auto const* mipmap_val = root_value.Member("mipmap"))
 			{
 				if (auto const* enabled_val = mipmap_val->Member("enabled"))
 				{
@@ -240,7 +239,7 @@ namespace KlayGE
 			}
 
 			{
-				auto const* bump_val = root_value->Member("bump");
+				auto const* bump_val = root_value.Member("bump");
 				if (((new_metadata.slot_ == RenderMaterial::TS_Normal) || (new_metadata.slot_ == RenderMaterial::TS_Height) ||
 						(new_metadata.slot_ == RenderMaterial::TS_Occlusion)) &&
 					(bump_val != nullptr))
@@ -280,7 +279,7 @@ namespace KlayGE
 					auto const& array_values = value.ValueArray();
 					for (auto iter = array_values.begin(); iter != array_values.end(); ++iter)
 					{
-						ret.emplace_back((*iter)->ValueString());
+						ret.emplace_back(iter->ValueString());
 					}
 				}
 				else
@@ -291,7 +290,7 @@ namespace KlayGE
 				return ret;
 			};
 
-			if (auto const* source_val = root_value->Member("source"))
+			if (auto const* source_val = root_value.Member("source"))
 			{
 				if (source_val->Type() == JsonValueType::String)
 				{
@@ -308,13 +307,13 @@ namespace KlayGE
 						auto const& array_values = array_val->ValueArray();
 						for (auto array_iter = array_values.begin(); array_iter != array_values.end(); ++array_iter)
 						{
-							if ((*array_iter)->Type() == JsonValueType::String)
+							if (array_iter->Type() == JsonValueType::String)
 							{
-								new_metadata.plane_file_names_.push_back(load_sources(**array_iter));
+								new_metadata.plane_file_names_.push_back(load_sources(*array_iter));
 							}
 							else
 							{
-								auto const* array_mips_val = (*array_iter)->Member("mips");
+								auto const* array_mips_val = array_iter->Member("mips");
 								BOOST_ASSERT(array_mips_val != nullptr);
 								new_metadata.plane_file_names_.push_back(load_sources(*array_mips_val));
 							}
@@ -339,12 +338,11 @@ namespace KlayGE
 
 	void TexMetadata::Save(std::string const& name) const
 	{
-		JsonDocument doc;
-		auto root_value = doc.AllocValue(JsonValueType::Object);
+		JsonValue root_value(JsonValueType::Object);
 
-		root_value->AppendValue("version", doc.AllocValueUInt(1U));
+		root_value.AppendValue("version", JsonValue(1U));
 
-		root_value->AppendValue("type", doc.AllocValueString("2D"));
+		root_value.AppendValue("type", JsonValue(std::string_view("2D")));
 
 		{
 			std::string slot_str;
@@ -373,7 +371,7 @@ namespace KlayGE
 			default:
 				KFL_UNREACHABLE("Invalid texture slot.");
 			}
-			root_value->AppendValue("slot", doc.AllocValueString(std::move(slot_str)));
+			root_value.AppendValue("slot", JsonValue(std::move(slot_str)));
 		}
 
 		if (prefered_format_ != EF_Unknown)
@@ -432,12 +430,12 @@ namespace KlayGE
 				preferred_format_str = "Unknown";
 				break;
 			}
-			root_value->AppendValue("prefered_format", doc.AllocValueString(std::move(preferred_format_str)));
+			root_value.AppendValue("prefered_format", JsonValue(std::move(preferred_format_str)));
 		}
 
 		if (force_srgb_)
 		{
-			root_value->AppendValue("force_srgb", doc.AllocValueBool(force_srgb_));
+			root_value.AppendValue("force_srgb", JsonValue(force_srgb_));
 		}
 
 		bool need_swizzle = false;
@@ -451,73 +449,73 @@ namespace KlayGE
 		}
 		if (need_swizzle)
 		{
-			auto channel_mapping_val = doc.AllocValue(JsonValueType::Array);
+			JsonValue channel_mapping_val(JsonValueType::Array);
 			for (auto item : channel_mapping_)
 			{
-				channel_mapping_val->AppendValue(doc.AllocValueInt(static_cast<int>(item)));
+				channel_mapping_val.AppendValue(JsonValue(static_cast<int32_t>(item)));
 			}
-			root_value->AppendValue("channel_mapping", std::move(channel_mapping_val));
+			root_value.AppendValue("channel_mapping", std::move(channel_mapping_val));
 		}
 
 		if (rgb_to_lum_)
 		{
-			root_value->AppendValue("rgb_to_lum", doc.AllocValueBool(rgb_to_lum_));
+			root_value.AppendValue("rgb_to_lum", JsonValue(rgb_to_lum_));
 		}
 
 		if (mipmap_.enabled)
 		{
-			auto mipmap_val = doc.AllocValue(JsonValueType::Object);
+			JsonValue mipmap_val(JsonValueType::Object);
 
-			mipmap_val->AppendValue("enabled", doc.AllocValueBool(mipmap_.enabled));
-			mipmap_val->AppendValue("auto_gen", doc.AllocValueBool(mipmap_.auto_gen));
-			mipmap_val->AppendValue("num_levels", doc.AllocValueUInt(mipmap_.num_levels));
-			mipmap_val->AppendValue("linear", doc.AllocValueBool(mipmap_.linear));
+			mipmap_val.AppendValue("enabled", JsonValue(mipmap_.enabled));
+			mipmap_val.AppendValue("auto_gen", JsonValue(mipmap_.auto_gen));
+			mipmap_val.AppendValue("num_levels", JsonValue(mipmap_.num_levels));
+			mipmap_val.AppendValue("linear", JsonValue(mipmap_.linear));
 
-			root_value->AppendValue("mipmap", std::move(mipmap_val));
+			root_value.AppendValue("mipmap", std::move(mipmap_val));
 		}
 
 		if (((slot_ == RenderMaterial::TS_Normal) || (slot_ == RenderMaterial::TS_Height) || (slot_ == RenderMaterial::TS_Occlusion)) &&
 			(bump_.to_normal || bump_.from_normal || bump_.to_occlusion))
 		{
-			auto bump_val = doc.AllocValue(JsonValueType::Object);
+			JsonValue bump_val(JsonValueType::Object);
 
 			if ((slot_ == RenderMaterial::TS_Normal) && bump_.to_normal)
 			{
-				bump_val->AppendValue("to_normal", doc.AllocValueBool(bump_.to_normal));
-				bump_val->AppendValue("scale", doc.AllocValueFloat(bump_.scale));
+				bump_val.AppendValue("to_normal", JsonValue(bump_.to_normal));
+				bump_val.AppendValue("scale", JsonValue(bump_.scale));
 			}
 			if ((slot_ == RenderMaterial::TS_Occlusion) && bump_.to_occlusion)
 			{
-				bump_val->AppendValue("to_occlusion", doc.AllocValueBool(bump_.to_normal));
-				bump_val->AppendValue("occlusion_amplitude", doc.AllocValueFloat(bump_.occlusion_amplitude));
+				bump_val.AppendValue("to_occlusion", JsonValue(bump_.to_normal));
+				bump_val.AppendValue("occlusion_amplitude", JsonValue(bump_.occlusion_amplitude));
 			}
 			if ((slot_ == RenderMaterial::TS_Height) && bump_.from_normal)
 			{
-				bump_val->AppendValue("from_normal", doc.AllocValueBool(bump_.from_normal));
-				bump_val->AppendValue("min_z", doc.AllocValueFloat(bump_.min_z));
+				bump_val.AppendValue("from_normal", JsonValue(bump_.from_normal));
+				bump_val.AppendValue("min_z", JsonValue(bump_.min_z));
 			}
 
-			root_value->AppendValue("bump", std::move(bump_val));
+			root_value.AppendValue("bump", std::move(bump_val));
 		}
 
-		auto store_mips = [this, &doc](size_t index) {
-			auto mip_names_val = doc.AllocValue(JsonValueType::Array);
+		auto store_mips = [this](size_t index) {
+			JsonValue mip_names_val(JsonValueType::Array);
 			for (auto const& plane_file : plane_file_names_[index])
 			{
-				mip_names_val->AppendValue(doc.AllocValueString(plane_file));
+				mip_names_val.AppendValue(JsonValue(plane_file));
 			}
 
-			auto ret = doc.AllocValue(JsonValueType::Object);
-			ret->AppendValue("mips", std::move(mip_names_val));
+			JsonValue ret(JsonValueType::Object);
+			ret.AppendValue("mips", std::move(mip_names_val));
 			return ret;
 		};
 
-		std::unique_ptr<JsonValue> source_val;
+		JsonValue source_val;
 		if (plane_file_names_.size() == 1)
 		{
 			if (plane_file_names_[0].size() == 1)
 			{
-				source_val = doc.AllocValueString(plane_file_names_[0][0]);
+				source_val = JsonValue(plane_file_names_[0][0]);
 			}
 			else
 			{
@@ -526,29 +524,27 @@ namespace KlayGE
 		}
 		else
 		{
-			auto array_names_val = doc.AllocValue(JsonValueType::Array);
+			auto array_names_val = JsonValue(JsonValueType::Array);
 
 			for (size_t i = 0; i < plane_file_names_.size(); ++i)
 			{
 				if (plane_file_names_[i].size() > 1)
 				{
-					array_names_val->AppendValue(store_mips(i));
+					array_names_val.AppendValue(store_mips(i));
 				}
 				else
 				{
-					array_names_val->AppendValue(doc.AllocValueString(plane_file_names_[i][0]));
+					array_names_val.AppendValue(JsonValue(plane_file_names_[i][0]));
 				}
 			}
 
-			source_val = doc.AllocValue(JsonValueType::Object);
-			source_val->AppendValue("array", std::move(array_names_val));
+			source_val = JsonValue(JsonValueType::Object);
+			source_val.AppendValue("array", std::move(array_names_val));
 		}
-		root_value->AppendValue("source", std::move(source_val));
-
-		doc.RootValue(std::move(root_value));
+		root_value.AppendValue("source", std::move(source_val));
 
 		std::ofstream ofs(name);
-		SaveJson(doc, ofs);
+		SaveJson(root_value, ofs);
 	}
 
 	void TexMetadata::DeviceDependentAdjustment(RenderDeviceCaps const& caps)

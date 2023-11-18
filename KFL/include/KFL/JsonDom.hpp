@@ -28,19 +28,17 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_JSON_DOM_HPP
-#define KFL_JSON_DOM_HPP
-
 #pragma once
 
-#include <iosfwd>
-#include <vector>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
 
-#include <KFL/Noncopyable.hpp>
+#include <KFL/CXX20/span.hpp>
 
 namespace KlayGE
 {
-	class JsonValue;
 	class XMLDocument;
 
 	enum class JsonValueType
@@ -55,75 +53,63 @@ namespace KlayGE
 		Object,
 	};
 
-	class JsonDocument
-	{
-		KLAYGE_NONCOPYABLE(JsonDocument);
-
-	public:
-		JsonDocument() noexcept;
-
-		JsonValue* RootValue() const;
-		void RootValue(std::unique_ptr<JsonValue> new_value);
-
-		std::unique_ptr<JsonValue> AllocValue(JsonValueType type);
-		std::unique_ptr<JsonValue> AllocValueNull();
-		std::unique_ptr<JsonValue> AllocValueBool(bool value);
-		std::unique_ptr<JsonValue> AllocValueInt(int32_t value);
-		std::unique_ptr<JsonValue> AllocValueUInt(uint32_t value);
-		std::unique_ptr<JsonValue> AllocValueFloat(float value);
-		std::unique_ptr<JsonValue> AllocValueString(std::string_view value);
-		std::unique_ptr<JsonValue> AllocValueArray(std::vector<std::unique_ptr<JsonValue>> values);
-		std::unique_ptr<JsonValue> AllocValueObject(std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values);
-
-	private:
-		std::unique_ptr<JsonValue> root_;
-	};
-
 	class JsonValue
 	{
-		KLAYGE_NONCOPYABLE(JsonValue);
-
 	public:
-		JsonValue() noexcept;
-		virtual ~JsonValue() noexcept;
+		explicit JsonValue(JsonValueType type);
+		JsonValue();
+		explicit JsonValue(bool value);
+		explicit JsonValue(int32_t value);
+		explicit JsonValue(uint32_t value);
+		explicit JsonValue(float value);
+		explicit JsonValue(std::string_view value);
+		explicit JsonValue(std::span<JsonValue> values);
+		explicit JsonValue(std::span<std::pair<std::string, JsonValue>> values);
+		JsonValue(JsonValue const& rhs);
+		JsonValue(JsonValue&& rhs) noexcept;
+		~JsonValue() noexcept;
 
-		virtual JsonValueType Type() const noexcept = 0;
+		JsonValue& operator=(JsonValue const& rhs);
+		JsonValue& operator=(JsonValue&& rhs) noexcept;
 
-		virtual std::unique_ptr<JsonValue> Clone() = 0;
+		JsonValueType Type() const noexcept;
 
-		virtual JsonValue* Member(std::string_view name) const;
+		JsonValue const* Member(std::string_view name) const;
+		JsonValue* Member(std::string_view name);
 
-		virtual void InsertAfterValue(JsonValue const& location, std::string_view name, std::unique_ptr<JsonValue> new_value);
-		virtual void AppendValue(std::string_view name, std::unique_ptr<JsonValue> new_value);
-		virtual void InsertAfterValue(JsonValue const& location, std::unique_ptr<JsonValue> new_value);
-		virtual void AppendValue(std::unique_ptr<JsonValue> new_value);
+		void InsertAfterValue(JsonValue const& location, std::string_view name, JsonValue new_value);
+		void AppendValue(std::string_view name, JsonValue new_value);
+		void InsertAfterValue(JsonValue const& location, JsonValue new_value);
+		void AppendValue(JsonValue new_value);
 
-		virtual void RemoveValue(JsonValue const& value);
+		void RemoveValue(JsonValue const& value);
 
-		virtual void ClearValues();
+		void ClearValues();
 
-		virtual bool ValueBool() const;
-		virtual int32_t ValueInt() const;
-		virtual uint32_t ValueUInt() const;
-		virtual float ValueFloat() const;
-		virtual std::string_view ValueString() const;
-		virtual std::vector<std::unique_ptr<JsonValue>> const& ValueArray() const;
-		virtual std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> const& ValueObject() const;
+		bool ValueBool() const;
+		int32_t ValueInt() const;
+		uint32_t ValueUInt() const;
+		float ValueFloat() const;
+		std::string_view ValueString() const;
+		std::span<JsonValue const> ValueArray() const;
+		std::span<std::pair<std::string, JsonValue> const> ValueObject() const;
 
-		virtual void Value(bool value);
-		virtual void Value(int32_t value);
-		virtual void Value(uint32_t value);
-		virtual void Value(float value);
-		virtual void Value(std::string_view value);
-		virtual void Value(std::vector<std::unique_ptr<JsonValue>> values);
-		virtual void Value(std::vector<std::pair<std::string, std::unique_ptr<JsonValue>>> values);
-		virtual void ValueIndex(uint32_t index, std::unique_ptr<JsonValue> value);
-		virtual void ValueIndex(uint32_t index, std::string_view name, std::unique_ptr<JsonValue> value);
+		void Value(bool value);
+		void Value(int32_t value);
+		void Value(uint32_t value);
+		void Value(float value);
+		void Value(std::string_view value);
+		void Value(std::span<JsonValue> values);
+		void Value(std::span<std::pair<std::string, JsonValue>> values);
+		void ValueIndex(uint32_t index, JsonValue value);
+		void ValueIndex(uint32_t index, std::string_view name, JsonValue value);
+
+	private:
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 
-	std::unique_ptr<JsonDocument> LoadJson(ResIdentifier& source);
-	void SaveJson(JsonDocument const& dom, std::ostream& os);
+	JsonValue LoadJson(ResIdentifier& source);
+	void SaveJson(JsonValue const& value, std::ostream& os);
 	void SaveJson(XMLDocument const& dom, std::ostream& os);
 } // namespace KlayGE
-
-#endif // KFL_JSON_DOM_HPP
