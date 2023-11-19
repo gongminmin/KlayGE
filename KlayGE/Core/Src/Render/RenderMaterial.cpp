@@ -133,10 +133,9 @@ namespace
 
 			ResIdentifierPtr mtl_input = ResLoader::Instance().Open(mtl_desc_.res_name);
 
-			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*mtl_input);
-			XMLNode const* root = doc->RootNode();
+			XMLNode root = LoadXml(*mtl_input);
 
-			if (XMLAttribute const* attr = root->Attrib("name"))
+			if (XMLAttribute const* attr = root.Attrib("name"))
 			{
 				mtl_desc_.mtl_data->name = std::string(attr->ValueString());
 			}
@@ -162,7 +161,7 @@ namespace
 			mtl_desc_.mtl_data->height_offset_scale = float2(-0.5f, 0.06f);
 			mtl_desc_.mtl_data->tess_factors = float4(5, 5, 1, 9);
 
-			if (XMLNode const* albedo_node = root->FirstNode("albedo"))
+			if (XMLNode const* albedo_node = root.FirstNode("albedo"))
 			{
 				if (XMLAttribute const* attr = albedo_node->Attrib("color"))
 				{
@@ -173,7 +172,7 @@ namespace
 					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Albedo] = std::string(attr->ValueString());
 				}
 			}
-			if (XMLNode const* metalness_glossiness_node = root->FirstNode("metalness_glossiness"))
+			if (XMLNode const* metalness_glossiness_node = root.FirstNode("metalness_glossiness"))
 			{
 				if (XMLAttribute const* attr = metalness_glossiness_node->Attrib("metalness"))
 				{
@@ -190,7 +189,7 @@ namespace
 			}
 			else
 			{
-				if (XMLNode const* metalness_node = root->FirstNode("metalness"))
+				if (XMLNode const* metalness_node = root.FirstNode("metalness"))
 				{
 					if (XMLAttribute const* attr = metalness_node->Attrib("value"))
 					{
@@ -202,7 +201,7 @@ namespace
 					}
 				}
 
-				if (XMLNode const* glossiness_node = root->FirstNode("glossiness"))
+				if (XMLNode const* glossiness_node = root.FirstNode("glossiness"))
 				{
 					if (XMLAttribute const* attr = glossiness_node->Attrib("value"))
 					{
@@ -214,7 +213,7 @@ namespace
 					}
 				}
 			}
-			if (XMLNode const* emissive_node = root->FirstNode("emissive"))
+			if (XMLNode const* emissive_node = root.FirstNode("emissive"))
 			{
 				if (XMLAttribute const* attr = emissive_node->Attrib("color"))
 				{
@@ -225,7 +224,7 @@ namespace
 					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Emissive] = std::string(attr->ValueString());
 				}
 			}
-			if (XMLNode const* normal_node = root->FirstNode("normal"))
+			if (XMLNode const* normal_node = root.FirstNode("normal"))
 			{
 				if (XMLAttribute const* attr = normal_node->Attrib("texture"))
 				{
@@ -236,7 +235,7 @@ namespace
 					mtl_desc_.mtl_data->normal_scale = attr->ValueFloat();
 				}
 			}
-			if (XMLNode const* height_node = root->FirstNode("height"))
+			if (XMLNode const* height_node = root.FirstNode("height"))
 			{
 				if (XMLAttribute const* attr = height_node->Attrib("texture"))
 				{
@@ -251,7 +250,7 @@ namespace
 					mtl_desc_.mtl_data->height_offset_scale.y() = attr->ValueFloat();
 				}
 			}
-			if (XMLNode const* occlusion_node = root->FirstNode("occlusion"))
+			if (XMLNode const* occlusion_node = root.FirstNode("occlusion"))
 			{
 				if (XMLAttribute const* attr = occlusion_node->Attrib("texture"))
 				{
@@ -262,7 +261,7 @@ namespace
 					mtl_desc_.mtl_data->occlusion_strength = attr->ValueFloat();
 				}
 			}
-			if (XMLNode const* detail_node = root->FirstNode("detail"))
+			if (XMLNode const* detail_node = root.FirstNode("detail"))
 			{
 				if (XMLAttribute const* attr = detail_node->Attrib("mode"))
 				{
@@ -301,28 +300,28 @@ namespace
 					}
 				}
 			}
-			if (XMLNode const* transparent_node = root->FirstNode("transparent"))
+			if (XMLNode const* transparent_node = root.FirstNode("transparent"))
 			{
 				if (XMLAttribute const* attr = transparent_node->Attrib("value"))
 				{
 					mtl_desc_.mtl_data->transparent = attr->ValueInt() ? true : false;
 				}
 			}
-			if (XMLNode const* alpha_test_node = root->FirstNode("alpha_test"))
+			if (XMLNode const* alpha_test_node = root.FirstNode("alpha_test"))
 			{
 				if (XMLAttribute const* attr = alpha_test_node->Attrib("value"))
 				{
 					mtl_desc_.mtl_data->alpha_test = attr->ValueFloat();
 				}
 			}
-			if (XMLNode const* sss_node = root->FirstNode("sss"))
+			if (XMLNode const* sss_node = root.FirstNode("sss"))
 			{
 				if (XMLAttribute const* attr = sss_node->Attrib("value"))
 				{
 					mtl_desc_.mtl_data->sss = attr->ValueInt() ? true : false;
 				}
 			}
-			if (XMLNode const* two_sided_node = root->FirstNode("two_sided"))
+			if (XMLNode const* two_sided_node = root.FirstNode("two_sided"))
 			{
 				if (XMLAttribute const* attr = two_sided_node->Attrib("value"))
 				{
@@ -1003,99 +1002,94 @@ namespace KlayGE
 
 	void SaveRenderMaterial(RenderMaterialPtr const & mtl, std::string const & mtlml_name)
 	{
-		XMLDocument doc;
-
-		auto root = doc.AllocNode(XMLNodeType::Element, "material");
+		XMLNode root(XMLNodeType::Element, "material");
 
 		{
-			auto albedo_node = doc.AllocNode(XMLNodeType::Element, "albedo");
+			XMLNode albedo_node(XMLNodeType::Element, "albedo");
 
 			float4 const& albedo = mtl->Albedo();
-			albedo_node->AppendAttrib(
-				doc.AllocAttribString("color", std::format("{} {} {} {}", albedo.x(), albedo.y(), albedo.z(), albedo.w())));
+			albedo_node.AppendAttrib(XMLAttribute("color", std::format("{} {} {} {}", albedo.x(), albedo.y(), albedo.z(), albedo.w())));
 
 			if (!mtl->TextureName(RenderMaterial::TS_Albedo).empty())
 			{
-				albedo_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Albedo)));
+				albedo_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_Albedo)));
 			}
 
-			root->AppendNode(std::move(albedo_node));
+			root.AppendNode(std::move(albedo_node));
 		}
 
 		if ((mtl->Metalness() > 0) || (mtl->Glossiness() > 0) || !mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 		{
-			auto metalness_glossiness_node = doc.AllocNode(XMLNodeType::Element, "metalness_glossiness");
+			XMLNode metalness_glossiness_node(XMLNodeType::Element, "metalness_glossiness");
 
 			if (mtl->Metalness() > 0)
 			{
-				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->Metalness()));
+				metalness_glossiness_node.AppendAttrib(XMLAttribute("value", mtl->Metalness()));
 			}
 			if (mtl->Glossiness() > 0)
 			{
-				metalness_glossiness_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->Glossiness()));
+				metalness_glossiness_node.AppendAttrib(XMLAttribute("value", mtl->Glossiness()));
 			}
 			if (!mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness).empty())
 			{
-				metalness_glossiness_node->AppendAttrib(
-					doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness)));
+				metalness_glossiness_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_MetalnessGlossiness)));
 			}
 
-			root->AppendNode(std::move(metalness_glossiness_node));
+			root.AppendNode(std::move(metalness_glossiness_node));
 		}
 
 		float3 const& emissive = mtl->Emissive();
 		if ((emissive.x() > 0) || (emissive.y() > 0) || (emissive.z() > 0)
 			|| (!mtl->TextureName(RenderMaterial::TS_Emissive).empty()))
 		{
-			auto emissive_node = doc.AllocNode(XMLNodeType::Element, "emissive");
+			XMLNode emissive_node(XMLNodeType::Element, "emissive");
 
 			if ((emissive.x() > 0) || (emissive.y() > 0) || (emissive.z() > 0))
 			{
-				emissive_node->AppendAttrib(
-					doc.AllocAttribString("color", std::format("{} {} {}", emissive.x(), emissive.y(), emissive.z())));
+				emissive_node.AppendAttrib(XMLAttribute("color", std::format("{} {} {}", emissive.x(), emissive.y(), emissive.z())));
 			}
 			if (!mtl->TextureName(RenderMaterial::TS_Emissive).empty())
 			{
-				emissive_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Emissive)));
+				emissive_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_Emissive)));
 			}
 
-			root->AppendNode(std::move(emissive_node));
+			root.AppendNode(std::move(emissive_node));
 		}
 
 		if (!mtl->TextureName(RenderMaterial::TS_Normal).empty())
 		{
-			auto normal_node = doc.AllocNode(XMLNodeType::Element, "normal");
+			XMLNode normal_node(XMLNodeType::Element, "normal");
 
-			normal_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Normal)));
-			normal_node->AppendAttrib(doc.AllocAttribFloat("scale", mtl->NormalScale()));
+			normal_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_Normal)));
+			normal_node.AppendAttrib(XMLAttribute("scale", mtl->NormalScale()));
 
-			root->AppendNode(std::move(normal_node));
+			root.AppendNode(std::move(normal_node));
 		}
 
 		if (!mtl->TextureName(RenderMaterial::TS_Height).empty())
 		{
-			auto height_node = doc.AllocNode(XMLNodeType::Element, "height");
+			XMLNode height_node(XMLNodeType::Element, "height");
 
-			height_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Height)));
-			height_node->AppendAttrib(doc.AllocAttribFloat("offset", mtl->HeightOffset()));
-			height_node->AppendAttrib(doc.AllocAttribFloat("scale", mtl->HeightScale()));
+			height_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_Height)));
+			height_node.AppendAttrib(XMLAttribute("offset", mtl->HeightOffset()));
+			height_node.AppendAttrib(XMLAttribute("scale", mtl->HeightScale()));
 
-			root->AppendNode(std::move(height_node));
+			root.AppendNode(std::move(height_node));
 		}
 
 		if (!mtl->TextureName(RenderMaterial::TS_Occlusion).empty())
 		{
-			auto occlusion_node = doc.AllocNode(XMLNodeType::Element, "occlusion");
+			XMLNode occlusion_node(XMLNodeType::Element, "occlusion");
 
-			occlusion_node->AppendAttrib(doc.AllocAttribString("texture", mtl->TextureName(RenderMaterial::TS_Occlusion)));
-			occlusion_node->AppendAttrib(doc.AllocAttribFloat("strength", mtl->OcclusionStrength()));
+			occlusion_node.AppendAttrib(XMLAttribute("texture", mtl->TextureName(RenderMaterial::TS_Occlusion)));
+			occlusion_node.AppendAttrib(XMLAttribute("strength", mtl->OcclusionStrength()));
 
-			root->AppendNode(std::move(occlusion_node));
+			root.AppendNode(std::move(occlusion_node));
 		}
 
 		if (mtl->DetailMode() != RenderMaterial::SurfaceDetailMode::ParallaxMapping)
 		{
-			auto detail_node = doc.AllocNode(XMLNodeType::Element, "detail");
+			XMLNode detail_node(XMLNodeType::Element, "detail");
 
 			std::string detail_mode_str;
 			switch (mtl->DetailMode())
@@ -1115,66 +1109,64 @@ namespace KlayGE
 			default:
 				KFL_UNREACHABLE("Invalid surface detail mode");
 			}
-			detail_node->AppendAttrib(doc.AllocAttribString("mode", detail_mode_str));
+			detail_node.AppendAttrib(XMLAttribute("mode", detail_mode_str));
 
 			if ((mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::FlatTessellation) ||
 				(mtl->DetailMode() == RenderMaterial::SurfaceDetailMode::SmoothTessellation))
 			{
-				auto tess_node = doc.AllocNode(XMLNodeType::Element, "tess");
-				tess_node->AppendAttrib(doc.AllocAttribFloat("edge_hint", mtl->EdgeTessHint()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("inside_hint", mtl->InsideTessHint()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("min", mtl->MinTessFactor()));
-				tess_node->AppendAttrib(doc.AllocAttribFloat("max", mtl->MaxTessFactor()));
-				detail_node->AppendNode(std::move(tess_node));
+				XMLNode tess_node(XMLNodeType::Element, "tess");
+				tess_node.AppendAttrib(XMLAttribute("edge_hint", mtl->EdgeTessHint()));
+				tess_node.AppendAttrib(XMLAttribute("inside_hint", mtl->InsideTessHint()));
+				tess_node.AppendAttrib(XMLAttribute("min", mtl->MinTessFactor()));
+				tess_node.AppendAttrib(XMLAttribute("max", mtl->MaxTessFactor()));
+				detail_node.AppendNode(std::move(tess_node));
 			}
 
-			root->AppendNode(std::move(detail_node));
+			root.AppendNode(std::move(detail_node));
 		}
 
 		if (mtl->Transparent())
 		{
-			auto transparent_node = doc.AllocNode(XMLNodeType::Element, "transparent");
+			XMLNode transparent_node(XMLNodeType::Element, "transparent");
 
-			transparent_node->AppendAttrib(doc.AllocAttribString("value", "1"));
+			transparent_node.AppendAttrib(XMLAttribute("value", std::string_view("1")));
 
-			root->AppendNode(std::move(transparent_node));
+			root.AppendNode(std::move(transparent_node));
 		}
 
 		if (mtl->AlphaTestThreshold() > 0)
 		{
-			auto alpha_test_node = doc.AllocNode(XMLNodeType::Element, "alpha_test");
+			XMLNode alpha_test_node(XMLNodeType::Element, "alpha_test");
 
-			alpha_test_node->AppendAttrib(doc.AllocAttribFloat("value", mtl->AlphaTestThreshold()));
+			alpha_test_node.AppendAttrib(XMLAttribute("value", mtl->AlphaTestThreshold()));
 
-			root->AppendNode(std::move(alpha_test_node));
+			root.AppendNode(std::move(alpha_test_node));
 		}
 
 		if (mtl->Sss())
 		{
-			auto sss_node = doc.AllocNode(XMLNodeType::Element, "sss");
+			XMLNode sss_node(XMLNodeType::Element, "sss");
 
-			sss_node->AppendAttrib(doc.AllocAttribString("value", "1"));
+			sss_node.AppendAttrib(XMLAttribute("value", std::string_view("1")));
 
-			root->AppendNode(std::move(sss_node));
+			root.AppendNode(std::move(sss_node));
 		}
 
 		if (mtl->TwoSided())
 		{
-			auto two_sided_node = doc.AllocNode(XMLNodeType::Element, "two_sided");
+			XMLNode two_sided_node(XMLNodeType::Element, "two_sided");
 
-			two_sided_node->AppendAttrib(doc.AllocAttribString("value", "1"));
+			two_sided_node.AppendAttrib(XMLAttribute("value", std::string_view("1")));
 
-			root->AppendNode(std::move(two_sided_node));
+			root.AppendNode(std::move(two_sided_node));
 		}
-
-		doc.RootNode(std::move(root));
 
 		std::ofstream ofs(std::string(mtlml_name).c_str());
 		if (!ofs)
 		{
 			ofs.open((ResLoader::Instance().LocalFolder() + mtlml_name).c_str());
 		}
-		SaveXml(doc, ofs);
+		SaveXml(root, ofs);
 	}
 
 

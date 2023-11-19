@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class XMLDocument;
+	class XMLNode;
 
 	enum class JsonValueType
 	{
@@ -111,5 +111,5 @@ namespace KlayGE
 
 	JsonValue LoadJson(ResIdentifier& source);
 	void SaveJson(JsonValue const& value, std::ostream& os);
-	void SaveJson(XMLDocument const& dom, std::ostream& os);
+	void SaveJson(XMLNode const& node, std::ostream& os);
 } // namespace KlayGE

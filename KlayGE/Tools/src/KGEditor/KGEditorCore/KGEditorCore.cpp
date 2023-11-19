@@ -1777,17 +1777,16 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Open(file_name);
 		if (file)
 		{
-			std::unique_ptr<XMLDocument> kges_doc = LoadXml(*file);
-			XMLNode const* kges_root = kges_doc->RootNode();
-			this->SceneName(std::string(kges_root->Attrib("name")->ValueString()));
+			XMLNode kges_root = LoadXml(*file);
+			this->SceneName(std::string(kges_root.Attrib("name")->ValueString()));
 			{
-				if (XMLAttribute const* attr = kges_root->Attrib("skybox"))
+				if (XMLAttribute const* attr = kges_root.Attrib("skybox"))
 				{
 					this->SkyboxName(std::string(attr->ValueString()));
 				}
 			}
 
-			for (XMLNode const* node = kges_root->FirstNode(); node; node = node->NextSibling())
+			for (XMLNode const* node = kges_root.FirstNode(); node; node = node->NextSibling())
 			{
 				if ("model" == node->Name())
 				{

@@ -100,18 +100,17 @@ void PackJTML(std::string const & jtml_name)
 
 	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_path.string());
 
-	std::unique_ptr<XMLDocument> doc = LoadXml(*jtml);
-	XMLNode const* root = doc->RootNode();
+	XMLNode root = LoadXml(*jtml);
 
-	uint32_t n = root->AttribInt("num_tiles", 2048);
+	uint32_t n = root.AttribInt("num_tiles", 2048);
 	uint32_t num_tiles = 1;
 	while (num_tiles * 2 <= n)
 	{
 		num_tiles *= 2;
 	}
 
-	uint32_t tile_size = root->AttribInt("tile_size", 128);
-	std::string_view const fmt_str = root->AttribString("format", "");
+	uint32_t tile_size = root.AttribInt("tile_size", 128);
+	std::string_view const fmt_str = root.AttribString("format", "");
 	ElementFormat format = EF_ARGB8;
 	if ("ARGB8" == fmt_str)
 	{
@@ -130,7 +129,7 @@ void PackJTML(std::string const & jtml_name)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	uint32_t attr = 0;
-	for (XMLNode const* node = root->FirstNode("image"); node; node = node->NextSibling("image"), ++ attr)
+	for (XMLNode const* node = root.FirstNode("image"); node; node = node->NextSibling("image"), ++ attr)
 	{
 		timer.restart();
 

@@ -227,7 +227,7 @@ namespace
 		{
 			rapidjson_value.SetObject();
 
-			std::vector<std::vector<XMLNode*>> cache;
+			std::vector<std::vector<XMLNode const*>> cache;
 			for (auto* child = node.FirstNode(); child; child = child->NextSibling())
 			{
 				bool found = false;
@@ -243,7 +243,7 @@ namespace
 
 				if (!found)
 				{
-					cache.emplace_back(std::vector<XMLNode*>{child});
+					cache.emplace_back(std::vector<XMLNode const*>{child});
 				}
 			}
 			for (auto const& objects : cache)
@@ -878,10 +878,10 @@ namespace KlayGE
 		os << sb.GetString();
 	}
 
-	void SaveJson(XMLDocument const& dom, std::ostream& os)
+	void SaveJson(XMLNode const& node, std::ostream& os)
 	{
 		rapidjson::Document doc;
-		AppendJsonValue(doc, doc, *dom.RootNode());
+		AppendJsonValue(doc, doc, node);
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);

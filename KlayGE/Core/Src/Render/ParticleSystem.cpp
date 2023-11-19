@@ -123,11 +123,10 @@ namespace
 
 			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
 
-			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*psmm_input);
-			XMLNode const* root = doc->RootNode();
+			KlayGE::XMLNode root = LoadXml(*psmm_input);
 
 			{
-				XMLNode const* particle_node = root->FirstNode("particle");
+				XMLNode const* particle_node = root.FirstNode("particle");
 				{
 					XMLNode const* alpha_node = particle_node->FirstNode("alpha");
 					ps_desc_.ps_data->particle_alpha_from_tex = std::string(alpha_node->Attrib("from")->ValueString());
@@ -182,7 +181,7 @@ namespace
 			}
 
 			{
-				XMLNode const* emitter_node = root->FirstNode("emitter");
+				XMLNode const* emitter_node = root.FirstNode("emitter");
 
 				if (XMLAttribute const* type_attr = emitter_node->Attrib("type"))
 				{
@@ -264,7 +263,7 @@ namespace
 			}
 
 			{
-				XMLNode const* updater_node = root->FirstNode("updater");
+				XMLNode const* updater_node = root.FirstNode("updater");
 
 				if (XMLAttribute const* type_attr = updater_node->Attrib("type"))
 				{
@@ -931,142 +930,136 @@ namespace KlayGE
 
 	void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name)
 	{
-		XMLDocument doc;
-
-		auto root = doc.AllocNode(XMLNodeType::Element, "particle_system");
+		XMLNode root(XMLNodeType::Element, "particle_system");
 
 		{
-			auto particle_node = doc.AllocNode(XMLNodeType::Element, "particle");
+			XMLNode particle_node(XMLNodeType::Element, "particle");
 			{
-				auto alpha_node = doc.AllocNode(XMLNodeType::Element, "alpha");
-				alpha_node->AppendAttrib(doc.AllocAttribString("from", ps->ParticleAlphaFromTex()));
-				alpha_node->AppendAttrib(doc.AllocAttribString("to", ps->ParticleAlphaToTex()));
-				particle_node->AppendNode(std::move(alpha_node));
+				XMLNode alpha_node(XMLNodeType::Element, "alpha");
+				alpha_node.AppendAttrib(XMLAttribute("from", ps->ParticleAlphaFromTex()));
+				alpha_node.AppendAttrib(XMLAttribute("to", ps->ParticleAlphaToTex()));
+				particle_node.AppendNode(std::move(alpha_node));
 			}
 			{
-				auto color_node = doc.AllocNode(XMLNodeType::Element, "color");
+				XMLNode color_node(XMLNodeType::Element, "color");
 				{
 					Color const & from = ps->ParticleColorFrom();
-					color_node->AppendAttrib(doc.AllocAttribString("from", std::format("{} {} {}", from.r(), from.g(), from.b())));
+					color_node.AppendAttrib(XMLAttribute("from", std::format("{} {} {}", from.r(), from.g(), from.b())));
 
 					Color const & to = ps->ParticleColorTo();
-					color_node->AppendAttrib(doc.AllocAttribString("to", std::format("{} {} {}", to.r(), to.g(), to.b())));
+					color_node.AppendAttrib(XMLAttribute("to", std::format("{} {} {}", to.r(), to.g(), to.b())));
 				}
-				particle_node->AppendNode(std::move(color_node));
+				particle_node.AppendNode(std::move(color_node));
 			}
-			root->AppendNode(std::move(particle_node));
+			root.AppendNode(std::move(particle_node));
 		}
 
 		for (uint32_t i = 0; i < ps->NumEmitters(); ++ i)
 		{
 			ParticleEmitterPtr const & particle_emitter = ps->Emitter(i);
 
-			auto emitter_node = doc.AllocNode(XMLNodeType::Element, "emitter");
-			emitter_node->AppendAttrib(doc.AllocAttribString("type", particle_emitter->Type()));
+			XMLNode emitter_node(XMLNodeType::Element, "emitter");
+			emitter_node.AppendAttrib(XMLAttribute("type", particle_emitter->Type()));
 
 			{
-				auto freq_node = doc.AllocNode(XMLNodeType::Element, "frequency");
-				freq_node->AppendAttrib(doc.AllocAttribFloat("value", particle_emitter->Frequency()));
-				emitter_node->AppendNode(std::move(freq_node));
+				XMLNode freq_node(XMLNodeType::Element, "frequency");
+				freq_node.AppendAttrib(XMLAttribute("value", particle_emitter->Frequency()));
+				emitter_node.AppendNode(std::move(freq_node));
 			}
 			{
-				auto angle_node = doc.AllocNode(XMLNodeType::Element, "angle");
-				angle_node->AppendAttrib(doc.AllocAttribInt("value", static_cast<int>(particle_emitter->EmitAngle() * RAD2DEG + 0.5f)));
-				emitter_node->AppendNode(std::move(angle_node));
+				XMLNode angle_node(XMLNodeType::Element, "angle");
+				angle_node.AppendAttrib(XMLAttribute("value", static_cast<int>(particle_emitter->EmitAngle() * RAD2DEG + 0.5f)));
+				emitter_node.AppendNode(std::move(angle_node));
 			}
 			{
-				auto pos_node = doc.AllocNode(XMLNodeType::Element, "pos");
-				pos_node->AppendAttrib(
-					doc.AllocAttribString("min", std::format("{} {} {}", particle_emitter->MinPosition().x(),
-													 particle_emitter->MinPosition().y(), particle_emitter->MinPosition().z())));
-				pos_node->AppendAttrib(
-					doc.AllocAttribString("max", std::format("{} {} {}", particle_emitter->MaxPosition().x(),
-													 particle_emitter->MaxPosition().y(), particle_emitter->MaxPosition().z())));
-				emitter_node->AppendNode(std::move(pos_node));
+				XMLNode pos_node(XMLNodeType::Element, "pos");
+				pos_node.AppendAttrib(XMLAttribute("min", std::format("{} {} {}", particle_emitter->MinPosition().x(),
+															   particle_emitter->MinPosition().y(), particle_emitter->MinPosition().z())));
+				pos_node.AppendAttrib(XMLAttribute("max", std::format("{} {} {}", particle_emitter->MaxPosition().x(),
+															   particle_emitter->MaxPosition().y(), particle_emitter->MaxPosition().z())));
+				emitter_node.AppendNode(std::move(pos_node));
 			}		
 			{
-				auto vel_node = doc.AllocNode(XMLNodeType::Element, "vel");
-				vel_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinVelocity()));
-				vel_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxVelocity()));
-				emitter_node->AppendNode(std::move(vel_node));
+				XMLNode vel_node(XMLNodeType::Element, "vel");
+				vel_node.AppendAttrib(XMLAttribute("min", particle_emitter->MinVelocity()));
+				vel_node.AppendAttrib(XMLAttribute("max", particle_emitter->MaxVelocity()));
+				emitter_node.AppendNode(std::move(vel_node));
 			}
 			{
-				auto life_node = doc.AllocNode(XMLNodeType::Element, "life");
-				life_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinLife()));
-				life_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxLife()));
-				emitter_node->AppendNode(std::move(life_node));
+				XMLNode life_node(XMLNodeType::Element, "life");
+				life_node.AppendAttrib(XMLAttribute("min", particle_emitter->MinLife()));
+				life_node.AppendAttrib(XMLAttribute("max", particle_emitter->MaxLife()));
+				emitter_node.AppendNode(std::move(life_node));
 			}
-			root->AppendNode(std::move(emitter_node));
+			root.AppendNode(std::move(emitter_node));
 		}
 
 		for (uint32_t i = 0; i < ps->NumUpdaters(); ++ i)
 		{
 			ParticleUpdaterPtr const & particle_updater = ps->Updater(i);
 
-			auto updater_node = doc.AllocNode(XMLNodeType::Element, "updater");
-			updater_node->AppendAttrib(doc.AllocAttribString("type", particle_updater->Type()));
+			XMLNode updater_node(XMLNodeType::Element, "updater");
+			updater_node.AppendAttrib(XMLAttribute("type", particle_updater->Type()));
 
 			if ("polyline" == particle_updater->Type())
 			{
 				std::shared_ptr<PolylineParticleUpdater> polyline_updater = checked_pointer_cast<PolylineParticleUpdater>(particle_updater);
 
-				auto size_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
-				size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
+				XMLNode size_over_life_node(XMLNodeType::Element, "curve");
+				size_over_life_node.AppendAttrib(XMLAttribute("name", std::string_view("size_over_life")));
 				std::vector<float2> const & size_over_life = polyline_updater->SizeOverLife();
 				for (size_t j = 0; j < size_over_life.size(); ++ j)
 				{
 					float2 const & pt = size_over_life[j];
 
-					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+					XMLNode ctrl_point_node(XMLNodeType::Element, "ctrl_point");
+					ctrl_point_node.AppendAttrib(XMLAttribute("x", pt.x()));
+					ctrl_point_node.AppendAttrib(XMLAttribute("y", pt.y()));
 
-					size_over_life_node->AppendNode(std::move(ctrl_point_node));
+					size_over_life_node.AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(std::move(size_over_life_node));
+				updater_node.AppendNode(std::move(size_over_life_node));
 
-				auto mass_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
-				mass_over_life_node->AppendAttrib(doc.AllocAttribString("name", "mass_over_life"));
+				XMLNode mass_over_life_node(XMLNodeType::Element, "curve");
+				mass_over_life_node.AppendAttrib(XMLAttribute("name", std::string_view("mass_over_life")));
 				std::vector<float2> const & mass_over_life = polyline_updater->MassOverLife();
 				for (size_t j = 0; j < mass_over_life.size(); ++ j)
 				{
 					float2 const & pt = mass_over_life[j];
 
-					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+					XMLNode ctrl_point_node(XMLNodeType::Element, "ctrl_point");
+					ctrl_point_node.AppendAttrib(XMLAttribute("x", pt.x()));
+					ctrl_point_node.AppendAttrib(XMLAttribute("y", pt.y()));
 
-					mass_over_life_node->AppendNode(std::move(ctrl_point_node));
+					mass_over_life_node.AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(std::move(mass_over_life_node));
+				updater_node.AppendNode(std::move(mass_over_life_node));
 
-				auto opacity_over_life_node = doc.AllocNode(XMLNodeType::Element, "curve");
-				opacity_over_life_node->AppendAttrib(doc.AllocAttribString("name", "opacity_over_life"));
+				XMLNode opacity_over_life_node(XMLNodeType::Element, "curve");
+				opacity_over_life_node.AppendAttrib(XMLAttribute("name", std::string_view("opacity_over_life")));
 				std::vector<float2> const & opacity_over_life = polyline_updater->OpacityOverLife();
 				for (size_t j = 0; j < opacity_over_life.size(); ++ j)
 				{
 					float2 const & pt = opacity_over_life[j];
 
-					auto ctrl_point_node = doc.AllocNode(XMLNodeType::Element, "ctrl_point");
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+					XMLNode ctrl_point_node(XMLNodeType::Element, "ctrl_point");
+					ctrl_point_node.AppendAttrib(XMLAttribute("x", pt.x()));
+					ctrl_point_node.AppendAttrib(XMLAttribute("y", pt.y()));
 
-					opacity_over_life_node->AppendNode(std::move(ctrl_point_node));
+					opacity_over_life_node.AppendNode(std::move(ctrl_point_node));
 				}
-				updater_node->AppendNode(std::move(opacity_over_life_node));
+				updater_node.AppendNode(std::move(opacity_over_life_node));
 			}
 
-			root->AppendNode(std::move(updater_node));
+			root.AppendNode(std::move(updater_node));
 		}
-
-		doc.RootNode(std::move(root));
 
 		std::ofstream ofs(psml_name.c_str());
 		if (!ofs)
 		{
 			ofs.open((ResLoader::Instance().LocalFolder() + psml_name).c_str());
 		}
-		SaveXml(doc, ofs);
+		SaveXml(root, ofs);
 	}
 
 

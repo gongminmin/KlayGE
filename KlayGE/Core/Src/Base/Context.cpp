@@ -337,11 +337,10 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Open(cfg_file);
 		if (file)
 		{
-			std::unique_ptr<XMLDocument> cfg_doc = LoadXml(*file);
-			XMLNode const* cfg_root = cfg_doc->RootNode();
+			XMLNode cfg_root = LoadXml(*file);
 
-			XMLNode const* context_node = cfg_root->FirstNode("context");
-			XMLNode const* graphics_node = cfg_root->FirstNode("graphics");
+			XMLNode const* context_node = cfg_root.FirstNode("context");
+			XMLNode const* graphics_node = cfg_root.FirstNode("graphics");
 
 			if (XMLNode const* rf_node = context_node->FirstNode("render_factory"))
 			{
@@ -683,57 +682,56 @@ namespace KlayGE
 
 	void Context::SaveCfg(std::string const & cfg_file)
 	{
-		XMLDocument cfg_doc;
-		auto root = cfg_doc.AllocNode(XMLNodeType::Element, "configure");
+		XMLNode root(XMLNodeType::Element, "configure");
 
 		{
-			auto context_node = cfg_doc.AllocNode(XMLNodeType::Element, "context");
+			XMLNode context_node(XMLNodeType::Element, "context");
 			{
-				auto rf_node = cfg_doc.AllocNode(XMLNodeType::Element, "render_factory");
-				rf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.render_factory_name));
-				context_node->AppendNode(std::move(rf_node));
+				XMLNode rf_node(XMLNodeType::Element, "render_factory");
+				rf_node.AppendAttrib(XMLAttribute("name", cfg_.render_factory_name));
+				context_node.AppendNode(std::move(rf_node));
 
-				auto af_node = cfg_doc.AllocNode(XMLNodeType::Element, "audio_factory");
-				af_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_factory_name));
-				context_node->AppendNode(std::move(af_node));
+				XMLNode af_node(XMLNodeType::Element, "audio_factory");
+				af_node.AppendAttrib(XMLAttribute("name", cfg_.audio_factory_name));
+				context_node.AppendNode(std::move(af_node));
 
-				auto if_node = cfg_doc.AllocNode(XMLNodeType::Element, "input_factory");
-				if_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.input_factory_name));
-				context_node->AppendNode(std::move(if_node));
+				XMLNode if_node(XMLNodeType::Element, "input_factory");
+				if_node.AppendAttrib(XMLAttribute("name", cfg_.input_factory_name));
+				context_node.AppendNode(std::move(if_node));
 
-				auto sm_node = cfg_doc.AllocNode(XMLNodeType::Element, "scene_manager");
-				sm_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.scene_manager_name));
-				context_node->AppendNode(std::move(sm_node));
+				XMLNode sm_node(XMLNodeType::Element, "scene_manager");
+				sm_node.AppendAttrib(XMLAttribute("name", cfg_.scene_manager_name));
+				context_node.AppendNode(std::move(sm_node));
 
-				auto sf_node = cfg_doc.AllocNode(XMLNodeType::Element, "show_factory");
-				sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
-				context_node->AppendNode(std::move(sf_node));
+				XMLNode sf_node(XMLNodeType::Element, "show_factory");
+				sf_node.AppendAttrib(XMLAttribute("name", cfg_.show_factory_name));
+				context_node.AppendNode(std::move(sf_node));
 
-				auto scf_node = cfg_doc.AllocNode(XMLNodeType::Element, "script_factory");
-				scf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.script_factory_name));
-				context_node->AppendNode(std::move(scf_node));
+				XMLNode scf_node(XMLNodeType::Element, "script_factory");
+				scf_node.AppendAttrib(XMLAttribute("name", cfg_.script_factory_name));
+				context_node.AppendNode(std::move(scf_node));
 
-				auto adsf_node = cfg_doc.AllocNode(XMLNodeType::Element, "audio_data_source_factory");
-				adsf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_data_source_factory_name));
-				context_node->AppendNode(std::move(adsf_node));
+				XMLNode adsf_node(XMLNodeType::Element, "audio_data_source_factory");
+				adsf_node.AppendAttrib(XMLAttribute("name", cfg_.audio_data_source_factory_name));
+				context_node.AppendNode(std::move(adsf_node));
 
-				auto perf_profiler_node = cfg_doc.AllocNode(XMLNodeType::Element, "perf_profiler");
-				perf_profiler_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.perf_profiler));
-				context_node->AppendNode(std::move(perf_profiler_node));
+				XMLNode perf_profiler_node(XMLNodeType::Element, "perf_profiler");
+				perf_profiler_node.AppendAttrib(XMLAttribute("enabled", static_cast<uint32_t>(cfg_.perf_profiler)));
+				context_node.AppendNode(std::move(perf_profiler_node));
 
-				auto location_sensor_node = cfg_doc.AllocNode(XMLNodeType::Element, "location_sensor");
-				location_sensor_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.location_sensor));
-				context_node->AppendNode(std::move(location_sensor_node));
+				XMLNode location_sensor_node(XMLNodeType::Element, "location_sensor");
+				location_sensor_node.AppendAttrib(XMLAttribute("enabled", static_cast<uint32_t>(cfg_.location_sensor)));
+				context_node.AppendNode(std::move(location_sensor_node));
 			}
-			root->AppendNode(std::move(context_node));
+			root.AppendNode(std::move(context_node));
 		}
 		{
-			auto graphics_node = cfg_doc.AllocNode(XMLNodeType::Element, "graphics");
+			XMLNode graphics_node(XMLNodeType::Element, "graphics");
 			{
 				{
-					auto frame_node = cfg_doc.AllocNode(XMLNodeType::Element, "frame");
-					frame_node->AppendAttrib(cfg_doc.AllocAttribUInt("width", cfg_.graphics_cfg.width));
-					frame_node->AppendAttrib(cfg_doc.AllocAttribUInt("height", cfg_.graphics_cfg.height));
+					XMLNode frame_node(XMLNodeType::Element, "frame");
+					frame_node.AppendAttrib(XMLAttribute("width", static_cast<uint32_t>(cfg_.graphics_cfg.width)));
+					frame_node.AppendAttrib(XMLAttribute("height", static_cast<uint32_t>(cfg_.graphics_cfg.height)));
 
 					std::string color_fmt_str;
 					switch (cfg_.graphics_cfg.color_fmt)
@@ -758,7 +756,7 @@ namespace KlayGE
 						color_fmt_str = "ARGB8";
 						break;
 					}
-					frame_node->AppendAttrib(cfg_doc.AllocAttribString("color_fmt", color_fmt_str));
+					frame_node.AppendAttrib(XMLAttribute("color_fmt", color_fmt_str));
 
 					std::string depth_stencil_fmt_str;
 					switch (cfg_.graphics_cfg.depth_stencil_fmt)
@@ -779,49 +777,49 @@ namespace KlayGE
 						depth_stencil_fmt_str = "None";
 						break;
 					}
-					frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));
+					frame_node.AppendAttrib(XMLAttribute("depth_stencil_fmt", depth_stencil_fmt_str));
 
-					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("fullscreen", cfg_.graphics_cfg.full_screen));
-					frame_node->AppendAttrib(cfg_doc.AllocAttribInt("keep_screen_on", cfg_.graphics_cfg.keep_screen_on));
+					frame_node.AppendAttrib(XMLAttribute("fullscreen", static_cast<uint32_t>(cfg_.graphics_cfg.full_screen)));
+					frame_node.AppendAttrib(XMLAttribute("keep_screen_on", static_cast<uint32_t>(cfg_.graphics_cfg.keep_screen_on)));
 
 					{
-						auto sample_node = cfg_doc.AllocNode(XMLNodeType::Element, "sample");
-						sample_node->AppendAttrib(cfg_doc.AllocAttribUInt("count", cfg_.graphics_cfg.sample_count));
-						sample_node->AppendAttrib(cfg_doc.AllocAttribUInt("quality", cfg_.graphics_cfg.sample_quality));
-						frame_node->AppendNode(std::move(sample_node));
+						XMLNode sample_node(XMLNodeType::Element, "sample");
+						sample_node.AppendAttrib(XMLAttribute("count", cfg_.graphics_cfg.sample_count));
+						sample_node.AppendAttrib(XMLAttribute("quality", cfg_.graphics_cfg.sample_quality));
+						frame_node.AppendNode(std::move(sample_node));
 					}
 
-					graphics_node->AppendNode(std::move(frame_node));
+					graphics_node.AppendNode(std::move(frame_node));
 				}
 				{
-					auto sync_interval_node = cfg_doc.AllocNode(XMLNodeType::Element, "sync_interval");
-					sync_interval_node->AppendAttrib(cfg_doc.AllocAttribUInt("value", cfg_.graphics_cfg.sync_interval));
-					graphics_node->AppendNode(std::move(sync_interval_node));
+					XMLNode sync_interval_node(XMLNodeType::Element, "sync_interval");
+					sync_interval_node.AppendAttrib(XMLAttribute("value", cfg_.graphics_cfg.sync_interval));
+					graphics_node.AppendNode(std::move(sync_interval_node));
 				}
 				{
-					auto hdr_node = cfg_doc.AllocNode(XMLNodeType::Element, "hdr");
-					hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
-					hdr_node->AppendAttrib(cfg_doc.AllocAttribFloat("bloom", cfg_.graphics_cfg.bloom));
-					hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("blue_shift", cfg_.graphics_cfg.blue_shift));
-					graphics_node->AppendNode(std::move(hdr_node));
+					XMLNode hdr_node(XMLNodeType::Element, "hdr");
+					hdr_node.AppendAttrib(XMLAttribute("value", cfg_.graphics_cfg.hdr));
+					hdr_node.AppendAttrib(XMLAttribute("bloom", cfg_.graphics_cfg.bloom));
+					hdr_node.AppendAttrib(XMLAttribute("blue_shift", static_cast<uint32_t>(cfg_.graphics_cfg.blue_shift)));
+					graphics_node.AppendNode(std::move(hdr_node));
 				}
 				{
-					auto ppaa_node = cfg_doc.AllocNode(XMLNodeType::Element, "ppaa");
-					ppaa_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.ppaa));
-					graphics_node->AppendNode(std::move(ppaa_node));
+					XMLNode ppaa_node(XMLNodeType::Element, "ppaa");
+					ppaa_node.AppendAttrib(XMLAttribute("value", static_cast<uint32_t>(cfg_.graphics_cfg.ppaa)));
+					graphics_node.AppendNode(std::move(ppaa_node));
 				}
 				{
-					auto gamma_node = cfg_doc.AllocNode(XMLNodeType::Element, "gamma");
-					gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));
-					graphics_node->AppendNode(std::move(gamma_node));
+					XMLNode gamma_node(XMLNodeType::Element, "gamma");
+					gamma_node.AppendAttrib(XMLAttribute("value", static_cast<uint32_t>(cfg_.graphics_cfg.gamma)));
+					graphics_node.AppendNode(std::move(gamma_node));
 				}
 				{
-					auto color_grading_node = cfg_doc.AllocNode(XMLNodeType::Element, "color_grading");
-					color_grading_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.color_grading));
-					graphics_node->AppendNode(std::move(color_grading_node));
+					XMLNode color_grading_node(XMLNodeType::Element, "color_grading");
+					color_grading_node.AppendAttrib(XMLAttribute("value", static_cast<uint32_t>(cfg_.graphics_cfg.color_grading)));
+					graphics_node.AppendNode(std::move(color_grading_node));
 				}
 				{
-					auto stereo_node = cfg_doc.AllocNode(XMLNodeType::Element, "stereo");
+					XMLNode stereo_node(XMLNodeType::Element, "stereo");
 					std::string method_str;
 					switch (cfg_.graphics_cfg.stereo_method)
 					{
@@ -869,17 +867,17 @@ namespace KlayGE
 						method_str = "none";
 						break;
 					}
-					stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
+					stereo_node.AppendAttrib(XMLAttribute("method", method_str));
 
 					std::ostringstream oss;
 					oss.precision(2);
 					oss << std::fixed << cfg_.graphics_cfg.stereo_separation;
-					stereo_node->AppendAttrib(cfg_doc.AllocAttribString("separation", oss.str()));
+					stereo_node.AppendAttrib(XMLAttribute("separation", oss.str()));
 
-					graphics_node->AppendNode(std::move(stereo_node));
+					graphics_node.AppendNode(std::move(stereo_node));
 				}
 				{
-					auto output_node = cfg_doc.AllocNode(XMLNodeType::Element, "output");
+					XMLNode output_node(XMLNodeType::Element, "output");
 					std::string method_str;
 					switch (cfg_.graphics_cfg.display_output_method)
 					{
@@ -891,27 +889,24 @@ namespace KlayGE
 						method_str = "srgb";
 						break;
 					}
-					output_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
+					output_node.AppendAttrib(XMLAttribute("method", method_str));
 
-					output_node->AppendAttrib(cfg_doc.AllocAttribString("white", std::to_string(cfg_.graphics_cfg.paper_white)));
-					output_node->AppendAttrib(
-						cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
+					output_node.AppendAttrib(XMLAttribute("white", cfg_.graphics_cfg.paper_white));
+					output_node.AppendAttrib(XMLAttribute("max_lum", cfg_.graphics_cfg.display_max_luminance));
 
-					graphics_node->AppendNode(std::move(output_node));
+					graphics_node.AppendNode(std::move(output_node));
 				}
 				{
-					auto debug_context_node = cfg_doc.AllocNode(XMLNodeType::Element, "debug_context");
-					debug_context_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.debug_context));
-					graphics_node->AppendNode(std::move(debug_context_node));
+					XMLNode debug_context_node(XMLNodeType::Element, "debug_context");
+					debug_context_node.AppendAttrib(XMLAttribute("value", static_cast<uint32_t>(cfg_.graphics_cfg.debug_context)));
+					graphics_node.AppendNode(std::move(debug_context_node));
 				}
 			}
-			root->AppendNode(std::move(graphics_node));
+			root.AppendNode(std::move(graphics_node));
 		}
 
-		cfg_doc.RootNode(std::move(root));
-
 		std::ofstream ofs(cfg_file.c_str());
-		SaveXml(cfg_doc, ofs);
+		SaveXml(root, ofs);
 	}
 
 	void Context::Config(ContextCfg const & cfg)

@@ -796,15 +796,14 @@ namespace KlayGE
 	{
 		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
 
-		std::unique_ptr<XMLDocument> doc = LoadXml(res);
-		XMLNode const* root = doc->RootNode();
+		XMLNode root = LoadXml(res);
 
-		if (XMLAttribute const* attr = root->Attrib("frame_rate"))
+		if (XMLAttribute const* attr = root.Attrib("frame_rate"))
 		{
 			ret->FrameRate(attr->ValueUInt());
 		}
 
-		for (XMLNode const* curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
+		for (XMLNode const* curve_node = root.FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
 			size_t const type_str_hash = HashValue(curve_node->Attrib("type")->ValueString());
 			CameraPathController::InterpolateType type;
@@ -872,14 +871,13 @@ namespace KlayGE
 
 	void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path)
 	{
-		XMLDocument doc;
-		auto root = doc.AllocNode(XMLNodeType::Element, "camera_path");
+		XMLNode root(XMLNodeType::Element, "camera_path");
 
-		root->AppendAttrib(doc.AllocAttribUInt("frame_rate", path->FrameRate()));
+		root.AppendAttrib(XMLAttribute("frame_rate", path->FrameRate()));
 
 		for (uint32_t curve_id = 0; curve_id < path->NumCurves(); ++ curve_id)
 		{
-			auto curve_node = doc.AllocNode(XMLNodeType::Element, "curve");
+			XMLNode curve_node(XMLNodeType::Element, "curve");
 			std::string type_str;
 			CameraPathController::InterpolateType type = path->CurveType(curve_id);
 			switch (type)
@@ -903,40 +901,39 @@ namespace KlayGE
 			default:
 				KFL_UNREACHABLE("Invalid interpolate type");
 			}
-			curve_node->AppendAttrib(doc.AllocAttribString("type", type_str));
-			curve_node->AppendAttrib(doc.AllocAttribUInt("num_frames", path->NumCurveFrames(curve_id)));
+			curve_node.AppendAttrib(XMLAttribute("type", type_str));
+			curve_node.AppendAttrib(XMLAttribute("num_frames", path->NumCurveFrames(curve_id)));
 
 			for (uint32_t key_id = 0; key_id < path->NumControlPoints(curve_id); ++ key_id)
 			{
-				auto key_node = doc.AllocNode(XMLNodeType::Element, "key");
+				XMLNode key_node(XMLNodeType::Element, "key");
 
-				key_node->AppendAttrib(doc.AllocAttribFloat("frame", path->FrameID(curve_id, key_id)));
+				key_node.AppendAttrib(XMLAttribute("frame", path->FrameID(curve_id, key_id)));
 
 				{
 					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
 					std::string const eye_str = std::format("{} {} {}", eye_ctrl_pt.x(), eye_ctrl_pt.y(), eye_ctrl_pt.z());
-					key_node->AppendAttrib(doc.AllocAttribString("eye", eye_str));
+					key_node.AppendAttrib(XMLAttribute("eye", eye_str));
 				}
 				{
 					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
 					std::string const target_str = std::format("{} {} {}", target_ctrl_pt.x(), target_ctrl_pt.y(), target_ctrl_pt.z());
-					key_node->AppendAttrib(doc.AllocAttribString("target", target_str));
+					key_node.AppendAttrib(XMLAttribute("target", target_str));
 				}
 				{
 					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
 					std::string const up_str = std::format("{} {} {}", up_ctrl_pt.x(), up_ctrl_pt.y(), up_ctrl_pt.z());
-					key_node->AppendAttrib(doc.AllocAttribString("up", up_str));
+					key_node.AppendAttrib(XMLAttribute("up", up_str));
 				}
 
-				key_node->AppendAttrib(doc.AllocAttribUInt("corner", path->Corner(curve_id, key_id)));
+				key_node.AppendAttrib(XMLAttribute("corner", path->Corner(curve_id, key_id)));
 
-				curve_node->AppendNode(std::move(key_node));
+				curve_node.AppendNode(std::move(key_node));
 			}
 
-			root->AppendNode(std::move(curve_node));
+			root.AppendNode(std::move(curve_node));
 		}
-		doc.RootNode(std::move(root));
 
-		SaveXml(doc, os);
+		SaveXml(root, os);
 	}
 }

@@ -399,30 +399,28 @@ namespace KlayGE
 			inited_ = true;
 		}
 
-		std::unique_ptr<XMLDocument> doc = LoadXml(source);
-		XMLNode* root = doc->RootNode();
+		XMLNode root = LoadXml(source);
 
-		std::vector<std::unique_ptr<XMLDocument>> include_docs;
-		for (XMLNode const* node = root->FirstNode("include"); node;)
+		std::vector<XMLNode> include_roots;
+		for (XMLNode const* node = root.FirstNode("include"); node;)
 		{
 			XMLAttribute const* attr = node->Attrib("name");
-			include_docs.push_back(LoadXml(*ResLoader::Instance().Open(std::string(attr->ValueString()))));
-			XMLNode const* include_root = include_docs.back()->RootNode();
+			XMLNode const& include_root = include_roots.emplace_back(LoadXml(*ResLoader::Instance().Open(std::string(attr->ValueString()))));
 
-			for (XMLNode const* child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+			for (XMLNode const* child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 			{
 				if (XMLNodeType::Element == child_node->Type())
 				{
-					root->InsertAfterNode(*node, doc->CloneNode(*child_node));
+					root.InsertAfterNode(*node, *child_node);
 				}
 			}
 
 			XMLNode const* node_next = node->NextSibling("include");
-			root->RemoveNode(*node);
+			root.RemoveNode(*node);
 			node = node_next;
 		}
 
-		for (XMLNode const* node = root->FirstNode("dialog"); node; node = node->NextSibling("dialog"))
+		for (XMLNode const* node = root.FirstNode("dialog"); node; node = node->NextSibling("dialog"))
 		{
 			UIDialogPtr dlg;
 			{

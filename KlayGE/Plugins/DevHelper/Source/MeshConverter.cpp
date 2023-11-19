@@ -3124,19 +3124,18 @@ namespace
 	void MeshLoader::LoadFromMeshML(std::string_view input_name, [[maybe_unused]] MeshMetadata const & metadata)
 	{
 		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
-		std::unique_ptr<XMLDocument> doc = LoadXml(*file);
-		XMLNode const* root = doc->RootNode();
+		XMLNode root = LoadXml(*file);
 
-		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
+		BOOST_ASSERT(root.Attrib("version") && (root.Attrib("version")->ValueInt() >= 1));
 
-		if (XMLNode const* bones_chunk = root->FirstNode("bones_chunk"))
+		if (XMLNode const* bones_chunk = root.FirstNode("bones_chunk"))
 		{
 			this->CompileBonesChunk(*bones_chunk);
 		}
 
 		bool const skinned = !joints_.empty();
 
-		if (XMLNode const* meshes_chunk = root->FirstNode("meshes_chunk"))
+		if (XMLNode const* meshes_chunk = root.FirstNode("meshes_chunk"))
 		{
 			this->CompileMeshesChunk(*meshes_chunk);
 		}
@@ -3188,12 +3187,12 @@ namespace
 			render_model_ = MakeSharedPtr<RenderModel>(nodes_[0].node);
 		}
 
-		if (XMLNode const* materials_chunk = root->FirstNode("materials_chunk"))
+		if (XMLNode const* materials_chunk = root.FirstNode("materials_chunk"))
 		{
 			this->CompileMaterialsChunk(*materials_chunk);
 		}
 
-		if (XMLNode const* key_frames_chunk = root->FirstNode("key_frames_chunk"))
+		if (XMLNode const* key_frames_chunk = root.FirstNode("key_frames_chunk"))
 		{
 			this->CompileKeyFramesChunk(*key_frames_chunk);
 
@@ -3231,14 +3230,14 @@ namespace
 				}
 			}
 
-			XMLNode const* bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
+			XMLNode const* bb_kfs_chunk = root.FirstNode("bb_key_frames_chunk");
 			for (uint32_t mesh_index = 0; mesh_index < skinned_model.NumMeshes(); ++ mesh_index)
 			{
 				this->CompileBBKeyFramesChunk(bb_kfs_chunk, mesh_index);
 			}
 		}
 
-		if (XMLNode const* actions_chunk = root->FirstNode("actions_chunk"))
+		if (XMLNode const* actions_chunk = root.FirstNode("actions_chunk"))
 		{
 			this->CompileActionsChunk(*actions_chunk);
 		}

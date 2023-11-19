@@ -346,10 +346,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
-	std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*ifs);
-	XMLNode const* root = doc->RootNode();
+	KlayGE::XMLNode root = LoadXml(*ifs);
 
-	if (XMLAttribute const* attr = root->Attrib("skybox"))
+	if (XMLAttribute const* attr = root.Attrib("skybox"))
 	{
 		auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
@@ -391,7 +390,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 	}
 
-	for (XMLNode const* light_node = root->FirstNode("light"); light_node; light_node = light_node->NextSibling("light"))
+	for (XMLNode const* light_node = root.FirstNode("light"); light_node; light_node = light_node->NextSibling("light"))
 	{
 		LightSourcePtr light;
 		SceneNodePtr scene_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
@@ -550,7 +549,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		}
 	}
 
-	for (XMLNode const* model_node = root->FirstNode("model"); model_node; model_node = model_node->NextSibling("model"))
+	for (XMLNode const* model_node = root.FirstNode("model"); model_node; model_node = model_node->NextSibling("model"))
 	{
 		uint32_t obj_attr = SceneNode::SOA_Cullable;
 		float4x4 obj_mat = float4x4::Identity();
@@ -656,7 +655,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		FrameBuffer& fb = *re.CurFrameBuffer();
 		float aspect = static_cast<float>(fb.Width()) / fb.Height();
 
-		XMLNode const* camera_node = root->FirstNode("camera");
+		XMLNode const* camera_node = root.FirstNode("camera");
 
 		if (XMLNode const* eye_pos_node = camera_node->FirstNode("eye_pos"))
 		{

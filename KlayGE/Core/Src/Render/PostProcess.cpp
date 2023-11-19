@@ -98,14 +98,13 @@ namespace
 
 			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
 
-			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*ppmm_input);
-			XMLNode const* root = doc->RootNode();
+			KlayGE::XMLNode root = LoadXml(*ppmm_input);
 
 			pp_desc_.pp_data->cs_data_per_thread_x = 1;
 			pp_desc_.pp_data->cs_data_per_thread_y = 1;
 			pp_desc_.pp_data->cs_data_per_thread_z = 1;
 
-			for (XMLNode const* pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
+			for (XMLNode const* pp_node = root.FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
 			{
 				std::string_view name = pp_node->Attrib("name")->ValueString();
 				if (pp_desc_.pp_name == name)

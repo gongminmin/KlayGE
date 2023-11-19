@@ -28,12 +28,9 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_XML_DOM_HPP
-#define KFL_XML_DOM_HPP
-
 #pragma once
 
-#include <iosfwd>
+#include <string_view>
 #include <vector>
 
 #include <KFL/Noncopyable.hpp>
@@ -55,54 +52,41 @@ namespace KlayGE
 		PI
 	};
 
-	class XMLDocument
-	{
-		KLAYGE_NONCOPYABLE(XMLDocument);
-
-	public:
-		XMLDocument() noexcept;
-
-		XMLNode* RootNode() const;
-		void RootNode(std::unique_ptr<XMLNode> new_node);
-
-		std::unique_ptr<XMLNode> CloneNode(XMLNode const& node);
-		std::unique_ptr<XMLAttribute> CloneAttrib(XMLAttribute const& attrib);
-
-		std::unique_ptr<XMLNode> AllocNode(XMLNodeType type, std::string_view name);
-		std::unique_ptr<XMLAttribute> AllocAttrib(std::string_view name);
-		std::unique_ptr<XMLAttribute> AllocAttribBool(std::string_view name, bool value);
-		std::unique_ptr<XMLAttribute> AllocAttribInt(std::string_view name, int32_t value);
-		std::unique_ptr<XMLAttribute> AllocAttribUInt(std::string_view name, uint32_t value);
-		std::unique_ptr<XMLAttribute> AllocAttribFloat(std::string_view name, float value);
-		std::unique_ptr<XMLAttribute> AllocAttribString(std::string_view name, std::string_view value);
-
-	private:
-		std::unique_ptr<XMLNode> root_;
-	};
-
 	class XMLNode final
 	{
-		KLAYGE_NONCOPYABLE(XMLNode);
-
 	public:
-		explicit XMLNode(XMLNodeType type);
+		explicit XMLNode(XMLNodeType type, std::string_view name);
+		XMLNode(XMLNode const& rhs);
+		XMLNode(XMLNode&& rhs) noexcept;
+		~XMLNode() noexcept;
 
-		std::string_view Name() const;
-		void Name(std::string_view name);
+		XMLNode& operator=(XMLNode const& rhs);
+		XMLNode& operator=(XMLNode&& rhs) noexcept;
 
-		XMLNodeType Type() const;
+		std::string_view Name() const noexcept;
+		void Name(std::string_view name) noexcept;
 
-		XMLNode* Parent() const;
-		void Parent(XMLNode* parent);
+		XMLNodeType Type() const noexcept;
 
-		XMLAttribute* FirstAttrib(std::string_view name) const;
-		XMLAttribute* NextAttrib(XMLAttribute const& attrib, std::string_view name) const;
-		XMLAttribute* LastAttrib(std::string_view name) const;
-		XMLAttribute* FirstAttrib() const;
-		XMLAttribute* NextAttrib(XMLAttribute const& attrib) const;
-		XMLAttribute* LastAttrib() const;
+		XMLNode const* Parent() const noexcept;
+		XMLNode* Parent() noexcept;
+		void Parent(XMLNode* parent) noexcept;
 
-		XMLAttribute* Attrib(std::string_view name) const;
+		XMLAttribute const* FirstAttrib(std::string_view name) const;
+		XMLAttribute* FirstAttrib(std::string_view name);
+		XMLAttribute const* NextAttrib(XMLAttribute const& attrib, std::string_view name) const;
+		XMLAttribute* NextAttrib(XMLAttribute const& attrib, std::string_view name);
+		XMLAttribute const* LastAttrib(std::string_view name) const;
+		XMLAttribute* LastAttrib(std::string_view name);
+		XMLAttribute const* FirstAttrib() const;
+		XMLAttribute* FirstAttrib();
+		XMLAttribute const* NextAttrib(XMLAttribute const& attrib) const;
+		XMLAttribute* NextAttrib(XMLAttribute const& attrib);
+		XMLAttribute const* LastAttrib() const;
+		XMLAttribute* LastAttrib();
+
+		XMLAttribute const* Attrib(std::string_view name) const;
+		XMLAttribute* Attrib(std::string_view name);
 
 		bool TryConvertAttrib(std::string_view name, bool& val, bool default_val) const;
 		bool TryConvertAttrib(std::string_view name, int32_t& val, int32_t default_val) const;
@@ -115,20 +99,31 @@ namespace KlayGE
 		float AttribFloat(std::string_view name, float default_val) const;
 		std::string_view AttribString(std::string_view name, std::string_view default_val) const;
 
-		XMLNode* FirstNode(std::string_view name) const;
-		XMLNode* LastNode(std::string_view name) const;
-		XMLNode* FirstNode() const;
-		XMLNode* LastNode() const;
+		XMLNode const* FirstNode(std::string_view name) const;
+		XMLNode* FirstNode(std::string_view name);
+		XMLNode const* LastNode(std::string_view name) const;
+		XMLNode* LastNode(std::string_view name);
+		XMLNode const* FirstNode() const;
+		XMLNode* FirstNode();
+		XMLNode const* LastNode() const;
+		XMLNode* LastNode();
 
-		XMLNode* PrevSibling(std::string_view name) const;
-		XMLNode* NextSibling(std::string_view name) const;
-		XMLNode* PrevSibling() const;
-		XMLNode* NextSibling() const;
+		XMLNode const* PrevSibling(std::string_view name) const;
+		XMLNode* PrevSibling(std::string_view name);
+		XMLNode const* NextSibling(std::string_view name) const;
+		XMLNode* NextSibling(std::string_view name);
+		XMLNode const* PrevSibling() const;
+		XMLNode* PrevSibling();
+		XMLNode const* NextSibling() const;
+		XMLNode* NextSibling();
 
-		void InsertAfterNode(XMLNode const& location, std::unique_ptr<XMLNode> new_node);
-		void InsertAfterAttrib(XMLAttribute const& location, std::unique_ptr<XMLAttribute> new_attr);
-		void AppendNode(std::unique_ptr<XMLNode> new_node);
-		void AppendAttrib(std::unique_ptr<XMLAttribute> new_attr);
+		uint32_t FindChildNodeIndex(XMLNode const& node) const;
+		void InsertAt(uint32_t index, XMLNode new_node);
+
+		void InsertAfterNode(XMLNode const& location, XMLNode new_node);
+		void InsertAfterAttrib(XMLAttribute const& location, XMLAttribute new_attr);
+		void AppendNode(XMLNode new_node);
+		void AppendAttrib(XMLAttribute new_attr);
 
 		void RemoveNode(XMLNode const& node);
 		void RemoveAttrib(XMLAttribute const& attr);
@@ -154,31 +149,37 @@ namespace KlayGE
 		void Value(std::string_view value);
 
 	private:
-		XMLNode* parent_{};
-
-		XMLNodeType type_;
-		std::string name_;
-		std::string value_;
-
-		std::vector<std::unique_ptr<XMLNode>> children_;
-		std::vector<std::unique_ptr<XMLAttribute>> attrs_;
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 
 	class XMLAttribute final
 	{
-		KLAYGE_NONCOPYABLE(XMLAttribute);
-
 	public:
-		XMLAttribute();
+		XMLAttribute(std::string_view name);
+		XMLAttribute(std::string_view name, bool value);
+		XMLAttribute(std::string_view name, int32_t value);
+		XMLAttribute(std::string_view name, uint32_t value);
+		XMLAttribute(std::string_view name, float value);
+		XMLAttribute(std::string_view name, std::string_view value);
+		XMLAttribute(XMLAttribute const& rhs);
+		XMLAttribute(XMLAttribute&& rhs) noexcept;
+		~XMLAttribute() noexcept;
 
-		std::string_view Name() const;
-		void Name(std::string_view name);
+		XMLAttribute& operator=(XMLAttribute const& rhs);
+		XMLAttribute& operator=(XMLAttribute&& rhs) noexcept;
 
-		XMLNode* Parent() const;
-		void Parent(XMLNode* parent);
+		std::string_view Name() const noexcept;
+		void Name(std::string_view name) noexcept;
 
-		XMLAttribute* NextAttrib(std::string_view name) const;
-		XMLAttribute* NextAttrib() const;
+		XMLNode const* Parent() const noexcept;
+		XMLNode* Parent() noexcept;
+		void Parent(XMLNode* parent) noexcept;
+
+		XMLAttribute const* NextAttrib(std::string_view name) const;
+		XMLAttribute* NextAttrib(std::string_view name);
+		XMLAttribute const* NextAttrib() const;
+		XMLAttribute* NextAttrib();
 
 		bool TryConvertValue(bool& val) const;
 		bool TryConvertValue(int32_t& val) const;
@@ -198,14 +199,10 @@ namespace KlayGE
 		void Value(std::string_view value);
 
 	private:
-		XMLNode* parent_{};
-
-		std::string name_;
-		std::string value_;
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 
-	std::unique_ptr<XMLDocument> LoadXml(ResIdentifier& source);
-	void SaveXml(XMLDocument const& dom, std::ostream& os);
+	XMLNode LoadXml(ResIdentifier& source);
+	void SaveXml(XMLNode const& node, std::ostream& os);
 } // namespace KlayGE
-
-#endif // KFL_XML_DOM_HPP

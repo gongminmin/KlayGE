@@ -87,22 +87,21 @@ namespace KlayGE
 
 			ResIdentifierPtr impml_input = ResLoader::Instance().Open(imposter_desc_.res_name);
 
-			std::unique_ptr<KlayGE::XMLDocument> doc = LoadXml(*impml_input);
-			XMLNode const* root = doc->RootNode();
+			KlayGE::XMLNode root = LoadXml(*impml_input);
 
-			XMLNode const* azimuth_node = root->FirstNode("azimuth");
+			XMLNode const* azimuth_node = root.FirstNode("azimuth");
 			imposter_desc_.imposter_data->num_azimuth = azimuth_node->Attrib("value")->ValueUInt();
 
-			XMLNode const* elevation_node = root->FirstNode("elevation");
+			XMLNode const* elevation_node = root.FirstNode("elevation");
 			imposter_desc_.imposter_data->num_elevation = elevation_node->Attrib("value")->ValueUInt();
 
-			XMLNode const* size_node = root->FirstNode("size");
+			XMLNode const* size_node = root.FirstNode("size");
 			imposter_desc_.imposter_data->size = size_node->Attrib("value")->ValueUInt();
 
-			XMLNode const* rt0_node = root->FirstNode("rt0");
+			XMLNode const* rt0_node = root.FirstNode("rt0");
 			imposter_desc_.imposter_data->rt0_name = std::string(rt0_node->Attrib("name")->ValueString());
 
-			XMLNode const* rt1_node = root->FirstNode("rt1");
+			XMLNode const* rt1_node = root.FirstNode("rt1");
 			imposter_desc_.imposter_data->rt1_name = std::string(rt1_node->Attrib("name")->ValueString());
 		}
 

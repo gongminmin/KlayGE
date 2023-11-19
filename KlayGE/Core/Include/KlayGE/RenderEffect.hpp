@@ -797,13 +797,11 @@ namespace KlayGE
 #endif
 
 #if KLAYGE_IS_DEV_PLATFORM
-		void PreprocessIncludes(XMLDocument& doc, XMLNode& root, std::vector<std::unique_ptr<XMLDocument>>& include_docs);
+		void PreprocessIncludes(XMLNode& root, std::vector<std::string>& include_names);
 		void RecursiveIncludeNode(XMLNode const& root, std::vector<std::string>& include_names) const;
-		void InsertIncludeNodes(
-			XMLDocument& target_doc, XMLNode& target_root, XMLNode const& target_place, XMLNode const& include_root) const;
 
-		std::unique_ptr<XMLNode> ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNode const* tech_node);
-		void ResolveOverrideTechs(XMLDocument& doc, XMLNode& root);
+		XMLNode ResolveInheritTechNode(XMLNode& root, XMLNode const* tech_node);
+		void ResolveOverrideTechs(XMLNode& root);
 
 		void Load(XMLNode const& root);
 #endif
