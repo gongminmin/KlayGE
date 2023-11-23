@@ -35,14 +35,14 @@
 
 namespace KlayGE
 {
-	template <typename T, int N>
+	template <typename T, size_t N>
 	class Vector_T;
 	template <typename T>
 	class Matrix4_T;
 
 	namespace detail
 	{
-		template <typename T, int N>
+		template <typename T, size_t N>
 		struct dot_helper
 		{
 			static T Do(T const * lhs, T const * rhs) noexcept
@@ -59,7 +59,7 @@ namespace KlayGE
 			}
 		};
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		struct max_minimize_helper
 		{
 			static void DoMax(T out[N], T const lhs[N], T const rhs[N]) noexcept
@@ -88,7 +88,7 @@ namespace KlayGE
 			}
 		};
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		struct transform_helper
 		{
 			static Vector_T<T, 4> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat) noexcept;
@@ -127,7 +127,7 @@ namespace KlayGE
 			}
 		};
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		struct transform_normal_helper
 		{
 			static Vector_T<T, N> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat) noexcept;
@@ -153,7 +153,7 @@ namespace KlayGE
 			}
 		};
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		struct vector_helper
 		{
 			template <typename U>

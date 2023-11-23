@@ -47,11 +47,11 @@ namespace KlayGE
 		template float3 abs(float3 const & x) noexcept;
 		template float4 abs(float4 const & x) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> abs(Vector_T<T, N> const & x) noexcept
 		{
 			Vector_T<T, N> ret;
-			for (int i = 0; i < N; ++ i)
+			for (size_t i = 0; i < N; ++ i)
 			{
 				ret[i] = MathLib::abs(x[i]);
 			}
@@ -67,11 +67,11 @@ namespace KlayGE
 		template float3 sgn(float3 const & x) noexcept;
 		template float4 sgn(float4 const & x) noexcept;
 		
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> sgn(Vector_T<T, N> const & x) noexcept
 		{
 			Vector_T<T, N> ret;
-			for (int i = 0; i < N; ++ i)
+			for (size_t i = 0; i < N; ++ i)
 			{
 				ret[i] = MathLib::sgn(x[i]);
 			}
@@ -87,11 +87,11 @@ namespace KlayGE
 		template float3 sqr(float3 const & x) noexcept;
 		template float4 sqr(float4 const & x) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> sqr(Vector_T<T, N> const & x) noexcept
 		{
 			Vector_T<T, N> ret;
-			for (int i = 0; i < N; ++ i)
+			for (size_t i = 0; i < N; ++ i)
 			{
 				ret[i] = MathLib::sqr(x[i]);
 			}
@@ -107,11 +107,11 @@ namespace KlayGE
 		template float3 cube(float3 const & x) noexcept;
 		template float4 cube(float4 const & x) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cube(Vector_T<T, N> const & x) noexcept
 		{
 			Vector_T<T, N> ret;
-			for (int i = 0; i < N; ++ i)
+			for (size_t i = 0; i < N; ++ i)
 			{
 				ret[i] = MathLib::cube(x[i]);
 			}
@@ -455,7 +455,7 @@ namespace KlayGE
 		template float4 catmull_rom(float4 const & v0, float4 const & v1, float4 const & v2,
 			float4 const & v3, float s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept
 		{
@@ -472,7 +472,7 @@ namespace KlayGE
 		template float4 hermite(float4 const & v1, float4 const & t1, float4 const & v2,
 			float4 const & t2, float s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s) noexcept
 		{
@@ -493,7 +493,7 @@ namespace KlayGE
 		template float4 cubic_b_spline(float4 const & v0, float4 const & v1, float4 const & v2,
 			float4 const & v3, float s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cubic_b_spline(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept
 		{
@@ -512,7 +512,7 @@ namespace KlayGE
 		template float4 cubic_bezier(float4 const & v0, float4 const & v1, float4 const & v2,
 			float4 const & v3, float s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cubic_bezier(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept
 		{
@@ -1540,9 +1540,9 @@ namespace KlayGE
 			}
 			else
 			{
-				int maxi = 0;
+				size_t maxi = 0;
 				T maxdiag = mat(0, 0);
-				for (int i = 1; i < 3; ++ i)
+				for (size_t i = 1; i < 3; ++ i)
 				{
 					if (mat(i, i) > maxdiag)
 					{
@@ -1603,10 +1603,10 @@ namespace KlayGE
 			return normalize(quat);
 		}
 
-		template Quaternion to_quaternion(float3 const & tangent, float3 const & binormal, float3 const & normal, int bits) noexcept;
+		template Quaternion to_quaternion(float3 const & tangent, float3 const & binormal, float3 const & normal, uint32_t bits) noexcept;
 
 		template <typename T>
-		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits) noexcept
+		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, uint32_t bits) noexcept
 		{
 			T k = 1;
 			if (dot(binormal, cross(normal, tangent)) < 0)
@@ -1931,7 +1931,7 @@ namespace KlayGE
 
 			// Compute the covariance matrix of the points.
 			value_type cov[6];
-			for (int i = 0; i < 6; ++ i)
+			for (size_t i = 0; i < 6; ++ i)
 			{
 				cov[i] = 0;
 			}
@@ -1947,7 +1947,7 @@ namespace KlayGE
 				cov[5] += diff[2] * diff[2];
 			}
 
-			for (int i = 0; i < 6; ++ i)
+			for (size_t i = 0; i < 6; ++ i)
 			{
 				cov[i] *= inv_num_points;
 			}
@@ -2282,7 +2282,7 @@ namespace KlayGE
 			Vector_T<T, 3> const extent_x = extent.x() * obb.Axis(0);
 			Vector_T<T, 3> const extent_y = extent.y() * obb.Axis(1);
 			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
-			for (int i = 0; i < 8; ++ i)
+			for (size_t i = 0; i < 8; ++ i)
 			{
 				Vector_T<T, 3> const corner = center + ((i & 1) ? extent_x : -extent_x)
 					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
@@ -2393,11 +2393,11 @@ namespace KlayGE
 		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, Matrix4_T<T> const & mat) noexcept
 		{
 			Frustum_T<T> ret;
-			for (int i = 0; i < 6; ++ i)
+			for (uint32_t i = 0; i < 6; ++ i)
 			{
 				ret.FrustumPlane(i, normalize(mul(frustum.FrustumPlane(i), mat)));
 			}
-			for (int i = 0; i < 8; ++ i)
+			for (uint32_t i = 0; i < 8; ++ i)
 			{
 				ret.Corner(i, transform_coord(frustum.Corner(i), mat));
 			}
@@ -2449,7 +2449,7 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_point_frustum(Vector_T<T, 3> const & v, Frustum_T<T> const & frustum) noexcept
 		{
-			for (int i = 0; i < 6; ++ i)
+			for (uint32_t i = 0; i < 6; ++ i)
 			{
 				if (dot_coord(frustum.FrustumPlane(i), v) < 0)
 				{
@@ -2468,7 +2468,7 @@ namespace KlayGE
 			T t_near = T(-1e10);
 			T t_far = T(+1e10);
 
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
 				if (equal(dir[i], T(0)))
 				{
@@ -2520,7 +2520,7 @@ namespace KlayGE
 			
 			Vector_T<T, 3> const p = obb.Center() - orig;
 			Vector_T<T, 3> const & extent = obb.HalfSize();
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
 				T const e = dot(obb.Axis(i), p);
 				T const f = dot(obb.Axis(i), dir);
@@ -2607,7 +2607,7 @@ namespace KlayGE
 			Vector_T<T, 3> const half_size = lhs.HalfSize();
 			Vector_T<T, 3> const d = sphere.Center() - lhs.Center();
 			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
 				Vector_T<T, 3> axis(0, 0, 0);
 				axis[i] = 1;
@@ -2637,9 +2637,9 @@ namespace KlayGE
 			T epsilon = T(1e-3);
 
 			Matrix4_T<T> r_mat = Matrix4_T<T>::Identity();
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
-				for (int j = 0; j < 3; ++ j)
+				for (uint32_t j = 0; j < 3; ++ j)
 				{
 					r_mat(i, j) = dot(lhs.Axis(i), obb.Axis(j));
 				}
@@ -2649,9 +2649,9 @@ namespace KlayGE
 			t = Vector_T<T, 3>(dot(t, lhs.Axis(0)), dot(t, lhs.Axis(1)), dot(t, lhs.Axis(2)));
 
 			Matrix4_T<T> abs_r_mat = Matrix4_T<T>::Identity();
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
-				for (int j = 0; j < 3; ++ j)
+				for (uint32_t j = 0; j < 3; ++ j)
 				{
 					abs_r_mat(i, j) = MathLib::abs(r_mat(i, j)) + epsilon;
 				}
@@ -2661,7 +2661,7 @@ namespace KlayGE
 			Vector_T<T, 3> const & rr = obb.HalfSize();
 
 			// Test the three major axes of this OBB.
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
 				T const ra = lr[i];
 				T const rb = rr[0] * abs_r_mat(i, 0) +  rr[1] * abs_r_mat(i, 1) + rr[2] * abs_r_mat(i, 2);
@@ -2672,7 +2672,7 @@ namespace KlayGE
 			}
 
 			// Test the three major axes of the OBB b.
-			for (int i = 0; i < 3; ++ i)
+			for (uint32_t i = 0; i < 3; ++ i)
 			{
 				T const ra = lr[0] * abs_r_mat(0, i) + lr[1] * abs_r_mat(1, i) + lr[2] * abs_r_mat(2, i);
 				T const rb = rr[i];

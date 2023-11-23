@@ -47,7 +47,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_add_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = lhs.Vec()[i] + rhs.Vec()[i];
 			}
@@ -61,7 +61,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_sub_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = lhs.Vec()[i] - rhs.Vec()[i];
 			}
@@ -75,7 +75,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_mul_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = lhs.Vec()[i] * rhs.Vec()[i];
 			}
@@ -89,7 +89,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_div_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = lhs.Vec()[i] / rhs.Vec()[i];
 			}
@@ -103,7 +103,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_sub_ps(_mm_setzero_ps(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = -rhs.Vec()[i];
 			}
@@ -173,7 +173,7 @@ namespace KlayGE
 			__m128 data_temp = _mm_sub_ps(_mm_setzero_ps(), res);
 			ret.Vec() = _mm_max_ps(data_temp, res);
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = MathLib::abs(x.Vec()[i]);
 			}
@@ -194,7 +194,7 @@ namespace KlayGE
 			res2 = _mm_sub_ps(zero, res2);
 			ret.Vec() = _mm_add_ps(res1,res2);
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = MathLib::sgn(x.Vec()[i]);
 			}
@@ -219,7 +219,7 @@ namespace KlayGE
 			ret.Vec() = _mm_load_ss(&v);
 #else
 			ret.Vec()[0] = v;
-			for (int i = 1; i < 4; ++ i)
+			for (size_t i = 1; i < 4; ++ i)
 			{
 				ret.Vec()[i] = 0;
 			}
@@ -250,11 +250,11 @@ namespace KlayGE
 			__m128 y = _mm_load_ss(&v[1]);
 			ret.Vec() = _mm_unpacklo_ps(x, y);
 #else
-			for (int i = 0; i < 2; ++ i)
+			for (size_t i = 0; i < 2; ++ i)
 			{
 				ret.Vec()[i] = v[i];
 			}
-			for (int i = 2; i < 4; ++ i)
+			for (size_t i = 2; i < 4; ++ i)
 			{
 				ret.Vec()[i] = 0;
 			}
@@ -272,11 +272,11 @@ namespace KlayGE
 			__m128 xy = _mm_unpacklo_ps(x, y);
 			ret.Vec() = _mm_movelh_ps(xy, z);
 #else
-			for (int i = 0; i < 3; ++ i)
+			for (size_t i = 0; i < 3; ++ i)
 			{
 				ret.Vec()[i] = v[i];
 			}
-			for (int i = 3; i < 4; ++ i)
+			for (size_t i = 3; i < 4; ++ i)
 			{
 				ret.Vec()[i] = 0;
 			}
@@ -290,7 +290,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_load_ps(&v[0]);
 #else
-			for (int i = 0; i < 4; ++i)
+			for (size_t i = 0; i < 4; ++i)
 			{
 				ret.Vec()[i] = v[i];
 			}
@@ -315,7 +315,7 @@ namespace KlayGE
 			_mm_store_ss(&fs[0], x);
 			_mm_store_ss(&fs[1], y);
 #else
-			for (int i = 0; i < 2; ++ i)
+			for (size_t i = 0; i < 2; ++ i)
 			{
 				fs[i] = v.Vec()[i];
 			}
@@ -332,7 +332,7 @@ namespace KlayGE
 			_mm_store_ss(&fs[1], y);
 			_mm_store_ss(&fs[2], z);
 #else
-			for (int i = 0; i < 3; ++ i)
+			for (size_t i = 0; i < 3; ++ i)
 			{
 				fs[i] = v.Vec()[i];
 			}
@@ -344,7 +344,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			_mm_store_ps(&fs[0], v.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				fs[i] = v.Vec()[i];
 			}
@@ -515,7 +515,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_max_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = std::max(lhs.Vec()[i], rhs.Vec()[i]);
 			}
@@ -529,7 +529,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			ret.Vec() = _mm_min_ps(lhs.Vec(), rhs.Vec());
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = std::min(lhs.Vec()[i], rhs.Vec()[i]);
 			}
@@ -637,7 +637,7 @@ namespace KlayGE
 			ret.Vec() = _mm_mul_ps(res1, inv_w);
 #else
 			SIMDVectorF4 temp;
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				temp.Vec()[i] = GetX(v) * mat(0, i) + GetY(v) * mat(1, i) + mat(3, i);
 			}
@@ -647,11 +647,11 @@ namespace KlayGE
 			}
 			else
 			{
-				for (int i = 0; i < 2; ++ i)
+				for (size_t i = 0; i < 2; ++ i)
 				{
 					ret.Vec()[i] = temp.Vec()[i] / GetW(temp);
 				}
-				for (int i = 2; i < 4; ++ i)
+				for (size_t i = 2; i < 4; ++ i)
 				{
 					ret.Vec()[i] = 0;
 				}
@@ -669,11 +669,11 @@ namespace KlayGE
 			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
 			ret.Vec() = _mm_add_ps(res1, res2);
 #else
-			for (int i = 0; i < 2; ++ i)
+			for (size_t i = 0; i < 2; ++ i)
 			{
 				ret.Vec()[i] = GetX(v) * mat(0, i) + GetY(v) * mat(1, i);
 			}
-			for (int i = 2; i < 4; ++ i)
+			for (size_t i = 2; i < 4; ++ i)
 			{
 				ret.Vec()[i] = 0;
 			}
@@ -772,7 +772,7 @@ namespace KlayGE
 			ret.Vec() = _mm_mul_ps(res1, inv_w);
 #else
 			SIMDVectorF4 temp;
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				temp.Vec()[i] = GetX(v) * mat(0, i) + GetY(v) * mat(1, i)
 					+ GetZ(v) * mat(2, i) + mat(3, i);
@@ -783,11 +783,11 @@ namespace KlayGE
 			}
 			else
 			{
-				for (int i = 0; i < 3; ++ i)
+				for (size_t i = 0; i < 3; ++ i)
 				{
 					ret.Vec()[i] = temp.Vec()[i] / GetW(temp);
 				}
-				for (int i = 3; i < 4; ++ i)
+				for (size_t i = 3; i < 4; ++ i)
 				{
 					ret.Vec()[i] = 0;
 				}
@@ -807,12 +807,12 @@ namespace KlayGE
 			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(2, 2, 2, 2)), mat.Row(2).Vec());
 			ret.Vec() = _mm_add_ps(res1, res2);
 #else
-			for (int i = 0; i < 3; ++ i)
+			for (size_t i = 0; i < 3; ++ i)
 			{
 				ret.Vec()[i] = GetX(v) * mat(0, i) + GetY(v) * mat(1, i)
 					+ GetZ(v) * mat(2, i);
 			}
-			for (int i = 3; i < 4; ++ i)
+			for (size_t i = 3; i < 4; ++ i)
 			{
 				ret.Vec()[i] = 0;
 			}
@@ -975,7 +975,7 @@ namespace KlayGE
 			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(3, 3, 3, 3)), mat.Row(3).Vec());
 			ret.Vec() = _mm_add_ps(res1, res2);
 #else
-			for (int i = 0; i < 4; ++ i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				ret.Vec()[i] = GetX(v) * mat(0, i) + GetY(v) * mat(1, i)
 					+ GetZ(v) * mat(2, i) + GetW(v) * mat(3, i);
@@ -1920,9 +1920,9 @@ namespace KlayGE
 			}
 			else
 			{
-				int max_i = 0;
+				size_t max_i = 0;
 				float max_diag = mat(0, 0);
-				for (int i = 1; i < 3; ++ i)
+				for (size_t i = 1; i < 3; ++ i)
 				{
 					if (mat(i, i) > max_diag)
 					{
@@ -1963,7 +1963,7 @@ namespace KlayGE
 			return NormalizeVector4(quat);
 		}
 
-		SIMDVectorF4 ToQuaternion(SIMDVectorF4 const & tangent, SIMDVectorF4 const & binormal, SIMDVectorF4 const & normal, int bits)
+		SIMDVectorF4 ToQuaternion(SIMDVectorF4 const & tangent, SIMDVectorF4 const & binormal, SIMDVectorF4 const & normal, uint32_t bits)
 		{
 			float k = 1;
 			if (GetX(DotVector3(binormal, CrossVector3(normal, tangent))) < 0)

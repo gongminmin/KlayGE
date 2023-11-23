@@ -222,7 +222,7 @@ namespace KlayGE
 		void ToAxisAngle(SIMDVectorF4& vec, float& ang, SIMDVectorF4 const & quat);
 
 		SIMDVectorF4 ToQuaternion(SIMDMatrixF4 const & mat);
-		SIMDVectorF4 ToQuaternion(SIMDVectorF4 const & tangent, SIMDVectorF4 const & binormal, SIMDVectorF4 const & normal, int bits);
+		SIMDVectorF4 ToQuaternion(SIMDVectorF4 const & tangent, SIMDVectorF4 const & binormal, SIMDVectorF4 const & normal, uint32_t bits);
 
 		SIMDVectorF4 Slerp(SIMDVectorF4 const & lhs, SIMDVectorF4 const & rhs, float s);
 

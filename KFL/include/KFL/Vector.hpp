@@ -40,10 +40,10 @@
 
 namespace KlayGE
 {
-	template <typename T, int N>
+	template <typename T, size_t N>
 	class Vector_T final
 	{
-		template <typename U, int M>
+		template <typename U, size_t M>
 		friend class Vector_T;
 
 		typedef std::array<T, N>	DetailType;
@@ -85,7 +85,7 @@ namespace KlayGE
 			: vec_(std::move(rhs.vec_))
 		{
 		}
-		template <typename U, int M>
+		template <typename U, size_t M>
 		constexpr Vector_T(Vector_T<U, M> const & rhs) noexcept
 		{
 			static_assert(M >= N, "Could not convert to a smaller vector.");
@@ -258,7 +258,7 @@ namespace KlayGE
 			vec_ = std::move(rhs.vec_);
 			return *this;
 		}
-		template <typename U, int M>
+		template <typename U, size_t M>
 		Vector_T& operator=(Vector_T<U, M> const & rhs) noexcept
 		{
 			static_assert(M >= N, "Could not assign to a smaller vector.");
@@ -289,7 +289,7 @@ namespace KlayGE
 			return detail::vector_helper<T, N>::DoEqual(vec_.data(), rhs.data());
 		}
 
-		template <int M>
+		template <size_t M>
 		constexpr Vector_T<T, M> const& AsVector() const noexcept
 		{
 			static_assert(M <= N, "Could not get a larger vector.");
@@ -335,7 +335,7 @@ namespace KlayGE
 	using float3 = Vector_T<float, 3>;
 	using float4 = Vector_T<float, 4>;
 
-	template <typename T, int N>
+	template <typename T, size_t N>
 	inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs) noexcept
 	{
 		lhs.swap(rhs);

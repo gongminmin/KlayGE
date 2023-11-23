@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	template <typename T, int N>
+	template <typename T, size_t N>
 	class Vector_T;
 	template <typename T>
 	class Matrix4_T;
@@ -106,7 +106,7 @@ namespace KlayGE
 		{
 			return x < T(0) ? -x : x;
 		}		
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> abs(Vector_T<T, N> const & x) noexcept;
 
 		// 取符号
@@ -116,7 +116,7 @@ namespace KlayGE
 		{
 			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
 		}
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> sgn(Vector_T<T, N> const & x) noexcept;
 
 		// 平方
@@ -126,7 +126,7 @@ namespace KlayGE
 		{
 			return x * x;
 		}
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> sqr(Vector_T<T, N> const & x) noexcept;
 		// 立方
 		template <typename T>
@@ -135,7 +135,7 @@ namespace KlayGE
 		{
 			return sqr(x) * x;
 		}
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cube(Vector_T<T, N> const & x) noexcept;
 
 		// 角度化弧度
@@ -374,19 +374,19 @@ namespace KlayGE
 		template <typename T>
 		T fresnel_term(T const & cos_theta, T const & refraction_index) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cubic_b_spline(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept;
 
-		template <typename T, int N>
+		template <typename T, size_t N>
 		Vector_T<T, N> cubic_bezier(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) noexcept;
 
@@ -574,7 +574,7 @@ namespace KlayGE
 		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat) noexcept;
 
 		template <typename T>
-		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits) noexcept;
+		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, uint32_t bits) noexcept;
 
 		template <typename T>
 		Quaternion_T<T> rotation_axis(Vector_T<T, 3> const & v, T const & angle) noexcept;
