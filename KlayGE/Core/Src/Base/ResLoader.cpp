@@ -186,14 +186,6 @@ namespace KlayGE
 		this->AddPath(local_path_);
 #else
 		this->AddPath("");
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::GetCurrentDirectoryA(sizeof(buf), buf);
-		char* colon = std::find(buf, buf + sizeof(buf), ':');
-		BOOST_ASSERT(colon != buf + sizeof(buf));
-		colon[1] = '/';
-		colon[2] = '\0';
-		this->AddPath(buf);
-#endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		this->AddPath("..");

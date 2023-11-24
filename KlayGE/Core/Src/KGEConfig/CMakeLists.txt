@@ -38,7 +38,3 @@ target_link_libraries(KGEConfig
 	PRIVATE
 		KlayGE_Core
 )
-
-IF(MSVC)
-	CREATE_VCPROJ_USERFILE(KGEConfig)
-ENDIF()

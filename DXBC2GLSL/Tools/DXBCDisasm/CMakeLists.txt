@@ -24,7 +24,3 @@ target_link_libraries(DXBCDisasm
 		DXBC2GLSLLib
 		KFL
 )
-
-IF(MSVC)
-	CREATE_VCPROJ_USERFILE(DXBCDisasm)
-ENDIF()
