@@ -23,16 +23,11 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _CONTEXT_HPP
-#define _CONTEXT_HPP
-
 #pragma once
 
 #include <string>
-#include <boost/assert.hpp>
 
 #include <KlayGE/RenderSettings.hpp>
-#include <KFL/DllLoader.hpp>
 #include <KFL/Noncopyable.hpp>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
@@ -144,47 +139,7 @@ namespace KlayGE
 		ThreadPool& ThreadPoolInstance();
 
 	private:
-		void DestroyAll() noexcept;
-
-	private:
-		static std::unique_ptr<Context> context_instance_;
-
-		ContextCfg cfg_;
-
-#ifdef KLAYGE_PLATFORM_ANDROID
-		android_app* state_;
-#endif
-
-		App3DFramework* app_ = nullptr;
-
-		std::unique_ptr<SceneManager> scene_mgr_;
-
-		std::unique_ptr<RenderFactory> render_factory_;
-		std::unique_ptr<AudioFactory> audio_factory_;
-		std::unique_ptr<InputFactory> input_factory_;
-		std::unique_ptr<ShowFactory> show_factory_;
-		std::unique_ptr<ScriptFactory> script_factory_;
-		std::unique_ptr<AudioDataSourceFactory> audio_data_src_factory_;
-		std::unique_ptr<DeferredRenderingLayer> deferred_rendering_layer_;
-
-#if KLAYGE_IS_DEV_PLATFORM
-		std::unique_ptr<DevHelper> dev_helper_;
-#endif
-
-		DllLoader render_loader_;
-		DllLoader audio_loader_;
-		DllLoader input_loader_;
-		DllLoader show_loader_;
-		DllLoader script_loader_;
-		DllLoader sm_loader_;
-		DllLoader ads_loader_;
-
-#if KLAYGE_IS_DEV_PLATFORM
-		DllLoader dev_helper_loader_;
-#endif
-
-		std::unique_ptr<ThreadPool> gtp_instance_;
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 }
-
-#endif		// _CONTEXT_HPP

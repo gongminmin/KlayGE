@@ -16,6 +16,7 @@
 #pragma once
 
 #include <KFL/com_ptr.hpp>
+#include <KFL/DllLoader.hpp>
 
 #include <atomic>
 #include <memory>

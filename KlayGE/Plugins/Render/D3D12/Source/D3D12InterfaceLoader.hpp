@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <KFL/DllLoader.hpp>
 #include "D3D12Util.hpp"
 
 namespace KlayGE

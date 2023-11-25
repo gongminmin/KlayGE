@@ -23,6 +23,7 @@
 
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/Color.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/SmartPtrHelper.hpp>
 

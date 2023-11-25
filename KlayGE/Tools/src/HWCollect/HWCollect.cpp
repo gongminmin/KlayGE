@@ -33,6 +33,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KFL/com_ptr.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KlayGE/HWDetect.hpp>
 
 #if defined(KLAYGE_PLATFORM_WINDOWS)

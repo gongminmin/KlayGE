@@ -158,6 +158,7 @@ namespace KlayGE
 		};
 
 	public:
+		ThreadPool();
 		ThreadPool(size_t num_min_cached_threads, size_t num_max_cached_threads);
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.

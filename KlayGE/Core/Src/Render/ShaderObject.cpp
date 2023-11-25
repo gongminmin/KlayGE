@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX23/utility.hpp>
 #include <KFL/CustomizedStreamBuf.hpp>
+#include <KFL/DllLoader.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/com_ptr.hpp>
 #include <KFL/Log.hpp>
@@ -40,7 +41,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KFL/CustomizedStreamBuf.hpp>
 
 #include <string>
 #include <vector>

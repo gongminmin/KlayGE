@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <KFL/DllLoader.hpp>
 #include <KFL/Vector.hpp>
 
 #include <vector>

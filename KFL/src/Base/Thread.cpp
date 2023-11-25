@@ -32,6 +32,7 @@
 
 #include <boost/assert.hpp>
 
+#include <KFL/CpuInfo.hpp>
 #include <KFL/Thread.hpp>
 
 namespace KlayGE
@@ -181,6 +182,11 @@ namespace KlayGE
 		num_min_cached_threads_ = num;
 	}
 
+
+	ThreadPool::ThreadPool()
+		: ThreadPool(1, CpuInfo().NumHWThreads() * 2)
+	{
+	}
 
 	ThreadPool::ThreadPool(size_t num_min_cached_threads, size_t num_max_cached_threads)
 		: data_(MakeSharedPtr<CommonData>(num_min_cached_threads, num_max_cached_threads))

@@ -32,6 +32,7 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 
+#include <KFL/DllLoader.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 
