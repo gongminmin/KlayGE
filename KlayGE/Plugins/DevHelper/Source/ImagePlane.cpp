@@ -34,6 +34,7 @@
 #include <KFL/CpuInfo.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Log.hpp>
+#include <KFL/Thread.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/TexCompression.hpp>
 #include <KlayGE/TexCompressionBC.hpp>

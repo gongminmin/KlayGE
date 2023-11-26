@@ -28,24 +28,14 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KLAYGE_CORE_RESLOADER_HPP
-#define KLAYGE_CORE_RESLOADER_HPP
-
 #pragma once
 
-#include <istream>
 #include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
 
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Noncopyable.hpp>
-#include <KFL/Thread.hpp>
-#include <KlayGE/Package.hpp>
-
-#if defined(KLAYGE_PLATFORM_ANDROID)
-struct AAsset;
-#endif
 
 namespace KlayGE
 {
@@ -96,10 +86,7 @@ namespace KlayGE
 		void AddPath(std::string_view phy_path);
 		void DelPath(std::string_view phy_path);
 		bool IsInPath(std::string_view phy_path);
-		std::string const & LocalFolder() const noexcept
-		{
-			return local_path_;
-		}
+		std::string const& LocalFolder() const noexcept;
 
 		void Mount(std::string_view virtual_path, std::string_view phy_path);
 		void Unmount(std::string_view virtual_path, std::string_view phy_path);
@@ -133,60 +120,10 @@ namespace KlayGE
 
 		void Update();
 
-		uint32_t NumLoadingResources() const noexcept
-		{
-			return static_cast<uint32_t>(loading_res_.size());
-		}
+		uint32_t NumLoadingResources() const noexcept;
 
 	private:
-		std::string RealPath(std::string_view path);
-		std::string RealPath(std::string_view path,
-			std::string& package_path, std::string& password, std::string& path_in_package);
-		void DecomposePackageName(std::string_view path,
-			std::string& package_path, std::string& password, std::string& path_in_package);
-
-		void AddLoadedResource(ResLoadingDescPtr const & res_desc, std::shared_ptr<void> const & res);
-		std::shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const & res_desc);
-		void RemoveUnrefResources();
-
-		void LoadingThreadFunc();
-
-#if defined(KLAYGE_PLATFORM_ANDROID)
-		AAsset* LocateFileAndroid(std::string_view name);
-#elif defined(KLAYGE_PLATFORM_IOS)
-		std::string LocateFileIOS(std::string_view name);
-#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
-		std::string LocateFileWinRT(std::string_view name);
-#endif
-
-	private:
-		static std::unique_ptr<ResLoader> res_loader_instance_;
-
-		enum LoadingStatus
-		{
-			LS_Loading,
-			LS_Complete,
-			LS_CanBeRemoved
-		};
-
-		std::string exe_path_;
-		std::string local_path_;
-		std::vector<std::tuple<uint64_t, uint32_t, std::string, PackagePtr>> paths_;
-		std::mutex paths_mutex_;
-
-		std::mutex loaded_mutex_;
-		std::mutex loading_mutex_;
-		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
-		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_;
-
-		bool non_empty_loading_res_queue_ = false;
-		std::condition_variable loading_res_queue_cv_;
-		std::mutex loading_res_queue_mutex_;
-		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
-
-		std::future<void> loading_thread_;
-		volatile bool quit_{false};
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 }
-
-#endif			// KLAYGE_CORE_RESLOADER_HPP

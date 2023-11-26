@@ -35,6 +35,7 @@
 #include <KFL/Hash.hpp>
 
 #include <cstring>
+#include <mutex>
 
 #include <KlayGE/PostProcess.hpp>
 

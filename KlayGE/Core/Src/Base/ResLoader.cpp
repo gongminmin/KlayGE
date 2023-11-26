@@ -38,7 +38,9 @@
 #endif
 #include <filesystem>
 #include <fstream>
+#include <istream>
 #include <sstream>
+#include <vector>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
@@ -74,12 +76,15 @@ namespace uwp
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+#include <KFL/Thread.hpp>
 #include <KlayGE/ResLoader.hpp>
+
+#if defined(KLAYGE_PLATFORM_ANDROID)
+struct AAsset;
+#endif
 
 namespace
 {
-	std::mutex singleton_mutex;
-
 #ifdef KLAYGE_PLATFORM_ANDROID
 	class AAssetStreamBuf : public KlayGE::MemInputStreamBuf
 	{
@@ -104,922 +109,1055 @@ namespace
 
 namespace KlayGE
 {
-	std::unique_ptr<ResLoader> ResLoader::res_loader_instance_;
-
-	ResLoadingDesc::ResLoadingDesc() noexcept = default;
-	ResLoadingDesc::~ResLoadingDesc() noexcept = default;
-
-	ResLoader::ResLoader()
+	class ResLoader::Impl final
 	{
+		KLAYGE_NONCOPYABLE(Impl);
+
+	public:
+		Impl()
+		{
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		char buf[MAX_PATH];
-		::GetModuleFileNameA(nullptr, buf, sizeof(buf));
-		exe_path_ = buf;
-		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
-		local_path_ = exe_path_ + "/";
+			char buf[MAX_PATH];
+			::GetModuleFileNameA(nullptr, buf, sizeof(buf));
+			exe_path_ = buf;
+			exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+			local_path_ = exe_path_ + "/";
 #else
-		auto package = uwp::Package::Current();
-		auto installed_loc_storage_item = package.InstalledLocation().as<uwp::IStorageItem>();
-		auto const installed_loc_folder_name = installed_loc_storage_item.Path();
-		Convert(exe_path_, installed_loc_folder_name);
+			auto package = uwp::Package::Current();
+			auto installed_loc_storage_item = package.InstalledLocation().as<uwp::IStorageItem>();
+			auto const installed_loc_folder_name = installed_loc_storage_item.Path();
+			Convert(exe_path_, installed_loc_folder_name);
 
-		auto app_data = uwp::ApplicationData::Current();
-		auto local_folder_storage_item = app_data.LocalFolder().as<uwp::IStorageItem>();
-		auto const local_folder_name = local_folder_storage_item.Path();
-		Convert(local_path_, local_folder_name);
-		local_path_ += "\\";
+			auto app_data = uwp::ApplicationData::Current();
+			auto local_folder_storage_item = app_data.LocalFolder().as<uwp::IStorageItem>();
+			auto const local_folder_name = local_folder_storage_item.Path();
+			Convert(local_path_, local_folder_name);
+			local_path_ += "\\";
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
-		{
-			FILE* fp = fopen("/proc/self/maps", "r");
-			if (fp != nullptr)
 			{
-				while (!feof(fp))
+				FILE* fp = fopen("/proc/self/maps", "r");
+				if (fp != nullptr)
 				{
-					char line[1024];
-					unsigned long start, end;
-					if (!fgets(line, sizeof(line), fp))
+					while (!feof(fp))
 					{
-						continue;
-					}
-					if (!strstr(line, " r-xp ") || !strchr(line, '/'))
-					{
-						continue;
-					}
+						char line[1024];
+						unsigned long start, end;
+						if (!fgets(line, sizeof(line), fp))
+						{
+							continue;
+						}
+						if (!strstr(line, " r-xp ") || !strchr(line, '/'))
+						{
+							continue;
+						}
 
-					void const * symbol = "";
-					sscanf(line, "%lx-%lx ", &start, &end);
-					if ((symbol >= reinterpret_cast<void const *>(start)) && (symbol < reinterpret_cast<void const *>(end)))
-					{
-						exe_path_ = strchr(line, '/');
-						exe_path_ = exe_path_.substr(0, exe_path_.rfind("/"));
+						void const* symbol = "";
+						sscanf(line, "%lx-%lx ", &start, &end);
+						if ((symbol >= reinterpret_cast<void const*>(start)) && (symbol < reinterpret_cast<void const*>(end)))
+						{
+							exe_path_ = strchr(line, '/');
+							exe_path_ = exe_path_.substr(0, exe_path_.rfind("/"));
+						}
 					}
+					fclose(fp);
 				}
-				fclose(fp);
-			}
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/"));
-			exe_path_ = exe_path_.substr(exe_path_.find_last_of("/") + 1);
-			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("-"));
-			exe_path_ = "/data/data/" + exe_path_;
+				exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/"));
+				exe_path_ = exe_path_.substr(exe_path_.find_last_of("/") + 1);
+				exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("-"));
+				exe_path_ = "/data/data/" + exe_path_;
 #endif
 
-			local_path_ = exe_path_;
-		}
+				local_path_ = exe_path_;
+			}
 #elif defined KLAYGE_PLATFORM_DARWIN
-		uint32_t size = 0;
-		_NSGetExecutablePath(nullptr, &size);
-		auto buffer = MakeUniquePtr<char[]>(size + 1);
-		_NSGetExecutablePath(buffer.get(), &size);
-		buffer[size] = '\0';
-		exe_path_ = buffer.get();
-		exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/") + 1);
-		local_path_ = exe_path_;
+			uint32_t size = 0;
+			_NSGetExecutablePath(nullptr, &size);
+			auto buffer = MakeUniquePtr<char[]>(size + 1);
+			_NSGetExecutablePath(buffer.get(), &size);
+			buffer[size] = '\0';
+			exe_path_ = buffer.get();
+			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/") + 1);
+			local_path_ = exe_path_;
 #endif
 
-		paths_.emplace_back(CT_HASH(""), 0, "", PackagePtr());
+			paths_.emplace_back(CT_HASH(""), 0, "", PackagePtr());
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
-		this->AddPath("Assets/");
-		this->AddPath(local_path_);
+			this->AddPath("Assets/");
+			this->AddPath(local_path_);
 #else
-		this->AddPath("");
+			this->AddPath("");
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
-		this->AddPath("..");
-		this->AddPath("../../media/RenderFX");
-		this->AddPath("../../media/Models");
+			this->AddPath("..");
+			this->AddPath("../../media/RenderFX");
+			this->AddPath("../../media/Models");
 #if KLAYGE_IS_DEV_PLATFORM
-		this->AddPath("../../media/PlatConf");
+			this->AddPath("../../media/PlatConf");
 #endif
-		this->AddPath("../../media/Textures/2D");
-		this->AddPath("../../media/Textures/3D");
-		this->AddPath("../../media/Textures/Cube");
-		this->AddPath("../../media/Textures/Juda");
-		this->AddPath("../../media/Fonts");
-		this->AddPath("../../media/PostProcessors");
+			this->AddPath("../../media/Textures/2D");
+			this->AddPath("../../media/Textures/3D");
+			this->AddPath("../../media/Textures/Cube");
+			this->AddPath("../../media/Textures/Juda");
+			this->AddPath("../../media/Fonts");
+			this->AddPath("../../media/PostProcessors");
 #endif
 #endif
 
-		loading_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoadingThreadFunc(); });
-	}
-
-	ResLoader::~ResLoader()
-	{
-		quit_ = true;
-
+			loading_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoadingThreadFunc(); });
+		}
+		~Impl()
 		{
-			std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
-			non_empty_loading_res_queue_ = true;
-			loading_res_queue_cv_.notify_one();
+			quit_ = true;
+
+			{
+				std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
+				non_empty_loading_res_queue_ = true;
+				loading_res_queue_cv_.notify_one();
+			}
+
+			loading_thread_.wait();
 		}
 
-		loading_thread_.wait();
-	}
-
-	ResLoader& ResLoader::Instance()
-	{
-		if (!res_loader_instance_)
+		static ResLoader& Instance()
 		{
-			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!res_loader_instance_)
 			{
-				res_loader_instance_ = MakeUniquePtr<ResLoader>();
+				std::lock_guard<std::mutex> lock(singleton_mutex_);
+				if (!res_loader_instance_)
+				{
+					res_loader_instance_ = MakeUniquePtr<ResLoader>();
+				}
+			}
+			return *res_loader_instance_;
+		}
+		static void Destroy() noexcept
+		{
+			std::lock_guard<std::mutex> lock(singleton_mutex_);
+			res_loader_instance_.reset();
+		}
+
+		void Suspend()
+		{
+			// TODO
+		}
+		void Resume()
+		{
+			// TODO
+		}
+
+		void AddPath(std::string_view phy_path)
+		{
+			this->Mount("", std::move(phy_path));
+		}
+		void DelPath(std::string_view phy_path)
+		{
+			this->Unmount("", std::move(phy_path));
+		}
+		bool IsInPath(std::string_view phy_path)
+		{
+			std::string_view virtual_path = "";
+
+			std::lock_guard<std::mutex> lock(paths_mutex_);
+
+			std::string real_path = this->RealPath(std::move(phy_path));
+			if (!real_path.empty())
+			{
+				std::string virtual_path_str(virtual_path);
+				if (!virtual_path.empty() && (virtual_path.back() != '/'))
+				{
+					virtual_path_str.push_back('/');
+				}
+				uint64_t const virtual_path_hash = HashValue(virtual_path_str);
+
+				bool found = false;
+				for (auto const& path : paths_)
+				{
+					if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
+					{
+						found = true;
+						break;
+					}
+				}
+
+				return found;
+			}
+			else
+			{
+				return false;
 			}
 		}
-		return *res_loader_instance_;
-	}
-
-	void ResLoader::Destroy() noexcept
-	{
-		std::lock_guard<std::mutex> lock(singleton_mutex);
-		res_loader_instance_.reset();
-	}
-
-	void ResLoader::Suspend()
-	{
-		// TODO
-	}
-
-	void ResLoader::Resume()
-	{
-		// TODO
-	}
-
-	std::string ResLoader::AbsPath(std::string_view path)
-	{
-		std::string path_str(path);
-		std::filesystem::path new_path(path_str);
-		if (!new_path.is_absolute())
+		std::string const& LocalFolder() const noexcept
 		{
-			std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
-			std::error_code ec;
-			if (!std::filesystem::exists(full_path, ec))
+			return local_path_;
+		}
+
+		void Mount(std::string_view virtual_path, std::string_view phy_path)
+		{
+			std::lock_guard<std::mutex> lock(paths_mutex_);
+
+			std::string package_path;
+			std::string password;
+			std::string path_in_package;
+			std::string real_path = this->RealPath(std::move(phy_path),
+				package_path, password, path_in_package);
+			if (!real_path.empty())
 			{
-#ifndef KLAYGE_PLATFORM_ANDROID
-				try
+				std::string virtual_path_str(virtual_path);
+				if (!virtual_path.empty() && (virtual_path.back() != '/'))
 				{
-					full_path = std::filesystem::current_path() / new_path;
+					virtual_path_str.push_back('/');
 				}
-				catch (...)
+				uint64_t const virtual_path_hash = HashValue(virtual_path_str);
+
+				bool found = false;
+				for (auto const& path : paths_)
 				{
-					full_path = new_path;
+					if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
+					{
+						found = true;
+						break;
+					}
 				}
+
+				if (!found)
+				{
+					PackagePtr package;
+					if (!package_path.empty())
+					{
+						for (auto const& path : paths_)
+						{
+							auto const& p = std::get<3>(path);
+							if (p && package_path == p->ArchiveStream()->ResName())
+							{
+								package = p;
+								break;
+							}
+						}
+						if (!package)
+						{
+							uint64_t const timestamp = std::filesystem::last_write_time(package_path).time_since_epoch().count();
+							auto package_res = MakeSharedPtr<ResIdentifier>(
+								package_path, timestamp, MakeSharedPtr<std::ifstream>(package_path.c_str(), std::ios_base::binary));
+
+							package = MakeSharedPtr<Package>(package_res, password);
+						}
+					}
+
+					paths_.emplace_back(virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), real_path, std::move(package));
+				}
+			}
+		}
+		void Unmount(std::string_view virtual_path, std::string_view phy_path)
+		{
+			std::lock_guard<std::mutex> lock(paths_mutex_);
+
+			std::string real_path = this->RealPath(std::move(phy_path));
+			if (!real_path.empty())
+			{
+				std::string virtual_path_str(std::move(virtual_path));
+				if (!virtual_path.empty() && (virtual_path.back() != '/'))
+				{
+					virtual_path_str.push_back('/');
+				}
+				uint64_t const virtual_path_hash = HashValue(virtual_path_str);
+
+				for (auto iter = paths_.begin(); iter != paths_.end(); ++iter)
+				{
+					if ((std::get<0>(*iter) == virtual_path_hash) && (std::get<2>(*iter) == real_path))
+					{
+						paths_.erase(iter);
+						break;
+					}
+				}
+			}
+		}
+
+		ResIdentifierPtr Open(std::string_view name)
+		{
+			if (name.empty())
+			{
+				return ResIdentifierPtr();
+			}
+
+#if defined(KLAYGE_PLATFORM_ANDROID)
+			AAsset* asset = this->LocateFileAndroid(name);
+			if (asset != nullptr)
+			{
+				std::shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
+				std::shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
+				return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
+			}
+#elif defined(KLAYGE_PLATFORM_IOS)
+			std::string const& res_name = this->LocateFileIOS(name);
+			if (!res_name.empty())
+			{
+				FILESYSTEM_NS::path res_path(res_name);
+				uint64_t const timestamp = FILESYSTEM_NS::last_write_time(res_path).time_since_epoch().count();
+				return MakeSharedPtr<ResIdentifier>(name, timestamp,
+					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+			}
+#else
+			{
+				std::lock_guard<std::mutex> lock(paths_mutex_);
+				for (auto const& path : paths_)
+				{
+					if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
+					{
+						std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
+#if defined KLAYGE_PLATFORM_WINDOWS
+						std::replace(res_name.begin(), res_name.end(), '\\', '/');
+#endif
+
+						std::filesystem::path res_path(res_name);
+						std::error_code ec;
+						if (std::filesystem::exists(res_path, ec))
+						{
+							uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+							return MakeSharedPtr<ResIdentifier>(
+								name, timestamp, MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+						}
+						else
+						{
+							std::string package_path;
+							std::string password;
+							std::string path_in_package;
+							this->DecomposePackageName(res_name, package_path, password, path_in_package);
+							auto const& package = std::get<3>(path);
+							if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
+							{
+								auto res = package->Extract(path_in_package, name);
+								if (res)
+								{
+									return res;
+								}
+							}
+						}
+					}
+
+					if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+					{
+						break;
+					}
+				}
+			}
+#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
+			std::string const& res_name = this->LocateFileWinRT(name);
+			if (!res_name.empty())
+			{
+				return this->Open(res_name);
+			}
+#endif
+#endif
+
+			return ResIdentifierPtr();
+		}
+		std::string Locate(std::string_view name)
+		{
+			if (name.empty())
+			{
+				return "";
+			}
+
+#if defined(KLAYGE_PLATFORM_ANDROID)
+			AAsset* asset = this->LocateFileAndroid(name);
+			if (asset != nullptr)
+			{
+				AAsset_close(asset);
+				return std::string(name);
+			}
+#elif defined(KLAYGE_PLATFORM_IOS)
+			return this->LocateFileIOS(name);
+#else
+			{
+				std::lock_guard<std::mutex> lock(paths_mutex_);
+				for (auto const& path : paths_)
+				{
+					if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
+					{
+						std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
+#if defined KLAYGE_PLATFORM_WINDOWS
+						std::replace(res_name.begin(), res_name.end(), '\\', '/');
+#endif
+
+						std::error_code ec;
+						if (std::filesystem::exists(res_name, ec))
+						{
+							return res_name;
+						}
+						else
+						{
+							std::string package_path;
+							std::string password;
+							std::string path_in_package;
+							this->DecomposePackageName(res_name, package_path, password, path_in_package);
+							auto const& package = std::get<3>(path);
+							if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
+							{
+								if (package->Locate(path_in_package))
+								{
+									return res_name;
+								}
+							}
+						}
+					}
+
+					if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+					{
+						break;
+					}
+				}
+			}
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
+			std::string const& res_name = this->LocateFileWinRT(name);
+			if (!res_name.empty())
+			{
+				return this->Locate(res_name);
+			}
+#endif
+#endif
+
+			return "";
+		}
+		uint64_t Timestamp(std::string_view name)
+		{
+			uint64_t timestamp = 0;
+			auto res_path = this->Locate(std::move(name));
+			if (!res_path.empty())
+			{
+#if !defined(KLAYGE_PLATFORM_ANDROID)
+				timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+#endif
+			}
+
+			return timestamp;
+		}
+		std::string AbsPath(std::string_view path)
+		{
+			std::string path_str(std::move(path));
+			std::filesystem::path new_path(path_str);
+			if (!new_path.is_absolute())
+			{
+				std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
+				std::error_code ec;
 				if (!std::filesystem::exists(full_path, ec))
 				{
-					return "";
+#ifndef KLAYGE_PLATFORM_ANDROID
+					try
+					{
+						full_path = std::filesystem::current_path() / new_path;
 				}
+					catch (...)
+					{
+						full_path = new_path;
+					}
+					if (!std::filesystem::exists(full_path, ec))
+					{
+						return "";
+					}
 #else
-				return "";
+					return "";
 #endif
 			}
-			new_path = full_path;
+				new_path = full_path;
 		}
-		std::string ret = new_path.string();
+			std::string ret = new_path.string();
 #if defined KLAYGE_PLATFORM_WINDOWS
-		std::replace(ret.begin(), ret.end(), '\\', '/');
+			std::replace(ret.begin(), ret.end(), '\\', '/');
 #endif
-		return ret;
-	}
+			return ret;
+		}
 
-	std::string ResLoader::RealPath(std::string_view path)
-	{
-		std::string package_path;
-		std::string password;
-		std::string path_in_package;
-		return this->RealPath(path, package_path, password, path_in_package);
-	}
-
-	std::string ResLoader::RealPath(std::string_view path,
-		std::string& package_path, std::string& password, std::string& path_in_package)
-	{
-		package_path = "";
-		password = "";
-		path_in_package = "";
-
-		std::string abs_path = this->AbsPath(path);
-		if (abs_path.empty())
+		std::shared_ptr<void> SyncQuery(ResLoadingDescPtr const& res_desc)
 		{
-			this->DecomposePackageName(path, package_path, password, path_in_package);
-			if (!package_path.empty())
+			this->RemoveUnrefResources();
+
+			std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+			std::shared_ptr<void> res;
+			if (loaded_res)
 			{
-				std::string real_package_path = this->RealPath(package_path);
-				real_package_path.pop_back();
-
-				package_path = real_package_path;
-
-				abs_path = real_package_path;
-				if (!password.empty())
+				if (res_desc->StateLess())
 				{
-					abs_path += "|" + password;
+					res = loaded_res;
 				}
-				if (!path_in_package.empty())
+				else
 				{
-					abs_path += "/" + path_in_package;
+					res = res_desc->CloneResourceFrom(loaded_res);
+					if (res != loaded_res)
+					{
+						this->AddLoadedResource(res_desc, res);
+					}
 				}
+			}
+			else
+			{
+				std::shared_ptr<volatile LoadingStatus> async_is_done;
+				bool found = false;
+				{
+					std::lock_guard<std::mutex> lock(loading_mutex_);
+
+					for (auto const& lrq : loading_res_)
+					{
+						if (lrq.first->Match(*res_desc))
+						{
+							res_desc->CopyDataFrom(*lrq.first);
+							async_is_done = lrq.second;
+							found = true;
+							break;
+						}
+					}
+				}
+
+				if (found)
+				{
+					*async_is_done = LS_Complete;
+				}
+				else
+				{
+					res = res_desc->CreateResource();
+				}
+
+				if (res_desc->HasSubThreadStage())
+				{
+					res_desc->SubThreadStage();
+				}
+
+				res_desc->MainThreadStage();
+				res = res_desc->Resource();
+				this->AddLoadedResource(res_desc, res);
+			}
+
+			return res;
+		}
+		std::shared_ptr<void> ASyncQuery(ResLoadingDescPtr const& res_desc)
+		{
+			this->RemoveUnrefResources();
+
+			std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+			std::shared_ptr<void> res;
+			if (loaded_res)
+			{
+				if (res_desc->StateLess())
+				{
+					res = loaded_res;
+				}
+				else
+				{
+					res = res_desc->CloneResourceFrom(loaded_res);
+					if (res != loaded_res)
+					{
+						this->AddLoadedResource(res_desc, res);
+					}
+				}
+			}
+			else
+			{
+				std::shared_ptr<volatile LoadingStatus> async_is_done;
+				bool found = false;
+				{
+					std::lock_guard<std::mutex> lock(loading_mutex_);
+
+					for (auto const& lrq : loading_res_)
+					{
+						if (lrq.first->Match(*res_desc))
+						{
+							res_desc->CopyDataFrom(*lrq.first);
+							async_is_done = lrq.second;
+							found = true;
+							break;
+						}
+					}
+				}
+
+				if (found)
+				{
+					res = res_desc->Resource();
+
+					if (!res_desc->StateLess())
+					{
+						std::lock_guard<std::mutex> lock(loading_mutex_);
+						loading_res_.emplace_back(res_desc, async_is_done);
+					}
+				}
+				else
+				{
+					if (res_desc->HasSubThreadStage())
+					{
+						res = res_desc->CreateResource();
+
+						async_is_done = MakeSharedPtr<LoadingStatus>(LS_Loading);
+
+						{
+							std::lock_guard<std::mutex> lock(loading_mutex_);
+							loading_res_.emplace_back(res_desc, async_is_done);
+						}
+						{
+							std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
+							loading_res_queue_.emplace_back(res_desc, async_is_done);
+							non_empty_loading_res_queue_ = true;
+							loading_res_queue_cv_.notify_one();
+						}
+					}
+					else
+					{
+						res_desc->MainThreadStage();
+						res = res_desc->Resource();
+						this->AddLoadedResource(res_desc, res);
+					}
+				}
+			}
+			return res;
+		}
+		void Unload(std::shared_ptr<void> const& res)
+		{
+			std::lock_guard<std::mutex> lock(loaded_mutex_);
+
+			for (auto iter = loaded_res_.begin(); iter != loaded_res_.end(); ++iter)
+			{
+				if (res == iter->second.lock())
+				{
+					loaded_res_.erase(iter);
+					break;
+				}
+			}
+		}
+
+		void Update()
+		{
+			std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> tmp_loading_res;
+			{
+				std::lock_guard<std::mutex> lock(loading_mutex_);
+				tmp_loading_res = loading_res_;
+			}
+
+			for (auto& lrq : tmp_loading_res)
+			{
+				if (LS_Complete == *lrq.second)
+				{
+					ResLoadingDescPtr const& res_desc = lrq.first;
+
+					std::shared_ptr<void> res;
+					std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+					if (loaded_res)
+					{
+						if (!res_desc->StateLess())
+						{
+							res = res_desc->CloneResourceFrom(loaded_res);
+							if (res != loaded_res)
+							{
+								this->AddLoadedResource(res_desc, res);
+							}
+						}
+					}
+					else
+					{
+						res_desc->MainThreadStage();
+						res = res_desc->Resource();
+						this->AddLoadedResource(res_desc, res);
+					}
+				}
+			}
+			for (auto& lrq : tmp_loading_res)
+			{
+				if (LS_Complete == *lrq.second)
+				{
+					*lrq.second = LS_CanBeRemoved;
+				}
+			}
+
+			{
+				std::lock_guard<std::mutex> lock(loading_mutex_);
+				for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
+				{
+					if (LS_CanBeRemoved == *(iter->second))
+					{
+						iter = loading_res_.erase(iter);
+					}
+					else
+					{
+						++iter;
+					}
+				}
+			}
+		}
+
+		uint32_t NumLoadingResources() const noexcept
+		{
+			return static_cast<uint32_t>(loading_res_.size());
+		}
+
+	private:
+		std::string RealPath(std::string_view path)
+		{
+			std::string package_path;
+			std::string password;
+			std::string path_in_package;
+			return this->RealPath(std::move(path), package_path, password, path_in_package);
+		}
+		std::string RealPath(std::string_view path,
+			std::string& package_path, std::string& password, std::string& path_in_package)
+		{
+			package_path = "";
+			password = "";
+			path_in_package = "";
+
+			std::string abs_path = this->AbsPath(path);
+			if (abs_path.empty())
+			{
+				this->DecomposePackageName(path, package_path, password, path_in_package);
+				if (!package_path.empty())
+				{
+					std::string real_package_path = this->RealPath(package_path);
+					real_package_path.pop_back();
+
+					package_path = real_package_path;
+
+					abs_path = real_package_path;
+					if (!password.empty())
+					{
+						abs_path += "|" + password;
+					}
+					if (!path_in_package.empty())
+					{
+						abs_path += "/" + path_in_package;
+					}
+					if (abs_path.back() != '/')
+					{
+						abs_path.push_back('/');
+					}
+				}
+			}
+			else
+			{
+				this->DecomposePackageName(abs_path, package_path, password, path_in_package);
+
 				if (abs_path.back() != '/')
 				{
 					abs_path.push_back('/');
 				}
 			}
+
+			return abs_path;
 		}
-		else
+		void DecomposePackageName(std::string_view path,
+			std::string& package_path, std::string& password, std::string& path_in_package)
 		{
-			this->DecomposePackageName(abs_path, package_path, password, path_in_package);
+			package_path = "";
+			password = "";
+			path_in_package = "";
 
-			if (abs_path.back() != '/')
+			size_t start_offset = 0;
+			for (;;)
 			{
-				abs_path.push_back('/');
-			}
-		}
-
-		return abs_path;
-	}
-
-	void ResLoader::DecomposePackageName(std::string_view path,
-		std::string& package_path, std::string& password, std::string& path_in_package)
-	{
-		package_path = "";
-		password = "";
-		path_in_package = "";
-
-		size_t start_offset = 0;
-		for (;;)
-		{
-			auto const pkt_offset = path.find(".7z", start_offset);
-			if (pkt_offset != std::string_view::npos)
-			{
-				package_path = std::string(path.substr(0, pkt_offset + 3));
-				std::filesystem::path pkt_path(package_path);
-				std::error_code ec;
-				if (std::filesystem::exists(pkt_path, ec) &&
-					(std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
+				auto const pkt_offset = path.find(".7z", start_offset);
+				if (pkt_offset != std::string_view::npos)
 				{
-					auto const next_slash_offset = path.find('/', pkt_offset + 3);
-					if ((path.size() > pkt_offset + 3) && (path[pkt_offset + 3] == '|'))
+					package_path = std::string(path.substr(0, pkt_offset + 3));
+					std::filesystem::path pkt_path(package_path);
+					std::error_code ec;
+					if (std::filesystem::exists(pkt_path, ec) &&
+						(std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
 					{
-						auto const password_start_offset = pkt_offset + 4;
+						auto const next_slash_offset = path.find('/', pkt_offset + 3);
+						if ((path.size() > pkt_offset + 3) && (path[pkt_offset + 3] == '|'))
+						{
+							auto const password_start_offset = pkt_offset + 4;
+							if (next_slash_offset != std::string_view::npos)
+							{
+								password = std::string(path.substr(password_start_offset, next_slash_offset - password_start_offset));
+							}
+							else
+							{
+								password = std::string(path.substr(password_start_offset));
+							}
+						}
 						if (next_slash_offset != std::string_view::npos)
 						{
-							password = std::string(path.substr(password_start_offset, next_slash_offset - password_start_offset));
+							path_in_package = std::string(path.substr(next_slash_offset + 1));
 						}
-						else
-						{
-							password = std::string(path.substr(password_start_offset));
-						}
+						break;
 					}
-					if (next_slash_offset != std::string_view::npos)
+					else
 					{
-						path_in_package = std::string(path.substr(next_slash_offset + 1));
+						start_offset = pkt_offset + 3;
 					}
-					break;
 				}
 				else
 				{
-					start_offset = pkt_offset + 3;
+					break;
 				}
 			}
-			else
+		}
+
+		void AddLoadedResource(ResLoadingDescPtr const& res_desc, std::shared_ptr<void> const& res)
+		{
+			std::lock_guard<std::mutex> lock(loaded_mutex_);
+
+			bool found = false;
+			for (auto& c_desc : loaded_res_)
 			{
-				break;
+				if (c_desc.first == res_desc)
+				{
+					c_desc.second = std::weak_ptr<void>(res);
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				loaded_res_.emplace_back(res_desc, std::weak_ptr<void>(res));
 			}
 		}
+		std::shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const& res_desc)
+		{
+			std::lock_guard<std::mutex> lock(loaded_mutex_);
+
+			std::shared_ptr<void> loaded_res;
+			for (auto const& lr : loaded_res_)
+			{
+				if (lr.first->Match(*res_desc))
+				{
+					loaded_res = lr.second.lock();
+					break;
+				}
+			}
+			return loaded_res;
+		}
+		void RemoveUnrefResources()
+		{
+			std::lock_guard<std::mutex> lock(loaded_mutex_);
+
+			for (auto iter = loaded_res_.begin(); iter != loaded_res_.end();)
+			{
+				if (iter->second.lock())
+				{
+					++iter;
+				}
+				else
+				{
+					iter = loaded_res_.erase(iter);
+				}
+			}
+		}
+
+		void LoadingThreadFunc()
+		{
+			while (!quit_)
+			{
+				std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_copy;
+
+				{
+					std::unique_lock<std::mutex> lock(loading_res_queue_mutex_);
+					loading_res_queue_cv_.wait(lock, [this] { return non_empty_loading_res_queue_; });
+
+					loading_res_queue_copy.swap(loading_res_queue_);
+					non_empty_loading_res_queue_ = false;
+				}
+
+				for (auto& res_pair : loading_res_queue_copy)
+				{
+					if (LS_Loading == *res_pair.second)
+					{
+						res_pair.first->SubThreadStage();
+						*res_pair.second = LS_Complete;
+					}
+				}
+
+				Sleep(10);
+			}
+		}
+
+#if defined(KLAYGE_PLATFORM_ANDROID)
+		AAsset* LocateFileAndroid(std::string_view name)
+		{
+			android_app* state = Context::Instance().AppState();
+			AAssetManager* am = state->activity->assetManager;
+			return AAssetManager_open(am, std::string(std::move(name)).c_str(), AASSET_MODE_UNKNOWN);
+		}
+#elif defined(KLAYGE_PLATFORM_IOS)
+		std::string LocateFileIOS(std::string_view name)
+		{
+			std::string res_name;
+			std::string::size_type found = name.find_last_of(".");
+			if (found != std::string::npos)
+			{
+				std::string::size_type found2 = name.find_last_of("/");
+				CFBundleRef main_bundle = CFBundleGetMainBundle();
+				CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
+					std::string(name.substr(found2 + 1, found - found2 - 1)).c_str(), kCFStringEncodingASCII);
+				CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
+					std::string(name.substr(found + 1)).c_str(), kCFStringEncodingASCII);
+				CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
+				CFRelease(file_name);
+				CFRelease(file_ext);
+				if (file_url != nullptr)
+				{
+					CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
+
+					res_name = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
+
+					CFRelease(file_url);
+					CFRelease(file_path);
+				}
+			}
+			return res_name;
+		}
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
+		std::string LocateFileWinRT(std::string_view name)
+		{
+			std::string res_name;
+			std::string::size_type pos = name.rfind('/');
+			if (std::string::npos == pos)
+			{
+				pos = name.rfind('\\');
+			}
+			if (pos != std::string::npos)
+			{
+				res_name = name.substr(pos + 1);
+			}
+			return res_name;
+		}
+#endif
+
+	private:
+		static std::mutex singleton_mutex_;
+		static std::unique_ptr<ResLoader> res_loader_instance_;
+
+		enum LoadingStatus
+		{
+			LS_Loading,
+			LS_Complete,
+			LS_CanBeRemoved
+		};
+
+		std::string exe_path_;
+		std::string local_path_;
+		std::vector<std::tuple<uint64_t, uint32_t, std::string, PackagePtr>> paths_;
+		std::mutex paths_mutex_;
+
+		std::mutex loaded_mutex_;
+		std::mutex loading_mutex_;
+		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_;
+
+		bool non_empty_loading_res_queue_ = false;
+		std::condition_variable loading_res_queue_cv_;
+		std::mutex loading_res_queue_mutex_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
+
+		std::future<void> loading_thread_;
+		volatile bool quit_{ false };
+	};
+
+	std::mutex ResLoader::Impl::singleton_mutex_;
+	std::unique_ptr<ResLoader> ResLoader::Impl::res_loader_instance_;
+
+	ResLoadingDesc::ResLoadingDesc() noexcept = default;
+	ResLoadingDesc::~ResLoadingDesc() noexcept = default;
+
+	ResLoader::ResLoader()
+		: pimpl_(MakeUniquePtr<Impl>())
+	{
+	}
+
+	ResLoader::~ResLoader() = default;
+
+	ResLoader& ResLoader::Instance()
+	{
+		return Impl::Instance();
+	}
+
+	void ResLoader::Destroy() noexcept
+	{
+		Impl::Destroy();
+	}
+
+	void ResLoader::Suspend()
+	{
+		pimpl_->Suspend();
+	}
+
+	void ResLoader::Resume()
+	{
+		pimpl_->Resume();
+	}
+
+	std::string ResLoader::AbsPath(std::string_view path)
+	{
+		return pimpl_->AbsPath(std::move(path));
 	}
 
 	void ResLoader::AddPath(std::string_view phy_path)
 	{
-		this->Mount("", phy_path);
+		pimpl_->AddPath(std::move(phy_path));
 	}
 
 	void ResLoader::DelPath(std::string_view phy_path)
 	{
-		this->Unmount("", phy_path);
+		pimpl_->DelPath(std::move(phy_path));
 	}
 
 	bool ResLoader::IsInPath(std::string_view phy_path)
 	{
-		std::string_view virtual_path = "";
+		return pimpl_->IsInPath(std::move(phy_path));
+	}
 
-		std::lock_guard<std::mutex> lock(paths_mutex_);
-
-		std::string real_path = this->RealPath(phy_path);
-		if (!real_path.empty())
-		{
-			std::string virtual_path_str(virtual_path);
-			if (!virtual_path.empty() && (virtual_path.back() != '/'))
-			{
-				virtual_path_str.push_back('/');
-			}
-			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
-
-			bool found = false;
-			for (auto const & path : paths_)
-			{
-				if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			return found;
-		}
-		else
-		{
-			return false;
-		}
+	std::string const& ResLoader::LocalFolder() const noexcept
+	{
+		return pimpl_->LocalFolder();
 	}
 
 	void ResLoader::Mount(std::string_view virtual_path, std::string_view phy_path)
 	{
-		std::lock_guard<std::mutex> lock(paths_mutex_);
-
-		std::string package_path;
-		std::string password;
-		std::string path_in_package;
-		std::string real_path = this->RealPath(phy_path,
-			package_path, password, path_in_package);
-		if (!real_path.empty())
-		{
-			std::string virtual_path_str(virtual_path);
-			if (!virtual_path.empty() && (virtual_path.back() != '/'))
-			{
-				virtual_path_str.push_back('/');
-			}
-			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
-
-			bool found = false;
-			for (auto const & path : paths_)
-			{
-				if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				PackagePtr package;
-				if (!package_path.empty())
-				{
-					for (auto const & path : paths_)
-					{
-						auto const & p = std::get<3>(path);
-						if (p && package_path == p->ArchiveStream()->ResName())
-						{
-							package = p;
-							break;
-						}
-					}
-					if (!package)
-					{
-						uint64_t const timestamp = std::filesystem::last_write_time(package_path).time_since_epoch().count();
-						auto package_res = MakeSharedPtr<ResIdentifier>(
-							package_path, timestamp, MakeSharedPtr<std::ifstream>(package_path.c_str(), std::ios_base::binary));
-
-						package = MakeSharedPtr<Package>(package_res, password);
-					}
-				}
-
-				paths_.emplace_back(virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), real_path, std::move(package));
-			}
-		}
+		pimpl_->Mount(std::move(virtual_path), std::move(phy_path));
 	}
 
 	void ResLoader::Unmount(std::string_view virtual_path, std::string_view phy_path)
 	{
-		std::lock_guard<std::mutex> lock(paths_mutex_);
-
-		std::string real_path = this->RealPath(phy_path);
-		if (!real_path.empty())
-		{
-			std::string virtual_path_str(virtual_path);
-			if (!virtual_path.empty() && (virtual_path.back() != '/'))
-			{
-				virtual_path_str.push_back('/');
-			}
-			uint64_t const virtual_path_hash = HashValue(virtual_path_str);
-
-			for (auto iter = paths_.begin(); iter != paths_.end(); ++ iter)
-			{
-				if ((std::get<0>(*iter) == virtual_path_hash) && (std::get<2>(*iter) == real_path))
-				{
-					paths_.erase(iter);
-					break;
-				}
-			}
-		}
+		pimpl_->Unmount(std::move(virtual_path), std::move(phy_path));
 	}
 
 	std::string ResLoader::Locate(std::string_view name)
 	{
-		if (name.empty())
-		{
-			return "";
-		}
-
-#if defined(KLAYGE_PLATFORM_ANDROID)
-		AAsset* asset = this->LocateFileAndroid(name);
-		if (asset != nullptr)
-		{
-			AAsset_close(asset);
-			return std::string(name);
-		}
-#elif defined(KLAYGE_PLATFORM_IOS)
-		return this->LocateFileIOS(name);
-#else
-		{
-			std::lock_guard<std::mutex> lock(paths_mutex_);
-			for (auto const & path : paths_)
-			{
-				if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
-				{
-					std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
-#if defined KLAYGE_PLATFORM_WINDOWS
-					std::replace(res_name.begin(), res_name.end(), '\\', '/');
-#endif
-
-					std::error_code ec;
-					if (std::filesystem::exists(res_name, ec))
-					{
-						return res_name;
-					}
-					else
-					{
-						std::string package_path;
-						std::string password;
-						std::string path_in_package;
-						this->DecomposePackageName(res_name, package_path, password, path_in_package);
-						auto const & package = std::get<3>(path);
-						if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
-						{
-							if (package->Locate(path_in_package))
-							{
-								return res_name;
-							}
-						}
-					}
-				}
-
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
-				{
-					break;
-				}
-			}
-		}
-#if defined KLAYGE_PLATFORM_WINDOWS_STORE
-		std::string const & res_name = this->LocateFileWinRT(name);
-		if (!res_name.empty())
-		{
-			return this->Locate(res_name);
-		}
-#endif
-#endif
-
-		return "";
+		return pimpl_->Locate(std::move(name));
 	}
 
 	ResIdentifierPtr ResLoader::Open(std::string_view name)
 	{
-		if (name.empty())
-		{
-			return ResIdentifierPtr();
-		}
-
-#if defined(KLAYGE_PLATFORM_ANDROID)
-		AAsset* asset = this->LocateFileAndroid(name);
-		if (asset != nullptr)
-		{
-			std::shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
-			std::shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
-			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
-		}
-#elif defined(KLAYGE_PLATFORM_IOS)
-		std::string const & res_name = this->LocateFileIOS(name);
-		if (!res_name.empty())
-		{
-			FILESYSTEM_NS::path res_path(res_name);
-			uint64_t const timestamp = FILESYSTEM_NS::last_write_time(res_path).time_since_epoch().count();
-			return MakeSharedPtr<ResIdentifier>(name, timestamp,
-				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
-		}
-#else
-		{
-			std::lock_guard<std::mutex> lock(paths_mutex_);
-			for (auto const & path : paths_)
-			{
-				if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
-				{
-					std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
-#if defined KLAYGE_PLATFORM_WINDOWS
-					std::replace(res_name.begin(), res_name.end(), '\\', '/');
-#endif
-
-					std::filesystem::path res_path(res_name);
-					std::error_code ec;
-					if (std::filesystem::exists(res_path, ec))
-					{
-						uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
-						return MakeSharedPtr<ResIdentifier>(
-							name, timestamp, MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
-					}
-					else
-					{
-						std::string package_path;
-						std::string password;
-						std::string path_in_package;
-						this->DecomposePackageName(res_name, package_path, password, path_in_package);
-						auto const & package = std::get<3>(path);
-						if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
-						{
-							auto res = package->Extract(path_in_package, name);
-							if (res)
-							{
-								return res;
-							}
-						}
-					}
-				}
-
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
-				{
-					break;
-				}
-			}
-		}
-#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
-		std::string const & res_name = this->LocateFileWinRT(name);
-		if (!res_name.empty())
-		{
-			return this->Open(res_name);
-		}
-#endif
-#endif
-
-		return ResIdentifierPtr();
+		return pimpl_->Open(std::move(name));
 	}
 
 	uint64_t ResLoader::Timestamp(std::string_view name)
 	{
-		uint64_t timestamp = 0;
-		auto res_path = this->Locate(name);
-		if (!res_path.empty())
-		{
-#if !defined(KLAYGE_PLATFORM_ANDROID)
-			timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
-#endif
-		}
-
-		return timestamp;
+		return pimpl_->Timestamp(std::move(name));
 	}
 
 	std::shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		this->RemoveUnrefResources();
-
-		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-		std::shared_ptr<void> res;
-		if (loaded_res)
-		{
-			if (res_desc->StateLess())
-			{
-				res = loaded_res;
-			}
-			else
-			{
-				res = res_desc->CloneResourceFrom(loaded_res);
-				if (res != loaded_res)
-				{
-					this->AddLoadedResource(res_desc, res);
-				}
-			}
-		}
-		else
-		{
-			std::shared_ptr<volatile LoadingStatus> async_is_done;
-			bool found = false;
-			{
-				std::lock_guard<std::mutex> lock(loading_mutex_);
-
-				for (auto const & lrq : loading_res_)
-				{
-					if (lrq.first->Match(*res_desc))
-					{
-						res_desc->CopyDataFrom(*lrq.first);
-						async_is_done = lrq.second;
-						found = true;
-						break;
-					}
-				}
-			}
-
-			if (found)
-			{
-				*async_is_done = LS_Complete;
-			}
-			else
-			{
-				res = res_desc->CreateResource();
-			}
-
-			if (res_desc->HasSubThreadStage())
-			{
-				res_desc->SubThreadStage();
-			}
-
-			res_desc->MainThreadStage();
-			res = res_desc->Resource();
-			this->AddLoadedResource(res_desc, res);
-		}
-
-		return res;
+		return pimpl_->SyncQuery(res_desc);
 	}
 
 	std::shared_ptr<void> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		this->RemoveUnrefResources();
-
-		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-		std::shared_ptr<void> res;
-		if (loaded_res)
-		{
-			if (res_desc->StateLess())
-			{
-				res = loaded_res;
-			}
-			else
-			{
-				res = res_desc->CloneResourceFrom(loaded_res);
-				if (res != loaded_res)
-				{
-					this->AddLoadedResource(res_desc, res);
-				}
-			}
-		}
-		else
-		{
-			std::shared_ptr<volatile LoadingStatus> async_is_done;
-			bool found = false;
-			{
-				std::lock_guard<std::mutex> lock(loading_mutex_);
-
-				for (auto const & lrq : loading_res_)
-				{
-					if (lrq.first->Match(*res_desc))
-					{
-						res_desc->CopyDataFrom(*lrq.first);
-						async_is_done = lrq.second;
-						found = true;
-						break;
-					}
-				}
-			}
-
-			if (found)
-			{
-				res = res_desc->Resource();
-
-				if (!res_desc->StateLess())
-				{
-					std::lock_guard<std::mutex> lock(loading_mutex_);
-					loading_res_.emplace_back(res_desc, async_is_done);
-				}
-			}
-			else
-			{
-				if (res_desc->HasSubThreadStage())
-				{
-					res = res_desc->CreateResource();
-
-					async_is_done = MakeSharedPtr<LoadingStatus>(LS_Loading);
-
-					{
-						std::lock_guard<std::mutex> lock(loading_mutex_);
-						loading_res_.emplace_back(res_desc, async_is_done);
-					}
-					{
-						std::unique_lock<std::mutex> lock(loading_res_queue_mutex_, std::try_to_lock);
-						loading_res_queue_.emplace_back(res_desc, async_is_done);
-						non_empty_loading_res_queue_ = true;
-						loading_res_queue_cv_.notify_one();
-					}
-				}
-				else
-				{
-					res_desc->MainThreadStage();
-					res = res_desc->Resource();
-					this->AddLoadedResource(res_desc, res);
-				}
-			}
-		}
-		return res;
+		return pimpl_->ASyncQuery(res_desc);
 	}
 
 	void ResLoader::Unload(std::shared_ptr<void> const & res)
 	{
-		std::lock_guard<std::mutex> lock(loaded_mutex_);
-
-		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end(); ++ iter)
-		{
-			if (res == iter->second.lock())
-			{
-				loaded_res_.erase(iter);
-				break;
-			}
-		}
-	}
-
-	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, std::shared_ptr<void> const & res)
-	{
-		std::lock_guard<std::mutex> lock(loaded_mutex_);
-
-		bool found = false;
-		for (auto& c_desc : loaded_res_)
-		{
-			if (c_desc.first == res_desc)
-			{
-				c_desc.second = std::weak_ptr<void>(res);
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-		{
-			loaded_res_.emplace_back(res_desc, std::weak_ptr<void>(res));
-		}
-	}
-
-	std::shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
-	{
-		std::lock_guard<std::mutex> lock(loaded_mutex_);
-
-		std::shared_ptr<void> loaded_res;
-		for (auto const & lr : loaded_res_)
-		{
-			if (lr.first->Match(*res_desc))
-			{
-				loaded_res = lr.second.lock();
-				break;
-			}
-		}
-		return loaded_res;
-	}
-
-	void ResLoader::RemoveUnrefResources()
-	{
-		std::lock_guard<std::mutex> lock(loaded_mutex_);
-
-		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end();)
-		{
-			if (iter->second.lock())
-			{
-				++ iter;
-			}
-			else
-			{
-				iter = loaded_res_.erase(iter);
-			}
-		}
+		pimpl_->Unload(res);
 	}
 
 	void ResLoader::Update()
 	{
-		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> tmp_loading_res;
-		{
-			std::lock_guard<std::mutex> lock(loading_mutex_);
-			tmp_loading_res = loading_res_;
-		}
-
-		for (auto& lrq : tmp_loading_res)
-		{
-			if (LS_Complete == *lrq.second)
-			{
-				ResLoadingDescPtr const & res_desc = lrq.first;
-
-				std::shared_ptr<void> res;
-				std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-				if (loaded_res)
-				{
-					if (!res_desc->StateLess())
-					{
-						res = res_desc->CloneResourceFrom(loaded_res);
-						if (res != loaded_res)
-						{
-							this->AddLoadedResource(res_desc, res);
-						}
-					}
-				}
-				else
-				{
-					res_desc->MainThreadStage();
-					res = res_desc->Resource();
-					this->AddLoadedResource(res_desc, res);
-				}
-			}
-		}
-		for (auto& lrq : tmp_loading_res)
-		{
-			if (LS_Complete == *lrq.second)
-			{
-				*lrq.second = LS_CanBeRemoved;
-			}
-		}
-
-		{
-			std::lock_guard<std::mutex> lock(loading_mutex_);
-			for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
-			{
-				if (LS_CanBeRemoved == *(iter->second))
-				{
-					iter = loading_res_.erase(iter);
-				}
-				else
-				{
-					++ iter;
-				}
-			}
-		}
+		pimpl_->Update();
 	}
 
-	void ResLoader::LoadingThreadFunc()
+	uint32_t ResLoader::NumLoadingResources() const noexcept
 	{
-		while (!quit_)
-		{
-			std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_copy;
-
-			{
-				std::unique_lock<std::mutex> lock(loading_res_queue_mutex_);
-				loading_res_queue_cv_.wait(lock, [this] { return non_empty_loading_res_queue_; });
-
-				loading_res_queue_copy.swap(loading_res_queue_);
-				non_empty_loading_res_queue_ = false;
-			}
-
-			for (auto& res_pair : loading_res_queue_copy)
-			{
-				if (LS_Loading == *res_pair.second)
-				{
-					res_pair.first->SubThreadStage();
-					*res_pair.second = LS_Complete;
-				}
-			}
-
-			Sleep(10);
-		}
+		return pimpl_->NumLoadingResources();
 	}
-
-#if defined(KLAYGE_PLATFORM_ANDROID)
-	AAsset* ResLoader::LocateFileAndroid(std::string_view name)
-	{
-		android_app* state = Context::Instance().AppState();
-		AAssetManager* am = state->activity->assetManager;
-		return AAssetManager_open(am, std::string(name).c_str(), AASSET_MODE_UNKNOWN);
-	}
-#elif defined(KLAYGE_PLATFORM_IOS)
-	std::string ResLoader::LocateFileIOS(std::string_view name)
-	{
-		std::string res_name;
-		std::string::size_type found = name.find_last_of(".");
-		if (found != std::string::npos)
-		{
-			std::string::size_type found2 = name.find_last_of("/");
-			CFBundleRef main_bundle = CFBundleGetMainBundle();
-			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
-				std::string(name.substr(found2 + 1, found - found2 - 1)).c_str(), kCFStringEncodingASCII);
-			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
-				std::string(name.substr(found + 1)).c_str(), kCFStringEncodingASCII);
-			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
-			CFRelease(file_name);
-			CFRelease(file_ext);
-			if (file_url != nullptr)
-			{
-				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
-
-				res_name = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
-
-				CFRelease(file_url);
-				CFRelease(file_path);
-			}
-		}
-		return res_name;
-	}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
-	std::string ResLoader::LocateFileWinRT(std::string_view name)
-	{
-		std::string res_name;
-		std::string::size_type pos = name.rfind('/');
-		if (std::string::npos == pos)
-		{
-			pos = name.rfind('\\');
-		}
-		if (pos != std::string::npos)
-		{
-			res_name = name.substr(pos + 1);
-		}
-		return res_name;
-	}
-#endif
 }
