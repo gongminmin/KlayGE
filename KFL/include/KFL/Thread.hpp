@@ -28,12 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef KFL_THREAD_HPP
-#define KFL_THREAD_HPP
-
 #pragma once
 
-#include <condition_variable>
 #include <functional>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -43,9 +39,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <mutex>
 #include <thread>
-#include <vector>
 
 #include <KFL/Noncopyable.hpp>
 
@@ -54,11 +48,11 @@ namespace KlayGE
 	template <typename Threadable>
 	inline std::future<std::invoke_result_t<Threadable>> CreateThread(Threadable func)
 	{
-		using result_t = std::invoke_result_t<Threadable>;
+		using ResultT = std::invoke_result_t<Threadable>;
 
-		auto task = std::packaged_task<result_t()>(std::move(func));
+		std::packaged_task<ResultT()> task(std::move(func));
 		auto ret = task.get_future();
-		auto thread = std::thread(std::move(task));
+		std::thread thread(std::move(task));
 		thread.detach();
 
 		return ret;
@@ -68,127 +62,39 @@ namespace KlayGE
 	{
 		KLAYGE_NONCOPYABLE(ThreadPool);
 
-		class CommonData;
-
-		// A class used to storage information of a pooled thread. Each object of this class represents a pooled thread.
-		//  It also has mechanisms to notify the pooled thread that it has a work to do. It also offers notification
-		//  to definitively tell to the thread that it should die.
-		struct ThreadInfo final
-		{
-			KLAYGE_NONCOPYABLE(ThreadInfo);
-
-			explicit ThreadInfo(CommonData& data) noexcept;
-
-			void WakeUp(std::function<void()> func);
-			void Kill();
-
-			std::function<void()> func_;
-			bool wake_up_ = false;
-			std::mutex wake_up_mutex_;
-			std::condition_variable wake_up_cond_;
-			CommonData* data_;
-		};
-
-		// A class used to storage information of the thread pool. It stores the pooled thread information container
-		//  and the functor that will envelop users Threadable to return it to the pool.
-		class CommonData final
-		{
-			KLAYGE_NONCOPYABLE(CommonData);
-
-		public:
-			CommonData(size_t num_min_cached_threads, size_t num_max_cached_threads);
-			~CommonData();
-
-			// Creates and adds more threads to the pool.
-			void AddWaitingThreads(size_t number);
-
-			size_t NumMinCachedThreads() const noexcept
-			{
-				return num_min_cached_threads_;
-			}
-			void NumMinCachedThreads(size_t num);
-
-			size_t NumMaxCachedThreads() const noexcept
-			{
-				return num_max_cached_threads_;
-			}
-			void NumMaxCachedThreads(size_t num) noexcept
-			{
-				num_max_cached_threads_ = num;
-			}
-
-			template <typename Threadable>
-			std::future<std::invoke_result_t<Threadable>> QueueThread(Threadable func)
-			{
-				using result_t = std::invoke_result_t<Threadable>;
-
-				auto task = MakeSharedPtr<std::packaged_task<result_t()>>(std::move(func));
-				auto ret = task->get_future();
-
-				{
-					std::lock_guard<std::mutex> lock(mutex_);
-
-					// If there are no threads, add more to the pool
-					if (threads_.empty())
-					{
-						this->AddWaitingThreadsLocked(lock, 1);
-					}
-					auto th_info = std::move(threads_.front());
-					threads_.erase(threads_.begin());
-					th_info->WakeUp([task]() { (*task)(); });
-				}
-
-				return ret;
-			}
-
-		private:
-			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
-			//  only called when we externally have locked that mutex.
-			void AddWaitingThreadsLocked(std::lock_guard<std::mutex> const& lock, size_t number);
-
-			static void WaitFunction(std::shared_ptr<ThreadInfo> const& info);
-
-		private:
-			// Shared data between all threads in the pool
-			size_t num_min_cached_threads_;
-			size_t num_max_cached_threads_;
-			std::mutex mutex_;
-			bool general_cleanup_ = false;
-			std::vector<std::shared_ptr<ThreadInfo>> threads_;
-		};
-
 	public:
 		ThreadPool();
-		ThreadPool(size_t num_min_cached_threads, size_t num_max_cached_threads);
+		ThreadPool(uint32_t num_min_cached_threads, uint32_t num_max_cached_threads);
+		~ThreadPool() noexcept;
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
 		std::future<std::invoke_result_t<Threadable>> QueueThread(Threadable func)
 		{
-			return data_->QueueThread(func);
+			using ResultT = std::invoke_result_t<Threadable>;
+
+			auto task = MakeSharedPtr<std::packaged_task<ResultT()>>(std::move(func));
+			auto ret = task->get_future();
+			this->DoQueueThread(
+				[task]()
+				{
+					(*task)();
+				});
+
+			return ret;
 		}
 
-		size_t NumMinCachedThreads() const noexcept
-		{
-			return data_->NumMinCachedThreads();
-		}
-		void NumMinCachedThreads(size_t num)
-		{
-			data_->NumMinCachedThreads(num);
-		}
+		uint32_t NumMinCachedThreads() const noexcept;
+		void NumMinCachedThreads(uint32_t num);
 
-		size_t NumMaxCachedThreads() const noexcept
-		{
-			return data_->NumMaxCachedThreads();
-		}
-		void NumMaxCachedThreads(size_t num) noexcept
-		{
-			data_->NumMaxCachedThreads(num);
-		}
+		uint32_t NumMaxCachedThreads() const noexcept;
+		void NumMaxCachedThreads(uint32_t num) noexcept;
 
 	private:
-		std::unique_ptr<CommonData> data_;
+		void DoQueueThread(std::function<void()> wake_up_func);
+
+	private:
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 }
-
-#endif		// KFL_THREAD_HPP

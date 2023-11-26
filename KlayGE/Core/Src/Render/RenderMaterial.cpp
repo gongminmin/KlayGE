@@ -42,6 +42,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <string>
 
 #include <KlayGE/RenderMaterial.hpp>

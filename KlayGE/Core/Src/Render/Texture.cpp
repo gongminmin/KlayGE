@@ -46,6 +46,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <mutex>
 #include <system_error>
 
 #include <KlayGE/Texture.hpp>

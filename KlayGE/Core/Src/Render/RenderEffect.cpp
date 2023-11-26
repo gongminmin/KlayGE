@@ -63,14 +63,15 @@
 #include <KFL/XMLDom.hpp>
 #include <KFL/Hash.hpp>
 
+#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
+#include <charconv>
+#endif
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <mutex>
 #include <string>
-#ifdef KLAYGE_CXX17_LIBRARY_CHARCONV_SUPPORT
-#include <charconv>
-#endif
 #include <variant>
 
 #include <boost/assert.hpp>
