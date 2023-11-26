@@ -86,12 +86,12 @@ namespace KlayGE
 			bool wake_up_ = false;
 			std::mutex wake_up_mutex_;
 			std::condition_variable wake_up_cond_;
-			std::weak_ptr<CommonData> data_;
+			CommonData* data_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class CommonData final : public std::enable_shared_from_this<CommonData>
+		class CommonData final
 		{
 			KLAYGE_NONCOPYABLE(CommonData);
 
@@ -187,7 +187,7 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<CommonData> data_;
+		std::unique_ptr<CommonData> data_;
 	};
 }
 

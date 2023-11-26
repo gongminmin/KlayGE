@@ -38,7 +38,7 @@
 namespace KlayGE
 {
 	ThreadPool::ThreadInfo::ThreadInfo(CommonData& data) noexcept
-		: data_(data.shared_from_this())
+		: data_(&data)
 	{
 	}
 
@@ -66,8 +66,8 @@ namespace KlayGE
 		for (;;)
 		{
 			{
-				auto data = info->data_.lock();
-				if (data)
+				auto* data = info->data_;
+				if (!data->general_cleanup_)
 				{
 					std::unique_lock<std::mutex> lock(info->wake_up_mutex_);
 
@@ -97,8 +97,8 @@ namespace KlayGE
 
 			// Locked code to try to insert the thread again in the thread pool
 			{
-				auto data = info->data_.lock();
-				if (data)
+				auto* data = info->data_;
+				if (!data->general_cleanup_)
 				{
 					std::lock_guard<std::mutex> lock(data->mutex_);
 
@@ -189,7 +189,7 @@ namespace KlayGE
 	}
 
 	ThreadPool::ThreadPool(size_t num_min_cached_threads, size_t num_max_cached_threads)
-		: data_(MakeSharedPtr<CommonData>(num_min_cached_threads, num_max_cached_threads))
+		: data_(MakeUniquePtr<CommonData>(num_min_cached_threads, num_max_cached_threads))
 	{
 		BOOST_ASSERT(num_max_cached_threads >= num_min_cached_threads);
 
