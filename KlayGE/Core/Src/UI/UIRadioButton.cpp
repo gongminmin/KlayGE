@@ -31,11 +31,13 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Box
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_RadioButton, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_RadioButton, 0));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);
 			Element.FontColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 200.0f / 255);
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
@@ -47,7 +49,7 @@ namespace KlayGE
 
 		// Check
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_RadioButton, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_RadioButton, 1));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}

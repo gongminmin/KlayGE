@@ -98,7 +98,8 @@ void VectorTexApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.0001f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -114,18 +115,18 @@ void VectorTexApp::OnCreate()
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
 	object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(model_->Mesh(0)), SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(object_);
 
 	checked_cast<RenderTeapot&>(*model_->Mesh(0)).VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("VectorTex.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VectorTex.uiml"));
 }
 
 void VectorTexApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void VectorTexApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -140,7 +141,7 @@ void VectorTexApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 
 void VectorTexApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

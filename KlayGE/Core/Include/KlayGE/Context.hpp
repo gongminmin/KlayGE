@@ -49,6 +49,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	class DevHelper;
 #endif
+	class UIManager;
 
 	struct ContextCfg
 	{
@@ -137,6 +138,8 @@ namespace KlayGE
 #endif
 
 		ThreadPool& ThreadPoolInstance();
+
+		UIManager& UIManagerInstance();
 
 	private:
 		class Impl;

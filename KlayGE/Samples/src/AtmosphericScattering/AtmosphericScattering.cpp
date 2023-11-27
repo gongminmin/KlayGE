@@ -149,7 +149,8 @@ void AtmosphericScatteringApp::OnCreate()
 	obj_controller_.AttachCamera(this->ActiveCamera());
 	obj_controller_.Scalers(0.003f, 0.003f);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& context = Context::Instance();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	auto light_ctrl_camera_node =
 		MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable | SceneNode::SOA_NotCastShadow);
@@ -170,8 +171,9 @@ void AtmosphericScatteringApp::OnCreate()
 		SceneNode::SOA_Cullable, AddToSceneRootHelper,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("AtmosphericScattering.uiml"));
-	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("AtmosphericScattering.uiml"));
+	dialog_param_ = ui_mgr.GetDialog("AtmosphericScattering");
 	id_atmosphere_top_ = dialog_param_->IDFromName("atmosphere_top");
 	id_density_ = dialog_param_->IDFromName("density");
 	id_beta_button_ = dialog_param_->IDFromName("beta_button");
@@ -218,7 +220,7 @@ void AtmosphericScatteringApp::OnCreate()
 	sun_light_node->AddComponent(sun_light);
 	root_node.AddChild(sun_light_node);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -235,7 +237,7 @@ void AtmosphericScatteringApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void AtmosphericScatteringApp::LoadBeta(Color const & clr)
@@ -386,7 +388,7 @@ void AtmosphericScatteringApp::ChangeAbsorbHandler(KlayGE::UITexButton const & /
 
 void AtmosphericScatteringApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Atmospheric Scattering", 16);
 

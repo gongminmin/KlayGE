@@ -145,8 +145,9 @@ void SSSSSApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("SSSSS.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("SSSSS.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_sss_ = dialog_params_->IDFromName("SSS");
 	id_sss_strength_static_ = dialog_params_->IDFromName("SSSStrengthStatic");
 	id_sss_strength_slider_ = dialog_params_->IDFromName("SSSStrengthSlider");
@@ -196,10 +197,11 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void SSSSSApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -254,7 +256,7 @@ void SSSSSApp::TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sende
 
 void SSSSSApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

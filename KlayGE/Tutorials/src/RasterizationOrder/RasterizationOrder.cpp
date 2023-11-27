@@ -202,14 +202,15 @@ void RasterizationOrderApp::OnCreate()
 
 	render_quad_ = MakeSharedPtr<RenderQuad>();
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 
 	ras_order_fb_ = rf.MakeFrameBuffer();
 	ras_order_fb_->Viewport()->Camera(rf.RenderEngineInstance().DefaultFrameBuffer()->Viewport()->Camera());
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -221,8 +222,9 @@ void RasterizationOrderApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("RasterizationOrder.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("RasterizationOrder.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_color_map_ = dialog_params_->IDFromName("ColorMap");
 	id_capture_ = dialog_params_->IDFromName("Capture");
 
@@ -241,7 +243,8 @@ void RasterizationOrderApp::OnCreate()
 
 void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	ras_order_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
 		EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
 		width * height * sizeof(uint32_t), nullptr, sizeof(uint32_t));
@@ -256,7 +259,7 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	copy_pp_->InputPin(0, rf.MakeTextureSrv(ras_order_tex_));
 
 	App3DFramework::OnResize(width, height);
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void RasterizationOrderApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -285,7 +288,7 @@ void RasterizationOrderApp::CaptureHandler([[maybe_unused]] KlayGE::UIButton con
 
 void RasterizationOrderApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

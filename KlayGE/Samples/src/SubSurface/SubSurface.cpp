@@ -77,13 +77,15 @@ void SubSurfaceApp::OnCreate()
 	auto light_proxy = LoadLightSourceProxyModel(light_);
 	light_proxy->RootNode()->TransformToParent(MathLib::scaling(0.05f, 0.05f, 0.05f) * light_proxy->RootNode()->TransformToParent());
 
+	auto& context = Context::Instance();
+
 	auto light_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable);
 	light_node->TransformToParent(MathLib::translation(0.0f, 2.0f, -3.0f));
 	light_node->AddComponent(light_);
 	light_node->AddChild(light_proxy->RootNode());
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(light_node);
+	context.SceneManagerInstance().SceneRootNode().AddChild(light_node);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -95,8 +97,9 @@ void SubSurfaceApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("SubSurface.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("SubSurface.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_sigma_static_ = dialog_params_->IDFromName("SigmaStatic");
 	id_sigma_slider_ = dialog_params_->IDFromName("SigmaSlider");
 	id_mtl_thickness_static_ = dialog_params_->IDFromName("MtlThicknessStatic");
@@ -116,7 +119,7 @@ void SubSurfaceApp::OnCreate()
 		});
 	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	depth_texture_support_ = caps.depth_texture_support;
@@ -130,7 +133,8 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -181,7 +185,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	back_face_depth_fb_->Attach(FrameBuffer::Attachment::Color0, rf.Make2DRtv(back_face_depth_tex, 0, 1, 0));
 	back_face_depth_fb_->Attach(back_face_ds_view);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void SubSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -222,9 +226,10 @@ void SubSurfaceApp::MtlThicknessChangedHandler(KlayGE::UISlider const & sender)
 
 void SubSurfaceApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

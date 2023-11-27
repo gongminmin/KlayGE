@@ -118,7 +118,8 @@ void MetalnessApp::OnCreate()
 	TexturePtr y_cube_map = ASyncLoadTexture("rnl_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr c_cube_map = ASyncLoadTexture("rnl_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& context = Context::Instance();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
@@ -128,9 +129,9 @@ void MetalnessApp::OnCreate()
 	root_node.AddChild(sphere_group_);
 
 	sphere_group_->OnMainThreadUpdate().Connect(
-		[](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+		[&context](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto& re = context.RenderFactoryInstance().RenderEngineInstance();
 			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			node.TransformToParent(camera.InverseViewMatrix());
@@ -179,7 +180,7 @@ void MetalnessApp::OnCreate()
 	obj_controller_.AttachCamera(this->ActiveCamera());
 	obj_controller_.Scalers(0.003f, 0.003f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -191,9 +192,9 @@ void MetalnessApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Metalness.uiml"));
-
-	dialog_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Metalness.uiml"));
+	dialog_ = ui_mgr.GetDialog("Parameters");
 	id_single_object_ = dialog_->IDFromName("SingleObject");
 	id_glossiness_static_ = dialog_->IDFromName("GlossinessStatic");
 	id_glossiness_ = dialog_->IDFromName("GlossinessSlider");
@@ -224,7 +225,7 @@ void MetalnessApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void MetalnessApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -279,7 +280,7 @@ void MetalnessApp::Material(RenderModel const & model, float3 const & albedo, fl
 
 void MetalnessApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

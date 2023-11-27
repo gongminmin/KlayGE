@@ -109,7 +109,8 @@ void Fractal::OnCreate()
 
 	renderFractal_ = MakeSharedPtr<RenderFractal>();
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -121,13 +122,13 @@ void Fractal::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Fractal.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void Fractal::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -153,7 +154,7 @@ void Fractal::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 
 void Fractal::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

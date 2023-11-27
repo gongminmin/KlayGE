@@ -143,7 +143,8 @@ void ParticleEditorApp::OnCreate()
 
 	fpsController_.Scalers(0.05f, 0.1f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -156,9 +157,9 @@ void ParticleEditorApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	terrain_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<TerrainRenderable>()), SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	depth_texture_support_ = caps.depth_texture_support;
@@ -178,8 +179,9 @@ void ParticleEditorApp::OnCreate()
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("ParticleEditor.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("ParticleEditor.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
 	id_save_as_ = dialog_->IDFromName("SaveAs");
@@ -333,7 +335,8 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -376,7 +379,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 		ps_->SceneDepthTexture(scene_depth_tex_);
 	}
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void ParticleEditorApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -885,7 +888,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 
 void ParticleEditorApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

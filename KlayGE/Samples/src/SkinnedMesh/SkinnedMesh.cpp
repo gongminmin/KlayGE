@@ -95,8 +95,9 @@ void SkinnedMeshApp::OnCreate()
 	input_handler->Connect([this](InputEngine const& sender, InputAction const& action) { this->InputHandler(sender, action); });
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("SkinnedMesh.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("SkinnedMesh.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_skinning_ = dialog_params_->IDFromName("Skinning");
 	id_playing_ = dialog_params_->IDFromName("Playing");
 
@@ -118,10 +119,11 @@ void SkinnedMeshApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void SkinnedMeshApp::InputHandler([[maybe_unused]] InputEngine const& sender, InputAction const& action)
@@ -155,7 +157,7 @@ void SkinnedMeshApp::PlayingHandler(UICheckBox const& sender)
 
 void SkinnedMeshApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

@@ -145,7 +145,7 @@ ProceduralTexApp::ProceduralTexApp()
 void ProceduralTexApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(*ResLoader::Instance().Open("ProceduralTex.uiml"));
+	Context::Instance().UIManagerInstance().Load(*ResLoader::Instance().Open("ProceduralTex.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
@@ -155,7 +155,7 @@ void ProceduralTexApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void ProceduralTexApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -192,7 +192,8 @@ void ProceduralTexApp::FreqChangedHandler(KlayGE::UISlider const & sender)
 
 void ProceduralTexApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -201,7 +202,7 @@ void ProceduralTexApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Procedural Texture", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
@@ -211,17 +212,19 @@ void ProceduralTexApp::DoUpdateOverlay()
 
 uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 	if (loading_percentage_ < 100)
 	{
-		UIDialogPtr const & dialog_loading = UIManager::Instance().GetDialog("Loading");
+		auto& ui_mgr = context.UIManagerInstance();
+		UIDialogPtr const & dialog_loading = ui_mgr.GetDialog("Loading");
 
 		UIStaticPtr const & msg = dialog_loading->Control<UIStatic>(dialog_loading->IDFromName("Msg"));
 		UIProgressBarPtr const & progress_bar = dialog_loading->Control<UIProgressBar>(dialog_loading->IDFromName("Progress"));			
 
 		if (loading_percentage_ < 20)
 		{
-			dialog_ = UIManager::Instance().GetDialog("ProceduralTex");
+			dialog_ = ui_mgr.GetDialog("ProceduralTex");
 			dialog_->SetVisible(false);
 			
 			dialog_loading->SetVisible(true);
@@ -268,7 +271,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			light_node->AddChild(light_proxy->RootNode());
 
 			{
-				auto& scene_mgr = Context::Instance().SceneManagerInstance();
+				auto& scene_mgr = context.SceneManagerInstance();
 				std::lock_guard<std::mutex> lock(scene_mgr.MutexForUpdate());
 				scene_mgr.SceneRootNode().AddChild(light_node);
 			}
@@ -279,7 +282,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		}
 		else if (loading_percentage_ < 90)
 		{
-			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+			InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
 			actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -331,7 +334,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 	else
 	{
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-		if (Context::Instance().Config().graphics_cfg.gamma)
+		if (context.Config().graphics_cfg.gamma)
 		{
 			clear_clr.r() = 0.029f;
 			clear_clr.g() = 0.133f;

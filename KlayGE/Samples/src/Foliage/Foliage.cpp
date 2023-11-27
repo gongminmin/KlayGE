@@ -166,8 +166,9 @@ void FoliageApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Foliage.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Foliage.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
@@ -188,10 +189,11 @@ void FoliageApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void FoliageApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -223,7 +225,7 @@ void FoliageApp::FPSCameraHandler(UICheckBox const & sender)
 
 void FoliageApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

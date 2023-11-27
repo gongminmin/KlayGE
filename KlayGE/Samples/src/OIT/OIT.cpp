@@ -449,7 +449,8 @@ void OITApp::OnCreate()
 	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 10);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -457,7 +458,7 @@ void OITApp::OnCreate()
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	auto skybox = MakeSharedPtr<RenderableSkyBox>();
 	skybox->CompressedCubeMap(y_cube_map, c_cube_map);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(
+	context.SceneManagerInstance().SceneRootNode().AddChild(
 		MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox), SceneNode::SOA_NotCastShadow));
 
 	depth_texture_support_ = caps.depth_texture_support;
@@ -499,7 +500,7 @@ void OITApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.003f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -513,9 +514,10 @@ void OITApp::OnCreate()
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("OIT.uiml"));
-	dialog_oit_ = UIManager::Instance().GetDialogs()[0];
-	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("OIT.uiml"));
+	dialog_oit_ = ui_mgr.GetDialogs()[0];
+	dialog_layer_ = ui_mgr.GetDialogs()[1];
 
 	id_oit_mode_ = dialog_oit_->IDFromName("OITMode");
 	id_alpha_static_ = dialog_oit_->IDFromName("AlphaStatic");
@@ -565,7 +567,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 	auto const ds_format = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_D24S8, EF_D16}), 1, 0);
@@ -655,7 +658,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void OITApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -701,9 +704,10 @@ void OITApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
 
 void OITApp::DoUpdateOverlay()
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	auto& context = Context::Instance();
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

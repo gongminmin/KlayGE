@@ -46,11 +46,13 @@ namespace KlayGE
 		track_rc_ = IRect(0, 0, 0, 0);
 		thumb_rc_ = IRect(0, 0, 0, 0);
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Track
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ScrollBar, 0));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -58,7 +60,7 @@ namespace KlayGE
 
 		// Up Arrow
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ScrollBar, 1));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -66,7 +68,7 @@ namespace KlayGE
 
 		// Down Arrow
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 2));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ScrollBar, 2));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -74,7 +76,7 @@ namespace KlayGE
 
 		// Button
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 3));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ScrollBar, 3));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}

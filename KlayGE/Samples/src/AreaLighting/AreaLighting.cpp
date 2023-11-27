@@ -197,8 +197,9 @@ void AreaLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("AreaLighting.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("AreaLighting.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_light_type_combo_ = dialog_->IDFromName("LightTypeCombo");
 	id_radius_static_ = dialog_->IDFromName("RadiusStatic");
@@ -243,10 +244,11 @@ void AreaLightingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void AreaLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -342,10 +344,11 @@ void AreaLightingApp::CtrlCameraHandler(UICheckBox const & sender)
 
 void AreaLightingApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
+	SceneManager& scene_mgr = context.SceneManagerInstance();
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Area Lighting", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);

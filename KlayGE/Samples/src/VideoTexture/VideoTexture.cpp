@@ -113,7 +113,9 @@ void VideoTextureApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.0001f);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& context = Context::Instance();
+
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
@@ -129,7 +131,7 @@ void VideoTextureApp::OnCreate()
 	light_node->AddChild(light_proxy->RootNode());
 	root_node.AddChild(light_node);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -145,20 +147,20 @@ void VideoTextureApp::OnCreate()
 		SceneNode::SOA_Cullable, nullptr,
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RenderTeapot>);
 	object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(model_->Mesh(0)), SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(object_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(object_);
 
-	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
+	ShowEngine& se = context.ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("VideoTexture.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VideoTexture.uiml"));
 }
 
 void VideoTextureApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -173,7 +175,7 @@ void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 void VideoTextureApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -185,11 +187,12 @@ void VideoTextureApp::DoUpdateOverlay()
 
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 {
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
+	ShowEngine& se = context.ShowFactoryInstance().ShowEngineInstance();
 
 	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
+	if (context.Config().graphics_cfg.gamma)
 	{
 		clear_clr.r() = 0.029f;
 		clear_clr.g() = 0.133f;

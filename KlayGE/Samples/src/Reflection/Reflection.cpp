@@ -218,8 +218,11 @@ ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
 
 void ScreenSpaceReflectionApp::OnCreate()
 {
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Reflection.uiml"));
-	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");
+	auto& context = Context::Instance();
+
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Reflection.uiml"));
+	parameter_dialog_ = ui_mgr.GetDialog("Reflection");
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
 	id_min_sample_num_slider_ = parameter_dialog_->IDFromName("min_sample_num_slider");
@@ -302,7 +305,6 @@ void ScreenSpaceReflectionApp::OnCreate()
 	point_light_node->AddComponent(point_light);
 	root_node.AddChild(point_light_node);
 
-	Context& context = Context::Instance();
 	BOOST_ASSERT(context.DeferredRenderingLayerValid());
 	deferred_rendering_ = &context.DeferredRenderingLayerInstance();
 
@@ -339,9 +341,10 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().SettleCtrls();
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), VPAM_NoSSVO | VPAM_NoGI);
@@ -428,7 +431,7 @@ void ScreenSpaceReflectionApp::EnableCameraPathHandler(KlayGE::UICheckBox const&
 
 void ScreenSpaceReflectionApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Reflection", 16);
 

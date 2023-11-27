@@ -362,8 +362,10 @@ namespace KlayGE
 
 	using UIControlPtr = std::shared_ptr<UIControl>;
 
-	class KLAYGE_CORE_API UIManager final : public std::enable_shared_from_this<UIManager>
+	class KLAYGE_CORE_API UIManager final
 	{
+		friend class Context;
+
 		KLAYGE_NONCOPYABLE(UIManager);
 
 	public:
@@ -382,11 +384,8 @@ namespace KlayGE
 			}
 		};
 
-		UIManager();
+		UIManager() noexcept;
 		~UIManager() noexcept;
-
-		static UIManager& Instance();
-		static void Destroy() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -406,15 +405,9 @@ namespace KlayGE
 		void UnregisterDialog(UIDialogPtr const & dialog);
 		void EnableKeyboardInputForAllDialogs();
 
-		RenderEffectPtr const & GetEffect() const
-		{
-			return effect_;
-		}
+		RenderEffectPtr const& GetEffect() const noexcept;
 
-		std::vector<UIDialogPtr> const & GetDialogs() const
-		{
-			return dialogs_;
-		}
+		std::vector<UIDialogPtr> const& GetDialogs() const noexcept;
 		UIDialogPtr const & GetDialog(std::string_view id) const;
 
 		UIDialogPtr const & GetNextDialog(UIDialogPtr const & dialog) const;
@@ -435,42 +428,16 @@ namespace KlayGE
 
 		void SettleCtrls();
 
-		bool MouseOnUI() const
-		{
-			return mouse_on_ui_;
-		}
+		bool MouseOnUI() const noexcept;
 
 	private:
 		void Init();
-		void InputHandler(InputEngine const & sender, InputAction const & action);
+		void Destroy() noexcept;
+		bool Valid() const noexcept;
 
 	private:
-		static std::unique_ptr<UIManager> ui_mgr_instance_;
-
-		// Shared between all dialogs
-		RenderEffectPtr effect_;
-
-		std::vector<UIDialogPtr> dialogs_;            // Dialogs registered
-
-		std::vector<TexturePtr> texture_cache_;   // Shared textures
-		std::vector<std::pair<FontPtr, float>> font_cache_;         // Shared fonts
-
-		std::array<std::vector<IRect >, UICT_Num_Control_Types> elem_texture_rcs_;
-
-		std::map<TexturePtr, RenderablePtr> rects_;
-
-		struct string_cache
-		{
-			Rect rc;
-			float depth;
-			Color clr;
-			std::wstring text;
-			uint32_t align;
-		};
-		std::map<size_t, std::vector<string_cache>> strings_;
-
-		bool mouse_on_ui_{false};
-		bool inited_{false};
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 
 	class KLAYGE_CORE_API UIDialog final

@@ -127,8 +127,9 @@ void CascadedShadowMapApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");
 	id_cascades_combo_ = dialog_->IDFromName("CascadesCombo");
@@ -180,10 +181,11 @@ void CascadedShadowMapApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void CascadedShadowMapApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -235,9 +237,10 @@ void CascadedShadowMapApp::CtrlCameraHandler(UICheckBox const & sender)
 
 void CascadedShadowMapApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cascaded Shadow Map", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);

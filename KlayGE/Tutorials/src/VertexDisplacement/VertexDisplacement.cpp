@@ -103,7 +103,8 @@ void VertexDisplacement::OnCreate()
 		{
 			node.FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<FlagRenderable>().SetAngle(app_time / 0.4f);
 		});
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(flag_);
+	auto& context = Context::Instance();
+	context.SceneManagerInstance().SceneRootNode().AddChild(flag_);
 
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
@@ -111,7 +112,7 @@ void VertexDisplacement::OnCreate()
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -123,14 +124,14 @@ void VertexDisplacement::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("VertexDisplacement.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VertexDisplacement.uiml"));
 }
 
 void VertexDisplacement::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -145,9 +146,10 @@ void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputActio
 
 void VertexDisplacement::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -156,7 +158,7 @@ void VertexDisplacement::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Vertex displacement", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "

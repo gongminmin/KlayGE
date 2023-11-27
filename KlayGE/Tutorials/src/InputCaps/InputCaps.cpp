@@ -263,7 +263,8 @@ void InputCaps::OnCreate()
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -275,7 +276,7 @@ void InputCaps::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("InputCaps.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("InputCaps.uiml"));
 
 	for (size_t i = 0; i < inputEngine.NumDevices(); ++i)
 	{
@@ -291,7 +292,7 @@ void InputCaps::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -421,9 +422,10 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 
 void InputCaps::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
 	stream.precision(2);

@@ -93,7 +93,8 @@ void TextApp::OnCreate()
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -105,14 +106,14 @@ void TextApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Text.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -204,7 +205,8 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 
 void TextApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	float2 fxy = position_ * scale_;
 	font_->RenderText(fxy.x(), fxy.y(), 0.5f, 1, 1, Color(1, 1, 1, 1), text_, 32 * scale_);
@@ -217,7 +219,7 @@ void TextApp::DoUpdateOverlay()
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 }
 
 uint32_t TextApp::DoUpdate(uint32_t /*pass*/)

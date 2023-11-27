@@ -31,12 +31,14 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Fill layer
 		for (int i = 0; i < 9; ++ i)
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_TexButton, i), Color(1, 1, 1, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_TexButton, i), Color(1, 1, 1, 0));
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
@@ -59,7 +61,7 @@ namespace KlayGE
 	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
 					: UITexButton(dialog)
 	{
-		tex_index_ = UIManager::Instance().AddTexture(tex);
+		tex_index_ = Context::Instance().UIManagerInstance().AddTexture(tex);
 		{
 			auto& element = *elements_.back();
 			if (tex)
@@ -209,12 +211,12 @@ namespace KlayGE
 
 	TexturePtr const & UITexButton::GetTexture() const
 	{
-		return UIManager::Instance().GetTexture(tex_index_);
+		return Context::Instance().UIManagerInstance().GetTexture(tex_index_);
 	}
 
 	void UITexButton::SetTexture(TexturePtr const & tex)
 	{
-		tex_index_ = UIManager::Instance().AddTexture(tex);
+		tex_index_ = Context::Instance().UIManagerInstance().AddTexture(tex);
 		if (tex)
 		{
 			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, tex->Width(0), tex->Height(0)));

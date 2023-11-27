@@ -151,8 +151,9 @@ void PostProcessingApp::OnCreate()
 	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
 	black_hole_ = SyncLoadPostProcess("BlackHole.ppml", "black_hole");
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("PostProcessing.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("PostProcessing.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
 	id_copy_ = dialog_->IDFromName("CopyPP");
@@ -235,7 +236,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 	auto const fmt = caps.BestMatchTextureRenderTargetFormat(MakeSpan({EF_B10G11R11F, EF_ABGR8, EF_ARGB8}), 1, 0);
 	BOOST_ASSERT(fmt != EF_Unknown);
@@ -268,7 +270,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	black_hole_->InputPin(0, color_srv);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void PostProcessingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -375,9 +377,10 @@ void PostProcessingApp::BlackHoleHandler(UIRadioButton const & sender)
 
 void PostProcessingApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Post Processing", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);

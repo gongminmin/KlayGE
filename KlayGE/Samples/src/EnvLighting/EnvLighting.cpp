@@ -1066,7 +1066,8 @@ void EnvLightingApp::OnCreate()
 	}
 #endif
 
-	auto& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	auto& rf = context.RenderFactoryInstance();
 	auto const & caps = rf.RenderEngineInstance().DeviceCaps();
 	ElementFormat const fmt = caps.BestMatchTextureFormat(MakeSpan({EF_GR8, EF_ABGR8, EF_ARGB8}));
 	if (fmt == EF_GR8)
@@ -1081,7 +1082,7 @@ void EnvLightingApp::OnCreate()
 		integrated_brdf_sw_tex->CopyToTexture(*integrated_brdf_tex_, TextureFilter::Point);
 	}
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
@@ -1091,9 +1092,9 @@ void EnvLightingApp::OnCreate()
 	root_node.AddChild(sphere_group_);
 
 	sphere_group_->OnMainThreadUpdate().Connect(
-		[this](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
+		[this, &context](SceneNode& node, [[maybe_unused]] float app_time, [[maybe_unused]] float elapsed_time)
 		{
-			auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			auto& re = context.RenderFactoryInstance().RenderEngineInstance();
 			auto const& camera = *re.CurFrameBuffer()->Viewport()->Camera();
 
 			node.TransformToParent(MathLib::translation(0.0f, 0.0f, distance_) * camera.InverseViewMatrix());
@@ -1138,7 +1139,7 @@ void EnvLightingApp::OnCreate()
 	obj_controller_.AttachCamera(this->ActiveCamera());
 	obj_controller_.Scalers(0.003f, 0.003f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -1150,9 +1151,10 @@ void EnvLightingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
 
-	dialog_ = UIManager::Instance().GetDialog("Method");
+	dialog_ = ui_mgr.GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
 
 	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().Connect(
@@ -1167,7 +1169,7 @@ void EnvLightingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -1202,7 +1204,7 @@ void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
 
 void EnvLightingApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

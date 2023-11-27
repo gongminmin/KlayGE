@@ -123,14 +123,16 @@ void TessellationApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
+	auto& context = Context::Instance();
+
 	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderTriangle>()), SceneNode::SOA_Cullable);
 	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -142,8 +144,9 @@ void TessellationApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Tessellation.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Tessellation.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_tess_enabled_ = dialog_->IDFromName("Tessellation");
 	id_edge0_static_ = dialog_->IDFromName("Edge0Static");
@@ -197,7 +200,7 @@ void TessellationApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void TessellationApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -279,9 +282,10 @@ void TessellationApp::InsideChangedHandler(KlayGE::UISlider const & sender)
 
 void TessellationApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
 	stream.precision(2);

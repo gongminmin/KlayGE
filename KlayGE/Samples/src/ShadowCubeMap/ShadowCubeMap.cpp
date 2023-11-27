@@ -278,7 +278,8 @@ void ShadowCubeMap::OnCreate()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& context = Context::Instance();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
@@ -328,7 +329,7 @@ void ShadowCubeMap::OnCreate()
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -340,8 +341,9 @@ void ShadowCubeMap::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("ShadowCubeMap.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("ShadowCubeMap.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");
 	id_scale_factor_slider_ = dialog_->IDFromName("ScaleFactorSlider");
@@ -387,7 +389,7 @@ void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -432,7 +434,7 @@ void ShadowCubeMap::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 void ShadowCubeMap::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

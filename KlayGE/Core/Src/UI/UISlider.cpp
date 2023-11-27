@@ -29,11 +29,13 @@ namespace KlayGE
 						value_(50), min_(0), max_(100),
 						pressed_(false)
 	{
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Track
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Slider, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_Slider, 0));
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Disabled] = Color(1, 1, 1, 70.0f / 255);
@@ -43,7 +45,7 @@ namespace KlayGE
 
 		// Button
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Slider, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_Slider, 1));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}

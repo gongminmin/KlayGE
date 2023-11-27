@@ -854,8 +854,9 @@ void OceanApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Ocean.uiml"));
-	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Ocean.uiml"));
+	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
 	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");
 	id_patch_length_static_ = dialog_params_->IDFromName("PatchLengthStatic");
@@ -948,9 +949,10 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().SettleCtrls();
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), 0);
@@ -1085,7 +1087,7 @@ void OceanApp::FPSCameraHandler(UICheckBox const & sender)
 
 void OceanApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

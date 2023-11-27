@@ -147,6 +147,8 @@ void Refract::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
+	auto& context = Context::Instance();
+
 	auto y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	auto c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 
@@ -155,7 +157,7 @@ void Refract::OnCreate()
 		CreateModelFactory<RenderModel>, CreateMeshFactory<RefractorRenderable>);
 
 	refractor_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(refractor_model_->Mesh(0)), SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(refractor_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(refractor_);
 
 	refractor_->FirstComponentOfType<RenderableComponent>()->BoundRenderableOfType<RefractorRenderable>().CompressedCubeMap(
 		y_cube_map, c_cube_map);
@@ -163,9 +165,9 @@ void Refract::OnCreate()
 	auto skybox_renderable = MakeSharedPtr<RenderableSkyBox>();
 	skybox_renderable->CompressedCubeMap(y_cube_map, c_cube_map);
 	skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(skybox_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(skybox_);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0.11f, 0));
@@ -174,7 +176,7 @@ void Refract::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.01f, 0.001f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -197,15 +199,16 @@ void Refract::OnCreate()
 		backface_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Refract.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Refract.uiml"));
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	ContextCfg const & cfg = Context::Instance().Config();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
+	ContextCfg const & cfg = context.Config();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 	DepthStencilViewPtr backface_ds_view;
@@ -245,7 +248,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 		backface_depth_buffer_->Attach(backface_ds_view);
 	}
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -260,7 +263,7 @@ void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 
 void Refract::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

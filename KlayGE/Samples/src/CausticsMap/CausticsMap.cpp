@@ -782,9 +782,9 @@ void CausticsMapApp::InitCubeSM()
 
 void CausticsMapApp::InitUI()
 {
-	//UI Settings
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Caustics.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = Context::Instance().UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Caustics.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	int ui_id = 0;
 	ui_id = dialog_->IDFromName("Light_Density_Slider");
@@ -832,9 +832,10 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().SettleCtrls();
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -920,8 +921,9 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 
 void CausticsMapApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 
 	wostringstream st;
 	st.precision(2);

@@ -213,7 +213,8 @@ void DistanceMapping::OnCreate()
 	polygon_renderable_ = MakeSharedPtr<RenderPolygon>();
 	polygon_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(polygon_renderable_), SceneNode::SOA_Cullable);
 	polygon_->TransformToParent(MathLib::rotation_x(-0.5f));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(polygon_);
+	auto& context = Context::Instance();
+	context.SceneManagerInstance().SceneRootNode().AddChild(polygon_);
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -222,7 +223,7 @@ void DistanceMapping::OnCreate()
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
@@ -241,7 +242,7 @@ void DistanceMapping::OnCreate()
 
 	checked_pointer_cast<RenderPolygon>(polygon_renderable_)->LightFalloff(light_->Falloff());
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -253,14 +254,14 @@ void DistanceMapping::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("DistanceMapping.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("DistanceMapping.uiml"));
 }
 
 void DistanceMapping::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -286,9 +287,10 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 void DistanceMapping::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
 	stream.precision(2);

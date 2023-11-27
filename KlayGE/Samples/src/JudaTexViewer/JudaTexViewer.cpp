@@ -189,14 +189,16 @@ void JudaTexViewer::OnCreate()
 	tile_renderable_ = MakeSharedPtr<RenderTile>();
 	grid_border_renderable_ = MakeSharedPtr<RenderGridBorder>();
 
+	auto& context = Context::Instance();
+	
 	node_ = MakeSharedPtr<SceneNode>(0);
 	node_->AddComponent(MakeSharedPtr<RenderableComponent>(tile_renderable_));
 	node_->AddComponent(MakeSharedPtr<RenderableComponent>(grid_border_renderable_));
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(node_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(node_);
 
 	this->OpenJudaTex("klayge_logo.jdt");
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -208,8 +210,9 @@ void JudaTexViewer::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("JudaTexViewer.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("JudaTexViewer.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
 	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().Connect(
@@ -223,7 +226,7 @@ void JudaTexViewer::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -351,7 +354,7 @@ void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
 
 void JudaTexViewer::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

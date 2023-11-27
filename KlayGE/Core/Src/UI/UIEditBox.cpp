@@ -195,6 +195,7 @@ namespace KlayGE
 	{
 		hide_caret_ = false;
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
 
 		UIElement Element;
 
@@ -213,55 +214,55 @@ namespace KlayGE
 
 		// Assign the style
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 0));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 1));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 2));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 2));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 3));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 3));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 4));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 4));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 5));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 5));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 6));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 6));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 7));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 7));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 8));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_EditBox, 8));
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}

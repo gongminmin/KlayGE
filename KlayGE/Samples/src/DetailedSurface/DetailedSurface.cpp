@@ -246,13 +246,15 @@ DetailedSurfaceApp::DetailedSurfaceApp()
 
 void DetailedSurfaceApp::OnCreate()
 {
+	auto& context = Context::Instance();
+
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	UIManager::Instance().Load(*ResLoader::Instance().Open("DetailedSurface.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("DetailedSurface.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	juda_tex_ = JudaTexture::Load("DetailedSurface.jdt");
 
 	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat(MakeSpan({EF_BC1, EF_ABGR8, EF_ARGB8}));
@@ -266,7 +268,7 @@ void DetailedSurfaceApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void DetailedSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -327,7 +329,8 @@ void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 
 void DetailedSurfaceApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -336,7 +339,7 @@ void DetailedSurfaceApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Detailed Surface", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
@@ -346,16 +349,18 @@ void DetailedSurfaceApp::DoUpdateOverlay()
 
 uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 	if (loading_percentage_ < 100)
 	{
-		UIDialogPtr const & dialog_loading = UIManager::Instance().GetDialog("Loading");
+		auto& ui_mgr = context.UIManagerInstance();
+		UIDialogPtr const & dialog_loading = ui_mgr.GetDialog("Loading");
 		UIStaticPtr const & msg = dialog_loading->Control<UIStatic>(dialog_loading->IDFromName("Msg"));
 		UIProgressBarPtr const & progress_bar = dialog_loading->Control<UIProgressBar>(dialog_loading->IDFromName("Progress"));
 
 		if (loading_percentage_ < 20)
 		{
-			dialog_ = UIManager::Instance().GetDialog("DetailedSurface");
+			dialog_ = ui_mgr.GetDialog("DetailedSurface");
 			dialog_->SetVisible(false);
 
 			dialog_loading->SetVisible(true);

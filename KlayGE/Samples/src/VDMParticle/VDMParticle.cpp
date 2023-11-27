@@ -117,7 +117,8 @@ VDMParticleApp::VDMParticleApp()
 
 void VDMParticleApp::OnCreate()
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	auto robot_model = ASyncLoadModel("attack_droid.glb", EAH_GPU_Read | EAH_Immutable,
@@ -140,7 +141,7 @@ void VDMParticleApp::OnCreate()
 	this->LookAt(float3(1.47f, 2.35f, -5.75f), float3(-2.18f, 0.71f, 2.20f));
 	this->Proj(0.1f, 200);
 
-	auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+	auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
@@ -172,7 +173,7 @@ void VDMParticleApp::OnCreate()
 
 	fpc_controller_.Scalers(0.05f, 0.1f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -184,8 +185,9 @@ void VDMParticleApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("VDMParticle.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("VDMParticle.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_particle_rendering_type_static_ = dialog_->IDFromName("ParticleRenderingTypeStatic");
 	id_particle_rendering_type_combo_ = dialog_->IDFromName("ParticleRenderingTypeCombo");
@@ -223,7 +225,8 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -296,7 +299,7 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	vdm_composition_pp_->InputPin(2, rf.MakeTextureSrv(vdm_count_tex_));
 	vdm_composition_pp_->InputPin(3, rf.MakeTextureSrv(scene_depth_tex_));
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void VDMParticleApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -336,7 +339,7 @@ void VDMParticleApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 void VDMParticleApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	Context::Instance().UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);

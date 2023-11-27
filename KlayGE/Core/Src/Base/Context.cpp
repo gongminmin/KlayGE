@@ -134,7 +134,7 @@ namespace KlayGE
 
 			ResLoader::Instance().Suspend();
 			PerfProfiler::Instance().Suspend();
-			UIManager::Instance().Suspend();
+			ui_mgr_.Suspend();
 
 			if (deferred_rendering_layer_)
 			{
@@ -174,7 +174,7 @@ namespace KlayGE
 
 			ResLoader::Instance().Resume();
 			PerfProfiler::Instance().Resume();
-			UIManager::Instance().Resume();
+			ui_mgr_.Resume();
 
 			if (deferred_rendering_layer_)
 			{
@@ -1283,6 +1283,20 @@ namespace KlayGE
 			return global_thread_pool_;
 		}
 
+		UIManager& UIManagerInstance()
+		{
+			if (!ui_mgr_.Valid())
+			{
+				std::lock_guard<std::mutex> lock(singleton_mutex_);
+				if (!ui_mgr_.Valid())
+				{
+					ui_mgr_.Init();
+				}
+			}
+
+			return ui_mgr_;
+		}
+
 	private:
 		void DestroyAll()
 		{
@@ -1292,7 +1306,7 @@ namespace KlayGE
 
 			ResLoader::Destroy();
 			PerfProfiler::Destroy();
-			UIManager::Destroy();
+			ui_mgr_.Destroy();
 
 			deferred_rendering_layer_.reset();
 			show_factory_.reset();
@@ -1346,6 +1360,8 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 		DllLoader dev_helper_loader_;
 #endif
+
+		UIManager ui_mgr_;
 
 		ThreadPool global_thread_pool_;
 	};
@@ -1570,5 +1586,10 @@ namespace KlayGE
 	ThreadPool& Context::ThreadPoolInstance()
 	{
 		return pimpl_->ThreadPoolInstance();
+	}
+
+	UIManager& Context::UIManagerInstance()
+	{
+		return pimpl_->UIManagerInstance();
 	}
 }

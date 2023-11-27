@@ -777,7 +777,8 @@ GPUParticleSystemApp::GPUParticleSystemApp()
 
 void GPUParticleSystemApp::OnCreate()
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -809,7 +810,7 @@ void GPUParticleSystemApp::OnCreate()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.003f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -823,7 +824,7 @@ void GPUParticleSystemApp::OnCreate()
 
 	particles_renderable_ = MakeSharedPtr<RenderParticles>(NUM_PARTICLE);
 	particles_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(particles_renderable_), SceneNode::SOA_Moveable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(particles_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(particles_);
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);
@@ -831,7 +832,7 @@ void GPUParticleSystemApp::OnCreate()
 	terrain_ = MakeSharedPtr<SceneNode>(
 		MakeSharedPtr<RenderableComponent>(MakeSharedPtr<TerrainRenderable>(terrain_height_tex, terrain_normal_tex)),
 		SceneNode::SOA_Cullable);
-	Context::Instance().SceneManagerInstance().SceneRootNode().AddChild(terrain_);
+	context.SceneManagerInstance().SceneRootNode().AddChild(terrain_);
 
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 	
@@ -847,14 +848,15 @@ void GPUParticleSystemApp::OnCreate()
 		checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 	}
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("GPUParticleSystem.uiml"));
+	context.UIManagerInstance().Load(*ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 
 	auto ds_view = rf.Make2DDsv(width, height, EF_D16, 1, 0);
 
@@ -871,7 +873,7 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	blend_pp_->InputPin(0, rf.MakeTextureSrv(scene_tex_));
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -886,7 +888,8 @@ void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAct
 
 void GPUParticleSystemApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -895,7 +898,7 @@ void GPUParticleSystemApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str(), 16);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), re.ScreenFrameBuffer()->Description(), 16);
 }

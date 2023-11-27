@@ -35,11 +35,13 @@ namespace KlayGE
 							selected_(-1), sel_start_(0),
 							drag_(false)
 	{
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Main
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ListBox, 0));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -47,7 +49,7 @@ namespace KlayGE
 
 		// Selection
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ListBox, 1));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -83,11 +85,13 @@ namespace KlayGE
 		text_rc_ = selection_rc_;
 		text_rc_ += IRect(margin_, 0, -margin_, 0);
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		// Update the scrollbar's rects
 		scroll_bar_.SetLocation(x_ + width_ - sb_width_, y_);
 		scroll_bar_.SetSize(sb_width_, height_);
-		FontPtr font = UIManager::Instance().GetFont(elements_[0]->FontIndex());
-		float font_size = UIManager::Instance().GetFontSize(elements_[0]->FontIndex());
+		FontPtr font = ui_mgr.GetFont(elements_[0]->FontIndex());
+		float font_size = ui_mgr.GetFontSize(elements_[0]->FontIndex());
 		if (font && (font_size != 0))
 		{
 			scroll_bar_.SetPageSize(static_cast<size_t>(text_rc_.Height() / font_size));
@@ -593,7 +597,7 @@ namespace KlayGE
 			// Find out the height of a single line of text
 			IRect rc = text_rc_;
 			IRect rcSel = selection_rc_;
-			rc.bottom() = static_cast<int32_t>(rc.top() + UIManager::Instance().GetFontSize(main_element.FontIndex()));
+			rc.bottom() = static_cast<int32_t>(rc.top() + Context::Instance().UIManagerInstance().GetFontSize(main_element.FontIndex()));
 
 			// Update the line height formation
 			text_height_ = rc.Height();

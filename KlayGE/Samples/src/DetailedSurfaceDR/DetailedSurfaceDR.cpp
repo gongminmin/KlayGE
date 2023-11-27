@@ -148,9 +148,10 @@ void DetailedSurfaceApp::OnCreate()
 	input_handler->Connect([this](InputEngine const& sender, InputAction const& action) { this->InputHandler(sender, action); });
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("DetailedSurfaceDR.uiml"));
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("DetailedSurfaceDR.uiml"));
 
-	dialog_ = UIManager::Instance().GetDialog("DetailedSurface");
+	dialog_ = ui_mgr.GetDialog("DetailedSurface");
 	id_scale_static_ = dialog_->IDFromName("ScaleStatic");
 	id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
 	id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
@@ -194,10 +195,11 @@ void DetailedSurfaceApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	auto& context = Context::Instance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void DetailedSurfaceApp::InputHandler(InputEngine const& /*sender*/, InputAction const& action)
@@ -254,7 +256,8 @@ void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const& sender)
 
 void DetailedSurfaceApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -263,7 +266,7 @@ void DetailedSurfaceApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Detailed Surface with Deferred Rendering", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables " << sceneMgr.NumPrimitivesRendered() << " Primitives "
 		   << sceneMgr.NumVerticesRendered() << " Vertices";

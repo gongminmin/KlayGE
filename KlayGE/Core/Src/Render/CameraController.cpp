@@ -313,7 +313,7 @@ namespace KlayGE
 
 	void TrackballCameraController::InputHandler(InputEngine const & /*ie*/, InputAction const & action)
 	{
-		if (camera_ && !UIManager::Instance().MouseOnUI())
+		if (camera_ && !Context::Instance().UIManagerInstance().MouseOnUI())
 		{
 			switch (action.first)
 			{

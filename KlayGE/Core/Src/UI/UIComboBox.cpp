@@ -32,11 +32,13 @@ namespace KlayGE
 							sb_width_(16), opened_(false),
 							pressed_(false)
 	{
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Main
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ComboBox, 0));
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_Normal] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 150.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(230.0f / 255, 230.0f / 255, 230.0f / 255, 170.0f / 255);
@@ -50,7 +52,7 @@ namespace KlayGE
 
 		// Button
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 1));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ComboBox, 1));
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(150.0f / 255, 150.0f / 255, 150.0f / 255, 1);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
@@ -61,7 +63,7 @@ namespace KlayGE
 
 		// Dropdown
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 2));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ComboBox, 2));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -69,7 +71,7 @@ namespace KlayGE
 
 		// Selection
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 3));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_ComboBox, 3));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
@@ -130,6 +132,8 @@ namespace KlayGE
 
 		if (opened_)
 		{
+			auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 			dropdown_rc_ = text_rc_;
 			dropdown_rc_ += int2(2, text_rc_.Height());
 			dropdown_rc_.bottom() += drop_height_;
@@ -143,8 +147,8 @@ namespace KlayGE
 			// Update the scrollbar's rects
 			scroll_bar_.SetLocation(dropdown_rc_.right(), dropdown_rc_.top() + 2);
 			scroll_bar_.SetSize(sb_width_, dropdown_rc_.Height() - 2);
-			FontPtr const & font = UIManager::Instance().GetFont(elements_[2]->FontIndex());
-			float font_size = UIManager::Instance().GetFontSize(elements_[2]->FontIndex());
+			FontPtr const & font = ui_mgr.GetFont(elements_[2]->FontIndex());
+			float font_size = ui_mgr.GetFontSize(elements_[2]->FontIndex());
 			if (font && (font_size != 0))
 			{
 				scroll_bar_.SetPageSize(static_cast<size_t>(dropdown_text_rc_.Height() / font_size));
@@ -403,11 +407,13 @@ namespace KlayGE
 		static bool bSBInit;
 		if (!bSBInit)
 		{
+			auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 			// Update the page size of the scroll bar
-			if (UIManager::Instance().GetFontSize(dropdown_element.FontIndex()) != 0)
+			if (ui_mgr.GetFontSize(dropdown_element.FontIndex()) != 0)
 			{
 				scroll_bar_.SetPageSize(
-					static_cast<size_t>(dropdown_text_rc_.Height() / UIManager::Instance().GetFontSize(dropdown_element.FontIndex())));
+					static_cast<size_t>(dropdown_text_rc_.Height() / ui_mgr.GetFontSize(dropdown_element.FontIndex())));
 			}
 			else
 			{

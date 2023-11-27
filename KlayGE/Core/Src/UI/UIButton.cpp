@@ -30,11 +30,13 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
+		auto& ui_mgr = Context::Instance().UIManagerInstance();
+
 		UIElement Element;
 
 		// Button
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_Button, 0));
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 200.0f / 255);
@@ -45,7 +47,7 @@ namespace KlayGE
 
 		// Fill layer
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
+			Element.SetTexture(0, ui_mgr.ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 160.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);

@@ -68,7 +68,9 @@ void SoundApp::OnCreate()
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	auto& context = Context::Instance();
+
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -80,7 +82,7 @@ void SoundApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	AudioDataSourceFactory& adsf = Context::Instance().AudioDataSourceFactoryInstance();
+	AudioDataSourceFactory& adsf = context.AudioDataSourceFactoryInstance();
 	music_1_ = adsf.MakeAudioDataSource();
 	music_1_->Open(ResLoader::Instance().Open("Carl_Douglas_-_Kung_Fu_Fighting.ogg"));
 	music_2_ = adsf.MakeAudioDataSource();
@@ -94,8 +96,9 @@ void SoundApp::OnCreate()
 	ae.AddBuffer(2, af.MakeMusicBuffer(music_2_, 3));
 	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("Sound.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("Sound.uiml"));
+	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");
 	id_music_2_ = dialog_->IDFromName("Music_2");
@@ -135,7 +138,7 @@ void SoundApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls();
+	Context::Instance().UIManagerInstance().SettleCtrls();
 }
 
 void SoundApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -199,9 +202,10 @@ void SoundApp::VolumeChangedHandler(UISlider const & sender)
 
 void SoundApp::DoUpdateOverlay()
 {
-	UIManager::Instance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
 	stream.precision(2);

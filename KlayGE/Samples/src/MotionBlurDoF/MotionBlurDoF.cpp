@@ -287,11 +287,12 @@ void MotionBlurDoFApp::OnCreate()
 	model_mesh_ = ASyncLoadModel("teapot.glb", EAH_GPU_Read | EAH_Immutable,
 		SceneNode::SOA_Cullable, nullptr, CreateModelFactory<RenderModel>, CreateMeshFactory<RenderNonInstancedMesh>);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
+	ScriptEngine& scriptEngine = context.ScriptFactoryInstance().ScriptEngineInstance();
 	script_module_ = scriptEngine.CreateModule("MotionBlurDoF_init");
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
@@ -306,7 +307,7 @@ void MotionBlurDoFApp::OnCreate()
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
 
@@ -328,10 +329,11 @@ void MotionBlurDoFApp::OnCreate()
 	motion_blur_ = MakeSharedPtr<MotionBlurPostProcess>();
 	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
-	UIManager::Instance().Load(*ResLoader::Instance().Open("MotionBlurDoF.uiml"));
-	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
-	mb_dialog_ = UIManager::Instance().GetDialogs()[1];
-	app_dialog_ = UIManager::Instance().GetDialogs()[2];
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*ResLoader::Instance().Open("MotionBlurDoF.uiml"));
+	dof_dialog_ = ui_mgr.GetDialogs()[0];
+	mb_dialog_ = ui_mgr.GetDialogs()[1];
+	app_dialog_ = ui_mgr.GetDialogs()[2];
 
 	id_dof_on_ = dof_dialog_->IDFromName("DoFOn");
 	id_bokeh_on_ = dof_dialog_->IDFromName("BokehOn");
@@ -440,7 +442,8 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	auto& context = Context::Instance();
+	RenderFactory& rf = context.RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -511,7 +514,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	motion_blur_->InputPin(2, velocity_srv);
 	motion_blur_copy_pp_->InputPin(0, dof_srv);
 
-	UIManager::Instance().SettleCtrls();
+	context.UIManagerInstance().SettleCtrls();
 }
 
 void MotionBlurDoFApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -666,9 +669,10 @@ void MotionBlurDoFApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 void MotionBlurDoFApp::DoUpdateOverlay()
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	auto& context = Context::Instance();
+	RenderEngine& renderEngine(context.RenderFactoryInstance().RenderEngineInstance());
 
-	UIManager::Instance().Render();
+	context.UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Motion Blur and Depth of field", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
