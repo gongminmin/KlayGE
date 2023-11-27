@@ -52,7 +52,7 @@ int SampleMain()
 SubSurfaceApp::SubSurfaceApp()
 					: App3DFramework("SubSurface")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/SubSurface");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/SubSurface");
 }
 
 void SubSurfaceApp::OnCreate()
@@ -98,7 +98,7 @@ void SubSurfaceApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("SubSurface.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("SubSurface.uiml"));
 	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_sigma_static_ = dialog_params_->IDFromName("SigmaStatic");
 	id_sigma_slider_ = dialog_params_->IDFromName("SigmaSlider");

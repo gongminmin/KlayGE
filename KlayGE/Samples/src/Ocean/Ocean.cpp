@@ -756,7 +756,7 @@ OceanApp::OceanApp()
 			: App3DFramework("Ocean"),
 				light_shaft_on_(true)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Ocean");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/Ocean");
 }
 
 void OceanApp::OnCreate()
@@ -855,7 +855,7 @@ void OceanApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Ocean.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("Ocean.uiml"));
 	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
 	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");
@@ -1087,7 +1087,8 @@ void OceanApp::FPSCameraHandler(UICheckBox const & sender)
 
 void OceanApp::DoUpdateOverlay()
 {
-	Context::Instance().UIManagerInstance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -1103,7 +1104,7 @@ void OceanApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

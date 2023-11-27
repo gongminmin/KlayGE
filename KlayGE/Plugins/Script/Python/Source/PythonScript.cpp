@@ -870,7 +870,7 @@ namespace KlayGE
 		}
 
 		std::wstring py_lib;
-		Convert(py_lib, ResLoader::Instance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
+		Convert(py_lib, Context::Instance().ResLoaderInstance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
 		Py_SetPath(&py_lib[0]);
 
 		PyImport_AppendInittab("emb", PyInit_emb);

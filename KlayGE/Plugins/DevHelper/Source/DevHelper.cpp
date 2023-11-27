@@ -76,7 +76,8 @@ namespace KlayGE
 			std::filesystem::path output_path(output_name);
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = std::filesystem::path(Context::Instance().ResLoaderInstance().Locate(input_name)).parent_path() /
+							  output_path.filename();
 			}
 
 			mc.Save(*model, output_path.string());
@@ -102,7 +103,8 @@ namespace KlayGE
 			std::filesystem::path output_path(output_name);
 			if (output_path.parent_path() == input_path.parent_path())
 			{
-				output_path = std::filesystem::path(ResLoader::Instance().Locate(input_name)).parent_path() / output_path.filename();
+				output_path = std::filesystem::path(Context::Instance().ResLoaderInstance().Locate(input_name)).parent_path() /
+							  output_path.filename();
 			}
 
 			SaveTexture(texture, output_path.string());

@@ -116,7 +116,7 @@ TessellationApp::TessellationApp()
 					: App3DFramework("Tessellation"),
 						tess_factor_(0, 0, 0, 0)
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/Tessellation");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/Tessellation");
 }
 
 void TessellationApp::OnCreate()
@@ -145,7 +145,7 @@ void TessellationApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Tessellation.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("Tessellation.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_tess_enabled_ = dialog_->IDFromName("Tessellation");

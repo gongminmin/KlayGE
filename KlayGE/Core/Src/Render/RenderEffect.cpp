@@ -4321,7 +4321,9 @@ namespace KlayGE
 			immutable_ = MakeSharedPtr<Immutable>();
 		}
 
-		std::filesystem::path first_fxml_path(ResLoader::Instance().Locate(*names.begin()));
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+
+		std::filesystem::path first_fxml_path(res_loader.Locate(*names.begin()));
 		std::filesystem::path first_fxml_directory = first_fxml_path.parent_path();
 
 		std::string connected_name;
@@ -4334,7 +4336,7 @@ namespace KlayGE
 			}
 		}
 
-		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
+		std::string kfx_name = res_loader.Locate(connected_name + ".kfx");
 		if (kfx_name.empty())
 		{
 			kfx_name = (first_fxml_directory / (connected_name + ".kfx")).string();
@@ -4347,7 +4349,7 @@ namespace KlayGE
 		{
 			immutable_->timestamp = 0;
 
-			ResIdentifierPtr source = ResLoader::Instance().Open(name);
+			ResIdentifierPtr source = res_loader.Open(name);
 			if (source)
 			{
 				immutable_->timestamp = std::max(immutable_->timestamp, source->Timestamp());
@@ -4359,7 +4361,7 @@ namespace KlayGE
 
 				for (auto const& include_name : include_names)
 				{
-					immutable_->timestamp = std::max(immutable_->timestamp, ResLoader::Instance().Timestamp(include_name));
+					immutable_->timestamp = std::max(immutable_->timestamp, res_loader.Timestamp(include_name));
 				}
 			}
 		}
@@ -4368,7 +4370,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 		immutable_->need_compile = false;
 #endif
-		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
+		ResIdentifierPtr kfx_source = res_loader.Open(kfx_name);
 		if (!kfx_source || !this->StreamIn(*kfx_source))
 		{
 #if KLAYGE_IS_DEV_PLATFORM
@@ -4387,7 +4389,7 @@ namespace KlayGE
 
 			std::vector<std::string> include_names;
 
-			ResIdentifierPtr main_source = ResLoader::Instance().Open(names[0]);
+			ResIdentifierPtr main_source = res_loader.Open(names[0]);
 			if (main_source)
 			{
 				XMLNode root = LoadXml(*main_source);
@@ -4395,7 +4397,7 @@ namespace KlayGE
 
 				for (size_t i = 1; i < names.size(); ++i)
 				{
-					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
+					ResIdentifierPtr source = res_loader.Open(names[i]);
 					if (source)
 					{
 						XMLNode frag_root = LoadXml(*source);
@@ -4725,6 +4727,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffect::PreprocessIncludes(XMLNode& root, std::vector<std::string>& include_names)
 	{
+		auto& res_loader = Context::Instance().ResLoaderInstance();
 		for (XMLNode const* node = root.FirstNode("include"); node; node = root.FirstNode("include"))
 		{
 			XMLAttribute const* attr = node->Attrib("name");
@@ -4738,7 +4741,7 @@ namespace KlayGE
 			auto iter = std::find(include_names.begin(), include_names.end(), include_name);
 			if (iter == include_names.end())
 			{
-				auto const& include_root = LoadXml(*ResLoader::Instance().Open(include_name));
+				auto const& include_root = LoadXml(*res_loader.Open(include_name));
 				for (XMLNode const* child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
 					if (XMLNodeType::Element == child_node->Type())
@@ -4755,6 +4758,7 @@ namespace KlayGE
 
 	void RenderEffect::RecursiveIncludeNode(XMLNode const& root, std::vector<std::string>& include_names) const
 	{
+		auto& res_loader = Context::Instance().ResLoaderInstance();
 		for (XMLNode const* node = root.FirstNode("include"); node; node = node->NextSibling("include"))
 		{
 			XMLAttribute const* attr = node->Attrib("name");
@@ -4762,7 +4766,7 @@ namespace KlayGE
 
 			std::string_view const include_name = attr->ValueString();
 
-			XMLNode include_root = LoadXml(*ResLoader::Instance().Open(include_name));
+			XMLNode include_root = LoadXml(*res_loader.Open(include_name));
 			this->RecursiveIncludeNode(include_root, include_names);
 
 			bool found = false;
@@ -7191,7 +7195,7 @@ namespace KlayGE
 			std::string val;
 			anno.Value(val);
 
-			if (ResLoader::Instance().Locate(val).empty())
+			if (Context::Instance().ResLoaderInstance().Locate(val).empty())
 			{
 				LogError() << val << " NOT found" << std::endl;
 			}
@@ -8002,21 +8006,23 @@ namespace KlayGE
 
 	RenderEffectPtr SyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<RenderEffect>(
+			MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
 	RenderEffectPtr SyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffect(std::string_view effect_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
+		return Context::Instance().ResLoaderInstance().ASyncQueryT<RenderEffect>(
+			MakeSharedPtr<EffectLoadingDesc>(MakeSpan<1>(std::string(effect_name))));
 	}
 
 	RenderEffectPtr ASyncLoadRenderEffects(std::span<std::string const> effect_names)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
+		return Context::Instance().ResLoaderInstance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 }

@@ -156,19 +156,20 @@ int main(int argc, char* argv[])
 		platform = "d3d_11_0";
 	}
 
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
+	auto& context = Context::Instance();
+	context.LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = context.Config();
 	context_cfg.render_factory_name = "NullRender";
 	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	context_cfg.graphics_cfg.ppaa = false;
 	context_cfg.graphics_cfg.gamma = false;
 	context_cfg.graphics_cfg.color_grading = false;
-	Context::Instance().Config(context_cfg);
+	context.Config(context_cfg);
 
 	PlatformDefinition platform_def(platform + ".plat");
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderEngine& re = context.RenderFactoryInstance().RenderEngineInstance();
 	int major_version = platform_def.major_version;
 	int minor_version = platform_def.minor_version;
 	bool frag_depth_support = platform_def.frag_depth_support;
@@ -181,20 +182,22 @@ int main(int argc, char* argv[])
 	re.SetCustomAttrib("DEVICE_CAPS", &platform_def.device_caps);
 	re.SetCustomAttrib("FRAG_DEPTH_SUPPORT", &frag_depth_support);
 
+	auto& res_loader = context.ResLoaderInstance();
+
 	for (auto const& fxml_name : input_names)
 	{
 		std::filesystem::path const fxml_path(fxml_name);
 		std::string const base_name = fxml_path.stem().string();
 		std::filesystem::path const fxml_directory = fxml_path.parent_path();
-		ResLoader::Instance().AddPath(fxml_directory.string());
+		res_loader.AddPath(fxml_directory.string());
 
 		std::filesystem::path const kfx_name = fxml_path.filename().replace_extension("kfx");
 		std::filesystem::path kfx_path = fxml_directory / kfx_name;
 		bool skip_jit = false;
 		if (std::filesystem::exists(fxml_path) && std::filesystem::exists(kfx_path))
 		{
-			ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
-			ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
+			ResIdentifierPtr source = res_loader.Open(fxml_name);
+			ResIdentifierPtr kfx_source = res_loader.Open(kfx_path.string());
 
 			uint64_t src_timestamp = source->Timestamp();
 
@@ -238,12 +241,12 @@ int main(int argc, char* argv[])
 		if (!skip_jit)
 		{
 			std::vector<string> fxml_names;
-			if (ResLoader::Instance().Locate(fxml_name).empty())
+			if (res_loader.Locate(fxml_name).empty())
 			{
 				std::vector<std::string_view> frags = StringUtil::Split(base_name, StringUtil::EqualTo('+'));
 				for (auto const& frag : frags)
 				{
-					fxml_names.push_back(ResLoader::Instance().Locate(std::string(frag) + ".fxml"));
+					fxml_names.push_back(res_loader.Locate(std::string(frag) + ".fxml"));
 				}
 			}
 			else

@@ -276,7 +276,7 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 						num_objs_rendered_(0), num_renderables_rendered_(0),
 						num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/MotionBlurDoF");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/MotionBlurDoF");
 }
 
 void MotionBlurDoFApp::OnCreate()
@@ -330,7 +330,7 @@ void MotionBlurDoFApp::OnCreate()
 	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("MotionBlurDoF.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = ui_mgr.GetDialogs()[0];
 	mb_dialog_ = ui_mgr.GetDialogs()[1];
 	app_dialog_ = ui_mgr.GetDialogs()[2];

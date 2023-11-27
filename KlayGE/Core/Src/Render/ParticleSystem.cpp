@@ -121,7 +121,7 @@ namespace
 				return;
 			}
 
-			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
+			ResIdentifierPtr psmm_input = Context::Instance().ResLoaderInstance().Open(ps_desc_.res_name);
 
 			KlayGE::XMLNode root = LoadXml(*psmm_input);
 
@@ -919,13 +919,13 @@ namespace KlayGE
 
 	ParticleSystemPtr SyncLoadParticleSystem(std::string_view psml_name)
 	{
-		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
 	ParticleSystemPtr ASyncLoadParticleSystem(std::string_view psml_name)
 	{
 		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
 	void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name)
@@ -1057,7 +1057,7 @@ namespace KlayGE
 		std::ofstream ofs(psml_name.c_str());
 		if (!ofs)
 		{
-			ofs.open((ResLoader::Instance().LocalFolder() + psml_name).c_str());
+			ofs.open((Context::Instance().ResLoaderInstance().LocalFolder() + psml_name).c_str());
 		}
 		SaveXml(root, ofs);
 	}

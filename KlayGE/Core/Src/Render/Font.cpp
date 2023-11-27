@@ -746,10 +746,11 @@ namespace
 				return;
 			}
 
-			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_desc_.res_name);
+			auto& context = Context::Instance();
+			ResIdentifierPtr kfont_input = context.ResLoaderInstance().Open(font_desc_.res_name);
 			font_desc_.kfont_loader->Load(kfont_input);
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderFactory& rf = context.RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
@@ -901,12 +902,12 @@ namespace KlayGE
 
 	FontPtr SyncLoadFont(std::string_view font_name, uint32_t flags)
 	{
-		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 
 	FontPtr ASyncLoadFont(std::string_view font_name, uint32_t flags)
 	{
 		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 }

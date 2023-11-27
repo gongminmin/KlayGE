@@ -132,7 +132,7 @@ namespace KlayGE
 {
 	bool ImagePlane::Load(std::string_view name, TexMetadata const & metadata)
 	{
-		std::string const name_str = ResLoader::Instance().Locate(name);
+		std::string const name_str = Context::Instance().ResLoaderInstance().Locate(name);
 		if (name_str.empty())
 		{
 			return false;

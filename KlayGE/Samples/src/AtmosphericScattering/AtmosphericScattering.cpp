@@ -136,7 +136,7 @@ AtmosphericScatteringApp::AtmosphericScatteringApp()
 		obj_controller_(true, MB_Left, MB_Middle, 0),
 		light_controller_(true, MB_Right, 0, 0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/AtmosphericScattering");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/AtmosphericScattering");
 }
 
 void AtmosphericScatteringApp::OnCreate()
@@ -172,7 +172,7 @@ void AtmosphericScatteringApp::OnCreate()
 		CreateModelFactory<RenderModel>, CreateMeshFactory<AtmosphereMesh>);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("AtmosphericScattering.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("AtmosphericScattering.uiml"));
 	dialog_param_ = ui_mgr.GetDialog("AtmosphericScattering");
 	id_atmosphere_top_ = dialog_param_->IDFromName("atmosphere_top");
 	id_density_ = dialog_param_->IDFromName("density");

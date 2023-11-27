@@ -199,7 +199,7 @@ namespace
 				ss.str(std::string());
 			}
 			d3dcompiler_wrapper_name += ".exe.so";
-			std::string wrapper_path = ResLoader::Instance().Locate(d3dcompiler_wrapper_name);
+			std::string wrapper_path = Context::Instance().ResLoaderInstance().Locate(d3dcompiler_wrapper_name);
 			ss << KFL_STRINGIZE(WINE_PATH) << "wine " << wrapper_path;
 #endif
 			ss << " compile";

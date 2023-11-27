@@ -20,9 +20,10 @@ inline int EntryFunc()
 {
 	auto on_exit = nonstd::make_scope_exit([] { KlayGE::Context::Destroy(); });
 
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
+	auto& context = KlayGE::Context::Instance();
+	context.ResLoaderInstance().AddPath("../../Samples/media/Common");
 
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
+	context.LoadCfg("KlayGE.cfg");
 
 	return SampleMain();
 }

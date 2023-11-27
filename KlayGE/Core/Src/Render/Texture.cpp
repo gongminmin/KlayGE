@@ -1107,7 +1107,7 @@ namespace
 			bool const dds_ext = (res_path.extension().string() == ".dds");
 			tex_desc_.metadata_name = tex_desc_.res_name + ".kmeta";
 			tex_desc_.runtime_name = tex_desc_.res_name;
-			if (!dds_ext || !ResLoader::Instance().Locate(tex_desc_.metadata_name).empty())
+			if (!dds_ext || !Context::Instance().ResLoaderInstance().Locate(tex_desc_.metadata_name).empty())
 			{
 				// Texture's runtime format is dds, for now
 				tex_desc_.runtime_name += ".dds";
@@ -1132,7 +1132,7 @@ namespace
 			{
 				uint32_t row_pitch, slice_pitch;
 				std::string_view image_info_name;
-				if (ResLoader::Instance().Locate(tex_desc_.runtime_name).empty())
+				if (Context::Instance().ResLoaderInstance().Locate(tex_desc_.runtime_name).empty())
 				{
 					image_info_name = tex_desc_.res_name;
 				}
@@ -1251,16 +1251,19 @@ namespace
 				return;
 			}
 
+			auto& context = Context::Instance();
+			auto& res_loader = context.ResLoaderInstance();
+
 			bool jit = false;
-			if (ResLoader::Instance().Locate(tex_desc_.runtime_name).empty())
+			if (res_loader.Locate(tex_desc_.runtime_name).empty())
 			{
 				jit = true;
 			}
 			else
 			{
-				uint64_t const runtime_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.runtime_name);
-				uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(tex_desc_.res_name);
-				uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(tex_desc_.metadata_name);
+				uint64_t const runtime_file_timestamp = res_loader.Timestamp(tex_desc_.runtime_name);
+				uint64_t const input_file_timestamp = res_loader.Timestamp(tex_desc_.res_name);
+				uint64_t const metadata_timestamp = res_loader.Timestamp(tex_desc_.metadata_name);
 				if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
 					|| (((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp))))
 				{
@@ -1270,10 +1273,10 @@ namespace
 			if (jit)
 			{
 #if KLAYGE_IS_DEV_PLATFORM
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderFactory& rf = context.RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-				Context::Instance().DevHelperInstance().ConvertTexture(tex_desc_.res_name, tex_desc_.metadata_name,
+				context.DevHelperInstance().ConvertTexture(tex_desc_.res_name, tex_desc_.metadata_name,
 					tex_desc_.runtime_name, &caps);
 #else
 				LogError() << "Could NOT locate " << tex_desc_.runtime_name << std::endl;
@@ -2090,6 +2093,7 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
+		auto& res_loader = Context::Instance().ResLoaderInstance();
 		std::filesystem::path res_path(tex_name);
 		if (res_path.extension().string() != ".dds")
 		{
@@ -2098,7 +2102,7 @@ namespace KlayGE
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			std::string const metadata_name = std::string(tex_name) + ".kmeta";
-			Context::Instance().DevHelperInstance().GetImageInfo(ResLoader::Instance().Locate(tex_name), metadata_name, &caps,
+			Context::Instance().DevHelperInstance().GetImageInfo(res_loader.Locate(tex_name), metadata_name, &caps,
 				type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
 #else
 			LogError() << "The file type is not supported: " << tex_name << std::endl;
@@ -2106,7 +2110,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
+			ResIdentifierPtr tex_res = res_loader.Open(tex_name);
 			ReadDdsFileHeader(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
 				row_pitch, slice_pitch);
 		}
@@ -2114,12 +2118,13 @@ namespace KlayGE
 
 	TexturePtr LoadSoftwareTexture(std::string_view tex_name)
 	{
-		if (ResLoader::Instance().Locate(tex_name).empty())
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+		if (res_loader.Locate(tex_name).empty())
 		{
 			return TexturePtr();
 		}
 
-		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
+		ResIdentifierPtr tex_res = res_loader.Open(tex_name);
 
 		Texture::TextureType type;
 		uint32_t width, height, depth;
@@ -2327,12 +2332,12 @@ namespace KlayGE
 
 	TexturePtr SyncLoadTexture(std::string_view tex_name, uint32_t access_hint)
 	{
-		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
 	TexturePtr ASyncLoadTexture(std::string_view tex_name, uint32_t access_hint)
 	{
-		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
+		return Context::Instance().ResLoaderInstance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 } // namespace KlayGE
 
@@ -2345,7 +2350,7 @@ namespace
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
 		if (!file)
 		{
-			file.open((ResLoader::Instance().LocalFolder() + tex_name).c_str(), std::ios_base::binary);
+			file.open((Context::Instance().ResLoaderInstance().LocalFolder() + tex_name).c_str(), std::ios_base::binary);
 		}
 
 		uint32_t magic = Native2LE(MakeFourCC<'D', 'D', 'S', ' '>::value);

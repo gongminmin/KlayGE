@@ -71,14 +71,13 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API ResLoader final
 	{
+		friend class Context;
+
 		KLAYGE_NONCOPYABLE(ResLoader);
 
 	public:
-		ResLoader();
-		~ResLoader();
-
-		static ResLoader& Instance();
-		static void Destroy() noexcept;
+		ResLoader() noexcept;
+		~ResLoader() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -121,6 +120,11 @@ namespace KlayGE
 		void Update();
 
 		uint32_t NumLoadingResources() const noexcept;
+
+	private:
+		void Init(ThreadPool& tp);
+		void Destroy() noexcept;
+		bool Valid() const noexcept;
 
 	private:
 		class Impl;

@@ -45,17 +45,18 @@ int main(int argc, char* argv[])
 
 	std::string fxml_name = argv[1];
 
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
+	auto& context = Context::Instance();
+	context.LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = context.Config();
 	context_cfg.render_factory_name = "D3D11";
 	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
+	context.Config(context_cfg);
 
 	Fxml2ShaderApp app;
 	app.Create();
 
-	fxml_name = ResLoader::Instance().Locate(fxml_name);
+	fxml_name = context.ResLoaderInstance().Locate(fxml_name);
 	std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
 	std::filesystem::remove(kfx_name);
 

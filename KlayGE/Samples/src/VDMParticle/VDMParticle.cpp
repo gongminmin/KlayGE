@@ -102,7 +102,7 @@ VDMParticleApp::VDMParticleApp()
 				: App3DFramework("VDMParticle"),
 					particle_rendering_type_(PRT_FullRes)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/VDMParticle");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/VDMParticle");
 
 	this->OnConfirmDevice().Connect([]
 		{
@@ -155,7 +155,9 @@ void VDMParticleApp::OnCreate()
 	light_node->AddComponent(light_);
 	root_node.AddChild(light_node);
 
-	ps_ = SyncLoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
+	auto& res_loader = context.ResLoaderInstance();
+
+	ps_ = SyncLoadParticleSystem(res_loader.Locate("Fire.psml"));
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
 	root_node.AddChild(ps_->RootNode());
@@ -186,7 +188,7 @@ void VDMParticleApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("VDMParticle.uiml"));
+	ui_mgr.Load(*res_loader.Open("VDMParticle.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_particle_rendering_type_static_ = dialog_->IDFromName("ParticleRenderingTypeStatic");

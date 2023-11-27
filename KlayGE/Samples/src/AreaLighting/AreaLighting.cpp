@@ -80,7 +80,7 @@ int SampleMain()
 AreaLightingApp::AreaLightingApp()
 			: App3DFramework("AreaLighting")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/AreaLighting");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/AreaLighting");
 }
 
 void AreaLightingApp::OnCreate()
@@ -198,7 +198,7 @@ void AreaLightingApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("AreaLighting.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("AreaLighting.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_light_type_combo_ = dialog_->IDFromName("LightTypeCombo");
@@ -370,7 +370,7 @@ void AreaLightingApp::DoUpdateOverlay()
 		<< scene_mgr.NumDispatchCalls() << " Dispatches/frame";
 	font_->RenderText(0, 72, Color(1, 1, 1, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

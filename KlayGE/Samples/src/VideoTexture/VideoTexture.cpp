@@ -100,7 +100,7 @@ int SampleMain()
 VideoTextureApp::VideoTextureApp()
 					: App3DFramework("Video Texture")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/VideoTexture");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/VideoTexture");
 }
 
 void VideoTextureApp::OnCreate()
@@ -149,11 +149,13 @@ void VideoTextureApp::OnCreate()
 	object_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(model_->Mesh(0)), SceneNode::SOA_Cullable);
 	context.SceneManagerInstance().SceneRootNode().AddChild(object_);
 
+	auto& res_loader = context.ResLoaderInstance();
+
 	ShowEngine& se = context.ShowFactoryInstance().ShowEngineInstance();
-	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
+	se.Load(res_loader.Locate("big_buck_bunny.avi"));
 	se.Play();
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VideoTexture.uiml"));
+	context.UIManagerInstance().Load(*res_loader.Open("VideoTexture.uiml"));
 }
 
 void VideoTextureApp::OnResize(uint32_t width, uint32_t height)

@@ -66,16 +66,19 @@ TextApp::TextApp()
 			: App3DFramework("Text"),
 				last_mouse_pt_(-1, -1), position_(0, 0), scale_(1)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Text");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/Text");
 }
 
 void TextApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
+	auto& context = Context::Instance();
+	auto& res_loader = context.ResLoaderInstance();
+
 	{
 		// text.txt is in UCS2 little endian
-		ResIdentifierPtr text_input = ResLoader::Instance().Open("text.txt");
+		ResIdentifierPtr text_input = res_loader.Open("text.txt");
 		text_input->seekg(0, std::ios_base::end);
 		uint32_t size = static_cast<uint32_t>(text_input->tellg());
 		std::vector<uint16_t> ucs2_text(size / 2, '\0');
@@ -93,7 +96,6 @@ void TextApp::OnCreate()
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	auto& context = Context::Instance();
 	InputEngine& inputEngine(context.InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + std::size(actions));
@@ -106,7 +108,7 @@ void TextApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Text.uiml"));
+	context.UIManagerInstance().Load(*res_loader.Open("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)

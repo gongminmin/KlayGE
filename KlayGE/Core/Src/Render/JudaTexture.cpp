@@ -881,7 +881,8 @@ namespace KlayGE
 		uint32_t tile_size;
 		ElementFormat format;
 
-		ResIdentifierPtr file = ResLoader::Instance().Open(ResLoader::Instance().Locate(file_name));
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+		ResIdentifierPtr file = res_loader.Open(res_loader.Locate(file_name));
 
 		uint32_t fourcc;
 		file->read(&fourcc, sizeof(fourcc));

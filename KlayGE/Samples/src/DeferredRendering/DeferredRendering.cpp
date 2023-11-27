@@ -163,7 +163,7 @@ DeferredRenderingApp::DeferredRenderingApp()
 				anti_alias_enabled_(1),
 				il_scale_(1.0f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DeferredRendering");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/DeferredRendering");
 }
 
 void DeferredRenderingApp::OnCreate()
@@ -257,7 +257,7 @@ void DeferredRenderingApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("DeferredRendering.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("DeferredRendering.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
@@ -586,7 +586,7 @@ void DeferredRenderingApp::DoUpdateOverlay()
 		<< scene_mgr.NumDispatchCalls() << " Dispatches/frame";
 	font_->RenderText(0, 90, Color(1, 1, 1, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

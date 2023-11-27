@@ -878,7 +878,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lps
 {
 	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
 
-	std::string cfg_path = ResLoader::Instance().Locate("KlayGE.cfg");
+	std::string cfg_path = Context::Instance().ResLoaderInstance().Locate("KlayGE.cfg");
 	Context::Instance().LoadCfg(cfg_path);
 	cfg = Context::Instance().Config();
 

@@ -31,7 +31,7 @@ namespace
 
 	std::vector<ascii_tile_type> LoadFromKFont(std::string const & font_name)
 	{
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_name);
+		ResIdentifierPtr kfont_input = Context::Instance().ResLoaderInstance().Open(font_name);
 		std::shared_ptr<KFont> kfont_loader = MakeSharedPtr<KFont>();
 		kfont_loader->Load(kfont_input);
 

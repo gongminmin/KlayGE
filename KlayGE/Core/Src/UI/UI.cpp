@@ -312,7 +312,7 @@ namespace KlayGE
 			{
 				XMLAttribute const* attr = node->Attrib("name");
 				XMLNode const& include_root =
-					include_roots.emplace_back(LoadXml(*ResLoader::Instance().Open(std::string(attr->ValueString()))));
+					include_roots.emplace_back(LoadXml(*Context::Instance().ResLoaderInstance().Open(std::string(attr->ValueString()))));
 
 				for (XMLNode const* child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 				{

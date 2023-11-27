@@ -87,7 +87,7 @@ namespace KlayGE
 
 	PlatformDefinition::PlatformDefinition(std::string_view name)
 	{
-		ResIdentifierPtr plat = ResLoader::Instance().Open(name);
+		ResIdentifierPtr plat = Context::Instance().ResLoaderInstance().Open(name);
 
 		KlayGE::XMLNode root = LoadXml(*plat);
 

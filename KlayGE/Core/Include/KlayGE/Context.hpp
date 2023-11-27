@@ -49,6 +49,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	class DevHelper;
 #endif
+	class ResLoader;
 	class PerfProfiler;
 	class UIManager;
 
@@ -140,6 +141,7 @@ namespace KlayGE
 
 		ThreadPool& ThreadPoolInstance();
 
+		ResLoader& ResLoaderInstance();
 		PerfProfiler& PerfProfilerInstance();
 		UIManager& UIManagerInstance();
 

@@ -54,7 +54,7 @@ int SampleMain()
 SkinnedMeshApp::SkinnedMeshApp()
 	: App3DFramework("SkinnedMesh"), obj_controller_(true, MB_Left, MB_Middle, 0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/SkinnedMesh");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/SkinnedMesh");
 }
 
 void SkinnedMeshApp::OnCreate()
@@ -96,7 +96,7 @@ void SkinnedMeshApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("SkinnedMesh.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("SkinnedMesh.uiml"));
 	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_skinning_ = dialog_params_->IDFromName("Skinning");
 	id_playing_ = dialog_params_->IDFromName("Playing");
@@ -157,7 +157,8 @@ void SkinnedMeshApp::PlayingHandler(UICheckBox const& sender)
 
 void SkinnedMeshApp::DoUpdateOverlay()
 {
-	Context::Instance().UIManagerInstance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -166,7 +167,7 @@ void SkinnedMeshApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Skinned Mesh", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

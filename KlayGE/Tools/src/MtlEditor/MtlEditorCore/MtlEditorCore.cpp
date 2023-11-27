@@ -174,7 +174,7 @@ namespace KlayGE
 					skinning_(true), curr_frame_(0), imposter_mode_(false), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
 					update_selective_buffer_(false), selected_obj_(0)
 	{
-		ResLoader::Instance().AddPath("../../Tools/media/MtlEditor");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tools/media/MtlEditor");
 	}
 
 	void MtlEditorCore::Resize(uint32_t width, uint32_t height)
@@ -307,27 +307,29 @@ namespace KlayGE
 
 	bool MtlEditorCore::OpenModel(std::string const & name)
 	{
+		auto& context = Context::Instance();
+		auto& res_loader = context.ResLoaderInstance();
 		if (!last_file_path_.empty())
 		{
-			ResLoader::Instance().DelPath(last_file_path_);
+			res_loader.DelPath(last_file_path_);
 		}
 
 		std::filesystem::path mesh_path = name;
 		last_file_path_ = mesh_path.parent_path().string();
-		ResLoader::Instance().AddPath(last_file_path_);
+		res_loader.AddPath(last_file_path_);
 
 		std::filesystem::path imposter_path = mesh_path;
 		imposter_path.replace_extension(".impml");
 		std::string imposter_name = imposter_path.string();
 
-		auto& root_node = Context::Instance().SceneManagerInstance().SceneRootNode();
+		auto& root_node = context.SceneManagerInstance().SceneRootNode();
 
 		if (object_)
 		{
 			root_node.RemoveChild(object_);
 			object_.reset();
 
-			ResLoader::Instance().Unload(model_);
+			res_loader.Unload(model_);
 			model_.reset();
 		}
 		if (skeleton_object_)
@@ -361,7 +363,7 @@ namespace KlayGE
 			root_node.AddChild(skeleton_object_);
 		}
 
-		if (!ResLoader::Instance().Locate(imposter_name).empty())
+		if (!res_loader.Locate(imposter_name).empty())
 		{
 			imposter_ = MakeSharedPtr<SceneNode>(
 				MakeSharedPtr<RenderableComponent>(MakeSharedPtr<RenderImpostor>(imposter_name, model_->RootNode()->PosBoundOS())), 0);

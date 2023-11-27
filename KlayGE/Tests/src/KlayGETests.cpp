@@ -16,7 +16,7 @@ namespace KlayGE
 		KlayGETestsApp()
 			: App3DFramework("KlayGETests")
 		{
-			ResLoader::Instance().AddPath("../../Tests/media");
+			Context::Instance().ResLoaderInstance().AddPath("../../Tests/media");
 		}
 
 		virtual void DoUpdateOverlay() override

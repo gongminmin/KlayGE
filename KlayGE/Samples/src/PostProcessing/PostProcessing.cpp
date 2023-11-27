@@ -74,7 +74,7 @@ int SampleMain()
 PostProcessingApp::PostProcessingApp()
 			: App3DFramework("Post Processing")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/PostProcessing");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/PostProcessing");
 }
 
 void PostProcessingApp::OnCreate()
@@ -152,7 +152,7 @@ void PostProcessingApp::OnCreate()
 	black_hole_ = SyncLoadPostProcess("BlackHole.ppml", "black_hole");
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("PostProcessing.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("PostProcessing.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
@@ -390,7 +390,7 @@ void PostProcessingApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

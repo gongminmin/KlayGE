@@ -58,8 +58,9 @@ int SampleMain()
 
 DetailedSurfaceApp::DetailedSurfaceApp() : App3DFramework("DetailedSurface"), height_scale_(0.06f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
-	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurfaceDR");
+	auto& res_loader = Context::Instance().ResLoaderInstance();
+	res_loader.AddPath("../../Samples/media/DetailedSurface");
+	res_loader.AddPath("../../Samples/media/DetailedSurfaceDR");
 }
 
 void DetailedSurfaceApp::OnCreate()
@@ -149,7 +150,7 @@ void DetailedSurfaceApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("DetailedSurfaceDR.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("DetailedSurfaceDR.uiml"));
 
 	dialog_ = ui_mgr.GetDialog("DetailedSurface");
 	id_scale_static_ = dialog_->IDFromName("ScaleStatic");
@@ -272,7 +273,7 @@ void DetailedSurfaceApp::DoUpdateOverlay()
 		   << sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

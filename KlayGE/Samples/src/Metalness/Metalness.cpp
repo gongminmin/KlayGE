@@ -106,7 +106,7 @@ MetalnessApp::MetalnessApp()
 		: App3DFramework("Metalness"),
 			obj_controller_(true, MB_Left, MB_Right, MB_Middle)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Metalness");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/Metalness");
 
 	albedo_ = float3(0.799102738f, 0.496932995f, 0.048171824f) * 0.5f;
 }
@@ -193,7 +193,7 @@ void MetalnessApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Metalness.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("Metalness.uiml"));
 	dialog_ = ui_mgr.GetDialog("Parameters");
 	id_single_object_ = dialog_->IDFromName("SingleObject");
 	id_glossiness_static_ = dialog_->IDFromName("GlossinessStatic");

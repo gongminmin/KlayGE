@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 		out_name += ".dds";
 	}
 
-	if (ResLoader::Instance().Locate(in_name).empty())
+	if (Context::Instance().ResLoaderInstance().Locate(in_name).empty())
 	{
 		std::cerr << "Could NOT find " << in_name << std::endl;
 		return 1;

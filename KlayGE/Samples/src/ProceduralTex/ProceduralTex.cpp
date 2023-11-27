@@ -139,13 +139,15 @@ ProceduralTexApp::ProceduralTexApp()
 				procedural_type_(0), procedural_freq_(10),
 				loading_percentage_(0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/ProceduralTex");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/ProceduralTex");
 }
 
 void ProceduralTexApp::OnCreate()
 {
+	auto& context = Context::Instance();
+
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	Context::Instance().UIManagerInstance().Load(*ResLoader::Instance().Open("ProceduralTex.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("ProceduralTex.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);

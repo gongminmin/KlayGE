@@ -85,7 +85,7 @@ namespace KlayGE
 				return;
 			}
 
-			ResIdentifierPtr impml_input = ResLoader::Instance().Open(imposter_desc_.res_name);
+			ResIdentifierPtr impml_input = Context::Instance().ResLoaderInstance().Open(imposter_desc_.res_name);
 
 			KlayGE::XMLNode root = LoadXml(*impml_input);
 
@@ -159,12 +159,12 @@ namespace KlayGE
 
 	ImposterPtr SyncLoadImposter(std::string_view tex_name)
 	{
-		return ResLoader::Instance().SyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
 	}
 
 	ImposterPtr ASyncLoadImposter(std::string_view tex_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
+		return Context::Instance().ResLoaderInstance().ASyncQueryT<Imposter>(MakeSharedPtr<ImposterLoadingDesc>(tex_name));
 	}
 
 

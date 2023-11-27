@@ -94,11 +94,13 @@ void PackJTML(std::string const & jtml_name)
 {
 	Timer timer;
 
-	std::filesystem::path jtml_path = ResLoader::Instance().Locate(jtml_name);
-	std::string const jtml_folder = jtml_path.parent_path().string() + '/';
-	ResLoader::Instance().AddPath(jtml_folder);
+	auto& res_loader = Context::Instance().ResLoaderInstance();
 
-	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_path.string());
+	std::filesystem::path jtml_path = res_loader.Locate(jtml_name);
+	std::string const jtml_folder = jtml_path.parent_path().string() + '/';
+	res_loader.AddPath(jtml_folder);
+
+	ResIdentifierPtr jtml = res_loader.Open(jtml_path.string());
 
 	XMLNode root = LoadXml(*jtml);
 
@@ -296,7 +298,7 @@ void PackJTML(std::string const & jtml_name)
 	JudaTexture::Save(juda_tex, base_name + ".jdt");
 	cout << "Takes " << timer.elapsed() << "s" << endl << endl;
 
-	ResLoader::Instance().DelPath(jtml_folder);
+	res_loader.DelPath(jtml_folder);
 }
 
 int main(int argc, char* argv[])

@@ -132,7 +132,7 @@ namespace
 				return;
 			}
 
-			ResIdentifierPtr mtl_input = ResLoader::Instance().Open(mtl_desc_.res_name);
+			ResIdentifierPtr mtl_input = Context::Instance().ResLoaderInstance().Open(mtl_desc_.res_name);
 
 			XMLNode root = LoadXml(*mtl_input);
 
@@ -971,17 +971,19 @@ namespace KlayGE
 
 	void RenderMaterial::LoadTextureSlots()
 	{
-		if (Context::Instance().RenderFactoryValid())
+		auto& context = Context::Instance();
+		if (context.RenderFactoryValid())
 		{
-			auto& rf = Context::Instance().RenderFactoryInstance();
+			auto& rf = context.RenderFactoryInstance();
+			auto& res_loader = context.ResLoaderInstance();
 			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++i)
 			{
 				auto slot = static_cast<RenderMaterial::TextureSlot>(i);
 				auto const& tex_name = textures_[slot].first;
 				if (!tex_name.empty())
 				{
-					if (!ResLoader::Instance().Locate(tex_name).empty()
-						|| !ResLoader::Instance().Locate(tex_name + ".dds").empty())
+					if (!res_loader.Locate(tex_name).empty()
+						|| !res_loader.Locate(tex_name + ".dds").empty())
 					{
 						this->Texture(slot, rf.MakeTextureSrv(ASyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable)));
 					}
@@ -992,13 +994,13 @@ namespace KlayGE
 
 	RenderMaterialPtr SyncLoadRenderMaterial(std::string_view mtlml_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
 	}
 
 	RenderMaterialPtr ASyncLoadRenderMaterial(std::string_view mtlml_name)
 	{
 		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<RenderMaterial>(MakeSharedPtr<RenderMaterialLoadingDesc>(mtlml_name));
 	}
 
 	void SaveRenderMaterial(RenderMaterialPtr const & mtl, std::string const & mtlml_name)
@@ -1165,7 +1167,7 @@ namespace KlayGE
 		std::ofstream ofs(std::string(mtlml_name).c_str());
 		if (!ofs)
 		{
-			ofs.open((ResLoader::Instance().LocalFolder() + mtlml_name).c_str());
+			ofs.open((Context::Instance().ResLoaderInstance().LocalFolder() + mtlml_name).c_str());
 		}
 		SaveXml(root, ofs);
 	}

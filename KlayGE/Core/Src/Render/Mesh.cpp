@@ -214,10 +214,11 @@ namespace
 			auto sub_path_loc = model_desc_.res_name.find_last_of('/');
 			if (sub_path_loc != std::string::npos)
 			{
-				sub_path = ResLoader::Instance().Locate(model_desc_.res_name.substr(0, sub_path_loc));
+				auto& res_loader = Context::Instance().ResLoaderInstance();
+				sub_path = res_loader.Locate(model_desc_.res_name.substr(0, sub_path_loc));
 				if (!sub_path.empty())
 				{
-					ResLoader::Instance().AddPath(sub_path);
+					res_loader.AddPath(sub_path);
 				}
 			}
 		}
@@ -1041,7 +1042,7 @@ namespace KlayGE
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
+		return Context::Instance().ResLoaderInstance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
 			access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
@@ -1059,7 +1060,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 		if (caps.multithread_res_creating_support)
 		{
-			return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
+			return Context::Instance().ResLoaderInstance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(model_name,
 				access_hint, node_attrib, OnFinishLoading, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 		}
 		else
@@ -1072,6 +1073,9 @@ namespace KlayGE
 	{
 		char const * JIT_EXT_NAME = ".model_bin";
 
+		auto& context = Context::Instance();
+		auto& res_loader = context.ResLoaderInstance();
+
 		std::string runtime_name(model_name);
 		if (std::filesystem::path(runtime_name).extension() != JIT_EXT_NAME)
 		{
@@ -1079,13 +1083,13 @@ namespace KlayGE
 			runtime_name += JIT_EXT_NAME;
 
 			bool jit = false;
-			if (ResLoader::Instance().Locate(runtime_name).empty())
+			if (res_loader.Locate(runtime_name).empty())
 			{
 				jit = true;
 			}
 			else
 			{
-				ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
+				ResIdentifierPtr runtime_file = res_loader.Open(runtime_name);
 				uint32_t fourcc;
 				runtime_file->read(&fourcc, sizeof(fourcc));
 				fourcc = LE2Native(fourcc);
@@ -1099,8 +1103,8 @@ namespace KlayGE
 				else
 				{
 					uint64_t const runtime_file_timestamp = runtime_file->Timestamp();
-					uint64_t const input_file_timestamp = ResLoader::Instance().Timestamp(model_name);
-					uint64_t const metadata_timestamp = ResLoader::Instance().Timestamp(metadata_name);
+					uint64_t const input_file_timestamp = res_loader.Timestamp(model_name);
+					uint64_t const metadata_timestamp = res_loader.Timestamp(metadata_name);
 					if (((input_file_timestamp > 0) && (runtime_file_timestamp < input_file_timestamp))
 						|| ((metadata_timestamp > 0) && (runtime_file_timestamp < metadata_timestamp)))
 					{
@@ -1112,10 +1116,10 @@ namespace KlayGE
 			if (jit)
 			{
 #if KLAYGE_IS_DEV_PLATFORM
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderFactory& rf = context.RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-				return Context::Instance().DevHelperInstance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
+				return context.DevHelperInstance().ConvertModel(model_name, metadata_name, runtime_name, &caps);
 #else
 				LogError() << "Could NOT locate " << runtime_name << std::endl;
 				return RenderModelPtr();
@@ -1152,7 +1156,7 @@ namespace KlayGE
 		uint32_t frame_rate = 0;
 		std::vector<std::shared_ptr<AABBKeyFrameSet>> frame_pos_bbs;
 
-		ResIdentifierPtr runtime_file = ResLoader::Instance().Open(runtime_name);
+		ResIdentifierPtr runtime_file = res_loader.Open(runtime_name);
 
 		uint32_t fourcc;
 		runtime_file->read(&fourcc, sizeof(fourcc));

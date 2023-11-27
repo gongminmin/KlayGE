@@ -47,9 +47,10 @@ class MipmapperTest : public testing::Test
 public:
 	void SetUp() override
 	{
-		ResLoader::Instance().AddPath("../../Tests/media/Mipmap");
-		ResLoader::Instance().AddPath("../../Tests/media/EncodeDecodeTex");
-		ResLoader::Instance().AddPath("../../Tests/media/TexConverter");
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+		res_loader.AddPath("../../Tests/media/Mipmap");
+		res_loader.AddPath("../../Tests/media/EncodeDecodeTex");
+		res_loader.AddPath("../../Tests/media/TexConverter");
 	}
 
 	void TestMipmapPoT2D(TexMetadata const& input_metadata, TextureFilter filter,

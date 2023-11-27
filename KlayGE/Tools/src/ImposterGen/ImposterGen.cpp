@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 		target_folder = vm["target-folder"].as<std::string>();
 	}
 
-	std::string model_name = ResLoader::Instance().Locate(input_name);
+	std::string model_name = Context::Instance().ResLoaderInstance().Locate(input_name);
 
 	std::string file_name;
 	std::filesystem::path model_path(model_name);

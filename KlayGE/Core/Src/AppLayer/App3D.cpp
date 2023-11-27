@@ -677,7 +677,7 @@ namespace KlayGE
 			this->UpdateStats();
 			this->DoUpdateOverlay();
 
-			ResLoader::Instance().Update();
+			Context::Instance().ResLoaderInstance().Update();
 		}
 
 		return this->DoUpdate(pass);

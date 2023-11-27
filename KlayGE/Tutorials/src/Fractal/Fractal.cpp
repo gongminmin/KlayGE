@@ -100,7 +100,7 @@ int SampleMain()
 Fractal::Fractal()
 			: App3DFramework("Fractal")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/Fractal");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/Fractal");
 }
 
 void Fractal::OnCreate()
@@ -122,7 +122,7 @@ void Fractal::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Fractal.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)

@@ -112,7 +112,7 @@ namespace KlayGE
 					offset_x_(0), offset_y_(0),
 					zoom_(1), stops_(0)
 	{
-		ResLoader::Instance().AddPath("../../Tools/media/TexViewer");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tools/media/TexViewer");
 	}
 
 	void TexViewerCore::Resize(uint32_t width, uint32_t height)
@@ -146,14 +146,15 @@ namespace KlayGE
 
 	void TexViewerCore::OpenTexture(std::string const & name)
 	{
+		auto& res_loader = Context::Instance().ResLoaderInstance();
 		if (!last_file_path_.empty())
 		{
-			ResLoader::Instance().DelPath(last_file_path_);
+			res_loader.DelPath(last_file_path_);
 		}
 
 		std::string file_name = name;
 		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
-		ResLoader::Instance().AddPath(last_file_path_);
+		res_loader.AddPath(last_file_path_);
 
 		texture_original_ = SyncLoadTexture(name, EAH_CPU_Read);
 		texels_.clear();

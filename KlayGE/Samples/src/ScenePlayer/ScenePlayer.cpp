@@ -327,7 +327,7 @@ ScenePlayerApp::ScenePlayerApp()
 			: App3DFramework("ScenePlayer"),
 				il_scale_(1.0f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/ScenePlayer");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/ScenePlayer");
 }
 
 void ScenePlayerApp::LoadScene(std::string const & name)
@@ -344,7 +344,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	lights_.clear();
 
-	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
+	auto& res_loader = context.ResLoaderInstance();
+	ResIdentifierPtr ifs = res_loader.Open(name.c_str());
 
 	KlayGE::XMLNode root = LoadXml(*ifs);
 
@@ -354,15 +355,15 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		skybox_ = MakeSharedPtr<SceneNode>(MakeSharedPtr<RenderableComponent>(skybox_renderable), SceneNode::SOA_NotCastShadow);
 
 		std::string const skybox_name = std::string(attr->ValueString());
-		if (!ResLoader::Instance().Locate(skybox_name).empty())
+		if (!res_loader.Locate(skybox_name).empty())
 		{
 			skybox_renderable->CubeMap(ASyncLoadTexture(skybox_name, EAH_GPU_Read | EAH_Immutable));
 		}
-		else if (!ResLoader::Instance().Locate(skybox_name + ".dds").empty())
+		else if (!res_loader.Locate(skybox_name + ".dds").empty())
 		{
 			skybox_renderable->CubeMap(ASyncLoadTexture(skybox_name + ".dds", EAH_GPU_Read | EAH_Immutable));
 		}
-		else if (!ResLoader::Instance().Locate(skybox_name + "_y.dds").empty())
+		else if (!res_loader.Locate(skybox_name + "_y.dds").empty())
 		{
 			skybox_renderable->CompressedCubeMap(ASyncLoadTexture(skybox_name + "_y.dds", EAH_GPU_Read | EAH_Immutable),
 				ASyncLoadTexture(skybox_name + "_c.dds", EAH_GPU_Read | EAH_Immutable));
@@ -740,7 +741,7 @@ void ScenePlayerApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("ScenePlayer.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("ScenePlayer.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
@@ -863,14 +864,16 @@ void ScenePlayerApp::OpenHandler(UIButton const & /*sender*/)
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+
 		if (last_file_path_.empty())
 		{
-			ResLoader::Instance().DelPath(last_file_path_);
+			res_loader.DelPath(last_file_path_);
 		}
 
 		std::string file_name = fn;
 		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
-		ResLoader::Instance().AddPath(last_file_path_);
+		res_loader.AddPath(last_file_path_);
 
 		this->LoadScene(file_name);
 
@@ -946,7 +949,7 @@ void ScenePlayerApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

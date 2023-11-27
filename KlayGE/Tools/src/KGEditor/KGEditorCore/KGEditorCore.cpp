@@ -479,7 +479,7 @@ namespace KlayGE
 					tb_controller_(false), update_selective_buffer_(false),
 					last_entity_id_(0)
 	{
-		ResLoader::Instance().AddPath("../../Tools/media/KGEditor");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tools/media/KGEditor");
 	}
 
 	void KGEditorCore::Resize(uint32_t width, uint32_t height)
@@ -820,7 +820,7 @@ namespace KlayGE
 		uint32_t const entity_id = last_entity_id_ + 1;
 		last_entity_id_ = entity_id;
 
-		ResLoader::Instance().AddPath(model_name.substr(0, model_name.find_last_of('\\')));
+		Context::Instance().ResLoaderInstance().AddPath(model_name.substr(0, model_name.find_last_of('\\')));
 
 		auto model = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,
 			SceneNode::SOA_Cullable | SceneNode::SOA_Moveable, AddToSceneRootHelper);
@@ -1774,7 +1774,7 @@ namespace KlayGE
 	{
 		this->CloseScene();
 
-		ResIdentifierPtr file = ResLoader::Instance().Open(file_name);
+		ResIdentifierPtr file = Context::Instance().ResLoaderInstance().Open(file_name);
 		if (file)
 		{
 			XMLNode kges_root = LoadXml(*file);

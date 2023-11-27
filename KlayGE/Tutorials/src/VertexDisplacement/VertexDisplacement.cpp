@@ -91,7 +91,7 @@ int SampleMain()
 VertexDisplacement::VertexDisplacement()
 						: App3DFramework("VertexDisplacement")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/VertexDisplacement");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/VertexDisplacement");
 }
 
 void VertexDisplacement::OnCreate()
@@ -124,7 +124,7 @@ void VertexDisplacement::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VertexDisplacement.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("VertexDisplacement.uiml"));
 }
 
 void VertexDisplacement::OnResize(uint32_t width, uint32_t height)

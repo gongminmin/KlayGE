@@ -431,7 +431,7 @@ OITApp::OITApp()
 			: App3DFramework("Order Independent Transparency"),
 				num_layers_(0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/OIT");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/OIT");
 }
 
 void OITApp::OnCreate()
@@ -515,7 +515,7 @@ void OITApp::OnCreate()
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("OIT.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("OIT.uiml"));
 	dialog_oit_ = ui_mgr.GetDialogs()[0];
 	dialog_layer_ = ui_mgr.GetDialogs()[1];
 

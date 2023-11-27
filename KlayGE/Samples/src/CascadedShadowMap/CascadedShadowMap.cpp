@@ -58,7 +58,7 @@ CascadedShadowMapApp::CascadedShadowMapApp()
 				light_controller_(true, MB_Right, 0, 0),
 				pssm_factor_(0.8f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/CascadedShadowMap");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/CascadedShadowMap");
 }
 
 void CascadedShadowMapApp::OnCreate()
@@ -128,7 +128,7 @@ void CascadedShadowMapApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("CascadedShadowMap.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("CascadedShadowMap.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");
@@ -257,7 +257,7 @@ void CascadedShadowMapApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

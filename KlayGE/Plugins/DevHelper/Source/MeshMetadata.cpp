@@ -57,7 +57,7 @@ namespace KlayGE
 	{
 		MeshMetadata new_metadata;
 
-		ResIdentifierPtr metadata_file = ResLoader::Instance().Open(name);
+		ResIdentifierPtr metadata_file = Context::Instance().ResLoaderInstance().Open(name);
 		if (metadata_file)
 		{
 			auto root_value = LoadJson(*metadata_file);

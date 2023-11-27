@@ -212,16 +212,18 @@ int SampleMain()
 ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
 	: App3DFramework("Reflection")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
-	ResLoader::Instance().AddPath("../../Samples/media/Reflection");
+	auto& res_loader = Context::Instance().ResLoaderInstance();
+	res_loader.AddPath("../../Samples/media/CausticsMap");
+	res_loader.AddPath("../../Samples/media/Reflection");
 }
 
 void ScreenSpaceReflectionApp::OnCreate()
 {
 	auto& context = Context::Instance();
+	auto& res_loader = context.ResLoaderInstance();
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Reflection.uiml"));
+	ui_mgr.Load(*res_loader.Open("Reflection.uiml"));
 	parameter_dialog_ = ui_mgr.GetDialog("Reflection");
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
@@ -285,7 +287,7 @@ void ScreenSpaceReflectionApp::OnCreate()
 	plane_node_->TransformToParent(MathLib::rotation_x(DEG90) * MathLib::translation(0.0f, -0.2f, 0.0f));
 	root_node.AddChild(plane_node_);
 
-	screen_camera_path_ = LoadCameraPath(*ResLoader::Instance().Open("Reflection.cam_path"));
+	screen_camera_path_ = LoadCameraPath(*res_loader.Open("Reflection.cam_path"));
 	auto camera_node = MakeSharedPtr<SceneNode>(SceneNode::SOA_Cullable | SceneNode::SOA_Moveable);
 	camera_node->AddComponent(this->ActiveCamera().shared_from_this());
 	root_node.AddChild(camera_node);
@@ -431,7 +433,8 @@ void ScreenSpaceReflectionApp::EnableCameraPathHandler(KlayGE::UICheckBox const&
 
 void ScreenSpaceReflectionApp::DoUpdateOverlay()
 {
-	Context::Instance().UIManagerInstance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Reflection", 16);
 
@@ -440,7 +443,7 @@ void ScreenSpaceReflectionApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

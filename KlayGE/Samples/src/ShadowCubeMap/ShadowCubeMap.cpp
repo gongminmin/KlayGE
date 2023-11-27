@@ -235,7 +235,7 @@ int SampleMain()
 ShadowCubeMap::ShadowCubeMap()
 				: App3DFramework("ShadowCubeMap")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/ShadowCubeMap");
 }
 
 void ShadowCubeMap::OnCreate()
@@ -342,7 +342,7 @@ void ShadowCubeMap::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("ShadowCubeMap.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("ShadowCubeMap.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");

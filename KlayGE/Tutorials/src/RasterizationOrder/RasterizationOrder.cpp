@@ -183,7 +183,7 @@ int SampleMain()
 RasterizationOrderApp::RasterizationOrderApp()
 			: App3DFramework("RasterizationOrder")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/RasterizationOrder");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/RasterizationOrder");
 
 	this->OnConfirmDevice().Connect([]
 		{
@@ -223,7 +223,7 @@ void RasterizationOrderApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("RasterizationOrder.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("RasterizationOrder.uiml"));
 	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_color_map_ = dialog_params_->IDFromName("ColorMap");
 	id_capture_ = dialog_params_->IDFromName("Capture");

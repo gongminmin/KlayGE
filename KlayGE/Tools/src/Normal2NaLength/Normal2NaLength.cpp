@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	std::string in_file = ResLoader::Instance().Locate(argv[1]);
+	std::string in_file = Context::Instance().ResLoaderInstance().Locate(argv[1]);
 	if (in_file.empty())
 	{
 		cout << "Couldn't locate " << in_file << endl;

@@ -118,7 +118,7 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 TexMetadata LoadTextureMetadata(std::string const & res_name, TexMetadata const & default_metadata)
 {
 	std::string metadata_name = res_name + ".kmeta";
-	if (ResLoader::Instance().Locate(metadata_name).empty())
+	if (Context::Instance().ResLoaderInstance().Locate(metadata_name).empty())
 	{
 		return default_metadata;
 	}
@@ -131,7 +131,7 @@ TexMetadata LoadTextureMetadata(std::string const & res_name, TexMetadata const 
 MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const & default_metadata)
 {
 	std::string metadata_name = res_name + ".kmeta";
-	if (ResLoader::Instance().Locate(metadata_name).empty())
+	if (Context::Instance().ResLoaderInstance().Locate(metadata_name).empty())
 	{
 		MeshMetadata ret = default_metadata;
 		ret.LodFileName(0, res_name);
@@ -297,7 +297,8 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 int main(int argc, char* argv[])
 {
-	Context::Instance().LoadCfg("KlayGE.cfg");
+	auto& context = Context::Instance();
+	context.LoadCfg("KlayGE.cfg");
 
 	auto on_exit = nonstd::make_scope_exit([] { Context::Destroy(); });
 
@@ -377,25 +378,26 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	auto& res_loader = context.ResLoaderInstance();
 	for (auto iter = res_names.begin(); iter != res_names.end();)
 	{
 		std::string const res_name = *iter;
 
 		bool need_convert = true;
 		std::string possible_asset_name;
-		std::string const full_res_name = ResLoader::Instance().Locate(res_name);
+		std::string const full_res_name = res_loader.Locate(res_name);
 		if (full_res_name.empty())
 		{
 			cout << "Could NOT find " << res_name << '.';
 
-			std::string const possible_dds_name = ResLoader::Instance().Locate(res_name + ".dds");
+			std::string const possible_dds_name = res_loader.Locate(res_name + ".dds");
 			if (std::filesystem::exists(possible_dds_name))
 			{
 				possible_asset_name = possible_dds_name;
 			}
 			else
 			{
-				std::string const possible_model_bin_name = ResLoader::Instance().Locate(res_name + ".model_bin");
+				std::string const possible_model_bin_name = res_loader.Locate(res_name + ".model_bin");
 				if (std::filesystem::exists(possible_model_bin_name))
 				{
 					possible_asset_name = possible_model_bin_name;

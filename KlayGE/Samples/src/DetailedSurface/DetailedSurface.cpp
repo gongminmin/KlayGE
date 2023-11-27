@@ -241,7 +241,7 @@ DetailedSurfaceApp::DetailedSurfaceApp()
 			: App3DFramework("DetailedSurface"),
 				height_scale_(0.06f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/DetailedSurface");
 }
 
 void DetailedSurfaceApp::OnCreate()
@@ -249,7 +249,7 @@ void DetailedSurfaceApp::OnCreate()
 	auto& context = Context::Instance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("DetailedSurface.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("DetailedSurface.uiml"));
 
 	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);

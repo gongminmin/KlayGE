@@ -131,7 +131,7 @@ int SampleMain()
 ParticleEditorApp::ParticleEditorApp()
 					: App3DFramework("Particle Editor")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/ParticleEditor");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/ParticleEditor");
 }
 
 void ParticleEditorApp::OnCreate()
@@ -179,8 +179,10 @@ void ParticleEditorApp::OnCreate()
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
+	auto& res_loader = Context::Instance().ResLoaderInstance();
+
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("ParticleEditor.uiml"));
+	ui_mgr.Load(*res_loader.Open("ParticleEditor.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
@@ -217,7 +219,7 @@ void ParticleEditorApp::OnCreate()
 	id_mass_over_life_ = dialog_->IDFromName("MassOverLifePolyline");
 	id_opacity_over_life_ = dialog_->IDFromName("OpacityOverLifePolyline");
 
-	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
+	this->LoadParticleSystem(res_loader.Locate("Fire.psml"));
 
 	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().Connect(
 		[this](UIButton const & sender)
@@ -417,14 +419,16 @@ void ParticleEditorApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+
 		if (last_file_path_.empty())
 		{
-			ResLoader::Instance().DelPath(last_file_path_);
+			res_loader.DelPath(last_file_path_);
 		}
 
 		std::string file_name = fn;
 		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
-		ResLoader::Instance().AddPath(last_file_path_);
+		res_loader.AddPath(last_file_path_);
 
 		this->LoadParticleSystem(fn);
 
@@ -843,8 +847,10 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	particle_emitter_->MaxSpin(+PI / 2);
 	particle_emitter_->ModelMatrix(MathLib::translation(0.0f, 0.1f, 0.0f));
 
-	this->LoadParticleAlpha(id_particle_alpha_from_button_, ResLoader::Instance().Locate(ps_->ParticleAlphaFromTex()));
-	this->LoadParticleAlpha(id_particle_alpha_to_button_, ResLoader::Instance().Locate(ps_->ParticleAlphaToTex()));
+	auto& res_loader = Context::Instance().ResLoaderInstance();
+
+	this->LoadParticleAlpha(id_particle_alpha_from_button_, res_loader.Locate(ps_->ParticleAlphaFromTex()));
+	this->LoadParticleAlpha(id_particle_alpha_to_button_, res_loader.Locate(ps_->ParticleAlphaToTex()));
 
 	this->LoadParticleColor(id_particle_color_from_button_, ps_->ParticleColorFrom());
 	this->LoadParticleColor(id_particle_color_to_button_, ps_->ParticleColorTo());

@@ -772,7 +772,7 @@ int SampleMain()
 GPUParticleSystemApp::GPUParticleSystemApp()
 							: App3DFramework("GPU Particle System")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/GPUParticleSystem");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/GPUParticleSystem");
 }
 
 void GPUParticleSystemApp::OnCreate()
@@ -848,7 +848,7 @@ void GPUParticleSystemApp::OnCreate()
 		checked_pointer_cast<RenderParticles>(particles_renderable_)->PosVB(gpu_ps->PosVB());
 	}
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("GPUParticleSystem.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)

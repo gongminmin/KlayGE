@@ -129,7 +129,7 @@ DeepGBuffersApp::DeepGBuffersApp()
 			: App3DFramework("DeepGBuffers"),
 				transparency_(1.0f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DeepGBuffers");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/DeepGBuffers");
 }
 
 void DeepGBuffersApp::OnCreate()
@@ -205,7 +205,7 @@ void DeepGBuffersApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("DeepGBuffers.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("DeepGBuffers.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 	id_receives_lighting_ = dialog_->IDFromName("Lighting");
 	id_transparency_static_ = dialog_->IDFromName("TransparencyStatic");
@@ -332,7 +332,7 @@ void DeepGBuffersApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

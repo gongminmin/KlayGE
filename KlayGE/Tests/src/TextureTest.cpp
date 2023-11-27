@@ -47,13 +47,15 @@ class TextureTest : public testing::Test
 public:
 	void SetUp() override
 	{
-		ResLoader::Instance().AddPath("../../Tests/media/EncodeDecodeTex");
-		ResLoader::Instance().AddPath("../../Tests/media/Texture");
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+		res_loader.AddPath("../../Tests/media/EncodeDecodeTex");
+		res_loader.AddPath("../../Tests/media/Texture");
 	}
 
 	void TestCopyToTexture(std::string_view input_name, std::string_view sanity_name, float scale, bool gpu_tex, float tolerance)
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		auto& rf = context.RenderFactoryInstance();
 
 		auto target = SyncLoadTexture(input_name, gpu_tex ? EAH_GPU_Read : EAH_CPU_Read);
 		auto target_scaled = rf.MakeTexture2D(
@@ -67,12 +69,13 @@ public:
 			*target_scaled, 0, 0, 0, 0,
 			target_sanity->Width(0), target_sanity->Height(0), tolerance));
 
-		ResLoader::Instance().Unload(target);
+		context.ResLoaderInstance().Unload(target);
 	}
 
 	void TestCopyToSubTexture(std::string_view input_name, std::string_view sanity_name, bool gpu_tex, float tolerance)
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		auto& rf = context.RenderFactoryInstance();
 
 		auto target = SyncLoadTexture(input_name, gpu_tex ? EAH_GPU_Read : EAH_CPU_Read);
 		auto target_scaled = rf.MakeTexture2D(target->Width(0) / 4, target->Height(0) / 4, 1, 1, target->Format(), 1, 0, EAH_CPU_Read);
@@ -85,12 +88,13 @@ public:
 			*target, 0, 0, 0, 0,
 			target_sanity->Width(0), target_sanity->Height(0), tolerance));
 
-		ResLoader::Instance().Unload(target);
+		context.ResLoaderInstance().Unload(target);
 	}
 
 	void TestUpdateSubTexture(std::string_view input_name, std::string_view sanity_name, bool gpu_tex, float tolerance)
 	{
-		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		auto& rf = context.RenderFactoryInstance();
 
 		auto target = SyncLoadTexture(input_name, gpu_tex ? EAH_GPU_Read : EAH_CPU_Read);
 		auto target_scaled = rf.MakeTexture2D(target->Width(0) / 4, target->Height(0) / 4, 1, 1, target->Format(), 1, 0, EAH_CPU_Read);
@@ -113,7 +117,7 @@ public:
 			*target, 0, 0, 0, 0,
 			target_sanity->Width(0), target_sanity->Height(0), tolerance));
 
-		ResLoader::Instance().Unload(target);
+		context.ResLoaderInstance().Unload(target);
 	}
 };
 

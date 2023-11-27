@@ -140,7 +140,7 @@ int SampleMain()
 Refract::Refract()
 			: App3DFramework("Refract")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/Refract");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/Refract");
 }
 
 void Refract::OnCreate()
@@ -199,7 +199,7 @@ void Refract::OnCreate()
 		backface_depth_buffer_->Viewport()->Camera(screen_buffer->Viewport()->Camera());
 	}
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("Refract.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("Refract.uiml"));
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)

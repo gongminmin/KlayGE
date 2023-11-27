@@ -79,11 +79,12 @@ namespace
 
 		metadata_ = metadata;
 
-		auto in_folder = std::filesystem::path(ResLoader::Instance().Locate(metadata_.PlaneFileName(0, 0))).parent_path().string();
-		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+		auto in_folder = std::filesystem::path(res_loader.Locate(metadata_.PlaneFileName(0, 0))).parent_path().string();
+		bool const in_path = res_loader.IsInPath(in_folder);
 		if (!in_path)
 		{
-			ResLoader::Instance().AddPath(in_folder);
+			res_loader.AddPath(in_folder);
 		}
 
 		if (this->Load())
@@ -93,7 +94,7 @@ namespace
 
 		if (!in_path)
 		{
-			ResLoader::Instance().DelPath(in_folder);
+			res_loader.DelPath(in_folder);
 		}
 
 		return ret;
@@ -186,7 +187,7 @@ namespace
 
 	bool TexLoader::IsSupported(std::string_view input_name)
 	{
-		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
+		std::string const input_name_str = Context::Instance().ResLoaderInstance().Locate(input_name);
 		if (input_name_str.empty())
 		{
 			LogError() << "Could NOT find " << input_name << '.' << std::endl;

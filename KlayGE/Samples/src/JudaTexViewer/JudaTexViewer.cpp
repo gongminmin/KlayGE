@@ -179,7 +179,7 @@ JudaTexViewer::JudaTexViewer()
 				sx_(0), sy_(0), ex_(0), ey_(0),
 				last_mouse_pt_(-1, -1), position_(0, 0), scale_(1)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/JudaTexViewer");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/JudaTexViewer");
 }
 
 void JudaTexViewer::OnCreate()
@@ -211,7 +211,7 @@ void JudaTexViewer::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("JudaTexViewer.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("JudaTexViewer.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
@@ -336,14 +336,16 @@ void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+
 		if (last_file_path_.empty())
 		{
-			ResLoader::Instance().DelPath(last_file_path_);
+			res_loader.DelPath(last_file_path_);
 		}
 
 		std::string file_name = fn;
 		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
-		ResLoader::Instance().AddPath(last_file_path_);
+		res_loader.AddPath(last_file_path_);
 		
 		this->OpenJudaTex(fn);
 

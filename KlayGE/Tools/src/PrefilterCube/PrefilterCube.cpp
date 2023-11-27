@@ -81,7 +81,7 @@ public:
 	PrefilterCubeApp()
 		: App3DFramework("PrefilterCube")
 	{
-		ResLoader::Instance().AddPath("../../Tools/media/PrefilterCube");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tools/media/PrefilterCube");
 	}
 
 	virtual void DoUpdateOverlay() override

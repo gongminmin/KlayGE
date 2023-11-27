@@ -81,7 +81,7 @@ FoliageApp::FoliageApp()
 			: App3DFramework("Foliage"),
 				light_shaft_on_(true)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Foliage");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/Foliage");
 }
 
 void FoliageApp::OnCreate()
@@ -167,7 +167,7 @@ void FoliageApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Foliage.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("Foliage.uiml"));
 	dialog_params_ = ui_mgr.GetDialog("Parameters");
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
@@ -225,7 +225,8 @@ void FoliageApp::FPSCameraHandler(UICheckBox const & sender)
 
 void FoliageApp::DoUpdateOverlay()
 {
-	Context::Instance().UIManagerInstance().Render();
+	auto& context = Context::Instance();
+	context.UIManagerInstance().Render();
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -250,7 +251,7 @@ void FoliageApp::DoUpdateOverlay()
 		font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 	}
 
-	uint32_t const num_loading_res = ResLoader::Instance().NumLoadingResources();
+	uint32_t const num_loading_res = context.ResLoaderInstance().NumLoadingResources();
 	if (num_loading_res > 0)
 	{
 		stream.str(L"");

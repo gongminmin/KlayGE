@@ -203,7 +203,7 @@ int SampleMain()
 DistanceMapping::DistanceMapping()
 					: App3DFramework("DistanceMapping")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/DistanceMapping");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/DistanceMapping");
 }
 
 void DistanceMapping::OnCreate()
@@ -254,7 +254,7 @@ void DistanceMapping::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("DistanceMapping.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("DistanceMapping.uiml"));
 }
 
 void DistanceMapping::OnResize(uint32_t width, uint32_t height)

@@ -114,7 +114,7 @@ namespace KlayGE
 		KLAYGE_NONCOPYABLE(Impl);
 
 	public:
-		Impl()
+		explicit Impl(ThreadPool& tp)
 		{
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -208,7 +208,7 @@ namespace KlayGE
 #endif
 #endif
 
-			loading_thread_ = Context::Instance().ThreadPoolInstance().QueueThread([this] { this->LoadingThreadFunc(); });
+			loading_thread_ = tp.QueueThread([this] { this->LoadingThreadFunc(); });
 		}
 		~Impl()
 		{
@@ -221,24 +221,6 @@ namespace KlayGE
 			}
 
 			loading_thread_.wait();
-		}
-
-		static ResLoader& Instance()
-		{
-			if (!res_loader_instance_)
-			{
-				std::lock_guard<std::mutex> lock(singleton_mutex_);
-				if (!res_loader_instance_)
-				{
-					res_loader_instance_ = MakeUniquePtr<ResLoader>();
-				}
-			}
-			return *res_loader_instance_;
-		}
-		static void Destroy() noexcept
-		{
-			std::lock_guard<std::mutex> lock(singleton_mutex_);
-			res_loader_instance_.reset();
 		}
 
 		void Suspend()
@@ -1024,9 +1006,6 @@ namespace KlayGE
 #endif
 
 	private:
-		static std::mutex singleton_mutex_;
-		static std::unique_ptr<ResLoader> res_loader_instance_;
-
 		enum LoadingStatus
 		{
 			LS_Loading,
@@ -1053,27 +1032,25 @@ namespace KlayGE
 		volatile bool quit_{ false };
 	};
 
-	std::mutex ResLoader::Impl::singleton_mutex_;
-	std::unique_ptr<ResLoader> ResLoader::Impl::res_loader_instance_;
-
 	ResLoadingDesc::ResLoadingDesc() noexcept = default;
 	ResLoadingDesc::~ResLoadingDesc() noexcept = default;
 
-	ResLoader::ResLoader()
-		: pimpl_(MakeUniquePtr<Impl>())
-	{
-	}
+	ResLoader::ResLoader() noexcept = default;
+	ResLoader::~ResLoader() noexcept = default;
 
-	ResLoader::~ResLoader() = default;
-
-	ResLoader& ResLoader::Instance()
+	void ResLoader::Init(ThreadPool& tp)
 	{
-		return Impl::Instance();
+		pimpl_ = MakeUniquePtr<Impl>(tp);
 	}
 
 	void ResLoader::Destroy() noexcept
 	{
-		Impl::Destroy();
+		pimpl_.reset();
+	}
+
+	bool ResLoader::Valid() const noexcept
+	{
+		return static_cast<bool>(pimpl_);
 	}
 
 	void ResLoader::Suspend()

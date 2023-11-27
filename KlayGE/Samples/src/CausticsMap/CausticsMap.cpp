@@ -518,8 +518,9 @@ int SampleMain()
 CausticsMapApp::CausticsMapApp()
 	: App3DFramework("Caustics Map")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
-	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
+	auto& res_loader = Context::Instance().ResLoaderInstance();
+	res_loader.AddPath("../../Samples/media/ShadowCubeMap");
+	res_loader.AddPath("../../Samples/media/CausticsMap");
 }
 
 void CausticsMapApp::OnCreate()
@@ -782,8 +783,9 @@ void CausticsMapApp::InitCubeSM()
 
 void CausticsMapApp::InitUI()
 {
-	auto& ui_mgr = Context::Instance().UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Caustics.uiml"));
+	auto& context = Context::Instance();
+	auto& ui_mgr = context.UIManagerInstance();
+	ui_mgr.Load(*context.ResLoaderInstance().Open("Caustics.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	int ui_id = 0;

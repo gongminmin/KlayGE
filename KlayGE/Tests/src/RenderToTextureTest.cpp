@@ -57,7 +57,7 @@ public:
 		auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		explicit_multi_sample_support_ = caps.explicit_multi_sample_support;
 
-		ResLoader::Instance().AddPath("../../Tests/media/RenderToTexture");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tests/media/RenderToTexture");
 	}
 
 	void TestRenderToTexture(uint32_t sample_count, float tolerance)

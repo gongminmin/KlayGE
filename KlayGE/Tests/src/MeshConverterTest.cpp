@@ -47,7 +47,7 @@ class MeshConverterTest : public testing::Test
 public:
 	void SetUp() override
 	{
-		ResLoader::Instance().AddPath("../../Tests/media/MeshConverter");
+		Context::Instance().ResLoaderInstance().AddPath("../../Tests/media/MeshConverter");
 	}
 
 	void RunTest(std::string_view input_name, std::string_view metadata_name, std::string_view sanity_name)

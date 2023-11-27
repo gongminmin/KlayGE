@@ -887,7 +887,7 @@ EnvLightingApp::EnvLightingApp()
 		: App3DFramework("EnvLighting"),
 			obj_controller_(true, MB_Left, MB_Middle, 0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/EnvLighting");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/EnvLighting");
 }
 
 void EnvLightingApp::OnCreate()
@@ -899,7 +899,7 @@ void EnvLightingApp::OnCreate()
 
 	TexturePtr y_cube_map = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
+	if (Context::Instance().ResLoaderInstance().Locate("IntegratedBRDF.dds").empty())
 	{
 		SaveTexture(
 			QuantizeToTexture(WIDTH, HEIGHT, GenIntegratedBRDF(WIDTH, HEIGHT)), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
@@ -1152,7 +1152,7 @@ void EnvLightingApp::OnCreate()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("EnvLighting.uiml"));
+	ui_mgr.Load(*context.ResLoaderInstance().Open("EnvLighting.uiml"));
 
 	dialog_ = ui_mgr.GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");

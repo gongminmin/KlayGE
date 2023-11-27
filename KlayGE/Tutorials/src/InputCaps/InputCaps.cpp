@@ -253,7 +253,7 @@ int SampleMain()
 InputCaps::InputCaps()
 			: App3DFramework("InputCaps")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/InputCaps");
+	Context::Instance().ResLoaderInstance().AddPath("../../Tutorials/media/InputCaps");
 }
 
 void InputCaps::OnCreate()
@@ -276,7 +276,7 @@ void InputCaps::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("InputCaps.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("InputCaps.uiml"));
 
 	for (size_t i = 0; i < inputEngine.NumDevices(); ++i)
 	{

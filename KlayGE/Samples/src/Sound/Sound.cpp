@@ -58,7 +58,7 @@ int SampleMain()
 SoundApp::SoundApp()
 			: App3DFramework("Sound")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Sound");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/Sound");
 }
 
 void SoundApp::OnCreate()
@@ -82,13 +82,15 @@ void SoundApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
+	auto& res_loader = context.ResLoaderInstance();
+
 	AudioDataSourceFactory& adsf = context.AudioDataSourceFactoryInstance();
 	music_1_ = adsf.MakeAudioDataSource();
-	music_1_->Open(ResLoader::Instance().Open("Carl_Douglas_-_Kung_Fu_Fighting.ogg"));
+	music_1_->Open(res_loader.Open("Carl_Douglas_-_Kung_Fu_Fighting.ogg"));
 	music_2_ = adsf.MakeAudioDataSource();
-	music_2_->Open(ResLoader::Instance().Open("Metallica_-_Enter_Sandman.ogg"));
+	music_2_->Open(res_loader.Open("Metallica_-_Enter_Sandman.ogg"));
 	sound_ = adsf.MakeAudioDataSource();
-	sound_->Open(ResLoader::Instance().Open("Cash_register.ogg"));
+	sound_->Open(res_loader.Open("Cash_register.ogg"));
 
 	AudioFactory& af = Context::Instance().AudioFactoryInstance();
 	AudioEngine& ae = af.AudioEngineInstance();
@@ -97,7 +99,7 @@ void SoundApp::OnCreate()
 	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
 	auto& ui_mgr = context.UIManagerInstance();
-	ui_mgr.Load(*ResLoader::Instance().Open("Sound.uiml"));
+	ui_mgr.Load(*res_loader.Open("Sound.uiml"));
 	dialog_ = ui_mgr.GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");

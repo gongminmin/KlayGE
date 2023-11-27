@@ -85,7 +85,7 @@ int SampleMain()
 VectorTexApp::VectorTexApp()
 	: App3DFramework("Vector Texture")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/VectorTex");
+	Context::Instance().ResLoaderInstance().AddPath("../../Samples/media/VectorTex");
 }
 
 void VectorTexApp::OnCreate()
@@ -119,7 +119,7 @@ void VectorTexApp::OnCreate()
 
 	checked_cast<RenderTeapot&>(*model_->Mesh(0)).VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
-	context.UIManagerInstance().Load(*ResLoader::Instance().Open("VectorTex.uiml"));
+	context.UIManagerInstance().Load(*context.ResLoaderInstance().Open("VectorTex.uiml"));
 }
 
 void VectorTexApp::OnResize(uint32_t width, uint32_t height)

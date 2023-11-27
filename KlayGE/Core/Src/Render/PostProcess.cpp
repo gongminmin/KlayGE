@@ -97,7 +97,7 @@ namespace
 				return;
 			}
 
-			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
+			ResIdentifierPtr ppmm_input = Context::Instance().ResLoaderInstance().Open(pp_desc_.res_name);
 
 			KlayGE::XMLNode root = LoadXml(*ppmm_input);
 
@@ -886,13 +886,13 @@ namespace KlayGE
 
 	PostProcessPtr SyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name)
 	{
-		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
 	PostProcessPtr ASyncLoadPostProcess(std::string_view ppml_name, std::string_view pp_name)
 	{
 		// TODO: Make it really async
-		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
+		return Context::Instance().ResLoaderInstance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
 

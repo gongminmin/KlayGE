@@ -1062,12 +1062,14 @@ namespace
 
 		uint32_t const num_lods = static_cast<uint32_t>(metadata.NumLods());
 
+		auto& res_loader = Context::Instance().ResLoaderInstance();
+
 		std::vector<Assimp::Importer> importers(num_lods);
 		std::vector<aiScene const*> scenes(num_lods);
 		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
 			std::string_view const lod_file_name = (lod == 0) ? input_name : metadata.LodFileName(lod);
-			std::string const file_name = (lod == 0) ? std::string(input_name) : ResLoader::Instance().Locate(lod_file_name);
+			std::string const file_name = (lod == 0) ? std::string(input_name) : res_loader.Locate(lod_file_name);
 			if (file_name.empty())
 			{
 				LogError() << "Could NOT find " << lod_file_name << " for LoD " << lod << '.' << std::endl;
@@ -3123,7 +3125,7 @@ namespace
 
 	void MeshLoader::LoadFromMeshML(std::string_view input_name, [[maybe_unused]] MeshMetadata const & metadata)
 	{
-		ResIdentifierPtr file = ResLoader::Instance().Open(input_name);
+		ResIdentifierPtr file = Context::Instance().ResLoaderInstance().Open(input_name);
 		XMLNode root = LoadXml(*file);
 
 		BOOST_ASSERT(root.Attrib("version") && (root.Attrib("version")->ValueInt() >= 1));
@@ -3407,8 +3409,9 @@ namespace
 
 	RenderModelPtr MeshLoader::Load(MeshMetadata const & metadata)
 	{
+		auto& res_loader = Context::Instance().ResLoaderInstance();
 		std::string_view const input_name = metadata.LodFileName(0);
-		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
+		std::string const input_name_str = res_loader.Locate(input_name);
 		if (input_name_str.empty())
 		{
 			LogError() << "Could NOT find " << input_name << '.' << std::endl;
@@ -3417,10 +3420,10 @@ namespace
 
 		std::filesystem::path input_path(input_name_str);
 		auto const in_folder = input_path.parent_path().string();
-		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
+		bool const in_path = res_loader.IsInPath(in_folder);
 		if (!in_path)
 		{
-			ResLoader::Instance().AddPath(in_folder);
+			res_loader.AddPath(in_folder);
 		}
 
 		render_model_.reset();
@@ -3852,7 +3855,7 @@ namespace
 
 		if (!in_path)
 		{
-			ResLoader::Instance().DelPath(in_folder);
+			Context::Instance().ResLoaderInstance().DelPath(in_folder);
 		}
 
 		return render_model_;
@@ -3860,7 +3863,7 @@ namespace
 
 	bool MeshLoader::IsSupported(std::string_view input_name) const
 	{
-		std::string const input_name_str = ResLoader::Instance().Locate(input_name);
+		std::string const input_name_str = Context::Instance().ResLoaderInstance().Locate(input_name);
 		if (input_name_str.empty())
 		{
 			LogError() << "Could NOT find " << input_name << '.' << std::endl;
