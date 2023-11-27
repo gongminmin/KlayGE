@@ -261,7 +261,7 @@ void AreaLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 	case Profile:
 #ifndef KLAYGE_SHIP
-		PerfProfiler::Instance().ExportToCSV("profile.csv");
+		Context::Instance().PerfProfilerInstance().ExportToCSV("profile.csv");
 #endif
 		break;
 	}

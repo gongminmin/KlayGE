@@ -36,9 +36,8 @@
 #include <KFL/Noncopyable.hpp>
 #include <KFL/Timer.hpp>
 
-#include <map>
+#include <memory>
 #include <string>
-#include <tuple>
 
 #include <KlayGE/Query.hpp>
 
@@ -81,13 +80,13 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API PerfProfiler final
 	{
+		friend class Context;
+
 		KLAYGE_NONCOPYABLE(PerfProfiler);
 
 	public:
-		PerfProfiler();
-
-		static PerfProfiler& Instance();
-		static void Destroy() noexcept;
+		PerfProfiler() noexcept;
+		~PerfProfiler() noexcept;
 
 		void Suspend();
 		void Resume();
@@ -98,25 +97,13 @@ namespace KlayGE
 		void ExportToCSV(std::string const& file_name) const;
 
 	private:
-		static std::unique_ptr<PerfProfiler> perf_profiler_instance_;
+		void Init();
+		void Destroy() noexcept;
+		bool Valid() const noexcept;
 
-		struct FramePerfInfo
-		{
-			uint32_t frame_id;
-			double cpu_time;
-			double gpu_time;
-		};
-
-		struct PerfInfo
-		{
-			int category;
-			std::string name;
-			std::unique_ptr<PerfRegion> perf_region;
-			std::vector<FramePerfInfo> frames;
-		};
-
-		std::vector<PerfInfo> perf_regions_;
-		uint32_t frame_id_ = 0;
+	private:
+		class Impl;
+		std::unique_ptr<Impl> pimpl_;
 	};
 } // namespace KlayGE
 

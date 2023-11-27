@@ -146,7 +146,8 @@ namespace KlayGE
 			settings.width = static_cast<uint32_t>(settings.height * screen_aspect + 0.5f);
 		}
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		RenderFactory& rf = context.RenderFactoryInstance();
 
 		pp_rl_ = rf.MakeRenderLayout();
 		pp_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -450,7 +451,7 @@ namespace KlayGE
 		this->DisplayMaxLuminanceNits(settings.display_max_luminance);
 
 #ifndef KLAYGE_SHIP
-		PerfProfiler& profiler = PerfProfiler::Instance();
+		PerfProfiler& profiler = context.PerfProfilerInstance();
 		hdr_pp_perf_ = profiler.CreatePerfRegion(0, "HDR PP");
 		smaa_pp_perf_ = profiler.CreatePerfRegion(0, "SMAA PP");
 		post_tone_mapping_pp_perf_ = profiler.CreatePerfRegion(0, "Post tone mapping PP");
@@ -1054,12 +1055,13 @@ namespace KlayGE
 
 	void RenderEngine::Refresh()
 	{
-		if (Context::Instance().AppInstance().MainWnd()->Active())
+		auto& context = Context::Instance();
+		if (context.AppInstance().MainWnd()->Active())
 		{
-			Context::Instance().SceneManagerInstance().Update();
+			context.SceneManagerInstance().Update();
 
 #ifndef KLAYGE_SHIP
-			PerfProfiler::Instance().CollectData();
+			context.PerfProfilerInstance().CollectData();
 #endif
 		}
 	}

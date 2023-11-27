@@ -49,6 +49,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	class DevHelper;
 #endif
+	class PerfProfiler;
 	class UIManager;
 
 	struct ContextCfg
@@ -139,6 +140,7 @@ namespace KlayGE
 
 		ThreadPool& ThreadPoolInstance();
 
+		PerfProfiler& PerfProfilerInstance();
 		UIManager& UIManagerInstance();
 
 	private:

@@ -35,19 +35,13 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <fstream>
+#include <map>
 #include <mutex>
 
 #include <KlayGE/PerfProfiler.hpp>
 
-namespace
-{
-	std::mutex singleton_mutex;
-}
-
 namespace KlayGE
 {
-	std::unique_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
-
 	PerfRegion::PerfRegion()
 	{
 		if (Context::Instance().Config().perf_profiler)
@@ -95,82 +89,129 @@ namespace KlayGE
 	}
 
 
-	PerfProfiler::PerfProfiler() = default;
-
-	PerfProfiler& PerfProfiler::Instance()
+	class PerfProfiler::Impl final
 	{
-		if (!perf_profiler_instance_)
+		KLAYGE_NONCOPYABLE(Impl);
+
+	public:
+		Impl() = default;
+
+		void Suspend()
 		{
-			std::lock_guard<std::mutex> lock(singleton_mutex);
-			if (!perf_profiler_instance_)
+		}
+		void Resume()
+		{
+		}
+
+		PerfRegion* CreatePerfRegion(int category, std::string const& name)
+		{
+			auto perf_region = MakeUniquePtr<PerfRegion>();
+			auto* ret = perf_region.get();
+			perf_regions_.emplace_back(PerfInfo{category, name, std::move(perf_region), {}});
+			return ret;
+		}
+		void CollectData()
+		{
+			if (Context::Instance().Config().perf_profiler)
 			{
-				perf_profiler_instance_ = MakeUniquePtr<PerfProfiler>();
+				for (auto& region : perf_regions_)
+				{
+					auto& perf_region = *region.perf_region;
+					if (perf_region.Dirty())
+					{
+						perf_region.CollectData();
+						region.frames.emplace_back(FramePerfInfo{frame_id_, perf_region.CpuTime(), perf_region.GpuTime()});
+					}
+				}
+
+				++frame_id_;
 			}
 		}
-		return *perf_profiler_instance_;
+
+		void ExportToCSV(std::string const& file_name) const
+		{
+			if (Context::Instance().Config().perf_profiler)
+			{
+				std::ofstream ofs(file_name.c_str());
+				ofs << "Frame" << ',' << "Category" << ',' << "Name" << ',' << "CPU Timing (ms)" << ',' << "GPU Timing (ms)\n";
+
+				for (auto const& region : perf_regions_)
+				{
+					for (auto const& frame : region.frames)
+					{
+						ofs << frame.frame_id << ',' << region.category << ',' << region.name << ',' << frame.cpu_time * 1000 << ',';
+						if (frame.gpu_time >= 0)
+						{
+							ofs << frame.gpu_time * 1000;
+						}
+						ofs << '\n';
+					}
+				}
+
+				ofs << '\n';
+			}
+		}
+
+	private:
+		struct FramePerfInfo
+		{
+			uint32_t frame_id;
+			double cpu_time;
+			double gpu_time;
+		};
+
+		struct PerfInfo
+		{
+			int category;
+			std::string name;
+			std::unique_ptr<PerfRegion> perf_region;
+			std::vector<FramePerfInfo> frames;
+		};
+
+		std::vector<PerfInfo> perf_regions_;
+		uint32_t frame_id_ = 0;
+	};
+
+	PerfProfiler::PerfProfiler() noexcept = default;
+	PerfProfiler::~PerfProfiler() noexcept = default;
+
+	void PerfProfiler::Init()
+	{
+		pimpl_ = MakeUniquePtr<Impl>();
 	}
 
 	void PerfProfiler::Destroy() noexcept
 	{
-		std::lock_guard<std::mutex> lock(singleton_mutex);
-		perf_profiler_instance_.reset();
+		pimpl_.reset();
+	}
+
+	bool PerfProfiler::Valid() const noexcept
+	{
+		return static_cast<bool>(pimpl_);
 	}
 
 	void PerfProfiler::Suspend()
 	{
+		pimpl_->Suspend();
 	}
 
 	void PerfProfiler::Resume()
 	{
+		pimpl_->Resume();
 	}
 
 	PerfRegion* PerfProfiler::CreatePerfRegion(int category, std::string const& name)
 	{
-		auto perf_region = MakeUniquePtr<PerfRegion>();
-		auto* ret = perf_region.get();
-		perf_regions_.emplace_back(PerfInfo{category, name, std::move(perf_region), {}});
-		return ret;
+		return pimpl_->CreatePerfRegion(category, name);
 	}
 
 	void PerfProfiler::CollectData()
 	{
-		if (Context::Instance().Config().perf_profiler)
-		{
-			for (auto& region : perf_regions_)
-			{
-				auto& perf_region = *region.perf_region;
-				if (perf_region.Dirty())
-				{
-					perf_region.CollectData();
-					region.frames.emplace_back(FramePerfInfo{frame_id_, perf_region.CpuTime(), perf_region.GpuTime()});
-				}
-			}
-
-			++frame_id_;
-		}
+		pimpl_->CollectData();
 	}
 
 	void PerfProfiler::ExportToCSV(std::string const& file_name) const
 	{
-		if (Context::Instance().Config().perf_profiler)
-		{
-			std::ofstream ofs(file_name.c_str());
-			ofs << "Frame" << ',' << "Category" << ',' << "Name" << ',' << "CPU Timing (ms)" << ',' << "GPU Timing (ms)\n";
-
-			for (auto const& region : perf_regions_)
-			{
-				for (auto const& frame : region.frames)
-				{
-					ofs << frame.frame_id << ',' << region.category << ',' << region.name << ',' << frame.cpu_time * 1000 << ',';
-					if (frame.gpu_time >= 0)
-					{
-						ofs << frame.gpu_time * 1000;
-					}
-					ofs << '\n';
-				}
-			}
-
-			ofs << '\n';
-		}
+		pimpl_->ExportToCSV(file_name);
 	}
 } // namespace KlayGE

@@ -412,7 +412,8 @@ namespace KlayGE
 			dr_debug_pp_(MakeSharedPtr<DeferredRenderingDebugPostProcess>()),
 			display_type_(DT_Final)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& context = Context::Instance();
+		RenderFactory& rf = context.RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
@@ -915,7 +916,7 @@ namespace KlayGE
 		this->SetCascadedShadowType(CSLT_Auto);
 
 #ifndef KLAYGE_SHIP
-		PerfProfiler& profiler = PerfProfiler::Instance();
+		PerfProfiler& profiler = context.PerfProfilerInstance();
 		shadow_map_perf_ = profiler.CreatePerfRegion(0, "Gen shadow map");
 		std::string buffer_name[] = { "Opaque", "Transparency back", "TransparencyFront" };
 		for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
