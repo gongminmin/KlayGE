@@ -132,9 +132,18 @@ namespace KlayGE
 				scene_mgr_->Suspend();
 			}
 
-			res_loader_.Suspend();
-			perf_profiler_.Suspend();
-			ui_mgr_.Suspend();
+			if (res_loader_.Valid())
+			{
+				res_loader_.Suspend();
+			}
+			if (perf_profiler_.Valid())
+			{
+				perf_profiler_.Suspend();
+			}
+			if (ui_mgr_.Valid())
+			{
+				ui_mgr_.Suspend();
+			}
 
 			if (deferred_rendering_layer_)
 			{
@@ -172,9 +181,18 @@ namespace KlayGE
 				scene_mgr_->Resume();
 			}
 
-			res_loader_.Resume();
-			perf_profiler_.Resume();
-			ui_mgr_.Resume();
+			if (res_loader_.Valid())
+			{
+				res_loader_.Resume();
+			}
+			if (perf_profiler_.Valid())
+			{
+				perf_profiler_.Resume();
+			}
+			if (ui_mgr_.Valid())
+			{
+				ui_mgr_.Resume();
+			}
 
 			if (deferred_rendering_layer_)
 			{
@@ -297,7 +315,8 @@ namespace KlayGE
 			std::string sm_name;
 			std::string adsf_name;
 
-			ResIdentifierPtr file = res_loader_.Open(cfg_file);
+			auto& res_loader = ResLoaderInstance();
+			ResIdentifierPtr file = res_loader.Open(cfg_file);
 			if (file)
 			{
 				XMLNode cfg_root = LoadXml(*file);
@@ -902,11 +921,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			render_loader_.Free();
 
-			std::string render_path = res_loader_.Locate("Render");
+			auto& res_loader = ResLoaderInstance();
+			std::string render_path = res_loader.Locate("Render");
 			std::string fn = KLAYGE_DLL_PREFIX"_RenderEngine_" + rf_name + DLL_SUFFIX;
 
 			std::string path = render_path + "/" + fn;
-			render_loader_.Load(res_loader_.Locate(path));
+			render_loader_.Load(res_loader.Locate(path));
 
 			auto* mrf = reinterpret_cast<MakeRenderFactoryFunc>(render_loader_.GetProcAddress("MakeRenderFactory"));
 			if (mrf != nullptr)
@@ -930,11 +950,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			audio_loader_.Free();
 
-			std::string audio_path = res_loader_.Locate("Audio");
+			auto& res_loader = ResLoaderInstance();
+			std::string audio_path = res_loader.Locate("Audio");
 			std::string fn = KLAYGE_DLL_PREFIX"_AudioEngine_" + af_name + DLL_SUFFIX;
 
 			std::string path = audio_path + "/" + fn;
-			audio_loader_.Load(res_loader_.Locate(path));
+			audio_loader_.Load(res_loader.Locate(path));
 
 			auto* maf = reinterpret_cast<MakeAudioFactoryFunc>(audio_loader_.GetProcAddress("MakeAudioFactory"));
 			if (maf != nullptr)
@@ -958,11 +979,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			input_loader_.Free();
 
-			std::string input_path = res_loader_.Locate("Input");
+			auto& res_loader = ResLoaderInstance();
+			std::string input_path = res_loader.Locate("Input");
 			std::string fn = KLAYGE_DLL_PREFIX"_InputEngine_" + if_name + DLL_SUFFIX;
 
 			std::string path = input_path + "/" + fn;
-			input_loader_.Load(res_loader_.Locate(path));
+			input_loader_.Load(res_loader.Locate(path));
 
 			auto* mif = reinterpret_cast<MakeInputFactoryFunc>(input_loader_.GetProcAddress("MakeInputFactory"));
 			if (mif != nullptr)
@@ -986,11 +1008,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			show_loader_.Free();
 
-			std::string show_path = res_loader_.Locate("Show");
+			auto& res_loader = ResLoaderInstance();
+			std::string show_path = res_loader.Locate("Show");
 			std::string fn = KLAYGE_DLL_PREFIX"_ShowEngine_" + sf_name + DLL_SUFFIX;
 
 			std::string path = show_path + "/" + fn;
-			show_loader_.Load(res_loader_.Locate(path));
+			show_loader_.Load(res_loader.Locate(path));
 
 			auto* msf = reinterpret_cast<MakeShowFactoryFunc>(show_loader_.GetProcAddress("MakeShowFactory"));
 			if (msf != nullptr)
@@ -1014,11 +1037,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			script_loader_.Free();
 
-			std::string script_path = res_loader_.Locate("Script");
+			auto& res_loader = ResLoaderInstance();
+			std::string script_path = res_loader.Locate("Script");
 			std::string fn = KLAYGE_DLL_PREFIX"_ScriptEngine_" + sf_name + DLL_SUFFIX;
 
 			std::string path = script_path + "/" + fn;
-			script_loader_.Load(res_loader_.Locate(path));
+			script_loader_.Load(res_loader.Locate(path));
 
 			auto* msf = reinterpret_cast<MakeScriptFactoryFunc>(script_loader_.GetProcAddress("MakeScriptFactory"));
 			if (msf != nullptr)
@@ -1042,11 +1066,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			sm_loader_.Free();
 
-			std::string sm_path = res_loader_.Locate("Scene");
+			auto& res_loader = ResLoaderInstance();
+			std::string sm_path = res_loader.Locate("Scene");
 			std::string fn = KLAYGE_DLL_PREFIX"_Scene_" + sm_name + DLL_SUFFIX;
 
 			std::string path = sm_path + "/" + fn;
-			sm_loader_.Load(res_loader_.Locate(path));
+			sm_loader_.Load(res_loader.Locate(path));
 
 			auto* msm = reinterpret_cast<MakeSceneManagerFunc>(sm_loader_.GetProcAddress("MakeSceneManager"));
 			if (msm != nullptr)
@@ -1070,11 +1095,12 @@ namespace KlayGE
 #ifndef KLAYGE_STATIC_LINK_PLUGINS
 			ads_loader_.Free();
 
-			std::string adsf_path = res_loader_.Locate("Audio");
+			auto& res_loader = ResLoaderInstance();
+			std::string adsf_path = res_loader.Locate("Audio");
 			std::string fn = KLAYGE_DLL_PREFIX"_AudioDataSource_" + adsf_name + DLL_SUFFIX;
 
 			std::string path = adsf_path + "/" + fn;
-			ads_loader_.Load(res_loader_.Locate(path));
+			ads_loader_.Load(res_loader.Locate(path));
 
 			auto* madsf = reinterpret_cast<MakeAudioDataSourceFactoryFunc>(ads_loader_.GetProcAddress("MakeAudioDataSourceFactory"));
 			if (madsf != nullptr)
@@ -1101,7 +1127,8 @@ namespace KlayGE
 
 			std::string path = KLAYGE_DLL_PREFIX"_DevHelper" DLL_SUFFIX;
 
-			dev_helper_loader_.Load(res_loader_.Locate(path));
+			auto& res_loader = ResLoaderInstance();
+			dev_helper_loader_.Load(res_loader.Locate(path));
 
 			auto* mdh = reinterpret_cast<MakeDevHelperFunc>(dev_helper_loader_.GetProcAddress("MakeDevHelper"));
 			if (mdh != nullptr)
@@ -1332,9 +1359,18 @@ namespace KlayGE
 
 			scene_mgr_.reset();
 
-			res_loader_.Destroy();
-			perf_profiler_.Destroy();
-			ui_mgr_.Destroy();
+			if (res_loader_.Valid())
+			{
+				res_loader_.Destroy();
+			}
+			if (perf_profiler_.Valid())
+			{
+				perf_profiler_.Destroy();
+			}
+			if (ui_mgr_.Valid())
+			{
+				ui_mgr_.Destroy();
+			}
 
 			deferred_rendering_layer_.reset();
 			show_factory_.reset();
