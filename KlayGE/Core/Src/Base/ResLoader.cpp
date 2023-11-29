@@ -532,7 +532,7 @@ namespace KlayGE
 					try
 					{
 						full_path = std::filesystem::current_path() / new_path;
-				}
+					}
 					catch (...)
 					{
 						full_path = new_path;
@@ -544,9 +544,9 @@ namespace KlayGE
 #else
 					return "";
 #endif
-			}
+				}
 				new_path = full_path;
-		}
+			}
 			std::string ret = new_path.string();
 #if defined KLAYGE_PLATFORM_WINDOWS
 			std::replace(ret.begin(), ret.end(), '\\', '/');
@@ -839,7 +839,7 @@ namespace KlayGE
 				if (pkt_offset != std::string_view::npos)
 				{
 					package_path = std::string(path.substr(0, pkt_offset + 3));
-					std::filesystem::path pkt_path(package_path);
+					std::filesystem::path pkt_path(this->AbsPath(package_path));
 					std::error_code ec;
 					if (std::filesystem::exists(pkt_path, ec) &&
 						(std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
