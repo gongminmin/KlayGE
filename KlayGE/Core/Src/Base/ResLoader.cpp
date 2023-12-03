@@ -120,8 +120,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			char buf[MAX_PATH];
 			::GetModuleFileNameA(nullptr, buf, sizeof(buf));
-			exe_path_ = buf;
-			exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+			exe_path_ = std::filesystem::path(buf).parent_path().generic_string();
 			local_path_ = exe_path_ + "/";
 #else
 			auto package = uwp::Package::Current();
@@ -184,7 +183,7 @@ namespace KlayGE
 			local_path_ = exe_path_;
 #endif
 
-			paths_.emplace_back(CT_HASH(""), 0, "", PackagePtr());
+			paths_.emplace_back(PathInfo{CT_HASH(""), 0U, std::filesystem::path(), PackagePtr()});
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 			this->AddPath("Assets/");
@@ -246,7 +245,7 @@ namespace KlayGE
 
 			std::lock_guard<std::mutex> lock(paths_mutex_);
 
-			std::string real_path = this->RealPath(std::move(phy_path));
+			std::filesystem::path const real_path = this->RealPath(std::move(phy_path));
 			if (!real_path.empty())
 			{
 				std::string virtual_path_str(virtual_path);
@@ -259,7 +258,7 @@ namespace KlayGE
 				bool found = false;
 				for (auto const& path : paths_)
 				{
-					if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
+					if ((path.virtual_path_hash == virtual_path_hash) && (path.real_path == real_path))
 					{
 						found = true;
 						break;
@@ -285,8 +284,7 @@ namespace KlayGE
 			std::string package_path;
 			std::string password;
 			std::string path_in_package;
-			std::string real_path = this->RealPath(std::move(phy_path),
-				package_path, password, path_in_package);
+			std::filesystem::path real_path = this->RealPath(std::move(phy_path), package_path, password, path_in_package);
 			if (!real_path.empty())
 			{
 				std::string virtual_path_str(virtual_path);
@@ -299,7 +297,7 @@ namespace KlayGE
 				bool found = false;
 				for (auto const& path : paths_)
 				{
-					if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
+					if ((path.virtual_path_hash == virtual_path_hash) && (path.real_path == real_path))
 					{
 						found = true;
 						break;
@@ -313,7 +311,7 @@ namespace KlayGE
 					{
 						for (auto const& path : paths_)
 						{
-							auto const& p = std::get<3>(path);
+							auto const& p = path.package;
 							if (p && package_path == p->ArchiveStream()->ResName())
 							{
 								package = p;
@@ -330,7 +328,8 @@ namespace KlayGE
 						}
 					}
 
-					paths_.emplace_back(virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), real_path, std::move(package));
+					paths_.emplace_back(PathInfo{
+						virtual_path_hash, static_cast<uint32_t>(virtual_path_str.size()), std::move(real_path), std::move(package)});
 				}
 			}
 		}
@@ -338,7 +337,7 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(paths_mutex_);
 
-			std::string real_path = this->RealPath(std::move(phy_path));
+			std::filesystem::path const real_path = this->RealPath(std::move(phy_path));
 			if (!real_path.empty())
 			{
 				std::string virtual_path_str(std::move(virtual_path));
@@ -350,7 +349,7 @@ namespace KlayGE
 
 				for (auto iter = paths_.begin(); iter != paths_.end(); ++iter)
 				{
-					if ((std::get<0>(*iter) == virtual_path_hash) && (std::get<2>(*iter) == real_path))
+					if ((iter->virtual_path_hash == virtual_path_hash) && (iter->real_path == real_path))
 					{
 						paths_.erase(iter);
 						break;
@@ -388,16 +387,12 @@ namespace KlayGE
 				std::lock_guard<std::mutex> lock(paths_mutex_);
 				for (auto const& path : paths_)
 				{
-					if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
+					if ((path.virtual_path_size != 0) ||
+						(HashRange(name.begin(), name.begin() + path.virtual_path_size) == path.virtual_path_hash))
 					{
-						std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
-#if defined KLAYGE_PLATFORM_WINDOWS
-						std::replace(res_name.begin(), res_name.end(), '\\', '/');
-#endif
-
-						std::filesystem::path res_path(res_name);
-						std::error_code ec;
-						if (std::filesystem::exists(res_path, ec))
+						std::filesystem::path const res_path = path.real_path / name.substr(path.virtual_path_size);
+						std::string const res_name = res_path.generic_string();
+						if (std::filesystem::exists(res_path))
 						{
 							uint64_t const timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
 							return MakeSharedPtr<ResIdentifier>(
@@ -409,7 +404,7 @@ namespace KlayGE
 							std::string password;
 							std::string path_in_package;
 							this->DecomposePackageName(res_name, package_path, password, path_in_package);
-							auto const& package = std::get<3>(path);
+							auto const& package = path.package;
 							if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
 							{
 								auto res = package->Extract(path_in_package, name);
@@ -421,7 +416,7 @@ namespace KlayGE
 						}
 					}
 
-					if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+					if ((path.virtual_path_size == 0) && std::filesystem::path(name).is_absolute())
 					{
 						break;
 					}
@@ -459,15 +454,11 @@ namespace KlayGE
 				std::lock_guard<std::mutex> lock(paths_mutex_);
 				for (auto const& path : paths_)
 				{
-					if ((std::get<1>(path) != 0) || (HashRange(name.begin(), name.begin() + std::get<1>(path)) == std::get<0>(path)))
+					if ((path.virtual_path_size != 0) || (HashRange(name.begin(), name.begin() + path.virtual_path_size) == path.virtual_path_hash))
 					{
-						std::string res_name(std::get<2>(path) + std::string(name.substr(std::get<1>(path))));
-#if defined KLAYGE_PLATFORM_WINDOWS
-						std::replace(res_name.begin(), res_name.end(), '\\', '/');
-#endif
-
-						std::error_code ec;
-						if (std::filesystem::exists(res_name, ec))
+						std::filesystem::path const res_path = path.real_path / name.substr(path.virtual_path_size);
+						std::string const res_name = res_path.generic_string();
+						if (std::filesystem::exists(res_path))
 						{
 							return res_name;
 						}
@@ -477,7 +468,7 @@ namespace KlayGE
 							std::string password;
 							std::string path_in_package;
 							this->DecomposePackageName(res_name, package_path, password, path_in_package);
-							auto const& package = std::get<3>(path);
+							auto const& package = path.package;
 							if (!package_path.empty() && package && (package_path == package->ArchiveStream()->ResName()))
 							{
 								if (package->Locate(path_in_package))
@@ -488,7 +479,7 @@ namespace KlayGE
 						}
 					}
 
-					if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+					if ((path.virtual_path_size == 0) && std::filesystem::path(name).is_absolute())
 					{
 						break;
 					}
@@ -520,13 +511,11 @@ namespace KlayGE
 		}
 		std::string AbsPath(std::string_view path)
 		{
-			std::string path_str(std::move(path));
-			std::filesystem::path new_path(path_str);
+			std::filesystem::path new_path(std::move(path));
 			if (!new_path.is_absolute())
 			{
 				std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
-				std::error_code ec;
-				if (!std::filesystem::exists(full_path, ec))
+				if (!std::filesystem::exists(full_path))
 				{
 #ifndef KLAYGE_PLATFORM_ANDROID
 					try
@@ -537,7 +526,7 @@ namespace KlayGE
 					{
 						full_path = new_path;
 					}
-					if (!std::filesystem::exists(full_path, ec))
+					if (!std::filesystem::exists(full_path))
 					{
 						return "";
 					}
@@ -547,11 +536,7 @@ namespace KlayGE
 				}
 				new_path = full_path;
 			}
-			std::string ret = new_path.string();
-#if defined KLAYGE_PLATFORM_WINDOWS
-			std::replace(ret.begin(), ret.end(), '\\', '/');
-#endif
-			return ret;
+			return new_path.generic_string();
 		}
 
 		std::shared_ptr<void> SyncQuery(ResLoadingDescPtr const& res_desc)
@@ -596,7 +581,7 @@ namespace KlayGE
 
 				if (found)
 				{
-					*async_is_done = LS_Complete;
+					*async_is_done = LoadingStatus::Complete;
 				}
 				else
 				{
@@ -671,7 +656,7 @@ namespace KlayGE
 					{
 						res = res_desc->CreateResource();
 
-						async_is_done = MakeSharedPtr<LoadingStatus>(LS_Loading);
+						async_is_done = MakeSharedPtr<LoadingStatus>(LoadingStatus::Loading);
 
 						{
 							std::lock_guard<std::mutex> lock(loading_mutex_);
@@ -718,7 +703,7 @@ namespace KlayGE
 
 			for (auto& lrq : tmp_loading_res)
 			{
-				if (LS_Complete == *lrq.second)
+				if (LoadingStatus::Complete == *lrq.second)
 				{
 					ResLoadingDescPtr const& res_desc = lrq.first;
 
@@ -745,9 +730,9 @@ namespace KlayGE
 			}
 			for (auto& lrq : tmp_loading_res)
 			{
-				if (LS_Complete == *lrq.second)
+				if (LoadingStatus::Complete == *lrq.second)
 				{
-					*lrq.second = LS_CanBeRemoved;
+					*lrq.second = LoadingStatus::CanBeRemoved;
 				}
 			}
 
@@ -755,7 +740,7 @@ namespace KlayGE
 				std::lock_guard<std::mutex> lock(loading_mutex_);
 				for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
 				{
-					if (LS_CanBeRemoved == *(iter->second))
+					if (LoadingStatus::CanBeRemoved == *(iter->second))
 					{
 						iter = loading_res_.erase(iter);
 					}
@@ -773,14 +758,14 @@ namespace KlayGE
 		}
 
 	private:
-		std::string RealPath(std::string_view path)
+		std::filesystem::path RealPath(std::string_view path)
 		{
 			std::string package_path;
 			std::string password;
 			std::string path_in_package;
 			return this->RealPath(std::move(path), package_path, password, path_in_package);
 		}
-		std::string RealPath(std::string_view path,
+		std::filesystem::path RealPath(std::string_view path,
 			std::string& package_path, std::string& password, std::string& path_in_package)
 		{
 			package_path = "";
@@ -793,7 +778,7 @@ namespace KlayGE
 				this->DecomposePackageName(path, package_path, password, path_in_package);
 				if (!package_path.empty())
 				{
-					std::string real_package_path = this->RealPath(package_path);
+					std::string real_package_path = this->RealPath(package_path).string();
 					real_package_path.pop_back();
 
 					package_path = real_package_path;
@@ -816,7 +801,6 @@ namespace KlayGE
 			else
 			{
 				this->DecomposePackageName(abs_path, package_path, password, path_in_package);
-
 				if (abs_path.back() != '/')
 				{
 					abs_path.push_back('/');
@@ -840,8 +824,7 @@ namespace KlayGE
 				{
 					package_path = std::string(path.substr(0, pkt_offset + 3));
 					std::filesystem::path pkt_path(this->AbsPath(package_path));
-					std::error_code ec;
-					if (std::filesystem::exists(pkt_path, ec) &&
+					if (std::filesystem::exists(pkt_path) &&
 						(std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
 					{
 						auto const next_slash_offset = path.find('/', pkt_offset + 3);
@@ -942,10 +925,10 @@ namespace KlayGE
 
 				for (auto& res_pair : loading_res_queue_copy)
 				{
-					if (LS_Loading == *res_pair.second)
+					if (LoadingStatus::Loading == *res_pair.second)
 					{
 						res_pair.first->SubThreadStage();
-						*res_pair.second = LS_Complete;
+						*res_pair.second = LoadingStatus::Complete;
 					}
 				}
 
@@ -1006,16 +989,24 @@ namespace KlayGE
 #endif
 
 	private:
-		enum LoadingStatus
+		enum class LoadingStatus
 		{
-			LS_Loading,
-			LS_Complete,
-			LS_CanBeRemoved
+			Loading,
+			Complete,
+			CanBeRemoved
 		};
 
 		std::string exe_path_;
 		std::string local_path_;
-		std::vector<std::tuple<uint64_t, uint32_t, std::string, PackagePtr>> paths_;
+
+		struct PathInfo
+		{
+			uint64_t virtual_path_hash;
+			uint32_t virtual_path_size;
+			std::filesystem::path real_path;
+			PackagePtr package;
+		};
+		std::vector<PathInfo> paths_;
 		std::mutex paths_mutex_;
 
 		std::mutex loaded_mutex_;
@@ -1029,7 +1020,7 @@ namespace KlayGE
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_queue_;
 
 		std::future<void> loading_thread_;
-		volatile bool quit_{ false };
+		volatile bool quit_{false};
 	};
 
 	ResLoadingDesc::ResLoadingDesc() noexcept = default;
