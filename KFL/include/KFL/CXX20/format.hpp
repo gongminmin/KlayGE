@@ -38,7 +38,17 @@
 #if defined(KLAYGE_CXX20_LIBRARY_FORMAT_SUPPORT)
 	#include <format>
 #else
+	#if defined(KLAYGE_COMPILER_MSVC)
+		#pragma warning(push)
+		#pragma warning(disable : 4582) // Ignore detail::value constructor is not implicitly called
+	#endif
+	#include <fmt/core.h>
+	#if defined(KLAYGE_COMPILER_MSVC)
+		#pragma warning(pop)
+	#endif
 	#include <fmt/format.h>
+	#include <fmt/xchar.h>
+
 	namespace std
 	{
 		using fmt::format;
@@ -68,7 +78,6 @@
 		using fmt::basic_format_args;
 		using fmt::format_args;
 		using fmt::wformat_args;
-		using fmt::format_args_t;
 
 		using fmt::format_error;
 	}
