@@ -22,6 +22,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX20/span.hpp>
 #include <KFL/ErrorHandling.hpp>
+#include <KFL/Log.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>

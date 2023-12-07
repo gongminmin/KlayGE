@@ -5,7 +5,7 @@ UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "3c177d011684
 SET(BUILD_SHARED_LIBS OFF)
 SET(BUILD_FRAMEWORK OFF)
 if(KLAYGE_COMPILER_MSVC)
-	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
+	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
 endif()
 
 # To make libvorbis enable to find libogg
