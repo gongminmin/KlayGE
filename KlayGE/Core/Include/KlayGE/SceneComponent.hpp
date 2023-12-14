@@ -35,7 +35,6 @@
 
 #include <memory>
 
-#define BOOST_NO_CXX98_FUNCTION_BASE // Remove the usage of std::unary_function in container_hash/hash.hpp
 #include <boost/type_index.hpp>
 #include <boost/type_index/runtime_cast.hpp>
 
