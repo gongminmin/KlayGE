@@ -103,8 +103,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("ParticleSystemLoadingDesc");
-			return type;
+			return CtHash("ParticleSystemLoadingDesc");
 		}
 
 		bool StateLess() const override
@@ -290,15 +289,15 @@ namespace
 
 						XMLAttribute const* attr = node->Attrib("name");
 						size_t const name_hash = HashValue(attr->ValueString());
-						if (CT_HASH("size_over_life") == name_hash)
+						if (CtHash("size_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;
 						}
-						else if (CT_HASH("mass_over_life") == name_hash)
+						else if (CtHash("mass_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->mass_over_life_ctrl_pts = xys;
 						}
-						else if (CT_HASH("opacity_over_life") == name_hash)
+						else if (CtHash("opacity_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->opacity_over_life_ctrl_pts = xys;
 						}

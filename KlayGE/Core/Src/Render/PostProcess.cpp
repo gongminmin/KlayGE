@@ -80,8 +80,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("PostProcessLoadingDesc");
-			return type;
+			return CtHash("PostProcessLoadingDesc");
 		}
 
 		bool StateLess() const override

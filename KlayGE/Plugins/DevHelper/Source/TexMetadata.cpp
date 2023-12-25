@@ -80,7 +80,7 @@ namespace KlayGE
 				size_t const type_hash = HashValue(type_val->ValueString());
 				switch (type_hash)
 				{
-				case CT_HASH("2D"):
+				case CtHash("2D"):
 					new_metadata.type_ = Texture::TT_2D;
 					break;
 
@@ -96,27 +96,27 @@ namespace KlayGE
 				size_t const slot_hash = HashValue(slot_val->ValueString());
 				switch (slot_hash)
 				{
-				case CT_HASH("albedo"):
+				case CtHash("albedo"):
 					new_metadata.slot_ = RenderMaterial::TS_Albedo;
 					break;
 
-				case CT_HASH("metalness_glossiness"):
+				case CtHash("metalness_glossiness"):
 					new_metadata.slot_ = RenderMaterial::TS_MetalnessGlossiness;
 					break;
 
-				case CT_HASH("emissive"):
+				case CtHash("emissive"):
 					new_metadata.slot_ = RenderMaterial::TS_Emissive;
 					break;
 
-				case CT_HASH("normal"):
+				case CtHash("normal"):
 					new_metadata.slot_ = RenderMaterial::TS_Normal;
 					break;
 
-				case CT_HASH("height"):
+				case CtHash("height"):
 					new_metadata.slot_ = RenderMaterial::TS_Height;
 					break;
 
-				case CT_HASH("occlusion"):
+				case CtHash("occlusion"):
 					new_metadata.slot_ = RenderMaterial::TS_Occlusion;
 					break;
 
@@ -130,50 +130,50 @@ namespace KlayGE
 				size_t const format_hash = HashValue(prefered_format_val->ValueString());
 				switch (format_hash)
 				{
-				case CT_HASH("BC1"):
+				case CtHash("BC1"):
 					new_metadata.prefered_format_ = EF_BC1;
 					break;
-				case CT_HASH("BC1_SRGB"):
+				case CtHash("BC1_SRGB"):
 					new_metadata.prefered_format_ = EF_BC1_SRGB;
 					break;
-				case CT_HASH("BC2"):
+				case CtHash("BC2"):
 					new_metadata.prefered_format_ = EF_BC2;
 					break;
-				case CT_HASH("BC2_SRGB"):
+				case CtHash("BC2_SRGB"):
 					new_metadata.prefered_format_ = EF_BC2_SRGB;
 					break;
-				case CT_HASH("BC3"):
+				case CtHash("BC3"):
 					new_metadata.prefered_format_ = EF_BC3;
 					break;
-				case CT_HASH("BC3_SRGB"):
+				case CtHash("BC3_SRGB"):
 					new_metadata.prefered_format_ = EF_BC3_SRGB;
 					break;
-				case CT_HASH("BC4"):
+				case CtHash("BC4"):
 					new_metadata.prefered_format_ = EF_BC4;
 					break;
-				case CT_HASH("BC4_SRGB"):
+				case CtHash("BC4_SRGB"):
 					new_metadata.prefered_format_ = EF_BC4_SRGB;
 					break;
-				case CT_HASH("BC5"):
+				case CtHash("BC5"):
 					new_metadata.prefered_format_ = EF_BC5;
 					break;
-				case CT_HASH("BC5_SRGB"):
+				case CtHash("BC5_SRGB"):
 					new_metadata.prefered_format_ = EF_BC5_SRGB;
 					break;
-				case CT_HASH("BC6"):
+				case CtHash("BC6"):
 					new_metadata.prefered_format_ = EF_BC6;
 					break;
-				case CT_HASH("BC7"):
+				case CtHash("BC7"):
 					new_metadata.prefered_format_ = EF_BC7;
 					break;
-				case CT_HASH("BC7_SRGB"):
+				case CtHash("BC7_SRGB"):
 					new_metadata.prefered_format_ = EF_BC7_SRGB;
 					break;
-				case CT_HASH("ETC1"):
+				case CtHash("ETC1"):
 					new_metadata.prefered_format_ = EF_ETC1;
 					break;
 
-				case CT_HASH("GR8"):
+				case CtHash("GR8"):
 					new_metadata.prefered_format_ = EF_GR8;
 					break;
 

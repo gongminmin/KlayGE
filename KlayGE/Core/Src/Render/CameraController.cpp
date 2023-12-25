@@ -807,19 +807,19 @@ namespace KlayGE
 		{
 			size_t const type_str_hash = HashValue(curve_node->Attrib("type")->ValueString());
 			CameraPathController::InterpolateType type;
-			if (CT_HASH("linear") == type_str_hash)
+			if (CtHash("linear") == type_str_hash)
 			{
 				type = CameraPathController::IT_Linear;
 			}
-			else if (CT_HASH("catmull_rom") == type_str_hash)
+			else if (CtHash("catmull_rom") == type_str_hash)
 			{
 				type = CameraPathController::IT_CatmullRom;
 			}
-			else if (CT_HASH("b_spline") == type_str_hash)
+			else if (CtHash("b_spline") == type_str_hash)
 			{
 				type = CameraPathController::IT_BSpline;
 			}
-			else if (CT_HASH("bezier") == type_str_hash)
+			else if (CtHash("bezier") == type_str_hash)
 			{
 				type = CameraPathController::IT_Bezier;
 			}

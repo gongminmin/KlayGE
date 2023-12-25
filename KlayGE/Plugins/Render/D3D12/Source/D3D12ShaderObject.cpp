@@ -216,7 +216,7 @@ namespace KlayGE
 					shader_desc_.cb_desc[i].name.resize(len);
 					res.read(&shader_desc_.cb_desc[i].name[0], len);
 
-					shader_desc_.cb_desc[i].name_hash = RT_HASH(shader_desc_.cb_desc[i].name.c_str());
+					shader_desc_.cb_desc[i].name_hash = RtHash(shader_desc_.cb_desc[i].name.c_str());
 
 					res.read(reinterpret_cast<char*>(&shader_desc_.cb_desc[i].size), sizeof(shader_desc_.cb_desc[i].size));
 					shader_desc_.cb_desc[i].size = LE2Native(shader_desc_.cb_desc[i].size);
@@ -409,7 +409,7 @@ namespace KlayGE
 						{
 							auto& cb_desc = shader_desc_.cb_desc.emplace_back();
 							cb_desc.name = d3d_cb_desc.Name;
-							cb_desc.name_hash = RT_HASH(d3d_cb_desc.Name);
+							cb_desc.name_hash = RtHash(d3d_cb_desc.Name);
 							cb_desc.size = d3d_cb_desc.Size;
 
 							for (UINT v = 0; v < d3d_cb_desc.Variables; ++v)

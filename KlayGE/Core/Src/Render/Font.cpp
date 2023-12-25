@@ -728,8 +728,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("FontLoadingDesc");
-			return type;
+			return CtHash("FontLoadingDesc");
 		}
 
 		bool StateLess() const override

@@ -114,8 +114,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("RenderMaterialLoadingDesc");
-			return type;
+			return CtHash("RenderMaterialLoadingDesc");
 		}
 
 		bool StateLess() const override
@@ -267,15 +266,15 @@ namespace
 				if (XMLAttribute const* attr = detail_node->Attrib("mode"))
 				{
 					size_t const mode_hash = HashValue(attr->ValueString());
-					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
+					if (CtHash("Parallax Occlusion Mapping") == mode_hash)
 					{
 						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping;
 					}
-					else if (CT_HASH("Flat Tessellation") == mode_hash)
+					else if (CtHash("Flat Tessellation") == mode_hash)
 					{
 						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::FlatTessellation;
 					}
-					else if (CT_HASH("Smooth Tessellation") == mode_hash)
+					else if (CtHash("Smooth Tessellation") == mode_hash)
 					{
 						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SurfaceDetailMode::SmoothTessellation;
 					}

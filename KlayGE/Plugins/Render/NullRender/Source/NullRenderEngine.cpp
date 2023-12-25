@@ -72,15 +72,15 @@ namespace KlayGE
 	void NullRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
 		size_t const name_hash = HashValue(std::move(name));
-		if (CT_HASH("MAJOR_VERSION") == name_hash)
+		if (CtHash("MAJOR_VERSION") == name_hash)
 		{
 			*static_cast<uint32_t*>(value) = major_version_;
 		}
-		else if (CT_HASH("MINOR_VERSION") == name_hash)
+		else if (CtHash("MINOR_VERSION") == name_hash)
 		{
 			*static_cast<uint32_t*>(value) = minor_version_;
 		}
-		else if (CT_HASH("FRAG_DEPTH_SUPPORT") == name_hash)
+		else if (CtHash("FRAG_DEPTH_SUPPORT") == name_hash)
 		{
 			*static_cast<bool*>(value) = frag_depth_support_;
 		}
@@ -89,7 +89,7 @@ namespace KlayGE
 	void NullRenderEngine::SetCustomAttrib(std::string_view name, void* value)
 	{
 		size_t const name_hash = HashValue(std::move(name));
-		if (CT_HASH("PLATFORM") == name_hash)
+		if (CtHash("PLATFORM") == name_hash)
 		{
 			native_shader_platform_name_ = *static_cast<std::string*>(value);
 
@@ -112,31 +112,31 @@ namespace KlayGE
 				shader_profiles_[std::to_underlying(ShaderStage::Domain)] = "ds_5_0";
 			}
 		}
-		else if (CT_HASH("MAJOR_VERSION") == name_hash)
+		else if (CtHash("MAJOR_VERSION") == name_hash)
 		{
 			major_version_ = static_cast<uint8_t>(*static_cast<uint32_t*>(value));
 		}
-		else if (CT_HASH("MINOR_VERSION") == name_hash)
+		else if (CtHash("MINOR_VERSION") == name_hash)
 		{
 			minor_version_ = static_cast<uint8_t>(*static_cast<uint32_t*>(value));
 		}
-		else if (CT_HASH("REQUIRES_FLIPPING") == name_hash)
+		else if (CtHash("REQUIRES_FLIPPING") == name_hash)
 		{
 			requires_flipping_ = *static_cast<bool*>(value);
 		}
-		else if (CT_HASH("NATIVE_SHADER_FOURCC") == name_hash)
+		else if (CtHash("NATIVE_SHADER_FOURCC") == name_hash)
 		{
 			native_shader_fourcc_ = *static_cast<uint32_t*>(value);
 		}
-		else if (CT_HASH("NATIVE_SHADER_VERSION") == name_hash)
+		else if (CtHash("NATIVE_SHADER_VERSION") == name_hash)
 		{
 			native_shader_version_ = *static_cast<uint32_t*>(value);
 		}
-		else if (CT_HASH("DEVICE_CAPS") == name_hash)
+		else if (CtHash("DEVICE_CAPS") == name_hash)
 		{
 			caps_ = *static_cast<RenderDeviceCaps*>(value);
 		}
-		else if (CT_HASH("FRAG_DEPTH_SUPPORT") == name_hash)
+		else if (CtHash("FRAG_DEPTH_SUPPORT") == name_hash)
 		{
 			frag_depth_support_ = *static_cast<bool*>(value);
 		}

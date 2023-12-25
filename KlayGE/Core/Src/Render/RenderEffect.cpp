@@ -97,7 +97,7 @@ namespace
 #if KLAYGE_IS_DEV_PLATFORM
 	std::span<std::pair<char const *, size_t> const> GetTypeDefines()
 	{
-#define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
+#define NAME_AND_HASH(name) std::make_pair(name, CtHash(name))
 		static std::pair<char const *, size_t> const types[] =
 		{
 			NAME_AND_HASH("bool"),
@@ -195,8 +195,8 @@ namespace
 	{
 		static size_t constexpr sms_hash[] =
 		{
-			CT_HASH("flat"),
-			CT_HASH("gouraud")
+			CtHash("flat"),
+			CtHash("gouraud")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -215,14 +215,14 @@ namespace
 	{
 		static size_t constexpr cfs_hash[] =
 		{
-			CT_HASH("always_fail"),
-			CT_HASH("always_pass"),
-			CT_HASH("less"),
-			CT_HASH("less_equal"),
-			CT_HASH("equal"),
-			CT_HASH("not_equal"),
-			CT_HASH("greater_equal"),
-			CT_HASH("greater")
+			CtHash("always_fail"),
+			CtHash("always_pass"),
+			CtHash("less"),
+			CtHash("less_equal"),
+			CtHash("equal"),
+			CtHash("not_equal"),
+			CtHash("greater_equal"),
+			CtHash("greater")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -241,9 +241,9 @@ namespace
 	{
 		static size_t constexpr cms_hash[] =
 		{
-			CT_HASH("none"),
-			CT_HASH("front"),
-			CT_HASH("back")
+			CtHash("none"),
+			CtHash("front"),
+			CtHash("back")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -262,9 +262,9 @@ namespace
 	{
 		static size_t constexpr pms_hash[] =
 		{
-			CT_HASH("point"),
-			CT_HASH("line"),
-			CT_HASH("fill")
+			CtHash("point"),
+			CtHash("line"),
+			CtHash("fill")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -283,23 +283,23 @@ namespace
 	{
 		static size_t constexpr abfs_hash[] =
 		{
-			CT_HASH("zero"),
-			CT_HASH("one"),
-			CT_HASH("src_alpha"),
-			CT_HASH("dst_alpha"),
-			CT_HASH("inv_src_alpha"),
-			CT_HASH("inv_dst_alpha"),
-			CT_HASH("src_color"),
-			CT_HASH("dst_color"),
-			CT_HASH("inv_src_color"),
-			CT_HASH("inv_dst_color"),
-			CT_HASH("src_alpha_sat"),
-			CT_HASH("blend_factor"),
-			CT_HASH("inv_blend_factor"),
-			CT_HASH("src1_alpha"),
-			CT_HASH("inv_src1_alpha"),
-			CT_HASH("src1_color"),
-			CT_HASH("inv_src1_color")
+			CtHash("zero"),
+			CtHash("one"),
+			CtHash("src_alpha"),
+			CtHash("dst_alpha"),
+			CtHash("inv_src_alpha"),
+			CtHash("inv_dst_alpha"),
+			CtHash("src_color"),
+			CtHash("dst_color"),
+			CtHash("inv_src_color"),
+			CtHash("inv_dst_color"),
+			CtHash("src_alpha_sat"),
+			CtHash("blend_factor"),
+			CtHash("inv_blend_factor"),
+			CtHash("src1_alpha"),
+			CtHash("inv_src1_alpha"),
+			CtHash("src1_color"),
+			CtHash("inv_src1_color")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -318,11 +318,11 @@ namespace
 	{
 		static size_t constexpr bops_hash[] =
 		{
-			CT_HASH("add"),
-			CT_HASH("sub"),
-			CT_HASH("rev_sub"),
-			CT_HASH("min"),
-			CT_HASH("max")
+			CtHash("add"),
+			CtHash("sub"),
+			CtHash("rev_sub"),
+			CtHash("min"),
+			CtHash("max")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -341,14 +341,14 @@ namespace
 	{
 		static size_t constexpr sops_hash[] =
 		{
-			CT_HASH("keep"),
-			CT_HASH("zero"),
-			CT_HASH("replace"),
-			CT_HASH("incr"),
-			CT_HASH("decr"),
-			CT_HASH("invert"),
-			CT_HASH("incr_wrap"),
-			CT_HASH("decr_wrap")
+			CtHash("keep"),
+			CtHash("zero"),
+			CtHash("replace"),
+			CtHash("incr"),
+			CtHash("decr"),
+			CtHash("invert"),
+			CtHash("incr_wrap"),
+			CtHash("decr_wrap")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -367,14 +367,14 @@ namespace
 	{
 		static size_t constexpr tfs_hash[] =
 		{
-			CT_HASH("min_mag_mip_point"),
-			CT_HASH("min_mag_point_mip_linear"),
-			CT_HASH("min_point_mag_linear_mip_point"),
-			CT_HASH("min_point_mag_mip_linear"),
-			CT_HASH("min_linear_mag_mip_point"),
-			CT_HASH("min_linear_mag_point_mip_linear"),
-			CT_HASH("min_mag_linear_mip_point"),
-			CT_HASH("min_mag_mip_linear")
+			CtHash("min_mag_mip_point"),
+			CtHash("min_mag_point_mip_linear"),
+			CtHash("min_point_mag_linear_mip_point"),
+			CtHash("min_point_mag_mip_linear"),
+			CtHash("min_linear_mag_mip_point"),
+			CtHash("min_linear_mag_point_mip_linear"),
+			CtHash("min_mag_linear_mip_point"),
+			CtHash("min_mag_mip_linear")
 		};
 
 		int cmp;
@@ -397,7 +397,7 @@ namespace
 				return static_cast<TexFilterOp>((cmp << 4) + i);
 			}
 		}
-		if (CT_HASH("anisotropic") == f_hash)
+		if (CtHash("anisotropic") == f_hash)
 		{
 			return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 		}
@@ -409,10 +409,10 @@ namespace
 	{
 		static size_t constexpr tams_hash[] =
 		{
-			CT_HASH("wrap"),
-			CT_HASH("mirror"),
-			CT_HASH("clamp"),
-			CT_HASH("border")
+			CtHash("wrap"),
+			CtHash("mirror"),
+			CtHash("clamp"),
+			CtHash("border")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -431,22 +431,22 @@ namespace
 	{
 		static size_t constexpr lops_hash[] =
 		{
-			CT_HASH("clear"),
-			CT_HASH("set"),
-			CT_HASH("copy"),
-			CT_HASH("copy_inverted"),
-			CT_HASH("noop"),
-			CT_HASH("invert"),
-			CT_HASH("and"),
-			CT_HASH("nand"),
-			CT_HASH("or"),
-			CT_HASH("nor"),
-			CT_HASH("xor"),
-			CT_HASH("equiv"),
-			CT_HASH("and_reverse"),
-			CT_HASH("and_inverted"),
-			CT_HASH("or_reverse"),
-			CT_HASH("or_inverted")
+			CtHash("clear"),
+			CtHash("set"),
+			CtHash("copy"),
+			CtHash("copy_inverted"),
+			CtHash("noop"),
+			CtHash("invert"),
+			CtHash("and"),
+			CtHash("nand"),
+			CtHash("or"),
+			CtHash("nor"),
+			CtHash("xor"),
+			CtHash("equiv"),
+			CtHash("and_reverse"),
+			CtHash("and_inverted"),
+			CtHash("or_reverse"),
+			CtHash("or_inverted")
 		};
 
 		size_t const name_hash = HashValue(std::move(name));
@@ -1489,43 +1489,43 @@ namespace
 					value_str = value_attr->ValueString();
 				}
 
-				if (CT_HASH("filtering") == name_hash)
+				if (CtHash("filtering") == name_hash)
 				{
 					desc.filter = TexFilterOpFromName(value_str);
 				}
-				else if (CT_HASH("address_u") == name_hash)
+				else if (CtHash("address_u") == name_hash)
 				{
 					desc.addr_mode_u = TexAddressingModeFromName(value_str);
 				}
-				else if (CT_HASH("address_v") == name_hash)
+				else if (CtHash("address_v") == name_hash)
 				{
 					desc.addr_mode_v = TexAddressingModeFromName(value_str);
 				}
-				else if (CT_HASH("address_w") == name_hash)
+				else if (CtHash("address_w") == name_hash)
 				{
 					desc.addr_mode_w = TexAddressingModeFromName(value_str);
 				}
-				else if (CT_HASH("max_anisotropy") == name_hash)
+				else if (CtHash("max_anisotropy") == name_hash)
 				{
 					desc.max_anisotropy = static_cast<uint8_t>(value_attr->ValueUInt());
 				}
-				else if (CT_HASH("min_lod") == name_hash)
+				else if (CtHash("min_lod") == name_hash)
 				{
 					desc.min_lod = value_attr->ValueFloat();
 				}
-				else if (CT_HASH("max_lod") == name_hash)
+				else if (CtHash("max_lod") == name_hash)
 				{
 					desc.max_lod = value_attr->ValueFloat();
 				}
-				else if (CT_HASH("mip_map_lod_bias") == name_hash)
+				else if (CtHash("mip_map_lod_bias") == name_hash)
 				{
 					desc.mip_map_lod_bias = value_attr->ValueFloat();
 				}
-				else if (CT_HASH("cmp_func") == name_hash)
+				else if (CtHash("cmp_func") == name_hash)
 				{
 					desc.cmp_func = CompareFunctionFromName(value_str);
 				}
-				else if (CT_HASH("border_clr") == name_hash)
+				else if (CtHash("border_clr") == name_hash)
 				{
 					if (auto attr = state_node->Attrib("r"))
 					{
@@ -4059,8 +4059,7 @@ namespace KlayGE
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("EffectLoadingDesc");
-			return type;
+			return CtHash("EffectLoadingDesc");
 		}
 
 		bool StateLess() const override
@@ -4968,7 +4967,7 @@ namespace KlayGE
 				RenderEffectConstantBuffer* cbuff = nullptr;
 				XMLNode const* parent_node = node.Parent();
 				std::string const cbuff_name = std::string(parent_node->AttribString("name", "global_cb"));
-				size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
+				size_t const cbuff_name_hash = RtHash(cbuff_name.c_str());
 
 				bool found = false;
 				for (size_t i = 0; i < cbuffers_.size(); ++ i)
@@ -6179,101 +6178,101 @@ namespace KlayGE
 				value_str = value_attr->ValueString();
 			}
 
-			if (CT_HASH("polygon_mode") == state_name_hash)
+			if (CtHash("polygon_mode") == state_name_hash)
 			{
 				rs_desc.polygon_mode = PolygonModeFromName(value_str);
 			}
-			else if (CT_HASH("shade_mode") == state_name_hash)
+			else if (CtHash("shade_mode") == state_name_hash)
 			{
 				rs_desc.shade_mode = ShadeModeFromName(value_str);
 			}
-			else if (CT_HASH("cull_mode") == state_name_hash)
+			else if (CtHash("cull_mode") == state_name_hash)
 			{
 				rs_desc.cull_mode = CullModeFromName(value_str);
 			}
-			else if (CT_HASH("front_face_ccw") == state_name_hash)
+			else if (CtHash("front_face_ccw") == state_name_hash)
 			{
 				rs_desc.front_face_ccw = value_attr->ValueBool();
 			}
-			else if (CT_HASH("polygon_offset_factor") == state_name_hash)
+			else if (CtHash("polygon_offset_factor") == state_name_hash)
 			{
 				rs_desc.polygon_offset_factor = value_attr->ValueFloat();
 			}
-			else if (CT_HASH("polygon_offset_units") == state_name_hash)
+			else if (CtHash("polygon_offset_units") == state_name_hash)
 			{
 				rs_desc.polygon_offset_units = value_attr->ValueFloat();
 			}
-			else if (CT_HASH("depth_clip_enable") == state_name_hash)
+			else if (CtHash("depth_clip_enable") == state_name_hash)
 			{
 				rs_desc.depth_clip_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("scissor_enable") == state_name_hash)
+			else if (CtHash("scissor_enable") == state_name_hash)
 			{
 				rs_desc.scissor_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("multisample_enable") == state_name_hash)
+			else if (CtHash("multisample_enable") == state_name_hash)
 			{
 				rs_desc.multisample_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("alpha_to_coverage_enable") == state_name_hash)
+			else if (CtHash("alpha_to_coverage_enable") == state_name_hash)
 			{
 				bs_desc.alpha_to_coverage_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("independent_blend_enable") == state_name_hash)
+			else if (CtHash("independent_blend_enable") == state_name_hash)
 			{
 				bs_desc.independent_blend_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("blend_enable") == state_name_hash)
+			else if (CtHash("blend_enable") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_enable[index] = value_attr->ValueBool();
 			}
-			else if (CT_HASH("logic_op_enable") == state_name_hash)
+			else if (CtHash("logic_op_enable") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.logic_op_enable[index] = value_attr->ValueBool();
 			}
-			else if (CT_HASH("blend_op") == state_name_hash)
+			else if (CtHash("blend_op") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_op[index] = BlendOperationFromName(value_str);
 			}
-			else if (CT_HASH("src_blend") == state_name_hash)
+			else if (CtHash("src_blend") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.src_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
-			else if (CT_HASH("dest_blend") == state_name_hash)
+			else if (CtHash("dest_blend") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.dest_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
-			else if (CT_HASH("blend_op_alpha") == state_name_hash)
+			else if (CtHash("blend_op_alpha") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.blend_op_alpha[index] = BlendOperationFromName(value_str);
 			}
-			else if (CT_HASH("src_blend_alpha") == state_name_hash)
+			else if (CtHash("src_blend_alpha") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.src_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
-			else if (CT_HASH("dest_blend_alpha") == state_name_hash)
+			else if (CtHash("dest_blend_alpha") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.dest_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
-			else if (CT_HASH("logic_op") == state_name_hash)
+			else if (CtHash("logic_op") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.logic_op[index] = LogicOperationFromName(value_str);
 			}
-			else if (CT_HASH("color_write_mask") == state_name_hash)
+			else if (CtHash("color_write_mask") == state_name_hash)
 			{
 				int index = RetrieveIndex(*state_node);
 				bs_desc.color_write_mask[index] = static_cast<uint8_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("blend_factor") == state_name_hash)
+			else if (CtHash("blend_factor") == state_name_hash)
 			{
 				if (XMLAttribute const* attr = state_node->Attrib("r"))
 				{
@@ -6292,114 +6291,114 @@ namespace KlayGE
 					bs_desc.blend_factor.a() = attr->ValueFloat();
 				}
 			}
-			else if (CT_HASH("sample_mask") == state_name_hash)
+			else if (CtHash("sample_mask") == state_name_hash)
 			{
 				bs_desc.sample_mask = value_attr->ValueUInt();
 			}
-			else if (CT_HASH("depth_enable") == state_name_hash)
+			else if (CtHash("depth_enable") == state_name_hash)
 			{
 				dss_desc.depth_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("depth_write_mask") == state_name_hash)
+			else if (CtHash("depth_write_mask") == state_name_hash)
 			{
 				dss_desc.depth_write_mask = value_attr->ValueBool();
 			}
-			else if (CT_HASH("depth_func") == state_name_hash)
+			else if (CtHash("depth_func") == state_name_hash)
 			{
 				dss_desc.depth_func = CompareFunctionFromName(value_str);
 			}
-			else if (CT_HASH("front_stencil_enable") == state_name_hash)
+			else if (CtHash("front_stencil_enable") == state_name_hash)
 			{
 				dss_desc.front_stencil_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("front_stencil_func") == state_name_hash)
+			else if (CtHash("front_stencil_func") == state_name_hash)
 			{
 				dss_desc.front_stencil_func = CompareFunctionFromName(value_str);
 			}
-			else if (CT_HASH("front_stencil_ref") == state_name_hash)
+			else if (CtHash("front_stencil_ref") == state_name_hash)
 			{
 				dss_desc.front_stencil_ref = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("front_stencil_read_mask") == state_name_hash)
+			else if (CtHash("front_stencil_read_mask") == state_name_hash)
 			{
 				dss_desc.front_stencil_read_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("front_stencil_write_mask") == state_name_hash)
+			else if (CtHash("front_stencil_write_mask") == state_name_hash)
 			{
 				dss_desc.front_stencil_write_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("front_stencil_fail") == state_name_hash)
+			else if (CtHash("front_stencil_fail") == state_name_hash)
 			{
 				dss_desc.front_stencil_fail = StencilOperationFromName(value_str);
 			}
-			else if (CT_HASH("front_stencil_depth_fail") == state_name_hash)
+			else if (CtHash("front_stencil_depth_fail") == state_name_hash)
 			{
 				dss_desc.front_stencil_depth_fail = StencilOperationFromName(value_str);
 			}
-			else if (CT_HASH("front_stencil_pass") == state_name_hash)
+			else if (CtHash("front_stencil_pass") == state_name_hash)
 			{
 				dss_desc.front_stencil_pass = StencilOperationFromName(value_str);
 			}
-			else if (CT_HASH("back_stencil_enable") == state_name_hash)
+			else if (CtHash("back_stencil_enable") == state_name_hash)
 			{
 				dss_desc.back_stencil_enable = value_attr->ValueBool();
 			}
-			else if (CT_HASH("back_stencil_func") == state_name_hash)
+			else if (CtHash("back_stencil_func") == state_name_hash)
 			{
 				dss_desc.back_stencil_func = CompareFunctionFromName(value_str);
 			}
-			else if (CT_HASH("back_stencil_ref") == state_name_hash)
+			else if (CtHash("back_stencil_ref") == state_name_hash)
 			{
 				dss_desc.back_stencil_ref = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("back_stencil_read_mask") == state_name_hash)
+			else if (CtHash("back_stencil_read_mask") == state_name_hash)
 			{
 				dss_desc.back_stencil_read_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("back_stencil_write_mask") == state_name_hash)
+			else if (CtHash("back_stencil_write_mask") == state_name_hash)
 			{
 				dss_desc.back_stencil_write_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
-			else if (CT_HASH("back_stencil_fail") == state_name_hash)
+			else if (CtHash("back_stencil_fail") == state_name_hash)
 			{
 				dss_desc.back_stencil_fail = StencilOperationFromName(value_str);
 			}
-			else if (CT_HASH("back_stencil_depth_fail") == state_name_hash)
+			else if (CtHash("back_stencil_depth_fail") == state_name_hash)
 			{
 				dss_desc.back_stencil_depth_fail = StencilOperationFromName(value_str);
 			}
-			else if (CT_HASH("back_stencil_pass") == state_name_hash)
+			else if (CtHash("back_stencil_pass") == state_name_hash)
 			{
 				dss_desc.back_stencil_pass = StencilOperationFromName(value_str);
 			}
-			else if ((CT_HASH("vertex_shader") == state_name_hash) || (CT_HASH("pixel_shader") == state_name_hash)
-				|| (CT_HASH("geometry_shader") == state_name_hash) || (CT_HASH("compute_shader") == state_name_hash)
-				|| (CT_HASH("hull_shader") == state_name_hash) || (CT_HASH("domain_shader") == state_name_hash))
+			else if ((CtHash("vertex_shader") == state_name_hash) || (CtHash("pixel_shader") == state_name_hash)
+				|| (CtHash("geometry_shader") == state_name_hash) || (CtHash("compute_shader") == state_name_hash)
+				|| (CtHash("hull_shader") == state_name_hash) || (CtHash("domain_shader") == state_name_hash))
 			{
 				ShaderStage stage;
-				if (CT_HASH("vertex_shader") == state_name_hash)
+				if (CtHash("vertex_shader") == state_name_hash)
 				{
 					stage = ShaderStage::Vertex;
 				}
-				else if (CT_HASH("pixel_shader") == state_name_hash)
+				else if (CtHash("pixel_shader") == state_name_hash)
 				{
 					stage = ShaderStage::Pixel;
 				}
-				else if (CT_HASH("geometry_shader") == state_name_hash)
+				else if (CtHash("geometry_shader") == state_name_hash)
 				{
 					stage = ShaderStage::Geometry;
 				}
-				else if (CT_HASH("compute_shader") == state_name_hash)
+				else if (CtHash("compute_shader") == state_name_hash)
 				{
 					stage = ShaderStage::Compute;
 				}
-				else if (CT_HASH("hull_shader") == state_name_hash)
+				else if (CtHash("hull_shader") == state_name_hash)
 				{
 					stage = ShaderStage::Hull;
 				}
 				else
 				{
-					BOOST_ASSERT(CT_HASH("domain_shader") == state_name_hash);
+					BOOST_ASSERT(CtHash("domain_shader") == state_name_hash);
 					stage = ShaderStage::Domain;
 				}
 
@@ -6426,15 +6425,15 @@ namespace KlayGE
 								decl.usage_index = 0;
 							}
 
-							if ((CT_HASH("POSITION") == usage_str_hash) || (CT_HASH("SV_Position") == usage_str_hash))
+							if ((CtHash("POSITION") == usage_str_hash) || (CtHash("SV_Position") == usage_str_hash))
 							{
 								decl.usage = VEU_Position;
 							}
-							else if (CT_HASH("NORMAL") == usage_str_hash)
+							else if (CtHash("NORMAL") == usage_str_hash)
 							{
 								decl.usage = VEU_Normal;
 							}
-							else if (CT_HASH("COLOR") == usage_str_hash)
+							else if (CtHash("COLOR") == usage_str_hash)
 							{
 								if (0 == decl.usage_index)
 								{
@@ -6445,23 +6444,23 @@ namespace KlayGE
 									decl.usage = VEU_Specular;
 								}
 							}
-							else if (CT_HASH("BLENDWEIGHT") == usage_str_hash)
+							else if (CtHash("BLENDWEIGHT") == usage_str_hash)
 							{
 								decl.usage = VEU_BlendWeight;
 							}
-							else if (CT_HASH("BLENDINDICES") == usage_str_hash)
+							else if (CtHash("BLENDINDICES") == usage_str_hash)
 							{
 								decl.usage = VEU_BlendIndex;
 							}
-							else if (CT_HASH("TEXCOORD") == usage_str_hash)
+							else if (CtHash("TEXCOORD") == usage_str_hash)
 							{
 								decl.usage = VEU_TextureCoord;
 							}
-							else if (CT_HASH("TANGENT") == usage_str_hash)
+							else if (CtHash("TANGENT") == usage_str_hash)
 							{
 								decl.usage = VEU_Tangent;
 							}
-							else if (CT_HASH("BINORMAL") == usage_str_hash)
+							else if (CtHash("BINORMAL") == usage_str_hash)
 							{
 								decl.usage = VEU_Binormal;
 							}
@@ -7314,29 +7313,29 @@ namespace KlayGE
 		if (XMLAttribute const* attr = node.Attrib("type"))
 		{
 			size_t const type_str_hash = HashValue(attr->ValueString());
-			if (CT_HASH("vertex_shader") == type_str_hash)
+			if (CtHash("vertex_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Vertex;
 			}
-			else if (CT_HASH("pixel_shader") == type_str_hash)
+			else if (CtHash("pixel_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Pixel;
 			}
-			else if (CT_HASH("geometry_shader") == type_str_hash)
+			else if (CtHash("geometry_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Geometry;
 			}
-			else if (CT_HASH("compute_shader") == type_str_hash)
+			else if (CtHash("compute_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Compute;
 			}
-			else if (CT_HASH("hull_shader") == type_str_hash)
+			else if (CtHash("hull_shader") == type_str_hash)
 			{
 				stage_ = ShaderStage::Hull;
 			}
 			else
 			{
-				BOOST_ASSERT(CT_HASH("domain_shader") == type_str_hash);
+				BOOST_ASSERT(CtHash("domain_shader") == type_str_hash);
 				stage_ = ShaderStage::Domain;
 			}
 		}

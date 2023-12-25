@@ -153,10 +153,10 @@ namespace KlayGE
 			{
 				static size_t constexpr feature_level_name_hashes[] =
 				{
-					CT_HASH("12_1"),
-					CT_HASH("12_0"),
-					CT_HASH("11_1"),
-					CT_HASH("11_0")
+					CtHash("12_1"),
+					CtHash("12_0"),
+					CtHash("11_1"),
+					CtHash("11_0")
 				};
 				static_assert(std::size(feature_level_name_hashes) == std::size(all_feature_levels));
 
@@ -172,9 +172,9 @@ namespace KlayGE
 				}
 				for (size_t index = 0; index < settings.options.size(); ++ index)
 				{
-					size_t const opt_name_hash = RT_HASH(settings.options[index].first.c_str());
-					size_t const opt_val_hash = RT_HASH(settings.options[index].second.c_str());
-					if (CT_HASH("level") == opt_name_hash)
+					size_t const opt_name_hash = RtHash(settings.options[index].first.c_str());
+					size_t const opt_val_hash = RtHash(settings.options[index].second.c_str());
+					if (CtHash("level") == opt_name_hash)
 					{
 						for (uint32_t i = feature_level_start_index; i < std::size(feature_level_name_hashes); ++ i)
 						{

@@ -89,8 +89,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("RenderModelLoadingDesc");
-			return type;
+			return CtHash("RenderModelLoadingDesc");
 		}
 
 		bool StateLess() const override

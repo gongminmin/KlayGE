@@ -183,7 +183,7 @@ namespace KlayGE
 			local_path_ = exe_path_;
 #endif
 
-			paths_.emplace_back(PathInfo{CT_HASH(""), 0U, std::filesystem::path(), PackagePtr()});
+			paths_.emplace_back(PathInfo{CtHash(""), 0U, std::filesystem::path(), PackagePtr()});
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 			this->AddPath("Assets/");

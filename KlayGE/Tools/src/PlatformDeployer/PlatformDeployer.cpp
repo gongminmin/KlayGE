@@ -79,29 +79,29 @@ TexMetadata DefaultTextureMetadata(size_t res_type_hash, RenderDeviceCaps const 
 	TexMetadata default_metadata;
 	switch (res_type_hash)
 	{
-	case CT_HASH("albedo"):
-	case CT_HASH("emissive"):
-		default_metadata.Slot((res_type_hash == CT_HASH("albedo")) ? RenderMaterial::TS_Albedo : RenderMaterial::TS_Emissive);
+	case CtHash("albedo"):
+	case CtHash("emissive"):
+		default_metadata.Slot((res_type_hash == CtHash("albedo")) ? RenderMaterial::TS_Albedo : RenderMaterial::TS_Emissive);
 		default_metadata.ForceSRGB(true);
 		break;
 
-	case CT_HASH("metalness_glossiness"):
+	case CtHash("metalness_glossiness"):
 		default_metadata.Slot(RenderMaterial::TS_MetalnessGlossiness);
 		default_metadata.ForceSRGB(false);
 		break;
 
-	case CT_HASH("normal"):
-	case CT_HASH("bump"):
+	case CtHash("normal"):
+	case CtHash("bump"):
 		default_metadata.Slot(RenderMaterial::TS_Normal);
 		default_metadata.ForceSRGB(false);
-		if (res_type_hash == CT_HASH("bump"))
+		if (res_type_hash == CtHash("bump"))
 		{
 			default_metadata.BumpToNormal(true);
 			default_metadata.BumpScale(1.0f);
 		}
 		break;
 
-	case CT_HASH("height"):
+	case CtHash("height"):
 		default_metadata.Slot(RenderMaterial::TS_Height);
 		default_metadata.ForceSRGB(false);
 		break;
@@ -148,13 +148,13 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 {
 	size_t const res_type_hash = HashValue(std::move(res_type));
 
-	if ((CT_HASH("albedo") == res_type_hash)
-		|| (CT_HASH("emissive") == res_type_hash)
-		|| (CT_HASH("glossiness") == res_type_hash)
-		|| (CT_HASH("metalness") == res_type_hash)
-		|| (CT_HASH("normal") == res_type_hash)
-		|| (CT_HASH("bump") == res_type_hash)
-		|| (CT_HASH("height") == res_type_hash))
+	if ((CtHash("albedo") == res_type_hash)
+		|| (CtHash("emissive") == res_type_hash)
+		|| (CtHash("glossiness") == res_type_hash)
+		|| (CtHash("metalness") == res_type_hash)
+		|| (CtHash("normal") == res_type_hash)
+		|| (CtHash("bump") == res_type_hash)
+		|| (CtHash("height") == res_type_hash))
 	{
 		TexMetadata const default_metadata = DefaultTextureMetadata(res_type_hash, caps);
 
@@ -202,7 +202,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 			}
 		}
 	}
-	else if (CT_HASH("model") == res_type_hash)
+	else if (CtHash("model") == res_type_hash)
 	{
 		MeshMetadata const default_metadata;
 
@@ -228,7 +228,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 	{
 		std::ofstream ofs("convert.bat");
 
-		if (CT_HASH("cubemap") == res_type_hash)
+		if (CtHash("cubemap") == res_type_hash)
 		{
 			std::string y_fmt;
 			std::string c_fmt;
@@ -265,7 +265,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 				ofs << "@echo on" << std::endl << std::endl;
 			}
 		}
-		else if (CT_HASH("effect") == res_type_hash)
+		else if (CtHash("effect") == res_type_hash)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{

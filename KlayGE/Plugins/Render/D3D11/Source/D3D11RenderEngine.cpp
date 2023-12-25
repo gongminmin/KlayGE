@@ -731,19 +731,19 @@ namespace KlayGE
 	void D3D11RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
 		size_t const name_hash = HashValue(std::move(name));
-		if (CT_HASH("D3D_DEVICE") == name_hash)
+		if (CtHash("D3D_DEVICE") == name_hash)
 		{
 			*static_cast<ID3D11Device1**>(value) = d3d_device_1_.get();
 		}
-		else if (CT_HASH("D3D_IMM_CONTEXT") == name_hash)
+		else if (CtHash("D3D_IMM_CONTEXT") == name_hash)
 		{
 			*static_cast<ID3D11DeviceContext1**>(value) = d3d_imm_ctx_1_.get();
 		}
-		else if (CT_HASH("FEATURE_LEVEL") == name_hash)
+		else if (CtHash("FEATURE_LEVEL") == name_hash)
 		{
 			*static_cast<D3D_FEATURE_LEVEL*>(value) = d3d_feature_level_;
 		}
-		else if (CT_HASH("DXGI_FACTORY") == name_hash)
+		else if (CtHash("DXGI_FACTORY") == name_hash)
 		{
 			*static_cast<IDXGIFactory2**>(value) = gi_factory_2_.get();
 		}

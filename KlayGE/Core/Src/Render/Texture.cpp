@@ -1116,8 +1116,7 @@ namespace
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("TextureLoadingDesc");
-			return type;
+			return CtHash("TextureLoadingDesc");
 		}
 
 		bool StateLess() const override

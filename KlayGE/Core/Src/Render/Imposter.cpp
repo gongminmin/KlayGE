@@ -69,8 +69,7 @@ namespace KlayGE
 
 		uint64_t Type() const override
 		{
-			static uint64_t const type = CT_HASH("ImposterLoadingDesc");
-			return type;
+			return CtHash("ImposterLoadingDesc");
 		}
 
 		bool StateLess() const override

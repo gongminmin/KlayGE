@@ -389,34 +389,34 @@ namespace KlayGE
 					keep_screen_on = attr->ValueBool();
 				}
 
-				size_t const color_fmt_str_hash = RT_HASH(color_fmt_str.c_str());
-				if (CT_HASH("ARGB8") == color_fmt_str_hash)
+				size_t const color_fmt_str_hash = RtHash(color_fmt_str.c_str());
+				if (CtHash("ARGB8") == color_fmt_str_hash)
 				{
 					color_fmt = EF_ARGB8;
 				}
-				else if (CT_HASH("ABGR8") == color_fmt_str_hash)
+				else if (CtHash("ABGR8") == color_fmt_str_hash)
 				{
 					color_fmt = EF_ABGR8;
 				}
-				else if (CT_HASH("A2BGR10") == color_fmt_str_hash)
+				else if (CtHash("A2BGR10") == color_fmt_str_hash)
 				{
 					color_fmt = EF_A2BGR10;
 				}
-				else if (CT_HASH("ABGR16F") == color_fmt_str_hash)
+				else if (CtHash("ABGR16F") == color_fmt_str_hash)
 				{
 					color_fmt = EF_ABGR16F;
 				}
 
-				size_t const depth_stencil_fmt_str_hash = RT_HASH(depth_stencil_fmt_str.c_str());
-				if (CT_HASH("D16") == depth_stencil_fmt_str_hash)
+				size_t const depth_stencil_fmt_str_hash = RtHash(depth_stencil_fmt_str.c_str());
+				if (CtHash("D16") == depth_stencil_fmt_str_hash)
 				{
 					depth_stencil_fmt = EF_D16;
 				}
-				else if (CT_HASH("D24S8") == depth_stencil_fmt_str_hash)
+				else if (CtHash("D24S8") == depth_stencil_fmt_str_hash)
 				{
 					depth_stencil_fmt = EF_D24S8;
 				}
-				else if (CT_HASH("D32F") == depth_stencil_fmt_str_hash)
+				else if (CtHash("D32F") == depth_stencil_fmt_str_hash)
 				{
 					depth_stencil_fmt = EF_D32F;
 				}
@@ -477,43 +477,43 @@ namespace KlayGE
 				if (XMLAttribute const* attr = stereo_node->Attrib("method"))
 				{
 					size_t const method_str_hash = HashValue(attr->ValueString());
-					if (CT_HASH("none") == method_str_hash)
+					if (CtHash("none") == method_str_hash)
 					{
 						stereo_method = STM_None;
 					}
-					else if (CT_HASH("red_cyan") == method_str_hash)
+					else if (CtHash("red_cyan") == method_str_hash)
 					{
 						stereo_method = STM_ColorAnaglyph_RedCyan;
 					}
-					else if (CT_HASH("yellow_blue") == method_str_hash)
+					else if (CtHash("yellow_blue") == method_str_hash)
 					{
 						stereo_method = STM_ColorAnaglyph_YellowBlue;
 					}
-					else if (CT_HASH("green_red") == method_str_hash)
+					else if (CtHash("green_red") == method_str_hash)
 					{
 						stereo_method = STM_ColorAnaglyph_GreenRed;
 					}
-					else if (CT_HASH("lcd_shutter") == method_str_hash)
+					else if (CtHash("lcd_shutter") == method_str_hash)
 					{
 						stereo_method = STM_LCDShutter;
 					}
-					else if (CT_HASH("hor_interlacing") == method_str_hash)
+					else if (CtHash("hor_interlacing") == method_str_hash)
 					{
 						stereo_method = STM_HorizontalInterlacing;
 					}
-					else if (CT_HASH("ver_interlacing") == method_str_hash)
+					else if (CtHash("ver_interlacing") == method_str_hash)
 					{
 						stereo_method = STM_VerticalInterlacing;
 					}
-					else if (CT_HASH("horizontal") == method_str_hash)
+					else if (CtHash("horizontal") == method_str_hash)
 					{
 						stereo_method = STM_Horizontal;
 					}
-					else if (CT_HASH("vertical") == method_str_hash)
+					else if (CtHash("vertical") == method_str_hash)
 					{
 						stereo_method = STM_Vertical;
 					}
-					else if (CT_HASH("oculus_vr") == method_str_hash)
+					else if (CtHash("oculus_vr") == method_str_hash)
 					{
 						stereo_method = STM_OculusVR;
 					}
@@ -535,7 +535,7 @@ namespace KlayGE
 				if (XMLAttribute const* attr = output_node->Attrib("method"))
 				{
 					size_t const method_str_hash = HashValue(attr->ValueString());
-					if (CT_HASH("hdr10") == method_str_hash)
+					if (CtHash("hdr10") == method_str_hash)
 					{
 						display_output_method = DOM_HDR10;
 					}

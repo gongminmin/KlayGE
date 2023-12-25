@@ -796,23 +796,23 @@ namespace KlayGE
 				std::string semantic = dxbc2glsl.InputParam(i).semantic_name;
 				uint32_t semantic_index = dxbc2glsl.InputParam(i).semantic_index;
 				std::string glsl_param_name = semantic;
-				size_t const semantic_hash = RT_HASH(semantic.c_str());
+				size_t const semantic_hash = RtHash(semantic.c_str());
 
-				if ((CT_HASH("SV_VertexID") != semantic_hash) && (CT_HASH("SV_InstanceID") != semantic_hash))
+				if ((CtHash("SV_VertexID") != semantic_hash) && (CtHash("SV_InstanceID") != semantic_hash))
 				{
 					VertexElementUsage usage = VEU_Position;
 					uint8_t usage_index = 0;
-					if (CT_HASH("POSITION") == semantic_hash)
+					if (CtHash("POSITION") == semantic_hash)
 					{
 						usage = VEU_Position;
 						glsl_param_name = "POSITION0";
 					}
-					else if (CT_HASH("NORMAL") == semantic_hash)
+					else if (CtHash("NORMAL") == semantic_hash)
 					{
 						usage = VEU_Normal;
 						glsl_param_name = "NORMAL0";
 					}
-					else if (CT_HASH("COLOR") == semantic_hash)
+					else if (CtHash("COLOR") == semantic_hash)
 					{
 						if (0 == semantic_index)
 						{
@@ -825,12 +825,12 @@ namespace KlayGE
 							glsl_param_name = "COLOR1";
 						}
 					}
-					else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
+					else if (CtHash("BLENDWEIGHT") == semantic_hash)
 					{
 						usage = VEU_BlendWeight;
 						glsl_param_name = "BLENDWEIGHT0";
 					}
-					else if (CT_HASH("BLENDINDICES") == semantic_hash)
+					else if (CtHash("BLENDINDICES") == semantic_hash)
 					{
 						usage = VEU_BlendIndex;
 						glsl_param_name = "BLENDINDICES0";
@@ -841,12 +841,12 @@ namespace KlayGE
 						usage_index = static_cast<uint8_t>(semantic_index);
 						glsl_param_name = std::format("TEXCOORD{}", semantic_index);
 					}
-					else if (CT_HASH("TANGENT") == semantic_hash)
+					else if (CtHash("TANGENT") == semantic_hash)
 					{
 						usage = VEU_Tangent;
 						glsl_param_name = "TANGENT0";
 					}
-					else if (CT_HASH("BINORMAL") == semantic_hash)
+					else if (CtHash("BINORMAL") == semantic_hash)
 					{
 						usage = VEU_Binormal;
 						glsl_param_name = "BINORMAL0";

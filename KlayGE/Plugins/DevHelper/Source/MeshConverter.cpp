@@ -2157,15 +2157,15 @@ namespace
 				if (XMLAttribute const* attr = detail_node->Attrib("mode"))
 				{
 					size_t const mode_hash = HashValue(attr->ValueString());
-					if (CT_HASH("Parallax Occlusion Mapping") == mode_hash)
+					if (CtHash("Parallax Occlusion Mapping") == mode_hash)
 					{
 						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::ParallaxOcclusionMapping);
 					}
-					else if (CT_HASH("Flat Tessellation") == mode_hash)
+					else if (CtHash("Flat Tessellation") == mode_hash)
 					{
 						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::FlatTessellation);
 					}
-					else if (CT_HASH("Smooth Tessellation") == mode_hash)
+					else if (CtHash("Smooth Tessellation") == mode_hash)
 					{
 						mtl.DetailMode(RenderMaterial::SurfaceDetailMode::SmoothTessellation);
 					}
@@ -2279,27 +2279,27 @@ namespace
 
 					std::string const name(tex_node->Attrib("name")->ValueString());
 
-					if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
-						|| (CT_HASH("Diffuse Color Map") == type_hash)
-						|| (CT_HASH("Albedo") == type_hash))
+					if ((CtHash("Color") == type_hash) || (CtHash("Diffuse Color") == type_hash)
+						|| (CtHash("Diffuse Color Map") == type_hash)
+						|| (CtHash("Albedo") == type_hash))
 					{
 						mtl.TextureName(RenderMaterial::TS_Albedo, name);
 					}
-					else if ((CT_HASH("MetalnessGlossiness") == type_hash) || (CT_HASH("Metalness") == type_hash) ||
-							 (CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
+					else if ((CtHash("MetalnessGlossiness") == type_hash) || (CtHash("Metalness") == type_hash) ||
+							 (CtHash("Glossiness") == type_hash) || (CtHash("Reflection Glossiness Map") == type_hash))
 					{
 						mtl.TextureName(RenderMaterial::TS_MetalnessGlossiness, name);
 					}
-					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
+					else if ((CtHash("Self-Illumination") == type_hash) || (CtHash("Emissive") == type_hash))
 					{
 						mtl.TextureName(RenderMaterial::TS_Emissive, name);
 					}
-					else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
+					else if ((CtHash("Normal") == type_hash) || (CtHash("Normal Map") == type_hash))
 					{
 						mtl.TextureName(RenderMaterial::TS_Normal, name);
 					}
-					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
-						|| (CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
+					else if ((CtHash("Bump") == type_hash) || (CtHash("Bump Map") == type_hash)
+						|| (CtHash("Height") == type_hash) || (CtHash("Height Map") == type_hash))
 					{
 						mtl.TextureName(RenderMaterial::TS_Height, name);
 					}

@@ -9,8 +9,8 @@ using namespace KlayGE;
 
 TEST(CTHashTest, Basic)
 {
-	EXPECT_EQ(CT_HASH("ABCD"), RT_HASH("ABCD"));
-	EXPECT_EQ(CT_HASH("KlayGE"), RT_HASH("KlayGE"));
-	EXPECT_EQ(CT_HASH("Test"), RT_HASH("Test"));
-	EXPECT_EQ(CT_HASH("min_linear_mag_point_mip_linear"), RT_HASH("min_linear_mag_point_mip_linear"));
+	EXPECT_EQ(CtHash("ABCD"), RtHash("ABCD"));
+	EXPECT_EQ(CtHash("KlayGE"), RtHash("KlayGE"));
+	EXPECT_EQ(CtHash("Test"), RtHash("Test"));
+	EXPECT_EQ(CtHash("min_linear_mag_point_mip_linear"), RtHash("min_linear_mag_point_mip_linear"));
 }

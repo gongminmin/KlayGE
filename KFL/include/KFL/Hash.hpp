@@ -40,37 +40,27 @@
 
 namespace KlayGE
 {
-#define PRIME_NUM 0x9e3779b9
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(disable: 4307) // The hash here could cause integral constant overflow
-#endif
-
-	size_t constexpr CTHashImpl(char const* str, size_t seed) noexcept
+	constexpr size_t HashCombineImpl(size_t value, size_t seed) noexcept
 	{
-		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (static_cast<size_t>(*str) + PRIME_NUM + (seed << 6) + (seed >> 2)));
+		size_t constexpr PRIME_NUM = 0x9e3779b9U;
+		return seed ^ (value + PRIME_NUM + (seed << 6) + (seed >> 2));
 	}
 
-	#define CT_HASH(x) (CTHashImpl(x, 0))
-
-	template <typename SizeT>
-	inline void HashCombineImpl(SizeT& seed, SizeT value) noexcept
+	constexpr size_t CtHash(char const* str, size_t seed = 0) noexcept
 	{
-		seed ^= value + PRIME_NUM + (seed << 6) + (seed >> 2);
+		return 0 == *str ? seed : CtHash(str + 1, HashCombineImpl(*str, seed));
 	}
 
-	inline size_t RT_HASH(char const* str) noexcept
+	inline size_t RtHash(char const* str) noexcept
 	{
 		size_t seed = 0;
 		while (*str != 0)
 		{
-			HashCombineImpl(seed, static_cast<size_t>(*str));
+			seed = HashCombineImpl(*str, seed);
 			++ str;
 		}
 		return seed;
 	}
-
-#undef PRIME_NUM
 
 	template <typename T>
 	inline size_t HashValue(T v) noexcept
@@ -87,7 +77,7 @@ namespace KlayGE
 	template <typename T>
 	inline void HashCombine(size_t& seed, T const& v) noexcept
 	{
-		return HashCombineImpl(seed, HashValue(v));
+		seed = HashCombineImpl(HashValue(v), seed);
 	}
 
 	template <typename T>
