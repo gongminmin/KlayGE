@@ -33,14 +33,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API LensFlareRenderableComponent : public RenderableComponent
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winconsistent-missing-override"
-#endif
 		NANO_RTTI_REGISTER_RUNTIME_CLASS(RenderableComponent)
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
-#endif
 
 		LensFlareRenderableComponent();
 	};

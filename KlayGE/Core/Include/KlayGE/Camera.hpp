@@ -37,14 +37,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API Camera final : public SceneComponent, public std::enable_shared_from_this<Camera>
 	{
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winconsistent-missing-override"
-#endif
 		NANO_RTTI_REGISTER_RUNTIME_CLASS(SceneComponent)
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
-#endif
 
 		Camera();
 
