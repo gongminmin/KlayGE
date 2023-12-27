@@ -562,7 +562,7 @@ target_precompile_headers(KlayGE_Core
 
 target_link_libraries(KlayGE_Core
 	PUBLIC
-		Boost::type_index
+		NanoRtti
 		KFL
 	PRIVATE
 		kfont

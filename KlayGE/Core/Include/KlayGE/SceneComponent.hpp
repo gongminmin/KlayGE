@@ -35,8 +35,7 @@
 
 #include <memory>
 
-#include <boost/type_index.hpp>
-#include <boost/type_index/runtime_cast.hpp>
+#include <NanoRtti/NanoRtti.hpp>
 
 #include <KFL/Noncopyable.hpp>
 #include <KlayGE/Signal.hpp>
@@ -52,14 +51,7 @@ namespace KlayGE
 		KLAYGE_NONCOPYABLE(SceneComponent);
 
 	public:
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winconsistent-missing-override"
-#endif
-		BOOST_TYPE_INDEX_REGISTER_RUNTIME_CLASS(BOOST_TYPE_INDEX_NO_BASE_CLASS)
-#if defined(KLAYGE_COMPILER_CLANGCL) || defined(KLAYGE_COMPILER_CLANG)
-#pragma clang diagnostic pop
-#endif
+		NANO_RTTI_REGISTER_RUNTIME_CLASS()
 
 		SceneComponent();
 		virtual ~SceneComponent() noexcept;
@@ -69,7 +61,7 @@ namespace KlayGE
 		template <typename T>
 		bool IsOfType() const
 		{
-			return (boost::typeindex::runtime_cast<T const*>(this) != nullptr);
+			return (NanoRtti::DynCast<T const*>(this) != nullptr);
 		}
 
 		virtual void BindSceneNode(SceneNode* node);

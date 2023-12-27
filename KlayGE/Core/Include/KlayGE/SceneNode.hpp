@@ -106,7 +106,7 @@ namespace KlayGE
 		{
 			for (auto const& component : components_)
 			{
-				T* casted = boost::typeindex::runtime_cast<T*>(component.get());
+				T* casted = NanoRtti::DynCast<T*>(component.get());
 				if (casted != nullptr)
 				{
 					return casted;
@@ -119,7 +119,7 @@ namespace KlayGE
 		{
 			for (auto const& component : components_)
 			{
-				T const* casted = boost::typeindex::runtime_cast<T*>(component.get());
+				T const* casted = NanoRtti::DynCast<T*>(component.get());
 				if (casted != nullptr)
 				{
 					return casted;
@@ -139,7 +139,7 @@ namespace KlayGE
 		void ForEachComponentOfType(std::function<void(T&)> const & callback) const
 		{
 			this->ForEachComponent([&](SceneComponent& component) {
-				T* casted = boost::typeindex::runtime_cast<T*>(&component);
+				T* casted = NanoRtti::DynCast<T*>(&component);
 				if (casted != nullptr)
 				{
 					callback(*casted);

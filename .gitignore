@@ -95,6 +95,7 @@ External/googletest
 External/GSL
 External/libogg
 External/libvorbis
+External/NanoRtti
 External/nanosvg
 External/openal-soft
 External/Python
