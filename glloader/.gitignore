@@ -1,0 +1,12 @@
+doc/html/
+include/glloader/glloader_egl.h
+include/glloader/glloader_gl.h
+include/glloader/glloader_gles.h
+include/glloader/glloader_glx.h
+include/glloader/glloader_wgl.h
+src/*.rule
+src/glloader_egl.c
+src/glloader_gl.c
+src/glloader_gles.c
+src/glloader_glx.c
+src/glloader_wgl.c
