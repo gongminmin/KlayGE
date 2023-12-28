@@ -675,8 +675,7 @@ namespace KlayGE
 
 				for (auto const& component : components_)
 				{
-					auto const* renderable_comp = NanoRtti::DynCast<RenderableComponent*>(component.get());
-					if (renderable_comp != nullptr)
+					if (auto const* renderable_comp = NanoRtti::DynCast<RenderableComponent const*>(component.get()))
 					{
 						*pos_aabb_os_ |= renderable_comp->BoundRenderable().PosBound();
 					}

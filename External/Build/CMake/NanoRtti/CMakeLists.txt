@@ -1,6 +1,6 @@
 SET(nano_rtti_project_dir "${EXTERNAL_PROJECT_DIR}/NanoRtti")
 
-UpdateExternalLib("NanoRtti" "https://github.com/gongminmin/NanoRtti.git" "0372314282fbce688d19f7f87d15c3e311864b83")
+UpdateExternalLib("NanoRtti" "https://github.com/gongminmin/NanoRtti.git" "de403e1698bf5e958269facc04a6e0f88053bf36")
 
 set(NANO_RTTI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 

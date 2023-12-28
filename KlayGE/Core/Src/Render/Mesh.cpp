@@ -511,7 +511,7 @@ namespace KlayGE
 					auto& component = *node.ComponentByIndex(i);
 					if (component.IsOfType<RenderableComponent>())
 					{
-						auto* renderable = &NanoRtti::DynCast<RenderableComponent*>(&component)->BoundRenderable();
+						auto const* renderable = &NanoRtti::DynCast<RenderableComponent const*>(&component)->BoundRenderable();
 						for (uint32_t mesh_index = 0; mesh_index < source.NumMeshes(); ++mesh_index)
 						{
 							if (renderable == source.Mesh(mesh_index).get())
@@ -1899,7 +1899,7 @@ namespace
 				[&mesh_indices, &joint_index, &renderable_indices, &joint_indices](SceneComponent& component) {
 					if (component.IsOfType<RenderableComponent>())
 					{
-						RenderableComponent const& renderable_comp = *NanoRtti::DynCast<RenderableComponent const*>(&component);
+						auto const& renderable_comp = *NanoRtti::DynCast<RenderableComponent const*>(&component);
 						Renderable const* renderable = &renderable_comp.BoundRenderable();
 						BOOST_ASSERT(renderable_indices.find(renderable) != renderable_indices.end());
 
@@ -1909,7 +1909,7 @@ namespace
 					}
 					else if (component.IsOfType<JointComponent>())
 					{
-						JointComponent const* joint_comp = NanoRtti::DynCast<JointComponent const*>(&component);
+						auto const* joint_comp = NanoRtti::DynCast<JointComponent const*>(&component);
 						BOOST_ASSERT(joint_indices.find(joint_comp) != joint_indices.end());
 
 						int16_t index = joint_indices[joint_comp];
