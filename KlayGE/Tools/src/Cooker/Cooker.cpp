@@ -1,5 +1,5 @@
 /**
- * @file PlatformDeployer.cpp
+ * @file Cooker.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -143,7 +143,7 @@ MeshMetadata LoadMeshMetadata(std::string const & res_name, MeshMetadata const &
 	}
 }
 
-void Deploy(std::vector<std::string> const& res_names, std::string_view res_type, RenderDeviceCaps const& caps, std::string_view platform,
+void Cook(std::vector<std::string> const& res_names, std::string_view res_type, RenderDeviceCaps const& caps, std::string_view platform,
 	std::string_view dest_folder)
 {
 	size_t const res_type_hash = HashValue(std::move(res_type));
@@ -188,7 +188,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 				KFL_UNREACHABLE("Invalid texture slot");
 			}
 
-			std::cout << "Converting " << res_names[i] << " to " << real_res_type << std::endl;
+			std::cout << "Cooking " << res_names[i] << " to " << real_res_type << std::endl;
 
 			auto output_tex = tc.Load(metadata);
 			if (output_tex)
@@ -209,7 +209,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 		MeshConverter mc;
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+			std::cout << "Cooking " << res_names[i] << " to " << res_type << std::endl;
 
 			auto metadata = LoadMeshMetadata(res_names[i], default_metadata);
 			auto output_model = mc.Load(metadata);
@@ -251,7 +251,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+				std::cout << "Cooking " << res_names[i] << " to " << res_type << std::endl;
 
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
@@ -269,7 +269,7 @@ void Deploy(std::vector<std::string> const& res_names, std::string_view res_type
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				std::cout << "Converting " << res_names[i] << " to " << res_type << std::endl;
+				std::cout << "Cooking " << res_names[i] << " to " << res_type << std::endl;
 
 				ofs << "@echo Processing: " << res_names[i] << std::endl;
 
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 	std::string platform;
 	std::string dest_folder;
 
-	cxxopts::Options options("PlatformDeployer", "KlayGE PlatformDeployer");
+	cxxopts::Options options("Cooker", "KlayGE Cooker");
 	// clang-format off
 	options.add_options()
 		("H,help", "Produce help message.")
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
 	}
 	if (vm.count("version") > 0)
 	{
-		cout << "KlayGE PlatformDeployer, Version 2.0.0" << endl;
+		cout << "KlayGE Cooker, Version 2.0.0" << endl;
 		return 1;
 	}
 	if (vm.count("dest-folder") > 0)
@@ -510,7 +510,7 @@ int main(int argc, char* argv[])
 	}
 
 	PlatformDefinition platform_def(platform + ".plat");
-	Deploy(res_names, res_type, platform_def.device_caps, platform, dest_folder);
+	Cook(res_names, res_type, platform_def.device_caps, platform, dest_folder);
 
 	return 0;
 }

@@ -90,16 +90,16 @@ def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 	print("Deploying resources...")
 
 	import subprocess
-	pd_path = dst_bin_dir + "PlatformDeployer" + debug_suffix + exe_suffix
+	cooker_path = dst_bin_dir + "Cooker" + debug_suffix + exe_suffix
 	if build_info.is_windows:
-		pd_path = pd_path.replace("/", "\\")
+		cooker_path = cooker_path.replace("/", "\\")
 		platform = "d3d_11_0"
 	elif build_info.is_darwin:
 		platform = "gl_4_1"
 	else:
 		platform = "gl_4_6"
 
-	pd_list = (
+	cook_list = (
 		"media/Models/*.glb",
 		"Samples/media/AtmosphericScattering/*.glb",
 		"Samples/media/CascadedShadowMap/*.glb",
@@ -137,16 +137,16 @@ def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 	)
 
 	import glob
-	for pd_item in pd_list:
-		resource_path = dst_sample_dir + pd_item
+	for cook_item in cook_list:
+		resource_path = dst_sample_dir + cook_item
 		for file in glob.glob(resource_path):
-			subprocess.call([pd_path, "-P", platform, "-I", file])
+			subprocess.call([cooker_path, "-P", platform, "-I", file])
 			print("Removing %s..." % file)
 			os.remove(file)
 
 	for file in glob.glob(dst_bin_dir + lib_prefix + "KlayGE_DevHelper*" + dll_suffix):
 		os.remove(file)
-	os.remove(dst_bin_dir + "PlatformDeployer" + debug_suffix + exe_suffix)
+	os.remove(dst_bin_dir + "Cooker" + debug_suffix + exe_suffix)
 	for file in glob.glob(dst_bin_dir + lib_prefix + "ToolCommon*" + dll_suffix):
 		os.remove(file)
 	for file in glob.glob(dst_bin_dir + lib_prefix + "assimp*" + dll_suffix):

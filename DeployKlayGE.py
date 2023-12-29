@@ -131,7 +131,7 @@ def DeployKlayGE(target_dir, build_info, compiler_info, cfg):
 		CopyToDst(fname, "%sScript/" % bin_dst_dir);
 	for fname in glob.iglob("%sShow/%sKlayGE_Show*%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("%sPlatformDeployer%s%s" % (bin_src_dir, debug_suffix, exe_suffix)):
+	for fname in glob.iglob("%sCooker%s%s" % (bin_src_dir, debug_suffix, exe_suffix)):
 		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("%s%sToolCommon%s" % (bin_src_dir, lib_prefix, lib_suffix)):
 		CopyToDst(fname, bin_dst_dir);
