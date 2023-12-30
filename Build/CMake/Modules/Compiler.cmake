@@ -281,7 +281,7 @@ ELSE()
 
 	FOREACH(flag_var
 		CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
-		SET(${flag_var} "${${flag_var}} -W -Wall -Werror -fpic")
+		SET(${flag_var} "${${flag_var}} -Wall -Wextra -Werror -fpic")
 		IF(NOT (ANDROID OR IOS))
 			SET(${flag_var} "${${flag_var}} -march=core2 -msse2")
 		ENDIF()
@@ -404,7 +404,7 @@ IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
 		ENDIF()
 	ENDFUNCTION()
 ENDIF()
-	
+
 FUNCTION(CREATE_PROJECT_USERFILE PROJECTNAME TARGETNAME)
 	IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
 		CREATE_XCODE_USERFILE(${PROJECTNAME} ${TARGETNAME})
