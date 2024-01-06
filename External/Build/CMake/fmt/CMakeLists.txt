@@ -12,6 +12,5 @@ set(FMT_DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} CACHE STRING "" FORCE)
 add_subdirectory(${fmt_project_dir} "${CMAKE_CURRENT_BINARY_DIR}/fmt" EXCLUDE_FROM_ALL)
 
 set_target_properties(fmt PROPERTIES
-	OUTPUT_NAME fmt${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "External/fmt"
 )

@@ -15,7 +15,5 @@ target_include_directories(android_native_app_glue
 )
 
 SET_TARGET_PROPERTIES(android_native_app_glue PROPERTIES
-	PROJECT_LABEL android_native_app_glue
-	OUTPUT_NAME android_native_app_glue${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "External/android_native_app_glue"
 )

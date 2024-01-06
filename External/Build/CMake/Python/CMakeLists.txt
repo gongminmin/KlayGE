@@ -197,7 +197,6 @@ target_include_directories(libpython-static
 )
 
 SET_TARGET_PROPERTIES(libpython-static PROPERTIES
-	OUTPUT_NAME python${KLAYGE_OUTPUT_SUFFIX}
 	FOLDER "External/Python"
 )
 
