@@ -186,7 +186,7 @@ stages:
           path: KlayGE/Tutorials/media
         displayName: Cache KlayGE/Tutorials/media
 
-      - script: |
+      - bash: |
           git config --global user.email "dummy@example.com"
           git config --global user.name "Dummy Name"
           # Reset the repo to restore changes in Externals
