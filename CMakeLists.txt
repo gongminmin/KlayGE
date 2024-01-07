@@ -39,7 +39,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ${KLAYGE_BIN_DIR})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_subdirectory(${KLAYGE_ROOT_DIR}/External/Build/CMake ${CMAKE_CURRENT_BINARY_DIR}/External EXCLUDE_FROM_ALL)
+add_subdirectory(Externals EXCLUDE_FROM_ALL)
 if(NOT KLAYGE_PLATFORM_WINDOWS_STORE)
 	add_subdirectory(glloader)
 endif()

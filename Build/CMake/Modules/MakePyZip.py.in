@@ -6,7 +6,7 @@ except Exception:
 	pass
 out = zipfile.ZipFile("@MEDIA_DIR@@EXE_NAME@Py.zip", 'w')#, compression = zipfile.ZIP_DEFLATED)
 
-prefix = "@KLAYGE_ROOT_DIR@/External/Python/Lib/"
+prefix = "@KLAYGE_ROOT_DIR@/Externals/Python/cpython/Lib/"
 file_list = ("_collections_abc",
 	"_weakrefset",
 	"abc",

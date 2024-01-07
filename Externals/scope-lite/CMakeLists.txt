@@ -1,0 +1,8 @@
+UpdateExternalLib("scope-lite" "https://github.com/martinmoene/scope-lite.git" "9adce0d39e0e0d3f3d370a523cb33a057af8c91c")
+
+set(SCOPE_LITE_OPT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SCOPE_LITE_OPT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SCOPE_LITE_OPT_SELECT_NONSTD ON CACHE BOOL "" FORCE)
+set(SCOPE_LITE_OPT_SELECT_STD OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(scope-lite)

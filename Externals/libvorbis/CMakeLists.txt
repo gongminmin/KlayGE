@@ -1,0 +1,16 @@
+UpdateExternalLib("libvorbis" "https://github.com/xiph/vorbis.git" "3c177d011684fce294edce5ea93f27d3453e6830")
+
+SET(BUILD_SHARED_LIBS OFF)
+SET(BUILD_FRAMEWORK OFF)
+if(KLAYGE_COMPILER_MSVC)
+	string(REPLACE "/WX" "/WX:NO" CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}")
+endif()
+
+# To make libvorbis enable to find libogg
+add_library(Ogg::ogg ALIAS ogg)
+export(EXPORT OggTargets NAMESPACE Ogg:: FILE OggTargets.cmake)
+SET(CMAKE_DISABLE_FIND_PACKAGE_Ogg TRUE CACHE BOOL "" FORCE)
+
+ADD_SUBDIRECTORY(libvorbis)
+
+set_target_properties("vorbis" "vorbisfile" "vorbisenc" PROPERTIES FOLDER "Externals/libvorbis")

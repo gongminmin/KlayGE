@@ -139,17 +139,17 @@ stages:
 
       - task: Cache@2
         inputs:
-          key: 'Build | External/Build/**/CMakeLists.txt | $(id) | $(project)'
+          key: 'Build | Externals/**/CMakeLists.txt | $(id) | $(project)'
           restoreKeys: 'Build | $(id) | $(project)'
           path: Build/$(BUILD_DIR)
         displayName: Cache Build
 
       - task: Cache@2
         inputs:
-          key: 'External | External/Build/**/CMakeLists.txt | $(id) | $(project)'
-          restoreKeys: 'External | $(id) | $(project)'
-          path: External
-        displayName: Cache External
+          key: 'Externals | Externals/**/CMakeLists.txt | $(id) | $(project)'
+          restoreKeys: 'Externals | $(id) | $(project)'
+          path: Externals
+        displayName: Cache Externals
 
       - task: Cache@2
         inputs:
@@ -189,7 +189,7 @@ stages:
       - script: |
           git config --global user.email "dummy@example.com"
           git config --global user.name "Dummy Name"
-          # Reset the repo to restore changes in External
+          # Reset the repo to restore changes in Externals
           git reset --hard
         displayName: 'Config git'
 

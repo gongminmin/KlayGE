@@ -1,0 +1,92 @@
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "c0cbe602ce66481a822ba16856052a47154f5cc5")
+
+if(KLAYGE_PLATFORM_WINDOWS)
+	if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+		set(ALSOFT_BACKEND_DSOUND ON CACHE BOOL "" FORCE)
+	else()
+		set(ALSOFT_BACKEND_DSOUND OFF CACHE BOOL "" FORCE)
+	endif()
+	if (KLAYGE_COMPILER_GCC)
+		set(ALSOFT_BUILD_IMPORT_LIB OFF CACHE BOOL "" FORCE)
+	else()
+		set(ALSOFT_BUILD_IMPORT_LIB ON CACHE BOOL "" FORCE)
+	endif()
+elseif(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_IOS)
+	set(ALSOFT_REQUIRE_COREAUDIO ON CACHE BOOL "" FORCE)
+	if(KLAYGE_PLATFORM_IOS)
+		set(ALSOFT_OSX_FRAMEWORK ON CACHE BOOL "" FORCE)
+	endif()
+elseif(KLAYGE_PLATFORM_LINUX)
+	set(ALSOFT_REQUIRE_OSS ON CACHE BOOL "" FORCE)
+endif()
+set(ALSOFT_BACKEND_WAVE OFF CACHE BOOL "" FORCE)
+set(ALSOFT_BACKEND_WINMM OFF CACHE BOOL "" FORCE)
+set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
+set(ALSOFT_NO_CONFIG_UTIL ON CACHE BOOL "" FORCE)
+set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
+set(ALSOFT_INSTALL_CONFIG OFF CACHE BOOL "" FORCE)
+set(ALSOFT_INSTALL_HRTF_DEFS OFF CACHE BOOL "" FORCE)
+set(ALSOFT_INSTALL_AMBDEC_PRESETS OFF CACHE BOOL "" FORCE)
+set(ALSOFT_EMBED_HRTF_DATA ON CACHE BOOL "" FORCE)
+
+if(KLAYGE_COMPILER_MSVC)
+	set(HAVE___RESTRICT FALSE)
+	if((KLAYGE_ARCH_NAME STREQUAL "arm") OR (KLAYGE_ARCH_NAME STREQUAL "arm64"))
+		set(HAVE_BITSCANFORWARD_INTRINSIC FALSE)
+		set(HAVE_BITSCANFORWARD64_INTRINSIC FALSE)
+		set(HAVE_ARM_NEON_H FALSE)
+	endif()
+endif()
+if(KLAYGE_PLATFORM_LINUX OR KLAYGE_PLATFORM_DARWIN)
+	set(HAVE_STD_ALIGNED_ALLOC FALSE)
+elseif(KLAYGE_PLATFORM_ANDROID)
+	if((KLAYGE_ARCH_NAME STREQUAL "x86") OR (KLAYGE_ARCH_NAME STREQUAL "x86_64"))
+		# GCC has a NEON to SSE header for x86 and x86_64. Clang doesn't.
+		set(ALSOFT_CPUEXT_NEON OFF CACHE BOOL "" FORCE)
+	endif()
+endif()
+
+if(KLAYGE_PLATFORM_ANDROID OR KLAYGE_PLATFORM_IOS)
+	set(LIBTYPE "STATIC")
+endif()
+
+add_subdirectory(openal-soft)
+
+if(KLAYGE_COMPILER_CLANGCL)
+	target_compile_options(OpenAL
+		PRIVATE
+			-Wno-nonportable-include-path
+			-Wno-expansion-to-defined
+			-Wno-pragma-pack
+			-Wno-unknown-pragmas
+			-Wno-ignored-attributes
+			-Wno-unused-function
+			-Wno-unused-value
+	)
+	if (KLAYGE_COMPILER_VERSION GREATER_EQUAL 160)
+		target_compile_options(OpenAL
+			PRIVATE
+				-Wno-deprecated-copy
+		)
+	endif()
+endif()
+if(KLAYGE_PLATFORM_WINDOWS)
+	target_compile_definitions(common
+		PUBLIC
+			_WIN32_WINNT=0x0502
+	)
+endif()
+
+if(KLAYGE_PLATFORM_WINDOWS AND (KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL))
+	set(prefix "")
+else()
+	set(prefix "lib")
+endif()
+
+set_target_properties(OpenAL PROPERTIES
+	OUTPUT_NAME OpenAL${KLAYGE_OUTPUT_SUFFIX}
+	PREFIX "${prefix}"
+)
+
+set_target_properties("build_version" "common" "OpenAL" PROPERTIES FOLDER "Externals/openal-soft")
