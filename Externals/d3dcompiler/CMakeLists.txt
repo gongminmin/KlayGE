@@ -17,8 +17,7 @@ if(NOT EXISTS "${staging_path}")
 		if(win_sdk_dir)
 			message(STATUS "Copying d3dcompiler from ${win_sdk_dir}/Redist/ ...")
 	
-			foreach(arch
-				"x64")
+			foreach(arch "x64" "arm64")
 				file(COPY "${win_sdk_dir}/Redist/D3D/${arch}/${D3DCOMPILER_NAME}" DESTINATION "${D3DCOMPILER_DIR}/Redist/${arch}/")
 			endforeach()
 		endif()
@@ -27,8 +26,7 @@ if(NOT EXISTS "${staging_path}")
 	if(NOT win_sdk_dir)
 		message(STATUS "Downloading ${D3DCOMPILER_NAME} ...")
 
-		foreach(arch
-			"x64")
+		foreach(arch "x64")
 			set(url "https://raw.githubusercontent.com/hrydgard/minidx9/7751cf73f5c06f1be21f5f31c3e2d9a7bacd3a93/10/Redist/D3D/${arch}/${D3DCOMPILER_NAME}")
 			set(dest "${D3DCOMPILER_DIR}/Redist/${arch}/${D3DCOMPILER_NAME}")
 			file(DOWNLOAD ${url} ${dest} STATUS ERR)
