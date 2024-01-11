@@ -2,6 +2,11 @@ if (NOT KLAYGE_PLATFORM_WINDOWS)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_MFSHOW_SHOW_ENGINE "Build MFShow show engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_MFSHOW_SHOW_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_ShowEngine_MFShow SHARED
 	Source/MFShow.hpp
 	Source/MFShowEngine.cpp

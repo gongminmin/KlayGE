@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGINS "Build plugins" ON)
+if(NOT KLAYGE_BUILD_PLUGINS)
+	return()
+endif()
+
 add_subdirectory(Audio)
 add_subdirectory(DevHelper)
 add_subdirectory(Input)

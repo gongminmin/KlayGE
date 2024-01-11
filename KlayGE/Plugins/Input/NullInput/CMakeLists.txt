@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_NULL_INPUT_ENGINE "Build Null input engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_INPUT_ENGINE)
+	return()
+endif()
+
 SET(LIB_NAME KlayGE_InputEngine_NullInput)
 
 ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}

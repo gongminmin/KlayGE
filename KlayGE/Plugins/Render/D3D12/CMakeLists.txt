@@ -2,6 +2,11 @@ if (NOT KLAYGE_PLATFORM_WINDOWS)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_D3D12_RENDER_ENGINE "Build D3D12 render engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_D3D12_RENDER_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_RenderEngine_D3D12 SHARED
 	Source/D3D12Adapter.cpp
 	Source/D3D12Adapter.hpp

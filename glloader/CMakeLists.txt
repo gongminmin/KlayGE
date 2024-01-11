@@ -1,3 +1,7 @@
+if(KLAYGE_PLATFORM_WINDOWS_STORE)
+	return()
+endif()
+
 SET(GLLOADER_PROJECT_DIR "${KLAYGE_ROOT_DIR}/glloader")
 
 SET(CodeGenOutput "${GLLOADER_PROJECT_DIR}/include/glloader/glloader_gl.h")

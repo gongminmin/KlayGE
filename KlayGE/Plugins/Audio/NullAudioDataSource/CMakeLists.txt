@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_NULL_AUDIO_DATA_SOURCE "Build Null audio data source plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_AUDIO_DATA_SOURCE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_AudioDataSource_NullAudioDataSource ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/NullSource.cpp
 	Source/NullSource.hpp

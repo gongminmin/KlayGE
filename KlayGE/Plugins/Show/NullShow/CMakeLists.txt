@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_NULL_SHOW_ENGINE "Build Null show engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_SHOW_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_ShowEngine_NullShow ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/NullShow.hpp
 	Source/NullShowEngine.cpp

@@ -2,6 +2,11 @@ if (KLAYGE_PLATFORM_WINDOWS_STORE OR KLAYGE_PLATFORM_ANDROID OR KLAYGE_PLATFORM_
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_OPENGL_RENDER_ENGINE "Build OpenGL render engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_OPENGL_RENDER_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_RenderEngine_OpenGL SHARED
 	Source/OGLFence.cpp
 	Source/OGLFence.hpp

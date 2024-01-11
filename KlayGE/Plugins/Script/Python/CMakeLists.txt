@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_PYTHON_SCRIPT_ENGINE "Build Python script engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_PYTHON_SCRIPT_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_ScriptEngine_Python ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/PythonScript.cpp
 	Source/PythonScript.hpp

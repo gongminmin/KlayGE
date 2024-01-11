@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_NULL_SCRIPT_ENGINE "Build Null script engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_SCRIPT_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_ScriptEngine_NullScript ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/NullScript.cpp
 	Source/NullScript.hpp

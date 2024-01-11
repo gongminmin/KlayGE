@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_TESTS "Build tests" ON)
+if(NOT KLAYGE_BUILD_TESTS)
+	return()
+endif()
+
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex.dds" "c180e28392be0f6d9b8e429c416392923d9e7139")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc2.dds" "3e4095b5252662319898cabd4011f0d9d50faad8")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc3.dds" "f596c895a2248b7650486adf32b911b5380c6f04")

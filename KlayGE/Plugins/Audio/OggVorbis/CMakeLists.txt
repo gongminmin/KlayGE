@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_OGG_VORBIS_AUDIO_DATA_SOURCE "Build OggVorbis audio data source plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_OGG_VORBIS_AUDIO_DATA_SOURCE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_AudioDataSource_OggVorbis ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/OggVorbisSource.cpp
 	Source/OggVorbisSource.hpp

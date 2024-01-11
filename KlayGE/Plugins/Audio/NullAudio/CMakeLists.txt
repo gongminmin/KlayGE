@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_NULL_AUDIO_ENGINE "Build Null audio engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_AUDIO_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_AudioEngine_NullAudio ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/NullAudio.hpp
 	Source/NullAudioEngine.cpp

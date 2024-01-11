@@ -2,6 +2,11 @@ if (NOT KLAYGE_IS_DEV_PLATFORM)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_DEV_HELPER "Build DevHelper plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_DEV_HELPER)
+	return()
+endif()
+
 SET(PLAT_CONF_FILES
 	${KLAYGE_PROJECT_DIR}/media/PlatConf/d3d_11_0.plat
 	${KLAYGE_PROJECT_DIR}/media/PlatConf/d3d_11_1.plat

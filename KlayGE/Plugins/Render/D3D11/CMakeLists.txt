@@ -2,6 +2,11 @@ if (NOT KLAYGE_PLATFORM_WINDOWS)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_D3D11_RENDER_ENGINE "Build D3D11 render engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_D3D11_RENDER_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_RenderEngine_D3D11 SHARED
 	Source/D3D11Adapter.cpp
 	Source/D3D11Adapter.hpp

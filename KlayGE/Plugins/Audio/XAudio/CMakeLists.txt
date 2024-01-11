@@ -2,6 +2,11 @@ if (NOT KLAYGE_PLATFORM_WINDOWS)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_XAUDIO_AUDIO_ENGINE "Build XAudio audio engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_XAUDIO_AUDIO_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_AudioEngine_XAudio SHARED
 	Source/XAAudio.hpp
 	Source/XAAudioEngine.cpp

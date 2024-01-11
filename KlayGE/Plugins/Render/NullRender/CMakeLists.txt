@@ -2,6 +2,11 @@ if (NOT KLAYGE_IS_DEV_PLATFORM)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_NULL_RENDER_ENGINE "Build Null render engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_NULL_RENDER_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_RenderEngine_NullRender SHARED
 	Source/NullRenderEngine.cpp
 	Source/NullRenderEngine.hpp

@@ -2,6 +2,11 @@ if (KLAYGE_PLATFORM_WINDOWS_STORE)
 	return()
 endif()
 
+option(KLAYGE_BUILD_PLUGIN_OPENAL_AUDIO_ENGINE "Build OpenAL audio engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_OPENAL_AUDIO_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_AudioEngine_OpenAL ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/OALAudio.hpp
 	Source/OALAudioEngine.cpp

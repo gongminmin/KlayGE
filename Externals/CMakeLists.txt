@@ -3,7 +3,9 @@ if(NOT EXISTS ${git_executable})
 endif()
 
 find_program(git_executable NAMES git git.exe git.cmd)
-if(NOT git_executable)
+if(git_executable)
+	set(git_executable ${git_executable} CACHE INTERNAL "" FORCE)
+else()
 	message(FATAL_ERROR "Failed to find git.")
 endif()
 

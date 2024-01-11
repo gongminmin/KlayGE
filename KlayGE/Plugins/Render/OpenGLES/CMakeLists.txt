@@ -8,6 +8,11 @@ IF(NOT KLAYGE_GLES_FOUND)
 	return()
 ENDIF()
 
+option(KLAYGE_BUILD_PLUGIN_OPENGLES_RENDER_ENGINE "Build OpenGLES render engine plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_OPENGLES_RENDER_ENGINE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_RenderEngine_OpenGLES ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/OGLESFence.cpp
 	Source/OGLESFence.hpp

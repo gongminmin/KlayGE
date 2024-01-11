@@ -1,3 +1,8 @@
+option(KLAYGE_BUILD_PLUGIN_OCTREE_SCENE "Build Octree scene plugin" ON)
+if(NOT KLAYGE_BUILD_PLUGIN_OCTREE_SCENE)
+	return()
+endif()
+
 ADD_LIBRARY(KlayGE_Scene_OCTree ${KLAYGE_PREFERRED_LIB_TYPE}
 	Source/OCTree.cpp
 	Source/OCTree.hpp
