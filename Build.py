@@ -388,6 +388,15 @@ class BuildInfo:
 						vcvarsall_options = ""
 					else:
 						LogError("Could NOT find clang-cl compiler toolset for VS2019.\n")
+				elif project_type == "ninja":
+					try_folder = self.FindVS2022Folder(program_files_folder)
+					if try_folder is None:
+						try_folder = self.FindVS2019Folder(program_files_folder)
+					if try_folder is not None:
+						compiler_root = try_folder
+						vcvarsall_options = ""
+					else:
+						LogError("Could NOT find clang-cl compiler toolset for VS2019 or VS2022.\n")
 				else:
 					LogError("Could NOT find clang-cl compiler.\n")
 			elif "clang" == compiler:
@@ -491,6 +500,11 @@ class BuildInfo:
 			elif "vc142" == compiler:
 				compiler_name = "vc"
 				compiler_version = 142
+				for arch in archs:
+					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_options))
+			elif compiler == "clangcl":
+				compiler_name = "clangcl"
+				compiler_version = self.RetrieveClangVersion(compiler_root.joinpath("../../Tools/Llvm/bin/"))
 				for arch in archs:
 					compilers.append(CompilerInfo(self, arch, gen_name, compiler_root, vcvarsall_options))
 			else:
@@ -755,7 +769,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 	if compiler_info.is_cross_compiling:
 		additional_options += f' -DKLAYGE_HOST_BIN_DIR="{build_info.host_bin_dir}"'
 
-	if build_info.project_type.startswith("vs"):
+	if (build_info.compiler_name == "vc") or (build_info.compiler_name == "clangcl"):
 		vcvarsall_path = compiler_info.compiler_root.joinpath("vcvarsall.bat")
 		if "x64" == compiler_info.arch:
 			vc_option = "amd64"
@@ -831,6 +845,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 					make_name = "mingw32-make.exe"
 			else:
 				make_name = "make"
+		make_name = Path(shutil.which(make_name)).absolute()
 
 		additional_options_backup = additional_options
 
@@ -850,9 +865,8 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 
 				if not build_dir.exists():
 					build_dir.mkdir()
-					if build_info.is_android:
-						additional_options += f' -DCMAKE_MAKE_PROGRAM="{make_name}"'
-					elif ("clang" == build_info.compiler_name):
+					additional_options += f' -DCMAKE_MAKE_PROGRAM="{make_name}"'
+					if ("clang" == build_info.compiler_name):
 						env = os.environ
 						if not ("CC" in env):
 							additional_options += " -DCMAKE_C_COMPILER=clang"
@@ -879,10 +893,18 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 					additional_options += f' -DANDROID_CPP_FEATURES="{cpp_feature}"'
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
-				if build_info.compiler_name == "vc":
+				if (build_info.compiler_name == "vc") or (build_info.compiler_name == "clangcl"):
+					if (compiler_info.compiler_root != "") and (build_info.compiler_name == "clangcl"):
+						clangcl_path = compiler_info.compiler_root.joinpath(f"../../Tools/Llvm/{vc_arch}/bin/")
+						# Set the path of clangcl in VS to the front
+						cmake_cmd.AddCommand(f"@SET PATH={clangcl_path};%PATH%")
 					cmake_cmd.AddCommand(f'@CALL "{vcvarsall_path}" {vc_option}')
 					cmake_cmd.AddCommand(f'@CD /d "{build_dir}"')
-					additional_options += " -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe"
+					if build_info.compiler_name == "vc":
+						compiler = "cl.exe"
+					elif build_info.compiler_name == "clangcl":
+						compiler = "clang-cl.exe"
+					additional_options += f" -DCMAKE_C_COMPILER={compiler} -DCMAKE_CXX_COMPILER={compiler}"
 				cmake_cmd.AddCommand(f'"{build_info.cmake_path}" -G "{compiler_info.generator}" {additional_options} ../../')
 				if cmake_cmd.Execute() != 0:
 					LogWarning(f"Config {config} failed, retry 1...\n")
@@ -892,7 +914,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 							LogError(f"Config {config} failed.\n")
 
 				build_cmd = BatchCommand(build_info.host_platform)
-				if build_info.compiler_name == "vc":
+				if (build_info.compiler_name == "vc") or (build_info.compiler_name == "clangcl"):
 					build_cmd.AddCommand(f'@CALL "{vcvarsall_path}" {vc_option}')
 					build_cmd.AddCommand(f'@CD /d "{build_dir}"')
 				build_info.CMakeAddBuildCommand(build_cmd, project_list, None)

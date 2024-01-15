@@ -26,9 +26,9 @@ stages:
 
         Windows_clangcl12:
           vmImage: windows-2019
-          project: vs2019
+          project: ninja
           compiler: clangcl
-          installCommand: ''
+          installCommand: 'choco install ninja'
           id: 'clangcl12_win_$(platform)_$(configuration)'
           BUILD_DIR: clangcl12
 

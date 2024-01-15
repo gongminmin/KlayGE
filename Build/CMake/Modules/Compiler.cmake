@@ -1,7 +1,10 @@
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "/Wall /WX /EHsc /MP /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
+	set(CMAKE_CXX_FLAGS "/Wall /WX /EHsc /bigobj /Zc:strictStrings /Zc:rvalueCast /Gw")
+	if(CMAKE_GENERATOR MATCHES "^Visual Studio")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+	endif()
 
 	if(CMAKE_C_COMPILER_ID MATCHES Clang)
 		set(KLAYGE_COMPILER_NAME "clangcl")
@@ -77,6 +80,12 @@ if(MSVC)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-reserved-id-macro") # Allow macros with __ prefix
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-sign-conversion")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-switch-enum") # NEVER turn it on. A bad designed warning.
+
+		if(NOT (CMAKE_GENERATOR MATCHES "^Visual Studio"))
+			foreach(flag_var CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+				set(${flag_var} "${${flag_var}} -Wno-nonportable-system-include-path")
+			endforeach()
+		endif()
 	else()
 		SET(KLAYGE_COMPILER_NAME "vc")
 		SET(KLAYGE_COMPILER_MSVC TRUE)
@@ -203,7 +212,10 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DKLAYGE_SHIP")
 	foreach(flag_var
 		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL)
-		set(${flag_var} "${${flag_var}} /fp:fast /Ob2 /GL")
+		set(${flag_var} "${${flag_var}} /fp:fast /Ob2")
+		if(CMAKE_GENERATOR MATCHES "^Visual Studio")
+			set(${flag_var} "${${flag_var}} /GL")
+		endif()
 	endforeach()
 	IF(KLAYGE_ARCH_NAME MATCHES "x86")
 		FOREACH(flag_var
