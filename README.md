@@ -6,7 +6,7 @@
 KlayGE is a cross-platform open source game engine with plugin-based architecture. It's started since 2003. The explicit goal of KlayGE is: to arm your engine with cutting-edge technology. It provides a framework to make game development, testing, porting as simple as possible. 
 
 # Getting started
-Before compiling KlayGE, Python 3.x+ and CMake 3.16+ must be installed first. Then you can run Build.py to build the whole code base. For details, please see [Installation](http://www.klayge.org/wiki/index.php/Installation).
+Before compiling KlayGE, Python 3.6+ and CMake 3.16+ must be installed first. Then you can run Build.py to build the whole code base. For details, please see [Installation](http://www.klayge.org/wiki/index.php/Installation).
 
 # Platforms
 KlayGE can be developed on those platforms, with no limitation.

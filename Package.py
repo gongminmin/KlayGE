@@ -9,13 +9,13 @@ from DeployKlayGE import DeployKlayGE, CopyToDst
 def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 	if not os.path.exists(tareget_dir):
 		os.mkdir(tareget_dir)
-	dst_sample_dir = "%s/KlayGE_Samples_%s%d_%s_%s/" % (tareget_dir, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+	dst_sample_dir = f"{tareget_dir}/KlayGE_Samples_{build_info.compiler_name}{build_info.compiler_version}_{build_info.target_platform}_{compiler_info.arch}/"
 	if os.path.exists(dst_sample_dir):
 		shutil.rmtree(dst_sample_dir)
 	os.mkdir(dst_sample_dir)
 	DeployKlayGE(dst_sample_dir, build_info, compiler_info, cfg)
 
-	output_suffix = "_%s%d" % (build_info.compiler_name, build_info.compiler_version)
+	output_suffix = f"_{build_info.compiler_name}{build_info.compiler_version}"
 	if cfg == "Debug":
 		debug_suffix = "_d"
 	else:
@@ -34,13 +34,13 @@ def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 	else:
 		lib_prefix = "lib"
 
-	src_bin_dir = "KlayGE/bin/%s_%s/" % (build_info.target_platform, compiler_info.arch)
-	dst_bin_dir = "%sbin/%s_%s/" % (dst_sample_dir, build_info.target_platform, compiler_info.arch)
+	src_bin_dir = f"KlayGE/bin/{build_info.target_platform}_{compiler_info.arch}/"
+	dst_bin_dir = f"{dst_sample_dir}bin/{build_info.target_platform}_{compiler_info.arch}/"
 
 	exe_list = (
 		"AreaLighting",
 		"AtmosphericScattering",
-		"CascadedShadowMap",		
+		"CascadedShadowMap",
 		"CausticsMap",
 		"DeepGBuffers",
 		"DeferredRendering",
@@ -141,7 +141,7 @@ def PackageSamples(tareget_dir, build_info, compiler_info, cfg):
 		resource_path = dst_sample_dir + cook_item
 		for file in glob.glob(resource_path):
 			subprocess.call([cooker_path, "-P", platform, "-I", file])
-			print("Removing %s..." % file)
+			print(f"Removing {file}...")
 			os.remove(file)
 
 	for file in glob.glob(dst_bin_dir + lib_prefix + "KlayGE_DevHelper*" + dll_suffix):
