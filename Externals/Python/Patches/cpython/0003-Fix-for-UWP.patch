@@ -1,4 +1,4 @@
-From cb02e572a7d234dd266fabfa0d601bc830b2fa27 Mon Sep 17 00:00:00 2001
+From b1c1b375291ffa8e1a973c766c8c7237d96072a2 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
 Subject: [PATCH 3/3] Fix for UWP
@@ -14,10 +14,10 @@ Subject: [PATCH 3/3] Fix for UWP
  7 files changed, 79 insertions(+), 5 deletions(-)
 
 diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
-index 16f98ace3b..60fef8e989 100644
+index 8d2221cfd8..d2d34e8fca 100644
 --- a/Modules/faulthandler.c
 +++ b/Modules/faulthandler.c
-@@ -1007,7 +1007,7 @@ faulthandler_unregister_py(PyObject *self, PyObject *args)
+@@ -1023,7 +1023,7 @@ faulthandler_unregister_py(PyObject *self, PyObject *args)
  static void
  faulthandler_suppress_crash_report(void)
  {
@@ -27,10 +27,21 @@ index 16f98ace3b..60fef8e989 100644
  
      /* Configure Windows to not display the Windows Error Reporting dialog */
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 99c160c916..87fac760ea 100644
+index 23a05529aa..e855dc3dbf 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
-@@ -303,8 +303,10 @@ corresponding Unix manual entries for more information on calls.");
+@@ -23,7 +23,9 @@
+ #  include <pathcch.h>
+ #  include <lmcons.h>             // UNLEN
+ #  include "osdefs.h"             // SEP
+-#  define HAVE_SYMLINK
++#  ifndef MS_WINDOWS_STORE
++#    define HAVE_SYMLINK
++#  endif
+ #endif
+ 
+ #ifdef __VXWORKS__
+@@ -312,8 +314,10 @@ corresponding Unix manual entries for more information on calls.");
  #else
  #  if defined(_MSC_VER) || defined(__MINGW32__)
       /* Microsoft compiler or MinGW */
@@ -43,18 +54,7 @@ index 99c160c916..87fac760ea 100644
  #    define HAVE_SPAWNV     1
  #    define HAVE_EXECV      1
  #    define HAVE_WSPAWNV    1
-@@ -435,7 +437,9 @@ extern char        *ctermid_r(char *);
- #  include <windows.h>
- #  include <shellapi.h>           // ShellExecute()
- #  include <lmcons.h>             // UNLEN
--#  define HAVE_SYMLINK
-+#  ifndef MS_WINDOWS_STORE
-+#    define HAVE_SYMLINK
-+#  endif
- #endif /* _MSC_VER || __MINGW32__ */
- 
- #ifndef MAXPATHLEN
-@@ -13196,6 +13200,10 @@ static int
+@@ -13355,6 +13359,10 @@ static int
  os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
  /*[clinic end generated code: output=36be5afca6ea84d8 input=cfe99f9c05c70ad1]*/
  {
@@ -65,7 +65,7 @@ index 99c160c916..87fac760ea 100644
      DWORD flags;
  
      if (!GetHandleInformation((HANDLE)handle, &flags)) {
-@@ -13204,6 +13212,7 @@ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
+@@ -13363,6 +13371,7 @@ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
      }
  
      return flags & HANDLE_FLAG_INHERIT;
@@ -73,7 +73,7 @@ index 99c160c916..87fac760ea 100644
  }
  
  
-@@ -13221,12 +13230,17 @@ os_set_handle_inheritable_impl(PyObject *module, intptr_t handle,
+@@ -13380,12 +13389,17 @@ os_set_handle_inheritable_impl(PyObject *module, intptr_t handle,
                                 int inheritable)
  /*[clinic end generated code: output=021d74fe6c96baa3 input=7a7641390d8364fc]*/
  {
@@ -91,7 +91,7 @@ index 99c160c916..87fac760ea 100644
  }
  #endif /* MS_WINDOWS */
  
-@@ -14356,8 +14370,10 @@ error:
+@@ -14520,8 +14534,10 @@ os_getrandom_impl(PyObject *module, Py_ssize_t size, int flags)
   * on win32
   */
  
@@ -102,7 +102,7 @@ index 99c160c916..87fac760ea 100644
  
  /*[clinic input]
  os._add_dll_directory
-@@ -14378,6 +14394,10 @@ static PyObject *
+@@ -14542,6 +14558,10 @@ static PyObject *
  os__add_dll_directory_impl(PyObject *module, path_t *path)
  /*[clinic end generated code: output=80b025daebb5d683 input=1de3e6c13a5808c8]*/
  {
@@ -113,7 +113,7 @@ index 99c160c916..87fac760ea 100644
      HMODULE hKernel32;
      PAddDllDirectory AddDllDirectory;
      DLL_DIRECTORY_COOKIE cookie = 0;
-@@ -14405,6 +14425,7 @@ os__add_dll_directory_impl(PyObject *module, path_t *path)
+@@ -14569,6 +14589,7 @@ os__add_dll_directory_impl(PyObject *module, path_t *path)
      }
  
      return PyCapsule_New(cookie, "DLL directory cookie", NULL);
@@ -121,7 +121,7 @@ index 99c160c916..87fac760ea 100644
  }
  
  /*[clinic input]
-@@ -14423,6 +14444,10 @@ static PyObject *
+@@ -14587,6 +14608,10 @@ static PyObject *
  os__remove_dll_directory_impl(PyObject *module, PyObject *cookie)
  /*[clinic end generated code: output=594350433ae535bc input=c1d16a7e7d9dc5dc]*/
  {
@@ -132,7 +132,7 @@ index 99c160c916..87fac760ea 100644
      HMODULE hKernel32;
      PRemoveDllDirectory RemoveDllDirectory;
      DLL_DIRECTORY_COOKIE cookieValue;
-@@ -14459,6 +14484,7 @@ os__remove_dll_directory_impl(PyObject *module, PyObject *cookie)
+@@ -14623,6 +14648,7 @@ os__remove_dll_directory_impl(PyObject *module, PyObject *cookie)
      }
  
      Py_RETURN_NONE;
@@ -140,7 +140,7 @@ index 99c160c916..87fac760ea 100644
  }
  
  #endif
-@@ -15250,7 +15276,7 @@ all_ins(PyObject *m)
+@@ -15444,7 +15470,7 @@ all_ins(PyObject *m)
      if (PyModule_AddIntConstant(m, "_COPYFILE_DATA", COPYFILE_DATA)) return -1;
  #endif
  
@@ -170,7 +170,7 @@ index 7c0eeab5db..97cddf380a 100644
 +#endif
  }
 diff --git a/PC/pyconfig.h b/PC/pyconfig.h
-index d7d3cf081e..72d8232ad5 100644
+index 103e647ac8..6f3ebe1eea 100644
 --- a/PC/pyconfig.h
 +++ b/PC/pyconfig.h
 @@ -14,6 +14,8 @@ the following #defines
@@ -204,7 +204,7 @@ index d7d3cf081e..72d8232ad5 100644
  #define HAVE_IO_H
  #define HAVE_SYS_UTIME_H
  #define HAVE_TEMPNAM
-@@ -498,6 +515,10 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+@@ -501,6 +518,10 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
  /* Define if you have getpid.  */
  #define HAVE_GETPID
  
@@ -216,10 +216,10 @@ index d7d3cf081e..72d8232ad5 100644
  /* #undef HAVE_GETTIMEOFDAY */
  
 diff --git a/Python/dynload_win.c b/Python/dynload_win.c
-index 81787e5f22..4727bc196a 100644
+index 96faa4b462..7ea8f02212 100644
 --- a/Python/dynload_win.c
 +++ b/Python/dynload_win.c
-@@ -184,20 +184,28 @@ _Py_COMP_DIAG_POP
+@@ -185,23 +185,31 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
          unsigned int old_mode;
  
          /* Don't display a message box when Python can't load a DLL */
@@ -240,6 +240,9 @@ index 81787e5f22..4727bc196a 100644
                                LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
 +#endif
          Py_END_ALLOW_THREADS
+ #if !USE_UNICODE_WCHAR_CACHE
+         PyMem_Free(wpathname);
+ #endif /* USE_UNICODE_WCHAR_CACHE */
  
          /* restore old error mode settings */
 +#ifndef MS_WINDOWS_STORE
@@ -249,10 +252,10 @@ index 81787e5f22..4727bc196a 100644
          if (hDLL==NULL){
              PyObject *message;
 diff --git a/Python/fileutils.c b/Python/fileutils.c
-index 26e97df4ef..ea48f796b9 100644
+index 3b53baa00e..f2e0fed2a8 100644
 --- a/Python/fileutils.c
 +++ b/Python/fileutils.c
-@@ -1196,6 +1196,9 @@ static int
+@@ -1260,6 +1260,9 @@ static int
  get_inheritable(int fd, int raise)
  {
  #ifdef MS_WINDOWS
@@ -262,7 +265,7 @@ index 26e97df4ef..ea48f796b9 100644
      HANDLE handle;
      DWORD flags;
  
-@@ -1215,6 +1218,7 @@ get_inheritable(int fd, int raise)
+@@ -1277,6 +1280,7 @@ get_inheritable(int fd, int raise)
      }
  
      return (flags & HANDLE_FLAG_INHERIT);
@@ -270,7 +273,7 @@ index 26e97df4ef..ea48f796b9 100644
  #else
      int flags;
  
-@@ -1243,8 +1247,10 @@ static int
+@@ -1305,8 +1309,10 @@ static int
  set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
  {
  #ifdef MS_WINDOWS
@@ -281,7 +284,7 @@ index 26e97df4ef..ea48f796b9 100644
  #else
  #if defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
      static int ioctl_works = -1;
-@@ -1272,6 +1278,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+@@ -1334,6 +1340,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
      }
  
  #ifdef MS_WINDOWS
@@ -291,10 +294,10 @@ index 26e97df4ef..ea48f796b9 100644
 +    PyErr_SetString(PyExc_NotImplementedError, "set_inheritable is not implemented on UWP");
 +    return -1;
 +#else
-     _Py_BEGIN_SUPPRESS_IPH
-     handle = (HANDLE)_get_osfhandle(fd);
-     _Py_END_SUPPRESS_IPH
-@@ -1298,6 +1310,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+     handle = _Py_get_osfhandle_noraise(fd);
+     if (handle == INVALID_HANDLE_VALUE) {
+         if (raise)
+@@ -1358,6 +1370,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
      }
  #undef CONSOLE_PSEUDOHANDLE
      return 0;
@@ -303,10 +306,10 @@ index 26e97df4ef..ea48f796b9 100644
  #else
  
 diff --git a/Python/sysmodule.c b/Python/sysmodule.c
-index 67df01699c..ec55cbc456 100644
+index e740cf933d..c61642aedc 100644
 --- a/Python/sysmodule.c
 +++ b/Python/sysmodule.c
-@@ -1510,6 +1510,7 @@ sys_getwindowsversion_impl(PyObject *module)
+@@ -1527,6 +1527,7 @@ sys_getwindowsversion_impl(PyObject *module)
      realMinor = ver.dwMinorVersion;
      realBuild = ver.dwBuildNumber;
  
@@ -314,7 +317,7 @@ index 67df01699c..ec55cbc456 100644
      // GetVersion will lie if we are running in a compatibility mode.
      // We need to read the version info from a system file resource
      // to accurately identify the OS version. If we fail for any reason,
-@@ -1531,6 +1532,7 @@ sys_getwindowsversion_impl(PyObject *module)
+@@ -1548,6 +1549,7 @@ sys_getwindowsversion_impl(PyObject *module)
          }
          PyMem_RawFree(verblock);
      }

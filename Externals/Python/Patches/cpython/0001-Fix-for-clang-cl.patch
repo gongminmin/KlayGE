@@ -1,20 +1,20 @@
-From c235fc0d75c7bd2bfb3e785247ec741b6f8c962c Mon Sep 17 00:00:00 2001
+From d9d33d3fc3a25ad13f7472e1097bfd183d3d7312 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 25 Feb 2020 21:57:22 -0800
 Subject: [PATCH 1/3] Fix for clang-cl
 
 ---
- Include/pytime.h       | 4 ++++
- Modules/_tracemalloc.c | 5 +++--
+ Include/cpython/pytime.h | 4 ++++
+ Modules/_tracemalloc.c   | 5 +++--
  2 files changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/Include/pytime.h b/Include/pytime.h
-index c79eba2f5b..63f23f3eaf 100644
---- a/Include/pytime.h
-+++ b/Include/pytime.h
-@@ -5,6 +5,10 @@
- #include "pyconfig.h" /* include for defines */
- #include "object.h"
+diff --git a/Include/cpython/pytime.h b/Include/cpython/pytime.h
+index 754c7f4777..f0999c1039 100644
+--- a/Include/cpython/pytime.h
++++ b/Include/cpython/pytime.h
+@@ -2,6 +2,10 @@
+ #ifndef Py_PYTIME_H
+ #define Py_PYTIME_H
  
 +#if defined(_MSC_VER)
 +struct timeval;

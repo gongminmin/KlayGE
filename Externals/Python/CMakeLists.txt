@@ -1,11 +1,11 @@
 SET(PY_VERSION_MAJOR 3)
-SET(PY_VERSION_MINOR 9)
-SET(PY_VERSION_PATCH 17)
+SET(PY_VERSION_MINOR 10)
+SET(PY_VERSION_PATCH 13)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cpython")
 
-UpdateExternalLib("cpython" "https://github.com/python/cpython.git" "0d3cd4eb6671872d8d9f049327d196e759615f70" "v${PY_VERSION}" "v3.9.10" need_patch)
+UpdateExternalLib("cpython" "https://github.com/python/cpython.git" "49965601d6afedafe47cc85556d99b7a24981051" "v${PY_VERSION}" "v3.10.5" need_patch)
 if(need_patch)
 	foreach(patch "0001-Fix-for-clang-cl" "0002-Fix-for-MinGW" "0003-Fix-for-UWP")
 		ApplyPatch("cpython" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/cpython/${patch}.patch")
@@ -18,7 +18,8 @@ if(need_patch)
 		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
 		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Make-building-python-executable-python-development-f"
 		"0007-Fix-some-problems-with-Android-and-iOS" "0008-Update-pyconfig.h-for-mingw"
-		"0009-No-need-to-dereference-system-variables-in-if" "0010-Fix-redefined-_POSIX_THREADS-and-_POSIX_SOURCE-on-Li")
+		"0009-No-need-to-dereference-system-variables-in-if" "0010-Fix-redefined-_POSIX_THREADS-and-_POSIX_SOURCE-on-Li"
+		"0011-Add-support-for-Python-3.10")
 		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/python-cmake-buildsystem/${patch}.patch")
 	endforeach()
 endif()

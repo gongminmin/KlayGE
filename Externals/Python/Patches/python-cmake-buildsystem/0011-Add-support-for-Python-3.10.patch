@@ -1,0 +1,465 @@
+From 72eea8e6cd5e85ddd70994c9c42a8ffe651340e6 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Tue, 16 Jan 2024 00:27:24 -0800
+Subject: [PATCH 11/11] Add support for Python 3.10
+
+Based on https://github.com/python-cmake-buildsystem/python-cmake-buildsystem/pull/345
+---
+ CMakeLists.txt                  |  15 +++
+ cmake/ConfigureChecks.cmake     |   5 +
+ cmake/config-mingw/pyconfig.h   |   3 +
+ cmake/config-unix/pyconfig.h.in |   6 +
+ cmake/extensions/CMakeLists.txt |  43 +++++---
+ cmake/fficonfig.h.in            |   3 +
+ cmake/libpython/CMakeLists.txt  | 190 +++++++++++++++++++++-----------
+ 7 files changed, 183 insertions(+), 82 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ca17eeb..bdbfdde 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -279,6 +279,21 @@ set(_download_3.9.14_md5 "324a9dcaaa11b2b0dafe5614e8f01145")
+ set(_download_3.9.15_md5 "3e13283a5f4e089db508bf81b60a5cca")
+ set(_download_3.9.16_md5 "38c99c7313f416dcf3238f5cf444c6c2")
+ set(_download_3.9.17_md5 "ded6379983f364cf790793ca24dcfe3e")
++# 3.10.x
++set(_download_3.10.0_md5 "729e36388ae9a832b01cf9138921b383")
++set(_download_3.10.1_md5 "91822157a97da16203877400c810d93e")
++set(_download_3.10.2_md5 "67c92270be6701f4a6fed57c4530139b")
++set(_download_3.10.3_md5 "f276ffcd05bccafe46da023d0a5bb04a")
++set(_download_3.10.4_md5 "7011fa5e61dc467ac9a98c3d62cfe2be")
++set(_download_3.10.5_md5 "d87193c077541e22f892ff1353fac76c")
++set(_download_3.10.6_md5 "d76638ca8bf57e44ef0841d2cde557a0")
++set(_download_3.10.7_md5 "1aea68575c0e97bc83ff8225977b0d46")
++set(_download_3.10.8_md5 "fbe3fff11893916ad1756b15c8a48834")
++set(_download_3.10.9_md5 "25eb3686327c157dcb8ac9f01105c306")
++set(_download_3.10.10_md5 "6dbe644dd1a520d9853cf6648084c346")
++set(_download_3.10.11_md5 "7e25e2f158b1259e271a45a249cb24bb")
++set(_download_3.10.12_md5 "1d64320e0b0df6e9ab7e611bacb2178d")
++set(_download_3.10.13_md5 "cbcad7f5e759176bf8ce8a5f9d487087")
+ 
+ set(_extracted_dir "Python-${PY_VERSION}")
+ 
+diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
+index 604174e..0bdbc7d 100644
+--- a/cmake/ConfigureChecks.cmake
++++ b/cmake/ConfigureChecks.cmake
+@@ -23,6 +23,9 @@ message(STATUS "BZIP2_INCLUDE_DIR=${BZIP2_INCLUDE_DIR}")
+ message(STATUS "BZIP2_LIBRARIES=${BZIP2_LIBRARIES}")
+ 
+ if(USE_SYSTEM_Curses)
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.10")
++        set(CURSES_NEED_WIDE TRUE)
++    endif()
+     find_package(Curses) # https://cmake.org/cmake/help/latest/module/FindCurses.html
+     find_library(PANEL_LIBRARY NAMES panel)
+     set(PANEL_LIBRARIES ${PANEL_LIBRARY})
+@@ -698,6 +701,7 @@ check_type_size(float SIZEOF_FLOAT)
+ check_type_size(fpos_t SIZEOF_FPOS_T)
+ check_type_size(int SIZEOF_INT)
+ check_type_size(long SIZEOF_LONG)
++check_type_size(long ALIGNOF_LONG)
+ check_type_size("long double" SIZEOF_LONG_DOUBLE)
+ set(HAVE_LONG_DOUBLE ${SIZEOF_LONG_DOUBLE}) # libffi and cpython
+ check_type_size("long long" SIZEOF_LONG_LONG)
+@@ -707,6 +711,7 @@ check_type_size(pid_t SIZEOF_PID_T)
+ check_type_size(pthread_t SIZEOF_PTHREAD_T)
+ check_type_size(short SIZEOF_SHORT)
+ check_type_size(size_t SIZEOF_SIZE_T)
++check_type_size(size_t ALIGNOF_SIZE_T)
+ check_type_size(ssize_t HAVE_SSIZE_T)
+ check_type_size(time_t SIZEOF_TIME_T)
+ check_type_size(uintptr_t SIZEOF_UINTPTR_T)
+diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
+index a208503..6e88a25 100644
+--- a/cmake/config-mingw/pyconfig.h
++++ b/cmake/config-mingw/pyconfig.h
+@@ -195,6 +195,7 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ #  define SIZEOF_FPOS_T 8
+ #  define SIZEOF_HKEY 8
+ #  define SIZEOF_SIZE_T 8
++#  define ALIGNOF_SIZE_T 8
+ /* configure.ac defines HAVE_LARGEFILE_SUPPORT iff HAVE_LONG_LONG,
+    sizeof(off_t) > sizeof(long), and sizeof(PY_LONG_LONG) >= sizeof(off_t).
+    On Win64 the second condition is not true, but if fpos_t replaces off_t
+@@ -208,6 +209,7 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ #  define SIZEOF_FPOS_T 8
+ #  define SIZEOF_HKEY 4
+ #  define SIZEOF_SIZE_T 4
++#  define ALIGNOF_SIZE_T 4
+ #  define SIZEOF_TIME_T 8
+ #endif
+ 
+@@ -221,6 +223,7 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ #define SIZEOF_SHORT 2
+ #define SIZEOF_INT 4
+ #define SIZEOF_LONG 4
++#define ALIGNOF_LONG 4
+ #define SIZEOF_LONG_LONG 8
+ #define SIZEOF_DOUBLE 8
+ #define SIZEOF_FLOAT 4
+diff --git a/cmake/config-unix/pyconfig.h.in b/cmake/config-unix/pyconfig.h.in
+index 2e8f8c2..051232b 100644
+--- a/cmake/config-unix/pyconfig.h.in
++++ b/cmake/config-unix/pyconfig.h.in
+@@ -1556,6 +1556,9 @@
+ /* The size of `long', as computed by sizeof. */
+ #cmakedefine SIZEOF_LONG @SIZEOF_LONG@
+ 
++/* The size of `long', as computed by alignof. */
++#cmakedefine ALIGNOF_LONG @SIZEOF_LONG@
++
+ /* The size of `long double', as computed by sizeof. */
+ #cmakedefine SIZEOF_LONG_DOUBLE @SIZEOF_LONG_DOUBLE@
+ 
+@@ -1580,6 +1583,9 @@
+ /* The size of `size_t', as computed by sizeof. */
+ #cmakedefine SIZEOF_SIZE_T @SIZEOF_SIZE_T@
+ 
++/* The size of `size_t', as computed by alignof. */
++#cmakedefine ALIGNOF_SIZE_T @SIZEOF_SIZE_T@
++
+ /* The size of `time_t', as computed by sizeof. */
+ #cmakedefine SIZEOF_TIME_T @SIZEOF_TIME_T@
+ 
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index ad380d4..dacaeab 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -72,7 +72,9 @@ add_python_extension(math ${WIN32_BUILTIN} REQUIRES HAVE_LIBM SOURCES _math.c ma
+ add_python_extension(mmap ${WIN32_BUILTIN} SOURCES mmapmodule.c)
+ add_python_extension(_multibytecodec ${WIN32_BUILTIN} SOURCES cjkcodecs/multibytecodec.c)
+ add_python_extension(operator ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES operator.c)
+-add_python_extension(parser ${WIN32_BUILTIN} SOURCES parsermodule.c)
++if(PY_VERSION VERSION_LESS "3.10")
++    add_python_extension(parser ${WIN32_BUILTIN} SOURCES parsermodule.c)
++endif()
+ add_python_extension(_random ${WIN32_BUILTIN} SOURCES _randommodule.c)
+ add_python_extension(strop ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES stropmodule.c)
+ add_python_extension(_struct ${WIN32_BUILTIN} SOURCES _struct.c)
+@@ -159,7 +161,7 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+ endif()
+ 
+ # Python 3.9
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
++if(PY_VERSION VERSION_EQUAL "3.9")
+     add_python_extension(_peg_parser ALWAYS_BUILTIN SOURCES _peg_parser.c)
+ endif()
+ 
+@@ -383,19 +385,30 @@ if(WIN32)
+     endif()
+ else()
+     if(APPLE)
+-        add_python_extension(_ctypes
+-            SOURCES ${ctypes_COMMON_SOURCES}
+-                    _ctypes/malloc_closure.c
+-                    _ctypes/darwin/dlfcn_simple.c
+-                    _ctypes/libffi_osx/ffi.c
+-                    _ctypes/libffi_osx/x86/darwin64.S
+-                    _ctypes/libffi_osx/x86/x86-darwin.S
+-                    _ctypes/libffi_osx/x86/x86-ffi_darwin.c
+-                    _ctypes/libffi_osx/x86/x86-ffi64.c
+-            INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi_osx/include
+-                        ${SRC_DIR}/Modules/_ctypes/darwin
+-            DEFINITIONS MACOSX
+-        )
++        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
++            add_python_extension(_ctypes
++                SOURCES ${ctypes_COMMON_SOURCES}
++                        _ctypes/malloc_closure.c
++                        _ctypes/darwin/dlfcn_simple.c
++                        _ctypes/libffi_osx/ffi.c
++                        _ctypes/libffi_osx/x86/darwin64.S
++                        _ctypes/libffi_osx/x86/x86-darwin.S
++                        _ctypes/libffi_osx/x86/x86-ffi_darwin.c
++                        _ctypes/libffi_osx/x86/x86-ffi64.c
++                INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi_osx/include
++                            ${SRC_DIR}/Modules/_ctypes/darwin
++                DEFINITIONS MACOSX
++            )
++        else()
++            # non-x86_64 architectures, e.g. arm64 or arm64+x86_64 universal build
++            add_python_extension(_ctypes
++                REQUIRES LibFFI_INCLUDE_DIR LibFFI_LIBRARY
++                SOURCES ${ctypes_COMMON_SOURCES}
++                DEFINITIONS Py_BUILD_CORE_MODULE FFI_BUILDING
++                INCLUDEDIRS ${LibFFI_INCLUDE_DIR}
++                LIBRARIES ${LibFFI_LIBRARY}
++            )
++        endif()
+     else()
+         enable_language(ASM)
+         if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+diff --git a/cmake/fficonfig.h.in b/cmake/fficonfig.h.in
+index c38ad2d..b7f5682 100644
+--- a/cmake/fficonfig.h.in
++++ b/cmake/fficonfig.h.in
+@@ -155,6 +155,9 @@
+ /* The size of `size_t', as computed by sizeof. */
+ #define SIZEOF_SIZE_T @SIZEOF_SIZE_T@
+ 
++/* The size of `size_t', as computed by alignof. */
++#define ALIGNOF_SIZE_T @SIZEOF_SIZE_T@
++
+ /* If using the C implementation of alloca, define if you know the
+    direction of stack growth for your system; otherwise it will be
+    automatically deduced at runtime.
+diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
+index 2a1cb2e..d31ec04 100644
+--- a/cmake/libpython/CMakeLists.txt
++++ b/cmake/libpython/CMakeLists.txt
+@@ -25,6 +25,8 @@ if(UNIX)
+             PYTHONPATH="${PYTHONPATH}"
+       )
+ elseif(WIN32)
++    add_definitions(-DPY3_DLLNAME="python3${CMAKE_DEBUG_POSTFIX}")
++    add_definitions(-DPYTHON_DLL_NAME="python${PY_VERSION_MAJOR}${PY_VERSION_MINOR}")
+     list(APPEND MODULE_SOURCES
+         ${SRC_DIR}/PC/getpathp.c
+     )
+@@ -67,36 +69,48 @@ elseif(WIN32)
+     )
+ endif()
+ 
+-set(PARSER_COMMON_SOURCES # Equivalent to POBJS in Makefile.pre
+-    ${SRC_DIR}/Parser/acceler.c
+-    ${SRC_DIR}/Parser/grammar1.c
+-    ${SRC_DIR}/Parser/listnode.c
+-    ${SRC_DIR}/Parser/node.c
+-    ${SRC_DIR}/Parser/parser.c
+-)
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
+-    list(APPEND PARSER_COMMON_SOURCES
+-        ${SRC_DIR}/Parser/pegen/pegen.c
+-        ${SRC_DIR}/Parser/pegen/parse.c
+-        ${SRC_DIR}/Parser/pegen/parse_string.c
+-        ${SRC_DIR}/Parser/pegen/peg_api.c
+-    )
+-endif()
+-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+-    list(APPEND PARSER_COMMON_SOURCES
++if(PY_VERSION VERSION_GREATER_EQUAL "3.10")
++    set(PARSER_COMMON_SOURCES # Equivalent to POBJS in Makefile.pre
+         ${SRC_DIR}/Parser/myreadline.c
+-        ${SRC_DIR}/Parser/parsetok.c
++        ${SRC_DIR}/Parser/parser.c
++        ${SRC_DIR}/Parser/peg_api.c
++        ${SRC_DIR}/Parser/pegen.c
++        ${SRC_DIR}/Parser/string_parser.c
+         ${SRC_DIR}/Parser/token.c
+         ${SRC_DIR}/Parser/tokenizer.c
+     )
+ else()
+-    list(APPEND PARSER_COMMON_SOURCES
+-        ${SRC_DIR}/Parser/bitset.c
+-        ${SRC_DIR}/Parser/firstsets.c
+-        ${SRC_DIR}/Parser/grammar.c
+-        ${SRC_DIR}/Parser/metagrammar.c
+-        ${SRC_DIR}/Parser/pgen.c
++    set(PARSER_COMMON_SOURCES # Equivalent to POBJS in Makefile.pre
++        ${SRC_DIR}/Parser/acceler.c
++        ${SRC_DIR}/Parser/grammar1.c
++        ${SRC_DIR}/Parser/listnode.c
++        ${SRC_DIR}/Parser/node.c
++        ${SRC_DIR}/Parser/parser.c
+     )
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
++        list(APPEND PARSER_COMMON_SOURCES
++            ${SRC_DIR}/Parser/pegen/pegen.c
++            ${SRC_DIR}/Parser/pegen/parse.c
++            ${SRC_DIR}/Parser/pegen/parse_string.c
++            ${SRC_DIR}/Parser/pegen/peg_api.c
++        )
++    endif()
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
++        list(APPEND PARSER_COMMON_SOURCES
++            ${SRC_DIR}/Parser/myreadline.c
++            ${SRC_DIR}/Parser/parsetok.c
++            ${SRC_DIR}/Parser/token.c
++            ${SRC_DIR}/Parser/tokenizer.c
++        )
++    else()
++        list(APPEND PARSER_COMMON_SOURCES
++            ${SRC_DIR}/Parser/bitset.c
++            ${SRC_DIR}/Parser/firstsets.c
++            ${SRC_DIR}/Parser/grammar.c
++            ${SRC_DIR}/Parser/metagrammar.c
++            ${SRC_DIR}/Parser/pgen.c
++        )
++    endif()
+ endif()
+ 
+ set(OBJECT2_SOURCES
+@@ -179,6 +193,11 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
+         ${SRC_DIR}/Objects/genericaliasobject.c
+     )
+ endif()
++if(PY_VERSION VERSION_GREATER_EQUAL "3.10")
++    list(APPEND OBJECT_COMMON_SOURCES
++        ${SRC_DIR}/Objects/unionobject.c
++    )
++endif()
+ 
+ if(CMAKE_C_COMPILER_ID MATCHES GNU)
+     foreach(filename class complex float int method string type unicode weakref)
+@@ -264,14 +283,12 @@ set(PYTHON_COMMON_SOURCES
+     ${SRC_DIR}/Python/getopt.c
+     ${SRC_DIR}/Python/getplatform.c
+     ${SRC_DIR}/Python/getversion.c
+-    ${SRC_DIR}/Python/graminit.c
+     ${SRC_DIR}/Python/import.c
+     ${SRC_DIR}/Python/importdl.c
+     ${SRC_DIR}/Python/marshal.c
+     ${SRC_DIR}/Python/modsupport.c
+     ${SRC_DIR}/Python/mysnprintf.c
+     ${SRC_DIR}/Python/mystrtoul.c
+-    ${SRC_DIR}/Python/peephole.c
+     ${SRC_DIR}/Python/pyarena.c
+     ${SRC_DIR}/Python/pyctype.c
+     ${SRC_DIR}/Python/pyfpe.c
+@@ -286,6 +303,12 @@ set(PYTHON_COMMON_SOURCES
+     ${SRC_DIR}/Python/traceback.c
+     ${SRC_DIR}/Python/_warnings.c
+ )
++if(PY_VERSION VERSION_LESS "3.10")
++    list(APPEND PYTHON_COMMON_SOURCES
++        ${SRC_DIR}/Python/graminit.c
++        ${SRC_DIR}/Python/peephole.c
++    )
++endif()
+ if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
+     list(APPEND PYTHON_COMMON_SOURCES
+         ${SRC_DIR}/Python/ast_opt.c
+@@ -306,6 +329,11 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
+         ${SRC_DIR}/Python/preconfig.c
+     )
+ endif()
++if(PY_VERSION VERSION_GREATER_EQUAL "3.10")
++    list(APPEND PYTHON_COMMON_SOURCES
++        ${SRC_DIR}/Python/suggestions.c
++    )
++endif()
+ 
+ if(UNIX)
+     list(APPEND PYTHON_COMMON_SOURCES
+@@ -609,48 +637,76 @@ if(BUILD_LIBPYTHON_SHARED)
+     set(targetname "libpython3-shared")
+ 
+     if(IS_PY3 AND MSVC)
+-        # XXX Add BuildPython3_dDef
+-
+-        # Generate 'python3stub.def'
+-        set(pythonstub_def ${PROJECT_BINARY_DIR}/${LIBPYTHON_ARCHIVEDIR}/${CMAKE_CFG_INTDIR}/python3stub.def)
+-        add_custom_command(
+-            OUTPUT ${pythonstub_def}
+-            COMMAND ${CMAKE_COMMAND}
+-                -DINPUT_DEF_FILE:PATH=${SRC_DIR}/PC/python3.def
+-                -DOUTPUT_DEF_FILE:PATH=${PROJECT_BINARY_DIR}/CMakeFiles/python3stub.def
+-                -P ${CMAKE_CURRENT_SOURCE_DIR}/generate_libpythonstub_def.cmake
+-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+-                ${PROJECT_BINARY_DIR}/CMakeFiles/python3stub.def
+-                ${pythonstub_def}
+-        )
+-        add_custom_target(generate_libpython3stub_def DEPENDS ${pythonstub_def})
+-
+-        # Build 'python3stub.lib' before linking 'python3.dll'
+-        set(python3stub_lib ${PROJECT_BINARY_DIR}/${LIBPYTHON_ARCHIVEDIR}/${CMAKE_CFG_INTDIR}/python3stub.lib)
+-        set(machine X86)
+-        if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+-            set(machine X64)
++        if(PY_VERSION VERSION_LESS "3.10")
++            # XXX Add BuildPython3_dDef
++
++            # Generate 'python3stub.def'
++            set(pythonstub_def ${PROJECT_BINARY_DIR}/${LIBPYTHON_ARCHIVEDIR}/${CMAKE_CFG_INTDIR}/python3stub.def)
++            add_custom_command(
++                OUTPUT ${pythonstub_def}
++                COMMAND ${CMAKE_COMMAND}
++                    -DINPUT_DEF_FILE:PATH=${SRC_DIR}/PC/python3.def
++                    -DOUTPUT_DEF_FILE:PATH=${PROJECT_BINARY_DIR}/CMakeFiles/python3stub.def
++                    -P ${CMAKE_CURRENT_SOURCE_DIR}/generate_libpythonstub_def.cmake
++                COMMAND ${CMAKE_COMMAND} -E copy_if_different
++                    ${PROJECT_BINARY_DIR}/CMakeFiles/python3stub.def
++                    ${pythonstub_def}
++            )
++            add_custom_target(generate_libpython3stub_def DEPENDS ${pythonstub_def})
++
++            # Build 'python3stub.lib' before linking 'python3.dll'
++            set(python3stub_lib ${PROJECT_BINARY_DIR}/${LIBPYTHON_ARCHIVEDIR}/${CMAKE_CFG_INTDIR}/python3stub.lib)
++            set(machine X86)
++            if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++                set(machine X64)
++            endif()
++            add_custom_command(
++                OUTPUT ${python3stub_lib}
++                COMMAND lib /nologo /def:${pythonstub_def} /out:${python3stub_lib} /MACHINE:${machine}
++                COMMENT "Rebuilding python3stub.lib"
++                DEPENDS generate_libpython3stub_def
++                VERBATIM
++            )
++            add_custom_target(generate_libpython3stub_lib DEPENDS ${python3stub_lib})
++
++            # Build 'python3.dll'
++            add_library(${targetname} SHARED ${SRC_DIR}/PC/python3dll.c ${SRC_DIR}/PC/python3.def)
++            set_target_properties(${targetname} PROPERTIES
++                OUTPUT_NAME python3
++                LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
++                RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
++                INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/${LIBPYTHON_LIBDIR}
++            )
++            add_dependencies(${targetname} generate_libpython3stub_lib)
++
++            target_link_libraries(${targetname} ${python3stub_lib})
++        else()
++            # Build 'python3stub.lib' before linking 'python3.dll'
++            set(python3stub_lib ${PROJECT_BINARY_DIR}/${LIBPYTHON_ARCHIVEDIR}/${CMAKE_CFG_INTDIR}/python3stub.lib)
++            set(machine X86)
++            if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++                set(machine X64)
++            endif()
++            add_custom_command(
++                OUTPUT ${python3stub_lib}
++                COMMAND lib /nologo /def /out:${python3stub_lib} /MACHINE:${machine}
++                COMMENT "Rebuilding python3stub.lib"
++                VERBATIM
++            )
++            add_custom_target(generate_libpython3stub_lib DEPENDS ${python3stub_lib})
++
++            # Build 'python3.dll'
++            add_library(${targetname} SHARED ${SRC_DIR}/PC/python3dll.c)
++            set_target_properties(${targetname} PROPERTIES
++                OUTPUT_NAME python3
++                LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
++                RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
++                INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/${LIBPYTHON_LIBDIR}
++            )
++            add_dependencies(${targetname} libpython-shared generate_libpython3stub_lib)
++
++            target_link_libraries(${targetname} ${python3stub_lib})
+         endif()
+-        add_custom_command(
+-            OUTPUT ${python3stub_lib}
+-            COMMAND lib /nologo /def:${pythonstub_def} /out:${python3stub_lib} /MACHINE:${machine}
+-            COMMENT "Rebuilding python3stub.lib"
+-            DEPENDS generate_libpython3stub_def
+-            VERBATIM
+-        )
+-        add_custom_target(generate_libpython3stub_lib DEPENDS ${python3stub_lib})
+-
+-        # Build 'python3.dll'
+-        add_library(${targetname} SHARED ${SRC_DIR}/PC/python3dll.c ${SRC_DIR}/PC/python3.def)
+-        set_target_properties(${targetname} PROPERTIES
+-            OUTPUT_NAME python3
+-            LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
+-            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${LIBPYTHON_LIBDIR}
+-            INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/${LIBPYTHON_LIBDIR}
+-        )
+-        add_dependencies(${targetname} generate_libpython3stub_lib)
+-
+-        target_link_libraries(${targetname} ${python3stub_lib})
+     endif()
+ 
+     if(IS_PY3 AND UNIX AND NOT APPLE)
+-- 
+2.43.0.windows.1
+
