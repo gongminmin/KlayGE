@@ -1,4 +1,4 @@
-From 1173ae3759df33385e869286f51d4ad9494a5759 Mon Sep 17 00:00:00 2001
+From 1c93d653980bdcb21239d60184905c9ff58e609e Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:20:12 -0500
 Subject: [PATCH 02/10] Fix android build by linking against libutil only if
@@ -33,5 +33,5 @@ index 40d32f8..aaacc84 100644
  if(WIN32 AND IS_PY3)
      list(APPEND LIBPYTHON_TARGET_LIBRARIES ws2_32) # Required by signalmodule
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

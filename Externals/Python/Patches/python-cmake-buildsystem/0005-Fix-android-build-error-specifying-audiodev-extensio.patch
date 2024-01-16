@@ -1,4 +1,4 @@
-From c5a38f10a0392b2a3ed852ae3c5ab2b9ea488737 Mon Sep 17 00:00:00 2001
+From 390beca8f5ae1c456333ffd83396d11207575895 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 02:59:34 -0500
 Subject: [PATCH 05/10] Fix android build error specifying audiodev extensions
@@ -18,7 +18,7 @@ Building C object CMakeBuild/extensions/CMakeFiles/extension_ossaudiodev.dir/dat
  2 files changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
-index a57ee83..1c57372 100644
+index b9bedd3..95cdc8f 100644
 --- a/cmake/ConfigureChecks.cmake
 +++ b/cmake/ConfigureChecks.cmake
 @@ -345,6 +345,7 @@ check_include_files(sys/poll.h HAVE_SYS_POLL_H)
@@ -30,7 +30,7 @@ index a57ee83..1c57372 100644
  check_include_files(sys/stat.h HAVE_SYS_STAT_H) # libffi and cpython
  check_include_files(sys/timeb.h HAVE_SYS_TIMEB_H)
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 82403c7..f0463b5 100644
+index 377b7f6..3730ce4 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
 @@ -207,8 +207,8 @@ add_python_extension(_scproxy
@@ -45,5 +45,5 @@ index 82403c7..f0463b5 100644
  # Python 3.8: UNIX-only extensions
  if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

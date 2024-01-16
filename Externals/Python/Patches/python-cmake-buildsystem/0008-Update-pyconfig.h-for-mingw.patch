@@ -1,14 +1,14 @@
-From bfebb5c91e713c07a207d1f860a47b29f6c592d7 Mon Sep 17 00:00:00 2001
+From 26ee6507d41a345f0706ec70016c358389bb81c9 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
-Date: Wed, 9 Jan 2019 23:00:01 -0800
+Date: Mon, 15 Jan 2024 23:53:57 -0800
 Subject: [PATCH 08/10] Update pyconfig.h for mingw
 
 ---
- cmake/config-mingw/pyconfig.h | 58 +++++++++++++++++++++++++++++------
- 1 file changed, 48 insertions(+), 10 deletions(-)
+ cmake/config-mingw/pyconfig.h | 62 +++++++++++++++++++++++++++++------
+ 1 file changed, 52 insertions(+), 10 deletions(-)
 
 diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
-index 5af0378..137dc9d 100644
+index 5af0378..a208503 100644
 --- a/cmake/config-mingw/pyconfig.h
 +++ b/cmake/config-mingw/pyconfig.h
 @@ -84,18 +84,24 @@ WIN32 is still required for the locale module.
@@ -104,7 +104,7 @@ index 5af0378..137dc9d 100644
  /* Define if you have the dl library (-ldl).  */
  /* #undef HAVE_LIBDL */
  
-@@ -563,4 +584,21 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+@@ -563,4 +584,25 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
     least significant byte first */
  #define DOUBLE_IS_LITTLE_ENDIAN_IEEE754 1
  
@@ -125,7 +125,11 @@ index 5af0378..137dc9d 100644
 +#define HAVE_X509_VERIFY_PARAM_SET1_HOST 1
 +#endif
 +
++#if PY_VERSION_HEX >= 0x03090000
++#define PLATLIBDIR "lib"
++#endif
++
  #endif /* !Py_CONFIG_H */
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

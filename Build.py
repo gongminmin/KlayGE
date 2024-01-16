@@ -942,7 +942,7 @@ if __name__ == "__main__":
 			if build_info.compiler_name == "vc":
 				host_compiler += str(build_info.compiler_version)
 			host_build_info = BuildInfo(build_info.project_type, host_compiler, (build_info.host_arch, ), build_info.cfg, "auto")
-			BuildProjects(host_build_info, host_build_info.compilers[0], ("FxmlJit", "Cooker"), additional_options)
+			BuildProjects(host_build_info, host_build_info.compilers[0], ("_freeze_importlib", "FxmlJit", "Cooker"), additional_options)
 			build_info.host_bin_dir = Path(os.curdir).absolute().joinpath(f"KlayGE/bin/{host_build_info.host_platform}_{build_info.host_arch}")
 			break
 

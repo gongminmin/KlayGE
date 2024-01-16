@@ -1,4 +1,4 @@
-From 52be69e54bc05254172ba7949b8fed9ed9a3855a Mon Sep 17 00:00:00 2001
+From 8bc83f3e7f3b4fac089a6176ae7d687725e6187a Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 02:57:58 -0500
 Subject: [PATCH 04/10] Fix android build error specifying multiprocessing
@@ -17,7 +17,7 @@ Building C object CMakeBuild/extensions/CMakeFiles/extension_multiprocessing.dir
  1 file changed, 1 insertion(+)
 
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 46d0dc0..82403c7 100644
+index e56bf8b..377b7f6 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
 @@ -264,6 +264,7 @@ if(UNIX)
@@ -29,5 +29,5 @@ index 46d0dc0..82403c7 100644
                  ${_multiprocessing${PY_VERSION_MAJOR}_SOURCES}
          REQUIRES ${_multiprocessing_REQUIRES}
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

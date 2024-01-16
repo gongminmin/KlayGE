@@ -1,18 +1,18 @@
 SET(PY_VERSION_MAJOR 3)
-SET(PY_VERSION_MINOR 8)
-SET(PY_VERSION_PATCH 13)
+SET(PY_VERSION_MINOR 9)
+SET(PY_VERSION_PATCH 17)
 SET(PY_VERSION "${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}")
 
 SET(PYTHON_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cpython")
 
-UpdateExternalLib("cpython" "https://github.com/python/cpython.git" "ea673213dd30afd8cacb53927e7d86f6125e86c8" "v${PY_VERSION}" "v3.8.12" need_patch)
+UpdateExternalLib("cpython" "https://github.com/python/cpython.git" "0d3cd4eb6671872d8d9f049327d196e759615f70" "v${PY_VERSION}" "v3.9.10" need_patch)
 if(need_patch)
 	foreach(patch "0001-Fix-for-clang-cl" "0002-Fix-for-MinGW" "0003-Fix-for-UWP")
 		ApplyPatch("cpython" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/cpython/${patch}.patch")
 	endforeach()
 endif()
 
-UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "bb45aa7a4cfc7a5a93bc490c6158f702d1a2226f" "" "" need_patch)
+UpdateExternalLib("python-cmake-buildsystem" "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem" "11a369e29b1be82e3b3108259ab89b7095854b47" "" "" need_patch)
 if(need_patch)
 	foreach(patch "0001-Enable-ASM-langage-only-if-required" "0002-Fix-android-build-by-linking-against-libutil-only-if"
 		"0003-Fix-build-error-when-curses-is-enabled-but-curses-he" "0004-Fix-android-build-error-specifying-multiprocessing-e"
@@ -42,9 +42,13 @@ ENDIF()
 
 SET(PYTHON_VERSION ${PY_VERSION} CACHE STRING "" FORCE)
 
-set(BUILD_PYTHON_EXECUTABLE OFF CACHE BOOL "" FORCE)
+set(BUILD_PYTHON_EXECUTABLE ON CACHE BOOL "" FORCE)
 set(BUILD_PYTHON_DEVELOPMENT OFF CACHE BOOL "" FORCE)
-set(BUILD_FREEZE_IMPORTLIB OFF CACHE BOOL "" FORCE)
+if(CMAKE_CROSSCOMPILING)
+	set(BUILD_FREEZE_IMPORTLIB OFF CACHE BOOL "" FORCE)
+else()
+	set(BUILD_FREEZE_IMPORTLIB ON CACHE BOOL "" FORCE)
+endif()
 set(BUILD_PGEN OFF CACHE BOOL "" FORCE)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo;MinSizeRel" CACHE STRING "" FORCE)
@@ -148,6 +152,13 @@ if(KLAYGE_COMPILER_CLANGCL)
 			-w
 			/Od # lld-link can't find __powidf2
 	)
+	if(TARGET _freeze_importlib)
+		target_compile_options(_freeze_importlib
+			PRIVATE
+				-Wno-invalid-token-paste
+				-w
+		)
+	endif()
 
 	target_compile_definitions(libpython-static
 		PRIVATE
@@ -199,5 +210,10 @@ target_include_directories(libpython-static
 SET_TARGET_PROPERTIES(libpython-static PROPERTIES
 	FOLDER "Externals/Python"
 )
+if(TARGET _freeze_importlib)
+	SET_TARGET_PROPERTIES(_freeze_importlib PROPERTIES
+		FOLDER "Externals/Python"
+	)
+endif()
 
 add_dependencies(libpython-static ${KLAYGE_ZLIB_NAME})

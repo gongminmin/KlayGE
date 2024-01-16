@@ -1,4 +1,4 @@
-From f7e5b7b45f51f561614fda61e43dd201127138db Mon Sep 17 00:00:00 2001
+From f9c87c7d53f0f59a8957c5731d157c9ab3ecce79 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 23 Jan 2018 23:38:33 -0800
 Subject: [PATCH 06/10] Make building python executable, python development,
@@ -10,7 +10,7 @@ Subject: [PATCH 06/10] Make building python executable, python development,
  2 files changed, 162 insertions(+), 141 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2680d3d..c0601e7 100644
+index 2ce5d0b..fd227c8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,6 +23,11 @@ if(APPLE)
@@ -36,7 +36,7 @@ index 2680d3d..c0601e7 100644
  
  # Options
  option(DOWNLOAD_SOURCES "Automatically download the Python sources" ON)
-@@ -565,48 +572,56 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
+@@ -585,48 +592,56 @@ add_subdirectory(cmake/extensions CMakeBuild/extensions)
  
  # Add the other subdirectories
  add_subdirectory(cmake/libpython CMakeBuild/libpython)
@@ -128,7 +128,7 @@ index 2680d3d..c0601e7 100644
  
  if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
  # Add target to generate `Tools/peg_generator/pegen/grammar_parser.py`
-@@ -643,41 +658,43 @@ add_custom_target(generate_pegen_parse
+@@ -663,41 +678,43 @@ add_custom_target(generate_pegen_parse
  )
  endif()
  
@@ -375,5 +375,5 @@ index aaacc84..2a1cb2e 100644
  
  # Collect libpython sources
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

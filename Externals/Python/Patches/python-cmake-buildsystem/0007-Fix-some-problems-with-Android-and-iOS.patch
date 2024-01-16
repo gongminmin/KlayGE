@@ -1,4 +1,4 @@
-From f254a402ed250999ef88782a053328abfb9fd748 Mon Sep 17 00:00:00 2001
+From cef42bfab6f619c7d8570e01eaa895c9abb6c3f0 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Wed, 10 Jan 2018 22:01:45 -0800
 Subject: [PATCH 07/10] Fix some problems with Android and iOS.
@@ -10,7 +10,7 @@ Subject: [PATCH 07/10] Fix some problems with Android and iOS.
  3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c0601e7..9941ee2 100644
+index fd227c8..ca17eeb 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -134,7 +134,7 @@ option(ENABLE_IPV6 "Enable IP v6" ON)
@@ -22,7 +22,7 @@ index c0601e7..9941ee2 100644
      option(WITH_STATIC_DEPENDENCIES "Restrict extensions and external dependencies to static libraries" OFF)
      if(WITH_STATIC_DEPENDENCIES)
              set(_reason " because of WITH_STATIC_DEPENDENCIES=ON")
-@@ -491,7 +491,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
+@@ -511,7 +511,7 @@ set(EXTRA_PYTHONPATH "" CACHE STRING
      "A colon (:) separated list of extra paths to add to the PYTHONPATH")
  
  # Configure 'pyconfig.h'
@@ -32,7 +32,7 @@ index c0601e7..9941ee2 100644
      configure_file(cmake/config-unix/pyconfig.h.in
                     ${PYCONFIG_BUILD_DIR}/pyconfig.h)
 diff --git a/cmake/ConfigureChecks.cmake b/cmake/ConfigureChecks.cmake
-index 1c57372..05832aa 100644
+index 95cdc8f..de272d0 100644
 --- a/cmake/ConfigureChecks.cmake
 +++ b/cmake/ConfigureChecks.cmake
 @@ -205,7 +205,7 @@ message(STATUS "${_msg} - ${ABIFLAGS}")
@@ -76,5 +76,5 @@ index 7c4b44f..772d5d7 100644
        COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

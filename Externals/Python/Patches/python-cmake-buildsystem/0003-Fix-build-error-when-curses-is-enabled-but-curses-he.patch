@@ -1,4 +1,4 @@
-From 4ef4fa0b3beb333b6cdf548fa28bf163f1683326 Mon Sep 17 00:00:00 2001
+From d61d18fd14dc51eff245795d6b142e4961020be4 Mon Sep 17 00:00:00 2001
 From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
 Date: Fri, 22 Jan 2016 00:21:34 -0500
 Subject: [PATCH 03/10] Fix build error when curses is enabled but curses
@@ -19,10 +19,10 @@ compilation terminated.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
-index 13ea266..46d0dc0 100644
+index ed45784..e56bf8b 100644
 --- a/cmake/extensions/CMakeLists.txt
 +++ b/cmake/extensions/CMakeLists.txt
-@@ -682,7 +682,7 @@ add_python_extension(_curses_panel
+@@ -683,7 +683,7 @@ add_python_extension(_curses_panel
      LIBRARIES ${curses_common_LIBRARIES} ${PANEL_LIBRARIES}
  )
  add_python_extension(_curses
@@ -32,5 +32,5 @@ index 13ea266..46d0dc0 100644
      LIBRARIES ${curses_common_LIBRARIES}
  )
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 
