@@ -2,7 +2,7 @@
 #-*- coding: ascii -*-
 
 import os, sys, multiprocessing, subprocess, shutil, platform
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 class CfgBuildDefault:
 	def __init__(self):
@@ -587,7 +587,7 @@ class BuildInfo:
 	def RetrieveClangVersion(self, path = None):
 		if self.is_android:
 			android_ndk_path = Path(os.environ["ANDROID_NDK"])
-			prebuilt_llvm_path = android_ndk_path.joinpath("/toolchains/llvm/prebuilt/")
+			prebuilt_llvm_path = android_ndk_path.joinpath("toolchains/llvm/prebuilt/")
 			prebuilt_clang_path = prebuilt_llvm_path.joinpath("windows/bin/")
 			if not prebuilt_clang_path.is_dir():
 				prebuilt_clang_path = prebuilt_llvm_path.joinpath("windows-x86_64/bin/")
@@ -749,7 +749,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 	if (build_info.compiler_name != "vc") or (build_info.project_type == "ninja"):
 		additional_options += f' -DKLAYGE_ARCH_NAME:STRING="{compiler_info.arch}"'
 	if build_info.is_android:
-		additional_options += f' -DCMAKE_TOOLCHAIN_FILE="{PosixPath(android_ndk_path.joinpath("build/cmake/android.toolchain.cmake"))}"'
+		additional_options += f' -DCMAKE_TOOLCHAIN_FILE="{android_ndk_path.joinpath("build/cmake/android.toolchain.cmake")}"'
 		additional_options += f" -DANDROID_PLATFORM=android-{build_info.target_api_level}"
 		additional_options += " -DANDROID_STL=c++_static -DANDROID_TOOLCHAIN=clang"
 	elif build_info.is_darwin:
@@ -758,7 +758,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 		else:
 			LogError("Unsupported Darwin architecture.\n")
 	elif build_info.is_ios:
-		additional_options += f' -DCMAKE_TOOLCHAIN_FILE="{PosixPath(curdir.joinpath("Build/CMake/Modules/iOS.cmake"))}'
+		additional_options += f' -DCMAKE_TOOLCHAIN_FILE="{curdir.joinpath("Build/CMake/Modules/iOS.cmake")}'
 		if "arm" == compiler_info.arch:
 			additional_options += " -DIOS_PLATFORM=OS"
 		elif "x86" == compiler_info.arch:
@@ -866,7 +866,7 @@ def BuildProjects(build_info, compiler_info, project_list, additional_options = 
 				if not build_dir.exists():
 					build_dir.mkdir()
 					additional_options += f' -DCMAKE_MAKE_PROGRAM="{make_name}"'
-					if ("clang" == build_info.compiler_name):
+					if (not build_info.is_android) and ("clang" == build_info.compiler_name):
 						env = os.environ
 						if not ("CC" in env):
 							additional_options += " -DCMAKE_C_COMPILER=clang"
