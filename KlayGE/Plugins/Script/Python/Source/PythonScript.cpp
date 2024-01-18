@@ -840,10 +840,8 @@ namespace KlayGE
 
 	PythonEngine::PythonEngine()
 	{
-		Py_NoSiteFlag = 1;
-
 		PyPreConfig preconfig;
-		PyPreConfig_InitPythonConfig(&preconfig);
+		PyPreConfig_InitIsolatedConfig(&preconfig);
 
 		preconfig.utf8_mode = 1;
 
@@ -853,14 +851,24 @@ namespace KlayGE
 			Py_ExitStatusException(status);
 		}
 
+		PyConfig config;
+		PyConfig_InitIsolatedConfig(&config);
+
 		std::wstring py_lib;
 		Convert(py_lib, Context::Instance().ResLoaderInstance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
-		Py_SetPath(&py_lib[0]);
+
+		config.module_search_paths_set = 1;
+		status = PyWideStringList_Append(&config.module_search_paths, py_lib.c_str());
+		if (PyStatus_Exception(status))
+		{
+			Py_ExitStatusException(status);
+		}
 
 		PyImport_AppendInittab("emb", PyInit_emb);
-		Py_InitializeEx(0);
+		Py_InitializeFromConfig(&config);
 		PyImport_ImportModule("emb");
 
+		PyConfig_Clear(&config);
 		SetStdout();
 	}
 

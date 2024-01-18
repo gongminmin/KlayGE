@@ -1,17 +1,18 @@
-From acf9c5735c7effec1bd01fb006fedf104d95c983 Mon Sep 17 00:00:00 2001
+From a8f701827e7f05dee59cb09a68d7ae374fc18ce0 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
 Subject: [PATCH 2/3] Fix for MinGW
 
 ---
  Modules/posixmodule.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ Python/dynload_win.c  |  2 +-
+ 2 files changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index c0421a94c1..23a05529aa 100644
+index 9ac021f6c5..c6410fceeb 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
-@@ -310,8 +310,8 @@ corresponding Unix manual entries for more information on calls.");
+@@ -337,8 +337,8 @@ corresponding Unix manual entries for more information on calls.");
  #  define HAVE_SYSTEM     1
  #  include <process.h>
  #else
@@ -22,16 +23,16 @@ index c0421a94c1..23a05529aa 100644
  #    define HAVE_GETPPID    1
  #    define HAVE_GETLOGIN   1
  #    define HAVE_SPAWNV     1
-@@ -343,7 +343,7 @@ corresponding Unix manual entries for more information on calls.");
- #    define HAVE_SYSTEM     1
- #    define HAVE_WAIT       1
- #    define HAVE_TTYNAME    1
+@@ -350,7 +350,7 @@ corresponding Unix manual entries for more information on calls.");
+ #    define HAVE_CWAIT      1
+ #    define HAVE_FSYNC      1
+ #    define fsync _commit
 -#  endif  /* _MSC_VER */
 +#  endif  /* _MSC_VER || __MINGW32__ */
  #endif  /* ! __WATCOMC__ || __QNX__ */
  
- _Py_IDENTIFIER(__fspath__);
-@@ -354,7 +354,7 @@ module os
+ /*[clinic input]
+@@ -359,7 +359,7 @@ module os
  [clinic start generated code]*/
  /*[clinic end generated code: output=da39a3ee5e6b4b0d input=94a0f0f978acae17]*/
  
@@ -40,7 +41,7 @@ index c0421a94c1..23a05529aa 100644
  
  #if defined(__sgi)&&_COMPILER_VERSION>=700
  /* declare ctermid_r if compiling with MIPSPro 7.x in ANSI C mode
-@@ -362,7 +362,7 @@ module os
+@@ -367,7 +367,7 @@ module os
  extern char        *ctermid_r(char *);
  #endif
  
@@ -49,7 +50,7 @@ index c0421a94c1..23a05529aa 100644
  
  #if defined(__VXWORKS__)
  #  include <vxCpuLib.h>
-@@ -423,7 +423,7 @@ extern char        *ctermid_r(char *);
+@@ -428,7 +428,7 @@ extern char        *ctermid_r(char *);
  #  endif
  #endif
  
@@ -58,7 +59,7 @@ index c0421a94c1..23a05529aa 100644
  #  ifdef HAVE_DIRECT_H
  #    include <direct.h>
  #  endif
-@@ -434,7 +434,7 @@ extern char        *ctermid_r(char *);
+@@ -439,7 +439,7 @@ extern char        *ctermid_r(char *);
  #    include <process.h>
  #  endif
  #  include <malloc.h>
@@ -67,6 +68,19 @@ index c0421a94c1..23a05529aa 100644
  
  #ifndef MAXPATHLEN
  #  if defined(PATH_MAX) && PATH_MAX > 1024
+diff --git a/Python/dynload_win.c b/Python/dynload_win.c
+index 5dc4095237..1a8582734e 100644
+--- a/Python/dynload_win.c
++++ b/Python/dynload_win.c
+@@ -170,7 +170,7 @@ static char *GetPythonImport (HINSTANCE hModule)
+    Return whether the DLL was found.
+ */
+ extern HMODULE PyWin_DLLhModule;
+-static int
++int
+ _Py_CheckPython3(void)
+ {
+     static int python3_checked = 0;
 -- 
 2.43.0.windows.1
 
