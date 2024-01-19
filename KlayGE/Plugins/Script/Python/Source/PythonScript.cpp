@@ -133,6 +133,8 @@ namespace KlayGE
 		0,                    /* tp_version_tag */
 		nullptr,              /* tp_finalize */
 		nullptr,              /* tp_vectorcall */
+
+		0,                    /* tp_watched */
 	};
 
 	PyModuleDef emb_module =

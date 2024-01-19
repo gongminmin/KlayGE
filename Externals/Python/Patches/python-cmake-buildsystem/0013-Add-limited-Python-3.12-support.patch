@@ -1,0 +1,302 @@
+From b87ea1dcb230abcde3eadb2a728dcb2d423b2351 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Thu, 18 Jan 2024 23:51:25 -0800
+Subject: [PATCH 13/13] Add limited Python 3.12 support
+
+---
+ cmake/config-mingw/pyconfig.h   | 16 ++++++
+ cmake/extensions/CMakeLists.txt | 91 +++++++++++++++++++++++++++------
+ cmake/libpython/CMakeLists.txt  | 48 +++++++++++++++--
+ 3 files changed, 136 insertions(+), 19 deletions(-)
+
+diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
+index 64ee7f3..8d16540 100644
+--- a/cmake/config-mingw/pyconfig.h
++++ b/cmake/config-mingw/pyconfig.h
+@@ -49,6 +49,14 @@ WIN32 is still required for the locale module.
+ #define USE_SOCKET
+ #endif
+ 
++#if PY_VERSION_HEX >= 0x030C0000
++#  define WIN32_LEAN_AND_MEAN
++#  include <windows.h>
++
++#  define MS_WINDOWS_DESKTOP
++#  define HAVE_WINDOWS_CONSOLE_IO 1
++#endif
++
+ /* ------------------------------------------------------------------------*/
+ /* (i686|x86_64)-w64-mingw32 toolchains defines __MINGW32__ */
+ #ifndef __MINGW32__
+@@ -148,6 +156,9 @@ WIN32 is still required for the locale module.
+ #define HAVE_TMPNAM
+ #define HAVE_CLOCK
+ #define HAVE_STRERROR
++#if PY_VERSION_HEX >= 0x030C0000
++#  define HAVE_CLOCK_GETTIME 1
++#endif
+ 
+ #include <io.h>
+ #include <stdio.h>
+@@ -498,6 +509,11 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ /* Define to 1 if you have the <process.h> header file. */
+ #define HAVE_PROCESS_H 1
+ 
++#if PY_VERSION_HEX >= 0x030C0000
++/* Define to 1 if you have the <pthread.h> header file. */
++#define HAVE_PTHREAD_H
++#endif
++
+ /* Define to 1 if you have the <signal.h> header file. */
+ #define HAVE_SIGNAL_H 1
+ 
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index a740029..f36f559 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -86,7 +86,44 @@ endif()
+ add_python_extension(_random ${WIN32_BUILTIN} SOURCES _randommodule.c)
+ add_python_extension(strop ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES stropmodule.c)
+ add_python_extension(_struct ${WIN32_BUILTIN} SOURCES _struct.c)
+-add_python_extension(_testcapi NEVER_BUILTIN SOURCES _testcapimodule.c)
++set(testcapi_SOURCES _testcapimodule.c)
++if(PY_VERSION VERSION_LESS "3.12")
++  list(APPEND testcapi_SOURCES
++    abstract.c
++    buffer.c
++    bytearray.c
++    bytes.c
++    code.c
++    codec.c
++    complex.c
++    datetime.c
++    dict.c
++    docstring.c
++    exceptions.c
++    file.c
++    float.c
++    gc.c
++    getargs.c
++    heaptype.c
++    heaptype_relative.c
++    immortal.c
++    list.c
++    long.c
++    mem.c
++    numbers.c
++    pyos.c
++    pytime.c
++    set.c
++    structmember.c
++    sys.c
++    tuple.c
++    unicode.c
++    vectorcall.c
++    vectorcall_limited.c
++    watchers.c
++  )
++endif()
++add_python_extension(_testcapi NEVER_BUILTIN SOURCES ${testcapi_SOURCES})
+ set(thread2_NAME thread)
+ set(thread3_NAME _thread)
+ set(thread2_SOURCES ${SRC_DIR}/Modules/threadmodule.c)
+@@ -153,7 +190,9 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.6")
+         _blake2/blake2s_impl.c
+     )
+     add_python_extension(_blake2 ${WIN32_BUILTIN} SOURCES ${_blake2_SOURCES})
+-    add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES _sha3/sha3module.c)
++    if(PY_VERSION VERSION_LESS "3.12")
++        add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES _sha3/sha3module.c)
++    endif()
+     add_python_extension(_testconsole ${WIN32_BUILTIN} REQUIRES WIN32 SOURCES ../PC/_testconsole.c)
+ endif()
+ 
+@@ -178,6 +217,11 @@ if(PY_VERSION VERSION_EQUAL "3.9")
+     add_python_extension(_peg_parser ALWAYS_BUILTIN SOURCES _peg_parser.c)
+ endif()
+ 
++# Python 3.12
++if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++    add_python_extension(_testsinglephase BUILTIN SOURCES _testsinglephase.c)
++endif()
++
+ # UNIX-only extensions
+ add_python_extension(fcntl REQUIRES UNIX SOURCES fcntlmodule.c)
+ add_python_extension(grp REQUIRES UNIX SOURCES grpmodule.c)
+@@ -263,6 +307,13 @@ if(EXISTS ${module_src})
+ endif()
+ add_python_extension(_distutils_findvs REQUIRES WIN32 IS_PY3 HAS_DISTUTILS_FINDVS_MODULE_SRC SOURCES ${module_src})
+ 
++if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++    add_python_extension(_wmi REQUIRES WIN32 IS_PY3
++        SOURCES ${SRC_DIR}/PC/_wmimodule.cpp
++        LIBRARIES propsys wbemuuid
++    )
++endif()
++
+ # Multiprocessing is different on unix and windows
+ if(UNIX)
+     set(_multiprocessing2_SOURCES
+@@ -399,15 +450,21 @@ if(WIN32)
+ else()
+     if(APPLE)
+         if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
++            set(ctypes_SOURCES
++                _ctypes/malloc_closure.c)
++            if(PY_VERSION VERSION_LESS "3.12")
++                list(APPEND ctypes_SOURCES
++                    _ctypes/darwin/dlfcn_simple.c
++                    _ctypes/libffi_osx/ffi.c
++                    _ctypes/libffi_osx/x86/darwin64.S
++                    _ctypes/libffi_osx/x86/x86-darwin.S
++                    _ctypes/libffi_osx/x86/x86-ffi_darwin.c
++                    _ctypes/libffi_osx/x86/x86-ffi64.c
++                )
++            endif()
+             add_python_extension(_ctypes
+                 SOURCES ${ctypes_COMMON_SOURCES}
+-                        _ctypes/malloc_closure.c
+-                        _ctypes/darwin/dlfcn_simple.c
+-                        _ctypes/libffi_osx/ffi.c
+-                        _ctypes/libffi_osx/x86/darwin64.S
+-                        _ctypes/libffi_osx/x86/x86-darwin.S
+-                        _ctypes/libffi_osx/x86/x86-ffi_darwin.c
+-                        _ctypes/libffi_osx/x86/x86-ffi64.c
++                        ${ctypes_SOURCES}
+                 INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi_osx/include
+                             ${SRC_DIR}/Modules/_ctypes/darwin
+                 DEFINITIONS MACOSX
+@@ -654,13 +711,15 @@ add_python_extension(_sha512 REQUIRES HASH_NOT_AVAILABLE ${WIN32_BUILTIN} SOURCE
+ 
+ else()
+ 
+-# We always compile these even when OpenSSL is available (issue #14693).
+-# It's harmless and the object code is tiny (40-50 KB per module,
+-# only loaded when actually used).
+-add_python_extension(_md5 ${WIN32_BUILTIN} SOURCES md5module.c)
+-add_python_extension(_sha1 ${WIN32_BUILTIN} SOURCES sha1module.c)
+-add_python_extension(_sha256 ${WIN32_BUILTIN} SOURCES sha256module.c)
+-add_python_extension(_sha512 ${WIN32_BUILTIN} SOURCES sha512module.c)
++if(PY_VERSION VERSION_LESS "3.12")
++    # We always compile these even when OpenSSL is available (issue #14693).
++    # It's harmless and the object code is tiny (40-50 KB per module,
++    # only loaded when actually used).
++    add_python_extension(_md5 ${WIN32_BUILTIN} SOURCES md5module.c)
++    add_python_extension(_sha1 ${WIN32_BUILTIN} SOURCES sha1module.c)
++    add_python_extension(_sha256 ${WIN32_BUILTIN} SOURCES sha256module.c)
++    add_python_extension(_sha512 ${WIN32_BUILTIN} SOURCES sha512module.c)
++endif()
+ 
+ endif()
+ 
+diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
+index fc8fae8..e2de811 100644
+--- a/cmake/libpython/CMakeLists.txt
++++ b/cmake/libpython/CMakeLists.txt
+@@ -142,11 +142,15 @@ if(MSVC)
+ endif()
+ 
+ set(OBJECT3_SOURCES
+-    ${SRC_DIR}/Objects/accu.c
+     ${SRC_DIR}/Objects/bytesobject.c
+     ${SRC_DIR}/Objects/namespaceobject.c
+     ${SRC_DIR}/Objects/odictobject.c
+ )
++if(PY_VERSION VERSION_LESS "3.12")
++    list(APPEND OBJECT3_SOURCES
++        ${SRC_DIR}/Objects/accu.c
++    )
++endif()
+ if(MSVC)
+     list(APPEND OBJECT3_SOURCES
+         ${SRC_DIR}/PC/invalid_parameter_handler.c
+@@ -157,6 +161,11 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
+         ${SRC_DIR}/Objects/call.c
+     )
+ endif()
++if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++    list(APPEND OBJECT3_SOURCES
++        ${SRC_DIR}/Objects/typevarobject.c
++    )
++endif()
+ 
+ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
+     ${OBJECT${PY_VERSION_MAJOR}_SOURCES}
+@@ -360,6 +369,18 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.11")
+         ${SRC_DIR}/Python/specialize.c
+     )
+ endif()
++if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++    list(APPEND PYTHON_COMMON_SOURCES
++        ${SRC_DIR}/Python/assemble.c
++        ${SRC_DIR}/Python/ceval_gil.c
++        ${SRC_DIR}/Python/flowgraph.c
++        ${SRC_DIR}/Python/instrumentation.c
++        ${SRC_DIR}/Python/intrinsics.c
++        ${SRC_DIR}/Python/legacy_tracing.c
++        ${SRC_DIR}/Python/perf_trampoline.c
++        ${SRC_DIR}/Python/tracemalloc.c
++    )
++endif()
+ 
+ if(UNIX)
+     list(APPEND PYTHON_COMMON_SOURCES
+@@ -772,13 +793,18 @@ if(BUILD_FREEZE_IMPORTLIB)
+           ${SRC_DIR}/Modules/getpath.py
+         )
+ 
++      if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++        set(DEEPFREEZE_PY ${SRC_DIR}/Tools/build/deepfreeze.py)
++      else()
++        set(DEEPFREEZE_PY ${SRC_DIR}/Tools/scripts/deepfreeze.py)
++      endif()
+       set(LIBPYTHON_DEEPFREEZE_SOURCES
+         ${SRC_DIR}/Python/deepfreeze/deepfreeze.c
+       )
+       add_custom_command(
+         OUTPUT ${LIBPYTHON_DEEPFREEZE_SOURCES}
+         COMMAND
+-          ${CMAKE_CROSSCOMPILING_EMULATOR} ${Python3_EXECUTABLE} ${SRC_DIR}/Tools/scripts/deepfreeze.py
++          ${CMAKE_CROSSCOMPILING_EMULATOR} ${Python3_EXECUTABLE} ${DEEPFREEZE_PY}
+             "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap.h:importlib._bootstrap"
+             "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap_external.h:importlib._bootstrap_external"
+             "${SRC_DIR}/Python/frozen_modules/zipimport.h:zipimport"
+@@ -804,7 +830,7 @@ if(BUILD_FREEZE_IMPORTLIB)
+             "${SRC_DIR}/Python/frozen_modules/frozen_only.h:frozen_only"
+             "-o" "${SRC_DIR}/Python/deepfreeze/deepfreeze.c"
+         DEPENDS
+-          ${SRC_DIR}/Tools/scripts/deepfreeze.py
++          ${DEEPFREEZE_PY}
+       )
+     endif()
+ 
+@@ -897,10 +923,26 @@ elseif(UNIX)
+         ${SRC_DIR}/Python/frozen.c
+     )
+ endif()
++if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++    list(APPEND LIBPYTHON_SOURCES
++        ${SRC_DIR}/Modules/_hacl/Hacl_Hash_MD5.c
++        ${SRC_DIR}/Modules/_hacl/Hacl_Hash_SHA1.c
++        ${SRC_DIR}/Modules/_hacl/Hacl_Hash_SHA2.c
++        ${SRC_DIR}/Modules/_hacl/Hacl_Hash_SHA3.c
++        ${SRC_DIR}/Modules/_xxinterpchannelsmodule.c
++        ${SRC_DIR}/Modules/md5module.c
++        ${SRC_DIR}/Modules/sha1module.c
++        ${SRC_DIR}/Modules/sha2module.c
++        ${SRC_DIR}/Modules/sha3module.c
++    )
++endif()
+ 
+ # Build python libraries
+ function(add_libpython name type install component)
+     add_library(${name} ${type} ${LIBPYTHON_SOURCES})
++    if(PY_VERSION VERSION_GREATER_EQUAL "3.12")
++        target_include_directories(${name} PRIVATE ${SRC_DIR}/Modules/_hacl/include)
++    endif()
+     target_link_libraries(${name} ${LIBPYTHON_TARGET_LIBRARIES})
+ 
+     if(MSVC)
+-- 
+2.43.0.windows.1
+

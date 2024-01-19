@@ -1,0 +1,213 @@
+From c07149bb83998055fdf27c3b5fa56ea252f14e19 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 20 Jan 2019 20:21:33 -0800
+Subject: [PATCH 2/2] Fix for UWP
+
+---
+ Modules/posixmodule.c | 22 +++++++++++++++++++++-
+ Python/dynload_win.c  |  8 ++++++++
+ Python/fileutils.c    | 13 +++++++++++++
+ Python/sysmodule.c    |  2 ++
+ 4 files changed, 44 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 348937ca17..f250f15861 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -14439,6 +14439,10 @@ static int
+ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
+ /*[clinic end generated code: output=36be5afca6ea84d8 input=cfe99f9c05c70ad1]*/
+ {
++#ifndef MS_WINDOWS_DESKTOP
++    /* No subprocesses on UWP */
++    return 0;
++#else
+     DWORD flags;
+ 
+     if (!GetHandleInformation((HANDLE)handle, &flags)) {
+@@ -14447,6 +14451,7 @@ os_get_handle_inheritable_impl(PyObject *module, intptr_t handle)
+     }
+ 
+     return flags & HANDLE_FLAG_INHERIT;
++#endif
+ }
+ 
+ 
+@@ -14464,12 +14469,17 @@ os_set_handle_inheritable_impl(PyObject *module, intptr_t handle,
+                                int inheritable)
+ /*[clinic end generated code: output=021d74fe6c96baa3 input=7a7641390d8364fc]*/
+ {
++#ifndef MS_WINDOWS_DESKTOP
++    PyErr_SetString(PyExc_NotImplementedError, "No subprocesses on UWP");
++    return NULL;
++#else
+     DWORD flags = inheritable ? HANDLE_FLAG_INHERIT : 0;
+     if (!SetHandleInformation((HANDLE)handle, HANDLE_FLAG_INHERIT, flags)) {
+         PyErr_SetFromWindowsErr(0);
+         return NULL;
+     }
+     Py_RETURN_NONE;
++#endif
+ }
+ #endif /* MS_WINDOWS */
+ 
+@@ -15636,6 +15646,10 @@ static PyObject *
+ os__add_dll_directory_impl(PyObject *module, path_t *path)
+ /*[clinic end generated code: output=80b025daebb5d683 input=1de3e6c13a5808c8]*/
+ {
++#ifndef MS_WINDOWS_DESKTOP
++    PyErr_SetString(PyExc_NotImplementedError, "No dll directory support in UWP");
++    return PyErr_SetExcFromWindowsErrWithFilenameObject(PyExc_NotImplementedError, 0, NULL);
++#else
+     DLL_DIRECTORY_COOKIE cookie = 0;
+     DWORD err = 0;
+ 
+@@ -15655,6 +15669,7 @@ os__add_dll_directory_impl(PyObject *module, path_t *path)
+     }
+ 
+     return PyCapsule_New(cookie, "DLL directory cookie", NULL);
++#endif
+ }
+ 
+ /*[clinic input]
+@@ -15673,6 +15688,10 @@ static PyObject *
+ os__remove_dll_directory_impl(PyObject *module, PyObject *cookie)
+ /*[clinic end generated code: output=594350433ae535bc input=c1d16a7e7d9dc5dc]*/
+ {
++#ifndef MS_WINDOWS_DESKTOP
++    PyErr_SetString(PyExc_NotImplementedError, "No dll directory support in UWP");
++    return PyErr_SetExcFromWindowsErrWithFilenameObject(PyExc_NotImplementedError, 0, NULL);
++#else
+     DLL_DIRECTORY_COOKIE cookieValue;
+     DWORD err = 0;
+ 
+@@ -15701,6 +15720,7 @@ os__remove_dll_directory_impl(PyObject *module, PyObject *cookie)
+     }
+ 
+     Py_RETURN_NONE;
++#endif
+ }
+ 
+ #endif /* MS_WINDOWS_APP || MS_WINDOWS_SYSTEM */
+@@ -16604,7 +16624,7 @@ all_ins(PyObject *m)
+     if (PyModule_AddIntConstant(m, "_COPYFILE_XATTR", COPYFILE_XATTR)) return -1;
+ #endif
+ 
+-#ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_DESKTOP
+     if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_DEFAULT_DIRS", LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)) return -1;
+     if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_APPLICATION_DIR", LOAD_LIBRARY_SEARCH_APPLICATION_DIR)) return -1;
+     if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_SYSTEM32", LOAD_LIBRARY_SEARCH_SYSTEM32)) return -1;
+diff --git a/Python/dynload_win.c b/Python/dynload_win.c
+index acab05e2c6..7c51e70a0c 100644
+--- a/Python/dynload_win.c
++++ b/Python/dynload_win.c
+@@ -174,6 +174,9 @@ extern HMODULE PyWin_DLLhModule;
+ static int
+ _Py_CheckPython3(void)
+ {
++#ifndef MS_WINDOWS_DESKTOP
++    return 0;
++#else
+     static int python3_checked = 0;
+     static HANDLE hPython3;
+     #define MAXPATHLEN 512
+@@ -216,6 +219,7 @@ _Py_CheckPython3(void)
+     }
+     return hPython3 != NULL;
+     #undef MAXPATHLEN
++#endif
+ }
+ #endif /* Py_ENABLE_SHARED */
+ 
+@@ -250,9 +254,13 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
+            AddDllDirectory function. We add SEARCH_DLL_LOAD_DIR to
+            ensure DLLs adjacent to the PYD are preferred. */
+         Py_BEGIN_ALLOW_THREADS
++#ifndef MS_WINDOWS_DESKTOP
++        hDLL = LoadPackagedLibrary(wpathname, 0);
++#else
+         hDLL = LoadLibraryExW(wpathname, NULL,
+                               LOAD_LIBRARY_SEARCH_DEFAULT_DIRS |
+                               LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
++#endif
+         Py_END_ALLOW_THREADS
+         PyMem_Free(wpathname);
+ 
+diff --git a/Python/fileutils.c b/Python/fileutils.c
+index c7521751cd..3665fba18d 100644
+--- a/Python/fileutils.c
++++ b/Python/fileutils.c
+@@ -1403,6 +1403,9 @@ static int
+ get_inheritable(int fd, int raise)
+ {
+ #ifdef MS_WINDOWS
++#ifndef MS_WINDOWS_DESKTOP
++    return 0;
++#else
+     HANDLE handle;
+     DWORD flags;
+ 
+@@ -1420,6 +1423,7 @@ get_inheritable(int fd, int raise)
+     }
+ 
+     return (flags & HANDLE_FLAG_INHERIT);
++#endif
+ #else
+     int flags;
+ 
+@@ -1448,8 +1452,10 @@ static int
+ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+ {
+ #ifdef MS_WINDOWS
++#ifdef MS_WINDOWS_DESKTOP
+     HANDLE handle;
+     DWORD flags;
++#endif
+ #else
+ #if defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
+     static int ioctl_works = -1;
+@@ -1477,6 +1483,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+     }
+ 
+ #ifdef MS_WINDOWS
++#ifndef MS_WINDOWS_DESKTOP
++    if (!inheritable)
++        return 0;
++    PyErr_SetString(PyExc_NotImplementedError, "set_inheritable is not implemented on UWP");
++    return -1;
++#else
+     handle = _Py_get_osfhandle_noraise(fd);
+     if (handle == INVALID_HANDLE_VALUE) {
+         if (raise)
+@@ -1495,6 +1507,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+         return -1;
+     }
+     return 0;
++#endif
+ 
+ #else
+ 
+diff --git a/Python/sysmodule.c b/Python/sysmodule.c
+index 14f4447425..0bb727e4e6 100644
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -1607,6 +1607,7 @@ sys_getwindowsversion_impl(PyObject *module)
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.wSuiteMask));
+     PyStructSequence_SET_ITEM(version, pos++, PyLong_FromLong(ver.wProductType));
+ 
++#ifdef MS_WINDOWS_DESKTOP
+     // GetVersion will lie if we are running in a compatibility mode.
+     // We need to read the version info from a system file resource
+     // to accurately identify the OS version. If we fail for any reason,
+@@ -1624,6 +1625,7 @@ sys_getwindowsversion_impl(PyObject *module)
+     if (realVersion) {
+         PyStructSequence_SET_ITEM(version, pos++, realVersion);
+     }
++#endif
+ 
+     if (PyErr_Occurred()) {
+         Py_DECREF(version);
+-- 
+2.43.0.windows.1
+

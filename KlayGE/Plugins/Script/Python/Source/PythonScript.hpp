@@ -39,7 +39,10 @@
 #endif
 #endif
 
-#if defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4100) // Ignore unused parameters
+#elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers" // Some uninitializers in python.h
 #elif defined(KLAYGE_COMPILER_CLANG)
@@ -50,7 +53,9 @@
 #pragma clang diagnostic ignored "-Wreserved-identifier" // Ignore reserved '_'
 #endif
 #include <Python.h>
-#if defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #elif defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop

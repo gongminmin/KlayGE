@@ -1,0 +1,76 @@
+From 8cffc569f9a94a9557d28059db10db314cb16673 Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sat, 20 Jan 2024 14:26:17 -0800
+Subject: [PATCH 1/2] Fix for MinGW
+
+---
+ Modules/posixmodule.c   | 10 +++++-----
+ Python/thread_pthread.h |  3 +++
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 0ac5a8d371..348937ca17 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -342,7 +342,7 @@ corresponding Unix manual entries for more information on calls.");
+ #  define HAVE_OPENDIR    1
+ #  define HAVE_SYSTEM     1
+ #  include <process.h>
+-#elif defined( _MSC_VER)
++#elif defined( _MSC_VER) || defined(__MINGW32__)
+   /* Microsoft compiler */
+ #  if defined(MS_WINDOWS_DESKTOP) || defined(MS_WINDOWS_APP) || defined(MS_WINDOWS_SYSTEM)
+ #    define HAVE_GETPPID    1
+@@ -369,7 +369,7 @@ module os
+ [clinic start generated code]*/
+ /*[clinic end generated code: output=da39a3ee5e6b4b0d input=94a0f0f978acae17]*/
+ 
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+ 
+ #if defined(__sgi)&&_COMPILER_VERSION>=700
+ /* declare ctermid_r if compiling with MIPSPro 7.x in ANSI C mode
+@@ -377,7 +377,7 @@ module os
+ extern char        *ctermid_r(char *);
+ #endif
+ 
+-#endif /* !_MSC_VER */
++#endif /* !_MSC_VER && !__MINGW32__ */
+ 
+ #if defined(__VXWORKS__)
+ #  include <vxCpuLib.h>
+@@ -438,7 +438,7 @@ extern char        *ctermid_r(char *);
+ #  endif
+ #endif
+ 
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+ #  ifdef HAVE_DIRECT_H
+ #    include <direct.h>
+ #  endif
+@@ -449,7 +449,7 @@ extern char        *ctermid_r(char *);
+ #    include <process.h>
+ #  endif
+ #  include <malloc.h>
+-#endif /* _MSC_VER */
++#endif /* _MSC_VER || __MINGW32__ */
+ 
+ #ifndef MAXPATHLEN
+ #  if defined(PATH_MAX) && PATH_MAX > 1024
+diff --git a/Python/thread_pthread.h b/Python/thread_pthread.h
+index f96c57da64..ba873d6d6f 100644
+--- a/Python/thread_pthread.h
++++ b/Python/thread_pthread.h
+@@ -346,6 +346,9 @@ PyThread_get_thread_native_id(void)
+ #elif defined(__DragonFly__)
+     lwpid_t native_id;
+     native_id = lwp_gettid();
++#elif defined(_WIN32)
++    DWORD native_id;
++    native_id = GetCurrentThreadId();
+ #endif
+     return (unsigned long) native_id;
+ }
+-- 
+2.43.0.windows.1
+
