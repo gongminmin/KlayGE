@@ -51,7 +51,13 @@
 #pragma warning(push)
 #pragma warning(disable : 5246) // Ignore "'Data4': the initialization of a subobject should be wrapped in braces" warning from mfidl.h
 #endif
+#ifdef KLAYGE_COMPILER_GCC
+#define protected pprotected // "protected" is a keyword, can't used as variable name
+#endif
 #include <mfmediaengine.h>
+#ifdef KLAYGE_COMPILER_GCC
+#undef protected
+#endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
 #endif
@@ -87,8 +93,10 @@
 
 #include "MFShow.hpp"
 
+#ifndef KLAYGE_COMPILER_GCC
 DEFINE_GUID(IID_IMFMediaEngineClassFactory, 0x4D645ACE, 0x26AA, 0x4688, 0x9B, 0xE1, 0xDF, 0x35, 0x16, 0x99, 0x0B, 0x93);
 DEFINE_GUID(IID_IMFMediaEngineNotify, 0xFEE7C112, 0xE776, 0x42B5, 0x9B, 0xBF, 0x00, 0x48, 0x52, 0x4E, 0x2B, 0xD5);
+#endif
 
 DEFINE_UUID_OF(ID3D10Multithread);
 DEFINE_UUID_OF(IDXGIDevice2);

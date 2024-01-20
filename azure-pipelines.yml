@@ -38,6 +38,8 @@ stages:
           compiler: mingw
           installCommand: 'choco install ninja'
           id: 'gcc13_win_$(platform)_$(configuration)'
+          CC: gcc
+          CXX: g++
           BUILD_DIR: mingw
 
         Linux_gcc11:

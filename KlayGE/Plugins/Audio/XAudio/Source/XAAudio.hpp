@@ -144,7 +144,7 @@ struct X3DAUDIO_LISTENER
 #endif
 #endif
 
-#if (_WIN32_WINNT <= _WIN32_WINNT_WIN7)
+#if (_WIN32_WINNT <= _WIN32_WINNT_WIN7) || defined(KLAYGE_COMPILER_GCC)
 #define XAUDIO2_DLL_A  "xaudio2_7.dll"
 #define XAUDIO2_DLL_W L"xaudio2_7.dll"
 #endif
