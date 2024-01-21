@@ -1,7 +1,7 @@
-From 91b6dec1a26d170737eb2ffcb2d8f7517b4fae20 Mon Sep 17 00:00:00 2001
+From 08d3eabc4f582539836c91ea2386a53d9e272c89 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 16 Jan 2024 22:37:53 -0800
-Subject: [PATCH 12/12] Add limited Python 3.11 support
+Subject: [PATCH 12/13] Add limited Python 3.11 support
 
 ---
  cmake/config-mingw/pyconfig.h   |   8 +-
@@ -73,7 +73,7 @@ index dacaeab..a740029 100644
  add_python_extension(_symtable BUILTIN SOURCES symtablemodule.c)
  # Python PEP-3118 (buffer protocol) test module
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index d31ec04..fc8fae8 100644
+index d31ec04..0e4e905 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
 @@ -3,70 +3,78 @@ add_definitions(-DPy_BUILD_CORE_BUILTIN)
@@ -641,17 +641,7 @@ index d31ec04..fc8fae8 100644
 +        ${SRC_DIR}/Python/frozen.c
 +    )
 +
-+    if(UNIX)
-+        set_property(
-+            SOURCE ${SRC_DIR}/Modules/getpath.c
-+            PROPERTY COMPILE_DEFINITIONS
-+                PREFIX="${CMAKE_INSTALL_PREFIX}"
-+                EXEC_PREFIX="${CMAKE_INSTALL_PREFIX}"
-+                VERSION="${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}"
-+                VPATH="."
-+                PLATLIBDIR="lib"
-+          )
-+    else()
++    if(WIN32)
 +        list(APPEND LIBPYTHON_SOURCES
 +            ${PROJECT_BINARY_DIR}/CMakeFiles/config.c
 +            ${SRC_DIR}/PC/dl_nt.c
@@ -678,6 +668,16 @@ index d31ec04..fc8fae8 100644
 +                Py_ENABLE_SHARED
 +                MS_DLL_ID="${ms_dll_id}"
 +            )
++    else()
++        set_property(
++            SOURCE ${SRC_DIR}/Modules/getpath.c
++            PROPERTY COMPILE_DEFINITIONS
++                PREFIX="${CMAKE_INSTALL_PREFIX}"
++                EXEC_PREFIX="${CMAKE_INSTALL_PREFIX}"
++                VERSION="${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}"
++                VPATH="."
++                PLATLIBDIR="lib"
++          )
 +    endif()
 +elseif(UNIX)
      list(APPEND LIBPYTHON_SOURCES

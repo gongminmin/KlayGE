@@ -1,4 +1,4 @@
-From b87ea1dcb230abcde3eadb2a728dcb2d423b2351 Mon Sep 17 00:00:00 2001
+From 87d628bf660ea7ea92b18d271b9880e776524b67 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 18 Jan 2024 23:51:25 -0800
 Subject: [PATCH 13/13] Add limited Python 3.12 support
@@ -190,7 +190,7 @@ index a740029..f36f559 100644
  endif()
  
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index fc8fae8..e2de811 100644
+index 0e4e905..1eddac7 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
 @@ -142,11 +142,15 @@ if(MSVC)
