@@ -1,4 +1,4 @@
-UpdateExternalLib("zlib" "https://github.com/madler/zlib.git" "cacf7f1d4e3d44d871b605da3b647f07d718623f" "" "" need_patch)
+UpdateExternalLib("zlib" "https://github.com/madler/zlib.git" "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851" "" "" need_patch)
 if(need_patch)
 	foreach(patch "0001-Fix-.rc-compiling-issues-in-clang-cl")
 		ApplyPatch("zlib" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/${patch}.patch")
@@ -6,8 +6,6 @@ if(need_patch)
 endif()
 
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
-set(AMD64 OFF CACHE BOOL "" FORCE)
-set(ASM686 OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(zlib)
 
