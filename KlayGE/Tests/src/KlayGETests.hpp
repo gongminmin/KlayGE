@@ -1,21 +1,7 @@
 #ifndef KLAYGE_TESTS_HPP
 #define KLAYGE_TESTS_HPP
 
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(disable : 6326) // Potential comparison of a constant with another constant.
-#endif
-
-#if defined(KLAYGE_COMPILER_CLANGCL)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshift-sign-overflow"
-#if (KLAYGE_COMPILER_VERSION >= 160)
-#pragma clang diagnostic ignored "-Wdeprecated" // Ignore out-of-line definition of constexpr
-#endif
-#endif
 #include <gtest/gtest.h>
-#if defined(KLAYGE_COMPILER_CLANGCL)
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Texture.hpp>

@@ -1,4 +1,4 @@
-UpdateExternalLib("nanosvg" "https://github.com/memononen/nanosvg.git" "3e403ec72a9145cbbcc6c63d94a4caf079aafec2")
+UpdateExternalLib("nanosvg" "https://github.com/memononen/nanosvg.git" "93ce879dc4c04a3ef1758428ec80083c38610b1f")
 
 add_library(nanosvg INTERFACE)
 target_include_directories(nanosvg

@@ -1,4 +1,4 @@
-UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "c0cbe602ce66481a822ba16856052a47154f5cc5")
+UpdateExternalLib("openal-soft" "https://github.com/kcat/openal-soft.git" "d3875f333fb6abe2f39d82caca329414871ae53b")
 
 if(KLAYGE_PLATFORM_WINDOWS)
 	if(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
@@ -29,6 +29,7 @@ set(ALSOFT_INSTALL_CONFIG OFF CACHE BOOL "" FORCE)
 set(ALSOFT_INSTALL_HRTF_DEFS OFF CACHE BOOL "" FORCE)
 set(ALSOFT_INSTALL_AMBDEC_PRESETS OFF CACHE BOOL "" FORCE)
 set(ALSOFT_EMBED_HRTF_DATA ON CACHE BOOL "" FORCE)
+set(ALSOFT_UPDATE_BUILD_VERSION OFF CACHE BOOL "" FORCE)
 
 if(KLAYGE_COMPILER_MSVC)
 	set(HAVE___RESTRICT FALSE)
@@ -51,7 +52,7 @@ if(KLAYGE_PLATFORM_ANDROID OR KLAYGE_PLATFORM_IOS)
 	set(LIBTYPE "STATIC")
 endif()
 
-add_subdirectory(openal-soft)
+add_subdirectory(openal-soft EXCLUDE_FROM_ALL)
 
 if(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(OpenAL
@@ -89,4 +90,4 @@ set_target_properties(OpenAL PROPERTIES
 	PREFIX "${prefix}"
 )
 
-set_target_properties("build_version" "common" "OpenAL" PROPERTIES FOLDER "Externals/openal-soft")
+set_target_properties("common" "OpenAL" PROPERTIES FOLDER "Externals/openal-soft")

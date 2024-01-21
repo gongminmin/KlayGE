@@ -14,15 +14,15 @@ fmt/fmt
 FreeImage/FreeImage
 freetype/freetype
 googletest/googletest
-libogg/libogg
-libvorbis/libvorbis
 NanoRtti/NanoRtti
 nanosvg/nanosvg
+ogg/ogg
 openal-soft/openal-soft
 Python/cpython
 Python/python-cmake-buildsystem
 rapidjson/rapidjson
 rapidxml/rapidxml
 scope-lite/scope-lite
+vorbis/vorbis
 wpftoolkit/wpftoolkit
 zlib/zlib

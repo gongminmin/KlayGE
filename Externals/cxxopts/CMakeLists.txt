@@ -1,6 +1,8 @@
-UpdateExternalLib("cxxopts" "https://github.com/jarro2783/cxxopts.git" "302302b30839505703d37fb82f536c53cf9172fa")
+UpdateExternalLib("cxxopts" "https://github.com/jarro2783/cxxopts.git" "eb787304d67ec22f7c3a184ee8b4c481d04357fd")
 
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(CXXOPTS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CXXOPTS_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+set(CXXOPTS_USE_UNICODE_HELP OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(cxxopts)
+add_subdirectory(cxxopts EXCLUDE_FROM_ALL)

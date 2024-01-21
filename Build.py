@@ -952,8 +952,8 @@ if __name__ == "__main__":
 	if (len(sys.argv) > 1) and (sys.argv[1].lower() == "clean"):
 		clean_dir_list = ["7z/7z", "7z/7zxa", "android_native_app_glue/android_native_app_glue", "assimp/assimp", "boost/assert", "boost/config", "boost/core", "boost/static_assert", "boost/throw_exception",
 			"cxxopts/cxxopts", "d3dcompiler/d3dcompiler", "DirectX-Headers/DirectX-Headers", "dxsdk/dxsdk", "fmt/fmt", "FreeImage/FreeImage", "freetype/freetype", "googletest/googletest",
-			"libogg/libogg", "libvorbis/libvorbis", "NanoRtti/NanoRtti", "nanosvg/nanosvg", "openal-soft/openal-soft", "Python/cpython", "Python/python-cmake-buildsystem", "rapidjson/rapidjson", "rapidxml/rapidxml",
-			"scope-lite/scope-lite", "wpftoolkit/wpftoolkit", "zlib/zlib"]
+			"NanoRtti/NanoRtti", "nanosvg/nanosvg", "ogg/ogg", "openal-soft/openal-soft", "Python/cpython", "Python/python-cmake-buildsystem", "rapidjson/rapidjson", "rapidxml/rapidxml",
+			"scope-lite/scope-lite", "vorbis/vorbis", "wpftoolkit/wpftoolkit", "zlib/zlib"]
 		for dir in clean_dir_list:
 			dir_name = Path("Externals/").joinpath(dir)
 			if dir_name.is_dir():

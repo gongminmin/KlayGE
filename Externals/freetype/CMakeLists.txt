@@ -1,4 +1,4 @@
-UpdateExternalLib("freetype" "https://git.savannah.nongnu.org/r/freetype/freetype2.git/" "6a2b3e4007e794bfc6c91030d0ed987f925164a8")
+UpdateExternalLib("freetype" "https://git.savannah.nongnu.org/r/freetype/freetype2.git/" "920c5502cc3ddda88f6c7d85ee834ac611bb11cc")
 
 SET(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
@@ -12,7 +12,7 @@ SET(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE CACHE BOOL "" FORCE)
 SET(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE CACHE BOOL "" FORCE)
 SET(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE BOOL "" FORCE)
 
-ADD_SUBDIRECTORY(freetype)
+add_subdirectory(freetype EXCLUDE_FROM_ALL)
 
 if(KLAYGE_COMPILER_CLANGCL)
 	target_compile_options(freetype
