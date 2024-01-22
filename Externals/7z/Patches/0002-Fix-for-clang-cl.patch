@@ -1,27 +1,36 @@
-From 62c609c44604241d5255180ac7e197d9e4ea735f Mon Sep 17 00:00:00 2001
+From 01bf91477f6b06efcd85e5b428afa376e6aa32d7 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sat, 4 Jun 2022 14:53:22 -0700
 Subject: [PATCH 2/3] Fix for clang-cl
 
 ---
- C/LzFind.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ C/AesOpt.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/C/LzFind.c b/C/LzFind.c
-index 1b73c284..91ba4548 100644
---- a/C/LzFind.c
-+++ b/C/LzFind.c
-@@ -511,7 +511,9 @@ void MatchFinder_Init(CMatchFinder *p)
-     || defined(__GNUC__) && (__GNUC__ >= 8) \
-     || defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 1900)
-       #define USE_SATUR_SUB_128
--      #define USE_AVX2
-+      #if !defined(_MSC_VER)
-+        #define USE_AVX2
-+      #endif
-       #define ATTRIB_SSE41 __attribute__((__target__("sse4.1")))
-       #define ATTRIB_AVX2 __attribute__((__target__("avx2")))
-   #elif defined(_MSC_VER)
+diff --git a/C/AesOpt.c b/C/AesOpt.c
+index cfa6413f..f3fa3ec5 100755
+--- a/C/AesOpt.c
++++ b/C/AesOpt.c
+@@ -23,7 +23,9 @@
+         #endif
+       #if defined(__clang__) && (__clang_major__ >= 8) \
+           || defined(__GNUC__) && (__GNUC__ >= 8)
+-        #define USE_INTEL_VAES
++        #if !defined(_MSC_VER) || (__clang_major__ >= 16)
++          #define USE_INTEL_VAES
++        #endif
+         #if !defined(__AES__) || !defined(__VAES__) || !defined(__AVX__) || !defined(__AVX2__)
+           #define ATTRIB_VAES __attribute__((__target__("aes,vaes,avx,avx2")))
+         #endif
+@@ -557,7 +559,7 @@ VAES_COMPAT_STUB (AesCtr_Code_HW)
+ #elif defined(MY_CPU_ARM_OR_ARM64) && defined(MY_CPU_LE)
+ 
+   #if defined(__clang__)
+-    #if (__clang_major__ >= 8) // fix that check
++    #if (__clang_major__ >= 8) && !defined(__ANDROID__) // fix that check
+       #define USE_HW_AES
+     #endif
+   #elif defined(__GNUC__)
 -- 
-2.17.1.windows.2
+2.43.0.windows.1
 

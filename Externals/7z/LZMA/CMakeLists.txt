@@ -37,7 +37,7 @@ ADD_LIBRARY(${LIB_NAME} ${KLAYGE_PREFERRED_LIB_TYPE}
 target_compile_definitions(${LIB_NAME}
 	PRIVATE
 		-DLZMALIB_EXPORTS
-		-D_7ZIP_ST
+		-DZ7_ST
 )
 target_include_directories(${LIB_NAME}
 	PUBLIC

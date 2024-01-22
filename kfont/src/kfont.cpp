@@ -48,7 +48,7 @@ namespace KlayGE
 
 	std::mutex singleton_mutex;
 
-	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
+	typedef int (Z7_STDCALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
 		int level,      /* 0 <= level <= 9, default = 5 */
 		unsigned int dictSize,  /* default = (1 << 24) */
@@ -57,7 +57,7 @@ namespace KlayGE
 		int pb,        /* 0 <= pb <= 4, default = 2  */
 		int fb,        /* 5 <= fb <= 273, default = 32 */
 		int numThreads /* 1 or 2, default = 2 */);
-	typedef int (MY_STD_CALL *LzmaUncompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
+	typedef int (Z7_STDCALL *LzmaUncompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
 		unsigned char const * props, size_t propsSize);
 
 	class LZMALoader
