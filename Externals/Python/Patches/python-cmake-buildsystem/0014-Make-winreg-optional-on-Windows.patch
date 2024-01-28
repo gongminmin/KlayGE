@@ -1,0 +1,25 @@
+From 67a7f77a638e1bccdef802f6c61fd068d6cbd85d Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 28 Jan 2024 11:11:42 -0800
+Subject: [PATCH 14/14] Make winreg optional on Windows
+
+---
+ cmake/extensions/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/extensions/CMakeLists.txt b/cmake/extensions/CMakeLists.txt
+index f36f559..9d0bd7f 100644
+--- a/cmake/extensions/CMakeLists.txt
++++ b/cmake/extensions/CMakeLists.txt
+@@ -290,7 +290,7 @@ add_python_extension(_subprocess REQUIRES WIN32 IS_PY2 BUILTIN SOURCES ${SRC_DIR
+ 
+ set(winreg2_NAME _winreg)
+ set(winreg3_NAME winreg)
+-add_python_extension(${winreg${PY_VERSION_MAJOR}_NAME} REQUIRES WIN32 BUILTIN SOURCES ${SRC_DIR}/PC/${winreg${PY_VERSION_MAJOR}_NAME}.c)
++add_python_extension(${winreg${PY_VERSION_MAJOR}_NAME} REQUIRES WIN32 SOURCES ${SRC_DIR}/PC/${winreg${PY_VERSION_MAJOR}_NAME}.c)
+ 
+ # Python3: Windows-only extensions
+ add_python_extension(_overlapped
+-- 
+2.43.0.windows.1
+

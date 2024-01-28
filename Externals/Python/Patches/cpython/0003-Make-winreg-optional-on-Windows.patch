@@ -1,0 +1,98 @@
+From 6ef7b6c7efdb4ecef06365b34be2dd935869399d Mon Sep 17 00:00:00 2001
+From: Minmin Gong <gongminmin@msn.com>
+Date: Sun, 28 Jan 2024 11:07:19 -0800
+Subject: [PATCH 3/3] Make winreg optional on Windows
+
+---
+ Lib/importlib/_bootstrap_external.py | 37 +++++++++++++++++-----------
+ PC/config_minimal.c                  |  7 ------
+ 2 files changed, 23 insertions(+), 21 deletions(-)
+
+diff --git a/Lib/importlib/_bootstrap_external.py b/Lib/importlib/_bootstrap_external.py
+index 73ac4405cb..0297f6c171 100644
+--- a/Lib/importlib/_bootstrap_external.py
++++ b/Lib/importlib/_bootstrap_external.py
+@@ -33,7 +33,6 @@
+ _MS_WINDOWS = (sys.platform == 'win32')
+ if _MS_WINDOWS:
+     import nt as _os
+-    import winreg
+ else:
+     import posix as _os
+ 
+@@ -933,24 +932,34 @@ class WindowsRegistryFinder:
+     @staticmethod
+     def _open_registry(key):
+         try:
+-            return winreg.OpenKey(winreg.HKEY_CURRENT_USER, key)
+-        except OSError:
+-            return winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key)
++            import winreg
++
++            try:
++                return winreg.OpenKey(winreg.HKEY_CURRENT_USER, key)
++            except OSError:
++                return winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key)
++        except ImportError:
++            pass
+ 
+     @classmethod
+     def _search_registry(cls, fullname):
+-        if cls.DEBUG_BUILD:
+-            registry_key = cls.REGISTRY_KEY_DEBUG
+-        else:
+-            registry_key = cls.REGISTRY_KEY
+-        key = registry_key.format(fullname=fullname,
+-                                  sys_version='%d.%d' % sys.version_info[:2])
+         try:
+-            with cls._open_registry(key) as hkey:
+-                filepath = winreg.QueryValue(hkey, '')
+-        except OSError:
++            import winreg
++
++            if cls.DEBUG_BUILD:
++                registry_key = cls.REGISTRY_KEY_DEBUG
++            else:
++                registry_key = cls.REGISTRY_KEY
++            key = registry_key.format(fullname=fullname,
++                                      sys_version='%d.%d' % sys.version_info[:2])
++            try:
++                with cls._open_registry(key) as hkey:
++                    filepath = winreg.QueryValue(hkey, '')
++            except OSError:
++                return None
++            return filepath
++        except ImportError:
+             return None
+-        return filepath
+ 
+     @classmethod
+     def find_spec(cls, fullname, path=None, target=None):
+diff --git a/PC/config_minimal.c b/PC/config_minimal.c
+index 9a66ea1d1c..41ec30ff9e 100644
+--- a/PC/config_minimal.c
++++ b/PC/config_minimal.c
+@@ -16,9 +16,6 @@ extern PyObject* PyInit__tracemalloc(void);
+ extern PyObject* PyInit_gc(void);
+ extern PyObject* PyInit_nt(void);
+ extern PyObject* PyInit__signal(void);
+-#if defined(MS_WINDOWS_DESKTOP) || defined(MS_WINDOWS_SYSTEM) || defined(MS_WINDOWS_GAMES)
+-extern PyObject* PyInit_winreg(void);
+-#endif
+ 
+ extern PyObject* PyInit__ast(void);
+ extern PyObject* PyInit__io(void);
+@@ -39,10 +36,6 @@ struct _inittab _PyImport_Inittab[] = {
+     {"_tokenize", PyInit__tokenize},
+     {"_tracemalloc", PyInit__tracemalloc},
+ 
+-#if defined(MS_WINDOWS_DESKTOP) || defined(MS_WINDOWS_SYSTEM) || defined(MS_WINDOWS_GAMES)
+-    {"winreg", PyInit_winreg},
+-#endif
+-
+     /* This module "lives in" with marshal.c */
+     {"marshal", PyMarshal_Init},
+ 
+-- 
+2.43.0.windows.1
+

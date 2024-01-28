@@ -7,7 +7,7 @@ SET(PYTHON_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cpython")
 
 UpdateExternalLib("cpython" "https://github.com/python/cpython.git" "2305ca51448552542b2414186252123a8dc87db7" "v${PY_VERSION}" "v3.12.0" need_patch)
 if(need_patch)
-	foreach(patch "0001-Fix-for-MinGW" "0002-Fix-for-UWP")
+	foreach(patch "0001-Fix-for-MinGW" "0002-Fix-for-UWP" "0003-Make-winreg-optional-on-Windows")
 		ApplyPatch("cpython" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/cpython/${patch}.patch")
 	endforeach()
 endif()
@@ -19,7 +19,8 @@ if(need_patch)
 		"0005-Fix-android-build-error-specifying-audiodev-extensio" "0006-Make-building-python-executable-python-development-f"
 		"0007-Fix-some-problems-with-Android-and-iOS" "0008-Update-pyconfig.h-for-mingw"
 		"0009-No-need-to-dereference-system-variables-in-if" "0010-Fix-redefined-_POSIX_THREADS-and-_POSIX_SOURCE-on-Li"
-		"0011-Add-support-for-Python-3.10" "0012-Add-limited-Python-3.11-support" "0013-Add-limited-Python-3.12-support")
+		"0011-Add-support-for-Python-3.10" "0012-Add-limited-Python-3.11-support" "0013-Add-limited-Python-3.12-support"
+		"0014-Make-winreg-optional-on-Windows")
 		ApplyPatch("python-cmake-buildsystem" "${CMAKE_CURRENT_SOURCE_DIR}/Patches/python-cmake-buildsystem/${patch}.patch")
 	endforeach()
 endif()
@@ -135,7 +136,7 @@ set(ENABLE_XXTESTFUZZ OFF CACHE BOOL "" FORCE)
 set(ENABLE_ZLIB ON CACHE BOOL "" FORCE)
 if(KLAYGE_PLATFORM_WINDOWS)
 	set(ENABLE_NT ON CACHE BOOL "" FORCE)
-	set(ENABLE_WINREG ON CACHE BOOL "" FORCE)
+	set(ENABLE_WINREG OFF CACHE BOOL "" FORCE)
 endif()
 set(INSTALL_DEVELOPMENT OFF CACHE BOOL "" FORCE)
 set(INSTALL_MANUAL OFF CACHE BOOL "" FORCE)

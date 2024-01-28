@@ -1,13 +1,12 @@
-From 0d6f62e67bf230c14ccef6f6bbe6bb62ff2a331c Mon Sep 17 00:00:00 2001
+From f2bce3d63429ee8d730a22ae17c808696b2f7763 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Sun, 20 Jan 2019 20:21:33 -0800
-Subject: [PATCH 2/2] Fix for UWP
+Subject: [PATCH 2/3] Fix for UWP
 
 ---
  Modules/posixmodule.c | 2 +-
- PC/winreg.c           | 4 ----
  Python/dynload_win.c  | 4 ++++
- 3 files changed, 5 insertions(+), 5 deletions(-)
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
 index 348937ca17..fd1afad514 100644
@@ -22,25 +21,6 @@ index 348937ca17..fd1afad514 100644
      if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_DEFAULT_DIRS", LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)) return -1;
      if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_APPLICATION_DIR", LOAD_LIBRARY_SEARCH_APPLICATION_DIR)) return -1;
      if (PyModule_AddIntConstant(m, "_LOAD_LIBRARY_SEARCH_SYSTEM32", LOAD_LIBRARY_SEARCH_SYSTEM32)) return -1;
-diff --git a/PC/winreg.c b/PC/winreg.c
-index e2d5322f45..bf840bdd2d 100644
---- a/PC/winreg.c
-+++ b/PC/winreg.c
-@@ -19,8 +19,6 @@
- #include "structmember.h"         // PyMemberDef
- #include <windows.h>
- 
--#if defined(MS_WINDOWS_DESKTOP) || defined(MS_WINDOWS_SYSTEM) || defined(MS_WINDOWS_GAMES)
--
- typedef struct {
-     PyTypeObject *PyHKEY_Type;
- } winreg_state;
-@@ -2219,5 +2217,3 @@ PyMODINIT_FUNC PyInit_winreg(void)
- {
-     return PyModuleDef_Init(&winregmodule);
- }
--
--#endif /* MS_WINDOWS_DESKTOP || MS_WINDOWS_SYSTEM || MS_WINDOWS_GAMES */
 diff --git a/Python/dynload_win.c b/Python/dynload_win.c
 index acab05e2c6..11995bf99c 100644
 --- a/Python/dynload_win.c
