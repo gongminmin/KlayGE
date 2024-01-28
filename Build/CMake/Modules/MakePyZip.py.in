@@ -7,20 +7,8 @@ except Exception:
 out = zipfile.ZipFile("@MEDIA_DIR@@EXE_NAME@Py.zip", 'w')#, compression = zipfile.ZIP_DEFLATED)
 
 prefix = "@KLAYGE_ROOT_DIR@/Externals/Python/cpython/Lib/"
-file_list = ("_collections_abc",
-	"_weakrefset",
-	"abc",
-	"codecs",
-	"genericpath",
-	"io",
-	"ntpath",
-	"os",
-	"posixpath",
-	"stat",
-	"encodings/__init__",
+file_list = ("encodings/__init__",
 	"encodings/aliases",
-	"encodings/ascii",
-	"encodings/latin_1",
 	"encodings/utf_8"
 )
 for file in file_list:
