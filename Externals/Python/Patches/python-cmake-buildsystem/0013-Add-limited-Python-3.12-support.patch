@@ -1,4 +1,4 @@
-From 87d628bf660ea7ea92b18d271b9880e776524b67 Mon Sep 17 00:00:00 2001
+From 570b26dc8f035932bc89fc305630b1363aaf1510 Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Thu, 18 Jan 2024 23:51:25 -0800
 Subject: [PATCH 13/13] Add limited Python 3.12 support
@@ -190,7 +190,7 @@ index a740029..f36f559 100644
  endif()
  
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index 0e4e905..1eddac7 100644
+index c0aef00..b635ffd 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
 @@ -142,11 +142,15 @@ if(MSVC)
@@ -241,7 +241,7 @@ index 0e4e905..1eddac7 100644
  
  if(UNIX)
      list(APPEND PYTHON_COMMON_SOURCES
-@@ -772,13 +793,18 @@ if(BUILD_FREEZE_IMPORTLIB)
+@@ -778,10 +799,15 @@ if(BUILD_FREEZE_IMPORTLIB)
            ${SRC_DIR}/Modules/getpath.py
          )
  
@@ -250,27 +250,24 @@ index 0e4e905..1eddac7 100644
 +      else()
 +        set(DEEPFREEZE_PY ${SRC_DIR}/Tools/scripts/deepfreeze.py)
 +      endif()
-       set(LIBPYTHON_DEEPFREEZE_SOURCES
-         ${SRC_DIR}/Python/deepfreeze/deepfreeze.c
-       )
        add_custom_command(
          OUTPUT ${LIBPYTHON_DEEPFREEZE_SOURCES}
          COMMAND
--          ${CMAKE_CROSSCOMPILING_EMULATOR} ${Python3_EXECUTABLE} ${SRC_DIR}/Tools/scripts/deepfreeze.py
-+          ${CMAKE_CROSSCOMPILING_EMULATOR} ${Python3_EXECUTABLE} ${DEEPFREEZE_PY}
+-          ${Python3_EXECUTABLE} ${SRC_DIR}/Tools/scripts/deepfreeze.py
++          ${Python3_EXECUTABLE} ${DEEPFREEZE_PY}
              "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap.h:importlib._bootstrap"
              "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap_external.h:importlib._bootstrap_external"
              "${SRC_DIR}/Python/frozen_modules/zipimport.h:zipimport"
-@@ -804,7 +830,7 @@ if(BUILD_FREEZE_IMPORTLIB)
+@@ -807,7 +833,7 @@ if(BUILD_FREEZE_IMPORTLIB)
              "${SRC_DIR}/Python/frozen_modules/frozen_only.h:frozen_only"
-             "-o" "${SRC_DIR}/Python/deepfreeze/deepfreeze.c"
+             "-o" "${LIBPYTHON_DEEPFREEZE_SOURCES}"
          DEPENDS
 -          ${SRC_DIR}/Tools/scripts/deepfreeze.py
 +          ${DEEPFREEZE_PY}
+           ${LIBPYTHON_FROZEN_SOURCES}
        )
      endif()
- 
-@@ -897,10 +923,26 @@ elseif(UNIX)
+@@ -901,10 +927,26 @@ elseif(UNIX)
          ${SRC_DIR}/Python/frozen.c
      )
  endif()

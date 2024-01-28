@@ -1,4 +1,4 @@
-From 08d3eabc4f582539836c91ea2386a53d9e272c89 Mon Sep 17 00:00:00 2001
+From b7eb4a944b9ffbdf9e032e564b63fef7e7f63e8d Mon Sep 17 00:00:00 2001
 From: Minmin Gong <gongminmin@msn.com>
 Date: Tue, 16 Jan 2024 22:37:53 -0800
 Subject: [PATCH 12/13] Add limited Python 3.11 support
@@ -6,8 +6,8 @@ Subject: [PATCH 12/13] Add limited Python 3.11 support
 ---
  cmake/config-mingw/pyconfig.h   |   8 +-
  cmake/extensions/CMakeLists.txt |  19 +-
- cmake/libpython/CMakeLists.txt  | 508 ++++++++++++++++++++++++++------
- 3 files changed, 432 insertions(+), 103 deletions(-)
+ cmake/libpython/CMakeLists.txt  | 512 ++++++++++++++++++++++++++------
+ 3 files changed, 436 insertions(+), 103 deletions(-)
 
 diff --git a/cmake/config-mingw/pyconfig.h b/cmake/config-mingw/pyconfig.h
 index 6e88a25..64ee7f3 100644
@@ -73,7 +73,7 @@ index dacaeab..a740029 100644
  add_python_extension(_symtable BUILTIN SOURCES symtablemodule.c)
  # Python PEP-3118 (buffer protocol) test module
 diff --git a/cmake/libpython/CMakeLists.txt b/cmake/libpython/CMakeLists.txt
-index d31ec04..0e4e905 100644
+index d31ec04..c0aef00 100644
 --- a/cmake/libpython/CMakeLists.txt
 +++ b/cmake/libpython/CMakeLists.txt
 @@ -3,70 +3,78 @@ add_definitions(-DPy_BUILD_CORE_BUILTIN)
@@ -300,18 +300,24 @@ index d31ec04..0e4e905 100644
  
  list(APPEND MODULE_SOURCES
      ${SRC_DIR}/Modules/signalmodule.c
-@@ -483,66 +518,299 @@ if(WIN32 AND IS_PY3)
+@@ -483,6 +518,16 @@ if(WIN32 AND IS_PY3)
      if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
          list(APPEND LIBPYTHON_TARGET_LIBRARIES pathcch)
      endif()
 +    if(PY_VERSION VERSION_GREATER_EQUAL "3.11")
 +        list(APPEND LIBPYTHON_TARGET_LIBRARIES bcrypt) # Required by bootstrap_hash
 +    endif()
++endif()
++
++set(LIBPYTHON_DEEPFREEZE_SOURCES )
++if(PY_VERSION VERSION_GREATER_EQUAL "3.11")
++  set(LIBPYTHON_DEEPFREEZE_SOURCES
++    ${SRC_DIR}/Python/deepfreeze/deepfreeze.c
++  )
  endif()
  
  if(BUILD_FREEZE_IMPORTLIB)
-     set(LIBPYTHON_FROZEN_SOURCES )
-+    set(LIBPYTHON_DEEPFREEZE_SOURCES )
+@@ -490,59 +535,286 @@ if(BUILD_FREEZE_IMPORTLIB)
      if(IS_PY3)
  
      # Build _freeze_importlib executable
@@ -585,13 +591,10 @@ index d31ec04..0e4e905 100644
 +          ${SRC_DIR}/Modules/getpath.py
 +        )
 +
-+      set(LIBPYTHON_DEEPFREEZE_SOURCES
-+        ${SRC_DIR}/Python/deepfreeze/deepfreeze.c
-+      )
 +      add_custom_command(
 +        OUTPUT ${LIBPYTHON_DEEPFREEZE_SOURCES}
 +        COMMAND
-+          ${CMAKE_CROSSCOMPILING_EMULATOR} ${Python3_EXECUTABLE} ${SRC_DIR}/Tools/scripts/deepfreeze.py
++          ${Python3_EXECUTABLE} ${SRC_DIR}/Tools/scripts/deepfreeze.py
 +            "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap.h:importlib._bootstrap"
 +            "${SRC_DIR}/Python/frozen_modules/importlib._bootstrap_external.h:importlib._bootstrap_external"
 +            "${SRC_DIR}/Python/frozen_modules/zipimport.h:zipimport"
@@ -615,9 +618,10 @@ index d31ec04..0e4e905 100644
 +            "${SRC_DIR}/Python/frozen_modules/__phello__.ham.eggs.h:__phello__.ham.eggs"
 +            "${SRC_DIR}/Python/frozen_modules/__phello__.spam.h:__phello__.spam"
 +            "${SRC_DIR}/Python/frozen_modules/frozen_only.h:frozen_only"
-+            "-o" "${SRC_DIR}/Python/deepfreeze/deepfreeze.c"
++            "-o" "${LIBPYTHON_DEEPFREEZE_SOURCES}"
 +        DEPENDS
 +          ${SRC_DIR}/Tools/scripts/deepfreeze.py
++          ${LIBPYTHON_FROZEN_SOURCES}
        )
      endif()
  
@@ -628,7 +632,7 @@ index d31ec04..0e4e905 100644
  
      endif()
  endif()
-@@ -578,7 +846,53 @@ set(LIBPYTHON_SOURCES
+@@ -578,7 +850,53 @@ set(LIBPYTHON_SOURCES
      ${LIBPYTHON_OMIT_FROZEN_SOURCES}
      ${LIBPYTHON_FROZEN_SOURCES}
  )

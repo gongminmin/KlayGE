@@ -265,6 +265,9 @@ if(KLAYGE_PLATFORM_WINDOWS)
 		)
 	endif()
 endif()
+if(TARGET freeze_modules)
+	add_dependencies(libpython-static freeze_modules)
+endif()
 
 if(KLAYGE_PLATFORM_WINDOWS)
 	if(KLAYGE_COMPILER_MSVC OR KLAYGE_COMPILER_CLANGCL)
@@ -286,6 +289,11 @@ SET_TARGET_PROPERTIES(libpython-static PROPERTIES
 )
 if(TARGET _freeze_importlib)
 	SET_TARGET_PROPERTIES(_freeze_importlib PROPERTIES
+		FOLDER "Externals/Python"
+	)
+endif()
+if(TARGET freeze_modules)
+	set_target_properties(freeze_modules PROPERTIES
 		FOLDER "Externals/Python"
 	)
 endif()
