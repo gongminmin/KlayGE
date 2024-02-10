@@ -127,11 +127,15 @@ class ModelDesc:
 		self.x_channel_mode = x_channel_mode
 		self.output_file_name = output_file_name
 
-def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs):
+def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs, continue_mode):
 	model = model_desc.model_class(model_desc.model_param)
 
+	pth_file_name = model_desc.output_file_name + ".pth"
+	if continue_mode and os.path.exists(pth_file_name):
+		model.load_state_dict(torch.load(pth_file_name))
+
+	model.train(True)
 	model.to(device)
-	model.train()
 
 	criterion = nn.MSELoss(reduction = "sum")
 	optimizer = optim.Adam(model.parameters(), lr = learning_rate)
@@ -155,7 +159,8 @@ def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs):
 		loss = running_loss.item() / len(data_set)
 		scheduler.step(loss)
 		if loss < min_loss:
-			with open(model_desc.output_file_name, "w") as file:
+			torch.save(model.state_dict(), pth_file_name)
+			with open(model_desc.output_file_name + ".hpp", "w") as file:
 				model.Write(file, model_desc.name)
 				file.write(f"// [{epoch + 1}] Loss: {loss}\n")
 			min_loss = loss
@@ -165,12 +170,14 @@ def TrainModel(device, data_set, model_desc, batch_size, learning_rate, epochs):
 	timespan = time.time() - start
 
 	print(f"Finished training in {(timespan / 60):.2f} mins.")
+	print(f"Min loss: {min_loss}")
+	print(f"Last learning rate: {optimizer.param_groups[0]['lr']}")
 
 	return model
 
 def TestModel(device, data_set, model, batch_size):
+	model.train(False)
 	model.to(device)
-	model.eval()
 
 	total_mse = torch.tensor(0.0, device = device)
 	with torch.no_grad():
@@ -184,11 +191,11 @@ def TestModel(device, data_set, model, batch_size):
 
 	return total_mse.item() / len(data_set)
 
-def TrainModels(device, training_set, testing_set, batch_size, learning_rate, epochs, model_descs):
+def TrainModels(device, training_set, testing_set, batch_size, learning_rate, epochs, continue_mode, model_descs):
 	models = []
 	for model_desc in model_descs:
 		training_set.XChannelMode(model_desc.x_channel_mode)
-		model = TrainModel(device, training_set, model_desc, batch_size, learning_rate, epochs)
+		model = TrainModel(device, training_set, model_desc, batch_size, learning_rate, epochs, continue_mode)
 		models.append(model)
 
 	for model, model_desc in zip(models, model_descs):
@@ -202,6 +209,7 @@ def ParseCommandLine():
 	parser.add_argument("--batch-size", dest = "batch_size", default = 256, type = int, help = "batch size in training")
 	parser.add_argument("--learning-rate", dest = "learning_rate", default = 0.01, type = float, help = "epochs in training")
 	parser.add_argument("--epochs", dest = "epochs", default = 500, type = int, help = "epochs in training")
+	parser.add_argument("--continue", dest = "continue_mode", default = False, action = "store_true", help = "continue training from current pth file")
 
 	return parser.parse_args()
 
@@ -225,18 +233,18 @@ if __name__ == "__main__":
 		(
 			"neural network",
 			(
-				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), True, "FittedBrdfNNs4LayerX.hpp"),
-				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 1), False, "FittedBrdfNNs3LayerY.hpp"),
+				ModelDesc("x_nn", IntegratedBrdfNetwork, (2, 2, 2, 1), True, "FittedBrdfNNs4LayerX"),
+				ModelDesc("y_nn", IntegratedBrdfNetwork, (2, 3, 1), False, "FittedBrdfNNs3LayerY"),
 			),
 		),
 		(
 			"3-Order expression",
 			(
-				ModelDesc("x_factors", IntegratedBrdfExpression, 3, True, "FittedBrdfFactorsX.hpp"),
-				ModelDesc("y_factors", IntegratedBrdfExpression, 3, False, "FittedBrdfFactorsY.hpp"),
+				ModelDesc("x_factors", IntegratedBrdfExpression, 3, True, "FittedBrdfFactorsX"),
+				ModelDesc("y_factors", IntegratedBrdfExpression, 3, False, "FittedBrdfFactorsY"),
 			),
 		),
 	)
 	for model in model_descs:
 		print(f"Training {model[0]} ...")
-		TrainModels(device, training_set, testing_set, args.batch_size, args.learning_rate, args.epochs, model[1])
+		TrainModels(device, training_set, testing_set, args.batch_size, args.learning_rate, args.epochs, args.continue_mode, model[1])
